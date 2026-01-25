@@ -1,0 +1,79 @@
+// Schéma Prisma pour la base de données locale de lieux vérifiés
+// Base de données SQLite pour stocker restaurants, hôtels, attractions
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Modèle principal pour les lieux (restaurants, hôtels, attractions)
+model Place {
+  id              String    @id @default(cuid())
+  externalId      String?   // ID SerpAPI, Foursquare, etc.
+  type            String    // 'restaurant', 'hotel', 'attraction'
+
+  // Informations de base
+  name            String
+  city            String
+  country         String?
+  address         String
+  latitude        Float
+  longitude       Float
+
+  // Données de qualité
+  rating          Float?
+  reviewCount     Int?
+  priceLevel      Int?      // 1-4 pour restaurants, tarif en € pour hôtels
+  stars           Int?      // 1-5 pour hôtels uniquement
+
+  // Détails spécifiques
+  cuisineTypes    String?   // JSON array pour restaurants: ["spanish", "tapas"]
+  amenities       String?   // JSON array pour hôtels: ["wifi", "pool"]
+  categories      String?   // JSON array pour attractions: ["museum", "culture"]
+
+  // Horaires et contact
+  openingHours    String?   // JSON object: {"monday": {"open": "09:00", "close": "18:00"}}
+  phone           String?
+  website         String?
+
+  // URLs importantes
+  googleMapsUrl   String    // Lien Google Maps direct vers le lieu
+  bookingUrl      String?   // Lien de réservation si applicable
+
+  // Descriptions
+  description     String?
+  tips            String?   // Conseils ou astuces pour ce lieu
+
+  // Métadonnées de vérification
+  source          String    // 'serpapi', 'foursquare', 'osm', 'claude'
+  dataReliability String    // 'verified' (SerpAPI/Foursquare), 'estimated' (OSM), 'generated' (Claude)
+  verifiedAt      DateTime  // Date de dernière vérification
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Index pour recherche rapide
+  @@index([city, type])
+  @@index([type, verifiedAt])
+  @@unique([externalId, source])
+}
+
+// Cache des recherches pour éviter les appels API redondants
+model SearchCache {
+  id          String    @id @default(cuid())
+  queryHash   String    @unique  // Hash SHA256 de la requête
+  queryType   String    // 'restaurants', 'hotels', 'attractions', 'flights'
+  city        String
+  parameters  String    // JSON des paramètres de recherche
+  resultCount Int       // Nombre de résultats
+  results     String    // JSON des IDs de Places retournés
+  source      String    // 'serpapi', 'foursquare', etc.
+  createdAt   DateTime  @default(now())
+  expiresAt   DateTime  // Date d'expiration du cache (30 jours par défaut)
+
+  @@index([city, queryType])
+  @@index([expiresAt])
+}

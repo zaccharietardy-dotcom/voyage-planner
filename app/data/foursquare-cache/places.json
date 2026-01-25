@@ -1,0 +1,1878 @@
+{
+  "museum-51.507--0.128-all": {
+    "places": [
+      {
+        "fsq_id": "4ac518cdf964a520eca520e3",
+        "name": "London Transport Museum",
+        "location": {
+          "address": "Covent Garden Piazza",
+          "formatted_address": "Covent Garden Piazza, London, Greater London, WC2E 7BB, United Kingdom",
+          "locality": "London",
+          "region": "Greater London",
+          "country": "United Kingdom",
+          "postcode": "WC2E 7BB"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 51.5120008940347,
+            "longitude": -0.12130816793336828
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d181941735",
+            "name": "Museum",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/arts_entertainment/museum_88.png"
+          }
+        ],
+        "distance": 681
+      },
+      {
+        "fsq_id": "4ac518d2f964a5203da720e3",
+        "name": "British Museum",
+        "location": {
+          "address": "Great Russell St",
+          "formatted_address": "Great Russell St (btwn Montague & Bloomsbury St), London, Greater London, WC1B 3DG, United Kingdom",
+          "locality": "London",
+          "region": "Greater London",
+          "country": "United Kingdom",
+          "cross_street": "btwn Montague & Bloomsbury St",
+          "postcode": "WC1B 3DG"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 51.51900874337275,
+            "longitude": -0.12643718771869317
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d190941735",
+            "name": "History Museum",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/arts_entertainment/museum_history_88.png"
+          }
+        ],
+        "distance": 1295
+      },
+      {
+        "fsq_id": "4ac518d3f964a52077a720e3",
+        "name": "Churchill War Rooms (Churchill Museum & Cabinet War Rooms)",
+        "location": {
+          "address": "King Charles St",
+          "formatted_address": "King Charles St, London, Greater London, SW1A 2AQ, United Kingdom",
+          "locality": "London",
+          "region": "Greater London",
+          "country": "United Kingdom",
+          "postcode": "SW1A 2AQ"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 51.502079,
+            "longitude": -0.129305
+          }
+        },
+        "categories": [
+          {
+            "id": "4deefb944765f83613cdba6e",
+            "name": "Historic and Protected Site",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/arts_entertainment/historicsite_88.png"
+          }
+        ],
+        "distance": 601
+      },
+      {
+        "fsq_id": "4ac518d3f964a5204fa720e3",
+        "name": "Sir John Soane's Museum",
+        "location": {
+          "address": "13 Lincoln's Inn Fields",
+          "formatted_address": "13 Lincoln's Inn Fields, London, Greater London, WC2A 3BP, United Kingdom",
+          "locality": "London",
+          "region": "Greater London",
+          "country": "United Kingdom",
+          "postcode": "WC2A 3BP"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 51.517011,
+            "longitude": -0.117365
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d190941735",
+            "name": "History Museum",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/arts_entertainment/museum_history_88.png"
+          }
+        ],
+        "distance": 1291
+      },
+      {
+        "fsq_id": "4ac518cdf964a520e8a520e3",
+        "name": "Natural History Museum",
+        "location": {
+          "address": "Cromwell Rd",
+          "formatted_address": "Cromwell Rd (Queen's Gate), London, Greater London, SW7 5BD, United Kingdom",
+          "locality": "London",
+          "region": "Greater London",
+          "country": "United Kingdom",
+          "cross_street": "Queen's Gate",
+          "postcode": "SW7 5BD"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 51.49652085547838,
+            "longitude": -0.17653226852416992
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d191941735",
+            "name": "Science Museum",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/arts_entertainment/museum_science_88.png"
+          }
+        ],
+        "distance": 3587
+      }
+    ],
+    "fetchedAt": "2026-01-25T10:03:36.895Z"
+  },
+  "all-35.676-139.650-10027,16000,10000": {
+    "places": [
+      {
+        "fsq_id": "5d42ce9d71e7d00007469971",
+        "name": "LINE CUBE SHIBUYA",
+        "location": {
+          "address": "宇田川町1-1",
+          "formatted_address": "宇田川町1-1, 渋谷区, Tokyo, 150-0042, 日本",
+          "locality": "東京",
+          "region": "東京都",
+          "country": "日本",
+          "postcode": "150-0042"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 35.664048,
+            "longitude": 139.698507
+          }
+        },
+        "categories": [
+          {
+            "id": "5032792091d4c4b30a586d5c",
+            "name": "Concert Hall",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/arts_entertainment/musicvenue_88.png"
+          }
+        ],
+        "distance": 4564
+      },
+      {
+        "fsq_id": "4b5a3a54f964a520cdb528e3",
+        "name": "Yoyogi Park (代々木公園)",
+        "location": {
+          "address": "代々木神園町/神南2",
+          "formatted_address": "代々木神園町/神南2, 渋谷区, Tokyo, 151-0052, 日本",
+          "locality": "渋谷区",
+          "region": "東京都",
+          "country": "日本",
+          "postcode": "151-0052"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 35.67043660939139,
+            "longitude": 139.69567090272903
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d163941735",
+            "name": "Park",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/parks_outdoors/park_88.png"
+          }
+        ],
+        "distance": 4152
+      },
+      {
+        "fsq_id": "5fa652c8e3bd4801bb27baeb",
+        "name": "Megaドン・キホーテ渋谷本店 7F “Donki Shibuya ~Art Content Mix Gallery~”",
+        "location": {
+          "address": "宇田川町28-6",
+          "formatted_address": "宇田川町28-6 (MEGAドン・キホーテ 渋谷本店 7F), 渋谷区, Tokyo, 150-0042, 日本",
+          "locality": "東京",
+          "region": "東京都",
+          "country": "日本",
+          "cross_street": "MEGAドン・キホーテ 渋谷本店 7F",
+          "postcode": "150-0042"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 35.660507,
+            "longitude": 139.69786
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d1e2931735",
+            "name": "Art Gallery",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/arts_entertainment/artgallery_88.png"
+          }
+        ],
+        "distance": 4642
+      },
+      {
+        "fsq_id": "4b5dd1aff964a5208a6d29e3",
+        "name": "Spotify O-EAST",
+        "location": {
+          "address": "道玄坂2-14-8",
+          "formatted_address": "道玄坂2-14-8 (2F), 渋谷区, Tokyo, 150-0043, 日本",
+          "locality": "東京",
+          "region": "東京都",
+          "country": "日本",
+          "cross_street": "2F",
+          "postcode": "150-0043"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 35.65873657503875,
+            "longitude": 139.6955181486804
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d1e9931735",
+            "name": "Rock Club",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/arts_entertainment/musicvenue_rockclub_88.png"
+          }
+        ],
+        "distance": 4527
+      },
+      {
+        "fsq_id": "4b9c4a47f964a5206b5c36e3",
+        "name": "Yoyogi 1st Gymnasium (国立代々木競技場 第一体育館)",
+        "location": {
+          "address": "神南2-1-1",
+          "formatted_address": "神南2-1-1, 渋谷区, Tokyo, 150-0041, 日本",
+          "locality": "東京",
+          "region": "東京都",
+          "country": "日本",
+          "postcode": "150-0041"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 35.66772590594513,
+            "longitude": 139.70022797584534
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d184941735",
+            "name": "Stadium",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/arts_entertainment/stadium_88.png"
+          }
+        ],
+        "distance": 4612
+      },
+      {
+        "fsq_id": "54826fb0498eb80c2a5d1426",
+        "name": "TOHO Cinemas (TOHOシネマズ 新宿)",
+        "location": {
+          "address": "歌舞伎町1-19-1",
+          "formatted_address": "歌舞伎町1-19-1 (新宿東宝ビル 3F-6F), 新宿区, Tokyo, 160-0021, 日本",
+          "locality": "東京",
+          "region": "東京都",
+          "country": "日本",
+          "cross_street": "新宿東宝ビル 3F-6F",
+          "postcode": "160-0021"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 35.695285,
+            "longitude": 139.701932
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d17f941735",
+            "name": "Movie Theater",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/arts_entertainment/movietheater_88.png"
+          }
+        ],
+        "distance": 5129
+      },
+      {
+        "fsq_id": "4b5bd0a2f964a520c31729e3",
+        "name": "Meiji Jingu Shrine (明治神宮)",
+        "location": {
+          "address": "代々木神園町1-1",
+          "formatted_address": "代々木神園町1-1, 渋谷区, Tokyo, 151-8557, 日本",
+          "locality": "東京",
+          "region": "東京都",
+          "country": "日本",
+          "postcode": "151-8557"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 35.67637194402257,
+            "longitude": 139.6993589401245
+          }
+        },
+        "categories": [
+          {
+            "id": "4eb1d80a4b900d56c88a45ff",
+            "name": "Shrine",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/building/religious_shrine_88.png"
+          }
+        ],
+        "distance": 4436
+      },
+      {
+        "fsq_id": "4b0587a1f964a520959d22e3",
+        "name": "Yoyogi National Stadium (国立代々木競技場)",
+        "location": {
+          "address": "神南2-1-1",
+          "formatted_address": "神南2-1-1, 渋谷区, Tokyo, 151-0053, 日本",
+          "locality": "東京",
+          "region": "東京都",
+          "country": "日本",
+          "postcode": "151-0053"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 35.668312920953746,
+            "longitude": 139.70122638593435
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d184941735",
+            "name": "Stadium",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/arts_entertainment/stadium_88.png"
+          }
+        ],
+        "distance": 4688
+      }
+    ],
+    "fetchedAt": "2026-01-25T10:04:05.772Z"
+  },
+  "all-48.857-2.352-10027,16000,10000": {
+    "places": [
+      {
+        "fsq_id": "4adcda10f964a520af3521e3",
+        "name": "Musée du Louvre",
+        "location": {
+          "address": "Rue de Rivoli",
+          "formatted_address": "Rue de Rivoli (Place du Carrousel), 75001 Paris, France",
+          "locality": "Paris",
+          "region": "Île-de-France",
+          "country": "France",
+          "cross_street": "Place du Carrousel",
+          "postcode": "75001"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 48.86084691113991,
+            "longitude": 2.336440086364746
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d181941735",
+            "name": "Museum",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/arts_entertainment/museum_88.png"
+          }
+        ],
+        "distance": 1247
+      },
+      {
+        "fsq_id": "51a2445e5019c80b56934c75",
+        "name": "Tour Eiffel",
+        "location": {
+          "address": "5 avenue Anatole France",
+          "formatted_address": "5 avenue Anatole France, 75007 Paris, France",
+          "locality": "Paris",
+          "region": "Île-de-France",
+          "country": "France",
+          "postcode": "75007"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 48.858256,
+            "longitude": 2.294478
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d12d941735",
+            "name": "Monument",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/building/government_monument_88.png"
+          }
+        ],
+        "distance": 4231
+      },
+      {
+        "fsq_id": "4adcda09f964a520de3321e3",
+        "name": "Arc de Triomphe (Arc de Triomphe de l'Étoile)",
+        "location": {
+          "address": "Place Charles de Gaulle",
+          "formatted_address": "Place Charles de Gaulle (Avenue des Champs-Élysées), 75008 Paris, France",
+          "locality": "Paris",
+          "region": "Île-de-France",
+          "country": "France",
+          "cross_street": "Avenue des Champs-Élysées",
+          "postcode": "75008"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 48.873783275868725,
+            "longitude": 2.2950589656829834
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d12d941735",
+            "name": "Monument",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/building/government_monument_88.png"
+          }
+        ],
+        "distance": 4600
+      },
+      {
+        "fsq_id": "4bb381b7eb3e9521d738cb0a",
+        "name": "Place du Trocadéro",
+        "location": {
+          "address": "Place du Trocadéro et du 11 Novembre",
+          "formatted_address": "Place du Trocadéro et du 11 Novembre, 75016 Paris, France",
+          "locality": "Paris",
+          "region": "Île-de-France",
+          "country": "France",
+          "postcode": "75016"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 48.86293063813086,
+            "longitude": 2.287217527627945
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d164941735",
+            "name": "Plaza",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/parks_outdoors/plaza_88.png"
+          }
+        ],
+        "distance": 4811
+      },
+      {
+        "fsq_id": "4b30f9bbf964a5208ffd24e3",
+        "name": "Jardin des Tuileries",
+        "location": {
+          "address": "Rue de Rivoli",
+          "formatted_address": "Rue de Rivoli (Quai des Tuileries), 75001 Paris, France",
+          "locality": "Paris",
+          "region": "Île-de-France",
+          "country": "France",
+          "cross_street": "Quai des Tuileries",
+          "postcode": "75001"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 48.863924276481605,
+            "longitude": 2.326483726501465
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d15a941735",
+            "name": "Garden",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/parks_outdoors/garden_88.png"
+          }
+        ],
+        "distance": 2052
+      }
+    ],
+    "fetchedAt": "2026-01-25T10:11:52.420Z"
+  },
+  "all-49.030-2.568-10027,16000,10000": {
+    "places": [
+      {
+        "fsq_id": "d2ce1189b85c4b70d5da1c46",
+        "name": "Les Vestiges du Château de Roissy-en-France",
+        "location": {
+          "address": "Parc de la Mairie",
+          "formatted_address": "Parc de la Mairie, 95700 Roissy en France, France",
+          "locality": "Roissy-en-France",
+          "region": "Île-de-France",
+          "country": "France",
+          "postcode": "95700"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 49.00323743090015,
+            "longitude": 2.516478402028251
+          }
+        },
+        "categories": [
+          {
+            "id": "4d4b7105d754a06377d81259",
+            "name": "Landmarks and Outdoors",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/parks_outdoors/default_88.png"
+          }
+        ],
+        "distance": 4771
+      },
+      {
+        "fsq_id": "4da0346431a6b60cf4d66d18",
+        "name": "Gamm vert",
+        "location": {
+          "address": "D317",
+          "formatted_address": "D317, 95380 Louvres, France",
+          "locality": "Louvres",
+          "region": "Île-de-France",
+          "country": "France",
+          "postcode": "95380"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 49.051427861720356,
+            "longitude": 2.512156956487024
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d15a941735",
+            "name": "Garden",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/parks_outdoors/garden_88.png"
+          }
+        ],
+        "distance": 4732
+      },
+      {
+        "fsq_id": "509b7784e4b00c69bdd17705",
+        "name": "Maguire Vs Ebdon",
+        "location": {
+          "formatted_address": "France",
+          "country": "France"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 49.0022592483483,
+            "longitude": 2.5781072476354687
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d1e3931735",
+            "name": "Pool Hall",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/arts_entertainment/billiards_88.png"
+          }
+        ],
+        "distance": 3144
+      },
+      {
+        "fsq_id": "5324635c498ed5af5926bddc",
+        "name": "parc équitation château bleu",
+        "location": {
+          "address": "9 chemin des Saints Pères",
+          "formatted_address": "9 chemin des Saints Pères, France",
+          "country": "France"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 48.982143641330666,
+            "longitude": 2.551059976351504
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d163941735",
+            "name": "Park",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/parks_outdoors/park_88.png"
+          }
+        ],
+        "distance": 5434
+      },
+      {
+        "fsq_id": "56a2b510498e4a771e7d2d3b",
+        "name": "La Factory",
+        "location": {
+          "formatted_address": "France",
+          "country": "France"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 49.06387190681839,
+            "longitude": 2.595882842253241
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d1e4931735",
+            "name": "Bowling Alley",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/arts_entertainment/bowling_88.png"
+          }
+        ],
+        "distance": 4317
+      },
+      {
+        "fsq_id": "4dc6c47d2271f270514d861b",
+        "name": "Le Concorde",
+        "location": {
+          "address": "Route des Peupliers",
+          "formatted_address": "Route des Peupliers (CDG Airport), 77990 Roissy-en-France, France",
+          "locality": "Roissy-en-France",
+          "region": "Île-de-France",
+          "country": "France",
+          "cross_street": "CDG Airport",
+          "postcode": "77990"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 49.01065532682525,
+            "longitude": 2.5532913208007812
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d12d941735",
+            "name": "Monument",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/building/government_monument_88.png"
+          }
+        ],
+        "distance": 2373
+      },
+      {
+        "fsq_id": "4f38fcf5e4b0edf91e892683",
+        "name": "Dsv air & sea",
+        "location": {
+          "address": "rue des 2 Cedres",
+          "formatted_address": "rue des 2 Cedres, France",
+          "country": "France"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 49.00079229611279,
+            "longitude": 2.529377747752833
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d130941735",
+            "name": "Structure",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/building/default_88.png"
+          }
+        ],
+        "distance": 4273
+      },
+      {
+        "fsq_id": "4be6ef7d910020a128c8d414",
+        "name": "Restaurant Air France Fret 2",
+        "location": {
+          "address": "Rue du Poirier",
+          "formatted_address": "Rue du Poirier, 93290 Tremblay-en-France, France",
+          "locality": "Tremblay-en-France",
+          "region": "Île-de-France",
+          "country": "France",
+          "postcode": "93290"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 49.003060823178075,
+            "longitude": 2.5389537824165305
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d130941735",
+            "name": "Structure",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/building/default_88.png"
+          }
+        ],
+        "distance": 3641
+      },
+      {
+        "fsq_id": "509cd8b7498efdffc5bdf11e",
+        "name": "Bolloré Logistics",
+        "location": {
+          "formatted_address": "France",
+          "country": "France"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 49.01368314522738,
+            "longitude": 2.5336441623540527
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d130941735",
+            "name": "Structure",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/building/default_88.png"
+          }
+        ],
+        "distance": 3071
+      },
+      {
+        "fsq_id": "5d06639cbf5e0e002415f40d",
+        "name": "Arcade Gaming Jeux",
+        "location": {
+          "address": "Terminal 2E, Hall K",
+          "formatted_address": "Terminal 2E, Hall K (Aéroport Paris-Charles de Gaulle (CDG)), 77290 Mitry-Mory, France",
+          "locality": "Mitry-Mory",
+          "region": "Île-de-France",
+          "country": "France",
+          "cross_street": "Aéroport Paris-Charles de Gaulle (CDG)",
+          "postcode": "77290"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 49.002012841432304,
+            "longitude": 2.5814008712768555
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d1e1931735",
+            "name": "Arcade",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/arts_entertainment/arcade_88.png"
+          }
+        ],
+        "distance": 3235
+      },
+      {
+        "fsq_id": "5c6d060afb8e59002c64735f",
+        "name": "Air France Crew Academy - Afca",
+        "location": {
+          "formatted_address": "93290 Tremblay-en-France, France",
+          "locality": "Tremblay-en-France",
+          "region": "Île-de-France",
+          "country": "France",
+          "postcode": "93290"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 49.010387,
+            "longitude": 2.5665846
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d130941735",
+            "name": "Structure",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/building/default_88.png"
+          }
+        ],
+        "distance": 2152
+      },
+      {
+        "fsq_id": "4f08044be4b05f830d126b1c",
+        "name": "Air France Simu 777",
+        "location": {
+          "formatted_address": "France",
+          "region": "Roissy",
+          "country": "France"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 49.01169024276205,
+            "longitude": 2.521303410211956
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d130941735",
+            "name": "Structure",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/building/default_88.png"
+          }
+        ],
+        "distance": 3948
+      },
+      {
+        "fsq_id": "505b0cdae4b069a169aba566",
+        "name": "Servair",
+        "location": {
+          "address": "10-14 rue de Rome",
+          "formatted_address": "10-14 rue de Rome, 95726 Tremblay-en-France, France",
+          "locality": "Tremblay-en-France",
+          "region": "Île-de-France",
+          "country": "France",
+          "postcode": "95726"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 49.00864149415426,
+            "longitude": 2.5570223274546837
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d130941735",
+            "name": "Structure",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/building/default_88.png"
+          }
+        ],
+        "distance": 2475
+      },
+      {
+        "fsq_id": "4dd4bab545ddd703551d940c",
+        "name": "Centre D'Expertise Medicale Aéronotique",
+        "location": {
+          "formatted_address": "Tremblay-en-France, France",
+          "locality": "Tremblay-en-France",
+          "region": "Île-de-France",
+          "country": "France"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 48.990446495056794,
+            "longitude": 2.543387552816983
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d130941735",
+            "name": "Structure",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/building/default_88.png"
+          }
+        ],
+        "distance": 4722
+      },
+      {
+        "fsq_id": "4c2e832a7cc0c9b6393aea9a",
+        "name": "Cmh Maintenance Qc",
+        "location": {
+          "address": "77990 Le Mesnil-Amelot",
+          "formatted_address": "77990 Le Mesnil-Amelot, Le Mesnil-Amelot, France",
+          "locality": "Le Mesnil-Amelot",
+          "region": "Île-de-France",
+          "country": "France"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 49.01085236926211,
+            "longitude": 2.5848770141601562
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d130941735",
+            "name": "Structure",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/building/default_88.png"
+          }
+        ],
+        "distance": 2436
+      }
+    ],
+    "fetchedAt": "2026-01-25T10:19:09.869Z"
+  },
+  "all-40.518--3.548-10027,16000,10000": {
+    "places": [
+      {
+        "fsq_id": "4bd07de7caff95210ce7cef0",
+        "name": "Polideportivo José Caballero",
+        "location": {
+          "address": "Carretera de Barajas, 7",
+          "formatted_address": "Carretera de Barajas, 7, 28108 Alcobendas Community of Madrid, España",
+          "locality": "Alcobendas",
+          "region": "Comunidad de Madrid",
+          "country": "España",
+          "postcode": "28108"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 40.53653112441931,
+            "longitude": -3.6199423984736523
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d176941735",
+            "name": "Gym",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/building/gym_88.png"
+          }
+        ],
+        "distance": 6448
+      },
+      {
+        "fsq_id": "4bb44e0749bdc9b697b40c10",
+        "name": "Club El Estudiante",
+        "location": {
+          "address": "Calle del Alto",
+          "formatted_address": "Calle del Alto, 28100 Alcobendas Community of Madrid, España",
+          "locality": "Alcobendas",
+          "region": "Comunidad de Madrid",
+          "country": "España",
+          "postcode": "28100"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 40.52030363554713,
+            "longitude": -3.59411297463831
+          }
+        },
+        "categories": [
+          {
+            "id": "4e39a956bd410d7aed40cbc3",
+            "name": "Tennis Court",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/arts_entertainment/stadium_tennis_88.png"
+          }
+        ],
+        "distance": 3942
+      },
+      {
+        "fsq_id": "5ed4b0b9b1da1c0008169138",
+        "name": "Hoyo 10",
+        "location": {
+          "formatted_address": "28055 Мадрид Community of Madrid, España",
+          "locality": "Madrid",
+          "region": "Comunidad de Madrid",
+          "country": "España",
+          "postcode": "28055"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 40.508039895942254,
+            "longitude": -3.6214978363379515
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d165941735",
+            "name": "Scenic Lookout",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/parks_outdoors/sceniclookout_88.png"
+          }
+        ],
+        "distance": 6357
+      },
+      {
+        "fsq_id": "535b84a5498e9d2f2ce93442",
+        "name": "Spotter Point (Cementerio)",
+        "location": {
+          "formatted_address": "España",
+          "country": "España"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 40.48212927935389,
+            "longitude": -3.58450805238783
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d165941735",
+            "name": "Scenic Lookout",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/parks_outdoors/sceniclookout_88.png"
+          }
+        ],
+        "distance": 5096
+      },
+      {
+        "fsq_id": "4fad6213e4b017dfa57d0f95",
+        "name": "Spotting - Plataforma de Carga",
+        "location": {
+          "formatted_address": "España",
+          "country": "España"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 40.46157672942222,
+            "longitude": -3.5779720375901674
+          }
+        },
+        "categories": [
+          {
+            "id": "4d4b7104d754a06370d81259",
+            "name": "Arts and Entertainment",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/arts_entertainment/default_88.png"
+          }
+        ],
+        "distance": 6817
+      },
+      {
+        "fsq_id": "4e213c1a18a88345f049b5b2",
+        "name": "Parque Forestal y Ermita De Ajalvir",
+        "location": {
+          "address": "28864 Ajalvir",
+          "formatted_address": "28864 Ajalvir (Deber), 28864 Ajalvir sendero Community of Madrid, España",
+          "locality": "Ajalvir sendero",
+          "region": "Comunidad de Madrid",
+          "country": "España",
+          "cross_street": "Deber",
+          "postcode": "28864"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 40.538702026671395,
+            "longitude": -3.5033627999181953
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d15f941735",
+            "name": "Field",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/parks_outdoors/field_88.png"
+          }
+        ],
+        "distance": 4378
+      },
+      {
+        "fsq_id": "4f23cc11e4b0476579047d4c",
+        "name": "Escuela De Musica Luis Estrella",
+        "location": {
+          "address": "Paseo De Alcobendas",
+          "formatted_address": "Paseo De Alcobendas, España",
+          "country": "España"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 40.52703701542774,
+            "longitude": -3.621735472791833
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d1e5931735",
+            "name": "Music Venue",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/arts_entertainment/musicvenue_88.png"
+          }
+        ],
+        "distance": 6348
+      },
+      {
+        "fsq_id": "4e358d5ad22d86185a6d26f9",
+        "name": "Carril Bici Miramadrid",
+        "location": {
+          "address": "Av de Retamosa, 233-261",
+          "formatted_address": "Av de Retamosa, 233-261, 28860 Paracuellos de Jarama Community of Madrid, España",
+          "locality": "Paracuellos de Jarama",
+          "region": "Comunidad de Madrid",
+          "country": "España",
+          "postcode": "28860"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 40.49492619114664,
+            "longitude": -3.5257818713828892
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d159941735",
+            "name": "Hiking Trail",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/parks_outdoors/hikingtrail_88.png"
+          }
+        ],
+        "distance": 3190
+      },
+      {
+        "fsq_id": "4e95d001cc21f49262ae530e",
+        "name": "Parque C/Cuadros",
+        "location": {
+          "formatted_address": "España",
+          "country": "España"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 40.497740146071294,
+            "longitude": -3.509042253294195
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d163941735",
+            "name": "Park",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/parks_outdoors/park_88.png"
+          }
+        ],
+        "distance": 3985
+      },
+      {
+        "fsq_id": "53202c70498e22c8853ac326",
+        "name": "Zona Infantil Terminal 4",
+        "location": {
+          "address": "Aeropuerto de Barajas",
+          "formatted_address": "Aeropuerto de Barajas, Madrid Автономне співтовариство Мадрид, España",
+          "locality": "Madrid",
+          "region": "Автономне співтовариство Мадрид",
+          "country": "España"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 40.490204,
+            "longitude": -3.590967
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d1e7941735",
+            "name": "Playground",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/parks_outdoors/playground_88.png"
+          }
+        ],
+        "distance": 4822
+      },
+      {
+        "fsq_id": "50eafd34e4b05b31f6401a8a",
+        "name": "Oporto",
+        "location": {
+          "address": "Pr Urzaiz, 63",
+          "formatted_address": "Pr Urzaiz, 63, Pontevedra, España",
+          "region": "Pontevedra",
+          "country": "España"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 40.46629457442929,
+            "longitude": -3.568471283780918
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d164941735",
+            "name": "Plaza",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/parks_outdoors/plaza_88.png"
+          }
+        ],
+        "distance": 6052
+      },
+      {
+        "fsq_id": "4e91519ccc2127f5dae5a039",
+        "name": "Rio Jarama",
+        "location": {
+          "formatted_address": "Paracuellos de Jarama Community of Madrid, España",
+          "locality": "Paracuellos de Jarama",
+          "region": "Comunidad de Madrid",
+          "country": "España"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 40.49862353576999,
+            "longitude": -3.545810490410209
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d162941735",
+            "name": "Other Great Outdoors",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/parks_outdoors/outdoors_88.png"
+          }
+        ],
+        "distance": 2195
+      },
+      {
+        "fsq_id": "58d654ea0a3d5435dd7fa165",
+        "name": "Circuitada De Barajas",
+        "location": {
+          "formatted_address": "28108 Alcobendas Community of Madrid, España",
+          "locality": "Alcobendas",
+          "region": "Comunidad de Madrid",
+          "country": "España",
+          "postcode": "28108"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 40.51372257690302,
+            "longitude": -3.5922715695119374
+          }
+        },
+        "categories": [
+          {
+            "id": "56aa371be4b08b9a8d57355e",
+            "name": "Bike Trail",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/parks_outdoors/hikingtrail_88.png"
+          }
+        ],
+        "distance": 3814
+      },
+      {
+        "fsq_id": "5235e18c11d29ab4ef9ce40f",
+        "name": "El bosque de Nuis",
+        "location": {
+          "formatted_address": "Paracuellos Community of Madrid, España",
+          "locality": "Paracuellos",
+          "region": "Comunidad de Madrid",
+          "country": "España"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 40.503113749791986,
+            "longitude": -3.513729629299114
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d18d941735",
+            "name": "Gaming Cafe",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/shops/gamingcafe_88.png"
+          }
+        ],
+        "distance": 3327
+      },
+      {
+        "fsq_id": "4d4d6801f8292d4306d66cd6",
+        "name": "Rotonda de la plaza del Ayuntamiento",
+        "location": {
+          "address": "Av Juan Pablo II",
+          "formatted_address": "Av Juan Pablo II (Paseo de las Camelias), 28860 Paracuellos de Jarama Community of Madrid, España",
+          "locality": "Paracuellos de Jarama",
+          "region": "Comunidad de Madrid",
+          "country": "España",
+          "cross_street": "Paseo de las Camelias",
+          "postcode": "28860"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 40.50999522667644,
+            "longitude": -3.5173181608924584
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d164941735",
+            "name": "Plaza",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/parks_outdoors/plaza_88.png"
+          }
+        ],
+        "distance": 2724
+      },
+      {
+        "fsq_id": "4f5b35b9e4b04fe10d9513d5",
+        "name": "Polideportivo Municipal Paracuellos del Jarama",
+        "location": {
+          "address": "Calle de Extremadura, 28860 Paracuellos de Jarama",
+          "formatted_address": "Calle de Extremadura, 28860 Paracuellos de Jarama, 28860 Paracuellos de Jarama Community of Madrid, España",
+          "locality": "Paracuellos de Jarama",
+          "region": "Comunidad de Madrid",
+          "country": "España",
+          "postcode": "28860"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 40.50402654502978,
+            "longitude": -3.525366332113787
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d188941735",
+            "name": "Soccer Stadium",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/arts_entertainment/stadium_soccer_88.png"
+          }
+        ],
+        "distance": 2462
+      },
+      {
+        "fsq_id": "4e73b001e4cd876b6e2d70ba",
+        "name": "recinto ferial de barajas",
+        "location": {
+          "address": "Barajas",
+          "formatted_address": "Barajas, Madrid Community of Madrid, España",
+          "locality": "Madrid",
+          "region": "Comunidad de Madrid",
+          "country": "España"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 40.47091858554106,
+            "longitude": -3.577538601396318
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d162941735",
+            "name": "Other Great Outdoors",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/parks_outdoors/outdoors_88.png"
+          }
+        ],
+        "distance": 5851
+      },
+      {
+        "fsq_id": "4ec280e95c5c3d470ded275d",
+        "name": "Hangares Iberia",
+        "location": {
+          "formatted_address": "Madrid Community of Madrid, España",
+          "locality": "Madrid",
+          "region": "Comunidad de Madrid",
+          "country": "España"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 40.4796313910504,
+            "longitude": -3.577480418444609
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d130941735",
+            "name": "Structure",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/building/default_88.png"
+          }
+        ],
+        "distance": 4992
+      },
+      {
+        "fsq_id": "51d680f0498e6c2cc3d4c291",
+        "name": "Cruce de La Moraleja",
+        "location": {
+          "formatted_address": "España",
+          "country": "España"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 40.52523323313584,
+            "longitude": -3.6016504555297533
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d162941735",
+            "name": "Other Great Outdoors",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/parks_outdoors/outdoors_88.png"
+          }
+        ],
+        "distance": 4638
+      },
+      {
+        "fsq_id": "56e18299498e0fbd1ba3edb2",
+        "name": "Torre de Control",
+        "location": {
+          "address": "Terminal 4 Satélite",
+          "formatted_address": "Terminal 4 Satélite (MAD Airport), 28042 Madrid Community of Madrid, España",
+          "locality": "Madrid",
+          "region": "Comunidad de Madrid",
+          "country": "España",
+          "cross_street": "MAD Airport",
+          "postcode": "28042"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 40.49172378297775,
+            "longitude": -3.5692128539085384
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d130941735",
+            "name": "Structure",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/building/default_88.png"
+          }
+        ],
+        "distance": 3478
+      }
+    ],
+    "fetchedAt": "2026-01-25T10:24:31.889Z"
+  },
+  "all-40.498--3.568-10027,16000,10000": {
+    "places": [
+      {
+        "fsq_id": "56e18299498e0fbd1ba3edb2",
+        "name": "Torre de Control",
+        "location": {
+          "address": "Terminal 4 Satélite",
+          "formatted_address": "Terminal 4 Satélite (MAD Airport), 28042 Madrid Community of Madrid, España",
+          "locality": "Madrid",
+          "region": "Comunidad de Madrid",
+          "country": "España",
+          "cross_street": "MAD Airport",
+          "postcode": "28042"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 40.49172378297775,
+            "longitude": -3.5692128539085384
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d130941735",
+            "name": "Structure",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/building/default_88.png"
+          }
+        ],
+        "distance": 744
+      },
+      {
+        "fsq_id": "5bfa7745610f04002bd24016",
+        "name": "Circlassica",
+        "location": {
+          "formatted_address": "28042 Madrid Community of Madrid, España",
+          "locality": "Madrid",
+          "region": "Comunidad de Madrid",
+          "country": "España",
+          "postcode": "28042"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 40.46366,
+            "longitude": -3.616797
+          }
+        },
+        "categories": [
+          {
+            "id": "52e81612bcbc57f1066b79e7",
+            "name": "Circus",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/arts_entertainment/default_88.png"
+          }
+        ],
+        "distance": 5676
+      },
+      {
+        "fsq_id": "4f5b35b9e4b04fe10d9513d5",
+        "name": "Polideportivo Municipal Paracuellos del Jarama",
+        "location": {
+          "address": "Calle de Extremadura, 28860 Paracuellos de Jarama",
+          "formatted_address": "Calle de Extremadura, 28860 Paracuellos de Jarama, 28860 Paracuellos de Jarama Community of Madrid, España",
+          "locality": "Paracuellos de Jarama",
+          "region": "Comunidad de Madrid",
+          "country": "España",
+          "postcode": "28860"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 40.50402654502978,
+            "longitude": -3.525366332113787
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d188941735",
+            "name": "Soccer Stadium",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/arts_entertainment/stadium_soccer_88.png"
+          }
+        ],
+        "distance": 3631
+      },
+      {
+        "fsq_id": "58cfd2db2ec3647b45fb4b95",
+        "name": "Toboganes Parque Felipe VI",
+        "location": {
+          "formatted_address": "28055 Madrid Community of Madrid, España",
+          "locality": "Madrid",
+          "region": "Comunidad de Madrid",
+          "country": "España",
+          "postcode": "28055"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 40.484135184266165,
+            "longitude": -3.6271659878670457
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d1e7941735",
+            "name": "Playground",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/parks_outdoors/playground_88.png"
+          }
+        ],
+        "distance": 5283
+      },
+      {
+        "fsq_id": "55e1cf80498ed112b834677e",
+        "name": "Vertical Park",
+        "location": {
+          "formatted_address": "Madrid Community of Madrid, España",
+          "locality": "Madrid",
+          "region": "Comunidad de Madrid",
+          "country": "España"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 40.44786758403583,
+            "longitude": -3.586683632174803
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d182941735",
+            "name": "Amusement Park",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/arts_entertainment/themepark_88.png"
+          }
+        ],
+        "distance": 5842
+      },
+      {
+        "fsq_id": "5a0557d24c9be64136140600",
+        "name": "Heroes Comic Con Madrid",
+        "location": {
+          "address": "Avenida Del Partenon",
+          "formatted_address": "Avenida Del Partenon, 28042 Madrid Community of Madrid, España",
+          "locality": "Madrid",
+          "region": "Comunidad de Madrid",
+          "country": "España",
+          "postcode": "28042"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 40.463837,
+            "longitude": -3.61655
+          }
+        },
+        "categories": [
+          {
+            "id": "56aa371be4b08b9a8d573532",
+            "name": "Exhibit",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/arts_entertainment/default_88.png"
+          }
+        ],
+        "distance": 5647
+      },
+      {
+        "fsq_id": "4ba24497f964a52062e837e3",
+        "name": "Centro Cultural Hortaleza",
+        "location": {
+          "address": "Santa Virgilia,15",
+          "formatted_address": "Santa Virgilia,15, 28033 Madrid Community of Madrid, España",
+          "locality": "Madrid",
+          "region": "Comunidad de Madrid",
+          "country": "España",
+          "postcode": "28033"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 40.47687382813492,
+            "longitude": -3.6420328877057084
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d1f2931735",
+            "name": "Performing Arts Venue",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/arts_entertainment/performingarts_88.png"
+          }
+        ],
+        "distance": 6737
+      },
+      {
+        "fsq_id": "4bf90ab85317a59388b0007f",
+        "name": "Castillo de la Alameda",
+        "location": {
+          "address": "Joaquin Ibarra",
+          "formatted_address": "Joaquin Ibarra (Antonio Sancha), 28042 Madrid Community of Madrid, España",
+          "locality": "Madrid",
+          "region": "Comunidad de Madrid",
+          "country": "España",
+          "cross_street": "Antonio Sancha",
+          "postcode": "28042"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 40.4587152840076,
+            "longitude": -3.592504808313799
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d165941735",
+            "name": "Scenic Lookout",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/parks_outdoors/sceniclookout_88.png"
+          }
+        ],
+        "distance": 4885
+      },
+      {
+        "fsq_id": "4f0c8d3de4b06b1f3ebb0121",
+        "name": "Parque Forestal de Valdebebas",
+        "location": {
+          "address": "Valdebebas",
+          "formatted_address": "Valdebebas, 28055 Madrid Community of Madrid, España",
+          "locality": "Madrid",
+          "region": "Comunidad de Madrid",
+          "country": "España",
+          "postcode": "28055"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 40.488541589366456,
+            "longitude": -3.618707656860351
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d163941735",
+            "name": "Park",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/parks_outdoors/park_88.png"
+          }
+        ],
+        "distance": 4460
+      },
+      {
+        "fsq_id": "535b84a5498e9d2f2ce93442",
+        "name": "Spotter Point (Cementerio)",
+        "location": {
+          "formatted_address": "España",
+          "country": "España"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 40.48212927935389,
+            "longitude": -3.58450805238783
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d165941735",
+            "name": "Scenic Lookout",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/parks_outdoors/sceniclookout_88.png"
+          }
+        ],
+        "distance": 2299
+      },
+      {
+        "fsq_id": "4df4f9f97d8b18e1723412d1",
+        "name": "Parque Campo de las Naciones",
+        "location": {
+          "formatted_address": "Madrid Community of Madrid, España",
+          "locality": "Madrid",
+          "region": "Comunidad de Madrid",
+          "country": "España"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 40.46066620361853,
+            "longitude": -3.5981107355494357
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d163941735",
+            "name": "Park",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/parks_outdoors/park_88.png"
+          }
+        ],
+        "distance": 4921
+      },
+      {
+        "fsq_id": "4dedddb3ae6052cbed100e39",
+        "name": "Centro de Carga Aérea Madrid",
+        "location": {
+          "address": "MAD Airport",
+          "formatted_address": "MAD Airport, Madrid Community of Madrid, España",
+          "locality": "Madrid",
+          "region": "Comunidad de Madrid",
+          "country": "España"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 40.45648277516808,
+            "longitude": -3.579890727996826
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d130941735",
+            "name": "Structure",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/building/default_88.png"
+          }
+        ],
+        "distance": 4769
+      },
+      {
+        "fsq_id": "4c383f2bdfb0e21e4447aea8",
+        "name": "Bowling Park Plenilunio",
+        "location": {
+          "address": "C.C. Plenilunio",
+          "formatted_address": "C.C. Plenilunio (C. Aracne, s/n), 28022 Madrid Community of Madrid, España",
+          "locality": "Madrid",
+          "region": "Comunidad de Madrid",
+          "country": "España",
+          "cross_street": "C. Aracne, s/n",
+          "postcode": "28022"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 40.44768357701404,
+            "longitude": -3.5871442294315647
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d1e4931735",
+            "name": "Bowling Alley",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/arts_entertainment/bowling_88.png"
+          }
+        ],
+        "distance": 5872
+      },
+      {
+        "fsq_id": "4adcda42f964a520343f21e3",
+        "name": "Palacio Municipal de Congresos",
+        "location": {
+          "address": "Av Capital de España Madrid 7",
+          "formatted_address": "Av Capital de España Madrid 7, 28042 Madrid Community of Madrid, España",
+          "locality": "Madrid",
+          "region": "Comunidad de Madrid",
+          "country": "España",
+          "postcode": "28042"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 40.462291865276015,
+            "longitude": -3.616214924479241
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d171941735",
+            "name": "Event Space",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/building/eventspace_88.png"
+          }
+        ],
+        "distance": 5745
+      },
+      {
+        "fsq_id": "4bb44e0749bdc9b697b40c10",
+        "name": "Club El Estudiante",
+        "location": {
+          "address": "Calle del Alto",
+          "formatted_address": "Calle del Alto, 28100 Alcobendas Community of Madrid, España",
+          "locality": "Alcobendas",
+          "region": "Comunidad de Madrid",
+          "country": "España",
+          "postcode": "28100"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 40.52030363554713,
+            "longitude": -3.59411297463831
+          }
+        },
+        "categories": [
+          {
+            "id": "4e39a956bd410d7aed40cbc3",
+            "name": "Tennis Court",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/arts_entertainment/stadium_tennis_88.png"
+          }
+        ],
+        "distance": 3321
+      },
+      {
+        "fsq_id": "4d4d6801f8292d4306d66cd6",
+        "name": "Rotonda de la plaza del Ayuntamiento",
+        "location": {
+          "address": "Av Juan Pablo II",
+          "formatted_address": "Av Juan Pablo II (Paseo de las Camelias), 28860 Paracuellos de Jarama Community of Madrid, España",
+          "locality": "Paracuellos de Jarama",
+          "region": "Comunidad de Madrid",
+          "country": "España",
+          "cross_street": "Paseo de las Camelias",
+          "postcode": "28860"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 40.50999522667644,
+            "longitude": -3.5173181608924584
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d164941735",
+            "name": "Plaza",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/parks_outdoors/plaza_88.png"
+          }
+        ],
+        "distance": 4450
+      },
+      {
+        "fsq_id": "4c83f33ee602b1f77786aa7a",
+        "name": "Plaza Del Navio",
+        "location": {
+          "address": "Plaza del Navio",
+          "formatted_address": "Plaza del Navio, 28042 Madrid Community of Madrid, España",
+          "locality": "Madrid",
+          "region": "Comunidad de Madrid",
+          "country": "España",
+          "postcode": "28042"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 40.45499412745951,
+            "longitude": -3.5857346624977353
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d164941735",
+            "name": "Plaza",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/parks_outdoors/plaza_88.png"
+          }
+        ],
+        "distance": 5059
+      },
+      {
+        "fsq_id": "4bd07de7caff95210ce7cef0",
+        "name": "Polideportivo José Caballero",
+        "location": {
+          "address": "Carretera de Barajas, 7",
+          "formatted_address": "Carretera de Barajas, 7, 28108 Alcobendas Community of Madrid, España",
+          "locality": "Alcobendas",
+          "region": "Comunidad de Madrid",
+          "country": "España",
+          "postcode": "28108"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 40.53653112441931,
+            "longitude": -3.6199423984736523
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d176941735",
+            "name": "Gym",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/building/gym_88.png"
+          }
+        ],
+        "distance": 6142
+      },
+      {
+        "fsq_id": "4bfc10f51be376b0c51bf8b4",
+        "name": "Parque Juan Carlos I",
+        "location": {
+          "address": "Gta. S.A.R. Don Juan de Borbon y Battemberg, 5",
+          "formatted_address": "Gta. S.A.R. Don Juan de Borbon y Battemberg, 5, 28042 Madrid Community of Madrid, España",
+          "locality": "Madrid",
+          "region": "Comunidad de Madrid",
+          "country": "España",
+          "postcode": "28042"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 40.460809323069135,
+            "longitude": -3.605833053588867
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d163941735",
+            "name": "Park",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/parks_outdoors/park_88.png"
+          }
+        ],
+        "distance": 5281
+      },
+      {
+        "fsq_id": "4d919fd55f33b1f7916c717e",
+        "name": "Poligono Las Mercedes",
+        "location": {
+          "formatted_address": "Madrid Community of Madrid, España",
+          "locality": "Madrid",
+          "region": "Comunidad de Madrid",
+          "country": "España"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 40.44288994353691,
+            "longitude": -3.5760076804355823
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d162941735",
+            "name": "Other Great Outdoors",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/parks_outdoors/outdoors_88.png"
+          }
+        ],
+        "distance": 6209
+      }
+    ],
+    "fetchedAt": "2026-01-25T16:41:08.000Z"
+  }
+}

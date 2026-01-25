@@ -1,0 +1,197 @@
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { Card, CardContent } from '@/components/ui/card';
+import {
+  StepDestination,
+  StepTransport,
+  StepGroup,
+  StepBudget,
+  StepActivities,
+} from '@/components/forms';
+import { TripPreferences } from '@/lib/types';
+import { ArrowLeft, ArrowRight, Sparkles, Loader2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+const STEPS = [
+  { id: 1, title: 'Destination', icon: '📍' },
+  { id: 2, title: 'Transport', icon: '✈️' },
+  { id: 3, title: 'Groupe', icon: '👥' },
+  { id: 4, title: 'Budget', icon: '💰' },
+  { id: 5, title: 'Activités', icon: '🎯' },
+];
+
+const DEFAULT_PREFERENCES: Partial<TripPreferences> = {
+  durationDays: 7,
+  groupSize: 2,
+  transport: 'plane',
+  carRental: false,
+  budgetLevel: 'moderate',
+  activities: [],
+  dietary: ['none'],
+};
+
+export default function PlanPage() {
+  const router = useRouter();
+  const [currentStep, setCurrentStep] = useState(1);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [preferences, setPreferences] = useState<Partial<TripPreferences>>(DEFAULT_PREFERENCES);
+
+  const updatePreferences = (data: Partial<TripPreferences>) => {
+    setPreferences((prev) => ({ ...prev, ...data }));
+  };
+
+  const canProceed = () => {
+    switch (currentStep) {
+      case 1:
+        return preferences.origin && preferences.destination && preferences.startDate;
+      case 2:
+        return preferences.transport;
+      case 3:
+        return preferences.groupSize && preferences.groupType;
+      case 4:
+        return preferences.budgetLevel || preferences.budgetCustom;
+      case 5:
+        return preferences.activities && preferences.activities.length > 0;
+      default:
+        return false;
+    }
+  };
+
+  const handleNext = () => {
+    if (currentStep < 5) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const handleBack = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const handleGenerate = async () => {
+    setIsGenerating(true);
+    try {
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(preferences),
+      });
+
+      if (!response.ok) throw new Error('Erreur de génération');
+
+      const data = await response.json();
+      // Store in localStorage for now (later: Supabase)
+      localStorage.setItem('currentTrip', JSON.stringify(data));
+      router.push(`/trip/${data.id}`);
+    } catch (error) {
+      console.error('Erreur:', error);
+      alert('Une erreur est survenue. Veuillez réessayer.');
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const renderStep = () => {
+    switch (currentStep) {
+      case 1:
+        return <StepDestination data={preferences} onChange={updatePreferences} />;
+      case 2:
+        return <StepTransport data={preferences} onChange={updatePreferences} />;
+      case 3:
+        return <StepGroup data={preferences} onChange={updatePreferences} />;
+      case 4:
+        return <StepBudget data={preferences} onChange={updatePreferences} />;
+      case 5:
+        return <StepActivities data={preferences} onChange={updatePreferences} />;
+      default:
+        return null;
+    }
+  };
+
+  const progress = (currentStep / STEPS.length) * 100;
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
+      <div className="container max-w-2xl mx-auto px-4 py-8">
+        {/* Progress header */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-lg font-semibold">Planifier votre voyage</h1>
+            <span className="text-sm text-muted-foreground">
+              Étape {currentStep} sur {STEPS.length}
+            </span>
+          </div>
+          <Progress value={progress} className="h-2" />
+
+          {/* Step indicators */}
+          <div className="flex justify-between mt-4">
+            {STEPS.map((step) => (
+              <button
+                key={step.id}
+                onClick={() => step.id < currentStep && setCurrentStep(step.id)}
+                disabled={step.id > currentStep}
+                className={cn(
+                  'flex flex-col items-center gap-1 transition-all',
+                  step.id === currentStep && 'scale-110',
+                  step.id < currentStep && 'cursor-pointer opacity-70 hover:opacity-100',
+                  step.id > currentStep && 'opacity-40 cursor-not-allowed'
+                )}
+              >
+                <span className="text-2xl">{step.icon}</span>
+                <span className="text-xs font-medium hidden sm:block">{step.title}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Form card */}
+        <Card className="shadow-lg">
+          <CardContent className="p-6 sm:p-8">{renderStep()}</CardContent>
+        </Card>
+
+        {/* Navigation buttons */}
+        <div className="flex justify-between mt-6">
+          <Button
+            variant="outline"
+            onClick={handleBack}
+            disabled={currentStep === 1}
+            className="gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Retour
+          </Button>
+
+          {currentStep < 5 ? (
+            <Button onClick={handleNext} disabled={!canProceed()} className="gap-2">
+              Suivant
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          ) : (
+            <Button
+              onClick={handleGenerate}
+              disabled={!canProceed() || isGenerating}
+              className="gap-2 bg-gradient-to-r from-primary to-primary/80"
+            >
+              {isGenerating ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Génération en cours...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4" />
+                  Générer mon voyage
+                </>
+              )}
+            </Button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
