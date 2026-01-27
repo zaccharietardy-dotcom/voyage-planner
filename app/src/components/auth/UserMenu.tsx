@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useAuth } from './AuthProvider';
 import { Button } from '@/components/ui/button';
 import {
@@ -10,21 +11,37 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { LogOut, User, Map, Settings } from 'lucide-react';
+import { LogOut, User, Map, Settings, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export function UserMenu() {
   const { user, profile, isLoading, signOut } = useAuth();
+  const [isSigningOut, setIsSigningOut] = useState(false);
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    try {
+      setIsSigningOut(true);
+      await signOut();
+      router.push('/');
+      router.refresh();
+    } catch (error) {
+      console.error('Erreur lors de la déconnexion:', error);
+    } finally {
+      setIsSigningOut(false);
+    }
+  };
 
   if (isLoading) {
     return (
-      <div className="w-12 h-12 rounded-full bg-muted animate-pulse" />
+      <div className="w-10 h-10 rounded-full bg-muted animate-pulse" />
     );
   }
 
   if (!user) {
     return (
-      <Button asChild variant="default" size="lg" className="px-6">
+      <Button asChild variant="default" size="default" className="px-6">
         <Link href="/login">Connexion</Link>
       </Button>
     );
@@ -42,10 +59,10 @@ export function UserMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-12 w-12 rounded-full p-0 hover:ring-2 hover:ring-primary/50 transition-all">
-          <Avatar className="h-12 w-12 border-2 border-primary/20">
+        <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0 hover:ring-2 hover:ring-primary/50 transition-all">
+          <Avatar className="h-10 w-10 border-2 border-primary/20">
             <AvatarImage src={avatarUrl} alt={displayName} referrerPolicy="no-referrer" />
-            <AvatarFallback className="text-lg font-semibold bg-primary/10">{initials}</AvatarFallback>
+            <AvatarFallback className="text-sm font-semibold bg-primary/10">{initials}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
@@ -63,31 +80,39 @@ export function UserMenu() {
           </div>
         </div>
         <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <Link href="/mes-voyages" className="cursor-pointer">
+        <DropdownMenuItem asChild className="cursor-pointer">
+          <Link href="/mes-voyages" className="w-full flex items-center">
             <Map className="mr-2 h-4 w-4" />
             Mes voyages
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link href="/profil" className="cursor-pointer">
+        <DropdownMenuItem asChild className="cursor-pointer">
+          <Link href="/profil" className="w-full flex items-center">
             <User className="mr-2 h-4 w-4" />
             Mon profil
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link href="/parametres" className="cursor-pointer">
+        <DropdownMenuItem asChild className="cursor-pointer">
+          <Link href="/parametres" className="w-full flex items-center">
             <Settings className="mr-2 h-4 w-4" />
             Paramètres
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
-          className="cursor-pointer text-red-600 focus:text-red-600"
-          onClick={() => signOut()}
+          className="text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-950 cursor-pointer"
+          onSelect={(e) => {
+            e.preventDefault();
+            handleSignOut();
+          }}
+          disabled={isSigningOut}
         >
-          <LogOut className="mr-2 h-4 w-4" />
-          Déconnexion
+          {isSigningOut ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <LogOut className="mr-2 h-4 w-4" />
+          )}
+          {isSigningOut ? 'Déconnexion...' : 'Déconnexion'}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

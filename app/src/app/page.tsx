@@ -185,8 +185,14 @@ export default function Home() {
                 Planifier un voyage
               </Button>
             </Link>
-            <Button variant="outline" size="lg" className="text-lg px-8 py-6">
-              Voir un exemple
+            <Button
+              variant="outline"
+              size="lg"
+              className="text-lg px-8 py-6"
+              onClick={() => handleQuickTest('paris-rome')}
+              disabled={loadingTest !== null}
+            >
+              {loadingTest === 'paris-rome' ? 'Chargement...' : 'Voir un exemple'}
             </Button>
           </div>
 
