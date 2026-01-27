@@ -71,6 +71,31 @@ const AIRPORTS: Record<string, AirportInfo> = {
   MPL: { code: 'MPL', name: 'Montpellier Méditerranée', city: 'Montpellier', country: 'France', latitude: 43.5762, longitude: 3.9630 },
   SXB: { code: 'SXB', name: 'Strasbourg Entzheim', city: 'Strasbourg', country: 'France', latitude: 48.5383, longitude: 7.6281 },
   LIL: { code: 'LIL', name: 'Lille-Lesquin', city: 'Lille', country: 'France', latitude: 50.5619, longitude: 3.0894 },
+
+  // Japon
+  NRT: { code: 'NRT', name: 'Tokyo Narita', city: 'Tokyo', country: 'Japon', latitude: 35.7720, longitude: 140.3929 },
+  HND: { code: 'HND', name: 'Tokyo Haneda', city: 'Tokyo', country: 'Japon', latitude: 35.5494, longitude: 139.7798 },
+  KIX: { code: 'KIX', name: 'Osaka Kansai', city: 'Osaka', country: 'Japon', latitude: 34.4320, longitude: 135.2304 },
+  ITM: { code: 'ITM', name: 'Osaka Itami', city: 'Osaka', country: 'Japon', latitude: 34.7855, longitude: 135.4380 },
+  NGO: { code: 'NGO', name: 'Nagoya Chubu', city: 'Nagoya', country: 'Japon', latitude: 34.8584, longitude: 136.8125 },
+  FUK: { code: 'FUK', name: 'Fukuoka', city: 'Fukuoka', country: 'Japon', latitude: 33.5859, longitude: 130.4510 },
+  CTS: { code: 'CTS', name: 'Sapporo New Chitose', city: 'Sapporo', country: 'Japon', latitude: 42.7752, longitude: 141.6925 },
+
+  // Asie (autres)
+  ICN: { code: 'ICN', name: 'Seoul Incheon', city: 'Seoul', country: 'Corée du Sud', latitude: 37.4602, longitude: 126.4407 },
+  PEK: { code: 'PEK', name: 'Beijing Capital', city: 'Pékin', country: 'Chine', latitude: 40.0799, longitude: 116.6031 },
+  PVG: { code: 'PVG', name: 'Shanghai Pudong', city: 'Shanghai', country: 'Chine', latitude: 31.1434, longitude: 121.8052 },
+  HKG: { code: 'HKG', name: 'Hong Kong International', city: 'Hong Kong', country: 'Hong Kong', latitude: 22.3080, longitude: 113.9185 },
+  SIN: { code: 'SIN', name: 'Singapore Changi', city: 'Singapour', country: 'Singapour', latitude: 1.3644, longitude: 103.9915 },
+  BKK: { code: 'BKK', name: 'Bangkok Suvarnabhumi', city: 'Bangkok', country: 'Thaïlande', latitude: 13.6900, longitude: 100.7501 },
+
+  // Amérique du Nord
+  JFK: { code: 'JFK', name: 'New York JFK', city: 'New York', country: 'États-Unis', latitude: 40.6413, longitude: -73.7781 },
+  LAX: { code: 'LAX', name: 'Los Angeles International', city: 'Los Angeles', country: 'États-Unis', latitude: 33.9416, longitude: -118.4085 },
+  SFO: { code: 'SFO', name: 'San Francisco International', city: 'San Francisco', country: 'États-Unis', latitude: 37.6213, longitude: -122.3790 },
+  MIA: { code: 'MIA', name: 'Miami International', city: 'Miami', country: 'États-Unis', latitude: 25.7959, longitude: -80.2870 },
+  YYZ: { code: 'YYZ', name: 'Toronto Pearson', city: 'Toronto', country: 'Canada', latitude: 43.6777, longitude: -79.6248 },
+  YUL: { code: 'YUL', name: 'Montréal Trudeau', city: 'Montréal', country: 'Canada', latitude: 45.4706, longitude: -73.7408 },
 };
 
 // Coordonnées des VRAIS centres-villes (pas les aéroports!)
@@ -173,6 +198,37 @@ const CITY_CENTERS: Record<string, { lat: number; lng: number }> = {
   'stockholm': { lat: 59.3293, lng: 18.0686 }, // Gamla Stan
   'oslo': { lat: 59.9139, lng: 10.7522 }, // Centre
   'helsinki': { lat: 60.1699, lng: 24.9384 }, // Cathédrale
+
+  // Japon
+  'tokyo': { lat: 35.6762, lng: 139.6503 }, // Shibuya
+  'osaka': { lat: 34.6937, lng: 135.5023 }, // Dotonbori
+  'kyoto': { lat: 35.0116, lng: 135.7681 }, // Gion
+  'nagoya': { lat: 35.1815, lng: 136.9066 }, // Centre
+  'fukuoka': { lat: 33.5904, lng: 130.4017 }, // Tenjin
+  'sapporo': { lat: 43.0618, lng: 141.3545 }, // Odori Park
+
+  // Asie
+  'seoul': { lat: 37.5665, lng: 126.9780 }, // Myeongdong
+  'séoul': { lat: 37.5665, lng: 126.9780 },
+  'beijing': { lat: 39.9042, lng: 116.4074 }, // Place Tiananmen
+  'pékin': { lat: 39.9042, lng: 116.4074 },
+  'pekin': { lat: 39.9042, lng: 116.4074 },
+  'shanghai': { lat: 31.2304, lng: 121.4737 }, // The Bund
+  'hong kong': { lat: 22.3193, lng: 114.1694 }, // Victoria Harbour
+  'hongkong': { lat: 22.3193, lng: 114.1694 },
+  'singapore': { lat: 1.3521, lng: 103.8198 }, // Marina Bay
+  'singapour': { lat: 1.3521, lng: 103.8198 },
+  'bangkok': { lat: 13.7563, lng: 100.5018 }, // Khao San Road
+
+  // Amérique du Nord
+  'new york': { lat: 40.7580, lng: -73.9855 }, // Times Square
+  'newyork': { lat: 40.7580, lng: -73.9855 },
+  'los angeles': { lat: 34.0522, lng: -118.2437 }, // Hollywood
+  'san francisco': { lat: 37.7749, lng: -122.4194 }, // Union Square
+  'miami': { lat: 25.7617, lng: -80.1918 }, // South Beach
+  'toronto': { lat: 43.6532, lng: -79.3832 }, // CN Tower
+  'montreal': { lat: 45.5017, lng: -73.5673 }, // Vieux-Montréal
+  'montréal': { lat: 45.5017, lng: -73.5673 },
 };
 
 /**
@@ -284,6 +340,27 @@ export function findNearbyAirports(city: string): AirportInfo[] {
     'montpellier': 'MPL', 'montpell': 'MPL',
     'strasbourg': 'SXB', 'strasbour': 'SXB',
     'lille': 'LIL',
+    // Japon
+    'tokyo': 'NRT', 'tokio': 'NRT',
+    'osaka': 'KIX',
+    'kyoto': 'KIX', // Kyoto utilise Osaka Kansai
+    'nagoya': 'NGO',
+    'fukuoka': 'FUK',
+    'sapporo': 'CTS',
+    // Asie
+    'seoul': 'ICN', 'séoul': 'ICN',
+    'beijing': 'PEK', 'pekin': 'PEK', 'pékin': 'PEK',
+    'shanghai': 'PVG',
+    'hong kong': 'HKG', 'hongkong': 'HKG',
+    'singapore': 'SIN', 'singapour': 'SIN',
+    'bangkok': 'BKK',
+    // Amérique du Nord
+    'new york': 'JFK', 'newyork': 'JFK', 'nyc': 'JFK',
+    'los angeles': 'LAX', 'la': 'LAX',
+    'san francisco': 'SFO',
+    'miami': 'MIA',
+    'toronto': 'YYZ',
+    'montreal': 'YUL', 'montréal': 'YUL',
   };
 
   // Chercher dans les régions avec plusieurs aéroports
