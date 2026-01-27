@@ -1,0 +1,1916 @@
+{
+  "_meta": {
+    "exportedAt": "2026-01-25T18:10:54.884Z",
+    "purpose": "Debug export for Claude analysis",
+    "version": "1.0"
+  },
+  "summary": {
+    "destination": "Barcelone ",
+    "origin": "Caen",
+    "startDate": "2026-01-27T23:00:00.000Z",
+    "durationDays": 3,
+    "groupSize": 2,
+    "groupType": "couple",
+    "budgetLevel": "moderate",
+    "activities": [
+      "culture"
+    ],
+    "transport": "plane",
+    "totalEstimatedCost": 2167
+  },
+  "selectedTransport": {
+    "id": "plane",
+    "mode": "plane",
+    "totalDuration": 354,
+    "totalPrice": 85,
+    "totalCO2": 216,
+    "score": 5.2,
+    "scoreDetails": {
+      "priceScore": 6.3,
+      "timeScore": 9.5,
+      "co2Score": 0
+    },
+    "segments": [
+      {
+        "mode": "plane",
+        "from": "Caen",
+        "to": "Barcelone ",
+        "duration": 64,
+        "price": 85
+      }
+    ],
+    "bookingUrl": "https://www.google.com/travel/flights?q=Flights%20from%20Caen%20to%20Barcelone%20"
+  },
+  "transportOptions": [
+    {
+      "id": "train",
+      "mode": "train",
+      "totalDuration": 464,
+      "totalPrice": 58,
+      "totalCO2": 12,
+      "score": 8.2,
+      "scoreDetails": {
+        "priceScore": 8.2,
+        "timeScore": 6.4,
+        "co2Score": 10
+      },
+      "segments": [
+        {
+          "mode": "train",
+          "from": "Caen",
+          "to": "Barcelone ",
+          "duration": 424,
+          "price": 58,
+          "operator": "Train régional"
+        }
+      ],
+      "bookingUrl": "https://www.thetrainline.com/en/train-times/caen-to-barcelone%20",
+      "recommended": true,
+      "recommendationReason": "Option économique, écologique"
+    },
+    {
+      "id": "combined_train_plane",
+      "mode": "combined",
+      "totalDuration": 337,
+      "totalPrice": 89,
+      "totalCO2": 127,
+      "score": 6.7,
+      "scoreDetails": {
+        "priceScore": 6,
+        "timeScore": 10,
+        "co2Score": 4.4
+      },
+      "segments": [
+        {
+          "mode": "train",
+          "from": "Caen",
+          "to": "Paris",
+          "duration": 48,
+          "price": 24,
+          "operator": "Train grande vitesse"
+        },
+        {
+          "mode": "plane",
+          "from": "Paris",
+          "to": "Barcelone ",
+          "duration": 49,
+          "price": 65
+        }
+      ]
+    },
+    {
+      "id": "bus",
+      "mode": "bus",
+      "totalDuration": 691,
+      "totalPrice": 34,
+      "totalCO2": 23,
+      "score": 6.5,
+      "scoreDetails": {
+        "priceScore": 10,
+        "timeScore": 0,
+        "co2Score": 9.5
+      },
+      "segments": [
+        {
+          "mode": "bus",
+          "from": "Caen",
+          "to": "Barcelone ",
+          "duration": 636,
+          "price": 34,
+          "operator": "FlixBus / BlaBlaCar Bus"
+        }
+      ],
+      "bookingUrl": "https://www.flixbus.fr/recherche?from=Caen&to=Barcelone%20"
+    },
+    {
+      "id": "plane",
+      "mode": "plane",
+      "totalDuration": 354,
+      "totalPrice": 85,
+      "totalCO2": 216,
+      "score": 5.2,
+      "scoreDetails": {
+        "priceScore": 6.3,
+        "timeScore": 9.5,
+        "co2Score": 0
+      },
+      "segments": [
+        {
+          "mode": "plane",
+          "from": "Caen",
+          "to": "Barcelone ",
+          "duration": 64,
+          "price": 85
+        }
+      ],
+      "bookingUrl": "https://www.google.com/travel/flights?q=Flights%20from%20Caen%20to%20Barcelone%20"
+    },
+    {
+      "id": "car",
+      "mode": "car",
+      "totalDuration": 584,
+      "totalPrice": 170,
+      "totalCO2": 44,
+      "score": 3.9,
+      "scoreDetails": {
+        "priceScore": 0,
+        "timeScore": 3,
+        "co2Score": 8.4
+      },
+      "segments": [
+        {
+          "mode": "car",
+          "from": "Caen",
+          "to": "Barcelone ",
+          "duration": 509,
+          "price": 170
+        }
+      ],
+      "bookingUrl": "https://www.google.com/maps/dir/Caen/Barcelone%20"
+    }
+  ],
+  "outboundFlight": {
+    "id": "serp-TO 4750-2026-01-27",
+    "airline": "TO",
+    "airlineLogo": "https://www.gstatic.com/flights/airline_logos/70px/TO.png",
+    "flightNumber": "TO 4750",
+    "departureAirport": "Aéroport de Paris-Orly",
+    "departureAirportCode": "ORY",
+    "departureCity": "ORY",
+    "departureTime": "2026-01-27T06:05:00.000Z",
+    "departureTimeDisplay": "07:05",
+    "arrivalAirport": "Aéroport international de Barcelone-El Prat",
+    "arrivalAirportCode": "BCN",
+    "arrivalCity": "BCN",
+    "arrivalTime": "2026-01-27T07:45:00.000Z",
+    "arrivalTimeDisplay": "08:45",
+    "duration": 100,
+    "stops": 0,
+    "price": 352,
+    "currency": "EUR",
+    "cabinClass": "economy",
+    "baggageIncluded": true,
+    "bookingUrl": "https://www.google.com/travel/flights?hl=fr&gl=fr&curr=EUR&tfs=CBwQAhoeEgoyMDI2LTAxLTI3agcIARIDT1JZcgcIARIDQkNOQgIBAUgBcAGYAQI&tfu=EgIIAQ&booking_token=WyJDalJJYkRSQ0xYWk5Vemc0U2tGQlRVMXZWMEZDUnkwdExTMHRMUzB0TFMxdmVXTmlNMEZCUVVGQlIyd3lWeTF6U0hCbFR6WkJFZ1pVVHpRM05UQWFDd2pBaVFFUUFob0RSVlZTT0J4dzA2SUIiLFtbIk9SWSIsIjIwMjYtMDEtMjciLCJCQ04iLG51bGwsIlRPIiwiNDc1MCJdXV0%3D"
+  },
+  "returnFlight": {
+    "id": "serp-TO 4755-2026-01-29",
+    "airline": "TO",
+    "airlineLogo": "https://www.gstatic.com/flights/airline_logos/70px/TO.png",
+    "flightNumber": "TO 4755",
+    "departureAirport": "Aéroport international de Barcelone-El Prat",
+    "departureAirportCode": "BCN",
+    "departureCity": "BCN",
+    "departureTime": "2026-01-29T12:45:00.000Z",
+    "departureTimeDisplay": "13:45",
+    "arrivalAirport": "Aéroport de Paris-Orly",
+    "arrivalAirportCode": "ORY",
+    "arrivalCity": "ORY",
+    "arrivalTime": "2026-01-29T14:45:00.000Z",
+    "arrivalTimeDisplay": "15:45",
+    "duration": 120,
+    "stops": 0,
+    "price": 236,
+    "currency": "EUR",
+    "cabinClass": "economy",
+    "baggageIncluded": true,
+    "bookingUrl": "https://www.google.com/travel/flights?hl=fr&gl=fr&curr=EUR&tfs=CBwQAhoeEgoyMDI2LTAxLTI5agcIARIDQkNOcgcIARIDT1JZQgIBAUgBcAGYAQI&tfu=EgIIAQ&booking_token=WyJDalJJTmpKU1QxSllRVGsxVlc5QlRpMVVSRUZDUnkwdExTMHRMUzB0TFc5NWFHb3lNVUZCUVVGQlIyd3lWbUZGUzFsWmIxVkJFZ1pVVHpRM05UVWFDZ2lZWEJBQ0dnTkZWVkk0SEhDR2JRPT0iLFtbIkJDTiIsIjIwMjYtMDEtMjkiLCJPUlkiLG51bGwsIlRPIiwiNDc1NSJdXV0%3D"
+  },
+  "accommodation": {
+    "id": "serp-hotel-ChgI5fW-hdLRgdWoARoLL2cvMXRkZnE5MGgQAQ",
+    "name": "Hotel Duquesa de Cardona Barcelona",
+    "type": "hotel",
+    "address": "Adresse non disponible",
+    "latitude": 41.3798075,
+    "longitude": 2.1804625,
+    "rating": 9,
+    "reviewCount": 1776,
+    "stars": 4,
+    "pricePerNight": 114,
+    "totalPrice": 228,
+    "currency": "EUR",
+    "amenities": [
+      "Breakfast ($)",
+      "Free Wi-Fi",
+      "Outdoor pool",
+      "Air conditioning",
+      "Fitness center",
+      "Bar",
+      "Restaurant",
+      "Room service",
+      "Airport shuttle",
+      "Full-service laundry",
+      "Accessible",
+      "Business center",
+      "Kid-friendly",
+      "Smoke-free property"
+    ],
+    "checkInTime": "15:00",
+    "checkOutTime": "12:00",
+    "bookingUrl": "http://www.hduquesadecardona.com/",
+    "distanceToCenter": 0,
+    "description": ""
+  },
+  "chronology": [
+    {
+      "dayNumber": 1,
+      "date": "2026-01-27T23:00:00.000Z",
+      "itemCount": 16,
+      "items": [
+        {
+          "time": "00:00 - 00:00",
+          "type": "hotel",
+          "title": "Check-in Hotel Duquesa de Cardona Barcelona",
+          "description": "4⭐ | 9.0/10 | 114€/nuit",
+          "location": "Adresse non disponible",
+          "coords": {
+            "lat": 41.3798075,
+            "lng": 2.1804625
+          },
+          "bookingUrl": "https://www.booking.com/searchresults.html?ss=Hotel+Duquesa+de+Cardona+Barcelona+Barcelone+&checkin=2026-01-27&checkout=2026-01-29",
+          "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Check-in%20Hotel%20Duquesa%20de%20Cardona%20Barcelona%2C%20Adresse%20non%20disponible",
+          "dataReliability": "generated"
+        },
+        {
+          "time": "00:30 - 02:30",
+          "type": "activity",
+          "title": "Sagrada Familia",
+          "description": "Chef-d'œuvre inachevé de Gaudí, basilique emblématique de Barcelone",
+          "location": "Sagrada Familia, Barcelone ",
+          "coords": {
+            "lat": 41.4036,
+            "lng": 2.1744
+          },
+          "estimatedCost": 52,
+          "rating": 4.8,
+          "bookingUrl": "https://sagradafamilia.org/tickets",
+          "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Sagrada%20Familia%2C%20Barcelone",
+          "timeFromPrevious": 21,
+          "dataReliability": "generated"
+        },
+        {
+          "time": "03:00 - 04:00",
+          "type": "activity",
+          "title": "La Rambla",
+          "description": "Avenue emblématique avec artistes de rue",
+          "location": "La Rambla, Barcelone ",
+          "coords": {
+            "lat": 41.3809,
+            "lng": 2.1734
+          },
+          "estimatedCost": 0,
+          "rating": 4.4,
+          "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=La%20Rambla%2C%20Barcelone",
+          "timeFromPrevious": 23,
+          "dataReliability": "generated"
+        },
+        {
+          "time": "04:30 - 06:30",
+          "type": "activity",
+          "title": "Camp Nou - FC Barcelona",
+          "description": "Stade mythique du FC Barcelone avec musée",
+          "location": "Camp Nou - FC Barcelona, Barcelone ",
+          "coords": {
+            "lat": 41.3809,
+            "lng": 2.1228
+          },
+          "estimatedCost": 56,
+          "rating": 4.6,
+          "bookingUrl": "https://www.fcbarcelona.com/en/tickets/camp-nou-experience",
+          "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Camp%20Nou%20-%20FC%20Barcelona%2C%20Barcelone",
+          "timeFromPrevious": 32,
+          "dataReliability": "generated"
+        },
+        {
+          "time": "04:35 - 05:05",
+          "type": "parking",
+          "title": "Parking: P Éco - Parking Économique",
+          "description": "Garez votre voiture. Prix: 54€",
+          "location": "Aéroport Paris-Orly",
+          "coords": {
+            "lat": 48.73,
+            "lng": 2.37
+          },
+          "estimatedCost": 54,
+          "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Parking%3A%20P%20%C3%89co%20-%20Parking%20%C3%89conomique%2C%20A%C3%A9roport%20Paris-Orly",
+          "dataReliability": "generated"
+        },
+        {
+          "time": "05:05 - 06:35",
+          "type": "checkin",
+          "title": "Enregistrement & Sécurité",
+          "description": "Arrivez 2h avant. Terminal: Paris Orly",
+          "location": "Paris Orly",
+          "coords": {
+            "lat": 48.7262,
+            "lng": 2.3652
+          },
+          "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Enregistrement%20%26%20S%C3%A9curit%C3%A9%2C%20Paris%20Orly",
+          "dataReliability": "generated"
+        },
+        {
+          "time": "06:35 - 08:15",
+          "type": "flight",
+          "title": "Vol TO 4750 → Barcelone ",
+          "description": "TO 4750 | 1h40 | Direct",
+          "location": "ORY → BCN",
+          "coords": {
+            "lat": 45.01165,
+            "lng": 2.22185
+          },
+          "estimatedCost": 352,
+          "bookingUrl": "https://www.google.com/travel/flights?q=flights+from+ORY+to+BCN+on+2026-01-27+return+2026-01-29",
+          "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Vol%20TO%204750%20%E2%86%92%20Barcelone%20%2C%20ORY%20%E2%86%92%20BCN",
+          "dataReliability": "generated"
+        },
+        {
+          "time": "08:15 - 08:55",
+          "type": "transport",
+          "title": "Transfert Aéroport → Consigne bagages",
+          "description": "Taxi ou transports vers la consigne.",
+          "location": "Barcelona El Prat → Bounce Barcelone ",
+          "coords": {
+            "lat": 41.3851,
+            "lng": 2.1734
+          },
+          "estimatedCost": 25,
+          "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Transfert%20A%C3%A9roport%20%E2%86%92%20Consigne%20bagages%2C%20Barcelona%20El%20Prat%20%E2%86%92%20Bounce%20Barcelone",
+          "dataReliability": "generated"
+        },
+        {
+          "time": "08:55 - 00:00",
+          "type": "transport",
+          "title": "Trajet Caen → Paris",
+          "description": "Train ou covoiturage vers l'aéroport (258km)",
+          "location": "Caen → Paris Orly",
+          "coords": {
+            "lat": 48.7262,
+            "lng": 2.3652
+          },
+          "estimatedCost": 70,
+          "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Trajet%20Caen%20%E2%86%92%20Paris%2C%20Caen%20%E2%86%92%20Paris%20Orly",
+          "dataReliability": "generated"
+        },
+        {
+          "time": "09:55 - 10:10",
+          "type": "luggage",
+          "title": "Dépôt bagages: Bounce Barcelone ",
+          "description": "Consigne partenaire | 7€/jour | 00:00-23:59",
+          "location": "Centre-ville de Barcelone ",
+          "coords": {
+            "lat": 41.3851,
+            "lng": 2.1734
+          },
+          "estimatedCost": 7,
+          "bookingUrl": "https://usebounce.com/barcelone ",
+          "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=D%C3%A9p%C3%B4t%20bagages%3A%20Bounce%20Barcelone%20%2C%20Centre-ville%20de%20Barcelone",
+          "dataReliability": "generated"
+        },
+        {
+          "time": "10:00 - 10:45",
+          "type": "activity",
+          "title": "Pause café",
+          "description": "Détente dans un café typique avec vue",
+          "location": "Centre-ville, Barcelone ",
+          "coords": {
+            "lat": 41.385088610364654,
+            "lng": 2.1680147487858443
+          },
+          "estimatedCost": 10,
+          "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=41.37901972368445,2.1723143128135973&destination=41.385088610364654,2.1680147487858443&travelmode=walking",
+          "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Pause%20caf%C3%A9%2C%20Barcelone",
+          "timeFromPrevious": 15,
+          "dataReliability": "generated"
+        },
+        {
+          "time": "11:15 - 11:55",
+          "type": "activity",
+          "title": "Place centrale de Barcelone ",
+          "description": "Profitez de l'ambiance nocturne de la ville",
+          "location": "Centre-ville, Barcelone ",
+          "coords": {
+            "lat": 41.382112378689456,
+            "lng": 2.172840863517793
+          },
+          "estimatedCost": 10,
+          "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=41.3853204,2.1677663&destination=41.382112378689456,2.172840863517793&travelmode=walking",
+          "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Place%20centrale%20de%20Barcelone%20%2C%20Barcelone",
+          "timeFromPrevious": 10,
+          "dataReliability": "generated"
+        },
+        {
+          "time": "15:15 - 15:45",
+          "type": "luggage",
+          "title": "Récupération bagages: Bounce Barcelone ",
+          "description": "Récupérez vos bagages avant le check-in hôtel.",
+          "location": "Centre-ville de Barcelone ",
+          "coords": {
+            "lat": 41.3851,
+            "lng": 2.1734
+          },
+          "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=R%C3%A9cup%C3%A9ration%20bagages%3A%20Bounce%20Barcelone%20%2C%20Centre-ville%20de%20Barcelone",
+          "dataReliability": "generated"
+        },
+        {
+          "time": "18:15 - 19:15",
+          "type": "activity",
+          "title": "La Rambla",
+          "description": "Avenue emblématique avec artistes de rue",
+          "location": "Barcelone ",
+          "coords": {
+            "lat": 41.3809,
+            "lng": 2.1734
+          },
+          "estimatedCost": 0,
+          "rating": 4.4,
+          "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=41.3851,2.1734&destination=41.3809,2.1734&travelmode=transit",
+          "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=La%20Rambla%2C%20Barcelone",
+          "timeFromPrevious": 8,
+          "dataReliability": "generated"
+        },
+        {
+          "time": "18:15 - 19:15",
+          "type": "activity",
+          "title": "Quartier historique de Barcelone ",
+          "description": "Promenade dans les ruelles typiques du centre historique",
+          "location": "Centre-ville, Barcelone ",
+          "coords": {
+            "lat": 41.37901972368445,
+            "lng": 2.1723143128135973
+          },
+          "estimatedCost": 10,
+          "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=41.3809,2.1734&destination=41.37901972368445,2.1723143128135973&travelmode=walking",
+          "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Quartier%20historique%20de%20Barcelone%20%2C%20Barcelone",
+          "timeFromPrevious": 15,
+          "dataReliability": "generated"
+        },
+        {
+          "time": "19:00 - 20:30",
+          "type": "restaurant",
+          "title": "Xaica",
+          "description": " | ⭐ 4.6/5",
+          "location": "5-7 Carrer de Jovellanos, Barcelona",
+          "coords": {
+            "lat": 41.3853204,
+            "lng": 2.1677663
+          },
+          "estimatedCost": 60,
+          "rating": 4.572873260477233,
+          "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=41.385088610364654,2.1680147487858443&destination=41.3853204,2.1677663&travelmode=walking",
+          "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Xaica%2C%205-7%20Carrer%20de%20Jovellanos%2C%20Barcelona",
+          "timeFromPrevious": 15,
+          "dataReliability": "generated"
+        }
+      ]
+    },
+    {
+      "dayNumber": 2,
+      "date": "2026-01-28T23:00:00.000Z",
+      "itemCount": 8,
+      "items": [
+        {
+          "time": "08:00 - 08:45",
+          "type": "restaurant",
+          "title": "Bosco",
+          "description": "tapas | ⭐ 4.7/5",
+          "location": "9 Carrer dels Capellans, Barcelona",
+          "coords": {
+            "lat": 41.3852432,
+            "lng": 2.174473
+          },
+          "estimatedCost": 24,
+          "rating": 4.697957333683909,
+          "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=41.3851,2.1734&destination=41.3852432,2.174473&travelmode=walking",
+          "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Bosco%2C%209%20Carrer%20dels%20Capellans%2C%20Barcelona",
+          "timeFromPrevious": 10,
+          "dataReliability": "generated"
+        },
+        {
+          "time": "09:00 - 10:30",
+          "type": "activity",
+          "title": "Casa Batlló",
+          "description": "Maison moderniste de Gaudí avec façade ondulée",
+          "location": "Barcelone ",
+          "coords": {
+            "lat": 41.3917,
+            "lng": 2.165
+          },
+          "estimatedCost": 70,
+          "rating": 4.7,
+          "bookingUrl": "https://www.casabatllo.es/en/tickets/",
+          "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=41.3852432,2.174473&destination=41.3917,2.165&travelmode=transit",
+          "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Casa%20Batll%C3%B3%2C%20Barcelone",
+          "timeFromPrevious": 16,
+          "dataReliability": "generated"
+        },
+        {
+          "time": "11:00 - 12:30",
+          "type": "activity",
+          "title": "Parc Güell",
+          "description": "Parc public avec des œuvres architecturales de Gaudí",
+          "location": "Barcelone ",
+          "coords": {
+            "lat": 41.4145,
+            "lng": 2.1527
+          },
+          "estimatedCost": 20,
+          "rating": 4.6,
+          "bookingUrl": "https://parkguell.barcelona/en/buy-tickets",
+          "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=41.3917,2.165&destination=41.4145,2.1527&travelmode=transit",
+          "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Parc%20G%C3%BCell%2C%20Barcelone",
+          "timeFromPrevious": 24,
+          "dataReliability": "generated"
+        },
+        {
+          "time": "13:00 - 14:15",
+          "type": "restaurant",
+          "title": "Embrumas",
+          "description": "ice_cream | ⭐ 4.5/5",
+          "location": "Adresse non disponible",
+          "coords": {
+            "lat": 41.412992,
+            "lng": 2.1530009
+          },
+          "estimatedCost": 40,
+          "rating": 4.50634479160537,
+          "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=41.4145,2.1527&destination=41.412992,2.1530009&travelmode=walking",
+          "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Embrumas%2C%20Barcelone%20",
+          "timeFromPrevious": 15,
+          "dataReliability": "generated"
+        },
+        {
+          "time": "15:00 - 18:00",
+          "type": "activity",
+          "title": "Plage de la Barceloneta",
+          "description": "Plage la plus populaire de Barcelone",
+          "location": "Barcelone ",
+          "coords": {
+            "lat": 41.3758,
+            "lng": 2.1894
+          },
+          "estimatedCost": 0,
+          "rating": 4.3,
+          "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=41.412992,2.1530009&destination=41.3758,2.1894&travelmode=transit",
+          "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Plage%20de%20la%20Barceloneta%2C%20Barcelone",
+          "timeFromPrevious": 31,
+          "dataReliability": "generated"
+        },
+        {
+          "time": "18:00 - 18:45",
+          "type": "activity",
+          "title": "Pause café",
+          "description": "Détente dans un café typique avec vue",
+          "location": "Centre-ville, Barcelone ",
+          "coords": {
+            "lat": 41.390083107695354,
+            "lng": 2.171204517832296
+          },
+          "estimatedCost": 10,
+          "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=41.3758,2.1894&destination=41.390083107695354,2.171204517832296&travelmode=walking",
+          "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Pause%20caf%C3%A9%2C%20Barcelone",
+          "timeFromPrevious": 15,
+          "dataReliability": "generated"
+        },
+        {
+          "time": "19:00 - 20:30",
+          "type": "restaurant",
+          "title": "Khalijia",
+          "description": "arab, indian | ⭐ 4.6/5",
+          "location": "92 Carrer de Pau Claris, Barcelona",
+          "coords": {
+            "lat": 41.390237,
+            "lng": 2.1706202
+          },
+          "estimatedCost": 60,
+          "rating": 4.597399365447615,
+          "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=41.390083107695354,2.171204517832296&destination=41.390237,2.1706202&travelmode=walking",
+          "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Khalijia%2C%2092%20Carrer%20de%20Pau%20Claris%2C%20Barcelona",
+          "timeFromPrevious": 15,
+          "dataReliability": "generated"
+        },
+        {
+          "time": "21:00 - 21:30",
+          "type": "activity",
+          "title": "Glace artisanale",
+          "description": "Pause gourmande dans une gelateria locale",
+          "location": "Centre-ville, Barcelone ",
+          "coords": {
+            "lat": 41.389795828208776,
+            "lng": 2.1717863674985494
+          },
+          "estimatedCost": 10,
+          "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=41.390237,2.1706202&destination=41.389795828208776,2.1717863674985494&travelmode=walking",
+          "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Glace%20artisanale%2C%20Barcelone",
+          "timeFromPrevious": 10,
+          "dataReliability": "generated"
+        }
+      ]
+    },
+    {
+      "dayNumber": 3,
+      "date": "2026-01-29T23:00:00.000Z",
+      "itemCount": 5,
+      "items": [
+        {
+          "time": "08:00 - 08:45",
+          "type": "restaurant",
+          "title": "Boulangerie Artisanale",
+          "description": "bakery, local | ⭐ 4.3/5",
+          "location": "Centre-ville, Barcelone ",
+          "coords": {
+            "lat": 41.391806076228555,
+            "lng": 2.171557209203516
+          },
+          "estimatedCost": 24,
+          "rating": 4.2669240157436565,
+          "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=41.3851,2.1734&destination=41.391806076228555,2.171557209203516&travelmode=walking",
+          "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Boulangerie%20Artisanale%2C%20Barcelone%20",
+          "timeFromPrevious": 10,
+          "dataReliability": "generated"
+        },
+        {
+          "time": "10:15 - 10:45",
+          "type": "checkout",
+          "title": "Check-out Hotel Duquesa de Cardona Barcelona",
+          "description": "Libérez votre hébergement.",
+          "location": "Adresse non disponible",
+          "coords": {
+            "lat": 41.3798075,
+            "lng": 2.1804625
+          },
+          "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Check-out%20Hotel%20Duquesa%20de%20Cardona%20Barcelona%2C%20Adresse%20non%20disponible",
+          "dataReliability": "generated"
+        },
+        {
+          "time": "10:45 - 11:45",
+          "type": "transport",
+          "title": "Transfert Hôtel → Aéroport",
+          "description": "Taxi ou transports.",
+          "location": "Centre-ville → Barcelona El Prat",
+          "coords": {
+            "lat": 41.2971,
+            "lng": 2.0785
+          },
+          "estimatedCost": 25,
+          "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Transfert%20H%C3%B4tel%20%E2%86%92%20A%C3%A9roport%2C%20Centre-ville%20%E2%86%92%20Barcelona%20El%20Prat",
+          "dataReliability": "generated"
+        },
+        {
+          "time": "13:45 - 15:45",
+          "type": "flight",
+          "title": "Vol TO 4755 → Caen",
+          "description": "TO 4755 | 2h | Direct",
+          "location": "BCN → ORY",
+          "coords": {
+            "lat": 45.01165,
+            "lng": 2.22185
+          },
+          "estimatedCost": 236,
+          "bookingUrl": "https://www.google.com/travel/flights?q=flights+from+BCN+to+ORY+on+2026-01-29",
+          "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Vol%20TO%204755%20%E2%86%92%20Caen%2C%20BCN%20%E2%86%92%20ORY",
+          "dataReliability": "generated"
+        },
+        {
+          "time": "16:15 - 16:45",
+          "type": "parking",
+          "title": "Récupération véhicule: P Éco - Parking Économique",
+          "description": "Navette et récupération de votre véhicule.",
+          "location": "Aéroport Paris-Orly",
+          "coords": {
+            "lat": 48.73,
+            "lng": 2.37
+          },
+          "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=R%C3%A9cup%C3%A9ration%20v%C3%A9hicule%3A%20P%20%C3%89co%20-%20Parking%20%C3%89conomique%2C%20A%C3%A9roport%20Paris-Orly",
+          "dataReliability": "generated"
+        }
+      ]
+    }
+  ],
+  "carbonFootprint": {
+    "total": 668,
+    "flights": 645,
+    "accommodation": 20,
+    "localTransport": 3,
+    "rating": "D",
+    "equivalents": {
+      "treesNeeded": 27,
+      "carKmEquivalent": 3179
+    },
+    "tips": [
+      "Envisagez de compenser vos émissions via un programme certifié",
+      "Privilégiez les transports en commun sur place",
+      "Choisissez des hébergements éco-labellisés"
+    ]
+  },
+  "costBreakdown": {
+    "flights": 588,
+    "accommodation": 300,
+    "food": 208,
+    "activities": 248,
+    "transport": 120,
+    "parking": 54,
+    "other": 649
+  },
+  "_rawTrip": {
+    "id": "r9sqodxbfec",
+    "createdAt": "2026-01-25T18:10:36.611Z",
+    "updatedAt": "2026-01-25T18:10:36.611Z",
+    "preferences": {
+      "durationDays": 3,
+      "groupSize": 2,
+      "transport": "plane",
+      "carRental": false,
+      "budgetLevel": "moderate",
+      "activities": [
+        "culture"
+      ],
+      "dietary": [
+        "none"
+      ],
+      "origin": "Caen",
+      "destination": "Barcelone ",
+      "startDate": "2026-01-27T23:00:00.000Z",
+      "groupType": "couple"
+    },
+    "days": [
+      {
+        "dayNumber": 1,
+        "date": "2026-01-27T23:00:00.000Z",
+        "items": [
+          {
+            "id": "pzj49dr71e",
+            "dayNumber": 1,
+            "startTime": "00:00",
+            "endTime": "00:00",
+            "type": "hotel",
+            "title": "Check-in Hotel Duquesa de Cardona Barcelona",
+            "orderIndex": 0,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Check-in%20Hotel%20Duquesa%20de%20Cardona%20Barcelona%2C%20Adresse%20non%20disponible",
+            "dataReliability": "generated",
+            "description": "4⭐ | 9.0/10 | 114€/nuit",
+            "locationName": "Adresse non disponible",
+            "latitude": 41.3798075,
+            "longitude": 2.1804625,
+            "bookingUrl": "https://www.booking.com/searchresults.html?ss=Hotel+Duquesa+de+Cardona+Barcelona+Barcelone+&checkin=2026-01-27&checkout=2026-01-29"
+          },
+          {
+            "id": "zrglfcj18xe",
+            "dayNumber": 1,
+            "startTime": "00:30",
+            "endTime": "02:30",
+            "type": "activity",
+            "title": "Sagrada Familia",
+            "orderIndex": 1,
+            "timeFromPrevious": 21,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Sagrada%20Familia%2C%20Barcelone",
+            "dataReliability": "generated",
+            "description": "Chef-d'œuvre inachevé de Gaudí, basilique emblématique de Barcelone",
+            "locationName": "Sagrada Familia, Barcelone ",
+            "latitude": 41.4036,
+            "longitude": 2.1744,
+            "estimatedCost": 52,
+            "rating": 4.8,
+            "bookingUrl": "https://sagradafamilia.org/tickets"
+          },
+          {
+            "id": "0guuvb0ua8q",
+            "dayNumber": 1,
+            "startTime": "03:00",
+            "endTime": "04:00",
+            "type": "activity",
+            "title": "La Rambla",
+            "orderIndex": 2,
+            "timeFromPrevious": 23,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=La%20Rambla%2C%20Barcelone",
+            "dataReliability": "generated",
+            "description": "Avenue emblématique avec artistes de rue",
+            "locationName": "La Rambla, Barcelone ",
+            "latitude": 41.3809,
+            "longitude": 2.1734,
+            "estimatedCost": 0,
+            "rating": 4.4
+          },
+          {
+            "id": "qk46u0qybm",
+            "dayNumber": 1,
+            "startTime": "04:30",
+            "endTime": "06:30",
+            "type": "activity",
+            "title": "Camp Nou - FC Barcelona",
+            "orderIndex": 3,
+            "timeFromPrevious": 32,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Camp%20Nou%20-%20FC%20Barcelona%2C%20Barcelone",
+            "dataReliability": "generated",
+            "description": "Stade mythique du FC Barcelone avec musée",
+            "locationName": "Camp Nou - FC Barcelona, Barcelone ",
+            "latitude": 41.3809,
+            "longitude": 2.1228,
+            "estimatedCost": 56,
+            "rating": 4.6,
+            "bookingUrl": "https://www.fcbarcelona.com/en/tickets/camp-nou-experience"
+          },
+          {
+            "id": "ou681r6h4w",
+            "dayNumber": 1,
+            "startTime": "04:35",
+            "endTime": "05:05",
+            "type": "parking",
+            "title": "Parking: P Éco - Parking Économique",
+            "orderIndex": 4,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Parking%3A%20P%20%C3%89co%20-%20Parking%20%C3%89conomique%2C%20A%C3%A9roport%20Paris-Orly",
+            "dataReliability": "generated",
+            "description": "Garez votre voiture. Prix: 54€",
+            "locationName": "Aéroport Paris-Orly",
+            "latitude": 48.73,
+            "longitude": 2.37,
+            "estimatedCost": 54
+          },
+          {
+            "id": "frrgqlvr8xf",
+            "dayNumber": 1,
+            "startTime": "05:05",
+            "endTime": "06:35",
+            "type": "checkin",
+            "title": "Enregistrement & Sécurité",
+            "orderIndex": 5,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Enregistrement%20%26%20S%C3%A9curit%C3%A9%2C%20Paris%20Orly",
+            "dataReliability": "generated",
+            "description": "Arrivez 2h avant. Terminal: Paris Orly",
+            "locationName": "Paris Orly",
+            "latitude": 48.7262,
+            "longitude": 2.3652
+          },
+          {
+            "id": "9ibfh7053wl",
+            "dayNumber": 1,
+            "startTime": "06:35",
+            "endTime": "08:15",
+            "type": "flight",
+            "title": "Vol TO 4750 → Barcelone ",
+            "orderIndex": 6,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Vol%20TO%204750%20%E2%86%92%20Barcelone%20%2C%20ORY%20%E2%86%92%20BCN",
+            "dataReliability": "generated",
+            "description": "TO 4750 | 1h40 | Direct",
+            "locationName": "ORY → BCN",
+            "latitude": 45.01165,
+            "longitude": 2.22185,
+            "estimatedCost": 352,
+            "bookingUrl": "https://www.google.com/travel/flights?q=flights+from+ORY+to+BCN+on+2026-01-27+return+2026-01-29"
+          },
+          {
+            "id": "o7mdkasnqfc",
+            "dayNumber": 1,
+            "startTime": "08:15",
+            "endTime": "08:55",
+            "type": "transport",
+            "title": "Transfert Aéroport → Consigne bagages",
+            "orderIndex": 7,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Transfert%20A%C3%A9roport%20%E2%86%92%20Consigne%20bagages%2C%20Barcelona%20El%20Prat%20%E2%86%92%20Bounce%20Barcelone",
+            "dataReliability": "generated",
+            "description": "Taxi ou transports vers la consigne.",
+            "locationName": "Barcelona El Prat → Bounce Barcelone ",
+            "latitude": 41.3851,
+            "longitude": 2.1734,
+            "estimatedCost": 25
+          },
+          {
+            "id": "v8ngm67dk4h",
+            "dayNumber": 1,
+            "startTime": "08:55",
+            "endTime": "00:00",
+            "type": "transport",
+            "title": "Trajet Caen → Paris",
+            "orderIndex": 8,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Trajet%20Caen%20%E2%86%92%20Paris%2C%20Caen%20%E2%86%92%20Paris%20Orly",
+            "dataReliability": "generated",
+            "description": "Train ou covoiturage vers l'aéroport (258km)",
+            "locationName": "Caen → Paris Orly",
+            "latitude": 48.7262,
+            "longitude": 2.3652,
+            "estimatedCost": 70
+          },
+          {
+            "id": "uefhc2h9z6f",
+            "dayNumber": 1,
+            "startTime": "09:55",
+            "endTime": "10:10",
+            "type": "luggage",
+            "title": "Dépôt bagages: Bounce Barcelone ",
+            "orderIndex": 9,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=D%C3%A9p%C3%B4t%20bagages%3A%20Bounce%20Barcelone%20%2C%20Centre-ville%20de%20Barcelone",
+            "dataReliability": "generated",
+            "description": "Consigne partenaire | 7€/jour | 00:00-23:59",
+            "locationName": "Centre-ville de Barcelone ",
+            "latitude": 41.3851,
+            "longitude": 2.1734,
+            "estimatedCost": 7,
+            "bookingUrl": "https://usebounce.com/barcelone "
+          },
+          {
+            "id": "ehf7zs7ceyi",
+            "dayNumber": 1,
+            "startTime": "10:00",
+            "endTime": "10:45",
+            "type": "activity",
+            "title": "Pause café",
+            "orderIndex": 10,
+            "timeFromPrevious": 15,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Pause%20caf%C3%A9%2C%20Barcelone",
+            "dataReliability": "generated",
+            "description": "Détente dans un café typique avec vue",
+            "locationName": "Centre-ville, Barcelone ",
+            "latitude": 41.385088610364654,
+            "longitude": 2.1680147487858443,
+            "estimatedCost": 10,
+            "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=41.37901972368445,2.1723143128135973&destination=41.385088610364654,2.1680147487858443&travelmode=walking"
+          },
+          {
+            "id": "2by54ezdf8k",
+            "dayNumber": 1,
+            "startTime": "11:15",
+            "endTime": "11:55",
+            "type": "activity",
+            "title": "Place centrale de Barcelone ",
+            "orderIndex": 11,
+            "timeFromPrevious": 10,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Place%20centrale%20de%20Barcelone%20%2C%20Barcelone",
+            "dataReliability": "generated",
+            "description": "Profitez de l'ambiance nocturne de la ville",
+            "locationName": "Centre-ville, Barcelone ",
+            "latitude": 41.382112378689456,
+            "longitude": 2.172840863517793,
+            "estimatedCost": 10,
+            "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=41.3853204,2.1677663&destination=41.382112378689456,2.172840863517793&travelmode=walking"
+          },
+          {
+            "id": "tqou55bhfhs",
+            "dayNumber": 1,
+            "startTime": "15:15",
+            "endTime": "15:45",
+            "type": "luggage",
+            "title": "Récupération bagages: Bounce Barcelone ",
+            "orderIndex": 12,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=R%C3%A9cup%C3%A9ration%20bagages%3A%20Bounce%20Barcelone%20%2C%20Centre-ville%20de%20Barcelone",
+            "dataReliability": "generated",
+            "description": "Récupérez vos bagages avant le check-in hôtel.",
+            "locationName": "Centre-ville de Barcelone ",
+            "latitude": 41.3851,
+            "longitude": 2.1734
+          },
+          {
+            "id": "tmodxqn84b",
+            "dayNumber": 1,
+            "startTime": "18:15",
+            "endTime": "19:15",
+            "type": "activity",
+            "title": "La Rambla",
+            "orderIndex": 13,
+            "timeFromPrevious": 8,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=La%20Rambla%2C%20Barcelone",
+            "dataReliability": "generated",
+            "description": "Avenue emblématique avec artistes de rue",
+            "locationName": "Barcelone ",
+            "latitude": 41.3809,
+            "longitude": 2.1734,
+            "estimatedCost": 0,
+            "rating": 4.4,
+            "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=41.3851,2.1734&destination=41.3809,2.1734&travelmode=transit"
+          },
+          {
+            "id": "sv5saulu2y7",
+            "dayNumber": 1,
+            "startTime": "18:15",
+            "endTime": "19:15",
+            "type": "activity",
+            "title": "Quartier historique de Barcelone ",
+            "orderIndex": 14,
+            "timeFromPrevious": 15,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Quartier%20historique%20de%20Barcelone%20%2C%20Barcelone",
+            "dataReliability": "generated",
+            "description": "Promenade dans les ruelles typiques du centre historique",
+            "locationName": "Centre-ville, Barcelone ",
+            "latitude": 41.37901972368445,
+            "longitude": 2.1723143128135973,
+            "estimatedCost": 10,
+            "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=41.3809,2.1734&destination=41.37901972368445,2.1723143128135973&travelmode=walking"
+          },
+          {
+            "id": "i7xrdfyerhl",
+            "dayNumber": 1,
+            "startTime": "19:00",
+            "endTime": "20:30",
+            "type": "restaurant",
+            "title": "Xaica",
+            "orderIndex": 15,
+            "timeFromPrevious": 15,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Xaica%2C%205-7%20Carrer%20de%20Jovellanos%2C%20Barcelona",
+            "dataReliability": "generated",
+            "description": " | ⭐ 4.6/5",
+            "locationName": "5-7 Carrer de Jovellanos, Barcelona",
+            "latitude": 41.3853204,
+            "longitude": 2.1677663,
+            "estimatedCost": 60,
+            "rating": 4.572873260477233,
+            "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=41.385088610364654,2.1680147487858443&destination=41.3853204,2.1677663&travelmode=walking"
+          }
+        ]
+      },
+      {
+        "dayNumber": 2,
+        "date": "2026-01-28T23:00:00.000Z",
+        "items": [
+          {
+            "id": "d0s3l4g1dil",
+            "dayNumber": 2,
+            "startTime": "08:00",
+            "endTime": "08:45",
+            "type": "restaurant",
+            "title": "Bosco",
+            "orderIndex": 0,
+            "timeFromPrevious": 10,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Bosco%2C%209%20Carrer%20dels%20Capellans%2C%20Barcelona",
+            "dataReliability": "generated",
+            "description": "tapas | ⭐ 4.7/5",
+            "locationName": "9 Carrer dels Capellans, Barcelona",
+            "latitude": 41.3852432,
+            "longitude": 2.174473,
+            "estimatedCost": 24,
+            "rating": 4.697957333683909,
+            "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=41.3851,2.1734&destination=41.3852432,2.174473&travelmode=walking"
+          },
+          {
+            "id": "d6q8ppw91fc",
+            "dayNumber": 2,
+            "startTime": "09:00",
+            "endTime": "10:30",
+            "type": "activity",
+            "title": "Casa Batlló",
+            "orderIndex": 1,
+            "timeFromPrevious": 16,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Casa%20Batll%C3%B3%2C%20Barcelone",
+            "dataReliability": "generated",
+            "description": "Maison moderniste de Gaudí avec façade ondulée",
+            "locationName": "Barcelone ",
+            "latitude": 41.3917,
+            "longitude": 2.165,
+            "estimatedCost": 70,
+            "rating": 4.7,
+            "bookingUrl": "https://www.casabatllo.es/en/tickets/",
+            "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=41.3852432,2.174473&destination=41.3917,2.165&travelmode=transit"
+          },
+          {
+            "id": "2k929szobor",
+            "dayNumber": 2,
+            "startTime": "11:00",
+            "endTime": "12:30",
+            "type": "activity",
+            "title": "Parc Güell",
+            "orderIndex": 2,
+            "timeFromPrevious": 24,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Parc%20G%C3%BCell%2C%20Barcelone",
+            "dataReliability": "generated",
+            "description": "Parc public avec des œuvres architecturales de Gaudí",
+            "locationName": "Barcelone ",
+            "latitude": 41.4145,
+            "longitude": 2.1527,
+            "estimatedCost": 20,
+            "rating": 4.6,
+            "bookingUrl": "https://parkguell.barcelona/en/buy-tickets",
+            "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=41.3917,2.165&destination=41.4145,2.1527&travelmode=transit"
+          },
+          {
+            "id": "p4s9ciqdc3r",
+            "dayNumber": 2,
+            "startTime": "13:00",
+            "endTime": "14:15",
+            "type": "restaurant",
+            "title": "Embrumas",
+            "orderIndex": 3,
+            "timeFromPrevious": 15,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Embrumas%2C%20Barcelone%20",
+            "dataReliability": "generated",
+            "description": "ice_cream | ⭐ 4.5/5",
+            "locationName": "Adresse non disponible",
+            "latitude": 41.412992,
+            "longitude": 2.1530009,
+            "estimatedCost": 40,
+            "rating": 4.50634479160537,
+            "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=41.4145,2.1527&destination=41.412992,2.1530009&travelmode=walking"
+          },
+          {
+            "id": "ygq4wasv46e",
+            "dayNumber": 2,
+            "startTime": "15:00",
+            "endTime": "18:00",
+            "type": "activity",
+            "title": "Plage de la Barceloneta",
+            "orderIndex": 4,
+            "timeFromPrevious": 31,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Plage%20de%20la%20Barceloneta%2C%20Barcelone",
+            "dataReliability": "generated",
+            "description": "Plage la plus populaire de Barcelone",
+            "locationName": "Barcelone ",
+            "latitude": 41.3758,
+            "longitude": 2.1894,
+            "estimatedCost": 0,
+            "rating": 4.3,
+            "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=41.412992,2.1530009&destination=41.3758,2.1894&travelmode=transit"
+          },
+          {
+            "id": "xi39cy35mbq",
+            "dayNumber": 2,
+            "startTime": "18:00",
+            "endTime": "18:45",
+            "type": "activity",
+            "title": "Pause café",
+            "orderIndex": 5,
+            "timeFromPrevious": 15,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Pause%20caf%C3%A9%2C%20Barcelone",
+            "dataReliability": "generated",
+            "description": "Détente dans un café typique avec vue",
+            "locationName": "Centre-ville, Barcelone ",
+            "latitude": 41.390083107695354,
+            "longitude": 2.171204517832296,
+            "estimatedCost": 10,
+            "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=41.3758,2.1894&destination=41.390083107695354,2.171204517832296&travelmode=walking"
+          },
+          {
+            "id": "ijwmwoc3l3d",
+            "dayNumber": 2,
+            "startTime": "19:00",
+            "endTime": "20:30",
+            "type": "restaurant",
+            "title": "Khalijia",
+            "orderIndex": 6,
+            "timeFromPrevious": 15,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Khalijia%2C%2092%20Carrer%20de%20Pau%20Claris%2C%20Barcelona",
+            "dataReliability": "generated",
+            "description": "arab, indian | ⭐ 4.6/5",
+            "locationName": "92 Carrer de Pau Claris, Barcelona",
+            "latitude": 41.390237,
+            "longitude": 2.1706202,
+            "estimatedCost": 60,
+            "rating": 4.597399365447615,
+            "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=41.390083107695354,2.171204517832296&destination=41.390237,2.1706202&travelmode=walking"
+          },
+          {
+            "id": "czuzy9gbir6",
+            "dayNumber": 2,
+            "startTime": "21:00",
+            "endTime": "21:30",
+            "type": "activity",
+            "title": "Glace artisanale",
+            "orderIndex": 7,
+            "timeFromPrevious": 10,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Glace%20artisanale%2C%20Barcelone",
+            "dataReliability": "generated",
+            "description": "Pause gourmande dans une gelateria locale",
+            "locationName": "Centre-ville, Barcelone ",
+            "latitude": 41.389795828208776,
+            "longitude": 2.1717863674985494,
+            "estimatedCost": 10,
+            "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=41.390237,2.1706202&destination=41.389795828208776,2.1717863674985494&travelmode=walking"
+          }
+        ]
+      },
+      {
+        "dayNumber": 3,
+        "date": "2026-01-29T23:00:00.000Z",
+        "items": [
+          {
+            "id": "fgyafcsfapc",
+            "dayNumber": 3,
+            "startTime": "08:00",
+            "endTime": "08:45",
+            "type": "restaurant",
+            "title": "Boulangerie Artisanale",
+            "orderIndex": 0,
+            "timeFromPrevious": 10,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Boulangerie%20Artisanale%2C%20Barcelone%20",
+            "dataReliability": "generated",
+            "description": "bakery, local | ⭐ 4.3/5",
+            "locationName": "Centre-ville, Barcelone ",
+            "latitude": 41.391806076228555,
+            "longitude": 2.171557209203516,
+            "estimatedCost": 24,
+            "rating": 4.2669240157436565,
+            "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=41.3851,2.1734&destination=41.391806076228555,2.171557209203516&travelmode=walking"
+          },
+          {
+            "id": "bhej39ve7yk",
+            "dayNumber": 3,
+            "startTime": "10:15",
+            "endTime": "10:45",
+            "type": "checkout",
+            "title": "Check-out Hotel Duquesa de Cardona Barcelona",
+            "orderIndex": 1,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Check-out%20Hotel%20Duquesa%20de%20Cardona%20Barcelona%2C%20Adresse%20non%20disponible",
+            "dataReliability": "generated",
+            "description": "Libérez votre hébergement.",
+            "locationName": "Adresse non disponible",
+            "latitude": 41.3798075,
+            "longitude": 2.1804625
+          },
+          {
+            "id": "vl4wgt69et",
+            "dayNumber": 3,
+            "startTime": "10:45",
+            "endTime": "11:45",
+            "type": "transport",
+            "title": "Transfert Hôtel → Aéroport",
+            "orderIndex": 2,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Transfert%20H%C3%B4tel%20%E2%86%92%20A%C3%A9roport%2C%20Centre-ville%20%E2%86%92%20Barcelona%20El%20Prat",
+            "dataReliability": "generated",
+            "description": "Taxi ou transports.",
+            "locationName": "Centre-ville → Barcelona El Prat",
+            "latitude": 41.2971,
+            "longitude": 2.0785,
+            "estimatedCost": 25
+          },
+          {
+            "id": "ih9roo9qrfi",
+            "dayNumber": 3,
+            "startTime": "13:45",
+            "endTime": "15:45",
+            "type": "flight",
+            "title": "Vol TO 4755 → Caen",
+            "orderIndex": 3,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Vol%20TO%204755%20%E2%86%92%20Caen%2C%20BCN%20%E2%86%92%20ORY",
+            "dataReliability": "generated",
+            "description": "TO 4755 | 2h | Direct",
+            "locationName": "BCN → ORY",
+            "latitude": 45.01165,
+            "longitude": 2.22185,
+            "estimatedCost": 236,
+            "bookingUrl": "https://www.google.com/travel/flights?q=flights+from+BCN+to+ORY+on+2026-01-29"
+          },
+          {
+            "id": "inzhn3cl6a9",
+            "dayNumber": 3,
+            "startTime": "16:15",
+            "endTime": "16:45",
+            "type": "parking",
+            "title": "Récupération véhicule: P Éco - Parking Économique",
+            "orderIndex": 4,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=R%C3%A9cup%C3%A9ration%20v%C3%A9hicule%3A%20P%20%C3%89co%20-%20Parking%20%C3%89conomique%2C%20A%C3%A9roport%20Paris-Orly",
+            "dataReliability": "generated",
+            "description": "Navette et récupération de votre véhicule.",
+            "locationName": "Aéroport Paris-Orly",
+            "latitude": 48.73,
+            "longitude": 2.37
+          }
+        ]
+      }
+    ],
+    "transportOptions": [
+      {
+        "id": "train",
+        "mode": "train",
+        "totalDuration": 464,
+        "totalPrice": 58,
+        "totalCO2": 12,
+        "score": 8.2,
+        "scoreDetails": {
+          "priceScore": 8.2,
+          "timeScore": 6.4,
+          "co2Score": 10
+        },
+        "segments": [
+          {
+            "mode": "train",
+            "from": "Caen",
+            "to": "Barcelone ",
+            "duration": 424,
+            "price": 58,
+            "operator": "Train régional"
+          }
+        ],
+        "bookingUrl": "https://www.thetrainline.com/en/train-times/caen-to-barcelone%20",
+        "recommended": true,
+        "recommendationReason": "Option économique, écologique"
+      },
+      {
+        "id": "combined_train_plane",
+        "mode": "combined",
+        "totalDuration": 337,
+        "totalPrice": 89,
+        "totalCO2": 127,
+        "score": 6.7,
+        "scoreDetails": {
+          "priceScore": 6,
+          "timeScore": 10,
+          "co2Score": 4.4
+        },
+        "segments": [
+          {
+            "mode": "train",
+            "from": "Caen",
+            "to": "Paris",
+            "duration": 48,
+            "price": 24,
+            "operator": "Train grande vitesse"
+          },
+          {
+            "mode": "plane",
+            "from": "Paris",
+            "to": "Barcelone ",
+            "duration": 49,
+            "price": 65
+          }
+        ]
+      },
+      {
+        "id": "bus",
+        "mode": "bus",
+        "totalDuration": 691,
+        "totalPrice": 34,
+        "totalCO2": 23,
+        "score": 6.5,
+        "scoreDetails": {
+          "priceScore": 10,
+          "timeScore": 0,
+          "co2Score": 9.5
+        },
+        "segments": [
+          {
+            "mode": "bus",
+            "from": "Caen",
+            "to": "Barcelone ",
+            "duration": 636,
+            "price": 34,
+            "operator": "FlixBus / BlaBlaCar Bus"
+          }
+        ],
+        "bookingUrl": "https://www.flixbus.fr/recherche?from=Caen&to=Barcelone%20"
+      },
+      {
+        "id": "plane",
+        "mode": "plane",
+        "totalDuration": 354,
+        "totalPrice": 85,
+        "totalCO2": 216,
+        "score": 5.2,
+        "scoreDetails": {
+          "priceScore": 6.3,
+          "timeScore": 9.5,
+          "co2Score": 0
+        },
+        "segments": [
+          {
+            "mode": "plane",
+            "from": "Caen",
+            "to": "Barcelone ",
+            "duration": 64,
+            "price": 85
+          }
+        ],
+        "bookingUrl": "https://www.google.com/travel/flights?q=Flights%20from%20Caen%20to%20Barcelone%20"
+      },
+      {
+        "id": "car",
+        "mode": "car",
+        "totalDuration": 584,
+        "totalPrice": 170,
+        "totalCO2": 44,
+        "score": 3.9,
+        "scoreDetails": {
+          "priceScore": 0,
+          "timeScore": 3,
+          "co2Score": 8.4
+        },
+        "segments": [
+          {
+            "mode": "car",
+            "from": "Caen",
+            "to": "Barcelone ",
+            "duration": 509,
+            "price": 170
+          }
+        ],
+        "bookingUrl": "https://www.google.com/maps/dir/Caen/Barcelone%20"
+      }
+    ],
+    "selectedTransport": {
+      "id": "plane",
+      "mode": "plane",
+      "totalDuration": 354,
+      "totalPrice": 85,
+      "totalCO2": 216,
+      "score": 5.2,
+      "scoreDetails": {
+        "priceScore": 6.3,
+        "timeScore": 9.5,
+        "co2Score": 0
+      },
+      "segments": [
+        {
+          "mode": "plane",
+          "from": "Caen",
+          "to": "Barcelone ",
+          "duration": 64,
+          "price": 85
+        }
+      ],
+      "bookingUrl": "https://www.google.com/travel/flights?q=Flights%20from%20Caen%20to%20Barcelone%20"
+    },
+    "outboundFlight": {
+      "id": "serp-TO 4750-2026-01-27",
+      "airline": "TO",
+      "airlineLogo": "https://www.gstatic.com/flights/airline_logos/70px/TO.png",
+      "flightNumber": "TO 4750",
+      "departureAirport": "Aéroport de Paris-Orly",
+      "departureAirportCode": "ORY",
+      "departureCity": "ORY",
+      "departureTime": "2026-01-27T06:05:00.000Z",
+      "departureTimeDisplay": "07:05",
+      "arrivalAirport": "Aéroport international de Barcelone-El Prat",
+      "arrivalAirportCode": "BCN",
+      "arrivalCity": "BCN",
+      "arrivalTime": "2026-01-27T07:45:00.000Z",
+      "arrivalTimeDisplay": "08:45",
+      "duration": 100,
+      "stops": 0,
+      "price": 352,
+      "currency": "EUR",
+      "cabinClass": "economy",
+      "baggageIncluded": true,
+      "bookingUrl": "https://www.google.com/travel/flights?hl=fr&gl=fr&curr=EUR&tfs=CBwQAhoeEgoyMDI2LTAxLTI3agcIARIDT1JZcgcIARIDQkNOQgIBAUgBcAGYAQI&tfu=EgIIAQ&booking_token=WyJDalJJYkRSQ0xYWk5Vemc0U2tGQlRVMXZWMEZDUnkwdExTMHRMUzB0TFMxdmVXTmlNMEZCUVVGQlIyd3lWeTF6U0hCbFR6WkJFZ1pVVHpRM05UQWFDd2pBaVFFUUFob0RSVlZTT0J4dzA2SUIiLFtbIk9SWSIsIjIwMjYtMDEtMjciLCJCQ04iLG51bGwsIlRPIiwiNDc1MCJdXV0%3D"
+    },
+    "returnFlight": {
+      "id": "serp-TO 4755-2026-01-29",
+      "airline": "TO",
+      "airlineLogo": "https://www.gstatic.com/flights/airline_logos/70px/TO.png",
+      "flightNumber": "TO 4755",
+      "departureAirport": "Aéroport international de Barcelone-El Prat",
+      "departureAirportCode": "BCN",
+      "departureCity": "BCN",
+      "departureTime": "2026-01-29T12:45:00.000Z",
+      "departureTimeDisplay": "13:45",
+      "arrivalAirport": "Aéroport de Paris-Orly",
+      "arrivalAirportCode": "ORY",
+      "arrivalCity": "ORY",
+      "arrivalTime": "2026-01-29T14:45:00.000Z",
+      "arrivalTimeDisplay": "15:45",
+      "duration": 120,
+      "stops": 0,
+      "price": 236,
+      "currency": "EUR",
+      "cabinClass": "economy",
+      "baggageIncluded": true,
+      "bookingUrl": "https://www.google.com/travel/flights?hl=fr&gl=fr&curr=EUR&tfs=CBwQAhoeEgoyMDI2LTAxLTI5agcIARIDQkNOcgcIARIDT1JZQgIBAUgBcAGYAQI&tfu=EgIIAQ&booking_token=WyJDalJJTmpKU1QxSllRVGsxVlc5QlRpMVVSRUZDUnkwdExTMHRMUzB0TFc5NWFHb3lNVUZCUVVGQlIyd3lWbUZGUzFsWmIxVkJFZ1pVVHpRM05UVWFDZ2lZWEJBQ0dnTkZWVkk0SEhDR2JRPT0iLFtbIkJDTiIsIjIwMjYtMDEtMjkiLCJPUlkiLG51bGwsIlRPIiwiNDc1NSJdXV0%3D"
+    },
+    "parking": {
+      "id": "ory-eco",
+      "name": "P Éco - Parking Économique",
+      "type": "airport",
+      "address": "Aéroport Paris-Orly",
+      "latitude": 48.73,
+      "longitude": 2.37,
+      "distanceToTerminal": 1200,
+      "pricePerDay": 18,
+      "currency": "EUR",
+      "amenities": [
+        "outdoor",
+        "24h",
+        "shuttle"
+      ],
+      "rating": 3.9,
+      "reviewCount": 650,
+      "bookingUrl": "https://www.parisaeroport.fr/passagers/acces/paris-orly/parkings",
+      "totalPrice": 54
+    },
+    "accommodation": {
+      "id": "serp-hotel-ChgI5fW-hdLRgdWoARoLL2cvMXRkZnE5MGgQAQ",
+      "name": "Hotel Duquesa de Cardona Barcelona",
+      "type": "hotel",
+      "address": "Adresse non disponible",
+      "latitude": 41.3798075,
+      "longitude": 2.1804625,
+      "rating": 9,
+      "reviewCount": 1776,
+      "stars": 4,
+      "pricePerNight": 114,
+      "totalPrice": 228,
+      "currency": "EUR",
+      "amenities": [
+        "Breakfast ($)",
+        "Free Wi-Fi",
+        "Outdoor pool",
+        "Air conditioning",
+        "Fitness center",
+        "Bar",
+        "Restaurant",
+        "Room service",
+        "Airport shuttle",
+        "Full-service laundry",
+        "Accessible",
+        "Business center",
+        "Kid-friendly",
+        "Smoke-free property"
+      ],
+      "checkInTime": "15:00",
+      "checkOutTime": "12:00",
+      "bookingUrl": "http://www.hduquesadecardona.com/",
+      "distanceToCenter": 0,
+      "description": ""
+    },
+    "accommodationOptions": [
+      {
+        "id": "serp-hotel-ChoI7o-xsb3izM6CARoNL2cvMTFnNnR2aHZtbRAB",
+        "name": "Hotel SB Glow",
+        "type": "hotel",
+        "address": "Adresse non disponible",
+        "latitude": 41.4021444,
+        "longitude": 2.191099,
+        "rating": 8.2,
+        "reviewCount": 2686,
+        "stars": 4,
+        "pricePerNight": 92,
+        "totalPrice": 184,
+        "currency": "EUR",
+        "amenities": [
+          "Breakfast ($)",
+          "Free Wi-Fi",
+          "Parking ($)",
+          "Outdoor pool",
+          "Air conditioning",
+          "Fitness center",
+          "Bar",
+          "Restaurant",
+          "Room service",
+          "Full-service laundry",
+          "Accessible",
+          "Business center",
+          "Kid-friendly",
+          "Smoke-free property"
+        ],
+        "checkInTime": "15:00",
+        "checkOutTime": "12:00",
+        "bookingUrl": "https://www.sb-hotels.com/hoteles/barcelona/glow/?utm_source=google&utm_medium=organic&utm_campaign=local-gmb",
+        "distanceToCenter": 0,
+        "description": ""
+      },
+      {
+        "id": "serp-hotel-ChgIlfeR45ngz6HSARoLL2cvMXRrMXZ4YmoQAQ",
+        "name": "Pol & Grace Hotel",
+        "type": "hotel",
+        "address": "Adresse non disponible",
+        "latitude": 41.4017465,
+        "longitude": 2.1477429999999997,
+        "rating": 8.6,
+        "reviewCount": 1243,
+        "stars": 4,
+        "pricePerNight": 70,
+        "totalPrice": 140,
+        "currency": "EUR",
+        "amenities": [
+          "Breakfast",
+          "Free Wi-Fi",
+          "Parking",
+          "Air conditioning",
+          "Pet-friendly",
+          "Restaurant",
+          "Airport shuttle",
+          "Full-service laundry",
+          "Accessible",
+          "Kid-friendly",
+          "Smoke-free property"
+        ],
+        "checkInTime": "15:00",
+        "checkOutTime": "12:00",
+        "bookingUrl": "http://www.polgracehotel.es/",
+        "distanceToCenter": 0,
+        "description": ""
+      },
+      {
+        "id": "serp-hotel-ChYIl63G7O7f-74LGgovbS8waGdsa3ZkEAE",
+        "name": "Hotel Barcelona Princess",
+        "type": "hotel",
+        "address": "Adresse non disponible",
+        "latitude": 41.4109339,
+        "longitude": 2.2186667,
+        "rating": 8.4,
+        "reviewCount": 6110,
+        "stars": 4,
+        "pricePerNight": 87,
+        "totalPrice": 174,
+        "currency": "EUR",
+        "amenities": [
+          "Breakfast",
+          "Free Wi-Fi",
+          "Parking",
+          "Outdoor pool",
+          "Hot tub",
+          "Air conditioning",
+          "Fitness center",
+          "Bar",
+          "Restaurant",
+          "Room service",
+          "Full-service laundry",
+          "Accessible",
+          "Business center",
+          "Kid-friendly",
+          "Smoke-free property"
+        ],
+        "checkInTime": "15:00",
+        "checkOutTime": "12:00",
+        "bookingUrl": "http://www.hotelbarcelonaprincess.com/",
+        "distanceToCenter": 0,
+        "description": ""
+      },
+      {
+        "id": "serp-hotel-ChgI9O7T19rJ85fSARoLL2cvMXRwNGw3aHEQAQ",
+        "name": "Hotel Arc La Rambla",
+        "type": "hotel",
+        "address": "Adresse non disponible",
+        "latitude": 41.378206399999996,
+        "longitude": 2.1755469,
+        "rating": 8.8,
+        "reviewCount": 2362,
+        "stars": 3,
+        "pricePerNight": 75,
+        "totalPrice": 150,
+        "currency": "EUR",
+        "amenities": [
+          "Breakfast ($)",
+          "Free Wi-Fi",
+          "Air conditioning",
+          "Accessible",
+          "Kid-friendly",
+          "Smoke-free property"
+        ],
+        "checkInTime": "15:00",
+        "checkOutTime": "12:00",
+        "bookingUrl": "http://www.hotelarclarambla.com/",
+        "distanceToCenter": 0,
+        "description": ""
+      },
+      {
+        "id": "serp-hotel-ChoIrM7f0t60ip70ARoNL2cvMTFid3l0bV9jOBAB",
+        "name": "Negresco Princess",
+        "type": "hotel",
+        "address": "Adresse non disponible",
+        "latitude": 41.3905054,
+        "longitude": 2.1726433,
+        "rating": 8.4,
+        "reviewCount": 2524,
+        "stars": 4,
+        "pricePerNight": 86,
+        "totalPrice": 172,
+        "currency": "EUR",
+        "amenities": [
+          "Breakfast",
+          "Free Wi-Fi",
+          "Parking",
+          "Pool",
+          "Air conditioning",
+          "Fitness center",
+          "Bar",
+          "Restaurant",
+          "Room service",
+          "Airport shuttle",
+          "Full-service laundry",
+          "Accessible",
+          "Kid-friendly",
+          "Smoke-free property"
+        ],
+        "checkInTime": "15:00",
+        "checkOutTime": "12:00",
+        "bookingUrl": "http://www.hotelnegrescoprincess.com/",
+        "distanceToCenter": 0,
+        "description": ""
+      },
+      {
+        "id": "serp-hotel-ChgI1-SX6_zO9fqwARoLL2cvMXRqNzByY20QAQ",
+        "name": "Hotel Barcelona Universal",
+        "type": "hotel",
+        "address": "Adresse non disponible",
+        "latitude": 41.375238499999995,
+        "longitude": 2.1683285999999997,
+        "rating": 8.8,
+        "reviewCount": 3074,
+        "stars": 4,
+        "pricePerNight": 72,
+        "totalPrice": 144,
+        "currency": "EUR",
+        "amenities": [
+          "Breakfast",
+          "Free Wi-Fi",
+          "Parking ($)",
+          "Outdoor pool",
+          "Air conditioning",
+          "Fitness center",
+          "Bar",
+          "Restaurant",
+          "Room service",
+          "Full-service laundry",
+          "Accessible",
+          "Business center",
+          "Kid-friendly",
+          "Smoke-free property"
+        ],
+        "checkInTime": "15:00",
+        "checkOutTime": "11:00",
+        "bookingUrl": "https://www.hotelbarcelonauniversal.com/",
+        "distanceToCenter": 0,
+        "description": ""
+      },
+      {
+        "id": "serp-hotel-ChgI5fW-hdLRgdWoARoLL2cvMXRkZnE5MGgQAQ",
+        "name": "Hotel Duquesa de Cardona Barcelona",
+        "type": "hotel",
+        "address": "Adresse non disponible",
+        "latitude": 41.3798075,
+        "longitude": 2.1804625,
+        "rating": 9,
+        "reviewCount": 1776,
+        "stars": 4,
+        "pricePerNight": 114,
+        "totalPrice": 228,
+        "currency": "EUR",
+        "amenities": [
+          "Breakfast ($)",
+          "Free Wi-Fi",
+          "Outdoor pool",
+          "Air conditioning",
+          "Fitness center",
+          "Bar",
+          "Restaurant",
+          "Room service",
+          "Airport shuttle",
+          "Full-service laundry",
+          "Accessible",
+          "Business center",
+          "Kid-friendly",
+          "Smoke-free property"
+        ],
+        "checkInTime": "15:00",
+        "checkOutTime": "12:00",
+        "bookingUrl": "http://www.hduquesadecardona.com/",
+        "distanceToCenter": 0,
+        "description": ""
+      },
+      {
+        "id": "serp-hotel-ChcI7rDfjMGl7tgjGgsvZy8xdGN6NTR3cRAB",
+        "name": "Pestana Arena Barcelona",
+        "type": "hotel",
+        "address": "Adresse non disponible",
+        "latitude": 41.376799999999996,
+        "longitude": 2.1460505,
+        "rating": 8.8,
+        "reviewCount": 1462,
+        "stars": 4,
+        "pricePerNight": 72,
+        "totalPrice": 144,
+        "currency": "EUR",
+        "amenities": [
+          "Breakfast",
+          "Free Wi-Fi",
+          "Parking ($)",
+          "Air conditioning",
+          "Fitness center",
+          "Bar",
+          "Restaurant",
+          "Room service",
+          "Full-service laundry",
+          "Accessible",
+          "Kid-friendly",
+          "Smoke-free property"
+        ],
+        "checkInTime": "16:00",
+        "checkOutTime": "11:00",
+        "bookingUrl": "https://www.pestana.com/en/hotel/pestana-arena-barcelona?utm_campaign=pestana-arena-barcelona-partoo&utm_medium=organicsearch",
+        "distanceToCenter": 0,
+        "description": ""
+      },
+      {
+        "id": "serp-hotel-ChgI9rOv8b3hy9W5ARoLL2cvMXc2Z21fOHcQAQ",
+        "name": "Hotel Eurostars Monumental",
+        "type": "hotel",
+        "address": "Adresse non disponible",
+        "latitude": 41.4006148,
+        "longitude": 2.1786496,
+        "rating": 8.2,
+        "reviewCount": 947,
+        "stars": 4,
+        "pricePerNight": 83,
+        "totalPrice": 166,
+        "currency": "EUR",
+        "amenities": [
+          "Breakfast ($)",
+          "Free Wi-Fi",
+          "Parking ($)",
+          "Air conditioning",
+          "Bar",
+          "Room service",
+          "Airport shuttle",
+          "Full-service laundry",
+          "Accessible",
+          "Kid-friendly"
+        ],
+        "checkInTime": "14:00",
+        "checkOutTime": "12:00",
+        "bookingUrl": "http://www.eurostarshotels.com/eurostars-monumental.html?referer_code=lb0gg00yx&utm_source=google&utm_medium=business&utm_campaign=lb0gg00yx",
+        "distanceToCenter": 0,
+        "description": ""
+      },
+      {
+        "id": "serp-hotel-ChgI7-Xw9K2xj-90GgwvZy8xam1ja21rZGsQAQ",
+        "name": "Balmoral Hotel",
+        "type": "hotel",
+        "address": "Adresse non disponible",
+        "latitude": 41.396197099999995,
+        "longitude": 2.155157,
+        "rating": 8.6,
+        "reviewCount": 1501,
+        "stars": 4,
+        "pricePerNight": 77,
+        "totalPrice": 154,
+        "currency": "EUR",
+        "amenities": [
+          "Breakfast",
+          "Free Wi-Fi",
+          "Parking",
+          "Air conditioning",
+          "Spa",
+          "Bar",
+          "Restaurant",
+          "Room service",
+          "Full-service laundry",
+          "Kid-friendly",
+          "Smoke-free property"
+        ],
+        "checkInTime": "15:00",
+        "checkOutTime": "12:00",
+        "bookingUrl": "https://www.abbahoteles.com/es/destinos/hotel-balmoral/hotel.html",
+        "distanceToCenter": 0,
+        "description": ""
+      }
+    ],
+    "totalEstimatedCost": 2167,
+    "costBreakdown": {
+      "flights": 588,
+      "accommodation": 300,
+      "food": 208,
+      "activities": 248,
+      "transport": 120,
+      "parking": 54,
+      "other": 649
+    },
+    "carbonFootprint": {
+      "total": 668,
+      "flights": 645,
+      "accommodation": 20,
+      "localTransport": 3,
+      "rating": "D",
+      "equivalents": {
+        "treesNeeded": 27,
+        "carKmEquivalent": 3179
+      },
+      "tips": [
+        "Envisagez de compenser vos émissions via un programme certifié",
+        "Privilégiez les transports en commun sur place",
+        "Choisissez des hébergements éco-labellisés"
+      ]
+    }
+  }
+}
