@@ -286,8 +286,8 @@ export function ShareTripDialog({
 
             {/* Boutons de partage */}
             <div className="grid grid-cols-3 gap-2">
-              {/* Partage natif (si disponible) */}
-              {typeof navigator !== 'undefined' && navigator.share && (
+              {/* Partage natif (si disponible sur mobile) */}
+              {typeof navigator !== 'undefined' && typeof navigator.share === 'function' && (
                 <Button
                   variant="outline"
                   className="flex flex-col items-center gap-1 h-auto py-3"
