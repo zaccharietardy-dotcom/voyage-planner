@@ -37,6 +37,9 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  --color-gold: var(--gold);
+  --color-gold-light: var(--gold-light);
+  --color-gold-dark: var(--gold-dark);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -48,71 +51,85 @@
 
 :root {
   --radius: 0.625rem;
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  /* Narae Light Theme - Clean with gold accents */
+  --background: #f8fafc;
+  --foreground: #0a1628;
+  --card: #ffffff;
+  --card-foreground: #0a1628;
+  --popover: #ffffff;
+  --popover-foreground: #0a1628;
+  --primary: #d4a853;
+  --primary-foreground: #0a1628;
+  --secondary: #e8f4fc;
+  --secondary-foreground: #0a1628;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --accent: #d4a853;
+  --accent-foreground: #0a1628;
+  --destructive: #ef4444;
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #d4a853;
+  /* Gold colors */
+  --gold: #d4a853;
+  --gold-light: #e8c068;
+  --gold-dark: #b8923d;
+  /* Charts */
+  --chart-1: #d4a853;
+  --chart-2: #1e3a5f;
+  --chart-3: #10b981;
+  --chart-4: #6366f1;
+  --chart-5: #f59e0b;
+  /* Sidebar */
+  --sidebar: #ffffff;
+  --sidebar-foreground: #0a1628;
+  --sidebar-primary: #d4a853;
+  --sidebar-primary-foreground: #0a1628;
+  --sidebar-accent: #f8fafc;
+  --sidebar-accent-foreground: #0a1628;
+  --sidebar-border: #e2e8f0;
+  --sidebar-ring: #d4a853;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* Narae Dark Theme - Deep blue with gold accents */
+  --background: #0a1628;
+  --foreground: #f8fafc;
+  --card: #0d1f35;
+  --card-foreground: #f8fafc;
+  --popover: #0d1f35;
+  --popover-foreground: #f8fafc;
+  --primary: #d4a853;
+  --primary-foreground: #0a1628;
+  --secondary: #122a45;
+  --secondary-foreground: #f8fafc;
+  --muted: #1e3a5f;
+  --muted-foreground: #a8c0d8;
+  --accent: #d4a853;
+  --accent-foreground: #0a1628;
+  --destructive: #ef4444;
+  --border: #1e3a5f;
+  --input: #1e3a5f;
+  --ring: #d4a853;
+  /* Gold colors */
+  --gold: #d4a853;
+  --gold-light: #e8c068;
+  --gold-dark: #b8923d;
+  /* Charts */
+  --chart-1: #d4a853;
+  --chart-2: #38bdf8;
+  --chart-3: #10b981;
+  --chart-4: #a78bfa;
+  --chart-5: #f59e0b;
+  /* Sidebar */
+  --sidebar: #0d1f35;
+  --sidebar-foreground: #f8fafc;
+  --sidebar-primary: #d4a853;
+  --sidebar-primary-foreground: #0a1628;
+  --sidebar-accent: #122a45;
+  --sidebar-accent-foreground: #f8fafc;
+  --sidebar-border: #1e3a5f;
+  --sidebar-ring: #d4a853;
 }
 
 @layer base {
@@ -130,5 +147,24 @@
 
   html.dark {
     color-scheme: dark;
+  }
+}
+
+/* Narae custom utilities */
+@layer utilities {
+  .text-gold {
+    color: var(--gold);
+  }
+  .bg-gold {
+    background-color: var(--gold);
+  }
+  .border-gold {
+    border-color: var(--gold);
+  }
+  .glow-gold {
+    box-shadow: 0 0 20px rgba(212, 168, 83, 0.3);
+  }
+  .glow-gold-strong {
+    box-shadow: 0 0 40px rgba(212, 168, 83, 0.5);
   }
 }

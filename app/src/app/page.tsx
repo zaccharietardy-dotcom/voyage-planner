@@ -151,8 +151,9 @@ export default function Home() {
       {/* Header avec menu utilisateur */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-sm border-b">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/" className="text-xl font-bold text-primary">
-            Voyage
+          <Link href="/" className="text-xl font-bold text-primary flex items-center gap-2">
+            <img src="/icons/icon-32x32.png" alt="Narae" className="w-8 h-8" />
+            Narae Voyage
           </Link>
           <UserMenu />
         </div>
@@ -244,7 +245,7 @@ export default function Home() {
                   <div className="w-3 h-3 rounded-full bg-yellow-500" />
                   <div className="w-3 h-3 rounded-full bg-green-500" />
                 </div>
-                <span className="text-sm text-muted-foreground ml-2">voyage.app</span>
+                <span className="text-sm text-muted-foreground ml-2">naraevoyage.fr</span>
               </div>
               <div className="p-8 bg-gradient-to-br from-card to-muted/20 min-h-[300px] flex items-center justify-center">
                 <div className="text-center text-muted-foreground">
@@ -301,7 +302,7 @@ export default function Home() {
       {/* Footer */}
       <footer className="border-t py-8">
         <div className="container mx-auto px-4 text-center text-muted-foreground">
-          <p>Voyage - Planificateur de voyage IA</p>
+          <p>Narae Voyage - Planifie et partage tes voyages</p>
         </div>
       </footer>
     </div>
