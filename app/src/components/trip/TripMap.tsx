@@ -8,6 +8,14 @@ interface TripMapProps {
   center?: { lat: number; lng: number };
   selectedItemId?: string;
   onItemClick?: (item: TripItem) => void;
+  // Optionnel: informations sur les vols pour afficher les escales
+  flightInfo?: {
+    departureCity?: string;
+    departureCoords?: { lat: number; lng: number };
+    arrivalCity?: string;
+    arrivalCoords?: { lat: number; lng: number };
+    stopoverCities?: string[];
+  };
 }
 
 // Icônes par type d'item
@@ -70,7 +78,7 @@ function getPopupContent(item: TripItem): string {
   `;
 }
 
-export function TripMap({ items, center, selectedItemId, onItemClick }: TripMapProps) {
+export function TripMap({ items, center, selectedItemId, onItemClick, flightInfo }: TripMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
@@ -193,9 +201,9 @@ export function TripMap({ items, center, selectedItemId, onItemClick }: TripMapP
       map.fitBounds(bounds, { padding: [50, 50] });
     }
 
-    // Draw route line between points
+    // Draw route line between points (for walking/transit in destination city)
     const routeCoords = items
-      .filter((item) => item.latitude && item.longitude)
+      .filter((item) => item.latitude && item.longitude && item.type !== 'flight')
       .sort((a, b) => a.orderIndex - b.orderIndex)
       .map((item) => [item.latitude, item.longitude] as [number, number]);
 
@@ -207,7 +215,113 @@ export function TripMap({ items, center, selectedItemId, onItemClick }: TripMapP
         dashArray: '10, 10',
       }).addTo(map);
     }
-  }, [items, onItemClick, isLoaded]);
+
+    // Draw flight path as curved dashed line (if we have flight items)
+    const flightItems = items.filter(item => item.type === 'flight');
+    flightItems.forEach(flightItem => {
+      if (flightItem.flight) {
+        // Add departure airport marker if different from other items
+        const flight = flightItem.flight;
+
+        // Try to find coordinates for stopovers
+        if (flight.stops > 0 && flight.stopCities && flight.stopCities.length > 0) {
+          // Add stopover markers with special styling
+          flight.stopCities.forEach((stopCity, idx) => {
+            // Create a special marker for stopovers (we don't have exact coords, so show as info)
+            const stopoverIcon = L.divIcon({
+              className: 'stopover-marker',
+              html: `
+                <div style="
+                  background: linear-gradient(135deg, #F59E0B, #D97706);
+                  color: white;
+                  padding: 4px 8px;
+                  border-radius: 12px;
+                  font-size: 11px;
+                  font-weight: 600;
+                  white-space: nowrap;
+                  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                  border: 2px solid white;
+                ">
+                  ✈️ Escale: ${stopCity}
+                </div>
+              `,
+              iconSize: [100, 24],
+              iconAnchor: [50, 12],
+            });
+
+            // Position the stopover label near the flight marker
+            if (flightItem.latitude && flightItem.longitude) {
+              const offsetLat = flightItem.latitude + (idx + 1) * 0.02;
+              const stopMarker = L.marker([offsetLat, flightItem.longitude], { icon: stopoverIcon })
+                .addTo(map);
+              markersRef.current.push(stopMarker);
+            }
+          });
+        }
+      }
+    });
+
+    // Add origin city marker if provided in flightInfo
+    if (flightInfo?.departureCoords) {
+      const originIcon = L.divIcon({
+        className: 'origin-marker',
+        html: `
+          <div style="
+            background: linear-gradient(135deg, #10B981, #059669);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+          ">🏠</div>
+        `,
+        iconSize: [36, 36],
+        iconAnchor: [18, 18],
+        popupAnchor: [0, -18],
+      });
+
+      const originMarker = L.marker(
+        [flightInfo.departureCoords.lat, flightInfo.departureCoords.lng],
+        { icon: originIcon }
+      )
+        .addTo(map)
+        .bindPopup(`<b>🏠 Ville de départ</b><br/>${flightInfo.departureCity || 'Origine'}`);
+      markersRef.current.push(originMarker);
+      bounds.extend([flightInfo.departureCoords.lat, flightInfo.departureCoords.lng]);
+
+      // Draw flight arc from origin to destination
+      if (items.length > 0) {
+        const firstDestItem = items.find(i => i.type !== 'flight' && i.latitude && i.longitude);
+        if (firstDestItem) {
+          // Create curved flight path
+          const midLat = (flightInfo.departureCoords.lat + firstDestItem.latitude) / 2;
+          const midLng = (flightInfo.departureCoords.lng + firstDestItem.longitude) / 2;
+          // Add curvature based on distance
+          const curvature = Math.abs(flightInfo.departureCoords.lng - firstDestItem.longitude) * 0.1;
+
+          L.polyline([
+            [flightInfo.departureCoords.lat, flightInfo.departureCoords.lng],
+            [midLat + curvature, midLng],
+            [firstDestItem.latitude, firstDestItem.longitude]
+          ], {
+            color: '#EC4899',
+            weight: 2,
+            opacity: 0.7,
+            dashArray: '8, 8',
+          }).addTo(map);
+        }
+      }
+
+      // Re-fit bounds to include origin
+      if (bounds.isValid()) {
+        map.fitBounds(bounds, { padding: [50, 50] });
+      }
+    }
+  }, [items, onItemClick, isLoaded, flightInfo]);
 
   // Highlight selected item
   useEffect(() => {
@@ -236,7 +350,6 @@ export function TripMap({ items, center, selectedItemId, onItemClick }: TripMapP
             { type: 'activity' as const, label: 'Activité', icon: '🏛️' },
             { type: 'restaurant' as const, label: 'Restaurant', icon: '🍽️' },
             { type: 'hotel' as const, label: 'Hébergement', icon: '🏨' },
-            { type: 'transport' as const, label: 'Transport', icon: '🚌' },
             { type: 'flight' as const, label: 'Vol', icon: '✈️' },
           ]).map(({ type, label, icon }) => (
             <div key={type} className="flex items-center gap-2 text-xs">
@@ -249,6 +362,15 @@ export function TripMap({ items, center, selectedItemId, onItemClick }: TripMapP
               <span>{label}</span>
             </div>
           ))}
+          {/* Special markers */}
+          {flightInfo?.departureCoords && (
+            <div className="flex items-center gap-2 text-xs">
+              <div className="w-4 h-4 rounded-full flex items-center justify-center text-[10px] bg-green-500">
+                🏠
+              </div>
+              <span>Départ</span>
+            </div>
+          )}
         </div>
       </div>
     </div>

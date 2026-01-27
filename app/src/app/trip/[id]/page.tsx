@@ -472,7 +472,12 @@ export default function TripPage() {
                 </div>
                 <div>
                   <p className="text-2xl font-bold">~{trip.totalEstimatedCost}€</p>
-                  <p className="text-xs text-muted-foreground">Budget estimé</p>
+                  <p className="text-xs text-muted-foreground">
+                    Budget estimé{' '}
+                    <span className="text-orange-600 font-medium">
+                      (~{Math.round((trip.totalEstimatedCost || 0) / trip.preferences.groupSize)}€/pers.)
+                    </span>
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -604,6 +609,13 @@ export default function TripPage() {
                     items={editMode ? getAllItems() : getActiveDayItems()}
                     selectedItemId={selectedItemId}
                     onItemClick={handleSelectItem}
+                    flightInfo={{
+                      departureCity: trip.preferences.origin,
+                      departureCoords: trip.preferences.originCoords,
+                      arrivalCity: trip.preferences.destination,
+                      arrivalCoords: trip.preferences.destinationCoords,
+                      stopoverCities: trip.outboundFlight?.stopCities,
+                    }}
                   />
                 </div>
               </CardContent>

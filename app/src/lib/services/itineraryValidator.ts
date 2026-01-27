@@ -312,11 +312,15 @@ export function shouldShowItinerary(
     }
   }
 
-  // Règle 2: Vol - pas d'itinéraire affiché (le pilote gère le trajet aérien)
-  // Ni DEPUIS un vol, ni VERS un vol
-  if (fromType === 'flight' || toType === 'flight') {
+  // Règle 2: Vol - pas d'itinéraire VERS un vol (on ne marche pas vers l'avion)
+  // Mais on AFFICHE l'itinéraire DEPUIS un vol vers l'activité suivante
+  // (pour montrer comment aller de l'aéroport à la ville)
+  if (toType === 'flight') {
     return false;
   }
+
+  // Depuis un vol: afficher le lien vers l'hôtel/activité (transfert aéroport -> ville)
+  // Sauf vers luggage (même terminal) qui est déjà dans NO_ITINERARY_TRANSITIONS
 
   // Règle 3: Même lieu (coordonnées très proches < 100m)
   if (fromItem.latitude && toItem.latitude && fromItem.longitude && toItem.longitude) {
