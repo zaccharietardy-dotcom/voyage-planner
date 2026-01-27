@@ -112,7 +112,7 @@ export async function searchRestaurants(params: RestaurantSearchParams): Promise
         filtered = filterByForbiddenNames(filtered, destination);
 
         if (filtered.length >= limit) {
-          return applyFinalFilter(filtered, destination, limit);
+          return applyFinalFilter(filtered, destination, limit, mealType);
         }
       }
     } catch (error) {
@@ -148,7 +148,7 @@ export async function searchRestaurants(params: RestaurantSearchParams): Promise
         console.log(`[Restaurants] ${serpRestaurants.length} restaurants trouvés via SerpAPI, ${filtered.length} après filtrage cuisine+nom`);
         if (filtered.length > 0) {
           finalRestaurants = filtered.slice(0, limit);
-          return applyFinalFilter(finalRestaurants, destination, limit);
+          return applyFinalFilter(finalRestaurants, destination, limit, mealType);
         }
       }
     } catch (error) {
@@ -176,7 +176,7 @@ export async function searchRestaurants(params: RestaurantSearchParams): Promise
 
         console.log(`[Restaurants] ${aiRestaurants.length} restaurants via Claude AI, ${filteredByCuisine.length} après filtrage`);
         finalRestaurants = filteredByCuisine.slice(0, limit);
-        return applyFinalFilter(finalRestaurants, destination, limit);
+        return applyFinalFilter(finalRestaurants, destination, limit, mealType);
       }
     } catch (error) {
       console.warn('[Restaurants] Claude AI error, trying alternatives:', error);
@@ -198,7 +198,7 @@ export async function searchRestaurants(params: RestaurantSearchParams): Promise
         console.log(`[Restaurants] ${filtered.length} via Google Places (après filtre cuisine+nom)`);
         finalRestaurants = filtered;
         // Appliquer le filtre final et retourner
-        return applyFinalFilter(finalRestaurants, destination, limit);
+        return applyFinalFilter(finalRestaurants, destination, limit, mealType);
       }
     } catch (error) {
       console.error('[Restaurants] Google Places error, falling back to OSM:', error);
@@ -219,7 +219,7 @@ export async function searchRestaurants(params: RestaurantSearchParams): Promise
       console.log(`[Restaurants] ${filtered.length} via OSM (après filtre cuisine+nom)`);
       finalRestaurants = filtered;
       // Appliquer le filtre final et retourner
-      return applyFinalFilter(finalRestaurants, destination, limit);
+      return applyFinalFilter(finalRestaurants, destination, limit, mealType);
     }
   } catch (error) {
     console.error('[Restaurants] Overpass error, using fallback:', error);
@@ -229,7 +229,7 @@ export async function searchRestaurants(params: RestaurantSearchParams): Promise
   // IMPORTANT: generateLocalRestaurants doit UNIQUEMENT générer de la cuisine locale
   finalRestaurants = generateLocalRestaurants(params, destination);
   // Appliquer le filtre final même pour les restaurants générés (sécurité)
-  return applyFinalFilter(finalRestaurants, destination, limit);
+  return applyFinalFilter(finalRestaurants, destination, limit, mealType);
 }
 
 /**
@@ -276,7 +276,7 @@ export async function searchRestaurantsNearActivity(
         console.log(`[Restaurants Nearby] ${nearbyRestaurants.length} trouvés via SerpAPI, ${filtered.length} après filtrage`);
 
         if (filtered.length > 0) {
-          return applyFinalFilter(filtered, destination, limit);
+          return applyFinalFilter(filtered, destination, limit, mealType);
         }
       }
     } catch (error) {
@@ -377,7 +377,69 @@ function filterByForbiddenNames(restaurants: Restaurant[], destination: string):
  * 1. Filtre par note minimum (>= 3.7)
  * 2. Filtre par noms interdits (cuisine non locale)
  */
-function applyFinalFilter(restaurants: Restaurant[], destination: string | undefined, limit: number): Restaurant[] {
+/**
+ * Types de restaurants inappropriés pour certains repas
+ * Pour le dîner: exclure les sandwicheries, coffee shops, fast-food, snacks
+ * Ces établissements sont OK pour le petit-déjeuner ou le déjeuner rapide
+ */
+const INAPPROPRIATE_FOR_DINNER = [
+  // Sandwicheries et fast-food
+  'sandwich', 'sandwicherie', 'panini',
+  'snack', 'quick', 'fast food', 'fast-food',
+  'kebab', 'döner', 'doner', 'shawarma',
+
+  // Cafés et coffee shops
+  'coffee', 'café', 'cafe', 'coffeeshop', 'coffee shop',
+
+  // Boulangeries et pâtisseries
+  'bakery', 'boulangerie', 'patisserie', 'pâtisserie',
+  'bagel', 'donut', 'doughnut',
+
+  // Desserts
+  'ice cream', 'glacier', 'gelato',
+
+  // Boissons
+  'juice', 'smoothie', 'bubble tea',
+
+  // NOUVEAU: Établissements de petit-déjeuner/brunch
+  'breakfast', 'brunch', 'pancake', 'waffle',
+
+  // NOUVEAU: Chaînes bas de gamme (inappropriées pour "luxury")
+  'prezzo', 'pizza hut', 'dominos', "domino's", 'papa john',
+  'subway', "mcdonald", 'burger king', 'kfc',
+];
+
+/**
+ * Filtre les restaurants inappropriés selon le type de repas
+ * Pour le dîner: exclure sandwicheries, coffee shops, etc.
+ */
+function filterByMealType(restaurants: Restaurant[], mealType?: 'breakfast' | 'lunch' | 'dinner'): Restaurant[] {
+  if (mealType !== 'dinner') {
+    return restaurants; // Pas de filtre pour petit-déjeuner/déjeuner
+  }
+
+  return restaurants.filter(r => {
+    const nameLower = (r.name || '').toLowerCase();
+    const cuisineLower = (r.cuisineTypes || []).join(' ').toLowerCase();
+    const descLower = (r.description || '').toLowerCase();
+
+    // Vérifier si le restaurant correspond à un type inapproprié pour le dîner
+    const isInappropriate = INAPPROPRIATE_FOR_DINNER.some(keyword =>
+      nameLower.includes(keyword) ||
+      cuisineLower.includes(keyword) ||
+      descLower.includes(keyword)
+    );
+
+    if (isInappropriate) {
+      console.log(`[Restaurants] Exclu pour dîner: "${r.name}" (type inapproprié)`);
+      return false;
+    }
+
+    return true;
+  });
+}
+
+function applyFinalFilter(restaurants: Restaurant[], destination: string | undefined, limit: number, mealType?: 'breakfast' | 'lunch' | 'dinner'): Restaurant[] {
   if (restaurants.length === 0) {
     return [];
   }
@@ -386,19 +448,24 @@ function applyFinalFilter(restaurants: Restaurant[], destination: string | undef
   let filtered = filterByRating(restaurants);
   const excludedByRating = restaurants.length - filtered.length;
 
-  // 2. Filtre par nom (si destination fournie)
+  // 2. Filtre par type de repas (ex: pas de sandwicherie pour le dîner)
+  const beforeMealTypeFilter = filtered.length;
+  filtered = filterByMealType(filtered, mealType);
+  const excludedByMealType = beforeMealTypeFilter - filtered.length;
+
+  // 3. Filtre par nom (si destination fournie)
   if (destination) {
     const beforeNameFilter = filtered.length;
     filtered = filterByForbiddenNames(filtered, destination);
     const excludedByName = beforeNameFilter - filtered.length;
 
     // Log détaillé des exclusions
-    const totalExcluded = excludedByRating + excludedByName;
+    const totalExcluded = excludedByRating + excludedByMealType + excludedByName;
     if (totalExcluded > 0) {
-      console.log(`[Restaurants] ⚠️ FILTRE FINAL: ${totalExcluded} restaurant(s) exclu(s) (${excludedByRating} par note, ${excludedByName} par nom)`);
+      console.log(`[Restaurants] ⚠️ FILTRE FINAL: ${totalExcluded} restaurant(s) exclu(s) (${excludedByRating} par note, ${excludedByMealType} par type repas, ${excludedByName} par nom)`);
     }
-  } else if (excludedByRating > 0) {
-    console.log(`[Restaurants] ⚠️ FILTRE FINAL: ${excludedByRating} restaurant(s) exclu(s) par note`);
+  } else if (excludedByRating + excludedByMealType > 0) {
+    console.log(`[Restaurants] ⚠️ FILTRE FINAL: ${excludedByRating + excludedByMealType} restaurant(s) exclu(s) (${excludedByRating} par note, ${excludedByMealType} par type repas)`);
   }
 
   return filtered.slice(0, limit);

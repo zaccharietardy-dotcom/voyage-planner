@@ -192,7 +192,7 @@ export async function searchAttractionsFromCache(
       console.log(`[Server] ✅ ${dbAttractions.length} attractions trouvées en base locale pour ${destination}`);
 
       const attractions = dbAttractions.map((place, index) => placeToAttraction(place, index));
-      return filterAttractions(attractions, options?.types, options?.maxResults);
+      return filterAttractions(attractions, options?.types, options?.maxResults, destination);
     }
   } catch (error) {
     console.warn('[Server] Erreur base locale, fallback vers API:', error);
@@ -232,7 +232,7 @@ export async function searchAttractionsFromCache(
         });
 
         console.log(`[Server] ${attractions.length} attractions vérifiées via Foursquare`);
-        return filterAttractions(attractions, options?.types, options?.maxResults);
+        return filterAttractions(attractions, options?.types, options?.maxResults, destination);
       }
     } catch (error) {
       console.warn('[Server] Foursquare error, trying cache/Claude:', error);
@@ -295,7 +295,7 @@ export async function searchAttractionsFromCache(
         saveCache(cache);
 
         console.log(`[Server] ✅ ${attractions.length} attractions RÉELLES via SerpAPI`);
-        return filterAttractions(attractions, options?.types, options?.maxResults);
+        return filterAttractions(attractions, options?.types, options?.maxResults, destination);
       }
     } catch (error) {
       console.warn('[Server] SerpAPI error, trying cache/Claude:', error);
@@ -310,7 +310,7 @@ export async function searchAttractionsFromCache(
     new Date().getTime() - new Date(cached.fetchedAt).getTime() < cacheMaxAge
   ) {
     console.log(`[Server] Cache hit pour ${destination} (${cached.attractions.length} attractions)`);
-    return filterAttractions(cached.attractions, options?.types, options?.maxResults);
+    return filterAttractions(cached.attractions, options?.types, options?.maxResults, destination);
   }
 
   // 4. Claude AI (fallback)
@@ -329,7 +329,7 @@ export async function searchAttractionsFromCache(
 
       console.log(`[Server] ${attractions.length} attractions mises en cache pour ${destination}`);
 
-      return filterAttractions(attractions, options?.types, options?.maxResults);
+      return filterAttractions(attractions, options?.types, options?.maxResults, destination);
     } catch (error) {
       console.error('[Server] Erreur recherche attractions:', error);
     }
@@ -338,7 +338,7 @@ export async function searchAttractionsFromCache(
   // 5. Fallback: cache expiré ou vide
   if (cached) {
     console.warn('[Server] Utilisation du cache expiré pour', destination);
-    return filterAttractions(cached.attractions, options?.types, options?.maxResults);
+    return filterAttractions(cached.attractions, options?.types, options?.maxResults, destination);
   }
   return [];
 }
@@ -346,6 +346,108 @@ export async function searchAttractionsFromCache(
 /**
  * Convertit une catégorie Foursquare en ActivityType
  */
+/**
+ * Base de données des attractions gratuites connues
+ * Organisées par ville et par nom (partiellement matching)
+ */
+const FREE_ATTRACTIONS: Record<string, string[]> = {
+  'london': [
+    // Musées nationaux gratuits
+    'national gallery', 'british museum', 'natural history museum',
+    'victoria and albert', 'v&a', 'tate modern', 'tate britain',
+    'science museum', 'national portrait gallery', 'imperial war museum',
+    // Monuments extérieurs gratuits
+    'big ben', 'elizabeth tower', 'houses of parliament', 'parliament square',
+    'tower bridge', 'london bridge', 'westminster abbey', // Extérieur gratuit
+    'buckingham palace', // Extérieur gratuit
+    // Places et parcs
+    'trafalgar square', 'piccadilly circus', 'leicester square',
+    'hyde park', 'regent\'s park', 'green park', 'st james\'s park',
+    'greenwich park', 'kensington gardens',
+    // Marchés
+    'borough market', 'camden market', 'portobello', 'brick lane',
+    // Quartiers
+    'soho', 'covent garden', 'notting hill', 'shoreditch',
+  ],
+  'londres': [
+    'national gallery', 'british museum', 'natural history museum',
+    'victoria and albert', 'v&a', 'tate modern', 'tate britain',
+    'science museum', 'big ben', 'tower bridge', 'hyde park',
+    'trafalgar square', 'piccadilly circus', 'buckingham palace',
+  ],
+  'paris': [
+    'notre-dame', 'sacré-cœur', 'sacre-coeur', 'basilique sacré-cœur',
+    'champs-élysées', 'champs elysees', 'avenue des champs',
+    'jardin du luxembourg', 'jardin des tuileries', 'parc des buttes-chaumont',
+    'place de la concorde', 'place vendôme', 'place des vosges',
+    'montmartre', 'quartier latin', 'le marais',
+    'pont alexandre', 'pont des arts', 'pont neuf',
+    'père lachaise', 'cimetière',
+  ],
+  'rome': [
+    'fontaine de trevi', 'trevi fountain', 'fontana di trevi',
+    'piazza navona', 'place navone',
+    'panthéon', 'pantheon', // Note: maintenant payant mais prix symbolique
+    'place d\'espagne', 'spanish steps', 'piazza di spagna',
+    'trastevere', 'quartier trastevere',
+    'villa borghese', 'park villa borghese',
+    'campo de\' fiori', 'campo dei fiori',
+    'forum romain', // Extérieur visible gratuitement
+  ],
+  'amsterdam': [
+    'vondelpark', 'jordaan', 'quartier jordaan',
+    'dam square', 'place du dam',
+    'begijnhof',
+    'waterlooplein', 'marché aux puces',
+    'negen straatjes', 'nine streets',
+  ],
+  'barcelona': [
+    'la rambla', 'las ramblas', 'ramblas',
+    'barceloneta', 'plage barceloneta',
+    'quartier gothique', 'gothic quarter', 'barri gotic',
+    'parc de la ciutadella', 'ciutadella',
+    'montjuïc', 'montjuic',
+  ],
+  'barcelone': [
+    'la rambla', 'barceloneta', 'quartier gothique', 'montjuïc',
+  ],
+};
+
+/**
+ * Vérifie si une attraction est connue comme gratuite
+ */
+function isAttractionFree(name: string, city: string): boolean {
+  const normalizedCity = city.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const normalizedName = name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+  // Vérifier dans la ville spécifique
+  const cityFreeList = FREE_ATTRACTIONS[normalizedCity] || [];
+  if (cityFreeList.some(free => normalizedName.includes(free) || free.includes(normalizedName.split(' ')[0]))) {
+    return true;
+  }
+
+  // Vérifier aussi avec les alias de ville
+  for (const [cityKey, freeList] of Object.entries(FREE_ATTRACTIONS)) {
+    if (normalizedCity.includes(cityKey) || cityKey.includes(normalizedCity)) {
+      if (freeList.some(free => normalizedName.includes(free) || free.includes(normalizedName.split(' ')[0]))) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Corrige le prix des attractions en fonction de la base de données des attractions gratuites
+ */
+function correctAttractionCost(attraction: Attraction, city: string): Attraction {
+  if (isAttractionFree(attraction.name, city)) {
+    return { ...attraction, estimatedCost: 0 };
+  }
+  return attraction;
+}
+
 function mapCategoryToActivityType(category: string): ActivityType {
   const lowerCategory = category.toLowerCase();
 
@@ -380,12 +482,18 @@ function mapCategoryToActivityType(category: string): ActivityType {
 function filterAttractions(
   attractions: Attraction[],
   types?: ActivityType[],
-  maxResults?: number
+  maxResults?: number,
+  city?: string
 ): Attraction[] {
   let filtered = attractions;
 
+  // Corriger les prix des attractions gratuites connues
+  if (city) {
+    filtered = filtered.map(a => correctAttractionCost(a, city));
+  }
+
   if (types && types.length > 0) {
-    filtered = attractions.filter(a => types.includes(a.type));
+    filtered = filtered.filter(a => types.includes(a.type));
   }
 
   if (maxResults && maxResults > 0) {

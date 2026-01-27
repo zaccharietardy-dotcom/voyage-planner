@@ -269,7 +269,7 @@ function calculateTrainOption(params: TransportSearchParams, distance: number): 
   const co2 = Math.round(distance * co2Factor);
 
   // URL de réservation
-  const bookingUrl = getTrainBookingUrl(params.origin, params.destination);
+  const bookingUrl = getTrainBookingUrl(params.origin, params.destination, params.passengers);
 
   return {
     id: isHighSpeed ? 'train_highspeed' : 'train',
@@ -617,20 +617,55 @@ function getTrainOperator(origin: string, destination: string): string {
 /**
  * Retourne l'URL de réservation train
  */
-function getTrainBookingUrl(origin: string, destination: string): string {
+function getTrainBookingUrl(origin: string, destination: string, passengers: number = 1): string {
   const cities = [origin.toLowerCase(), destination.toLowerCase()];
+  const originLower = origin.toLowerCase();
+  const destLower = destination.toLowerCase();
 
-  if (cities.some(c => c.includes('paris') || c.includes('lyon') || c.includes('marseille'))) {
+  // Eurostar: Paris/Bruxelles/Amsterdam ↔ Londres
+  if (cities.some(c => c.includes('london') || c.includes('londres'))) {
+    // Codes numériques Eurostar (format utilisé par leur site de recherche)
+    const eurostarCodes: Record<string, string> = {
+      'paris': '8727100',      // Paris Nord
+      'london': '7015400',     // London St Pancras
+      'londres': '7015400',
+      'brussels': '8814001',   // Bruxelles-Midi
+      'bruxelles': '8814001',
+      'amsterdam': '8400058',  // Amsterdam Centraal
+      'lille': '8722326',      // Lille Europe
+      'rotterdam': '8400530',  // Rotterdam Centraal
+    };
+
+    // Trouver le code d'origine et de destination
+    let originCode = '';
+    let destCode = '';
+    for (const [city, code] of Object.entries(eurostarCodes)) {
+      if (originLower.includes(city)) originCode = code;
+      if (destLower.includes(city)) destCode = code;
+    }
+
+    // Si on a trouvé les codes, générer l'URL avec paramètres
+    // Format: https://www.eurostar.com/search/uk-en?adult=3&origin=8727100&destination=7015400&outbound=2026-01-28
+    if (originCode && destCode) {
+      return `https://www.eurostar.com/search/uk-en?adult=${passengers}&origin=${originCode}&destination=${destCode}`;
+    }
+
+    // Fallback: page d'accueil Eurostar
+    return `https://www.eurostar.com/uk-en`;
+  }
+
+  // SNCF Connect: trajets France
+  if (cities.some(c => c.includes('paris') || c.includes('lyon') || c.includes('marseille') || c.includes('bordeaux') || c.includes('toulouse') || c.includes('nice') || c.includes('strasbourg'))) {
     return `https://www.sncf-connect.com/app/home/search?from=${encodeURIComponent(origin)}&to=${encodeURIComponent(destination)}`;
   }
-  if (cities.some(c => c.includes('barcelona') || c.includes('madrid'))) {
+
+  // Renfe: trajets Espagne
+  if (cities.some(c => c.includes('barcelona') || c.includes('barcelone') || c.includes('madrid') || c.includes('valencia') || c.includes('seville') || c.includes('sevilla'))) {
     return `https://www.renfe.com/es/en`;
   }
-  if (cities.some(c => c.includes('london'))) {
-    return `https://www.eurostar.com/`;
-  }
+
   // Trainline: fonctionne pour la plupart des trajets européens
-  return `https://www.thetrainline.com/en/train-times/${encodeURIComponent(origin.toLowerCase())}-to-${encodeURIComponent(destination.toLowerCase())}`;
+  return `https://www.thetrainline.com/en/train-times/${encodeURIComponent(origin.toLowerCase().replace(/\s+/g, '-'))}-to-${encodeURIComponent(destination.toLowerCase().replace(/\s+/g, '-'))}`;
 }
 
 /**

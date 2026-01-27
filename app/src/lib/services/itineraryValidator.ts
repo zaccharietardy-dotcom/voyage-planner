@@ -312,8 +312,9 @@ export function shouldShowItinerary(
     }
   }
 
-  // Règle 2: Vol lui-même ne nécessite pas d'itinéraire (le pilote gère)
-  if (fromType === 'flight') {
+  // Règle 2: Vol - pas d'itinéraire affiché (le pilote gère le trajet aérien)
+  // Ni DEPUIS un vol, ni VERS un vol
+  if (fromType === 'flight' || toType === 'flight') {
     return false;
   }
 

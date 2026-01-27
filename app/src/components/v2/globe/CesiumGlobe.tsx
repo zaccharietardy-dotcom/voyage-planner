@@ -1,0 +1,446 @@
+'use client';
+
+import { useEffect, useRef, useState } from 'react';
+import { Traveler, TripArc } from '@/lib/v2/mockData';
+import { colors } from '@/lib/v2/theme';
+
+// Create a marker icon using canvas
+function createMarkerCanvas(Cesium: any, isSelected: boolean, isOnline: boolean): HTMLCanvasElement {
+  const canvas = document.createElement('canvas');
+  const size = 48;
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d')!;
+
+  const centerX = size / 2;
+  const centerY = size / 2;
+  const radius = isSelected ? 10 : 8;
+
+  // Outer glow for online users
+  if (isOnline) {
+    const gradient = ctx.createRadialGradient(centerX, centerY, radius, centerX, centerY, radius + 8);
+    gradient.addColorStop(0, 'rgba(251, 191, 36, 0.4)');
+    gradient.addColorStop(1, 'rgba(251, 191, 36, 0)');
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius + 8, 0, Math.PI * 2);
+    ctx.fillStyle = gradient;
+    ctx.fill();
+  }
+
+  // White outline
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, radius + 2, 0, Math.PI * 2);
+  ctx.fillStyle = '#ffffff';
+  ctx.fill();
+
+  // Inner circle
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+  ctx.fillStyle = isSelected ? '#6366f1' : '#fbbf24';
+  ctx.fill();
+
+  // Inner highlight
+  ctx.beginPath();
+  ctx.arc(centerX - 2, centerY - 2, radius / 3, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+  ctx.fill();
+
+  return canvas;
+}
+
+// Major world cities for labels
+const MAJOR_CITIES = [
+  { name: 'Paris', lat: 48.8566, lng: 2.3522, population: 11000000 },
+  { name: 'London', lat: 51.5074, lng: -0.1278, population: 9000000 },
+  { name: 'New York', lat: 40.7128, lng: -74.0060, population: 8300000 },
+  { name: 'Tokyo', lat: 35.6762, lng: 139.6503, population: 37400000 },
+  { name: 'Berlin', lat: 52.5200, lng: 13.4050, population: 3600000 },
+  { name: 'Rome', lat: 41.9028, lng: 12.4964, population: 2800000 },
+  { name: 'Madrid', lat: 40.4168, lng: -3.7038, population: 3200000 },
+  { name: 'Barcelona', lat: 41.3851, lng: 2.1734, population: 1600000 },
+  { name: 'Amsterdam', lat: 52.3676, lng: 4.9041, population: 870000 },
+  { name: 'Dubai', lat: 25.2048, lng: 55.2708, population: 3400000 },
+  { name: 'Singapore', lat: 1.3521, lng: 103.8198, population: 5700000 },
+  { name: 'Sydney', lat: -33.8688, lng: 151.2093, population: 5300000 },
+  { name: 'Los Angeles', lat: 34.0522, lng: -118.2437, population: 4000000 },
+  { name: 'San Francisco', lat: 37.7749, lng: -122.4194, population: 880000 },
+  { name: 'Bangkok', lat: 13.7563, lng: 100.5018, population: 10500000 },
+  { name: 'Hong Kong', lat: 22.3193, lng: 114.1694, population: 7500000 },
+  { name: 'Istanbul', lat: 41.0082, lng: 28.9784, population: 15500000 },
+  { name: 'Moscow', lat: 55.7558, lng: 37.6173, population: 12500000 },
+  { name: 'São Paulo', lat: -23.5505, lng: -46.6333, population: 12300000 },
+  { name: 'Buenos Aires', lat: -34.6037, lng: -58.3816, population: 3100000 },
+  { name: 'Cairo', lat: 30.0444, lng: 31.2357, population: 20900000 },
+  { name: 'Mumbai', lat: 19.0760, lng: 72.8777, population: 20700000 },
+  { name: 'Beijing', lat: 39.9042, lng: 116.4074, population: 21500000 },
+  { name: 'Seoul', lat: 37.5665, lng: 126.9780, population: 9700000 },
+  { name: 'Mexico City', lat: 19.4326, lng: -99.1332, population: 21800000 },
+  { name: 'Lagos', lat: 6.5244, lng: 3.3792, population: 14800000 },
+  { name: 'Johannesburg', lat: -26.2041, lng: 28.0473, population: 5800000 },
+  { name: 'Cape Town', lat: -33.9249, lng: 18.4241, population: 4600000 },
+  { name: 'Marrakech', lat: 31.6295, lng: -7.9811, population: 930000 },
+  { name: 'Lisbon', lat: 38.7223, lng: -9.1393, population: 500000 },
+  { name: 'Vienna', lat: 48.2082, lng: 16.3738, population: 1900000 },
+  { name: 'Prague', lat: 50.0755, lng: 14.4378, population: 1300000 },
+  { name: 'Budapest', lat: 47.4979, lng: 19.0402, population: 1750000 },
+  { name: 'Athens', lat: 37.9838, lng: 23.7275, population: 3150000 },
+  { name: 'Dublin', lat: 53.3498, lng: -6.2603, population: 1400000 },
+  { name: 'Copenhagen', lat: 55.6761, lng: 12.5683, population: 800000 },
+  { name: 'Stockholm', lat: 59.3293, lng: 18.0686, population: 975000 },
+  { name: 'Oslo', lat: 59.9139, lng: 10.7522, population: 700000 },
+  { name: 'Helsinki', lat: 60.1699, lng: 24.9384, population: 650000 },
+  { name: 'Reykjavik', lat: 64.1466, lng: -21.9426, population: 130000 },
+];
+
+export interface CesiumGlobeProps {
+  travelers: Traveler[];
+  arcs: TripArc[];
+  onTravelerSelect?: (traveler: Traveler | null) => void;
+  selectedTraveler?: Traveler | null;
+  className?: string;
+}
+
+export function CesiumGlobe({
+  travelers,
+  arcs,
+  onTravelerSelect,
+  selectedTraveler = null,
+  className = '',
+}: CesiumGlobeProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const viewerRef = useRef<any>(null);
+  const cesiumRef = useRef<any>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const markersRef = useRef<Map<string, any>>(new Map());
+
+  // Initialize Cesium
+  useEffect(() => {
+    let mounted = true;
+
+    async function initCesium() {
+      try {
+        // Set Cesium base URL for assets (must be before import)
+        (window as any).CESIUM_BASE_URL = '/cesium';
+
+        // Dynamic import of Cesium
+        const CesiumModule = await import('cesium');
+        cesiumRef.current = CesiumModule;
+
+        if (!mounted || !containerRef.current) return;
+
+        const Cesium = CesiumModule;
+
+        // Set access token
+        Cesium.Ion.defaultAccessToken = process.env.NEXT_PUBLIC_CESIUM_ION_TOKEN || '';
+
+        // Create viewer with dark theme settings
+        const viewer = new Cesium.Viewer(containerRef.current, {
+          terrain: Cesium.Terrain.fromWorldTerrain(),
+          animation: false,
+          baseLayerPicker: false,
+          fullscreenButton: false,
+          vrButton: false,
+          geocoder: false,
+          homeButton: false,
+          infoBox: false,
+          sceneModePicker: false,
+          selectionIndicator: false,
+          timeline: false,
+          navigationHelpButton: false,
+          navigationInstructionsInitiallyVisible: false,
+          skyBox: false,
+          skyAtmosphere: new Cesium.SkyAtmosphere(),
+          contextOptions: {
+            webgl: {
+              alpha: true,
+            },
+          },
+        });
+
+        // Dark theme - visible but muted
+        const imageryLayers = viewer.imageryLayers;
+        const baseLayer = imageryLayers.get(0);
+        if (baseLayer) {
+          baseLayer.brightness = 0.55; // Slightly brighter
+          baseLayer.contrast = 1.15;
+          baseLayer.saturation = 0.45; // Muted colors
+          baseLayer.gamma = 0.95;
+        }
+
+        // Labels overlay - only show when very close (street level)
+        const osmLabels = await Cesium.IonImageryProvider.fromAssetId(3);
+        const labelsLayer = imageryLayers.addImageryProvider(osmLabels);
+        labelsLayer.alpha = 0.5;
+        labelsLayer.brightness = 0.6;
+        // Make labels only visible at low altitude (under 50km)
+        labelsLayer.minificationFilter = Cesium.TextureMinificationFilter.LINEAR;
+        labelsLayer.magnificationFilter = Cesium.TextureMagnificationFilter.LINEAR;
+
+        // Dark background
+        viewer.scene.backgroundColor = Cesium.Color.fromCssColorString('#050508');
+        viewer.scene.globe.baseColor = Cesium.Color.fromCssColorString('#0a0a12');
+        viewer.scene.globe.showGroundAtmosphere = true;
+
+        // Subtle atmosphere
+        if (viewer.scene.skyAtmosphere) {
+          viewer.scene.skyAtmosphere.brightnessShift = 0.2;
+          viewer.scene.skyAtmosphere.saturationShift = -0.2;
+        }
+
+        // Dynamic labels visibility based on zoom
+        viewer.camera.changed.addEventListener(() => {
+          const height = viewer.camera.positionCartographic.height;
+          // Only show road labels when under 50km altitude
+          if (labelsLayer) {
+            labelsLayer.alpha = height < 50000 ? 0.7 : height < 200000 ? 0.3 : 0;
+          }
+        });
+
+        // Set initial camera position (view of Earth from Paris)
+        viewer.camera.setView({
+          destination: Cesium.Cartesian3.fromDegrees(2.3522, 48.8566, 20000000),
+        });
+
+        // Spin animation when zoomed out
+        let lastTime = Date.now();
+        const spinRate = 0.05;
+
+        viewer.clock.onTick.addEventListener(() => {
+          const now = Date.now();
+          const delta = (now - lastTime) / 1000;
+          lastTime = now;
+
+          const cameraHeight = viewer.camera.positionCartographic.height;
+          if (cameraHeight > 5000000) {
+            viewer.scene.camera.rotate(Cesium.Cartesian3.UNIT_Z, -spinRate * delta * (Math.PI / 180));
+          }
+        });
+
+        // Add city labels - only mega cities visible from far, others need zoom
+        MAJOR_CITIES.forEach((city) => {
+          // Only show top 15 mega cities from far away
+          const isMegaCity = city.population > 10000000;
+          const isLargeCity = city.population > 5000000;
+
+          const fontSize = isMegaCity ? 14 : isLargeCity ? 12 : 11;
+
+          viewer.entities.add({
+            id: `city-${city.name}`,
+            position: Cesium.Cartesian3.fromDegrees(city.lng, city.lat, 0),
+            label: {
+              text: city.name,
+              font: `600 ${fontSize}px -apple-system, BlinkMacSystemFont, sans-serif`,
+              fillColor: Cesium.Color.WHITE.withAlpha(0.85),
+              outlineColor: Cesium.Color.BLACK.withAlpha(0.8),
+              outlineWidth: 2,
+              style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+              verticalOrigin: Cesium.VerticalOrigin.CENTER,
+              horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
+              // Much stricter zoom requirements - need to zoom more to see labels
+              distanceDisplayCondition: new Cesium.DistanceDisplayCondition(
+                0,
+                isMegaCity ? 4000000 : isLargeCity ? 2500000 : 1500000
+              ),
+              heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+              disableDepthTestDistance: Number.POSITIVE_INFINITY,
+            },
+          });
+        });
+
+        viewerRef.current = viewer;
+        setIsLoaded(true);
+
+      } catch (err) {
+        console.error('Failed to initialize Cesium:', err);
+        setError('Échec du chargement du globe 3D');
+      }
+    }
+
+    initCesium();
+
+    return () => {
+      mounted = false;
+      if (viewerRef.current) {
+        viewerRef.current.destroy();
+        viewerRef.current = null;
+      }
+    };
+  }, []);
+
+  // Add traveler markers
+  useEffect(() => {
+    const Cesium = cesiumRef.current;
+    if (!isLoaded || !viewerRef.current || !Cesium) return;
+
+    const viewer = viewerRef.current;
+
+    // Clear existing markers
+    markersRef.current.forEach((entity) => {
+      viewer.entities.remove(entity);
+    });
+    markersRef.current.clear();
+
+    // Add markers for each traveler
+    travelers.forEach((traveler) => {
+      const isSelected = selectedTraveler?.id === traveler.id;
+      const color = isSelected
+        ? Cesium.Color.fromCssColorString(colors.accentPrimary)
+        : Cesium.Color.fromCssColorString(colors.markerColor);
+
+      const entity = viewer.entities.add({
+        id: `traveler-${traveler.id}`,
+        position: Cesium.Cartesian3.fromDegrees(
+          traveler.location.lng,
+          traveler.location.lat,
+          100
+        ),
+        billboard: {
+          image: createMarkerCanvas(Cesium, isSelected, traveler.isOnline ?? false),
+          scale: isSelected ? 0.6 : 0.5,
+          verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+          heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND,
+          disableDepthTestDistance: Number.POSITIVE_INFINITY,
+        },
+        label: {
+          text: traveler.name,
+          font: '600 11px -apple-system, BlinkMacSystemFont, sans-serif',
+          fillColor: Cesium.Color.WHITE,
+          outlineColor: Cesium.Color.BLACK.withAlpha(0.8),
+          outlineWidth: 3,
+          style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+          verticalOrigin: Cesium.VerticalOrigin.TOP,
+          pixelOffset: new Cesium.Cartesian2(0, 4),
+          distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0, 3000000),
+          heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND,
+          disableDepthTestDistance: Number.POSITIVE_INFINITY,
+        },
+        properties: {
+          traveler: traveler,
+        },
+      });
+
+      markersRef.current.set(traveler.id, entity);
+    });
+
+    // Click handler for markers
+    const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
+    handler.setInputAction((click: any) => {
+      const pickedObject = viewer.scene.pick(click.position);
+      if (Cesium.defined(pickedObject) && pickedObject.id?.properties?.traveler) {
+        const traveler = pickedObject.id.properties.traveler.getValue();
+        onTravelerSelect?.(traveler);
+      } else {
+        onTravelerSelect?.(null);
+      }
+    }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+    return () => {
+      handler.destroy();
+    };
+  }, [isLoaded, travelers, selectedTraveler, onTravelerSelect]);
+
+  // Add trip arcs
+  useEffect(() => {
+    const Cesium = cesiumRef.current;
+    if (!isLoaded || !viewerRef.current || !Cesium) return;
+
+    const viewer = viewerRef.current;
+
+    // Remove existing arcs
+    const existingArcs = viewer.entities.values.filter((e: any) => e.id?.startsWith('arc-'));
+    existingArcs.forEach((e: any) => viewer.entities.remove(e));
+
+    // Add arcs
+    arcs.forEach((arc) => {
+      const positions = Cesium.Cartesian3.fromDegreesArrayHeights([
+        arc.from.lng, arc.from.lat, 100000,
+        (arc.from.lng + arc.to.lng) / 2, (arc.from.lat + arc.to.lat) / 2, 500000,
+        arc.to.lng, arc.to.lat, 100000,
+      ]);
+
+      viewer.entities.add({
+        id: `arc-${arc.id}`,
+        polyline: {
+          positions: positions,
+          width: 2,
+          material: new Cesium.PolylineGlowMaterialProperty({
+            glowPower: 0.2,
+            color: Cesium.Color.fromCssColorString(arc.color || colors.arcColor),
+          }),
+          arcType: Cesium.ArcType.NONE,
+        },
+      });
+    });
+  }, [isLoaded, arcs]);
+
+  // Fly to selected traveler
+  useEffect(() => {
+    const Cesium = cesiumRef.current;
+    if (!isLoaded || !viewerRef.current || !selectedTraveler || !Cesium) return;
+
+    const viewer = viewerRef.current;
+    viewer.camera.flyTo({
+      destination: Cesium.Cartesian3.fromDegrees(
+        selectedTraveler.location.lng,
+        selectedTraveler.location.lat,
+        1000000
+      ),
+      duration: 2,
+    });
+  }, [isLoaded, selectedTraveler]);
+
+  return (
+    <div className={`relative w-full h-full ${className}`}>
+      {/* Loading state */}
+      {!isLoaded && !error && (
+        <div className="absolute inset-0 flex items-center justify-center bg-[#0a0a0f] z-10">
+          <div className="text-center">
+            <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+            <p className="text-gray-400">Chargement du globe...</p>
+          </div>
+        </div>
+      )}
+
+      {/* Error state */}
+      {error && (
+        <div className="absolute inset-0 flex items-center justify-center bg-[#0a0a0f] z-10">
+          <div className="text-center text-red-400">
+            <p>{error}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Cesium container */}
+      <div
+        ref={containerRef}
+        className="w-full h-full"
+        style={{ background: '#0a0a0f' }}
+      />
+
+      {/* Custom styles to hide Cesium branding and match dark theme */}
+      <style jsx global>{`
+        .cesium-viewer {
+          font-family: inherit;
+        }
+        .cesium-viewer-bottom {
+          display: none !important;
+        }
+        .cesium-credit-logoContainer {
+          display: none !important;
+        }
+        .cesium-credit-textContainer {
+          display: none !important;
+        }
+        .cesium-widget-credits {
+          display: none !important;
+        }
+        .cesium-viewer .cesium-widget-credits {
+          display: none !important;
+        }
+      `}</style>
+    </div>
+  );
+}
+
+export default CesiumGlobe;

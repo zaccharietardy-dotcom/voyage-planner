@@ -41,6 +41,7 @@ export interface ReservationContext {
   checkOut?: string;
   date?: string;
   returnDate?: string;
+  passengers?: number;
 }
 
 export type ReservableElement =
@@ -51,6 +52,7 @@ export type ReservableElement =
 
 /**
  * Formate une date pour utilisation dans une URL (YYYY-MM-DD)
+ * IMPORTANT: Utilise la date LOCALE, pas UTC, pour éviter les décalages de timezone
  */
 export function formatDateForUrl(date: string | Date | null | undefined): string {
   if (!date) {
@@ -58,7 +60,12 @@ export function formatDateForUrl(date: string | Date | null | undefined): string
   }
 
   if (date instanceof Date) {
-    return date.toISOString().split('T')[0];
+    // IMPORTANT: Utiliser getFullYear/Month/Date pour la date LOCALE
+    // et non toISOString() qui convertit en UTC
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
   // Si c'est déjà une chaîne au format YYYY-MM-DD, la retourner
@@ -72,7 +79,11 @@ export function formatDateForUrl(date: string | Date | null | undefined): string
     if (isNaN(parsed.getTime())) {
       return '';
     }
-    return parsed.toISOString().split('T')[0];
+    // Utiliser la date locale
+    const year = parsed.getFullYear();
+    const month = String(parsed.getMonth() + 1).padStart(2, '0');
+    const day = String(parsed.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   } catch {
     return '';
   }
@@ -130,32 +141,52 @@ export function generateHotelLink(
 
 /**
  * Génère un lien Google Flights avec dates
+ *
+ * On utilise Skyscanner qui a des URLs prévisibles et bien structurées:
+ * https://www.skyscanner.fr/transport/vols/ORY/BCN/260128/260204/
+ * Format de date: YYMMDD
+ *
+ * Alternative: Google Flights avec format tfs encodé (complexe)
  */
 export function generateFlightLink(
   flight: FlightForLink,
   context: ReservationContext
 ): string {
   const { origin, destination } = flight;
-  const { date, returnDate } = context;
+  const { date, returnDate, passengers = 1 } = context;
 
-  // Format Google Flights URL
-  // https://www.google.com/travel/flights?q=flights+from+CDG+to+BCN+on+2026-01-28
-  const baseUrl = 'https://www.google.com/travel/flights';
+  // Fonction pour formater la date au format YYMMDD pour Skyscanner
+  const formatDateForSkyscanner = (dateStr: string): string => {
+    if (!dateStr) return '';
+    // dateStr est au format YYYY-MM-DD
+    const [year, month, day] = dateStr.split('-');
+    // Prendre les 2 derniers chiffres de l'année
+    const shortYear = year.slice(2);
+    return `${shortYear}${month}${day}`;
+  };
 
-  let query = `flights from ${origin} to ${destination}`;
+  const dateStr = date ? formatDateForUrl(date) : '';
+  const returnDateStr = returnDate ? formatDateForUrl(returnDate) : '';
 
-  if (date) {
-    query += ` on ${formatDateForUrl(date)}`;
+  // Construire l'URL Skyscanner
+  // Format: /transport/vols/{origin}/{destination}/{date_aller}/{date_retour}/?adults=N
+  const baseUrl = 'https://www.skyscanner.fr/transport/vols';
+
+  let url = `${baseUrl}/${origin.toLowerCase()}/${destination.toLowerCase()}/`;
+
+  if (dateStr) {
+    url += `${formatDateForSkyscanner(dateStr)}/`;
   }
 
-  if (returnDate) {
-    query += ` return ${formatDateForUrl(returnDate)}`;
+  if (returnDateStr) {
+    url += `${formatDateForSkyscanner(returnDateStr)}/`;
   }
 
-  const params = new URLSearchParams();
-  params.set('q', query);
+  // Toujours ajouter les paramètres de passagers (Skyscanner défaut à 1 sinon)
+  const hasReturn = returnDateStr ? '1' : '0';
+  url += `?adults=${passengers}&adultsv2=${passengers}&cabinclass=economy&children=0&childrenv2=&infants=0&preferdirects=false&rtn=${hasReturn}`;
 
-  return `${baseUrl}?${params.toString()}`;
+  return url;
 }
 
 /**
@@ -203,4 +234,43 @@ export function generateReservationLink(
       // Type exhaustif, ne devrait jamais arriver
       throw new Error(`Unknown element type`);
   }
+}
+
+/**
+ * Génère des liens de recherche d'hôtels vers Google Hotels ET Booking.com
+ * Ces liens permettent à l'utilisateur de voir les hôtels DISPONIBLES en temps réel
+ */
+export function generateHotelSearchLinks(
+  destination: string,
+  checkIn: string | Date,
+  checkOut: string | Date,
+  guests: number = 2
+): { googleHotels: string; booking: string } {
+  const checkInStr = formatDateForUrl(checkIn);
+  const checkOutStr = formatDateForUrl(checkOut);
+
+  // Google Hotels URL
+  const googleParams = new URLSearchParams({
+    q: `hotels ${destination}`,
+    hl: 'fr',
+    gl: 'fr',
+  });
+  if (checkInStr) googleParams.set('checkin', checkInStr);
+  if (checkOutStr) googleParams.set('checkout', checkOutStr);
+  googleParams.set('guests', guests.toString());
+
+  // Booking.com URL
+  const bookingParams = new URLSearchParams({
+    ss: destination,
+    group_adults: guests.toString(),
+    no_rooms: '1',
+    group_children: '0',
+  });
+  if (checkInStr) bookingParams.set('checkin', checkInStr);
+  if (checkOutStr) bookingParams.set('checkout', checkOutStr);
+
+  return {
+    googleHotels: `https://www.google.com/travel/hotels?${googleParams.toString()}`,
+    booking: `https://www.booking.com/searchresults.html?${bookingParams.toString()}`,
+  };
 }

@@ -1,13 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { Trip, TripItem, TripDay } from '@/lib/types';
+import { Trip, TripItem, TripDay, Accommodation } from '@/lib/types';
 import { DayTimeline, CarbonFootprint, TransportOptions } from '@/components/trip';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import {
   ArrowLeft,
   Share2,
@@ -18,9 +19,95 @@ import {
   Loader2,
   RefreshCw,
   Bug,
+  GitPullRequest,
+  GripVertical,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { HotelSelector } from '@/components/trip/HotelSelector';
+import { generateHotelSearchLinks } from '@/lib/services/linkGenerator';
+import { useAuth } from '@/components/auth';
+import { useRealtimeTrip } from '@/hooks/useRealtimeTrip';
+import { SharePanel } from '@/components/trip/SharePanel';
+import { ProposalsList } from '@/components/trip/ProposalsList';
+import { CreateProposalDialog } from '@/components/trip/CreateProposalDialog';
+import { DraggableTimeline } from '@/components/trip/DraggableTimeline';
+import { ProposedChange, createMoveActivityChange } from '@/lib/types/collaboration';
+import { cn } from '@/lib/utils';
+
+/**
+ * Met à jour le planning quand l'hôtel change
+ */
+function updateTripWithNewHotel(trip: Trip, newHotel: Accommodation): Trip {
+  const oldHotelName = trip.accommodation?.name || '';
+  const newHotelName = newHotel.name;
+
+  const updatedDays = trip.days.map(day => ({
+    ...day,
+    items: day.items.map(item => {
+      const isHotelItem = item.type === 'checkin' || item.type === 'checkout' || item.type === 'hotel';
+      const titleContainsHotel = item.title?.toLowerCase().includes('check-in') ||
+                                  item.title?.toLowerCase().includes('check-out') ||
+                                  item.title?.toLowerCase().includes('hébergement');
+
+      if (isHotelItem || titleContainsHotel) {
+        let newTitle = item.title;
+        if (oldHotelName && item.title?.includes(oldHotelName)) {
+          newTitle = item.title.replace(oldHotelName, newHotelName);
+        } else if (item.title?.includes('Check-in ')) {
+          newTitle = `Check-in ${newHotelName}`;
+        } else if (item.title?.includes('Check-out ')) {
+          newTitle = `Check-out ${newHotelName}`;
+        }
+
+        let newDescription = item.description;
+        if (newDescription && oldHotelName) {
+          newDescription = newDescription.replace(oldHotelName, newHotelName);
+        }
+
+        return {
+          ...item,
+          title: newTitle,
+          description: newDescription,
+          locationName: newHotelName,
+          latitude: newHotel.latitude,
+          longitude: newHotel.longitude,
+          accommodation: item.accommodation ? {
+            ...item.accommodation,
+            name: newHotelName,
+            address: newHotel.address,
+            latitude: newHotel.latitude,
+            longitude: newHotel.longitude,
+            pricePerNight: newHotel.pricePerNight,
+            totalPrice: newHotel.totalPrice,
+            rating: newHotel.rating,
+            stars: newHotel.stars,
+            bookingUrl: newHotel.bookingUrl,
+          } : undefined,
+        };
+      }
+      return item;
+    }),
+  }));
+
+  const oldHotelPrice = trip.accommodation?.totalPrice || 0;
+  const nights = trip.preferences.durationDays - 1;
+  const newHotelPrice = newHotel.totalPrice || (newHotel.pricePerNight * nights);
+  const priceDiff = newHotelPrice - oldHotelPrice;
+
+  const updatedCostBreakdown = trip.costBreakdown ? {
+    ...trip.costBreakdown,
+    accommodation: newHotelPrice,
+  } : undefined;
+
+  return {
+    ...trip,
+    days: updatedDays,
+    accommodation: newHotel,
+    costBreakdown: updatedCostBreakdown,
+    totalEstimatedCost: Math.round((trip.totalEstimatedCost || 0) + priceDiff),
+  };
+}
 
 // Import map dynamically to avoid SSR issues with Leaflet
 const TripMap = dynamic(
@@ -38,41 +125,121 @@ const TripMap = dynamic(
 export default function TripPage() {
   const params = useParams();
   const router = useRouter();
-  const [trip, setTrip] = useState<Trip | null>(null);
-  const [loading, setLoading] = useState(true);
+  const tripId = params.id as string;
+  const { user } = useAuth();
+
+  // Mode collaboratif (Supabase) ou local (localStorage)
+  const [useCollaborativeMode, setUseCollaborativeMode] = useState(false);
+
+  // État pour le mode localStorage
+  const [localTrip, setLocalTrip] = useState<Trip | null>(null);
+  const [localLoading, setLocalLoading] = useState(true);
+
+  // Hook pour le mode collaboratif
+  const {
+    trip: collaborativeTrip,
+    isLoading: collaborativeLoading,
+    error: collaborativeError,
+    updateDays,
+    createProposal,
+    vote,
+    refetch,
+  } = useRealtimeTrip(tripId, user?.id);
+
+  // États UI
   const [regenerating, setRegenerating] = useState(false);
   const [transportChanged, setTransportChanged] = useState(false);
   const [originalTransportId, setOriginalTransportId] = useState<string | undefined>();
   const [selectedItemId, setSelectedItemId] = useState<string | undefined>();
   const [activeDay, setActiveDay] = useState('1');
+  const [selectedHotelId, setSelectedHotelId] = useState<string | undefined>();
+  const [editMode, setEditMode] = useState(false);
+  const [pendingChanges, setPendingChanges] = useState<ProposedChange[]>([]);
+  const [showProposalDialog, setShowProposalDialog] = useState(false);
+  const [showCollabPanel, setShowCollabPanel] = useState(false);
 
+  // Déterminer quel trip utiliser
+  const trip = useCollaborativeMode ? collaborativeTrip?.data : localTrip;
+  const loading = useCollaborativeMode ? collaborativeLoading : localLoading;
+
+  // Données collaboratives
+  const members = collaborativeTrip?.members || [];
+  const proposals = collaborativeTrip?.proposals || [];
+  const userRole = collaborativeTrip?.userRole;
+  const shareCode = collaborativeTrip?.shareCode || '';
+  const isOwner = userRole === 'owner';
+  const canEdit = userRole === 'owner' || userRole === 'editor';
+
+  // Charger le trip depuis localStorage
   useEffect(() => {
-    // Load trip from localStorage (later: from Supabase)
     const stored = localStorage.getItem('currentTrip');
     if (stored) {
       const parsed = JSON.parse(stored);
-      // Convert date strings back to Date objects
-      parsed.createdAt = new Date(parsed.createdAt);
-      parsed.updatedAt = new Date(parsed.updatedAt);
-      parsed.preferences.startDate = new Date(parsed.preferences.startDate);
-      parsed.days = parsed.days.map((day: TripDay) => ({
-        ...day,
-        date: new Date(day.date),
-      }));
-      setTrip(parsed);
-      // Sauvegarder l'ID du transport original
-      setOriginalTransportId(parsed.selectedTransport?.id);
+      if (parsed.id === tripId) {
+        parsed.createdAt = new Date(parsed.createdAt);
+        parsed.updatedAt = new Date(parsed.updatedAt);
+        parsed.preferences.startDate = new Date(parsed.preferences.startDate);
+        parsed.days = parsed.days.map((day: TripDay) => ({
+          ...day,
+          date: new Date(day.date),
+        }));
+        setLocalTrip(parsed);
+        setOriginalTransportId(parsed.selectedTransport?.id);
+        setSelectedHotelId(parsed.accommodation?.id);
+      }
     }
-    setLoading(false);
-  }, [params.id]);
+    setLocalLoading(false);
+  }, [tripId]);
 
-  // Fonction pour régénérer le voyage avec le nouveau transport
+  // Vérifier si on peut utiliser le mode collaboratif
+  useEffect(() => {
+    if (user && collaborativeTrip && !collaborativeError) {
+      setUseCollaborativeMode(true);
+    }
+  }, [user, collaborativeTrip, collaborativeError]);
+
+  // Fonction de sauvegarde unifiée
+  const saveTrip = useCallback((updatedTrip: Trip) => {
+    if (useCollaborativeMode) {
+      updateDays(updatedTrip.days);
+    } else {
+      setLocalTrip(updatedTrip);
+      localStorage.setItem('currentTrip', JSON.stringify(updatedTrip));
+    }
+  }, [useCollaborativeMode, updateDays]);
+
+  // Gestion du drag-and-drop
+  const handleDirectUpdate = useCallback((updatedDays: TripDay[]) => {
+    if (!trip) return;
+    const updatedTrip = { ...trip, days: updatedDays, updatedAt: new Date() };
+    saveTrip(updatedTrip);
+  }, [trip, saveTrip]);
+
+  const handleProposalFromDrag = useCallback((change: ProposedChange) => {
+    setPendingChanges((prev) => [...prev, change]);
+    setShowProposalDialog(true);
+  }, []);
+
+  // Créer une proposition
+  const handleCreateProposal = useCallback(async (title: string, description: string, changes: ProposedChange[]) => {
+    if (useCollaborativeMode) {
+      await createProposal(title, description, changes);
+    }
+    setPendingChanges([]);
+  }, [useCollaborativeMode, createProposal]);
+
+  // Voter sur une proposition
+  const handleVote = useCallback(async (proposalId: string, voteValue: boolean) => {
+    if (useCollaborativeMode) {
+      await vote(proposalId, voteValue);
+    }
+  }, [useCollaborativeMode, vote]);
+
+  // Régénérer le voyage
   const handleRegenerateTrip = async () => {
     if (!trip) return;
-
     setRegenerating(true);
     try {
-      // Appeler l'API pour régénérer avec le nouveau transport
       const response = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -85,11 +252,8 @@ export default function TripPage() {
       if (!response.ok) throw new Error('Erreur régénération');
 
       const newTrip = await response.json();
-      // Garder le transport sélectionné
       newTrip.selectedTransport = trip.selectedTransport;
-
-      setTrip(newTrip);
-      localStorage.setItem('currentTrip', JSON.stringify(newTrip));
+      saveTrip(newTrip);
       setTransportChanged(false);
       setOriginalTransportId(newTrip.selectedTransport?.id);
     } catch (error) {
@@ -114,8 +278,7 @@ export default function TripPage() {
     }));
 
     const updatedTrip = { ...trip, days: updatedDays, updatedAt: new Date() };
-    setTrip(updatedTrip);
-    localStorage.setItem('currentTrip', JSON.stringify(updatedTrip));
+    saveTrip(updatedTrip);
   };
 
   const getAllItems = (): TripItem[] => {
@@ -123,91 +286,39 @@ export default function TripPage() {
     return trip.days.flatMap((day) => day.items);
   };
 
-  // Export du planning pour debug
+  const getActiveDayItems = (): TripItem[] => {
+    if (!trip) return [];
+    const dayNumber = parseInt(activeDay);
+    const day = trip.days.find((d) => d.dayNumber === dayNumber);
+    return day?.items || [];
+  };
+
+  // Export debug
   const handleExportDebug = () => {
     if (!trip) return;
-
-    // Créer un format lisible pour Claude
     const debugExport = {
-      _meta: {
-        exportedAt: new Date().toISOString(),
-        purpose: 'Debug export for Claude analysis',
-        version: '1.0',
-      },
+      _meta: { exportedAt: new Date().toISOString(), purpose: 'Debug export' },
       summary: {
         destination: trip.preferences.destination,
         origin: trip.preferences.origin,
         startDate: trip.preferences.startDate,
         durationDays: trip.preferences.durationDays,
         groupSize: trip.preferences.groupSize,
-        groupType: trip.preferences.groupType,
-        budgetLevel: trip.preferences.budgetLevel,
-        activities: trip.preferences.activities,
-        transport: trip.preferences.transport,
         totalEstimatedCost: trip.totalEstimatedCost,
       },
-      selectedTransport: trip.selectedTransport,
-      transportOptions: trip.transportOptions,
-      outboundFlight: trip.outboundFlight,
-      returnFlight: trip.returnFlight,
-      accommodation: trip.accommodation,
-      chronology: trip.days.map((day) => ({
-        dayNumber: day.dayNumber,
-        date: day.date,
-        itemCount: day.items.length,
-        items: day.items.map((item) => ({
-          time: `${item.startTime} - ${item.endTime}`,
-          type: item.type,
-          title: item.title,
-          description: item.description,
-          location: item.locationName,
-          coords: { lat: item.latitude, lng: item.longitude },
-          duration: item.duration,
-          estimatedCost: item.estimatedCost,
-          rating: item.rating,
-          // Liens
-          bookingUrl: item.bookingUrl,
-          googleMapsUrl: item.googleMapsUrl,
-          googleMapsPlaceUrl: item.googleMapsPlaceUrl,
-          // Transport vers ce point
-          distanceFromPrevious: item.distanceFromPrevious,
-          timeFromPrevious: item.timeFromPrevious,
-          transportToPrevious: item.transportToPrevious,
-          transitInfo: item.transitInfo,
-          // Données enrichies
-          dataReliability: item.dataReliability,
-          flight: item.flight,
-          restaurant: item.restaurant,
-          accommodation: item.accommodation,
-        })),
-      })),
-      carbonFootprint: trip.carbonFootprint,
-      costBreakdown: trip.costBreakdown,
-      // Données brutes complètes pour debug avancé
+      days: trip.days,
       _rawTrip: trip,
     };
 
-    // Télécharger le fichier JSON
-    const blob = new Blob([JSON.stringify(debugExport, null, 2)], {
-      type: 'application/json',
-    });
+    const blob = new Blob([JSON.stringify(debugExport, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    const now = new Date();
-    const timestamp = `${now.toISOString().split('T')[0]}-${now.getHours().toString().padStart(2, '0')}h${now.getMinutes().toString().padStart(2, '0')}`;
-    a.download = `voyage-${trip.preferences.origin.replace(/\s+/g, '').toLowerCase()}${trip.preferences.destination.replace(/\s+/g, '').toLowerCase()}--debug-${timestamp}.json`;
+    a.download = `voyage-debug-${new Date().toISOString().split('T')[0]}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-  };
-
-  const getActiveDayItems = (): TripItem[] => {
-    if (!trip) return [];
-    const dayNumber = parseInt(activeDay);
-    const day = trip.days.find((d) => d.dayNumber === dayNumber);
-    return day?.items || [];
   };
 
   if (loading) {
@@ -236,33 +347,77 @@ export default function TripPage() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => router.push('/')}
-              >
+              <Button variant="ghost" size="icon" onClick={() => router.push('/')}>
                 <ArrowLeft className="h-5 w-5" />
               </Button>
               <div>
-                <h1 className="font-bold text-xl">
-                  {trip.preferences.destination}
-                </h1>
+                <h1 className="font-bold text-xl">{trip.preferences.destination}</h1>
                 <p className="text-sm text-muted-foreground">
-                  {format(trip.preferences.startDate, 'd MMMM yyyy', {
-                    locale: fr,
-                  })}{' '}
-                  • {trip.preferences.durationDays} jours
+                  {format(new Date(trip.preferences.startDate), 'd MMMM yyyy', { locale: fr })} • {trip.preferences.durationDays} jours
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" className="gap-2">
-                <Share2 className="h-4 w-4" />
-                <span className="hidden sm:inline">Partager</span>
-              </Button>
+              {/* Bouton mode édition */}
+              {canEdit && (
+                <Button
+                  variant={editMode ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setEditMode(!editMode)}
+                  className="gap-2"
+                >
+                  <GripVertical className="h-4 w-4" />
+                  {editMode ? 'Terminer' : 'Éditer'}
+                </Button>
+              )}
+
+              {/* Bouton propositions (mode collaboratif) */}
+              {useCollaborativeMode && (
+                <Sheet open={showCollabPanel} onOpenChange={setShowCollabPanel}>
+                  <SheetTrigger asChild>
+                    <Button variant="outline" size="sm" className="gap-2 relative">
+                      <GitPullRequest className="h-4 w-4" />
+                      <span className="hidden sm:inline">Propositions</span>
+                      {proposals.filter(p => p.status === 'pending').length > 0 && (
+                        <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-primary-foreground text-xs rounded-full flex items-center justify-center">
+                          {proposals.filter(p => p.status === 'pending').length}
+                        </span>
+                      )}
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent className="w-full sm:max-w-md overflow-y-auto">
+                    <SheetHeader>
+                      <SheetTitle>Collaboration</SheetTitle>
+                    </SheetHeader>
+                    <div className="mt-6 space-y-6">
+                      <SharePanel
+                        tripId={tripId}
+                        shareCode={shareCode}
+                        members={members}
+                        currentUserId={user?.id}
+                        userRole={userRole}
+                      />
+                      <ProposalsList
+                        proposals={proposals}
+                        onVote={handleVote}
+                        currentUserId={user?.id}
+                      />
+                    </div>
+                  </SheetContent>
+                </Sheet>
+              )}
+
+              {/* Bouton partage (ancien) */}
+              {!useCollaborativeMode && (
+                <Button variant="outline" size="sm" className="gap-2">
+                  <Share2 className="h-4 w-4" />
+                  <span className="hidden sm:inline">Partager</span>
+                </Button>
+              )}
+
               <Button variant="outline" size="sm" className="gap-2" onClick={handleExportDebug}>
                 <Bug className="h-4 w-4" />
-                <span className="hidden sm:inline">Export Debug</span>
+                <span className="hidden sm:inline">Debug</span>
               </Button>
             </div>
           </div>
@@ -302,9 +457,11 @@ export default function TripPage() {
                 </div>
                 <div>
                   <p className="text-2xl font-bold">
-                    {trip.preferences.groupSize}
+                    {useCollaborativeMode ? members.length : trip.preferences.groupSize}
                   </p>
-                  <p className="text-xs text-muted-foreground">Voyageurs</p>
+                  <p className="text-xs text-muted-foreground">
+                    {useCollaborativeMode ? 'Collaborateurs' : 'Voyageurs'}
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -314,9 +471,7 @@ export default function TripPage() {
                   <Wallet className="h-5 w-5 text-orange-500" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">
-                    ~{trip.totalEstimatedCost}€
-                  </p>
+                  <p className="text-2xl font-bold">~{trip.totalEstimatedCost}€</p>
                   <p className="text-xs text-muted-foreground">Budget estimé</p>
                 </div>
               </CardContent>
@@ -332,37 +487,52 @@ export default function TripPage() {
           <div className="order-2 lg:order-1">
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-lg">Itinéraire</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg">Itinéraire</CardTitle>
+                  {editMode && (
+                    <span className="text-xs text-muted-foreground">
+                      Glissez les activités pour les réorganiser
+                    </span>
+                  )}
+                </div>
               </CardHeader>
               <CardContent>
-                <Tabs value={activeDay} onValueChange={setActiveDay}>
-                  <TabsList className="w-full flex-wrap h-auto gap-1 bg-transparent p-0 mb-4">
-                    {trip.days.map((day) => (
-                      <TabsTrigger
-                        key={day.dayNumber}
-                        value={day.dayNumber.toString()}
-                        className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                      >
-                        Jour {day.dayNumber}
-                      </TabsTrigger>
-                    ))}
-                  </TabsList>
+                {editMode ? (
+                  // Mode édition avec drag-and-drop
+                  <DraggableTimeline
+                    days={trip.days}
+                    isEditable={canEdit}
+                    isOwner={isOwner}
+                    onDirectUpdate={isOwner ? handleDirectUpdate : undefined}
+                    onProposalCreate={!isOwner && canEdit ? handleProposalFromDrag : undefined}
+                  />
+                ) : (
+                  // Mode lecture avec onglets
+                  <Tabs value={activeDay} onValueChange={setActiveDay}>
+                    <TabsList className="w-full flex-wrap h-auto gap-1 bg-transparent p-0 mb-4">
+                      {trip.days.map((day) => (
+                        <TabsTrigger
+                          key={day.dayNumber}
+                          value={day.dayNumber.toString()}
+                          className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                        >
+                          Jour {day.dayNumber}
+                        </TabsTrigger>
+                      ))}
+                    </TabsList>
 
-                  {trip.days.map((day) => (
-                    <TabsContent
-                      key={day.dayNumber}
-                      value={day.dayNumber.toString()}
-                      className="mt-0"
-                    >
-                      <DayTimeline
-                        day={day}
-                        selectedItemId={selectedItemId}
-                        onSelectItem={handleSelectItem}
-                        onDeleteItem={handleDeleteItem}
-                      />
-                    </TabsContent>
-                  ))}
-                </Tabs>
+                    {trip.days.map((day) => (
+                      <TabsContent key={day.dayNumber} value={day.dayNumber.toString()} className="mt-0">
+                        <DayTimeline
+                          day={day}
+                          selectedItemId={selectedItemId}
+                          onSelectItem={handleSelectItem}
+                          onDeleteItem={handleDeleteItem}
+                        />
+                      </TabsContent>
+                    ))}
+                  </Tabs>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -376,15 +546,12 @@ export default function TripPage() {
                   options={trip.transportOptions}
                   selectedId={trip.selectedTransport?.id}
                   onSelect={(option) => {
-                    // Mettre à jour le transport sélectionné
                     const updatedTrip = {
                       ...trip,
                       selectedTransport: option,
                       updatedAt: new Date(),
                     };
-                    setTrip(updatedTrip);
-                    localStorage.setItem('currentTrip', JSON.stringify(updatedTrip));
-                    // Marquer que le transport a changé
+                    saveTrip(updatedTrip);
                     if (option.id !== originalTransportId) {
                       setTransportChanged(true);
                     } else {
@@ -393,7 +560,6 @@ export default function TripPage() {
                   }}
                 />
 
-                {/* Banner de régénération si transport changé */}
                 {transportChanged && (
                   <Card className="bg-amber-50 border-amber-200">
                     <CardContent className="p-4">
@@ -401,7 +567,7 @@ export default function TripPage() {
                         <div>
                           <p className="font-medium text-amber-800">Transport modifié</p>
                           <p className="text-sm text-amber-600">
-                            Régénérer le voyage pour mettre à jour les horaires et itinéraires.
+                            Régénérer le voyage pour mettre à jour les horaires.
                           </p>
                         </div>
                         <Button
@@ -435,13 +601,36 @@ export default function TripPage() {
               <CardContent className="p-0">
                 <div className="h-[400px]">
                   <TripMap
-                    items={getActiveDayItems()}
+                    items={editMode ? getAllItems() : getActiveDayItems()}
                     selectedItemId={selectedItemId}
                     onItemClick={handleSelectItem}
                   />
                 </div>
               </CardContent>
             </Card>
+
+            {/* Hébergement */}
+            {trip.accommodationOptions && trip.accommodationOptions.length > 0 && (
+              <HotelSelector
+                hotels={trip.accommodationOptions}
+                selectedId={selectedHotelId || trip.accommodation?.id || trip.accommodationOptions[0]?.id || ''}
+                onSelect={(hotelId) => {
+                  setSelectedHotelId(hotelId);
+                  const newHotel = trip.accommodationOptions?.find(h => h.id === hotelId);
+                  if (newHotel) {
+                    const updatedTrip = updateTripWithNewHotel(trip, newHotel);
+                    saveTrip(updatedTrip);
+                  }
+                }}
+                searchLinks={generateHotelSearchLinks(
+                  trip.preferences.destination,
+                  trip.days[0]?.date || trip.preferences.startDate,
+                  trip.days[trip.days.length - 1]?.date || trip.preferences.startDate,
+                  trip.preferences.groupSize
+                )}
+                nights={trip.preferences.durationDays - 1}
+              />
+            )}
 
             {/* Carbon Footprint */}
             {trip.carbonFootprint && (
@@ -450,6 +639,17 @@ export default function TripPage() {
           </div>
         </div>
       </div>
+
+      {/* Dialog pour créer une proposition */}
+      <CreateProposalDialog
+        open={showProposalDialog}
+        onClose={() => {
+          setShowProposalDialog(false);
+          setPendingChanges([]);
+        }}
+        onSubmit={handleCreateProposal}
+        pendingChanges={pendingChanges}
+      />
     </div>
   );
 }

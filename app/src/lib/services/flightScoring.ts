@@ -1,14 +1,20 @@
 /**
  * Système de scoring des vols (Bug #7)
  *
- * Pénalise les vols retour très tôt le matin qui gaspillent la dernière nuit d'hôtel.
+ * Pénalise les vols avec des horaires problématiques.
  *
  * Règles de scoring:
  * - Score de base: 100
+ *
+ * VOLS RETOUR:
  * - Vol retour < 08:00: -30 points (gaspille la nuit d'hôtel)
  * - Vol retour 08:00-10:00: -10 points (un peu tôt)
  * - Vol retour 14:00-19:00: +10 points (temps optimal)
- * - Vol aller tôt le matin: pas de pénalité (plus de temps à destination)
+ *
+ * VOLS ALLER:
+ * - Vol aller avec arrivée >= 22:00: -20 points (gaspille le Jour 1, pas d'activités)
+ * - Vol aller avec arrivée 20:00-22:00: -10 points (peu de temps le Jour 1)
+ * - Vol aller tôt le matin (06:00-10:00): +5 points (plus de temps à destination)
  */
 
 /**
@@ -30,11 +36,24 @@ export const EARLY_PENALTY = 10;
 export const OPTIMAL_TIME_BONUS = 10;
 
 /**
+ * Pénalité pour vol aller arrivant très tard (>= 22:00)
+ * Le voyageur n'aura pas d'activités le Jour 1
+ */
+export const LATE_ARRIVAL_PENALTY = 20;
+
+/**
+ * Pénalité pour vol aller arrivant tard (20:00-22:00)
+ * Peu de temps pour des activités le Jour 1
+ */
+export const EVENING_ARRIVAL_PENALTY = 10;
+
+/**
  * Interface minimale pour un vol
  */
 export interface FlightForScoring {
   id: string;
   departureTime: string; // Format "HH:MM"
+  arrivalTime?: string; // Format "HH:MM" - optionnel pour vols aller
   type: 'outbound' | 'return';
   price: number;
 }
@@ -70,26 +89,49 @@ function parseHour(timeStr: string): number {
  */
 export function calculateFlightScore(flight: FlightForScoring): number {
   let score = 100;
-  const hour = parseHour(flight.departureTime);
+  const departureHour = parseHour(flight.departureTime);
 
   if (flight.type === 'return') {
     // Vol retour: pénaliser les heures très tôt
-    if (hour < 8) {
+    if (departureHour < 8) {
       // 00:00-07:59: grosse pénalité (gaspille la nuit d'hôtel)
       score -= EARLY_MORNING_PENALTY;
-    } else if (hour < 10) {
+    } else if (departureHour < 10) {
       // 08:00-09:59: petite pénalité (un peu tôt)
       score -= EARLY_PENALTY;
-    } else if (hour >= 14 && hour <= 19) {
+    } else if (departureHour >= 14 && departureHour <= 19) {
       // 14:00-19:59: bonus (heure optimale, profite de la journée)
       score += OPTIMAL_TIME_BONUS;
     }
   } else {
-    // Vol aller: pas de pénalité pour les heures matinales
-    // Au contraire, un vol tôt le matin permet d'avoir plus de temps à destination
-    if (hour >= 6 && hour <= 10) {
-      // Léger bonus pour vol aller matinal
-      score += 5;
+    // Vol aller: pénaliser les arrivées tardives qui gaspillent le Jour 1
+    if (flight.arrivalTime) {
+      const arrivalHour = parseHour(flight.arrivalTime);
+
+      if (arrivalHour >= 22 || arrivalHour < 5) {
+        // Arrivée après 22h ou avant 5h: grosse pénalité
+        // Le voyageur n'aura pas d'activités le Jour 1
+        score -= LATE_ARRIVAL_PENALTY;
+      } else if (arrivalHour >= 20) {
+        // Arrivée entre 20h et 22h: pénalité moyenne
+        // Peu de temps pour des activités le Jour 1
+        score -= EVENING_ARRIVAL_PENALTY;
+      } else if (arrivalHour <= 10) {
+        // Arrivée avant 10h: GROS bonus
+        // Énormément de temps pour des activités le Jour 1 (6-7h avant check-in)
+        score += 20;
+      } else if (arrivalHour <= 14) {
+        // Arrivée entre 10h et 14h: bonus moyen
+        // Bon temps pour des activités le Jour 1
+        score += 10;
+      }
+    } else {
+      // Pas d'heure d'arrivée disponible, utiliser l'heure de départ comme proxy
+      // Un vol tôt le matin permet d'avoir plus de temps à destination
+      if (departureHour >= 6 && departureHour <= 10) {
+        // Léger bonus pour vol aller matinal
+        score += 5;
+      }
     }
   }
 

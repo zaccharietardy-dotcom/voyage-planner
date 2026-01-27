@@ -1,7 +1,11 @@
+'use client';
+
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { MapPin, Users, Sparkles, Calendar, Share2, Wallet } from 'lucide-react';
+import { MapPin, Users, Sparkles, Calendar, Share2, Wallet, FlaskConical, Loader2, Trash2 } from 'lucide-react';
 
 const FEATURES = [
   {
@@ -36,7 +40,111 @@ const FEATURES = [
   },
 ];
 
+// Configurations de test prédéfinies
+const TEST_CONFIGS = [
+  {
+    id: 'caen-barcelone',
+    label: 'Caen → Barcelone (4j, 2 pers)',
+    origin: 'Caen',
+    destination: 'Barcelone',
+    durationDays: 4,
+    groupSize: 2,
+    groupType: 'couple',
+    budgetLevel: 'moderate',
+    activities: ['culture', 'gastronomy'],
+    transport: 'plane',
+  },
+  {
+    id: 'paris-rome',
+    label: 'Paris → Rome (5j, 4 pers)',
+    origin: 'Paris',
+    destination: 'Rome',
+    durationDays: 5,
+    groupSize: 4,
+    groupType: 'family',
+    budgetLevel: 'moderate',
+    activities: ['culture', 'gastronomy', 'nature'],
+    transport: 'plane',
+  },
+  {
+    id: 'lyon-amsterdam',
+    label: 'Lyon → Amsterdam (3j, 2 pers)',
+    origin: 'Lyon',
+    destination: 'Amsterdam',
+    durationDays: 3,
+    groupSize: 2,
+    groupType: 'couple',
+    budgetLevel: 'economic',
+    activities: ['culture', 'nightlife'],
+    transport: 'plane',
+  },
+  {
+    id: 'paris-londres',
+    label: 'Paris → Londres (4j, 3 pers)',
+    origin: 'Paris',
+    destination: 'Londres',
+    durationDays: 4,
+    groupSize: 3,
+    groupType: 'friends',
+    budgetLevel: 'luxury',
+    activities: ['culture', 'shopping', 'gastronomy'],
+    transport: 'train',
+  },
+];
+
 export default function Home() {
+  const router = useRouter();
+  const [loadingTest, setLoadingTest] = useState<string | null>(null);
+
+  // Fonction de test rapide générique
+  const handleQuickTest = async (configId: string) => {
+    const config = TEST_CONFIGS.find(c => c.id === configId);
+    if (!config) return;
+
+    setLoadingTest(configId);
+    try {
+      // Date de départ dans 30 jours pour avoir plus de disponibilité hôtelière
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() + 30);
+
+      const testPreferences = {
+        origin: config.origin,
+        destination: config.destination,
+        startDate: startDate.toISOString(),
+        durationDays: config.durationDays,
+        groupSize: config.groupSize,
+        groupType: config.groupType,
+        budgetLevel: config.budgetLevel,
+        activities: config.activities,
+        transport: config.transport,
+        carRental: false,
+      };
+
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(testPreferences),
+      });
+
+      if (!response.ok) {
+        throw new Error('Erreur lors de la génération');
+      }
+
+      const trip = await response.json();
+      // Log pour debug - vérifier l'hôtel sélectionné
+      console.log('[Voyage] Hôtel sélectionné:', trip.accommodation?.name, '-', trip.accommodation?.pricePerNight, '€/nuit');
+      console.log('[Voyage] Source:', trip.accommodation?.id?.startsWith('booking-') ? 'Booking.com API' : 'Autre source');
+      // Sauvegarder le voyage dans localStorage pour que trip/[id] le charge
+      localStorage.setItem('currentTrip', JSON.stringify(trip));
+      router.push(`/trip/${trip.id}`);
+    } catch (error) {
+      console.error('Erreur test:', error);
+      alert('Erreur lors de la génération du voyage test');
+    } finally {
+      setLoadingTest(null);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
       {/* Hero Section */}
@@ -68,6 +176,49 @@ export default function Home() {
             <Button variant="outline" size="lg" className="text-lg px-8 py-6">
               Voir un exemple
             </Button>
+          </div>
+
+          {/* Boutons de test rapide (DEV) */}
+          <div className="mt-6 pt-6 border-t border-dashed border-muted-foreground/30">
+            <div className="flex items-center justify-center gap-4 mb-3">
+              <p className="text-sm text-muted-foreground">🧪 Mode développeur - Tests rapides</p>
+              <Button
+                onClick={() => {
+                  localStorage.clear();
+                  alert('Cache vidé ! Vous pouvez relancer un test.');
+                }}
+                variant="ghost"
+                size="sm"
+                className="gap-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+              >
+                <Trash2 className="h-3 w-3" />
+                Vider cache
+              </Button>
+            </div>
+            <div className="flex flex-wrap gap-2 justify-center">
+              {TEST_CONFIGS.map((config) => (
+                <Button
+                  key={config.id}
+                  onClick={() => handleQuickTest(config.id)}
+                  disabled={loadingTest !== null}
+                  variant="secondary"
+                  size="sm"
+                  className="gap-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-500/30"
+                >
+                  {loadingTest === config.id ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Génération...
+                    </>
+                  ) : (
+                    <>
+                      <FlaskConical className="h-4 w-4" />
+                      {config.label}
+                    </>
+                  )}
+                </Button>
+              ))}
+            </div>
           </div>
         </div>
 

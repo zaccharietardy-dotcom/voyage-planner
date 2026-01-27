@@ -31,6 +31,12 @@ interface SerpApiFlightOffer {
     legroom?: string;
     extensions?: string[];
   }>;
+  layovers?: Array<{
+    name: string;
+    id: string;
+    duration: number;
+    overnight?: boolean; // true si l'escale est de nuit
+  }>;
   total_duration: number;
   price: number;
   type: string;
@@ -78,6 +84,7 @@ export async function searchFlightsWithSerpApi(
 
   try {
     console.log(`[SerpAPI] Recherche vols ${origin} → ${destination} le ${date}...`);
+    console.log(`[SerpAPI] URL: ${SERPAPI_BASE_URL}?departure_id=${origin}&arrival_id=${destination}&outbound_date=${date}&type=2`);
     const response = await fetch(`${SERPAPI_BASE_URL}?${params}`);
 
     if (!response.ok) {
@@ -98,12 +105,48 @@ export async function searchFlightsWithSerpApi(
 
     // Traiter les meilleurs vols
     const allFlights = [...(data.best_flights || []), ...(data.other_flights || [])];
+    console.log(`[SerpAPI] ═══════════════════════════════════════════════════════`);
+    console.log(`[SerpAPI] ${allFlights.length} offres de vols reçues pour ${origin} → ${destination} le ${date}`);
+    console.log(`[SerpAPI] ═══════════════════════════════════════════════════════`);
 
     for (const flightOffer of allFlights.slice(0, 10)) {
+      // DEBUG: Log la structure brute pour diagnostic
+      if (allFlights.indexOf(flightOffer) === 0) {
+        console.log(`[SerpAPI] DEBUG - Structure première offre:`, JSON.stringify(flightOffer, null, 2).slice(0, 1500));
+      }
+
       const firstLeg = flightOffer.flights[0];
       const lastLeg = flightOffer.flights[flightOffer.flights.length - 1];
 
       if (!firstLeg || !lastLeg) continue;
+
+      // DEBUG: Afficher la structure complète du vol
+      console.log(`[SerpAPI] Offre: ${flightOffer.flights.length} segment(s), prix=${flightOffer.price}€`);
+      console.log(`[SerpAPI]   - Premier segment: ${firstLeg.departure_airport.id} → ${firstLeg.arrival_airport.id}`);
+      console.log(`[SerpAPI]   - Dernier segment: ${lastLeg.departure_airport.id} → ${lastLeg.arrival_airport.id}`);
+
+      // VALIDATION: Vérifier que le vol arrive bien à la destination demandée
+      if (lastLeg.arrival_airport.id !== destination) {
+        console.warn(`[SerpAPI] ⚠️ Vol ignoré: arrive à ${lastLeg.arrival_airport.id} au lieu de ${destination}`);
+        continue;
+      }
+
+      // VALIDATION: Rejeter les vols avec escale de nuit (overnight)
+      // Ces vols obligent à dormir à l'aéroport, ce qui est impraticable
+      const hasOvernightLayover = flightOffer.layovers?.some(l => l.overnight === true);
+      if (hasOvernightLayover) {
+        const layoverInfo = flightOffer.layovers?.find(l => l.overnight)!;
+        console.warn(`[SerpAPI] ⚠️ Vol ignoré: escale de nuit à ${layoverInfo.name} (${Math.round(layoverInfo.duration / 60)}h)`);
+        continue;
+      }
+
+      // VALIDATION: Rejeter les vols avec escales trop longues (> 4h)
+      const hasLongLayover = flightOffer.layovers?.some(l => l.duration > 240);
+      if (hasLongLayover) {
+        const layoverInfo = flightOffer.layovers?.find(l => l.duration > 240)!;
+        console.warn(`[SerpAPI] ⚠️ Vol ignoré: escale trop longue à ${layoverInfo.name} (${Math.round(layoverInfo.duration / 60)}h)`);
+        continue;
+      }
 
       // VALIDATION: Rejeter les vols sans numéro valide
       if (!firstLeg.flight_number) {
@@ -132,31 +175,11 @@ export async function searchFlightsWithSerpApi(
       const airlineCode = firstLeg.flight_number?.slice(0, 2) ||
         getAirlineCode(firstLeg.airline) || 'XX';
 
-      // Construire l'URL de réservation
-      // PRIORITÉ 1: booking_token de SerpAPI → lien DIRECT vers le vol sur Google Flights
-      // PRIORITÉ 2: Google Flights avec date exacte (TOUJOURS FIABLE)
-      // NOTE: Les deep links Vueling avec dt=1 ne fonctionnent pas (ignoré par Vueling)
-      let finalBookingUrl: string;
-
-      // URL Google Flights avec la date exacte dans la recherche
-      // Format fiable qui affiche les vols du bon jour
-      const googleFlightsSearchUrl = `https://www.google.com/travel/flights?q=${encodeURIComponent(
-        `flights from ${firstLeg.departure_airport.id} to ${lastLeg.arrival_airport.id} on ${date}`
-      )}&curr=EUR&hl=fr`;
-
-      if (flightOffer.booking_token) {
-        // Le booking_token crée un lien vers Google Flights avec le vol PRÉ-SÉLECTIONNÉ
-        // L'utilisateur n'a plus qu'à cliquer "Sélectionner" puis "Réserver" sur le site de la compagnie
-        finalBookingUrl = `${googleFlightsUrl}&booking_token=${encodeURIComponent(flightOffer.booking_token)}`;
-        console.log(`[SerpAPI] ✅ Lien direct via booking_token: ${firstLeg.flight_number}`);
-      } else {
-        // Google Flights avec la date exacte - TOUJOURS FIABLE
-        // Inclut le numéro de vol pour faciliter l'identification
-        finalBookingUrl = `https://www.google.com/travel/flights?q=${encodeURIComponent(
-          `${firstLeg.flight_number} from ${firstLeg.departure_airport.id} to ${lastLeg.arrival_airport.id} on ${date}`
-        )}&curr=EUR&hl=fr`;
-        console.log(`[SerpAPI] ✅ Lien Google Flights avec date: ${firstLeg.flight_number} le ${date}`);
-      }
+      // Utiliser l'URL Google Flights retournée par SerpAPI
+      // Cette URL pointe vers la même recherche avec les mêmes vols
+      // Le vol le moins cher sera en haut de la liste (même ordre que notre sélection)
+      const finalBookingUrl = googleFlightsUrl;
+      console.log(`[SerpAPI] ✅ Lien Google Flights: ${firstLeg.flight_number} le ${date}`);
 
       flights.push({
         id: `serp-${firstLeg.flight_number}-${date}`,
@@ -178,7 +201,8 @@ export async function searchFlightsWithSerpApi(
         stopCities: flightOffer.flights.length > 1
           ? flightOffer.flights.slice(0, -1).map(f => f.arrival_airport.name)
           : undefined,
-        price: flightOffer.price * passengers,
+        price: flightOffer.price, // Prix TOTAL (SerpAPI retourne déjà le total pour tous les passagers)
+        pricePerPerson: Math.round(flightOffer.price / passengers), // Prix par personne
         currency: 'EUR',
         cabinClass: 'economy',
         baggageIncluded: !['FR', 'U2', 'W6', 'W9'].includes(airlineCode),
@@ -186,10 +210,18 @@ export async function searchFlightsWithSerpApi(
       });
     }
 
-    // Trier par prix
-    flights.sort((a, b) => a.price - b.price);
+    // NOTE: On garde l'ordre "best flights" de Google Flights (prix + durée + escales)
+    // pour que le premier vol corresponde à celui affiché sur Google Flights
 
-    console.log(`[SerpAPI] ✅ ${flights.length} vols RÉELS trouvés`);
+    console.log(`[SerpAPI] ═══════════════════════════════════════════════════════`);
+    console.log(`[SerpAPI] RÉSULTAT FINAL: ${flights.length} vols VALIDES pour ${origin} → ${destination}`);
+    if (flights.length > 0) {
+      console.log(`[SerpAPI] Premier vol: ${flights[0].flightNumber} à ${flights[0].pricePerPerson}€/pers`);
+      console.log(`[SerpAPI] Arrive à: ${flights[0].arrivalAirportCode} (${flights[0].arrivalAirport})`);
+    } else {
+      console.log(`[SerpAPI] ⚠️ AUCUN VOL VALIDE - tous les vols rejetés car destination incorrecte`);
+    }
+    console.log(`[SerpAPI] ═══════════════════════════════════════════════════════`);
     return flights;
   } catch (error) {
     console.error('[SerpAPI] Erreur:', error);

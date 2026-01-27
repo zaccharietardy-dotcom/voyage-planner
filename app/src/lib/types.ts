@@ -74,7 +74,9 @@ export interface Flight {
   duration: number; // en minutes
   stops: number;
   stopCities?: string[];
-  price: number;
+  price: number; // Prix TOTAL pour tous les passagers
+  pricePerPerson?: number; // Prix par personne (optionnel pour rétrocompatibilité)
+  isRoundTripPrice?: boolean; // true si le prix vient d'une recherche aller-retour (plus fiable)
   currency: string;
   bookingUrl?: string;
   cabinClass: 'economy' | 'premium_economy' | 'business' | 'first';
@@ -165,6 +167,8 @@ export interface Accommodation {
   bookingUrl?: string;
   distanceToCenter?: number;
   distanceToActivities?: { activityId: string; distance: number }[];
+  breakfastIncluded?: boolean; // true si petit-déjeuner inclus dans le prix
+  description?: string;
 }
 
 // ============================================

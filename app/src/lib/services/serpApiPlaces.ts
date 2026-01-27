@@ -120,8 +120,24 @@ export async function searchRestaurantsWithSerpApi(
     const results = data.local_results || [];
     console.log(`[SerpAPI Places] ${results.length} restaurants trouvés`);
 
+    // Filtrer les restaurants fermés définitivement
+    const openResults = results.filter(r => {
+      const openState = r.open_state?.toLowerCase() || '';
+      // Exclure les restaurants fermés définitivement
+      if (openState.includes('permanently closed') ||
+          openState.includes('fermé définitivement') ||
+          openState.includes('cerrado permanentemente') ||
+          openState.includes('chiuso definitivamente')) {
+        console.log(`[SerpAPI Places] Exclusion de "${r.title}": ${r.open_state}`);
+        return false;
+      }
+      return true;
+    });
+
+    console.log(`[SerpAPI Places] ${openResults.length} restaurants après filtre (${results.length - openResults.length} fermés exclus)`);
+
     // Convertir en format Restaurant
-    const restaurants: Restaurant[] = results.slice(0, limit).map((r, index) => {
+    const restaurants: Restaurant[] = openResults.slice(0, limit).map((r, index) => {
       // Générer une URL Google Maps fiable en utilisant le NOM + ADRESSE COMPLÈTE
       // Cela permet à Google Maps de trouver le lieu exact
       const searchQuery = r.address
@@ -170,7 +186,9 @@ export async function searchHotelsWithSerpApi(
     minPrice?: number;
     maxPrice?: number;
     minRating?: number;
+    hotelClass?: number; // 2, 3, 4, ou 5 étoiles
     limit?: number;
+    sort?: 'relevance' | 'lowest_price' | 'highest_rating';
   } = {}
 ): Promise<any[]> {
   if (!SERPAPI_KEY) {
@@ -178,7 +196,7 @@ export async function searchHotelsWithSerpApi(
     return [];
   }
 
-  const { adults = 2, limit = 10 } = options;
+  const { adults = 2, limit = 10, minPrice, maxPrice, hotelClass, sort } = options;
 
   const params = new URLSearchParams({
     api_key: SERPAPI_KEY,
@@ -191,6 +209,28 @@ export async function searchHotelsWithSerpApi(
     hl: 'fr',
     gl: getCountryCode(destination),
   });
+
+  // Filtres de prix (par nuit)
+  if (minPrice) {
+    params.set('min_price', minPrice.toString());
+  }
+  if (maxPrice) {
+    params.set('max_price', maxPrice.toString());
+  }
+
+  // Filtre de classe d'hôtel (étoiles)
+  // Format SerpAPI: "2" pour 2 étoiles, "3" pour 3 étoiles, etc.
+  if (hotelClass) {
+    params.set('hotel_class', hotelClass.toString());
+  }
+
+  // Tri des résultats
+  // 3 = lowest price, 8 = highest rating
+  if (sort === 'lowest_price') {
+    params.set('sort_by', '3');
+  } else if (sort === 'highest_rating') {
+    params.set('sort_by', '8');
+  }
 
   try {
     console.log(`[SerpAPI Hotels] Recherche hôtels à ${destination}...`);
@@ -209,29 +249,114 @@ export async function searchHotelsWithSerpApi(
     }
 
     const properties = data.properties || [];
-    console.log(`[SerpAPI Hotels] ${properties.length} hôtels trouvés`);
+    console.log(`[SerpAPI Hotels] ${properties.length} hôtels trouvés au total`);
 
-    return properties.slice(0, limit).map((h: any) => ({
-      id: `serp-hotel-${h.property_token || h.name}`,
-      name: h.name,
-      address: h.address,
-      latitude: h.gps_coordinates?.latitude,
-      longitude: h.gps_coordinates?.longitude,
-      rating: h.overall_rating,
-      reviewCount: h.reviews,
-      stars: h.hotel_class,
-      pricePerNight: h.rate_per_night?.lowest ? parseFloat(h.rate_per_night.lowest.replace(/[^0-9.]/g, '')) : null,
-      totalPrice: h.total_rate?.lowest ? parseFloat(h.total_rate.lowest.replace(/[^0-9.]/g, '')) : null,
-      amenities: h.amenities,
-      images: h.images,
-      checkIn: h.check_in_time,
-      checkOut: h.check_out_time,
-      bookingUrl: h.link,
-      dataSource: 'serpapi',
-    }));
+    // FILTRER les hôtels DISPONIBLES uniquement (ceux qui ont un prix)
+    // Si rate_per_night est null, l'hôtel est probablement complet pour ces dates
+    const availableProperties = properties.filter((h: any) => {
+      const hasPrice = h.rate_per_night?.lowest || h.total_rate?.lowest;
+      if (!hasPrice) {
+        console.log(`[SerpAPI Hotels] ⚠️ ${h.name}: COMPLET (pas de prix disponible)`);
+        return false;
+      }
+      return true;
+    });
+
+    console.log(`[SerpAPI Hotels] ✅ ${availableProperties.length} hôtels DISPONIBLES (${properties.length - availableProperties.length} complets)`);
+
+    return availableProperties.slice(0, limit).map((h: any) => {
+      // UTILISER LE LIEN DIRECT FOURNI PAR GOOGLE
+      // Ce lien pointe vers le site officiel de l'hôtel avec les dates pré-remplies
+      // C'est la source la plus fiable pour la disponibilité
+      const bookingUrl = h.link || `https://www.google.com/travel/hotels/entity/${h.property_token}?q=${encodeURIComponent(destination)}&g2lb=2502548&hl=fr&gl=fr&cs=1&ssta=1&ts=CAEaHBIaEhQKBwjoDxAHGBcSBwjoDxAHGBgYATICEAAqCQoFOgNFVVIaAA&checkin=${checkInDate}&checkout=${checkOutDate}&adults=${options.adults || 2}`;
+
+      return {
+        id: `serp-hotel-${h.property_token || h.name}`,
+        name: h.name,
+        address: h.address,
+        latitude: h.gps_coordinates?.latitude,
+        longitude: h.gps_coordinates?.longitude,
+        rating: h.overall_rating,
+        reviewCount: h.reviews,
+        stars: h.hotel_class,
+        pricePerNight: h.rate_per_night?.extracted_lowest || (h.rate_per_night?.lowest ? parseFloat(h.rate_per_night.lowest.replace(/[^0-9.]/g, '')) : null),
+        totalPrice: h.total_rate?.extracted_lowest || (h.total_rate?.lowest ? parseFloat(h.total_rate.lowest.replace(/[^0-9.]/g, '')) : null),
+        amenities: h.amenities,
+        images: h.images,
+        checkIn: h.check_in_time,
+        checkOut: h.check_out_time,
+        bookingUrl, // Lien direct vers le site de l'hôtel (disponibilité garantie)
+        dataSource: 'serpapi',
+        propertyToken: h.property_token, // Pour récupérer les détails si besoin
+      };
+    });
   } catch (error) {
     console.error('[SerpAPI Hotels] Erreur:', error);
     return [];
+  }
+}
+
+/**
+ * Récupère la liste des noms d'hôtels DISPONIBLES via SerpAPI Google Hotels
+ * Utilisé pour vérifier si les hôtels de RapidAPI sont vraiment disponibles
+ */
+export async function getAvailableHotelNames(
+  destination: string,
+  checkInDate: string,
+  checkOutDate: string,
+  adults: number = 2
+): Promise<Set<string>> {
+  if (!SERPAPI_KEY) {
+    console.warn('[SerpAPI] Clé non configurée - skip vérification disponibilité');
+    return new Set(); // Retourne un set vide = on ne peut pas vérifier
+  }
+
+  const params = new URLSearchParams({
+    api_key: SERPAPI_KEY,
+    engine: 'google_hotels',
+    q: destination,
+    check_in_date: checkInDate,
+    check_out_date: checkOutDate,
+    adults: adults.toString(),
+    currency: 'EUR',
+    hl: 'fr',
+    gl: 'fr',
+  });
+
+  try {
+    console.log(`[SerpAPI] Vérification disponibilité hôtels à ${destination}...`);
+    const response = await fetch(`${SERPAPI_BASE_URL}?${params}`);
+
+    if (!response.ok) {
+      console.error('[SerpAPI] Erreur HTTP:', response.status);
+      return new Set();
+    }
+
+    const data = await response.json();
+
+    if (data.error) {
+      console.error('[SerpAPI] Erreur:', data.error);
+      return new Set();
+    }
+
+    const properties = data.properties || [];
+
+    // Récupérer les noms des hôtels qui ont un prix (= disponibles)
+    const availableNames = new Set<string>();
+    properties.forEach((h: any) => {
+      const hasPrice = h.rate_per_night?.lowest || h.total_rate?.lowest;
+      if (hasPrice && h.name) {
+        // Normaliser le nom pour la comparaison
+        const normalizedName = h.name.toLowerCase().trim();
+        availableNames.add(normalizedName);
+      }
+    });
+
+    console.log(`[SerpAPI] ✅ ${availableNames.size} hôtels confirmés DISPONIBLES sur Google Hotels`);
+    return availableNames;
+  } catch (error) {
+    console.error('[SerpAPI] Erreur vérification disponibilité:', error);
+    return new Set();
   }
 }
 

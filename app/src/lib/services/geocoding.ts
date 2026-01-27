@@ -91,6 +91,31 @@ const CITY_CENTERS: Record<string, { lat: number; lng: number }> = {
   'rennes': { lat: 48.1173, lng: -1.6778 }, // Place de la Mairie
   'tours': { lat: 47.3941, lng: 0.6848 }, // Place Jean Jaurès
   'le mans': { lat: 48.0061, lng: 0.1996 }, // Place des Jacobins
+  'caen': { lat: 49.1859, lng: -0.3706 }, // Château de Caen
+  'rouen': { lat: 49.4432, lng: 1.0999 }, // Cathédrale Notre-Dame
+  'le havre': { lat: 49.4944, lng: 0.1079 }, // Centre-ville
+  'amiens': { lat: 49.8942, lng: 2.2957 }, // Cathédrale Notre-Dame
+  'reims': { lat: 49.2583, lng: 4.0317 }, // Cathédrale Notre-Dame
+  'metz': { lat: 49.1193, lng: 6.1757 }, // Place d'Armes
+  'nancy': { lat: 48.6921, lng: 6.1844 }, // Place Stanislas
+  'dijon': { lat: 47.3220, lng: 5.0415 }, // Palais des Ducs
+  'besancon': { lat: 47.2378, lng: 6.0241 }, // Citadelle
+  'grenoble': { lat: 45.1885, lng: 5.7245 }, // Place Grenette
+  'clermont-ferrand': { lat: 45.7772, lng: 3.0870 }, // Place de Jaude
+  'limoges': { lat: 45.8336, lng: 1.2611 }, // Gare des Bénédictins
+  'poitiers': { lat: 46.5802, lng: 0.3404 }, // Place Charles de Gaulle
+  'la rochelle': { lat: 46.1603, lng: -1.1511 }, // Vieux-Port
+  'perpignan': { lat: 42.6988, lng: 2.8956 }, // Place de Catalogne
+  'pau': { lat: 43.2951, lng: -0.3708 }, // Place Royale
+  'biarritz': { lat: 43.4832, lng: -1.5586 }, // Grande Plage
+  'bayonne': { lat: 43.4929, lng: -1.4748 }, // Cathédrale Sainte-Marie
+  'avignon': { lat: 43.9493, lng: 4.8055 }, // Palais des Papes
+  'aix-en-provence': { lat: 43.5297, lng: 5.4474 }, // Cours Mirabeau
+  'toulon': { lat: 43.1242, lng: 5.9280 }, // Port
+  'cannes': { lat: 43.5528, lng: 7.0174 }, // La Croisette
+  'antibes': { lat: 43.5808, lng: 7.1239 }, // Vieil Antibes
+  'ajaccio': { lat: 41.9192, lng: 8.7386 }, // Port Tino Rossi
+  'bastia': { lat: 42.6971, lng: 9.4509 }, // Vieux-Port
 
   // Espagne
   'barcelona': { lat: 41.3851, lng: 2.1734 }, // Plaça Catalunya

@@ -23,7 +23,9 @@ export type CoherenceErrorType =
   | 'MEAL_WRONG_ORDER'               // Repas dans le mauvais ordre (diner avant dejeuner)
   | 'DUPLICATE_ATTRACTION'           // Meme attraction plusieurs fois
   | 'OVERLAP'                        // Chevauchement horaire
-  | 'ILLOGICAL_SEQUENCE';            // Sequence illogique generale
+  | 'ILLOGICAL_SEQUENCE'             // Sequence illogique generale
+  | 'ACTIVITY_IMPOSSIBLE_HOUR'       // Activite a une heure impossible (00:00-06:59)
+  | 'GENERIC_ACTIVITY';              // Activite generique inventee (pas un vrai POI)
 
 export interface CoherenceError {
   type: CoherenceErrorType;
@@ -131,6 +133,97 @@ function validateDayCoherence(
   // Verifier l'ordre des repas
   errors.push(...checkMealOrder(day.dayNumber, items));
 
+  // Verifier les horaires realistes (pas d'activites entre 00:00 et 06:59)
+  errors.push(...checkRealisticHours(day.dayNumber, items));
+
+  // Verifier les activites generiques
+  errors.push(...checkGenericActivities(day.dayNumber, items));
+
+  return errors;
+}
+
+/**
+ * Liste des activites generiques a detecter et supprimer
+ * Ces activites sont inventees et n'ont pas de valeur reelle pour l'utilisateur
+ */
+const GENERIC_ACTIVITY_PATTERNS = [
+  /^pause caf[eé]/i,
+  /^shopping local/i,
+  /^quartier historique/i,
+  /^point de vue/i,
+  /^promenade digestive/i,
+  /^glace artisanale/i,
+  /^parc et jardins/i,
+  /^march[eé] de /i,
+  /^place centrale/i,
+  /^galerie d'art locale/i,
+  /^librairie-caf[eé]/i,
+  /^ap[eé]ritif local/i,
+  /^promenade nocturne/i,
+  /^bar [àa] /i,  // Bar à cocktails, Bar à tapas, etc.
+  /^rooftop bar/i,
+  /^jazz club/i,
+];
+
+/**
+ * Verifie si une activite est generique (inventee)
+ */
+function isGenericActivity(title: string): boolean {
+  return GENERIC_ACTIVITY_PATTERNS.some(pattern => pattern.test(title));
+}
+
+/**
+ * Detecte les activites generiques inventees
+ */
+function checkGenericActivities(dayNumber: number, items: TripItem[]): CoherenceError[] {
+  const errors: CoherenceError[] = [];
+
+  for (const item of items) {
+    if (item.type !== 'activity') continue;
+
+    if (isGenericActivity(item.title)) {
+      errors.push({
+        type: 'GENERIC_ACTIVITY',
+        dayNumber,
+        message: `"${item.title}" est une activite generique inventee - pas un vrai lieu`,
+        items: [item],
+        severity: 'critical',
+        autoFixable: true,
+      });
+    }
+  }
+
+  return errors;
+}
+
+/**
+ * Verifie que les activites sont a des heures realistes
+ * Pas d'activites touristiques entre 00:00 et 06:59 (sauf logistique)
+ */
+function checkRealisticHours(dayNumber: number, items: TripItem[]): CoherenceError[] {
+  const errors: CoherenceError[] = [];
+  const logisticsTypes = ['flight', 'transport', 'checkin', 'checkout', 'parking', 'hotel', 'luggage'];
+
+  for (const item of items) {
+    // Ignorer les elements logistiques (peuvent etre tot le matin)
+    if (logisticsTypes.includes(item.type)) continue;
+
+    const startMinutes = parseTimeToMinutes(item.startTime);
+    const startHour = Math.floor(startMinutes / 60);
+
+    // Activites entre 00:00 et 06:59 sont suspectes
+    if (startHour >= 0 && startHour < 7) {
+      errors.push({
+        type: 'ACTIVITY_IMPOSSIBLE_HOUR',
+        dayNumber,
+        message: `"${item.title}" planifiee a ${item.startTime} - heure impossible pour une activite touristique`,
+        items: [item],
+        severity: 'critical',
+        autoFixable: true,
+      });
+    }
+  }
+
   return errors;
 }
 
@@ -237,17 +330,24 @@ function validateFirstDay(dayNumber: number, items: TripItem[]): CoherenceError[
     }
   }
 
-  // === VERIFICATION DES ACTIVITES APRES LE CHECK-IN ===
-  if (hotelCheckin) {
-    const checkinEnd = parseTimeToMinutes(hotelCheckin.endTime);
+  // === VERIFICATION DES ACTIVITES ===
+  // NOTE: Cette fonction ne s'exécute QUE pour le Jour 1 (premier jour)
+  // Sur le Jour 1, il est NORMAL d'avoir des activités AVANT le check-in
+  // si le voyageur arrive tôt le matin (ex: vol 8h, check-in 15h → 6h de libre)
+  // On ne signale une erreur que si l'activité est AVANT l'arrivée à destination
+
+  // Pour le Jour 1: vérifier que les activités sont APRÈS l'arrivée (vol ou transport)
+  const arrivalItem = flight || transferToHotel;
+  if (arrivalItem) {
+    const arrivalEnd = parseTimeToMinutes(arrivalItem.endTime);
     for (const activity of activities) {
       const activityStart = parseTimeToMinutes(activity.startTime);
-      if (activityStart < checkinEnd) {
+      if (activityStart < arrivalEnd) {
         errors.push({
-          type: 'ACTIVITY_BEFORE_HOTEL_CHECKIN',
+          type: 'ACTIVITY_BEFORE_ARRIVAL',
           dayNumber,
-          message: `Activite "${activity.title}" (${activity.startTime}) planifiee AVANT la fin du check-in hotel (${hotelCheckin.endTime})`,
-          items: [hotelCheckin, activity],
+          message: `Activite "${activity.title}" (${activity.startTime}) planifiee AVANT l'arrivee (${arrivalItem.endTime})`,
+          items: [arrivalItem, activity],
           severity: 'critical',
           autoFixable: true,
         });
@@ -270,10 +370,14 @@ function validateFirstDay(dayNumber: number, items: TripItem[]): CoherenceError[
     const firstActivityStart = parseTimeToMinutes(firstActivity.startTime);
 
     // Verifier qu'aucune logistique n'est planifiee APRES le debut de la premiere activite
+    // EXCEPTION: Sur le Jour 1, le check-in hôtel PEUT être après les activités
+    // (le voyageur fait des activités en attendant l'heure du check-in)
     for (const logistic of allLogistics) {
       const logisticStart = parseTimeToMinutes(logistic.startTime);
       // Sauf enregistrement aeroport (checkin) qui est AVANT le vol
       if (logistic.type === 'checkin') continue;
+      // Sauf check-in hôtel sur le Jour 1 (activités possibles avant)
+      if (logistic.type === 'hotel' && dayNumber === 1) continue;
 
       if (logisticStart > firstActivityStart && logistic.type !== 'parking') {
         errors.push({
@@ -591,6 +695,12 @@ function autoFixTrip(trip: Trip, errors: CoherenceError[]): Trip {
       case 'MEAL_WRONG_ORDER':
         fixMealOrder(fixedTrip, error);
         break;
+
+      case 'ACTIVITY_IMPOSSIBLE_HOUR':
+      case 'GENERIC_ACTIVITY':
+        // Supprimer les activites a heures impossibles et les activites generiques
+        removeInvalidActivity(fixedTrip, error);
+        break;
     }
   }
 
@@ -724,50 +834,55 @@ function fixLogisticsOrder(trip: Trip, error: CoherenceError): void {
   }
 
   // Recalculer les horaires de la logistique
-  let cursor = parseTimeToMinutes(logistics[0]?.startTime || '08:00');
+  // PROTECTION: Si un item a une heure avant 05:00, c'est probablement une erreur de calcul
+  // (ex: trajet Caen → Paris qui débute à 22:38 la veille mais s'affiche le jour même)
+  // On utilise 08:00 comme heure minimale de départ pour la logistique
+  const MIN_LOGISTICS_START = 5 * 60; // 05:00 en minutes
+  let rawStart = parseTimeToMinutes(logistics[0]?.startTime || '08:00');
+  // Si l'heure de départ est avant 05:00 (ex: 00:30, 03:00), c'est suspect
+  // Cela peut arriver si un trajet traverse minuit et que l'heure est mal calculée
+  let cursor = rawStart < MIN_LOGISTICS_START ? parseTimeToMinutes('08:00') : rawStart;
+
   for (const item of logistics) {
     const duration = parseTimeToMinutes(item.endTime) - parseTimeToMinutes(item.startTime);
+    // Protection contre les durées négatives (item qui traverse minuit)
+    const safeDuration = duration >= 0 ? duration : Math.min(120, Math.abs(duration));
     item.startTime = minutesToTime(cursor);
-    item.endTime = minutesToTime(cursor + duration);
-    cursor += duration;
+    item.endTime = minutesToTime(cursor + safeDuration);
+    cursor += safeDuration;
   }
 
-  // S'assurer que les activites sont APRES la logistique d'arrivee (jour 1)
+  // S'assurer que les activites sont APRES l'ARRIVEE (jour 1)
+  // IMPORTANT: Sur le Jour 1, les activités peuvent être AVANT le check-in hôtel!
+  // Le voyageur arrive tôt (ex: 9h30), le check-in est à 15h → il a 5h30 pour faire des activités
+  // La "logistique d'arrivée" est le TRANSFERT (aéroport→centre-ville), PAS le check-in hôtel
   if (isFirstDay) {
-    const lastLogistic = logistics[logistics.length - 1];
-    if (lastLogistic) {
-      const logisticEnd = parseTimeToMinutes(lastLogistic.endTime);
-      let activityCursor = logisticEnd + 30; // 30 min apres le check-in
-      const MAX_END_TIME = 23 * 60; // 23:00
+    // Trouver le transfert d'arrivée (pas le check-in hôtel)
+    const arrivalLogistic = logistics.find(l =>
+      l.type === 'transport' &&
+      (l.title.toLowerCase().includes('aéroport') ||
+       l.title.toLowerCase().includes('gare') ||
+       l.title.toLowerCase().includes('transfert'))
+    ) || logistics.find(l => l.type === 'flight');
 
+    // NE PAS décaler les activités après le check-in - elles peuvent être avant!
+    // On vérifie seulement qu'elles sont après l'ARRIVÉE (transfert ou vol)
+    if (arrivalLogistic) {
+      const arrivalEnd = parseTimeToMinutes(arrivalLogistic.endTime);
       const activities = nonLogistics.filter(i => i.type === 'activity');
-      const activitiesToRemove: string[] = [];
 
       for (const item of activities) {
-        const duration = parseTimeToMinutes(item.endTime) - parseTimeToMinutes(item.startTime);
-        const newEnd = activityCursor + duration;
-
-        // VALIDATION: verifier que l'activite rentre dans la journee
-        if (newEnd > MAX_END_TIME) {
-          console.log(`[AutoFix] Activite "${item.title}" ne rentre pas (finirait a ${Math.floor(newEnd/60)}:${newEnd%60})`);
-          activitiesToRemove.push(item.id);
-          continue;
-        }
-
-        item.startTime = minutesToTime(activityCursor);
-        item.endTime = minutesToTime(newEnd);
-        activityCursor = newEnd + 30; // 30 min entre chaque
-      }
-
-      // Supprimer les activites qui ne rentrent pas
-      for (const id of activitiesToRemove) {
-        const index = day.items.findIndex(i => i.id === id);
-        if (index !== -1) {
-          const removed = day.items.splice(index, 1)[0];
-          console.log(`[AutoFix] Activite "${removed.title}" supprimee (pas assez de temps)`);
+        const activityStart = parseTimeToMinutes(item.startTime);
+        // Si l'activité commence AVANT l'arrivée, la décaler juste après
+        if (activityStart < arrivalEnd) {
+          const duration = parseTimeToMinutes(item.endTime) - parseTimeToMinutes(item.startTime);
+          item.startTime = minutesToTime(arrivalEnd + 15);
+          item.endTime = minutesToTime(arrivalEnd + 15 + duration);
+          console.log(`[AutoFix] Activite "${item.title}" decalee apres arrivee: ${item.startTime}-${item.endTime}`);
         }
       }
     }
+    // NOTE: On ne supprime plus les activités qui sont avant le check-in!
   }
 
   // S'assurer que les activites sont AVANT la logistique de depart (dernier jour)
@@ -825,6 +940,25 @@ function removeDuplicate(trip: Trip, error: CoherenceError): void {
   if (index !== -1) {
     day.items.splice(index, 1);
     console.log(`[AutoFix] Attraction en double "${duplicateItem.title}" supprimee du jour ${day.dayNumber}`);
+  }
+}
+
+/**
+ * Supprime une activite invalide (heure impossible ou generique)
+ */
+function removeInvalidActivity(trip: Trip, error: CoherenceError): void {
+  const day = trip.days.find(d => d.dayNumber === error.dayNumber);
+  if (!day) return;
+
+  for (const item of error.items) {
+    const index = day.items.findIndex(i => i.id === item.id);
+    if (index !== -1) {
+      day.items.splice(index, 1);
+      const reason = error.type === 'GENERIC_ACTIVITY'
+        ? 'activite generique'
+        : 'heure impossible';
+      console.log(`[AutoFix] "${item.title}" supprimee (${reason}) du jour ${day.dayNumber}`);
+    }
   }
 }
 
@@ -893,17 +1027,31 @@ function minutesToTime(minutes: number): string {
 
 function getFirstDayLogisticsOrder(type: string, title: string = ''): number {
   // Pour le premier jour:
-  // Avec vol: parking -> checkin aeroport -> flight -> transfert local -> hotel
+  // Ordre logique: trajet vers aeroport -> parking -> checkin -> flight -> transfert local -> hotel
   // Avec train/bus: transport principal -> transfert local -> hotel
 
   const isMainTransportItem = isMainTransport(title);
+  const lowerTitle = title.toLowerCase();
 
+  // Detecter si c'est un trajet VERS l'aeroport (ex: "Trajet Caen → Paris")
+  // Ces trajets doivent venir en PREMIER, avant le parking
+  const isTransferToAirport = type === 'transport' && !isMainTransportItem &&
+    (lowerTitle.includes('trajet') || lowerTitle.includes('navette')) &&
+    (lowerTitle.includes('→') || lowerTitle.includes('->'));
+
+  // Detecter si c'est un transfert DEPUIS l'aeroport (ex: "Transfert Aéroport → Centre")
+  const isTransferFromAirport = type === 'transport' && !isMainTransportItem &&
+    (lowerTitle.includes('aéroport') || lowerTitle.includes('aeroport') || lowerTitle.includes('airport'));
+
+  if (isTransferToAirport) return 0; // Avant tout (trajet domicile → aeroport)
   if (type === 'parking') return 1;
   if (type === 'checkin') return 2;
   if (type === 'flight') return 3;
   if (type === 'transport' && isMainTransportItem) return 3; // Meme niveau que vol
-  if (type === 'transport' && !isMainTransportItem) return 4; // Transfert local
+  if (isTransferFromAirport) return 4; // Transfert depuis l'aeroport
+  if (type === 'transport' && !isMainTransportItem) return 4; // Autres transferts locaux
   if (type === 'hotel') return 5;
+  if (type === 'luggage') return 4.5; // Bagages entre transfert et hotel
 
   return 99;
 }
@@ -926,15 +1074,27 @@ function getLastDayLogisticsOrder(type: string, title: string = ''): number {
 /**
  * Fonction principale pour valider et corriger un voyage
  * A appeler apres la generation du voyage
+ *
+ * IMPORTANT: Trie TOUJOURS les items par heure, meme si le voyage est valide.
+ * Cela garantit que l'affichage est toujours chronologique.
  */
 export function validateAndFixTrip(trip: Trip): Trip {
   console.log('\n=== Validation de coherence du voyage ===');
 
-  const result = validateTripCoherence(trip);
+  // TOUJOURS trier les items par heure (avant et apres validation)
+  const sortedTrip = JSON.parse(JSON.stringify(trip)) as Trip;
+  for (const day of sortedTrip.days) {
+    day.items.sort((a, b) => parseTimeToMinutes(a.startTime) - parseTimeToMinutes(b.startTime));
+    day.items.forEach((item, index) => {
+      item.orderIndex = index;
+    });
+  }
+
+  const result = validateTripCoherence(sortedTrip);
 
   if (result.valid) {
     console.log('Voyage valide! Aucune incoherence detectee.');
-    return trip;
+    return sortedTrip;  // Retourner la version triee
   }
 
   console.log(`${result.errors.length} erreur(s) critique(s) detectee(s):`);

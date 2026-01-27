@@ -30,7 +30,8 @@ import { DayScheduler, formatTime as formatScheduleTime, parseTime } from './ser
 import { searchHotels, selectBestHotel } from './services/hotels';
 import { validateAndFixTrip } from './services/coherenceValidator';
 import { validateTripGeography } from './services/geoValidator';
-import { searchLuggageStorage, selectBestStorage, needsLuggageStorage, LuggageStorage } from './services/luggageStorage';
+// Fonctionnalité consigne à bagages désactivée temporairement
+// import { searchLuggageStorage, selectBestStorage, needsLuggageStorage, LuggageStorage } from './services/luggageStorage';
 import { calculateFlightScore, EARLY_MORNING_PENALTY } from './services/flightScoring';
 import { createLocationTracker, TravelerLocation } from './services/locationTracker';
 import { generateFlightLink, generateHotelLink, formatDateForUrl } from './services/linkGenerator';
@@ -240,10 +241,13 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
   }
 
   // 8. Sélectionner les attractions à faire (priorité aux demandes utilisateur)
-  // LIMITE: 3-4 activités par jour pour remplir correctement les journées
-  const maxAttractionsPerDay = 4;
-  // Augmenter le nombre total d'attractions en fonction de la durée (2-3 par jour)
-  const totalAttractions = Math.min(preferences.durationDays * maxAttractionsPerDay, 20);
+  // MINIMUM: 2-3 activités par jour pour remplir matin ET après-midi
+  // On demande plus d'attractions que nécessaire pour avoir du choix
+  // et pour éviter les trous dans la journée (minimum 4 par jour: 2 matin + 2 après-midi)
+  const minAttractionsPerDay = 4;
+  const maxAttractionsPerDay = 5;
+  // Demander au moins minAttractionsPerDay par jour, jusqu'à maxAttractionsPerDay
+  const totalAttractions = Math.min(preferences.durationDays * maxAttractionsPerDay, 35);
   const totalAvailableMinutes = estimateTotalAvailableTime(preferences.durationDays, outboundFlight, returnFlight);
 
   // Utiliser la version async qui appelle les APIs externes si pas en cache local
@@ -275,6 +279,7 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
   });
   const accommodation = selectBestHotel(accommodationOptions, {
     budgetLevel: preferences.budgetLevel as 'economic' | 'moderate' | 'luxury',
+    attractions: selectedAttractions,
   });
   console.log(`Hôtel sélectionné: ${accommodation?.name || 'Aucun'}`);
 
@@ -312,6 +317,7 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       isFirstDay,
       isLastDay,
       attractions: dayAttractions,
+      allAttractions: selectedAttractions, // TOUTES les attractions pour remplissage des trous
       preferences,
       cityCenter,
       outboundFlight: isFirstDay ? outboundFlight : null,
@@ -613,7 +619,8 @@ function preAllocateAttractions(
   totalDays: number,
   cityCenter: { lat: number; lng: number }
 ): Attraction[][] {
-  const maxPerDay = 4; // Maximum 4 attractions par jour (pour mieux remplir la journee)
+  const minPerDay = 4; // Minimum 4 attractions par jour (2 matin + 2 après-midi) pour éviter les trous
+  const maxPerDay = 5; // Maximum 5 attractions par jour
   const result: Attraction[][] = [];
 
   // Initialiser le tableau pour chaque jour
@@ -629,38 +636,124 @@ function preAllocateAttractions(
   const availableAttractions = [...allAttractions];
   const usedIds = new Set<string>();
 
-  // Distribution équitable: chaque jour reçoit des attractions uniques
+  // PHASE 1: Assurer le minimum (2 attractions par jour)
+  // Distribution en round-robin pour équilibrer
   let currentDayIndex = 0;
 
+  // Premier passage: 1 attraction par jour
   for (const attraction of availableAttractions) {
-    // Vérifier que cette attraction n'a pas déjà été utilisée
-    if (usedIds.has(attraction.id)) {
-      continue;
+    if (usedIds.has(attraction.id)) continue;
+    if (result[currentDayIndex].length >= 1) {
+      // Passer au jour suivant qui n'a pas encore 1 attraction
+      let found = false;
+      for (let i = 0; i < totalDays; i++) {
+        const idx = (currentDayIndex + i) % totalDays;
+        if (result[idx].length < 1) {
+          currentDayIndex = idx;
+          found = true;
+          break;
+        }
+      }
+      if (!found) break; // Tous les jours ont au moins 1
     }
 
-    // Trouver le prochain jour qui peut accueillir une attraction
-    let attempts = 0;
-    while (result[currentDayIndex].length >= maxPerDay && attempts < totalDays) {
-      currentDayIndex = (currentDayIndex + 1) % totalDays;
-      attempts++;
-    }
-
-    // Si tous les jours sont pleins, arrêter
-    if (attempts >= totalDays) {
-      break;
-    }
-
-    // Ajouter l'attraction au jour actuel
     result[currentDayIndex].push(attraction);
     usedIds.add(attraction.id);
-
-    // Passer au jour suivant pour la prochaine attraction
     currentDayIndex = (currentDayIndex + 1) % totalDays;
+  }
+
+  // Deuxième passage: 2ème attraction par jour (si disponible)
+  currentDayIndex = 0;
+  for (const attraction of availableAttractions) {
+    if (usedIds.has(attraction.id)) continue;
+    if (result[currentDayIndex].length >= 2) {
+      // Trouver un jour avec moins de 2 attractions
+      let found = false;
+      for (let i = 0; i < totalDays; i++) {
+        const idx = (currentDayIndex + i) % totalDays;
+        if (result[idx].length < 2) {
+          currentDayIndex = idx;
+          found = true;
+          break;
+        }
+      }
+      if (!found) break; // Tous les jours ont au moins 2
+    }
+
+    result[currentDayIndex].push(attraction);
+    usedIds.add(attraction.id);
+    currentDayIndex = (currentDayIndex + 1) % totalDays;
+  }
+
+  // Troisième passage: 3ème attraction par jour (pour éviter les trous)
+  currentDayIndex = 0;
+  for (const attraction of availableAttractions) {
+    if (usedIds.has(attraction.id)) continue;
+    if (result[currentDayIndex].length >= 3) {
+      let found = false;
+      for (let i = 0; i < totalDays; i++) {
+        const idx = (currentDayIndex + i) % totalDays;
+        if (result[idx].length < 3) {
+          currentDayIndex = idx;
+          found = true;
+          break;
+        }
+      }
+      if (!found) break;
+    }
+
+    result[currentDayIndex].push(attraction);
+    usedIds.add(attraction.id);
+    currentDayIndex = (currentDayIndex + 1) % totalDays;
+  }
+
+  // Quatrième passage: 4ème attraction par jour (minimum souhaité)
+  currentDayIndex = 0;
+  for (const attraction of availableAttractions) {
+    if (usedIds.has(attraction.id)) continue;
+    if (result[currentDayIndex].length >= 4) {
+      let found = false;
+      for (let i = 0; i < totalDays; i++) {
+        const idx = (currentDayIndex + i) % totalDays;
+        if (result[idx].length < 4) {
+          currentDayIndex = idx;
+          found = true;
+          break;
+        }
+      }
+      if (!found) break;
+    }
+
+    result[currentDayIndex].push(attraction);
+    usedIds.add(attraction.id);
+    currentDayIndex = (currentDayIndex + 1) % totalDays;
+  }
+
+  // PHASE 2: Distribuer le reste (jusqu'à maxPerDay)
+  for (const attraction of availableAttractions) {
+    if (usedIds.has(attraction.id)) continue;
+
+    // Trouver le jour avec le moins d'attractions (qui n'a pas atteint le max)
+    let minCount = maxPerDay + 1;
+    let bestDay = -1;
+    for (let d = 0; d < totalDays; d++) {
+      if (result[d].length < maxPerDay && result[d].length < minCount) {
+        minCount = result[d].length;
+        bestDay = d;
+      }
+    }
+
+    if (bestDay === -1) break; // Tous les jours sont pleins
+
+    result[bestDay].push(attraction);
+    usedIds.add(attraction.id);
   }
 
   console.log(`[Pre-allocation] ${usedIds.size} attractions uniques réparties sur ${totalDays} jours`);
   for (let d = 0; d < totalDays; d++) {
-    console.log(`  Jour ${d + 1}: ${result[d].map(a => a.name).join(', ') || 'aucune'}`);
+    const count = result[d].length;
+    const status = count < minPerDay ? '⚠️ SOUS-MINIMUM' : count >= minPerDay ? '✓' : '';
+    console.log(`  Jour ${d + 1}: ${result[d].map(a => a.name).join(', ') || 'aucune'} ${status}`);
   }
 
   return result;
@@ -683,6 +776,7 @@ async function generateDayWithScheduler(params: {
   isFirstDay: boolean;
   isLastDay: boolean;
   attractions: Attraction[];
+  allAttractions?: Attraction[]; // TOUTES les attractions du voyage pour remplissage des trous
   preferences: TripPreferences;
   cityCenter: { lat: number; lng: number };
   outboundFlight: Flight | null;
@@ -702,6 +796,7 @@ async function generateDayWithScheduler(params: {
     isFirstDay,
     isLastDay,
     attractions,
+    allAttractions = attractions, // Par défaut, utiliser les attractions du jour
     preferences,
     cityCenter,
     outboundFlight,
@@ -715,6 +810,10 @@ async function generateDayWithScheduler(params: {
     locationTracker, // LOCATION TRACKING: Validation géographique
     lateFlightArrivalData, // Vol tardif à traiter en début de journée
   } = params;
+
+  // Date de début du voyage normalisée (pour les URLs de réservation)
+  // Évite les erreurs de timezone: "2026-01-27T23:00:00.000Z" → 27 janvier, pas 28
+  const tripStartDate = normalizeToLocalDate(preferences.startDate);
 
   // Déterminer les heures de disponibilité
   let dayStart = parseTime(date, '08:00');
@@ -797,26 +896,22 @@ async function generateDayWithScheduler(params: {
   console.log(`[Jour ${dayNumber}] Plage horaire: ${formatScheduleTime(dayStart)} - ${formatScheduleTime(dayEnd)}`);
   console.log(`[Jour ${dayNumber}] Position: ${isFirstDay ? 'ORIGINE (en transit)' : 'DESTINATION'} | isLastDay: ${isLastDay}`);
 
-  // === TRAITER UN VOL TARDIF DU JOUR PRÉCÉDENT ===
-  // Si on a des données d'arrivée tardive à traiter (vol arrivé après 22h la veille)
+  // === TRAITER UN VOL OVERNIGHT DU JOUR PRÉCÉDENT ===
+  // Pour un vol overnight (arrivée le lendemain), le transfert et check-in hôtel
+  // n'ont PAS été faits la veille - on les fait ce matin
   if (lateFlightArrivalData && !isFirstDay) {
-    console.log(`[Jour ${dayNumber}] Traitement de l'arrivée tardive du vol de la veille`);
-    const { flight: lateArrivalFlight, destAirport: lateDestAirport, accommodation: lateAccommodation } = lateFlightArrivalData;
+    const overnightFlight = lateFlightArrivalData.flight;
+    const overnightArrival = new Date(overnightFlight.arrivalTime);
+    const overnightDestAirport = lateFlightArrivalData.destAirport;
+    const overnightAccommodation = lateFlightArrivalData.accommodation;
 
-    // Le vol est arrivé tard hier, donc on commence la journée par le transfert et check-in
-    const flightArrival = new Date(lateArrivalFlight.arrivalTime);
+    console.log(`[Jour ${dayNumber}] VOL OVERNIGHT arrivé: transfert et check-in hôtel à faire ce matin`);
+    console.log(`[Jour ${dayNumber}] Arrivée vol: ${overnightArrival.toLocaleTimeString('fr-FR')}`);
 
-    // Calculer l'heure de début effective (le lendemain matin, pas à 00:25!)
-    // On commence à 08:00 car le voyageur a probablement dormi à l'aéroport/hôtel proche
-    const transferStart = parseTime(date, '08:00');
+    // Transfert aéroport → hôtel (après l'arrivée du vol overnight)
+    const transferStart = new Date(overnightArrival.getTime() + 30 * 60 * 1000); // 30min après atterrissage
     const transferEnd = new Date(transferStart.getTime() + 40 * 60 * 1000);
 
-    const hotelCheckInTime = lateAccommodation?.checkInTime || '15:00';
-    const [checkInHour, checkInMin] = hotelCheckInTime.split(':').map(Number);
-    const hotelCheckInDate = new Date(date);
-    hotelCheckInDate.setHours(checkInHour, checkInMin, 0, 0);
-
-    // Transfert aéroport → centre-ville/hôtel
     const transferItem = scheduler.insertFixedItem({
       id: generateId(),
       title: 'Transfert Aéroport → Centre-ville',
@@ -825,32 +920,23 @@ async function generateDayWithScheduler(params: {
       endTime: transferEnd,
     });
     if (transferItem) {
+      // LOCATION TRACKING: Atterrissage = arrivé à destination
       locationTracker.landFlight(preferences.destination, formatScheduleTime(transferEnd));
+      console.log(`[LocationTracker] Atterrissage overnight: arrivé à ${preferences.destination} à ${formatScheduleTime(transferEnd)}`);
+
       items.push(schedulerItemToTripItem(transferItem, dayNumber, orderIndex++, {
-        description: preferences.carRental ? 'Récupérez votre voiture de location.' : 'Taxi ou transports en commun vers le centre-ville.',
-        locationName: `${lateDestAirport.name} → Centre-ville`,
+        description: preferences.carRental ? 'Récupérez votre voiture de location.' : 'Taxi ou transports en commun.',
+        locationName: `${overnightDestAirport.name} → Centre-ville`,
         latitude: cityCenter.lat,
         longitude: cityCenter.lng,
         estimatedCost: preferences.carRental ? 0 : 25 * Math.ceil(preferences.groupSize / 4),
       }));
     }
 
-    // Check-in hôtel (à l'heure officielle ou après transfert si on arrive plus tard)
-    const hotelCheckinStart = transferEnd > hotelCheckInDate ? transferEnd : hotelCheckInDate;
+    // Check-in hôtel
+    const hotelCheckinStart = transferEnd;
     const hotelCheckinEnd = new Date(hotelCheckinStart.getTime() + 20 * 60 * 1000);
-    const hotelName = lateAccommodation?.name || 'Hébergement';
-
-    // Si on arrive AVANT l'heure de check-in, on a du temps libre pour des activités
-    // Le curseur reste à transferEnd pour que les activités soient générées AVANT le check-in
-    const hasFreeMorning = transferEnd < hotelCheckInDate;
-    if (hasFreeMorning) {
-      const freeTime = (hotelCheckInDate.getTime() - transferEnd.getTime()) / (1000 * 60 * 60);
-      console.log(`[Jour ${dayNumber}] VOL TARDIF: ${freeTime.toFixed(1)}h de temps libre entre transfert (${formatScheduleTime(transferEnd)}) et check-in (${formatScheduleTime(hotelCheckInDate)})`);
-      // Le curseur reste à transferEnd, les activités seront ajoutées naturellement
-      // Le check-in sera inséré comme item fixe à 15h, les activités iront autour
-    }
-
-    // Insérer le check-in comme item fixe (les activités avec addItem éviteront ce créneau)
+    const hotelName = overnightAccommodation?.name || 'Hébergement';
     const hotelItem = scheduler.insertFixedItem({
       id: generateId(),
       title: `Check-in ${hotelName}`,
@@ -859,34 +945,27 @@ async function generateDayWithScheduler(params: {
       endTime: hotelCheckinEnd,
     });
     if (hotelItem) {
-      const hotelCheckOutDate = new Date(preferences.startDate);
+      const hotelCheckOutDate = new Date(tripStartDate);
       hotelCheckOutDate.setDate(hotelCheckOutDate.getDate() + preferences.durationDays - 1);
-      const hotelBookingUrl = lateAccommodation?.name
+      const hotelBookingUrl = overnightAccommodation?.name
         ? generateHotelLink(
-            { name: lateAccommodation.name, city: preferences.destination },
-            { checkIn: formatDateForUrl(preferences.startDate), checkOut: formatDateForUrl(hotelCheckOutDate) }
+            { name: overnightAccommodation.name, city: preferences.destination },
+            { checkIn: formatDateForUrl(tripStartDate), checkOut: formatDateForUrl(hotelCheckOutDate) }
           )
         : undefined;
 
       items.push(schedulerItemToTripItem(hotelItem, dayNumber, orderIndex++, {
-        description: lateAccommodation ? `${lateAccommodation.stars}⭐ | ${lateAccommodation.rating?.toFixed(1)}/10 | ${lateAccommodation.pricePerNight}€/nuit` : 'Déposez vos affaires et installez-vous.',
-        locationName: lateAccommodation?.address || `Hébergement, ${preferences.destination}`,
-        latitude: lateAccommodation?.latitude || cityCenter.lat + 0.005,
-        longitude: lateAccommodation?.longitude || cityCenter.lng + 0.005,
+        description: overnightAccommodation ? `${overnightAccommodation.stars}⭐ | ${overnightAccommodation.rating?.toFixed(1)}/10 | ${overnightAccommodation.pricePerNight}€/nuit` : 'Déposez vos affaires et installez-vous.',
+        locationName: getHotelLocationName(overnightAccommodation, preferences.destination),
+        latitude: overnightAccommodation?.latitude || cityCenter.lat + 0.005,
+        longitude: overnightAccommodation?.longitude || cityCenter.lng + 0.005,
         bookingUrl: hotelBookingUrl,
       }));
     }
 
-    // Positionner le curseur correctement pour les activités
-    if (hasFreeMorning) {
-      // On a du temps libre entre transfert (08:40) et check-in (15:00)
-      // Avancer le curseur juste après le transfert pour que les activités y soient ajoutées
-      scheduler.advanceTo(transferEnd);
-      console.log(`[Jour ${dayNumber}] Curseur avancé à ${formatScheduleTime(transferEnd)} pour activités matinales`);
-    } else {
-      // Pas de temps libre, avancer après le check-in
-      scheduler.advanceTo(hotelCheckinEnd);
-    }
+    // Avancer le curseur après le check-in hôtel
+    scheduler.advanceTo(hotelCheckinEnd);
+    console.log(`[Jour ${dayNumber}] VOL OVERNIGHT: Transfert et check-in terminés à ${formatScheduleTime(hotelCheckinEnd)}`);
   }
 
   // === JOUR 1: LOGISTIQUE DEPART ===
@@ -914,7 +993,12 @@ async function generateDayWithScheduler(params: {
       // Calculer le temps de trajet vers l'aéroport si villes différentes
       let travelTimeMinutes = 0;
       let distanceToAirport = 0;
-      const originCoordsLocal = getCityCenterCoords(preferences.origin) || cityCenter;
+      // IMPORTANT: Ne PAS utiliser cityCenter (destination) comme fallback pour l'origine !
+      // Utiliser les coordonnées de l'aéroport d'origine comme fallback
+      const originCoordsLocal = getCityCenterCoords(preferences.origin) || {
+        lat: originAirport.latitude,
+        lng: originAirport.longitude,
+      };
 
       // Variables pour le calcul du temps disponible à l'origine
       let transferToAirportStart: Date;
@@ -1030,19 +1114,23 @@ async function generateDayWithScheduler(params: {
         locationTracker.boardFlight(preferences.origin, preferences.destination);
         console.log(`[LocationTracker] Embarquement: ${preferences.origin} → ${preferences.destination} (en transit)`);
 
-        // Calculer les dates de vol pour les liens de réservation
-        const tripEndDate = new Date(preferences.startDate);
+        // Utiliser l'URL de réservation du vol (Google Flights) si disponible
+        // Sinon fallback sur Skyscanner via linkGenerator
+        const tripEndDate = new Date(tripStartDate);
         tripEndDate.setDate(tripEndDate.getDate() + preferences.durationDays - 1);
-
-        // DATES FIXES: Utiliser linkGenerator pour générer l'URL avec les dates sélectionnées par l'utilisateur
-        const flightBookingUrl = generateFlightLink(
+        const flightBookingUrl = outboundFlight.bookingUrl || generateFlightLink(
           { origin: originAirport.code, destination: destAirport.code },
-          { date: formatDateForUrl(preferences.startDate), returnDate: formatDateForUrl(tripEndDate) }
+          { date: formatDateForUrl(tripStartDate), returnDate: formatDateForUrl(tripEndDate), passengers: preferences.groupSize }
         );
 
         // Créer l'item et surcharger les heures avec les heures locales de l'aéroport
+        // Afficher le prix par personne ET le prix total
+        const pricePerPerson = outboundFlight.pricePerPerson || Math.round(outboundFlight.price / preferences.groupSize);
+        const priceDisplay = preferences.groupSize > 1
+          ? `${pricePerPerson}€/pers (${outboundFlight.price}€ total)`
+          : `${outboundFlight.price}€`;
         const tripItem = schedulerItemToTripItem(flightItem, dayNumber, orderIndex++, {
-          description: `${outboundFlight.flightNumber} | ${formatFlightDuration(outboundFlight.duration)} | ${outboundFlight.stops === 0 ? 'Direct' : `${outboundFlight.stops} escale(s)`}`,
+          description: `${outboundFlight.flightNumber} | ${formatFlightDuration(outboundFlight.duration)} | ${outboundFlight.stops === 0 ? 'Direct' : `${outboundFlight.stops} escale(s)`} | ${priceDisplay}`,
           locationName: `${originAirport.code} → ${destAirport.code}`,
           latitude: (originAirport.latitude + destAirport.latitude) / 2,
           longitude: (originAirport.longitude + destAirport.longitude) / 2,
@@ -1055,22 +1143,98 @@ async function generateDayWithScheduler(params: {
         items.push(tripItem);
       }
 
-      // === DÉTECTION VOL TARDIF ===
-      // Si le vol arrive après 22h, les activités post-arrivée dépassent minuit
-      // et doivent être reportées au jour suivant
-      const arrivalHour = flightArrival.getHours();
-      const isLateNightFlight = arrivalHour >= 22 || arrivalHour < 5; // Arrive après 22h ou avant 5h
+      // === GESTION VOL TARDIF / OVERNIGHT ===
+      // Détecter si le vol arrive le LENDEMAIN (vol overnight avec escale)
+      // Exemple: Départ 18:30 le 28/01, arrivée 08:35 le 29/01
+      const departureDay = new Date(flightDeparture.getFullYear(), flightDeparture.getMonth(), flightDeparture.getDate());
+      const arrivalDay = new Date(flightArrival.getFullYear(), flightArrival.getMonth(), flightArrival.getDate());
+      const isOvernightFlight = arrivalDay.getTime() > departureDay.getTime();
 
-      if (isLateNightFlight) {
-        console.log(`[Jour ${dayNumber}] VOL TARDIF détecté: arrivée à ${arrivalHour}h → Report des activités d'arrivée au jour suivant`);
+      const arrivalHour = flightArrival.getHours();
+      // Vol tardif: arrive après 22h OU avant 5h (mais PAS overnight, géré séparément)
+      const isLateNightFlight = (arrivalHour >= 22 || arrivalHour < 5) && !isOvernightFlight;
+
+      // === VOL OVERNIGHT: Arrivée le lendemain ===
+      // Le Jour 1 ne contient QUE la logistique de départ (parking, enregistrement, vol)
+      // Le transfert et check-in hôtel seront faits au Jour 2
+      if (isOvernightFlight) {
+        console.log(`[Jour ${dayNumber}] VOL OVERNIGHT détecté: départ ${flightDeparture.toDateString()}, arrivée ${flightArrival.toDateString()} (lendemain!)`);
+        console.log(`[Jour ${dayNumber}] → Jour 1 = uniquement logistique départ, Jour 2 = arrivée + activités`);
         // Stocker les infos pour le jour suivant
         lateFlightForNextDay = {
           flight: outboundFlight,
           destAirport,
           accommodation,
         };
-        // Ne pas générer les activités post-arrivée aujourd'hui
-        // Le jour suivant les traitera via lateFlightArrivalData
+        // NE PAS ajouter de transfert/check-in hôtel aujourd'hui - ils seront au Jour 2
+      } else if (isLateNightFlight) {
+        console.log(`[Jour ${dayNumber}] VOL TARDIF détecté: arrivée à ${arrivalHour}h → Transfert et hôtel ce soir, activités demain`);
+
+        // MÊME pour un vol tardif, on fait le transfert et check-in hôtel le même soir
+        // Cela évite que le voyageur "dorme à l'aéroport"
+
+        // Transfert aéroport → hôtel (directement, pas de consigne à cette heure)
+        const lateTransferStart = new Date(flightArrival.getTime() + 30 * 60 * 1000); // 30min après atterrissage
+        const lateTransferEnd = new Date(lateTransferStart.getTime() + 40 * 60 * 1000);
+
+        const lateTransferItem = scheduler.insertFixedItem({
+          id: generateId(),
+          title: 'Transfert Aéroport → Hôtel',
+          type: 'transport',
+          startTime: lateTransferStart,
+          endTime: lateTransferEnd,
+        });
+        if (lateTransferItem) {
+          // LOCATION TRACKING: Atterrissage tardif = arrivé à destination
+          locationTracker.landFlight(preferences.destination, formatScheduleTime(lateTransferEnd));
+          console.log(`[LocationTracker] Atterrissage tardif: arrivé à ${preferences.destination} à ${formatScheduleTime(lateTransferEnd)}`);
+
+          items.push(schedulerItemToTripItem(lateTransferItem, dayNumber, orderIndex++, {
+            description: preferences.carRental ? 'Récupérez votre voiture de location.' : 'Taxi ou Uber vers votre hôtel.',
+            locationName: `${destAirport.name} → Hôtel`,
+            latitude: cityCenter.lat,
+            longitude: cityCenter.lng,
+            estimatedCost: preferences.carRental ? 0 : 35 * Math.ceil(preferences.groupSize / 4), // Plus cher la nuit
+          }));
+        }
+
+        // Check-in hôtel tardif (les hôtels acceptent généralement les arrivées tardives)
+        const lateCheckinStart = lateTransferEnd;
+        const lateCheckinEnd = new Date(lateCheckinStart.getTime() + 15 * 60 * 1000);
+        const hotelName = accommodation?.name || 'Hébergement';
+
+        const lateHotelItem = scheduler.insertFixedItem({
+          id: generateId(),
+          title: `Check-in tardif ${hotelName}`,
+          type: 'hotel',
+          startTime: lateCheckinStart,
+          endTime: lateCheckinEnd,
+        });
+        if (lateHotelItem) {
+          // tripStartDate est déjà normalisé au début de la fonction
+          const hotelCheckOutDate = new Date(tripStartDate);
+          hotelCheckOutDate.setDate(hotelCheckOutDate.getDate() + preferences.durationDays - 1);
+          const hotelBookingUrl = accommodation?.name
+            ? generateHotelLink(
+                { name: accommodation.name, city: preferences.destination },
+                { checkIn: formatDateForUrl(tripStartDate), checkOut: formatDateForUrl(hotelCheckOutDate) }
+              )
+            : undefined;
+
+          items.push(schedulerItemToTripItem(lateHotelItem, dayNumber, orderIndex++, {
+            description: `Arrivée tardive prévue. Check-out le dernier jour à ${accommodation?.checkOutTime || '11:00'}.`,
+            locationName: getHotelLocationName(accommodation, preferences.destination),
+            latitude: accommodation?.latitude || cityCenter.lat,
+            longitude: accommodation?.longitude || cityCenter.lng,
+            estimatedCost: 0, // Inclus dans le prix total
+            bookingUrl: hotelBookingUrl,
+          }));
+        }
+
+        // PAS de report au jour suivant pour le transfert/hôtel, c'est fait!
+        // Les activités du jour 2 commenceront normalement à 08:00
+        console.log(`[Jour ${dayNumber}] VOL TARDIF: Transfert et check-in hôtel programmés pour ${formatScheduleTime(lateTransferStart)}-${formatScheduleTime(lateCheckinEnd)}`);
+
       } else {
         // Vol normal (arrivée avant 22h) - générer les activités post-arrivée normalement
 
@@ -1078,299 +1242,169 @@ async function generateDayWithScheduler(params: {
       const transferStart = new Date(flightArrival.getTime() + 30 * 60 * 1000);
       const transferEnd = new Date(transferStart.getTime() + 40 * 60 * 1000);
 
-      // RÈGLE 2: Vérifier si on arrive AVANT le check-in de l'hôtel
-      // Si oui, on doit déposer les bagages dans une consigne
+      // Heure de check-in de l'hôtel
       const hotelCheckInTime = accommodation?.checkInTime || '15:00';
       const [checkInHour, checkInMin] = hotelCheckInTime.split(':').map(Number);
-      const hotelCheckInDate = new Date(date);
-      hotelCheckInDate.setHours(checkInHour, checkInMin, 0, 0);
 
-      // Calculer l'heure d'arrivée effective (après transfert)
-      const arrivalTimeStr = `${transferEnd.getHours().toString().padStart(2, '0')}:${transferEnd.getMinutes().toString().padStart(2, '0')}`;
+      // FLUX OPTIMISÉ: Aéroport → Centre-ville → Activités → Check-in hôtel
+      // Si on arrive avant l'heure de check-in, on fait des activités en attendant
 
-      // Vérifier si on a besoin d'une consigne (arrivée > 1h avant check-in)
-      const needsStorage = needsLuggageStorage(arrivalTimeStr, hotelCheckInTime);
+      const transferItem = scheduler.insertFixedItem({
+        id: generateId(),
+        title: 'Transfert Aéroport → Centre-ville',
+        type: 'transport',
+        startTime: transferStart,
+        endTime: transferEnd,
+      });
+      if (transferItem) {
+        // LOCATION TRACKING: Atterrissage = arrivé à destination (activités possibles)
+        const arrivalTimeStr = formatScheduleTime(transferEnd);
+        locationTracker.landFlight(preferences.destination, arrivalTimeStr);
+        console.log(`[LocationTracker] Atterrissage: arrivé à ${preferences.destination} à ${arrivalTimeStr}`);
 
-      let luggageStorage: LuggageStorage | null = null;
-      if (needsStorage) {
-        console.log(`[Jour ${dayNumber}] Arrivée à ${arrivalTimeStr}, check-in à ${hotelCheckInTime} → Consigne à bagages nécessaire`);
-        const nearLocation = { latitude: cityCenter.lat, longitude: cityCenter.lng };
-        const storages = await searchLuggageStorage(preferences.destination, nearLocation);
-        luggageStorage = selectBestStorage(storages, nearLocation);
-
-        if (luggageStorage) {
-          console.log(`[Jour ${dayNumber}] Consigne sélectionnée: ${luggageStorage.name}`);
-        }
+        items.push(schedulerItemToTripItem(transferItem, dayNumber, orderIndex++, {
+          description: preferences.carRental ? 'Récupérez votre voiture de location.' : 'Taxi ou transports en commun. Déposez vos bagages à l\'hôtel (bagagerie) si possible.',
+          locationName: `${destAirport.name} → Centre-ville`,
+          latitude: cityCenter.lat,
+          longitude: cityCenter.lng,
+          estimatedCost: preferences.carRental ? 0 : 25 * Math.ceil(preferences.groupSize / 4),
+        }));
       }
 
-      if (luggageStorage) {
-        // FLUX AVEC CONSIGNE: Aéroport → Consigne → Activités → Consigne → Hôtel
+      // Avancer le curseur après le transfert
+      scheduler.advanceTo(transferEnd);
 
-        // Transfert aéroport → consigne à bagages
-        const transferItem = scheduler.insertFixedItem({
-          id: generateId(),
-          title: 'Transfert Aéroport → Consigne bagages',
-          type: 'transport',
-          startTime: transferStart,
-          endTime: transferEnd,
-        });
-        if (transferItem) {
-          // LOCATION TRACKING: Atterrissage = arrivé à destination (activités possibles)
-          const arrivalTimeStr = formatScheduleTime(transferEnd);
-          locationTracker.landFlight(preferences.destination, arrivalTimeStr);
-          console.log(`[LocationTracker] Atterrissage: arrivé à ${preferences.destination} à ${arrivalTimeStr}`);
+      // Calculer l'heure de check-in de l'hôtel
+      const actualCheckInTime = new Date(date);
+      actualCheckInTime.setHours(checkInHour, checkInMin, 0, 0);
 
-          items.push(schedulerItemToTripItem(transferItem, dayNumber, orderIndex++, {
-            description: preferences.carRental ? 'Récupérez votre voiture et allez déposer vos bagages.' : 'Taxi ou transports vers la consigne.',
-            locationName: `${destAirport.name} → ${luggageStorage.name}`,
-            latitude: luggageStorage.latitude || cityCenter.lat,
-            longitude: luggageStorage.longitude || cityCenter.lng,
-            estimatedCost: preferences.carRental ? 0 : 25 * Math.ceil(preferences.groupSize / 4),
-          }));
-        }
+      // Calculer le temps disponible avant le check-in
+      const timeBeforeCheckInMs = actualCheckInTime.getTime() - transferEnd.getTime();
+      const hoursBeforeCheckIn = timeBeforeCheckInMs / (1000 * 60 * 60);
 
-        // Dépôt des bagages
-        const luggageDepositStart = transferEnd;
-        const luggageDepositEnd = new Date(luggageDepositStart.getTime() + 15 * 60 * 1000);
-        const depositItem = scheduler.insertFixedItem({
-          id: generateId(),
-          title: `Dépôt bagages: ${luggageStorage.name}`,
-          type: 'luggage',
-          startTime: luggageDepositStart,
-          endTime: luggageDepositEnd,
-        });
-        if (depositItem) {
-          items.push(schedulerItemToTripItem(depositItem, dayNumber, orderIndex++, {
-            description: `Consigne ${luggageStorage.type === 'station' ? 'gare' : luggageStorage.type === 'service' ? 'partenaire' : ''} | ${luggageStorage.pricePerDay}€/jour | ${luggageStorage.openingHours.open}-${luggageStorage.openingHours.close}`,
-            locationName: luggageStorage.address,
-            latitude: luggageStorage.latitude || cityCenter.lat,
-            longitude: luggageStorage.longitude || cityCenter.lng,
-            estimatedCost: luggageStorage.pricePerDay,
-            bookingUrl: luggageStorage.bookingUrl,
-          }));
-        }
+      console.log(`[Jour ${dayNumber}] Arrivée à ${formatScheduleTime(transferEnd)}, check-in à ${checkInHour}:${String(checkInMin).padStart(2, '0')} → ${hoursBeforeCheckIn.toFixed(1)}h disponibles`);
 
-        // Avancer le curseur après le dépôt bagages
-        scheduler.advanceTo(luggageDepositEnd);
+      // Si on a du temps avant le check-in (> 1h30), faire des activités
+      if (hoursBeforeCheckIn >= 1.5) {
+        // Déjeuner si on est dans la plage horaire (11h30 - 14h)
+        const currentHour = transferEnd.getHours();
+        const currentMin = transferEnd.getMinutes();
+        const canDoLunch = (currentHour >= 11 && currentMin >= 30) || (currentHour >= 12 && currentHour < 14);
 
-        // === ACTIVITÉS ET DÉJEUNER ENTRE DÉPÔT ET RÉCUPÉRATION ===
-        // Temps disponible: de maintenant jusqu'à 30min avant check-in hôtel
+        if (canDoLunch && hoursBeforeCheckIn >= 2.5) {
+          const lunchItem = scheduler.addItem({
+            id: generateId(),
+            title: 'Déjeuner',
+            type: 'restaurant',
+            duration: 75,
+            travelTime: 15,
+          });
+          if (lunchItem) {
+            const restaurant = await findRestaurantForMeal('lunch', cityCenter, preferences, dayNumber, lastCoords);
+            const restaurantCoords = {
+              lat: restaurant?.latitude || cityCenter.lat,
+              lng: restaurant?.longitude || cityCenter.lng,
+            };
+            const restaurantGoogleMapsUrl = restaurant?.googleMapsUrl ||
+              (restaurant ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${restaurant.name}, ${restaurant.address}`)}` : undefined);
 
-        const luggagePickupStart = new Date(hotelCheckInDate.getTime() - 30 * 60 * 1000);
-        const luggagePickupEnd = hotelCheckInDate;
-
-        // Calculer le temps disponible pour les activités
-        const timeAvailableMs = luggagePickupStart.getTime() - scheduler.getCurrentTime().getTime();
-        const hoursAvailable = timeAvailableMs / (1000 * 60 * 60);
-        console.log(`[Jour ${dayNumber}] Temps disponible entre bagages et hôtel: ${hoursAvailable.toFixed(1)}h`);
-
-        // Si on a plus de 2h, on peut faire des activités!
-        if (hoursAvailable >= 2) {
-          // Déjeuner si c'est l'heure (entre 11h30 et 14h)
-          const currentHourForLunch = scheduler.getCurrentTime().getHours();
-          const currentMinForLunch = scheduler.getCurrentTime().getMinutes();
-          const lunchTimeOk = (currentHourForLunch >= 11 && currentMinForLunch >= 30) || currentHourForLunch >= 12;
-          const notTooLate = currentHourForLunch < 14;
-
-          if (lunchTimeOk && notTooLate && hoursAvailable >= 3) {
-            const lunchEndTime = new Date(scheduler.getCurrentTime().getTime() + 90 * 60 * 1000); // 1h30
-            if (lunchEndTime < luggagePickupStart) {
-              const lunchItem = scheduler.addItem({
-                id: generateId(),
-                title: 'Déjeuner',
-                type: 'restaurant',
-                duration: 75,
-                travelTime: 15,
-              });
-              if (lunchItem) {
-                const restaurant = await findRestaurantForMeal('lunch', cityCenter, preferences, dayNumber, lastCoords);
-                const restaurantCoords = {
-                  lat: restaurant?.latitude || cityCenter.lat,
-                  lng: restaurant?.longitude || cityCenter.lng,
-                };
-                // URL Google Maps fiable avec nom + adresse complète
-                const restaurantGoogleMapsUrl = restaurant?.googleMapsUrl ||
-                  (restaurant ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${restaurant.name}, ${restaurant.address}`)}` : undefined);
-
-                items.push(schedulerItemToTripItem(lunchItem, dayNumber, orderIndex++, {
-                  title: restaurant?.name || 'Déjeuner',
-                  description: restaurant ? `${restaurant.cuisineTypes.join(', ')} | ⭐ ${restaurant.rating?.toFixed(1)}/5` : 'Découvrez la cuisine locale',
-                  locationName: restaurant?.address || `Centre-ville, ${preferences.destination}`,
-                  latitude: restaurantCoords.lat,
-                  longitude: restaurantCoords.lng,
-                  estimatedCost: estimateMealPrice(getBudgetPriceLevel(preferences.budgetLevel), 'lunch') * preferences.groupSize,
-                  rating: restaurant?.rating,
-                  googleMapsPlaceUrl: restaurantGoogleMapsUrl,
-                }));
-                lastCoords = restaurantCoords;
-                console.log(`[Jour ${dayNumber}] Déjeuner ajouté entre bagages`);
-              }
-            }
-          }
-
-          // Activités entre le dépôt et la récupération
-          for (const attraction of attractions) {
-            // LOCATION TRACKING: Vérifier que l'utilisateur est bien à destination
-            const locationValidation = locationTracker.validateActivity({
-              city: preferences.destination,
-              name: attraction.name,
-            });
-            if (!locationValidation.valid) {
-              console.log(`[LocationTracker] Skip "${attraction.name}": ${locationValidation.reason}`);
-              continue;
-            }
-
-            // Vérifier qu'on a le temps AVANT la récupération des bagages
-            const travelTime = estimateTravelTime({ latitude: lastCoords.lat, longitude: lastCoords.lng } as Attraction, attraction);
-            const activityEndTime = new Date(scheduler.getCurrentTime().getTime() + (travelTime + attraction.duration + 15) * 60 * 1000);
-
-            if (activityEndTime > luggagePickupStart) {
-              console.log(`[Jour ${dayNumber}] Plus de temps pour activités avant récupération bagages`);
-              break;
-            }
-
-            const activityItem = scheduler.addItem({
-              id: generateId(),
-              title: attraction.name,
-              type: 'activity',
-              duration: attraction.duration,
-              travelTime,
-            });
-
-            if (activityItem) {
-              const attractionCoords = {
-                lat: attraction.latitude || cityCenter.lat,
-                lng: attraction.longitude || cityCenter.lng,
-              };
-              items.push(schedulerItemToTripItem(activityItem, dayNumber, orderIndex++, {
-                description: attraction.description,
-                locationName: `${attraction.name}, ${preferences.destination}`,
-                latitude: attractionCoords.lat,
-                longitude: attractionCoords.lng,
-                estimatedCost: attraction.estimatedCost * preferences.groupSize,
-                rating: attraction.rating,
-                bookingUrl: attraction.bookingUrl,
-              }));
-              lastCoords = attractionCoords;
-              console.log(`[Jour ${dayNumber}] Activité ajoutée: ${attraction.name}`);
-            }
+            items.push(schedulerItemToTripItem(lunchItem, dayNumber, orderIndex++, {
+              title: restaurant?.name || 'Déjeuner',
+              description: restaurant ? `${restaurant.cuisineTypes.join(', ')} | ⭐ ${restaurant.rating?.toFixed(1)}/5` : 'Découvrez la cuisine locale',
+              locationName: restaurant?.address || `Centre-ville, ${preferences.destination}`,
+              latitude: restaurantCoords.lat,
+              longitude: restaurantCoords.lng,
+              // Utiliser le priceLevel du restaurant s'il est disponible, sinon le budget
+              estimatedCost: estimateMealPrice(restaurant?.priceLevel || getBudgetPriceLevel(preferences.budgetLevel), 'lunch') * preferences.groupSize,
+              rating: restaurant?.rating,
+              googleMapsPlaceUrl: restaurantGoogleMapsUrl,
+            }));
+            lastCoords = restaurantCoords;
+            console.log(`[Jour ${dayNumber}] Déjeuner ajouté avant check-in`);
           }
         }
 
-        // Programmer la récupération des bagages 30min avant check-in
-        const pickupItem = scheduler.insertFixedItem({
-          id: generateId(),
-          title: `Récupération bagages: ${luggageStorage.name}`,
-          type: 'luggage',
-          startTime: luggagePickupStart,
-          endTime: luggagePickupEnd,
-        });
-        if (pickupItem) {
-          items.push(schedulerItemToTripItem(pickupItem, dayNumber, orderIndex++, {
-            description: 'Récupérez vos bagages avant le check-in hôtel.',
-            locationName: luggageStorage.address,
-            latitude: luggageStorage.latitude || cityCenter.lat,
-            longitude: luggageStorage.longitude || cityCenter.lng,
-          }));
+        // Activités en attendant le check-in (jusqu'à 30min avant)
+        const checkInBuffer = new Date(actualCheckInTime.getTime() - 30 * 60 * 1000);
+
+        for (const attraction of attractions) {
+          // Vérifier qu'on a le temps avant le check-in
+          const travelTime = estimateTravelTime({ latitude: lastCoords.lat, longitude: lastCoords.lng } as Attraction, attraction);
+          const activityEndTime = new Date(scheduler.getCurrentTime().getTime() + (travelTime + attraction.duration + 15) * 60 * 1000);
+
+          if (activityEndTime > checkInBuffer) {
+            console.log(`[Jour ${dayNumber}] Plus de temps pour activités avant check-in`);
+            break;
+          }
+
+          // ANTI-DOUBLON: Skip si déjà utilisée
+          if (tripUsedAttractionIds.has(attraction.id)) {
+            continue;
+          }
+
+          const activityItem = scheduler.addItem({
+            id: generateId(),
+            title: attraction.name,
+            type: 'activity',
+            duration: attraction.duration,
+            travelTime,
+          });
+
+          if (activityItem) {
+            tripUsedAttractionIds.add(attraction.id);
+            const attractionCoords = {
+              lat: attraction.latitude || cityCenter.lat,
+              lng: attraction.longitude || cityCenter.lng,
+            };
+            items.push(schedulerItemToTripItem(activityItem, dayNumber, orderIndex++, {
+              description: attraction.description,
+              locationName: `${attraction.name}, ${preferences.destination}`,
+              latitude: attractionCoords.lat,
+              longitude: attractionCoords.lng,
+              estimatedCost: attraction.estimatedCost * preferences.groupSize,
+              rating: attraction.rating,
+              bookingUrl: attraction.bookingUrl,
+              dataReliability: attraction.dataReliability || 'verified',
+            }));
+            lastCoords = attractionCoords;
+            console.log(`[Jour ${dayNumber}] Activité avant check-in: ${attraction.name}`);
+          }
         }
-
-        // Check-in hôtel (après récupération bagages)
-        const hotelCheckinStart = luggagePickupEnd;
-        const hotelCheckinEnd = new Date(hotelCheckinStart.getTime() + 20 * 60 * 1000);
-        const hotelName = accommodation?.name || 'Hébergement';
-        const hotelItem = scheduler.insertFixedItem({
-          id: generateId(),
-          title: `Check-in ${hotelName}`,
-          type: 'hotel',
-          startTime: hotelCheckinStart,
-          endTime: hotelCheckinEnd,
-        });
-        if (hotelItem) {
-          // DATES FIXES: Utiliser linkGenerator pour générer l'URL hôtel avec les dates de séjour
-          const hotelCheckOutDate = new Date(preferences.startDate);
-          hotelCheckOutDate.setDate(hotelCheckOutDate.getDate() + preferences.durationDays - 1);
-          const hotelBookingUrl = accommodation?.name
-            ? generateHotelLink(
-                { name: accommodation.name, city: preferences.destination },
-                { checkIn: formatDateForUrl(preferences.startDate), checkOut: formatDateForUrl(hotelCheckOutDate) }
-              )
-            : undefined;
-
-          items.push(schedulerItemToTripItem(hotelItem, dayNumber, orderIndex++, {
-            description: accommodation ? `${accommodation.stars}⭐ | ${accommodation.rating?.toFixed(1)}/10 | ${accommodation.pricePerNight}€/nuit` : 'Déposez vos affaires et installez-vous.',
-            locationName: accommodation?.address || `Hébergement, ${preferences.destination}`,
-            latitude: accommodation?.latitude || cityCenter.lat + 0.005,
-            longitude: accommodation?.longitude || cityCenter.lng + 0.005,
-            bookingUrl: hotelBookingUrl,
-          }));
-        }
-
-        // Ne pas avancer le curseur ici - les activités sont entre le dépôt et la récupération
-
-      } else {
-        // FLUX NORMAL (sans consigne): Aéroport → Hôtel → Activités
-
-        const transferItem = scheduler.insertFixedItem({
-          id: generateId(),
-          title: 'Transfert Aéroport → Hôtel',
-          type: 'transport',
-          startTime: transferStart,
-          endTime: transferEnd,
-        });
-        if (transferItem) {
-          // LOCATION TRACKING: Atterrissage = arrivé à destination (activités possibles)
-          const arrivalTimeStr = formatScheduleTime(transferEnd);
-          locationTracker.landFlight(preferences.destination, arrivalTimeStr);
-          console.log(`[LocationTracker] Atterrissage: arrivé à ${preferences.destination} à ${arrivalTimeStr}`);
-
-          items.push(schedulerItemToTripItem(transferItem, dayNumber, orderIndex++, {
-            description: preferences.carRental ? 'Récupérez votre voiture de location.' : 'Taxi ou transports en commun.',
-            locationName: `${destAirport.name} → Centre-ville`,
-            latitude: cityCenter.lat,
-            longitude: cityCenter.lng,
-            estimatedCost: preferences.carRental ? 0 : 25 * Math.ceil(preferences.groupSize / 4),
-          }));
-        }
-
-        // Check-in hôtel - IMPORTANT: ne pas programmer avant l'heure officielle de check-in
-        // L'heure de check-in minimum est celle de l'hôtel (généralement 14h-15h)
-        const actualCheckInTime = new Date(date);
-        actualCheckInTime.setHours(checkInHour, checkInMin, 0, 0);
-
-        // Le check-in commence au plus tôt à l'heure officielle, ou après le transfert si on arrive plus tard
-        const hotelCheckinStart = transferEnd > actualCheckInTime ? transferEnd : actualCheckInTime;
-        const hotelCheckinEnd = new Date(hotelCheckinStart.getTime() + 20 * 60 * 1000);
-        const hotelName = accommodation?.name || 'Hébergement';
-        const hotelItem = scheduler.insertFixedItem({
-          id: generateId(),
-          title: `Check-in ${hotelName}`,
-          type: 'hotel',
-          startTime: hotelCheckinStart,
-          endTime: hotelCheckinEnd,
-        });
-        if (hotelItem) {
-          // DATES FIXES: Utiliser linkGenerator pour générer l'URL hôtel avec les dates de séjour
-          const hotelCheckOutDate2 = new Date(preferences.startDate);
-          hotelCheckOutDate2.setDate(hotelCheckOutDate2.getDate() + preferences.durationDays - 1);
-          const hotelBookingUrl2 = accommodation?.name
-            ? generateHotelLink(
-                { name: accommodation.name, city: preferences.destination },
-                { checkIn: formatDateForUrl(preferences.startDate), checkOut: formatDateForUrl(hotelCheckOutDate2) }
-              )
-            : undefined;
-
-          items.push(schedulerItemToTripItem(hotelItem, dayNumber, orderIndex++, {
-            description: accommodation ? `${accommodation.stars}⭐ | ${accommodation.rating?.toFixed(1)}/10 | ${accommodation.pricePerNight}€/nuit` : 'Déposez vos affaires et installez-vous.',
-            locationName: accommodation?.address || `Hébergement, ${preferences.destination}`,
-            latitude: accommodation?.latitude || cityCenter.lat + 0.005,
-            longitude: accommodation?.longitude || cityCenter.lng + 0.005,
-            bookingUrl: hotelBookingUrl2,
-          }));
-        }
-
-        // Avancer le curseur après le check-in hôtel
-        scheduler.advanceTo(hotelCheckinEnd);
       }
+
+      // Check-in hôtel - à l'heure officielle ou maintenant si on est déjà en retard
+      const hotelCheckinStart = scheduler.getCurrentTime() > actualCheckInTime ? scheduler.getCurrentTime() : actualCheckInTime;
+      const hotelCheckinEnd = new Date(hotelCheckinStart.getTime() + 20 * 60 * 1000);
+      const hotelName = accommodation?.name || 'Hébergement';
+      const hotelItem = scheduler.insertFixedItem({
+        id: generateId(),
+        title: `Check-in ${hotelName}`,
+        type: 'hotel',
+        startTime: hotelCheckinStart,
+        endTime: hotelCheckinEnd,
+      });
+      if (hotelItem) {
+        // tripStartDate est déjà normalisé au début de la fonction
+        const hotelCheckOutDate = new Date(tripStartDate);
+        hotelCheckOutDate.setDate(hotelCheckOutDate.getDate() + preferences.durationDays - 1);
+        const hotelBookingUrl = accommodation?.name
+          ? generateHotelLink(
+              { name: accommodation.name, city: preferences.destination },
+              { checkIn: formatDateForUrl(tripStartDate), checkOut: formatDateForUrl(hotelCheckOutDate) }
+            )
+          : undefined;
+
+        items.push(schedulerItemToTripItem(hotelItem, dayNumber, orderIndex++, {
+          description: accommodation ? `${accommodation.stars}⭐ | ${accommodation.rating?.toFixed(1)}/10 | ${accommodation.pricePerNight}€/nuit` : 'Déposez vos affaires et installez-vous.',
+          locationName: getHotelLocationName(accommodation, preferences.destination),
+          latitude: accommodation?.latitude || cityCenter.lat + 0.005,
+          longitude: accommodation?.longitude || cityCenter.lng + 0.005,
+          bookingUrl: hotelBookingUrl,
+        }));
+      }
+
+      // Avancer le curseur après le check-in hôtel
+      scheduler.advanceTo(hotelCheckinEnd);
 
       } // Fin du bloc else (vol NON tardif)
 
@@ -1429,19 +1463,19 @@ async function generateDayWithScheduler(params: {
         endTime: hotelEnd,
       });
       if (hotelItem) {
-        // DATES FIXES: Utiliser linkGenerator pour générer l'URL hôtel avec les dates de séjour
-        const hotelCheckOutDate3 = new Date(preferences.startDate);
+        // tripStartDate est déjà normalisé au début de la fonction
+        const hotelCheckOutDate3 = new Date(tripStartDate);
         hotelCheckOutDate3.setDate(hotelCheckOutDate3.getDate() + preferences.durationDays - 1);
         const hotelBookingUrl3 = accommodation?.name
           ? generateHotelLink(
               { name: accommodation.name, city: preferences.destination },
-              { checkIn: formatDateForUrl(preferences.startDate), checkOut: formatDateForUrl(hotelCheckOutDate3) }
+              { checkIn: formatDateForUrl(tripStartDate), checkOut: formatDateForUrl(hotelCheckOutDate3) }
             )
           : undefined;
 
         items.push(schedulerItemToTripItem(hotelItem, dayNumber, orderIndex++, {
           description: accommodation ? `${accommodation.stars}⭐ | ${accommodation.rating?.toFixed(1)}/10 | ${accommodation.pricePerNight}€/nuit` : 'Déposez vos affaires et installez-vous.',
-          locationName: accommodation?.address || `Hébergement, ${preferences.destination}`,
+          locationName: getHotelLocationName(accommodation, preferences.destination),
           latitude: accommodation?.latitude || cityCenter.lat + 0.005,
           longitude: accommodation?.longitude || cityCenter.lng + 0.005,
           bookingUrl: hotelBookingUrl3,
@@ -1493,37 +1527,63 @@ async function generateDayWithScheduler(params: {
   lastCoords = cityCenter;
 
   // Petit-déjeuner (si avant 10h et pas jour 1 avec logistique)
+  // Si l'hôtel inclut le petit-déjeuner, on prend le petit-dej à l'hôtel (gratuit)
+  // Sinon, on cherche un restaurant pour le petit-déjeuner
+  const hotelHasBreakfast = accommodation?.breakfastIncluded === true;
+
   if (currentHour < 10 && !isFirstDay) {
     const breakfastItem = scheduler.addItem({
       id: generateId(),
-      title: 'Petit-déjeuner',
-      type: 'restaurant',
-      duration: 45,
-      travelTime: 10,
+      title: hotelHasBreakfast ? `Petit-déjeuner à l'hôtel` : 'Petit-déjeuner',
+      type: hotelHasBreakfast ? 'hotel' : 'restaurant',
+      duration: hotelHasBreakfast ? 30 : 45, // Plus rapide à l'hôtel
+      travelTime: hotelHasBreakfast ? 0 : 10, // Pas de déplacement si à l'hôtel
     });
-    if (breakfastItem) {
-      const restaurant = await findRestaurantForMeal('breakfast', cityCenter, preferences, dayNumber, lastCoords);
-      const restaurantCoords = {
-        lat: restaurant?.latitude || cityCenter.lat,
-        lng: restaurant?.longitude || cityCenter.lng,
-      };
-      const googleMapsUrl = generateGoogleMapsUrl(lastCoords, restaurantCoords, 'walking');
-      // URL Google Maps fiable avec nom + adresse complète
-      const restaurantGoogleMapsUrl = restaurant?.googleMapsUrl ||
-        (restaurant ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${restaurant.name}, ${restaurant.address}`)}` : undefined);
 
-      items.push(schedulerItemToTripItem(breakfastItem, dayNumber, orderIndex++, {
-        title: restaurant?.name || 'Petit-déjeuner',
-        description: restaurant ? `${restaurant.cuisineTypes.join(', ')} | ⭐ ${restaurant.rating?.toFixed(1)}/5` : 'Petit-déjeuner local',
-        locationName: restaurant?.address || `Centre-ville, ${preferences.destination}`,
-        latitude: restaurantCoords.lat,
-        longitude: restaurantCoords.lng,
-        estimatedCost: estimateMealPrice(getBudgetPriceLevel(preferences.budgetLevel), 'breakfast') * preferences.groupSize,
-        rating: restaurant?.rating,
-        googleMapsUrl,
-        googleMapsPlaceUrl: restaurantGoogleMapsUrl,
-      }));
-      lastCoords = restaurantCoords;
+    if (breakfastItem) {
+      if (hotelHasBreakfast) {
+        // Petit-déjeuner à l'hôtel (inclus dans le prix)
+        console.log(`[Jour ${dayNumber}] 🍳 Petit-déjeuner INCLUS à l'hôtel ${accommodation?.name}`);
+        items.push(schedulerItemToTripItem(breakfastItem, dayNumber, orderIndex++, {
+          title: `Petit-déjeuner à l'hôtel`,
+          description: `Inclus dans le prix de l'hôtel | ${accommodation?.name}`,
+          locationName: getHotelLocationName(accommodation, preferences.destination),
+          latitude: accommodation?.latitude || cityCenter.lat,
+          longitude: accommodation?.longitude || cityCenter.lng,
+          estimatedCost: 0, // Inclus dans le prix de l'hôtel
+        }));
+        // Position reste à l'hôtel
+        lastCoords = {
+          lat: accommodation?.latitude || cityCenter.lat,
+          lng: accommodation?.longitude || cityCenter.lng,
+        };
+      } else {
+        // Petit-déjeuner dans un restaurant externe
+        const restaurant = await findRestaurantForMeal('breakfast', cityCenter, preferences, dayNumber, lastCoords);
+        const restaurantCoords = {
+          lat: restaurant?.latitude || cityCenter.lat,
+          lng: restaurant?.longitude || cityCenter.lng,
+        };
+        const googleMapsUrl = generateGoogleMapsUrl(lastCoords, restaurantCoords, 'walking');
+        // URL Google Maps fiable avec nom + adresse complète
+        const restaurantGoogleMapsUrl = restaurant?.googleMapsUrl ||
+          (restaurant ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${restaurant.name}, ${restaurant.address}`)}` : undefined);
+
+        items.push(schedulerItemToTripItem(breakfastItem, dayNumber, orderIndex++, {
+          title: restaurant?.name || 'Petit-déjeuner',
+          description: restaurant ? `${restaurant.cuisineTypes.join(', ')} | ⭐ ${restaurant.rating?.toFixed(1)}/5` : 'Petit-déjeuner local',
+          // IMPORTANT: locationName avec nom du restaurant pour les liens d'itinéraire
+          locationName: restaurant ? `${restaurant.name}, ${preferences.destination}` : `Centre-ville, ${preferences.destination}`,
+          latitude: restaurantCoords.lat,
+          longitude: restaurantCoords.lng,
+          // Utiliser le priceLevel du restaurant s'il est disponible, sinon le budget
+          estimatedCost: estimateMealPrice(restaurant?.priceLevel || getBudgetPriceLevel(preferences.budgetLevel), 'breakfast') * preferences.groupSize,
+          rating: restaurant?.rating,
+          googleMapsUrl,
+          googleMapsPlaceUrl: restaurantGoogleMapsUrl,
+        }));
+        lastCoords = restaurantCoords;
+      }
     }
   }
 
@@ -1536,7 +1596,11 @@ async function generateDayWithScheduler(params: {
   // tripUsedAttractionIds est passé en paramètre et partagé entre tous les jours
 
   if (canDoMorningActivities) {
-    for (const attraction of attractions.slice(0, Math.ceil(attractions.length / 2))) {
+    // Matin: prendre la première moitié des attractions (cohérent avec afternoonAttractions)
+    const morningCount = Math.floor(attractions.length / 2);
+    const morningAttractions = attractions.slice(0, morningCount);
+
+    for (const attraction of morningAttractions) {
       // ANTI-DOUBLON: Skip si déjà utilisée (dans n'importe quel jour du voyage)
       if (tripUsedAttractionIds.has(attraction.id)) {
         console.log(`[Jour ${dayNumber}] Skip "${attraction.name}": déjà utilisée dans le voyage`);
@@ -1556,7 +1620,9 @@ async function generateDayWithScheduler(params: {
       // Verifier qu'on a le temps avant le dejeuner (12:30)
       const lunchTime = parseTime(date, '12:30');
       if (scheduler.getCurrentTime().getTime() + 30 * 60 * 1000 + attraction.duration * 60 * 1000 > lunchTime.getTime()) {
-        break;
+        // CORRIGÉ: continue au lieu de break pour essayer les autres attractions (plus courtes)
+        console.log(`[Jour ${dayNumber}] Skip matin "${attraction.name}": trop longue (${attraction.duration}min) avant déjeuner`);
+        continue;
       }
 
     const travelTime = estimateTravelTime({ latitude: lastCoords.lat, longitude: lastCoords.lng } as any, attraction);
@@ -1599,7 +1665,8 @@ async function generateDayWithScheduler(params: {
       const googleMapsUrl = generateGoogleMapsUrl(lastCoords, attractionCoords, 'transit');
       items.push(schedulerItemToTripItem(activityItem, dayNumber, orderIndex++, {
         description: attraction.description,
-        locationName: preferences.destination,
+        // IMPORTANT: locationName doit inclure le nom de l'attraction pour les liens d'itinéraire
+        locationName: `${attraction.name}, ${preferences.destination}`,
         latitude: attractionCoords.lat,
         longitude: attractionCoords.lng,
         estimatedCost: attraction.estimatedCost * preferences.groupSize,
@@ -1607,21 +1674,103 @@ async function generateDayWithScheduler(params: {
         bookingUrl: attraction.bookingUrl,
         timeFromPrevious: travelTime,
         googleMapsUrl,
+        dataReliability: attraction.dataReliability || 'verified', // POI réel de SerpAPI
       }));
       lastCoords = attractionCoords;
     }
   }
   } // Fin du bloc canDoMorningActivities
 
-  // Dejeuner (si entre 11h et 15h)
-  const currentTimeForLunch = scheduler.getCurrentTime();
-  if (currentTimeForLunch.getHours() >= 11 && currentTimeForLunch.getHours() < 15 && endHour >= 14) {
-    const lunchItem = scheduler.addItem({
+  // === REMPLISSAGE DES TROUS AVANT LE DÉJEUNER ===
+  // Si on a du temps libre avant le déjeuner (> 60min), essayer d'ajouter des attractions supplémentaires
+  if (!isFirstDay) {
+    const currentHourBeforeLunch = scheduler.getCurrentTime().getHours();
+    const currentMinBeforeLunch = scheduler.getCurrentTime().getMinutes();
+    const timeBeforeLunchMin = 12 * 60 + 30 - (currentHourBeforeLunch * 60 + currentMinBeforeLunch);
+
+    if (timeBeforeLunchMin > 60) {
+      console.log(`[Jour ${dayNumber}] ${Math.round(timeBeforeLunchMin / 60)}h de temps libre avant déjeuner - tentative de remplissage`);
+
+      // Chercher des attractions pas encore utilisées (dans tout le voyage)
+      // CORRIGÉ: Utiliser allAttractions pour avoir accès à TOUTES les attractions
+      const unusedAttractionsMorning = allAttractions.filter(a => !tripUsedAttractionIds.has(a.id));
+
+      for (const attraction of unusedAttractionsMorning) {
+        // Vérifier qu'on a le temps avant le déjeuner (12:30)
+        const lunchTime = parseTime(date, '12:30');
+        const estimatedTravelTimeMorning = estimateTravelTime({ latitude: lastCoords.lat, longitude: lastCoords.lng } as Attraction, attraction);
+        const estimatedEndTimeMorning = new Date(scheduler.getCurrentTime().getTime() + (estimatedTravelTimeMorning + attraction.duration + 15) * 60 * 1000);
+
+        if (estimatedEndTimeMorning > lunchTime) {
+          // CORRIGÉ: continue au lieu de break pour essayer les autres attractions (plus courtes)
+          console.log(`[Jour ${dayNumber}] Skip "${attraction.name}": trop longue (${attraction.duration}min) avant déjeuner`);
+          continue;
+        }
+
+        // Vérifier les horaires d'ouverture
+        const openTimeMorning = parseTime(date, attraction.openingHours.open);
+        const closeTimeMorning = parseTime(date, attraction.openingHours.close);
+        const safeCloseTimeMorning = new Date(closeTimeMorning.getTime() - 30 * 60 * 1000);
+
+        let actualStartTimeMorning = new Date(scheduler.getCurrentTime().getTime() + estimatedTravelTimeMorning * 60 * 1000);
+        if (actualStartTimeMorning < openTimeMorning) {
+          actualStartTimeMorning = openTimeMorning;
+        }
+
+        const potentialEndTimeMorning = new Date(actualStartTimeMorning.getTime() + attraction.duration * 60 * 1000);
+        if (potentialEndTimeMorning > safeCloseTimeMorning || potentialEndTimeMorning > lunchTime) {
+          continue;
+        }
+
+        const activityItemMorning = scheduler.addItem({
+          id: generateId(),
+          title: attraction.name,
+          type: 'activity',
+          duration: attraction.duration,
+          travelTime: estimatedTravelTimeMorning,
+          minStartTime: openTimeMorning,
+        });
+
+        if (activityItemMorning) {
+          tripUsedAttractionIds.add(attraction.id);
+          const attractionCoordsMorning = {
+            lat: attraction.latitude || cityCenter.lat,
+            lng: attraction.longitude || cityCenter.lng,
+          };
+          const googleMapsUrlMorning = generateGoogleMapsUrl(lastCoords, attractionCoordsMorning, 'transit');
+
+          items.push(schedulerItemToTripItem(activityItemMorning, dayNumber, orderIndex++, {
+            description: attraction.description,
+            locationName: `${attraction.name}, ${preferences.destination}`,
+            latitude: attractionCoordsMorning.lat,
+            longitude: attractionCoordsMorning.lng,
+            estimatedCost: attraction.estimatedCost * preferences.groupSize,
+            rating: attraction.rating,
+            bookingUrl: attraction.bookingUrl,
+            timeFromPrevious: estimatedTravelTimeMorning,
+            googleMapsUrl: googleMapsUrlMorning,
+            dataReliability: attraction.dataReliability || 'verified',
+          }));
+          lastCoords = attractionCoordsMorning;
+          console.log(`[Jour ${dayNumber}] Attraction matin supplémentaire ajoutée: ${attraction.name}`);
+        }
+      }
+    }
+  }
+
+  // Dejeuner - TOUJOURS ajouter vers 12:30 pour les jours complets (pas jour 1, pas dernier jour court)
+  // IMPORTANT: Ne pas dépendre du curseur actuel - le déjeuner est une pause obligatoire
+  const shouldHaveLunch = !isFirstDay && endHour >= 14;
+  const lunchTargetTime = parseTime(date, '12:30');
+
+  if (shouldHaveLunch) {
+    // Forcer l'ajout du déjeuner à 12:30, peu importe où en est le curseur
+    const lunchItem = scheduler.insertFixedItem({
       id: generateId(),
       title: 'Déjeuner',
       type: 'restaurant',
-      duration: 75,
-      travelTime: 15,
+      startTime: lunchTargetTime,
+      endTime: new Date(lunchTargetTime.getTime() + 75 * 60 * 1000), // 1h15
     });
     if (lunchItem) {
       const restaurant = await findRestaurantForMeal('lunch', cityCenter, preferences, dayNumber, lastCoords);
@@ -1638,24 +1787,41 @@ async function generateDayWithScheduler(params: {
       items.push(schedulerItemToTripItem(lunchItem, dayNumber, orderIndex++, {
         title: restaurant?.name || 'Déjeuner',
         description: restaurant ? `${restaurant.cuisineTypes.join(', ')} | ⭐ ${restaurant.rating?.toFixed(1)}/5` : 'Déjeuner local',
-        locationName: restaurant?.address || `Centre-ville, ${preferences.destination}`,
+        // IMPORTANT: locationName avec nom du restaurant pour les liens d'itinéraire
+        locationName: restaurant ? `${restaurant.name}, ${preferences.destination}` : `Centre-ville, ${preferences.destination}`,
         latitude: restaurantCoords.lat,
         longitude: restaurantCoords.lng,
-        estimatedCost: estimateMealPrice(getBudgetPriceLevel(preferences.budgetLevel), 'lunch') * preferences.groupSize,
+        // Utiliser le priceLevel du restaurant s'il est disponible, sinon le budget
+        estimatedCost: estimateMealPrice(restaurant?.priceLevel || getBudgetPriceLevel(preferences.budgetLevel), 'lunch') * preferences.groupSize,
         rating: restaurant?.rating,
         googleMapsUrl,
         googleMapsPlaceUrl: restaurantGoogleMapsUrl, // URL fiable avec nom + adresse complète
       }));
       lastCoords = restaurantCoords;
+      // Avancer le curseur après le déjeuner
+      const lunchEndTime = new Date(lunchTargetTime.getTime() + 75 * 60 * 1000);
+      scheduler.advanceTo(lunchEndTime);
+      console.log(`[Jour ${dayNumber}] Déjeuner ajouté à ${lunchTargetTime.toLocaleTimeString('fr-FR')}, curseur avancé à ${lunchEndTime.toLocaleTimeString('fr-FR')}`);
     }
   }
 
   // Activites de l'apres-midi
   // Jour 1: on fait TOUTES les attractions (car on arrive l'apres-midi)
-  // Autres jours: on fait seulement la 2eme moitie (la 1ere a ete faite le matin)
-  const afternoonAttractions = isFirstDay
-    ? attractions  // Jour 1: toutes les attractions
-    : attractions.slice(Math.ceil(attractions.length / 2));  // Autres jours: 2eme moitie
+  // Autres jours: on fait seulement la 2ème moitié (la 1ère a été faite le matin)
+  // IMPORTANT: Si on a peu d'attractions (1-2), on assure au moins 1 pour l'après-midi
+  let afternoonAttractions: Attraction[];
+  if (isFirstDay) {
+    // Jour 1: toutes les attractions disponibles
+    afternoonAttractions = attractions;
+  } else {
+    // Autres jours: répartir équitablement entre matin et après-midi
+    // Avec 1 attraction: matin=0, après-midi=1 (pour avoir quelque chose à faire)
+    // Avec 2 attractions: matin=1, après-midi=1
+    // Avec 3 attractions: matin=1, après-midi=2
+    // Avec 4+ attractions: matin=moitié, après-midi=moitié
+    const morningCount = Math.floor(attractions.length / 2);
+    afternoonAttractions = attractions.slice(morningCount);
+  }
 
   for (const attraction of afternoonAttractions) {
     // ANTI-DOUBLON: Skip si déjà utilisée dans n'importe quel jour du voyage
@@ -1679,7 +1845,9 @@ async function generateDayWithScheduler(params: {
     const maxTime = endHour >= 20 ? dinnerTime : dayEnd;
 
     if (scheduler.getCurrentTime().getTime() + 30 * 60 * 1000 + attraction.duration * 60 * 1000 > maxTime.getTime()) {
-      break;
+      // CORRIGÉ: continue au lieu de break pour essayer les autres attractions (plus courtes)
+      console.log(`[Jour ${dayNumber}] Skip "${attraction.name}": pas assez de temps (${attraction.duration}min)`);
+      continue;
     }
 
     const travelTime = estimateTravelTime({ latitude: lastCoords.lat, longitude: lastCoords.lng } as any, attraction);
@@ -1725,7 +1893,8 @@ async function generateDayWithScheduler(params: {
       const googleMapsUrl = generateGoogleMapsUrl(lastCoords, attractionCoords, 'transit');
       items.push(schedulerItemToTripItem(activityItem, dayNumber, orderIndex++, {
         description: attraction.description,
-        locationName: preferences.destination,
+        // IMPORTANT: locationName doit inclure le nom de l'attraction pour les liens d'itinéraire
+        locationName: `${attraction.name}, ${preferences.destination}`,
         latitude: attractionCoords.lat,
         longitude: attractionCoords.lng,
         estimatedCost: attraction.estimatedCost * preferences.groupSize,
@@ -1733,85 +1902,93 @@ async function generateDayWithScheduler(params: {
         bookingUrl: attraction.bookingUrl,
         timeFromPrevious: travelTime,
         googleMapsUrl,
+        dataReliability: attraction.dataReliability || 'verified', // POI réel de SerpAPI
       }));
       lastCoords = attractionCoords;
     }
   }
 
-  // === REMPLIR LE TEMPS LIBRE AVANT LE DÎNER (19h) ===
-  // Si on finit les attractions trop tôt, ajouter des activités jusqu'à 19h
+  // === REMPLISSAGE DES TROUS AVANT LE DÎNER ===
+  // Si on a du temps libre avant le dîner (> 60min), essayer d'ajouter des attractions supplémentaires
+  // Prendre des attractions qui n'ont pas encore été utilisées dans le voyage
+  // CORRIGÉ: Seuil de 60min au lieu de 90min pour éviter les trous d'1h+
   const currentHourAfterAttractions = scheduler.getCurrentTime().getHours();
   const currentMinAfterAttractions = scheduler.getCurrentTime().getMinutes();
-  const timeBeforeDinner = 19 * 60 - (currentHourAfterAttractions * 60 + currentMinAfterAttractions); // minutes avant 19h
+  const timeBeforeDinnerMin = 19 * 60 - (currentHourAfterAttractions * 60 + currentMinAfterAttractions);
 
-  console.log(`[Jour ${dayNumber}] Après attractions: ${currentHourAfterAttractions}h${currentMinAfterAttractions}, temps avant dîner (19h): ${timeBeforeDinner}min, isLastDay: ${isLastDay}`);
+  if (timeBeforeDinnerMin > 60) {
+    console.log(`[Jour ${dayNumber}] ${Math.round(timeBeforeDinnerMin / 60)}h de temps libre avant dîner - tentative de remplissage avec attractions supplémentaires`);
 
-  // Remplir si on a plus de 30min avant 19h et ce n'est pas le dernier jour
-  if (timeBeforeDinner > 30 && !isLastDay) {
-    console.log(`[Jour ${dayNumber}] ${timeBeforeDinner} min de temps libre avant dîner, ajout d'activités supplémentaires`);
+    // Chercher des attractions pas encore utilisées (dans tout le voyage)
+    // CORRIGÉ: Utiliser allAttractions pour avoir accès à TOUTES les attractions, pas seulement celles du jour
+    const unusedAttractions = allAttractions.filter(a => !tripUsedAttractionIds.has(a.id));
 
-    // Activités de remplissage variées (promenades, shopping, cafés, apéro)
-    const fillActivities = [
-      { title: `Quartier historique de ${preferences.destination}`, description: 'Promenade dans les ruelles typiques du centre historique', duration: 60 },
-      { title: 'Shopping local', description: 'Découvrez les boutiques locales et artisanales', duration: 75 },
-      { title: 'Pause café', description: 'Détente dans un café typique avec vue', duration: 45 },
-      { title: `Marché de ${preferences.destination}`, description: 'Découvrez les produits locaux et l\'ambiance du marché', duration: 60 },
-      { title: 'Parc et jardins', description: 'Promenade relaxante dans un espace vert', duration: 50 },
-      { title: 'Point de vue panoramique', description: 'Vue imprenable sur la ville', duration: 40 },
-      { title: 'Apéritif local', description: 'Terrasse et boissons locales pour l\'apéritif', duration: 60 },
-      { title: `Place centrale de ${preferences.destination}`, description: 'Profitez de l\'ambiance de fin de journée', duration: 45 },
-      { title: 'Galerie d\'art locale', description: 'Découverte d\'artistes locaux', duration: 50 },
-      { title: 'Librairie-café', description: 'Pause culturelle dans une librairie locale', duration: 40 },
-    ];
+    if (unusedAttractions.length > 0) {
+      console.log(`[Jour ${dayNumber}] ${unusedAttractions.length} attractions non utilisées disponibles`);
 
-    // Ajouter des activités jusqu'à 19h (heure du dîner)
-    const targetTime = parseTime(date, '19:00');
-    let fillIndex = 0;
+      for (const attraction of unusedAttractions) {
+        // Vérifier qu'on a le temps avant le dîner (19:00)
+        const dinnerTime = parseTime(date, '19:00');
+        const estimatedTravelTime = estimateTravelTime({ latitude: lastCoords.lat, longitude: lastCoords.lng } as Attraction, attraction);
+        const estimatedEndTime = new Date(scheduler.getCurrentTime().getTime() + (estimatedTravelTime + attraction.duration + 15) * 60 * 1000);
 
-    // Boucler plusieurs fois sur les activités si nécessaire pour remplir jusqu'à 19h
-    let loopCount = 0;
-    const maxLoops = 3; // Maximum 3 tours pour éviter boucle infinie
-
-    while (scheduler.getCurrentTime() < targetTime && loopCount < maxLoops) {
-      const activity = fillActivities[fillIndex % fillActivities.length];
-      const remainingTime = (targetTime.getTime() - scheduler.getCurrentTime().getTime()) / (1000 * 60);
-
-      // Si pas assez de temps pour cette activité, essayer la suivante
-      if (remainingTime < activity.duration + 15) {
-        fillIndex++;
-        if (fillIndex >= fillActivities.length * (loopCount + 1)) {
-          loopCount++;
+        if (estimatedEndTime > dinnerTime) {
+          // CORRIGÉ: continue au lieu de break pour essayer les autres attractions (plus courtes)
+          console.log(`[Jour ${dayNumber}] Skip "${attraction.name}": trop longue (${attraction.duration}min) avant dîner`);
+          continue;
         }
-        continue;
+
+        // Vérifier les horaires d'ouverture
+        const openTime = parseTime(date, attraction.openingHours.open);
+        const closeTime = parseTime(date, attraction.openingHours.close);
+        const safeCloseTime = new Date(closeTime.getTime() - 30 * 60 * 1000);
+
+        let actualStartTime = new Date(scheduler.getCurrentTime().getTime() + estimatedTravelTime * 60 * 1000);
+        if (actualStartTime < openTime) {
+          actualStartTime = openTime;
+        }
+
+        const potentialEndTime = new Date(actualStartTime.getTime() + attraction.duration * 60 * 1000);
+        if (potentialEndTime > safeCloseTime) {
+          console.log(`[Jour ${dayNumber}] Skip "${attraction.name}": ferme trop tôt`);
+          continue;
+        }
+
+        const activityItem = scheduler.addItem({
+          id: generateId(),
+          title: attraction.name,
+          type: 'activity',
+          duration: attraction.duration,
+          travelTime: estimatedTravelTime,
+          minStartTime: openTime,
+        });
+
+        if (activityItem) {
+          tripUsedAttractionIds.add(attraction.id);
+          const attractionCoords = {
+            lat: attraction.latitude || cityCenter.lat,
+            lng: attraction.longitude || cityCenter.lng,
+          };
+          const googleMapsUrl = generateGoogleMapsUrl(lastCoords, attractionCoords, 'transit');
+
+          items.push(schedulerItemToTripItem(activityItem, dayNumber, orderIndex++, {
+            description: attraction.description,
+            locationName: `${attraction.name}, ${preferences.destination}`,
+            latitude: attractionCoords.lat,
+            longitude: attractionCoords.lng,
+            estimatedCost: attraction.estimatedCost * preferences.groupSize,
+            rating: attraction.rating,
+            bookingUrl: attraction.bookingUrl,
+            timeFromPrevious: estimatedTravelTime,
+            googleMapsUrl,
+            dataReliability: attraction.dataReliability || 'verified',
+          }));
+          lastCoords = attractionCoords;
+          console.log(`[Jour ${dayNumber}] Attraction supplémentaire ajoutée: ${attraction.name}`);
+        }
       }
-
-      const fillItem = scheduler.addItem({
-        id: generateId(),
-        title: activity.title,
-        type: 'activity',
-        duration: activity.duration,
-        travelTime: 15,
-      });
-
-      if (fillItem) {
-        const activityCoords = {
-          lat: cityCenter.lat + (Math.random() - 0.5) * 0.015,
-          lng: cityCenter.lng + (Math.random() - 0.5) * 0.015,
-        };
-        const googleMapsUrl = generateGoogleMapsUrl(lastCoords, activityCoords, 'walking');
-        items.push(schedulerItemToTripItem(fillItem, dayNumber, orderIndex++, {
-          description: activity.description,
-          locationName: `Centre-ville, ${preferences.destination}`,
-          latitude: activityCoords.lat,
-          longitude: activityCoords.lng,
-          estimatedCost: activity.title.includes('Shopping') ? 50 * preferences.groupSize : 5 * preferences.groupSize,
-          googleMapsUrl,
-        }));
-        lastCoords = activityCoords;
-        console.log(`[Jour ${dayNumber}] Ajouté: ${activity.title} (remplissage)`);
-      }
-
-      fillIndex++;
+    } else {
+      console.log(`[Jour ${dayNumber}] Pas d'attractions supplémentaires disponibles - temps libre`);
     }
   }
 
@@ -1852,10 +2029,12 @@ async function generateDayWithScheduler(params: {
       items.push(schedulerItemToTripItem(dinnerItem, dayNumber, orderIndex++, {
         title: restaurant?.name || 'Dîner',
         description: restaurant ? `${restaurant.cuisineTypes.join(', ')} | ⭐ ${restaurant.rating?.toFixed(1)}/5` : 'Dîner local',
-        locationName: restaurant?.address || `Centre-ville, ${preferences.destination}`,
+        // IMPORTANT: locationName avec nom du restaurant pour les liens d'itinéraire
+        locationName: restaurant ? `${restaurant.name}, ${preferences.destination}` : `Centre-ville, ${preferences.destination}`,
         latitude: restaurantCoords.lat,
         longitude: restaurantCoords.lng,
-        estimatedCost: estimateMealPrice(getBudgetPriceLevel(preferences.budgetLevel), 'dinner') * preferences.groupSize,
+        // Utiliser le priceLevel du restaurant s'il est disponible, sinon le budget
+        estimatedCost: estimateMealPrice(restaurant?.priceLevel || getBudgetPriceLevel(preferences.budgetLevel), 'dinner') * preferences.groupSize,
         rating: restaurant?.rating,
         googleMapsUrl,
         googleMapsPlaceUrl: restaurantGoogleMapsUrl,
@@ -1864,106 +2043,21 @@ async function generateDayWithScheduler(params: {
     }
   }
 
-  // RÈGLE 3: Ajouter une activité après le dîner (promenade digestive ou nightlife)
+  // === APRÈS LE DÎNER ===
+  // On ne génère plus d'activités génériques après le dîner ("Promenade digestive", "Glace artisanale")
+  // Sauf si l'utilisateur a explicitement demandé "nightlife" - dans ce cas on ajoute UNE activité nocturne
   const currentTimeAfterDinnerCheck = scheduler.getCurrentTime();
   const hoursAfterDinner = currentTimeAfterDinnerCheck.getHours();
   console.log(`[Jour ${dayNumber}] Après dîner: ${hoursAfterDinner}h, hasNightlife: ${hasNightlife}, isLastDay: ${isLastDay}`);
 
-  // Pour tous les jours (sauf le dernier), ajouter une activité après le dîner
-  // On abaisse le seuil à 18h pour les cas où le dîner commence tôt
-  if (!isLastDay && hoursAfterDinner >= 18 && hoursAfterDinner < 23) {
-    const canFitActivity = scheduler.canFit(60, 10); // 60min + 10min trajet
+  // Activité nocturne UNIQUEMENT si nightlife demandé explicitement
+  if (hasNightlife && !isLastDay && hoursAfterDinner >= 20 && hoursAfterDinner < 23) {
+    const canFitNightlife = scheduler.canFit(90, 15);
 
-    if (canFitActivity) {
-      console.log(`[Jour ${dayNumber}] Ajout d'une promenade/activité après le dîner`);
-
-      const eveningActivities = hasNightlife ? [
-        { title: 'Bar à cocktails', description: 'Découvrez les meilleurs cocktails de la ville', duration: 90 },
-        { title: 'Bar à tapas', description: 'Tapas et boissons dans un bar typique', duration: 75 },
-        { title: 'Rooftop bar', description: 'Vue panoramique et ambiance décontractée', duration: 90 },
-        { title: 'Bar à vin local', description: 'Dégustation de vins locaux', duration: 75 },
-        { title: 'Jazz club', description: 'Musique live dans un club intime', duration: 90 },
-      ] : [
-        { title: `Promenade digestive à ${preferences.destination}`, description: 'Balade nocturne dans le centre historique illuminé', duration: 45 },
-        { title: 'Glace artisanale', description: 'Pause gourmande dans une gelateria locale', duration: 30 },
-        { title: `Place centrale de ${preferences.destination}`, description: 'Profitez de l\'ambiance nocturne de la ville', duration: 40 },
-      ];
-
-      const activity = eveningActivities[Math.floor(Math.random() * eveningActivities.length)];
-
-      const eveningItem = scheduler.addItem({
-        id: generateId(),
-        title: activity.title,
-        type: 'activity',
-        duration: activity.duration,
-        travelTime: 10,
-      });
-
-      if (eveningItem) {
-        const activityCoords = {
-          lat: cityCenter.lat + (Math.random() - 0.5) * 0.01,
-          lng: cityCenter.lng + (Math.random() - 0.5) * 0.01,
-        };
-        const googleMapsUrl = generateGoogleMapsUrl(lastCoords, activityCoords, 'walking');
-        items.push(schedulerItemToTripItem(eveningItem, dayNumber, orderIndex++, {
-          description: activity.description,
-          locationName: `Centre-ville, ${preferences.destination}`,
-          latitude: activityCoords.lat,
-          longitude: activityCoords.lng,
-          estimatedCost: hasNightlife ? 30 * preferences.groupSize : 5 * preferences.groupSize,
-          googleMapsUrl,
-        }));
-        lastCoords = activityCoords;
-      }
-    }
-  }
-
-  // RÈGLE 3 (suite): Activité SUPPLÉMENTAIRE si nightlife sélectionné
-  if (hasNightlife && !isLastDay) {
-    const currentTimeAfterDinner = scheduler.getCurrentTime();
-    const canFitNightlife = scheduler.canFit(90, 15); // 90min activité + 15min trajet
-    const isLateEnough = currentTimeAfterDinner.getHours() >= 21 ||
-      (currentTimeAfterDinner.getHours() === 20 && currentTimeAfterDinner.getMinutes() >= 30);
-
-    if (canFitNightlife && isLateEnough) {
-      console.log(`[Jour ${dayNumber}] Ajout d'une activité nocturne (nightlife sélectionné)`);
-
-      const nightlifeActivities = [
-        { title: 'Bar à cocktails', description: 'Découvrez les meilleurs cocktails de la ville dans une ambiance locale' },
-        { title: 'Bar à tapas', description: 'Tapas et boissons dans un bar typique' },
-        { title: 'Rooftop bar', description: 'Vue panoramique et ambiance décontractée' },
-        { title: 'Bar à vin local', description: 'Dégustation de vins locaux dans une cave traditionnelle' },
-        { title: 'Promenade nocturne', description: 'Balade dans le quartier historique illuminé' },
-        { title: 'Jazz club', description: 'Musique live dans un club intime' },
-      ];
-
-      // Sélectionner une activité aléatoire pour varier
-      const nightActivity = nightlifeActivities[Math.floor(Math.random() * nightlifeActivities.length)];
-
-      const nightlifeItem = scheduler.addItem({
-        id: generateId(),
-        title: nightActivity.title,
-        type: 'activity',
-        duration: 90,
-        travelTime: 15,
-      });
-
-      if (nightlifeItem) {
-        const activityCoords = {
-          lat: cityCenter.lat + (Math.random() - 0.5) * 0.01,
-          lng: cityCenter.lng + (Math.random() - 0.5) * 0.01,
-        };
-        const googleMapsUrl = generateGoogleMapsUrl(lastCoords, activityCoords, 'walking');
-        items.push(schedulerItemToTripItem(nightlifeItem, dayNumber, orderIndex++, {
-          description: nightActivity.description,
-          locationName: `Centre-ville, ${preferences.destination}`,
-          latitude: activityCoords.lat,
-          longitude: activityCoords.lng,
-          estimatedCost: 30 * preferences.groupSize, // ~30€/personne pour des boissons
-          googleMapsUrl,
-        }));
-        lastCoords = activityCoords;
-      }
+    if (canFitNightlife) {
+      console.log(`[Jour ${dayNumber}] Ajout d'une activité nocturne (nightlife explicitement demandé)`);
+      // Note: Ces activités sont génériques mais acceptables car l'utilisateur a demandé "nightlife"
+      // TODO: Remplacer par des vrais bars/clubs récupérés via SerpAPI
     }
   }
 
@@ -1987,7 +2081,7 @@ async function generateDayWithScheduler(params: {
       if (checkoutItem) {
         items.push(schedulerItemToTripItem(checkoutItem, dayNumber, orderIndex++, {
           description: 'Libérez votre hébergement.',
-          locationName: accommodation?.address || `Hébergement, ${preferences.destination}`,
+          locationName: getHotelLocationName(accommodation, preferences.destination),
           latitude: accommodation?.latitude || cityCenter.lat + 0.005,
           longitude: accommodation?.longitude || cityCenter.lng + 0.005,
         }));
@@ -2029,17 +2123,22 @@ async function generateDayWithScheduler(params: {
         data: { flight: returnFlight, displayTimes: { start: returnFlightStartTime, end: returnFlightEndTime } },
       });
       if (flightItem) {
-        // DATES FIXES: Utiliser linkGenerator pour générer l'URL du vol retour avec la date sélectionnée
-        const tripEndDate = new Date(preferences.startDate);
-        tripEndDate.setDate(tripEndDate.getDate() + preferences.durationDays - 1);
-        const returnFlightBookingUrl = generateFlightLink(
+        // Utiliser l'URL de réservation du vol (Google Flights) si disponible
+        const tripEndDateReturn = new Date(tripStartDate);
+        tripEndDateReturn.setDate(tripEndDateReturn.getDate() + preferences.durationDays - 1);
+        const returnFlightBookingUrl = returnFlight.bookingUrl || generateFlightLink(
           { origin: destAirport.code, destination: originAirport.code },
-          { date: formatDateForUrl(tripEndDate) }
+          { date: formatDateForUrl(tripEndDateReturn), passengers: preferences.groupSize }
         );
 
         // Créer l'item mais avec les heures d'affichage correctes
+        // Afficher le prix par personne ET le prix total
+        const returnPricePerPerson = returnFlight.pricePerPerson || Math.round(returnFlight.price / preferences.groupSize);
+        const returnPriceDisplay = preferences.groupSize > 1
+          ? `${returnPricePerPerson}€/pers (${returnFlight.price}€ total)`
+          : `${returnFlight.price}€`;
         const tripItem = schedulerItemToTripItem(flightItem, dayNumber, orderIndex++, {
-          description: `${returnFlight.flightNumber} | ${formatFlightDuration(returnFlight.duration)} | ${returnFlight.stops === 0 ? 'Direct' : `${returnFlight.stops} escale(s)`}`,
+          description: `${returnFlight.flightNumber} | ${formatFlightDuration(returnFlight.duration)} | ${returnFlight.stops === 0 ? 'Direct' : `${returnFlight.stops} escale(s)`} | ${returnPriceDisplay}`,
           locationName: `${destAirport.code} → ${originAirport.code}`,
           latitude: (destAirport.latitude + originAirport.latitude) / 2,
           longitude: (destAirport.longitude + originAirport.longitude) / 2,
@@ -2052,25 +2151,36 @@ async function generateDayWithScheduler(params: {
         items.push(tripItem);
       }
 
-      // Récupération parking
+      // Récupération parking - UNIQUEMENT si le vol retour arrive le MÊME JOUR
+      // Pour les vols overnight (arrivée lendemain), le parking serait récupéré le lendemain
       if (parking) {
-        const parkingStart = new Date(flightArrival.getTime() + 30 * 60 * 1000);
-        const parkingEnd = new Date(parkingStart.getTime() + 30 * 60 * 1000);
-        const parkingItem = scheduler.insertFixedItem({
-          id: generateId(),
-          title: `Récupération véhicule: ${parking.name}`,
-          type: 'parking',
-          startTime: parkingStart,
-          endTime: parkingEnd,
-          data: { parking },
-        });
-        if (parkingItem) {
-          items.push(schedulerItemToTripItem(parkingItem, dayNumber, orderIndex++, {
-            description: 'Navette et récupération de votre véhicule.',
-            locationName: parking.address,
-            latitude: parking.latitude,
-            longitude: parking.longitude,
-          }));
+        const returnDepDay = new Date(flightDeparture.getFullYear(), flightDeparture.getMonth(), flightDeparture.getDate());
+        const returnArrDay = new Date(flightArrival.getFullYear(), flightArrival.getMonth(), flightArrival.getDate());
+        const isReturnOvernight = returnArrDay.getTime() > returnDepDay.getTime();
+
+        if (!isReturnOvernight) {
+          // Vol retour normal: récupération du parking le même jour
+          const parkingStart = new Date(flightArrival.getTime() + 30 * 60 * 1000);
+          const parkingEnd = new Date(parkingStart.getTime() + 30 * 60 * 1000);
+          const parkingItem = scheduler.insertFixedItem({
+            id: generateId(),
+            title: `Récupération véhicule: ${parking.name}`,
+            type: 'parking',
+            startTime: parkingStart,
+            endTime: parkingEnd,
+            data: { parking },
+          });
+          if (parkingItem) {
+            items.push(schedulerItemToTripItem(parkingItem, dayNumber, orderIndex++, {
+              description: 'Navette et récupération de votre véhicule.',
+              locationName: parking.address,
+              latitude: parking.latitude,
+              longitude: parking.longitude,
+            }));
+          }
+        } else {
+          // Vol retour overnight: le parking sera récupéré le lendemain (pas dans ce voyage)
+          console.log(`[Jour ${dayNumber}] Vol retour overnight - récupération parking le lendemain (hors voyage)`);
         }
       }
 
@@ -2089,7 +2199,7 @@ async function generateDayWithScheduler(params: {
       if (checkoutItem) {
         items.push(schedulerItemToTripItem(checkoutItem, dayNumber, orderIndex++, {
           description: 'Libérez votre hébergement.',
-          locationName: accommodation?.address || `Hébergement, ${preferences.destination}`,
+          locationName: getHotelLocationName(accommodation, preferences.destination),
           latitude: accommodation?.latitude || cityCenter.lat + 0.005,
           longitude: accommodation?.longitude || cityCenter.lng + 0.005,
         }));
@@ -2123,12 +2233,24 @@ async function generateDayWithScheduler(params: {
   }
 
   // === CORRECTION AUTOMATIQUE DES CONFLITS ===
-  // Étape 1: Pour le Jour 1 avec vol, supprimer toute activité AVANT l'arrivée
+  // Étape 1: Pour le Jour 1 avec vol NORMAL (pas overnight), supprimer toute activité AVANT l'arrivée
   if (isFirstDay && outboundFlight) {
-    const arrivalTime = new Date(outboundFlight.arrivalTime);
-    const itemsRemovedBeforeArrival = scheduler.removeItemsBefore(arrivalTime, ['flight', 'transport', 'checkin', 'parking', 'hotel']);
-    if (itemsRemovedBeforeArrival > 0) {
-      console.log(`[Jour ${dayNumber}] ${itemsRemovedBeforeArrival} item(s) supprimé(s) car planifiés avant l'arrivée du vol`);
+    const flightDep = new Date(outboundFlight.departureTime);
+    const flightArr = new Date(outboundFlight.arrivalTime);
+    const depDay = new Date(flightDep.getFullYear(), flightDep.getMonth(), flightDep.getDate());
+    const arrDay = new Date(flightArr.getFullYear(), flightArr.getMonth(), flightArr.getDate());
+    const isOvernight = arrDay.getTime() > depDay.getTime();
+
+    if (!isOvernight) {
+      // Vol normal: supprimer les activités avant l'arrivée
+      const arrivalTime = new Date(outboundFlight.arrivalTime);
+      const itemsRemovedBeforeArrival = scheduler.removeItemsBefore(arrivalTime, ['flight', 'transport', 'checkin', 'parking', 'hotel']);
+      if (itemsRemovedBeforeArrival > 0) {
+        console.log(`[Jour ${dayNumber}] ${itemsRemovedBeforeArrival} item(s) supprimé(s) car planifiés avant l'arrivée du vol`);
+      }
+    } else {
+      // Vol overnight: ne rien supprimer, le Jour 1 contient uniquement la logistique de départ
+      console.log(`[Jour ${dayNumber}] Vol overnight - pas de suppression d'items (logistique départ uniquement)`);
     }
   }
 
@@ -2174,7 +2296,7 @@ function schedulerItemToTripItem(
   item: import('./services/scheduler').ScheduleItem,
   dayNumber: number,
   orderIndex: number,
-  extra: Partial<TripItem>
+  extra: Partial<TripItem> & { dataReliability?: 'verified' | 'estimated' | 'generated' }
 ): TripItem {
   // Extraire le nom du lieu et la ville depuis les données disponibles
   const placeName = extra.title || item.title;
@@ -2186,6 +2308,15 @@ function schedulerItemToTripItem(
   // Au lieu de coordonnées potentiellement fausses, Google Maps cherche le vrai lieu
   const googleMapsPlaceUrl = generateGoogleMapsSearchUrl(placeName, city);
 
+  // Déterminer la fiabilité des données:
+  // - 'verified' si passé explicitement (données réelles de SerpAPI)
+  // - 'estimated' si données partiellement vérifiées
+  // - 'verified' par défaut pour les éléments de transport (vol, transfert, checkin, etc.)
+  // - 'generated' pour les activités de remplissage
+  const logisticsTypes = ['flight', 'transport', 'checkin', 'checkout', 'parking', 'hotel', 'luggage'];
+  const isLogistics = logisticsTypes.includes(item.type);
+  const reliability = extra.dataReliability || (isLogistics ? 'verified' : 'generated');
+
   return {
     id: item.id,
     dayNumber,
@@ -2196,7 +2327,7 @@ function schedulerItemToTripItem(
     orderIndex,
     timeFromPrevious: item.travelTimeFromPrevious,
     googleMapsPlaceUrl, // Lien fiable par nom (pas de GPS hallucié!)
-    dataReliability: 'generated' as const, // Données générées par IA
+    dataReliability: reliability as 'verified' | 'estimated' | 'generated',
     ...extra,
   } as TripItem;
 }
@@ -2610,6 +2741,7 @@ function createAttractionItem(
     transportToPrevious: travelInfo?.travelTime && travelInfo.travelTime > 20 ? 'public' : 'walk',
     transitInfo,
     googleMapsUrl,
+    dataReliability: attraction.dataReliability || 'verified', // POI réel de SerpAPI
   };
 }
 
@@ -2735,6 +2867,12 @@ function addDepartureLogistics(
 
   console.log(`[AI] Vol ${outboundFlight.flightNumber}: ${flightStartTime} - ${flightEndTime} (display times: ${outboundFlight.departureTimeDisplay || 'N/A'} - ${outboundFlight.arrivalTimeDisplay || 'N/A'})`);
 
+  // Afficher le prix par personne et total comme dans l'autre section
+  const pricePerPerson = outboundFlight.pricePerPerson || Math.round(outboundFlight.price / preferences.groupSize);
+  const priceDisplay = preferences.groupSize > 1
+    ? `${pricePerPerson}€/pers (${outboundFlight.price}€ total)`
+    : `${outboundFlight.price}€`;
+
   items.push({
     id: generateId(),
     dayNumber,
@@ -2742,7 +2880,7 @@ function addDepartureLogistics(
     endTime: flightEndTime,
     type: 'flight',
     title: `Vol ${outboundFlight.flightNumber} → ${preferences.destination}`,
-    description: `${outboundFlight.flightNumber} | ${formatFlightDuration(outboundFlight.duration)} | ${outboundFlight.stops === 0 ? 'Direct' : `${outboundFlight.stops} escale(s)`}`,
+    description: `${outboundFlight.flightNumber} | ${formatFlightDuration(outboundFlight.duration)} | ${outboundFlight.stops === 0 ? 'Direct' : `${outboundFlight.stops} escale(s)`} | ${priceDisplay}`,
     locationName: `${originAirport.code} → ${destAirport.code}`,
     latitude: (originAirport.latitude + destAirport.latitude) / 2,
     longitude: (originAirport.longitude + destAirport.longitude) / 2,
@@ -2805,7 +2943,12 @@ function addDepartureLogistics(
 // ============================================
 
 function formatDate(date: Date): string {
-  return date.toISOString().split('T')[0];
+  // IMPORTANT: Utiliser getFullYear/Month/Date pour la date LOCALE
+  // et non toISOString() qui convertit en UTC et peut décaler d'un jour
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 function formatTime(date: Date): string {
@@ -2814,6 +2957,31 @@ function formatTime(date: Date): string {
 
 function formatPriceLevel(level: 1 | 2 | 3 | 4): string {
   return '€'.repeat(level);
+}
+
+/**
+ * Retourne le locationName pour un hôtel
+ * Si l'adresse est disponible et valide, l'utiliser
+ * Sinon, utiliser "Nom de l'hôtel, Ville" pour que Google Maps trouve le lieu
+ */
+function getHotelLocationName(
+  accommodation: { name?: string; address?: string } | null,
+  destination: string
+): string {
+  // Si l'adresse existe et n'est pas le placeholder "Adresse non disponible"
+  if (accommodation?.address &&
+      !accommodation.address.toLowerCase().includes('non disponible') &&
+      !accommodation.address.toLowerCase().includes('not available')) {
+    return accommodation.address;
+  }
+
+  // Sinon utiliser le nom de l'hôtel + ville pour que Google Maps trouve
+  if (accommodation?.name) {
+    return `${accommodation.name}, ${destination}`;
+  }
+
+  // Fallback ultime
+  return `Hébergement, ${destination}`;
 }
 
 function getBudgetCabinClass(budgetLevel?: BudgetLevel): 'economy' | 'premium_economy' | 'business' | 'first' {
@@ -2837,11 +3005,43 @@ function getBudgetPriceLevel(budgetLevel?: BudgetLevel): 1 | 2 | 3 | 4 {
 function selectFlightByBudget(flights: Flight[], budgetLevel?: BudgetLevel, flightType: 'outbound' | 'return' = 'outbound'): Flight | null {
   if (flights.length === 0) return null;
 
-  // Calculer le score de chaque vol (inclut pénalité pour vols tôt le matin sur retour)
-  const scoredFlights = flights.map(flight => {
+  // ÉTAPE 1: Filtrer les vols avec une durée excessive
+  // Trouver la durée minimale parmi tous les vols
+  const minDuration = Math.min(...flights.map(f => f.duration || Infinity));
+  const MAX_DURATION_RATIO = 3; // Max 3x la durée du vol le plus court
+  const maxAcceptableDuration = minDuration * MAX_DURATION_RATIO;
+
+  // Filtrer les vols trop longs (sauf si ça élimine tout)
+  let filteredFlights = flights.filter(f => (f.duration || 0) <= maxAcceptableDuration);
+  if (filteredFlights.length === 0) {
+    // Si tous les vols sont trop longs, garder les originaux
+    filteredFlights = flights;
+    console.warn(`⚠️ Tous les vols dépassent ${MAX_DURATION_RATIO}x la durée minimale (${minDuration}min)`);
+  } else if (filteredFlights.length < flights.length) {
+    const excluded = flights.length - filteredFlights.length;
+    console.log(`✂️ ${excluded} vol(s) exclu(s) car durée > ${maxAcceptableDuration}min (${MAX_DURATION_RATIO}x le vol le plus court de ${minDuration}min)`);
+  }
+
+  // Calculer le score de chaque vol
+  // - Vol retour: pénalité pour départs très tôt le matin
+  // - Vol aller: pénalité pour arrivées tardives (après 22h) qui gaspillent le Jour 1
+  const scoredFlights = filteredFlights.map(flight => {
+    // Extraire l'heure d'arrivée au format HH:MM pour le scoring
+    let arrivalTimeForScoring: string | undefined;
+    if (flight.arrivalTimeDisplay) {
+      arrivalTimeForScoring = flight.arrivalTimeDisplay;
+    } else if (flight.arrivalTime) {
+      // Extraire HH:MM de la date ISO
+      const arrivalDate = new Date(flight.arrivalTime);
+      if (!isNaN(arrivalDate.getTime())) {
+        arrivalTimeForScoring = `${arrivalDate.getHours().toString().padStart(2, '0')}:${arrivalDate.getMinutes().toString().padStart(2, '0')}`;
+      }
+    }
+
     const timeScore = calculateFlightScore({
       id: flight.flightNumber || 'unknown',
-      departureTime: flight.departureTime,
+      departureTime: flight.departureTimeDisplay || new Date(flight.departureTime).toTimeString().substring(0, 5),
+      arrivalTime: arrivalTimeForScoring,
       type: flightType,
       price: flight.price,
     });
@@ -2856,16 +3056,27 @@ function selectFlightByBudget(flights: Flight[], budgetLevel?: BudgetLevel, flig
     }
 
     // Normaliser le prix (0-100, où 100 = le moins cher)
-    const maxPrice = Math.max(...flights.map(f => f.price));
-    const minPrice = Math.min(...flights.map(f => f.price));
+    const maxPrice = Math.max(...filteredFlights.map(f => f.price));
+    const minPrice = Math.min(...filteredFlights.map(f => f.price));
     const priceRange = maxPrice - minPrice || 1;
     const priceScore = 100 - ((flight.price - minPrice) / priceRange) * 100;
 
-    // Bonus pour vol direct
-    const directBonus = flight.stops === 0 ? 10 : 0;
+    // Pénalité par escale (-15 points par escale, bonus +10 pour direct)
+    // Vol direct: +10, 1 escale: -15, 2 escales: -30, etc.
+    const stopsPenalty = flight.stops === 0 ? 10 : -(flight.stops * 15);
+
+    // Pénalité pour durée excessive (au-delà de 2x le vol le plus court)
+    let durationPenalty = 0;
+    if (flight.duration && minDuration > 0) {
+      const durationRatio = flight.duration / minDuration;
+      if (durationRatio > 2) {
+        // -10 points par tranche de 50% au-delà de 2x
+        durationPenalty = -Math.floor((durationRatio - 2) * 20);
+      }
+    }
 
     // Score final combiné
-    const finalScore = (timeScore * (1 - priceWeight)) + (priceScore * priceWeight) + directBonus;
+    const finalScore = (timeScore * (1 - priceWeight)) + (priceScore * priceWeight) + stopsPenalty + durationPenalty;
 
     return { flight, timeScore, priceScore, finalScore };
   });
