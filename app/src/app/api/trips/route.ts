@@ -1,6 +1,16 @@
 import { createRouteHandlerClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 
+// Générer un code de partage unique (6 caractères alphanumériques)
+function generateShareCode(): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let code = '';
+  for (let i = 0; i < 6; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return code;
+}
+
 // GET /api/trips - Liste tous les voyages de l'utilisateur
 export async function GET() {
   try {
@@ -62,6 +72,9 @@ export async function POST(request: Request) {
 
     const tripData = await request.json();
 
+    // Générer un code de partage unique
+    const shareCode = generateShareCode();
+
     // Créer le voyage
     const { data: trip, error: tripError } = await supabase
       .from('trips')
@@ -73,6 +86,7 @@ export async function POST(request: Request) {
         duration_days: tripData.durationDays || tripData.preferences?.durationDays || 7,
         preferences: tripData.preferences || {},
         data: tripData,
+        share_code: shareCode,
       })
       .select()
       .single();
