@@ -721,6 +721,45 @@ function generateLocalRestaurants(params: RestaurantSearchParams, destination?: 
         { name: 'Pizzarium', cuisine: ['pizza', 'roman'], price: 1, specialties: ['Pizza al taglio', 'Toppings créatifs'] },
       ],
     },
+    // UK
+    london: {
+      breakfast: [
+        { name: 'The Wolseley', cuisine: ['british', 'cafe'], price: 3, specialties: ['Full English Breakfast', 'Eggs Benedict'] },
+        { name: 'Dishoom', cuisine: ['indian', 'brunch'], price: 2, specialties: ['Bacon Naan Roll', 'Masala Chai'] },
+        { name: 'The Breakfast Club', cuisine: ['brunch', 'british'], price: 2, specialties: ['Full Monty', 'Pancakes'] },
+      ],
+      lunch: [
+        { name: 'Rules', cuisine: ['british', 'traditional'], price: 3, specialties: ['Roast Beef', 'Game Pie'] },
+        { name: 'The Ivy', cuisine: ['british', 'modern'], price: 3, specialties: ['Fish and Chips', 'Shepherd\'s Pie'] },
+        { name: 'Ye Olde Cheshire Cheese', cuisine: ['british', 'pub'], price: 2, specialties: ['Pie and Mash', 'Real Ale'] },
+        { name: 'Gordon\'s Wine Bar', cuisine: ['british', 'wine bar'], price: 2, specialties: ['Cheese Board', 'Wine Selection'] },
+      ],
+      dinner: [
+        { name: 'St. John', cuisine: ['british', 'nose-to-tail'], price: 3, specialties: ['Bone Marrow', 'Welsh Rarebit'] },
+        { name: 'The Harwood Arms', cuisine: ['british', 'gastropub'], price: 3, specialties: ['Venison', 'Scotch Egg'] },
+        { name: 'Sketch', cuisine: ['modern', 'british'], price: 4, specialties: ['Afternoon Tea', 'Creative Menu'] },
+        { name: 'Duck & Waffle', cuisine: ['british', 'modern'], price: 3, specialties: ['Duck and Waffle', 'City Views'] },
+      ],
+    },
+    londres: {
+      breakfast: [
+        { name: 'The Wolseley', cuisine: ['british', 'cafe'], price: 3, specialties: ['Full English Breakfast', 'Eggs Benedict'] },
+        { name: 'Dishoom', cuisine: ['indian', 'brunch'], price: 2, specialties: ['Bacon Naan Roll', 'Masala Chai'] },
+        { name: 'The Breakfast Club', cuisine: ['brunch', 'british'], price: 2, specialties: ['Full Monty', 'Pancakes'] },
+      ],
+      lunch: [
+        { name: 'Rules', cuisine: ['british', 'traditional'], price: 3, specialties: ['Roast Beef', 'Game Pie'] },
+        { name: 'The Ivy', cuisine: ['british', 'modern'], price: 3, specialties: ['Fish and Chips', 'Shepherd\'s Pie'] },
+        { name: 'Ye Olde Cheshire Cheese', cuisine: ['british', 'pub'], price: 2, specialties: ['Pie and Mash', 'Real Ale'] },
+        { name: 'Gordon\'s Wine Bar', cuisine: ['british', 'wine bar'], price: 2, specialties: ['Cheese Board', 'Wine Selection'] },
+      ],
+      dinner: [
+        { name: 'St. John', cuisine: ['british', 'nose-to-tail'], price: 3, specialties: ['Bone Marrow', 'Welsh Rarebit'] },
+        { name: 'The Harwood Arms', cuisine: ['british', 'gastropub'], price: 3, specialties: ['Venison', 'Scotch Egg'] },
+        { name: 'Sketch', cuisine: ['modern', 'british'], price: 4, specialties: ['Afternoon Tea', 'Creative Menu'] },
+        { name: 'Duck & Waffle', cuisine: ['british', 'modern'], price: 3, specialties: ['Duck and Waffle', 'City Views'] },
+      ],
+    },
   };
 
   // Déterminer la région
@@ -733,19 +772,19 @@ function generateLocalRestaurants(params: RestaurantSearchParams, destination?: 
     }
   }
 
-  // Restaurants par défaut (cuisine locale générique)
+  // Restaurants par défaut (cuisine locale générique - noms neutres)
   const defaultRestaurants: Record<string, { name: string; cuisine: string[]; price: 1 | 2 | 3 | 4; specialties: string[] }[]> = {
     breakfast: [
-      { name: 'Café du Marché', cuisine: ['cafe', 'local'], price: 1, specialties: ['Petit-déjeuner traditionnel'] },
-      { name: 'Boulangerie Artisanale', cuisine: ['bakery', 'local'], price: 1, specialties: ['Viennoiseries', 'Pain frais'] },
+      { name: 'Local Cafe', cuisine: ['cafe', 'local'], price: 1, specialties: ['Traditional Breakfast'] },
+      { name: 'Artisan Bakery', cuisine: ['bakery', 'local'], price: 1, specialties: ['Fresh Pastries', 'Coffee'] },
     ],
     lunch: [
-      { name: 'Restaurant du Terroir', cuisine: ['local', 'traditional'], price: 2, specialties: ['Cuisine locale', 'Produits du marché'] },
-      { name: 'Bistrot Local', cuisine: ['bistrot', 'local'], price: 2, specialties: ['Plat du jour', 'Cuisine maison'] },
+      { name: 'Local Kitchen', cuisine: ['local', 'traditional'], price: 2, specialties: ['Local Cuisine', 'Fresh Produce'] },
+      { name: 'City Bistro', cuisine: ['bistrot', 'local'], price: 2, specialties: ['Daily Special', 'Homemade'] },
     ],
     dinner: [
-      { name: 'La Table Locale', cuisine: ['local', 'gastronomic'], price: 3, specialties: ['Menu dégustation', 'Vins locaux'] },
-      { name: 'Auberge Traditionnelle', cuisine: ['traditional', 'local'], price: 2, specialties: ['Spécialités régionales'] },
+      { name: 'The Local Table', cuisine: ['local', 'gastronomic'], price: 3, specialties: ['Tasting Menu', 'Local Wine'] },
+      { name: 'Traditional Inn', cuisine: ['traditional', 'local'], price: 2, specialties: ['Regional Specialties'] },
     ],
   };
 
