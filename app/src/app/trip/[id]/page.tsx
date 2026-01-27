@@ -32,6 +32,7 @@ import { SharePanel } from '@/components/trip/SharePanel';
 import { ProposalsList } from '@/components/trip/ProposalsList';
 import { CreateProposalDialog } from '@/components/trip/CreateProposalDialog';
 import { DraggableTimeline } from '@/components/trip/DraggableTimeline';
+import { ShareTripDialog } from '@/components/trip/ShareTripDialog';
 import { ProposedChange, createMoveActivityChange } from '@/lib/types/collaboration';
 import { cn } from '@/lib/utils';
 
@@ -157,6 +158,7 @@ export default function TripPage() {
   const [pendingChanges, setPendingChanges] = useState<ProposedChange[]>([]);
   const [showProposalDialog, setShowProposalDialog] = useState(false);
   const [showCollabPanel, setShowCollabPanel] = useState(false);
+  const [showShareDialog, setShowShareDialog] = useState(false);
 
   // Déterminer quel trip utiliser
   const trip = useCollaborativeMode ? collaborativeTrip?.data : localTrip;
@@ -407,9 +409,14 @@ export default function TripPage() {
                 </Sheet>
               )}
 
-              {/* Bouton partage (ancien) */}
+              {/* Bouton partage */}
               {!useCollaborativeMode && (
-                <Button variant="outline" size="sm" className="gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-2"
+                  onClick={() => setShowShareDialog(true)}
+                >
                   <Share2 className="h-4 w-4" />
                   <span className="hidden sm:inline">Partager</span>
                 </Button>
@@ -662,6 +669,22 @@ export default function TripPage() {
         onSubmit={handleCreateProposal}
         pendingChanges={pendingChanges}
       />
+
+      {/* Dialog de partage */}
+      {trip && (
+        <ShareTripDialog
+          open={showShareDialog}
+          onOpenChange={setShowShareDialog}
+          trip={trip}
+          tripId={tripId}
+          onTripSaved={(savedId, code) => {
+            // Activer le mode collaboratif après la sauvegarde
+            setUseCollaborativeMode(true);
+            // Rediriger vers le voyage sauvegardé
+            router.push(`/trip/${savedId}`);
+          }}
+        />
+      )}
     </div>
   );
 }
