@@ -26,7 +26,10 @@ export function DayTimeline({
   onDeleteItem,
   onAddItem,
 }: DayTimelineProps) {
-  const sortedItems = [...day.items].sort((a, b) => {
+  // Filter out 'transport' items (transfers) - they're replaced by ItineraryConnector links
+  const filteredItems = day.items.filter(item => item.type !== 'transport');
+
+  const sortedItems = [...filteredItems].sort((a, b) => {
     // Sort by start time
     return a.startTime.localeCompare(b.startTime);
   });

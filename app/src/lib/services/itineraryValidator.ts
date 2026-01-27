@@ -329,11 +329,8 @@ export function shouldShowItinerary(
     }
   }
 
-  // Règle 4: Transport inclut déjà l'itinéraire (ex: "Transfert Aéroport → Hôtel")
-  // On montre l'itinéraire APRÈS le transport, pas avant
-  if (fromType === 'transport' && (toType === 'hotel' || toType === 'luggage')) {
-    return false;
-  }
+  // Note: Les items de type 'transport' sont maintenant filtrés dans DayTimeline
+  // donc cette règle n'est plus nécessaire
 
   // Par défaut, afficher l'itinéraire
   return true;

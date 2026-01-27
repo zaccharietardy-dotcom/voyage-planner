@@ -116,6 +116,14 @@ function DroppableDay({
   );
 }
 
+// Filter out 'transport' items from days (transfers are replaced by ItineraryConnector links)
+function filterTransportItems(days: TripDay[]): TripDay[] {
+  return days.map(day => ({
+    ...day,
+    items: day.items.filter(item => item.type !== 'transport'),
+  }));
+}
+
 export function DraggableTimeline({
   days,
   isEditable,
@@ -124,11 +132,13 @@ export function DraggableTimeline({
   onProposalCreate,
 }: DraggableTimelineProps) {
   const [activeItem, setActiveItem] = useState<TripItem | null>(null);
-  const [localDays, setLocalDays] = useState(days);
+  // Filter out transport items for display
+  const filteredDays = filterTransportItems(days);
+  const [localDays, setLocalDays] = useState(filteredDays);
 
   // Mettre à jour les jours locaux quand les props changent
-  if (days !== localDays && !activeItem) {
-    setLocalDays(days);
+  if (filteredDays !== localDays && !activeItem) {
+    setLocalDays(filteredDays);
   }
 
   const sensors = useSensors(
@@ -200,16 +210,16 @@ export function DraggableTimeline({
         );
         onProposalCreate(change);
         // Revenir à l'état initial
-        setLocalDays(days);
+        setLocalDays(filteredDays);
       }
     },
-    [localDays, days, isOwner, onDirectUpdate, onProposalCreate]
+    [localDays, filteredDays, isOwner, onDirectUpdate, onProposalCreate]
   );
 
   const handleDragCancel = useCallback(() => {
     setActiveItem(null);
-    setLocalDays(days);
-  }, [days]);
+    setLocalDays(filteredDays);
+  }, [filteredDays]);
 
   return (
     <DndContext
