@@ -297,22 +297,61 @@ export function TripMap({ items, center, selectedItemId, onItemClick, flightInfo
       if (items.length > 0) {
         const firstDestItem = items.find(i => i.type !== 'flight' && i.latitude && i.longitude);
         if (firstDestItem) {
-          // Create curved flight path
-          const midLat = (flightInfo.departureCoords.lat + firstDestItem.latitude) / 2;
-          const midLng = (flightInfo.departureCoords.lng + firstDestItem.longitude) / 2;
-          // Add curvature based on distance
-          const curvature = Math.abs(flightInfo.departureCoords.lng - firstDestItem.longitude) * 0.1;
+          const startLat = flightInfo.departureCoords.lat;
+          const startLng = flightInfo.departureCoords.lng;
+          const endLat = firstDestItem.latitude;
+          const endLng = firstDestItem.longitude;
 
-          L.polyline([
-            [flightInfo.departureCoords.lat, flightInfo.departureCoords.lng],
-            [midLat + curvature, midLng],
-            [firstDestItem.latitude, firstDestItem.longitude]
-          ], {
-            color: '#EC4899',
-            weight: 2,
-            opacity: 0.7,
-            dashArray: '8, 8',
+          // Create smooth curved flight path with multiple points
+          const curvePoints: [number, number][] = [];
+          const numPoints = 50;
+
+          for (let i = 0; i <= numPoints; i++) {
+            const t = i / numPoints;
+            // Quadratic Bezier curve
+            const lat = startLat + t * (endLat - startLat);
+            const lng = startLng + t * (endLng - startLng);
+            // Add curvature (arc) - higher in the middle
+            const arc = Math.sin(t * Math.PI) * Math.abs(endLng - startLng) * 0.15;
+            curvePoints.push([lat + arc, lng]);
+          }
+
+          // Draw solid flight path line
+          L.polyline(curvePoints, {
+            color: '#6366F1',
+            weight: 2.5,
+            opacity: 0.8,
           }).addTo(map);
+
+          // Calculate angle for airplane icon (pointing in flight direction)
+          // Use points at ~60% of the path for the airplane position
+          const planeIndex = Math.floor(numPoints * 0.6);
+          const planePos = curvePoints[planeIndex];
+          const nextPos = curvePoints[Math.min(planeIndex + 3, numPoints)];
+
+          // Calculate rotation angle in degrees
+          const deltaLng = nextPos[1] - planePos[1];
+          const deltaLat = nextPos[0] - planePos[0];
+          const angleRad = Math.atan2(deltaLng, deltaLat);
+          const angleDeg = (angleRad * 180 / Math.PI);
+
+          // Add airplane marker on the flight path
+          const planeIcon = L.divIcon({
+            className: 'plane-marker',
+            html: `
+              <div style="
+                font-size: 20px;
+                transform: rotate(${angleDeg + 90}deg);
+                filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
+              ">✈️</div>
+            `,
+            iconSize: [24, 24],
+            iconAnchor: [12, 12],
+          });
+
+          const planeMarker = L.marker(planePos, { icon: planeIcon, interactive: false })
+            .addTo(map);
+          markersRef.current.push(planeMarker);
         }
       }
 
@@ -364,12 +403,18 @@ export function TripMap({ items, center, selectedItemId, onItemClick, flightInfo
           ))}
           {/* Special markers */}
           {flightInfo?.departureCoords && (
-            <div className="flex items-center gap-2 text-xs">
-              <div className="w-4 h-4 rounded-full flex items-center justify-center text-[10px] bg-green-500">
-                🏠
+            <>
+              <div className="flex items-center gap-2 text-xs">
+                <div className="w-4 h-4 rounded-full flex items-center justify-center text-[10px] bg-green-500">
+                  🏠
+                </div>
+                <span>Départ</span>
               </div>
-              <span>Départ</span>
-            </div>
+              <div className="flex items-center gap-2 text-xs">
+                <div className="w-8 h-0.5 bg-indigo-500 rounded"></div>
+                <span>Vol ✈️</span>
+              </div>
+            </>
           )}
         </div>
       </div>
