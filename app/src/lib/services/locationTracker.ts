@@ -51,11 +51,14 @@ export interface LocationValidationResult {
   reason: string;
 }
 
+import { normalizeCitySync } from './cityNormalization';
+
 /**
- * Normalise un nom de ville (minuscule, sans espaces aux extrémités)
+ * Normalise un nom de ville (utilise le service unifié)
  */
 function normalizeCity(city: string): string {
-  return city.toLowerCase().trim();
+  const result = normalizeCitySync(city);
+  return result.normalized;
 }
 
 /**

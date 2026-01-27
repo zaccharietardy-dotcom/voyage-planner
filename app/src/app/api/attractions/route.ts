@@ -5,7 +5,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
-import { Attraction } from '@/lib/services/attractions';
+import { Attraction, getAttractions, getMustSeeAttractions } from '@/lib/services/attractions';
+import { normalizeCity } from '@/lib/services/cityNormalization';
 import { ActivityType } from '@/lib/types';
 import { tokenTracker } from '@/lib/services/tokenTracker';
 import * as fs from 'fs';
@@ -155,12 +156,44 @@ Réponds UNIQUEMENT avec un tableau JSON valide, sans texte avant ou après.`;
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const destination = searchParams.get('destination');
+  const destination = searchParams.get('destination') || searchParams.get('city');
   const forceRefresh = searchParams.get('forceRefresh') === 'true';
   const typesParam = searchParams.get('types');
+  const mustSeeOnly = searchParams.get('mustSee') === 'true';
 
   if (!destination) {
     return NextResponse.json({ error: 'destination requise' }, { status: 400 });
+  }
+
+  // Normaliser la ville (supporte toutes les langues)
+  const normalizedCity = await normalizeCity(destination);
+  console.log(`[API Attractions] Recherche pour "${destination}" → "${normalizedCity.displayName}" (${normalizedCity.confidence})`);
+
+  // Si mustSee=true, retourner uniquement les incontournables de la base locale
+  if (mustSeeOnly) {
+    const localAttractions = getMustSeeAttractions(normalizedCity.displayName);
+
+    if (localAttractions.length > 0) {
+      console.log(`[API Attractions] ${localAttractions.length} incontournables trouvés dans la base locale`);
+      return NextResponse.json({
+        attractions: localAttractions.map(a => ({
+          id: a.id,
+          name: a.name,
+          type: a.type,
+          description: a.description,
+          duration: a.duration,
+          estimatedCost: a.estimatedCost,
+          mustSee: a.mustSee,
+          latitude: a.latitude,
+          longitude: a.longitude,
+        })),
+        source: 'local',
+        city: normalizedCity.displayName,
+      });
+    }
+
+    // Pas d'attractions locales, on va essayer le cache/Claude
+    console.log(`[API Attractions] Aucune attraction locale pour ${normalizedCity.displayName}, fallback vers cache/Claude`);
   }
 
   const types = typesParam ? typesParam.split(',') as ActivityType[] : undefined;

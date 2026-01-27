@@ -683,24 +683,30 @@ const ATTRACTIONS: Record<string, Attraction[]> = {
   ],
 };
 
-// Aliases pour les noms de villes
-const CITY_ALIASES: Record<string, string> = {
+// Import du service unifié de normalisation des villes
+import { normalizeCitySync } from './cityNormalization';
+
+// Aliases locaux pour mapper vers nos clés ATTRACTIONS
+// (le service cityNormalization retourne des clés anglaises, on mappe vers nos clés internes)
+const ATTRACTIONS_KEY_MAP: Record<string, string> = {
+  'london': 'london',
+  'paris': 'paris',
   'barcelona': 'barcelone',
-  'barca': 'barcelone',
-  'roma': 'rome',
+  'rome': 'rome',
   'lisbon': 'lisbonne',
-  'lisboa': 'lisbonne',
-  'praha': 'prague',
-  'málaga': 'malaga',
-  'londres': 'london',
+  'amsterdam': 'amsterdam',
+  'prague': 'prague',
+  'malaga': 'malaga',
 };
 
 /**
- * Normalise le nom d'une ville
+ * Normalise le nom d'une ville pour les attractions
+ * Utilise le service unifié puis mappe vers nos clés internes
  */
 export function normalizeCity(city: string): string {
-  const normalized = city.toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-  return CITY_ALIASES[normalized] || normalized;
+  const result = normalizeCitySync(city);
+  // Mapper vers notre clé interne si elle existe
+  return ATTRACTIONS_KEY_MAP[result.normalized] || result.normalized;
 }
 
 /**
@@ -830,23 +836,35 @@ export function selectAttractionsFromList(
     }
   }
 
-  // Trier par priorité
+  // Trier par priorité avec un système de scoring amélioré
   attractions.sort((a, b) => {
-    // 1. Incontournables en premier
+    let scoreA = 0;
+    let scoreB = 0;
+
+    // 1. +50 points si le type matche les préférences de l'utilisateur
+    // C'est le critère le plus important pour respecter les choix utilisateur
+    if (preferences.types.includes(a.type)) scoreA += 50;
+    if (preferences.types.includes(b.type)) scoreB += 50;
+
+    // 2. +30 points si c'est un incontournable (mustSee)
     if (preferences.prioritizeMustSee !== false) {
-      if (a.mustSee && !b.mustSee) return -1;
-      if (!a.mustSee && b.mustSee) return 1;
+      if (a.mustSee) scoreA += 30;
+      if (b.mustSee) scoreB += 30;
     }
 
-    // 2. Types préférés
-    const aTypeMatch = preferences.types.includes(a.type);
-    const bTypeMatch = preferences.types.includes(b.type);
-    if (aTypeMatch && !bTypeMatch) return -1;
-    if (!aTypeMatch && bTypeMatch) return 1;
+    // 3. +0-10 points basés sur le rating (note sur 5 → score sur 10)
+    scoreA += a.rating * 2;
+    scoreB += b.rating * 2;
 
-    // 3. Par note
-    return b.rating - a.rating;
+    // 4. +5 points si gratuit (incentive les options économiques)
+    if (a.estimatedCost === 0) scoreA += 5;
+    if (b.estimatedCost === 0) scoreB += 5;
+
+    // Tri décroissant (meilleur score en premier)
+    return scoreB - scoreA;
   });
+
+  console.log(`[Attractions] Triées par score - Top 3: ${attractions.slice(0, 3).map(a => `${a.name} (type=${a.type}, mustSee=${a.mustSee})`).join(', ')}`);
 
   // Sélectionner selon le temps disponible avec temps de trajet réaliste
   const selected: Attraction[] = [];

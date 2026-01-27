@@ -6,6 +6,7 @@
  */
 
 import { calculateDistance } from './geocoding';
+import { normalizeCitySync } from './cityNormalization';
 
 // Types
 export interface TransportOption {
@@ -278,8 +279,8 @@ function calculateTrainOption(params: TransportSearchParams, distance: number): 
   const co2Factor = isHighSpeed ? CO2_PER_KM.train_highspeed : CO2_PER_KM.train_regular;
   const co2 = Math.round(distance * co2Factor);
 
-  // URL de réservation
-  const bookingUrl = getTrainBookingUrl(params.origin, params.destination, params.passengers);
+  // URL de réservation avec date
+  const bookingUrl = getTrainBookingUrl(params.origin, params.destination, params.passengers, params.date);
 
   return {
     id: isHighSpeed ? 'train_highspeed' : 'train',
@@ -578,37 +579,12 @@ function hasDirectHighSpeedRail(origin: string, destination: string): boolean {
 }
 
 /**
- * Normalise le nom d'une ville
+ * Normalise le nom d'une ville pour le transport
+ * Utilise le service unifié puis retourne le displayName
  */
 function normalizeCity(city: string): string {
-  const mapping: Record<string, string> = {
-    'barcelone': 'Barcelona',
-    'londres': 'London',
-    'bruxelles': 'Brussels',
-    'genève': 'Geneva',
-    'geneve': 'Geneva',
-    'munich': 'Munich',
-    'münchen': 'Munich',
-    'vienne': 'Vienna',
-    'wien': 'Vienna',
-    'rome': 'Rome',
-    'roma': 'Rome',
-    'milan': 'Milan',
-    'milano': 'Milan',
-    'florence': 'Florence',
-    'firenze': 'Florence',
-    'venise': 'Venice',
-    'venezia': 'Venice',
-    'naples': 'Naples',
-    'napoli': 'Naples',
-    'séville': 'Seville',
-    'seville': 'Seville',
-    'sevilla': 'Seville',
-    'valence': 'Valencia',
-  };
-
-  const lower = city.toLowerCase().trim();
-  return mapping[lower] || city.charAt(0).toUpperCase() + city.slice(1).toLowerCase();
+  const result = normalizeCitySync(city);
+  return result.displayName;
 }
 
 /**
@@ -638,50 +614,53 @@ function getTrainOperator(origin: string, destination: string): string {
 /**
  * Retourne l'URL de réservation train
  */
-function getTrainBookingUrl(origin: string, destination: string, passengers: number = 1): string {
-  const cities = [origin.toLowerCase(), destination.toLowerCase()];
-  const originLower = origin.toLowerCase();
-  const destLower = destination.toLowerCase();
+function getTrainBookingUrl(origin: string, destination: string, passengers: number = 1, date?: Date): string {
+  // Utiliser le service unifié pour normaliser les villes
+  const originNorm = normalizeCitySync(origin);
+  const destNorm = normalizeCitySync(destination);
+  const originKey = originNorm.normalized.toLowerCase();
+  const destKey = destNorm.normalized.toLowerCase();
 
   // Eurostar: Paris/Bruxelles/Amsterdam ↔ Londres
-  if (cities.some(c => c.includes('london') || c.includes('londres'))) {
+  const eurostarCities = ['london', 'paris', 'brussels', 'amsterdam', 'lille', 'rotterdam'];
+  const isEurostarRoute = eurostarCities.includes(originKey) || eurostarCities.includes(destKey);
+
+  if (isEurostarRoute && (originKey === 'london' || destKey === 'london')) {
     // Codes numériques Eurostar (format utilisé par leur site de recherche)
     const eurostarCodes: Record<string, string> = {
       'paris': '8727100',      // Paris Nord
       'london': '7015400',     // London St Pancras
-      'londres': '7015400',
       'brussels': '8814001',   // Bruxelles-Midi
-      'bruxelles': '8814001',
       'amsterdam': '8400058',  // Amsterdam Centraal
       'lille': '8722326',      // Lille Europe
       'rotterdam': '8400530',  // Rotterdam Centraal
     };
 
-    // Trouver le code d'origine et de destination
-    let originCode = '';
-    let destCode = '';
-    for (const [city, code] of Object.entries(eurostarCodes)) {
-      if (originLower.includes(city)) originCode = code;
-      if (destLower.includes(city)) destCode = code;
-    }
+    const originCode = eurostarCodes[originKey];
+    const destCode = eurostarCodes[destKey];
 
-    // Si on a trouvé les codes, générer l'URL avec paramètres
-    // Format: https://www.eurostar.com/search/uk-en?adult=3&origin=8727100&destination=7015400&outbound=2026-01-28
+    // Si on a trouvé les codes, générer l'URL avec paramètres incluant la date
     if (originCode && destCode) {
-      return `https://www.eurostar.com/search/uk-en?adult=${passengers}&origin=${originCode}&destination=${destCode}`;
+      const dateStr = date ? date.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+      return `https://www.eurostar.com/search/uk-en?adult=${passengers}&origin=${originCode}&destination=${destCode}&outbound=${dateStr}`;
     }
 
-    // Fallback: page d'accueil Eurostar
-    return `https://www.eurostar.com/uk-en`;
+    // Fallback: page de recherche Eurostar avec villes pré-remplies
+    return `https://www.eurostar.com/uk-en/travel/booking/search?origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}`;
   }
 
+  // Liste des clés normalisées pour vérification
+  const cities = [originKey, destKey];
+
   // SNCF Connect: trajets France
-  if (cities.some(c => c.includes('paris') || c.includes('lyon') || c.includes('marseille') || c.includes('bordeaux') || c.includes('toulouse') || c.includes('nice') || c.includes('strasbourg'))) {
+  const frenchCities = ['paris', 'lyon', 'marseille', 'bordeaux', 'toulouse', 'nice', 'strasbourg', 'lille', 'nantes'];
+  if (cities.some(c => frenchCities.includes(c))) {
     return `https://www.sncf-connect.com/app/home/search?from=${encodeURIComponent(origin)}&to=${encodeURIComponent(destination)}`;
   }
 
   // Renfe: trajets Espagne
-  if (cities.some(c => c.includes('barcelona') || c.includes('barcelone') || c.includes('madrid') || c.includes('valencia') || c.includes('seville') || c.includes('sevilla'))) {
+  const spanishCities = ['barcelona', 'madrid', 'valencia', 'seville', 'malaga'];
+  if (cities.some(c => spanishCities.includes(c))) {
     return `https://www.renfe.com/es/en`;
   }
 
