@@ -21,10 +21,6 @@ export function GoogleSignIn({ redirectTo, className }: GoogleSignInProps) {
       provider: 'google',
       options: {
         redirectTo: redirectTo || `${window.location.origin}/auth/callback`,
-        queryParams: {
-          access_type: 'offline',
-          prompt: 'consent',
-        },
       },
     });
 
