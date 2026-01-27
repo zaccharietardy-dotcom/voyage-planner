@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Search, X } from 'lucide-react';
+import { Search, X, Sparkles } from 'lucide-react';
 
 interface SearchBarProps {
   placeholder?: string;
@@ -39,12 +39,19 @@ export function SearchBar({
       <div
         className={`
           flex items-center gap-3 px-4 py-3 rounded-xl
-          bg-[#12121a]/60 backdrop-blur-xl
-          border transition-colors duration-200
-          ${isFocused ? 'border-indigo-500/50' : 'border-[#2a2a38]'}
+          bg-[#0d1f35]/80 backdrop-blur-xl
+          border transition-all duration-300
+          ${isFocused
+            ? 'border-[#d4a853]/50 shadow-[0_0_20px_rgba(212,168,83,0.15)]'
+            : 'border-[#1e3a5f]'
+          }
         `}
       >
-        <Search className={`w-5 h-5 ${isFocused ? 'text-indigo-400' : 'text-gray-500'}`} />
+        <Search
+          className={`w-5 h-5 transition-colors duration-300 ${
+            isFocused ? 'text-[#d4a853]' : 'text-[#6b8aab]'
+          }`}
+        />
         <input
           type="text"
           value={query}
@@ -52,7 +59,7 @@ export function SearchBar({
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           placeholder={placeholder}
-          className="flex-1 bg-transparent text-white placeholder-gray-500 outline-none text-sm"
+          className="flex-1 bg-transparent text-white placeholder-[#6b8aab] outline-none text-sm"
         />
         {query && (
           <motion.button
@@ -60,9 +67,9 @@ export function SearchBar({
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
             onClick={handleClear}
-            className="p-1 rounded-full hover:bg-white/10"
+            className="p-1 rounded-full hover:bg-[#d4a853]/10 transition-colors"
           >
-            <X className="w-4 h-4 text-gray-400" />
+            <X className="w-4 h-4 text-[#a8c0d8]" />
           </motion.button>
         )}
       </div>
