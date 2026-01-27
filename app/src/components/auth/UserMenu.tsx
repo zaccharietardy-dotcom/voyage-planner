@@ -99,13 +99,11 @@ export function UserMenu() {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem
-          className="text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-950 cursor-pointer"
-          onSelect={(e) => {
-            e.preventDefault();
-            handleSignOut();
-          }}
+        <button
+          type="button"
+          onClick={handleSignOut}
           disabled={isSigningOut}
+          className="relative flex w-full cursor-pointer select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none text-red-600 hover:bg-red-50 dark:hover:bg-red-950 focus:bg-red-50 dark:focus:bg-red-950 disabled:pointer-events-none disabled:opacity-50"
         >
           {isSigningOut ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -113,7 +111,7 @@ export function UserMenu() {
             <LogOut className="mr-2 h-4 w-4" />
           )}
           {isSigningOut ? 'Déconnexion...' : 'Déconnexion'}
-        </DropdownMenuItem>
+        </button>
       </DropdownMenuContent>
     </DropdownMenu>
   );
