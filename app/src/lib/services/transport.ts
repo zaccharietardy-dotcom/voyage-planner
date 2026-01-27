@@ -177,6 +177,8 @@ export async function compareTransportOptions(
     if (combinedOption) options.push(combinedOption);
   }
 
+  console.log(`[Transport] Options générées: ${options.map(o => o.mode).join(', ')}`);
+
   // Calculer les scores
   const scoredOptions = calculateScores(options, params.preferences?.prioritize || 'balanced');
 
@@ -184,7 +186,10 @@ export async function compareTransportOptions(
   markRecommendation(scoredOptions);
 
   // Trier par score décroissant
-  return scoredOptions.sort((a, b) => b.score - a.score);
+  const sorted = scoredOptions.sort((a, b) => b.score - a.score);
+  console.log(`[Transport] Options finales: ${sorted.map(o => `${o.mode}(${o.score})`).join(', ')}`);
+
+  return sorted;
 }
 
 /**
@@ -247,8 +252,13 @@ function calculatePlaneOption(params: TransportSearchParams, distance: number): 
 function calculateTrainOption(params: TransportSearchParams, distance: number): TransportOption | null {
   const isHighSpeed = hasDirectHighSpeedRail(params.origin, params.destination);
 
+  console.log(`[Train] calculateTrainOption: ${params.origin} → ${params.destination}, distance: ${Math.round(distance)}km, isHighSpeed: ${isHighSpeed}`);
+
   // Si pas de train direct et distance > 1000km, pas d'option train simple
-  if (!isHighSpeed && distance > 1000) return null;
+  if (!isHighSpeed && distance > 1000) {
+    console.log(`[Train] Skipping train: no high-speed rail and distance > 1000km`);
+    return null;
+  }
 
   const speed = isHighSpeed ? SPEEDS.train_highspeed : SPEEDS.train_regular;
   const travelTime = Math.round((distance / speed) * 60);
@@ -552,8 +562,19 @@ function hasDirectHighSpeedRail(origin: string, destination: string): boolean {
   const normalizedOrigin = normalizeCity(origin);
   const normalizedDest = normalizeCity(destination);
 
+  // Vérifier dans les deux sens (Paris→London et London→Paris)
   const originRoutes = HIGH_SPEED_RAIL_ROUTES[normalizedOrigin] || [];
-  return originRoutes.some(city => normalizeCity(city) === normalizedDest);
+  const destRoutes = HIGH_SPEED_RAIL_ROUTES[normalizedDest] || [];
+
+  const hasFromOrigin = originRoutes.some(city => normalizeCity(city) === normalizedDest);
+  const hasFromDest = destRoutes.some(city => normalizeCity(city) === normalizedOrigin);
+
+  console.log(`[Train] Checking high-speed rail: ${origin} (${normalizedOrigin}) → ${destination} (${normalizedDest})`);
+  console.log(`[Train] Routes from ${normalizedOrigin}: ${originRoutes.join(', ')}`);
+  console.log(`[Train] Routes from ${normalizedDest}: ${destRoutes.join(', ')}`);
+  console.log(`[Train] Has direct: ${hasFromOrigin || hasFromDest}`);
+
+  return hasFromOrigin || hasFromDest;
 }
 
 /**
