@@ -50,6 +50,7 @@ export interface Database {
           preferences: Json;
           data: Json;
           share_code: string;
+          visibility: 'public' | 'friends' | 'private';
           created_at: string;
           updated_at: string;
         };
@@ -63,6 +64,7 @@ export interface Database {
           preferences: Json;
           data: Json;
           share_code?: string;
+          visibility?: 'public' | 'friends' | 'private';
           created_at?: string;
           updated_at?: string;
         };
@@ -76,6 +78,7 @@ export interface Database {
           preferences?: Json;
           data?: Json;
           share_code?: string;
+          visibility?: 'public' | 'friends' | 'private';
           created_at?: string;
           updated_at?: string;
         };
@@ -257,6 +260,153 @@ export interface Database {
           }
         ];
       };
+      user_preferences: {
+        Row: {
+          id: string;
+          user_id: string;
+          favorite_activities: string[];
+          travel_style: 'adventurous' | 'relaxed' | 'cultural' | 'party' | 'balanced';
+          budget_preference: 'budget' | 'moderate' | 'comfort' | 'luxury';
+          accommodation_preference: 'hostel' | 'hotel' | 'airbnb' | 'luxury';
+          pace_preference: 'relaxed' | 'moderate' | 'intense';
+          dietary_restrictions: string[];
+          cuisine_preferences: string[];
+          allergies: string[];
+          accessibility_needs: string[];
+          preferred_language: string;
+          preferred_currency: string;
+          wake_up_time: 'early' | 'normal' | 'late';
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          favorite_activities?: string[];
+          travel_style?: 'adventurous' | 'relaxed' | 'cultural' | 'party' | 'balanced';
+          budget_preference?: 'budget' | 'moderate' | 'comfort' | 'luxury';
+          accommodation_preference?: 'hostel' | 'hotel' | 'airbnb' | 'luxury';
+          pace_preference?: 'relaxed' | 'moderate' | 'intense';
+          dietary_restrictions?: string[];
+          cuisine_preferences?: string[];
+          allergies?: string[];
+          accessibility_needs?: string[];
+          preferred_language?: string;
+          preferred_currency?: string;
+          wake_up_time?: 'early' | 'normal' | 'late';
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          favorite_activities?: string[];
+          travel_style?: 'adventurous' | 'relaxed' | 'cultural' | 'party' | 'balanced';
+          budget_preference?: 'budget' | 'moderate' | 'comfort' | 'luxury';
+          accommodation_preference?: 'hostel' | 'hotel' | 'airbnb' | 'luxury';
+          pace_preference?: 'relaxed' | 'moderate' | 'intense';
+          dietary_restrictions?: string[];
+          cuisine_preferences?: string[];
+          allergies?: string[];
+          accessibility_needs?: string[];
+          preferred_language?: string;
+          preferred_currency?: string;
+          wake_up_time?: 'early' | 'normal' | 'late';
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "user_preferences_user_id_fkey";
+            columns: ["user_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      trip_likes: {
+        Row: {
+          id: string;
+          trip_id: string;
+          user_id: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          trip_id: string;
+          user_id: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          trip_id?: string;
+          user_id?: string;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "trip_likes_trip_id_fkey";
+            columns: ["trip_id"];
+            referencedRelation: "trips";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "trip_likes_user_id_fkey";
+            columns: ["user_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      trip_comments: {
+        Row: {
+          id: string;
+          trip_id: string;
+          user_id: string;
+          content: string;
+          parent_id: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          trip_id: string;
+          user_id: string;
+          content: string;
+          parent_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          trip_id?: string;
+          user_id?: string;
+          content?: string;
+          parent_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "trip_comments_trip_id_fkey";
+            columns: ["trip_id"];
+            referencedRelation: "trips";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "trip_comments_user_id_fkey";
+            columns: ["user_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "trip_comments_parent_id_fkey";
+            columns: ["parent_id"];
+            referencedRelation: "trip_comments";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
     };
     Views: {
       [_ in never]: never;
@@ -280,6 +430,9 @@ export type TripMember = Database['public']['Tables']['trip_members']['Row'];
 export type Proposal = Database['public']['Tables']['proposals']['Row'];
 export type Vote = Database['public']['Tables']['votes']['Row'];
 export type ActivityLog = Database['public']['Tables']['activity_log']['Row'];
+export type UserPreferences = Database['public']['Tables']['user_preferences']['Row'];
+export type TripLike = Database['public']['Tables']['trip_likes']['Row'];
+export type TripComment = Database['public']['Tables']['trip_comments']['Row'];
 
 // Extended types with relations
 export interface TripWithMembers extends Trip {
@@ -293,4 +446,26 @@ export interface ProposalWithAuthor extends Proposal {
 
 export interface TripMemberWithProfile extends TripMember {
   profile: Profile;
+}
+
+// Social types
+export interface PublicTrip {
+  id: string;
+  owner_id: string;
+  title: string;
+  destination: string;
+  start_date: string;
+  duration_days: number;
+  data: Json;
+  visibility: 'public' | 'friends' | 'private';
+  created_at: string;
+  updated_at: string;
+  owner_name: string | null;
+  owner_avatar: string | null;
+  likes_count: number;
+  comments_count: number;
+}
+
+export interface TripCommentWithAuthor extends TripComment {
+  author: Profile;
 }

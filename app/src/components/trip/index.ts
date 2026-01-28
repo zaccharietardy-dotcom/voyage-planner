@@ -5,3 +5,4 @@ export { ItineraryConnector } from './ItineraryConnector';
 export { CarbonFootprint } from './CarbonFootprint';
 export { DirectionsEmbed, DirectionsMiniMap } from './DirectionsEmbed';
 export { TransportOptions } from './TransportOptions';
+export { ActivityEditModal } from './ActivityEditModal';

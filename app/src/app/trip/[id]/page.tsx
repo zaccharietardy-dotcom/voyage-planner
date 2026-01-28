@@ -33,8 +33,17 @@ import { ProposalsList } from '@/components/trip/ProposalsList';
 import { CreateProposalDialog } from '@/components/trip/CreateProposalDialog';
 import { DraggableTimeline } from '@/components/trip/DraggableTimeline';
 import { ShareTripDialog } from '@/components/trip/ShareTripDialog';
+import { ActivityEditModal } from '@/components/trip/ActivityEditModal';
 import { ProposedChange, createMoveActivityChange } from '@/lib/types/collaboration';
 import { cn } from '@/lib/utils';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { toast } from 'sonner';
 
 /**
  * Met à jour le planning quand l'hôtel change
@@ -159,6 +168,8 @@ export default function TripPage() {
   const [showProposalDialog, setShowProposalDialog] = useState(false);
   const [showCollabPanel, setShowCollabPanel] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
+  const [editingItem, setEditingItem] = useState<TripItem | null>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   // Déterminer quel trip utiliser
   const trip = useCollaborativeMode ? collaborativeTrip?.data : localTrip;
@@ -270,6 +281,24 @@ export default function TripPage() {
     setSelectedItemId(item.id);
   };
 
+  const handleEditItem = (item: TripItem) => {
+    setEditingItem(item);
+    setShowEditModal(true);
+  };
+
+  const handleSaveItem = (updatedItem: TripItem) => {
+    if (!trip) return;
+
+    const updatedDays = trip.days.map((day) => ({
+      ...day,
+      items: day.items.map((i) => (i.id === updatedItem.id ? updatedItem : i)),
+    }));
+
+    const updatedTrip = { ...trip, days: updatedDays, updatedAt: new Date() };
+    saveTrip(updatedTrip);
+    toast.success('Activité modifiée');
+  };
+
   const handleDeleteItem = (item: TripItem) => {
     if (!trip) return;
     if (!confirm('Supprimer cette activité ?')) return;
@@ -281,6 +310,143 @@ export default function TripPage() {
 
     const updatedTrip = { ...trip, days: updatedDays, updatedAt: new Date() };
     saveTrip(updatedTrip);
+    toast.success('Activité supprimée');
+  };
+
+  // Helper function for sorting times with after-midnight handling
+  const timeToSortableMinutes = (time: string): number => {
+    const [hours, minutes] = time.split(':').map(Number);
+    const totalMinutes = hours * 60 + minutes;
+    // Hours 00:00-05:59 are considered "after midnight" and sort after normal hours
+    return hours < 6 ? totalMinutes + 1440 : totalMinutes;
+  };
+
+  const handleMoveItem = (item: TripItem, direction: 'up' | 'down') => {
+    if (!trip) return;
+
+    const dayIndex = trip.days.findIndex((d) =>
+      d.items.some((i) => i.id === item.id)
+    );
+    if (dayIndex === -1) return;
+
+    const day = trip.days[dayIndex];
+
+    // Work with sorted items (same as DayTimeline does) excluding transport
+    // Use special sorting for after-midnight times
+    const sortedItems = [...day.items]
+      .filter((i) => i.type !== 'transport')
+      .sort((a, b) => timeToSortableMinutes(a.startTime) - timeToSortableMinutes(b.startTime));
+
+    const currentIndex = sortedItems.findIndex((i) => i.id === item.id);
+    if (currentIndex === -1) return;
+
+    const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+    if (targetIndex < 0 || targetIndex >= sortedItems.length) return;
+
+    // Get the two items to swap (BEFORE modifying anything)
+    const currentItem = sortedItems[currentIndex];
+    const targetItem = sortedItems[targetIndex];
+
+    // Save the times we need to swap
+    const currentStartTime = currentItem.startTime;
+    const currentEndTime = currentItem.endTime;
+    const targetStartTime = targetItem.startTime;
+    const targetEndTime = targetItem.endTime;
+
+    // Create new items array with swapped times
+    const newItems = day.items.map((i) => {
+      if (i.id === currentItem.id) {
+        return { ...i, startTime: targetStartTime, endTime: targetEndTime };
+      }
+      if (i.id === targetItem.id) {
+        return { ...i, startTime: currentStartTime, endTime: currentEndTime };
+      }
+      return i;
+    });
+
+    const updatedDays = trip.days.map((d, idx) =>
+      idx === dayIndex ? { ...d, items: newItems } : d
+    );
+
+    const updatedTrip = { ...trip, days: updatedDays, updatedAt: new Date() };
+    saveTrip(updatedTrip);
+    toast.success('Activité déplacée');
+  };
+
+  const handleRegenerateDay = async (dayNumber: number) => {
+    if (!trip) return;
+    setRegenerating(true);
+    try {
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...trip.preferences,
+          regenerateDay: dayNumber,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Erreur régénération');
+
+      const newTrip = await response.json();
+      // Only update the specific day
+      const updatedDays = trip.days.map((day) =>
+        day.dayNumber === dayNumber
+          ? newTrip.days.find((d: TripDay) => d.dayNumber === dayNumber) || day
+          : day
+      );
+
+      const updatedTrip = { ...trip, days: updatedDays, updatedAt: new Date() };
+      saveTrip(updatedTrip);
+      toast.success(`Jour ${dayNumber} régénéré`);
+    } catch (error) {
+      console.error('Erreur régénération jour:', error);
+      toast.error('Erreur lors de la régénération');
+    } finally {
+      setRegenerating(false);
+    }
+  };
+
+  const handleRegenerateRestaurants = async () => {
+    if (!trip) return;
+    setRegenerating(true);
+    try {
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...trip.preferences,
+          regenerateRestaurants: true,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Erreur régénération');
+
+      const newTrip = await response.json();
+      // Only update restaurant items
+      const updatedDays = trip.days.map((day, dayIdx) => ({
+        ...day,
+        items: day.items.map((item) => {
+          if (item.type === 'restaurant') {
+            const newDayItems = newTrip.days[dayIdx]?.items || [];
+            const newRestaurant = newDayItems.find(
+              (ni: TripItem) => ni.type === 'restaurant' && ni.startTime === item.startTime
+            );
+            return newRestaurant || item;
+          }
+          return item;
+        }),
+      }));
+
+      const updatedTrip = { ...trip, days: updatedDays, updatedAt: new Date() };
+      saveTrip(updatedTrip);
+      toast.success('Restaurants régénérés');
+    } catch (error) {
+      console.error('Erreur régénération restaurants:', error);
+      toast.error('Erreur lors de la régénération');
+    } finally {
+      setRegenerating(false);
+    }
   };
 
   const getAllItems = (): TripItem[] => {
@@ -360,6 +526,43 @@ export default function TripPage() {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              {/* Bouton régénérer */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-2"
+                    disabled={regenerating}
+                  >
+                    {regenerating ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <RefreshCw className="h-4 w-4" />
+                    )}
+                    <span className="hidden sm:inline">Régénérer</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={handleRegenerateTrip}>
+                    Tout régénérer
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  {trip.days.map((day) => (
+                    <DropdownMenuItem
+                      key={day.dayNumber}
+                      onClick={() => handleRegenerateDay(day.dayNumber)}
+                    >
+                      Jour {day.dayNumber}
+                    </DropdownMenuItem>
+                  ))}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleRegenerateRestaurants}>
+                    Restaurants uniquement
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
               {/* Bouton mode édition */}
               {canEdit && (
                 <Button
@@ -539,7 +742,10 @@ export default function TripPage() {
                           day={day}
                           selectedItemId={selectedItemId}
                           onSelectItem={handleSelectItem}
+                          onEditItem={handleEditItem}
                           onDeleteItem={handleDeleteItem}
+                          onMoveItem={handleMoveItem}
+                          showMoveButtons={true}
                         />
                       </TabsContent>
                     ))}
@@ -685,6 +891,18 @@ export default function TripPage() {
           }}
         />
       )}
+
+      {/* Modal d'édition d'activité */}
+      <ActivityEditModal
+        item={editingItem}
+        isOpen={showEditModal}
+        onClose={() => {
+          setShowEditModal(false);
+          setEditingItem(null);
+        }}
+        onSave={handleSaveItem}
+        onDelete={handleDeleteItem}
+      />
     </div>
   );
 }

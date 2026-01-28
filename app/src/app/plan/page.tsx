@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Card, CardContent } from '@/components/ui/card';
@@ -13,8 +14,11 @@ import {
   StepActivities,
 } from '@/components/forms';
 import { TripPreferences } from '@/lib/types';
-import { ArrowLeft, ArrowRight, Sparkles, Loader2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Sparkles, Loader2, UserCog, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/components/auth';
+import { useUserPreferences, preferenceOptions } from '@/hooks/useUserPreferences';
+import { toast } from 'sonner';
 
 const STEPS = [
   { id: 1, title: 'Destination', icon: '📍' },
@@ -36,9 +40,73 @@ const DEFAULT_PREFERENCES: Partial<TripPreferences> = {
 
 export default function PlanPage() {
   const router = useRouter();
+  const { user } = useAuth();
+  const { preferences: userPrefs, isLoading: prefsLoading } = useUserPreferences();
   const [currentStep, setCurrentStep] = useState(1);
   const [isGenerating, setIsGenerating] = useState(false);
   const [preferences, setPreferences] = useState<Partial<TripPreferences>>(DEFAULT_PREFERENCES);
+  const [preferencesApplied, setPreferencesApplied] = useState(false);
+
+  // Function to apply user preferences to trip form
+  const applyUserPreferences = () => {
+    if (!userPrefs) return;
+
+    const updatedPrefs: Partial<TripPreferences> = { ...preferences };
+
+    // Map budget preference (user prefs uses 'budget', form uses 'economic')
+    if (userPrefs.budget_preference) {
+      const budgetMap: Record<string, 'economic' | 'moderate' | 'comfort' | 'luxury'> = {
+        'budget': 'economic',
+        'moderate': 'moderate',
+        'comfort': 'comfort',
+        'luxury': 'luxury',
+      };
+      updatedPrefs.budgetLevel = budgetMap[userPrefs.budget_preference] || 'moderate';
+    }
+
+    // Map activities (filter to match available activities in the form)
+    if (userPrefs.favorite_activities && userPrefs.favorite_activities.length > 0) {
+      // Map user preference activities to form ActivityType
+      type ActivityType = 'beach' | 'nature' | 'culture' | 'gastronomy' | 'nightlife' | 'shopping' | 'adventure' | 'wellness';
+      const activityMapping: Record<string, ActivityType> = {
+        'museums': 'culture',
+        'monuments': 'culture',
+        'nature': 'nature',
+        'beaches': 'beach',
+        'hiking': 'adventure',
+        'shopping': 'shopping',
+        'nightlife': 'nightlife',
+        'food_tours': 'gastronomy',
+        'sports': 'adventure',
+        'wellness': 'wellness',
+        'photography': 'culture',
+        'local_experiences': 'culture',
+      };
+
+      const mappedActivities = userPrefs.favorite_activities
+        .map(a => activityMapping[a])
+        .filter((a): a is ActivityType => !!a);
+
+      if (mappedActivities.length > 0) {
+        updatedPrefs.activities = [...new Set(mappedActivities)] as ActivityType[];
+      }
+    }
+
+    // Map dietary restrictions
+    if (userPrefs.dietary_restrictions && userPrefs.dietary_restrictions.length > 0) {
+      type DietaryType = 'none' | 'vegetarian' | 'vegan' | 'halal' | 'kosher' | 'gluten_free';
+      const validDietary: DietaryType[] = ['vegetarian', 'vegan', 'halal', 'kosher', 'gluten_free'];
+      const mappedDietary = userPrefs.dietary_restrictions
+        .filter((d): d is DietaryType => validDietary.includes(d as DietaryType));
+      if (mappedDietary.length > 0) {
+        updatedPrefs.dietary = mappedDietary;
+      }
+    }
+
+    setPreferences(updatedPrefs);
+    setPreferencesApplied(true);
+    toast.success('Préférences appliquées !');
+  };
 
   const updatePreferences = (data: Partial<TripPreferences>) => {
     setPreferences((prev) => ({ ...prev, ...data }));
@@ -118,6 +186,62 @@ export default function PlanPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
       <div className="container max-w-2xl mx-auto px-4 py-8">
+        {/* User Preferences Banner */}
+        {user && !prefsLoading && (
+          <div className="mb-6">
+            {userPrefs ? (
+              <div className="flex items-center justify-between p-4 rounded-xl bg-primary/5 border border-primary/20">
+                <div className="flex items-center gap-3">
+                  <UserCog className="h-5 w-5 text-primary" />
+                  <div>
+                    <p className="text-sm font-medium">Vos préférences de voyage</p>
+                    <p className="text-xs text-muted-foreground">
+                      {preferenceOptions.travelStyle.find(o => o.value === userPrefs.travel_style)?.label} · {preferenceOptions.budgetPreference.find(o => o.value === userPrefs.budget_preference)?.label}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  {preferencesApplied ? (
+                    <span className="text-sm text-primary flex items-center gap-1">
+                      <Check className="h-4 w-4" />
+                      Appliquées
+                    </span>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={applyUserPreferences}
+                      className="text-primary border-primary/30 hover:bg-primary/10"
+                    >
+                      Charger
+                    </Button>
+                  )}
+                  <Link href="/preferences">
+                    <Button variant="ghost" size="sm">
+                      Modifier
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              <Link href="/preferences" className="block">
+                <div className="flex items-center justify-between p-4 rounded-xl bg-muted/50 border border-border hover:bg-muted/80 transition-colors cursor-pointer">
+                  <div className="flex items-center gap-3">
+                    <UserCog className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <p className="text-sm font-medium">Définir mes préférences</p>
+                      <p className="text-xs text-muted-foreground">
+                        Gagnez du temps en sauvegardant vos préférences
+                      </p>
+                    </div>
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                </div>
+              </Link>
+            )}
+          </div>
+        )}
+
         {/* Progress header */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">

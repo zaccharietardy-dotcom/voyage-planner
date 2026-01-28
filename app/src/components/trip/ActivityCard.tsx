@@ -24,6 +24,8 @@ import {
   TramFront,
   Ship,
   Briefcase,
+  ChevronUp,
+  ChevronDown,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TripItemType } from '@/lib/types';
@@ -35,6 +37,10 @@ interface ActivityCardProps {
   onSelect?: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
+  onMoveUp?: () => void;
+  onMoveDown?: () => void;
+  canMoveUp?: boolean;
+  canMoveDown?: boolean;
   dragHandleProps?: React.HTMLAttributes<HTMLDivElement>;
 }
 
@@ -87,6 +93,10 @@ export function ActivityCard({
   onSelect,
   onEdit,
   onDelete,
+  onMoveUp,
+  onMoveDown,
+  canMoveUp = true,
+  canMoveDown = true,
   dragHandleProps,
 }: ActivityCardProps) {
   const Icon = TYPE_ICONS[item.type];
@@ -279,6 +289,37 @@ export function ActivityCard({
 
           {/* Action buttons */}
           <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+            {/* Move buttons */}
+            {onMoveUp && (
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-7 w-7"
+                disabled={!canMoveUp}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onMoveUp();
+                }}
+                title="Déplacer vers le haut"
+              >
+                <ChevronUp className="h-4 w-4" />
+              </Button>
+            )}
+            {onMoveDown && (
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-7 w-7"
+                disabled={!canMoveDown}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onMoveDown();
+                }}
+                title="Déplacer vers le bas"
+              >
+                <ChevronDown className="h-4 w-4" />
+              </Button>
+            )}
             {onEdit && (
               <Button
                 size="icon"

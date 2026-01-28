@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { AuthProvider, UserMenu } from "@/components/auth";
+import { AuthProvider } from "@/components/auth";
+import { Header } from "@/components/layout";
+import { Toaster } from "sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,7 +18,15 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Narae Voyage - Planifie et partage tes voyages",
-  description: "Planifie et partage tes voyages avec tes amis",
+  description: "Planifie et partage tes voyages avec tes amis. L'IA génère ton itinéraire personnalisé en 2 minutes.",
+  keywords: ["voyage", "planification", "itinéraire", "IA", "collaboration", "gratuit"],
+  authors: [{ name: "Narae Voyage" }],
+  openGraph: {
+    title: "Narae Voyage - Planifie et partage tes voyages",
+    description: "L'IA génère ton itinéraire personnalisé en 2 minutes. Gratuit et collaboratif.",
+    type: "website",
+    locale: "fr_FR",
+  },
   icons: {
     icon: [
       { url: '/favicon.svg', type: 'image/svg+xml' },
@@ -41,11 +50,20 @@ export default function RootLayout({
       >
         <ThemeProvider defaultTheme="system" storageKey="voyage-theme">
           <AuthProvider>
-            <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
-              <UserMenu />
-              <ThemeToggle />
-            </div>
-            {children}
+            <Header />
+            <main className="pt-16">
+              {children}
+            </main>
+            <Toaster
+              position="bottom-right"
+              toastOptions={{
+                classNames: {
+                  toast: 'bg-background border-border',
+                  title: 'text-foreground',
+                  description: 'text-muted-foreground',
+                },
+              }}
+            />
           </AuthProvider>
         </ThemeProvider>
       </body>

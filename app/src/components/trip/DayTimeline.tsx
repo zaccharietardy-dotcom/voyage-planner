@@ -16,6 +16,26 @@ interface DayTimelineProps {
   onEditItem?: (item: TripItem) => void;
   onDeleteItem?: (item: TripItem) => void;
   onAddItem?: (dayNumber: number) => void;
+  onMoveItem?: (item: TripItem, direction: 'up' | 'down') => void;
+  showMoveButtons?: boolean;
+}
+
+/**
+ * Convertit une heure HH:MM en minutes depuis minuit, avec gestion des horaires après minuit.
+ * Les heures entre 00:00 et 05:59 sont considérées comme "après minuit" (lendemain)
+ * et reçoivent +1440 minutes (24h) pour être triées après les heures normales.
+ */
+function timeToSortableMinutes(time: string): number {
+  const [hours, minutes] = time.split(':').map(Number);
+  const totalMinutes = hours * 60 + minutes;
+
+  // Si l'heure est entre 00:00 et 05:59, c'est probablement après minuit
+  // On ajoute 24h (1440 minutes) pour que ça trie APRÈS les heures de la journée
+  if (hours < 6) {
+    return totalMinutes + 1440;
+  }
+
+  return totalMinutes;
 }
 
 export function DayTimeline({
@@ -25,14 +45,14 @@ export function DayTimeline({
   onEditItem,
   onDeleteItem,
   onAddItem,
+  onMoveItem,
+  showMoveButtons = false,
 }: DayTimelineProps) {
   // Filter out 'transport' items (transfers) - they're replaced by ItineraryConnector links
-  const filteredItems = day.items.filter(item => item.type !== 'transport');
-
-  const sortedItems = [...filteredItems].sort((a, b) => {
-    // Sort by start time
-    return a.startTime.localeCompare(b.startTime);
-  });
+  // Then sort by startTime with special handling for after-midnight times
+  const sortedItems = [...day.items]
+    .filter(item => item.type !== 'transport')
+    .sort((a, b) => timeToSortableMinutes(a.startTime) - timeToSortableMinutes(b.startTime));
 
   return (
     <div className="space-y-4">
@@ -71,8 +91,11 @@ export function DayTimeline({
         {sortedItems.map((item, index) => {
           const nextItem = index < sortedItems.length - 1 ? sortedItems[index + 1] : null;
 
+          const isFirst = index === 0;
+          const isLast = index === sortedItems.length - 1;
+
           return (
-            <div key={item.id} className="relative">
+            <div key={item.id} className="relative group/item">
               {/* Timeline dot */}
               <div className="absolute -left-6 top-5 w-3 h-3 rounded-full bg-background border-2 border-primary" />
 
@@ -82,6 +105,10 @@ export function DayTimeline({
                 onSelect={() => onSelectItem?.(item)}
                 onEdit={() => onEditItem?.(item)}
                 onDelete={() => onDeleteItem?.(item)}
+                onMoveUp={showMoveButtons && onMoveItem ? () => onMoveItem(item, 'up') : undefined}
+                onMoveDown={showMoveButtons && onMoveItem ? () => onMoveItem(item, 'down') : undefined}
+                canMoveUp={!isFirst}
+                canMoveDown={!isLast}
               />
 
               {/* Connecteur d'itinéraire vers l'activité suivante */}
