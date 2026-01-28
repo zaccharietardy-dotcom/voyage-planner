@@ -4,13 +4,13 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export async function GET(request: NextRequest) {
-  const { searchParams, origin } = new URL(request.url);
-  const code = searchParams.get('code');
-  const redirect = searchParams.get('redirect') || '/mes-voyages';
+  const requestUrl = new URL(request.url);
+  const code = requestUrl.searchParams.get('code');
+  const origin = requestUrl.origin;
 
   // Vérifier s'il y a une erreur OAuth
-  const errorParam = searchParams.get('error');
-  const errorDescription = searchParams.get('error_description');
+  const errorParam = requestUrl.searchParams.get('error');
+  const errorDescription = requestUrl.searchParams.get('error_description');
 
   if (errorParam) {
     console.error('OAuth error:', errorParam, errorDescription);
@@ -40,17 +40,17 @@ export async function GET(request: NextRequest) {
       }
     );
 
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
-    if (!error) {
-      // S'assurer que le redirect commence par /
-      const safeRedirect = redirect.startsWith('/') ? redirect : `/${redirect}`;
-      return NextResponse.redirect(`${origin}${safeRedirect}`);
+    if (!error && data.session) {
+      // Redirection vers mes-voyages après connexion réussie
+      return NextResponse.redirect(`${origin}/mes-voyages`);
     }
 
     console.error('Session exchange error:', error);
+    return NextResponse.redirect(`${origin}/login?error=session_error`);
   }
 
-  // Return the user to an error page with instructions
-  return NextResponse.redirect(`${origin}/login?error=auth_error`);
+  // Pas de code - rediriger vers login
+  return NextResponse.redirect(`${origin}/login`);
 }
