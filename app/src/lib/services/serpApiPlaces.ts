@@ -10,12 +10,56 @@
  * https://serpapi.com/
  */
 
+import * as fs from 'fs';
+import * as path from 'path';
 import { Restaurant, DietaryType, ActivityType } from '../types';
 import { Attraction } from './attractions';
 import { calculateDistance } from './geocoding';
 
 const SERPAPI_KEY = process.env.SERPAPI_KEY?.trim();
 const SERPAPI_BASE_URL = 'https://serpapi.com/search.json';
+
+// ============================================
+// Cache attractions (7 jours TTL)
+// ============================================
+
+const ATTRACTIONS_CACHE_DIR = path.join(process.cwd(), '.cache', 'attractions');
+const ATTRACTIONS_CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 jours
+
+function getAttractionsCacheKey(destination: string, cityCenter: { lat: number; lng: number }): string {
+  const key = `${destination}-${cityCenter.lat.toFixed(2)}-${cityCenter.lng.toFixed(2)}`;
+  return key.replace(/[^a-zA-Z0-9-]/g, '_').substring(0, 200);
+}
+
+function readAttractionsCache(key: string): Attraction[] | null {
+  try {
+    const filePath = path.join(ATTRACTIONS_CACHE_DIR, `${key}.json`);
+    if (!fs.existsSync(filePath)) return null;
+
+    const stat = fs.statSync(filePath);
+    if (Date.now() - stat.mtimeMs > ATTRACTIONS_CACHE_TTL_MS) {
+      fs.unlinkSync(filePath);
+      return null;
+    }
+
+    console.log(`[SerpAPI Cache] ✅ Cache hit pour "${key}"`);
+    return JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+  } catch {
+    return null;
+  }
+}
+
+function writeAttractionsCache(key: string, data: Attraction[]): void {
+  try {
+    if (!fs.existsSync(ATTRACTIONS_CACHE_DIR)) {
+      fs.mkdirSync(ATTRACTIONS_CACHE_DIR, { recursive: true });
+    }
+    fs.writeFileSync(path.join(ATTRACTIONS_CACHE_DIR, `${key}.json`), JSON.stringify(data));
+    console.log(`[SerpAPI Cache] 💾 Cache écrit pour "${key}" (${data.length} attractions)`);
+  } catch (error) {
+    console.warn('[SerpAPI Cache] Erreur écriture:', error);
+  }
+}
 
 interface SerpApiLocalResult {
   position: number;
@@ -509,6 +553,14 @@ export async function searchAttractionsMultiQuery(
   }
 
   const { limit = 50 } = options;
+
+  // Vérifier le cache
+  const cacheKey = getAttractionsCacheKey(destination, cityCenter);
+  const cached = readAttractionsCache(cacheKey);
+  if (cached) {
+    return cached.slice(0, limit);
+  }
+
   const allAttractions: Map<string, Attraction & { priority: number }> = new Map();
   const countryCode = getCountryCode(destination);
 
@@ -581,6 +633,10 @@ export async function searchAttractionsMultiQuery(
   });
 
   console.log(`[SerpAPI Attractions Multi] ✅ ${finalAttractions.length} attractions de qualité trouvées`);
+
+  // Sauvegarder en cache
+  writeAttractionsCache(cacheKey, finalAttractions);
+
   return finalAttractions;
 }
 
