@@ -42,35 +42,45 @@ export default function MesVoyagesPage() {
 
   useEffect(() => {
     async function fetchTrips() {
-      if (!user) return;
-
-      const supabase = getSupabaseClient();
-
-      // Get trips where user is owner or member
-      const { data: memberTrips } = await supabase
-        .from('trip_members')
-        .select('trip_id')
-        .eq('user_id', user.id);
-
-      const tripIds = memberTrips?.map((m) => m.trip_id) || [];
-
-      if (tripIds.length > 0) {
-        const { data: tripsData } = await supabase
-          .from('trips')
-          .select('*')
-          .in('id', tripIds)
-          .order('created_at', { ascending: false });
-
-        setTrips(tripsData || []);
+      if (!user) {
+        setIsLoading(false);
+        return;
       }
 
-      setIsLoading(false);
+      try {
+        const supabase = getSupabaseClient();
+
+        // Get trips where user is owner or member
+        const { data: memberTrips } = await supabase
+          .from('trip_members')
+          .select('trip_id')
+          .eq('user_id', user.id);
+
+        const tripIds = memberTrips?.map((m) => m.trip_id) || [];
+
+        if (tripIds.length > 0) {
+          const { data: tripsData } = await supabase
+            .from('trips')
+            .select('*')
+            .in('id', tripIds)
+            .order('created_at', { ascending: false });
+
+          setTrips(tripsData || []);
+        } else {
+          setTrips([]);
+        }
+      } catch (error) {
+        console.error('Error fetching trips:', error);
+      } finally {
+        setIsLoading(false);
+      }
     }
 
-    if (user) {
+    // Ne fetch que quand authLoading est terminé
+    if (!authLoading) {
       fetchTrips();
     }
-  }, [user]);
+  }, [user, authLoading]);
 
   const updateVisibility = async (tripId: string, visibility: TripVisibility) => {
     const supabase = getSupabaseClient();
