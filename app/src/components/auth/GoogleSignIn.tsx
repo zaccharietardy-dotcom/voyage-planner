@@ -17,10 +17,18 @@ export function GoogleSignIn({ redirectTo, className }: GoogleSignInProps) {
     setIsLoading(true);
     const supabase = getSupabaseClient();
 
+    // Construire l'URL de callback avec le redirect final
+    const callbackUrl = new URL(`${window.location.origin}/auth/callback`);
+    if (redirectTo) {
+      callbackUrl.searchParams.set('redirect', redirectTo);
+    } else {
+      callbackUrl.searchParams.set('redirect', '/mes-voyages');
+    }
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: redirectTo || `${window.location.origin}/auth/callback`,
+        redirectTo: callbackUrl.toString(),
       },
     });
 

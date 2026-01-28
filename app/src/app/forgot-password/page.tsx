@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { getSupabaseClient } from '@/lib/supabase';
+// getSupabaseClient n'est plus nécessaire - on utilise l'API Resend
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
@@ -21,14 +21,16 @@ export default function ForgotPasswordPage() {
     setIsLoading(true);
 
     try {
-      const supabase = getSupabaseClient();
-
-      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+      // Envoyer l'email de réinitialisation via notre API Resend
+      const response = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
       });
 
-      if (resetError) {
-        setError(resetError.message);
+      if (!response.ok) {
+        const data = await response.json();
+        setError(data.error || 'Une erreur est survenue');
         return;
       }
 
