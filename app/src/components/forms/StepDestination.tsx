@@ -69,8 +69,12 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
 
   // Mettre à jour les préférences quand les sélections changent
   useEffect(() => {
-    onChange({ mustSee: selectedMustSee.join(', ') });
-  }, [selectedMustSee, onChange]);
+    const newMustSee = selectedMustSee.join(', ');
+    // Éviter les appels inutiles si la valeur n'a pas changé
+    if (newMustSee !== (data.mustSee || '')) {
+      onChange({ mustSee: newMustSee });
+    }
+  }, [selectedMustSee, data.mustSee, onChange]);
 
   const handleMustSeeToggle = (attractionName: string) => {
     setSelectedMustSee(prev => {

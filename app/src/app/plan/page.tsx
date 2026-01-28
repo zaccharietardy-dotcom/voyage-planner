@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -108,9 +108,9 @@ export default function PlanPage() {
     toast.success('Préférences appliquées !');
   };
 
-  const updatePreferences = (data: Partial<TripPreferences>) => {
+  const updatePreferences = useCallback((data: Partial<TripPreferences>) => {
     setPreferences((prev) => ({ ...prev, ...data }));
-  };
+  }, []);
 
   const canProceed = () => {
     switch (currentStep) {
