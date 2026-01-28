@@ -96,19 +96,24 @@ export async function POST(request: Request) {
     // Générer un code de partage unique
     const shareCode = generateShareCode();
 
+    // Preparer les donnees pour l'insertion avec validation stricte
+    const insertData = {
+      owner_id: user.id,
+      title: tripData.title || `Voyage à ${destination}`,
+      destination: destination,
+      start_date: typeof startDate === 'string' ? startDate.split('T')[0] : new Date().toISOString().split('T')[0],
+      duration_days: durationDays || 7,
+      preferences: tripData.preferences || {},
+      data: tripData || {},
+      share_code: shareCode,
+    };
+
+    console.log('[API/trips] Insert data:', JSON.stringify(insertData, null, 2).substring(0, 500));
+
     // Créer le voyage
     const { data: trip, error: tripError } = await supabase
       .from('trips')
-      .insert({
-        owner_id: user.id,
-        title: tripData.title || `Voyage à ${tripData.destination || tripData.preferences?.destination || 'Destination'}`,
-        destination: tripData.destination || tripData.preferences?.destination || 'Destination',
-        start_date: tripData.startDate || tripData.preferences?.startDate || new Date().toISOString().split('T')[0],
-        duration_days: tripData.durationDays || tripData.preferences?.durationDays || 7,
-        preferences: tripData.preferences || {},
-        data: tripData,
-        share_code: shareCode,
-      })
+      .insert(insertData)
       .select()
       .single();
 
