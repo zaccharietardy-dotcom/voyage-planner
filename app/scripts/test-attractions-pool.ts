@@ -160,6 +160,30 @@ async function testDestination(dest: TestDestination) {
         console.log(`        - ${s.name} (${s.area}) - ${s.whyVisit}`);
       }
     }
+
+    // Booking advice
+    if (day.bookingAdvice?.length > 0) {
+      console.log(`     🎫 Réservations:`);
+      for (const b of day.bookingAdvice) {
+        const icon = b.urgency === 'essential' ? '🔴' : b.urgency === 'recommended' ? '🟡' : '🟢';
+        console.log(`        ${icon} ${b.attractionName}: ${b.reason}`);
+        if (b.bookingSearchQuery) {
+          console.log(`           🔗 Rechercher: "${b.bookingSearchQuery}"`);
+        }
+      }
+    }
+  }
+
+  // Booking warnings (global)
+  if (itinerary.bookingWarnings?.length > 0) {
+    console.log(`\n  🎫 RÉSERVATIONS À FAIRE:`);
+    for (const b of itinerary.bookingWarnings) {
+      const icon = b.urgency === 'essential' ? '🔴 OBLIGATOIRE' : b.urgency === 'recommended' ? '🟡 Recommandé' : '🟢 Optionnel';
+      console.log(`     ${icon} - ${b.attractionName}: ${b.reason}`);
+      if (b.bookingSearchQuery) {
+        console.log(`       🔗 "${b.bookingSearchQuery}"`);
+      }
+    }
   }
 
   // Seasonal tips

@@ -61,11 +61,25 @@ export interface ClaudeItineraryDay {
     bestTimeOfDay?: string;
   }[];
   dayNarrative: string;
+  bookingAdvice?: {
+    attractionName: string;
+    attractionId?: string;
+    urgency: 'essential' | 'recommended' | 'optional';
+    reason: string;
+    bookingSearchQuery?: string;
+  }[];
 }
 
 export interface ClaudeItineraryResponse {
   days: ClaudeItineraryDay[];
   seasonalTips: string[];
+  bookingWarnings?: {
+    attractionName: string;
+    attractionId?: string;
+    urgency: 'essential' | 'recommended' | 'optional';
+    reason: string;
+    bookingSearchQuery?: string;
+  }[];
   excludedReasons: { id: string; reason: string }[];
 }
 
@@ -219,7 +233,20 @@ RÈGLES D'OR:
    - INCLUE le must-see du voyageur en PRIORITÉ ABSOLUE (jour 1-2)
    - Si une attraction ESSENTIELLE de ${request.destination} manque du pool, ajoute-la dans additionalSuggestions
 
-7. NARRATIF DE GUIDE:
+7. COMPLÉTER LE POOL SI NÉCESSAIRE:
+   - Le pool SerpAPI peut manquer des lieux importants. Si tu connais des attractions INCONTOURNABLES de ${request.destination} qui ne sont PAS dans le pool, ajoute-les dans additionalSuggestions
+   - Exemples de manques fréquents: quartiers emblématiques, points de vue gratuits, expériences locales (cérémonie du thé, cours de cuisine...), marchés aux puces, street food spots
+   - N'hésite PAS à ajouter 2-4 suggestions par jour si le pool est insuffisant
+
+8. RÉSERVATIONS:
+   - Pour CHAQUE attraction qui nécessite une réservation à l'avance, ajoute un bookingAdvice dans le jour correspondant
+   - urgency "essential": réservation OBLIGATOIRE sinon refus d'entrée ou files de 2h+ (ex: Tour Eiffel sommet, Uffizi Florence, Alhambra Grenade, TeamLab Tokyo)
+   - urgency "recommended": fortement conseillé surtout en haute saison (ex: Louvre, Vatican, Sagrada Familia)
+   - urgency "optional": possible de prendre sur place sans trop attendre
+   - Fournis un bookingSearchQuery optimisé pour Google (ex: "Tour Eiffel billets sommet réservation officielle")
+   - Indique le délai recommandé (ex: "Réservez 2-3 semaines avant")
+
+9. NARRATIF DE GUIDE:
    - dayNarrative: 2-3 phrases vivantes comme un vrai guide local
    - Inclue un conseil pratique par jour (ex: "Arrivez avant 9h pour éviter 1h de queue")
    - Mentionne une spécialité culinaire locale à essayer dans le quartier du jour
@@ -239,10 +266,16 @@ Format EXACT:
       "additionalSuggestions": [
         {"name": "Nom", "whyVisit": "Pourquoi en 1 phrase", "estimatedDuration": 90, "estimatedCost": 10, "area": "Quartier", "bestTimeOfDay": "morning"}
       ],
+      "bookingAdvice": [
+        {"attractionName": "Tour Eiffel", "attractionId": "id-si-dans-pool", "urgency": "essential", "reason": "Réservez 2 semaines avant, créneaux complets en haute saison", "bookingSearchQuery": "Tour Eiffel billets sommet réservation officielle"}
+      ],
       "dayNarrative": "Description vivante avec conseil pratique"
     }
   ],
   "seasonalTips": ["Conseil saisonnier spécifique à ${season} à ${request.destination}"],
+  "bookingWarnings": [
+    {"attractionName": "Nom", "urgency": "essential", "reason": "Explication courte", "bookingSearchQuery": "query google pour trouver le site officiel de réservation"}
+  ],
   "excludedReasons": [{"id": "id", "reason": "Raison courte"}]
 }`;
 
