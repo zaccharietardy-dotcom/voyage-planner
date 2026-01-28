@@ -1151,11 +1151,13 @@ async function generateDayWithScheduler(params: {
         );
 
         // Créer l'item et surcharger les heures avec les heures locales de l'aéroport
-        // Afficher le prix par personne ET le prix total
-        const pricePerPerson = outboundFlight.pricePerPerson || Math.round(outboundFlight.price / preferences.groupSize);
-        const priceDisplay = preferences.groupSize > 1
-          ? `${pricePerPerson}€/pers (${outboundFlight.price}€ total)`
-          : `${outboundFlight.price}€`;
+        // Afficher le prix par personne ET le prix total (avec protections NaN)
+        const flightPrice = outboundFlight.price || 0;
+        const groupSize = preferences.groupSize || 1;
+        const pricePerPerson = outboundFlight.pricePerPerson || (flightPrice > 0 ? Math.round(flightPrice / groupSize) : 0);
+        const priceDisplay = groupSize > 1 && pricePerPerson > 0
+          ? `${pricePerPerson}€/pers (${flightPrice}€ total)`
+          : flightPrice > 0 ? `${flightPrice}€` : 'Prix non disponible';
         const tripItem = schedulerItemToTripItem(flightItem, dayNumber, orderIndex++, {
           description: `${outboundFlight.flightNumber} | ${formatFlightDuration(outboundFlight.duration)} | ${outboundFlight.stops === 0 ? 'Direct' : `${outboundFlight.stops} escale(s)`} | ${priceDisplay}`,
           locationName: `${originAirport.code} → ${destAirport.code}`,
@@ -2159,11 +2161,13 @@ async function generateDayWithScheduler(params: {
         );
 
         // Créer l'item mais avec les heures d'affichage correctes
-        // Afficher le prix par personne ET le prix total
-        const returnPricePerPerson = returnFlight.pricePerPerson || Math.round(returnFlight.price / preferences.groupSize);
-        const returnPriceDisplay = preferences.groupSize > 1
-          ? `${returnPricePerPerson}€/pers (${returnFlight.price}€ total)`
-          : `${returnFlight.price}€`;
+        // Afficher le prix par personne ET le prix total (avec protections NaN)
+        const returnFlightPrice = returnFlight.price || 0;
+        const returnGroupSize = preferences.groupSize || 1;
+        const returnPricePerPerson = returnFlight.pricePerPerson || (returnFlightPrice > 0 ? Math.round(returnFlightPrice / returnGroupSize) : 0);
+        const returnPriceDisplay = returnGroupSize > 1 && returnPricePerPerson > 0
+          ? `${returnPricePerPerson}€/pers (${returnFlightPrice}€ total)`
+          : returnFlightPrice > 0 ? `${returnFlightPrice}€` : 'Prix non disponible';
         const tripItem = schedulerItemToTripItem(flightItem, dayNumber, orderIndex++, {
           description: `${returnFlight.flightNumber} | ${formatFlightDuration(returnFlight.duration)} | ${returnFlight.stops === 0 ? 'Direct' : `${returnFlight.stops} escale(s)`} | ${returnPriceDisplay}`,
           locationName: `${destAirport.code} → ${originAirport.code}`,
@@ -2260,7 +2264,11 @@ async function generateDayWithScheduler(params: {
   }
 
   // === CORRECTION AUTOMATIQUE DES CONFLITS ===
-  // Étape 1: Pour le Jour 1 avec vol NORMAL (pas overnight), supprimer toute activité AVANT l'arrivée
+  // Étape 1: Pour le Jour 1 avec vol ALLER, supprimer toute activité non-logistique
+  // Le jour 1 avec vol = uniquement logistique (trajet aéroport, parking, checkin, vol, transfert arrivée, hôtel)
+  // Pas de restaurant ni d'activité car:
+  // - On ne peut pas faire d'activités à destination AVANT d'y arriver
+  // - On ne veut pas programmer d'activités à l'ORIGINE avant le départ
   if (isFirstDay && outboundFlight) {
     const flightDep = new Date(outboundFlight.departureTime);
     const flightArr = new Date(outboundFlight.arrivalTime);
@@ -2268,16 +2276,53 @@ async function generateDayWithScheduler(params: {
     const arrDay = new Date(flightArr.getFullYear(), flightArr.getMonth(), flightArr.getDate());
     const isOvernight = arrDay.getTime() > depDay.getTime();
 
+    // Pour TOUS les vols du jour 1 (overnight ou pas), supprimer les items non-logistique
+    // AVANT le trajet vers l'aéroport (on ne veut pas de restaurant à l'origine avant le départ)
+    // Calculer l'heure de départ effective (trajet vers aéroport ou 2h avant vol)
+    const airportArrivalTime = new Date(flightDep.getTime() - 2 * 60 * 60 * 1000); // 2h avant le vol
+
+    // Supprimer tous les restaurants et activités du jour 1 qui sont AVANT le trajet vers l'aéroport
+    // Garder uniquement: transport, parking, checkin, flight, hotel
+    const protectedTypes = ['flight', 'transport', 'checkin', 'parking', 'hotel', 'checkout'];
+    const allSchedulerItems = scheduler.getItems();
+    let itemsRemoved = 0;
+
+    for (const item of allSchedulerItems) {
+      // Supprimer si c'est un restaurant ou une activité (pas de la logistique)
+      if (!protectedTypes.includes(item.type)) {
+        // Supprimer si AVANT le départ vers l'aéroport (on est encore à l'origine)
+        if (item.slot.start < airportArrivalTime) {
+          console.log(`[Jour ${dayNumber}] Suppression "${item.title}" (${formatScheduleTime(item.slot.start)}) - activité à l'origine avant départ aéroport`);
+          itemsRemoved++;
+        }
+        // OU supprimer si APRÈS le vol mais AVANT l'arrivée réelle + transfert (impossible d'être là)
+        else if (!isOvernight) {
+          // Vol court: vérifier que l'item est APRÈS l'arrivée + transfert
+          const minActivityTime = new Date(flightArr.getTime() + 90 * 60 * 1000); // arrivée + 1h30
+          if (item.slot.start < minActivityTime) {
+            console.log(`[Jour ${dayNumber}] Suppression "${item.title}" (${formatScheduleTime(item.slot.start)}) - avant arrivée à destination (${formatScheduleTime(minActivityTime)})`);
+            itemsRemoved++;
+          }
+        }
+      }
+    }
+
+    // Appliquer les suppressions via removeItemsBefore avec une heure très tardive pour les non-logistique
+    // Alternative: utiliser la logique existante mais avec l'heure de départ vers l'aéroport
     if (!isOvernight) {
-      // Vol normal: supprimer les activités avant l'arrivée
       const arrivalTime = new Date(outboundFlight.arrivalTime);
-      const itemsRemovedBeforeArrival = scheduler.removeItemsBefore(arrivalTime, ['flight', 'transport', 'checkin', 'parking', 'hotel']);
-      if (itemsRemovedBeforeArrival > 0) {
-        console.log(`[Jour ${dayNumber}] ${itemsRemovedBeforeArrival} item(s) supprimé(s) car planifiés avant l'arrivée du vol`);
+      const minActivityTime = new Date(arrivalTime.getTime() + 90 * 60 * 1000); // arrivée + 1h30
+      const removed = scheduler.removeItemsBefore(minActivityTime, protectedTypes);
+      if (removed > 0) {
+        console.log(`[Jour ${dayNumber}] ${removed} item(s) supprimé(s) car planifiés avant l'arrivée effective à destination`);
       }
     } else {
-      // Vol overnight: ne rien supprimer, le Jour 1 contient uniquement la logistique de départ
-      console.log(`[Jour ${dayNumber}] Vol overnight - pas de suppression d'items (logistique départ uniquement)`);
+      // Vol overnight: le jour 1 ne contient QUE la logistique de départ
+      // Supprimer TOUT ce qui n'est pas logistique car on n'arrive que le lendemain
+      const removed = scheduler.removeItemsBefore(new Date(dayEnd.getTime() + 24 * 60 * 60 * 1000), protectedTypes);
+      if (removed > 0) {
+        console.log(`[Jour ${dayNumber}] Vol overnight - ${removed} item(s) non-logistique supprimé(s)`);
+      }
     }
   }
 
@@ -2894,11 +2939,13 @@ function addDepartureLogistics(
 
   console.log(`[AI] Vol ${outboundFlight.flightNumber}: ${flightStartTime} - ${flightEndTime} (display times: ${outboundFlight.departureTimeDisplay || 'N/A'} - ${outboundFlight.arrivalTimeDisplay || 'N/A'})`);
 
-  // Afficher le prix par personne et total comme dans l'autre section
-  const pricePerPerson = outboundFlight.pricePerPerson || Math.round(outboundFlight.price / preferences.groupSize);
-  const priceDisplay = preferences.groupSize > 1
-    ? `${pricePerPerson}€/pers (${outboundFlight.price}€ total)`
-    : `${outboundFlight.price}€`;
+  // Afficher le prix par personne et total comme dans l'autre section (avec protections NaN)
+  const fallbackFlightPrice = outboundFlight.price || 0;
+  const fallbackGroupSize = preferences.groupSize || 1;
+  const pricePerPerson = outboundFlight.pricePerPerson || (fallbackFlightPrice > 0 ? Math.round(fallbackFlightPrice / fallbackGroupSize) : 0);
+  const priceDisplay = fallbackGroupSize > 1 && pricePerPerson > 0
+    ? `${pricePerPerson}€/pers (${fallbackFlightPrice}€ total)`
+    : fallbackFlightPrice > 0 ? `${fallbackFlightPrice}€` : 'Prix non disponible';
 
   items.push({
     id: generateId(),

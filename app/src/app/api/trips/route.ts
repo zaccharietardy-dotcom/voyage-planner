@@ -97,9 +97,12 @@ export async function POST(request: Request) {
     const shareCode = generateShareCode();
 
     // Preparer les donnees pour l'insertion avec validation stricte
+    // Note: Supabase table has both 'name' (required) and 'title' columns
+    const tripName = tripData.title || tripData.name || `Voyage à ${destination}`;
     const insertData = {
       owner_id: user.id,
-      title: tripData.title || `Voyage à ${destination}`,
+      name: tripName,
+      title: tripName,
       destination: destination,
       start_date: typeof startDate === 'string' ? startDate.split('T')[0] : new Date().toISOString().split('T')[0],
       duration_days: durationDays || 7,
