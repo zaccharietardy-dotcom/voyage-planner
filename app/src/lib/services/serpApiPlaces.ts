@@ -377,18 +377,26 @@ export async function searchAttractionsWithSerpApi(
 
   const { type, limit = 10 } = options;
 
+  // Obtenir le code pays pour precision
+  const countryCode = getCountryCode(destination);
+  const countryName = getCountryName(countryCode);
+
+  // Construire une query plus precise avec le pays
+  const locationQuery = countryName ? `${destination}, ${countryName}` : destination;
   const query = type
-    ? `${type} ${destination}`
-    : `tourist attractions ${destination}`;
+    ? `${type} ${locationQuery}`
+    : `tourist attractions ${locationQuery}`;
 
   const params = new URLSearchParams({
     api_key: SERPAPI_KEY,
     engine: 'google_local',
     q: query,
-    location: destination,
+    location: locationQuery,
     hl: 'fr',
-    gl: getCountryCode(destination),
+    gl: countryCode,
   });
+
+  console.log(`[SerpAPI Attractions] Query: "${query}", location: "${locationQuery}", gl: ${countryCode}`);
 
   try {
     console.log(`[SerpAPI Attractions] Recherche attractions à ${destination}...`);
@@ -809,17 +817,59 @@ function getCountryCode(destination: string): string {
   const dest = destination.toLowerCase();
 
   if (['barcelona', 'madrid', 'sevilla', 'valencia', 'malaga'].some(c => dest.includes(c))) return 'es';
-  if (['paris', 'lyon', 'marseille', 'nice', 'bordeaux'].some(c => dest.includes(c))) return 'fr';
-  if (['rome', 'florence', 'venice', 'milan', 'naples'].some(c => dest.includes(c))) return 'it';
-  if (['lisbon', 'porto'].some(c => dest.includes(c))) return 'pt';
-  if (['london', 'manchester', 'edinburgh'].some(c => dest.includes(c))) return 'uk';
+  if (['paris', 'lyon', 'marseille', 'nice', 'bordeaux', 'angers', 'nantes', 'toulouse'].some(c => dest.includes(c))) return 'fr';
+  if (['rome', 'florence', 'venice', 'milan', 'naples', 'roma', 'firenze', 'venezia', 'milano', 'napoli'].some(c => dest.includes(c))) return 'it';
+  if (['lisbon', 'porto', 'lisbonne'].some(c => dest.includes(c))) return 'pt';
+  if (['london', 'manchester', 'edinburgh', 'londres'].some(c => dest.includes(c))) return 'uk';
   if (['berlin', 'munich', 'frankfurt'].some(c => dest.includes(c))) return 'de';
   if (['amsterdam', 'rotterdam'].some(c => dest.includes(c))) return 'nl';
-  if (['brussels', 'bruges'].some(c => dest.includes(c))) return 'be';
-  if (['athens', 'santorini'].some(c => dest.includes(c))) return 'gr';
+  if (['brussels', 'bruges', 'bruxelles'].some(c => dest.includes(c))) return 'be';
+  if (['athens', 'santorini', 'athenes'].some(c => dest.includes(c))) return 'gr';
   if (['tokyo', 'kyoto', 'osaka'].some(c => dest.includes(c))) return 'jp';
+  // Chine - IMPORTANT: Pekin/Beijing
+  if (['beijing', 'pekin', 'pékin', 'shanghai', 'hong kong', 'guangzhou', 'shenzhen', 'xian', "xi'an", 'chengdu'].some(c => dest.includes(c))) return 'cn';
+  // Autres pays asiatiques
+  if (['bangkok', 'phuket', 'chiang mai'].some(c => dest.includes(c))) return 'th';
+  if (['singapore', 'singapour'].some(c => dest.includes(c))) return 'sg';
+  if (['bali', 'jakarta'].some(c => dest.includes(c))) return 'id';
+  if (['hanoi', 'ho chi minh', 'saigon'].some(c => dest.includes(c))) return 'vn';
+  if (['seoul'].some(c => dest.includes(c))) return 'kr';
+  // Amerique
+  if (['new york', 'los angeles', 'san francisco', 'miami', 'las vegas', 'chicago'].some(c => dest.includes(c))) return 'us';
+  // Moyen-Orient
+  if (['dubai', 'abu dhabi'].some(c => dest.includes(c))) return 'ae';
+  if (['marrakech', 'casablanca', 'fes', 'rabat'].some(c => dest.includes(c))) return 'ma';
+  // Oceanie
+  if (['sydney', 'melbourne', 'brisbane'].some(c => dest.includes(c))) return 'au';
 
-  return 'us'; // Défaut
+  return 'fr'; // Defaut France (plus pertinent pour une app francaise)
+}
+
+// Convertit le code pays en nom de pays pour les queries
+function getCountryName(countryCode: string): string {
+  const countryNames: Record<string, string> = {
+    'es': 'Spain',
+    'fr': 'France',
+    'it': 'Italy',
+    'pt': 'Portugal',
+    'uk': 'United Kingdom',
+    'de': 'Germany',
+    'nl': 'Netherlands',
+    'be': 'Belgium',
+    'gr': 'Greece',
+    'jp': 'Japan',
+    'cn': 'China',
+    'th': 'Thailand',
+    'sg': 'Singapore',
+    'id': 'Indonesia',
+    'vn': 'Vietnam',
+    'kr': 'South Korea',
+    'us': 'USA',
+    'ae': 'UAE',
+    'ma': 'Morocco',
+    'au': 'Australia',
+  };
+  return countryNames[countryCode] || '';
 }
 
 function parsePriceLevel(price?: string): 1 | 2 | 3 | 4 {

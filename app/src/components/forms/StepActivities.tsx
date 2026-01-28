@@ -261,17 +261,19 @@ export function StepActivities({ data, onChange }: StepActivitiesProps) {
                       {attraction.description}
                     </p>
                     <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
-                        {Math.round(attraction.duration / 60)}h{attraction.duration % 60 > 0 ? (attraction.duration % 60).toString().padStart(2, '0') : ''}
-                      </span>
-                      {attraction.estimatedCost > 0 && (
+                      {attraction.duration && attraction.duration > 0 && (
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          {Math.round(attraction.duration / 60)}h{attraction.duration % 60 > 0 ? (attraction.duration % 60).toString().padStart(2, '0') : ''}
+                        </span>
+                      )}
+                      {attraction.estimatedCost && attraction.estimatedCost > 0 && (
                         <span className="flex items-center gap-1">
                           <Ticket className="h-3 w-3" />
                           ~{attraction.estimatedCost}€
                         </span>
                       )}
-                      {attraction.rating && (
+                      {attraction.rating && attraction.rating > 0 && (
                         <span className="flex items-center gap-1">
                           <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
                           {attraction.rating.toFixed(1)}
