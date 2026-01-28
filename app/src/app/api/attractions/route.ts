@@ -1,6 +1,6 @@
 /**
- * API Route pour rechercher des attractions via Claude
- * Cette route est côté serveur donc peut utiliser fs et l'API Claude
+ * API Route pour rechercher des attractions
+ * Priorite: 1. Local DB, 2. SerpAPI (Google), 3. Cache, 4. Claude AI
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -9,6 +9,8 @@ import { Attraction, getAttractions, getMustSeeAttractions } from '@/lib/service
 import { normalizeCity } from '@/lib/services/cityNormalization';
 import { ActivityType } from '@/lib/types';
 import { tokenTracker } from '@/lib/services/tokenTracker';
+import { searchAttractionsWithSerpApi, isSerpApiPlacesConfigured } from '@/lib/services/serpApiPlaces';
+import { getCityCenterCoords } from '@/lib/services/geocoding';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -112,7 +114,7 @@ IMPORTANT:
 Réponds UNIQUEMENT avec un tableau JSON valide, sans texte avant ou après.`;
 
   const response = await client.messages.create({
-    model: 'claude-sonnet-4-20250514',
+    model: 'claude-3-5-haiku-20241022',
     max_tokens: 4000,
     messages: [{ role: 'user', content: prompt }],
   });
@@ -196,6 +198,9 @@ export async function GET(request: NextRequest) {
     console.log(`[API Attractions] Aucune attraction locale pour ${normalizedCity.displayName}, fallback vers cache/Claude`);
   }
 
+  // Log pour debug
+  console.log(`[API Attractions] Parameters: mustSeeOnly=${mustSeeOnly}, forceRefresh=${forceRefresh}, types=${typesParam}`);
+
   const types = typesParam ? typesParam.split(',') as ActivityType[] : undefined;
   const normalizedDest = normalizeDestination(destination);
   const cache = loadCache();
@@ -216,10 +221,34 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  console.log(`Cache miss pour ${destination}, appel Claude API...`);
+  console.log(`Cache miss pour ${destination}, recherche d'attractions...`);
 
   try {
-    const attractions = await fetchAttractionsFromClaude(destination, types);
+    let attractions: Attraction[] = [];
+
+    // Priorite 1: SerpAPI (Google Places) - gratuit 100 req/mois
+    if (isSerpApiPlacesConfigured()) {
+      console.log(`[API Attractions] Tentative SerpAPI pour ${destination}...`);
+      try {
+        attractions = await searchAttractionsWithSerpApi(destination, { limit: 15 });
+        console.log(`[API Attractions] SerpAPI: ${attractions.length} attractions trouvees`);
+      } catch (serpError) {
+        console.warn(`[API Attractions] SerpAPI erreur:`, serpError);
+      }
+    }
+
+    // Priorite 2: Claude AI (si SerpAPI echoue ou retourne peu de resultats)
+    if (attractions.length < 5) {
+      console.log(`[API Attractions] Fallback vers Claude API...`);
+      const claudeAttractions = await fetchAttractionsFromClaude(destination, types);
+      // Merger sans doublons
+      const existingIds = new Set(attractions.map(a => a.id));
+      for (const a of claudeAttractions) {
+        if (!existingIds.has(a.id)) {
+          attractions.push(a);
+        }
+      }
+    }
 
     // Sauvegarder en cache
     cache[normalizedDest] = {
