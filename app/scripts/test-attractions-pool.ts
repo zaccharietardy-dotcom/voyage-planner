@@ -157,7 +157,11 @@ async function testDestination(dest: TestDestination) {
     if (day.additionalSuggestions.length > 0) {
       console.log(`     ➕ Suggestions Claude:`);
       for (const s of day.additionalSuggestions) {
-        console.log(`        - ${s.name} (${s.area}) - ${s.whyVisit}`);
+        const bookIcon = s.bookable ? ' 🎟️' : '';
+        console.log(`        - ${s.name} (${s.area}) - ${s.whyVisit}${bookIcon}`);
+        if (s.bookingUrl) {
+          console.log(`          📌 Réserver: ${s.bookingUrl}`);
+        }
       }
     }
 

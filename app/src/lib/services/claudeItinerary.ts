@@ -60,6 +60,9 @@ export interface ClaudeItineraryDay {
     estimatedCost: number;
     area: string;
     bestTimeOfDay?: string;
+    bookable?: boolean;
+    gygSearchQuery?: string;
+    bookingUrl?: string;
   }[];
   dayNarrative: string;
   bookingAdvice?: BookingAdvice[];
@@ -236,10 +239,17 @@ RÈGLES D'OR:
    - INCLUE le must-see du voyageur en PRIORITÉ ABSOLUE (jour 1-2)
    - Si une attraction ESSENTIELLE de ${request.destination} manque du pool, ajoute-la dans additionalSuggestions
 
-7. COMPLÉTER LE POOL SI NÉCESSAIRE:
-   - Le pool SerpAPI peut manquer des lieux importants. Si tu connais des attractions INCONTOURNABLES de ${request.destination} qui ne sont PAS dans le pool, ajoute-les dans additionalSuggestions
-   - Exemples de manques fréquents: quartiers emblématiques, points de vue gratuits, expériences locales (cérémonie du thé, cours de cuisine...), marchés aux puces, street food spots
-   - N'hésite PAS à ajouter 2-4 suggestions par jour si le pool est insuffisant
+7. COMPLÉTER LE POOL + EXPÉRIENCES UNIQUES:
+   - Le pool SerpAPI contient surtout des monuments et musées. Il MANQUE les expériences/activités réservables.
+   - Pour CHAQUE jour, ajoute au moins 1-2 EXPÉRIENCES dans additionalSuggestions parmi:
+     * Activités outdoor: kayak, vélo, randonnée, snorkeling, paddle, escalade...
+     * Expériences culturelles: cours de cuisine locale, cérémonie du thé, atelier artisanat, visite guidée thématique...
+     * Food tours, street food tours, dégustations (vin, sake, fromage, chocolat...)
+     * Expériences originales: bateau, segway, tuk-tuk, side-car, montgolfière...
+     * Spectacles: flamenco, kabuki, opéra, concert local...
+   - Pour ces expériences, mets "bookable": true et un "gygSearchQuery" optimisé pour GetYourGuide (ex: "kayak Stockholm archipelago", "cooking class Rome pasta", "flamenco show Seville")
+   - Ajoute aussi les lieux/quartiers incontournables manquants du pool
+   - N'hésite PAS à ajouter 2-4 suggestions par jour
 
 8. RÉSERVATIONS:
    - Pour CHAQUE attraction qui nécessite une réservation à l'avance, ajoute un bookingAdvice dans le jour correspondant
@@ -267,7 +277,8 @@ Format EXACT:
       "selectedAttractionIds": ["id1", "id2"],
       "visitOrder": ["id2", "id1"],
       "additionalSuggestions": [
-        {"name": "Nom", "whyVisit": "Pourquoi en 1 phrase", "estimatedDuration": 90, "estimatedCost": 10, "area": "Quartier", "bestTimeOfDay": "morning"}
+        {"name": "Nom lieu/monument", "whyVisit": "Pourquoi", "estimatedDuration": 90, "estimatedCost": 0, "area": "Quartier", "bestTimeOfDay": "morning"},
+        {"name": "Kayak dans l'archipel", "whyVisit": "Expérience nature unique", "estimatedDuration": 180, "estimatedCost": 55, "area": "Archipel", "bestTimeOfDay": "morning", "bookable": true, "gygSearchQuery": "kayak archipelago Stockholm"}
       ],
       "bookingAdvice": [
         {"attractionName": "Tour Eiffel", "attractionId": "id-si-dans-pool", "urgency": "essential", "reason": "Réservez 2 semaines avant, créneaux complets en haute saison", "bookingSearchQuery": "Tour Eiffel billets sommet réservation officielle"}
@@ -361,6 +372,19 @@ function enrichBookingLinks(
     if (day.bookingAdvice) {
       for (const advice of day.bookingAdvice) {
         generateLinks(advice, day.dayNumber);
+      }
+    }
+
+    // Générer les liens GetYourGuide pour les suggestions bookable
+    if (day.additionalSuggestions) {
+      for (const suggestion of day.additionalSuggestions) {
+        if (suggestion.bookable && suggestion.gygSearchQuery) {
+          const dayDate = new Date(new Date(request.startDate));
+          dayDate.setDate(dayDate.getDate() + day.dayNumber - 1);
+          const dateStr = dayDate.toISOString().split('T')[0];
+          const query = encodeURIComponent(suggestion.gygSearchQuery);
+          (suggestion as any).bookingUrl = `https://www.getyourguide.com/s/?q=${query}&date_from=${dateStr}&adults=${groupSize}`;
+        }
       }
     }
   }
