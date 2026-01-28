@@ -153,6 +153,12 @@ export default function PlanPage() {
       if (!response.ok) throw new Error('Erreur de génération');
 
       const data = await response.json();
+
+      // Validate that we have an ID before navigating
+      if (!data.id) {
+        throw new Error('Voyage généré sans identifiant');
+      }
+
       // Store in localStorage for now (later: Supabase)
       localStorage.setItem('currentTrip', JSON.stringify(data));
       router.push(`/trip/${data.id}`);
