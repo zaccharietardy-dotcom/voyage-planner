@@ -150,7 +150,11 @@ export default function PlanPage() {
         body: JSON.stringify(preferences),
       });
 
-      if (!response.ok) throw new Error('Erreur de génération');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.error || `Erreur ${response.status}`;
+        throw new Error(errorMessage);
+      }
 
       const data = await response.json();
 
@@ -163,8 +167,9 @@ export default function PlanPage() {
       localStorage.setItem('currentTrip', JSON.stringify(data));
       router.push(`/trip/${data.id}`);
     } catch (error) {
-      console.error('Erreur:', error);
-      alert('Une erreur est survenue. Veuillez réessayer.');
+      console.error('Erreur génération:', error);
+      const message = error instanceof Error ? error.message : 'Erreur inconnue';
+      toast.error(`Erreur: ${message}`);
     } finally {
       setIsGenerating(false);
     }

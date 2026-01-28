@@ -6657,5 +6657,1203 @@
       }
     ],
     "fetchedAt": "2026-01-27T14:52:34.802Z"
+  },
+  "all-35.676-139.650-10027,16000,10000": {
+    "places": [
+      {
+        "fsq_id": "5db1240443598d00073edbe0",
+        "name": "SHIBUYA SKY",
+        "location": {
+          "address": "渋谷2-24-12",
+          "formatted_address": "渋谷2-24-12 (渋谷スクランブルスクエア 14F/45F-RF), 渋谷区, Tokyo, 150-0002, 日本",
+          "locality": "渋谷区",
+          "region": "東京都",
+          "country": "日本",
+          "cross_street": "渋谷スクランブルスクエア 14F/45F-RF",
+          "postcode": "150-0002"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 35.65831,
+            "longitude": 139.70222
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d165941735",
+            "name": "Scenic Lookout",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/parks_outdoors/sceniclookout_88.png"
+          }
+        ],
+        "distance": 5100
+      },
+      {
+        "fsq_id": "4b54ea63f964a520efd227e3",
+        "name": "Shinjuku Wald 9 (新宿バルト9)",
+        "location": {
+          "address": "新宿3-1-26",
+          "formatted_address": "新宿3-1-26 (新宿三丁目イーストビル 9F-13F), 新宿区, Tokyo, 160-0022, 日本",
+          "locality": "新宿区",
+          "region": "東京都",
+          "country": "日本",
+          "cross_street": "新宿三丁目イーストビル 9F-13F",
+          "postcode": "160-0022"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 35.689949,
+            "longitude": 139.706056
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d17f941735",
+            "name": "Movie Theater",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/arts_entertainment/movietheater_88.png"
+          }
+        ],
+        "distance": 5268
+      },
+      {
+        "fsq_id": "4b5585f7f964a5206ee627e3",
+        "name": "Taito Station (タイトーステーション 新宿南口ゲームワールド店)",
+        "location": {
+          "address": "新宿3-35-8",
+          "formatted_address": "新宿3-35-8 (ワールドビル 1F-6F), 新宿区, Tokyo, 160-0022, 日本",
+          "locality": "新宿区",
+          "region": "東京都",
+          "country": "日本",
+          "cross_street": "ワールドビル 1F-6F",
+          "postcode": "160-0022"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 35.68979434358881,
+            "longitude": 139.70222355311807
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d1e1931735",
+            "name": "Arcade",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/arts_entertainment/arcade_88.png"
+          }
+        ],
+        "distance": 4932
+      },
+      {
+        "fsq_id": "4b55dc56f964a5205bf327e3",
+        "name": "Shinjuku Chuo Park (新宿中央公園)",
+        "location": {
+          "address": "西新宿2-11",
+          "formatted_address": "西新宿2-11, 新宿区, Tokyo, 160-0023, 日本",
+          "locality": "新宿区",
+          "region": "東京都",
+          "country": "日本",
+          "postcode": "160-0023"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 35.689397,
+            "longitude": 139.6896
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d163941735",
+            "name": "Park",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/parks_outdoors/park_88.png"
+          }
+        ],
+        "distance": 3845
+      },
+      {
+        "fsq_id": "5f043a3579379579959cadfa",
+        "name": "MIYASHITA PARK",
+        "location": {
+          "address": "神宮前6-20-10",
+          "formatted_address": "神宮前6-20-10, 渋谷区, Tokyo, 150-0001, 日本",
+          "locality": "東京",
+          "region": "東京都",
+          "country": "日本",
+          "postcode": "150-0001"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 35.662068,
+            "longitude": 139.701771
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d1fd941735",
+            "name": "Shopping Mall",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/shops/mall_88.png"
+          }
+        ],
+        "distance": 4913
+      },
+      {
+        "fsq_id": "5a0665a89ef8ef67b17a8869",
+        "name": "Tokyo Mystery Circus (東京ミステリーサーカス)",
+        "location": {
+          "address": "歌舞伎町1-27-5",
+          "formatted_address": "歌舞伎町1-27-5 (APMビル), 新宿区, Tokyo, 160-0021, 日本",
+          "locality": "東京",
+          "region": "東京都",
+          "country": "日本",
+          "cross_street": "APMビル",
+          "postcode": "160-0021"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 35.69535157859535,
+            "longitude": 139.7007333052742
+          }
+        },
+        "categories": [
+          {
+            "id": "5f2c2834b6d05514c704451e",
+            "name": "Escape Room",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/arts_entertainment/default_88.png"
+          }
+        ],
+        "distance": 5033
+      },
+      {
+        "fsq_id": "4b54ddbbf964a5206fd027e3",
+        "name": "Setagaya Park (世田谷公園)",
+        "location": {
+          "address": "池尻1-5-27",
+          "formatted_address": "池尻1-5-27, 世田谷区, Tokyo, 154-0001, 日本",
+          "locality": "世田谷区",
+          "region": "東京都",
+          "country": "日本",
+          "postcode": "154-0001"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 35.643927328350735,
+            "longitude": 139.6814140716513
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d163941735",
+            "name": "Park",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/parks_outdoors/park_88.png"
+          }
+        ],
+        "distance": 4563
+      },
+      {
+        "fsq_id": "618de2bdc537221612801d48",
+        "name": "ゲームパニック 新宿歌舞伎町",
+        "location": {
+          "address": "歌舞伎町1-20-1",
+          "formatted_address": "歌舞伎町1-20-1 (HUMAX 1F-2F), 新宿区, Tokyo, 160-0021, 日本",
+          "locality": "東京",
+          "region": "東京都",
+          "country": "日本",
+          "cross_street": "HUMAX 1F-2F",
+          "postcode": "160-0021"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 35.695786,
+            "longitude": 139.70152
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d1e1931735",
+            "name": "Arcade",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/arts_entertainment/arcade_88.png"
+          }
+        ],
+        "distance": 5118
+      },
+      {
+        "fsq_id": "4b0587b2f964a52041a022e3",
+        "name": "LIQUIDROOM",
+        "location": {
+          "address": "東3-16-6",
+          "formatted_address": "東3-16-6, 渋谷区, Tokyo, 160-0021, 日本",
+          "locality": "東京",
+          "region": "東京都",
+          "country": "日本",
+          "postcode": "160-0021"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 35.649207,
+            "longitude": 139.710685
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d1e9931735",
+            "name": "Rock Club",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/arts_entertainment/musicvenue_rockclub_88.png"
+          }
+        ],
+        "distance": 6233
+      },
+      {
+        "fsq_id": "4b5ac819f964a52060d428e3",
+        "name": "Spotify O-WEST",
+        "location": {
+          "address": "円山町2-3",
+          "formatted_address": "円山町2-3 (Shibuya O-WESTビル 2F), 渋谷区, Tokyo, 150-0044, 日本",
+          "locality": "渋谷区",
+          "region": "東京都",
+          "country": "日本",
+          "cross_street": "Shibuya O-WESTビル 2F",
+          "postcode": "150-0044"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 35.65853105251609,
+            "longitude": 139.69527669310537
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d1e9931735",
+            "name": "Rock Club",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/arts_entertainment/musicvenue_rockclub_88.png"
+          }
+        ],
+        "distance": 4518
+      },
+      {
+        "fsq_id": "4b5dd1aff964a5208a6d29e3",
+        "name": "Spotify O-EAST",
+        "location": {
+          "address": "道玄坂2-14-8",
+          "formatted_address": "道玄坂2-14-8 (2F), 渋谷区, Tokyo, 150-0043, 日本",
+          "locality": "東京",
+          "region": "東京都",
+          "country": "日本",
+          "cross_street": "2F",
+          "postcode": "150-0043"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 35.65873657503875,
+            "longitude": 139.6955181486804
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d1e9931735",
+            "name": "Rock Club",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/arts_entertainment/musicvenue_rockclub_88.png"
+          }
+        ],
+        "distance": 4527
+      },
+      {
+        "fsq_id": "4b5680f8f964a520331328e3",
+        "name": "Hachiko Square (ハチ公前広場)",
+        "location": {
+          "address": "道玄坂2-1",
+          "formatted_address": "道玄坂2-1, 渋谷区, Tokyo, 150-0043, 日本",
+          "locality": "渋谷区",
+          "region": "東京都",
+          "country": "日本",
+          "postcode": "150-0043"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 35.65907106546249,
+            "longitude": 139.70071882009506
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d164941735",
+            "name": "Plaza",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/parks_outdoors/plaza_88.png"
+          }
+        ],
+        "distance": 4942
+      },
+      {
+        "fsq_id": "5fa652c8e3bd4801bb27baeb",
+        "name": "Megaドン・キホーテ渋谷本店 7F “Donki Shibuya ~Art Content Mix Gallery~”",
+        "location": {
+          "address": "宇田川町28-6",
+          "formatted_address": "宇田川町28-6 (MEGAドン・キホーテ 渋谷本店 7F), 渋谷区, Tokyo, 150-0042, 日本",
+          "locality": "東京",
+          "region": "東京都",
+          "country": "日本",
+          "cross_street": "MEGAドン・キホーテ 渋谷本店 7F",
+          "postcode": "150-0042"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 35.660507,
+            "longitude": 139.69786
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d1e2931735",
+            "name": "Art Gallery",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/arts_entertainment/artgallery_88.png"
+          }
+        ],
+        "distance": 4642
+      },
+      {
+        "fsq_id": "4b0587a0f964a5205c9d22e3",
+        "name": "clubasia",
+        "location": {
+          "address": "円山町1-8",
+          "formatted_address": "円山町1-8, 渋谷区, Tokyo, 150-0044, 日本",
+          "locality": "渋谷区",
+          "region": "東京都",
+          "country": "日本",
+          "postcode": "150-0044"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 35.65903,
+            "longitude": 139.695327
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d1e9931735",
+            "name": "Rock Club",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/arts_entertainment/musicvenue_rockclub_88.png"
+          }
+        ],
+        "distance": 4498
+      },
+      {
+        "fsq_id": "4ba72bcaf964a5202d8439e3",
+        "name": "SHIBUYA PLEASURE PLEASURE",
+        "location": {
+          "address": "道玄坂2-29-5",
+          "formatted_address": "道玄坂2-29-5 (渋谷プライム 6F), 渋谷区, Tokyo, 150-0043, 日本",
+          "locality": "東京",
+          "region": "東京都",
+          "country": "日本",
+          "cross_street": "渋谷プライム 6F",
+          "postcode": "150-0043"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 35.65917454929684,
+            "longitude": 139.6984335739884
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d1e5931735",
+            "name": "Music Venue",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/arts_entertainment/musicvenue_88.png"
+          }
+        ],
+        "distance": 4747
+      },
+      {
+        "fsq_id": "54826fb0498eb80c2a5d1426",
+        "name": "TOHO Cinemas (TOHOシネマズ 新宿)",
+        "location": {
+          "address": "歌舞伎町1-19-1",
+          "formatted_address": "歌舞伎町1-19-1 (新宿東宝ビル 3F-6F), 新宿区, Tokyo, 160-0021, 日本",
+          "locality": "東京",
+          "region": "東京都",
+          "country": "日本",
+          "cross_street": "新宿東宝ビル 3F-6F",
+          "postcode": "160-0021"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 35.695285,
+            "longitude": 139.701932
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d17f941735",
+            "name": "Movie Theater",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/arts_entertainment/movietheater_88.png"
+          }
+        ],
+        "distance": 5129
+      },
+      {
+        "fsq_id": "5fdadfa22768232e68a285d6",
+        "name": "Shangri-La Shimokitazawa (下北沢シャングリラ)",
+        "location": {
+          "address": "北沢2-4-5",
+          "formatted_address": "北沢2-4-5 (mosiaB 1F), 世田谷区, Tokyo, 155-0031, 日本",
+          "locality": "世田谷区",
+          "region": "東京都",
+          "country": "日本",
+          "cross_street": "mosiaB 1F",
+          "postcode": "155-0031"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 35.660465,
+            "longitude": 139.668484
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d1e9931735",
+            "name": "Rock Club",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/arts_entertainment/musicvenue_rockclub_88.png"
+          }
+        ],
+        "distance": 2402
+      },
+      {
+        "fsq_id": "5d42ce9d71e7d00007469971",
+        "name": "LINE CUBE SHIBUYA",
+        "location": {
+          "address": "宇田川町1-1",
+          "formatted_address": "宇田川町1-1, 渋谷区, Tokyo, 150-0042, 日本",
+          "locality": "東京",
+          "region": "東京都",
+          "country": "日本",
+          "postcode": "150-0042"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 35.664048,
+            "longitude": 139.698507
+          }
+        },
+        "categories": [
+          {
+            "id": "5032792091d4c4b30a586d5c",
+            "name": "Concert Hall",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/arts_entertainment/musicvenue_88.png"
+          }
+        ],
+        "distance": 4564
+      },
+      {
+        "fsq_id": "4b9c4a47f964a5206b5c36e3",
+        "name": "Yoyogi 1st Gymnasium (国立代々木競技場 第一体育館)",
+        "location": {
+          "address": "神南2-1-1",
+          "formatted_address": "神南2-1-1, 渋谷区, Tokyo, 150-0041, 日本",
+          "locality": "東京",
+          "region": "東京都",
+          "country": "日本",
+          "postcode": "150-0041"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 35.66772590594513,
+            "longitude": 139.70022797584534
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d184941735",
+            "name": "Stadium",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/arts_entertainment/stadium_88.png"
+          }
+        ],
+        "distance": 4612
+      },
+      {
+        "fsq_id": "4bc037562a89ef3b8849f088",
+        "name": "NHK Hall (NHKホール)",
+        "location": {
+          "address": "神南2-2-1",
+          "formatted_address": "神南2-2-1, 渋谷区, Tokyo, 150-8001, 日本",
+          "locality": "渋谷区",
+          "region": "東京都",
+          "country": "日本",
+          "postcode": "150-8001"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 35.66654484719824,
+            "longitude": 139.6969985961914
+          }
+        },
+        "categories": [
+          {
+            "id": "5032792091d4c4b30a586d5c",
+            "name": "Concert Hall",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/arts_entertainment/musicvenue_88.png"
+          }
+        ],
+        "distance": 4357
+      },
+      {
+        "fsq_id": "57bf37df498e4272a5707d4e",
+        "name": "WWW X",
+        "location": {
+          "address": "宇田川町13-17",
+          "formatted_address": "宇田川町13-17 (ライズビル 2F), 渋谷区, Tokyo, 150-0042, 日本",
+          "locality": "東京",
+          "region": "東京都",
+          "country": "日本",
+          "cross_street": "ライズビル 2F",
+          "postcode": "150-0042"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 35.66164126411828,
+            "longitude": 139.6985617057197
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d1e9931735",
+            "name": "Rock Club",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/arts_entertainment/musicvenue_rockclub_88.png"
+          }
+        ],
+        "distance": 4655
+      },
+      {
+        "fsq_id": "4b55d735f964a52055f227e3",
+        "name": "Shinjuku Piccadilly (新宿ピカデリー)",
+        "location": {
+          "address": "新宿3-15-15",
+          "formatted_address": "新宿3-15-15 (新宿ピカデリー), 新宿区, Tokyo, 160-0022, 日本",
+          "locality": "新宿区",
+          "region": "東京都",
+          "country": "日本",
+          "cross_street": "新宿ピカデリー",
+          "postcode": "160-0022"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 35.69281423149464,
+            "longitude": 139.70370526191493
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d17f941735",
+            "name": "Movie Theater",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/arts_entertainment/movietheater_88.png"
+          }
+        ],
+        "distance": 5170
+      },
+      {
+        "fsq_id": "4b6c0f00f964a520c6212ce3",
+        "name": "Hachiko Statue (忠犬ハチ公)",
+        "location": {
+          "address": "道玄坂2-1",
+          "formatted_address": "道玄坂2-1 (ハチ公広場), 渋谷区, Tokyo, 150-0043, 日本",
+          "locality": "渋谷区",
+          "region": "東京都",
+          "country": "日本",
+          "cross_street": "ハチ公広場",
+          "postcode": "150-0043"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 35.65906062016762,
+            "longitude": 139.70059543848038
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d12d941735",
+            "name": "Monument",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/building/government_monument_88.png"
+          }
+        ],
+        "distance": 4932
+      },
+      {
+        "fsq_id": "4b79f7a8f964a520f11c2fe3",
+        "name": "duo MUSIC EXCHANGE",
+        "location": {
+          "address": "道玄坂2-14-8",
+          "formatted_address": "道玄坂2-14-8 (O-EASTビル 1F), 渋谷区, Tokyo, 150-0043, 日本",
+          "locality": "東京",
+          "region": "東京都",
+          "country": "日本",
+          "cross_street": "O-EASTビル 1F",
+          "postcode": "150-0043"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 35.6586303927246,
+            "longitude": 139.69547871279886
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d1e9931735",
+            "name": "Rock Club",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/arts_entertainment/musicvenue_rockclub_88.png"
+          }
+        ],
+        "distance": 4529
+      },
+      {
+        "fsq_id": "4b0587b4f964a52096a022e3",
+        "name": "Shinjuku Marz (新宿MARZ)",
+        "location": {
+          "address": "歌舞伎町2-45-1",
+          "formatted_address": "歌舞伎町2-45-1 (第1トキワビル B1F), Shinjuku, Tokyo, 160-0021, 日本",
+          "locality": "東京",
+          "region": "東京都",
+          "country": "日本",
+          "cross_street": "第1トキワビル B1F",
+          "postcode": "160-0021"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 35.69618141803239,
+            "longitude": 139.7006827310524
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d1e9931735",
+            "name": "Rock Club",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/arts_entertainment/musicvenue_rockclub_88.png"
+          }
+        ],
+        "distance": 5069
+      },
+      {
+        "fsq_id": "60d9b7d994df8a3d5be13315",
+        "name": "EXBAR TOKYO plus",
+        "location": {
+          "address": "新宿3-35-8",
+          "formatted_address": "新宿3-35-8 (ワールドビル B1F), 新宿区, Tokyo, 160-0022, 日本",
+          "locality": "新宿区",
+          "region": "東京都",
+          "country": "日本",
+          "cross_street": "ワールドビル B1F",
+          "postcode": "160-0022"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 35.689902,
+            "longitude": 139.702071
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d18d941735",
+            "name": "Gaming Cafe",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/shops/gamingcafe_88.png"
+          }
+        ],
+        "distance": 4923
+      },
+      {
+        "fsq_id": "4b5bd0a2f964a520c31729e3",
+        "name": "Meiji Jingu Shrine (明治神宮)",
+        "location": {
+          "address": "代々木神園町1-1",
+          "formatted_address": "代々木神園町1-1, 渋谷区, Tokyo, 151-8557, 日本",
+          "locality": "東京",
+          "region": "東京都",
+          "country": "日本",
+          "postcode": "151-8557"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 35.67637194402257,
+            "longitude": 139.6993589401245
+          }
+        },
+        "categories": [
+          {
+            "id": "4eb1d80a4b900d56c88a45ff",
+            "name": "Shrine",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/building/religious_shrine_88.png"
+          }
+        ],
+        "distance": 4436
+      },
+      {
+        "fsq_id": "4b0587b3f964a52070a022e3",
+        "name": "Shinjuku Loft (新宿LOFT)",
+        "location": {
+          "address": "歌舞伎町1-12-9",
+          "formatted_address": "歌舞伎町1-12-9 (タテハナビル B2F), 新宿区, Tokyo, 160-0021, 日本",
+          "locality": "東京",
+          "region": "東京都",
+          "country": "日本",
+          "cross_street": "タテハナビル B2F",
+          "postcode": "160-0021"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 35.69549146151973,
+            "longitude": 139.7025736478463
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d1e9931735",
+            "name": "Rock Club",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/arts_entertainment/musicvenue_rockclub_88.png"
+          }
+        ],
+        "distance": 5191
+      },
+      {
+        "fsq_id": "4b05879ef964a520f49c22e3",
+        "name": "WOMB",
+        "location": {
+          "address": "円山町2-16",
+          "formatted_address": "円山町2-16 (スタジオアリアス 1F), 渋谷区, Tokyo, 150-0044, 日本",
+          "locality": "渋谷区",
+          "region": "東京都",
+          "country": "日本",
+          "cross_street": "スタジオアリアス 1F",
+          "postcode": "150-0044"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 35.658437,
+            "longitude": 139.69508
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d11f941735",
+            "name": "Night Club",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/nightlife/nightclub_88.png"
+          }
+        ],
+        "distance": 4506
+      },
+      {
+        "fsq_id": "4b0587b2f964a5204fa022e3",
+        "name": "Shibuya CLUB QUATTRO (渋谷CLUB QUATTRO)",
+        "location": {
+          "address": "宇田川町32-13",
+          "formatted_address": "宇田川町32-13 (4F-5F), 渋谷区, Tokyo, 150-0042, 日本",
+          "locality": "東京",
+          "region": "東京都",
+          "country": "日本",
+          "cross_street": "4F-5F",
+          "postcode": "150-0042"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 35.66117666238404,
+            "longitude": 139.69748813532726
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d1e9931735",
+            "name": "Rock Club",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/arts_entertainment/musicvenue_rockclub_88.png"
+          }
+        ],
+        "distance": 4583
+      },
+      {
+        "fsq_id": "4c1a916a63750f475a7fb367",
+        "name": "Meiji Jingu Gyoen (明治神宮御苑)",
+        "location": {
+          "address": "代々木神園町1-1",
+          "formatted_address": "代々木神園町1-1 (明治神宮), 渋谷区, Tokyo, 151-0052, 日本",
+          "locality": "東京",
+          "region": "東京都",
+          "country": "日本",
+          "cross_street": "明治神宮",
+          "postcode": "151-0052"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 35.6737823381669,
+            "longitude": 139.70031888276495
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d15a941735",
+            "name": "Garden",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/parks_outdoors/garden_88.png"
+          }
+        ],
+        "distance": 4531
+      },
+      {
+        "fsq_id": "4c1341a0a9c220a10c86559d",
+        "name": "Shinjuku Southern Terrace (新宿サザンテラス)",
+        "location": {
+          "address": "代々木2",
+          "formatted_address": "代々木2, 渋谷区, Tokyo, 151-0053, 日本",
+          "locality": "東京",
+          "region": "東京都",
+          "country": "日本",
+          "postcode": "151-0053"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 35.6870937164165,
+            "longitude": 139.70059312676048
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d164941735",
+            "name": "Plaza",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/parks_outdoors/plaza_88.png"
+          }
+        ],
+        "distance": 4706
+      },
+      {
+        "fsq_id": "4b14cd19f964a520a7a623e3",
+        "name": "Tokyo Opera City (東京オペラシティ)",
+        "location": {
+          "address": "西新宿3-20-2",
+          "formatted_address": "西新宿3-20-2, 新宿区, Tokyo, 163-1403, 日本",
+          "locality": "東京",
+          "region": "東京都",
+          "country": "日本",
+          "postcode": "163-1403"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 35.68258292966017,
+            "longitude": 139.68726633920548
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d1fd941735",
+            "name": "Shopping Mall",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/shops/mall_88.png"
+          }
+        ],
+        "distance": 3417
+      },
+      {
+        "fsq_id": "4e74d9c588775d593db096c1",
+        "name": "LIQUID LOFT",
+        "location": {
+          "address": "東3-16-6",
+          "formatted_address": "東3-16-6 (LIQUIDROOM 2F), 渋谷区, Tokyo, 160-0021, 日本",
+          "locality": "東京",
+          "region": "東京都",
+          "country": "日本",
+          "cross_street": "LIQUIDROOM 2F",
+          "postcode": "160-0021"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 35.64914546007966,
+            "longitude": 139.71088252061986
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d11f941735",
+            "name": "Night Club",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/nightlife/nightclub_88.png"
+          }
+        ],
+        "distance": 6252
+      },
+      {
+        "fsq_id": "4b5ff761f964a520f1d129e3",
+        "name": "Shinjuku Gyoen (新宿御苑)",
+        "location": {
+          "address": "内藤町11",
+          "formatted_address": "内藤町11, 新宿区, Tokyo, 160-0014, 日本",
+          "locality": "東京",
+          "region": "東京都",
+          "country": "日本",
+          "postcode": "160-0014"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 35.685267844287104,
+            "longitude": 139.70952773146564
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d15a941735",
+            "name": "Garden",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/parks_outdoors/garden_88.png"
+          }
+        ],
+        "distance": 5449
+      },
+      {
+        "fsq_id": "4b0587a1f964a520959d22e3",
+        "name": "Yoyogi National Stadium (国立代々木競技場)",
+        "location": {
+          "address": "神南2-1-1",
+          "formatted_address": "神南2-1-1, 渋谷区, Tokyo, 151-0053, 日本",
+          "locality": "東京",
+          "region": "東京都",
+          "country": "日本",
+          "postcode": "151-0053"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 35.668312920953746,
+            "longitude": 139.70122638593435
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d184941735",
+            "name": "Stadium",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/arts_entertainment/stadium_88.png"
+          }
+        ],
+        "distance": 4688
+      },
+      {
+        "fsq_id": "4f16668ee4b0725661a16dd2",
+        "name": "Nakano Central Park (中野セントラルパーク)",
+        "location": {
+          "address": "中野4-10-1",
+          "formatted_address": "中野4-10-1, 中野区, Tokyo, 164-0001, 日本",
+          "locality": "中野区",
+          "region": "東京都",
+          "country": "日本",
+          "postcode": "164-0001"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 35.707355,
+            "longitude": 139.66266
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d1fd941735",
+            "name": "Shopping Mall",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/shops/mall_88.png"
+          }
+        ],
+        "distance": 3643
+      },
+      {
+        "fsq_id": "4b606ff1f964a520dae529e3",
+        "name": "なかのZERO (もみじ山文化センター)",
+        "location": {
+          "address": "中野2-9-7",
+          "formatted_address": "中野2-9-7, 中野区, Tokyo, 164-0001, 日本",
+          "locality": "中野区",
+          "region": "東京都",
+          "country": "日本",
+          "postcode": "164-0001"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 35.70470962189906,
+            "longitude": 139.67155070625876
+          }
+        },
+        "categories": [
+          {
+            "id": "52e81612bcbc57f1066b7a32",
+            "name": "Cultural Center",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/building/default_88.png"
+          }
+        ],
+        "distance": 3709
+      },
+      {
+        "fsq_id": "4baf1ee5f964a52042ec3be3",
+        "name": "中目黒アトラスタワー",
+        "location": {
+          "address": "上目黒1-26-1",
+          "formatted_address": "上目黒1-26-1, 目黒区, Tokyo, 153-0051, 日本",
+          "locality": "東京",
+          "region": "東京都",
+          "country": "日本",
+          "postcode": "153-0051"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 35.643703936763025,
+            "longitude": 139.6997700424792
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d130941735",
+            "name": "Structure",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/building/default_88.png"
+          }
+        ],
+        "distance": 5753
+      },
+      {
+        "fsq_id": "4b5d8827f964a520606029e3",
+        "name": "Mode Gakuen Cocoon Tower (モード学園コクーンタワー)",
+        "location": {
+          "address": "西新宿1-7-3",
+          "formatted_address": "西新宿1-7-3, 新宿区, Tokyo, 160-0023, 日本",
+          "locality": "新宿区",
+          "region": "東京都",
+          "country": "日本",
+          "postcode": "160-0023"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 35.69160203792307,
+            "longitude": 139.69691947102547
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d130941735",
+            "name": "Structure",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/building/default_88.png"
+          }
+        ],
+        "distance": 4550
+      },
+      {
+        "fsq_id": "507e6ffbe4b04a64069960ad",
+        "name": "Shibuya Toei Plaza (渋谷TOEIプラザ)",
+        "location": {
+          "address": "渋谷1-24-12",
+          "formatted_address": "渋谷1-24-12, 渋谷区, Tokyo, 150-0002, 日本",
+          "locality": "渋谷区",
+          "region": "東京都",
+          "country": "日本",
+          "postcode": "150-0002"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 35.65946924309493,
+            "longitude": 139.702497911043
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d130941735",
+            "name": "Structure",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/building/default_88.png"
+          }
+        ],
+        "distance": 5074
+      },
+      {
+        "fsq_id": "55651a30498ee4977dee7dc6",
+        "name": "Smoking Area - Seibu-Shinjuku Sta. (西武新宿駅前喫煙所)",
+        "location": {
+          "address": "歌舞伎町1-30",
+          "formatted_address": "歌舞伎町1-30, 新宿区, Tokyo, 160-0021, 日本",
+          "locality": "東京",
+          "region": "東京都",
+          "country": "日本",
+          "postcode": "160-0021"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 35.693870062403924,
+            "longitude": 139.70048554806039
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d164941735",
+            "name": "Plaza",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/parks_outdoors/plaza_88.png"
+          }
+        ],
+        "distance": 4945
+      },
+      {
+        "fsq_id": "4b5a3a54f964a520cdb528e3",
+        "name": "Yoyogi Park (代々木公園)",
+        "location": {
+          "address": "代々木神園町/神南2",
+          "formatted_address": "代々木神園町/神南2, 渋谷区, Tokyo, 151-0052, 日本",
+          "locality": "渋谷区",
+          "region": "東京都",
+          "country": "日本",
+          "postcode": "151-0052"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 35.67043660939139,
+            "longitude": 139.69567090272903
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d163941735",
+            "name": "Park",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/parks_outdoors/park_88.png"
+          }
+        ],
+        "distance": 4152
+      },
+      {
+        "fsq_id": "4ba42635f964a520998638e3",
+        "name": "Yoyogi Park Dogrun (代々木公園ドッグラン)",
+        "location": {
+          "address": "代々木神園町2-1",
+          "formatted_address": "代々木神園町2-1, 渋谷区, Tokyo, 151-0052, 日本",
+          "locality": "東京",
+          "region": "東京都",
+          "country": "日本",
+          "postcode": "151-0052"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 35.67267814006101,
+            "longitude": 139.69407127724088
+          }
+        },
+        "categories": [
+          {
+            "id": "4bf58dd8d48988d1e5941735",
+            "name": "Dog Park",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/parks_outdoors/dogrun_88.png"
+          }
+        ],
+        "distance": 3977
+      },
+      {
+        "fsq_id": "576c8d22498e9e8798e4ab9a",
+        "name": "晴のち雨のち晴",
+        "location": {
+          "address": "千駄ヶ谷4-7-11",
+          "formatted_address": "千駄ヶ谷4-7-11 (北参道駅構内), Shibuya, Tokyo, 151-0051, 日本",
+          "locality": "東京",
+          "region": "東京都",
+          "country": "日本",
+          "cross_street": "北参道駅構内",
+          "postcode": "151-0051"
+        },
+        "geocodes": {
+          "main": {
+            "latitude": 35.678294,
+            "longitude": 139.705562
+          }
+        },
+        "categories": [
+          {
+            "id": "507c8c4091d498d9fc8c67a9",
+            "name": "Public Art",
+            "icon": "https://ss3.4sqi.net/img/categories_v2/arts_entertainment/default_88.png"
+          }
+        ],
+        "distance": 5002
+      }
+    ],
+    "fetchedAt": "2026-01-28T12:56:35.506Z"
   }
 }
