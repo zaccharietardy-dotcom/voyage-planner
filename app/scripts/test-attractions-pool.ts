@@ -167,8 +167,11 @@ async function testDestination(dest: TestDestination) {
       for (const b of day.bookingAdvice) {
         const icon = b.urgency === 'essential' ? '🔴' : b.urgency === 'recommended' ? '🟡' : '🟢';
         console.log(`        ${icon} ${b.attractionName}: ${b.reason}`);
-        if (b.bookingSearchQuery) {
-          console.log(`           🔗 Rechercher: "${b.bookingSearchQuery}"`);
+        if (b.bookingLinks) {
+          if (b.bookingLinks.getYourGuide) console.log(`           🎟️ GetYourGuide: ${b.bookingLinks.getYourGuide}`);
+          if (b.bookingLinks.tiqets) console.log(`           🎟️ Tiqets: ${b.bookingLinks.tiqets}`);
+          if (b.bookingLinks.viator) console.log(`           🎟️ Viator: ${b.bookingLinks.viator}`);
+          if (b.bookingLinks.googleSearch) console.log(`           🔍 Google: ${b.bookingLinks.googleSearch}`);
         }
       }
     }

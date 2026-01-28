@@ -41,6 +41,7 @@ export interface ClaudeItineraryRequest {
   budgetLevel: string;
   mustSee?: string;
   groupType?: string;
+  groupSize?: number;
   attractionPool: AttractionSummary[];
 }
 
@@ -61,25 +62,27 @@ export interface ClaudeItineraryDay {
     bestTimeOfDay?: string;
   }[];
   dayNarrative: string;
-  bookingAdvice?: {
-    attractionName: string;
-    attractionId?: string;
-    urgency: 'essential' | 'recommended' | 'optional';
-    reason: string;
-    bookingSearchQuery?: string;
-  }[];
+  bookingAdvice?: BookingAdvice[];
+}
+
+export interface BookingAdvice {
+  attractionName: string;
+  attractionId?: string;
+  urgency: 'essential' | 'recommended' | 'optional';
+  reason: string;
+  bookingSearchQuery?: string;
+  bookingLinks?: {
+    getYourGuide?: string;
+    tiqets?: string;
+    viator?: string;
+    googleSearch?: string;
+  };
 }
 
 export interface ClaudeItineraryResponse {
   days: ClaudeItineraryDay[];
   seasonalTips: string[];
-  bookingWarnings?: {
-    attractionName: string;
-    attractionId?: string;
-    urgency: 'essential' | 'recommended' | 'optional';
-    reason: string;
-    bookingSearchQuery?: string;
-  }[];
+  bookingWarnings?: BookingAdvice[];
   excludedReasons: { id: string; reason: string }[];
 }
 
@@ -310,6 +313,9 @@ Format EXACT:
       console.log(`  Jour ${day.dayNumber}: ${day.theme} (${day.selectedAttractionIds.length} attractions${day.isDayTrip ? ', DAY TRIP: ' + day.dayTripDestination : ''})`);
     }
 
+    // Enrichir avec les liens de réservation
+    enrichBookingLinks(parsed, request);
+
     // Cache the result
     writeCache(cacheKey, parsed);
 
@@ -317,6 +323,57 @@ Format EXACT:
   } catch (error) {
     console.error('[ClaudeItinerary] Erreur:', error);
     return null;
+  }
+}
+
+/**
+ * Génère des liens de réservation pour les attractions qui en ont besoin
+ */
+function enrichBookingLinks(
+  response: ClaudeItineraryResponse,
+  request: ClaudeItineraryRequest,
+): void {
+  const groupSize = request.groupSize || 2;
+
+  function generateLinks(advice: BookingAdvice, dayNumber: number): void {
+    const attractionName = advice.attractionName;
+    const destination = request.destination.split(',')[0].trim(); // "Paris" from "Paris, France"
+
+    // Calculer la date du jour
+    const startDate = new Date(request.startDate);
+    const dayDate = new Date(startDate);
+    dayDate.setDate(dayDate.getDate() + dayNumber - 1);
+    const dateStr = dayDate.toISOString().split('T')[0]; // YYYY-MM-DD
+
+    const searchTerm = encodeURIComponent(`${attractionName} ${destination}`);
+    const searchTermShort = encodeURIComponent(attractionName);
+
+    advice.bookingLinks = {
+      getYourGuide: `https://www.getyourguide.com/s/?q=${searchTerm}&date_from=${dateStr}&adults=${groupSize}`,
+      tiqets: `https://www.tiqets.com/en/search?query=${searchTermShort}`,
+      viator: `https://www.viator.com/searchResults/all?text=${searchTerm}&startDate=${dateStr}&adults=${groupSize}`,
+      googleSearch: `https://www.google.com/search?q=${encodeURIComponent(`${attractionName} ${destination} billets réservation officielle`)}`,
+    };
+  }
+
+  // Enrichir les bookingAdvice par jour
+  for (const day of response.days) {
+    if (day.bookingAdvice) {
+      for (const advice of day.bookingAdvice) {
+        generateLinks(advice, day.dayNumber);
+      }
+    }
+  }
+
+  // Enrichir les bookingWarnings globaux
+  if (response.bookingWarnings) {
+    for (const warning of response.bookingWarnings) {
+      // Trouver le jour correspondant
+      const dayNumber = response.days.find(d =>
+        d.bookingAdvice?.some(a => a.attractionName === warning.attractionName)
+      )?.dayNumber || 1;
+      generateLinks(warning, dayNumber);
+    }
   }
 }
 

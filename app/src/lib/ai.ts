@@ -303,6 +303,7 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       budgetLevel: preferences.budgetLevel,
       mustSee: preferences.mustSee,
       groupType: preferences.groupType,
+      groupSize: preferences.groupSize || 2,
       attractionPool: summarizeAttractions(attractionPool),
     });
   } catch (error) {
