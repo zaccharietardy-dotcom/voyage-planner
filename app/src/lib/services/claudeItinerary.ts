@@ -51,12 +51,14 @@ export interface ClaudeItineraryDay {
   dayTripDestination?: string;
   dayTripTransport?: string;
   selectedAttractionIds: string[];
+  visitOrder?: string[];
   additionalSuggestions: {
     name: string;
     whyVisit: string;
     estimatedDuration: number;
     estimatedCost: number;
     area: string;
+    bestTimeOfDay?: string;
   }[];
   dayNarrative: string;
 }
@@ -156,47 +158,92 @@ export async function generateClaudeItinerary(
     cost: a.estimatedCost,
   }));
 
-  const prompt = `Tu es un guide de voyage expert. Conçois un itinéraire de ${request.durationDays} jours à ${request.destination}.
+  const budgetContext = {
+    economic: 'Privilégie les attractions gratuites ou pas chères. Parcs, temples, quartiers à explorer à pied, marchés.',
+    moderate: 'Mix équilibré entre attractions payantes et gratuites. Quelques musées majeurs + exploration libre.',
+    comfort: 'Inclue les grandes attractions payantes sans hésiter. Expériences premium possibles.',
+    luxury: 'Les meilleures expériences sans limite de budget. Expériences VIP, restaurants étoilés, visites privées.',
+  }[request.budgetLevel] || '';
 
-Date: ${request.startDate} (saison: ${season})
-Voyageurs: ${request.groupType || 'couple'}, budget ${request.budgetLevel}
-Activités souhaitées: ${request.activities.join(', ')}
-Must-see: ${request.mustSee || 'aucun'}
+  const groupContext = {
+    solo: 'Voyageur solo: rythme flexible, rencontres locales, quartiers authentiques.',
+    couple: 'Couple: spots romantiques, belles vues, restaurants intimistes.',
+    friends: 'Groupe d\'amis: ambiance festive, activités de groupe, quartiers animés.',
+    family_with_kids: 'Famille avec enfants: rythme adapté, pauses régulières, attractions kid-friendly, pas trop de marche.',
+    family_without_kids: 'Famille adulte: culture, gastronomie, rythme modéré.',
+  }[request.groupType || 'couple'] || '';
 
-Voici ${poolCompact.length} attractions récupérées sur place (données vérifiées avec GPS, horaires, prix).
-Sélectionne les MEILLEURES et organise-les intelligemment:
+  const prompt = `Tu es un guide de voyage local expert avec 20 ans d'expérience à ${request.destination}. Conçois l'itinéraire PARFAIT de ${request.durationDays} jours.
 
+CONTEXTE DU VOYAGE:
+- Date: ${request.startDate} (saison: ${season})
+- Voyageurs: ${request.groupType || 'couple'} — ${groupContext}
+- Budget: ${request.budgetLevel} — ${budgetContext}
+- Activités souhaitées: ${request.activities.join(', ')}
+- Must-see absolus: ${request.mustSee || 'aucun spécifié'}
+
+POOL DE ${poolCompact.length} ATTRACTIONS VÉRIFIÉES (coordonnées GPS, horaires, prix réels):
 ${JSON.stringify(poolCompact)}
 
-RÈGLES:
-1. Sélectionne 4-6 attractions par jour complet, 2-3 pour jour d'arrivée/départ
-2. Groupe par quartier/zone géographique (attractions proches le même jour)
-3. Si le voyage fait 4+ jours, propose un day trip hors de la ville si pertinent (ex: Mt. Fuji depuis Tokyo, Versailles depuis Paris, Pompéi depuis Naples)
-4. Considère la saison: cerisiers au printemps, illuminations en hiver, etc.
-5. EXCLUE les cinémas, arcades, salles de sport, immeubles résidentiels
-6. INCLUE le must-see du voyageur en priorité absolue
-7. Si une attraction ESSENTIELLE manque du pool (ex: Senso-ji à Tokyo), ajoute-la dans additionalSuggestions
-8. Pour chaque jour, écris un "dayNarrative" (1-2 phrases) comme un vrai guide
+RÈGLES D'OR:
+1. TIMING INTELLIGENT:
+   - Temples, sanctuaires, marchés → tôt le matin (moins de monde, plus authentique)
+   - Musées → milieu de matinée ou début d'après-midi
+   - Viewpoints, observatoires → fin d'après-midi/coucher de soleil
+   - Quartiers animés, rues commerçantes → fin d'après-midi/soirée
+   - Parcs, jardins → selon la lumière et la saison
 
-Réponds UNIQUEMENT en JSON valide (pas de markdown, pas de backticks).
-Format:
+2. REGROUPEMENT GÉOGRAPHIQUE:
+   - Groupe les attractions PROCHES le même jour (regarde les coordonnées lat/lng)
+   - Ordonne-les pour minimiser les déplacements (circuit logique, pas de zig-zag)
+   - Indique le quartier/zone dans le theme du jour
+
+3. RYTHME & ÉQUILIBRE:
+   - Jour d'arrivée: 2-3 attractions légères (jet lag, installation)
+   - Jours pleins: 4-6 attractions avec pauses
+   - Dernier jour: 2-3 attractions + temps pour souvenirs/shopping
+   - Alterne intense (musée 2h) et léger (balade quartier 30min)
+   - Prévois des pauses café/repos entre les visites intensives
+
+4. DAY TRIPS:
+   - Si ${request.durationDays}+ jours, propose un day trip pertinent hors de la ville
+   - Précise le moyen de transport ET la durée du trajet
+   - Place le day trip au milieu du séjour (pas jour 1 ni dernier jour)
+
+5. SAISONNALITÉ (${season}):
+   - Adapte les suggestions à la saison (cerisiers printemps, illuminations hiver, plages été...)
+   - Mentionne les événements/festivals si pertinents pour la date
+
+6. FILTRAGE STRICT:
+   - EXCLUE: cinémas, arcades, salles de sport, immeubles, bureaux, centres commerciaux génériques
+   - INCLUE le must-see du voyageur en PRIORITÉ ABSOLUE (jour 1-2)
+   - Si une attraction ESSENTIELLE de ${request.destination} manque du pool, ajoute-la dans additionalSuggestions
+
+7. NARRATIF DE GUIDE:
+   - dayNarrative: 2-3 phrases vivantes comme un vrai guide local
+   - Inclue un conseil pratique par jour (ex: "Arrivez avant 9h pour éviter 1h de queue")
+   - Mentionne une spécialité culinaire locale à essayer dans le quartier du jour
+
+Réponds UNIQUEMENT en JSON valide (pas de markdown, pas de backticks, pas de commentaires).
+Format EXACT:
 {
   "days": [
     {
       "dayNumber": 1,
-      "theme": "Titre du jour",
+      "theme": "Quartier/Zone - Titre évocateur",
       "isDayTrip": false,
       "dayTripDestination": null,
       "dayTripTransport": null,
       "selectedAttractionIds": ["id1", "id2"],
+      "visitOrder": ["id2", "id1"],
       "additionalSuggestions": [
-        {"name": "Nom", "whyVisit": "Pourquoi", "estimatedDuration": 90, "estimatedCost": 10, "area": "Quartier"}
+        {"name": "Nom", "whyVisit": "Pourquoi en 1 phrase", "estimatedDuration": 90, "estimatedCost": 10, "area": "Quartier", "bestTimeOfDay": "morning"}
       ],
-      "dayNarrative": "Description du jour"
+      "dayNarrative": "Description vivante avec conseil pratique"
     }
   ],
-  "seasonalTips": ["Conseil saisonnier"],
-  "excludedReasons": [{"id": "id", "reason": "Pourquoi exclu"}]
+  "seasonalTips": ["Conseil saisonnier spécifique à ${season} à ${request.destination}"],
+  "excludedReasons": [{"id": "id", "reason": "Raison courte"}]
 }`;
 
   try {
@@ -204,7 +251,7 @@ Format:
 
     const message = await client.messages.create({
       model: 'claude-sonnet-4-20250514',
-      max_tokens: 4000,
+      max_tokens: 6000,
       messages: [{ role: 'user', content: prompt }],
     });
 
