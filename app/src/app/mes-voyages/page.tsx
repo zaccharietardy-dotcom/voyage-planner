@@ -107,7 +107,18 @@ export default function MesVoyagesPage() {
     toast.success(`Voyage maintenant ${option?.label.toLowerCase()}`);
   };
 
-  if (authLoading || isLoading) {
+  // Afficher le loader seulement pendant le chargement initial de l'auth
+  // Une fois l'auth terminée, on affiche la page même si les trips chargent encore
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // Si pas connecté après le chargement de l'auth, ne rien afficher (la redirection va se faire)
+  if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
