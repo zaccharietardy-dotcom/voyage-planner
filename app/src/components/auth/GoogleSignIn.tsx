@@ -17,14 +17,10 @@ export function GoogleSignIn({ redirectTo, className }: GoogleSignInProps) {
     setIsLoading(true);
     const supabase = getSupabaseClient();
 
-    // Construire le chemin de callback avec le redirect final
-    const finalRedirect = redirectTo || '/mes-voyages';
-    const callbackPath = `/auth/callback?redirect=${encodeURIComponent(finalRedirect)}`;
-
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}${callbackPath}`,
+        redirectTo: `${window.location.origin}/auth/callback`,
       },
     });
 
