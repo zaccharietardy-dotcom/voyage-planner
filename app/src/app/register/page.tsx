@@ -93,6 +93,7 @@ export default function RegisterPage() {
     try {
       const supabase = getSupabaseClient();
 
+      // 1. Créer le compte Supabase (sans envoyer d'email auto)
       const { error: signUpError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -102,7 +103,8 @@ export default function RegisterPage() {
             first_name: formData.firstName,
             last_name: formData.lastName,
           },
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          // Ne pas envoyer l'email Supabase - on utilise Resend
+          emailRedirectTo: undefined,
         },
       });
 
@@ -113,6 +115,21 @@ export default function RegisterPage() {
           setError(signUpError.message);
         }
         return;
+      }
+
+      // 2. Envoyer l'email de vérification via Resend
+      const emailResponse = await fetch('/api/auth/send-verification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: formData.email,
+          firstName: formData.firstName,
+        }),
+      });
+
+      if (!emailResponse.ok) {
+        console.error('Erreur envoi email Resend');
+        // On continue quand même - le compte est créé
       }
 
       setSuccess(true);
