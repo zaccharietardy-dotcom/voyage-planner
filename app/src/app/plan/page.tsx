@@ -144,28 +144,49 @@ export default function PlanPage() {
   const handleGenerate = async () => {
     setIsGenerating(true);
     try {
-      const response = await fetch('/api/generate', {
+      // 1. Générer le voyage avec l'IA
+      const generateResponse = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(preferences),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        const errorMessage = errorData.error || `Erreur ${response.status}`;
+      if (!generateResponse.ok) {
+        const errorData = await generateResponse.json().catch(() => ({}));
+        const errorMessage = errorData.error || `Erreur ${generateResponse.status}`;
         throw new Error(errorMessage);
       }
 
-      const data = await response.json();
+      const generatedTrip = await generateResponse.json();
 
-      // Validate that we have an ID before navigating
-      if (!data.id) {
-        throw new Error('Voyage généré sans identifiant');
+      // 2. Si l'utilisateur est connecté, sauvegarder en base de données
+      if (user) {
+        const saveResponse = await fetch('/api/trips', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...generatedTrip,
+            preferences,
+          }),
+        });
+
+        if (saveResponse.ok) {
+          const savedTrip = await saveResponse.json();
+          // Utiliser l'ID de la base de données
+          localStorage.setItem('currentTrip', JSON.stringify({ ...generatedTrip, id: savedTrip.id }));
+          router.push(`/trip/${savedTrip.id}`);
+          return;
+        }
+        // Si la sauvegarde échoue, continuer avec localStorage
+        console.warn('Sauvegarde en BDD échouée, utilisation localStorage');
       }
 
-      // Store in localStorage for now (later: Supabase)
-      localStorage.setItem('currentTrip', JSON.stringify(data));
-      router.push(`/trip/${data.id}`);
+      // Fallback: localStorage pour les utilisateurs non connectés
+      if (!generatedTrip.id) {
+        throw new Error('Voyage généré sans identifiant');
+      }
+      localStorage.setItem('currentTrip', JSON.stringify(generatedTrip));
+      router.push(`/trip/${generatedTrip.id}`);
     } catch (error) {
       console.error('Erreur génération:', error);
       const message = error instanceof Error ? error.message : 'Erreur inconnue';
