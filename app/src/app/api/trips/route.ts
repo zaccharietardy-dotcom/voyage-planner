@@ -106,6 +106,11 @@ export async function POST(request: Request) {
       destination: destination,
       start_date: typeof startDate === 'string' ? startDate.split('T')[0] : new Date().toISOString().split('T')[0],
       duration_days: durationDays || 7,
+      end_date: (() => {
+        const start = new Date(typeof startDate === 'string' ? startDate.split('T')[0] : new Date().toISOString().split('T')[0]);
+        start.setDate(start.getDate() + (durationDays || 7) - 1);
+        return start.toISOString().split('T')[0];
+      })(),
       preferences: tripData.preferences || {},
       data: tripData || {},
       share_code: shareCode,

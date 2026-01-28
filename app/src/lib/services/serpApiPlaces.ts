@@ -456,10 +456,39 @@ export const QUALITY_THRESHOLDS = {
 // === Requêtes thématiques pour attractions ===
 
 const ATTRACTION_QUERIES = [
+  // Incontournables
   { query: 'top tourist attractions must see', priority: 1 },
-  { query: 'best museums', priority: 2 },
-  { query: 'famous viewpoints landmarks', priority: 2 },
-  { query: 'parks gardens nature', priority: 3 },
+  { query: 'famous temples shrines churches', priority: 1 },
+  { query: 'iconic landmarks monuments', priority: 1 },
+  // Culture
+  { query: 'best museums art galleries', priority: 2 },
+  { query: 'historical sites heritage', priority: 2 },
+  // Nature & vues
+  { query: 'famous viewpoints observation decks', priority: 2 },
+  { query: 'parks gardens nature walks', priority: 3 },
+  // Marchés & expériences
+  { query: 'famous markets food streets', priority: 2 },
+  { query: 'traditional cultural experiences', priority: 3 },
+  // Quartiers
+  { query: 'famous neighborhoods districts to explore', priority: 3 },
+];
+
+// Types non-touristiques à exclure
+const NON_TOURISTIC_TYPES = new Set([
+  'movie_theater', 'cinema', 'gym', 'fitness_center',
+  'bowling_alley', 'arcade', 'event_venue', 'convention_center',
+  'apartment_building', 'residential', 'office', 'bank',
+  'hospital', 'dentist', 'car_dealer', 'gas_station',
+  'laundry', 'storage', 'parking', 'car_rental',
+  'night_club', 'bar',
+]);
+
+const NON_TOURISTIC_NAME_KEYWORDS = [
+  'cinema', 'cinéma', 'movie', 'toho', 'imax',
+  'gym', 'fitness', 'bowling', 'arcade', 'gaming', 'taito station',
+  'tower apartment', 'residence', 'office', 'マンション',
+  'nhk hall', 'line cube', 'gymnasium', 'arena',
+  'don quijote', 'donki', 'uniqlo', 'daiso',
 ];
 
 /**
@@ -479,7 +508,7 @@ export async function searchAttractionsMultiQuery(
     return [];
   }
 
-  const { limit = 15 } = options;
+  const { limit = 50 } = options;
   const allAttractions: Map<string, Attraction & { priority: number }> = new Map();
   const countryCode = getCountryCode(destination);
 
@@ -553,6 +582,65 @@ export async function searchAttractionsMultiQuery(
 
   console.log(`[SerpAPI Attractions Multi] ✅ ${finalAttractions.length} attractions de qualité trouvées`);
   return finalAttractions;
+}
+
+/**
+ * Recherche spécifique des mustSee par nom exact via SerpAPI Google Maps
+ */
+export async function searchMustSeeAttractions(
+  mustSee: string,
+  destination: string,
+  cityCenter: { lat: number; lng: number },
+): Promise<Attraction[]> {
+  if (!SERPAPI_KEY || !mustSee.trim()) return [];
+
+  const items = mustSee.split(',').map(s => s.trim()).filter(Boolean);
+  const countryCode = getCountryCode(destination);
+  const results: Attraction[] = [];
+
+  console.log(`[SerpAPI MustSee] Recherche de ${items.length} lieux spécifiques...`);
+
+  const promises = items.map(async (item) => {
+    const params = new URLSearchParams({
+      api_key: SERPAPI_KEY!,
+      engine: 'google_maps',
+      q: `${item} ${destination}`,
+      ll: `@${cityCenter.lat},${cityCenter.lng},14z`,
+      hl: 'fr',
+      gl: countryCode,
+    });
+
+    try {
+      const response = await fetch(`${SERPAPI_BASE_URL}?${params}`);
+      if (!response.ok) return null;
+
+      const data = await response.json();
+      const places: SerpApiLocalResult[] = data.local_results || [];
+
+      // Prendre le premier résultat (le plus pertinent pour une recherche par nom)
+      if (places.length > 0 && places[0].gps_coordinates) {
+        const attraction = convertToAttraction(places[0], destination, 0);
+        if (attraction) {
+          attraction.mustSee = true;
+          console.log(`[SerpAPI MustSee] ✅ Trouvé: "${item}" → ${attraction.name}`);
+          return attraction;
+        }
+      }
+      console.log(`[SerpAPI MustSee] ❌ Non trouvé: "${item}"`);
+      return null;
+    } catch (error) {
+      console.error(`[SerpAPI MustSee] Erreur pour "${item}":`, error);
+      return null;
+    }
+  });
+
+  const found = await Promise.all(promises);
+  for (const attr of found) {
+    if (attr) results.push(attr);
+  }
+
+  console.log(`[SerpAPI MustSee] ${results.length}/${items.length} lieux trouvés`);
+  return results;
 }
 
 /**
@@ -689,6 +777,24 @@ export async function searchRestaurantsNearby(
  */
 function meetsAttractionQualityThreshold(place: SerpApiLocalResult): boolean {
   const { minRating, minReviews } = QUALITY_THRESHOLDS.attractions;
+
+  // Exclure les types non-touristiques
+  const allTypes = [place.type, ...(place.types || []), ...(place.type_ids || [])].filter(Boolean).map(t => t!.toLowerCase());
+  for (const t of allTypes) {
+    if (NON_TOURISTIC_TYPES.has(t)) {
+      console.log(`[SerpAPI] Exclusion type non-touristique: "${place.title}" (${t})`);
+      return false;
+    }
+  }
+
+  // Exclure par nom (heuristique)
+  const nameLower = place.title.toLowerCase();
+  for (const keyword of NON_TOURISTIC_NAME_KEYWORDS) {
+    if (nameLower.includes(keyword)) {
+      console.log(`[SerpAPI] Exclusion par nom: "${place.title}" (contient "${keyword}")`);
+      return false;
+    }
+  }
 
   // Si pas de rating/reviews, on accepte (données manquantes != mauvaise qualité)
   if (place.rating === undefined && place.reviews === undefined) return true;

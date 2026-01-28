@@ -294,6 +294,11 @@ export interface TripDay {
     tempMax: number;
     icon: string;
   };
+  // Itinéraire intelligent (Claude curation)
+  theme?: string;
+  dayNarrative?: string;
+  isDayTrip?: boolean;
+  dayTripDestination?: string;
 }
 
 // Options de transport comparées

@@ -35,6 +35,8 @@ import { validateTripGeography } from './services/geoValidator';
 import { calculateFlightScore, EARLY_MORNING_PENALTY } from './services/flightScoring';
 import { createLocationTracker, TravelerLocation } from './services/locationTracker';
 import { generateFlightLink, generateHotelLink, formatDateForUrl } from './services/linkGenerator';
+import { searchAttractionsMultiQuery, searchMustSeeAttractions } from './services/serpApiPlaces';
+import { generateClaudeItinerary, summarizeAttractions, mapItineraryToAttractions } from './services/claudeItinerary';
 
 // Génère un ID unique
 function generateId(): string {
@@ -234,53 +236,49 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
     parking = selectBestParking(originAirport.code, preferences.durationDays, preferences.budgetLevel || 'moderate');
   }
 
-  // 7. Vérifier si on a des données d'attractions pour cette destination
-  // Note: Si pas en cache local, Claude sera appelé automatiquement via selectAttractionsAsync
-  if (!hasAttractionData(preferences.destination)) {
-    console.log(`Destination ${preferences.destination} pas en cache - recherche via Claude AI...`);
-  }
+  // 7. NOUVEAU FLUX: Gros pool SerpAPI + Claude Curation
+  // Étape 1: Récupérer un gros pool d'attractions via SerpAPI (50+)
+  console.log('[AI] Étape 1: Récupération du gros pool SerpAPI...');
+  let attractionPool = await searchAttractionsMultiQuery(
+    preferences.destination,
+    cityCenter,
+    { types: preferences.activities, limit: 50 }
+  );
 
-  // 8. Sélectionner les attractions à faire (priorité aux demandes utilisateur)
-  // MINIMUM: 2-3 activités par jour pour remplir matin ET après-midi
-  // On demande plus d'attractions que nécessaire pour avoir du choix
-  // et pour éviter les trous dans la journée (minimum 4 par jour: 2 matin + 2 après-midi)
-  const minAttractionsPerDay = 4;
-  const maxAttractionsPerDay = 5;
-  // Demander au moins minAttractionsPerDay par jour, jusqu'à maxAttractionsPerDay
-  const totalAttractions = Math.min(preferences.durationDays * maxAttractionsPerDay, 35);
-  const totalAvailableMinutes = estimateTotalAvailableTime(preferences.durationDays, outboundFlight, returnFlight);
-
-  // Utiliser la version async qui appelle les APIs externes si pas en cache local
-  let selectedAttractions = await selectAttractionsAsync(preferences.destination, totalAvailableMinutes, {
-    types: preferences.activities,
-    mustSeeQuery: preferences.mustSee,
-    prioritizeMustSee: true,
-    maxPerDay: totalAttractions,
-    cityCenter, // Pour Foursquare Places API
-  });
-
-  console.log(`Attractions selectionnees (${selectedAttractions.length}): ${selectedAttractions.map(a => a.name).join(', ')}`);
-
-  // VALIDATION: S'assurer qu'on a assez d'attractions
-  const minRequiredAttractions = Math.max(preferences.durationDays * 2, 4); // Au moins 2 par jour, minimum 4 total
-  if (selectedAttractions.length < minRequiredAttractions) {
-    console.warn(`[AI] ALERTE: Seulement ${selectedAttractions.length} attractions pour ${preferences.durationDays} jours (minimum recommande: ${minRequiredAttractions})`);
-
-    // Tenter une recherche supplementaire avec des criteres plus larges
-    if (selectedAttractions.length < 2) {
-      console.log('[AI] Tentative de recuperation d\'attractions avec criteres elargis...');
-      const fallbackAttractions = await selectAttractionsAsync(preferences.destination, totalAvailableMinutes, {
-        types: ['culture', 'nature', 'gastronomy'], // Types generiques
-        prioritizeMustSee: true,
-        maxPerDay: totalAttractions,
-        cityCenter,
-      });
-      if (fallbackAttractions.length > selectedAttractions.length) {
-        console.log(`[AI] Recupere ${fallbackAttractions.length} attractions avec criteres elargis`);
-        selectedAttractions = fallbackAttractions;
+  // Étape 1b: Recherche spécifique des mustSee
+  if (preferences.mustSee?.trim()) {
+    console.log('[AI] Recherche des mustSee spécifiques...');
+    const mustSeeAttractions = await searchMustSeeAttractions(
+      preferences.mustSee,
+      preferences.destination,
+      cityCenter
+    );
+    // Ajouter les mustSee au pool (dédupliquer par nom)
+    const poolNames = new Set(attractionPool.map(a => a.name.toLowerCase()));
+    for (const msAttr of mustSeeAttractions) {
+      if (!poolNames.has(msAttr.name.toLowerCase())) {
+        attractionPool.unshift(msAttr); // Ajouter en priorité
+        poolNames.add(msAttr.name.toLowerCase());
       }
     }
   }
+
+  console.log(`[AI] Pool SerpAPI: ${attractionPool.length} attractions`);
+
+  // Fallback: Si SerpAPI échoue, utiliser l'ancien système
+  if (attractionPool.length < 5) {
+    console.warn('[AI] Pool SerpAPI insuffisant, fallback sur selectAttractionsAsync...');
+    const totalAvailableMinutes = estimateTotalAvailableTime(preferences.durationDays, outboundFlight, returnFlight);
+    attractionPool = await selectAttractionsAsync(preferences.destination, totalAvailableMinutes, {
+      types: preferences.activities,
+      mustSeeQuery: preferences.mustSee,
+      prioritizeMustSee: true,
+      maxPerDay: Math.min(preferences.durationDays * 5, 35),
+      cityCenter,
+    });
+  }
+
+  let selectedAttractions = attractionPool;
 
   // Protection finale: s'assurer que groupSize est valide pour eviter NaN
   if (!preferences.groupSize || preferences.groupSize < 1) {
@@ -288,12 +286,70 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
     preferences.groupSize = 1;
   }
 
-  // 7. Pré-allouer les attractions aux jours (SANS RÉPÉTITION)
-  const attractionsByDay = preAllocateAttractions(
-    selectedAttractions,
-    preferences.durationDays,
-    cityCenter
-  );
+  // Étape 2: Claude organise l'itinéraire intelligemment
+  console.log('[AI] Étape 2: Curation Claude Sonnet...');
+  let claudeItinerary: Awaited<ReturnType<typeof generateClaudeItinerary>> = null;
+  let attractionsByDay: Attraction[][];
+  let dayMetadata: { theme?: string; dayNarrative?: string; isDayTrip?: boolean; dayTripDestination?: string }[] = [];
+
+  try {
+    claudeItinerary = await generateClaudeItinerary({
+      destination: preferences.destination,
+      durationDays: preferences.durationDays,
+      startDate: typeof preferences.startDate === 'string'
+        ? (preferences.startDate as string).split('T')[0]
+        : new Date(preferences.startDate).toISOString().split('T')[0],
+      activities: preferences.activities,
+      budgetLevel: preferences.budgetLevel,
+      mustSee: preferences.mustSee,
+      groupType: preferences.groupType,
+      attractionPool: summarizeAttractions(attractionPool),
+    });
+  } catch (error) {
+    console.error('[AI] Claude curation error:', error);
+  }
+
+  if (claudeItinerary) {
+    console.log('[AI] ✅ Itinéraire Claude reçu, mapping des attractions...');
+    attractionsByDay = mapItineraryToAttractions(claudeItinerary, attractionPool);
+
+    // Stocker les métadonnées par jour
+    dayMetadata = claudeItinerary.days.map(d => ({
+      theme: d.theme,
+      dayNarrative: d.dayNarrative,
+      isDayTrip: d.isDayTrip,
+      dayTripDestination: d.dayTripDestination || undefined,
+    }));
+
+    // Resolve additional suggestions: search SerpAPI for exact name
+    for (let i = 0; i < claudeItinerary.days.length; i++) {
+      const day = claudeItinerary.days[i];
+      for (const suggestion of day.additionalSuggestions) {
+        // Try to find via SerpAPI for real coordinates
+        const found = await searchMustSeeAttractions(
+          suggestion.name,
+          preferences.destination,
+          cityCenter
+        );
+        if (found.length > 0) {
+          // Replace the generated attraction with verified data
+          const genIndex = attractionsByDay[i].findIndex(a => a.id.startsWith('claude-') && a.name === suggestion.name);
+          if (genIndex >= 0) {
+            attractionsByDay[i][genIndex] = { ...found[0], mustSee: true };
+            console.log(`[AI]   Résolu: "${suggestion.name}" → coordonnées vérifiées`);
+          }
+        }
+      }
+    }
+  } else {
+    // Fallback: pré-allocation simple par rating
+    console.log('[AI] Fallback: pré-allocation par rating...');
+    attractionsByDay = preAllocateAttractions(
+      selectedAttractions,
+      preferences.durationDays,
+      cityCenter
+    );
+  }
 
   // 7.5 Rechercher les hôtels disponibles
   console.log('Recherche des hôtels...');
@@ -359,10 +415,15 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       lateFlightArrivalData: pendingLateFlightData, // Données du vol tardif du jour précédent
     });
 
+    const meta = dayMetadata[i] || {};
     days.push({
       dayNumber,
       date: dayDate,
       items: dayResult.items,
+      theme: meta.theme,
+      dayNarrative: meta.dayNarrative,
+      isDayTrip: meta.isDayTrip,
+      dayTripDestination: meta.dayTripDestination,
     });
 
     // Si ce jour a un vol tardif, le stocker pour le jour suivant
