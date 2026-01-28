@@ -667,7 +667,7 @@ export default function TripPage() {
                 </div>
                 <div>
                   <p className="text-2xl font-bold">
-                    {useCollaborativeMode ? members.length : trip.preferences.groupSize}
+                    {useCollaborativeMode ? members.length : (trip.preferences.groupSize || 1)}
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {useCollaborativeMode ? 'Collaborateurs' : 'Voyageurs'}
@@ -685,7 +685,7 @@ export default function TripPage() {
                   <p className="text-xs text-muted-foreground">
                     Budget estimé{' '}
                     <span className="text-orange-600 font-medium">
-                      (~{Math.round((trip.totalEstimatedCost || 0) / trip.preferences.groupSize)}€/pers.)
+                      (~{Math.round((trip.totalEstimatedCost || 0) / (trip.preferences.groupSize || 1))}€/pers.)
                     </span>
                   </p>
                 </div>
@@ -851,7 +851,7 @@ export default function TripPage() {
                   trip.preferences.destination,
                   trip.days[0]?.date || trip.preferences.startDate,
                   trip.days[trip.days.length - 1]?.date || trip.preferences.startDate,
-                  trip.preferences.groupSize
+                  trip.preferences.groupSize || 1
                 )}
                 nights={trip.preferences.durationDays - 1}
               />

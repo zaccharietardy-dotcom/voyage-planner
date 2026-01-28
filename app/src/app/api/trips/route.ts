@@ -72,6 +72,27 @@ export async function POST(request: Request) {
 
     const tripData = await request.json();
 
+    // Diagnostic logging
+    console.log('[API/trips] Saving trip for user:', user.id);
+    console.log('[API/trips] TripData keys:', Object.keys(tripData));
+
+    // Extract and validate required fields
+    const destination = tripData.destination || tripData.preferences?.destination;
+    const startDate = tripData.startDate || tripData.preferences?.startDate;
+    const durationDays = tripData.durationDays || tripData.preferences?.durationDays;
+
+    console.log('[API/trips] Extracted fields:', { destination, startDate, durationDays });
+
+    if (!destination) {
+      console.error('[API/trips] Missing destination');
+      return NextResponse.json({ error: 'Destination requise' }, { status: 400 });
+    }
+
+    if (!startDate) {
+      console.error('[API/trips] Missing startDate');
+      return NextResponse.json({ error: 'Date de départ requise' }, { status: 400 });
+    }
+
     // Générer un code de partage unique
     const shareCode = generateShareCode();
 
@@ -92,9 +113,12 @@ export async function POST(request: Request) {
       .single();
 
     if (tripError) {
-      console.error('Error creating trip:', tripError);
-      return NextResponse.json({ error: tripError.message }, { status: 500 });
+      console.error('[API/trips] Error creating trip:', tripError);
+      console.error('[API/trips] Error details:', { code: tripError.code, details: tripError.details, hint: tripError.hint });
+      return NextResponse.json({ error: tripError.message, code: tripError.code }, { status: 500 });
     }
+
+    console.log('[API/trips] Trip created successfully:', trip.id);
 
     // Ajouter le créateur comme membre owner
     const { error: memberError } = await supabase.from('trip_members').insert({

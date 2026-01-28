@@ -82,11 +82,26 @@ async function fetchAttractionsFromClaude(
 
   const client = new Anthropic({ apiKey });
 
-  const typesList = types?.length
+  const hasUserPreferences = types && types.length > 0;
+  const typesList = hasUserPreferences
     ? types.join(', ')
     : 'culture, nature, gastronomy, beach, shopping, nightlife, adventure, wellness';
 
-  const prompt = `Tu es un expert en voyage. Génère une liste de 10-15 attractions touristiques RÉELLES et populaires pour ${destination}.
+  // Prompt ameliore pour prioriser les preferences utilisateur
+  const prompt = `Tu es un expert en voyage. Genere une liste de 15-20 attractions touristiques REELLES et populaires pour ${destination}.
+
+${hasUserPreferences ? `
+PRIORITE ABSOLUE - L'utilisateur a EXPLICITEMENT selectionne ces types d'activites: ${typesList}
+
+Tu DOIS inclure:
+- 10-12 attractions correspondant aux preferences de l'utilisateur (${typesList})
+- 4-6 incontournables absolus de ${destination} (meme si type different)
+- 2-3 attractions variees pour completer
+
+La MAJORITE (60%+) des attractions doivent correspondre aux types: ${typesList}
+` : `
+Inclus une variete equilibree de tous les types: ${typesList}
+`}
 
 Pour chaque attraction, fournis les informations au format JSON suivant:
 {
@@ -94,27 +109,25 @@ Pour chaque attraction, fournis les informations au format JSON suivant:
   "name": "Nom officiel de l'attraction",
   "type": "culture|nature|gastronomy|beach|shopping|nightlife|adventure|wellness",
   "description": "Description courte et attrayante (1-2 phrases)",
-  "duration": 90,
+  "duration": 120,
   "estimatedCost": 15,
   "latitude": 41.4036,
   "longitude": 2.1744,
   "rating": 4.5,
   "mustSee": true,
-  "bookingRequired": true,
-  "bookingUrl": "https://...",
-  "openingHours": { "open": "09:00", "close": "20:00" },
+  "bookingRequired": false,
+  "openingHours": { "open": "09:00", "close": "18:00" },
   "tips": "Conseil pratique pour les visiteurs"
 }
 
-Types d'activités à inclure prioritairement: ${typesList}
-
-IMPORTANT:
+REGLES CRITIQUES pour ${destination}:
+- Inclus OBLIGATOIREMENT les monuments et sites celebres (ex: pour Pekin = Cite Interdite, Grande Muraille, Temple du Ciel)
 - Utilise UNIQUEMENT des attractions qui EXISTENT VRAIMENT
-- Les coordonnées GPS doivent être EXACTES et RÉELLES
-- Inclus les prix d'entrée actuels (approximatifs)
-- Varie les types d'attractions
+- Les coordonnees GPS doivent etre EXACTES et REELLES (verifie-les!)
+- Durees realistes: musee = 120-180min, monument = 60-120min, quartier = 120-240min, restaurant = 75min
+- Les attractions "mustSee: true" sont les incontournables absolus de la destination
 
-Réponds UNIQUEMENT avec un tableau JSON valide, sans texte avant ou après.`;
+Reponds UNIQUEMENT avec un tableau JSON valide, sans texte avant ou apres.`;
 
   const response = await client.messages.create({
     model: 'claude-3-5-sonnet-20241022',

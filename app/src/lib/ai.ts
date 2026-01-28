@@ -251,7 +251,7 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
   const totalAvailableMinutes = estimateTotalAvailableTime(preferences.durationDays, outboundFlight, returnFlight);
 
   // Utiliser la version async qui appelle les APIs externes si pas en cache local
-  const selectedAttractions = await selectAttractionsAsync(preferences.destination, totalAvailableMinutes, {
+  let selectedAttractions = await selectAttractionsAsync(preferences.destination, totalAvailableMinutes, {
     types: preferences.activities,
     mustSeeQuery: preferences.mustSee,
     prioritizeMustSee: true,
@@ -259,7 +259,34 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
     cityCenter, // Pour Foursquare Places API
   });
 
-  console.log(`Attractions sélectionnées (${selectedAttractions.length}): ${selectedAttractions.map(a => a.name).join(', ')}`);
+  console.log(`Attractions selectionnees (${selectedAttractions.length}): ${selectedAttractions.map(a => a.name).join(', ')}`);
+
+  // VALIDATION: S'assurer qu'on a assez d'attractions
+  const minRequiredAttractions = Math.max(preferences.durationDays * 2, 4); // Au moins 2 par jour, minimum 4 total
+  if (selectedAttractions.length < minRequiredAttractions) {
+    console.warn(`[AI] ALERTE: Seulement ${selectedAttractions.length} attractions pour ${preferences.durationDays} jours (minimum recommande: ${minRequiredAttractions})`);
+
+    // Tenter une recherche supplementaire avec des criteres plus larges
+    if (selectedAttractions.length < 2) {
+      console.log('[AI] Tentative de recuperation d\'attractions avec criteres elargis...');
+      const fallbackAttractions = await selectAttractionsAsync(preferences.destination, totalAvailableMinutes, {
+        types: ['culture', 'nature', 'gastronomy'], // Types generiques
+        prioritizeMustSee: true,
+        maxPerDay: totalAttractions,
+        cityCenter,
+      });
+      if (fallbackAttractions.length > selectedAttractions.length) {
+        console.log(`[AI] Recupere ${fallbackAttractions.length} attractions avec criteres elargis`);
+        selectedAttractions = fallbackAttractions;
+      }
+    }
+  }
+
+  // Protection finale: s'assurer que groupSize est valide pour eviter NaN
+  if (!preferences.groupSize || preferences.groupSize < 1) {
+    console.warn('[AI] groupSize invalide, utilisation de 1 par defaut');
+    preferences.groupSize = 1;
+  }
 
   // 7. Pré-allouer les attractions aux jours (SANS RÉPÉTITION)
   const attractionsByDay = preAllocateAttractions(

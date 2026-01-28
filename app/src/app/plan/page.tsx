@@ -161,24 +161,32 @@ export default function PlanPage() {
 
       // 2. Si l'utilisateur est connecté, sauvegarder en base de données
       if (user) {
-        const saveResponse = await fetch('/api/trips', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            ...generatedTrip,
-            preferences,
-          }),
-        });
+        try {
+          const saveResponse = await fetch('/api/trips', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              ...generatedTrip,
+              preferences,
+            }),
+          });
 
-        if (saveResponse.ok) {
-          const savedTrip = await saveResponse.json();
-          // Utiliser l'ID de la base de données
-          localStorage.setItem('currentTrip', JSON.stringify({ ...generatedTrip, id: savedTrip.id }));
-          router.push(`/trip/${savedTrip.id}`);
-          return;
+          if (saveResponse.ok) {
+            const savedTrip = await saveResponse.json();
+            // Utiliser l'ID de la base de données
+            localStorage.setItem('currentTrip', JSON.stringify({ ...generatedTrip, id: savedTrip.id }));
+            router.push(`/trip/${savedTrip.id}`);
+            return;
+          }
+
+          // Sauvegarde échouée - afficher l'erreur mais continuer
+          const errorData = await saveResponse.json().catch(() => ({}));
+          console.error('[Plan] Save failed:', saveResponse.status, errorData);
+          toast.error(`Sauvegarde échouée: ${errorData.error || 'Erreur inconnue'}. Le voyage sera stocké localement.`);
+        } catch (saveError) {
+          console.error('[Plan] Save exception:', saveError);
+          toast.error('Erreur lors de la sauvegarde. Le voyage sera stocké localement.');
         }
-        // Si la sauvegarde échoue, continuer avec localStorage
-        console.warn('Sauvegarde en BDD échouée, utilisation localStorage');
       }
 
       // Fallback: localStorage pour les utilisateurs non connectés

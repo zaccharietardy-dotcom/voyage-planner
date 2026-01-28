@@ -1,9 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
 import {
   TripPreferences,
   ActivityType,
@@ -12,8 +11,8 @@ import {
   DIETARY_LABELS,
 } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { getMustSeeAttractions, Attraction } from '@/lib/services/attractions';
-import { MapPin, Star, Clock, Ticket } from 'lucide-react';
+import { Attraction } from '@/lib/services/attractions';
+import { Star, Clock, Ticket, Loader2 } from 'lucide-react';
 
 interface StepActivitiesProps {
   data: Partial<TripPreferences>;
@@ -40,29 +39,103 @@ const DIETARY_OPTIONS: DietaryType[] = [
   'gluten_free',
 ];
 
+// Cache local pour eviter les appels repetes a l'API
+const attractionsCache: Record<string, Attraction[]> = {};
+
 export function StepActivities({ data, onChange }: StepActivitiesProps) {
   const activities = data.activities || [];
   const dietary = data.dietary || [];
   const [suggestions, setSuggestions] = useState<Attraction[]>([]);
   const [selectedAttractions, setSelectedAttractions] = useState<Set<string>>(new Set());
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
-  // Charger les suggestions basées sur la destination
+  // Charger les suggestions basees sur la destination (async via API)
   useEffect(() => {
-    if (data.destination) {
-      const mustSee = getMustSeeAttractions(data.destination);
-      setSuggestions(mustSee);
+    if (!data.destination) {
+      setSuggestions([]);
+      setIsLoading(false);
+      setLoadError(null);
+      return;
+    }
 
-      // Si mustSee existe déjà, parser les attractions sélectionnées
+    const destination = data.destination;
+    const cacheKey = destination.toLowerCase().trim();
+
+    // Verifier le cache d'abord
+    if (attractionsCache[cacheKey]) {
+      setSuggestions(attractionsCache[cacheKey]);
+      // Restaurer les selections precedentes
       if (data.mustSee) {
         const selected = new Set<string>();
-        mustSee.forEach((a) => {
+        attractionsCache[cacheKey].forEach((a) => {
           if (data.mustSee?.toLowerCase().includes(a.name.toLowerCase())) {
             selected.add(a.id);
           }
         });
         setSelectedAttractions(selected);
       }
+      return;
     }
+
+    // Annuler la requete precedente si elle existe
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    abortControllerRef.current = new AbortController();
+
+    const fetchAttractions = async () => {
+      setIsLoading(true);
+      setLoadError(null);
+
+      try {
+        const response = await fetch(
+          `/api/attractions?city=${encodeURIComponent(destination)}&mustSee=true`,
+          { signal: abortControllerRef.current?.signal }
+        );
+
+        if (!response.ok) {
+          throw new Error(`Erreur ${response.status}`);
+        }
+
+        const result = await response.json();
+        const attractions: Attraction[] = result.attractions || [];
+
+        // Filtrer uniquement les mustSee (ou prendre les 10 premieres si pas de flag)
+        const mustSeeAttractions = attractions.filter(a => a.mustSee !== false).slice(0, 12);
+
+        // Mettre en cache
+        attractionsCache[cacheKey] = mustSeeAttractions;
+        setSuggestions(mustSeeAttractions);
+
+        // Restaurer les selections si existantes
+        if (data.mustSee) {
+          const selected = new Set<string>();
+          mustSeeAttractions.forEach((a) => {
+            if (data.mustSee?.toLowerCase().includes(a.name.toLowerCase())) {
+              selected.add(a.id);
+            }
+          });
+          setSelectedAttractions(selected);
+        }
+      } catch (error) {
+        if ((error as Error).name === 'AbortError') {
+          return; // Requete annulee, ignorer
+        }
+        console.error('Erreur chargement attractions:', error);
+        setLoadError('Impossible de charger les suggestions');
+        setSuggestions([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAttractions();
+
+    return () => {
+      abortControllerRef.current?.abort();
+    };
   }, [data.destination]);
 
   const toggleActivity = (activity: ActivityType) => {
@@ -94,7 +167,7 @@ export function StepActivities({ data, onChange }: StepActivitiesProps) {
     }
     setSelectedAttractions(newSelected);
 
-    // Mettre à jour le champ mustSee
+    // Mettre a jour le champ mustSee
     const selectedNames = suggestions
       .filter((a) => newSelected.has(a.id))
       .map((a) => a.name);
@@ -105,13 +178,13 @@ export function StepActivities({ data, onChange }: StepActivitiesProps) {
     <div className="space-y-8">
       <div className="text-center mb-8">
         <h2 className="text-2xl font-bold mb-2">Que voulez-vous faire ?</h2>
-        <p className="text-muted-foreground">Sélectionnez vos types d'activités préférés</p>
+        <p className="text-muted-foreground">Selectionnez vos types d'activites preferes</p>
       </div>
 
-      {/* Types d'activités */}
+      {/* Types d'activites */}
       <div className="space-y-4">
         <Label className="text-base font-medium">
-          Activités <span className="text-muted-foreground font-normal">(plusieurs choix possibles)</span>
+          Activites <span className="text-muted-foreground font-normal">(plusieurs choix possibles)</span>
         </Label>
         <div className="flex flex-wrap gap-3">
           {ACTIVITY_OPTIONS.map((activity) => (
@@ -132,76 +205,96 @@ export function StepActivities({ data, onChange }: StepActivitiesProps) {
           ))}
         </div>
         {activities.length === 0 && (
-          <p className="text-sm text-amber-600">Sélectionnez au moins une activité</p>
+          <p className="text-sm text-amber-600">Selectionnez au moins une activite</p>
         )}
       </div>
 
-      {/* Suggestions d'incontournables basées sur la destination */}
-      {suggestions.length > 0 && (
+      {/* Suggestions d'incontournables basees sur la destination */}
+      {data.destination && (
         <div className="space-y-4">
           <Label className="text-base font-medium">
-            Incontournables à {data.destination}{' '}
-            <span className="text-muted-foreground font-normal">(cliquez pour sélectionner)</span>
+            Incontournables a {data.destination}{' '}
+            <span className="text-muted-foreground font-normal">(cliquez pour selectionner)</span>
           </Label>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {suggestions.map((attraction) => (
-              <button
-                key={attraction.id}
-                type="button"
-                onClick={() => toggleAttraction(attraction)}
-                className={cn(
-                  'flex items-start gap-3 p-4 rounded-xl border-2 text-left transition-all',
-                  'hover:border-primary/50 hover:bg-primary/5',
-                  selectedAttractions.has(attraction.id)
-                    ? 'border-primary bg-primary/10'
-                    : 'border-border bg-card'
-                )}
-              >
-                <div
+
+          {isLoading ? (
+            <div className="flex items-center justify-center py-8 text-muted-foreground">
+              <Loader2 className="h-6 w-6 animate-spin mr-2" />
+              Recherche des incontournables...
+            </div>
+          ) : loadError ? (
+            <div className="text-center py-4 text-amber-600 text-sm">
+              {loadError}
+            </div>
+          ) : suggestions.length > 0 ? (
+            <div className="grid gap-3 sm:grid-cols-2">
+              {suggestions.map((attraction) => (
+                <button
+                  key={attraction.id}
+                  type="button"
+                  onClick={() => toggleAttraction(attraction)}
                   className={cn(
-                    'mt-0.5 w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 transition-colors',
+                    'flex items-start gap-3 p-4 rounded-xl border-2 text-left transition-all',
+                    'hover:border-primary/50 hover:bg-primary/5',
                     selectedAttractions.has(attraction.id)
-                      ? 'bg-primary border-primary text-primary-foreground'
-                      : 'border-muted-foreground/30'
+                      ? 'border-primary bg-primary/10'
+                      : 'border-border bg-card'
                   )}
                 >
-                  {selectedAttractions.has(attraction.id) && (
-                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-medium text-sm">{attraction.name}</div>
-                  <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">
-                    {attraction.description}
-                  </p>
-                  <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      {Math.round(attraction.duration / 60)}h{attraction.duration % 60 > 0 ? (attraction.duration % 60).toString().padStart(2, '0') : ''}
-                    </span>
-                    {attraction.estimatedCost > 0 && (
-                      <span className="flex items-center gap-1">
-                        <Ticket className="h-3 w-3" />
-                        ~{attraction.estimatedCost}€
-                      </span>
+                  <div
+                    className={cn(
+                      'mt-0.5 w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 transition-colors',
+                      selectedAttractions.has(attraction.id)
+                        ? 'bg-primary border-primary text-primary-foreground'
+                        : 'border-muted-foreground/30'
                     )}
-                    <span className="flex items-center gap-1">
-                      <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                      {attraction.rating.toFixed(1)}
-                    </span>
+                  >
+                    {selectedAttractions.has(attraction.id) && (
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
                   </div>
-                </div>
-              </button>
-            ))}
-          </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-sm">{attraction.name}</div>
+                    <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">
+                      {attraction.description}
+                    </p>
+                    <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        {Math.round(attraction.duration / 60)}h{attraction.duration % 60 > 0 ? (attraction.duration % 60).toString().padStart(2, '0') : ''}
+                      </span>
+                      {attraction.estimatedCost > 0 && (
+                        <span className="flex items-center gap-1">
+                          <Ticket className="h-3 w-3" />
+                          ~{attraction.estimatedCost}€
+                        </span>
+                      )}
+                      {attraction.rating && (
+                        <span className="flex items-center gap-1">
+                          <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                          {attraction.rating.toFixed(1)}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-4 text-muted-foreground text-sm">
+              Aucun incontournable trouve pour cette destination.
+              <br />
+              Vous pouvez ajouter vos propres lieux ci-dessous.
+            </div>
+          )}
         </div>
       )}
 
-      {/* Régimes alimentaires */}
+      {/* Regimes alimentaires */}
       <div className="space-y-4">
-        <Label className="text-base font-medium">Régime alimentaire</Label>
+        <Label className="text-base font-medium">Regime alimentaire</Label>
         <div className="flex flex-wrap gap-3">
           {DIETARY_OPTIONS.map((diet) => (
             <button
@@ -225,7 +318,7 @@ export function StepActivities({ data, onChange }: StepActivitiesProps) {
       {/* Champ texte pour autres incontournables */}
       <div className="space-y-3">
         <Label htmlFor="must-see" className="text-base font-medium">
-          Autres lieux à inclure{' '}
+          Autres lieux a inclure{' '}
           <span className="text-muted-foreground font-normal">(optionnel)</span>
         </Label>
         <Textarea
