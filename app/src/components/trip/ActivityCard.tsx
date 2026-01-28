@@ -287,14 +287,13 @@ export function ActivityCard({
             </div>
           </div>
 
-          {/* Action buttons */}
-          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-            {/* Move buttons */}
-            {onMoveUp && (
+          {/* Bouton monter - centré en haut */}
+          {onMoveUp && (
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
               <Button
                 size="icon"
-                variant="ghost"
-                className="h-7 w-7"
+                variant="secondary"
+                className="h-8 w-8 rounded-full shadow-md"
                 disabled={!canMoveUp}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -302,14 +301,18 @@ export function ActivityCard({
                 }}
                 title="Déplacer vers le haut"
               >
-                <ChevronUp className="h-4 w-4" />
+                <ChevronUp className="h-5 w-5" />
               </Button>
-            )}
-            {onMoveDown && (
+            </div>
+          )}
+
+          {/* Bouton descendre - centré en bas */}
+          {onMoveDown && (
+            <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
               <Button
                 size="icon"
-                variant="ghost"
-                className="h-7 w-7"
+                variant="secondary"
+                className="h-8 w-8 rounded-full shadow-md"
                 disabled={!canMoveDown}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -317,9 +320,13 @@ export function ActivityCard({
                 }}
                 title="Déplacer vers le bas"
               >
-                <ChevronDown className="h-4 w-4" />
+                <ChevronDown className="h-5 w-5" />
               </Button>
-            )}
+            </div>
+          )}
+
+          {/* Action buttons (edit/delete) */}
+          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
             {onEdit && (
               <Button
                 size="icon"

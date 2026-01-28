@@ -11,6 +11,9 @@ ALTER TABLE trips ADD COLUMN IF NOT EXISTS title TEXT;
 -- Add duration_days column if it doesn't exist
 ALTER TABLE trips ADD COLUMN IF NOT EXISTS duration_days INTEGER;
 
+-- Add preferences column if it doesn't exist
+ALTER TABLE trips ADD COLUMN IF NOT EXISTS preferences JSONB DEFAULT '{}';
+
 -- =====================================================
 -- PART 1: Add visibility column to trips table
 -- =====================================================

@@ -1,6 +1,6 @@
 'use client';
 
-import { Hero, HowItWorks, Features, PopularDestinations, Testimonials, CTASection } from '@/components/landing';
+import { Hero, HowItWorks, Features, PopularDestinations, CTASection } from '@/components/landing';
 import { Footer } from '@/components/layout';
 
 export default function Home() {
@@ -10,7 +10,6 @@ export default function Home() {
       <HowItWorks />
       <Features />
       <PopularDestinations />
-      <Testimonials />
       <CTASection />
       <Footer />
     </div>

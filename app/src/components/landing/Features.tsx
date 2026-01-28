@@ -1,14 +1,14 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Sparkles, Users, Utensils, Leaf, FileDown, Globe } from 'lucide-react';
+import { Zap, Users, Utensils, Leaf, FileDown, Globe } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 
 const features = [
   {
-    icon: Sparkles,
-    title: 'IA Intelligente',
-    description: 'Génération d\'itinéraires personnalisés en quelques secondes grâce à l\'intelligence artificielle.',
+    icon: Zap,
+    title: 'Planification rapide',
+    description: 'Créez votre itinéraire personnalisé en quelques minutes avec tous les détails pratiques.',
     color: 'bg-purple-500/10 text-purple-500',
   },
   {

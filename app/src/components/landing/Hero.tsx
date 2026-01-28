@@ -3,15 +3,9 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Search, Sparkles, ArrowRight } from 'lucide-react';
+import { Search, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-
-const stats = [
-  { number: '10K+', label: 'Voyages créés' },
-  { number: '50+', label: 'Destinations' },
-  { number: '4.8★', label: 'Note moyenne' },
-];
 
 export function Hero() {
   const router = useRouter();
@@ -61,17 +55,6 @@ export function Hero() {
 
       <div className="container mx-auto px-4 py-20 relative z-10">
         <div className="max-w-4xl mx-auto text-center">
-          {/* Badge */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-8"
-          >
-            <Sparkles className="h-4 w-4" />
-            Propulsé par l&apos;Intelligence Artificielle
-          </motion.div>
-
           {/* Title */}
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
@@ -92,8 +75,8 @@ export function Hero() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto"
           >
-            L&apos;IA crée ton itinéraire personnalisé avec restaurants authentiques,
-            activités incontournables et hébergements adaptés. Tu profites.
+            Crée ton itinéraire personnalisé avec restaurants authentiques,
+            activités incontournables et hébergements adaptés à ton budget.
           </motion.p>
 
           {/* Search form */}
@@ -120,27 +103,6 @@ export function Hero() {
             </Button>
           </motion.form>
 
-          {/* Stats */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="flex flex-wrap justify-center gap-8 md:gap-16"
-          >
-            {stats.map((stat, index) => (
-              <div key={stat.label} className="text-center">
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ duration: 0.5, delay: 0.5 + index * 0.1 }}
-                  className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#1e3a5f] to-[#c9a227] bg-clip-text text-transparent"
-                >
-                  {stat.number}
-                </motion.div>
-                <div className="text-sm text-muted-foreground mt-1">{stat.label}</div>
-              </div>
-            ))}
-          </motion.div>
         </div>
       </div>
 
