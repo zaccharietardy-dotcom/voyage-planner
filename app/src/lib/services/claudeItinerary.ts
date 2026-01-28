@@ -259,7 +259,18 @@ RÈGLES D'OR:
    - Fournis un bookingSearchQuery optimisé pour Google (ex: "Tour Eiffel billets sommet réservation officielle")
    - Indique le délai recommandé (ex: "Réservez 2-3 semaines avant")
 
-9. NARRATIF DE GUIDE:
+9. PRIORITÉ AUX ACTIVITÉS CHOISIES:
+   - Les activités sélectionnées (${request.activities.join(', ')}) sont PRIORITAIRES et doivent dominer l'itinéraire
+   - Si "nightlife" est choisi: CHAQUE soir doit proposer un bar, club, spectacle ou quartier festif
+   - Si "gastronomy" est choisi: food tours, marchés locaux, restaurants notables CHAQUE jour
+   - Si "nature" est choisi: randonnées, parcs, excursions nature en priorité
+   - Si "adventure" est choisi: activités sportives (kayak, escalade, vélo...) CHAQUE jour
+   - Si "beach" est choisi: plages, sports nautiques, détente bord de mer
+   - Si "culture" est choisi: musées, monuments, sites historiques en priorité
+   - Si "shopping" est choisi: quartiers commerçants, marchés, boutiques locales
+   - Assure-toi que CHAQUE jour reflète au moins 2 des activités choisies par le voyageur
+
+10. NARRATIF DE GUIDE:
    - dayNarrative: 2-3 phrases vivantes comme un vrai guide local
    - Inclue un conseil pratique par jour (ex: "Arrivez avant 9h pour éviter 1h de queue")
    - Mentionne une spécialité culinaire locale à essayer dans le quartier du jour
@@ -453,7 +464,8 @@ export function mapItineraryToAttractions(
         longitude: 0,
         rating: 4.5,
         mustSee: true,
-        bookingRequired: false,
+        bookingRequired: !!suggestion.bookable,
+        bookingUrl: suggestion.bookingUrl,
         openingHours: { open: '09:00', close: '18:00' },
         dataReliability: 'generated' as const,
       });

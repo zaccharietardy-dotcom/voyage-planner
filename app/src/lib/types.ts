@@ -1,6 +1,6 @@
 // Types pour le formulaire de planification
 
-export type TransportType = 'plane' | 'train' | 'car' | 'bus';
+export type TransportType = 'optimal' | 'plane' | 'train' | 'car' | 'bus';
 
 export type GroupType = 'solo' | 'couple' | 'friends' | 'family_with_kids' | 'family_without_kids';
 
@@ -401,6 +401,7 @@ export interface Balance {
 // Labels pour l'UI
 
 export const TRANSPORT_LABELS: Record<TransportType, string> = {
+  optimal: 'Optimal (recommandé) 🎯',
   plane: 'Avion ✈️',
   train: 'Train 🚄',
   car: 'Voiture 🚗',

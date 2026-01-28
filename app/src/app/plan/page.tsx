@@ -31,7 +31,7 @@ const STEPS = [
 const DEFAULT_PREFERENCES: Partial<TripPreferences> = {
   durationDays: 7,
   groupSize: 2,
-  transport: 'plane',
+  transport: 'optimal',
   carRental: false,
   budgetLevel: 'moderate',
   activities: [],

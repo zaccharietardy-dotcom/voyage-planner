@@ -133,7 +133,7 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
     preferences: {
       prioritize: preferences.budgetLevel === 'economic' ? 'price' :
                   preferences.budgetLevel === 'luxury' ? 'time' : 'balanced',
-      forceIncludeMode: preferences.transport, // Forcer l'inclusion du mode choisi par l'utilisateur
+      forceIncludeMode: preferences.transport === 'optimal' ? undefined : preferences.transport,
     },
   });
 
@@ -162,19 +162,18 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
   // Sélectionner la meilleure option (ou celle choisie par l'utilisateur via preferences.transport)
   let selectedTransport = transportOptions.find(t => t.recommended) || transportOptions[0];
 
-  // Si l'utilisateur a spécifié un mode de transport, RESPECTER son choix
-  if (preferences.transport) {
+  // Si l'utilisateur a spécifié un mode de transport (pas 'optimal'), RESPECTER son choix
+  if (preferences.transport && preferences.transport !== 'optimal') {
     const userPreferred = transportOptions.find(t => t.mode === preferences.transport);
     if (userPreferred) {
       selectedTransport = userPreferred;
       console.log(`Mode de transport choisi par l'utilisateur: ${preferences.transport}`);
     } else {
-      // L'option demandée n'existe pas dans les résultats
-      // Pour 'plane', c'est probablement parce que la distance est trop courte (< 300km)
       console.warn(`Mode de transport "${preferences.transport}" demandé mais non disponible pour cette destination`);
       console.warn(`Options disponibles: ${transportOptions.map(t => t.mode).join(', ')}`);
-      // On garde quand même le mode recommandé mais on log clairement
     }
+  } else {
+    console.log(`Mode optimal: meilleure option sélectionnée automatiquement`);
   }
 
   console.log(`Transport sélectionné: ${selectedTransport?.mode} (score: ${selectedTransport?.score}/10)`);

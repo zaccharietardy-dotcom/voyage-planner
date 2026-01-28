@@ -100,7 +100,7 @@ export class DayScheduler {
     const { id, title, type, duration, travelTime = 0, minStartTime, data } = params;
 
     // Buffer time entre activités (sauf pour transport/flight/checkin/checkout)
-    const BUFFER_MINUTES = 10;
+    const BUFFER_MINUTES = 5;
     const needsBuffer = !['flight', 'transport', 'checkin', 'checkout', 'parking'].includes(type);
 
     // DEBUG: Afficher l'etat du curseur
@@ -233,7 +233,7 @@ export class DayScheduler {
    * Trouve le prochain créneau libre d'au moins X minutes après une heure donnée
    */
   private findNextFreeSlot(durationMinutes: number, afterTime: Date): TimeSlot | null {
-    const BUFFER_MINUTES = 10;
+    const BUFFER_MINUTES = 5;
 
     // Trier les items par heure de début
     const sorted = [...this.items].sort((a, b) => a.slot.start.getTime() - b.slot.start.getTime());
