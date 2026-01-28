@@ -17,18 +17,14 @@ export function GoogleSignIn({ redirectTo, className }: GoogleSignInProps) {
     setIsLoading(true);
     const supabase = getSupabaseClient();
 
-    // Construire l'URL de callback avec le redirect final
-    const callbackUrl = new URL(`${window.location.origin}/auth/callback`);
-    if (redirectTo) {
-      callbackUrl.searchParams.set('redirect', redirectTo);
-    } else {
-      callbackUrl.searchParams.set('redirect', '/mes-voyages');
-    }
+    // Construire le chemin de callback avec le redirect final
+    const finalRedirect = redirectTo || '/mes-voyages';
+    const callbackPath = `/auth/callback?redirect=${encodeURIComponent(finalRedirect)}`;
 
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: callbackUrl.toString(),
+        redirectTo: `${window.location.origin}${callbackPath}`,
       },
     });
 
