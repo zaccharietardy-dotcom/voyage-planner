@@ -357,6 +357,31 @@ export interface Trip {
     parking: number;
     other: number;
   };
+  // Infos pratiques voyage
+  travelTips?: {
+    vocabulary: {
+      language: string;
+      phrases: { original: string; translation: string; phonetic?: string; context: string }[];
+    };
+    packing: {
+      essentials: { item: string; reason: string }[];
+      plugType?: string;
+      voltage?: string;
+    };
+    legal: {
+      visaInfo: { originCountry: string; requirement: string }[];
+      importantLaws: string[];
+      disclaimer: string;
+    };
+    emergency: {
+      police: string;
+      ambulance: string;
+      fire: string;
+      generalEmergency: string;
+      embassy?: string;
+      otherNumbers?: { label: string; number: string }[];
+    };
+  };
   // Empreinte carbone
   carbonFootprint?: {
     total: number; // kg CO2

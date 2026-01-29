@@ -36,6 +36,7 @@ import { DraggableTimeline } from '@/components/trip/DraggableTimeline';
 import { ShareTripDialog } from '@/components/trip/ShareTripDialog';
 import { ActivityEditModal } from '@/components/trip/ActivityEditModal';
 import { ExpensesPanel } from '@/components/trip/expenses/ExpensesPanel';
+import { TravelTips } from '@/components/trip/TravelTips';
 import { ProposedChange, createMoveActivityChange } from '@/lib/types/collaboration';
 import { cn } from '@/lib/utils';
 import {
@@ -522,10 +523,25 @@ export default function TripPage() {
                 <ArrowLeft className="h-5 w-5" />
               </Button>
               <div>
-                <h1 className="font-bold text-xl">{trip.preferences.destination}</h1>
+                <h1 className="font-bold text-xl">
+                  {trip.preferences.origin && <span className="text-muted-foreground">{trip.preferences.origin} → </span>}
+                  {trip.preferences.destination}
+                </h1>
                 <p className="text-sm text-muted-foreground">
                   {format(new Date(trip.preferences.startDate), 'd MMMM yyyy', { locale: fr })} • {trip.preferences.durationDays} jours
+                  {trip.preferences.groupSize && ` • ${trip.preferences.groupSize} pers.`}
+                  {trip.preferences.budgetLevel && ` • ${trip.preferences.budgetLevel === 'economic' ? 'Éco' : trip.preferences.budgetLevel === 'moderate' ? 'Modéré' : trip.preferences.budgetLevel === 'comfort' ? 'Confort' : 'Luxe'}`}
+                  {trip.preferences.transport && trip.preferences.transport !== 'optimal' && ` • ${trip.preferences.transport === 'plane' ? 'Avion' : trip.preferences.transport === 'train' ? 'Train' : trip.preferences.transport === 'car' ? 'Voiture' : 'Bus'}`}
+                  {trip.preferences.groupType && ` • ${trip.preferences.groupType === 'solo' ? 'Solo' : trip.preferences.groupType === 'couple' ? 'Couple' : trip.preferences.groupType === 'friends' ? 'Amis' : trip.preferences.groupType === 'family_with_kids' ? 'Famille (enfants)' : 'Famille'}`}
                 </p>
+                {trip.preferences.activities && trip.preferences.activities.length > 0 && (
+                  <p className="text-xs text-muted-foreground/70">
+                    {trip.preferences.activities.map((a: string) => {
+                      const labels: Record<string, string> = { beach: 'Plage', nature: 'Nature', culture: 'Culture', gastronomy: 'Gastronomie', nightlife: 'Vie nocturne', shopping: 'Shopping', adventure: 'Aventure', wellness: 'Bien-être' };
+                      return labels[a] || a;
+                    }).join(', ')}
+                  </p>
+                )}
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -894,6 +910,11 @@ export default function TripPage() {
             {/* Carbon Footprint */}
             {trip.carbonFootprint && (
               <CarbonFootprint data={trip.carbonFootprint} />
+            )}
+
+            {/* Travel Tips */}
+            {trip.travelTips && (
+              <TravelTips data={trip.travelTips} />
             )}
           </div>
         </div>

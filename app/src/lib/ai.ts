@@ -36,6 +36,7 @@ import { createLocationTracker, TravelerLocation } from './services/locationTrac
 import { generateFlightLink, generateHotelLink, formatDateForUrl } from './services/linkGenerator';
 import { searchAttractionsMultiQuery, searchMustSeeAttractions } from './services/serpApiPlaces';
 import { generateClaudeItinerary, summarizeAttractions, mapItineraryToAttractions } from './services/claudeItinerary';
+import { generateTravelTips } from './services/travelTips';
 
 /**
  * Choisit le mode de direction Google Maps en fonction de la distance
@@ -274,15 +275,26 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
     guests: preferences.groupSize,
   });
 
-  // Attendre les 3 en parallèle
-  const [transportOptions, attractionPoolRaw, accommodationOptions] = await Promise.all([
+  // Lancer les travel tips en parallèle aussi
+  console.time('[AI] TravelTips');
+  const travelTipsPromise = generateTravelTips(
+    preferences.origin,
+    preferences.destination,
+    startDate,
+    preferences.durationDays,
+  );
+
+  // Attendre les 4 en parallèle
+  const [transportOptions, attractionPoolRaw, accommodationOptions, travelTipsData] = await Promise.all([
     transportPromise,
     attractionsPromise,
     hotelsPromise,
+    travelTipsPromise,
   ]);
   console.timeEnd('[AI] Transport');
   console.timeEnd('[AI] Attractions pool');
   console.timeEnd('[AI] Hotels');
+  console.timeEnd('[AI] TravelTips');
 
   // Convertir en format pour l'interface
   const transportOptionsSummary: TransportOptionSummary[] = transportOptions.map(opt => ({
@@ -674,6 +686,7 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       },
       tips: carbonData.tips,
     },
+    travelTips: travelTipsData || undefined,
   };
 
   // VALIDATION ET CORRECTION AUTOMATIQUE
