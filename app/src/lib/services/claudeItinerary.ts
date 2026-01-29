@@ -175,7 +175,7 @@ export async function generateClaudeItinerary(
     lat: +a.latitude.toFixed(4),
     lng: +a.longitude.toFixed(4),
     dur: a.estimatedDuration,
-    cost: a.estimatedCost,
+    cost: a.estimatedCost || 0,
   }));
 
   const budgetContext = {
@@ -235,6 +235,13 @@ RÈGLES D'OR:
      * Jardin/parc (Tuileries, Luxembourg): 45-60
      * Marché: 45-60
      * NE METS JAMAIS 180min pour un simple monument, une place ou une église !
+   - COÛTS estimatedCost RÉALISTES (par personne en €):
+     * Gratuit (0€): parcs, jardins, places, extérieurs de monuments, églises, marchés (visite), quartiers
+     * 5-15€: petits musées, tours d'église/cryptes, expositions temporaires
+     * 15-25€: grands musées (Louvre 22€, Orsay 16€), monuments payants (Arc de Triomphe 16€, Tour Eiffel 29€)
+     * 25-40€: expériences réservables (food tour, croisière, vélo guidé)
+     * 40-80€: expériences premium (spectacle, montgolfière, VIP)
+     * NE METS PAS 30€ pour une attraction GRATUITE (Sacré-Cœur, Tuileries, Notre-Dame extérieur) !
 
 4. DAY TRIPS:
    - Si ${request.durationDays}+ jours, propose un day trip pertinent hors de la ville
@@ -247,7 +254,8 @@ RÈGLES D'OR:
 
 6. FILTRAGE STRICT:
    - EXCLUE: cinémas, arcades, salles de sport, immeubles, bureaux, centres commerciaux génériques
-   - INCLUE le must-see du voyageur en PRIORITÉ ABSOLUE (jour 1-2)
+   - MUST-SEE OBLIGATOIRES: "${request.mustSee || 'aucun'}" → Tu DOIS inclure CHACUN d'entre eux dans les jours 1-3, SANS EXCEPTION
+   - Si un must-see n'est PAS dans le pool d'attractions, AJOUTE-LE dans additionalSuggestions avec ses vraies coordonnées
    - Si une attraction ESSENTIELLE de ${request.destination} manque du pool, ajoute-la dans additionalSuggestions
 
 7. COMPLÉTER LE POOL + EXPÉRIENCES UNIQUES:

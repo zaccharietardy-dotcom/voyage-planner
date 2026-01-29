@@ -620,11 +620,34 @@ export async function searchAttractionsMultiQuery(
 
   // Trier par priorité puis par rating
   const sorted = Array.from(allAttractions.values())
-    .sort((a, b) => a.priority - b.priority || (b.rating || 0) - (a.rating || 0))
-    .slice(0, limit);
+    .sort((a, b) => a.priority - b.priority || (b.rating || 0) - (a.rating || 0));
+
+  // Déduplication par proximité GPS: si 2 attractions sont à < 150m et partagent un mot commun (>3 chars), garder la mieux notée
+  const deduped: typeof sorted = [];
+  for (const attr of sorted) {
+    const isDuplicate = deduped.some(existing => {
+      if (!attr.latitude || !existing.latitude) return false;
+      // Distance approximative en km (Haversine simplifié)
+      const dLat = (attr.latitude - existing.latitude) * 111;
+      const dLng = (attr.longitude - existing.longitude) * 111 * Math.cos(attr.latitude * Math.PI / 180);
+      const distKm = Math.sqrt(dLat * dLat + dLng * dLng);
+      if (distKm > 0.15) return false; // > 150m = pas un doublon
+      // Vérifier un mot commun significatif (>3 chars)
+      const wordsA = attr.name.toLowerCase().split(/\s+/).filter(w => w.length > 3);
+      const wordsB = existing.name.toLowerCase().split(/\s+/).filter(w => w.length > 3);
+      return wordsA.some(w => wordsB.includes(w));
+    });
+    if (!isDuplicate) {
+      deduped.push(attr);
+    } else {
+      console.log(`[SerpAPI] Dédup GPS: "${attr.name}" doublon de lieu proche, ignoré`);
+    }
+  }
+
+  const limited = deduped.slice(0, limit);
 
   // Marquer les 3 premiers comme mustSee
-  const finalAttractions = sorted.map((attr, index) => {
+  const finalAttractions = limited.map((attr, index) => {
     const { priority, ...attraction } = attr;
     return {
       ...attraction,
@@ -682,7 +705,37 @@ export async function searchMustSeeAttractions(
           return attraction;
         }
       }
-      console.log(`[SerpAPI MustSee] ❌ Non trouvé: "${item}"`);
+      // Retry avec variantes (nom anglais, nom complet)
+      const variants = [
+        `${item} attraction ${destination}`,
+        `${item} landmark ${destination}`,
+      ];
+      for (const variant of variants) {
+        try {
+          const retryParams = new URLSearchParams({
+            api_key: SERPAPI_KEY!,
+            engine: 'google_maps',
+            q: variant,
+            ll: `@${cityCenter.lat},${cityCenter.lng},14z`,
+            hl: 'fr',
+            gl: countryCode,
+          });
+          const retryResponse = await fetch(`${SERPAPI_BASE_URL}?${retryParams}`);
+          if (retryResponse.ok) {
+            const retryData = await retryResponse.json();
+            const retryPlaces: SerpApiLocalResult[] = retryData.local_results || [];
+            if (retryPlaces.length > 0 && retryPlaces[0].gps_coordinates) {
+              const retryAttraction = convertToAttraction(retryPlaces[0], destination, 0);
+              if (retryAttraction) {
+                retryAttraction.mustSee = true;
+                console.log(`[SerpAPI MustSee] ✅ Trouvé (retry): "${item}" → ${retryAttraction.name}`);
+                return retryAttraction;
+              }
+            }
+          }
+        } catch { /* ignore retry errors */ }
+      }
+      console.log(`[SerpAPI MustSee] ❌ Non trouvé après retries: "${item}"`);
       return null;
     } catch (error) {
       console.error(`[SerpAPI MustSee] Erreur pour "${item}":`, error);

@@ -3,7 +3,7 @@ import { generateTripWithAI } from '@/lib/ai';
 import { TripPreferences } from '@/lib/types';
 import { normalizeCity } from '@/lib/services/cityNormalization';
 
-export const maxDuration = 120; // 2 minutes max (SerpAPI + Claude Sonnet)
+export const maxDuration = 300; // 5 minutes max (SerpAPI + Claude Sonnet + pipeline)
 
 export async function POST(request: NextRequest) {
   try {

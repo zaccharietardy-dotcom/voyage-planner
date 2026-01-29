@@ -121,9 +121,9 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
     console.warn(`[AI] ⚠ Pas de centre-ville connu pour "${preferences.destination}", fallback utilisé`);
   }
 
-  // 2. Comparer les options de transport
-  console.log('Comparaison des options de transport...');
-  const transportOptions = await compareTransportOptions({
+  // 2. Comparer les options de transport (lancé en parallèle avec attractions + hôtels)
+  console.time('[AI] Transport');
+  const transportPromise = compareTransportOptions({
     origin: preferences.origin,
     originCoords,
     destination: preferences.destination,
@@ -136,6 +136,39 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       forceIncludeMode: preferences.transport === 'optimal' ? undefined : preferences.transport,
     },
   });
+
+  // 3. Dates du voyage (calculées tôt pour paralléliser hôtels)
+  const startDate = normalizeToLocalDate(preferences.startDate);
+  const endDate = new Date(startDate);
+  endDate.setDate(endDate.getDate() + preferences.durationDays - 1);
+  console.log(`[AI] Date de départ normalisée: ${startDate.toDateString()} (input: ${preferences.startDate})`);
+
+  // Lancer attractions + hôtels en parallèle avec le transport
+  console.time('[AI] Attractions pool');
+  const attractionsPromise = searchAttractionsMultiQuery(
+    preferences.destination,
+    destCoords,
+    { types: preferences.activities, limit: 50 }
+  );
+
+  console.time('[AI] Hotels');
+  const hotelsPromise = searchHotels(preferences.destination, {
+    budgetLevel: preferences.budgetLevel as 'economic' | 'moderate' | 'luxury',
+    cityCenter: destCoords,
+    checkInDate: startDate,
+    checkOutDate: endDate,
+    guests: preferences.groupSize,
+  });
+
+  // Attendre les 3 en parallèle
+  const [transportOptions, attractionPoolRaw, accommodationOptions] = await Promise.all([
+    transportPromise,
+    attractionsPromise,
+    hotelsPromise,
+  ]);
+  console.timeEnd('[AI] Transport');
+  console.timeEnd('[AI] Attractions pool');
+  console.timeEnd('[AI] Hotels');
 
   // Convertir en format pour l'interface
   const transportOptionsSummary: TransportOptionSummary[] = transportOptions.map(opt => ({
@@ -177,16 +210,6 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
   }
 
   console.log(`Transport sélectionné: ${selectedTransport?.mode} (score: ${selectedTransport?.score}/10)`);
-
-  // 3. Dates du voyage
-  // IMPORTANT: Normaliser les dates pour éviter les problèmes de timezone
-  // preferences.startDate peut être "2026-01-27T23:00:00.000Z" (UTC) qui donne le 28 en local
-  // On extrait YYYY-MM-DD et on crée une date locale à midi pour éviter les décalages
-  const startDate = normalizeToLocalDate(preferences.startDate);
-  const endDate = new Date(startDate);
-  endDate.setDate(endDate.getDate() + preferences.durationDays - 1);
-
-  console.log(`[AI] Date de départ normalisée: ${startDate.toDateString()} (input: ${preferences.startDate})`);
 
   // 4. Si avion, rechercher les vols détaillés
   let outboundFlight: Flight | null = null;
@@ -235,16 +258,10 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
     parking = selectBestParking(originAirport.code, preferences.durationDays, preferences.budgetLevel || 'moderate');
   }
 
-  // 7. NOUVEAU FLUX: Gros pool SerpAPI + Claude Curation
-  // Étape 1: Récupérer un gros pool d'attractions via SerpAPI (50+)
-  console.log('[AI] Étape 1: Récupération du gros pool SerpAPI...');
-  let attractionPool = await searchAttractionsMultiQuery(
-    preferences.destination,
-    cityCenter,
-    { types: preferences.activities, limit: 50 }
-  );
+  // 7. Pool d'attractions (déjà récupéré en parallèle ci-dessus)
+  let attractionPool = attractionPoolRaw;
 
-  // Étape 1b: Recherche spécifique des mustSee
+  // Recherche spécifique des mustSee
   if (preferences.mustSee?.trim()) {
     console.log('[AI] Recherche des mustSee spécifiques...');
     const mustSeeAttractions = await searchMustSeeAttractions(
@@ -252,11 +269,10 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       preferences.destination,
       cityCenter
     );
-    // Ajouter les mustSee au pool (dédupliquer par nom)
     const poolNames = new Set(attractionPool.map(a => a.name.toLowerCase()));
     for (const msAttr of mustSeeAttractions) {
       if (!poolNames.has(msAttr.name.toLowerCase())) {
-        attractionPool.unshift(msAttr); // Ajouter en priorité
+        attractionPool.unshift(msAttr);
         poolNames.add(msAttr.name.toLowerCase());
       }
     }
@@ -351,15 +367,7 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
     );
   }
 
-  // 7.5 Rechercher les hôtels disponibles
-  console.log('Recherche des hôtels...');
-  const accommodationOptions = await searchHotels(preferences.destination, {
-    budgetLevel: preferences.budgetLevel as 'economic' | 'moderate' | 'luxury',
-    cityCenter,
-    checkInDate: startDate,
-    checkOutDate: endDate,
-    guests: preferences.groupSize,
-  });
+  // 7.5 Sélectionner le meilleur hôtel (recherche déjà faite en parallèle)
   const accommodation = selectBestHotel(accommodationOptions, {
     budgetLevel: preferences.budgetLevel as 'economic' | 'moderate' | 'luxury',
     attractions: selectedAttractions,
@@ -957,15 +965,17 @@ async function generateDayWithScheduler(params: {
         console.log(`[Jour ${dayNumber}] Dernier jour - activités jusqu'à ${checkoutTime.toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'})} (checkout)`);
       }
     } else if (groundTransport) {
-      // Dernier jour transport terrestre: check-out a 10h, activites jusqu'a 09:30
-      const targetEnd = parseTime(date, '09:30'); // 30min avant checkout (10:00)
+      // Dernier jour transport terrestre: activités possibles APRÈS check-out (10:30) jusqu'au départ (14:00)
+      // Le check-out (10:00-10:30) et le transport retour (14:00) sont des fixed items
+      // On étend dayEnd jusqu'à 13:30 pour permettre des activités entre check-out et départ
+      const targetEnd = parseTime(date, '13:30'); // 30min avant transport retour (14:00)
 
-      // FIX: Si checkout est AVANT dayStart, pas d'activités
       if (targetEnd <= dayStart) {
-        console.log(`[Jour ${dayNumber}] Transport matinal - checkout avant dayStart → Pas d'activités`);
+        console.log(`[Jour ${dayNumber}] Transport matinal - pas d'activités possibles`);
         dayEnd = dayStart;
       } else {
         dayEnd = targetEnd;
+        console.log(`[Jour ${dayNumber}] Dernier jour ground - activités jusqu'à 13:30 (départ 14:00)`);
       }
     }
   }
@@ -1577,11 +1587,20 @@ async function generateDayWithScheduler(params: {
         }));
       }
 
-      scheduler.advanceTo(hotelEnd);
-      // Mettre à jour lastCoords à la position de l'hôtel
+      // NE PAS avancer le curseur au check-in: laisser du temps pour des activités avant
+      // Le scheduler les programmera naturellement entre l'arrivée et le check-in (fixed item)
+      // Avancer juste après l'arrivée du transport + buffer
+      const afterArrival = new Date(transportEnd.getTime() + 30 * 60 * 1000);
+      if (afterArrival < hotelStart) {
+        scheduler.advanceTo(afterArrival);
+        console.log(`[Jour ${dayNumber}] ⏰ ${Math.round((hotelStart.getTime() - afterArrival.getTime()) / 60000)}min de temps libre avant check-in`);
+      } else {
+        scheduler.advanceTo(hotelEnd);
+      }
+      // Mettre à jour lastCoords à la gare/arrivée pour les activités pré-check-in
       lastCoords = {
-        lat: accommodation?.latitude || cityCenter.lat,
-        lng: accommodation?.longitude || cityCenter.lng,
+        lat: cityCenter.lat,
+        lng: cityCenter.lng,
       };
     }
   }
@@ -1598,10 +1617,11 @@ async function generateDayWithScheduler(params: {
         minActivityStart = new Date(flightArrival.getTime() + 90 * 60 * 1000);
       }
     } else if (groundTransport) {
-      // Transport terrestre: départ 08:00 + durée + 50min check-in
+      // Transport terrestre: activités possibles dès l'arrivée + petit buffer
+      // Le check-in hôtel est un fixed item, pas besoin d'attendre pour visiter
       const departureTime = parseTime(date, '08:00');
       const arrivalTime = new Date(departureTime.getTime() + groundTransport.totalDuration * 60 * 1000);
-      minActivityStart = new Date(arrivalTime.getTime() + 50 * 60 * 1000);
+      minActivityStart = new Date(arrivalTime.getTime() + 15 * 60 * 1000); // 15min buffer après descente
     }
 
     if (minActivityStart) {
@@ -2308,6 +2328,11 @@ async function generateDayWithScheduler(params: {
           latitude: accommodation?.latitude || cityCenter.lat + 0.005,
           longitude: accommodation?.longitude || cityCenter.lng + 0.005,
         }));
+        // Update lastCoords to hotel position for post-checkout activities
+        lastCoords = {
+          lat: accommodation?.latitude || cityCenter.lat,
+          lng: accommodation?.longitude || cityCenter.lng,
+        };
       }
 
       // Transport retour
