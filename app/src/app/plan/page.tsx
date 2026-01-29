@@ -14,7 +14,8 @@ import {
   StepActivities,
 } from '@/components/forms';
 import { TripPreferences } from '@/lib/types';
-import { ArrowLeft, ArrowRight, Sparkles, Loader2, UserCog, Check } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Sparkles, Loader2, UserCog, Check, Shuffle } from 'lucide-react';
+import { generateRandomPreferences } from '@/lib/randomExample';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/components/auth';
 import { useUserPreferences, preferenceOptions } from '@/hooks/useUserPreferences';
@@ -286,7 +287,22 @@ export default function PlanPage() {
         {/* Progress header */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="text-lg font-semibold">Planifier votre voyage</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-lg font-semibold">Planifier votre voyage</h1>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setPreferences(generateRandomPreferences());
+                  setCurrentStep(1);
+                  toast.success('Exemple aléatoire chargé !');
+                }}
+                className="gap-1 text-xs"
+              >
+                <Shuffle className="h-3 w-3" />
+                Exemple aléatoire
+              </Button>
+            </div>
             <span className="text-sm text-muted-foreground">
               Étape {currentStep} sur {STEPS.length}
             </span>

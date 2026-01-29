@@ -132,7 +132,21 @@ export default function MesVoyagesPage() {
           </Button>
         </div>
 
-        {trips.length === 0 ? (
+        {isLoading ? (
+          <div className="grid gap-4">
+            {[1, 2, 3].map(i => (
+              <Card key={i} className="animate-pulse">
+                <CardHeader className="pb-2">
+                  <div className="h-5 bg-muted rounded w-1/3" />
+                  <div className="h-4 bg-muted rounded w-1/4 mt-2" />
+                </CardHeader>
+                <CardContent>
+                  <div className="h-4 bg-muted rounded w-2/3" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : trips.length === 0 ? (
           <Card className="text-center py-12">
             <CardContent>
               <Plane className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
