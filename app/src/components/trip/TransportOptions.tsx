@@ -124,6 +124,16 @@ function TransportOptionCard({
                   Sélectionné
                 </Badge>
               )}
+              {option.dataSource === 'api' && (
+                <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 text-xs">
+                  Prix réel
+                </Badge>
+              )}
+              {option.dataSource === 'estimated' && (
+                <Badge variant="secondary" className="bg-amber-100 text-amber-700 text-xs">
+                  Estimé
+                </Badge>
+              )}
             </div>
             {option.recommendationReason && (
               <p className="text-xs text-muted-foreground">{option.recommendationReason}</p>

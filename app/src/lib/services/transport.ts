@@ -7,6 +7,7 @@
 
 import { calculateDistance } from './geocoding';
 import { normalizeCitySync } from './cityNormalization';
+import { getCheapestTrainPrice } from './dbTransport';
 
 // Types
 export interface TransportOption {
@@ -239,7 +240,7 @@ export async function compareTransportOptions(
   }
 
   // 2. Option train (si ligne existe ou distance < 1500km)
-  const trainOption = calculateTrainOption(params, distance);
+  const trainOption = await calculateTrainOption(params, distance);
   if (trainOption) options.push(trainOption);
 
   // 3. Option bus (si distance < 1200km OU si l'utilisateur l'a demandé)
@@ -333,19 +334,23 @@ function calculatePlaneOption(params: TransportSearchParams, distance: number): 
 }
 
 /**
- * Calcule l'option train
+ * Calcule l'option train — essaie l'API DB Transport, puis la base connue, puis les estimations
  */
-function calculateTrainOption(params: TransportSearchParams, distance: number): TransportOption | null {
-  // 1. Chercher un trajet connu avec prix/durée réels
-  const knownRoute = findKnownRoute(params.origin, params.destination);
-  const isHighSpeed = knownRoute?.highSpeed ?? hasDirectHighSpeedRail(params.origin, params.destination);
+async function calculateTrainOption(params: TransportSearchParams, distance: number): Promise<TransportOption | null> {
+  const isHighSpeed = hasDirectHighSpeedRail(params.origin, params.destination);
 
-  console.log(`[Train] calculateTrainOption: ${params.origin} → ${params.destination}, distance: ${Math.round(distance)}km, isHighSpeed: ${isHighSpeed}, knownRoute: ${knownRoute ? 'YES' : 'NO'}`);
+  console.log(`[Train] calculateTrainOption: ${params.origin} → ${params.destination}, distance: ${Math.round(distance)}km, isHighSpeed: ${isHighSpeed}`);
 
   // Si pas de train direct et distance > 1000km, pas d'option train simple
-  if (!knownRoute && !isHighSpeed && distance > 1000) {
-    console.log(`[Train] Skipping train: no high-speed rail and distance > 1000km`);
-    return null;
+  if (!isHighSpeed && distance > 1000) {
+    // Quand même tenter l'API DB au cas où
+    const dbResult = await getCheapestTrainPrice(params.origin, params.destination, params.date).catch(() => null);
+    if (!dbResult) {
+      console.log(`[Train] Skipping train: no high-speed rail, distance > 1000km, and no DB API result`);
+      return null;
+    }
+    // DB API found a route even without known high-speed — use it
+    return buildTrainOption(params, distance, dbResult.duration, dbResult.price || 0, dbResult.operator, 'api');
   }
 
   let travelTime: number;
@@ -353,39 +358,78 @@ function calculateTrainOption(params: TransportSearchParams, distance: number): 
   let operator: string;
   let dataSource: 'api' | 'estimated' = 'estimated';
 
+  // 1. Try DB Transport REST API (real-time prices + schedules)
+  try {
+    const dbResult = await getCheapestTrainPrice(params.origin, params.destination, params.date);
+    if (dbResult && dbResult.duration > 0) {
+      travelTime = dbResult.duration;
+      price = dbResult.price > 0 ? dbResult.price : 0;
+      operator = dbResult.operator;
+      dataSource = 'api';
+      console.log(`[Train] DB API result: ${travelTime}min, ${price > 0 ? price + '€' : 'no price'}, ${operator}, ${dbResult.transfers} transfers`);
+
+      // If DB returned duration but no price, try known routes for price
+      if (price === 0) {
+        const knownRoute = findKnownRoute(params.origin, params.destination);
+        if (knownRoute) {
+          price = knownRoute.price;
+          console.log(`[Train] Using known route price as supplement: ${price}€`);
+        } else {
+          // Estimate price from distance
+          const pricePerKm = isHighSpeed ? PRICE_PER_KM.train_highspeed : PRICE_PER_KM.train_regular;
+          price = Math.max(Math.round(distance * pricePerKm), 15);
+          dataSource = 'estimated'; // Price is estimated even though duration is real
+        }
+      }
+
+      return buildTrainOption(params, distance, travelTime, price, operator, dataSource);
+    }
+  } catch (err) {
+    console.warn(`[Train] DB API error, falling back:`, err instanceof Error ? err.message : err);
+  }
+
+  // 2. Try known routes database
+  const knownRoute = findKnownRoute(params.origin, params.destination);
   if (knownRoute) {
-    // Utiliser les données réelles
     travelTime = knownRoute.duration;
     price = knownRoute.price;
     operator = knownRoute.operator;
-    dataSource = 'api'; // Données vérifiées
+    dataSource = 'api'; // Verified data
     console.log(`[Train] Using known route: ${travelTime}min, ${price}€, ${operator}`);
-  } else {
-    // Fallback: estimation par distance
-    const speed = isHighSpeed ? SPEEDS.train_highspeed : SPEEDS.train_regular;
-    travelTime = Math.round((distance / speed) * 60);
-    const pricePerKm = isHighSpeed ? PRICE_PER_KM.train_highspeed : PRICE_PER_KM.train_regular;
-    price = Math.round(distance * pricePerKm);
-    if (distance > 500) price = Math.round(price * 0.85);
-    // Prix minimum réaliste
-    price = Math.max(price, 15);
-    operator = isHighSpeed ? getTrainOperator(params.origin, params.destination) : 'Train régional';
+    return buildTrainOption(params, distance, travelTime, price, operator, dataSource);
   }
 
-  // Temps total avec accès gare
+  // 3. Fallback: distance-based estimation
+  const speed = isHighSpeed ? SPEEDS.train_highspeed : SPEEDS.train_regular;
+  travelTime = Math.round((distance / speed) * 60);
+  const pricePerKm = isHighSpeed ? PRICE_PER_KM.train_highspeed : PRICE_PER_KM.train_regular;
+  price = Math.round(distance * pricePerKm);
+  if (distance > 500) price = Math.round(price * 0.85);
+  price = Math.max(price, 15);
+  operator = isHighSpeed ? getTrainOperator(params.origin, params.destination) : 'Train régional';
+
+  return buildTrainOption(params, distance, travelTime, price, operator, 'estimated');
+}
+
+function buildTrainOption(
+  params: TransportSearchParams,
+  distance: number,
+  travelTime: number,
+  price: number,
+  operator: string,
+  dataSource: 'api' | 'estimated'
+): TransportOption {
+  const isHighSpeed = travelTime > 0 && distance > 0 && (distance / (travelTime / 60)) > 150;
   const totalDuration = travelTime +
     ADDITIONAL_TIME.train.station_access * 2 +
     ADDITIONAL_TIME.train.boarding;
 
-  // CO2
   const co2Factor = isHighSpeed ? CO2_PER_KM.train_highspeed : CO2_PER_KM.train_regular;
   const co2 = Math.round(distance * co2Factor);
-
-  // URL de réservation avec date
   const bookingUrl = getTrainBookingUrl(params.origin, params.destination, params.passengers, params.date);
 
   return {
-    id: knownRoute ? 'train_known' : (isHighSpeed ? 'train_highspeed' : 'train'),
+    id: dataSource === 'api' ? 'train_api' : (isHighSpeed ? 'train_highspeed' : 'train'),
     mode: 'train',
     segments: [{
       mode: 'train',
