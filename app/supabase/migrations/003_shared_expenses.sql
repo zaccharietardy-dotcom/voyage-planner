@@ -1,14 +1,93 @@
 -- Migration: Shared Expenses System (Tricount-like)
 -- Adds expenses tracking, splits, and settlements for trip members
 
+-- =====================================================
+-- PART 0: Create trip_members if it doesn't exist
+-- =====================================================
+CREATE TABLE IF NOT EXISTS trip_members (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  trip_id UUID NOT NULL REFERENCES trips(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  role TEXT NOT NULL DEFAULT 'viewer' CHECK (role IN ('owner', 'editor', 'viewer')),
+  joined_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_trip_members_trip ON trip_members(trip_id);
+CREATE INDEX IF NOT EXISTS idx_trip_members_user ON trip_members(user_id);
+
+ALTER TABLE trip_members ENABLE ROW LEVEL SECURITY;
+
+-- RLS for trip_members (idempotent)
+DO $$ BEGIN
+  CREATE POLICY "Trip members can view members" ON trip_members
+    FOR SELECT USING (
+      EXISTS (SELECT 1 FROM trip_members tm WHERE tm.trip_id = trip_members.trip_id AND tm.user_id = auth.uid())
+    );
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+  CREATE POLICY "Authenticated users can join trips" ON trip_members
+    FOR INSERT WITH CHECK (auth.uid() = user_id);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+-- =====================================================
+-- PART 0b: Create proposals/votes/activity_log if needed
+-- =====================================================
+CREATE TABLE IF NOT EXISTS proposals (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  trip_id UUID NOT NULL REFERENCES trips(id) ON DELETE CASCADE,
+  author_id UUID NOT NULL REFERENCES profiles(id),
+  title TEXT NOT NULL,
+  description TEXT,
+  changes JSONB NOT NULL DEFAULT '[]',
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected', 'merged')),
+  votes_for INTEGER NOT NULL DEFAULT 0,
+  votes_against INTEGER NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  resolved_at TIMESTAMPTZ
+);
+
+CREATE TABLE IF NOT EXISTS votes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  proposal_id UUID NOT NULL REFERENCES proposals(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES profiles(id),
+  vote BOOLEAN NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE(proposal_id, user_id)
+);
+
+CREATE TABLE IF NOT EXISTS activity_log (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  trip_id UUID NOT NULL REFERENCES trips(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES profiles(id),
+  action TEXT NOT NULL,
+  details JSONB,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- =====================================================
+-- PART 1: Fix constraints
+-- =====================================================
+
 -- Fix: Add unique constraint on trip_members to prevent race condition on join
-ALTER TABLE trip_members ADD CONSTRAINT trip_members_trip_user_unique UNIQUE(trip_id, user_id);
+DO $$ BEGIN
+  ALTER TABLE trip_members ADD CONSTRAINT trip_members_trip_user_unique UNIQUE(trip_id, user_id);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- Fix: Add unique constraint on share_code
-ALTER TABLE trips ADD CONSTRAINT trips_share_code_unique UNIQUE(share_code);
+DO $$ BEGIN
+  ALTER TABLE trips ADD CONSTRAINT trips_share_code_unique UNIQUE(share_code);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
--- Expenses table
-CREATE TABLE expenses (
+-- =====================================================
+-- PART 2: Expenses tables
+-- =====================================================
+
+CREATE TABLE IF NOT EXISTS expenses (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   trip_id UUID NOT NULL REFERENCES trips(id) ON DELETE CASCADE,
   title TEXT NOT NULL,
@@ -26,11 +105,11 @@ CREATE TABLE expenses (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX idx_expenses_trip ON expenses(trip_id);
-CREATE INDEX idx_expenses_payer ON expenses(payer_id);
+CREATE INDEX IF NOT EXISTS idx_expenses_trip ON expenses(trip_id);
+CREATE INDEX IF NOT EXISTS idx_expenses_payer ON expenses(payer_id);
 
 -- Expense splits: how each expense is divided among participants
-CREATE TABLE expense_splits (
+CREATE TABLE IF NOT EXISTS expense_splits (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   expense_id UUID NOT NULL REFERENCES expenses(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES profiles(id),
@@ -39,11 +118,11 @@ CREATE TABLE expense_splits (
   UNIQUE(expense_id, user_id)
 );
 
-CREATE INDEX idx_splits_expense ON expense_splits(expense_id);
-CREATE INDEX idx_splits_user ON expense_splits(user_id);
+CREATE INDEX IF NOT EXISTS idx_splits_expense ON expense_splits(expense_id);
+CREATE INDEX IF NOT EXISTS idx_splits_user ON expense_splits(user_id);
 
 -- Settlements: recorded payments between members
-CREATE TABLE settlements (
+CREATE TABLE IF NOT EXISTS settlements (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   trip_id UUID NOT NULL REFERENCES trips(id) ON DELETE CASCADE,
   from_user_id UUID NOT NULL REFERENCES profiles(id),
@@ -53,13 +132,27 @@ CREATE TABLE settlements (
   created_by UUID NOT NULL REFERENCES profiles(id)
 );
 
-CREATE INDEX idx_settlements_trip ON settlements(trip_id);
+CREATE INDEX IF NOT EXISTS idx_settlements_trip ON settlements(trip_id);
 
--- RLS Policies
+-- =====================================================
+-- PART 3: RLS Policies
+-- =====================================================
 
 ALTER TABLE expenses ENABLE ROW LEVEL SECURITY;
 ALTER TABLE expense_splits ENABLE ROW LEVEL SECURITY;
 ALTER TABLE settlements ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies to make migration re-runnable
+DROP POLICY IF EXISTS "Trip members can view expenses" ON expenses;
+DROP POLICY IF EXISTS "Trip members can insert expenses" ON expenses;
+DROP POLICY IF EXISTS "Expense creator can update" ON expenses;
+DROP POLICY IF EXISTS "Expense creator can delete" ON expenses;
+DROP POLICY IF EXISTS "Trip members can view splits" ON expense_splits;
+DROP POLICY IF EXISTS "Trip members can insert splits" ON expense_splits;
+DROP POLICY IF EXISTS "Trip members can update splits" ON expense_splits;
+DROP POLICY IF EXISTS "Trip members can delete splits" ON expense_splits;
+DROP POLICY IF EXISTS "Trip members can view settlements" ON settlements;
+DROP POLICY IF EXISTS "Trip members can insert settlements" ON settlements;
 
 -- Expenses: only trip members can read/write
 CREATE POLICY "Trip members can view expenses" ON expenses
