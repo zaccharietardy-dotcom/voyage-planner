@@ -48,18 +48,14 @@ export default function MesVoyagesPage() {
       }
 
       try {
-        const supabase = getSupabaseClient();
-
-        // Get trips where user is owner (direct query, no trip_members dependency)
-        const { data: tripsData, error: tripsError } = await supabase
-          .from('trips')
-          .select('*')
-          .eq('owner_id', user.id)
-          .order('created_at', { ascending: false });
-
-        if (tripsError) {
-          console.error('Error fetching trips:', tripsError);
+        // Use API route (server-side) to avoid RLS issues
+        const res = await fetch('/api/trips');
+        if (!res.ok) {
+          console.error('Error fetching trips:', res.status, await res.text());
+          setTrips([]);
+          return;
         }
+        const tripsData = await res.json();
         setTrips(tripsData || []);
       } catch (error) {
         console.error('Error fetching trips:', error);
@@ -156,6 +152,7 @@ export default function MesVoyagesPage() {
           <div className="grid gap-4">
             {trips.map((trip) => {
               const tripData = trip.data as Record<string, unknown>;
+              const prefs = (trip.preferences || tripData?.preferences || {}) as Record<string, unknown>;
               const visibility = (trip as Trip & { visibility?: TripVisibility }).visibility || 'private';
               const visibilityOption = VISIBILITY_OPTIONS.find(o => o.value === visibility) || VISIBILITY_OPTIONS[2];
 
@@ -214,17 +211,17 @@ export default function MesVoyagesPage() {
                         <span>
                           {trip.duration_days} jour{trip.duration_days > 1 ? 's' : ''}
                         </span>
-                        {(tripData?.preferences as { groupSize?: number })?.groupSize && (
+                        {prefs.groupSize ? (
                           <span className="flex items-center gap-1">
                             <Users className="h-4 w-4" />
-                            {(tripData.preferences as { groupSize: number }).groupSize} pers.
+                            {String(prefs.groupSize)} pers.
                           </span>
-                        )}
-                        {(tripData?.totalEstimatedCost as number) && (
-                          <span className="ml-auto font-medium text-foreground">
-                            {Math.round(tripData.totalEstimatedCost as number)}€
-                          </span>
-                        )}
+                        ) : null}
+                        {prefs.budgetLevel ? (
+                          <Badge variant="outline" className="ml-auto">
+                            {prefs.budgetLevel === 'budget' ? 'Économique' : prefs.budgetLevel === 'moderate' ? 'Modéré' : prefs.budgetLevel === 'comfort' ? 'Confort' : 'Luxe'}
+                          </Badge>
+                        ) : null}
                       </div>
                     </CardContent>
                   </Link>
