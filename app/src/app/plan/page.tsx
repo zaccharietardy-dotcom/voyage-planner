@@ -243,9 +243,7 @@ export default function PlanPage() {
       });
       const data = await res.json();
       if (res.ok) {
-        setTestResult(`✅ Sauvegardé! ID: ${data.id}`);
-        // Nettoyer: supprimer le trip de test
-        await fetch(`/api/trips/${data.id}`, { method: 'DELETE' }).catch(() => {});
+        setTestResult(`✅ Sauvegardé! ID: ${data.id} — va voir dans "Mes voyages"`);
       } else {
         setTestResult(`❌ ${data.error}${data.details ? ` | ${data.details}` : ''}${data.hint ? ` | ${data.hint}` : ''}`);
       }
