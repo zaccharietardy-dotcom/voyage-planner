@@ -235,7 +235,8 @@ CREATE POLICY "Public trips are viewable" ON public.trips
 -- Replace SECURITY DEFINER with SECURITY INVOKER
 -- =============================================
 
-CREATE OR REPLACE VIEW public.public_trips
+DROP VIEW IF EXISTS public.public_trips;
+CREATE VIEW public.public_trips
 WITH (security_invoker = true)
 AS SELECT * FROM public.trips WHERE visibility = 'public';
 
