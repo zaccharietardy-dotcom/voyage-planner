@@ -38,6 +38,19 @@ import { generateFlightLink, generateHotelLink, formatDateForUrl } from './servi
 import { searchAttractionsMultiQuery, searchMustSeeAttractions } from './services/serpApiPlaces';
 import { generateClaudeItinerary, summarizeAttractions, mapItineraryToAttractions } from './services/claudeItinerary';
 
+/**
+ * Choisit le mode de direction Google Maps en fonction de la distance
+ * Walking si < 1.5km, transit sinon
+ */
+function pickDirectionMode(from: { lat: number; lng: number }, to: { lat: number; lng: number }): 'walking' | 'transit' {
+  const R = 6371; // km
+  const dLat = (to.lat - from.lat) * Math.PI / 180;
+  const dLng = (to.lng - from.lng) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(from.lat * Math.PI / 180) * Math.cos(to.lat * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
+  const dist = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return dist < 1.5 ? 'walking' : 'transit';
+}
+
 // Génère un ID unique
 function generateId(): string {
   return Math.random().toString(36).substring(2, 15);
@@ -100,9 +113,17 @@ function fixAttractionDuration(attraction: Attraction): Attraction {
   if (/\b(jardin|parc|park|garden)\b/.test(name)) {
     if (d > 60) return { ...attraction, duration: 60 };
   }
-  // Églises, cathédrales: max 60min
-  if (/\b(église|cathédrale|basilique|church|cathedral|basilica|chapelle|chapel)\b/.test(name)) {
+  // Petites églises: max 30min (pas les cathédrales/basiliques)
+  if (/\b(église|church|chapelle|chapel)\b/.test(name) && !/\b(cathédrale|cathedral|basilique|basilica|notre-dame|sacré|sainte-chapelle)\b/.test(name)) {
+    if (d > 30) return { ...attraction, duration: 20 };
+  }
+  // Cathédrales, basiliques: max 60min
+  if (/\b(cathédrale|cathedral|basilique|basilica)\b/.test(name)) {
     if (d > 60) return { ...attraction, duration: 50 };
+  }
+  // Vignes, petits vignobles urbains: max 20min
+  if (/\b(vigne|vignoble|vineyard)\b/.test(name) && !/\b(domaine|château|cave|cellar|dégustation|tasting)\b/.test(name)) {
+    if (d > 20) return { ...attraction, duration: 15 };
   }
   // Monuments, arcs, statues: max 45min
   if (/\b(arc de|monument|statue|fontaine|fountain|colonne|column|obélisque|obelisk|tower|tour)\b/.test(name) && !/\bmusée\b/.test(name)) {
@@ -133,8 +154,8 @@ function fixAttractionCost(attraction: Attraction): Attraction {
   const name = attraction.name.toLowerCase();
   const cost = attraction.estimatedCost;
 
-  // Gratuit: parcs, jardins, places, extérieurs, églises, quartiers
-  if (/\b(jardin|parc|park|garden|place|square|piazza|champ|esplanade|promenade|quartier|neighborhood|district|boulevard|rue|street)\b/.test(name)) {
+  // Gratuit: parcs, jardins, places, extérieurs, quartiers, vignes urbaines
+  if (/\b(jardin|parc|park|garden|place|square|piazza|champ|esplanade|promenade|quartier|neighborhood|district|boulevard|rue|street|vigne|vignoble)\b/.test(name)) {
     if (cost > 0) return { ...attraction, estimatedCost: 0 };
   }
   // Églises et cathédrales: généralement gratuit (sauf tours/cryptes)
@@ -162,6 +183,18 @@ function fixAttractionCost(attraction: Attraction): Attraction {
   }
   if (/\bnotre-dame\b/.test(name) || /\bnotre dame\b/.test(name)) {
     return { ...attraction, estimatedCost: 0 };
+  }
+  // Versailles: 21€
+  if (/\bversailles\b/.test(name)) {
+    return { ...attraction, estimatedCost: 21 };
+  }
+  // Panthéon: 11€
+  if (/\bpanthéon\b/.test(name) || /\bpantheon\b/.test(name)) {
+    return { ...attraction, estimatedCost: 11 };
+  }
+  // Conciergerie: 11.50€
+  if (/\bconciergerie\b/.test(name)) {
+    return { ...attraction, estimatedCost: 12 };
   }
 
   return attraction;
@@ -451,7 +484,7 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
   }
 
   // Post-traitement: corriger durées et coûts irréalistes, filtrer attractions non pertinentes
-  const irrelevantPatterns = /\b(temple ganesh|temple hindou|hindu temple|salle de sport|gym|fitness|cinéma|cinema|arcade|bowling)\b/i;
+  const irrelevantPatterns = /\b(temple ganesh|temple hindou|hindu temple|salle de sport|gym|fitness|cinéma|cinema|arcade|bowling|landmark architecture|local architecture|architecture locale|city sightseeing|sightseeing tour|photo spot|photo opportunity|scenic view point|generic|unnamed)\b/i;
   for (let i = 0; i < attractionsByDay.length; i++) {
     const before = attractionsByDay[i].length;
     attractionsByDay[i] = attractionsByDay[i]
@@ -459,6 +492,12 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
         if (a.mustSee) return true;
         if (irrelevantPatterns.test(a.name)) {
           console.log(`[AI] Filtré attraction non pertinente: "${a.name}"`);
+          return false;
+        }
+        // Filtrer les noms trop génériques (pas un vrai lieu)
+        const nameLower = a.name.toLowerCase().trim();
+        if (nameLower.split(/\s+/).length <= 2 && /^(landmark|architecture|culture|history|nature|scenic|local|traditional|ancient|modern|famous|popular|beautiful)\s/i.test(nameLower)) {
+          console.log(`[AI] Filtré attraction générique: "${a.name}"`);
           return false;
         }
         return true;
@@ -1790,7 +1829,7 @@ async function generateDayWithScheduler(params: {
           lat: restaurant?.latitude || cityCenter.lat,
           lng: restaurant?.longitude || cityCenter.lng,
         };
-        const googleMapsUrl = generateGoogleMapsUrl(lastCoords, restaurantCoords, 'walking');
+        const googleMapsUrl = generateGoogleMapsUrl(lastCoords, restaurantCoords, pickDirectionMode(lastCoords, restaurantCoords));
         // URL Google Maps fiable avec nom + adresse complète
         const restaurantGoogleMapsUrl = restaurant?.googleMapsUrl ||
           (restaurant ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${restaurant.name}, ${restaurant.address}`)}` : undefined);
@@ -2008,7 +2047,7 @@ async function generateDayWithScheduler(params: {
         lat: restaurant?.latitude || cityCenter.lat,
         lng: restaurant?.longitude || cityCenter.lng,
       };
-      const googleMapsUrl = generateGoogleMapsUrl(lastCoords, restaurantCoords, 'walking');
+      const googleMapsUrl = generateGoogleMapsUrl(lastCoords, restaurantCoords, pickDirectionMode(lastCoords, restaurantCoords));
       // Utiliser l'URL Google Maps du restaurant si disponible (plus fiable avec nom + adresse)
       // Sinon générer une URL de recherche avec nom + ville
       const restaurantGoogleMapsUrl = restaurant?.googleMapsUrl ||
@@ -2251,7 +2290,7 @@ async function generateDayWithScheduler(params: {
         lat: restaurant?.latitude || cityCenter.lat,
         lng: restaurant?.longitude || cityCenter.lng,
       };
-      const googleMapsUrl = generateGoogleMapsUrl(lastCoords, restaurantCoords, 'walking');
+      const googleMapsUrl = generateGoogleMapsUrl(lastCoords, restaurantCoords, pickDirectionMode(lastCoords, restaurantCoords));
       // URL Google Maps fiable avec nom + adresse complète
       const restaurantGoogleMapsUrl = restaurant?.googleMapsUrl ||
         (restaurant ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${restaurant.name}, ${restaurant.address}`)}` : undefined);
