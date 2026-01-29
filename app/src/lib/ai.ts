@@ -40,15 +40,17 @@ import { generateTravelTips } from './services/travelTips';
 
 /**
  * Choisit le mode de direction Google Maps en fonction de la distance
- * Walking si < 1.5km, transit sinon
+ * Walking si < 1.5km, transit si < 15km, driving sinon
  */
-function pickDirectionMode(from: { lat: number; lng: number }, to: { lat: number; lng: number }): 'walking' | 'transit' {
+function pickDirectionMode(from: { lat: number; lng: number }, to: { lat: number; lng: number }): 'walking' | 'transit' | 'driving' {
   const R = 6371; // km
   const dLat = (to.lat - from.lat) * Math.PI / 180;
   const dLng = (to.lng - from.lng) * Math.PI / 180;
   const a = Math.sin(dLat / 2) ** 2 + Math.cos(from.lat * Math.PI / 180) * Math.cos(to.lat * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
   const dist = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return dist < 1.5 ? 'walking' : 'transit';
+  if (dist < 1.5) return 'walking';
+  if (dist < 15) return 'transit';
+  return 'driving';
 }
 
 // Génère un ID unique
@@ -2057,7 +2059,7 @@ async function generateDayWithScheduler(params: {
         lng: attraction.longitude || cityCenter.lng + (Math.random() - 0.5) * 0.02,
       };
       // Générer le lien Google Maps avec itinéraire depuis le point précédent
-      const googleMapsUrl = generateGoogleMapsUrl(lastCoords, attractionCoords, 'transit');
+      const googleMapsUrl = generateGoogleMapsUrl(lastCoords, attractionCoords, pickDirectionMode(lastCoords, attractionCoords));
       items.push(schedulerItemToTripItem(activityItem, dayNumber, orderIndex++, {
         description: attraction.description,
         // IMPORTANT: locationName doit inclure le nom de l'attraction pour les liens d'itinéraire
@@ -2132,7 +2134,7 @@ async function generateDayWithScheduler(params: {
             lat: attraction.latitude || cityCenter.lat,
             lng: attraction.longitude || cityCenter.lng,
           };
-          const googleMapsUrlMorning = generateGoogleMapsUrl(lastCoords, attractionCoordsMorning, 'transit');
+          const googleMapsUrlMorning = generateGoogleMapsUrl(lastCoords, attractionCoordsMorning, pickDirectionMode(lastCoords, attractionCoordsMorning));
 
           items.push(schedulerItemToTripItem(activityItemMorning, dayNumber, orderIndex++, {
             description: attraction.description,
@@ -2289,7 +2291,7 @@ async function generateDayWithScheduler(params: {
         lng: attraction.longitude || cityCenter.lng + (Math.random() - 0.5) * 0.02,
       };
       // Générer le lien Google Maps avec itinéraire depuis le point précédent
-      const googleMapsUrl = generateGoogleMapsUrl(lastCoords, attractionCoords, 'transit');
+      const googleMapsUrl = generateGoogleMapsUrl(lastCoords, attractionCoords, pickDirectionMode(lastCoords, attractionCoords));
       items.push(schedulerItemToTripItem(activityItem, dayNumber, orderIndex++, {
         description: attraction.description,
         // IMPORTANT: locationName doit inclure le nom de l'attraction pour les liens d'itinéraire
@@ -2368,7 +2370,7 @@ async function generateDayWithScheduler(params: {
             lat: attraction.latitude || cityCenter.lat,
             lng: attraction.longitude || cityCenter.lng,
           };
-          const googleMapsUrl = generateGoogleMapsUrl(lastCoords, attractionCoords, 'transit');
+          const googleMapsUrl = generateGoogleMapsUrl(lastCoords, attractionCoords, pickDirectionMode(lastCoords, attractionCoords));
 
           items.push(schedulerItemToTripItem(activityItem, dayNumber, orderIndex++, {
             description: attraction.description,
@@ -3158,7 +3160,7 @@ function createAttractionItem(
     googleMapsUrl = generateGoogleMapsUrl(
       travelInfo.fromCoords,
       attractionCoords,
-      'transit'
+      pickDirectionMode(travelInfo.fromCoords, attractionCoords)
     );
   }
 

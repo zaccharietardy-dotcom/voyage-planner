@@ -256,9 +256,25 @@ RÈGLES D'OR:
 
 6. FILTRAGE STRICT:
    - EXCLUE: cinémas, arcades, salles de sport, immeubles, bureaux, centres commerciaux génériques
+   - EXCLUE: rooftop bars, bars d'hôtel, pubs, discothèques comme ACTIVITÉS DE JOUR (OK en suggestion soirée uniquement)
+   - EXCLUE: attractions mineures de moins de 30min seules — fusionne-les dans un créneau "exploration quartier"
    - MUST-SEE OBLIGATOIRES: "${request.mustSee || 'aucun'}" → Tu DOIS inclure CHACUN d'entre eux dans les jours 1-3, SANS EXCEPTION
    - Si un must-see n'est PAS dans le pool d'attractions, AJOUTE-LE dans additionalSuggestions avec ses vraies coordonnées
    - Si une attraction ESSENTIELLE de ${request.destination} manque du pool, ajoute-la dans additionalSuggestions
+   - INCONTOURNABLES MONDIAUX OBLIGATOIRES: MÊME si l'utilisateur n'a PAS coché "culture", tu DOIS inclure les sites mondialement célèbres de ${request.destination}.
+     Exemples: Barcelona → Sagrada Família, Casa Batlló, Parc Güell, La Rambla, Barri Gòtic. Paris → Tour Eiffel, Louvre, Sacré-Cœur, Notre-Dame. Rome → Colisée, Vatican, Fontaine de Trevi. Tokyo → Shibuya, Senso-ji, Meiji. Londres → Big Ben, Tower, British Museum.
+     Ces incontournables sont PRIORITAIRES sur les attractions secondaires (musées mineurs, rooftop bars, etc.). Si un incontournable manque du pool, AJOUTE-LE dans additionalSuggestions.
+
+6b. TRANSPORT POUR EXCURSIONS HORS VILLE:
+   - Si un day trip est à >15km du centre (Montserrat, Versailles, Mt. Fuji...), précise le MOYEN DE TRANSPORT RÉALISTE dans dayTripTransport:
+     * Train/crémaillère si disponible (ex: "FGC train + crémaillère pour Montserrat, 1h15")
+     * Location de voiture si pas de train pratique ou si excursion nature/multi-stops (ex: "Location voiture recommandée, 2h de route")
+     * Bus touristique si c'est le plus simple (ex: "Bus direct depuis gare routière, 1h30")
+   - Pour les voyages >= 7 jours, propose une EXCURSION MULTI-JOURS (2-3 jours) hors de la ville:
+     * Location de voiture avec lien (ex: "rentalcars.com")
+     * Changement d'hébergement (hôtel/airbnb sur place)
+     * Activités sur place (randonnée, visite, etc.)
+     * Mets ces infos dans additionalSuggestions avec les détails logistiques dans whyVisit
 
 7. COMPLÉTER LE POOL + EXPÉRIENCES UNIQUES:
    - Le pool SerpAPI contient surtout des monuments et musées. Il MANQUE les expériences/activités réservables.
