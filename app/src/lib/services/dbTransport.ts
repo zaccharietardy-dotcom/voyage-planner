@@ -50,7 +50,7 @@ interface DBAPIJourney {
 }
 
 const DB_API_BASE = 'https://v6.db.transport.rest';
-const TIMEOUT_MS = 12000;
+const TIMEOUT_MS = 6000; // Keep short for Vercel serverless
 
 // Countries/regions covered well by the DB API
 // Outside Europe, results are unreliable (e.g. "Tokyo" resolves to a German location)
