@@ -218,12 +218,23 @@ RÈGLES D'OR:
    - Ordonne-les pour minimiser les déplacements (circuit logique, pas de zig-zag)
    - Indique le quartier/zone dans le theme du jour
 
-3. RYTHME & ÉQUILIBRE:
+3. RYTHME & DURÉES RÉALISTES:
    - Jour d'arrivée: 2-3 attractions légères (jet lag, installation)
    - Jours pleins: 4-6 attractions avec pauses
    - Dernier jour: 2-3 attractions + temps pour souvenirs/shopping
    - Alterne intense (musée 2h) et léger (balade quartier 30min)
    - Prévois des pauses café/repos entre les visites intensives
+   - DURÉES estimatedDuration RÉALISTES (en minutes):
+     * Grand musée (Louvre, Orsay, British Museum, Prado): 150-180
+     * Musée moyen (Marmottan, Rodin, Picasso): 90-120
+     * Cathédrale/église (intérieur): 45-60
+     * Monument extérieur (Arc de Triomphe, pyramide): 30-45
+     * Place publique (Concorde, Trocadéro): 15-25
+     * Viewpoint/panorama: 30-45
+     * Quartier à explorer (Montmartre, Marais, Shibuya): 90-120
+     * Jardin/parc (Tuileries, Luxembourg): 45-60
+     * Marché: 45-60
+     * NE METS JAMAIS 180min pour un simple monument, une place ou une église !
 
 4. DAY TRIPS:
    - Si ${request.durationDays}+ jours, propose un day trip pertinent hors de la ville

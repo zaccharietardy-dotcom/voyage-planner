@@ -101,6 +101,7 @@ export async function POST(request: Request) {
     const tripName = tripData.title || tripData.name || `Voyage à ${destination}`;
     const insertData = {
       owner_id: user.id,
+      name: tripName,
       title: tripName,
       destination: destination,
       start_date: typeof startDate === 'string' ? startDate.split('T')[0] : new Date().toISOString().split('T')[0],

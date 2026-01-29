@@ -43,6 +43,7 @@ export interface Database {
         Row: {
           id: string;
           owner_id: string;
+          name: string;
           title: string;
           destination: string;
           start_date: string;
@@ -57,6 +58,7 @@ export interface Database {
         Insert: {
           id?: string;
           owner_id: string;
+          name: string;
           title: string;
           destination: string;
           start_date: string;
@@ -71,6 +73,7 @@ export interface Database {
         Update: {
           id?: string;
           owner_id?: string;
+          name?: string;
           title?: string;
           destination?: string;
           start_date?: string;

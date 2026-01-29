@@ -1495,6 +1495,11 @@ async function generateDayWithScheduler(params: {
 
       // Avancer le curseur après le check-in hôtel
       scheduler.advanceTo(hotelCheckinEnd);
+      // Mettre à jour lastCoords à la position de l'hôtel
+      lastCoords = {
+        lat: accommodation?.latitude || cityCenter.lat,
+        lng: accommodation?.longitude || cityCenter.lng,
+      };
 
       } // Fin du bloc else (vol NON tardif)
 
@@ -1573,6 +1578,11 @@ async function generateDayWithScheduler(params: {
       }
 
       scheduler.advanceTo(hotelEnd);
+      // Mettre à jour lastCoords à la position de l'hôtel
+      lastCoords = {
+        lat: accommodation?.latitude || cityCenter.lat,
+        lng: accommodation?.longitude || cityCenter.lng,
+      };
     }
   }
 
@@ -1613,8 +1623,11 @@ async function generateDayWithScheduler(params: {
 
   console.log(`[Jour ${dayNumber}] Début des activités - curseur à ${scheduler.getCurrentTime().toLocaleTimeString('fr-FR')}, fin de journée à ${dayEnd.toLocaleTimeString('fr-FR')}`);
 
-  // Réinitialiser la position au centre-ville pour les activités
-  lastCoords = cityCenter;
+  // Sur les jours suivants, réinitialiser au centre-ville (le petit-déjeuner mettra à jour vers l'hôtel)
+  // Sur le jour 1 avec check-in hôtel, lastCoords est déjà à la position de l'hôtel
+  if (!isFirstDay) {
+    lastCoords = cityCenter;
+  }
 
   // Petit-déjeuner (si avant 10h et pas jour 1 avec logistique)
   // Si l'hôtel inclut le petit-déjeuner, on prend le petit-dej à l'hôtel (gratuit)

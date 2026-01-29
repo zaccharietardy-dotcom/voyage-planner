@@ -767,14 +767,15 @@ function calculateDistance(lat1: number, lng1: number, lat2: number, lng2: numbe
  */
 export function estimateTravelTime(from: Attraction, to: Attraction): number {
   const distance = calculateDistance(from.latitude, from.longitude, to.latitude, to.longitude);
-  // En ville: ~5 km/h à pied, ~15 km/h en transport
-  // Pas de buffer ici — le scheduler ajoute déjà BUFFER_MINUTES
-  if (distance < 1) {
-    return Math.ceil(distance / 5 * 60); // À pied (~12min/km)
+  // Temps réaliste: trajet + marche vers/depuis station + attente
+  if (distance < 0.5) {
+    return Math.max(5, Math.ceil(distance / 4 * 60)); // À pied, minimum 5min
+  } else if (distance < 1) {
+    return Math.ceil(distance / 4 * 60) + 5; // À pied + buffer
   } else if (distance < 5) {
-    return Math.ceil(distance / 15 * 60); // Transport urbain
+    return Math.ceil(distance / 15 * 60) + 10; // Transport urbain + 10min (marche + attente)
   } else {
-    return Math.ceil(distance / 25 * 60); // Transport plus long
+    return Math.ceil(distance / 25 * 60) + 15; // Long trajet + 15min (marche + attente + correspondance)
   }
 }
 
