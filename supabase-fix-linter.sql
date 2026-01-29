@@ -227,3 +227,44 @@ CREATE POLICY "Public trips are viewable" ON public.trips
   FOR SELECT USING (visibility = 'public');
 -- Note: Postgres evaluates permissive policies with OR, so having two SELECT policies
 -- (one from ALL, one from SELECT) is expected here. The ALL policy covers owner CRUD.
+
+-- =============================================
+-- 5. FIX SECURITY DEFINER VIEW (ERROR)
+-- Replace SECURITY DEFINER with SECURITY INVOKER
+-- =============================================
+
+CREATE OR REPLACE VIEW public.public_trips
+WITH (security_invoker = true)
+AS SELECT * FROM public.trips WHERE visibility = 'public';
+
+-- =============================================
+-- 6. ENABLE RLS ON activity_log (ERROR)
+-- =============================================
+
+ALTER TABLE public.activity_log ENABLE ROW LEVEL SECURITY;
+
+-- Allow trip members/owners to view activity logs
+CREATE POLICY "Trip members can view activity log" ON public.activity_log
+  FOR SELECT USING (
+    trip_id IN (SELECT trip_id FROM public.trip_members WHERE user_id = (select auth.uid()))
+    OR trip_id IN (SELECT id FROM public.trips WHERE owner_id = (select auth.uid()))
+  );
+
+-- Allow authenticated users to insert activity logs
+CREATE POLICY "Authenticated users can insert activity log" ON public.activity_log
+  FOR INSERT WITH CHECK ((select auth.uid()) IS NOT NULL);
+
+-- =============================================
+-- 7. FIX FUNCTION SEARCH PATH (WARN)
+-- Set search_path to '' for security
+-- =============================================
+
+ALTER FUNCTION public.update_user_preferences_updated_at() SET search_path = '';
+ALTER FUNCTION public.update_trip_comments_updated_at() SET search_path = '';
+
+-- =============================================
+-- 8. LEAKED PASSWORD PROTECTION (WARN)
+-- This must be enabled in Supabase Dashboard:
+-- Authentication > Settings > Enable "Leaked Password Protection"
+-- Cannot be done via SQL.
+-- =============================================
