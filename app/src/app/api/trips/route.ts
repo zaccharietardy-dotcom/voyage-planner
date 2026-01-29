@@ -21,36 +21,21 @@ export async function GET() {
       return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
     }
 
-    // Récupérer les voyages où l'utilisateur est membre
-    const { data: memberTrips, error: memberError } = await supabase
-      .from('trip_members')
-      .select('trip_id, role')
-      .eq('user_id', user.id);
-
-    if (memberError) {
-      return NextResponse.json({ error: memberError.message }, { status: 500 });
-    }
-
-    const tripIds = memberTrips?.map((m) => m.trip_id) || [];
-
-    if (tripIds.length === 0) {
-      return NextResponse.json([]);
-    }
-
+    // Récupérer les voyages dont l'utilisateur est propriétaire
     const { data: trips, error: tripsError } = await supabase
       .from('trips')
       .select('*')
-      .in('id', tripIds)
+      .eq('owner_id', user.id)
       .order('created_at', { ascending: false });
 
     if (tripsError) {
       return NextResponse.json({ error: tripsError.message }, { status: 500 });
     }
 
-    // Ajouter le rôle de l'utilisateur à chaque voyage
+    // Ajouter le rôle owner à chaque voyage
     const tripsWithRole = trips?.map((trip) => ({
       ...trip,
-      userRole: memberTrips?.find((m) => m.trip_id === trip.id)?.role,
+      userRole: 'owner',
     }));
 
     return NextResponse.json(tripsWithRole || []);
@@ -141,25 +126,15 @@ export async function POST(request: Request) {
 
     console.log('[API/trips] Trip created successfully:', trip.id);
 
-    // Ajouter le créateur comme membre owner
-    const { error: memberError } = await supabase.from('trip_members').insert({
-      trip_id: trip.id,
-      user_id: user.id,
-      role: 'owner',
-    });
-
-    if (memberError) {
-      console.error('Error adding member:', memberError);
-      // Le voyage a été créé, on continue
-    }
-
-    // Log d'activité
-    await supabase.from('activity_log').insert({
-      trip_id: trip.id,
-      user_id: user.id,
-      action: 'trip_created',
-      details: { destination: trip.destination },
-    });
+    // Log d'activité (best effort, table may not exist)
+    try {
+      await supabase.from('activity_log').insert({
+        trip_id: trip.id,
+        user_id: user.id,
+        action: 'trip_created',
+        details: { destination: trip.destination },
+      });
+    } catch { /* ignore */ }
 
     return NextResponse.json({ ...trip, userRole: 'owner' });
   } catch (error) {

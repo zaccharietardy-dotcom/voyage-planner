@@ -50,25 +50,17 @@ export default function MesVoyagesPage() {
       try {
         const supabase = getSupabaseClient();
 
-        // Get trips where user is owner or member
-        const { data: memberTrips } = await supabase
-          .from('trip_members')
-          .select('trip_id')
-          .eq('user_id', user.id);
+        // Get trips where user is owner (direct query, no trip_members dependency)
+        const { data: tripsData, error: tripsError } = await supabase
+          .from('trips')
+          .select('*')
+          .eq('owner_id', user.id)
+          .order('created_at', { ascending: false });
 
-        const tripIds = memberTrips?.map((m) => m.trip_id) || [];
-
-        if (tripIds.length > 0) {
-          const { data: tripsData } = await supabase
-            .from('trips')
-            .select('*')
-            .in('id', tripIds)
-            .order('created_at', { ascending: false });
-
-          setTrips(tripsData || []);
-        } else {
-          setTrips([]);
+        if (tripsError) {
+          console.error('Error fetching trips:', tripsError);
         }
+        setTrips(tripsData || []);
       } catch (error) {
         console.error('Error fetching trips:', error);
       } finally {
