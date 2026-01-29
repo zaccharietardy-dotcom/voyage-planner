@@ -172,6 +172,7 @@ export default function TripPage() {
   const [showCollabPanel, setShowCollabPanel] = useState(false);
   const [showExpensesPanel, setShowExpensesPanel] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
+  const [mainTab, setMainTab] = useState('planning');
   const [editingItem, setEditingItem] = useState<TripItem | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
 
@@ -631,36 +632,16 @@ export default function TripPage() {
                 </Sheet>
               )}
 
-              {/* Bouton dépenses */}
-              <Sheet open={showExpensesPanel} onOpenChange={setShowExpensesPanel}>
-                <SheetTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-2">
-                    <Receipt className="h-4 w-4" />
-                    <span className="hidden sm:inline">Dépenses</span>
-                  </Button>
-                </SheetTrigger>
-                <SheetContent className="w-full sm:max-w-md overflow-y-auto">
-                  <SheetHeader>
-                    <SheetTitle>Dépenses partagées</SheetTitle>
-                  </SheetHeader>
-                  <div className="mt-6">
-                    <ExpensesPanel
-                      tripId={tripId}
-                      members={useCollaborativeMode
-                        ? members.map((m: any) => ({
-                            userId: m.userId,
-                            profile: {
-                              displayName: m.profile.displayName,
-                              avatarUrl: m.profile.avatarUrl,
-                            },
-                          }))
-                        : user ? [{ userId: user.id, profile: { displayName: 'Moi', avatarUrl: null } }] : []
-                      }
-                      currentUserId={user?.id || ''}
-                    />
-                  </div>
-                </SheetContent>
-              </Sheet>
+              {/* Bouton dépenses - scroll vers l'onglet */}
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2"
+                onClick={() => setMainTab('depenses')}
+              >
+                <Receipt className="h-4 w-4" />
+                <span className="hidden sm:inline">Dépenses</span>
+              </Button>
 
               {/* Bouton partage */}
               {!useCollaborativeMode && (
@@ -747,113 +728,276 @@ export default function TripPage() {
 
       {/* Main content */}
       <div className="container mx-auto px-4 py-6">
-        <div className="grid lg:grid-cols-2 gap-6">
-          {/* Left: Timeline */}
-          <div className="order-2 lg:order-1">
-            <Card>
-              <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg">Itinéraire</CardTitle>
-                  {editMode && (
-                    <span className="text-xs text-muted-foreground">
-                      Glissez les activités pour les réorganiser
-                    </span>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent>
-                {editMode ? (
-                  // Mode édition avec drag-and-drop
-                  <DraggableTimeline
-                    days={trip.days}
-                    isEditable={canEdit}
-                    isOwner={isOwner}
-                    onDirectUpdate={isOwner ? handleDirectUpdate : undefined}
-                    onProposalCreate={!isOwner && canEdit ? handleProposalFromDrag : undefined}
-                  />
-                ) : (
-                  // Mode lecture avec onglets
-                  <Tabs value={activeDay} onValueChange={setActiveDay}>
-                    <TabsList className="w-full flex-wrap h-auto gap-1 bg-transparent p-0 mb-4">
-                      {trip.days.map((day) => (
-                        <TabsTrigger
-                          key={day.dayNumber}
-                          value={day.dayNumber.toString()}
-                          className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                        >
-                          Jour {day.dayNumber}
-                        </TabsTrigger>
-                      ))}
-                    </TabsList>
+        {/* Mobile layout: everything in tabs */}
+        <div className="lg:hidden">
+          <Tabs value={mainTab} onValueChange={setMainTab}>
+            <TabsList className="w-full grid grid-cols-4 mb-4">
+              <TabsTrigger value="planning" className="text-xs sm:text-sm">Planning</TabsTrigger>
+              <TabsTrigger value="carte" className="text-xs sm:text-sm">Carte</TabsTrigger>
+              <TabsTrigger value="infos" className="text-xs sm:text-sm">Infos</TabsTrigger>
+              <TabsTrigger value="depenses" className="text-xs sm:text-sm">Dépenses</TabsTrigger>
+            </TabsList>
 
-                    {trip.days.map((day) => (
-                      <TabsContent key={day.dayNumber} value={day.dayNumber.toString()} className="mt-0">
-                        <DayTimeline
-                          day={day}
-                          selectedItemId={selectedItemId}
-                          onSelectItem={handleSelectItem}
-                          onEditItem={handleEditItem}
-                          onDeleteItem={handleDeleteItem}
-                          onMoveItem={handleMoveItem}
-                          showMoveButtons={true}
-                        />
-                      </TabsContent>
-                    ))}
-                  </Tabs>
+            <TabsContent value="planning">
+              <Card>
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg">Itinéraire</CardTitle>
+                    {editMode && (
+                      <span className="text-xs text-muted-foreground">
+                        Glissez les activités pour les réorganiser
+                      </span>
+                    )}
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {editMode ? (
+                    <DraggableTimeline
+                      days={trip.days}
+                      isEditable={canEdit}
+                      isOwner={isOwner}
+                      onDirectUpdate={isOwner ? handleDirectUpdate : undefined}
+                      onProposalCreate={!isOwner && canEdit ? handleProposalFromDrag : undefined}
+                    />
+                  ) : (
+                    <Tabs value={activeDay} onValueChange={setActiveDay}>
+                      <TabsList className="w-full flex-wrap h-auto gap-1 bg-transparent p-0 mb-4">
+                        {trip.days.map((day) => (
+                          <TabsTrigger
+                            key={day.dayNumber}
+                            value={day.dayNumber.toString()}
+                            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                          >
+                            Jour {day.dayNumber}
+                          </TabsTrigger>
+                        ))}
+                      </TabsList>
+                      {trip.days.map((day) => (
+                        <TabsContent key={day.dayNumber} value={day.dayNumber.toString()} className="mt-0">
+                          <DayTimeline
+                            day={day}
+                            selectedItemId={selectedItemId}
+                            onSelectItem={handleSelectItem}
+                            onEditItem={handleEditItem}
+                            onDeleteItem={handleDeleteItem}
+                            onMoveItem={handleMoveItem}
+                            showMoveButtons={true}
+                          />
+                        </TabsContent>
+                      ))}
+                    </Tabs>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="carte">
+              <div className="space-y-6">
+                {trip.transportOptions && trip.transportOptions.length > 0 && (
+                  <>
+                    <TransportOptions
+                      options={trip.transportOptions}
+                      selectedId={trip.selectedTransport?.id}
+                      onSelect={(option) => {
+                        const updatedTrip = { ...trip, selectedTransport: option, updatedAt: new Date() };
+                        saveTrip(updatedTrip);
+                        setTransportChanged(option.id !== originalTransportId);
+                      }}
+                    />
+                    {transportChanged && (
+                      <Card className="bg-amber-50 border-amber-200">
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between gap-4">
+                            <div>
+                              <p className="font-medium text-amber-800">Transport modifié</p>
+                              <p className="text-sm text-amber-600">Régénérer le voyage pour mettre à jour les horaires.</p>
+                            </div>
+                            <Button onClick={handleRegenerateTrip} disabled={regenerating} className="bg-amber-600 hover:bg-amber-700">
+                              {regenerating ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Régénération...</> : <><RefreshCw className="h-4 w-4 mr-2" />Régénérer</>}
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </>
                 )}
-              </CardContent>
-            </Card>
+                <Card>
+                  <CardHeader className="pb-2"><CardTitle className="text-lg">Carte</CardTitle></CardHeader>
+                  <CardContent className="p-0">
+                    <div className="h-[400px]">
+                      <TripMap
+                        items={editMode ? getAllItems() : getActiveDayItems()}
+                        selectedItemId={selectedItemId}
+                        onItemClick={handleSelectItem}
+                        flightInfo={{
+                          departureCity: trip.preferences.origin,
+                          departureCoords: trip.preferences.originCoords,
+                          arrivalCity: trip.preferences.destination,
+                          arrivalCoords: trip.preferences.destinationCoords,
+                          stopoverCities: trip.outboundFlight?.stopCities,
+                        }}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+                {trip.accommodationOptions && trip.accommodationOptions.length > 0 && (
+                  <HotelSelector
+                    hotels={trip.accommodationOptions}
+                    selectedId={selectedHotelId || trip.accommodation?.id || trip.accommodationOptions[0]?.id || ''}
+                    onSelect={(hotelId) => {
+                      setSelectedHotelId(hotelId);
+                      const newHotel = trip.accommodationOptions?.find(h => h.id === hotelId);
+                      if (newHotel) saveTrip(updateTripWithNewHotel(trip, newHotel));
+                    }}
+                    searchLinks={generateHotelSearchLinks(
+                      trip.preferences.destination,
+                      trip.days[0]?.date || trip.preferences.startDate,
+                      trip.days[trip.days.length - 1]?.date || trip.preferences.startDate,
+                      trip.preferences.groupSize || 1
+                    )}
+                    nights={trip.preferences.durationDays - 1}
+                  />
+                )}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="infos">
+              <div className="space-y-6">
+                {trip.carbonFootprint && <CarbonFootprint data={trip.carbonFootprint} />}
+                {trip.travelTips && <TravelTips data={trip.travelTips} />}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="depenses">
+              <Card>
+                <CardHeader><CardTitle className="text-lg">Dépenses partagées</CardTitle></CardHeader>
+                <CardContent>
+                  <ExpensesPanel
+                    tripId={tripId}
+                    members={useCollaborativeMode
+                      ? members.map((m: any) => ({ userId: m.userId, profile: { displayName: m.profile.displayName, avatarUrl: m.profile.avatarUrl } }))
+                      : user ? [{ userId: user.id, profile: { displayName: 'Moi', avatarUrl: null } }] : []
+                    }
+                    currentUserId={user?.id || ''}
+                  />
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </div>
+
+        {/* Desktop layout: 2 columns */}
+        <div className="hidden lg:grid lg:grid-cols-2 gap-6">
+          {/* Left: tabs for Planning / Infos / Dépenses */}
+          <div>
+            <Tabs value={mainTab} onValueChange={setMainTab}>
+              <TabsList className="mb-4">
+                <TabsTrigger value="planning">Planning</TabsTrigger>
+                <TabsTrigger value="infos">Infos pratiques</TabsTrigger>
+                <TabsTrigger value="depenses">Dépenses</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="planning">
+                <Card>
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg">Itinéraire</CardTitle>
+                      {editMode && (
+                        <span className="text-xs text-muted-foreground">
+                          Glissez les activités pour les réorganiser
+                        </span>
+                      )}
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    {editMode ? (
+                      <DraggableTimeline
+                        days={trip.days}
+                        isEditable={canEdit}
+                        isOwner={isOwner}
+                        onDirectUpdate={isOwner ? handleDirectUpdate : undefined}
+                        onProposalCreate={!isOwner && canEdit ? handleProposalFromDrag : undefined}
+                      />
+                    ) : (
+                      <Tabs value={activeDay} onValueChange={setActiveDay}>
+                        <TabsList className="w-full flex-wrap h-auto gap-1 bg-transparent p-0 mb-4">
+                          {trip.days.map((day) => (
+                            <TabsTrigger
+                              key={day.dayNumber}
+                              value={day.dayNumber.toString()}
+                              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                            >
+                              Jour {day.dayNumber}
+                            </TabsTrigger>
+                          ))}
+                        </TabsList>
+                        {trip.days.map((day) => (
+                          <TabsContent key={day.dayNumber} value={day.dayNumber.toString()} className="mt-0">
+                            <DayTimeline
+                              day={day}
+                              selectedItemId={selectedItemId}
+                              onSelectItem={handleSelectItem}
+                              onEditItem={handleEditItem}
+                              onDeleteItem={handleDeleteItem}
+                              onMoveItem={handleMoveItem}
+                              showMoveButtons={true}
+                            />
+                          </TabsContent>
+                        ))}
+                      </Tabs>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="infos">
+                <div className="space-y-6">
+                  {trip.carbonFootprint && <CarbonFootprint data={trip.carbonFootprint} />}
+                  {trip.travelTips && <TravelTips data={trip.travelTips} />}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="depenses">
+                <Card>
+                  <CardHeader><CardTitle className="text-lg">Dépenses partagées</CardTitle></CardHeader>
+                  <CardContent>
+                    <ExpensesPanel
+                      tripId={tripId}
+                      members={useCollaborativeMode
+                        ? members.map((m: any) => ({ userId: m.userId, profile: { displayName: m.profile.displayName, avatarUrl: m.profile.avatarUrl } }))
+                        : user ? [{ userId: user.id, profile: { displayName: 'Moi', avatarUrl: null } }] : []
+                      }
+                      currentUserId={user?.id || ''}
+                    />
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
           </div>
 
-          {/* Right: Transport, Map & Carbon */}
-          <div className="order-1 lg:order-2 space-y-6">
-            {/* Transport Options */}
+          {/* Right: Transport, Map & Hotel — always visible */}
+          <div className="space-y-6">
             {trip.transportOptions && trip.transportOptions.length > 0 && (
               <>
                 <TransportOptions
                   options={trip.transportOptions}
                   selectedId={trip.selectedTransport?.id}
                   onSelect={(option) => {
-                    const updatedTrip = {
-                      ...trip,
-                      selectedTransport: option,
-                      updatedAt: new Date(),
-                    };
+                    const updatedTrip = { ...trip, selectedTransport: option, updatedAt: new Date() };
                     saveTrip(updatedTrip);
-                    if (option.id !== originalTransportId) {
-                      setTransportChanged(true);
-                    } else {
-                      setTransportChanged(false);
-                    }
+                    setTransportChanged(option.id !== originalTransportId);
                   }}
                 />
-
                 {transportChanged && (
                   <Card className="bg-amber-50 border-amber-200">
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between gap-4">
                         <div>
                           <p className="font-medium text-amber-800">Transport modifié</p>
-                          <p className="text-sm text-amber-600">
-                            Régénérer le voyage pour mettre à jour les horaires.
-                          </p>
+                          <p className="text-sm text-amber-600">Régénérer le voyage pour mettre à jour les horaires.</p>
                         </div>
-                        <Button
-                          onClick={handleRegenerateTrip}
-                          disabled={regenerating}
-                          className="bg-amber-600 hover:bg-amber-700"
-                        >
-                          {regenerating ? (
-                            <>
-                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                              Régénération...
-                            </>
-                          ) : (
-                            <>
-                              <RefreshCw className="h-4 w-4 mr-2" />
-                              Régénérer
-                            </>
-                          )}
+                        <Button onClick={handleRegenerateTrip} disabled={regenerating} className="bg-amber-600 hover:bg-amber-700">
+                          {regenerating ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Régénération...</> : <><RefreshCw className="h-4 w-4 mr-2" />Régénérer</>}
                         </Button>
                       </div>
                     </CardContent>
@@ -863,9 +1007,7 @@ export default function TripPage() {
             )}
 
             <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg">Carte</CardTitle>
-              </CardHeader>
+              <CardHeader className="pb-2"><CardTitle className="text-lg">Carte</CardTitle></CardHeader>
               <CardContent className="p-0">
                 <div className="h-[400px]">
                   <TripMap
@@ -884,7 +1026,6 @@ export default function TripPage() {
               </CardContent>
             </Card>
 
-            {/* Hébergement */}
             {trip.accommodationOptions && trip.accommodationOptions.length > 0 && (
               <HotelSelector
                 hotels={trip.accommodationOptions}
@@ -892,10 +1033,7 @@ export default function TripPage() {
                 onSelect={(hotelId) => {
                   setSelectedHotelId(hotelId);
                   const newHotel = trip.accommodationOptions?.find(h => h.id === hotelId);
-                  if (newHotel) {
-                    const updatedTrip = updateTripWithNewHotel(trip, newHotel);
-                    saveTrip(updatedTrip);
-                  }
+                  if (newHotel) saveTrip(updateTripWithNewHotel(trip, newHotel));
                 }}
                 searchLinks={generateHotelSearchLinks(
                   trip.preferences.destination,
@@ -905,16 +1043,6 @@ export default function TripPage() {
                 )}
                 nights={trip.preferences.durationDays - 1}
               />
-            )}
-
-            {/* Carbon Footprint */}
-            {trip.carbonFootprint && (
-              <CarbonFootprint data={trip.carbonFootprint} />
-            )}
-
-            {/* Travel Tips */}
-            {trip.travelTips && (
-              <TravelTips data={trip.travelTips} />
             )}
           </div>
         </div>
