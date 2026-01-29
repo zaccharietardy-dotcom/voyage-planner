@@ -25,7 +25,7 @@ import { Attraction, estimateTravelTime, hasAttractionData } from './services/at
 import { selectAttractionsAsync } from './services/attractionsServer';
 import { getDirections, generateGoogleMapsUrl, generateGoogleMapsSearchUrl, DirectionsResult } from './services/directions';
 import { calculateTripCarbon } from './services/carbon';
-import { compareTransportOptions, TransportOption } from './services/transport';
+import { compareTransportOptions, TransportOption, getTrainBookingUrl } from './services/transport';
 import { DayScheduler, formatTime as formatScheduleTime, parseTime } from './services/scheduler';
 import { searchHotels, selectBestHotel } from './services/hotels';
 import { validateAndFixTrip } from './services/coherenceValidator';
@@ -2457,13 +2457,23 @@ async function generateDayWithScheduler(params: {
         data: { transport: groundTransport },
       });
       if (transportItem) {
+        // Generate return booking URL with correct direction and date
+        let returnBookingUrl = groundTransport.bookingUrl;
+        if (groundTransport.mode === 'train') {
+          returnBookingUrl = getTrainBookingUrl(preferences.destination, preferences.origin, preferences.groupSize, date);
+        } else if (groundTransport.mode === 'bus') {
+          const dateStr = date ? date.toISOString().split('T')[0] : '';
+          returnBookingUrl = `https://www.flixbus.fr/recherche?departureCity=${encodeURIComponent(preferences.destination)}&arrivalCity=${encodeURIComponent(preferences.origin)}${dateStr ? `&rideDate=${dateStr}` : ''}`;
+        } else if (groundTransport.mode === 'car') {
+          returnBookingUrl = `https://www.google.com/maps/dir/${encodeURIComponent(preferences.destination)}/${encodeURIComponent(preferences.origin)}`;
+        }
         items.push(schedulerItemToTripItem(transportItem, dayNumber, orderIndex++, {
           description: `Retour | ${groundTransport.totalPrice}€`,
           locationName: `${preferences.destination} → ${preferences.origin}`,
           latitude: cityCenter.lat,
           longitude: cityCenter.lng,
           estimatedCost: groundTransport.totalPrice,
-          bookingUrl: groundTransport.bookingUrl,
+          bookingUrl: returnBookingUrl,
         }));
       }
     }

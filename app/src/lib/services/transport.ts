@@ -778,7 +778,7 @@ function getTrainOperator(origin: string, destination: string): string {
 /**
  * Retourne l'URL de réservation train
  */
-function getTrainBookingUrl(origin: string, destination: string, passengers: number = 1, date?: Date): string {
+export function getTrainBookingUrl(origin: string, destination: string, passengers: number = 1, date?: Date): string {
   // Utiliser le service unifié pour normaliser les villes
   const originNorm = normalizeCitySync(origin);
   const destNorm = normalizeCitySync(destination);
