@@ -735,7 +735,7 @@ export default function TripPage() {
               <TabsTrigger value="planning" className="text-xs sm:text-sm">Planning</TabsTrigger>
               <TabsTrigger value="carte" className="text-xs sm:text-sm">Carte</TabsTrigger>
               <TabsTrigger value="infos" className="text-xs sm:text-sm">Infos</TabsTrigger>
-              <TabsTrigger value="depenses" className="text-xs sm:text-sm">Dépenses</TabsTrigger>
+              <TabsTrigger value="depenses" className="text-xs sm:text-sm">Suivi dépenses</TabsTrigger>
             </TabsList>
 
             <TabsContent value="planning">
@@ -894,7 +894,7 @@ export default function TripPage() {
               <TabsList className="mb-4">
                 <TabsTrigger value="planning">Planning</TabsTrigger>
                 <TabsTrigger value="infos">Infos pratiques</TabsTrigger>
-                <TabsTrigger value="depenses">Dépenses</TabsTrigger>
+                <TabsTrigger value="depenses">Suivi dépenses</TabsTrigger>
               </TabsList>
 
               <TabsContent value="planning">
