@@ -201,6 +201,7 @@ CREATE POLICY "Trip members can insert settlements" ON public.settlements
 -- trip_comments: replace two SELECT policies with one
 DROP POLICY IF EXISTS "Anyone can view comments on public trips" ON public.trip_comments;
 DROP POLICY IF EXISTS "Users can view own comments" ON public.trip_comments;
+DROP POLICY IF EXISTS "Users can view comments" ON public.trip_comments;
 CREATE POLICY "Users can view comments" ON public.trip_comments
   FOR SELECT USING (
     user_id = (select auth.uid())
@@ -210,6 +211,7 @@ CREATE POLICY "Users can view comments" ON public.trip_comments
 -- trip_likes: replace two SELECT policies with one
 DROP POLICY IF EXISTS "Anyone can view likes on public trips" ON public.trip_likes;
 DROP POLICY IF EXISTS "Users can view own likes" ON public.trip_likes;
+DROP POLICY IF EXISTS "Users can view likes" ON public.trip_likes;
 CREATE POLICY "Users can view likes" ON public.trip_likes
   FOR SELECT USING (
     user_id = (select auth.uid())
@@ -244,6 +246,7 @@ AS SELECT * FROM public.trips WHERE visibility = 'public';
 ALTER TABLE public.activity_log ENABLE ROW LEVEL SECURITY;
 
 -- Allow trip members/owners to view activity logs
+DROP POLICY IF EXISTS "Trip members can view activity log" ON public.activity_log;
 CREATE POLICY "Trip members can view activity log" ON public.activity_log
   FOR SELECT USING (
     trip_id IN (SELECT trip_id FROM public.trip_members WHERE user_id = (select auth.uid()))
@@ -251,6 +254,7 @@ CREATE POLICY "Trip members can view activity log" ON public.activity_log
   );
 
 -- Allow authenticated users to insert activity logs
+DROP POLICY IF EXISTS "Authenticated users can insert activity log" ON public.activity_log;
 CREATE POLICY "Authenticated users can insert activity log" ON public.activity_log
   FOR INSERT WITH CHECK ((select auth.uid()) IS NOT NULL);
 
