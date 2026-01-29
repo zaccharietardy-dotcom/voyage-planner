@@ -224,9 +224,50 @@ export default function PlanPage() {
 
   const progress = (currentStep / STEPS.length) * 100;
 
+  // Test de sauvegarde rapide (dev only)
+  const [testResult, setTestResult] = useState<string | null>(null);
+  const testSave = async () => {
+    setTestResult('⏳ Test en cours...');
+    try {
+      const res = await fetch('/api/trips', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: 'Test Save',
+          destination: 'Paris',
+          startDate: '2026-02-01',
+          durationDays: 3,
+          preferences: { destination: 'Paris', origin: 'Caen', startDate: '2026-02-01', durationDays: 3, groupSize: 2, budgetLevel: 'moderate', activities: ['culture'], transport: 'optimal' },
+          days: [],
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setTestResult(`✅ Sauvegardé! ID: ${data.id}`);
+        // Nettoyer: supprimer le trip de test
+        await fetch(`/api/trips/${data.id}`, { method: 'DELETE' }).catch(() => {});
+      } else {
+        setTestResult(`❌ ${data.error}${data.details ? ` | ${data.details}` : ''}${data.hint ? ` | ${data.hint}` : ''}`);
+      }
+    } catch (e) {
+      setTestResult(`❌ Exception: ${e instanceof Error ? e.message : String(e)}`);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
       <div className="container max-w-2xl mx-auto px-4 py-8">
+        {/* Test de sauvegarde rapide */}
+        {process.env.NODE_ENV === 'development' && user && (
+          <div className="mb-4 p-3 rounded-lg border border-dashed border-orange-400 bg-orange-50 dark:bg-orange-950/20">
+            <div className="flex items-center gap-3">
+              <button onClick={testSave} className="px-3 py-1.5 text-sm font-medium rounded bg-orange-500 text-white hover:bg-orange-600">
+                🧪 Tester sauvegarde DB
+              </button>
+              {testResult && <span className="text-sm font-mono">{testResult}</span>}
+            </div>
+          </div>
+        )}
         {/* User Preferences Banner */}
         {user && !prefsLoading && (
           <div className="mb-6">
