@@ -88,7 +88,7 @@ Si la destination est dans un pays francophone, mets quand même le vocabulaire 
 
   try {
     const response = await client.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-3-5-haiku-20241022',
       max_tokens: 2000,
       messages: [{ role: 'user', content: prompt }],
     });
