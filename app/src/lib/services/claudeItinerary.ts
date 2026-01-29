@@ -243,10 +243,12 @@ RÈGLES D'OR:
      * 40-80€: expériences premium (spectacle, montgolfière, VIP)
      * NE METS PAS 30€ pour une attraction GRATUITE (Sacré-Cœur, Tuileries, Notre-Dame extérieur) !
 
-4. DAY TRIPS:
-   - Si ${request.durationDays}+ jours, propose un day trip pertinent hors de la ville
-   - Précise le moyen de transport ET la durée du trajet
+4. DAY TRIPS (OBLIGATOIRE si séjour >= 4 jours):
+   - Pour ${request.durationDays} jours, propose AU MOINS 1 day trip hors de la ville
+   - Exemples classiques: Paris→Versailles/Giverny/Fontainebleau, Tokyo→Kamakura/Nikko, Rome→Tivoli/Pompéi, London→Stonehenge/Bath/Oxford
    - Place le day trip au milieu du séjour (pas jour 1 ni dernier jour)
+   - Ajoute le day trip dans additionalSuggestions avec les vraies coordonnées
+   - Précise le moyen de transport ET la durée du trajet dans la description
 
 5. SAISONNALITÉ (${season}):
    - Adapte les suggestions à la saison (cerisiers printemps, illuminations hiver, plages été...)

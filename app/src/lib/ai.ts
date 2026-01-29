@@ -86,6 +86,88 @@ interface DayContext {
 }
 
 /**
+ * Post-traitement: corrige les durées irréalistes que Claude assigne
+ */
+function fixAttractionDuration(attraction: Attraction): Attraction {
+  const name = attraction.name.toLowerCase();
+  const d = attraction.duration;
+
+  // Places et squares: max 30min
+  if (/\b(place|square|piazza|platz)\b/.test(name)) {
+    if (d > 30) return { ...attraction, duration: 25 };
+  }
+  // Jardins et parcs: max 60min
+  if (/\b(jardin|parc|park|garden)\b/.test(name)) {
+    if (d > 60) return { ...attraction, duration: 60 };
+  }
+  // Églises, cathédrales: max 60min
+  if (/\b(église|cathédrale|basilique|church|cathedral|basilica|chapelle|chapel)\b/.test(name)) {
+    if (d > 60) return { ...attraction, duration: 50 };
+  }
+  // Monuments, arcs, statues: max 45min
+  if (/\b(arc de|monument|statue|fontaine|fountain|colonne|column|obélisque|obelisk|tower|tour)\b/.test(name) && !/\bmusée\b/.test(name)) {
+    if (d > 45) return { ...attraction, duration: 40 };
+  }
+  // Champ-de-Mars, esplanade: max 30min
+  if (/\b(champ|esplanade|promenade|boulevard)\b/.test(name)) {
+    if (d > 45) return { ...attraction, duration: 30 };
+  }
+  // Quartiers à explorer: 60-90min
+  if (/\b(quartier|neighborhood|district|marché|market)\b/.test(name)) {
+    if (d > 120) return { ...attraction, duration: 90 };
+  }
+  // Grands musées: 150-180min OK, ne pas toucher
+  // Musées moyens: max 120min si pas un "grand"
+  if (/\b(musée|museum)\b/.test(name)) {
+    const isGrand = /\b(louvre|orsay|british|prado|hermitage|metropolitan|smithsonian|uffizi)\b/.test(name);
+    if (!isGrand && d > 120) return { ...attraction, duration: 120 };
+  }
+
+  return attraction;
+}
+
+/**
+ * Post-traitement: corrige les coûts irréalistes (tout à 30€)
+ */
+function fixAttractionCost(attraction: Attraction): Attraction {
+  const name = attraction.name.toLowerCase();
+  const cost = attraction.estimatedCost;
+
+  // Gratuit: parcs, jardins, places, extérieurs, églises, quartiers
+  if (/\b(jardin|parc|park|garden|place|square|piazza|champ|esplanade|promenade|quartier|neighborhood|district|boulevard|rue|street)\b/.test(name)) {
+    if (cost > 0) return { ...attraction, estimatedCost: 0 };
+  }
+  // Églises et cathédrales: généralement gratuit (sauf tours/cryptes)
+  if (/\b(église|cathédrale|basilique|church|cathedral|basilica|mosquée|mosque|temple|synagogue)\b/.test(name)) {
+    if (cost > 0 && !/\b(tour|tower|crypte|crypt|chapelle|sainte-chapelle)\b/.test(name)) {
+      return { ...attraction, estimatedCost: 0 };
+    }
+  }
+  // Sainte-Chapelle: 13€
+  if (/sainte-chapelle/.test(name)) {
+    return { ...attraction, estimatedCost: 13 };
+  }
+  // Grands musées avec prix connus
+  if (/\blouvre\b/.test(name) && /\bmusée\b/.test(name)) {
+    return { ...attraction, estimatedCost: 22 };
+  }
+  if (/\borsay\b/.test(name)) {
+    return { ...attraction, estimatedCost: 16 };
+  }
+  if (/\barc de triomphe\b/.test(name)) {
+    return { ...attraction, estimatedCost: 16 };
+  }
+  if (/\btour eiffel\b/.test(name) || /\beiffel tower\b/.test(name)) {
+    return { ...attraction, estimatedCost: 29 };
+  }
+  if (/\bnotre-dame\b/.test(name) || /\bnotre dame\b/.test(name)) {
+    return { ...attraction, estimatedCost: 0 };
+  }
+
+  return attraction;
+}
+
+/**
  * Génère un voyage complet avec toute la logistique
  */
 export async function generateTripWithAI(preferences: TripPreferences): Promise<Trip> {
@@ -366,6 +448,26 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       cityCenter
     );
   }
+
+  // Post-traitement: corriger durées et coûts irréalistes, filtrer attractions non pertinentes
+  const irrelevantPatterns = /\b(temple ganesh|temple hindou|hindu temple|salle de sport|gym|fitness|cinéma|cinema|arcade|bowling)\b/i;
+  for (let i = 0; i < attractionsByDay.length; i++) {
+    const before = attractionsByDay[i].length;
+    attractionsByDay[i] = attractionsByDay[i]
+      .filter(a => {
+        if (a.mustSee) return true;
+        if (irrelevantPatterns.test(a.name)) {
+          console.log(`[AI] Filtré attraction non pertinente: "${a.name}"`);
+          return false;
+        }
+        return true;
+      })
+      .map(a => fixAttractionCost(fixAttractionDuration(a)));
+    if (attractionsByDay[i].length < before) {
+      console.log(`[AI] Jour ${i + 1}: ${before - attractionsByDay[i].length} attraction(s) filtrée(s)`);
+    }
+  }
+  console.log('[AI] ✅ Post-traitement durées/coûts/filtrage appliqué');
 
   // 7.5 Sélectionner le meilleur hôtel (recherche déjà faite en parallèle)
   const accommodation = selectBestHotel(accommodationOptions, {
@@ -942,7 +1044,7 @@ async function generateDayWithScheduler(params: {
       // Transport terrestre: disponible après arrivée + check-in hôtel
       const departureTime = parseTime(date, '08:00');
       const arrivalTime = new Date(departureTime.getTime() + groundTransport.totalDuration * 60 * 1000);
-      dayStart = new Date(arrivalTime.getTime() + 50 * 60 * 1000); // +50min check-in
+      dayStart = new Date(arrivalTime.getTime() + 15 * 60 * 1000); // +15min buffer (check-in est un fixed item)
       console.log(`[Jour ${dayNumber}] Transport terrestre arrive à ${arrivalTime.toLocaleTimeString('fr-FR')}, activités possibles à partir de ${dayStart.toLocaleTimeString('fr-FR')}`);
     }
   }
@@ -1713,7 +1815,7 @@ async function generateDayWithScheduler(params: {
   // Activites du matin - SEULEMENT si on est deja sur place (pas le jour 1)
   // Le jour 1, on arrive generalement l'apres-midi, donc pas d'activites matin
   const cursorHour = scheduler.getCurrentTime().getHours();
-  const canDoMorningActivities = !isFirstDay && cursorHour < 12;
+  const canDoMorningActivities = cursorHour < 12;
 
   // IMPORTANT: Utiliser le Set partagé au niveau du voyage pour éviter les doublons
   // tripUsedAttractionIds est passé en paramètre et partagé entre tous les jours
@@ -1806,7 +1908,7 @@ async function generateDayWithScheduler(params: {
 
   // === REMPLISSAGE DES TROUS AVANT LE DÉJEUNER ===
   // Si on a du temps libre avant le déjeuner (> 60min), essayer d'ajouter des attractions supplémentaires
-  if (!isFirstDay) {
+  {
     const currentHourBeforeLunch = scheduler.getCurrentTime().getHours();
     const currentMinBeforeLunch = scheduler.getCurrentTime().getMinutes();
     const timeBeforeLunchMin = 12 * 60 + 30 - (currentHourBeforeLunch * 60 + currentMinBeforeLunch);
@@ -1883,7 +1985,11 @@ async function generateDayWithScheduler(params: {
 
   // Dejeuner - TOUJOURS ajouter vers 12:30 pour les jours complets (pas jour 1, pas dernier jour court)
   // IMPORTANT: Ne pas dépendre du curseur actuel - le déjeuner est une pause obligatoire
-  const shouldHaveLunch = !isFirstDay && endHour >= 14;
+  // Déjeuner sur tous les jours où on est à destination avant 12:30
+  // Jour 1 avec ground transport: on arrive ~10-11h, donc déjeuner possible
+  // Jour 1 avec vol: on arrive souvent l'après-midi, pas de déjeuner
+  const isDay1WithEarlyArrival = isFirstDay && groundTransport && !outboundFlight;
+  const shouldHaveLunch = (!isFirstDay || isDay1WithEarlyArrival) && endHour >= 14;
   const lunchTargetTime = parseTime(date, '12:30');
 
   if (shouldHaveLunch) {

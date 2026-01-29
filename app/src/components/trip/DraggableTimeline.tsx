@@ -120,7 +120,7 @@ function DroppableDay({
 function filterTransportItems(days: TripDay[]): TripDay[] {
   return days.map(day => ({
     ...day,
-    items: day.items.filter(item => item.type !== 'transport'),
+    items: day.items,
   }));
 }
 

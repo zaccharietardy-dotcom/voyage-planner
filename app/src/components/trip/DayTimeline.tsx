@@ -51,7 +51,6 @@ export function DayTimeline({
   // Filter out 'transport' items (transfers) - they're replaced by ItineraryConnector links
   // Then sort by startTime with special handling for after-midnight times
   const sortedItems = [...day.items]
-    .filter(item => item.type !== 'transport')
     .sort((a, b) => timeToSortableMinutes(a.startTime) - timeToSortableMinutes(b.startTime));
 
   return (

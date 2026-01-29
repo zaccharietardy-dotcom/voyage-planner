@@ -673,7 +673,17 @@ export async function searchMustSeeAttractions(
 ): Promise<Attraction[]> {
   if (!SERPAPI_KEY || !mustSee.trim()) return [];
 
-  const items = mustSee.split(',').map(s => s.trim()).filter(Boolean);
+  // Split by comma, then expand "&" / "et" into separate items
+  const rawItems = mustSee.split(',').map(s => s.trim()).filter(Boolean);
+  const items: string[] = [];
+  for (const item of rawItems) {
+    if (/\s*[&]\s*/.test(item) || /\s+et\s+/i.test(item)) {
+      const parts = item.split(/\s*[&]\s*|\s+et\s+/i).map(p => p.trim()).filter(Boolean);
+      items.push(...parts);
+    } else {
+      items.push(item);
+    }
+  }
   const countryCode = getCountryCode(destination);
   const results: Attraction[] = [];
 
