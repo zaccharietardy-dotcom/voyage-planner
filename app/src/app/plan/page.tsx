@@ -243,7 +243,23 @@ export default function PlanPage() {
       });
       const data = await res.json();
       if (res.ok) {
-        setTestResult(`✅ Sauvegardé! ID: ${data.id} — va voir dans "Mes voyages"`);
+        // Vérifier côté client si trip_members est lisible
+        const { getSupabaseClient } = await import('@/lib/supabase');
+        const supabase = getSupabaseClient();
+        const { data: members, error: memErr } = await supabase
+          .from('trip_members')
+          .select('*')
+          .eq('trip_id', data.id);
+        const { data: tripCheck, error: tripErr } = await supabase
+          .from('trips')
+          .select('id, name')
+          .eq('id', data.id)
+          .single();
+        setTestResult(
+          `✅ Trip créé: ${data.id}\n` +
+          `Members: ${memErr ? `❌ ${memErr.message}` : `${members?.length || 0} (${JSON.stringify(members)})`}\n` +
+          `Trip query: ${tripErr ? `❌ ${tripErr.message}` : `✅ ${tripCheck?.name}`}`
+        );
       } else {
         setTestResult(`❌ ${data.error}${data.details ? ` | ${data.details}` : ''}${data.hint ? ` | ${data.hint}` : ''}`);
       }
@@ -262,7 +278,7 @@ export default function PlanPage() {
               <button onClick={testSave} className="px-3 py-1.5 text-sm font-medium rounded bg-orange-500 text-white hover:bg-orange-600">
                 🧪 Tester sauvegarde DB
               </button>
-              {testResult && <span className="text-sm font-mono">{testResult}</span>}
+              {testResult && <pre className="text-xs font-mono whitespace-pre-wrap mt-2 max-w-full overflow-auto">{testResult}</pre>}
             </div>
           </div>
         )}
