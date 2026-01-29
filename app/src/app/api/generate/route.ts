@@ -37,9 +37,11 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(trip);
   } catch (error) {
-    console.error('Erreur de génération:', error);
+    const message = error instanceof Error ? error.message : String(error);
+    const stack = error instanceof Error ? error.stack : undefined;
+    console.error('Erreur de génération:', message, stack);
     return NextResponse.json(
-      { error: 'Erreur lors de la génération du voyage' },
+      { error: `Erreur lors de la génération du voyage: ${message}` },
       { status: 500 }
     );
   }
