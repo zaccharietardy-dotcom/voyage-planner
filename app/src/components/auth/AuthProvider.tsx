@@ -76,28 +76,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    // Timeout to prevent infinite loading
+    // Short timeout fallback (500ms instead of 3s)
     const timeout = setTimeout(() => {
       setIsLoading(false);
-    }, 3000);
+    }, 500);
 
     // Get initial session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
       clearTimeout(timeout);
       setSession(session);
       setUser(session?.user ?? null);
-
-      if (session?.user) {
-        // Try to fetch existing profile
-        const existingProfile = await fetchProfile(session.user.id);
-
-        // If no profile exists, create one
-        if (!existingProfile) {
-          await createProfile(session.user);
-        }
-      }
-
       setIsLoading(false);
+
+      // Fetch/create profile in background (don't block render)
+      if (session?.user) {
+        fetchProfile(session.user.id).then(existingProfile => {
+          if (!existingProfile) {
+            createProfile(session.user!);
+          }
+        });
+      }
     }).catch(() => {
       clearTimeout(timeout);
       setIsLoading(false);
