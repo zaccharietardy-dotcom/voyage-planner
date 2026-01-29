@@ -615,35 +615,36 @@ export default function TripPage() {
                 </Sheet>
               )}
 
-              {/* Bouton dépenses partagées (mode collaboratif) */}
-              {useCollaborativeMode && (
-                <Sheet open={showExpensesPanel} onOpenChange={setShowExpensesPanel}>
-                  <SheetTrigger asChild>
-                    <Button variant="outline" size="sm" className="gap-2">
-                      <Receipt className="h-4 w-4" />
-                      <span className="hidden sm:inline">Dépenses</span>
-                    </Button>
-                  </SheetTrigger>
-                  <SheetContent className="w-full sm:max-w-md overflow-y-auto">
-                    <SheetHeader>
-                      <SheetTitle>Dépenses partagées</SheetTitle>
-                    </SheetHeader>
-                    <div className="mt-6">
-                      <ExpensesPanel
-                        tripId={tripId}
-                        members={members.map((m: any) => ({
-                          userId: m.userId,
-                          profile: {
-                            displayName: m.profile.displayName,
-                            avatarUrl: m.profile.avatarUrl,
-                          },
-                        }))}
-                        currentUserId={user?.id || ''}
-                      />
-                    </div>
-                  </SheetContent>
-                </Sheet>
-              )}
+              {/* Bouton dépenses */}
+              <Sheet open={showExpensesPanel} onOpenChange={setShowExpensesPanel}>
+                <SheetTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <Receipt className="h-4 w-4" />
+                    <span className="hidden sm:inline">Dépenses</span>
+                  </Button>
+                </SheetTrigger>
+                <SheetContent className="w-full sm:max-w-md overflow-y-auto">
+                  <SheetHeader>
+                    <SheetTitle>Dépenses partagées</SheetTitle>
+                  </SheetHeader>
+                  <div className="mt-6">
+                    <ExpensesPanel
+                      tripId={tripId}
+                      members={useCollaborativeMode
+                        ? members.map((m: any) => ({
+                            userId: m.userId,
+                            profile: {
+                              displayName: m.profile.displayName,
+                              avatarUrl: m.profile.avatarUrl,
+                            },
+                          }))
+                        : user ? [{ userId: user.id, profile: { displayName: 'Moi', avatarUrl: null } }] : []
+                      }
+                      currentUserId={user?.id || ''}
+                    />
+                  </div>
+                </SheetContent>
+              </Sheet>
 
               {/* Bouton partage */}
               {!useCollaborativeMode && (
