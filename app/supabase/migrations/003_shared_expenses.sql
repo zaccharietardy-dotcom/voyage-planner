@@ -70,13 +70,13 @@ CREATE TABLE IF NOT EXISTS activity_log (
 -- Fix: Add unique constraint on trip_members to prevent race condition on join
 DO $$ BEGIN
   ALTER TABLE trip_members ADD CONSTRAINT trip_members_trip_user_unique UNIQUE(trip_id, user_id);
-EXCEPTION WHEN duplicate_object THEN NULL;
+EXCEPTION WHEN OTHERS THEN NULL;
 END $$;
 
 -- Fix: Add unique constraint on share_code
 DO $$ BEGIN
   ALTER TABLE trips ADD CONSTRAINT trips_share_code_unique UNIQUE(share_code);
-EXCEPTION WHEN duplicate_object THEN NULL;
+EXCEPTION WHEN OTHERS THEN NULL;
 END $$;
 
 -- =====================================================
