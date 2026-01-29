@@ -223,6 +223,12 @@ CREATE POLICY "Trip members can insert settlements" ON settlements
     OR EXISTS (SELECT 1 FROM trips WHERE trips.id = settlements.trip_id AND trips.owner_id = auth.uid())
   );
 
--- Enable realtime
-ALTER PUBLICATION supabase_realtime ADD TABLE expenses;
-ALTER PUBLICATION supabase_realtime ADD TABLE settlements;
+-- Enable realtime (ignore if already added)
+DO $$ BEGIN
+  ALTER PUBLICATION supabase_realtime ADD TABLE expenses;
+EXCEPTION WHEN OTHERS THEN NULL;
+END $$;
+DO $$ BEGIN
+  ALTER PUBLICATION supabase_realtime ADD TABLE settlements;
+EXCEPTION WHEN OTHERS THEN NULL;
+END $$;
