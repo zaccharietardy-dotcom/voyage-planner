@@ -16,6 +16,7 @@ export async function GET(
       return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
     }
 
+    // Check membership or ownership
     const { data: member } = await supabase
       .from('trip_members')
       .select('role')
@@ -24,20 +25,42 @@ export async function GET(
       .single();
 
     if (!member) {
-      return NextResponse.json({ error: 'Accès refusé' }, { status: 403 });
+      const { data: trip } = await supabase
+        .from('trips')
+        .select('owner_id')
+        .eq('id', id)
+        .eq('owner_id', user.id)
+        .single();
+      if (!trip) {
+        return NextResponse.json({ error: 'Accès refusé' }, { status: 403 });
+      }
     }
 
-    // Fetch members
+    // Fetch members from trip_members
     const { data: members } = await supabase
       .from('trip_members')
       .select('user_id, profiles:user_id (id, display_name, avatar_url)')
       .eq('trip_id', id);
 
-    const memberInfos = (members || []).map((m: any) => ({
+    let memberInfos = (members || []).map((m: any) => ({
       userId: m.user_id,
       displayName: m.profiles?.display_name || 'Utilisateur',
       avatarUrl: m.profiles?.avatar_url || null,
     }));
+
+    // Solo mode: if no members, use current user
+    if (memberInfos.length === 0) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id, display_name, avatar_url')
+        .eq('id', user.id)
+        .single();
+      memberInfos = [{
+        userId: user.id,
+        displayName: profile?.display_name || 'Moi',
+        avatarUrl: profile?.avatar_url || null,
+      }];
+    }
 
     // Fetch expenses with splits
     const { data: expenses } = await supabase

@@ -1,6 +1,26 @@
 import { createRouteHandlerClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 
+async function verifyAccess(supabase: any, tripId: string, userId: string) {
+  const { data: member } = await supabase
+    .from('trip_members')
+    .select('role')
+    .eq('trip_id', tripId)
+    .eq('user_id', userId)
+    .single();
+  if (member) return member;
+
+  const { data: trip } = await supabase
+    .from('trips')
+    .select('owner_id')
+    .eq('id', tripId)
+    .eq('owner_id', userId)
+    .single();
+  if (trip) return { role: 'owner' };
+
+  return null;
+}
+
 // GET /api/trips/[id]/settlements
 export async function GET(
   request: Request,
@@ -15,14 +35,7 @@ export async function GET(
       return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
     }
 
-    const { data: member } = await supabase
-      .from('trip_members')
-      .select('role')
-      .eq('trip_id', id)
-      .eq('user_id', user.id)
-      .single();
-
-    if (!member) {
+    if (!await verifyAccess(supabase, id, user.id)) {
       return NextResponse.json({ error: 'Accès refusé' }, { status: 403 });
     }
 
@@ -72,14 +85,7 @@ export async function POST(
       return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
     }
 
-    const { data: member } = await supabase
-      .from('trip_members')
-      .select('role')
-      .eq('trip_id', id)
-      .eq('user_id', user.id)
-      .single();
-
-    if (!member) {
+    if (!await verifyAccess(supabase, id, user.id)) {
       return NextResponse.json({ error: 'Accès refusé' }, { status: 403 });
     }
 

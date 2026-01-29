@@ -1,14 +1,26 @@
 import { createRouteHandlerClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 
-async function verifyMembership(supabase: any, tripId: string, userId: string) {
+async function verifyAccess(supabase: any, tripId: string, userId: string) {
+  // Check trip_members first
   const { data: member } = await supabase
     .from('trip_members')
     .select('role')
     .eq('trip_id', tripId)
     .eq('user_id', userId)
     .single();
-  return member;
+  if (member) return member;
+
+  // Fallback: check if user is trip owner (solo mode)
+  const { data: trip } = await supabase
+    .from('trips')
+    .select('owner_id')
+    .eq('id', tripId)
+    .eq('owner_id', userId)
+    .single();
+  if (trip) return { role: 'owner' };
+
+  return null;
 }
 
 // GET /api/trips/[id]/expenses
@@ -25,7 +37,7 @@ export async function GET(
       return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
     }
 
-    const member = await verifyMembership(supabase, id, user.id);
+    const member = await verifyAccess(supabase, id, user.id);
     if (!member) {
       return NextResponse.json({ error: 'Accès refusé' }, { status: 403 });
     }
@@ -109,7 +121,7 @@ export async function POST(
       return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
     }
 
-    const member = await verifyMembership(supabase, id, user.id);
+    const member = await verifyAccess(supabase, id, user.id);
     if (!member) {
       return NextResponse.json({ error: 'Accès refusé' }, { status: 403 });
     }
