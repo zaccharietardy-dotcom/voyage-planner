@@ -258,7 +258,7 @@ export default function PlanPage() {
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
       <div className="container max-w-2xl mx-auto px-4 py-8">
         {/* Test de sauvegarde rapide */}
-        {process.env.NODE_ENV === 'development' && user && (
+        {user && (
           <div className="mb-4 p-3 rounded-lg border border-dashed border-orange-400 bg-orange-50 dark:bg-orange-950/20">
             <div className="flex items-center gap-3">
               <button onClick={testSave} className="px-3 py-1.5 text-sm font-medium rounded bg-orange-500 text-white hover:bg-orange-600">
