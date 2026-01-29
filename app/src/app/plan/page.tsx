@@ -179,10 +179,11 @@ export default function PlanPage() {
             return;
           }
 
-          // Sauvegarde échouée - afficher l'erreur mais continuer
+          // Sauvegarde échouée - afficher l'erreur complète pour debug
           const errorData = await saveResponse.json().catch(() => ({}));
-          console.error('[Plan] Save failed:', saveResponse.status, errorData);
-          toast.error(`Sauvegarde échouée: ${errorData.error || 'Erreur inconnue'}. Le voyage sera stocké localement.`);
+          console.error('[Plan] Save failed:', saveResponse.status, JSON.stringify(errorData));
+          const errorMsg = [errorData.error, errorData.details, errorData.hint].filter(Boolean).join(' | ');
+          toast.error(`Sauvegarde échouée: ${errorMsg || 'Erreur inconnue'}. Le voyage sera stocké localement.`);
         } catch (saveError) {
           console.error('[Plan] Save exception:', saveError);
           toast.error('Erreur lors de la sauvegarde. Le voyage sera stocké localement.');

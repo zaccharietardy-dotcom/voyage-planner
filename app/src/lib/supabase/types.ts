@@ -47,6 +47,7 @@ export interface Database {
           title: string;
           destination: string;
           start_date: string;
+          end_date: string;
           duration_days: number;
           preferences: Json;
           data: Json;
@@ -62,6 +63,7 @@ export interface Database {
           title: string;
           destination: string;
           start_date: string;
+          end_date: string;
           duration_days: number;
           preferences: Json;
           data: Json;
@@ -77,6 +79,7 @@ export interface Database {
           title?: string;
           destination?: string;
           start_date?: string;
+          end_date?: string;
           duration_days?: number;
           preferences?: Json;
           data?: Json;

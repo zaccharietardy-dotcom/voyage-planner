@@ -99,12 +99,19 @@ export async function POST(request: Request) {
     // Preparer les donnees pour l'insertion avec validation stricte
     // Note: Supabase table has both 'name' (required) and 'title' columns
     const tripName = tripData.title || tripData.name || `Voyage à ${destination}`;
+    // Calculer end_date à partir de start_date + duration_days
+    const startDateStr = typeof startDate === 'string' ? startDate.split('T')[0] : new Date().toISOString().split('T')[0];
+    const endDateObj = new Date(startDateStr);
+    endDateObj.setDate(endDateObj.getDate() + (durationDays || 7) - 1);
+    const endDateStr = endDateObj.toISOString().split('T')[0];
+
     const insertData = {
       owner_id: user.id,
       name: tripName,
       title: tripName,
       destination: destination,
-      start_date: typeof startDate === 'string' ? startDate.split('T')[0] : new Date().toISOString().split('T')[0],
+      start_date: startDateStr,
+      end_date: endDateStr,
       duration_days: durationDays || 7,
       preferences: tripData.preferences || {},
       data: tripData || {},
@@ -122,8 +129,14 @@ export async function POST(request: Request) {
 
     if (tripError) {
       console.error('[API/trips] Error creating trip:', tripError);
-      console.error('[API/trips] Error details:', { code: tripError.code, details: tripError.details, hint: tripError.hint });
-      return NextResponse.json({ error: tripError.message, code: tripError.code }, { status: 500 });
+      console.error('[API/trips] Error details:', JSON.stringify({ code: tripError.code, details: tripError.details, hint: tripError.hint, message: tripError.message }));
+      // Renvoyer TOUS les détails pour le debug
+      return NextResponse.json({
+        error: tripError.message,
+        code: tripError.code,
+        details: tripError.details,
+        hint: tripError.hint,
+      }, { status: 500 });
     }
 
     console.log('[API/trips] Trip created successfully:', trip.id);
