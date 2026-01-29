@@ -325,6 +325,7 @@ export interface TransportOptionSummary {
   bookingUrl?: string;
   recommended?: boolean;
   recommendationReason?: string;
+  dataSource?: 'api' | 'estimated';
 }
 
 export interface Trip {

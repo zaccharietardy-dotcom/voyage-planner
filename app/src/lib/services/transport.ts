@@ -25,6 +25,7 @@ export interface TransportOption {
   bookingUrl?: string;
   recommended?: boolean;
   recommendationReason?: string;
+  dataSource?: 'api' | 'estimated';
 }
 
 export interface TransportSegment {
