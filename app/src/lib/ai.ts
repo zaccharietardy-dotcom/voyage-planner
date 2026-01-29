@@ -30,8 +30,7 @@ import { DayScheduler, formatTime as formatScheduleTime, parseTime } from './ser
 import { searchHotels, selectBestHotel } from './services/hotels';
 import { validateAndFixTrip } from './services/coherenceValidator';
 import { validateTripGeography } from './services/geoValidator';
-// Fonctionnalité consigne à bagages désactivée temporairement
-// import { searchLuggageStorage, selectBestStorage, needsLuggageStorage, LuggageStorage } from './services/luggageStorage';
+import { searchLuggageStorage, selectBestStorage, needsLuggageStorage, LuggageStorage } from './services/luggageStorage';
 import { calculateFlightScore, EARLY_MORNING_PENALTY } from './services/flightScoring';
 import { createLocationTracker, TravelerLocation } from './services/locationTracker';
 import { generateFlightLink, generateHotelLink, formatDateForUrl } from './services/linkGenerator';
@@ -1526,6 +1525,62 @@ async function generateDayWithScheduler(params: {
 
       console.log(`[Jour ${dayNumber}] Arrivée à ${formatScheduleTime(transferEnd)}, check-in à ${checkInHour}:${String(checkInMin).padStart(2, '0')} → ${hoursBeforeCheckIn.toFixed(1)}h disponibles`);
 
+      // === CONSIGNE À BAGAGES (vol) ===
+      const flightArrivalTimeStr = `${transferEnd.getHours().toString().padStart(2, '0')}:${transferEnd.getMinutes().toString().padStart(2, '0')}`;
+      const flightNeedsStorage = preferences.durationDays > 1 && needsLuggageStorage(flightArrivalTimeStr, hotelCheckInTime);
+
+      if (flightNeedsStorage && hoursBeforeCheckIn >= 1.5) {
+        try {
+          const flightStorages = await searchLuggageStorage(preferences.destination, { latitude: cityCenter.lat, longitude: cityCenter.lng });
+          const flightBestStorage = selectBestStorage(flightStorages, { latitude: cityCenter.lat, longitude: cityCenter.lng });
+
+          if (flightBestStorage) {
+            const flightLuggageDropStart = scheduler.getCurrentTime();
+            const flightLuggageDropEnd = new Date(flightLuggageDropStart.getTime() + 15 * 60 * 1000);
+            const flightLuggageDropItem = scheduler.addItem({
+              id: generateId(),
+              title: '🧳 Dépôt bagages en consigne',
+              type: 'activity',
+              duration: 15,
+              travelTime: 10,
+            });
+            if (flightLuggageDropItem) {
+              items.push(schedulerItemToTripItem(flightLuggageDropItem, dayNumber, orderIndex++, {
+                description: `${flightBestStorage.name} — ${flightBestStorage.pricePerDay}€/jour${flightBestStorage.notes ? ` | ${flightBestStorage.notes}` : ''}`,
+                locationName: flightBestStorage.address,
+                latitude: flightBestStorage.latitude || cityCenter.lat,
+                longitude: flightBestStorage.longitude || cityCenter.lng,
+                estimatedCost: flightBestStorage.pricePerDay * preferences.groupSize,
+                bookingUrl: flightBestStorage.bookingUrl,
+              }));
+              console.log(`[Jour ${dayNumber}] 🧳 Dépôt bagages (vol) ajouté: ${flightBestStorage.name}`);
+            }
+
+            // Récupération bagages avant check-in
+            const flightLuggagePickupStart = new Date(actualCheckInTime.getTime() - 30 * 60 * 1000);
+            if (flightLuggagePickupStart > flightLuggageDropEnd) {
+              const flightLuggagePickupItem = scheduler.insertFixedItem({
+                id: generateId(),
+                title: '🧳 Récupération bagages',
+                type: 'activity',
+                startTime: flightLuggagePickupStart,
+                endTime: new Date(flightLuggagePickupStart.getTime() + 15 * 60 * 1000),
+              });
+              if (flightLuggagePickupItem) {
+                items.push(schedulerItemToTripItem(flightLuggagePickupItem, dayNumber, orderIndex++, {
+                  description: `Récupérez vos bagages à ${flightBestStorage.name} avant le check-in`,
+                  locationName: flightBestStorage.address,
+                  latitude: flightBestStorage.latitude || cityCenter.lat,
+                  longitude: flightBestStorage.longitude || cityCenter.lng,
+                }));
+              }
+            }
+          }
+        } catch (err) {
+          console.warn(`[Jour ${dayNumber}] 🧳 Erreur recherche consigne (vol):`, err instanceof Error ? err.message : err);
+        }
+      }
+
       // Si on a du temps avant le check-in (> 1h30), faire des activités
       if (hoursBeforeCheckIn >= 1.5) {
         // Déjeuner si on est dans la plage horaire (11h30 - 14h)
@@ -1701,6 +1756,68 @@ async function generateDayWithScheduler(params: {
       const arrivalPlusBuffer = new Date(transportEnd.getTime() + 30 * 60 * 1000);
       const hotelStart = arrivalPlusBuffer > minCheckInTime ? arrivalPlusBuffer : minCheckInTime;
       const hotelEnd = new Date(hotelStart.getTime() + 20 * 60 * 1000);
+
+      // === CONSIGNE À BAGAGES ===
+      // Si arrivée > 1h avant check-in et voyage > 1 jour (= valises probables), proposer consigne
+      const arrivalTimeForLuggage = `${transportEnd.getHours().toString().padStart(2, '0')}:${transportEnd.getMinutes().toString().padStart(2, '0')}`;
+      const needsStorage = preferences.durationDays > 1 && needsLuggageStorage(arrivalTimeForLuggage, hotelCheckInTimeStr);
+
+      if (needsStorage) {
+        console.log(`[Jour ${dayNumber}] 🧳 Consigne nécessaire: arrivée ${arrivalTimeForLuggage}, check-in ${hotelCheckInTimeStr}`);
+        try {
+          const storages = await searchLuggageStorage(preferences.destination, { latitude: cityCenter.lat, longitude: cityCenter.lng });
+          const bestStorage = selectBestStorage(storages, { latitude: cityCenter.lat, longitude: cityCenter.lng });
+
+          if (bestStorage) {
+            // Dépôt bagages (15min) juste après arrivée
+            const luggageDropStart = new Date(transportEnd.getTime() + 15 * 60 * 1000);
+            const luggageDropEnd = new Date(luggageDropStart.getTime() + 15 * 60 * 1000);
+            const luggageDropItem = scheduler.insertFixedItem({
+              id: generateId(),
+              title: '🧳 Dépôt bagages en consigne',
+              type: 'activity',
+              startTime: luggageDropStart,
+              endTime: luggageDropEnd,
+            });
+            if (luggageDropItem) {
+              items.push(schedulerItemToTripItem(luggageDropItem, dayNumber, orderIndex++, {
+                description: `${bestStorage.name} — ${bestStorage.pricePerDay}€/jour${bestStorage.notes ? ` | ${bestStorage.notes}` : ''}`,
+                locationName: bestStorage.address,
+                latitude: bestStorage.latitude || cityCenter.lat,
+                longitude: bestStorage.longitude || cityCenter.lng,
+                estimatedCost: bestStorage.pricePerDay * preferences.groupSize,
+                bookingUrl: bestStorage.bookingUrl,
+              }));
+              console.log(`[Jour ${dayNumber}] 🧳 Dépôt bagages ajouté: ${bestStorage.name} (${bestStorage.pricePerDay}€/jour)`);
+            }
+
+            // Récupération bagages (15min) 30min avant check-in hôtel
+            const luggagePickupStart = new Date(hotelStart.getTime() - 30 * 60 * 1000);
+            const luggagePickupEnd = new Date(luggagePickupStart.getTime() + 15 * 60 * 1000);
+            if (luggagePickupStart > luggageDropEnd) {
+              const luggagePickupItem = scheduler.insertFixedItem({
+                id: generateId(),
+                title: '🧳 Récupération bagages',
+                type: 'activity',
+                startTime: luggagePickupStart,
+                endTime: luggagePickupEnd,
+              });
+              if (luggagePickupItem) {
+                items.push(schedulerItemToTripItem(luggagePickupItem, dayNumber, orderIndex++, {
+                  description: `Récupérez vos bagages à ${bestStorage.name} avant le check-in`,
+                  locationName: bestStorage.address,
+                  latitude: bestStorage.latitude || cityCenter.lat,
+                  longitude: bestStorage.longitude || cityCenter.lng,
+                }));
+                console.log(`[Jour ${dayNumber}] 🧳 Récupération bagages ajoutée avant check-in`);
+              }
+            }
+          }
+        } catch (err) {
+          console.warn(`[Jour ${dayNumber}] 🧳 Erreur recherche consigne:`, err instanceof Error ? err.message : err);
+        }
+      }
+
       const hotelNameGround = accommodation?.name || 'Hébergement';
       const hotelItem = scheduler.insertFixedItem({
         id: generateId(),
