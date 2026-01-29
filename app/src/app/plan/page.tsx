@@ -224,64 +224,9 @@ export default function PlanPage() {
 
   const progress = (currentStep / STEPS.length) * 100;
 
-  // Test de sauvegarde rapide (dev only)
-  const [testResult, setTestResult] = useState<string | null>(null);
-  const testSave = async () => {
-    setTestResult('⏳ Test en cours...');
-    try {
-      const res = await fetch('/api/trips', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: 'Test Save',
-          destination: 'Paris',
-          startDate: '2026-02-01',
-          durationDays: 3,
-          preferences: { destination: 'Paris', origin: 'Caen', startDate: '2026-02-01', durationDays: 3, groupSize: 2, budgetLevel: 'moderate', activities: ['culture'], transport: 'optimal' },
-          days: [],
-        }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        // Vérifier côté client si trip_members est lisible
-        const { getSupabaseClient } = await import('@/lib/supabase');
-        const supabase = getSupabaseClient();
-        const { data: members, error: memErr } = await supabase
-          .from('trip_members')
-          .select('*')
-          .eq('trip_id', data.id);
-        const { data: tripCheck, error: tripErr } = await supabase
-          .from('trips')
-          .select('id, name')
-          .eq('id', data.id)
-          .single();
-        setTestResult(
-          `✅ Trip créé: ${data.id}\n` +
-          `Members: ${memErr ? `❌ ${memErr.message}` : `${members?.length || 0} (${JSON.stringify(members)})`}\n` +
-          `Trip query: ${tripErr ? `❌ ${tripErr.message}` : `✅ ${tripCheck?.name}`}`
-        );
-      } else {
-        setTestResult(`❌ ${data.error}${data.details ? ` | ${data.details}` : ''}${data.hint ? ` | ${data.hint}` : ''}`);
-      }
-    } catch (e) {
-      setTestResult(`❌ Exception: ${e instanceof Error ? e.message : String(e)}`);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
       <div className="container max-w-2xl mx-auto px-4 py-8">
-        {/* Test de sauvegarde rapide (temporaire) */}
-        {(
-          <div className="mb-4 p-3 rounded-lg border border-dashed border-orange-400 bg-orange-50 dark:bg-orange-950/20">
-            <div className="flex items-center gap-3">
-              <button onClick={testSave} className="px-3 py-1.5 text-sm font-medium rounded bg-orange-500 text-white hover:bg-orange-600">
-                🧪 Tester sauvegarde DB
-              </button>
-              {testResult && <pre className="text-xs font-mono whitespace-pre-wrap mt-2 max-w-full overflow-auto">{testResult}</pre>}
-            </div>
-          </div>
-        )}
         {/* User Preferences Banner */}
         {user && !prefsLoading && (
           <div className="mb-6">
