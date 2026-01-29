@@ -12,7 +12,7 @@ const DESTINATIONS = [
   'Séville', 'Copenhague', 'Vienne', 'Budapest', 'Dubrovnik',
 ];
 
-const TRANSPORTS: TripPreferences['transport'][] = ['optimal', 'plane', 'train', 'car', 'bus'];
+// Always use 'optimal' (véhicule recommandé) for random examples
 const GROUP_TYPES: TripPreferences['groupType'][] = ['solo', 'couple', 'friends', 'family_with_kids', 'family_without_kids'];
 const BUDGET_LEVELS: TripPreferences['budgetLevel'][] = ['economic', 'moderate', 'comfort', 'luxury'];
 const ACTIVITIES: TripPreferences['activities'][number][] = ['beach', 'nature', 'culture', 'gastronomy', 'nightlife', 'shopping', 'adventure', 'wellness'];
@@ -48,7 +48,7 @@ export function generateRandomPreferences(): Partial<TripPreferences> {
     destination,
     startDate,
     durationDays: 3 + Math.floor(Math.random() * 12),
-    transport: pick(TRANSPORTS),
+    transport: 'optimal',
     carRental: Math.random() > 0.7,
     groupSize,
     groupType,
