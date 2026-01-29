@@ -21,6 +21,7 @@ import {
   Bug,
   GitPullRequest,
   GripVertical,
+  Receipt,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -34,6 +35,7 @@ import { CreateProposalDialog } from '@/components/trip/CreateProposalDialog';
 import { DraggableTimeline } from '@/components/trip/DraggableTimeline';
 import { ShareTripDialog } from '@/components/trip/ShareTripDialog';
 import { ActivityEditModal } from '@/components/trip/ActivityEditModal';
+import { ExpensesPanel } from '@/components/trip/expenses/ExpensesPanel';
 import { ProposedChange, createMoveActivityChange } from '@/lib/types/collaboration';
 import { cn } from '@/lib/utils';
 import {
@@ -167,6 +169,7 @@ export default function TripPage() {
   const [pendingChanges, setPendingChanges] = useState<ProposedChange[]>([]);
   const [showProposalDialog, setShowProposalDialog] = useState(false);
   const [showCollabPanel, setShowCollabPanel] = useState(false);
+  const [showExpensesPanel, setShowExpensesPanel] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [editingItem, setEditingItem] = useState<TripItem | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -606,6 +609,36 @@ export default function TripPage() {
                         proposals={proposals}
                         onVote={handleVote}
                         currentUserId={user?.id}
+                      />
+                    </div>
+                  </SheetContent>
+                </Sheet>
+              )}
+
+              {/* Bouton dépenses partagées (mode collaboratif) */}
+              {useCollaborativeMode && (
+                <Sheet open={showExpensesPanel} onOpenChange={setShowExpensesPanel}>
+                  <SheetTrigger asChild>
+                    <Button variant="outline" size="sm" className="gap-2">
+                      <Receipt className="h-4 w-4" />
+                      <span className="hidden sm:inline">Dépenses</span>
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent className="w-full sm:max-w-md overflow-y-auto">
+                    <SheetHeader>
+                      <SheetTitle>Dépenses partagées</SheetTitle>
+                    </SheetHeader>
+                    <div className="mt-6">
+                      <ExpensesPanel
+                        tripId={tripId}
+                        members={members.map((m: any) => ({
+                          userId: m.userId,
+                          profile: {
+                            displayName: m.profile.displayName,
+                            avatarUrl: m.profile.avatarUrl,
+                          },
+                        }))}
+                        currentUserId={user?.id || ''}
                       />
                     </div>
                   </SheetContent>

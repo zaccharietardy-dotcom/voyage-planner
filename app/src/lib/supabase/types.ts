@@ -364,6 +364,165 @@ export interface Database {
           }
         ];
       };
+      expenses: {
+        Row: {
+          id: string;
+          trip_id: string;
+          title: string;
+          amount: number;
+          currency: string;
+          category: string;
+          date: string;
+          notes: string | null;
+          payer_id: string;
+          split_method: string;
+          created_by: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          trip_id: string;
+          title: string;
+          amount: number;
+          currency?: string;
+          category?: string;
+          date: string;
+          notes?: string | null;
+          payer_id: string;
+          split_method?: string;
+          created_by: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          trip_id?: string;
+          title?: string;
+          amount?: number;
+          currency?: string;
+          category?: string;
+          date?: string;
+          notes?: string | null;
+          payer_id?: string;
+          split_method?: string;
+          created_by?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "expenses_trip_id_fkey";
+            columns: ["trip_id"];
+            referencedRelation: "trips";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "expenses_payer_id_fkey";
+            columns: ["payer_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "expenses_created_by_fkey";
+            columns: ["created_by"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      expense_splits: {
+        Row: {
+          id: string;
+          expense_id: string;
+          user_id: string;
+          amount: number;
+          share_value: number | null;
+        };
+        Insert: {
+          id?: string;
+          expense_id: string;
+          user_id: string;
+          amount: number;
+          share_value?: number | null;
+        };
+        Update: {
+          id?: string;
+          expense_id?: string;
+          user_id?: string;
+          amount?: number;
+          share_value?: number | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "expense_splits_expense_id_fkey";
+            columns: ["expense_id"];
+            referencedRelation: "expenses";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "expense_splits_user_id_fkey";
+            columns: ["user_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      settlements: {
+        Row: {
+          id: string;
+          trip_id: string;
+          from_user_id: string;
+          to_user_id: string;
+          amount: number;
+          settled_at: string;
+          created_by: string;
+        };
+        Insert: {
+          id?: string;
+          trip_id: string;
+          from_user_id: string;
+          to_user_id: string;
+          amount: number;
+          settled_at?: string;
+          created_by: string;
+        };
+        Update: {
+          id?: string;
+          trip_id?: string;
+          from_user_id?: string;
+          to_user_id?: string;
+          amount?: number;
+          settled_at?: string;
+          created_by?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "settlements_trip_id_fkey";
+            columns: ["trip_id"];
+            referencedRelation: "trips";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "settlements_from_user_id_fkey";
+            columns: ["from_user_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "settlements_to_user_id_fkey";
+            columns: ["to_user_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "settlements_created_by_fkey";
+            columns: ["created_by"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
       trip_comments: {
         Row: {
           id: string;

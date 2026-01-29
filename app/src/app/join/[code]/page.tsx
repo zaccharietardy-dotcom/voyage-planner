@@ -64,7 +64,7 @@ export default function JoinTripPage() {
         return;
       }
 
-      // Ajouter comme membre viewer
+      // Ajouter comme membre viewer (contrainte UNIQUE sur trip_id+user_id gère la race condition)
       setStatus('joining');
       const { error: joinError } = await supabase.from('trip_members').insert({
         trip_id: trip.id,
@@ -73,6 +73,11 @@ export default function JoinTripPage() {
       });
 
       if (joinError) {
+        // Si conflit de contrainte unique, l'utilisateur est déjà membre (race condition)
+        if (joinError.code === '23505') {
+          setStatus('already_member');
+          return;
+        }
         setStatus('error');
         setError('Impossible de rejoindre ce voyage. Veuillez réessayer.');
         return;

@@ -11,6 +11,10 @@ export async function GET(
     const supabase = await createRouteHandlerClient();
     const { data: { user } } = await supabase.auth.getUser();
 
+    if (!user) {
+      return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
+    }
+
     // Récupérer le voyage
     const { data: trip, error: tripError } = await supabase
       .from('trips')
@@ -22,18 +26,19 @@ export async function GET(
       return NextResponse.json({ error: 'Voyage non trouvé' }, { status: 404 });
     }
 
-    // Vérifier l'accès si l'utilisateur est connecté
-    let userRole = null;
-    if (user) {
-      const { data: member } = await supabase
-        .from('trip_members')
-        .select('role')
-        .eq('trip_id', id)
-        .eq('user_id', user.id)
-        .single();
+    // Vérifier que l'utilisateur est membre
+    const { data: member } = await supabase
+      .from('trip_members')
+      .select('role')
+      .eq('trip_id', id)
+      .eq('user_id', user.id)
+      .single();
 
-      userRole = member?.role;
+    if (!member) {
+      return NextResponse.json({ error: 'Accès refusé' }, { status: 403 });
     }
+
+    const userRole = member.role;
 
     // Récupérer les membres avec leurs profils
     const { data: members } = await supabase
