@@ -306,8 +306,11 @@ export function needsLuggageStorage(
   const arrival = parseTime(arrivalTime);
   const checkIn = parseTime(hotelCheckInTime);
 
-  // Si arrivee plus de 1h avant check-in, consigne necessaire
-  return checkIn - arrival > 60;
+  // Consigne utile seulement si le gap est > 2h30.
+  // Pour des gaps plus courts (<2h30), aller directement à l'hôtel est toujours mieux:
+  // la plupart des hôtels acceptent de garder les bagages même avant le check-in.
+  // Payer une consigne + détour pour 1-2h n'a aucun sens.
+  return checkIn - arrival > 150;
 }
 
 /**

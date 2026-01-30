@@ -24,11 +24,9 @@ export function UserMenu() {
     try {
       setIsSigningOut(true);
       await signOut();
-      router.push('/');
-      router.refresh();
+      window.location.href = '/';
     } catch (error) {
       console.error('Erreur lors de la déconnexion:', error);
-    } finally {
       setIsSigningOut(false);
     }
   };

@@ -18,6 +18,30 @@ export type DietaryType = 'none' | 'vegetarian' | 'vegan' | 'halal' | 'kosher' |
 
 export type BudgetLevel = 'economic' | 'moderate' | 'comfort' | 'luxury';
 
+export type MealStrategy = 'self_catered' | 'restaurant' | 'mixed';
+
+export interface BudgetStrategy {
+  accommodationType: 'airbnb_with_kitchen' | 'hotel' | 'hostel';
+  accommodationBudgetPerNight: number;
+  mealsStrategy: {
+    breakfast: MealStrategy;
+    lunch: MealStrategy;
+    dinner: MealStrategy;
+  };
+  groceryShoppingNeeded: boolean;
+  activitiesLevel: 'mostly_free' | 'mixed' | 'premium';
+  dailyActivityBudget: number;
+  transportTips: string;
+  reasoning: string;
+}
+
+export interface ResolvedBudget {
+  totalBudget: number;
+  perPersonBudget: number;
+  perPersonPerDay: number;
+  budgetLevel: BudgetLevel;
+}
+
 export interface TripPreferences {
   // Étape 1 - Destination & Dates
   origin: string;
@@ -38,6 +62,7 @@ export interface TripPreferences {
   // Étape 4 - Budget
   budgetLevel: BudgetLevel;
   budgetCustom?: number; // Budget personnalisé en €
+  budgetIsPerPerson?: boolean; // true = budgetCustom est par personne, false = total
 
   // Étape 5 - Activités & Préférences
   activities: ActivityType[];
@@ -381,6 +406,14 @@ export interface Trip {
       embassy?: string;
       otherNumbers?: { label: string; number: string }[];
     };
+  };
+  // Stratégie budget
+  budgetStrategy?: BudgetStrategy;
+  budgetStatus?: {
+    target: number;
+    estimated: number;
+    difference: number;
+    isOverBudget: boolean;
   };
   // Empreinte carbone
   carbonFootprint?: {

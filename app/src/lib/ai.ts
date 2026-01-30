@@ -16,6 +16,8 @@ import {
   ParkingOption,
   BudgetLevel,
   TransportOptionSummary,
+  Accommodation,
+  BudgetStrategy,
 } from './types';
 import { findNearbyAirports, calculateDistance, AirportInfo, getCityCenterCoords } from './services/geocoding';
 import { searchFlights, formatFlightDuration } from './services/flights';
@@ -37,6 +39,8 @@ import { generateFlightLink, generateHotelLink, formatDateForUrl } from './servi
 import { searchAttractionsMultiQuery, searchMustSeeAttractions } from './services/serpApiPlaces';
 import { generateClaudeItinerary, summarizeAttractions, mapItineraryToAttractions } from './services/claudeItinerary';
 import { generateTravelTips } from './services/travelTips';
+import { resolveBudget, generateBudgetStrategy } from './services/budgetResolver';
+import { searchAirbnbListings, isAirbnbApiConfigured } from './services/airbnb';
 
 /**
  * Choisit le mode de direction Google Maps en fonction de la distance
@@ -199,6 +203,26 @@ function fixAttractionCost(attraction: Attraction): Attraction {
     return { ...attraction, estimatedCost: 12 };
   }
 
+  // Règles génériques pour toutes les villes:
+  // Monuments/arcs/statues en plein air → gratuit (Arc de Triomphe Barcelone, etc.)
+  if (/\b(arc de|arco|monument|statue|fontaine|fountain|colonne|column|obélisque|obelisk)\b/.test(name)) {
+    if (cost > 0 && !/\b(musée|museum|tour|tower|observation|mirador|deck)\b/.test(name)) {
+      return { ...attraction, estimatedCost: 0 };
+    }
+  }
+
+  // Miradors/viewpoints gratuits (sauf si observatoire payant)
+  if (/\b(mirador|viewpoint|lookout|panoramic)\b/.test(name)) {
+    if (cost > 20 && !/\b(observatory|observation|deck|tower|tour)\b/.test(name)) {
+      return { ...attraction, estimatedCost: 0 };
+    }
+  }
+
+  // Cap générique: si coût >= 50€/pers et pas bookable → probablement faux, cap à 20€
+  if (cost >= 50 && !attraction.bookingUrl) {
+    return { ...attraction, estimatedCost: 20 };
+  }
+
   return attraction;
 }
 
@@ -260,6 +284,19 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
   endDate.setDate(endDate.getDate() + preferences.durationDays - 1);
   console.log(`[AI] Date de départ normalisée: ${startDate.toDateString()} (input: ${preferences.startDate})`);
 
+  // Résoudre le budget et générer la stratégie
+  console.time('[AI] BudgetStrategy');
+  const resolvedBudget = resolveBudget(preferences);
+  console.log(`[AI] Budget résolu: ${resolvedBudget.totalBudget}€ total, ${resolvedBudget.perPersonPerDay.toFixed(0)}€/pers/jour, niveau=${resolvedBudget.budgetLevel}`);
+
+  const budgetStrategyPromise = generateBudgetStrategy(
+    resolvedBudget,
+    preferences.destination,
+    preferences.durationDays,
+    preferences.groupSize,
+    preferences.activities,
+  );
+
   // Lancer attractions + hôtels en parallèle avec le transport
   console.time('[AI] Attractions pool');
   const attractionsPromise = searchAttractionsMultiQuery(
@@ -269,12 +306,16 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
   );
 
   console.time('[AI] Hotels');
+  // Estimer le plafond prix/nuit avant d'avoir la stratégie complète
+  const estimatedMaxPricePerNight = resolvedBudget.budgetLevel === 'economic' ? 80 :
+    resolvedBudget.budgetLevel === 'moderate' ? 120 : undefined;
   const hotelsPromise = searchHotels(preferences.destination, {
-    budgetLevel: preferences.budgetLevel as 'economic' | 'moderate' | 'luxury',
+    budgetLevel: (resolvedBudget.budgetLevel || preferences.budgetLevel) as 'economic' | 'moderate' | 'luxury',
     cityCenter: destCoords,
     checkInDate: startDate,
     checkOutDate: endDate,
     guests: preferences.groupSize,
+    maxPricePerNight: estimatedMaxPricePerNight,
   });
 
   // Lancer les travel tips en parallèle aussi
@@ -286,17 +327,47 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
     preferences.durationDays,
   );
 
-  // Attendre les 4 en parallèle
-  const [transportOptions, attractionPoolRaw, accommodationOptions, travelTipsData] = await Promise.all([
+  // Attendre les 5 en parallèle (inclut stratégie budget)
+  const [transportOptions, attractionPoolRaw, accommodationOptions, travelTipsData, budgetStrategy] = await Promise.all([
     transportPromise,
     attractionsPromise,
     hotelsPromise,
     travelTipsPromise,
+    budgetStrategyPromise,
   ]);
   console.timeEnd('[AI] Transport');
   console.timeEnd('[AI] Attractions pool');
   console.timeEnd('[AI] Hotels');
   console.timeEnd('[AI] TravelTips');
+  console.timeEnd('[AI] BudgetStrategy');
+  console.log(`[AI] Stratégie budget: ${budgetStrategy.accommodationType}, courses=${budgetStrategy.groceryShoppingNeeded}, activités=${budgetStrategy.activitiesLevel}`);
+
+  // Si la stratégie recommande Airbnb, lancer une recherche en parallèle
+  let airbnbOptions: Accommodation[] = [];
+  if (budgetStrategy.accommodationType.includes('airbnb') && isAirbnbApiConfigured()) {
+    console.time('[AI] Airbnb');
+    try {
+      const checkInStr = startDate.toISOString().split('T')[0];
+      const checkOutStr = endDate.toISOString().split('T')[0];
+      airbnbOptions = await searchAirbnbListings(
+        preferences.destination,
+        checkInStr,
+        checkOutStr,
+        {
+          maxPricePerNight: budgetStrategy.accommodationBudgetPerNight,
+          guests: preferences.groupSize,
+          requireKitchen: budgetStrategy.accommodationType === 'airbnb_with_kitchen',
+        },
+      );
+      console.log(`[AI] ✅ ${airbnbOptions.length} Airbnb trouvés`);
+    } catch (error) {
+      console.warn('[AI] Recherche Airbnb échouée, fallback hôtels:', error);
+    }
+    console.timeEnd('[AI] Airbnb');
+  }
+
+  // Combiner les options d'hébergement (hôtels + Airbnb)
+  const allAccommodationOptions = [...accommodationOptions, ...airbnbOptions];
 
   // Convertir en format pour l'interface
   const transportOptionsSummary: TransportOptionSummary[] = transportOptions.map(opt => ({
@@ -359,7 +430,9 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
         destAirports,
         startDate,
         endDate,
-        preferences
+        preferences,
+        originCoords,
+        destCoords
       );
 
       outboundFlight = flightResult.outboundFlight;
@@ -383,7 +456,7 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
 
   // 6. Parking si nécessaire (pour avion ou voiture)
   let parking: ParkingOption | null = null;
-  if (preferences.needsParking !== false && selectedTransport?.mode === 'plane' && originAirport) {
+  if ((preferences.needsParking === true || preferences.transport === 'car') && selectedTransport?.mode === 'plane' && originAirport) {
     parking = selectBestParking(originAirport.code, preferences.durationDays, preferences.budgetLevel || 'moderate');
   }
 
@@ -444,11 +517,12 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
         ? (preferences.startDate as string).split('T')[0]
         : new Date(preferences.startDate).toISOString().split('T')[0],
       activities: preferences.activities,
-      budgetLevel: preferences.budgetLevel,
+      budgetLevel: resolvedBudget.budgetLevel,
       mustSee: preferences.mustSee,
       groupType: preferences.groupType,
       groupSize: preferences.groupSize || 2,
       attractionPool: summarizeAttractions(attractionPool),
+      budgetStrategy,
     });
   } catch (error) {
     console.error('[AI] Claude curation error:', error);
@@ -522,12 +596,12 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
   }
   console.log('[AI] ✅ Post-traitement durées/coûts/filtrage appliqué');
 
-  // 7.5 Sélectionner le meilleur hôtel (recherche déjà faite en parallèle)
-  const accommodation = selectBestHotel(accommodationOptions, {
-    budgetLevel: preferences.budgetLevel as 'economic' | 'moderate' | 'luxury',
+  // 7.5 Sélectionner le meilleur hébergement (hôtels + Airbnb si disponible)
+  const accommodation = selectBestHotel(allAccommodationOptions, {
+    budgetLevel: resolvedBudget.budgetLevel as 'economic' | 'moderate' | 'luxury',
     attractions: selectedAttractions,
   });
-  console.log(`Hôtel sélectionné: ${accommodation?.name || 'Aucun'}`);
+  console.log(`Hébergement sélectionné: ${accommodation?.name || 'Aucun'} (type: ${accommodation?.type || 'N/A'})`);
 
   // 8. Générer les jours avec le SCHEDULER (évite les chevauchements)
   const days: TripDay[] = [];
@@ -575,6 +649,7 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       accommodation,
       tripUsedAttractionIds, // ANTI-DOUBLON: Set partagé
       locationTracker, // LOCATION TRACKING: Validation géographique
+      budgetStrategy, // Stratégie budget pour repas self_catered vs restaurant
       lateFlightArrivalData: pendingLateFlightData, // Données du vol tardif du jour précédent
     });
 
@@ -673,9 +748,19 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
     parking: parking || undefined,
     // Hébergement
     accommodation: accommodation || undefined,
-    accommodationOptions: accommodationOptions.length > 0 ? accommodationOptions : undefined,
+    accommodationOptions: allAccommodationOptions.length > 0 ? allAccommodationOptions : undefined,
     totalEstimatedCost: Object.values(costBreakdown).reduce((a, b) => a + b, 0),
     costBreakdown,
+    budgetStrategy,
+    budgetStatus: resolvedBudget.totalBudget > 0 ? (() => {
+      const estimated = Object.values(costBreakdown).reduce((a, b) => a + b, 0);
+      return {
+        target: resolvedBudget.totalBudget,
+        estimated,
+        difference: resolvedBudget.totalBudget - estimated,
+        isOverBudget: estimated > resolvedBudget.totalBudget,
+      };
+    })() : undefined,
     carbonFootprint: {
       total: carbonData.total,
       flights: carbonData.flights,
@@ -710,7 +795,9 @@ async function findBestFlights(
   destAirports: AirportInfo[],
   startDate: Date,
   endDate: Date,
-  preferences: TripPreferences
+  preferences: TripPreferences,
+  originCityCoords?: { lat: number; lng: number },
+  destCityCoords?: { lat: number; lng: number }
 ): Promise<{
   outboundFlight: Flight | null;
   returnFlight: Flight | null;
@@ -721,7 +808,11 @@ async function findBestFlights(
   let bestReturnFlight: Flight | null = null;
   let bestOriginAirport: AirportInfo = originAirports[0];
   let bestDestAirport: AirportInfo = destAirports[0];
-  let bestTotalPrice = Infinity;
+  let bestScore = Infinity; // Lower is better (price + distance penalty)
+
+  // Distance penalty: 0.30€/km for distance from city to airport
+  // This prevents selecting a cheap flight from an airport 450km away
+  const DISTANCE_PENALTY_PER_KM = 0.30;
 
   for (const originAirport of originAirports) {
     for (const destAirport of destAirports) {
@@ -744,13 +835,38 @@ async function findBestFlights(
           if (outbound) {
             const totalPrice = (outbound?.price || 0) + (returnFlight?.price || 0);
 
-            if (totalPrice < bestTotalPrice || bestOutboundFlight === null) {
-              bestTotalPrice = totalPrice;
+            // Calculate distance penalty for origin airport
+            let originDistancePenalty = 0;
+            if (originCityCoords) {
+              const distKm = calculateDistance(
+                originCityCoords.lat, originCityCoords.lng,
+                originAirport.latitude, originAirport.longitude
+              );
+              originDistancePenalty = distKm * DISTANCE_PENALTY_PER_KM;
+            }
+
+            // Calculate distance penalty for destination airport
+            let destDistancePenalty = 0;
+            if (destCityCoords) {
+              const distKm = calculateDistance(
+                destCityCoords.lat, destCityCoords.lng,
+                destAirport.latitude, destAirport.longitude
+              );
+              destDistancePenalty = distKm * DISTANCE_PENALTY_PER_KM;
+            }
+
+            const score = totalPrice + originDistancePenalty + destDistancePenalty;
+
+            if (score < bestScore || bestOutboundFlight === null) {
+              bestScore = score;
               bestOutboundFlight = outbound;
               bestReturnFlight = returnFlight;
               bestOriginAirport = originAirport;
               bestDestAirport = destAirport;
-              console.log(`→ Meilleure option: ${originAirport.code}→${destAirport.code} à ${totalPrice}€`);
+              const penaltyInfo = (originDistancePenalty + destDistancePenalty) > 10
+                ? ` (prix: ${totalPrice}€, pénalité distance: +${Math.round(originDistancePenalty + destDistancePenalty)}€)`
+                : '';
+              console.log(`→ Meilleure option: ${originAirport.code}→${destAirport.code} score=${Math.round(score)}€${penaltyInfo}`);
             }
           }
         }
@@ -1022,6 +1138,24 @@ interface LateFlightArrivalData {
   accommodation: import('./types').Accommodation | null;
 }
 
+/**
+ * Détermine si un repas doit être self_catered (courses/cuisine) ou restaurant
+ */
+function shouldSelfCater(
+  mealType: 'breakfast' | 'lunch' | 'dinner',
+  dayNumber: number,
+  budgetStrategy?: BudgetStrategy,
+  hotelHasBreakfast?: boolean,
+): boolean {
+  if (!budgetStrategy) return false;
+  if (mealType === 'breakfast' && hotelHasBreakfast) return false;
+
+  const strategy = budgetStrategy.mealsStrategy[mealType];
+  if (strategy === 'self_catered') return true;
+  if (strategy === 'mixed') return dayNumber % 2 === 1; // jours impairs = self_catered
+  return false;
+}
+
 async function generateDayWithScheduler(params: {
   dayNumber: number;
   date: Date;
@@ -1040,6 +1174,7 @@ async function generateDayWithScheduler(params: {
   accommodation: import('./types').Accommodation | null;
   tripUsedAttractionIds: Set<string>; // ANTI-DOUBLON: Set partagé entre tous les jours
   locationTracker: ReturnType<typeof createLocationTracker>; // LOCATION TRACKING: Validation géographique
+  budgetStrategy?: BudgetStrategy; // Stratégie budget pour repas self_catered vs restaurant
   lateFlightArrivalData?: LateFlightArrivalData | null; // Vol tardif du jour précédent à traiter
 }): Promise<{ items: TripItem[]; lateFlightForNextDay?: LateFlightArrivalData }> {
   const {
@@ -1060,6 +1195,7 @@ async function generateDayWithScheduler(params: {
     accommodation,
     tripUsedAttractionIds, // ANTI-DOUBLON: Set partagé entre tous les jours
     locationTracker, // LOCATION TRACKING: Validation géographique
+    budgetStrategy, // Stratégie budget pour repas
     lateFlightArrivalData, // Vol tardif à traiter en début de journée
   } = params;
 
@@ -1612,26 +1748,36 @@ async function generateDayWithScheduler(params: {
             travelTime: 15,
           });
           if (lunchItem) {
-            const restaurant = await findRestaurantForMeal('lunch', cityCenter, preferences, dayNumber, lastCoords);
-            const restaurantCoords = {
-              lat: restaurant?.latitude || cityCenter.lat,
-              lng: restaurant?.longitude || cityCenter.lng,
-            };
-            const restaurantGoogleMapsUrl = restaurant?.googleMapsUrl ||
-              (restaurant ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${restaurant.name}, ${restaurant.address}`)}` : undefined);
+            if (shouldSelfCater('lunch', dayNumber, budgetStrategy)) {
+              items.push(schedulerItemToTripItem(lunchItem, dayNumber, orderIndex++, {
+                title: 'Déjeuner pique-nique / maison',
+                description: 'Repas préparé avec les courses | Option économique',
+                locationName: `Centre-ville, ${preferences.destination}`,
+                latitude: lastCoords.lat,
+                longitude: lastCoords.lng,
+                estimatedCost: 8 * (preferences.groupSize || 1),
+              }));
+            } else {
+              const restaurant = await findRestaurantForMeal('lunch', cityCenter, preferences, dayNumber, lastCoords);
+              const restaurantCoords = {
+                lat: restaurant?.latitude || cityCenter.lat,
+                lng: restaurant?.longitude || cityCenter.lng,
+              };
+              const restaurantGoogleMapsUrl = restaurant?.googleMapsUrl ||
+                (restaurant ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${restaurant.name}, ${restaurant.address}`)}` : undefined);
 
-            items.push(schedulerItemToTripItem(lunchItem, dayNumber, orderIndex++, {
-              title: restaurant?.name || 'Déjeuner',
-              description: restaurant ? `${restaurant.cuisineTypes.join(', ')} | ⭐ ${restaurant.rating?.toFixed(1)}/5` : 'Découvrez la cuisine locale',
-              locationName: restaurant?.address || `Centre-ville, ${preferences.destination}`,
-              latitude: restaurantCoords.lat,
-              longitude: restaurantCoords.lng,
-              // Utiliser le priceLevel du restaurant s'il est disponible, sinon le budget
-              estimatedCost: estimateMealPrice(restaurant?.priceLevel || getBudgetPriceLevel(preferences.budgetLevel), 'lunch') * preferences.groupSize,
-              rating: restaurant?.rating,
-              googleMapsPlaceUrl: restaurantGoogleMapsUrl,
-            }));
-            lastCoords = restaurantCoords;
+              items.push(schedulerItemToTripItem(lunchItem, dayNumber, orderIndex++, {
+                title: restaurant?.name || 'Déjeuner',
+                description: restaurant ? `${restaurant.cuisineTypes.join(', ')} | ⭐ ${restaurant.rating?.toFixed(1)}/5` : 'Découvrez la cuisine locale',
+                locationName: restaurant?.address || `Centre-ville, ${preferences.destination}`,
+                latitude: restaurantCoords.lat,
+                longitude: restaurantCoords.lng,
+                estimatedCost: estimateMealPrice(restaurant?.priceLevel || getBudgetPriceLevel(preferences.budgetLevel), 'lunch') * preferences.groupSize,
+                rating: restaurant?.rating,
+                googleMapsPlaceUrl: restaurantGoogleMapsUrl,
+              }));
+              lastCoords = restaurantCoords;
+            }
             console.log(`[Jour ${dayNumber}] Déjeuner ajouté avant check-in`);
           }
         }
@@ -1773,7 +1919,8 @@ async function generateDayWithScheduler(params: {
       const hotelEnd = new Date(hotelStart.getTime() + 20 * 60 * 1000);
 
       // === CONSIGNE À BAGAGES ===
-      // Si arrivée > 1h avant check-in et voyage > 1 jour (= valises probables), proposer consigne
+      // Si arrivée > 2h30 avant check-in et voyage > 1 jour, proposer consigne.
+      // Pour des gaps plus courts, on va directement à l'hôtel (bagagerie gratuite).
       const arrivalTimeForLuggage = `${transportEnd.getHours().toString().padStart(2, '0')}:${transportEnd.getMinutes().toString().padStart(2, '0')}`;
       const needsStorage = preferences.durationDays > 1 && needsLuggageStorage(arrivalTimeForLuggage, hotelCheckInTimeStr);
 
@@ -1954,6 +2101,21 @@ async function generateDayWithScheduler(params: {
           lat: accommodation?.latitude || cityCenter.lat,
           lng: accommodation?.longitude || cityCenter.lng,
         };
+      } else if (shouldSelfCater('breakfast', dayNumber, budgetStrategy, hotelHasBreakfast)) {
+        // Petit-déjeuner self_catered (courses/cuisine au logement)
+        const accommodationCoords = {
+          lat: accommodation?.latitude || cityCenter.lat,
+          lng: accommodation?.longitude || cityCenter.lng,
+        };
+        items.push(schedulerItemToTripItem(breakfastItem, dayNumber, orderIndex++, {
+          title: 'Petit-déjeuner au logement',
+          description: 'Courses au supermarché local | Repas préparé au logement',
+          locationName: getHotelLocationName(accommodation, preferences.destination),
+          latitude: accommodationCoords.lat,
+          longitude: accommodationCoords.lng,
+          estimatedCost: 7 * (preferences.groupSize || 1), // ~7€/pers
+        }));
+        lastCoords = accommodationCoords;
       } else {
         // Petit-déjeuner dans un restaurant externe
         const restaurant = await findRestaurantForMeal('breakfast', cityCenter, preferences, dayNumber, lastCoords);
@@ -1962,18 +2124,15 @@ async function generateDayWithScheduler(params: {
           lng: restaurant?.longitude || cityCenter.lng,
         };
         const googleMapsUrl = generateGoogleMapsUrl(lastCoords, restaurantCoords, pickDirectionMode(lastCoords, restaurantCoords));
-        // URL Google Maps fiable avec nom + adresse complète
         const restaurantGoogleMapsUrl = restaurant?.googleMapsUrl ||
           (restaurant ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${restaurant.name}, ${restaurant.address}`)}` : undefined);
 
         items.push(schedulerItemToTripItem(breakfastItem, dayNumber, orderIndex++, {
           title: restaurant?.name || 'Petit-déjeuner',
           description: restaurant ? `${restaurant.cuisineTypes.join(', ')} | ⭐ ${restaurant.rating?.toFixed(1)}/5` : 'Petit-déjeuner local',
-          // IMPORTANT: locationName avec nom du restaurant pour les liens d'itinéraire
           locationName: restaurant ? `${restaurant.name}, ${preferences.destination}` : `Centre-ville, ${preferences.destination}`,
           latitude: restaurantCoords.lat,
           longitude: restaurantCoords.lng,
-          // Utiliser le priceLevel du restaurant s'il est disponible, sinon le budget
           estimatedCost: estimateMealPrice(restaurant?.priceLevel || getBudgetPriceLevel(preferences.budgetLevel), 'breakfast') * preferences.groupSize,
           rating: restaurant?.rating,
           googleMapsUrl,
@@ -2174,32 +2333,39 @@ async function generateDayWithScheduler(params: {
       endTime: new Date(lunchTargetTime.getTime() + 75 * 60 * 1000), // 1h15
     });
     if (lunchItem) {
-      const restaurant = await findRestaurantForMeal('lunch', cityCenter, preferences, dayNumber, lastCoords);
-      const restaurantCoords = {
-        lat: restaurant?.latitude || cityCenter.lat,
-        lng: restaurant?.longitude || cityCenter.lng,
-      };
-      const googleMapsUrl = generateGoogleMapsUrl(lastCoords, restaurantCoords, pickDirectionMode(lastCoords, restaurantCoords));
-      // Utiliser l'URL Google Maps du restaurant si disponible (plus fiable avec nom + adresse)
-      // Sinon générer une URL de recherche avec nom + ville
-      const restaurantGoogleMapsUrl = restaurant?.googleMapsUrl ||
-        (restaurant ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${restaurant.name}, ${restaurant.address}`)}` : undefined);
+      if (shouldSelfCater('lunch', dayNumber, budgetStrategy)) {
+        // Déjeuner self_catered : pique-nique ou repas au logement
+        items.push(schedulerItemToTripItem(lunchItem, dayNumber, orderIndex++, {
+          title: 'Déjeuner pique-nique / maison',
+          description: 'Repas préparé avec les courses | Option économique',
+          locationName: `Centre-ville, ${preferences.destination}`,
+          latitude: lastCoords.lat,
+          longitude: lastCoords.lng,
+          estimatedCost: 8 * (preferences.groupSize || 1), // ~8€/pers
+        }));
+      } else {
+        const restaurant = await findRestaurantForMeal('lunch', cityCenter, preferences, dayNumber, lastCoords);
+        const restaurantCoords = {
+          lat: restaurant?.latitude || cityCenter.lat,
+          lng: restaurant?.longitude || cityCenter.lng,
+        };
+        const googleMapsUrl = generateGoogleMapsUrl(lastCoords, restaurantCoords, pickDirectionMode(lastCoords, restaurantCoords));
+        const restaurantGoogleMapsUrl = restaurant?.googleMapsUrl ||
+          (restaurant ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${restaurant.name}, ${restaurant.address}`)}` : undefined);
 
-      items.push(schedulerItemToTripItem(lunchItem, dayNumber, orderIndex++, {
-        title: restaurant?.name || 'Déjeuner',
-        description: restaurant ? `${restaurant.cuisineTypes.join(', ')} | ⭐ ${restaurant.rating?.toFixed(1)}/5` : 'Déjeuner local',
-        // IMPORTANT: locationName avec nom du restaurant pour les liens d'itinéraire
-        locationName: restaurant ? `${restaurant.name}, ${preferences.destination}` : `Centre-ville, ${preferences.destination}`,
-        latitude: restaurantCoords.lat,
-        longitude: restaurantCoords.lng,
-        // Utiliser le priceLevel du restaurant s'il est disponible, sinon le budget
-        estimatedCost: estimateMealPrice(restaurant?.priceLevel || getBudgetPriceLevel(preferences.budgetLevel), 'lunch') * preferences.groupSize,
-        rating: restaurant?.rating,
-        googleMapsUrl,
-        googleMapsPlaceUrl: restaurantGoogleMapsUrl, // URL fiable avec nom + adresse complète
-      }));
-      lastCoords = restaurantCoords;
-      // Avancer le curseur après le déjeuner
+        items.push(schedulerItemToTripItem(lunchItem, dayNumber, orderIndex++, {
+          title: restaurant?.name || 'Déjeuner',
+          description: restaurant ? `${restaurant.cuisineTypes.join(', ')} | ⭐ ${restaurant.rating?.toFixed(1)}/5` : 'Déjeuner local',
+          locationName: restaurant ? `${restaurant.name}, ${preferences.destination}` : `Centre-ville, ${preferences.destination}`,
+          latitude: restaurantCoords.lat,
+          longitude: restaurantCoords.lng,
+          estimatedCost: estimateMealPrice(restaurant?.priceLevel || getBudgetPriceLevel(preferences.budgetLevel), 'lunch') * preferences.groupSize,
+          rating: restaurant?.rating,
+          googleMapsUrl,
+          googleMapsPlaceUrl: restaurantGoogleMapsUrl,
+        }));
+        lastCoords = restaurantCoords;
+      }
       const lunchEndTime = new Date(lunchTargetTime.getTime() + 75 * 60 * 1000);
       scheduler.advanceTo(lunchEndTime);
       console.log(`[Jour ${dayNumber}] Déjeuner ajouté à ${lunchTargetTime.toLocaleTimeString('fr-FR')}, curseur avancé à ${lunchEndTime.toLocaleTimeString('fr-FR')}`);
@@ -2417,30 +2583,44 @@ async function generateDayWithScheduler(params: {
       minStartTime: dinnerMinTime, // FORCE 19h minimum
     });
     if (dinnerItem) {
-      const restaurant = await findRestaurantForMeal('dinner', cityCenter, preferences, dayNumber, lastCoords);
-      const restaurantCoords = {
-        lat: restaurant?.latitude || cityCenter.lat,
-        lng: restaurant?.longitude || cityCenter.lng,
-      };
-      const googleMapsUrl = generateGoogleMapsUrl(lastCoords, restaurantCoords, pickDirectionMode(lastCoords, restaurantCoords));
-      // URL Google Maps fiable avec nom + adresse complète
-      const restaurantGoogleMapsUrl = restaurant?.googleMapsUrl ||
-        (restaurant ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${restaurant.name}, ${restaurant.address}`)}` : undefined);
+      if (shouldSelfCater('dinner', dayNumber, budgetStrategy)) {
+        // Dîner self_catered : cuisine au logement
+        const accommodationCoords = {
+          lat: accommodation?.latitude || cityCenter.lat,
+          lng: accommodation?.longitude || cityCenter.lng,
+        };
+        items.push(schedulerItemToTripItem(dinnerItem, dayNumber, orderIndex++, {
+          title: 'Dîner au logement',
+          description: 'Repas cuisiné au logement | Courses au supermarché local',
+          locationName: getHotelLocationName(accommodation, preferences.destination),
+          latitude: accommodationCoords.lat,
+          longitude: accommodationCoords.lng,
+          estimatedCost: 10 * (preferences.groupSize || 1), // ~10€/pers
+        }));
+        lastCoords = accommodationCoords;
+      } else {
+        const restaurant = await findRestaurantForMeal('dinner', cityCenter, preferences, dayNumber, lastCoords);
+        const restaurantCoords = {
+          lat: restaurant?.latitude || cityCenter.lat,
+          lng: restaurant?.longitude || cityCenter.lng,
+        };
+        const googleMapsUrl = generateGoogleMapsUrl(lastCoords, restaurantCoords, pickDirectionMode(lastCoords, restaurantCoords));
+        const restaurantGoogleMapsUrl = restaurant?.googleMapsUrl ||
+          (restaurant ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${restaurant.name}, ${restaurant.address}`)}` : undefined);
 
-      items.push(schedulerItemToTripItem(dinnerItem, dayNumber, orderIndex++, {
-        title: restaurant?.name || 'Dîner',
-        description: restaurant ? `${restaurant.cuisineTypes.join(', ')} | ⭐ ${restaurant.rating?.toFixed(1)}/5` : 'Dîner local',
-        // IMPORTANT: locationName avec nom du restaurant pour les liens d'itinéraire
-        locationName: restaurant ? `${restaurant.name}, ${preferences.destination}` : `Centre-ville, ${preferences.destination}`,
-        latitude: restaurantCoords.lat,
-        longitude: restaurantCoords.lng,
-        // Utiliser le priceLevel du restaurant s'il est disponible, sinon le budget
-        estimatedCost: estimateMealPrice(restaurant?.priceLevel || getBudgetPriceLevel(preferences.budgetLevel), 'dinner') * preferences.groupSize,
-        rating: restaurant?.rating,
-        googleMapsUrl,
-        googleMapsPlaceUrl: restaurantGoogleMapsUrl,
-      }));
-      lastCoords = restaurantCoords;
+        items.push(schedulerItemToTripItem(dinnerItem, dayNumber, orderIndex++, {
+          title: restaurant?.name || 'Dîner',
+          description: restaurant ? `${restaurant.cuisineTypes.join(', ')} | ⭐ ${restaurant.rating?.toFixed(1)}/5` : 'Dîner local',
+          locationName: restaurant ? `${restaurant.name}, ${preferences.destination}` : `Centre-ville, ${preferences.destination}`,
+          latitude: restaurantCoords.lat,
+          longitude: restaurantCoords.lng,
+          estimatedCost: estimateMealPrice(restaurant?.priceLevel || getBudgetPriceLevel(preferences.budgetLevel), 'dinner') * preferences.groupSize,
+          rating: restaurant?.rating,
+          googleMapsUrl,
+          googleMapsPlaceUrl: restaurantGoogleMapsUrl,
+        }));
+        lastCoords = restaurantCoords;
+      }
     }
   }
 
@@ -2862,10 +3042,37 @@ async function findRestaurantForMeal(
     // Filtrer les restaurants déjà utilisés
     let availableRestaurants = filteredList.filter(r => !usedRestaurantIds.has(r.id));
 
-    // Si tous ont été utilisés, réinitialiser mais garder le filtre cuisine!
+    // Si tous ont été utilisés, try wider search before allowing repeats
     if (availableRestaurants.length === 0) {
-      usedRestaurantIds.clear();
-      availableRestaurants = filteredList; // BUG FIX: utiliser filteredList au lieu de restaurants
+      // Try expanding search radius (2km, then 3km)
+      for (const expandedRadius of [2000, 3000]) {
+        try {
+          const widerResults = await searchRestaurants({
+            latitude: searchLocation.lat,
+            longitude: searchLocation.lng,
+            mealType,
+            dietary: preferences.dietary,
+            priceLevel: getBudgetPriceLevel(preferences.budgetLevel),
+            limit: 15,
+            radius: expandedRadius,
+            destination: preferences.destination,
+          });
+          const widerFiltered = widerResults.filter(r => !usedRestaurantIds.has(r.id));
+          if (widerFiltered.length > 0) {
+            availableRestaurants = widerFiltered;
+            console.log(`[Restaurants] Rayon élargi à ${expandedRadius}m: ${widerFiltered.length} nouveaux restos`);
+            break;
+          }
+        } catch {
+          // ignore, fall through
+        }
+      }
+
+      // Last resort: allow repeats
+      if (availableRestaurants.length === 0) {
+        console.warn(`[Restaurants] Pool épuisé même à 3km, autorisation de doublons`);
+        availableRestaurants = filteredList;
+      }
     }
 
     // Calculer un score pour chaque restaurant: note + proximité

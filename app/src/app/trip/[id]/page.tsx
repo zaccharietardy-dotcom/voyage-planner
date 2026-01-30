@@ -541,6 +541,14 @@ export default function TripPage() {
                       const labels: Record<string, string> = { beach: 'Plage', nature: 'Nature', culture: 'Culture', gastronomy: 'Gastronomie', nightlife: 'Vie nocturne', shopping: 'Shopping', adventure: 'Aventure', wellness: 'Bien-être' };
                       return labels[a] || a;
                     }).join(', ')}
+                    {trip.budgetStrategy && ` • ${trip.budgetStrategy.accommodationType === 'airbnb_with_kitchen' ? 'Airbnb + cuisine' : trip.budgetStrategy.accommodationType === 'hostel' ? 'Auberge' : 'Hôtel'}`}
+                    {trip.budgetStrategy?.groceryShoppingNeeded && ' + courses'}
+                  </p>
+                )}
+                {trip.budgetStatus && (
+                  <p className={`text-xs ${trip.budgetStatus.isOverBudget ? 'text-red-500' : 'text-green-600'}`}>
+                    Budget cible: {trip.budgetStatus.target}€ • Estimé: {trip.budgetStatus.estimated}€
+                    {trip.budgetStatus.isOverBudget ? ` (+${Math.abs(trip.budgetStatus.difference)}€)` : ` (${trip.budgetStatus.difference}€ restants)`}
                   </p>
                 )}
               </div>
@@ -644,17 +652,15 @@ export default function TripPage() {
               </Button>
 
               {/* Bouton partage */}
-              {!useCollaborativeMode && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-2"
-                  onClick={() => setShowShareDialog(true)}
-                >
-                  <Share2 className="h-4 w-4" />
-                  <span className="hidden sm:inline">Partager</span>
-                </Button>
-              )}
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2"
+                onClick={() => setShowShareDialog(true)}
+              >
+                <Share2 className="h-4 w-4" />
+                <span className="hidden sm:inline">Partager</span>
+              </Button>
 
               <Button variant="outline" size="sm" className="gap-2" onClick={handleExportDebug}>
                 <Bug className="h-4 w-4" />
@@ -1063,14 +1069,19 @@ export default function TripPage() {
       {trip && (
         <ShareTripDialog
           open={showShareDialog}
-          onOpenChange={setShowShareDialog}
+          onOpenChange={(open) => {
+            setShowShareDialog(open);
+            if (!open) {
+              // Activer le mode collaboratif quand le dialog se ferme (si le trip a été sauvegardé)
+              refetch();
+              setUseCollaborativeMode(true);
+            }
+          }}
           trip={trip}
           tripId={tripId}
           onTripSaved={(savedId, code) => {
-            // Activer le mode collaboratif après la sauvegarde
-            setUseCollaborativeMode(true);
-            // Rediriger vers le voyage sauvegardé
-            router.push(`/trip/${savedId}`);
+            // Mettre à jour l'URL sans recharger (pour que le tripId soit correct)
+            window.history.replaceState(null, '', `/trip/${savedId}`);
           }}
         />
       )}

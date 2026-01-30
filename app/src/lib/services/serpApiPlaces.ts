@@ -533,6 +533,11 @@ const NON_TOURISTIC_NAME_KEYWORDS = [
   'tower apartment', 'residence', 'office', 'マンション',
   'nhk hall', 'line cube', 'gymnasium', 'arena',
   'don quijote', 'donki', 'uniqlo', 'daiso',
+  // Tourist traps
+  'madame tussauds', 'tussaud', 'hard rock cafe', 'hard rock café',
+  'planet hollywood', 'rainforest cafe', 'rainforest café', 'bubba gump',
+  'wax museum', 'musée de cire', 'selfie museum', 'trick eye',
+  "ripley's", 'believe it or not',
 ];
 
 /**

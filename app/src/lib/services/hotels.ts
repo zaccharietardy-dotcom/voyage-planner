@@ -129,16 +129,18 @@ function checkBreakfastIncluded(amenities: string[] | undefined): boolean {
 /**
  * Prix moyen par nuit selon le niveau de budget
  */
-function getPriceRange(budgetLevel: 'economic' | 'moderate' | 'luxury'): { min: number; max: number } {
+function getPriceRange(budgetLevel: 'economic' | 'moderate' | 'comfort' | 'luxury'): { min: number; max: number; hardMax: number } {
   switch (budgetLevel) {
     case 'economic':
-      return { min: 40, max: 80 };
+      return { min: 40, max: 80, hardMax: 120 };
     case 'moderate':
-      return { min: 80, max: 150 };
+      return { min: 80, max: 150, hardMax: 220 };
+    case 'comfort':
+      return { min: 120, max: 250, hardMax: 400 };
     case 'luxury':
-      return { min: 150, max: 400 };
+      return { min: 150, max: 400, hardMax: Infinity };
     default:
-      return { min: 60, max: 120 };
+      return { min: 60, max: 120, hardMax: 200 };
   }
 }
 
@@ -148,12 +150,13 @@ function getPriceRange(budgetLevel: 'economic' | 'moderate' | 'luxury'): { min: 
 export async function searchHotels(
   destination: string,
   options: {
-    budgetLevel: 'economic' | 'moderate' | 'luxury';
+    budgetLevel: 'economic' | 'moderate' | 'comfort' | 'luxury';
     cityCenter: { lat: number; lng: number };
     checkInDate: Date;
     checkOutDate: Date;
     guests: number;
     forceRefresh?: boolean;
+    maxPricePerNight?: number; // Plafond issu de la stratégie budget
   }
 ): Promise<Accommodation[]> {
   // IMPORTANT: PAS DE CACHE pour les hôtels !
@@ -163,7 +166,15 @@ export async function searchHotels(
   const checkInStr = options.checkInDate.toISOString().split('T')[0];
   const checkOutStr = options.checkOutDate.toISOString().split('T')[0];
   const priceRange = getPriceRange(options.budgetLevel);
-  const targetStars = options.budgetLevel === 'luxury' ? 4 : options.budgetLevel === 'moderate' ? 3 : 2;
+
+  // Si un maxPricePerNight est fourni par la stratégie budget, l'utiliser comme plafond
+  if (options.maxPricePerNight) {
+    priceRange.max = Math.min(priceRange.max, options.maxPricePerNight);
+    priceRange.hardMax = Math.min(priceRange.hardMax, options.maxPricePerNight * 1.2);
+    console.log(`[Hotels] Budget strategy: plafond ${options.maxPricePerNight}€/nuit → max ajusté à ${priceRange.max}€`);
+  }
+
+  const targetStars = options.budgetLevel === 'luxury' ? 4 : (options.budgetLevel === 'comfort' || options.budgetLevel === 'moderate') ? 3 : 2;
 
   // 1. PRIORITÉ: SerpAPI Google Hotels (DISPONIBILITÉ FIABLE)
   // Seuls les hôtels avec un prix affiché sont vraiment disponibles
@@ -323,7 +334,7 @@ function adjustHotelPrices(
 async function fetchHotelsFromClaude(
   destination: string,
   options: {
-    budgetLevel: 'economic' | 'moderate' | 'luxury';
+    budgetLevel: 'economic' | 'moderate' | 'comfort' | 'luxury';
     cityCenter: { lat: number; lng: number };
     guests: number;
   }
@@ -336,9 +347,10 @@ async function fetchHotelsFromClaude(
   const client = new Anthropic({ apiKey });
   const priceRange = getPriceRange(options.budgetLevel);
 
-  const budgetLabels = {
+  const budgetLabels: Record<string, string> = {
     economic: 'économique (hôtels 2-3 étoiles, auberges)',
     moderate: 'moyen (hôtels 3-4 étoiles)',
+    comfort: 'confort (hôtels 4 étoiles, boutique hotels)',
     luxury: 'luxe (hôtels 4-5 étoiles, boutique hotels)',
   };
 
@@ -439,7 +451,7 @@ Réponds UNIQUEMENT avec un tableau JSON valide.`;
 function generateFallbackHotels(
   destination: string,
   options: {
-    budgetLevel: 'economic' | 'moderate' | 'luxury';
+    budgetLevel: 'economic' | 'moderate' | 'comfort' | 'luxury';
     cityCenter: { lat: number; lng: number };
     checkInDate: Date;
     checkOutDate: Date;
@@ -450,7 +462,7 @@ function generateFallbackHotels(
     (options.checkOutDate.getTime() - options.checkInDate.getTime()) / (1000 * 60 * 60 * 24)
   );
 
-  const hotelTemplates = {
+  const hotelTemplates: Record<string, { name: string; stars: number; basePrice: number }[]> = {
     economic: [
       { name: 'Ibis Budget', stars: 2, basePrice: 55 },
       { name: 'B&B Hotel', stars: 2, basePrice: 60 },
@@ -460,6 +472,11 @@ function generateFallbackHotels(
       { name: 'Novotel', stars: 4, basePrice: 110 },
       { name: 'Mercure', stars: 4, basePrice: 100 },
       { name: 'Holiday Inn', stars: 3, basePrice: 90 },
+    ],
+    comfort: [
+      { name: 'Pullman', stars: 4, basePrice: 160 },
+      { name: 'MGallery', stars: 4, basePrice: 180 },
+      { name: 'Sofitel', stars: 5, basePrice: 200 },
     ],
     luxury: [
       { name: 'Marriott', stars: 5, basePrice: 200 },
@@ -521,57 +538,67 @@ function calculateAverageDistanceToAttractions(
 export function selectBestHotel(
   hotels: Accommodation[],
   preferences: {
-    budgetLevel: 'economic' | 'moderate' | 'luxury';
+    budgetLevel: 'economic' | 'moderate' | 'comfort' | 'luxury';
     attractions?: Array<{ latitude?: number; longitude?: number; name?: string }>;
   }
 ): Accommodation | null {
   if (hotels.length === 0) return null;
 
-  // Si le premier hôtel vient de SerpAPI, on le prend directement
-  // car il est déjà filtré par disponibilité (seuls ceux avec prix sont retournés)
-  const firstHotel = hotels[0];
-  if (firstHotel.id?.startsWith('serp-hotel-')) {
-    console.log(`[Hotels] ✅ Sélection directe: ${firstHotel.name} (SerpAPI, disponibilité vérifiée)`);
-    console.log(`[Hotels]    Prix: ${firstHotel.pricePerNight}€/nuit, Note: ${firstHotel.rating}/10, ${firstHotel.stars}⭐`);
-    return firstHotel;
+  // HARD BUDGET CUTOFF: filter out hotels that exceed the budget's hard max
+  const priceRange = getPriceRange(preferences.budgetLevel);
+  let affordableHotels = hotels.filter(h => h.pricePerNight <= priceRange.hardMax);
+
+  if (affordableHotels.length === 0) {
+    // No hotels within hard max — take the cheapest available
+    console.warn(`[Hotels] ⚠️ Aucun hôtel sous ${priceRange.hardMax}€/nuit, sélection du moins cher`);
+    affordableHotels = [...hotels].sort((a, b) => a.pricePerNight - b.pricePerNight).slice(0, 3);
+  } else {
+    const removed = hotels.length - affordableHotels.length;
+    if (removed > 0) {
+      console.log(`[Hotels] Budget ${preferences.budgetLevel}: ${removed} hôtels exclus (>${priceRange.hardMax}€/nuit)`);
+    }
   }
 
-  // Pour les autres sources (Booking.com, Claude, fallback), on fait un scoring
+  // Score all affordable hotels (including SerpAPI ones — don't blindly take first)
   const attractions = preferences.attractions || [];
 
-  // Score: rating + proximité centre + proximité attractions + étoiles
-  const scored = hotels.map(hotel => {
+  const scored = affordableHotels.map(hotel => {
     let score = 0;
 
     // 1. Note de l'hôtel (0-100 points, note sur 10 * 10)
     score += hotel.rating * 10;
 
     // 2. Proximité au centre-ville (0-20 points)
-    // Plus l'hôtel est proche du centre, plus le score est élevé
     const centerDistance = hotel.distanceToCenter || 0;
     score += Math.max(0, 20 - centerDistance * 10);
 
     // 3. Proximité aux attractions (0-30 points)
     if (attractions.length > 0) {
       const avgDistanceToAttractions = calculateAverageDistanceToAttractions(hotel, attractions);
-      // Moins de 1km = 30 points, 3km = 0 points
       score += Math.max(0, 30 - avgDistanceToAttractions * 10);
     }
 
     // 4. Bonus pour les étoiles correspondant au budget (0-10 points)
-    const targetStars = preferences.budgetLevel === 'luxury' ? 5 : preferences.budgetLevel === 'moderate' ? 4 : 3;
+    const targetStars = preferences.budgetLevel === 'luxury' ? 5
+      : preferences.budgetLevel === 'comfort' ? 4
+      : preferences.budgetLevel === 'moderate' ? 4 : 3;
     if (hotel.stars === targetStars) score += 10;
     if (hotel.stars === targetStars - 1 || hotel.stars === targetStars + 1) score += 5;
+
+    // 5. Bonus for being within ideal price range (0-15 points)
+    if (hotel.pricePerNight >= priceRange.min && hotel.pricePerNight <= priceRange.max) {
+      score += 15;
+    } else if (hotel.pricePerNight < priceRange.min) {
+      score += 5; // Cheap but might be lower quality
+    }
 
     return { hotel, score };
   });
 
-  // Trier par score décroissant
   scored.sort((a, b) => b.score - a.score);
 
-  // Log le meilleur
   const best = scored[0];
-  console.log(`[Hotels] Sélectionné par scoring: ${best.hotel.name} (score=${best.score.toFixed(1)})`);
+  console.log(`[Hotels] Sélectionné: ${best.hotel.name} (score=${best.score.toFixed(1)}, ${best.hotel.pricePerNight}€/nuit)`);
   if (best.hotel.id?.startsWith('booking-')) {
     console.log(`[Hotels] ⚠️ Source Booking.com: disponibilité non garantie à 100%`);
   }

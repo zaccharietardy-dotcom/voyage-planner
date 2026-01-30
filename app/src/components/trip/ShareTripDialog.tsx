@@ -55,7 +55,10 @@ export function ShareTripDialog({
 
   // Sauvegarder le voyage en Supabase pour obtenir un code de partage
   const saveTrip = async () => {
-    if (!user) return;
+    if (!user) {
+      setError('Vous devez être connecté pour partager ce voyage');
+      return;
+    }
 
     setIsLoading(true);
     setError(null);

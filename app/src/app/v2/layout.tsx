@@ -24,7 +24,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: '#0a3d62',
+  themeColor: '#0a1628',
 };
 
 export default function V2Layout({

@@ -21,6 +21,7 @@ export const metadata: Metadata = {
   description: "Planifie et partage tes voyages avec tes amis. L'IA génère ton itinéraire personnalisé en 2 minutes.",
   keywords: ["voyage", "planification", "itinéraire", "IA", "collaboration", "gratuit"],
   authors: [{ name: "Narae Voyage" }],
+  manifest: '/manifest.json',
   openGraph: {
     title: "Narae Voyage - Planifie et partage tes voyages",
     description: "L'IA génère ton itinéraire personnalisé en 2 minutes. Gratuit et collaboratif.",
@@ -35,6 +36,11 @@ export const metadata: Metadata = {
     ],
     apple: '/apple-touch-icon.png',
     shortcut: '/favicon.svg',
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'Narae',
   },
 };
 

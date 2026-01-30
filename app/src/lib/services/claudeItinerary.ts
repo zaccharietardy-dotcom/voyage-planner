@@ -13,7 +13,7 @@
 
 import Anthropic from '@anthropic-ai/sdk';
 import { Attraction } from './attractions';
-import { ActivityType } from '../types';
+import { ActivityType, BudgetStrategy } from '../types';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -43,6 +43,7 @@ export interface ClaudeItineraryRequest {
   groupType?: string;
   groupSize?: number;
   attractionPool: AttractionSummary[];
+  budgetStrategy?: BudgetStrategy;
 }
 
 export interface ClaudeItineraryDay {
@@ -193,6 +194,24 @@ export async function generateClaudeItinerary(
     family_without_kids: 'Famille adulte: culture, gastronomie, rythme modéré.',
   }[request.groupType || 'couple'] || '';
 
+  // Construire le contexte stratégie budget si disponible
+  const strategy = request.budgetStrategy;
+  const strategyContext = strategy ? `
+STRATÉGIE BUDGET (décidée en amont):
+- Hébergement: ${strategy.accommodationType === 'airbnb_with_kitchen' ? 'Airbnb avec cuisine (les voyageurs pourront cuisiner)' : strategy.accommodationType === 'hostel' ? 'Auberge de jeunesse' : 'Hôtel'}
+- Repas: petit-déj=${strategy.mealsStrategy.breakfast}, déjeuner=${strategy.mealsStrategy.lunch}, dîner=${strategy.mealsStrategy.dinner}
+  (self_catered = courses au supermarché, restaurant = au resto, mixed = alternance)
+- Courses nécessaires: ${strategy.groceryShoppingNeeded ? 'OUI — inclure des créneaux courses supermarché (~30min) dans l\'itinéraire, de préférence le matin ou en fin de journée, dans un supermarché RÉEL proche du logement' : 'NON'}
+- Niveau activités: ${strategy.activitiesLevel} (budget ~${strategy.dailyActivityBudget}€/pers/jour)
+- Transport local: ${strategy.transportTips}
+
+${strategy.groceryShoppingNeeded ? `IMPORTANT COURSES:
+- Ajoute un créneau "Courses au supermarché" (~30min) dans les additionalSuggestions quand des repas self_catered sont prévus
+- Nomme un vrai supermarché local (Carrefour, Mercadona, Lidl, Konbini, etc. selon la destination)
+- Estime le coût courses à 5-8€/personne/repas
+- Place les courses à un moment logique (matin tôt ou retour au logement en fin d'après-midi)` : ''}
+` : '';
+
   const prompt = `Tu es un guide de voyage local expert avec 20 ans d'expérience à ${request.destination}. Conçois l'itinéraire PARFAIT de ${request.durationDays} jours.
 
 CONTEXTE DU VOYAGE:
@@ -201,6 +220,7 @@ CONTEXTE DU VOYAGE:
 - Budget: ${request.budgetLevel} — ${budgetContext}
 - Activités souhaitées: ${request.activities.join(', ')}
 - Must-see absolus: ${request.mustSee || 'aucun spécifié'}
+${strategyContext}
 
 POOL DE ${poolCompact.length} ATTRACTIONS VÉRIFIÉES (coordonnées GPS, horaires, prix réels):
 ${JSON.stringify(poolCompact)}
@@ -245,10 +265,13 @@ RÈGLES D'OR:
 
 4. DAY TRIPS (OBLIGATOIRE si séjour >= 4 jours):
    - Pour ${request.durationDays} jours, propose AU MOINS 1 day trip hors de la ville
-   - Exemples classiques: Paris→Versailles/Giverny/Fontainebleau, Tokyo→Kamakura/Nikko, Rome→Tivoli/Pompéi, London→Stonehenge/Bath/Oxford
+   - Choisis l'excursion la plus EMBLÉMATIQUE depuis ${request.destination}: montagne, site naturel, ville historique proche, volcan, archipel, parc national, etc.
+   - Ne hardcode PAS — utilise ta connaissance du monde pour choisir LE day trip classique de la destination
+   - Exemples (pour référence, PAS pour copier-coller): Paris→Versailles, Tokyo→Kamakura/Mt.Fuji, Barcelona→Montserrat, Naples→Pompéi/Vésuve, Stockholm→archipel, Rome→Tivoli
    - Place le day trip au milieu du séjour (pas jour 1 ni dernier jour)
    - Ajoute le day trip dans additionalSuggestions avec les vraies coordonnées
    - Précise le moyen de transport ET la durée du trajet dans la description
+   - isDayTrip DOIT être true pour ce jour, avec dayTripDestination et dayTripTransport renseignés
 
 5. SAISONNALITÉ (${season}):
    - Adapte les suggestions à la saison (cerisiers printemps, illuminations hiver, plages été...)
@@ -258,12 +281,23 @@ RÈGLES D'OR:
    - EXCLUE: cinémas, arcades, salles de sport, immeubles, bureaux, centres commerciaux génériques
    - EXCLUE: rooftop bars, bars d'hôtel, pubs, discothèques comme ACTIVITÉS DE JOUR (OK en suggestion soirée uniquement)
    - EXCLUE: attractions mineures de moins de 30min seules — fusionne-les dans un créneau "exploration quartier"
+   - EXCLUE TOUJOURS ces tourist traps: Madame Tussauds, Hard Rock Café, Planet Hollywood, Rainforest Café, Bubba Gump, et autres chaînes touristiques internationales
+   - EXCLUE: attractions avec "wax museum", "selfie museum", "trick eye", "ripley's", "believe it or not" dans le nom
    - MUST-SEE OBLIGATOIRES: "${request.mustSee || 'aucun'}" → Tu DOIS inclure CHACUN d'entre eux dans les jours 1-3, SANS EXCEPTION
    - Si un must-see n'est PAS dans le pool d'attractions, AJOUTE-LE dans additionalSuggestions avec ses vraies coordonnées
    - Si une attraction ESSENTIELLE de ${request.destination} manque du pool, ajoute-la dans additionalSuggestions
    - INCONTOURNABLES MONDIAUX OBLIGATOIRES: MÊME si l'utilisateur n'a PAS coché "culture", tu DOIS inclure les sites mondialement célèbres de ${request.destination}.
-     Exemples: Barcelona → Sagrada Família, Casa Batlló, Parc Güell, La Rambla, Barri Gòtic. Paris → Tour Eiffel, Louvre, Sacré-Cœur, Notre-Dame. Rome → Colisée, Vatican, Fontaine de Trevi. Tokyo → Shibuya, Senso-ji, Meiji. Londres → Big Ben, Tower, British Museum.
+     Exemples: Barcelona → Sagrada Família, Casa Batlló, Parc Güell, La Rambla, Barri Gòtic. Paris → Tour Eiffel, Louvre, Sacré-Cœur, Notre-Dame, Montmartre. Rome → Colisée, Vatican, Fontaine de Trevi, Panthéon. Tokyo → Shibuya, Senso-ji, Meiji, Shinjuku, Akihabara. Londres → Big Ben, Tower, British Museum, Buckingham, Camden.
+     New York → Statue de la Liberté, Empire State Building, Central Park, Times Square, Brooklyn Bridge, MoMA ou Met Museum, Top of the Rock ou One World Observatory, 5th Avenue, SoHo/Greenwich Village.
+     Amsterdam → Rijksmuseum, Anne Frank, canaux, Vondelpark, Jordaan. Lisbonne → Belém, Alfama, LX Factory, Pastéis de Belém. Berlin → Porte de Brandebourg, Mur, Île aux Musées, Reichstag. Istanbul → Sainte-Sophie, Mosquée Bleue, Grand Bazar, Bosphore. Marrakech → Jemaa el-Fna, Majorelle, Souks, Palais Bahia. Bangkok → Grand Palais, Wat Pho, Wat Arun, Chatuchak, Khao San Road. Prague → Pont Charles, Château, Place Vieille Ville, Horloge astronomique. Budapest → Parlement, Bains Széchenyi, Bastion des Pêcheurs, Ruin Bars.
      Ces incontournables sont PRIORITAIRES sur les attractions secondaires (musées mineurs, rooftop bars, etc.). Si un incontournable manque du pool, AJOUTE-LE dans additionalSuggestions.
+
+6c. DIVERSITÉ CATÉGORIELLE OBLIGATOIRE:
+   - Maximum 1 lieu religieux (église, temple, cathédrale, mosquée, synagogue, sanctuaire) par jour
+   - Maximum 3 lieux religieux sur TOUT le séjour
+   - JAMAIS 2 lieux du même type consécutifs (2 musées d'affilée, 2 églises d'affilée)
+   - Chaque jour doit mixer au moins 2 catégories différentes (culture + nature, shopping + gastronomie, monument + quartier...)
+   - PRIORITÉ aux attractions ICONIQUES et DIVERSIFIÉES plutôt qu'à l'exhaustivité d'une seule catégorie
 
 6b. TRANSPORT POUR EXCURSIONS HORS VILLE:
    - Si un day trip est à >15km du centre (Montserrat, Versailles, Mt. Fuji...), précise le MOYEN DE TRANSPORT RÉALISTE dans dayTripTransport:
@@ -307,10 +341,23 @@ RÈGLES D'OR:
    - Si "shopping" est choisi: quartiers commerçants, marchés, boutiques locales
    - Assure-toi que CHAQUE jour reflète au moins 2 des activités choisies par le voyageur
 
-10. NARRATIF DE GUIDE:
+10. ADAPTATION AU TYPE DE GROUPE:
+${request.groupType === 'family_with_kids' ? `   - FAMILLE AVEC ENFANTS: Tu DOIS inclure des activités kid-friendly dans l'itinéraire!
+   - Ajoute au moins 1 activité enfants par jour parmi: aquariums, zoos, parcs d'attractions, musées interactifs/sciences, plages, aires de jeux, spectacles pour enfants
+   - Cherche dans le pool SerpAPI ou ajoute en additionalSuggestions: aquarium, zoo, parc d'attractions, musée des sciences/interactif
+   - Rythme adapté: pas plus de 3 visites culturelles par jour, pauses régulières, pas de marche excessive (>3km entre 2 points)
+   - Privilégie les activités outdoor et interactives par rapport aux musées classiques` : request.groupType === 'friends' ? `   - GROUPE D'AMIS: activités de groupe, ambiance festive, quartiers animés` : ''}
+
+11. NARRATIF DE GUIDE:
    - dayNarrative: 2-3 phrases vivantes comme un vrai guide local
    - Inclue un conseil pratique par jour (ex: "Arrivez avant 9h pour éviter 1h de queue")
    - Mentionne une spécialité culinaire locale à essayer dans le quartier du jour
+
+VÉRIFICATION FINALE OBLIGATOIRE avant de répondre:
+- As-tu inclus TOUS les incontournables mondiaux de ${request.destination} listés en règle 6? Si non, ajoute-les maintenant.
+- As-tu prévu AU MOINS 1 day trip si le séjour >= 4 jours? Si non, ajoute-le maintenant.
+- As-tu au moins 1 jour avec isDayTrip=true et dayTripDestination renseigné (si >= 4 jours)?
+${request.groupType === 'family_with_kids' ? '- As-tu inclus des activités kid-friendly (aquarium, zoo, parc, musée interactif)? Si non, ajoute-les.' : ''}
 
 Réponds UNIQUEMENT en JSON valide (pas de markdown, pas de backticks, pas de commentaires).
 Format EXACT:
@@ -370,6 +417,42 @@ Format EXACT:
     console.log(`[ClaudeItinerary] ✅ Itinéraire généré: ${parsed.days.length} jours`);
     for (const day of parsed.days) {
       console.log(`  Jour ${day.dayNumber}: ${day.theme} (${day.selectedAttractionIds.length} attractions${day.isDayTrip ? ', DAY TRIP: ' + day.dayTripDestination : ''})`);
+    }
+
+    // VALIDATION: Day trip obligatoire si >= 4 jours
+    if (request.durationDays >= 4) {
+      const hasDayTrip = parsed.days.some(d => d.isDayTrip === true);
+      if (!hasDayTrip) {
+        console.warn(`[ClaudeItinerary] ⚠️ AUCUN day trip détecté pour un séjour de ${request.durationDays} jours — Claude a ignoré la consigne`);
+      }
+    }
+
+    // VALIDATION: Incontournables mondiaux
+    const allSelectedIds = parsed.days.flatMap(d => d.selectedAttractionIds);
+    const allSuggestionNames = parsed.days.flatMap(d => (d.additionalSuggestions || []).map(s => s.name.toLowerCase()));
+    const allNames = [
+      ...poolCompact.filter(a => allSelectedIds.includes(a.id)).map(a => a.name.toLowerCase()),
+      ...allSuggestionNames,
+    ].join(' ');
+
+    // Vérifier les incontournables pour les destinations connues
+    const mustHaveChecks: Record<string, string[]> = {
+      'barcelona': ['sagrada', 'batlló', 'güell', 'rambla'],
+      'paris': ['eiffel', 'louvre', 'sacré-cœur', 'notre-dame', 'montmartre'],
+      'rome': ['colisée', 'colosseum', 'vatican', 'trevi', 'panthéon'],
+      'tokyo': ['shibuya', 'senso-ji', 'meiji'],
+      'london': ['big ben', 'tower', 'british museum', 'buckingham'],
+      'new york': ['statue of liberty', 'central park', 'empire state', 'times square'],
+    };
+
+    const destLower = request.destination.toLowerCase();
+    for (const [city, landmarks] of Object.entries(mustHaveChecks)) {
+      if (destLower.includes(city)) {
+        const missing = landmarks.filter(l => !allNames.includes(l) && !allNames.split(' ').some(w => w.includes(l)));
+        if (missing.length > 0) {
+          console.warn(`[ClaudeItinerary] ⚠️ Incontournables manquants pour ${city}: ${missing.join(', ')}`);
+        }
+      }
     }
 
     // Enrichir avec les liens de réservation

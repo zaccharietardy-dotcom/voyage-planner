@@ -95,9 +95,48 @@ export function StepBudget({ data, onChange }: StepBudgetProps) {
             €
           </span>
         </div>
-        <p className="text-sm text-muted-foreground">
-          Budget total pour {data.groupSize || 1} personne{(data.groupSize || 1) > 1 ? 's' : ''}
-        </p>
+
+        {/* Toggle total / par personne */}
+        <div className="flex items-center gap-2 rounded-lg border p-1 bg-muted/50 w-fit">
+          <button
+            type="button"
+            onClick={() => onChange({ budgetIsPerPerson: false })}
+            className={cn(
+              'px-3 py-1.5 rounded-md text-sm font-medium transition-all',
+              !data.budgetIsPerPerson
+                ? 'bg-background shadow-sm text-foreground'
+                : 'text-muted-foreground hover:text-foreground'
+            )}
+          >
+            Budget total
+          </button>
+          <button
+            type="button"
+            onClick={() => onChange({ budgetIsPerPerson: true })}
+            className={cn(
+              'px-3 py-1.5 rounded-md text-sm font-medium transition-all',
+              data.budgetIsPerPerson
+                ? 'bg-background shadow-sm text-foreground'
+                : 'text-muted-foreground hover:text-foreground'
+            )}
+          >
+            Par personne
+          </button>
+        </div>
+
+        {data.budgetCustom && (
+          <p className="text-sm text-muted-foreground">
+            {data.budgetIsPerPerson
+              ? `${data.budgetCustom}€ × ${data.groupSize || 1} = ${data.budgetCustom * (data.groupSize || 1)}€ total`
+              : `${data.budgetCustom}€ total pour ${data.groupSize || 1} personne${(data.groupSize || 1) > 1 ? 's' : ''} (${Math.round(data.budgetCustom / (data.groupSize || 1))}€/pers)`
+            }
+          </p>
+        )}
+        {!data.budgetCustom && (
+          <p className="text-sm text-muted-foreground">
+            Budget {data.budgetIsPerPerson ? 'par personne' : 'total'} pour le voyage
+          </p>
+        )}
       </div>
     </div>
   );

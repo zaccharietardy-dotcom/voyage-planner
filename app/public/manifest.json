@@ -2,11 +2,11 @@
   "name": "Narae Voyage",
   "short_name": "Narae",
   "description": "Planifie et partage tes voyages avec tes amis",
-  "start_url": "/v2",
+  "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#0a3d62",
-  "theme_color": "#0a3d62",
+  "background_color": "#0a1628",
+  "theme_color": "#0a1628",
   "icons": [
     {
       "src": "/icons/icon-72x72.png",

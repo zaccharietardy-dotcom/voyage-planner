@@ -1,0 +1,35 @@
+{
+  "name": "narae-voyage-mobile",
+  "version": "1.0.0",
+  "description": "Narae Voyage - Native mobile app (Capacitor)",
+  "scripts": {
+    "sync": "cap sync",
+    "sync:ios": "cap sync ios",
+    "sync:android": "cap sync android",
+    "open:ios": "cap open ios",
+    "open:android": "cap open android",
+    "build:ios": "cap sync ios && cap open ios",
+    "build:android": "cap sync android && cap open android",
+    "assets": "capacitor-assets generate --iconBackgroundColor '#0a3d62' --splashBackgroundColor '#0a3d62'"
+  },
+  "keywords": ["travel", "voyage", "mobile"],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@capacitor/android": "^8.0.2",
+    "@capacitor/app": "^8.0.0",
+    "@capacitor/cli": "^8.0.2",
+    "@capacitor/core": "^8.0.2",
+    "@capacitor/haptics": "^8.0.0",
+    "@capacitor/ios": "^8.0.2",
+    "@capacitor/keyboard": "^8.0.0",
+    "@capacitor/share": "^8.0.0",
+    "@capacitor/splash-screen": "^8.0.0",
+    "@capacitor/status-bar": "^8.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "typescript": "^5.9.3"
+  }
+}
