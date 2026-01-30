@@ -1,5 +1,5 @@
 /**
- * BudgetTracker - Suivi du budget en temps réel pendant la planification
+ * BudgetTracker - Suivi du budget en temps réel pendant la planification.
  *
  * Permet de contraindre les choix (activités, repas) par le budget restant
  * au lieu de calculer les coûts après coup.
