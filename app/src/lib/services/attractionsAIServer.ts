@@ -3,19 +3,18 @@
  * Ce fichier utilise fs et ne peut être importé que côté serveur
  *
  * Chaîne de priorité:
- * 1. Foursquare Places API (GRATUIT, données vérifiées)
- * 2. SerpAPI Google Local (données RÉELLES, 100 req/mois gratuit) ✅
- * 3. Cache local
- * 4. Claude AI (fallback)
+ * 1. SerpAPI Google Local (données RÉELLES) + Viator en parallèle
+ * 2. Cache local fichier
+ * 3. Claude AI (fallback)
  */
 
 import Anthropic from '@anthropic-ai/sdk';
 import { Attraction } from './attractions';
 import { ActivityType } from '../types';
 import { tokenTracker } from './tokenTracker';
-import { searchAttractions as searchFoursquareAttractions, foursquareToAttraction, isFoursquareConfigured } from './foursquare';
 import { searchAttractionsWithSerpApi, searchAttractionsMultiQuery, isSerpApiPlacesConfigured } from './serpApiPlaces';
-import { searchPlacesFromDB, savePlacesToDB, type PlaceData } from './placeDatabase';
+
+import { searchViatorActivities, isViatorConfigured } from './viator';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -171,13 +170,78 @@ Reponds UNIQUEMENT avec un tableau JSON valide, sans texte avant ou apres.`;
 }
 
 /**
+ * Estime les durées réalistes pour des attractions qui ont la durée par défaut (90 min).
+ * Utilise Claude Haiku pour un batch rapide et économique.
+ */
+async function estimateAttractionDurations(
+  attractions: Attraction[],
+  destination: string
+): Promise<Attraction[]> {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) return attractions;
+
+  // Only estimate for attractions with default duration (90 min)
+  const needEstimate = attractions.filter(a => a.duration === 90);
+  if (needEstimate.length === 0) return attractions;
+
+  try {
+    const client = new Anthropic({ apiKey });
+    const names = needEstimate.map(a => `- ${a.name} (${a.type})`).join('\n');
+
+    const response = await client.messages.create({
+      model: 'claude-3-5-haiku-20241022',
+      max_tokens: 1000,
+      messages: [{
+        role: 'user',
+        content: `Pour chaque attraction de ${destination}, estime la durée de visite typique en minutes.
+Sois réaliste: un point de vue = 20-30min, un petit musée = 60-90min, un grand musée = 120-180min, un quartier à pied = 60-120min, une plage = 120-180min, un marché = 45-60min, un monument = 30-60min.
+
+${names}
+
+Réponds UNIQUEMENT en JSON: {"durations": {"Nom exact": minutes, ...}}`,
+      }],
+    });
+
+    if (response.usage) {
+      tokenTracker.track(response.usage, `Durations: ${destination}`);
+    }
+
+    const content = response.content[0];
+    if (content.type !== 'text') return attractions;
+
+    let jsonStr = content.text.trim();
+    if (jsonStr.startsWith('```')) {
+      jsonStr = jsonStr.replace(/```json?\n?/g, '').replace(/```$/g, '').trim();
+    }
+
+    const parsed = JSON.parse(jsonStr);
+    const durations: Record<string, number> = parsed.durations || parsed;
+
+    console.log(`[Server] ✅ Durées estimées pour ${Object.keys(durations).length} attractions`);
+
+    return attractions.map(a => {
+      if (a.duration !== 90) return a; // Already has real duration
+      const estimated = durations[a.name];
+      if (estimated && estimated >= 15 && estimated <= 300) {
+        return { ...a, duration: estimated };
+      }
+      return a;
+    });
+  } catch (error) {
+    console.warn('[Server] Erreur estimation durées:', error);
+    return attractions;
+  }
+}
+
+/**
  * Recherche des attractions depuis le cache ou Claude
  * Version serveur qui accède directement au cache fichier
  *
  * Priorité:
- * 1. Foursquare (si configuré et coordonnées disponibles)
- * 2. Cache local
- * 3. Claude AI
+ * 1. SerpAPI Google Local (données réelles) + Viator en parallèle
+ * 2. Cache local fichier
+ * 3. Claude AI (fallback)
+ * Viator est lancé en parallèle et mergé avec les résultats à chaque étape.
  */
 export async function searchAttractionsFromCache(
   destination: string,
@@ -185,74 +249,22 @@ export async function searchAttractionsFromCache(
     types?: ActivityType[];
     forceRefresh?: boolean;
     maxResults?: number;
-    cityCenter?: { lat: number; lng: number }; // Pour Foursquare
+    cityCenter?: { lat: number; lng: number }; // Pour Viator
+    dailyActivityBudget?: number; // Pour filtrer Viator par budget
   }
 ): Promise<Attraction[]> {
   const normalizedDest = normalizeDestination(destination);
   const cache = loadCache();
   const cacheMaxAge = 30 * 24 * 60 * 60 * 1000; // 30 jours
 
-  // 0. PRIORITÉ MAXIMALE: Base de données SQLite (données vérifiées < 30 jours)
-  try {
-    const dbAttractions = await searchPlacesFromDB({
-      city: destination,
-      type: 'attraction',
-      maxAgeDays: 30,
-      limit: (options?.maxResults || 15) + 5,
-    });
+  // 0. Lancer Viator en parallèle (non-bloquant, await au moment du merge)
+  const viatorPromise: Promise<Attraction[]> = (isViatorConfigured() && options?.cityCenter)
+    ? searchViatorActivities(destination, options.cityCenter, { types: options?.types, limit: 20 })
+        .then(results => { console.log(`[Server] ${results.length} expériences Viator trouvées`); return results; })
+        .catch(err => { console.warn('[Server] Viator error:', err); return [] as Attraction[]; })
+    : Promise.resolve([]);
 
-    if (dbAttractions.length >= 5) {
-      console.log(`[Server] ✅ ${dbAttractions.length} attractions trouvées en base locale pour ${destination}`);
-
-      const attractions = dbAttractions.map((place, index) => placeToAttraction(place, index));
-      return filterAttractions(attractions, options?.types, options?.maxResults, destination);
-    }
-  } catch (error) {
-    console.warn('[Server] Erreur base locale, fallback vers API:', error);
-  }
-
-  // 1. PRIORITÉ: Foursquare Places API (données vérifiées)
-  if (isFoursquareConfigured() && options?.cityCenter) {
-    try {
-      console.log(`[Server] Recherche attractions via Foursquare pour ${destination}...`);
-      const foursquarePlaces = await searchFoursquareAttractions(
-        destination,
-        options.cityCenter,
-        { type: 'all', limit: (options.maxResults || 15) + 5 }
-      );
-
-      if (foursquarePlaces.length > 0) {
-        const attractions: Attraction[] = foursquarePlaces.map((place, index) => {
-          const converted = foursquareToAttraction(place);
-          return {
-            id: converted.id,
-            name: converted.name,
-            type: mapCategoryToActivityType(converted.category),
-            description: converted.description,
-            duration: 90, // Durée par défaut
-            estimatedCost: 15, // Coût estimé par défaut
-            latitude: converted.latitude,
-            longitude: converted.longitude,
-            rating: converted.rating,
-            mustSee: index < 3, // Top 3 = incontournables
-            bookingRequired: false,
-            bookingUrl: converted.website,
-            openingHours: { open: '09:00', close: '18:00' },
-            tips: converted.tips[0],
-            dataReliability: 'verified' as const,
-            googleMapsUrl: converted.googleMapsUrl,
-          };
-        });
-
-        console.log(`[Server] ${attractions.length} attractions vérifiées via Foursquare`);
-        return filterAttractions(attractions, options?.types, options?.maxResults, destination);
-      }
-    } catch (error) {
-      console.warn('[Server] Foursquare error, trying cache/Claude:', error);
-    }
-  }
-
-  // 2. PRIORITÉ: SerpAPI Google Maps (données RÉELLES avec multi-requêtes)
+  // 1. PRIORITÉ: SerpAPI Google Maps (données RÉELLES avec multi-requêtes)
   if (isSerpApiPlacesConfigured()) {
     try {
       let attractions: Attraction[] = [];
@@ -277,11 +289,11 @@ export async function searchAttractionsFromCache(
           type: mapCategoryToActivityType(a.type || 'culture'),
           description: a.description || '',
           duration: 90,
-          estimatedCost: 15,
+          estimatedCost: estimateCostByType(mapCategoryToActivityType(a.type || 'culture'), destination),
           latitude: a.latitude || 0,
           longitude: a.longitude || 0,
           rating: a.rating || 4,
-          mustSee: index < 3,
+          mustSee: false,
           bookingRequired: false,
           bookingUrl: a.website,
           openingHours: a.openingHours || { open: '09:00', close: '18:00' },
@@ -291,15 +303,7 @@ export async function searchAttractionsFromCache(
       }
 
       if (attractions.length > 0) {
-        // SAUVEGARDER EN BASE SQLITE pour les prochaines requêtes
-        try {
-          const placesToSave = attractions.map(a => attractionToPlace(a, destination));
-          await savePlacesToDB(placesToSave, 'serpapi');
-        } catch (saveError) {
-          console.warn('[Server] Erreur sauvegarde en base:', saveError);
-        }
-
-        // Sauvegarder en cache fichier aussi
+        // Sauvegarder en cache fichier
         cache[normalizedDest] = {
           attractions,
           fetchedAt: new Date().toISOString(),
@@ -308,12 +312,18 @@ export async function searchAttractionsFromCache(
         saveCache(cache);
 
         console.log(`[Server] ✅ ${attractions.length} attractions RÉELLES via SerpAPI`);
-        return filterAttractions(attractions, options?.types, options?.maxResults, destination);
+        const withDurations = await estimateAttractionDurations(attractions, destination);
+        const viatorResults = await viatorPromise;
+        const merged = mergeWithViator(withDurations, viatorResults, options?.types, options?.dailyActivityBudget);
+        return filterAttractions(merged, options?.types, options?.maxResults, destination);
       }
     } catch (error) {
       console.warn('[Server] SerpAPI error, trying cache/Claude:', error);
     }
   }
+
+  // Await Viator (lancé en parallèle plus haut)
+  const viatorResults = await viatorPromise;
 
   // 3. Vérifier le cache
   const cached = cache[normalizedDest];
@@ -323,7 +333,9 @@ export async function searchAttractionsFromCache(
     new Date().getTime() - new Date(cached.fetchedAt).getTime() < cacheMaxAge
   ) {
     console.log(`[Server] Cache hit pour ${destination} (${cached.attractions.length} attractions)`);
-    return filterAttractions(cached.attractions, options?.types, options?.maxResults, destination);
+    const withDurations = await estimateAttractionDurations(cached.attractions, destination);
+    const merged = mergeWithViator(withDurations, viatorResults, options?.types, options?.dailyActivityBudget);
+    return filterAttractions(merged, options?.types, options?.maxResults, destination);
   }
 
   // 4. Claude AI (fallback)
@@ -342,7 +354,9 @@ export async function searchAttractionsFromCache(
 
       console.log(`[Server] ${attractions.length} attractions mises en cache pour ${destination}`);
 
-      return filterAttractions(attractions, options?.types, options?.maxResults, destination);
+      const withDurations = await estimateAttractionDurations(attractions, destination);
+      const merged = mergeWithViator(withDurations, viatorResults, options?.types, options?.dailyActivityBudget);
+      return filterAttractions(merged, options?.types, options?.maxResults, destination);
     } catch (error) {
       console.error('[Server] Erreur recherche attractions:', error);
     }
@@ -351,14 +365,140 @@ export async function searchAttractionsFromCache(
   // 5. Fallback: cache expiré ou vide
   if (cached) {
     console.warn('[Server] Utilisation du cache expiré pour', destination);
-    return filterAttractions(cached.attractions, options?.types, options?.maxResults, destination);
+    const merged = mergeWithViator(cached.attractions, viatorResults, options?.types, options?.dailyActivityBudget);
+    return filterAttractions(merged, options?.types, options?.maxResults, destination);
   }
+
+  // 6. Si uniquement Viator a des résultats
+  if (viatorResults.length > 0) {
+    return filterAttractions(viatorResults, options?.types, options?.maxResults, destination);
+  }
+
   return [];
 }
 
 /**
- * Convertit une catégorie Foursquare en ActivityType
+ * Normalise un nom d'attraction pour détecter les doublons fuzzy.
+ * "Visite guidée de la Tour Eiffel" → "tour eiffel"
  */
+function normalizeAttractionName(name: string): string {
+  return name.toLowerCase()
+    .replace(/visite guidée de |guided tour of |tour of |visit to |visite de |excursion à |trip to /gi, '')
+    .replace(/^(the|le|la|les|l'|un|une|des|a|an) /i, '')
+    .replace(/[''`\-:,()]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/** Known sub-attractions that are part of a larger attraction */
+const KNOWN_SUB_ATTRACTIONS: Record<string, string> = {
+  'wihan': 'wat pho',
+  'bouddha couché': 'wat pho',
+  'reclining buddha': 'wat pho',
+  'emerald buddha': 'wat phra kaew',
+  'chapel royal': 'grand palace',
+  'sistine chapel': 'vatican',
+  'chapelle sixtine': 'vatican',
+};
+
+function getSignificantWords(name: string): string[] {
+  const stopWords = new Set(['de', 'du', 'des', 'le', 'la', 'les', 'the', 'a', 'an', 'of', 'in', 'at', 'to', 'et', 'and', 'à', 'au', 'aux']);
+  return name.toLowerCase().split(/\s+/).filter(w => w.length > 2 && !stopWords.has(w));
+}
+
+function isFuzzyDuplicate(newName: string, existingNames: Set<string>): boolean {
+  const normalized = normalizeAttractionName(newName);
+
+  // Check known sub-attractions
+  const normalizedLower = normalized.toLowerCase();
+  for (const [subPart, parentName] of Object.entries(KNOWN_SUB_ATTRACTIONS)) {
+    if (normalizedLower.includes(subPart)) {
+      for (const existing of existingNames) {
+        if (normalizeAttractionName(existing).toLowerCase().includes(parentName)) return true;
+      }
+    }
+  }
+
+  for (const existing of existingNames) {
+    const existingNorm = normalizeAttractionName(existing);
+    if (normalized === existingNorm) return true;
+    if (normalized.length > 5 && existingNorm.length > 5) {
+      if (normalized.includes(existingNorm) || existingNorm.includes(normalized)) return true;
+    }
+
+    // Word overlap check: if ≥60% of significant words match, it's a duplicate
+    const newWords = getSignificantWords(normalized);
+    const existingWords = getSignificantWords(existingNorm);
+    if (newWords.length >= 2 && existingWords.length >= 2) {
+      const overlap = newWords.filter(w => existingWords.some(ew => ew === w || ew.includes(w) || w.includes(ew))).length;
+      const minLen = Math.min(newWords.length, existingWords.length);
+      if (overlap / minLen >= 0.6) return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Combine les résultats : mustSee d'abord, puis expériences Viator filtrées, puis le reste.
+ * - Max ~8 expériences Viator dans le mix
+ * - Viator filtré par préférences utilisateur (types) si disponibles
+ * - Dédupliqué par nom (fuzzy)
+ */
+function mergeWithViator(baseAttractions: Attraction[], viatorAttractions: Attraction[], types?: ActivityType[], dailyActivityBudget?: number): Attraction[] {
+  if (viatorAttractions.length === 0) return baseAttractions;
+  if (baseAttractions.length === 0) return viatorAttractions;
+
+  const MAX_VIATOR = 8;
+  const usedNames = new Set<string>();
+  const combined: Attraction[] = [];
+
+  const addUnique = (a: Attraction) => {
+    if (!isFuzzyDuplicate(a.name, usedNames)) {
+      usedNames.add(a.name);
+      combined.push(a);
+      return true;
+    }
+    return false;
+  };
+
+  // 1. MustSee POIs first (monuments, incontournables)
+  for (const a of baseAttractions) {
+    if (a.mustSee) addUnique(a);
+  }
+
+  // 2. Viator experiences — filtered by budget + user types, sorted by rating*reviews
+  let filteredViator = [...viatorAttractions];
+  // Budget filter: exclude activities > 1.5x daily budget
+  if (dailyActivityBudget && dailyActivityBudget > 0) {
+    const maxCost = dailyActivityBudget * 1.5;
+    filteredViator = filteredViator.filter(a => a.estimatedCost <= maxCost || a.estimatedCost === 0);
+  }
+  if (types && types.length > 0) {
+    const matching = filteredViator.filter(a => types.includes(a.type));
+    const rest = filteredViator.filter(a => !types.includes(a.type));
+    filteredViator = [...matching, ...rest];
+  }
+  filteredViator.sort((a, b) => {
+    const scoreA = a.rating * Math.log10((a.reviewCount || 1) + 1);
+    const scoreB = b.rating * Math.log10((b.reviewCount || 1) + 1);
+    return scoreB - scoreA;
+  });
+  let viatorAdded = 0;
+  for (const a of filteredViator) {
+    if (viatorAdded >= MAX_VIATOR) break;
+    if (addUnique(a)) {
+      viatorAdded++;
+    }
+  }
+
+  // 3. Remaining base attractions
+  for (const a of baseAttractions) {
+    addUnique(a);
+  }
+
+  return combined;
+}
+
 /**
  * Base de données des attractions gratuites connues
  * Organisées par ville et par nom (partiellement matching)
@@ -424,6 +564,38 @@ const FREE_ATTRACTIONS: Record<string, string[]> = {
   'barcelone': [
     'la rambla', 'barceloneta', 'quartier gothique', 'montjuïc',
   ],
+  'bangkok': [
+    // Temples gratuits (extérieur) et sanctuaires
+    'ganesha shrine', 'ganesha temple', 'erawan shrine',
+    'golden mount', 'wat saket', // Golden Mount: 50 baht = ~1.3€ (quasi gratuit)
+    // Marchés et quartiers
+    'chatuchak', 'khao san', 'chinatown', 'yaowarat',
+    'asiatique', 'jodd fairs',
+    // Parcs
+    'lumphini park', 'lumpini', 'benjakitti park', 'benchasiri park',
+    // Rues piétonnes / promenades
+    'silom', 'sukhumvit', 'siam square',
+  ],
+  'tokyo': [
+    'meiji shrine', 'senso-ji', 'asakusa', 'shibuya crossing',
+    'harajuku', 'takeshita street', 'ueno park', 'yoyogi park',
+    'imperial palace', 'tsukiji outer market', 'akihabara',
+    'shinjuku gyoen', // 500¥ = ~3€
+  ],
+  'lisbon': [
+    'alfama', 'bairro alto', 'praça do comércio', 'commerce square',
+    'miradouro', 'viewpoint', 'time out market',
+    'ponte 25 de abril', 'rossio', 'chiado',
+  ],
+  'lisbonne': [
+    'alfama', 'bairro alto', 'praça do comércio', 'miradouro',
+  ],
+  'prague': [
+    'charles bridge', 'pont charles', 'old town square',
+    'place vieille ville', 'astronomical clock',
+    'wenceslas square', 'petrin hill', 'john lennon wall',
+    'letna park', 'vysehrad',
+  ],
 };
 
 /**
@@ -449,6 +621,36 @@ function isAttractionFree(name: string, city: string): boolean {
   }
 
   return false;
+}
+
+/**
+ * Estime le coût d'entrée par personne en fonction du type d'activité et de la destination.
+ * Les pays à faible coût (Asie du Sud-Est, Amérique latine, etc.) ont des prix réduits.
+ */
+function estimateCostByType(type: ActivityType, destination: string): number {
+  const lowCostCountries = /thailand|bangkok|vietnam|cambodia|laos|myanmar|indonesia|bali|philippines|india|nepal|sri lanka|mexico|colombia|peru|bolivia|ecuador|guatemala|morocco|egypt|tunisia|turkey/i;
+  const isLowCost = lowCostCountries.test(destination);
+  const factor = isLowCost ? 0.3 : 1;
+
+  switch (type) {
+    case 'nature':
+    case 'beach':
+      return Math.round(2 * factor); // Parcs, plages, randonnées: souvent gratuit ou très peu
+    case 'culture':
+      return Math.round(8 * factor); // Temples, monuments: 0-15€ en Europe, 0-5€ en Asie
+    case 'adventure':
+      return Math.round(25 * factor); // Activités encadrées
+    case 'gastronomy':
+      return Math.round(15 * factor); // Marchés, food tours
+    case 'nightlife':
+      return Math.round(10 * factor); // Bars, clubs (coût d'entrée)
+    case 'shopping':
+      return 0; // Pas de coût d'entrée
+    case 'wellness':
+      return Math.round(20 * factor);
+    default:
+      return Math.round(10 * factor);
+  }
 }
 
 /**
@@ -505,8 +707,14 @@ function filterAttractions(
     filtered = filtered.map(a => correctAttractionCost(a, city));
   }
 
+  // Prioritize matching types but don't exclude others entirely
+  // Keep max 40% of non-matching "culture" activities if culture isn't in user preferences
   if (types && types.length > 0) {
-    filtered = filtered.filter(a => types.includes(a.type));
+    const matching = filtered.filter(a => types.includes(a.type));
+    const nonMatching = filtered.filter(a => !types.includes(a.type));
+    // Limit non-matching culture items to ~40% of total
+    const maxNonMatching = Math.ceil(filtered.length * 0.4);
+    filtered = [...matching, ...nonMatching.slice(0, maxNonMatching)];
   }
 
   if (maxResults && maxResults > 0) {
@@ -533,61 +741,3 @@ export function getCachedDestinationsList(): string[] {
   return Object.keys(cache);
 }
 
-/**
- * Convertit un PlaceData de la base de données en Attraction
- */
-function placeToAttraction(place: PlaceData, index: number): Attraction {
-  return {
-    id: place.externalId || `db-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-    name: place.name,
-    type: mapCategoryToActivityType(place.categories?.[0] || 'culture'),
-    description: place.description || '',
-    duration: 90, // Durée par défaut
-    estimatedCost: place.priceLevel || 15,
-    latitude: place.latitude,
-    longitude: place.longitude,
-    rating: place.rating || 4,
-    mustSee: index < 3, // Top 3 = incontournables
-    bookingRequired: false,
-    bookingUrl: place.bookingUrl,
-    openingHours: place.openingHours
-      ? { open: place.openingHours.monday?.open || '09:00', close: place.openingHours.monday?.close || '18:00' }
-      : { open: '09:00', close: '18:00' },
-    tips: place.tips,
-    dataReliability: place.dataReliability as 'verified' | 'estimated' | 'generated',
-    googleMapsUrl: place.googleMapsUrl,
-  };
-}
-
-/**
- * Convertit une Attraction en PlaceData pour sauvegarde en base
- */
-function attractionToPlace(attraction: Attraction, city: string): PlaceData {
-  return {
-    externalId: attraction.id,
-    type: 'attraction',
-    name: attraction.name,
-    city,
-    address: `${city}`,
-    latitude: attraction.latitude,
-    longitude: attraction.longitude,
-    rating: attraction.rating,
-    priceLevel: attraction.estimatedCost,
-    categories: [attraction.type],
-    openingHours: {
-      monday: attraction.openingHours,
-      tuesday: attraction.openingHours,
-      wednesday: attraction.openingHours,
-      thursday: attraction.openingHours,
-      friday: attraction.openingHours,
-      saturday: attraction.openingHours,
-      sunday: attraction.openingHours,
-    },
-    googleMapsUrl: attraction.googleMapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${attraction.name}, ${city}`)}`,
-    bookingUrl: attraction.bookingUrl,
-    description: attraction.description,
-    tips: attraction.tips,
-    source: 'serpapi',
-    dataReliability: 'verified',
-  };
-}

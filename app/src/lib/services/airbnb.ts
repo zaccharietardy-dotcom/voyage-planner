@@ -28,6 +28,7 @@ interface AirbnbSearchOptions {
   guests?: number;
   requireKitchen?: boolean;
   limit?: number;
+  cityCenter?: { lat: number; lng: number };
 }
 
 /**
@@ -128,7 +129,7 @@ export async function searchAirbnbListings(
 ): Promise<Accommodation[]> {
   if (!RAPIDAPI_KEY) {
     console.warn('[Airbnb] RAPIDAPI_KEY non configurée, fallback lien de recherche');
-    return generateFallbackAirbnb(destination, checkIn, checkOut, options);
+    return generateFallbackAirbnb(destination, checkIn, checkOut, options, options.cityCenter);
   }
 
   try {
@@ -138,7 +139,7 @@ export async function searchAirbnbListings(
 
     if (!place) {
       console.warn('[Airbnb] Destination non trouvée, fallback');
-      return generateFallbackAirbnb(destination, checkIn, checkOut, options);
+      return generateFallbackAirbnb(destination, checkIn, checkOut, options, options.cityCenter);
     }
 
     console.log(`[Airbnb] Place ID: ${place.id} (${place.name})`);
@@ -149,7 +150,7 @@ export async function searchAirbnbListings(
 
     if (listings.length === 0) {
       console.warn('[Airbnb] Aucun résultat, fallback');
-      return generateFallbackAirbnb(destination, checkIn, checkOut, options);
+      return generateFallbackAirbnb(destination, checkIn, checkOut, options, options.cityCenter);
     }
 
     console.log(`[Airbnb] ${listings.length} propriétés trouvées`);
@@ -232,7 +233,7 @@ export async function searchAirbnbListings(
     return filtered;
   } catch (error) {
     console.error('[Airbnb] Erreur:', error);
-    return generateFallbackAirbnb(destination, checkIn, checkOut, options);
+    return generateFallbackAirbnb(destination, checkIn, checkOut, options, options.cityCenter);
   }
 }
 
@@ -318,6 +319,7 @@ function generateFallbackAirbnb(
   checkIn: string,
   checkOut: string,
   options: AirbnbSearchOptions,
+  cityCenter?: { lat: number; lng: number },
 ): Accommodation[] {
   const nights = Math.max(1, Math.ceil(
     (new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (1000 * 60 * 60 * 24)
@@ -334,8 +336,8 @@ function generateFallbackAirbnb(
     name: `Airbnb à ${destination} (rechercher)`,
     type: 'apartment' as const,
     address: destination,
-    latitude: 0,
-    longitude: 0,
+    latitude: cityCenter?.lat || 0,
+    longitude: cityCenter?.lng || 0,
     rating: 8,
     reviewCount: 0,
     pricePerNight: maxPrice,

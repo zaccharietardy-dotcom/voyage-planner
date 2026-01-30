@@ -129,6 +129,18 @@ export function ActivityCard({
           style={{ backgroundColor: color }}
         />
 
+        {/* Activity image */}
+        {item.imageUrl && item.type === 'activity' && (
+          <div className="w-24 h-full min-h-[100px] shrink-0 overflow-hidden">
+            <img
+              src={item.imageUrl}
+              alt={item.title}
+              className="w-full h-full object-cover"
+              loading="lazy"
+            />
+          </div>
+        )}
+
         {/* Content */}
         <div className="flex-1 p-4">
           <div className="flex items-start justify-between gap-4">
