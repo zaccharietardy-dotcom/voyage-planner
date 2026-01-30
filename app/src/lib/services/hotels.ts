@@ -540,6 +540,7 @@ export function selectBestHotel(
   preferences: {
     budgetLevel: 'economic' | 'moderate' | 'comfort' | 'luxury';
     attractions?: Array<{ latitude?: number; longitude?: number; name?: string }>;
+    preferApartment?: boolean;
   }
 ): Accommodation | null {
   if (hotels.length === 0) return null;
@@ -590,6 +591,17 @@ export function selectBestHotel(
       score += 15;
     } else if (hotel.pricePerNight < priceRange.min) {
       score += 5; // Cheap but might be lower quality
+    }
+
+    // 6. Bonus for apartments when budget strategy prefers Airbnb (0-50 points)
+    if (preferences.preferApartment) {
+      const isApartment = hotel.type === 'apartment' || hotel.type === 'bnb' ||
+        /\b(apartment|flat|appart|résidence|studio|loft)\b/i.test(hotel.name);
+      if (isApartment) {
+        score += 50; // Strong preference for apartments
+      }
+      // Also prefer cheaper options when airbnb strategy
+      score += Math.max(0, 20 - (hotel.pricePerNight / 50));
     }
 
     return { hotel, score };

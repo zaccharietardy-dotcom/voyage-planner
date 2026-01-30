@@ -160,13 +160,13 @@ function fixAttractionCost(attraction: Attraction): Attraction {
   const name = attraction.name.toLowerCase();
   const cost = attraction.estimatedCost;
 
-  // Gratuit: parcs, jardins, places, extérieurs, quartiers, vignes urbaines
-  if (/\b(jardin|parc|park|garden|place|square|piazza|champ|esplanade|promenade|quartier|neighborhood|district|boulevard|rue|street|vigne|vignoble)\b/.test(name)) {
+  // Gratuit: parcs, jardins, places, extérieurs, quartiers, vignes urbaines, plages, portes, escaliers, vieille ville, ports
+  if (/\b(jardin|parc|park|garden|place|square|piazza|champ|esplanade|promenade|quartier|neighborhood|district|boulevard|rue|street|vigne|vignoble|beach|plage|playa|spiaggia|gate|porte|porta|puerta|stairs|escalier|old town|vieille ville|centro storico|altstadt|harbour|harbor|port|marina|waterfront|pier|quai|boardwalk)\b/i.test(name)) {
     if (cost > 0) return { ...attraction, estimatedCost: 0 };
   }
   // Églises et cathédrales: généralement gratuit (sauf tours/cryptes)
-  if (/\b(église|cathédrale|basilique|church|cathedral|basilica|mosquée|mosque|temple|synagogue)\b/.test(name)) {
-    if (cost > 0 && !/\b(tour|tower|crypte|crypt|chapelle|sainte-chapelle)\b/.test(name)) {
+  if (/\b(église|cathédrale|basilique|church|cathedral|basilica|mosquée|mosque|temple|synagogue|chapel)\b/i.test(name)) {
+    if (cost > 0 && !/\b(tour|tower|crypte|crypt|sainte-chapelle)\b/i.test(name)) {
       return { ...attraction, estimatedCost: 0 };
     }
   }
@@ -211,16 +211,21 @@ function fixAttractionCost(attraction: Attraction): Attraction {
     }
   }
 
-  // Miradors/viewpoints gratuits (sauf si observatoire payant)
-  if (/\b(mirador|viewpoint|lookout|panoramic)\b/.test(name)) {
-    if (cost > 20 && !/\b(observatory|observation|deck|tower|tour)\b/.test(name)) {
+  // Miradors/viewpoints/observation points gratuits (sauf si observatoire payant avec "deck"/"tower")
+  if (/\b(mirador|viewpoint|lookout|panoramic|observation point|vidikovac|belvedere|belvédère)\b/i.test(name)) {
+    if (cost > 0 && !/\b(observatory|deck|tower|tour|ticket)\b/i.test(name)) {
       return { ...attraction, estimatedCost: 0 };
     }
   }
 
-  // Cap générique: si coût >= 50€/pers et pas bookable → probablement faux, cap à 20€
-  if (cost >= 50 && !attraction.bookingUrl) {
-    return { ...attraction, estimatedCost: 20 };
+  // Street food / food markets / marchés → cap à 15€/pers max
+  if (/\b(street food|food market|marché|mercado|market hall|food hall)\b/i.test(name)) {
+    if (cost > 15) return { ...attraction, estimatedCost: 15 };
+  }
+
+  // Cap générique: si coût >= 30€/pers et pas bookable → probablement faux, cap à 15€
+  if (cost >= 30 && !attraction.bookingUrl) {
+    return { ...attraction, estimatedCost: 15 };
   }
 
   return attraction;
@@ -616,6 +621,7 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
   const accommodation = selectBestHotel(allAccommodationOptions, {
     budgetLevel: resolvedBudget.budgetLevel as 'economic' | 'moderate' | 'luxury',
     attractions: selectedAttractions,
+    preferApartment: budgetStrategy.accommodationType.includes('airbnb'),
   });
   console.log(`Hébergement sélectionné: ${accommodation?.name || 'Aucun'} (type: ${accommodation?.type || 'N/A'})`);
 
