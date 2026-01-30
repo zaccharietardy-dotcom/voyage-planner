@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
           bookingUrl: a.bookingUrl,
           rating: a.rating,
           reviewCount: (a as any).reviewCount,
-          imageUrl: a.imageUrl,
+          imageUrl: (a as any).imageUrl,
         })),
       });
     } catch (error: any) {
