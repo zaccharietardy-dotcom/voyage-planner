@@ -138,6 +138,22 @@ ALTER TABLE expenses ENABLE ROW LEVEL SECURITY;
 ALTER TABLE expense_splits ENABLE ROW LEVEL SECURITY;
 ALTER TABLE settlements ENABLE ROW LEVEL SECURITY;
 
+-- SECURITY DEFINER function to check trip access WITHOUT triggering RLS on trip_members
+-- This prevents infinite recursion: expenses → trip_members RLS → ... → loop
+CREATE OR REPLACE FUNCTION public.is_trip_member_or_owner(p_trip_id UUID, p_user_id UUID)
+RETURNS BOOLEAN
+LANGUAGE sql
+SECURITY DEFINER
+STABLE
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM trip_members WHERE trip_id = p_trip_id AND user_id = p_user_id
+  )
+  OR EXISTS (
+    SELECT 1 FROM trips WHERE id = p_trip_id AND owner_id = p_user_id
+  );
+$$;
+
 -- Drop existing policies to make migration re-runnable
 DROP POLICY IF EXISTS "Trip members can view expenses" ON expenses;
 DROP POLICY IF EXISTS "Trip members can insert expenses" ON expenses;
@@ -150,18 +166,12 @@ DROP POLICY IF EXISTS "Trip members can delete splits" ON expense_splits;
 DROP POLICY IF EXISTS "Trip members can view settlements" ON settlements;
 DROP POLICY IF EXISTS "Trip members can insert settlements" ON settlements;
 
--- Expenses: trip members OR trip owner can read/write
+-- Expenses: use SECURITY DEFINER function to avoid RLS recursion
 CREATE POLICY "Trip members can view expenses" ON expenses
-  FOR SELECT USING (
-    EXISTS (SELECT 1 FROM trip_members WHERE trip_members.trip_id = expenses.trip_id AND trip_members.user_id = auth.uid())
-    OR EXISTS (SELECT 1 FROM trips WHERE trips.id = expenses.trip_id AND trips.owner_id = auth.uid())
-  );
+  FOR SELECT USING (public.is_trip_member_or_owner(trip_id, auth.uid()));
 
 CREATE POLICY "Trip members can insert expenses" ON expenses
-  FOR INSERT WITH CHECK (
-    EXISTS (SELECT 1 FROM trip_members WHERE trip_members.trip_id = expenses.trip_id AND trip_members.user_id = auth.uid())
-    OR EXISTS (SELECT 1 FROM trips WHERE trips.id = expenses.trip_id AND trips.owner_id = auth.uid())
-  );
+  FOR INSERT WITH CHECK (public.is_trip_member_or_owner(trip_id, auth.uid()));
 
 CREATE POLICY "Expense creator can update" ON expenses
   FOR UPDATE USING (created_by = auth.uid());
@@ -169,14 +179,13 @@ CREATE POLICY "Expense creator can update" ON expenses
 CREATE POLICY "Expense creator can delete" ON expenses
   FOR DELETE USING (created_by = auth.uid());
 
--- Expense splits: readable by trip members or owner
+-- Expense splits: use SECURITY DEFINER via expenses join
 CREATE POLICY "Trip members can view splits" ON expense_splits
   FOR SELECT USING (
     EXISTS (
       SELECT 1 FROM expenses e
-      LEFT JOIN trip_members tm ON tm.trip_id = e.trip_id AND tm.user_id = auth.uid()
-      LEFT JOIN trips t ON t.id = e.trip_id AND t.owner_id = auth.uid()
-      WHERE e.id = expense_splits.expense_id AND (tm.user_id IS NOT NULL OR t.owner_id IS NOT NULL)
+      WHERE e.id = expense_splits.expense_id
+      AND public.is_trip_member_or_owner(e.trip_id, auth.uid())
     )
   );
 
@@ -184,9 +193,8 @@ CREATE POLICY "Trip members can insert splits" ON expense_splits
   FOR INSERT WITH CHECK (
     EXISTS (
       SELECT 1 FROM expenses e
-      LEFT JOIN trip_members tm ON tm.trip_id = e.trip_id AND tm.user_id = auth.uid()
-      LEFT JOIN trips t ON t.id = e.trip_id AND t.owner_id = auth.uid()
-      WHERE e.id = expense_splits.expense_id AND (tm.user_id IS NOT NULL OR t.owner_id IS NOT NULL)
+      WHERE e.id = expense_splits.expense_id
+      AND public.is_trip_member_or_owner(e.trip_id, auth.uid())
     )
   );
 
@@ -194,9 +202,8 @@ CREATE POLICY "Trip members can update splits" ON expense_splits
   FOR UPDATE USING (
     EXISTS (
       SELECT 1 FROM expenses e
-      LEFT JOIN trip_members tm ON tm.trip_id = e.trip_id AND tm.user_id = auth.uid()
-      LEFT JOIN trips t ON t.id = e.trip_id AND t.owner_id = auth.uid()
-      WHERE e.id = expense_splits.expense_id AND (tm.user_id IS NOT NULL OR t.owner_id IS NOT NULL)
+      WHERE e.id = expense_splits.expense_id
+      AND public.is_trip_member_or_owner(e.trip_id, auth.uid())
     )
   );
 
@@ -204,24 +211,17 @@ CREATE POLICY "Trip members can delete splits" ON expense_splits
   FOR DELETE USING (
     EXISTS (
       SELECT 1 FROM expenses e
-      LEFT JOIN trip_members tm ON tm.trip_id = e.trip_id AND tm.user_id = auth.uid()
-      LEFT JOIN trips t ON t.id = e.trip_id AND t.owner_id = auth.uid()
-      WHERE e.id = expense_splits.expense_id AND (tm.user_id IS NOT NULL OR t.owner_id IS NOT NULL)
+      WHERE e.id = expense_splits.expense_id
+      AND public.is_trip_member_or_owner(e.trip_id, auth.uid())
     )
   );
 
--- Settlements: trip members or owner can read/write
+-- Settlements: use SECURITY DEFINER function
 CREATE POLICY "Trip members can view settlements" ON settlements
-  FOR SELECT USING (
-    EXISTS (SELECT 1 FROM trip_members WHERE trip_members.trip_id = settlements.trip_id AND trip_members.user_id = auth.uid())
-    OR EXISTS (SELECT 1 FROM trips WHERE trips.id = settlements.trip_id AND trips.owner_id = auth.uid())
-  );
+  FOR SELECT USING (public.is_trip_member_or_owner(trip_id, auth.uid()));
 
 CREATE POLICY "Trip members can insert settlements" ON settlements
-  FOR INSERT WITH CHECK (
-    EXISTS (SELECT 1 FROM trip_members WHERE trip_members.trip_id = settlements.trip_id AND trip_members.user_id = auth.uid())
-    OR EXISTS (SELECT 1 FROM trips WHERE trips.id = settlements.trip_id AND trips.owner_id = auth.uid())
-  );
+  FOR INSERT WITH CHECK (public.is_trip_member_or_owner(trip_id, auth.uid()));
 
 -- Enable realtime (ignore if already added)
 DO $$ BEGIN
