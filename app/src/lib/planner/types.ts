@@ -14,11 +14,13 @@ import {
   ParkingOption,
   Accommodation,
   BudgetLevel,
+  BudgetStrategy,
   TransportOptionSummary,
 } from '../types';
 import { Attraction } from '../services/attractions';
 import { AirportInfo } from '../services/geocoding';
 import { TransportOption } from '../services/transport';
+import { BudgetTracker } from '../services/budgetTracker';
 
 // ============================================
 // Day Classification
@@ -100,6 +102,10 @@ export interface PlannerContext {
 
   // Activités disponibles (toutes)
   allAttractions: Attraction[];
+
+  // Budget
+  budgetTracker?: BudgetTracker;
+  budgetStrategy?: BudgetStrategy;
 
   // Préférences dérivées
   hasNightlife: boolean;
