@@ -18,12 +18,14 @@ export function isNativePlatform(): boolean {
 
 export async function nativeShare(data: { title: string; text: string; url: string }) {
   if (!isNativePlatform()) return;
+  // @ts-ignore - package only available in mobile build
   const { Share } = await import('@capacitor/share');
   await Share.share(data);
 }
 
 export async function triggerHaptic(style: 'light' | 'medium' | 'heavy' = 'medium') {
   if (!isNativePlatform()) return;
+  // @ts-ignore - package only available in mobile build
   const { Haptics, ImpactStyle } = await import('@capacitor/haptics');
   const map = { light: ImpactStyle.Light, medium: ImpactStyle.Medium, heavy: ImpactStyle.Heavy };
   await Haptics.impact({ style: map[style] });
