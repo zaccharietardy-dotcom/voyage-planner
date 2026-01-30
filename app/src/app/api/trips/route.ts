@@ -126,6 +126,13 @@ export async function POST(request: Request) {
 
     console.log('[API/trips] Trip created successfully:', trip.id);
 
+    // Ajouter le créateur comme membre owner
+    await supabase.from('trip_members').insert({
+      trip_id: trip.id,
+      user_id: user.id,
+      role: 'owner',
+    });
+
     // Log d'activité (best effort, table may not exist)
     try {
       await supabase.from('activity_log').insert({
