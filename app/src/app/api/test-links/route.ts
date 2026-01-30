@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
           estimatedCost: a.estimatedCost,
           bookingUrl: a.bookingUrl,
           rating: a.rating,
-          reviewCount: a.reviewCount,
+          reviewCount: (a as any).reviewCount,
           imageUrl: a.imageUrl,
         })),
       });
