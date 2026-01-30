@@ -85,7 +85,8 @@ async function searchByPlaceId(
 
   if (checkIn) params.set('checkin', checkIn);
   if (checkOut) params.set('checkout', checkOut);
-  if (options.maxPricePerNight) params.set('priceMax', options.maxPricePerNight.toString());
+  // Ne PAS passer priceMax à l'API — elle filtre trop agressivement et retourne 0 résultats
+  // pour les budgets serrés. On triera par prix côté client après.
   if (options.minPricePerNight) params.set('priceMin', options.minPricePerNight.toString());
 
   const response = await fetch(`https://${RAPIDAPI_AIRBNB_HOST}/api/v2/searchPropertyByPlaceId?${params}`, {
@@ -196,16 +197,33 @@ export async function searchAirbnbListings(
       .filter((a: Accommodation) => a.pricePerNight > 0);
 
     // Si cuisine requise, ne garder que les logements entiers
+    let filtered = accommodations;
     if (options.requireKitchen) {
       const entireHomes = accommodations.filter(a => a.type === 'apartment');
       if (entireHomes.length > 0) {
         console.log(`[Airbnb] ✅ ${entireHomes.length} logements entiers (avec cuisine probable)`);
-        return entireHomes;
+        filtered = entireHomes;
       }
     }
 
-    console.log(`[Airbnb] ✅ ${accommodations.length} logements valides`);
-    return accommodations;
+    // Trier par prix croissant pour que les moins chers soient en premier
+    filtered.sort((a, b) => a.pricePerNight - b.pricePerNight);
+
+    // Log le range de prix trouvé
+    if (filtered.length > 0) {
+      console.log(`[Airbnb] Prix: ${filtered[0].pricePerNight}€ - ${filtered[filtered.length - 1].pricePerNight}€/nuit`);
+      if (options.maxPricePerNight) {
+        const affordable = filtered.filter(a => a.pricePerNight <= options.maxPricePerNight! * 1.5);
+        if (affordable.length > 0) {
+          console.log(`[Airbnb] ${affordable.length} logements ≤ ${Math.round(options.maxPricePerNight * 1.5)}€/nuit`);
+          return affordable;
+        }
+        console.log(`[Airbnb] Aucun logement ≤ ${options.maxPricePerNight}€, on retourne les moins chers`);
+      }
+    }
+
+    console.log(`[Airbnb] ✅ ${filtered.length} logements valides`);
+    return filtered;
   } catch (error) {
     console.error('[Airbnb] Erreur:', error);
     return generateFallbackAirbnb(destination, checkIn, checkOut, options);
