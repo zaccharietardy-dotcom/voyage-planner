@@ -201,15 +201,11 @@ STRATÉGIE BUDGET (décidée en amont):
 - Hébergement: ${strategy.accommodationType === 'airbnb_with_kitchen' ? 'Airbnb avec cuisine (les voyageurs pourront cuisiner)' : strategy.accommodationType === 'hostel' ? 'Auberge de jeunesse' : 'Hôtel'}
 - Repas: petit-déj=${strategy.mealsStrategy.breakfast}, déjeuner=${strategy.mealsStrategy.lunch}, dîner=${strategy.mealsStrategy.dinner}
   (self_catered = courses au supermarché, restaurant = au resto, mixed = alternance)
-- Courses nécessaires: ${strategy.groceryShoppingNeeded ? 'OUI — inclure des créneaux courses supermarché (~30min) dans l\'itinéraire, de préférence le matin ou en fin de journée, dans un supermarché RÉEL proche du logement' : 'NON'}
+- Courses nécessaires: ${strategy.groceryShoppingNeeded ? 'OUI — les repas self_catered sont gérés automatiquement par le système, tu n\'as PAS besoin d\'ajouter de créneaux courses dans l\'itinéraire. Concentre-toi sur les activités et visites.' : 'NON'}
 - Niveau activités: ${strategy.activitiesLevel} (budget ~${strategy.dailyActivityBudget}€/pers/jour)
 - Transport local: ${strategy.transportTips}
 
-${strategy.groceryShoppingNeeded ? `IMPORTANT COURSES:
-- Ajoute un créneau "Courses au supermarché" (~30min) dans les additionalSuggestions quand des repas self_catered sont prévus
-- Nomme un vrai supermarché local (Carrefour, Mercadona, Lidl, Konbini, etc. selon la destination)
-- Estime le coût courses à 5-8€/personne/repas
-- Place les courses à un moment logique (matin tôt ou retour au logement en fin d'après-midi)` : ''}
+IMPORTANT: Les repas self_catered (courses/cuisine) sont AUTOMATIQUEMENT ajoutés par le système. Ne les inclus PAS dans ton itinéraire. Concentre-toi UNIQUEMENT sur les activités, visites et restaurants (quand la stratégie dit "restaurant").
 ` : '';
 
   const prompt = `Tu es un guide de voyage local expert avec 20 ans d'expérience à ${request.destination}. Conçois l'itinéraire PARFAIT de ${request.durationDays} jours.

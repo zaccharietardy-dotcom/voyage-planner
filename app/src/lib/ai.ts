@@ -345,6 +345,7 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
   // Si la stratégie recommande Airbnb, lancer une recherche en parallèle
   let airbnbOptions: Accommodation[] = [];
   if (budgetStrategy.accommodationType.includes('airbnb') && isAirbnbApiConfigured()) {
+    // API Airbnb disponible → recherche directe
     console.time('[AI] Airbnb');
     try {
       const checkInStr = startDate.toISOString().split('T')[0];
@@ -364,6 +365,21 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       console.warn('[AI] Recherche Airbnb échouée, fallback hôtels:', error);
     }
     console.timeEnd('[AI] Airbnb');
+  } else if (budgetStrategy.accommodationType.includes('airbnb') && !isAirbnbApiConfigured()) {
+    // Pas d'API Airbnb → filtrer les appartements/flats dans les résultats hôtel existants
+    console.log('[AI] Pas d\'API Airbnb configurée, recherche d\'apartments dans les résultats Booking...');
+    const apartmentKeywords = /\b(apartment|flat|appart|résidence|studio|loft|suite.*kitchen|self.?catering)\b/i;
+    const apartmentResults = accommodationOptions.filter(h =>
+      apartmentKeywords.test(h.name) || apartmentKeywords.test(h.description || '') ||
+      (h.amenities && h.amenities.some((a: string) => /kitchen|cuisine|kitchenette/i.test(a)))
+    );
+    if (apartmentResults.length > 0) {
+      console.log(`[AI] ✅ ${apartmentResults.length} apartments trouvés dans les résultats hôtel`);
+      // Prioriser les apartments en les mettant en premier
+      airbnbOptions = apartmentResults;
+    } else {
+      console.log('[AI] Aucun apartment trouvé, on garde les hôtels les moins chers');
+    }
   }
 
   // Combiner les options d'hébergement (hôtels + Airbnb)
@@ -690,7 +706,7 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
   }
 
   // Calculer le coût total
-  const costBreakdown = calculateCostBreakdown(days, outboundFlight, returnFlight, parking, preferences);
+  const costBreakdown = calculateCostBreakdown(days, outboundFlight, returnFlight, parking, preferences, accommodation);
 
   // Calculer l'empreinte carbone basée sur le transport sélectionné
   const travelDistance = originAirport && destAirport
@@ -3769,11 +3785,14 @@ function calculateCostBreakdown(
   outboundFlight: Flight | null,
   returnFlight: Flight | null,
   parking: ParkingOption | null,
-  preferences: TripPreferences
+  preferences: TripPreferences,
+  accommodation?: Accommodation | null,
 ): { flights: number; accommodation: number; food: number; activities: number; transport: number; parking: number; other: number } {
+  // Utiliser le VRAI prix de l'hébergement sélectionné si disponible
+  const nightlyRate = accommodation?.pricePerNight || getAccommodationCost(preferences.budgetLevel);
   const breakdown = {
     flights: (outboundFlight?.price || 0) + (returnFlight?.price || 0),
-    accommodation: preferences.durationDays * getAccommodationCost(preferences.budgetLevel),
+    accommodation: (preferences.durationDays - 1) * nightlyRate, // -1 car dernière nuit pas dormie
     food: 0,
     activities: 0,
     transport: 0,
