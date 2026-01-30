@@ -36,17 +36,12 @@ interface AirbnbSearchOptions {
 async function resolveDestinationId(destination: string): Promise<{ id: string; name: string } | null> {
   try {
     const params = new URLSearchParams({ query: destination });
-    const response = await fetch(`https://${RAPIDAPI_AIRBNB_HOST}/api/v1/searchDestination?${params}`, {
-      headers: {
-        'x-rapidapi-key': RAPIDAPI_KEY,
-        'x-rapidapi-host': RAPIDAPI_AIRBNB_HOST,
-      },
-    });
+    const data = await fetchWithRetry(
+      `https://${RAPIDAPI_AIRBNB_HOST}/api/v1/searchDestination?${params}`,
+      { 'x-rapidapi-key': RAPIDAPI_KEY, 'x-rapidapi-host': RAPIDAPI_AIRBNB_HOST },
+    );
 
-    if (!response.ok) return null;
-
-    const data = await response.json();
-    if (!data.status || !data.data || data.data.length === 0) return null;
+    if (!data || !data.status || !data.data || data.data.length === 0) return null;
 
     const first = data.data[0];
     return { id: first.id, name: first.display_name || first.location_name || destination };
@@ -71,6 +66,26 @@ async function resolveDestinationId(destination: string): Promise<{ id: string; 
  *   title: "Flat in Barcelona"
  * }
  */
+async function fetchWithRetry(url: string, headers: Record<string, string>, maxRetries = 3): Promise<any> {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    const response = await fetch(url, { headers });
+    if (!response.ok) {
+      console.error(`[Airbnb] HTTP ${response.status}`);
+      return null;
+    }
+    const data = await response.json();
+    // Rate limit → wait and retry
+    if (data.message && data.message.includes('rate limit')) {
+      const delay = (attempt + 1) * 2000; // 2s, 4s, 6s
+      console.warn(`[Airbnb] Rate limited, retry ${attempt + 1}/${maxRetries} dans ${delay}ms...`);
+      await new Promise(r => setTimeout(r, delay));
+      continue;
+    }
+    return data;
+  }
+  return null;
+}
+
 async function searchByPlaceId(
   placeId: string,
   checkIn: string,
@@ -89,22 +104,13 @@ async function searchByPlaceId(
   // pour les budgets serrés. On triera par prix côté client après.
   if (options.minPricePerNight) params.set('priceMin', options.minPricePerNight.toString());
 
-  const response = await fetch(`https://${RAPIDAPI_AIRBNB_HOST}/api/v2/searchPropertyByPlaceId?${params}`, {
-    headers: {
-      'x-rapidapi-key': RAPIDAPI_KEY,
-      'x-rapidapi-host': RAPIDAPI_AIRBNB_HOST,
-    },
-  });
+  const data = await fetchWithRetry(
+    `https://${RAPIDAPI_AIRBNB_HOST}/api/v2/searchPropertyByPlaceId?${params}`,
+    { 'x-rapidapi-key': RAPIDAPI_KEY, 'x-rapidapi-host': RAPIDAPI_AIRBNB_HOST },
+  );
 
-  if (!response.ok) {
-    console.error(`[Airbnb] HTTP ${response.status}`);
-    return [];
-  }
-
-  const data = await response.json();
-
-  if (!data.status || !data.data) {
-    console.warn(`[Airbnb] API error: ${data.message || 'no data'}`);
+  if (!data || !data.status || !data.data) {
+    console.warn(`[Airbnb] API error: ${data?.message || 'no data'}`);
     return [];
   }
 
