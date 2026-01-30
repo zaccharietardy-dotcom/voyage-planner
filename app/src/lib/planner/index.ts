@@ -12,6 +12,8 @@ export type { RestaurantFinder, MealResult } from './MealScheduler';
 export { ActivityPlanner } from './ActivityPlanner';
 export { ClaudeAdvisor } from './ClaudeAdvisor';
 export { applyFallbackRules } from './FallbackRules';
+export { BudgetTracker } from './BudgetTracker';
+export type { BudgetCategory, BudgetBreakdown } from './BudgetTracker';
 export type {
   DayType,
   TravelerState,

@@ -42,7 +42,7 @@ import { generateClaudeItinerary, summarizeAttractions, mapItineraryToAttraction
 import { generateTravelTips } from './services/travelTips';
 import { resolveBudget, generateBudgetStrategy } from './services/budgetResolver';
 import { searchAirbnbListings, isAirbnbApiConfigured } from './services/airbnb';
-import { BudgetTracker } from './planner/BudgetTracker';
+import { BudgetTracker } from './planner';
 
 /**
  * Génère l'URL de réservation pour un hébergement.
