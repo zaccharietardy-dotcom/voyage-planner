@@ -53,12 +53,39 @@ export function ShareTripDialog({
     ? `${typeof window !== 'undefined' ? window.location.origin : ''}/join/${shareCode}`
     : '';
 
+  // Vérifier si le voyage est déjà sauvegardé quand le dialog s'ouvre
+  useEffect(() => {
+    if (!open || !user || shareCode) return;
+
+    const checkExisting = async () => {
+      try {
+        const response = await fetch('/api/trips');
+        if (!response.ok) return;
+        const trips = await response.json();
+        // Chercher par tripId (UUID Supabase) ou par destination + date
+        const startStr = new Date(trip.preferences.startDate).toISOString().split('T')[0];
+        const existing = trips.find((t: any) =>
+          t.id === tripId ||
+          (t.destination === trip.preferences.destination && t.start_date === startStr)
+        );
+        if (existing) {
+          setShareCode(existing.share_code);
+          setSavedTripId(existing.id);
+        }
+      } catch { /* ignore */ }
+    };
+    checkExisting();
+  }, [open, user]);
+
   // Sauvegarder le voyage en Supabase pour obtenir un code de partage
   const saveTrip = async () => {
     if (!user) {
       setError('Vous devez être connecté pour partager ce voyage');
       return;
     }
+
+    // Déjà sauvegardé
+    if (shareCode) return;
 
     setIsLoading(true);
     setError(null);
