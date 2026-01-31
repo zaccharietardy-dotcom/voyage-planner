@@ -804,6 +804,48 @@ export function mapItineraryToAttractions(
       });
     }
 
-    return dayAttractions;
+    // Reorder attractions by geographic proximity (nearest-neighbor) to minimize travel
+    return reorderByProximity(dayAttractions);
   });
+}
+
+/**
+ * Réordonne les attractions par proximité géographique (nearest-neighbor greedy)
+ * Commence par la première attraction, puis visite toujours la plus proche non visitée
+ */
+function reorderByProximity(attractions: Attraction[]): Attraction[] {
+  if (attractions.length <= 2) return attractions;
+
+  // Only reorder attractions that have valid coords
+  const withCoords = attractions.filter(a => a.latitude && a.longitude);
+  const withoutCoords = attractions.filter(a => !a.latitude || !a.longitude);
+
+  if (withCoords.length <= 2) return attractions;
+
+  const result: Attraction[] = [];
+  const remaining = new Set(withCoords.map((_, i) => i));
+
+  // Start with first attraction (usually Claude's first pick is intentional)
+  let current = 0;
+  result.push(withCoords[current]);
+  remaining.delete(current);
+
+  while (remaining.size > 0) {
+    let nearest = -1;
+    let nearestDist = Infinity;
+    for (const idx of remaining) {
+      const dlat = (withCoords[current].latitude - withCoords[idx].latitude) * 111;
+      const dlng = (withCoords[current].longitude - withCoords[idx].longitude) * 111 * Math.cos(withCoords[current].latitude * Math.PI / 180);
+      const dist = dlat * dlat + dlng * dlng; // squared distance is fine for comparison
+      if (dist < nearestDist) {
+        nearestDist = dist;
+        nearest = idx;
+      }
+    }
+    result.push(withCoords[nearest]);
+    remaining.delete(nearest);
+    current = nearest;
+  }
+
+  return [...result, ...withoutCoords];
 }
