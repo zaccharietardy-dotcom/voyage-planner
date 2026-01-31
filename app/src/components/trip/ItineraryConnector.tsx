@@ -36,7 +36,12 @@ export function ItineraryConnector({
 
   // Générer l'URL Google Maps avec itinéraire
   // Utiliser les noms pour une meilleure précision que les coordonnées GPS
-  const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(from.name)}&destination=${encodeURIComponent(to.name)}&travelmode=${googleMapsMode}`;
+  // Use coordinates for unambiguous routing (names alone can resolve to wrong city)
+  const hasFromCoords = from.latitude && from.longitude;
+  const hasToCoords = to.latitude && to.longitude;
+  const origin = hasFromCoords ? `${from.latitude},${from.longitude}` : encodeURIComponent(from.name);
+  const destination = hasToCoords ? `${to.latitude},${to.longitude}` : encodeURIComponent(to.name);
+  const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&travelmode=${googleMapsMode}`;
 
   // Icône selon le mode de transport
   const getModeIcon = () => {
