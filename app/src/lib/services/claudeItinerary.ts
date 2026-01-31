@@ -448,14 +448,50 @@ Format EXACT:
     ].join(' ');
 
     // Vérifier les incontournables pour les destinations connues
-    const mustHaveChecks: Record<string, string[]> = {
-      'barcelona': ['sagrada', 'batlló', 'güell', 'rambla'],
-      'paris': ['eiffel', 'louvre', 'sacré-cœur', 'notre-dame', 'montmartre'],
-      'rome': ['colisée', 'colosseum', 'vatican', 'trevi', 'panthéon'],
-      'tokyo': ['shibuya', 'senso-ji', 'meiji'],
-      'london': ['big ben', 'tower', 'british museum', 'buckingham'],
-      'new york': ['statue of liberty', 'central park', 'empire state', 'times square'],
+    // Incontournables with full names for geocoding and proper durations
+  const mustHaveDetails: Record<string, { keyword: string; fullName: string; duration: number; cost: number }[]> = {
+      'barcelona': [
+        { keyword: 'sagrada', fullName: 'Sagrada Família, Barcelona', duration: 120, cost: 26 },
+        { keyword: 'batlló', fullName: 'Casa Batlló, Barcelona', duration: 60, cost: 35 },
+        { keyword: 'güell', fullName: 'Parc Güell, Barcelona', duration: 90, cost: 10 },
+        { keyword: 'rambla', fullName: 'La Rambla, Barcelona', duration: 60, cost: 0 },
+      ],
+      'paris': [
+        { keyword: 'eiffel', fullName: 'Tour Eiffel, Paris', duration: 90, cost: 29 },
+        { keyword: 'louvre', fullName: 'Musée du Louvre, Paris', duration: 180, cost: 22 },
+        { keyword: 'sacré-cœur', fullName: 'Basilique du Sacré-Cœur, Paris', duration: 45, cost: 0 },
+        { keyword: 'notre-dame', fullName: 'Cathédrale Notre-Dame de Paris', duration: 45, cost: 0 },
+        { keyword: 'montmartre', fullName: 'Montmartre, Paris', duration: 90, cost: 0 },
+      ],
+      'rome': [
+        { keyword: 'colisée', fullName: 'Colisée, Rome', duration: 90, cost: 18 },
+        { keyword: 'colosseum', fullName: 'Colosseum, Rome', duration: 90, cost: 18 },
+        { keyword: 'vatican', fullName: 'Musées du Vatican, Rome', duration: 180, cost: 17 },
+        { keyword: 'trevi', fullName: 'Fontaine de Trevi, Rome', duration: 20, cost: 0 },
+        { keyword: 'panthéon', fullName: 'Panthéon, Rome', duration: 45, cost: 0 },
+      ],
+      'tokyo': [
+        { keyword: 'shibuya', fullName: 'Shibuya Crossing, Tokyo', duration: 30, cost: 0 },
+        { keyword: 'senso-ji', fullName: 'Senso-ji Temple, Tokyo', duration: 60, cost: 0 },
+        { keyword: 'meiji', fullName: 'Meiji Jingu Shrine, Tokyo', duration: 60, cost: 0 },
+      ],
+      'london': [
+        { keyword: 'big ben', fullName: 'Big Ben, London', duration: 20, cost: 0 },
+        { keyword: 'tower', fullName: 'Tower of London', duration: 120, cost: 30 },
+        { keyword: 'british museum', fullName: 'British Museum, London', duration: 180, cost: 0 },
+        { keyword: 'buckingham', fullName: 'Buckingham Palace, London', duration: 30, cost: 0 },
+      ],
+      'new york': [
+        { keyword: 'statue of liberty', fullName: 'Statue of Liberty, New York', duration: 180, cost: 24 },
+        { keyword: 'central park', fullName: 'Central Park, New York', duration: 120, cost: 0 },
+        { keyword: 'empire state', fullName: 'Empire State Building, New York', duration: 60, cost: 42 },
+        { keyword: 'times square', fullName: 'Times Square, New York', duration: 30, cost: 0 },
+      ],
     };
+    const mustHaveChecks: Record<string, string[]> = {};
+    for (const [city, details] of Object.entries(mustHaveDetails)) {
+      mustHaveChecks[city] = details.map(d => d.keyword);
+    }
 
     const destLower = request.destination.toLowerCase();
     for (const [city, landmarks] of Object.entries(mustHaveChecks)) {
@@ -489,22 +525,23 @@ Format EXACT:
       }
     }
 
-    // POST-VALIDATION: Inject missing incontournables
-    for (const [city, landmarks] of Object.entries(mustHaveChecks)) {
+    // POST-VALIDATION: Inject missing incontournables with proper names and durations
+    for (const [city, details] of Object.entries(mustHaveDetails)) {
       if (destLower.includes(city)) {
-        const missing = landmarks.filter(l => !allNames.includes(l) && !allNames.split(' ').some(w => w.includes(l)));
-        for (const landmark of missing) {
-          // Find the day with the fewest activities and inject as additionalSuggestion
-          const lightest = parsed.days.reduce((min, d) =>
+        const missingDetails = details.filter(d => !allNames.includes(d.keyword) && !allNames.split(' ').some(w => w.includes(d.keyword)));
+        for (const detail of missingDetails) {
+          // Find the day with the fewest activities (skip day trips and first/last day)
+          const candidates = parsed.days.filter(d => !d.isDayTrip && d.dayNumber > 1 && d.dayNumber < request.durationDays);
+          const lightest = (candidates.length > 0 ? candidates : parsed.days).reduce((min, d) =>
             d.selectedAttractionIds.length + d.additionalSuggestions.length <
             min.selectedAttractionIds.length + min.additionalSuggestions.length ? d : min
           );
-          console.log(`[ClaudeItinerary] Injecting missing incontournable: ${landmark} into day ${lightest.dayNumber}`);
+          console.log(`[ClaudeItinerary] Injecting missing incontournable: "${detail.fullName}" into day ${lightest.dayNumber}`);
           lightest.additionalSuggestions.push({
-            name: landmark.charAt(0).toUpperCase() + landmark.slice(1),
-            whyVisit: `Incontournable manquant de ${request.destination} — ajouté automatiquement`,
-            estimatedDuration: 90,
-            estimatedCost: 0,
+            name: detail.fullName,
+            whyVisit: `Incontournable de ${request.destination} — ajouté automatiquement`,
+            estimatedDuration: detail.duration,
+            estimatedCost: detail.cost,
             area: request.destination,
           });
         }
@@ -513,12 +550,42 @@ Format EXACT:
 
     // POST-VALIDATION: Duration caps, timing, audience filtering
     const nightlifePattern = /\b(moulin rouge|lido|crazy horse|cabaret|nightclub|strip club|burlesque)\b/i;
-    const eveningOnlyPattern = /\b(cabaret|spectacle|show|concert|opéra|opera|flamenco|jazz club)\b/i;
+    const eveningOnlyPattern = /\b(cabaret|spectacle|show|concert|opéra|opera|flamenco|jazz club|moulin rouge)\b/i;
+    const majorMuseums = /\b(louvre|british museum|metropolitan|met museum|prado|uffizi|hermitage|vatican museum|rijksmuseum|national gallery|musée d'orsay|orsay)\b/i;
+    // Duration caps by attraction type name patterns
+    const durationCaps: [RegExp, number][] = [
+      [/\b(chapelle|chapel|sainte-chapelle)\b/i, 60],
+      [/\b(place|square|plaza|piazza)\b/i, 30],
+      [/\b(pont|bridge|fontaine|fountain|obélisque|obelisk|statue|colonne|column)\b/i, 30],
+      [/\b(jardin|garden|parc|park)\b/i, 75],
+      [/\b(église|church|cathedral|cathédrale|basilique|basilica)\b/i, 60],
+      [/\b(marché|market)\b/i, 60],
+    ];
 
     for (const day of parsed.days) {
+      // Clean suggestion names: remove city/country suffixes like ", Paris, France"
+      for (const s of day.additionalSuggestions) {
+        s.name = s.name.replace(/,\s*(Paris|France|Spain|Italy|Japan|UK|Germany|USA|Netherlands|Portugal|Turkey|Morocco|Thailand|Czech Republic|Hungary|Greece|Egypt|Brazil|Mexico|Australia|India|China|South Korea)[^,]*/gi, '').trim();
+      }
+
+      // Filter selectedAttractionIds: remove nightlife for family_with_kids
+      if (request.groupType === 'family_with_kids') {
+        day.selectedAttractionIds = day.selectedAttractionIds.filter(id => {
+          const attraction = poolCompact.find(a => a.id === id);
+          if (!attraction) return true;
+          if (nightlifePattern.test(attraction.name)) {
+            console.log(`[ClaudeItinerary] Removed pool attraction "${attraction.name}": not kid-friendly`);
+            return false;
+          }
+          return true;
+        });
+        if (day.visitOrder) {
+          day.visitOrder = day.visitOrder.filter(id => day.selectedAttractionIds.includes(id));
+        }
+      }
+
       // Filter additionalSuggestions
       day.additionalSuggestions = day.additionalSuggestions.filter(s => {
-        // Audience filter: remove nightlife/cabaret for family_with_kids
         if (request.groupType === 'family_with_kids' && nightlifePattern.test(s.name)) {
           console.log(`[ClaudeItinerary] Removed "${s.name}": not kid-friendly`);
           return false;
@@ -528,10 +595,17 @@ Format EXACT:
 
       for (const s of day.additionalSuggestions) {
         // Duration cap: max 4h unless major museum
-        const majorMuseums = /\b(louvre|british museum|metropolitan|met museum|prado|uffizi|hermitage|vatican museum|rijksmuseum|national gallery)\b/i;
         if (s.estimatedDuration > 240 && !majorMuseums.test(s.name)) {
           console.log(`[ClaudeItinerary] Cap duration "${s.name}": ${s.estimatedDuration}min → 120min`);
           s.estimatedDuration = 120;
+        }
+        // Type-based duration caps
+        for (const [pattern, maxMin] of durationCaps) {
+          if (pattern.test(s.name) && s.estimatedDuration > maxMin * 1.5) {
+            console.log(`[ClaudeItinerary] Cap duration "${s.name}": ${s.estimatedDuration}min → ${maxMin}min`);
+            s.estimatedDuration = maxMin;
+            break;
+          }
         }
 
         // Evening-only enforcement for shows/cabarets

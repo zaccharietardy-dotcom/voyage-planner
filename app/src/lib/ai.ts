@@ -598,12 +598,16 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
     // Resolve additional suggestions: use Travel Places API (free) first, SerpAPI fallback
     for (let i = 0; i < claudeItinerary.days.length; i++) {
       const day = claudeItinerary.days[i];
+      // For day trips, use dayTripDestination as geocoding context
+      const geoContext = day.isDayTrip && day.dayTripDestination ? day.dayTripDestination : preferences.destination;
+      const geoCenter = day.isDayTrip && day.dayTripDestination ? undefined : cityCenter; // undefined = let API figure it out
+
       for (const suggestion of day.additionalSuggestions) {
         const genIndex = attractionsByDay[i].findIndex(a => a.id.startsWith('claude-') && a.name === suggestion.name);
         if (genIndex < 0) continue;
 
         // Try Travel Places API first (free, via RapidAPI)
-        const resolved = await resolveAttractionByName(suggestion.name, cityCenter);
+        const resolved = await resolveAttractionByName(suggestion.name, geoCenter || cityCenter);
         if (resolved) {
           attractionsByDay[i][genIndex] = {
             ...attractionsByDay[i][genIndex],
@@ -620,8 +624,8 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
         // Fallback 2: SerpAPI
         const found = await searchMustSeeAttractions(
           suggestion.name,
-          preferences.destination,
-          cityCenter
+          geoContext,
+          geoCenter || cityCenter
         );
         if (found.length > 0) {
           attractionsByDay[i][genIndex] = { ...found[0], mustSee: true };
@@ -631,7 +635,7 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
 
         // Fallback 3: Nominatim geocoding (free, reliable for named places)
         try {
-          const geo = await geocodeAddress(`${suggestion.name}, ${preferences.destination}`);
+          const geo = await geocodeAddress(`${suggestion.name}, ${geoContext}`);
           if (geo && geo.lat && geo.lng) {
             attractionsByDay[i][genIndex] = {
               ...attractionsByDay[i][genIndex],
@@ -639,7 +643,7 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
               longitude: geo.lng,
               mustSee: true,
               dataReliability: 'verified',
-              googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(suggestion.name + ', ' + preferences.destination)}`,
+              googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(suggestion.name + ', ' + geoContext)}`,
             };
             console.log(`[AI]   Résolu via Nominatim: "${suggestion.name}" → (${geo.lat}, ${geo.lng})`);
             continue;

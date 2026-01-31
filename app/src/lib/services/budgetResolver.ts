@@ -140,12 +140,13 @@ RÈGLES:
 
     const strategy: BudgetStrategy = JSON.parse(jsonStr);
 
-    // Guard: if budget per person per day is high enough (>80€), ensure restaurant meals
-    // This covers luxury budgets without blindly forcing it when budget is actually tight
+    // Guard: if budget per person per day is high enough (>=80€), force all meals to restaurant
     if (resolved.perPersonPerDay >= 80) {
       const meals = strategy.mealsStrategy;
-      if (meals.lunch === 'self_catered' || meals.dinner === 'self_catered') {
-        console.log(`[BudgetStrategy] Override: ${resolved.perPersonPerDay.toFixed(0)}€/pers/jour → forcing lunch+dinner to restaurant`);
+      const needsOverride = meals.breakfast !== 'restaurant' || meals.lunch !== 'restaurant' || meals.dinner !== 'restaurant';
+      if (needsOverride) {
+        console.log(`[BudgetStrategy] Override: ${resolved.perPersonPerDay.toFixed(0)}€/pers/jour → forcing ALL meals to restaurant`);
+        meals.breakfast = 'restaurant';
         meals.lunch = 'restaurant';
         meals.dinner = 'restaurant';
         strategy.groceryShoppingNeeded = false;
