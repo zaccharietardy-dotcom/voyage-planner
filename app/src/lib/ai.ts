@@ -815,6 +815,10 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
   // Variable pour propager les vols tardifs au jour suivant
   let pendingLateFlightData: LateFlightArrivalData | undefined;
 
+  // Tracker: on ne peut pas cuisiner tant qu'on n'a pas fait les courses
+  // Si groceryShoppingNeeded=false, on considère que les courses ne sont pas nécessaires (pas de self-catering)
+  let groceriesDoneByDay = !budgetStrategy?.groceryShoppingNeeded; // true si pas besoin de courses
+
   for (let i = 0; i < preferences.durationDays; i++) {
     // Créer la date du jour (startDate est déjà normalisé à midi local)
     const dayDate = new Date(startDate);
@@ -857,6 +861,7 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       lateFlightArrivalData: pendingLateFlightData, // Données du vol tardif du jour précédent
       isDayTrip: (dayMetadata[i] || {} as any).isDayTrip,
       dayTripDestination: (dayMetadata[i] || {} as any).dayTripDestination,
+      groceriesDone: groceriesDoneByDay,
     });
 
     // Injecter les courses si ce jour est un jour de courses
@@ -917,6 +922,8 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
 
       if (budgetTracker) budgetTracker.spend('food', 25 * (preferences.groupSize || 1));
       console.log(`[Jour ${dayNumber}] 🛒 Courses ajoutées: ${groceryStore.name} à ${insertTime}`);
+      // Les courses sont faites → on peut cuisiner à partir de maintenant
+      groceriesDoneByDay = true;
     }
 
     const meta = dayMetadata[i] || {};
@@ -1455,11 +1462,14 @@ function shouldSelfCater(
   hotelHasBreakfast?: boolean,
   totalDays?: number,
   isDayTrip?: boolean,
+  groceriesDone?: boolean,
 ): boolean {
   if (!budgetStrategy) return false;
   if (mealType === 'breakfast' && hotelHasBreakfast) return false;
   // On ne peut pas cuisiner pendant un day trip
   if (isDayTrip) return false;
+  // On ne peut pas cuisiner si les courses n'ont pas encore été faites
+  if (groceriesDone === false) return false;
 
   const strategy = budgetStrategy.mealsStrategy[mealType];
   if (strategy === 'self_catered') return true;
@@ -1501,6 +1511,7 @@ async function generateDayWithScheduler(params: {
   lateFlightArrivalData?: LateFlightArrivalData | null; // Vol tardif du jour précédent à traiter
   isDayTrip?: boolean; // Day trip: relax city validation
   dayTripDestination?: string; // Day trip destination city name
+  groceriesDone?: boolean; // true si les courses ont déjà été faites (on peut cuisiner)
 }): Promise<{ items: TripItem[]; lateFlightForNextDay?: LateFlightArrivalData }> {
   const {
     dayNumber,
@@ -1525,6 +1536,7 @@ async function generateDayWithScheduler(params: {
     lateFlightArrivalData, // Vol tardif à traiter en début de journée
     isDayTrip,
     dayTripDestination,
+    groceriesDone,
   } = params;
 
   // Date de début du voyage normalisée (pour les URLs de réservation)
@@ -2123,7 +2135,7 @@ async function generateDayWithScheduler(params: {
             travelTime: 15,
           });
           if (lunchItem) {
-            if (shouldSelfCater('lunch', dayNumber, budgetStrategy, false, preferences.durationDays, isDayTrip)) {
+            if (shouldSelfCater('lunch', dayNumber, budgetStrategy, false, preferences.durationDays, isDayTrip, groceriesDone)) {
               items.push(schedulerItemToTripItem(lunchItem, dayNumber, orderIndex++, {
                 title: 'Déjeuner pique-nique / maison',
                 description: 'Repas préparé avec les courses | Option économique',
@@ -2489,7 +2501,7 @@ async function generateDayWithScheduler(params: {
           lat: accommodation?.latitude || cityCenter.lat,
           lng: accommodation?.longitude || cityCenter.lng,
         };
-      } else if (shouldSelfCater('breakfast', dayNumber, budgetStrategy, hotelHasBreakfast, preferences.durationDays, isDayTrip)) {
+      } else if (shouldSelfCater('breakfast', dayNumber, budgetStrategy, hotelHasBreakfast, preferences.durationDays, isDayTrip, groceriesDone)) {
         // Petit-déjeuner self_catered (courses/cuisine au logement)
         const accommodationCoords = {
           lat: accommodation?.latitude || cityCenter.lat,
@@ -2734,7 +2746,7 @@ async function generateDayWithScheduler(params: {
       endTime: new Date(lunchTargetTime.getTime() + 75 * 60 * 1000), // 1h15
     });
     if (lunchItem) {
-      if (shouldSelfCater('lunch', dayNumber, budgetStrategy, false, preferences.durationDays, isDayTrip)) {
+      if (shouldSelfCater('lunch', dayNumber, budgetStrategy, false, preferences.durationDays, isDayTrip, groceriesDone)) {
         // Déjeuner self_catered : pique-nique ou repas au logement
         items.push(schedulerItemToTripItem(lunchItem, dayNumber, orderIndex++, {
           title: 'Déjeuner pique-nique / maison',
@@ -3014,7 +3026,7 @@ async function generateDayWithScheduler(params: {
       minStartTime: dinnerMinTime, // FORCE 19h minimum
     });
     if (dinnerItem) {
-      if (shouldSelfCater('dinner', dayNumber, budgetStrategy, false, preferences.durationDays, isDayTrip)) {
+      if (shouldSelfCater('dinner', dayNumber, budgetStrategy, false, preferences.durationDays, isDayTrip, groceriesDone)) {
         // Dîner self_catered : cuisine au logement
         const accommodationCoords = {
           lat: accommodation?.latitude || cityCenter.lat,

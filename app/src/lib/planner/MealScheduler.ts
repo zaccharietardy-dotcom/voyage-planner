@@ -93,6 +93,8 @@ export interface MealSchedulerConfig {
   budgetTracker?: BudgetTracker;
   /** Activités planifiées ce jour (pour détecter activités longues → picnic) */
   plannedActivities?: Array<{ name: string; startTime: Date; endTime: Date; duration: number }>;
+  /** true si les courses ont déjà été faites (on peut cuisiner) */
+  groceriesDone?: boolean;
 }
 
 // ============================================
@@ -119,6 +121,9 @@ export class MealScheduler {
     const { budgetStrategy, dayNumber, context } = this.config;
     if (!budgetStrategy) return false;
     if (budgetStrategy.accommodationType !== 'airbnb_with_kitchen') return false;
+
+    // On ne peut pas cuisiner si les courses n'ont pas encore été faites
+    if (this.config.groceriesDone === false) return false;
 
     const strategy = budgetStrategy.mealsStrategy[mealType];
     if (strategy === 'self_catered') return true;
