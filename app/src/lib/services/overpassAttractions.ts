@@ -25,7 +25,7 @@ const EXCLUDED_OSM_TYPES = new Set([
   'apartment', 'camp_site',
 ]);
 
-// Noms à exclure (animaux de zoo, personnes, etc.)
+// Noms à exclure (animaux de zoo, personnes, lieux mineurs polluants)
 const EXCLUDED_NAME_PATTERNS = [
   // Animaux (zoo de Prague, etc.)
   /^(ailurus|tapir|daim|gorilla|panthera|cervus|ursus|vulpes|canis|felis|equus|bison|lynx)/i,
@@ -33,6 +33,14 @@ const EXCLUDED_NAME_PATTERNS = [
   /madame tussauds/i, /hard rock caf/i, /planet hollywood/i,
   /rainforest caf/i, /ripley.*believe/i, /wax museum/i,
   /selfie museum/i, /trick eye/i,
+  // Lieux mineurs qui polluent les résultats
+  /temple de paris/i,
+  /arc de triomphe du carrousel/i,
+  /\bobelisk\b/i, /\bobélisque\b/i,
+  /\bwar memorial\b/i, /\bmémorial de guerre\b/i,
+  /\bcenotaph\b/i,
+  /\bcemetery\b/i, /\bcimetière\b/i,
+  /\bossuary\b/i, /\bossuaire\b/i,
 ];
 
 // Mapping OSM tourism/historic types → ActivityType
@@ -372,7 +380,9 @@ export async function searchAttractionsOverpass(
   // Sort by popularity (most famous first)
   attractions.sort((a, b) => b.popularity - a.popularity);
 
-  // Cap religious buildings to max 3 (keep most popular ones)
+  // Religious filter: only keep religious buildings with high popularity (>=80 sitelinks = Notre-Dame, Sacré-Cœur level)
+  // Minor chapels, temples, churches are excluded
+  const MIN_RELIGIOUS_POPULARITY = 80;
   const MAX_RELIGIOUS = 3;
   let religiousCount = 0;
   const diversified = attractions.filter(a => {
@@ -380,8 +390,13 @@ export async function searchAttractionsOverpass(
     const building = tags.building || '';
     const amenity = tags.amenity || '';
     const isReligious = /church|cathedral|basilica|chapel|mosque|synagogue|temple/i.test(building)
-      || /place_of_worship/i.test(amenity);
+      || /place_of_worship/i.test(amenity)
+      || /\b(église|church|cathedral|cathédrale|basilique|basilica|chapel|chapelle|mosquée|mosque|synagogue|temple|sanctuaire|shrine)\b/i.test(a.name);
     if (isReligious) {
+      if (a.popularity < MIN_RELIGIOUS_POPULARITY) {
+        console.log(`[Overpass] Filtered minor religious: "${a.name}" (popularity=${a.popularity})`);
+        return false;
+      }
       religiousCount++;
       if (religiousCount > MAX_RELIGIOUS) return false;
     }

@@ -245,10 +245,19 @@ RÈGLES D'OR:
    - Quartiers animés, rues commerçantes → fin d'après-midi/soirée
    - Parcs, jardins → selon la lumière et la saison
 
-2. REGROUPEMENT GÉOGRAPHIQUE:
+2. REGROUPEMENT GÉOGRAPHIQUE STRICT:
    - Groupe les attractions PROCHES le même jour (regarde les coordonnées lat/lng)
    - Ordonne-les pour minimiser les déplacements (circuit logique, pas de zig-zag)
    - Indique le quartier/zone dans le theme du jour
+   - JAMAIS une attraction satellite SANS l'attraction principale du même lieu:
+     * Trocadéro, Champ de Mars → TOUJOURS avec Tour Eiffel
+     * Jardin des Tuileries, Palais Royal → TOUJOURS avec Louvre
+     * Place du Tertre → TOUJOURS avec Sacré-Cœur/Montmartre
+     * Île de la Cité → TOUJOURS avec Notre-Dame
+     * Rambla → TOUJOURS avec Barri Gòtic
+   - Ce principe s'applique à TOUTE destination: les petites attractions (places, jardins, ponts) doivent être groupées avec le monument majeur le plus proche
+   - Attractions distantes de < 500m DOIVENT être le même jour
+   - Ne propose JAMAIS Champ de Mars ou Trocadéro sans Tour Eiffel le même jour
 
 3. RYTHME & DURÉES RÉALISTES:
    - Jour d'arrivée: 2-3 attractions légères (jet lag, installation)
@@ -612,6 +621,34 @@ Format EXACT:
         if (eveningOnlyPattern.test(s.name) && s.bestTimeOfDay !== 'evening') {
           console.log(`[ClaudeItinerary] Force evening for "${s.name}"`);
           s.bestTimeOfDay = 'evening';
+        }
+      }
+    }
+
+    // POST-VALIDATION: Geographic coherence check (logging only)
+    for (const day of parsed.days) {
+      if (day.isDayTrip) continue;
+      const dayCoords: { lat: number; lng: number; name: string }[] = [];
+      for (const id of day.selectedAttractionIds) {
+        const a = poolCompact.find(p => p.id === id);
+        if (a && a.lat && a.lng) dayCoords.push({ lat: a.lat, lng: a.lng, name: a.name });
+      }
+      if (dayCoords.length >= 2) {
+        let maxDist = 0;
+        let pair = ['', ''];
+        for (let x = 0; x < dayCoords.length; x++) {
+          for (let y = x + 1; y < dayCoords.length; y++) {
+            const dlat = (dayCoords[x].lat - dayCoords[y].lat) * 111;
+            const dlng = (dayCoords[x].lng - dayCoords[y].lng) * 111 * Math.cos(dayCoords[x].lat * Math.PI / 180);
+            const dist = Math.sqrt(dlat * dlat + dlng * dlng);
+            if (dist > maxDist) {
+              maxDist = dist;
+              pair = [dayCoords[x].name, dayCoords[y].name];
+            }
+          }
+        }
+        if (maxDist > 5) {
+          console.warn(`[ClaudeItinerary] ⚠️ Jour ${day.dayNumber}: diamètre ${maxDist.toFixed(1)}km entre "${pair[0]}" et "${pair[1]}"`);
         }
       }
     }

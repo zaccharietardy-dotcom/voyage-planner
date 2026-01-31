@@ -602,12 +602,43 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       const geoContext = day.isDayTrip && day.dayTripDestination ? day.dayTripDestination : preferences.destination;
       const geoCenter = day.isDayTrip && day.dayTripDestination ? undefined : cityCenter; // undefined = let API figure it out
 
+      // For day trips, resolve destination center coords for better geocoding
+      let dayTripCenter: { lat: number; lng: number } | undefined;
+      if (day.isDayTrip && day.dayTripDestination) {
+        const dtCoords = await getCityCenterCoordsAsync(day.dayTripDestination);
+        if (dtCoords) {
+          dayTripCenter = dtCoords;
+          console.log(`[AI] Day trip center for "${day.dayTripDestination}": (${dtCoords.lat}, ${dtCoords.lng})`);
+        }
+      }
+
       for (const suggestion of day.additionalSuggestions) {
         const genIndex = attractionsByDay[i].findIndex(a => a.id.startsWith('claude-') && a.name === suggestion.name);
         if (genIndex < 0) continue;
 
+        // For day trips, try Nominatim first (better for named places outside city center radius)
+        if (day.isDayTrip && day.dayTripDestination) {
+          try {
+            const geo = await geocodeAddress(`${suggestion.name}, ${day.dayTripDestination}`);
+            if (geo && geo.lat && geo.lng) {
+              attractionsByDay[i][genIndex] = {
+                ...attractionsByDay[i][genIndex],
+                latitude: geo.lat,
+                longitude: geo.lng,
+                mustSee: true,
+                dataReliability: 'verified',
+                googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(suggestion.name + ', ' + day.dayTripDestination)}`,
+              };
+              console.log(`[AI]   Résolu day trip via Nominatim: "${suggestion.name}" → (${geo.lat}, ${geo.lng})`);
+              continue;
+            }
+          } catch (e) {
+            console.warn(`[AI]   Nominatim day trip error for "${suggestion.name}":`, e);
+          }
+        }
+
         // Try Travel Places API first (free, via RapidAPI)
-        const resolved = await resolveAttractionByName(suggestion.name, geoCenter || cityCenter);
+        const resolved = await resolveAttractionByName(suggestion.name, dayTripCenter || geoCenter || cityCenter);
         if (resolved) {
           attractionsByDay[i][genIndex] = {
             ...attractionsByDay[i][genIndex],
