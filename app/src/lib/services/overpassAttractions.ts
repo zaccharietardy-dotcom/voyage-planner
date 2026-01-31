@@ -123,8 +123,8 @@ async function queryOverpass(lat: number, lng: number, radiusKm: number = 10): P
   node["leisure"="park"]["wikidata"]["name"](${bbox});
   way["leisure"="park"]["wikidata"]["name"](${bbox});
   way["bridge"="yes"]["wikidata"]["name"](${bbox});
-  node["building"~"cathedral|basilica|church"]["wikidata"]["name"](${bbox});
-  way["building"~"cathedral|basilica|church"]["wikidata"]["name"](${bbox});
+  node["amenity"="theatre"]["wikidata"]["name"](${bbox});
+  way["amenity"="theatre"]["wikidata"]["name"](${bbox});
 );
 out center body;`;
 
@@ -263,7 +263,7 @@ export async function searchAttractionsOverpass(
     minPopularity?: number; // Minimum sitelinks count
   } = {}
 ): Promise<Attraction[]> {
-  const { limit = 50, minPopularity = 20 } = options;
+  const { limit = 50, minPopularity = 40 } = options;
 
   // Check cache
   const cacheKey = getCacheKey(cityCenter.lat, cityCenter.lng);
@@ -356,7 +356,7 @@ export async function searchAttractionsOverpass(
       latitude: lat,
       longitude: lng,
       rating: Math.min(5, 3 + (popularity / 50)), // Convert popularity to 3-5 rating
-      mustSee: popularity >= 50, // Major landmarks (50+ Wikipedia pages)
+      mustSee: popularity >= 80, // Major landmarks (80+ Wikipedia pages)
       bookingRequired: false,
       bookingUrl: wd?.officialWebsite,
       openingHours: { open: '09:00', close: '18:00' },
@@ -372,8 +372,24 @@ export async function searchAttractionsOverpass(
   // Sort by popularity (most famous first)
   attractions.sort((a, b) => b.popularity - a.popularity);
 
+  // Cap religious buildings to max 3 (keep most popular ones)
+  const MAX_RELIGIOUS = 3;
+  let religiousCount = 0;
+  const diversified = attractions.filter(a => {
+    const tags = pois.find(p => `osm-${p.qid}` === a.id)?.tags || {};
+    const building = tags.building || '';
+    const amenity = tags.amenity || '';
+    const isReligious = /church|cathedral|basilica|chapel|mosque|synagogue|temple/i.test(building)
+      || /place_of_worship/i.test(amenity);
+    if (isReligious) {
+      religiousCount++;
+      if (religiousCount > MAX_RELIGIOUS) return false;
+    }
+    return true;
+  });
+
   // Take top N
-  const result: Attraction[] = attractions.slice(0, limit).map(({ popularity, ...attr }) => attr);
+  const result: Attraction[] = diversified.slice(0, limit).map(({ popularity, ...attr }) => attr);
 
   console.log(`[Overpass] ✅ ${result.length} attractions de qualité trouvées (top: ${result[0]?.name || 'none'})`);
 

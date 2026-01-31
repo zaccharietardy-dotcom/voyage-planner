@@ -168,8 +168,19 @@ export async function generateClaudeItinerary(
   const client = new Anthropic({ apiKey });
   const season = getSeason(request.startDate);
 
+  // Pre-filter pool: cap religious buildings to max 5 to avoid bias
+  const religiousPattern = /\b(église|church|cathedral|cathédrale|basilique|basilica|chapel|chapelle|mosquée|mosque|synagogue|temple|sanctuaire|shrine)\b/i;
+  let religiousInPool = 0;
+  const filteredPool = request.attractionPool.filter(a => {
+    if (religiousPattern.test(a.name)) {
+      religiousInPool++;
+      if (religiousInPool > 5) return false;
+    }
+    return true;
+  });
+
   // Compact attraction pool for the prompt
-  const poolCompact = request.attractionPool.map(a => ({
+  const poolCompact = filteredPool.map(a => ({
     id: a.id,
     name: a.name,
     type: a.type,
@@ -222,6 +233,8 @@ ${strategyContext}
 
 POOL DE ${poolCompact.length} ATTRACTIONS VÉRIFIÉES (coordonnées GPS, horaires, prix réels):
 ${JSON.stringify(poolCompact)}
+
+⚠️ BIAIS DONNÉES: Le pool provient d'OpenStreetMap et peut surreprésenter les lieux religieux (églises, temples). IGNORE les églises/temples mineurs et PRIORISE les attractions iconiques mondiales (musées majeurs, monuments emblématiques, quartiers célèbres). Si le Louvre, le Musée d'Orsay ou d'autres grands musées manquent du pool, AJOUTE-LES dans additionalSuggestions.
 
 RÈGLES D'OR:
 1. TIMING INTELLIGENT:
@@ -453,6 +466,50 @@ Format EXACT:
       }
     }
 
+    // POST-VALIDATION: Enforce religious diversity cap (max 3 across entire trip)
+    const MAX_RELIGIOUS_TOTAL = 3;
+    const religiousPatterns = /\b(église|church|cathedral|cathédrale|basilique|basilica|chapel|chapelle|mosquée|mosque|synagogue|temple|sanctuaire|shrine)\b/i;
+    let religiousTotal = 0;
+    for (const day of parsed.days) {
+      day.selectedAttractionIds = day.selectedAttractionIds.filter(id => {
+        const attraction = poolCompact.find(a => a.id === id);
+        if (!attraction) return true;
+        if (religiousPatterns.test(attraction.name)) {
+          religiousTotal++;
+          if (religiousTotal > MAX_RELIGIOUS_TOTAL) {
+            console.log(`[ClaudeItinerary] Removed religious overflow: ${attraction.name}`);
+            return false;
+          }
+        }
+        return true;
+      });
+      if (day.visitOrder) {
+        day.visitOrder = day.visitOrder.filter(id => day.selectedAttractionIds.includes(id));
+      }
+    }
+
+    // POST-VALIDATION: Inject missing incontournables
+    for (const [city, landmarks] of Object.entries(mustHaveChecks)) {
+      if (destLower.includes(city)) {
+        const missing = landmarks.filter(l => !allNames.includes(l) && !allNames.split(' ').some(w => w.includes(l)));
+        for (const landmark of missing) {
+          // Find the day with the fewest activities and inject as additionalSuggestion
+          const lightest = parsed.days.reduce((min, d) =>
+            d.selectedAttractionIds.length + d.additionalSuggestions.length <
+            min.selectedAttractionIds.length + min.additionalSuggestions.length ? d : min
+          );
+          console.log(`[ClaudeItinerary] Injecting missing incontournable: ${landmark} into day ${lightest.dayNumber}`);
+          lightest.additionalSuggestions.push({
+            name: landmark.charAt(0).toUpperCase() + landmark.slice(1),
+            whyVisit: `Incontournable manquant de ${request.destination} — ajouté automatiquement`,
+            estimatedDuration: 90,
+            estimatedCost: 0,
+            area: request.destination,
+          });
+        }
+      }
+    }
+
     // Enrichir avec les liens de réservation
     enrichBookingLinks(parsed, request);
 
@@ -565,7 +622,19 @@ export function mapItineraryToAttractions(
   return itinerary.days.map(day => {
     const dayAttractions: Attraction[] = [];
 
-    for (const id of day.selectedAttractionIds) {
+    // Use visitOrder if available (Claude's smart geographic/temporal ordering), fallback to selectedAttractionIds
+    const orderedIds = (day.visitOrder && day.visitOrder.length > 0) ? day.visitOrder : day.selectedAttractionIds;
+    const selectedSet = new Set(day.selectedAttractionIds);
+
+    for (const id of orderedIds) {
+      const attraction = poolMap.get(id);
+      if (attraction) {
+        dayAttractions.push(attraction);
+        selectedSet.delete(id);
+      }
+    }
+    // Add any remaining selectedAttractionIds not in visitOrder
+    for (const id of selectedSet) {
       const attraction = poolMap.get(id);
       if (attraction) {
         dayAttractions.push(attraction);

@@ -2354,11 +2354,10 @@ async function generateDayWithScheduler(params: {
   // tripUsedAttractionIds est passé en paramètre et partagé entre tous les jours
 
   if (canDoMorningActivities) {
-    // Matin: prendre la première moitié des attractions (cohérent avec afternoonAttractions)
-    const morningCount = Math.floor(attractions.length / 2);
-    const morningAttractions = attractions.slice(0, morningCount);
+    // Matin: itérer TOUTES les attractions dans l'ordre de Claude (visitOrder)
+    // Le scheduler s'arrêtera naturellement au déjeuner, les restantes seront traitées l'après-midi
 
-    for (const attraction of morningAttractions) {
+    for (const attraction of attractions) {
       // ANTI-DOUBLON: Skip si déjà utilisée (dans n'importe quel jour du voyage)
       if (tripUsedAttractionIds.has(attraction.id)) {
         console.log(`[Jour ${dayNumber}] Skip "${attraction.name}": déjà utilisée dans le voyage`);
@@ -2460,9 +2459,9 @@ async function generateDayWithScheduler(params: {
     if (timeBeforeLunchMin > 60) {
       console.log(`[Jour ${dayNumber}] ${Math.round(timeBeforeLunchMin / 60)}h de temps libre avant déjeuner - tentative de remplissage`);
 
-      // Chercher des attractions pas encore utilisées (dans tout le voyage)
-      // CORRIGÉ: Utiliser allAttractions pour avoir accès à TOUTES les attractions
-      const unusedAttractionsMorning = allAttractions.filter(a => !tripUsedAttractionIds.has(a.id));
+      // Chercher des attractions pas encore utilisées DANS LA SÉLECTION DU JOUR (Claude)
+      // On ne pioche PAS dans allAttractions pour ne pas diluer la curation de Claude
+      const unusedAttractionsMorning = attractions.filter(a => !tripUsedAttractionIds.has(a.id));
 
       for (const attraction of unusedAttractionsMorning) {
         // Vérifier qu'on a le temps avant le déjeuner (12:30)
@@ -2585,25 +2584,11 @@ async function generateDayWithScheduler(params: {
     }
   }
 
-  // Activites de l'apres-midi
-  // Jour 1: on fait TOUTES les attractions (car on arrive l'apres-midi)
-  // Autres jours: on fait seulement la 2ème moitié (la 1ère a été faite le matin)
-  // IMPORTANT: Si on a peu d'attractions (1-2), on assure au moins 1 pour l'après-midi
-  let afternoonAttractions: Attraction[];
-  if (isFirstDay) {
-    // Jour 1: toutes les attractions disponibles
-    afternoonAttractions = attractions;
-  } else {
-    // Autres jours: répartir équitablement entre matin et après-midi
-    // Avec 1 attraction: matin=0, après-midi=1 (pour avoir quelque chose à faire)
-    // Avec 2 attractions: matin=1, après-midi=1
-    // Avec 3 attractions: matin=1, après-midi=2
-    // Avec 4+ attractions: matin=moitié, après-midi=moitié
-    const morningCount = Math.floor(attractions.length / 2);
-    afternoonAttractions = attractions.slice(morningCount);
-  }
+  // Activités de l'après-midi
+  // On itère TOUTES les attractions dans l'ordre de Claude — celles déjà placées le matin
+  // seront automatiquement skippées par le check tripUsedAttractionIds
 
-  for (const attraction of afternoonAttractions) {
+  for (const attraction of attractions) {
     // ANTI-DOUBLON: Skip si déjà utilisée dans n'importe quel jour du voyage
     if (tripUsedAttractionIds.has(attraction.id)) {
       console.log(`[Jour ${dayNumber}] Skip "${attraction.name}": déjà utilisée dans le voyage`);
@@ -2710,9 +2695,9 @@ async function generateDayWithScheduler(params: {
   if (timeBeforeDinnerMin > 60) {
     console.log(`[Jour ${dayNumber}] ${Math.round(timeBeforeDinnerMin / 60)}h de temps libre avant dîner - tentative de remplissage avec attractions supplémentaires`);
 
-    // Chercher des attractions pas encore utilisées (dans tout le voyage)
-    // CORRIGÉ: Utiliser allAttractions pour avoir accès à TOUTES les attractions, pas seulement celles du jour
-    const unusedAttractions = allAttractions.filter(a => !tripUsedAttractionIds.has(a.id));
+    // Chercher des attractions pas encore utilisées DANS LA SÉLECTION DU JOUR (Claude)
+    // On ne pioche PAS dans allAttractions pour ne pas diluer la curation de Claude
+    const unusedAttractions = attractions.filter(a => !tripUsedAttractionIds.has(a.id));
 
     if (unusedAttractions.length > 0) {
       console.log(`[Jour ${dayNumber}] ${unusedAttractions.length} attractions non utilisées disponibles`);
