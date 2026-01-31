@@ -96,6 +96,45 @@ const AIRPORTS: Record<string, AirportInfo> = {
   MIA: { code: 'MIA', name: 'Miami International', city: 'Miami', country: 'États-Unis', latitude: 25.7959, longitude: -80.2870 },
   YYZ: { code: 'YYZ', name: 'Toronto Pearson', city: 'Toronto', country: 'Canada', latitude: 43.6777, longitude: -79.6248 },
   YUL: { code: 'YUL', name: 'Montréal Trudeau', city: 'Montréal', country: 'Canada', latitude: 45.4706, longitude: -73.7408 },
+
+  // Grèce (îles et autres)
+  HER: { code: 'HER', name: 'Heraklion Nikos Kazantzakis', city: 'Heraklion', country: 'Grèce', latitude: 35.3397, longitude: 25.1803 },
+  JTR: { code: 'JTR', name: 'Santorini (Thira)', city: 'Santorin', country: 'Grèce', latitude: 36.3992, longitude: 25.4793 },
+  RHO: { code: 'RHO', name: 'Rhodes Diagoras', city: 'Rhodes', country: 'Grèce', latitude: 36.4054, longitude: 28.0862 },
+  CFU: { code: 'CFU', name: 'Corfu Ioannis Kapodistrias', city: 'Corfou', country: 'Grèce', latitude: 39.6019, longitude: 19.9117 },
+  SKG: { code: 'SKG', name: 'Thessaloniki Macedonia', city: 'Thessalonique', country: 'Grèce', latitude: 40.5197, longitude: 22.9709 },
+
+  // Croatie
+  DBV: { code: 'DBV', name: 'Dubrovnik', city: 'Dubrovnik', country: 'Croatie', latitude: 42.5614, longitude: 18.2682 },
+  SPU: { code: 'SPU', name: 'Split', city: 'Split', country: 'Croatie', latitude: 43.5390, longitude: 16.2980 },
+
+  // Maroc
+  RAK: { code: 'RAK', name: 'Marrakech Menara', city: 'Marrakech', country: 'Maroc', latitude: 31.6069, longitude: -8.0363 },
+  CMN: { code: 'CMN', name: 'Casablanca Mohammed V', city: 'Casablanca', country: 'Maroc', latitude: 33.3675, longitude: -7.5900 },
+
+  // Malte
+  MLA: { code: 'MLA', name: 'Malta International', city: 'La Valette', country: 'Malte', latitude: 35.8575, longitude: 14.4775 },
+
+  // Sardaigne
+  CAG: { code: 'CAG', name: 'Cagliari Elmas', city: 'Cagliari', country: 'Italie', latitude: 39.2515, longitude: 9.0543 },
+  OLB: { code: 'OLB', name: 'Olbia Costa Smeralda', city: 'Olbia', country: 'Italie', latitude: 40.8987, longitude: 9.5176 },
+
+  // Sicile
+  CTA: { code: 'CTA', name: 'Catania Fontanarossa', city: 'Catane', country: 'Italie', latitude: 37.4668, longitude: 15.0664 },
+  PMO: { code: 'PMO', name: 'Palermo Falcone-Borsellino', city: 'Palerme', country: 'Italie', latitude: 38.1760, longitude: 13.0910 },
+
+  // Chypre
+  LCA: { code: 'LCA', name: 'Larnaca', city: 'Larnaca', country: 'Chypre', latitude: 34.8751, longitude: 33.6249 },
+
+  // Canaries
+  TFS: { code: 'TFS', name: 'Tenerife South', city: 'Tenerife', country: 'Espagne', latitude: 28.0445, longitude: -16.5725 },
+  LPA: { code: 'LPA', name: 'Gran Canaria', city: 'Las Palmas', country: 'Espagne', latitude: 27.9319, longitude: -15.3866 },
+
+  // Turquie
+  IST: { code: 'IST', name: 'Istanbul Airport', city: 'Istanbul', country: 'Turquie', latitude: 41.2753, longitude: 28.7519 },
+
+  // Hongrie
+  BUD: { code: 'BUD', name: 'Budapest Ferenc Liszt', city: 'Budapest', country: 'Hongrie', latitude: 47.4398, longitude: 19.2612 },
 };
 
 // Coordonnées des VRAIS centres-villes (pas les aéroports!)
@@ -219,6 +258,68 @@ const CITY_CENTERS: Record<string, { lat: number; lng: number }> = {
   'singapore': { lat: 1.3521, lng: 103.8198 }, // Marina Bay
   'singapour': { lat: 1.3521, lng: 103.8198 },
   'bangkok': { lat: 13.7563, lng: 100.5018 }, // Khao San Road
+
+  // Grèce (îles et autres)
+  'heraklion': { lat: 35.3387, lng: 25.1442 }, // Vieux port vénitien
+  'héraklion': { lat: 35.3387, lng: 25.1442 },
+  'iraklion': { lat: 35.3387, lng: 25.1442 },
+  'crete': { lat: 35.2401, lng: 24.4709 },
+  'crète': { lat: 35.2401, lng: 24.4709 },
+  'chania': { lat: 35.5138, lng: 24.0180 },
+  'la canée': { lat: 35.5138, lng: 24.0180 },
+  'santorin': { lat: 36.3932, lng: 25.4615 },
+  'santorini': { lat: 36.3932, lng: 25.4615 },
+  'rhodes': { lat: 36.4341, lng: 28.2176 },
+  'corfou': { lat: 39.6243, lng: 19.9217 },
+  'corfu': { lat: 39.6243, lng: 19.9217 },
+  'mykonos': { lat: 37.4467, lng: 25.3289 },
+  'thessalonique': { lat: 40.6401, lng: 22.9444 },
+  'thessaloniki': { lat: 40.6401, lng: 22.9444 },
+
+  // Croatie
+  'dubrovnik': { lat: 42.6507, lng: 18.0944 }, // Vieille ville
+  'split': { lat: 43.5081, lng: 16.4402 }, // Palais de Dioclétien
+  'zagreb': { lat: 45.8150, lng: 15.9819 },
+
+  // Turquie
+  'istanbul': { lat: 41.0082, lng: 28.9784 }, // Sultanahmet
+  'antalya': { lat: 36.8969, lng: 30.7133 },
+
+  // Maroc
+  'marrakech': { lat: 31.6295, lng: -7.9811 }, // Jemaa el-Fna
+  'fes': { lat: 34.0181, lng: -5.0078 },
+  'fès': { lat: 34.0181, lng: -5.0078 },
+  'casablanca': { lat: 33.5731, lng: -7.5898 },
+
+  // Malte
+  'malte': { lat: 35.8989, lng: 14.5146 },
+  'malta': { lat: 35.8989, lng: 14.5146 },
+  'valletta': { lat: 35.8989, lng: 14.5146 },
+  'la valette': { lat: 35.8989, lng: 14.5146 },
+
+  // Sicile / Sardaigne
+  'palermo': { lat: 38.1157, lng: 13.3615 },
+  'palerme': { lat: 38.1157, lng: 13.3615 },
+  'catania': { lat: 37.5079, lng: 15.0830 },
+  'catane': { lat: 37.5079, lng: 15.0830 },
+  'cagliari': { lat: 39.2238, lng: 9.1217 },
+
+  // Baléares
+  'palma': { lat: 39.5696, lng: 2.6502 },
+  'majorque': { lat: 39.5696, lng: 2.6502 },
+  'mallorca': { lat: 39.5696, lng: 2.6502 },
+  'ibiza': { lat: 38.9067, lng: 1.4206 },
+
+  // Canaries
+  'tenerife': { lat: 28.4636, lng: -16.2518 },
+  'las palmas': { lat: 28.1235, lng: -15.4363 },
+  'gran canaria': { lat: 28.1235, lng: -15.4363 },
+
+  // Chypre
+  'chypre': { lat: 34.9071, lng: 33.6226 },
+  'cyprus': { lat: 34.9071, lng: 33.6226 },
+  'larnaca': { lat: 34.9003, lng: 33.6232 },
+  'paphos': { lat: 34.7720, lng: 32.4297 },
 
   // Amérique du Nord
   'new york': { lat: 40.7580, lng: -73.9855 }, // Times Square
@@ -354,6 +455,36 @@ export function findNearbyAirports(city: string): AirportInfo[] {
     'hong kong': 'HKG', 'hongkong': 'HKG',
     'singapore': 'SIN', 'singapour': 'SIN',
     'bangkok': 'BKK',
+    // Grèce
+    'heraklion': 'HER', 'iraklion': 'HER', 'héraklion': 'HER', 'crete': 'HER', 'crète': 'HER', 'chania': 'HER',
+    'santorini': 'JTR', 'santorin': 'JTR', 'thira': 'JTR',
+    'rhodes': 'RHO',
+    'corfu': 'CFU', 'corfou': 'CFU',
+    'mykonos': 'JTR', // Closest major airport
+    'thessaloniki': 'SKG', 'thessalonique': 'SKG',
+    // Croatie
+    'dubrovnik': 'DBV',
+    'split': 'SPU',
+    // Maroc
+    'marrakech': 'RAK',
+    'casablanca': 'CMN',
+    'fes': 'CMN', 'fès': 'CMN',
+    // Malte
+    'malte': 'MLA', 'malta': 'MLA', 'valletta': 'MLA',
+    // Sicile / Sardaigne
+    'palermo': 'PMO', 'palerme': 'PMO',
+    'catania': 'CTA', 'catane': 'CTA',
+    'cagliari': 'CAG',
+    'olbia': 'OLB',
+    // Chypre
+    'chypre': 'LCA', 'cyprus': 'LCA', 'larnaca': 'LCA', 'paphos': 'LCA',
+    // Canaries
+    'tenerife': 'TFS',
+    'gran canaria': 'LPA', 'las palmas': 'LPA',
+    // Turquie
+    'istanbul': 'IST',
+    // Hongrie
+    'budapest': 'BUD',
     // Amérique du Nord
     'new york': 'JFK', 'newyork': 'JFK', 'nyc': 'JFK',
     'los angeles': 'LAX', 'la': 'LAX',
@@ -485,6 +616,65 @@ export function getCityCenterCoords(city: string): { lat: number; lng: number } 
 
   console.log(`[Geocoding] Pas de centre-ville connu pour "${city}"`);
   return null;
+}
+
+/**
+ * Version async de getCityCenterCoords avec fallback Nominatim
+ * Tente d'abord le lookup hardcodé, puis geocode via Nominatim si inconnu
+ */
+export async function getCityCenterCoordsAsync(city: string): Promise<{ lat: number; lng: number } | null> {
+  // 1. Lookup hardcodé (instantané)
+  const hardcoded = getCityCenterCoords(city);
+  if (hardcoded) return hardcoded;
+
+  // 2. Fallback Nominatim (gratuit)
+  console.log(`[Geocoding] Nominatim fallback pour "${city}"...`);
+  const result = await geocodeAddress(city);
+  if (result && result.lat && result.lng) {
+    const coords = { lat: result.lat, lng: result.lng };
+    // Stocker pour le reste de la session
+    const normalizedCity = city.toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    CITY_CENTERS[normalizedCity] = coords;
+    console.log(`[Geocoding] ✅ Nominatim: "${city}" → ${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)}`);
+    return coords;
+  }
+
+  console.warn(`[Geocoding] ❌ Nominatim: aucun résultat pour "${city}"`);
+  return null;
+}
+
+/**
+ * Version async de findNearbyAirports avec fallback par distance géographique
+ * Ne retourne plus Paris CDG par défaut pour les villes inconnues
+ */
+export async function findNearbyAirportsAsync(city: string): Promise<AirportInfo[]> {
+  const result = findNearbyAirports(city);
+  // Si on a trouvé autre chose que le fallback Paris CDG, c'est bon
+  if (result.length > 0 && result[0].code !== 'CDG') {
+    return result;
+  }
+  // Vérifier si c'est vraiment Paris/IDF
+  const normalizedCity = city.toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const parisCities = ['paris', 'igny', 'versailles', 'evry', 'massy', 'palaiseau', 'antony', 'boulogne', 'neuilly', 'saint-denis', 'montreuil', 'creteil', 'ile-de-france'];
+  if (parisCities.some(p => normalizedCity.includes(p))) {
+    return result; // C'est bien Paris
+  }
+
+  // Pas Paris → trouver l'aéroport le plus proche par coordonnées
+  console.log(`[Geocoding] Recherche aéroport le plus proche pour "${city}" via géocodage...`);
+  const coords = await getCityCenterCoordsAsync(city);
+  if (!coords) return result; // Nominatim a échoué, on garde le fallback
+
+  // Calculer la distance à chaque aéroport
+  const airportsWithDistance = Object.values(AIRPORTS).map(airport => ({
+    airport,
+    distance: calculateDistance(coords.lat, coords.lng, airport.latitude, airport.longitude),
+  }));
+  airportsWithDistance.sort((a, b) => a.distance - b.distance);
+
+  const nearest = airportsWithDistance.slice(0, 3).map(a => a.airport);
+  console.log(`[Geocoding] ✅ Aéroports les plus proches de "${city}": ${nearest.map(a => `${a.code} (${Math.round(airportsWithDistance.find(x => x.airport.code === a.code)!.distance)}km)`).join(', ')}`);
+  return nearest;
 }
 
 export { AIRPORTS, CITY_CENTERS };

@@ -117,6 +117,26 @@ export const LOCAL_CUISINES: Record<string, string[]> = {
   Greece: ['greek', 'mediterranean', 'taverna', 'mezze', 'souvlaki', 'moussaka', 'seafood', 'grec', 'grecque'],
   Athens: ['greek', 'taverna', 'mezze', 'souvlaki', 'mediterranean', 'grec'],
   Santorini: ['greek', 'seafood', 'mediterranean', 'taverna', 'grec'],
+  Heraklion: ['greek', 'cretan', 'mediterranean', 'seafood', 'taverna', 'grec', 'crétois'],
+
+  // Croatie
+  Croatia: ['croatian', 'mediterranean', 'seafood', 'dalmatian', 'croate', 'adriatic'],
+  Dubrovnik: ['croatian', 'mediterranean', 'seafood', 'dalmatian', 'croate'],
+  Split: ['croatian', 'mediterranean', 'seafood', 'dalmatian', 'croate'],
+
+  // Maroc
+  Morocco: ['moroccan', 'marocain', 'tagine', 'couscous', 'pastilla', 'harira', 'mediterranean', 'north african'],
+  Marrakech: ['moroccan', 'marocain', 'tagine', 'couscous', 'riad', 'north african'],
+
+  // Malte
+  Malta: ['maltese', 'mediterranean', 'seafood', 'rabbit', 'pastizzi', 'maltais'],
+
+  // Turquie
+  Turkey: ['turkish', 'turc', 'kebab', 'meze', 'pide', 'lahmacun', 'baklava', 'mediterranean'],
+  Istanbul: ['turkish', 'turc', 'kebab', 'meze', 'pide', 'seafood', 'ottoman'],
+
+  // Chypre
+  Cyprus: ['cypriot', 'greek', 'mediterranean', 'meze', 'halloumi', 'seafood', 'chypriote'],
 
   // Pays-Bas
   Netherlands: ['dutch', 'indonesian', 'surinamese', 'hollandais', 'néerlandais'],
@@ -165,6 +185,21 @@ export const FORBIDDEN_CUISINES: Record<string, string[]> = {
 
   // En Grèce
   Greece: ['chinese', 'japanese', 'sushi', 'indian', 'american', 'fast-food', 'mexican'],
+
+  // En Croatie
+  Croatia: ['chinese', 'japanese', 'sushi', 'indian', 'american', 'fast-food', 'mexican'],
+
+  // Au Maroc
+  Morocco: ['chinese', 'japanese', 'sushi', 'indian', 'american', 'fast-food', 'mexican', 'korean'],
+
+  // À Malte
+  Malta: ['chinese', 'japanese', 'sushi', 'indian', 'american', 'fast-food', 'mexican'],
+
+  // En Turquie
+  Turkey: ['chinese', 'japanese', 'sushi', 'american', 'fast-food', 'mexican'],
+
+  // À Chypre
+  Cyprus: ['chinese', 'japanese', 'sushi', 'indian', 'american', 'fast-food', 'mexican'],
 
   // Au Japon
   Japan: ['fast-food', 'american'],
@@ -219,8 +254,33 @@ export function getCountryFromDestination(destination: string): string | null {
   }
 
   // Villes grecques
-  if (['athens', 'athenes', 'santorini', 'mykonos', 'crete', 'thessaloniki'].some(city => dest.includes(city))) {
+  if (['athens', 'athenes', 'santorini', 'santorin', 'mykonos', 'crete', 'crète', 'heraklion', 'iraklion', 'chania', 'rethymno', 'thessaloniki', 'rhodes', 'corfu', 'corfou', 'zakynthos', 'kos', 'naxos', 'paros'].some(city => dest.includes(city))) {
     return 'Greece';
+  }
+
+  // Villes croates
+  if (['dubrovnik', 'split', 'zagreb', 'hvar', 'pula', 'zadar'].some(city => dest.includes(city))) {
+    return 'Croatia';
+  }
+
+  // Villes marocaines
+  if (['marrakech', 'fes', 'fès', 'casablanca', 'rabat', 'tangier', 'tanger', 'chefchaouen', 'essaouira'].some(city => dest.includes(city))) {
+    return 'Morocco';
+  }
+
+  // Malte
+  if (['malta', 'malte', 'valletta', 'la valette'].some(city => dest.includes(city))) {
+    return 'Malta';
+  }
+
+  // Villes turques
+  if (['istanbul', 'antalya', 'cappadocia', 'bodrum', 'izmir'].some(city => dest.includes(city))) {
+    return 'Turkey';
+  }
+
+  // Chypre
+  if (['cyprus', 'chypre', 'larnaca', 'paphos', 'limassol', 'nicosia'].some(city => dest.includes(city))) {
+    return 'Cyprus';
   }
 
   // Villes néerlandaises

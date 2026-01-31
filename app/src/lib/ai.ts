@@ -20,7 +20,7 @@ import {
   Accommodation,
   BudgetStrategy,
 } from './types';
-import { findNearbyAirports, calculateDistance, AirportInfo, getCityCenterCoords } from './services/geocoding';
+import { findNearbyAirports, findNearbyAirportsAsync, calculateDistance, AirportInfo, getCityCenterCoords, getCityCenterCoordsAsync } from './services/geocoding';
 import { searchFlights, formatFlightDuration } from './services/flights';
 import { selectBestParking, calculateParkingTime } from './services/parking';
 import { searchRestaurants, selectBestRestaurant, estimateMealPrice } from './services/restaurants';
@@ -264,31 +264,34 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
   // RESET: Nettoyer les trackers de la session précédente pour éviter les doublons inter-voyages
   usedRestaurantIds.clear();
 
-  // 1. Trouver les coordonnées et aéroports
-  const originAirports = findNearbyAirports(preferences.origin);
-  const destAirports = findNearbyAirports(preferences.destination);
+  // 1. Trouver les coordonnées et aéroports (avec fallback Nominatim async)
+  const [originCityCenter, destCityCenter, originAirports, destAirports] = await Promise.all([
+    getCityCenterCoordsAsync(preferences.origin),
+    getCityCenterCoordsAsync(preferences.destination),
+    findNearbyAirportsAsync(preferences.origin),
+    findNearbyAirportsAsync(preferences.destination),
+  ]);
 
-  // Coordonnées d'origine et destination
-  // IMPORTANT: Utiliser getCityCenterCoords() comme fallback principal, PAS l'aéroport!
-  // L'aéroport peut être à 15-30km du centre-ville (ex: BCN El Prat = 41.29, 2.07 vs centre = 41.38, 2.17)
-  const originCityCenter = getCityCenterCoords(preferences.origin);
   const originCoords = preferences.originCoords || originCityCenter || (originAirports[0] ? {
     lat: originAirports[0].latitude,
     lng: originAirports[0].longitude,
   } : { lat: 48.8566, lng: 2.3522 }); // Paris par défaut
 
-  // CORRECTION CRITIQUE: Utiliser le VRAI centre-ville, pas l'aéroport
-  const destCityCenter = getCityCenterCoords(preferences.destination);
   const destCoords = preferences.destinationCoords || destCityCenter || (destAirports[0] ? {
     lat: destAirports[0].latitude,
     lng: destAirports[0].longitude,
-  } : { lat: 41.3851, lng: 2.1734 }); // Barcelona par défaut
+  } : null);
+
+  if (!destCoords) {
+    console.error(`[AI] ❌ Impossible de géocoder "${preferences.destination}" — aucune coordonnée trouvée`);
+    throw new Error(`Destination inconnue: "${preferences.destination}". Impossible de trouver les coordonnées.`);
+  }
 
   console.log(`[AI] Centre-ville destination: ${preferences.destination} → ${destCoords.lat.toFixed(4)}, ${destCoords.lng.toFixed(4)}`);
   if (destCityCenter) {
-    console.log(`[AI] ✓ Utilisation des coords centre-ville depuis getCityCenterCoords()`);
+    console.log(`[AI] ✓ Utilisation des coords centre-ville`);
   } else {
-    console.warn(`[AI] ⚠ Pas de centre-ville connu pour "${preferences.destination}", fallback utilisé`);
+    console.warn(`[AI] ⚠ Coords via fallback aéroport pour "${preferences.destination}"`);
   }
 
   // 2. Comparer les options de transport (lancé en parallèle avec attractions + hôtels)

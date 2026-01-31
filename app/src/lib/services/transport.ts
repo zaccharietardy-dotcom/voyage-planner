@@ -193,6 +193,72 @@ const HIGH_SPEED_RAIL_ROUTES: Record<string, string[]> = {
   'Zurich': ['Paris', 'Milan', 'Munich', 'Frankfurt', 'Vienna'],
 };
 
+// Destinations insulaires — pas de train/bus possible depuis le continent
+const ISLAND_KEYWORDS = new Set([
+  // Grèce
+  'crete', 'crète', 'heraklion', 'héraklion', 'iraklion', 'chania', 'rethymno',
+  'santorini', 'santorin', 'mykonos', 'rhodes', 'corfu', 'corfou', 'zakynthos',
+  'kos', 'naxos', 'paros', 'lesbos', 'samos',
+  // Malte
+  'malta', 'malte', 'valletta', 'la valette',
+  // Baléares
+  'mallorca', 'majorque', 'ibiza', 'menorca', 'minorque', 'formentera',
+  // Canaries
+  'tenerife', 'gran canaria', 'lanzarote', 'fuerteventura', 'la palma', 'las palmas',
+  // Madère / Açores
+  'madeira', 'madère', 'funchal', 'azores', 'açores',
+  // Sardaigne
+  'sardinia', 'sardaigne', 'cagliari', 'olbia', 'alghero',
+  // Sicile (exception partielle — ferry+train depuis Italie continentale)
+  'sicilia', 'sicile', 'catania', 'catane', 'palermo', 'palerme',
+  // Corse
+  'corse', 'corsica', 'ajaccio', 'bastia',
+  // Chypre
+  'cyprus', 'chypre', 'larnaca', 'paphos', 'limassol',
+  // Autres
+  'iceland', 'islande', 'reykjavik',
+]);
+
+// Îles connectées par ferry+train au continent (exception)
+const CONNECTED_ISLANDS: Record<string, string[]> = {
+  // Sicile: train via ferry du détroit de Messine depuis l'Italie continentale
+  'sicilia': ['italy', 'italie', 'rome', 'roma', 'naples', 'napoli', 'milan', 'milano', 'florence', 'firenze'],
+  'sicile': ['italy', 'italie', 'rome', 'roma', 'naples', 'napoli', 'milan', 'milano', 'florence', 'firenze'],
+  'catania': ['italy', 'italie', 'rome', 'roma', 'naples', 'napoli', 'milan', 'milano', 'florence', 'firenze'],
+  'catane': ['italy', 'italie', 'rome', 'roma', 'naples', 'napoli', 'milan', 'milano', 'florence', 'firenze'],
+  'palermo': ['italy', 'italie', 'rome', 'roma', 'naples', 'napoli', 'milan', 'milano', 'florence', 'firenze'],
+  'palerme': ['italy', 'italie', 'rome', 'roma', 'naples', 'napoli', 'milan', 'milano', 'florence', 'firenze'],
+};
+
+function isIslandDestination(city: string): boolean {
+  const norm = city.toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  return Array.from(ISLAND_KEYWORDS).some(kw => norm.includes(kw));
+}
+
+function isIslandRouteBlocked(origin: string, destination: string): boolean {
+  const originIsIsland = isIslandDestination(origin);
+  const destIsIsland = isIslandDestination(destination);
+
+  if (!originIsIsland && !destIsIsland) return false; // Pas d'île → OK
+
+  // Vérifier les exceptions (Sicile connectée à l'Italie)
+  const islandCity = originIsIsland ? origin : destination;
+  const otherCity = originIsIsland ? destination : origin;
+  const normIsland = islandCity.toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const normOther = otherCity.toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+  for (const [island, connectedCities] of Object.entries(CONNECTED_ISLANDS)) {
+    if (normIsland.includes(island)) {
+      if (connectedCities.some(c => normOther.includes(c))) {
+        return false; // Route connectée → train/bus OK
+      }
+    }
+  }
+
+  console.log(`[Transport] ⛔ Route terrestre bloquée: ${origin} → ${destination} (île détectée)`);
+  return true; // Île sans connexion terrestre → bloqué
+}
+
 // Temps additionnels (minutes)
 const ADDITIONAL_TIME = {
   plane: {
@@ -337,6 +403,11 @@ function calculatePlaneOption(params: TransportSearchParams, distance: number): 
  * Calcule l'option train — essaie l'API DB Transport, puis la base connue, puis les estimations
  */
 async function calculateTrainOption(params: TransportSearchParams, distance: number): Promise<TransportOption | null> {
+  // Bloquer les routes vers les îles (avant tout calcul)
+  if (isIslandRouteBlocked(params.origin, params.destination)) {
+    return null;
+  }
+
   try {
     return await calculateTrainOptionInner(params, distance);
   } catch (err) {
@@ -356,6 +427,11 @@ async function calculateTrainOption(params: TransportSearchParams, distance: num
 }
 
 async function calculateTrainOptionInner(params: TransportSearchParams, distance: number): Promise<TransportOption | null> {
+  // Bloquer les routes vers les îles
+  if (isIslandRouteBlocked(params.origin, params.destination)) {
+    return null;
+  }
+
   const isHighSpeed = hasDirectHighSpeedRail(params.origin, params.destination);
 
   console.log(`[Train] calculateTrainOption: ${params.origin} → ${params.destination}, distance: ${Math.round(distance)}km, isHighSpeed: ${isHighSpeed}`);
@@ -473,6 +549,11 @@ function buildTrainOption(
  * Calcule l'option bus
  */
 function calculateBusOption(params: TransportSearchParams, distance: number): TransportOption | null {
+  // Bloquer les routes vers les îles
+  if (isIslandRouteBlocked(params.origin, params.destination)) {
+    return null;
+  }
+
   const travelTime = Math.round((distance / SPEEDS.bus) * 60);
 
   // Bus: généralement de nuit pour les longs trajets

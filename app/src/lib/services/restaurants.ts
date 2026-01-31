@@ -385,6 +385,11 @@ function filterByForbiddenNames(restaurants: Restaurant[], destination: string):
     France: ['burger king', 'mcdonald', 'kfc', 'subway', 'quick', 'five guys'],
     Portugal: ['chinese', 'chinois', 'china', 'chines', 'wok', 'asia', 'sushi', 'indian', 'indiano', 'curry', 'kebab', 'pekin', 'peking'],
     Greece: ['chinese', 'chinois', 'china', 'wok', 'asia', 'asian', 'sushi', 'indian', 'curry', 'mexican', 'pekin', 'peking'],
+    Croatia: ['chinese', 'chinois', 'china', 'wok', 'asia', 'asian', 'sushi', 'indian', 'curry', 'mexican', 'pekin', 'peking'],
+    Morocco: ['chinese', 'chinois', 'china', 'wok', 'asia', 'asian', 'sushi', 'indian', 'curry', 'mexican', 'pekin', 'peking', 'japanese', 'japonais'],
+    Malta: ['chinese', 'chinois', 'china', 'wok', 'asia', 'asian', 'sushi', 'indian', 'curry', 'mexican', 'pekin', 'peking'],
+    Turkey: ['chinese', 'chinois', 'china', 'wok', 'asia', 'asian', 'sushi', 'mexican', 'pekin', 'peking'],
+    Cyprus: ['chinese', 'chinois', 'china', 'wok', 'asia', 'asian', 'sushi', 'indian', 'curry', 'mexican', 'pekin', 'peking'],
   };
 
   const country = getCountryFromDestination(destination);
