@@ -555,6 +555,7 @@ export function summarizeAttractions(attractions: Attraction[]): AttractionSumma
 export function mapItineraryToAttractions(
   itinerary: ClaudeItineraryResponse,
   attractionPool: Attraction[],
+  cityCenter?: { lat: number; lng: number },
 ): Attraction[][] {
   const poolMap = new Map<string, Attraction>();
   for (const a of attractionPool) {
@@ -580,8 +581,8 @@ export function mapItineraryToAttractions(
         description: suggestion.whyVisit,
         duration: suggestion.estimatedDuration,
         estimatedCost: suggestion.estimatedCost,
-        latitude: 0, // Will be resolved by SerpAPI search or left as generated
-        longitude: 0,
+        latitude: cityCenter?.lat || 0, // Default to city center; resolved later via API
+        longitude: cityCenter?.lng || 0,
         rating: 4.5,
         mustSee: true,
         bookingRequired: !!suggestion.bookable,

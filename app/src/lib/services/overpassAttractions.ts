@@ -263,7 +263,7 @@ export async function searchAttractionsOverpass(
     minPopularity?: number; // Minimum sitelinks count
   } = {}
 ): Promise<Attraction[]> {
-  const { limit = 50, minPopularity = 5 } = options;
+  const { limit = 50, minPopularity = 20 } = options;
 
   // Check cache
   const cacheKey = getCacheKey(cityCenter.lat, cityCenter.lng);

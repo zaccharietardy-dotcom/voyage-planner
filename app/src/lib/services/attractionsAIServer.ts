@@ -274,7 +274,7 @@ export async function searchAttractionsFromCache(
         limit: (options.maxResults || 15) + 10,
       });
 
-      if (attractions.length >= 5) {
+      if (attractions.length >= 3) {
         // Sauvegarder en cache fichier
         cache[normalizedDest] = {
           attractions,
@@ -480,7 +480,7 @@ function mergeWithViator(baseAttractions: Attraction[], viatorAttractions: Attra
   if (viatorAttractions.length === 0) return baseAttractions;
   if (baseAttractions.length === 0) return viatorAttractions;
 
-  const MAX_VIATOR = 8;
+  const MAX_VIATOR = 12;
   const usedNames = new Set<string>();
   const combined: Attraction[] = [];
 

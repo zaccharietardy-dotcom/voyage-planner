@@ -20,7 +20,7 @@ import {
   Accommodation,
   BudgetStrategy,
 } from './types';
-import { findNearbyAirports, findNearbyAirportsAsync, calculateDistance, AirportInfo, getCityCenterCoords, getCityCenterCoordsAsync } from './services/geocoding';
+import { findNearbyAirports, findNearbyAirportsAsync, calculateDistance, AirportInfo, getCityCenterCoords, getCityCenterCoordsAsync, geocodeAddress } from './services/geocoding';
 import { searchFlights, formatFlightDuration } from './services/flights';
 import { selectBestParking, calculateParkingTime } from './services/parking';
 import { searchRestaurants, selectBestRestaurant, estimateMealPrice } from './services/restaurants';
@@ -585,7 +585,7 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
 
   if (claudeItinerary) {
     console.log('[AI] ✅ Itinéraire Claude reçu, mapping des attractions...');
-    attractionsByDay = mapItineraryToAttractions(claudeItinerary, attractionPool);
+    attractionsByDay = mapItineraryToAttractions(claudeItinerary, attractionPool, cityCenter);
 
     // Stocker les métadonnées par jour
     dayMetadata = claudeItinerary.days.map(d => ({
@@ -617,7 +617,7 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
           continue;
         }
 
-        // Fallback: SerpAPI
+        // Fallback 2: SerpAPI
         const found = await searchMustSeeAttractions(
           suggestion.name,
           preferences.destination,
@@ -626,6 +626,44 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
         if (found.length > 0) {
           attractionsByDay[i][genIndex] = { ...found[0], mustSee: true };
           console.log(`[AI]   Résolu via SerpAPI: "${suggestion.name}" → coordonnées vérifiées`);
+          continue;
+        }
+
+        // Fallback 3: Nominatim geocoding (free, reliable for named places)
+        try {
+          const geo = await geocodeAddress(`${suggestion.name}, ${preferences.destination}`);
+          if (geo && geo.lat && geo.lng) {
+            attractionsByDay[i][genIndex] = {
+              ...attractionsByDay[i][genIndex],
+              latitude: geo.lat,
+              longitude: geo.lng,
+              mustSee: true,
+              dataReliability: 'verified',
+              googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(suggestion.name + ', ' + preferences.destination)}`,
+            };
+            console.log(`[AI]   Résolu via Nominatim: "${suggestion.name}" → (${geo.lat}, ${geo.lng})`);
+            continue;
+          }
+        } catch (e) {
+          console.warn(`[AI]   Nominatim error for "${suggestion.name}":`, e);
+        }
+      }
+    }
+
+    // Last resort: any attraction still at city center or (0,0) gets a Google Maps search URL
+    for (const dayAttrs of attractionsByDay) {
+      for (let j = 0; j < dayAttrs.length; j++) {
+        const a = dayAttrs[j];
+        if (a.latitude === 0 && a.longitude === 0) {
+          console.log(`[AI] Coords fallback pour "${a.name}" → centre-ville (${cityCenter.lat}, ${cityCenter.lng})`);
+          dayAttrs[j] = { ...a, latitude: cityCenter.lat, longitude: cityCenter.lng };
+        }
+        // Ensure all attractions have a Google Maps URL for the user
+        if (!a.googleMapsUrl && a.id.startsWith('claude-')) {
+          dayAttrs[j] = {
+            ...dayAttrs[j],
+            googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(a.name + ', ' + preferences.destination)}`,
+          };
         }
       }
     }

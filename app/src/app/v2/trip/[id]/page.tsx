@@ -23,6 +23,8 @@ import {
   Share2,
 } from 'lucide-react';
 import type { Trip, TripDay, TripItem } from '@/lib/types';
+import { ItineraryConnector } from '@/components/trip/ItineraryConnector';
+import { shouldShowItinerary } from '@/lib/services/itineraryValidator';
 
 const ITEM_TYPE_ICONS: Record<string, any> = {
   activity: Camera,
@@ -415,9 +417,31 @@ function DayCard({
             className="overflow-hidden"
           >
             <div className="px-4 pb-4 space-y-3">
-              {day.items?.map((item, index) => (
-                <TripItemCard key={item.id || index} item={item} />
-              ))}
+              {day.items?.map((item, index) => {
+                const nextItem = index < (day.items?.length || 0) - 1 ? day.items![index + 1] : null;
+                return (
+                  <div key={item.id || index}>
+                    <TripItemCard item={item} />
+                    {nextItem && shouldShowItinerary(item, nextItem) && (
+                      <ItineraryConnector
+                        from={{
+                          name: item.locationName || item.title,
+                          latitude: item.latitude,
+                          longitude: item.longitude,
+                        }}
+                        to={{
+                          name: nextItem.locationName || nextItem.title,
+                          latitude: nextItem.latitude,
+                          longitude: nextItem.longitude,
+                        }}
+                        duration={nextItem.timeFromPrevious}
+                        distance={nextItem.distanceFromPrevious}
+                        mode={nextItem.transportToPrevious}
+                      />
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </motion.div>
         )}

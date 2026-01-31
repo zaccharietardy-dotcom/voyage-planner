@@ -333,7 +333,7 @@ function generateFallbackAirbnb(
 
   return [{
     id: 'airbnb-search-link',
-    name: `Airbnb à ${destination} (rechercher)`,
+    name: `Logement entier via Airbnb`,
     type: 'apartment' as const,
     address: destination,
     latitude: cityCenter?.lat || 0,
@@ -349,6 +349,6 @@ function generateFallbackAirbnb(
     bookingUrl: searchUrl,
     distanceToCenter: undefined,
     breakfastIncluded: false,
-    description: `Rechercher un logement entier à ${destination} (max ${maxPrice}€/nuit)`,
+    description: `Rechercher sur Airbnb avec vos critères pré-remplis (${destination}, max ${maxPrice}€/nuit)`,
   }];
 }
