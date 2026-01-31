@@ -84,7 +84,8 @@ Pour les objets : 6-10 objets spécifiques à cette destination et saison (adapt
 Pour le légal : infos visa depuis ${origin}, 3-5 lois locales importantes.
 Pour les urgences : numéros réels du pays de destination.
 
-Si la destination est dans un pays francophone, mets quand même le vocabulaire avec les expressions locales/argot utiles.`;
+Si l'origine ET la destination sont dans le même pays (ex: France→France), génère des conseils pratiques locaux (spécialités culinaires régionales à goûter, expressions régionales polies, usages et coutumes locales) au lieu de vocabulaire de langue. Ne mets JAMAIS d'argot vulgaire ou familier (pas de "chiottes", "j'pige pas", etc.).
+Si la destination est dans un pays francophone ÉTRANGER (ex: France→Belgique, France→Suisse), mets les expressions locales polies et différences de vocabulaire utiles.`;
 
   try {
     const response = await client.messages.create({

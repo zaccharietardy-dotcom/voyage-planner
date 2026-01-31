@@ -246,7 +246,8 @@ RÈGLES D'OR:
    - Parcs, jardins → selon la lumière et la saison
 
 2. REGROUPEMENT GÉOGRAPHIQUE STRICT:
-   - Groupe les attractions PROCHES le même jour (regarde les coordonnées lat/lng)
+   - CHAQUE jour doit couvrir UNE zone/quartier principal (max 2 quartiers adjacents). JAMAIS zigzaguer entre est/ouest/nord dans la même journée
+   - Groupe les attractions PROCHES le même jour (regarde les coordonnées lat/lng). Si 2 attractions sont à >3km, elles NE DOIVENT PAS être le même jour sauf si elles sont sur le même trajet linéaire
    - Ordonne-les pour minimiser les déplacements (circuit logique, pas de zig-zag)
    - Indique le quartier/zone dans le theme du jour
    - JAMAIS une attraction satellite SANS l'attraction principale du même lieu:
@@ -261,8 +262,9 @@ RÈGLES D'OR:
 
 3. RYTHME & DURÉES RÉALISTES:
    - Jour d'arrivée: 2-3 attractions légères (jet lag, installation)
-   - Jours pleins: 4-6 attractions avec pauses
+   - Jours pleins: MINIMUM 4 attractions + pauses (idéalement 5-6). NE LAISSE JAMAIS un jour avec seulement 1-2 attractions — c'est INSUFFISANT et crée des trous de 4-5h dans l'après-midi
    - Dernier jour: 2-3 attractions + temps pour souvenirs/shopping
+   - TOTAL MINIMUM: au moins ${Math.max(request.durationDays * 4, 15)} attractions sur tout le séjour (selectedAttractionIds + additionalSuggestions combinés)
    - Alterne intense (musée 2h) et léger (balade quartier 30min)
    - Prévois des pauses café/repos entre les visites intensives
    - DURÉES estimatedDuration RÉALISTES (en minutes):
@@ -380,8 +382,10 @@ ${request.groupType === 'family_with_kids' ? `   - FAMILLE AVEC ENFANTS: Tu DOIS
 
 VÉRIFICATION FINALE OBLIGATOIRE avant de répondre:
 - As-tu inclus TOUS les incontournables mondiaux de ${request.destination} listés en règle 6? Si non, ajoute-les maintenant.
+- Chaque jour plein a-t-il AU MOINS 4 attractions (selectedAttractionIds + additionalSuggestions)? Si non, ajoute des attractions proches du quartier du jour.
 - As-tu prévu AU MOINS 1 day trip si le séjour >= 4 jours? Si non, ajoute-le maintenant.
 - As-tu au moins 1 jour avec isDayTrip=true et dayTripDestination renseigné (si >= 4 jours)?
+- CHAQUE jour couvre-t-il UNE zone géographique cohérente (pas de zigzag)? Vérifie les lat/lng.
 ${request.groupType === 'family_with_kids' ? '- As-tu inclus des activités kid-friendly (aquarium, zoo, parc, musée interactif)? Si non, ajoute-les.' : ''}
 
 Réponds UNIQUEMENT en JSON valide (pas de markdown, pas de backticks, pas de commentaires).
@@ -594,6 +598,9 @@ Format EXACT:
         /\bossuary\b/i, /\bossuaire\b/i,
         /madame tussauds/i, /hard rock caf/i,
         /wax museum/i, /selfie museum/i, /trick eye/i,
+        /temple de .* - versailles/i, // LDS temple, not tourist
+        /\bkingdom hall\b/i, /\bsalle du royaume\b/i, // Jehovah's Witnesses
+        /\bstake center\b/i, /\bward house\b/i, // LDS wards
       ];
       day.additionalSuggestions = day.additionalSuggestions.filter(s => {
         for (const pattern of SUGGESTION_BLACKLIST) {
@@ -604,6 +611,38 @@ Format EXACT:
         }
         return true;
       });
+
+      // Apply blacklist to selectedAttractionIds too (not just suggestions)
+      day.selectedAttractionIds = day.selectedAttractionIds.filter(id => {
+        const attraction = poolCompact.find(a => a.id === id);
+        if (!attraction) return true;
+        for (const pattern of SUGGESTION_BLACKLIST) {
+          if (pattern.test(attraction.name)) {
+            console.log(`[ClaudeItinerary] Blacklisted pool attraction: "${attraction.name}"`);
+            return false;
+          }
+        }
+        // Filter attractions >20km from pool centroid on non-day-trip days
+        if (!day.isDayTrip && attraction.lat && attraction.lng) {
+          const validPool = poolCompact.filter(a => a.lat && a.lng);
+          if (validPool.length > 0) {
+            const centroidLat = validPool.reduce((s, a) => s + a.lat, 0) / validPool.length;
+            const centroidLng = validPool.reduce((s, a) => s + a.lng, 0) / validPool.length;
+            const dlat = (attraction.lat - centroidLat) * 111;
+            const dlng = (attraction.lng - centroidLng) * 111 * Math.cos(centroidLat * Math.PI / 180);
+            const distKm = Math.sqrt(dlat * dlat + dlng * dlng);
+            if (distKm > 20) {
+              console.log(`[ClaudeItinerary] Filtered distant attraction: "${attraction.name}" (${distKm.toFixed(1)}km from center)`);
+              return false;
+            }
+          }
+        }
+        return true;
+      });
+      if (day.visitOrder) {
+        const selectedSet = new Set(day.selectedAttractionIds);
+        day.visitOrder = day.visitOrder.filter(id => selectedSet.has(id));
+      }
 
       // Filter selectedAttractionIds: remove nightlife for family_with_kids
       if (request.groupType === 'family_with_kids') {

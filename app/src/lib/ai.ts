@@ -145,7 +145,7 @@ function fixAttractionDuration(attraction: Attraction): Attraction {
     if (d > 60) return { ...attraction, duration: 60 };
   }
   // Petites églises: max 30min (pas les cathédrales/basiliques)
-  if (/\b(église|church|chapelle|chapel)\b/.test(name) && !/\b(cathédrale|cathedral|basilique|basilica|notre-dame|sacré|sainte-chapelle)\b/.test(name)) {
+  if (/\b(église|eglise|church|chapelle|chapel)\b/.test(name) && !/\b(cathédrale|cathedrale|cathedral|basilique|basilica|notre-dame|sacré|sacre|sainte-chapelle)\b/.test(name)) {
     if (d > 30) return { ...attraction, duration: 20 };
   }
   // Cathédrales, basiliques: max 60min
@@ -194,7 +194,7 @@ function fixAttractionCost(attraction: Attraction): Attraction {
     if (cost > 0) return { ...attraction, estimatedCost: 0 };
   }
   // Églises et cathédrales: généralement gratuit (sauf tours/cryptes)
-  if (/\b(église|cathédrale|basilique|church|cathedral|basilica|mosquée|mosque|temple|synagogue|chapel)\b/i.test(name)) {
+  if (/\b(église|eglise|cathédrale|cathedrale|basilique|church|cathedral|basilica|mosquée|mosque|temple|synagogue|chapel|chapelle)\b/i.test(name)) {
     if (cost > 0 && !/\b(tour|tower|crypte|crypt|sainte-chapelle)\b/i.test(name)) {
       return { ...attraction, estimatedCost: 0 };
     }
@@ -209,6 +209,10 @@ function fixAttractionCost(attraction: Attraction): Attraction {
   }
   if (/\borsay\b/.test(name)) {
     return { ...attraction, estimatedCost: 16 };
+  }
+  // Arc de Triomphe du Carrousel: gratuit (en plein air)
+  if (/\barc de triomphe\b/.test(name) && /\bcarrousel\b/i.test(name)) {
+    return { ...attraction, estimatedCost: 0 };
   }
   if (/\barc de triomphe\b/.test(name)) {
     return { ...attraction, estimatedCost: 16 };
@@ -340,7 +344,7 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
   const attractionsPromise = searchAttractionsMultiQuery(
     preferences.destination,
     destCoords,
-    { types: preferences.activities, limit: 50 }
+    { types: preferences.activities, limit: preferences.durationDays >= 5 ? 80 : 50 }
   );
 
   console.time('[AI] Hotels');
@@ -3375,7 +3379,7 @@ async function generateDayWithScheduler(params: {
               const segOperator = s.operator ? ` (${s.operator})` : '';
               const segDuration = s.duration ? ` ${Math.floor(s.duration / 60)}h${s.duration % 60 > 0 ? String(s.duration % 60).padStart(2, '0') : ''}` : '';
               const segPrice = s.price ? ` ${s.price}€` : '';
-              return `${segMode} ${preferences.destination === s.from ? s.from : s.from} → ${s.to}${segOperator}${segDuration}${segPrice}`;
+              return `${segMode} ${s.to} → ${s.from}${segOperator}${segDuration}${segPrice}`;
             }).join(' puis ')
           : `${preferences.destination} → ${preferences.origin}`;
         const returnDescription = `${returnSegmentsDesc} | ${groundTransport.totalPrice}€ total`;
