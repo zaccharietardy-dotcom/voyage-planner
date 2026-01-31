@@ -3,9 +3,10 @@
  * Ce fichier utilise fs et ne peut être importé que côté serveur
  *
  * Chaîne de priorité:
- * 1. SerpAPI Google Local (données RÉELLES) + Viator en parallèle
- * 2. Cache local fichier
- * 3. Claude AI (fallback)
+ * 1. Overpass + Wikidata (gratuit, illimité) + Viator en parallèle
+ * 2. SerpAPI Google Local (fallback payant)
+ * 3. Cache local fichier
+ * 4. Claude AI (fallback ultime)
  */
 
 import Anthropic from '@anthropic-ai/sdk';
@@ -13,6 +14,7 @@ import { Attraction } from './attractions';
 import { ActivityType } from '../types';
 import { tokenTracker } from './tokenTracker';
 import { searchAttractionsWithSerpApi, searchAttractionsMultiQuery, isSerpApiPlacesConfigured } from './serpApiPlaces';
+import { searchAttractionsOverpass, isOverpassConfigured } from './overpassAttractions';
 
 import { searchViatorActivities, isViatorConfigured } from './viator';
 import * as fs from 'fs';
@@ -264,7 +266,37 @@ export async function searchAttractionsFromCache(
         .catch(err => { console.warn('[Server] Viator error:', err); return [] as Attraction[]; })
     : Promise.resolve([]);
 
-  // 1. PRIORITÉ: SerpAPI Google Maps (données RÉELLES avec multi-requêtes)
+  // 1. PRIORITÉ: Overpass + Wikidata (gratuit, illimité)
+  if (isOverpassConfigured() && options?.cityCenter) {
+    try {
+      console.log(`[Server] Recherche attractions via Overpass+Wikidata pour ${destination}...`);
+      const attractions = await searchAttractionsOverpass(destination, options.cityCenter, {
+        limit: (options.maxResults || 15) + 10,
+      });
+
+      if (attractions.length >= 5) {
+        // Sauvegarder en cache fichier
+        cache[normalizedDest] = {
+          attractions,
+          fetchedAt: new Date().toISOString(),
+          version: 4, // Version 4 = Overpass+Wikidata
+        };
+        saveCache(cache);
+
+        console.log(`[Server] ✅ ${attractions.length} attractions via Overpass+Wikidata`);
+        const withDurations = await estimateAttractionDurations(attractions, destination);
+        const viatorResults = await viatorPromise;
+        const merged = mergeWithViator(withDurations, viatorResults, options?.types, options?.dailyActivityBudget);
+        return filterAttractions(merged, options?.types, options?.maxResults, destination);
+      } else {
+        console.warn(`[Server] Overpass: seulement ${attractions.length} résultats, fallback SerpAPI...`);
+      }
+    } catch (error) {
+      console.warn('[Server] Overpass error, trying SerpAPI:', error);
+    }
+  }
+
+  // 2. FALLBACK: SerpAPI Google Maps (données RÉELLES avec multi-requêtes)
   if (isSerpApiPlacesConfigured()) {
     try {
       let attractions: Attraction[] = [];

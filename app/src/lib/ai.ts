@@ -38,6 +38,7 @@ import { calculateFlightScore, EARLY_MORNING_PENALTY } from './services/flightSc
 import { createLocationTracker, TravelerLocation } from './services/locationTracker';
 import { generateFlightLink, generateHotelLink, formatDateForUrl } from './services/linkGenerator';
 import { searchAttractionsMultiQuery, searchMustSeeAttractions } from './services/serpApiPlaces';
+import { resolveAttractionByName } from './services/overpassAttractions';
 import { generateClaudeItinerary, summarizeAttractions, mapItineraryToAttractions } from './services/claudeItinerary';
 import { generateTravelTips } from './services/travelTips';
 import { resolveBudget, generateBudgetStrategy } from './services/budgetResolver';
@@ -591,23 +592,37 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       dayTripDestination: d.dayTripDestination || undefined,
     }));
 
-    // Resolve additional suggestions: search SerpAPI for exact name
+    // Resolve additional suggestions: use Travel Places API (free) first, SerpAPI fallback
     for (let i = 0; i < claudeItinerary.days.length; i++) {
       const day = claudeItinerary.days[i];
       for (const suggestion of day.additionalSuggestions) {
-        // Try to find via SerpAPI for real coordinates
+        const genIndex = attractionsByDay[i].findIndex(a => a.id.startsWith('claude-') && a.name === suggestion.name);
+        if (genIndex < 0) continue;
+
+        // Try Travel Places API first (free, via RapidAPI)
+        const resolved = await resolveAttractionByName(suggestion.name, cityCenter);
+        if (resolved) {
+          attractionsByDay[i][genIndex] = {
+            ...attractionsByDay[i][genIndex],
+            latitude: resolved.lat,
+            longitude: resolved.lng,
+            name: resolved.name || suggestion.name,
+            mustSee: true,
+            dataReliability: 'verified',
+          };
+          console.log(`[AI]   Résolu via Travel Places: "${suggestion.name}" → (${resolved.lat}, ${resolved.lng})`);
+          continue;
+        }
+
+        // Fallback: SerpAPI
         const found = await searchMustSeeAttractions(
           suggestion.name,
           preferences.destination,
           cityCenter
         );
         if (found.length > 0) {
-          // Replace the generated attraction with verified data
-          const genIndex = attractionsByDay[i].findIndex(a => a.id.startsWith('claude-') && a.name === suggestion.name);
-          if (genIndex >= 0) {
-            attractionsByDay[i][genIndex] = { ...found[0], mustSee: true };
-            console.log(`[AI]   Résolu: "${suggestion.name}" → coordonnées vérifiées`);
-          }
+          attractionsByDay[i][genIndex] = { ...found[0], mustSee: true };
+          console.log(`[AI]   Résolu via SerpAPI: "${suggestion.name}" → coordonnées vérifiées`);
         }
       }
     }

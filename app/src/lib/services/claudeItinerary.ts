@@ -31,6 +31,8 @@ export interface AttractionSummary {
   longitude: number;
   estimatedDuration: number;
   estimatedCost: number;
+  mustSee?: boolean;
+  reviewCount?: number;
 }
 
 export interface ClaudeItineraryRequest {
@@ -542,6 +544,8 @@ export function summarizeAttractions(attractions: Attraction[]): AttractionSumma
     longitude: a.longitude || 0,
     estimatedDuration: a.duration,
     estimatedCost: a.estimatedCost || 0,
+    mustSee: a.mustSee || false,
+    reviewCount: a.reviewCount || 0,
   }));
 }
 

@@ -13,6 +13,7 @@ import { Accommodation } from '../types';
 import { tokenTracker } from './tokenTracker';
 import { searchHotelsWithSerpApi, isSerpApiPlacesConfigured, getAvailableHotelNames } from './serpApiPlaces';
 import { searchHotelsWithBookingApi, isRapidApiBookingConfigured, type BookingHotel } from './rapidApiBooking';
+import { searchTripAdvisorHotels, isTripAdvisorConfigured } from './tripadvisor';
 import { searchPlacesFromDB, savePlacesToDB, type PlaceData } from './placeDatabase';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -176,7 +177,133 @@ export async function searchHotels(
 
   const targetStars = options.budgetLevel === 'luxury' ? 4 : (options.budgetLevel === 'comfort' || options.budgetLevel === 'moderate') ? 3 : 2;
 
-  // 1. PRIORITÉ: SerpAPI Google Hotels (DISPONIBILITÉ FIABLE)
+  // 1. PRIORITÉ: TripAdvisor (découverte) → SerpAPI (validation dispo, 1 requête)
+  // TripAdvisor donne les meilleurs hôtels avec prix comparés multi-providers
+  // SerpAPI Google Hotels confirme la disponibilité (seuls les hôtels avec prix sont dispo)
+  if (isTripAdvisorConfigured()) {
+    try {
+      console.log(`[Hotels] 🔍 Étape 1: Découverte via TripAdvisor (prix multi-providers)...`);
+      const taHotels = await searchTripAdvisorHotels(destination, {
+        checkIn: checkInStr,
+        checkOut: checkOutStr,
+        adults: options.guests,
+        rooms: 1,
+        currency: 'EUR',
+        limit: 15,
+      });
+
+      if (taHotels.length > 0) {
+        // Filtrer par budget
+        let filtered = taHotels.filter(h =>
+          h.pricePerNight === 0 ||
+          (h.pricePerNight >= priceRange.min * 0.7 && h.pricePerNight <= priceRange.hardMax)
+        );
+
+        if (filtered.length > 0) {
+          console.log(`[Hotels] ${filtered.length} candidats TripAdvisor dans le budget`);
+
+          // Étape 2: Valider la dispo via SerpAPI Google Hotels (1 requête)
+          // On cherche par nom de ville — SerpAPI retourne les hôtels DISPONIBLES uniquement
+          if (isSerpApiPlacesConfigured()) {
+            try {
+              console.log(`[Hotels] 🔍 Étape 2: Validation dispo via SerpAPI Google Hotels...`);
+              const serpHotels = await searchHotelsWithSerpApi(destination, checkInStr, checkOutStr, {
+                adults: options.guests,
+                minPrice: priceRange.min,
+                maxPrice: Math.round(priceRange.hardMax),
+                hotelClass: targetStars,
+                sort: options.budgetLevel === 'economic' ? 'lowest_price' : 'highest_rating',
+                limit: 30, // Plus large pour matcher
+              });
+
+              if (serpHotels.length > 0) {
+                // Matcher les candidats TripAdvisor avec les résultats SerpAPI (dispo confirmée)
+                const serpNames = new Set(serpHotels.map((h: any) => h.name?.toLowerCase().trim()));
+                const serpMap = new Map(serpHotels.map((h: any) => [h.name?.toLowerCase().trim(), h]));
+
+                const validated: Accommodation[] = [];
+                for (const taHotel of filtered) {
+                  const taNameLower = taHotel.name.toLowerCase().trim();
+                  // Match exact ou partiel (ex: "Hotel Ritz" dans "The Ritz Paris")
+                  let serpMatch: any = serpMap.get(taNameLower);
+                  if (!serpMatch) {
+                    // Fuzzy match: chercher si un nom SerpAPI contient le nom TA ou vice-versa
+                    for (const [serpName, serpData] of serpMap) {
+                      if (serpName.includes(taNameLower) || taNameLower.includes(serpName) ||
+                          serpName.split(/\s+/).filter((w: string) => w.length > 3).some((w: string) => taNameLower.includes(w))) {
+                        serpMatch = serpData;
+                        break;
+                      }
+                    }
+                  }
+
+                  if (serpMatch) {
+                    // Dispo confirmée ! Utiliser le lien SerpAPI (Google Travel direct avec dates)
+                    validated.push({
+                      ...taHotel,
+                      bookingUrl: serpMatch.bookingUrl || taHotel.bookingUrl,
+                      latitude: serpMatch.latitude || taHotel.latitude,
+                      longitude: serpMatch.longitude || taHotel.longitude,
+                      description: (taHotel.description || '') + ' • Disponibilité confirmée',
+                    });
+                    console.log(`[Hotels] ✅ ${taHotel.name}: DISPONIBLE (confirmé Google Hotels)`);
+                  }
+                }
+
+                if (validated.length > 0) {
+                  console.log(`[Hotels] ✅ ${validated.length}/${filtered.length} hôtels confirmés disponibles`);
+                  return adjustHotelPrices(validated, options);
+                }
+
+                // Aucun match → utiliser les résultats SerpAPI directement (on sait qu'ils sont dispo)
+                console.log(`[Hotels] Aucun match TA↔SerpAPI, utilisation des résultats SerpAPI directs`);
+                const serpAccommodations: Accommodation[] = serpHotels.slice(0, 10).map((h: any) => {
+                  const amenities = h.amenities || [];
+                  const breakfastIncluded = checkBreakfastIncluded(amenities);
+                  let stars = 3;
+                  if (h.stars) {
+                    stars = typeof h.stars === 'number' ? h.stars : parseInt(String(h.stars).match(/(\d)/)?.[1] || '3');
+                  }
+                  return {
+                    id: h.id,
+                    name: h.name,
+                    type: 'hotel' as const,
+                    address: h.address || 'Adresse non disponible',
+                    latitude: h.latitude || options.cityCenter.lat,
+                    longitude: h.longitude || options.cityCenter.lng,
+                    rating: h.rating ? (h.rating <= 5 ? h.rating * 2 : h.rating) : 8,
+                    reviewCount: h.reviewCount || 0,
+                    stars,
+                    pricePerNight: h.pricePerNight || priceRange.min,
+                    totalPrice: h.totalPrice || 0,
+                    currency: 'EUR',
+                    amenities,
+                    checkInTime: validateCheckInTime(h.checkIn),
+                    checkOutTime: validateCheckOutTime(h.checkOut),
+                    bookingUrl: h.bookingUrl,
+                    distanceToCenter: 0,
+                    description: 'Disponibilité confirmée',
+                    breakfastIncluded,
+                  };
+                });
+                return adjustHotelPrices(serpAccommodations, options);
+              }
+            } catch (serpError) {
+              console.warn('[Hotels] SerpAPI validation error:', serpError);
+            }
+          }
+
+          // Pas de SerpAPI → retourner TripAdvisor tel quel (pas de validation dispo)
+          console.log(`[Hotels] ✅ ${filtered.length} hôtels TripAdvisor (dispo non vérifiée)`);
+          return adjustHotelPrices(filtered, options);
+        }
+      }
+    } catch (error) {
+      console.warn('[Hotels] TripAdvisor error, trying SerpAPI:', error);
+    }
+  }
+
+  // 2. FALLBACK: SerpAPI Google Hotels seul (si TripAdvisor échoue)
   // Seuls les hôtels avec un prix affiché sont vraiment disponibles
   if (isSerpApiPlacesConfigured()) {
     try {

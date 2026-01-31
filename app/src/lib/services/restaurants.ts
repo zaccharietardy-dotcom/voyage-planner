@@ -17,6 +17,7 @@ import { validateRestaurantCuisine, filterRestaurantsByCuisine } from './cuisine
 import { searchRestaurants as searchFoursquareRestaurants, foursquareToRestaurant, isFoursquareConfigured } from './foursquare';
 import { searchRestaurantsWithSerpApi, searchRestaurantsNearby, isSerpApiPlacesConfigured, QUALITY_THRESHOLDS } from './serpApiPlaces';
 import { searchPlacesFromDB, savePlacesToDB, isDataFresh, type PlaceData } from './placeDatabase';
+import { searchTripAdvisorRestaurants, isTripAdvisorConfigured } from './tripadvisor';
 
 // Configuration optionnelle Google Places
 const GOOGLE_PLACES_API_KEY = process.env.GOOGLE_PLACES_API_KEY;
@@ -120,7 +121,40 @@ export async function searchRestaurants(params: RestaurantSearchParams): Promise
     }
   }
 
-  // 1. PRIORITÉ: SerpAPI Google Local (données RÉELLES vérifiées, 100 req/mois gratuit)
+  // 1. PRIORITÉ: TripAdvisor (données RÉELLES, rating, cuisine, Michelin)
+  if (destination && isTripAdvisorConfigured()) {
+    try {
+      const taRestaurants = await searchTripAdvisorRestaurants(destination, {
+        limit: limit + 10,
+      });
+
+      if (taRestaurants.length > 0) {
+        // Sauvegarder en base locale
+        try {
+          const placesToSave = taRestaurants.map(r => restaurantToPlace(r, destination));
+          await savePlacesToDB(placesToSave, 'tripadvisor');
+        } catch (saveError) {
+          console.warn('[Restaurants] Erreur sauvegarde TripAdvisor en base:', saveError);
+        }
+
+        let filtered = filterRestaurantsByCuisine(taRestaurants, destination, {
+          strictMode: true,
+          allowNonLocal: true,
+        });
+        filtered = filterByForbiddenNames(filtered, destination);
+
+        console.log(`[Restaurants] ${taRestaurants.length} restaurants TripAdvisor, ${filtered.length} après filtrage`);
+        if (filtered.length > 0) {
+          finalRestaurants = filtered.slice(0, limit);
+          return applyFinalFilter(finalRestaurants, destination, limit, mealType);
+        }
+      }
+    } catch (error) {
+      console.warn('[Restaurants] TripAdvisor error, trying SerpAPI:', error);
+    }
+  }
+
+  // 2. FALLBACK: SerpAPI Google Local (données RÉELLES vérifiées, 100 req/mois gratuit)
   if (destination && isSerpApiPlacesConfigured()) {
     try {
       const serpRestaurants = await searchRestaurantsWithSerpApi(destination, {

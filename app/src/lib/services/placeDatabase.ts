@@ -14,7 +14,7 @@ import crypto from 'crypto';
 // Types
 export type PlaceType = 'restaurant' | 'hotel' | 'attraction';
 export type DataReliability = 'verified' | 'estimated' | 'generated';
-export type DataSource = 'serpapi' | 'foursquare' | 'osm' | 'claude';
+export type DataSource = 'serpapi' | 'foursquare' | 'osm' | 'claude' | 'tripadvisor';
 
 export interface PlaceData {
   externalId?: string;
@@ -312,6 +312,7 @@ export async function getDatabaseStats(): Promise<{
     foursquare: 0,
     osm: 0,
     claude: 0,
+    tripadvisor: 0,
   };
   bySourceRaw.forEach((item) => {
     bySource[item.source as DataSource] = item._count;
