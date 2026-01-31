@@ -113,7 +113,9 @@ RÈGLES:
 - "restaurant" = manger dehors (~15-30€/pers/repas selon destination)
 - "mixed" = alternance courses/restaurant
 - Le petit-déjeuner est souvent self_catered même avec un bon budget (sauf si hôtel avec PDJ inclus)
-- accommodationBudgetPerNight = budget TOTAL chambre/logement par nuit (pas par personne)`;
+- accommodationBudgetPerNight = budget TOTAL chambre/logement par nuit (pas par personne)
+- Si le budget par personne/jour est >= 80€, privilégie les restaurants pour déjeuner et dîner
+- Si le budget par personne/jour est < 30€, privilégie self_catered pour économiser`;
 
   try {
     const response = await client.messages.create({
@@ -137,6 +139,19 @@ RÈGLES:
     }
 
     const strategy: BudgetStrategy = JSON.parse(jsonStr);
+
+    // Guard: if budget per person per day is high enough (>80€), ensure restaurant meals
+    // This covers luxury budgets without blindly forcing it when budget is actually tight
+    if (resolved.perPersonPerDay >= 80) {
+      const meals = strategy.mealsStrategy;
+      if (meals.lunch === 'self_catered' || meals.dinner === 'self_catered') {
+        console.log(`[BudgetStrategy] Override: ${resolved.perPersonPerDay.toFixed(0)}€/pers/jour → forcing lunch+dinner to restaurant`);
+        meals.lunch = 'restaurant';
+        meals.dinner = 'restaurant';
+        strategy.groceryShoppingNeeded = false;
+      }
+    }
+
     console.log(`[BudgetStrategy] ${destination}: ${strategy.accommodationType}, activités=${strategy.activitiesLevel}, courses=${strategy.groceryShoppingNeeded}`);
     console.log(`[BudgetStrategy] Reasoning: ${strategy.reasoning}`);
 

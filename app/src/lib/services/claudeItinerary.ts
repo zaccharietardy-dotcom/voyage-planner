@@ -219,6 +219,7 @@ STRATÉGIE BUDGET (décidée en amont):
 - Transport local: ${strategy.transportTips}
 
 IMPORTANT: Les repas self_catered (courses/cuisine) sont AUTOMATIQUEMENT ajoutés par le système. Ne les inclus PAS dans ton itinéraire. Concentre-toi UNIQUEMENT sur les activités, visites et restaurants (quand la stratégie dit "restaurant").
+${request.budgetLevel === 'luxury' || request.budgetLevel === 'comfort' ? `\nBUDGET PREMIUM: Tous les repas sont au restaurant. Mentionne des restaurants gastronomiques ou réputés dans les dayNarrative. Propose des expériences premium (visites privées, coupe-file, croisières VIP).` : ''}
 ` : '';
 
   const prompt = `Tu es un guide de voyage local expert avec 20 ans d'expérience à ${request.destination}. Conçois l'itinéraire PARFAIT de ${request.durationDays} jours.
@@ -506,6 +507,37 @@ Format EXACT:
             estimatedCost: 0,
             area: request.destination,
           });
+        }
+      }
+    }
+
+    // POST-VALIDATION: Duration caps, timing, audience filtering
+    const nightlifePattern = /\b(moulin rouge|lido|crazy horse|cabaret|nightclub|strip club|burlesque)\b/i;
+    const eveningOnlyPattern = /\b(cabaret|spectacle|show|concert|opéra|opera|flamenco|jazz club)\b/i;
+
+    for (const day of parsed.days) {
+      // Filter additionalSuggestions
+      day.additionalSuggestions = day.additionalSuggestions.filter(s => {
+        // Audience filter: remove nightlife/cabaret for family_with_kids
+        if (request.groupType === 'family_with_kids' && nightlifePattern.test(s.name)) {
+          console.log(`[ClaudeItinerary] Removed "${s.name}": not kid-friendly`);
+          return false;
+        }
+        return true;
+      });
+
+      for (const s of day.additionalSuggestions) {
+        // Duration cap: max 4h unless major museum
+        const majorMuseums = /\b(louvre|british museum|metropolitan|met museum|prado|uffizi|hermitage|vatican museum|rijksmuseum|national gallery)\b/i;
+        if (s.estimatedDuration > 240 && !majorMuseums.test(s.name)) {
+          console.log(`[ClaudeItinerary] Cap duration "${s.name}": ${s.estimatedDuration}min → 120min`);
+          s.estimatedDuration = 120;
+        }
+
+        // Evening-only enforcement for shows/cabarets
+        if (eveningOnlyPattern.test(s.name) && s.bestTimeOfDay !== 'evening') {
+          console.log(`[ClaudeItinerary] Force evening for "${s.name}"`);
+          s.bestTimeOfDay = 'evening';
         }
       }
     }

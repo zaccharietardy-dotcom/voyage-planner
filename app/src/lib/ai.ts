@@ -790,6 +790,8 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       budgetStrategy, // Stratégie budget pour repas self_catered vs restaurant
       budgetTracker, // Suivi budget en temps réel
       lateFlightArrivalData: pendingLateFlightData, // Données du vol tardif du jour précédent
+      isDayTrip: (dayMetadata[i] || {} as any).isDayTrip,
+      dayTripDestination: (dayMetadata[i] || {} as any).dayTripDestination,
     });
 
     const meta = dayMetadata[i] || {};
@@ -1316,6 +1318,8 @@ async function generateDayWithScheduler(params: {
   budgetStrategy?: BudgetStrategy; // Stratégie budget pour repas self_catered vs restaurant
   budgetTracker?: BudgetTracker; // Suivi budget en temps réel
   lateFlightArrivalData?: LateFlightArrivalData | null; // Vol tardif du jour précédent à traiter
+  isDayTrip?: boolean; // Day trip: relax city validation
+  dayTripDestination?: string; // Day trip destination city name
 }): Promise<{ items: TripItem[]; lateFlightForNextDay?: LateFlightArrivalData }> {
   const {
     dayNumber,
@@ -1338,6 +1342,8 @@ async function generateDayWithScheduler(params: {
     budgetStrategy, // Stratégie budget pour repas
     budgetTracker, // Suivi budget en temps réel
     lateFlightArrivalData, // Vol tardif à traiter en début de journée
+    isDayTrip,
+    dayTripDestination,
   } = params;
 
   // Date de début du voyage normalisée (pour les URLs de réservation)
@@ -2365,13 +2371,16 @@ async function generateDayWithScheduler(params: {
       }
 
       // LOCATION TRACKING: Vérifier que l'utilisateur est bien à destination
-      const locationValidation = locationTracker.validateActivity({
-        city: preferences.destination,
-        name: attraction.name,
-      });
-      if (!locationValidation.valid) {
-        console.log(`[LocationTracker] Skip "${attraction.name}": ${locationValidation.reason}`);
-        continue;
+      // LOCATION TRACKING: Skip validation for day trips (attractions are in a different city by design)
+      if (!isDayTrip) {
+        const locationValidation = locationTracker.validateActivity({
+          city: preferences.destination,
+          name: attraction.name,
+        });
+        if (!locationValidation.valid) {
+          console.log(`[LocationTracker] Skip "${attraction.name}": ${locationValidation.reason}`);
+          continue;
+        }
       }
 
       // Verifier qu'on a le temps avant le dejeuner (12:30)
@@ -2695,14 +2704,37 @@ async function generateDayWithScheduler(params: {
   if (timeBeforeDinnerMin > 60) {
     console.log(`[Jour ${dayNumber}] ${Math.round(timeBeforeDinnerMin / 60)}h de temps libre avant dîner - tentative de remplissage avec attractions supplémentaires`);
 
-    // Chercher des attractions pas encore utilisées DANS LA SÉLECTION DU JOUR (Claude)
-    // On ne pioche PAS dans allAttractions pour ne pas diluer la curation de Claude
-    const unusedAttractions = attractions.filter(a => !tripUsedAttractionIds.has(a.id));
+    // Smart gap filling: use allAttractions but filter by proximity + diversity
+    const dayTypes = new Set(attractions.filter(a => tripUsedAttractionIds.has(a.id)).map(a => a.type));
+    const dayHasReligious = attractions.some(a => tripUsedAttractionIds.has(a.id) && /church|cathedral|basilica|chapel|mosque|synagogue|temple|shrine/i.test(a.name));
+
+    // Compute centroid of day's placed attractions for proximity filter
+    const placedAttractions = attractions.filter(a => tripUsedAttractionIds.has(a.id) && a.latitude && a.longitude);
+    const centroid = placedAttractions.length > 0 ? {
+      lat: placedAttractions.reduce((s, a) => s + a.latitude, 0) / placedAttractions.length,
+      lng: placedAttractions.reduce((s, a) => s + a.longitude, 0) / placedAttractions.length,
+    } : cityCenter;
+
+    let gapFillAdded = 0;
+    const MAX_GAP_FILL = 2;
+    const unusedAttractions = allAttractions.filter(a => {
+      if (tripUsedAttractionIds.has(a.id)) return false;
+      // Proximity: within ~3km of day's centroid
+      if (a.latitude && a.longitude) {
+        const dlat = (a.latitude - centroid.lat) * 111;
+        const dlng = (a.longitude - centroid.lng) * 111 * Math.cos(centroid.lat * Math.PI / 180);
+        if (Math.sqrt(dlat * dlat + dlng * dlng) > 3) return false;
+      }
+      // No religious if day already has one
+      if (dayHasReligious && /church|cathedral|basilica|chapel|mosque|synagogue|temple|shrine/i.test(a.name)) return false;
+      return true;
+    });
 
     if (unusedAttractions.length > 0) {
       console.log(`[Jour ${dayNumber}] ${unusedAttractions.length} attractions non utilisées disponibles`);
 
       for (const attraction of unusedAttractions) {
+        if (gapFillAdded >= MAX_GAP_FILL) break;
         // Vérifier qu'on a le temps avant le dîner (19:00)
         const dinnerTime = parseTime(date, '19:00');
         const estimatedTravelTime = estimateTravelTime({ latitude: lastCoords.lat, longitude: lastCoords.lng } as Attraction, attraction);
@@ -2746,6 +2778,7 @@ async function generateDayWithScheduler(params: {
         });
 
         if (activityItem) {
+          gapFillAdded++;
           if (gapFillCost > 0 && budgetTracker) {
             budgetTracker.spend('activities', gapFillCost);
           }
