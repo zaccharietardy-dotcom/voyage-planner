@@ -460,6 +460,234 @@ Réponds UNIQUEMENT en JSON (pas de markdown):
 }
 
 /**
+ * Recherche le prix d'un billet de train via Gemini + Google Search
+ */
+export async function searchTrainPrice(
+  origin: string,
+  dest: string,
+  date: string,
+  passengers: number = 1
+): Promise<{ price: number | null; operator?: string; source?: string; duration?: number } | null> {
+  if (!GEMINI_API_KEY) {
+    console.warn('[Gemini] GOOGLE_AI_API_KEY non configurée');
+    return null;
+  }
+
+  const prompt = `Recherche sur Google le prix d'un billet de train de ${origin} à ${dest} le ${date} pour ${passengers} adulte(s).
+Cherche sur SNCF Connect, Trainline, Renfe, Trenitalia, Deutsche Bahn.
+Retourne UNIQUEMENT un JSON valide, sans commentaire:
+{
+  "price": number (prix par personne en EUR, le moins cher trouvé),
+  "operator": "SNCF TGV INOUI" | "Renfe AVE" | etc.,
+  "source": "sncf-connect.com" | "thetrainline.com" | etc.,
+  "duration": number (minutes de trajet)
+}
+Si aucun prix trouvé, retourne: { "price": null }`;
+
+  try {
+    console.log(`[Gemini] Recherche train ${origin} → ${dest} le ${date}...`);
+    const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        tools: [{ googleSearch: {} }],
+        generationConfig: { temperature: 0.1, maxOutputTokens: 500 },
+      }),
+    });
+
+    if (!response.ok) {
+      console.error('[Gemini] Train API error:', response.status);
+      return null;
+    }
+
+    const data: GeminiResponse = await response.json();
+    if (data.error) {
+      console.error('[Gemini] Train error:', data.error.message);
+      return null;
+    }
+
+    const textContent = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!textContent) {
+      console.warn('[Gemini] Train: pas de contenu dans la réponse');
+      return null;
+    }
+
+    const sources = data.candidates?.[0]?.groundingMetadata?.groundingChunks;
+    if (sources?.length) {
+      console.log('[Gemini] Train sources:', sources.slice(0, 3).map(s => s.web?.title).join(', '));
+    }
+
+    const jsonMatch = textContent.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      console.warn('[Gemini] Train: pas de JSON trouvé');
+      return null;
+    }
+
+    const result = JSON.parse(jsonMatch[0]);
+    console.log(`[Gemini] Train ${origin}-${dest}: ${result.price != null ? result.price + '€' : 'non trouvé'}`);
+    return result;
+  } catch (error) {
+    console.error('[Gemini] Erreur recherche train:', error);
+    return null;
+  }
+}
+
+/**
+ * Recherche des ferries via Gemini + Google Search
+ */
+export async function searchFerryInfo(
+  origin: string,
+  dest: string,
+  date: string,
+  passengers: number = 1
+): Promise<{
+  price: number | null;
+  operator?: string;
+  duration?: number;
+  bookingUrl?: string;
+  departurePort?: string;
+  arrivalPort?: string;
+} | null> {
+  if (!GEMINI_API_KEY) {
+    console.warn('[Gemini] GOOGLE_AI_API_KEY non configurée');
+    return null;
+  }
+
+  const prompt = `Recherche sur Google les ferries de ${origin} à ${dest} le ${date} pour ${passengers} adulte(s).
+Cherche sur Corsica Linea, La Méridionale, GNV, Grimaldi Lines, Brittany Ferries, Balearia, Trasmediterranea.
+Retourne UNIQUEMENT un JSON valide:
+{
+  "price": number (prix par personne en EUR),
+  "operator": "Corsica Linea" | etc.,
+  "duration": number (minutes de traversée),
+  "bookingUrl": "https://..." (lien de réservation direct si trouvé),
+  "departurePort": "Marseille",
+  "arrivalPort": "Ajaccio"
+}
+Si aucun ferry trouvé, retourne: { "price": null }`;
+
+  try {
+    console.log(`[Gemini] Recherche ferry ${origin} → ${dest} le ${date}...`);
+    const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        tools: [{ googleSearch: {} }],
+        generationConfig: { temperature: 0.1, maxOutputTokens: 500 },
+      }),
+    });
+
+    if (!response.ok) {
+      console.error('[Gemini] Ferry API error:', response.status);
+      return null;
+    }
+
+    const data: GeminiResponse = await response.json();
+    if (data.error) {
+      console.error('[Gemini] Ferry error:', data.error.message);
+      return null;
+    }
+
+    const textContent = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!textContent) {
+      console.warn('[Gemini] Ferry: pas de contenu dans la réponse');
+      return null;
+    }
+
+    const sources = data.candidates?.[0]?.groundingMetadata?.groundingChunks;
+    if (sources?.length) {
+      console.log('[Gemini] Ferry sources:', sources.slice(0, 3).map(s => s.web?.title).join(', '));
+    }
+
+    const jsonMatch = textContent.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      console.warn('[Gemini] Ferry: pas de JSON trouvé');
+      return null;
+    }
+
+    const result = JSON.parse(jsonMatch[0]);
+    console.log(`[Gemini] Ferry ${origin}-${dest}: ${result.price != null ? result.price + '€' : 'non trouvé'}`);
+    return result;
+  } catch (error) {
+    console.error('[Gemini] Erreur recherche ferry:', error);
+    return null;
+  }
+}
+
+/**
+ * Recherche le coût des péages autoroute via Gemini + Google Search
+ */
+export async function searchTollCost(
+  origin: string,
+  dest: string
+): Promise<{ toll: number; route?: string; source?: string } | null> {
+  if (!GEMINI_API_KEY) {
+    console.warn('[Gemini] GOOGLE_AI_API_KEY non configurée');
+    return null;
+  }
+
+  const prompt = `Recherche sur Google le coût total des péages autoroute en voiture de ${origin} à ${dest} en France/Europe.
+Cherche sur autoroutes.fr, mappy.com, viamichelin.com.
+Retourne UNIQUEMENT un JSON valide:
+{
+  "toll": number (coût total en EUR pour une voiture standard classe 1),
+  "route": "A6 puis A7" (autoroutes empruntées),
+  "source": "autoroutes.fr" | etc.
+}
+Si péages gratuits (ex: Allemagne), retourne: { "toll": 0, "route": "Autobahn (gratuit)" }`;
+
+  try {
+    console.log(`[Gemini] Recherche péages ${origin} → ${dest}...`);
+    const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        tools: [{ googleSearch: {} }],
+        generationConfig: { temperature: 0.1, maxOutputTokens: 500 },
+      }),
+    });
+
+    if (!response.ok) {
+      console.error('[Gemini] Toll API error:', response.status);
+      return null;
+    }
+
+    const data: GeminiResponse = await response.json();
+    if (data.error) {
+      console.error('[Gemini] Toll error:', data.error.message);
+      return null;
+    }
+
+    const textContent = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!textContent) {
+      console.warn('[Gemini] Toll: pas de contenu dans la réponse');
+      return null;
+    }
+
+    const sources = data.candidates?.[0]?.groundingMetadata?.groundingChunks;
+    if (sources?.length) {
+      console.log('[Gemini] Toll sources:', sources.slice(0, 3).map(s => s.web?.title).join(', '));
+    }
+
+    const jsonMatch = textContent.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      console.warn('[Gemini] Toll: pas de JSON trouvé');
+      return null;
+    }
+
+    const result = JSON.parse(jsonMatch[0]);
+    console.log(`[Gemini] Péages ${origin}-${dest}: ${result.toll}€ via ${result.route || 'N/A'}`);
+    return result;
+  } catch (error) {
+    console.error('[Gemini] Erreur recherche péages:', error);
+    return null;
+  }
+}
+
+/**
  * Génère une URL Google Flights
  */
 function generateGoogleFlightsUrl(origin: string, destination: string, date: string): string {

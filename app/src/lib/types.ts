@@ -329,7 +329,7 @@ export interface TripDay {
 // Options de transport comparées
 export interface TransportOptionSummary {
   id: string;
-  mode: 'plane' | 'train' | 'bus' | 'car' | 'combined';
+  mode: 'plane' | 'train' | 'bus' | 'car' | 'combined' | 'ferry';
   totalDuration: number;      // minutes
   totalPrice: number;         // euros
   totalCO2: number;           // kg CO2

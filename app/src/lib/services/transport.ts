@@ -8,11 +8,14 @@
 import { calculateDistance } from './geocoding';
 import { normalizeCitySync } from './cityNormalization';
 import { getCheapestTrainPrice } from './dbTransport';
+import { checkTransportFeasibility } from './transportFeasibility';
+import { findMultiModalOptions } from './multiModalTransport';
+import { calculateCarCost } from './carCostCalculator';
 
 // Types
 export interface TransportOption {
   id: string;
-  mode: 'plane' | 'train' | 'bus' | 'car' | 'combined';
+  mode: 'plane' | 'train' | 'bus' | 'car' | 'combined' | 'ferry';
   segments: TransportSegment[];
   totalDuration: number;      // minutes
   totalPrice: number;         // euros
@@ -26,6 +29,7 @@ export interface TransportOption {
   bookingUrl?: string;
   recommended?: boolean;
   recommendationReason?: string;
+  budgetNote?: string;
   dataSource?: 'api' | 'estimated';
 }
 
@@ -296,37 +300,96 @@ export async function compareTransportOptions(
 
   console.log(`Comparaison transport ${params.origin} → ${params.destination} (${Math.round(distance)} km)`);
 
+  // Feasibility check — filtre les modes impossibles
+  const feasibility = checkTransportFeasibility(
+    params.origin,
+    params.destination,
+    distance,
+    params.originCoords,
+    params.destCoords
+  );
+  const feasibleModes = new Set(
+    feasibility.filter(f => f.feasible).map(f => f.mode)
+  );
+  const ferryRequired = feasibility.some(f => f.requiresFerry);
+  console.log(`[Transport] Modes faisables: ${[...feasibleModes].join(', ')}${ferryRequired ? ' (ferry requis)' : ''}`);
+
   const options: TransportOption[] = [];
 
   // 1. Option avion (si distance > 300km OU si l'utilisateur l'a demandé)
   const forcePlane = params.preferences?.forceIncludeMode === 'plane';
-  if ((distance > 300 || forcePlane) && !params.preferences?.avoidModes?.includes('plane')) {
+  if (feasibleModes.has('plane') && (distance > 300 || forcePlane) && !params.preferences?.avoidModes?.includes('plane')) {
     const planeOption = calculatePlaneOption(params, distance);
     if (planeOption) options.push(planeOption);
   }
 
-  // 2. Option train (si ligne existe ou distance < 1500km)
-  const trainOption = await calculateTrainOption(params, distance);
-  if (trainOption) options.push(trainOption);
+  // 2. Option train (si faisable)
+  if (feasibleModes.has('train')) {
+    const trainOption = await calculateTrainOption(params, distance);
+    if (trainOption) options.push(trainOption);
+  }
 
-  // 3. Option bus (si distance < 1200km OU si l'utilisateur l'a demandé)
+  // 3. Option bus (si faisable)
   const forceBus = params.preferences?.forceIncludeMode === 'bus';
-  if ((distance < 1200 || forceBus) && !params.preferences?.avoidModes?.includes('bus')) {
+  if (feasibleModes.has('bus') && (distance < 1200 || forceBus) && !params.preferences?.avoidModes?.includes('bus')) {
     const busOption = calculateBusOption(params, distance);
     if (busOption) options.push(busOption);
   }
 
-  // 4. Option voiture (si distance < 1500km OU si l'utilisateur l'a demandé)
+  // 4. Option voiture (si faisable, avec coûts réels)
   const forceCar = params.preferences?.forceIncludeMode === 'car';
-  if ((distance < 1500 || forceCar) && !params.preferences?.avoidModes?.includes('car')) {
+  if (feasibleModes.has('car') && (distance < 1500 || forceCar) && !params.preferences?.avoidModes?.includes('car')) {
     const carOption = calculateCarOption(params, distance);
-    if (carOption) options.push(carOption);
+    if (carOption) {
+      // Enrichir avec coûts réels (péages Gemini + essence)
+      try {
+        const realCost = await calculateCarCost(params.origin, params.destination, distance, {
+          passengers: params.passengers,
+        });
+        carOption.totalPrice = realCost.total;
+        carOption.segments[0].price = realCost.total;
+        carOption.dataSource = realCost.tollDetails.source === 'gemini' ? 'api' : 'estimated';
+      } catch {
+        // Keep estimated price on failure
+      }
+      options.push(carOption);
+    }
   }
 
   // 5. Option combinée train + avion (pour très longues distances sans train direct)
   if (distance > 800 && !hasDirectHighSpeedRail(params.origin, params.destination)) {
     const combinedOption = calculateCombinedOption(params, distance);
     if (combinedOption) options.push(combinedOption);
+  }
+
+  // 6. Options multi-modales (ferry+train, voiture+avion, etc.)
+  if (ferryRequired || (distance > 800 && feasibleModes.size > 1)) {
+    try {
+      const multiModalOptions = await findMultiModalOptions(
+        params.origin,
+        params.destination,
+        params.date,
+        params.passengers,
+        'moderate', // default, will be overridden by budget-aware selection later
+        params.originCoords,
+        params.destCoords
+      );
+      for (const mm of multiModalOptions) {
+        options.push({
+          id: mm.id,
+          mode: 'combined',
+          segments: mm.segments,
+          totalDuration: mm.totalDuration,
+          totalPrice: mm.totalPrice,
+          totalCO2: mm.totalCO2,
+          score: 0,
+          scoreDetails: { priceScore: 0, timeScore: 0, co2Score: 0 },
+          bookingUrl: mm.bookingLinks[0]?.url,
+        });
+      }
+    } catch (err) {
+      console.warn('[Transport] Multi-modal search failed:', err instanceof Error ? err.message : err);
+    }
   }
 
   console.log(`[Transport] Options générées: ${options.map(o => o.mode).join(', ')}`);
@@ -568,8 +631,11 @@ function calculateBusOption(params: TransportSearchParams, distance: number): Tr
   const co2 = Math.round(distance * CO2_PER_KM.bus);
 
   // FlixBus booking URL with date
-  const dateStr = params.date ? params.date.toISOString().split('T')[0] : '';
-  const bookingUrl = `https://www.flixbus.fr/recherche?departureCity=${encodeURIComponent(params.origin)}&arrivalCity=${encodeURIComponent(params.destination)}${dateStr ? `&rideDate=${dateStr}` : ''}`;
+  // Format date as DD.MM.YYYY for FlixBus
+  const flixDate = params.date
+    ? `${String(params.date.getDate()).padStart(2, '0')}.${String(params.date.getMonth() + 1).padStart(2, '0')}.${params.date.getFullYear()}`
+    : '';
+  const bookingUrl = `https://shop.flixbus.fr/search?departureCity=${encodeURIComponent(params.origin)}&arrivalCity=${encodeURIComponent(params.destination)}${flixDate ? `&rideDate=${flixDate}` : ''}&adult=${params.passengers || 1}`;
 
   return {
     id: 'bus',
@@ -905,14 +971,16 @@ export function getTrainBookingUrl(origin: string, destination: string, passenge
     return `https://www.sncf-connect.com/app/home/search?from=${encodeURIComponent(origin)}&to=${encodeURIComponent(destination)}${dateParam}${paxParam}`;
   }
 
-  // Renfe: trajets Espagne
+  // Renfe: trajets Espagne — Renfe has no deep-link; use Trainline instead (validated to work with search params)
   const spanishCities = ['barcelona', 'madrid', 'valencia', 'seville', 'malaga'];
   if (cities.some(c => spanishCities.includes(c))) {
-    return `https://www.renfe.com/es/en`;
+    const dateStr = date ? date.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+    return `https://www.thetrainline.com/book/results?origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}&outwardDate=${dateStr}T06:00:00&adults=${passengers}`;
   }
 
   // Trainline: fonctionne pour la plupart des trajets européens
-  return `https://www.thetrainline.com/en/train-times/${encodeURIComponent(origin.toLowerCase().replace(/\s+/g, '-'))}-to-${encodeURIComponent(destination.toLowerCase().replace(/\s+/g, '-'))}`;
+  const dateStr = date ? date.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+  return `https://www.thetrainline.com/book/results?origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}&outwardDate=${dateStr}T06:00:00&adults=${passengers}`;
 }
 
 /**
@@ -984,4 +1052,166 @@ export function getTransportModeLabel(mode: TransportOption['mode']): string {
     ferry: 'Ferry',
   };
   return labels[mode] || mode;
+}
+
+/**
+ * Select the best transport option based on budget constraints.
+ * Called AFTER compareTransportOptions to pick the recommended option.
+ */
+export function selectBudgetAwareTransport(
+  options: TransportOption[],
+  budgetLevel: 'economic' | 'moderate' | 'comfort' | 'luxury',
+  transportBudget?: number
+): TransportOption | null {
+  if (options.length === 0) return null;
+
+  let pool = [...options];
+  let budgetExceeded = false;
+
+  // Apply transportBudget constraint
+  if (transportBudget !== undefined) {
+    const affordable = pool.filter(o => o.totalPrice <= transportBudget);
+    if (affordable.length === 0) {
+      // All exceed budget — pick cheapest anyway, flag it
+      budgetExceeded = true;
+    } else {
+      pool = affordable;
+    }
+  }
+
+  // Estimate route distance from first option's segment coords
+  let routeDistance = 0;
+  const firstSeg = options[0]?.segments?.[0];
+  if (firstSeg?.fromCoords && firstSeg?.toCoords) {
+    routeDistance = calculateDistance(
+      firstSeg.fromCoords.lat, firstSeg.fromCoords.lng,
+      firstSeg.toCoords.lat, firstSeg.toCoords.lng
+    );
+  }
+
+  let selected: TransportOption;
+
+  switch (budgetLevel) {
+    case 'economic': {
+      const sorted = [...pool].sort((a, b) => a.totalPrice - b.totalPrice);
+      selected = sorted[0];
+
+      // If cheapest is bus and takes >20h, consider train if <30% more expensive
+      if (selected.mode === 'bus' && selected.totalDuration > 20 * 60) {
+        const train = sorted.find(o => o.mode === 'train');
+        if (train && train.totalPrice <= selected.totalPrice * 1.3) {
+          selected = train;
+          selected.budgetNote = 'Train choisi : bus trop long (>20h), train <30% plus cher';
+        }
+      }
+
+      // Never pick plane if train exists and is <4h more travel time
+      if (selected.mode === 'plane') {
+        const train = pool.find(o => o.mode === 'train');
+        if (train && (train.totalDuration - selected.totalDuration) < 4 * 60) {
+          selected = train;
+          selected.budgetNote = 'Train préféré au budget économique (écart <4h)';
+        }
+      }
+      break;
+    }
+
+    case 'moderate': {
+      // Weight: 50% price, 50% time — pick best price/time ratio
+      const maxPrice = Math.max(...pool.map(o => o.totalPrice));
+      const minPrice = Math.min(...pool.map(o => o.totalPrice));
+      const maxDur = Math.max(...pool.map(o => o.totalDuration));
+      const minDur = Math.min(...pool.map(o => o.totalDuration));
+
+      const scored = pool.map(o => {
+        const pNorm = maxPrice === minPrice ? 1 : 1 - (o.totalPrice - minPrice) / (maxPrice - minPrice);
+        const tNorm = maxDur === minDur ? 1 : 1 - (o.totalDuration - minDur) / (maxDur - minDur);
+        return { option: o, compositeScore: pNorm * 0.5 + tNorm * 0.5 };
+      });
+      scored.sort((a, b) => b.compositeScore - a.compositeScore);
+      selected = scored[0].option;
+
+      // Bus acceptable only if saves >40% vs train
+      if (selected.mode === 'bus') {
+        const train = pool.find(o => o.mode === 'train');
+        if (train && selected.totalPrice >= train.totalPrice * 0.6) {
+          selected = train;
+          selected.budgetNote = 'Train choisi : bus n\'économise pas assez (>40% requis)';
+        }
+      }
+      break;
+    }
+
+    case 'comfort': {
+      // Weight: 30% price, 70% time
+      const maxPrice = Math.max(...pool.map(o => o.totalPrice));
+      const minPrice = Math.min(...pool.map(o => o.totalPrice));
+      const maxDur = Math.max(...pool.map(o => o.totalDuration));
+      const minDur = Math.min(...pool.map(o => o.totalDuration));
+
+      const scored = pool.map(o => {
+        const pNorm = maxPrice === minPrice ? 1 : 1 - (o.totalPrice - minPrice) / (maxPrice - minPrice);
+        const tNorm = maxDur === minDur ? 1 : 1 - (o.totalDuration - minDur) / (maxDur - minDur);
+        return { option: o, compositeScore: pNorm * 0.3 + tNorm * 0.7 };
+      });
+      scored.sort((a, b) => b.compositeScore - a.compositeScore);
+      selected = scored[0].option;
+
+      // Prefer train for <500km, plane for >500km
+      if (routeDistance > 0) {
+        if (routeDistance < 500) {
+          const train = pool.find(o => o.mode === 'train');
+          if (train) {
+            selected = train;
+            selected.budgetNote = 'Train préféré pour <500km (confort)';
+          }
+        } else {
+          const plane = pool.find(o => o.mode === 'plane');
+          if (plane) {
+            selected = plane;
+            selected.budgetNote = 'Avion préféré pour >500km (confort)';
+          }
+        }
+      }
+
+      // Bus only if no other option
+      if (selected.mode === 'bus') {
+        const nonBus = pool.find(o => o.mode !== 'bus');
+        if (nonBus) {
+          selected = nonBus;
+          selected.budgetNote = 'Bus évité au niveau confort';
+        }
+      }
+      break;
+    }
+
+    case 'luxury': {
+      // Sort by totalDuration ascending — pick fastest
+      const sorted = [...pool].sort((a, b) => a.totalDuration - b.totalDuration);
+      selected = sorted[0];
+
+      // Prefer plane for >300km
+      if (routeDistance > 300) {
+        const plane = pool.find(o => o.mode === 'plane');
+        if (plane) {
+          selected = plane;
+          selected.budgetNote = 'Avion préféré (luxe, >300km)';
+        }
+      }
+      break;
+    }
+  }
+
+  // If all options exceeded the transport budget, return cheapest with note
+  if (budgetExceeded) {
+    selected = [...options].sort((a, b) => a.totalPrice - b.totalPrice)[0];
+    selected.budgetNote = `Toutes les options dépassent le budget de ${transportBudget}€ — option la moins chère sélectionnée`;
+  }
+
+  selected.recommended = true;
+  if (!selected.budgetNote) {
+    selected.budgetNote = `Sélection automatique pour budget ${budgetLevel}`;
+  }
+
+  return selected;
 }
