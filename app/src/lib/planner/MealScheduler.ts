@@ -50,6 +50,19 @@ function getBudgetPriceLevel(budgetLevel?: BudgetLevel): 1 | 2 | 3 | 4 {
   }
 }
 
+function getReliableGoogleMapsPlaceUrl(
+  restaurant: { name: string; address?: string; googleMapsUrl?: string } | null,
+  destination: string,
+): string | undefined {
+  if (!restaurant) return undefined;
+  if (restaurant.googleMapsUrl) return restaurant.googleMapsUrl;
+  const hasRealAddress = restaurant.address && !restaurant.address.includes('non disponible');
+  const searchQuery = hasRealAddress
+    ? `${restaurant.name}, ${restaurant.address}`
+    : `${restaurant.name}, ${destination}`;
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(searchQuery)}`;
+}
+
 function getHotelLocationName(accommodation: Accommodation | null, destination: string): string {
   if (accommodation?.name) {
     return `${accommodation.name}, ${destination}`;
@@ -100,6 +113,29 @@ export class MealScheduler {
   }
 
   /**
+   * Détermine si un repas doit être self-catered (mixed logic intelligente)
+   */
+  private shouldSelfCater(mealType: 'breakfast' | 'lunch' | 'dinner'): boolean {
+    const { budgetStrategy, dayNumber, context } = this.config;
+    if (!budgetStrategy) return false;
+    if (budgetStrategy.accommodationType !== 'airbnb_with_kitchen') return false;
+
+    const strategy = budgetStrategy.mealsStrategy[mealType];
+    if (strategy === 'self_catered') return true;
+    if (strategy === 'restaurant') return false;
+
+    // Logique mixed
+    if (strategy === 'mixed') {
+      const totalDays = context.preferences.durationDays || 999;
+      const lastFullDay = totalDays - 1;
+      if (dayNumber === 1) return false; // Jour 1: restaurant
+      if (dayNumber === lastFullDay && mealType === 'dinner') return false; // Dernier soir: restaurant
+      return dayNumber % 2 === 1; // Alternance
+    }
+    return false;
+  }
+
+  /**
    * Petit-déjeuner: avant 10h, pas le jour 1
    * Supporte: hôtel inclus, self-catering (appartement), restaurant
    */
@@ -111,9 +147,7 @@ export class MealScheduler {
     if (currentHour >= 10 || isFirstDay) return null;
 
     const hotelHasBreakfast = context.accommodation?.breakfastIncluded === true;
-    const isSelfCatered = !hotelHasBreakfast &&
-      budgetStrategy?.mealsStrategy?.breakfast === 'self_catered' &&
-      budgetStrategy?.accommodationType === 'airbnb_with_kitchen';
+    const isSelfCatered = !hotelHasBreakfast && this.shouldSelfCater('breakfast');
 
     const breakfastItem = scheduler.addItem({
       id: generateId(),
@@ -186,8 +220,7 @@ export class MealScheduler {
       lng: restaurant?.longitude || context.cityCenter.lng,
     };
     const googleMapsUrl = generateGoogleMapsUrl(lastCoords, coords, 'walking');
-    const restaurantGoogleMapsUrl = restaurant?.googleMapsUrl ||
-      (restaurant ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${restaurant.name}, ${restaurant.address}`)}` : undefined);
+    const restaurantGoogleMapsUrl = getReliableGoogleMapsPlaceUrl(restaurant, preferences.destination);
 
     const cost = estimateMealPrice(restaurant?.priceLevel || getBudgetPriceLevel(preferences.budgetLevel), 'breakfast') * (preferences.groupSize || 1);
     if (budgetTracker) budgetTracker.spend('food', cost);
@@ -241,8 +274,7 @@ export class MealScheduler {
       return null;
     }
 
-    const isSelfCatered = budgetStrategy?.mealsStrategy?.lunch === 'self_catered' &&
-      budgetStrategy?.accommodationType === 'airbnb_with_kitchen';
+    const isSelfCatered = this.shouldSelfCater('lunch');
     const isPicnic = !!longActivityAtLunch || isSelfCatered;
     const picnicDuration = isPicnic ? 30 : 75;
 
@@ -298,8 +330,7 @@ export class MealScheduler {
       lng: restaurant?.longitude || context.cityCenter.lng,
     };
     const googleMapsUrl = generateGoogleMapsUrl(lastCoords, coords, 'walking');
-    const restaurantGoogleMapsUrl = restaurant?.googleMapsUrl ||
-      (restaurant ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${restaurant.name}, ${restaurant.address}`)}` : undefined);
+    const restaurantGoogleMapsUrl = getReliableGoogleMapsPlaceUrl(restaurant, preferences.destination);
 
     const cost = estimateMealPrice(restaurant?.priceLevel || getBudgetPriceLevel(preferences.budgetLevel), 'lunch') * (preferences.groupSize || 1);
     if (budgetTracker) budgetTracker.spend('food', cost);
@@ -337,8 +368,7 @@ export class MealScheduler {
     const canHaveDinner = scheduler.canFit(90, 15);
     if (isLastDay || !daySupportsDinner || !canHaveDinner) return null;
 
-    const isSelfCatered = budgetStrategy?.mealsStrategy?.dinner === 'self_catered' &&
-      budgetStrategy?.accommodationType === 'airbnb_with_kitchen';
+    const isSelfCatered = this.shouldSelfCater('dinner');
 
     const dinnerMinTime = parseTime(date, '19:00');
     const dinnerItem = scheduler.addItem({
@@ -390,8 +420,7 @@ export class MealScheduler {
       lng: restaurant?.longitude || context.cityCenter.lng,
     };
     const googleMapsUrl = generateGoogleMapsUrl(lastCoords, coords, 'walking');
-    const restaurantGoogleMapsUrl = restaurant?.googleMapsUrl ||
-      (restaurant ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${restaurant.name}, ${restaurant.address}`)}` : undefined);
+    const restaurantGoogleMapsUrl = getReliableGoogleMapsPlaceUrl(restaurant, preferences.destination);
 
     const cost = estimateMealPrice(restaurant?.priceLevel || getBudgetPriceLevel(preferences.budgetLevel), 'dinner') * (preferences.groupSize || 1);
     if (budgetTracker) budgetTracker.spend('food', cost);

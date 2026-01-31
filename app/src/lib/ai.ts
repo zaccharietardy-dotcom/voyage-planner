@@ -37,13 +37,14 @@ import { searchLuggageStorage, selectBestStorage, needsLuggageStorage, LuggageSt
 import { calculateFlightScore, EARLY_MORNING_PENALTY } from './services/flightScoring';
 import { createLocationTracker, TravelerLocation } from './services/locationTracker';
 import { generateFlightLink, generateHotelLink, formatDateForUrl } from './services/linkGenerator';
-import { searchAttractionsMultiQuery, searchMustSeeAttractions } from './services/serpApiPlaces';
+import { searchAttractionsMultiQuery, searchMustSeeAttractions, searchGroceryStores, type GroceryStore } from './services/serpApiPlaces';
 import { resolveAttractionByName } from './services/overpassAttractions';
 import { generateClaudeItinerary, summarizeAttractions, mapItineraryToAttractions } from './services/claudeItinerary';
 import { generateTravelTips } from './services/travelTips';
 import { resolveBudget, generateBudgetStrategy } from './services/budgetResolver';
 import { searchAirbnbListings, isAirbnbApiConfigured } from './services/airbnb';
 import { BudgetTracker } from './services/budgetTracker';
+import { enrichRestaurantsWithGemini } from './services/geminiSearch';
 
 /**
  * Génère l'URL de réservation pour un hébergement.
@@ -776,7 +777,36 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
 
   console.log(`[Budget] ${budgetTracker.getSummary()}`);
 
-  // 8. Générer les jours avec le SCHEDULER (évite les chevauchements)
+  // 8. Recherche supermarché si nécessaire (courses pour self-catering)
+  let groceryStore: GroceryStore | null = null;
+  const groceryDays = new Set<number>(); // numéros de jours où ajouter les courses
+  if (budgetStrategy?.groceryShoppingNeeded) {
+    const accommodationCoords = accommodation
+      ? { lat: accommodation.latitude, lng: accommodation.longitude }
+      : cityCenter;
+    try {
+      const stores = await searchGroceryStores(accommodationCoords, preferences.destination);
+      if (stores.length > 0) {
+        groceryStore = stores[0];
+        console.log(`[AI] Supermarché trouvé: ${groceryStore.name} (${groceryStore.walkingTime}min à pied)`);
+      }
+    } catch (error) {
+      console.warn('[AI] Erreur recherche supermarché:', error);
+    }
+
+    // Déterminer les jours de courses:
+    // - Jour 1 ou 2 (selon heure d'arrivée)
+    // - Si séjour > 4 jours, ajouter un 2e créneau au milieu
+    const firstGroceryDay = preferences.durationDays > 2 ? 2 : 1; // Jour 2 si possible (Jour 1 = arrivée)
+    groceryDays.add(firstGroceryDay);
+    if (preferences.durationDays > 4) {
+      const midDay = Math.ceil(preferences.durationDays / 2) + 1;
+      groceryDays.add(midDay);
+    }
+    console.log(`[AI] Courses prévues aux jours: ${[...groceryDays].join(', ')}`);
+  }
+
+  // 9. Générer les jours avec le SCHEDULER (évite les chevauchements)
   const days: TripDay[] = [];
 
   // ANTI-DOUBLON: Set partagé entre tous les jours pour éviter de répéter une attraction
@@ -829,11 +859,71 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       dayTripDestination: (dayMetadata[i] || {} as any).dayTripDestination,
     });
 
+    // Injecter les courses si ce jour est un jour de courses
+    const dayItems = [...dayResult.items];
+    if (groceryDays.has(dayNumber) && groceryStore) {
+      // Trouver un bon créneau: après le check-in (jour 1) ou en fin d'après-midi
+      // On cherche le dernier item avant 18h pour insérer les courses juste après
+      const groceryDuration = 40; // minutes
+      let insertTime = '17:30'; // défaut: fin d'après-midi
+
+      if (isFirstDay) {
+        // Jour d'arrivée: courses après le check-in hôtel
+        const checkinItem = dayItems.find(item => item.type === 'checkin' || (item.type === 'hotel' && item.title.includes('Check-in')));
+        if (checkinItem && checkinItem.endTime) {
+          const checkinEnd = new Date(checkinItem.endTime);
+          insertTime = `${checkinEnd.getHours().toString().padStart(2, '0')}:${checkinEnd.getMinutes().toString().padStart(2, '0')}`;
+        }
+      } else {
+        // Jour intermédiaire: après la dernière activité de l'après-midi ou avant le dîner
+        const dinnerItem = dayItems.find(item => item.type === 'restaurant' && (item.title.includes('Dîner') || item.title.includes('dîner')));
+        if (dinnerItem && dinnerItem.startTime) {
+          // 50 min avant le dîner (40min courses + 10min trajet)
+          const dinnerStart = parseTime(dayDate, dinnerItem.startTime);
+          const groceryStart = new Date(dinnerStart.getTime() - 50 * 60 * 1000);
+          insertTime = `${groceryStart.getHours().toString().padStart(2, '0')}:${groceryStart.getMinutes().toString().padStart(2, '0')}`;
+        }
+      }
+
+      const groceryEnd = parseTime(dayDate, insertTime);
+      const groceryEndTime = new Date(groceryEnd.getTime() + groceryDuration * 60 * 1000);
+
+      const groceryItem: TripItem = {
+        id: Math.random().toString(36).substring(2, 15),
+        dayNumber,
+        startTime: insertTime,
+        endTime: `${groceryEndTime.getHours().toString().padStart(2, '0')}:${groceryEndTime.getMinutes().toString().padStart(2, '0')}`,
+        type: 'activity',
+        title: `Courses au ${groceryStore.name}`,
+        description: `Supermarché à ${groceryStore.walkingTime || 5}min à pied du logement | Provisions pour les repas self-catering`,
+        locationName: `${groceryStore.name}, ${groceryStore.address}`,
+        latitude: groceryStore.latitude,
+        longitude: groceryStore.longitude,
+        estimatedCost: 25 * (preferences.groupSize || 1), // ~25€/pers pour quelques jours
+        duration: groceryDuration,
+        orderIndex: 0,
+        googleMapsPlaceUrl: groceryStore.googleMapsUrl,
+      };
+
+      dayItems.push(groceryItem);
+      // Re-trier par heure
+      dayItems.sort((a, b) => {
+        const aTime = a.startTime ? parseTime(dayDate, a.startTime).getTime() : 0;
+        const bTime = b.startTime ? parseTime(dayDate, b.startTime).getTime() : 0;
+        return aTime - bTime;
+      });
+      // Re-indexer
+      dayItems.forEach((item, idx) => { item.orderIndex = idx; });
+
+      if (budgetTracker) budgetTracker.spend('food', 25 * (preferences.groupSize || 1));
+      console.log(`[Jour ${dayNumber}] 🛒 Courses ajoutées: ${groceryStore.name} à ${insertTime}`);
+    }
+
     const meta = dayMetadata[i] || {};
     days.push({
       dayNumber,
       date: dayDate,
-      items: dayResult.items,
+      items: dayItems,
       theme: meta.theme,
       dayNarrative: meta.dayNarrative,
       isDayTrip: meta.isDayTrip,
@@ -863,6 +953,41 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
         }
       }
     }
+  }
+
+  // Enrichir les restaurants avec descriptions et spécialités (batch par voyage)
+  try {
+    const allRestaurantItems = days.flatMap(day =>
+      day.items.filter(item => item.type === 'restaurant' && item.title && !item.title.includes('Petit-déjeuner à l') && !item.title.includes('Pique-nique') && !item.title.includes('Dîner à l\'appartement'))
+    );
+    if (allRestaurantItems.length > 0) {
+      const toEnrich = allRestaurantItems.map(item => ({
+        name: item.title,
+        address: item.locationName || '',
+        cuisineTypes: item.description?.split(' | ')[0]?.split(', ') || ['local'],
+        mealType: item.title.includes('Déjeuner') ? 'lunch' : item.title.includes('Dîner') ? 'dinner' : 'breakfast',
+      }));
+
+      const enriched = await enrichRestaurantsWithGemini(toEnrich, preferences.destination);
+
+      for (const item of allRestaurantItems) {
+        const data = enriched.get(item.title);
+        if (data) {
+          // Build rich description
+          const parts: string[] = [];
+          if (data.description) parts.push(data.description);
+          if (data.specialties?.length) parts.push(`🍽️ ${data.specialties.join(', ')}`);
+          if (data.tips) parts.push(`💡 ${data.tips}`);
+          // Keep existing rating info
+          const ratingPart = item.description?.match(/⭐.*$/)?.[0];
+          if (ratingPart) parts.push(ratingPart);
+          item.description = parts.join(' | ');
+        }
+      }
+      console.log(`[AI] ✅ ${enriched.size} restaurants enrichis avec descriptions et spécialités`);
+    }
+  } catch (error) {
+    console.warn('[AI] Enrichissement restaurants échoué (non bloquant):', error);
   }
 
   // Calculer le coût total
@@ -1316,19 +1441,40 @@ interface LateFlightArrivalData {
 
 /**
  * Détermine si un repas doit être self_catered (courses/cuisine) ou restaurant
+ *
+ * Logique "mixed" intelligente:
+ * - Jour 1 (arrivée): toujours restaurant (on découvre la destination)
+ * - Dernier soir complet: toujours restaurant (soirée spéciale)
+ * - Jours intermédiaires: alterner restaurant/cuisine
+ * - Day trips: toujours restaurant (pas d'accès à la cuisine)
  */
 function shouldSelfCater(
   mealType: 'breakfast' | 'lunch' | 'dinner',
   dayNumber: number,
   budgetStrategy?: BudgetStrategy,
   hotelHasBreakfast?: boolean,
+  totalDays?: number,
+  isDayTrip?: boolean,
 ): boolean {
   if (!budgetStrategy) return false;
   if (mealType === 'breakfast' && hotelHasBreakfast) return false;
+  // On ne peut pas cuisiner pendant un day trip
+  if (isDayTrip) return false;
 
   const strategy = budgetStrategy.mealsStrategy[mealType];
   if (strategy === 'self_catered') return true;
-  if (strategy === 'mixed') return dayNumber % 2 === 1; // jours impairs = self_catered
+  if (strategy === 'restaurant') return false;
+
+  // Logique "mixed": décision intelligente par jour
+  if (strategy === 'mixed') {
+    const lastFullDay = (totalDays || 999) - 1; // avant-dernier jour = dernier soir complet
+    // Jour 1: restaurant (découverte)
+    if (dayNumber === 1) return false;
+    // Dernier soir complet: restaurant (soirée spéciale)
+    if (dayNumber === lastFullDay && mealType === 'dinner') return false;
+    // Jours intermédiaires: alterner (pairs = restaurant, impairs = cuisine)
+    return dayNumber % 2 === 1;
+  }
   return false;
 }
 
@@ -1977,7 +2123,7 @@ async function generateDayWithScheduler(params: {
             travelTime: 15,
           });
           if (lunchItem) {
-            if (shouldSelfCater('lunch', dayNumber, budgetStrategy)) {
+            if (shouldSelfCater('lunch', dayNumber, budgetStrategy, false, preferences.durationDays, isDayTrip)) {
               items.push(schedulerItemToTripItem(lunchItem, dayNumber, orderIndex++, {
                 title: 'Déjeuner pique-nique / maison',
                 description: 'Repas préparé avec les courses | Option économique',
@@ -1992,8 +2138,7 @@ async function generateDayWithScheduler(params: {
                 lat: restaurant?.latitude || cityCenter.lat,
                 lng: restaurant?.longitude || cityCenter.lng,
               };
-              const restaurantGoogleMapsUrl = restaurant?.googleMapsUrl ||
-                (restaurant ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${restaurant.name}, ${restaurant.address}`)}` : undefined);
+              const restaurantGoogleMapsUrl = getReliableGoogleMapsPlaceUrl(restaurant, preferences.destination);
 
               items.push(schedulerItemToTripItem(lunchItem, dayNumber, orderIndex++, {
                 title: restaurant?.name || 'Déjeuner',
@@ -2344,7 +2489,7 @@ async function generateDayWithScheduler(params: {
           lat: accommodation?.latitude || cityCenter.lat,
           lng: accommodation?.longitude || cityCenter.lng,
         };
-      } else if (shouldSelfCater('breakfast', dayNumber, budgetStrategy, hotelHasBreakfast)) {
+      } else if (shouldSelfCater('breakfast', dayNumber, budgetStrategy, hotelHasBreakfast, preferences.durationDays, isDayTrip)) {
         // Petit-déjeuner self_catered (courses/cuisine au logement)
         const accommodationCoords = {
           lat: accommodation?.latitude || cityCenter.lat,
@@ -2368,7 +2513,7 @@ async function generateDayWithScheduler(params: {
         };
         const googleMapsUrl = generateGoogleMapsUrl(lastCoords, restaurantCoords, pickDirectionMode(lastCoords, restaurantCoords));
         const restaurantGoogleMapsUrl = restaurant?.googleMapsUrl ||
-          (restaurant ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${restaurant.name}, ${restaurant.address}`)}` : undefined);
+          getReliableGoogleMapsPlaceUrl(restaurant, preferences.destination);
 
         items.push(schedulerItemToTripItem(breakfastItem, dayNumber, orderIndex++, {
           title: restaurant?.name || 'Petit-déjeuner',
@@ -2589,7 +2734,7 @@ async function generateDayWithScheduler(params: {
       endTime: new Date(lunchTargetTime.getTime() + 75 * 60 * 1000), // 1h15
     });
     if (lunchItem) {
-      if (shouldSelfCater('lunch', dayNumber, budgetStrategy)) {
+      if (shouldSelfCater('lunch', dayNumber, budgetStrategy, false, preferences.durationDays, isDayTrip)) {
         // Déjeuner self_catered : pique-nique ou repas au logement
         items.push(schedulerItemToTripItem(lunchItem, dayNumber, orderIndex++, {
           title: 'Déjeuner pique-nique / maison',
@@ -2607,7 +2752,7 @@ async function generateDayWithScheduler(params: {
         };
         const googleMapsUrl = generateGoogleMapsUrl(lastCoords, restaurantCoords, pickDirectionMode(lastCoords, restaurantCoords));
         const restaurantGoogleMapsUrl = restaurant?.googleMapsUrl ||
-          (restaurant ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${restaurant.name}, ${restaurant.address}`)}` : undefined);
+          getReliableGoogleMapsPlaceUrl(restaurant, preferences.destination);
 
         items.push(schedulerItemToTripItem(lunchItem, dayNumber, orderIndex++, {
           title: restaurant?.name || 'Déjeuner',
@@ -2869,7 +3014,7 @@ async function generateDayWithScheduler(params: {
       minStartTime: dinnerMinTime, // FORCE 19h minimum
     });
     if (dinnerItem) {
-      if (shouldSelfCater('dinner', dayNumber, budgetStrategy)) {
+      if (shouldSelfCater('dinner', dayNumber, budgetStrategy, false, preferences.durationDays, isDayTrip)) {
         // Dîner self_catered : cuisine au logement
         const accommodationCoords = {
           lat: accommodation?.latitude || cityCenter.lat,
@@ -2892,7 +3037,7 @@ async function generateDayWithScheduler(params: {
         };
         const googleMapsUrl = generateGoogleMapsUrl(lastCoords, restaurantCoords, pickDirectionMode(lastCoords, restaurantCoords));
         const restaurantGoogleMapsUrl = restaurant?.googleMapsUrl ||
-          (restaurant ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${restaurant.name}, ${restaurant.address}`)}` : undefined);
+          getReliableGoogleMapsPlaceUrl(restaurant, preferences.destination);
 
         items.push(schedulerItemToTripItem(dinnerItem, dayNumber, orderIndex++, {
           title: restaurant?.name || 'Dîner',
@@ -3981,6 +4126,25 @@ function getBudgetCabinClass(budgetLevel?: BudgetLevel): 'economy' | 'premium_ec
     case 'comfort': return 'premium_economy';
     default: return 'economy';
   }
+}
+
+/**
+ * Génère un lien Google Maps fiable pour un restaurant
+ * Priorité: googleMapsUrl existante > place_id > nom + ville (plus fiable que nom + adresse incomplète)
+ */
+function getReliableGoogleMapsPlaceUrl(
+  restaurant: { name: string; address?: string; googleMapsUrl?: string } | null,
+  destination: string,
+): string | undefined {
+  if (!restaurant) return undefined;
+  // Utiliser l'URL existante si disponible (souvent de SerpAPI avec place_id)
+  if (restaurant.googleMapsUrl) return restaurant.googleMapsUrl;
+  // Construire une URL fiable: nom + ville est plus fiable que nom + adresse partielle
+  const hasRealAddress = restaurant.address && !restaurant.address.includes('non disponible');
+  const searchQuery = hasRealAddress
+    ? `${restaurant.name}, ${restaurant.address}`
+    : `${restaurant.name}, ${destination}`;
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(searchQuery)}`;
 }
 
 function getBudgetPriceLevel(budgetLevel?: BudgetLevel): 1 | 2 | 3 | 4 {

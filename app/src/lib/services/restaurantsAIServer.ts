@@ -298,6 +298,77 @@ function calculateDistance(lat1: number, lng1: number, lat2: number, lng2: numbe
   return R * c;
 }
 
+/**
+ * Enrichit les restaurants sélectionnés avec des descriptions, spécialités et liens
+ * Batch: un seul appel Haiku pour tous les restaurants d'un jour
+ */
+export async function enrichRestaurantsForDay(
+  restaurants: { name: string; address: string; cuisineTypes: string[]; mealType: string }[],
+  destination: string,
+): Promise<Map<string, { description: string; specialties: string[]; tips: string; reservationUrl?: string }>> {
+  const result = new Map<string, { description: string; specialties: string[]; tips: string; reservationUrl?: string }>();
+
+  if (restaurants.length === 0) return result;
+
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) return result;
+
+  const client = new Anthropic({ apiKey });
+
+  const restaurantList = restaurants.map((r, i) =>
+    `${i + 1}. "${r.name}" (${r.cuisineTypes.join(', ')}) - ${r.address} - ${r.mealType}`
+  ).join('\n');
+
+  const prompt = `Pour ces restaurants à ${destination}, donne une brève description, 2-3 spécialités et un conseil pratique.
+
+${restaurantList}
+
+Réponds en JSON (tableau):
+[{
+  "name": "nom exact",
+  "description": "2 phrases max: ambiance + type de cuisine",
+  "specialties": ["plat 1", "plat 2"],
+  "tips": "conseil court (réserver? plat signature? bon rapport qualité-prix?)"
+}]
+
+UNIQUEMENT le JSON, pas de markdown.`;
+
+  try {
+    const response = await client.messages.create({
+      model: 'claude-3-5-haiku-20241022',
+      max_tokens: 2000,
+      messages: [{ role: 'user', content: prompt }],
+    });
+
+    if (response.usage) {
+      tokenTracker.track(response.usage, `RestaurantEnrich: ${destination} (${restaurants.length})`);
+    }
+
+    const content = response.content[0];
+    if (content.type !== 'text') return result;
+
+    let jsonStr = content.text.trim();
+    if (jsonStr.startsWith('```')) {
+      jsonStr = jsonStr.replace(/```json?\n?/g, '').replace(/```$/g, '').trim();
+    }
+
+    const enriched = JSON.parse(jsonStr);
+    for (const item of enriched) {
+      result.set(item.name, {
+        description: item.description || '',
+        specialties: item.specialties || [],
+        tips: item.tips || '',
+      });
+    }
+
+    console.log(`[RestaurantEnrich] ✅ ${result.size} restaurants enrichis pour ${destination}`);
+  } catch (error) {
+    console.warn('[RestaurantEnrich] Erreur:', error);
+  }
+
+  return result;
+}
+
 function generateOpeningHours(mealType: string): Record<string, { open: string; close: string } | null> {
   const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
   const result: Record<string, { open: string; close: string } | null> = {};

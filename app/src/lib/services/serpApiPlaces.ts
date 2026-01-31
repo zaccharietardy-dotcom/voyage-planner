@@ -126,10 +126,19 @@ export async function searchRestaurantsWithSerpApi(
 
   const { mealType, cuisineType, limit = 10 } = options;
 
-  // Construire la requête selon le type de repas
+  // Construire la requête selon le type de repas + langue locale
+  const countryCode = getCountryCode(destination);
   let query = 'restaurant';
   if (mealType === 'breakfast') {
-    query = 'breakfast brunch';
+    // Query adaptée au pays pour trouver cafés et boulangeries
+    const breakfastQueries: Record<string, string> = {
+      fr: 'café petit déjeuner boulangerie',
+      es: 'cafetería desayuno',
+      it: 'caffè colazione pasticceria',
+      pt: 'café pequeno almoço padaria',
+      de: 'frühstück café bäckerei',
+    };
+    query = breakfastQueries[countryCode] || 'breakfast brunch café bakery';
   } else if (cuisineType) {
     query = `${cuisineType} restaurant`;
   } else {
@@ -795,12 +804,20 @@ export async function searchRestaurantsNearby(
     limit = 5,
   } = options;
 
-  // Construire la requête selon le type de repas
+  // Construire la requête selon le type de repas + langue locale
+  const countryCode = getCountryCode(destination);
   let query: string;
   switch (mealType) {
-    case 'breakfast':
-      query = 'breakfast brunch cafe';
+    case 'breakfast': {
+      const breakfastQueries: Record<string, string> = {
+        fr: 'café boulangerie petit déjeuner',
+        es: 'cafetería desayuno',
+        it: 'caffè colazione',
+        pt: 'café padaria',
+      };
+      query = breakfastQueries[countryCode] || 'breakfast brunch café bakery';
       break;
+    }
     case 'dinner':
       query = 'restaurant dinner';
       break;
@@ -892,6 +909,120 @@ export async function searchRestaurantsNearby(
     return restaurants.slice(0, limit);
   } catch (error) {
     console.error('[SerpAPI Restaurants Nearby] Erreur:', error);
+    return [];
+  }
+}
+
+// ============================================
+// Grocery Store Search
+// ============================================
+
+export interface GroceryStore {
+  id: string;
+  name: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+  rating: number;
+  reviewCount: number;
+  distance?: number; // km
+  walkingTime?: number; // minutes
+  googleMapsUrl: string;
+  openingHours?: Record<string, { open: string; close: string } | null>;
+}
+
+/**
+ * Recherche un supermarché/épicerie proche d'une position (logement typiquement)
+ */
+export async function searchGroceryStores(
+  coords: { lat: number; lng: number },
+  destination: string,
+  options: {
+    maxDistance?: number; // mètres, défaut 800
+    limit?: number;
+  } = {}
+): Promise<GroceryStore[]> {
+  if (!SERPAPI_KEY) {
+    console.warn('[SerpAPI Grocery] SERPAPI_KEY non configurée');
+    return [];
+  }
+
+  const { maxDistance = 800, limit = 3 } = options;
+
+  const countryCode = getCountryCode(destination);
+  // Query adaptée à la langue locale
+  const queryMap: Record<string, string> = {
+    fr: 'supermarché épicerie',
+    es: 'supermercado',
+    it: 'supermercato',
+    pt: 'supermercado',
+    de: 'supermarkt',
+    nl: 'supermarkt',
+  };
+  const query = queryMap[countryCode] || 'supermarket grocery store';
+
+  const params = new URLSearchParams({
+    api_key: SERPAPI_KEY,
+    engine: 'google_maps',
+    q: query,
+    ll: `@${coords.lat},${coords.lng},15z`,
+    hl: 'fr',
+    gl: countryCode,
+  });
+
+  try {
+    console.log(`[SerpAPI Grocery] Recherche supermarchés près de (${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)})...`);
+    const response = await fetch(`${SERPAPI_BASE_URL}?${params}`);
+
+    if (!response.ok) {
+      console.error('[SerpAPI Grocery] Erreur HTTP:', response.status);
+      return [];
+    }
+
+    const data = await response.json();
+    if (data.error) {
+      console.error('[SerpAPI Grocery] Erreur:', data.error);
+      return [];
+    }
+
+    const results = data.local_results || [];
+    const stores: GroceryStore[] = [];
+
+    for (const place of results) {
+      if (!place.gps_coordinates?.latitude || !place.gps_coordinates?.longitude) continue;
+
+      const distanceKm = calculateDistance(
+        coords.lat, coords.lng,
+        place.gps_coordinates.latitude, place.gps_coordinates.longitude
+      );
+      const distanceMeters = Math.round(distanceKm * 1000);
+
+      if (distanceMeters > maxDistance) continue;
+
+      const searchQuery = place.address
+        ? `${place.title}, ${place.address}`
+        : `${place.title}, ${destination}`;
+
+      stores.push({
+        id: `serp-grocery-${place.place_id || place.data_cid || stores.length}`,
+        name: place.title,
+        address: place.address || 'Adresse non disponible',
+        latitude: place.gps_coordinates.latitude,
+        longitude: place.gps_coordinates.longitude,
+        rating: place.rating || 0,
+        reviewCount: place.reviews || 0,
+        distance: distanceKm,
+        walkingTime: Math.round(distanceMeters / 80),
+        googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(searchQuery)}`,
+        openingHours: parseOpeningHours(place.operating_hours) || undefined,
+      });
+    }
+
+    stores.sort((a, b) => (a.distance || 0) - (b.distance || 0));
+    console.log(`[SerpAPI Grocery] ✅ ${stores.length} supermarchés trouvés à moins de ${maxDistance}m`);
+    return stores.slice(0, limit);
+  } catch (error) {
+    console.error('[SerpAPI Grocery] Erreur:', error);
     return [];
   }
 }

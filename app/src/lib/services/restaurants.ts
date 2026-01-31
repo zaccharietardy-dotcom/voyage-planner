@@ -2,11 +2,12 @@
  * Service de recherche de restaurants
  *
  * Chaîne de priorité:
- * 1. SerpAPI Google Local (RÉELS, 100 req/mois gratuit) ✅ RECOMMANDÉ
- * 2. Claude AI (authentiques locaux) - si API configurée
+ * 1. TripAdvisor (données riches, Michelin) ✅
+ * 2. SerpAPI Google Local (RÉELS, 100 req/mois gratuit) ✅ RECOMMANDÉ
  * 3. Google Places API (si configuré)
  * 4. OpenStreetMap Overpass API
- * 5. Restaurants locaux générés (fallback)
+ * 5. Gemini + Google Search (données vérifiées sur internet) ✅ DERNIER RECOURS
+ * 6. Restaurants locaux générés (fallback hardcodé)
  *
  * NOTE: Foursquare supprimé - API v3 incompatible
  */
@@ -18,6 +19,7 @@ import { searchRestaurants as searchFoursquareRestaurants, foursquareToRestauran
 import { searchRestaurantsWithSerpApi, searchRestaurantsNearby, isSerpApiPlacesConfigured, QUALITY_THRESHOLDS } from './serpApiPlaces';
 import { searchPlacesFromDB, savePlacesToDB, isDataFresh, type PlaceData } from './placeDatabase';
 import { searchTripAdvisorRestaurants, isTripAdvisorConfigured } from './tripadvisor';
+import { searchRestaurantsWithGemini } from './geminiSearch';
 
 // Configuration optionnelle Google Places
 const GOOGLE_PLACES_API_KEY = process.env.GOOGLE_PLACES_API_KEY;
@@ -190,32 +192,8 @@ export async function searchRestaurants(params: RestaurantSearchParams): Promise
     }
   }
 
-  // 2. Fallback: Claude AI (si configuré et SerpAPI échoue)
-  if (destination && mealType && process.env.ANTHROPIC_API_KEY) {
-    try {
-      const { searchRestaurantsWithAI } = await import('./restaurantsAIServer');
-      const aiRestaurants = await searchRestaurantsWithAI(destination, {
-        mealType,
-        priceLevel: params.priceLevel,
-        dietary: params.dietary,
-        cityCenter: { lat: latitude, lng: longitude },
-      });
-
-      if (aiRestaurants.length > 0) {
-        let filteredByCuisine = filterRestaurantsByCuisine(aiRestaurants, destination, {
-          strictMode: true,
-          allowNonLocal: true,
-        });
-        filteredByCuisine = filterByForbiddenNames(filteredByCuisine, destination);
-
-        console.log(`[Restaurants] ${aiRestaurants.length} restaurants via Claude AI, ${filteredByCuisine.length} après filtrage`);
-        finalRestaurants = filteredByCuisine.slice(0, limit);
-        return applyFinalFilter(finalRestaurants, destination, limit, mealType);
-      }
-    } catch (error) {
-      console.warn('[Restaurants] Claude AI error, trying alternatives:', error);
-    }
-  }
+  // 2. NOTE: Claude AI fallback supprimé - Claude hallucine des restaurants inexistants
+  // La chaîne continue avec Google Places, OSM, puis fallback hardcodé (restaurants réels)
 
   // 3. Essayer Google Places si configuré
   if (GOOGLE_PLACES_API_KEY) {
@@ -259,7 +237,32 @@ export async function searchRestaurants(params: RestaurantSearchParams): Promise
     console.error('[Restaurants] Overpass error, using fallback:', error);
   }
 
-  // 5. Fallback: générer des restaurants locaux typiques
+  // 5. Gemini + Google Search (dernier recours avant hardcodé - données vérifiées sur internet)
+  if (process.env.GOOGLE_AI_API_KEY) {
+    try {
+      const geminiResults = await searchRestaurantsWithGemini(destination || 'unknown', {
+        mealType: mealType || 'lunch',
+        limit: limit,
+        cityCenter: { lat: params.latitude, lng: params.longitude },
+      });
+      if (geminiResults.length > 0) {
+        let filtered = filterOutChains(geminiResults);
+        if (destination) {
+          filtered = filterRestaurantsByCuisine(filtered, destination, { strictMode: true, allowNonLocal: true });
+          filtered = filterByForbiddenNames(filtered, destination);
+        }
+        if (filtered.length > 0) {
+          console.log(`[Restaurants] ${filtered.length} via Gemini + Google Search (après filtre cuisine+nom)`);
+          finalRestaurants = filtered;
+          return applyFinalFilter(finalRestaurants, destination, limit, mealType);
+        }
+      }
+    } catch (error) {
+      console.warn('[Restaurants] Gemini error, using hardcoded fallback:', error);
+    }
+  }
+
+  // 6. Fallback: générer des restaurants locaux typiques
   // IMPORTANT: generateLocalRestaurants doit UNIQUEMENT générer de la cuisine locale
   finalRestaurants = generateLocalRestaurants(params, destination);
   // Appliquer le filtre final même pour les restaurants générés (sécurité)
