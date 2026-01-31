@@ -294,6 +294,12 @@ export class ActivityPlanner {
   private tryAddAttraction(attraction: Attraction, travelTime: number): boolean {
     const { scheduler, date, dayNumber, tripUsedAttractionIds, context } = this.config;
 
+    // Budget check: skip if activity costs more than remaining budget
+    const cost = (attraction.estimatedCost || 0) * (context.preferences.groupSize || 1);
+    if (cost > 0 && context.budgetTracker && !context.budgetTracker.canAfford('activities', cost)) {
+      return false;
+    }
+
     const openTime = parseTime(date, attraction.openingHours.open);
 
     const activityItem = scheduler.addItem({
@@ -307,6 +313,11 @@ export class ActivityPlanner {
     });
 
     if (!activityItem) return false;
+
+    // Track spending
+    if (cost > 0 && context.budgetTracker) {
+      context.budgetTracker.spend('activities', cost);
+    }
 
     tripUsedAttractionIds.add(attraction.id);
 
@@ -340,6 +351,7 @@ export class ActivityPlanner {
       googleMapsUrl,
       googleMapsPlaceUrl,
       dataReliability: attraction.dataReliability || 'verified',
+      imageUrl: attraction.imageUrl,
       dayNumber,
       orderIndex: this.orderIndex++,
     };

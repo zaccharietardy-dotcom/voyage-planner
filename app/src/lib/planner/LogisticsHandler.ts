@@ -45,6 +45,31 @@ function normalizeToLocalDate(dateInput: Date | string): Date {
   return new Date(year, month - 1, day, 12, 0, 0, 0);
 }
 
+/**
+ * Estime la durée et le coût d'un transfert aéroport ↔ ville
+ * basé sur la distance réelle (haversine) au lieu de 40min fixe.
+ */
+function estimateAirportTransfer(
+  airportLat: number, airportLng: number,
+  hotelLat: number, hotelLng: number,
+  arrivalHour: number, groupSize: number,
+): { duration: number; cost: number } {
+  const distKm = calculateDistance(airportLat, airportLng, hotelLat, hotelLng);
+  const isNight = arrivalHour >= 22 || arrivalHour < 6;
+
+  // Durée : ~2 min/km en ville (trafic), min 15min, max 90min
+  const duration = Math.max(15, Math.min(90, Math.round(distKm * 2)));
+
+  // Coût : base + distance, par taxi (partagé par 4 max)
+  const taxiGroups = Math.ceil(groupSize / 4);
+  const baseCost = isNight
+    ? Math.round(15 + distKm * 1.5)
+    : Math.round(10 + distKm * 1.0);
+  const cost = baseCost * taxiGroups;
+
+  return { duration, cost };
+}
+
 function getHotelLocationName(accommodation: Accommodation | null, destination: string): string {
   if (accommodation?.name) {
     return `${accommodation.name}, ${destination}`;
@@ -277,44 +302,56 @@ export class LogisticsHandler {
     const flightArrival = new Date(outboundFlight.arrivalTime);
     const airportArrival = new Date(flightDeparture.getTime() - 2 * 60 * 60 * 1000);
 
-    // Trajet origine → aéroport (si villes différentes)
-    const originCityNorm = preferences.origin.toLowerCase().trim();
-    const airportCityNorm = originAirport.city.toLowerCase().trim();
-    const originDifferentFromAirport = !airportCityNorm.includes(originCityNorm) && !originCityNorm.includes(airportCityNorm);
+    // Trajet origine → aéroport (toujours pour un vol)
+    const originCoords = getCityCenterCoords(preferences.origin) || this.context.originCoords;
+    const distance = calculateDistance(originCoords.lat, originCoords.lng, originAirport.latitude, originAirport.longitude);
 
-    if (originDifferentFromAirport) {
-      const originCoords = getCityCenterCoords(preferences.origin) || { lat: originAirport.latitude, lng: originAirport.longitude };
-      const distance = calculateDistance(originCoords.lat, originCoords.lng, originAirport.latitude, originAirport.longitude);
+    // Calculer durée et coût selon la distance
+    let travelMinutes: number;
+    let travelCost: number;
+    let travelDescription: string;
+
+    if (distance > 100) {
+      // Longue distance: train/covoiturage
       const effectiveSpeed = distance > 200 ? 150 : 100;
-      const travelMinutes = Math.max(60, Math.round((distance / effectiveSpeed) * 60) + 30);
-      const travelCost = distance > 200 ? 70 : Math.round(distance * 0.15);
+      travelMinutes = Math.max(60, Math.round((distance / effectiveSpeed) * 60) + 30);
+      travelCost = distance > 200 ? 70 : Math.round(distance * 0.15);
+      travelDescription = `Train ou covoiturage vers l'aéroport (${Math.round(distance)}km)`;
+    } else if (distance > 10) {
+      // Moyenne distance: taxi/navette/RER
+      travelMinutes = Math.max(30, Math.round(distance * 2));
+      travelCost = Math.round(10 + distance * 0.8);
+      travelDescription = `Taxi ou navette vers l'aéroport (${Math.round(distance)}km)`;
+    } else {
+      // Proche: taxi local
+      travelMinutes = Math.max(20, Math.round(distance * 3));
+      travelCost = Math.round(15 + distance * 1.5);
+      travelDescription = `Taxi vers l'aéroport (${Math.round(distance)}km)`;
+    }
 
-      const transferEnd = parking
-        ? new Date(airportArrival.getTime() - calculateParkingTime(parking) * 60 * 1000)
-        : airportArrival;
-      const transferStart = new Date(transferEnd.getTime() - travelMinutes * 60 * 1000);
+    const originTransferEnd = parking
+      ? new Date(airportArrival.getTime() - calculateParkingTime(parking) * 60 * 1000)
+      : airportArrival;
+    const originTransferStart = new Date(originTransferEnd.getTime() - travelMinutes * 60 * 1000);
 
-      const item = scheduler.insertFixedItem({
-        id: generateId(),
-        title: `Trajet ${preferences.origin} → ${originAirport.city}`,
+    const originTransferItem = scheduler.insertFixedItem({
+      id: generateId(),
+      title: `Trajet ${preferences.origin} → ${originAirport.name}`,
+      type: 'transport',
+      startTime: originTransferStart,
+      endTime: originTransferEnd,
+    });
+    if (originTransferItem) {
+      items.push(toTripItem(originTransferItem.slot, dayNumber, this.orderIndex++, {
+        id: originTransferItem.id,
         type: 'transport',
-        startTime: transferStart,
-        endTime: transferEnd,
-      });
-      if (item) {
-        items.push(toTripItem(item.slot, dayNumber, this.orderIndex++, {
-          id: item.id,
-          type: 'transport',
-          title: item.title,
-          description: distance > 150
-            ? `Train ou covoiturage vers l'aéroport (${Math.round(distance)}km)`
-            : `Voiture ou navette vers l'aéroport (${Math.round(distance)}km)`,
-          locationName: `${preferences.origin} → ${originAirport.name}`,
-          latitude: originAirport.latitude,
-          longitude: originAirport.longitude,
-          estimatedCost: travelCost,
-        }));
-      }
+        title: originTransferItem.title,
+        description: travelDescription,
+        locationName: `${preferences.origin} → ${originAirport.name}`,
+        latitude: originAirport.latitude,
+        longitude: originAirport.longitude,
+        estimatedCost: travelCost,
+      }));
     }
 
     // Parking
@@ -427,8 +464,14 @@ export class LogisticsHandler {
     const arrivalHour = flightArrival.getHours();
     const isLateNight = arrivalHour >= 22 || arrivalHour < 5;
 
+    const hotelLat = accommodation?.latitude || cityCenter.lat;
+    const hotelLng = accommodation?.longitude || cityCenter.lng;
+    const transfer = preferences.carRental
+      ? { duration: 40, cost: 0 }
+      : estimateAirportTransfer(destAirport.latitude, destAirport.longitude, hotelLat, hotelLng, arrivalHour, preferences.groupSize || 1);
+
     const transferStart = new Date(flightArrival.getTime() + 30 * 60 * 1000);
-    const transferEnd = new Date(transferStart.getTime() + 40 * 60 * 1000);
+    const transferEnd = new Date(transferStart.getTime() + transfer.duration * 60 * 1000);
 
     const transferItem = scheduler.insertFixedItem({
       id: generateId(),
@@ -442,11 +485,11 @@ export class LogisticsHandler {
         id: transferItem.id,
         type: 'transport',
         title: transferItem.title,
-        description: preferences.carRental ? 'Récupérez votre voiture de location.' : 'Taxi ou transports en commun.',
+        description: preferences.carRental ? 'Récupérez votre voiture de location.' : `Taxi ou transports en commun (~${transfer.duration}min).`,
         locationName: `${destAirport.name} → ${isLateNight ? 'Hôtel' : 'Centre-ville'}`,
         latitude: cityCenter.lat,
         longitude: cityCenter.lng,
-        estimatedCost: preferences.carRental ? 0 : (isLateNight ? 35 : 25) * Math.ceil((preferences.groupSize || 1) / 4),
+        estimatedCost: transfer.cost,
       }));
     }
 
@@ -455,8 +498,9 @@ export class LogisticsHandler {
     const hotelEnd = new Date(transferEnd.getTime() + 20 * 60 * 1000);
     const hotelName = accommodation?.name || 'Hébergement';
 
-    // Pour les arrivées tardives ou si le transfert arrive après le check-in
+    // Check-in ou dépôt de bagages selon l'heure d'arrivée
     if (isLateNight || transferEnd.getHours() >= 14) {
+      // Arrivée après 14h ou tardive → check-in complet
       const hotelItem = scheduler.insertFixedItem({
         id: generateId(),
         title: isLateNight ? `Check-in tardif ${hotelName}` : `Check-in ${hotelName}`,
@@ -484,6 +528,27 @@ export class LogisticsHandler {
                 { checkIn: formatDateForUrl(tripStartDate), checkOut: formatDateForUrl(hotelCheckOutDate) }
               )
             : undefined,
+        }));
+      }
+    } else {
+      // Arrivée avant 14h → déposer les bagages à l'hôtel (la plupart acceptent les bagages avant le check-in)
+      const luggageDropEnd = new Date(transferEnd.getTime() + 10 * 60 * 1000);
+      const luggageItem = scheduler.insertFixedItem({
+        id: generateId(),
+        title: `Déposer bagages à ${hotelName}`,
+        type: 'hotel',
+        startTime: transferEnd,
+        endTime: luggageDropEnd,
+      });
+      if (luggageItem) {
+        items.push(toTripItem(luggageItem.slot, dayNumber, this.orderIndex++, {
+          id: luggageItem.id,
+          type: 'hotel',
+          title: luggageItem.title,
+          description: 'Déposez vos bagages à la réception avant le check-in officiel. Vous récupérerez votre chambre plus tard.',
+          locationName: getHotelLocationName(accommodation, preferences.destination),
+          latitude: accommodation?.latitude || cityCenter.lat + 0.005,
+          longitude: accommodation?.longitude || cityCenter.lng + 0.005,
         }));
       }
     }
@@ -604,8 +669,10 @@ export class LogisticsHandler {
     const flightDeparture = new Date(returnFlight.departureTime);
     const flightArrival = new Date(returnFlight.arrivalTime);
 
-    // Checkout: 3h30 avant le vol
-    const checkoutStart = new Date(flightDeparture.getTime() - 210 * 60 * 1000);
+    // Checkout: min(3h30 avant le vol, 12h00) — pas de checkout à 17h30 pour un vol à 21h
+    const checkoutByFlight = new Date(flightDeparture.getTime() - 210 * 60 * 1000);
+    const checkoutByStandard = parseTime(date, '12:00');
+    const checkoutStart = checkoutByFlight < checkoutByStandard ? checkoutByFlight : checkoutByStandard;
     const checkoutEnd = new Date(checkoutStart.getTime() + 30 * 60 * 1000);
     const hotelName = accommodation?.name || 'Hébergement';
 
@@ -628,9 +695,14 @@ export class LogisticsHandler {
       }));
     }
 
-    // Transfert hôtel → aéroport
-    const transferStart = checkoutEnd;
+    // Transfert hôtel → aéroport (durée dynamique, arriver 2h avant le vol)
+    const returnHotelLat = accommodation?.latitude || cityCenter.lat;
+    const returnHotelLng = accommodation?.longitude || cityCenter.lng;
+    const returnTransfer = preferences.carRental
+      ? { duration: 40, cost: 0 }
+      : estimateAirportTransfer(destAirport.latitude, destAirport.longitude, returnHotelLat, returnHotelLng, flightDeparture.getHours(), preferences.groupSize || 1);
     const transferEnd = new Date(flightDeparture.getTime() - 120 * 60 * 1000);
+    const transferStart = new Date(transferEnd.getTime() - returnTransfer.duration * 60 * 1000);
     const transferItem = scheduler.insertFixedItem({
       id: generateId(),
       title: 'Transfert Hôtel → Aéroport',
@@ -643,11 +715,11 @@ export class LogisticsHandler {
         id: transferItem.id,
         type: 'transport',
         title: transferItem.title,
-        description: preferences.carRental ? 'Rendez votre voiture.' : 'Taxi ou transports.',
+        description: preferences.carRental ? 'Rendez votre voiture.' : `Taxi ou transports (~${returnTransfer.duration}min).`,
         locationName: `Centre-ville → ${destAirport.name}`,
         latitude: destAirport.latitude,
         longitude: destAirport.longitude,
-        estimatedCost: preferences.carRental ? 0 : 25 * Math.ceil((preferences.groupSize || 1) / 4),
+        estimatedCost: returnTransfer.cost,
       }));
     }
 
@@ -719,11 +791,12 @@ export class LogisticsHandler {
       }
     }
 
-    // Les activités sont possibles de 8h jusqu'au checkout
+    // Les activités sont possibles de 8h jusqu'au départ pour l'aéroport
+    // (après checkout, on peut encore faire des activités avant le transfert)
     return {
       items,
       activitiesStartTime: parseTime(date, '08:00'),
-      activitiesEndTime: checkoutStart,
+      activitiesEndTime: transferStart,
       arrivedAtDestination: true,
     };
   }

@@ -26,6 +26,9 @@ export interface Attraction {
   tips?: string;
   dataReliability?: 'verified' | 'estimated' | 'generated'; // Source des données
   googleMapsUrl?: string; // Lien direct vers Google Maps
+  imageUrl?: string; // Photo de l'activité (Viator, etc.)
+  providerName?: string; // Source: 'Viator', 'Foursquare', etc.
+  reviewCount?: number; // Nombre d'avis
 }
 
 // Base de données des attractions par destination
