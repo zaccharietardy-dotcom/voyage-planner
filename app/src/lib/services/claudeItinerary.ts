@@ -631,7 +631,7 @@ Format EXACT:
             const dlat = (attraction.lat - centroidLat) * 111;
             const dlng = (attraction.lng - centroidLng) * 111 * Math.cos(centroidLat * Math.PI / 180);
             const distKm = Math.sqrt(dlat * dlat + dlng * dlng);
-            if (distKm > 20) {
+            if (distKm > 30) {
               console.log(`[ClaudeItinerary] Filtered distant attraction: "${attraction.name}" (${distKm.toFixed(1)}km from center)`);
               return false;
             }
