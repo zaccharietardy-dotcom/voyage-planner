@@ -289,6 +289,10 @@ RÈGLES D'OR:
    - Choisis l'excursion la plus EMBLÉMATIQUE depuis ${request.destination}: montagne, site naturel, ville historique proche, volcan, archipel, parc national, etc.
    - Ne hardcode PAS — utilise ta connaissance du monde pour choisir LE day trip classique de la destination
    - Exemples (pour référence, PAS pour copier-coller): Paris→Versailles, Tokyo→Kamakura/Mt.Fuji, Barcelona→Montserrat, Naples→Pompéi/Vésuve, Stockholm→archipel, Rome→Tivoli
+   - L'attraction PRINCIPALE du day trip DOIT être incluse EN PREMIER dans additionalSuggestions avec son nom complet exact.
+     Exemple: day trip "Versailles" → "Château de Versailles" OBLIGATOIRE (pas juste Grand Trianon ou Hameau de la Reine)
+     Exemple: day trip "Giverny" → "Maison et Jardins de Claude Monet" OBLIGATOIRE
+   - Les restaurants du MIDI pendant un day trip doivent être SUR PLACE (dans la ville du day trip), PAS dans la ville de base
    - Place le day trip au milieu du séjour (pas jour 1 ni dernier jour)
    - Ajoute le day trip dans additionalSuggestions avec les vraies coordonnées
    - Précise le moyen de transport ET la durée du trajet dans la description
@@ -574,8 +578,32 @@ Format EXACT:
     for (const day of parsed.days) {
       // Clean suggestion names: remove city/country suffixes like ", Paris, France"
       for (const s of day.additionalSuggestions) {
-        s.name = s.name.replace(/,\s*(Paris|France|Spain|Italy|Japan|UK|Germany|USA|Netherlands|Portugal|Turkey|Morocco|Thailand|Czech Republic|Hungary|Greece|Egypt|Brazil|Mexico|Australia|India|China|South Korea)[^,]*/gi, '').trim();
+        // Strip trailing ", City", ", City, Country", ", Country" suffixes generically
+        // Keep names like "Basilique du Sacré-Cœur de Montmartre" intact (no comma = no strip)
+        s.name = s.name.replace(/,\s*[A-ZÀ-Ÿ][a-zà-ÿ]+(?:\s+[A-ZÀ-Ÿa-zà-ÿ]+)*(?:,\s*[A-ZÀ-Ÿ][a-zà-ÿ]+(?:\s+[A-ZÀ-Ÿa-zà-ÿ]+)*)*\s*$/, '').trim();
       }
+
+      // Blacklist applied to additionalSuggestions (same as Overpass pool filter)
+      const SUGGESTION_BLACKLIST = [
+        /arc de triomphe du carrousel/i,
+        /\bobelisk\b/i, /\bobélisque\b/i,
+        /temple de paris/i,
+        /\bwar memorial\b/i, /\bmémorial de guerre\b/i,
+        /\bcenotaph\b/i,
+        /\bcemetery\b/i, /\bcimetière\b/i,
+        /\bossuary\b/i, /\bossuaire\b/i,
+        /madame tussauds/i, /hard rock caf/i,
+        /wax museum/i, /selfie museum/i, /trick eye/i,
+      ];
+      day.additionalSuggestions = day.additionalSuggestions.filter(s => {
+        for (const pattern of SUGGESTION_BLACKLIST) {
+          if (pattern.test(s.name)) {
+            console.log(`[ClaudeItinerary] Blacklisted suggestion: "${s.name}"`);
+            return false;
+          }
+        }
+        return true;
+      });
 
       // Filter selectedAttractionIds: remove nightlife for family_with_kids
       if (request.groupType === 'family_with_kids') {
@@ -769,9 +797,12 @@ export function mapItineraryToAttractions(
     const orderedIds = (day.visitOrder && day.visitOrder.length > 0) ? day.visitOrder : day.selectedAttractionIds;
     const selectedSet = new Set(day.selectedAttractionIds);
 
+    const cleanName = (name: string) => name.replace(/,\s*[A-ZÀ-Ÿ][a-zà-ÿ]+(?:\s+[A-ZÀ-Ÿa-zà-ÿ]+)*(?:,\s*[A-ZÀ-Ÿ][a-zà-ÿ]+(?:\s+[A-ZÀ-Ÿa-zà-ÿ]+)*)*\s*$/, '').trim();
+
     for (const id of orderedIds) {
       const attraction = poolMap.get(id);
       if (attraction) {
+        attraction.name = cleanName(attraction.name);
         dayAttractions.push(attraction);
         selectedSet.delete(id);
       }
@@ -780,6 +811,7 @@ export function mapItineraryToAttractions(
     for (const id of selectedSet) {
       const attraction = poolMap.get(id);
       if (attraction) {
+        attraction.name = cleanName(attraction.name);
         dayAttractions.push(attraction);
       }
     }
@@ -804,9 +836,60 @@ export function mapItineraryToAttractions(
       });
     }
 
+    // Deduplicate: if two attractions have very similar names, keep the one from pool (better coords)
+    const deduped = deduplicateAttractions(dayAttractions);
+
     // Reorder attractions by geographic proximity (nearest-neighbor) to minimize travel
-    return reorderByProximity(dayAttractions);
+    return reorderByProximity(deduped);
   });
+}
+
+/**
+ * Normalize name for comparison: lowercase, strip accents, strip suffixes
+ */
+function normalizeName(name: string): string {
+  return name
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // strip accents
+    .replace(/,\s*.*/g, '') // strip everything after first comma
+    .replace(/\b(le|la|les|du|de|des|l'|d')\b/g, '') // strip French articles
+    .replace(/[^a-z0-9 ]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
+ * Check if two names are similar enough to be duplicates
+ */
+function areNamesSimilar(a: string, b: string): boolean {
+  const na = normalizeName(a);
+  const nb = normalizeName(b);
+  if (na === nb) return true;
+  // One contains the other
+  if (na.includes(nb) || nb.includes(na)) return true;
+  // Check word overlap: if 2+ significant words match
+  const wordsA = na.split(' ').filter(w => w.length > 2);
+  const wordsB = nb.split(' ').filter(w => w.length > 2);
+  const common = wordsA.filter(w => wordsB.includes(w));
+  if (common.length >= 2) return true;
+  if (common.length >= 1 && (wordsA.length <= 2 || wordsB.length <= 2)) return true;
+  return false;
+}
+
+/**
+ * Remove duplicate attractions within a day. Prefer pool attractions (better coords) over generated ones.
+ */
+function deduplicateAttractions(attractions: Attraction[]): Attraction[] {
+  const result: Attraction[] = [];
+  for (const a of attractions) {
+    const isDupe = result.some(existing => areNamesSimilar(existing.name, a.name));
+    if (isDupe) {
+      console.log(`[ClaudeItinerary] Dedup: removed "${a.name}" (similar to existing)`);
+      continue;
+    }
+    result.push(a);
+  }
+  return result;
 }
 
 /**
