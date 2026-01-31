@@ -71,6 +71,11 @@ const AIRPORTS: Record<string, AirportInfo> = {
   MPL: { code: 'MPL', name: 'Montpellier Méditerranée', city: 'Montpellier', country: 'France', latitude: 43.5762, longitude: 3.9630 },
   SXB: { code: 'SXB', name: 'Strasbourg Entzheim', city: 'Strasbourg', country: 'France', latitude: 48.5383, longitude: 7.6281 },
   LIL: { code: 'LIL', name: 'Lille-Lesquin', city: 'Lille', country: 'France', latitude: 50.5619, longitude: 3.0894 },
+  // France - Corse
+  AJA: { code: 'AJA', name: 'Ajaccio Napoleon Bonaparte', city: 'Ajaccio', country: 'France', latitude: 41.9236, longitude: 8.8029 },
+  BIA: { code: 'BIA', name: 'Bastia Poretta', city: 'Bastia', country: 'France', latitude: 42.5527, longitude: 9.4837 },
+  FSC: { code: 'FSC', name: 'Figari Sud Corse', city: 'Figari', country: 'France', latitude: 41.5006, longitude: 9.0978 },
+  CLY: { code: 'CLY', name: 'Calvi Sainte-Catherine', city: 'Calvi', country: 'France', latitude: 42.5308, longitude: 8.7932 },
 
   // Japon
   NRT: { code: 'NRT', name: 'Tokyo Narita', city: 'Tokyo', country: 'Japon', latitude: 35.7720, longitude: 140.3929 },
@@ -151,6 +156,13 @@ const CITY_CENTERS: Record<string, { lat: number; lng: number }> = {
   'montpellier': { lat: 43.6108, lng: 3.8767 }, // Place de la Comédie
   'strasbourg': { lat: 48.5734, lng: 7.7521 }, // Cathédrale
   'lille': { lat: 50.6292, lng: 3.0573 }, // Grand Place
+  // France - Corse
+  'ajaccio': { lat: 41.9192, lng: 8.7386 }, // Place Foch
+  'bastia': { lat: 42.6975, lng: 9.4510 }, // Vieux-Port
+  'porto-vecchio': { lat: 41.5917, lng: 9.2789 }, // Centre
+  'bonifacio': { lat: 41.3873, lng: 9.1593 }, // Citadelle
+  'calvi': { lat: 42.5679, lng: 8.7571 }, // Citadelle
+  'corte': { lat: 42.3058, lng: 9.1492 }, // Citadelle
   'angers': { lat: 47.4712, lng: -0.5518 }, // Château d'Angers
   'rennes': { lat: 48.1173, lng: -1.6778 }, // Place de la Mairie
   'tours': { lat: 47.3941, lng: 0.6848 }, // Place Jean Jaurès
@@ -441,6 +453,12 @@ export function findNearbyAirports(city: string): AirportInfo[] {
     'montpellier': 'MPL', 'montpell': 'MPL',
     'strasbourg': 'SXB', 'strasbour': 'SXB',
     'lille': 'LIL',
+    // France - Corse
+    'ajaccio': 'AJA', 'aiacciu': 'AJA',
+    'bastia': 'BIA',
+    'figari': 'FSC', 'porto-vecchio': 'FSC', 'porto vecchio': 'FSC', 'bonifacio': 'FSC',
+    'calvi': 'CLY',
+    'corse': 'AJA', 'corsica': 'AJA',
     // Japon
     'tokyo': 'NRT', 'tokio': 'NRT',
     'osaka': 'KIX',

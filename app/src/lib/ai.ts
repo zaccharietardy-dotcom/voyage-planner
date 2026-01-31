@@ -164,6 +164,10 @@ function fixAttractionDuration(attraction: Attraction): Attraction {
   if (/\b(champ|esplanade|promenade|boulevard)\b/.test(name)) {
     if (d > 45) return { ...attraction, duration: 30 };
   }
+  // Ancient/old buildings without museum: max 30min (facades, palaces without exhibit)
+  if (/\b(ancien|old|palais|palazzo|palace|hôtel de ville|town hall|mairie)\b/.test(name) && !/\b(musée|museum|exposition|exhibit|galerie|gallery)\b/.test(name)) {
+    if (d > 45) return { ...attraction, duration: 30 };
+  }
   // Quartiers à explorer: 60-90min
   if (/\b(quartier|neighborhood|district|marché|market)\b/.test(name)) {
     if (d > 120) return { ...attraction, duration: 90 };
@@ -328,6 +332,7 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
     preferences.durationDays,
     preferences.groupSize,
     preferences.activities,
+    preferences.mealPreference,
   );
 
   // Lancer attractions + hôtels en parallèle avec le transport
@@ -686,20 +691,50 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       }
     }
 
-    // Last resort: any attraction still at city center or (0,0) gets a Google Maps search URL
-    for (const dayAttrs of attractionsByDay) {
+    // Last resort: any attraction still at city center or (0,0) gets coords and Google Maps URL
+    for (let i = 0; i < attractionsByDay.length; i++) {
+      const day = claudeItinerary.days[i];
+      const isDayTripDay = day?.isDayTrip && day?.dayTripDestination;
+      const geoContextCity = isDayTripDay ? day.dayTripDestination! : preferences.destination;
+
+      // For day trip days, get the day trip center for fallback coords
+      let fallbackCenter = cityCenter;
+      if (isDayTripDay) {
+        const dtCoords = await getCityCenterCoordsAsync(day.dayTripDestination!);
+        if (dtCoords) fallbackCenter = dtCoords;
+      }
+
+      const dayAttrs = attractionsByDay[i];
       for (let j = 0; j < dayAttrs.length; j++) {
         const a = dayAttrs[j];
         if (a.latitude === 0 && a.longitude === 0) {
-          console.log(`[AI] Coords fallback pour "${a.name}" → centre-ville (${cityCenter.lat}, ${cityCenter.lng})`);
-          dayAttrs[j] = { ...a, latitude: cityCenter.lat, longitude: cityCenter.lng };
+          console.log(`[AI] Coords fallback pour "${a.name}" → ${geoContextCity} (${fallbackCenter.lat}, ${fallbackCenter.lng})`);
+          dayAttrs[j] = { ...a, latitude: fallbackCenter.lat, longitude: fallbackCenter.lng };
         }
         // Ensure all attractions have a Google Maps URL for the user
         if (!a.googleMapsUrl && a.id.startsWith('claude-')) {
           dayAttrs[j] = {
             ...dayAttrs[j],
-            googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(a.name + ', ' + preferences.destination)}`,
+            googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(a.name + ', ' + geoContextCity)}`,
           };
+        }
+      }
+
+      // Day trip validation: filter out attractions that are in the base city (not near day trip destination)
+      if (isDayTripDay && fallbackCenter.lat !== cityCenter.lat) {
+        const MAX_DIST_FROM_DAY_TRIP_KM = 30; // attractions must be within 30km of day trip destination
+        const beforeCount = dayAttrs.length;
+        attractionsByDay[i] = dayAttrs.filter(a => {
+          const distFromDayTrip = calculateDistance(a.latitude, a.longitude, fallbackCenter.lat, fallbackCenter.lng);
+          const distFromBase = calculateDistance(a.latitude, a.longitude, cityCenter.lat, cityCenter.lng);
+          // Keep if closer to day trip destination than to base city, or within range of day trip
+          if (distFromDayTrip <= MAX_DIST_FROM_DAY_TRIP_KM) return true;
+          if (distFromDayTrip < distFromBase) return true;
+          console.log(`[AI] Day trip filter: "${a.name}" removed (${Math.round(distFromDayTrip)}km from ${day.dayTripDestination}, ${Math.round(distFromBase)}km from ${preferences.destination})`);
+          return false;
+        });
+        if (attractionsByDay[i].length < beforeCount) {
+          console.log(`[AI] Day trip filter: ${beforeCount - attractionsByDay[i].length} attractions removed for day ${i + 1} (too far from ${day.dayTripDestination})`);
         }
       }
     }
@@ -715,6 +750,8 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
 
   // Post-traitement: corriger durées et coûts irréalistes, filtrer attractions non pertinentes
   const irrelevantPatterns = /\b(temple ganesh|temple hindou|hindu temple|salle de sport|gym|fitness|cinéma|cinema|arcade|bowling|landmark architecture|local architecture|architecture locale|city sightseeing|sightseeing tour|photo spot|photo opportunity|scenic view point|generic|unnamed)\b/i;
+  // Restaurants/bars/cafes should not be in the attraction pool - they belong in the meal system
+  const restaurantPatterns = /\b(restaurant|ristorante|restaurante|bistrot|bistro|brasserie|trattoria|osteria|taverna|pizzeria|crêperie|creperie|bar à|wine bar|pub |café restaurant|grill|steakhouse)\b/i;
   for (let i = 0; i < attractionsByDay.length; i++) {
     const before = attractionsByDay[i].length;
     attractionsByDay[i] = attractionsByDay[i]
@@ -722,6 +759,10 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
         if (a.mustSee) return true;
         if (irrelevantPatterns.test(a.name)) {
           console.log(`[AI] Filtré attraction non pertinente: "${a.name}"`);
+          return false;
+        }
+        if (restaurantPatterns.test(a.name)) {
+          console.log(`[AI] Filtré restaurant dans le pool d'attractions: "${a.name}"`);
           return false;
         }
         // Filtrer les noms trop génériques (pas un vrai lieu)
@@ -861,7 +902,7 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       lateFlightArrivalData: pendingLateFlightData, // Données du vol tardif du jour précédent
       isDayTrip: (dayMetadata[i] || {} as any).isDayTrip,
       dayTripDestination: (dayMetadata[i] || {} as any).dayTripDestination,
-      groceriesDone: groceriesDoneByDay,
+      groceriesDone: groceriesDoneByDay || groceryDays.has(dayNumber), // If groceries planned today, dinner can be self-catered
     });
 
     // Injecter les courses si ce jour est un jour de courses
@@ -2786,10 +2827,16 @@ async function generateDayWithScheduler(params: {
   }
 
   // Activités de l'après-midi
-  // On itère TOUTES les attractions dans l'ordre de Claude — celles déjà placées le matin
-  // seront automatiquement skippées par le check tripUsedAttractionIds
+  // Re-sort remaining attractions by proximity to current position (after lunch, position may have changed)
+  // This prevents geographic back-and-forth (e.g., going west, coming back to center for lunch, then west again)
+  const afternoonAttractions = [...attractions].sort((a, b) => {
+    // Already-used attractions will be skipped in the loop, no need to filter here
+    const distA = calculateDistance(lastCoords.lat, lastCoords.lng, a.latitude || 0, a.longitude || 0);
+    const distB = calculateDistance(lastCoords.lat, lastCoords.lng, b.latitude || 0, b.longitude || 0);
+    return distA - distB;
+  });
 
-  for (const attraction of attractions) {
+  for (const attraction of afternoonAttractions) {
     // ANTI-DOUBLON: Skip si déjà utilisée dans n'importe quel jour du voyage
     if (tripUsedAttractionIds.has(attraction.id)) {
       console.log(`[Jour ${dayNumber}] Skip "${attraction.name}": déjà utilisée dans le voyage`);
@@ -2908,14 +2955,16 @@ async function generateDayWithScheduler(params: {
     } : cityCenter;
 
     let gapFillAdded = 0;
-    const MAX_GAP_FILL = 2;
+    const MAX_GAP_FILL = 3; // Allow up to 3 gap-fill attractions to avoid large empty blocks
+    const PROXIMITY_KM = 5; // 5km radius from day's centroid (covers most city neighborhoods)
     const unusedAttractions = allAttractions.filter(a => {
       if (tripUsedAttractionIds.has(a.id)) return false;
-      // Proximity: within ~3km of day's centroid
+      // Proximity: within ~5km of day's centroid (or last placed coords)
       if (a.latitude && a.longitude) {
-        const dlat = (a.latitude - centroid.lat) * 111;
-        const dlng = (a.longitude - centroid.lng) * 111 * Math.cos(centroid.lat * Math.PI / 180);
-        if (Math.sqrt(dlat * dlat + dlng * dlng) > 3) return false;
+        const refPoint = lastCoords.lat !== cityCenter.lat ? lastCoords : centroid;
+        const dlat = (a.latitude - refPoint.lat) * 111;
+        const dlng = (a.longitude - refPoint.lng) * 111 * Math.cos(refPoint.lat * Math.PI / 180);
+        if (Math.sqrt(dlat * dlat + dlng * dlng) > PROXIMITY_KM) return false;
       }
       // No religious if day already has one
       if (dayHasReligious && /church|cathedral|basilica|chapel|mosque|synagogue|temple|shrine/i.test(a.name)) return false;
@@ -2923,7 +2972,13 @@ async function generateDayWithScheduler(params: {
     });
 
     if (unusedAttractions.length > 0) {
-      console.log(`[Jour ${dayNumber}] ${unusedAttractions.length} attractions non utilisées disponibles`);
+      // Sort by distance to last coords (nearest first) for optimal gap filling
+      unusedAttractions.sort((a, b) => {
+        const distA = calculateDistance(lastCoords.lat, lastCoords.lng, a.latitude || 0, a.longitude || 0);
+        const distB = calculateDistance(lastCoords.lat, lastCoords.lng, b.latitude || 0, b.longitude || 0);
+        return distA - distB;
+      });
+      console.log(`[Jour ${dayNumber}] ${unusedAttractions.length} attractions non utilisées disponibles pour remplissage`);
 
       for (const attraction of unusedAttractions) {
         if (gapFillAdded >= MAX_GAP_FILL) break;
@@ -3289,8 +3344,23 @@ async function generateDayWithScheduler(params: {
       });
       if (transportItem) {
         // Generate return booking URL with correct direction and date
+        // For combined transport, generate URL for the first bookable segment
         let returnBookingUrl = groundTransport.bookingUrl;
-        if (groundTransport.mode === 'train') {
+        if (groundTransport.mode === 'combined' && groundTransport.segments?.length) {
+          // For combined, generate booking URL based on first segment mode
+          const firstSeg = groundTransport.segments[0];
+          if (firstSeg.mode === 'train') {
+            returnBookingUrl = getTrainBookingUrl(preferences.destination, firstSeg.to || preferences.origin, preferences.groupSize, date);
+          } else if (firstSeg.mode === 'ferry') {
+            // Link to ferry operator if available
+            const operator = firstSeg.operator?.toLowerCase() || '';
+            if (operator.includes('corsica')) {
+              returnBookingUrl = `https://www.corsica-linea.com/`;
+            } else {
+              returnBookingUrl = `https://www.directferries.fr/`;
+            }
+          }
+        } else if (groundTransport.mode === 'train') {
           returnBookingUrl = getTrainBookingUrl(preferences.destination, preferences.origin, preferences.groupSize, date);
         } else if (groundTransport.mode === 'bus') {
           const dateStr = date ? date.toISOString().split('T')[0] : '';
@@ -3298,8 +3368,20 @@ async function generateDayWithScheduler(params: {
         } else if (groundTransport.mode === 'car') {
           returnBookingUrl = `https://www.google.com/maps/dir/${encodeURIComponent(preferences.destination)}/${encodeURIComponent(preferences.origin)}`;
         }
+        // Build detailed description with segments (like outbound)
+        const returnSegmentsDesc = groundTransport.segments?.length
+          ? groundTransport.segments.map(s => {
+              const segMode = s.mode === 'train' ? '🚄' : s.mode === 'ferry' ? '⛴️' : s.mode === 'bus' ? '🚌' : s.mode === 'car' ? '🚗' : '🚊';
+              const segOperator = s.operator ? ` (${s.operator})` : '';
+              const segDuration = s.duration ? ` ${Math.floor(s.duration / 60)}h${s.duration % 60 > 0 ? String(s.duration % 60).padStart(2, '0') : ''}` : '';
+              const segPrice = s.price ? ` ${s.price}€` : '';
+              return `${segMode} ${preferences.destination === s.from ? s.from : s.from} → ${s.to}${segOperator}${segDuration}${segPrice}`;
+            }).join(' puis ')
+          : `${preferences.destination} → ${preferences.origin}`;
+        const returnDescription = `${returnSegmentsDesc} | ${groundTransport.totalPrice}€ total`;
+
         items.push(schedulerItemToTripItem(transportItem, dayNumber, orderIndex++, {
-          description: `Retour | ${groundTransport.totalPrice}€`,
+          description: returnDescription,
           locationName: `${preferences.destination} → ${preferences.origin}`,
           latitude: cityCenter.lat,
           longitude: cityCenter.lng,

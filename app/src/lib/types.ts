@@ -67,6 +67,7 @@ export interface TripPreferences {
   // Étape 5 - Activités & Préférences
   activities: ActivityType[];
   dietary: DietaryType[];
+  mealPreference?: 'auto' | 'mostly_cooking' | 'mostly_restaurants' | 'balanced'; // Préférence repas
   mustSee: string;
 
   // Étape 6 (optionnel) - Détails logistiques

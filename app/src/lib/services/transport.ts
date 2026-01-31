@@ -963,16 +963,30 @@ export function getTrainBookingUrl(origin: string, destination: string, passenge
   // Liste des clés normalisées pour vérification
   const cities = [originKey, destKey];
 
-  // SNCF Connect: trajets France (avec date si dispo)
-  const frenchCities = ['paris', 'lyon', 'marseille', 'bordeaux', 'toulouse', 'nice', 'strasbourg', 'lille', 'nantes', 'rennes', 'montpellier', 'caen', 'rouen', 'tours', 'dijon', 'avignon', 'angers', 'le mans', 'grenoble', 'clermont-ferrand'];
-  if (cities.some(c => frenchCities.includes(c))) {
+  // Cross-border routes: use Trainline (handles multi-country routes well)
+  const frenchCities = ['paris', 'lyon', 'marseille', 'bordeaux', 'toulouse', 'nice', 'strasbourg', 'lille', 'nantes', 'rennes', 'montpellier', 'caen', 'rouen', 'tours', 'dijon', 'avignon', 'angers', 'le mans', 'grenoble', 'clermont-ferrand', 'ajaccio', 'bastia', 'calvi', 'toulon'];
+  const spanishCities = ['barcelona', 'madrid', 'valencia', 'seville', 'malaga'];
+  const germanCities = ['berlin', 'munich', 'frankfurt', 'hamburg', 'cologne'];
+  const italianCities = ['rome', 'milan', 'florence', 'venice', 'naples', 'turin'];
+  const allForeignCities = [...spanishCities, ...germanCities, ...italianCities];
+
+  const hasFrench = cities.some(c => frenchCities.includes(c));
+  const hasForeign = cities.some(c => allForeignCities.includes(c));
+
+  // Cross-border: always use Trainline (SNCF Connect doesn't handle foreign city names well)
+  if (hasFrench && hasForeign) {
+    const dateStr = date ? date.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+    return `https://www.thetrainline.com/book/results?origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}&outwardDate=${dateStr}T06:00:00&adults=${passengers}`;
+  }
+
+  // SNCF Connect: trajets 100% France (avec date si dispo)
+  if (hasFrench) {
     const dateParam = date ? `&outwardDate=${date.toISOString().split('T')[0]}` : '';
     const paxParam = passengers > 1 ? `&passengers=${passengers}` : '';
     return `https://www.sncf-connect.com/app/home/search?from=${encodeURIComponent(origin)}&to=${encodeURIComponent(destination)}${dateParam}${paxParam}`;
   }
 
-  // Renfe: trajets Espagne — Renfe has no deep-link; use Trainline instead (validated to work with search params)
-  const spanishCities = ['barcelona', 'madrid', 'valencia', 'seville', 'malaga'];
+  // Renfe/Trainline: trajets Espagne
   if (cities.some(c => spanishCities.includes(c))) {
     const dateStr = date ? date.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
     return `https://www.thetrainline.com/book/results?origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}&outwardDate=${dateStr}T06:00:00&adults=${passengers}`;

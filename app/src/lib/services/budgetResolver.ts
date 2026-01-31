@@ -69,6 +69,7 @@ export async function generateBudgetStrategy(
   durationDays: number,
   groupSize: number,
   activities: string[],
+  mealPreference?: 'auto' | 'mostly_cooking' | 'mostly_restaurants' | 'balanced',
 ): Promise<BudgetStrategy> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
@@ -115,7 +116,11 @@ RÈGLES:
 - Le petit-déjeuner est souvent self_catered même avec un bon budget (sauf si hôtel avec PDJ inclus)
 - accommodationBudgetPerNight = budget TOTAL chambre/logement par nuit (pas par personne)
 - Si le budget par personne/jour est >= 80€, privilégie les restaurants pour déjeuner et dîner
-- Si le budget par personne/jour est < 30€, privilégie self_catered pour économiser`;
+- Si le budget par personne/jour est < 30€, privilégie self_catered pour économiser
+${mealPreference && mealPreference !== 'auto' ? `- IMPORTANT: L'utilisateur a explicitement choisi la préférence repas "${mealPreference}":
+  ${mealPreference === 'mostly_cooking' ? '→ Privilégie self_catered pour la plupart des repas (breakfast + lunch self_catered, dinner mixed)' : ''}
+  ${mealPreference === 'mostly_restaurants' ? '→ Privilégie restaurant pour la plupart des repas, groceryShoppingNeeded=false' : ''}
+  ${mealPreference === 'balanced' ? '→ Mets "mixed" pour lunch et dinner, self_catered pour breakfast' : ''}` : ''}`;
 
   try {
     const response = await client.messages.create({
@@ -140,8 +145,33 @@ RÈGLES:
 
     const strategy: BudgetStrategy = JSON.parse(jsonStr);
 
-    // Guard: if budget per person per day is high enough (>=80€), force all meals to restaurant
-    if (resolved.perPersonPerDay >= 80) {
+    // Guard: apply user meal preference override
+    if (mealPreference && mealPreference !== 'auto') {
+      const meals = strategy.mealsStrategy;
+      if (mealPreference === 'mostly_cooking') {
+        meals.breakfast = 'self_catered';
+        meals.lunch = 'self_catered';
+        meals.dinner = 'mixed';
+        strategy.groceryShoppingNeeded = true;
+        if (strategy.accommodationType === 'hotel') {
+          strategy.accommodationType = 'airbnb_with_kitchen';
+        }
+      } else if (mealPreference === 'mostly_restaurants') {
+        meals.breakfast = 'restaurant';
+        meals.lunch = 'restaurant';
+        meals.dinner = 'restaurant';
+        strategy.groceryShoppingNeeded = false;
+      } else if (mealPreference === 'balanced') {
+        meals.breakfast = 'self_catered';
+        meals.lunch = 'mixed';
+        meals.dinner = 'mixed';
+        strategy.groceryShoppingNeeded = true;
+      }
+      console.log(`[BudgetStrategy] Override from mealPreference=${mealPreference}`);
+    }
+
+    // Guard: if budget per person per day is high enough (>=80€) AND no explicit meal preference, force all meals to restaurant
+    if ((!mealPreference || mealPreference === 'auto') && resolved.perPersonPerDay >= 80) {
       const meals = strategy.mealsStrategy;
       const needsOverride = meals.breakfast !== 'restaurant' || meals.lunch !== 'restaurant' || meals.dinner !== 'restaurant';
       if (needsOverride) {

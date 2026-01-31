@@ -3,7 +3,7 @@
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { TripPreferences, BudgetLevel, BUDGET_LABELS } from '@/lib/types';
-import { Wallet, Coins, CreditCard, Gem } from 'lucide-react';
+import { Wallet, Coins, CreditCard, Gem, ChefHat, UtensilsCrossed, Shuffle, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface StepBudgetProps {
@@ -137,6 +137,47 @@ export function StepBudget({ data, onChange }: StepBudgetProps) {
             Budget {data.budgetIsPerPerson ? 'par personne' : 'total'} pour le voyage
           </p>
         )}
+      </div>
+
+      {/* Préférence repas */}
+      <div className="space-y-4">
+        <Label className="text-base font-medium">Préférence pour les repas</Label>
+        <div className="grid grid-cols-2 gap-3">
+          {([
+            { value: 'auto', label: 'Automatique', desc: 'Selon votre budget', icon: <Sparkles className="h-5 w-5" /> },
+            { value: 'mostly_cooking', label: 'Plutôt cuisiner', desc: 'Plus économique', icon: <ChefHat className="h-5 w-5" /> },
+            { value: 'mostly_restaurants', label: 'Plutôt restaurants', desc: 'Découverte locale', icon: <UtensilsCrossed className="h-5 w-5" /> },
+            { value: 'balanced', label: 'Équilibré', desc: 'Mix des deux', icon: <Shuffle className="h-5 w-5" /> },
+          ] as const).map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => onChange({ mealPreference: option.value })}
+              className={cn(
+                'flex items-center gap-3 p-4 rounded-xl border-2 transition-all text-left',
+                'hover:border-primary hover:bg-primary/5',
+                (data.mealPreference || 'auto') === option.value
+                  ? 'border-primary bg-primary/10'
+                  : 'border-border bg-card'
+              )}
+            >
+              <div
+                className={cn(
+                  'p-2 rounded-full shrink-0',
+                  (data.mealPreference || 'auto') === option.value
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted'
+                )}
+              >
+                {option.icon}
+              </div>
+              <div>
+                <span className="font-medium text-sm">{option.label}</span>
+                <p className="text-xs text-muted-foreground">{option.desc}</p>
+              </div>
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );
