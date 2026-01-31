@@ -190,8 +190,6 @@ const CITY_CENTERS: Record<string, { lat: number; lng: number }> = {
   'toulon': { lat: 43.1242, lng: 5.9280 }, // Port
   'cannes': { lat: 43.5528, lng: 7.0174 }, // La Croisette
   'antibes': { lat: 43.5808, lng: 7.1239 }, // Vieil Antibes
-  'ajaccio': { lat: 41.9192, lng: 8.7386 }, // Port Tino Rossi
-  'bastia': { lat: 42.6971, lng: 9.4509 }, // Vieux-Port
 
   // Espagne
   'barcelona': { lat: 41.3851, lng: 2.1734 }, // Plaça Catalunya
