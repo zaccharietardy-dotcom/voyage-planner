@@ -47,6 +47,7 @@ import { ProposedChange, createMoveActivityChange } from '@/lib/types/collaborat
 import { recalculateTimes } from '@/lib/services/itineraryCalculator';
 import { AddActivityModal } from '@/components/trip/AddActivityModal';
 import { CalendarView } from '@/components/trip/CalendarView';
+import { CommentsSection } from '@/components/trip/CommentsSection';
 import { cn } from '@/lib/utils';
 import {
   DropdownMenu,
@@ -1316,6 +1317,15 @@ export default function TripPage() {
             )}
           </div>
         </div>
+      </div>
+
+      {/* Comments section */}
+      <div className="container mx-auto px-4 py-6 border-t">
+        <Card>
+          <CardContent className="p-4 sm:p-6">
+            <CommentsSection tripId={tripId} />
+          </CardContent>
+        </Card>
       </div>
 
       {/* Dialog pour créer une proposition */}

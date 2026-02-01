@@ -5,8 +5,8 @@
  * - Liens avec dates dynamiques (check-in, check-out, date de vol)
  * - Restaurant: URL Google Maps
  * - Hôtel: Booking.com avec dates
- * - Vol: Google Flights avec dates exactes
- * - Attraction: Site officiel ou Google Maps
+ * - Vol: Aviasales avec lien affilié Travelpayouts (commission ~40% du revenu Aviasales)
+ * - Attraction: Site officiel, Viator (affilié 8%), ou Google Maps
  */
 
 /**
@@ -140,13 +140,14 @@ export function generateHotelLink(
 }
 
 /**
- * Génère un lien Google Flights avec dates
+ * Génère un lien Aviasales pour recherche de vols
  *
- * On utilise Skyscanner qui a des URLs prévisibles et bien structurées:
- * https://www.skyscanner.fr/transport/vols/ORY/BCN/260128/260204/
- * Format de date: YYMMDD
+ * Format URL Aviasales: /search/{ORIGIN}{DDMM}{DESTINATION}{DDMM}{PASSENGERS}
+ * Exemple aller simple: /search/CDG2302BCN1 (CDG le 23/02, BCN, 1 passager)
+ * Exemple aller-retour: /search/CDG2302BCN01031 (CDG le 23/02, BCN retour 01/03, 1 passager)
  *
- * Alternative: Google Flights avec format tfs encodé (complexe)
+ * Ce lien est ensuite converti en lien affilié via l'API Travelpayouts
+ * (POST /api/affiliate-link) pour tracker les commissions.
  */
 export function generateFlightLink(
   flight: FlightForLink,
@@ -155,38 +156,101 @@ export function generateFlightLink(
   const { origin, destination } = flight;
   const { date, returnDate, passengers = 1 } = context;
 
-  // Fonction pour formater la date au format YYMMDD pour Skyscanner
-  const formatDateForSkyscanner = (dateStr: string): string => {
+  // Formater la date au format DDMM pour Aviasales
+  const formatDateForAviasales = (dateStr: string): string => {
     if (!dateStr) return '';
     // dateStr est au format YYYY-MM-DD
-    const [year, month, day] = dateStr.split('-');
-    // Prendre les 2 derniers chiffres de l'année
-    const shortYear = year.slice(2);
-    return `${shortYear}${month}${day}`;
+    const [, month, day] = dateStr.split('-');
+    return `${day}${month}`;
   };
 
   const dateStr = date ? formatDateForUrl(date) : '';
   const returnDateStr = returnDate ? formatDateForUrl(returnDate) : '';
 
-  // Construire l'URL Skyscanner
-  // Format: /transport/vols/{origin}/{destination}/{date_aller}/{date_retour}/?adults=N
-  const baseUrl = 'https://www.skyscanner.fr/transport/vols';
-
-  let url = `${baseUrl}/${origin.toLowerCase()}/${destination.toLowerCase()}/`;
+  // Construire l'URL Aviasales
+  // Format: /search/{ORIGIN}{DDMM}{DESTINATION}{DDMM_RETOUR}{PASSENGERS}
+  let searchPath = `${origin.toUpperCase()}`;
 
   if (dateStr) {
-    url += `${formatDateForSkyscanner(dateStr)}/`;
+    searchPath += formatDateForAviasales(dateStr);
   }
+
+  searchPath += destination.toUpperCase();
 
   if (returnDateStr) {
-    url += `${formatDateForSkyscanner(returnDateStr)}/`;
+    searchPath += formatDateForAviasales(returnDateStr);
   }
 
-  // Toujours ajouter les paramètres de passagers (Skyscanner défaut à 1 sinon)
-  const hasReturn = returnDateStr ? '1' : '0';
-  url += `?adults=${passengers}&adultsv2=${passengers}&cabinclass=economy&children=0&childrenv2=&infants=0&preferdirects=false&rtn=${hasReturn}`;
+  searchPath += passengers.toString();
 
-  return url;
+  return `https://www.aviasales.com/search/${searchPath}?currency=eur`;
+}
+
+/**
+ * Convertit un lien Aviasales (ou autre) en lien affilié Travelpayouts
+ * Appelle l'API interne /api/affiliate-link
+ *
+ * Usage: const affiliateUrl = await generateAffiliateLink(aviasalesUrl);
+ */
+export async function generateAffiliateLink(
+  url: string,
+  baseUrl: string = ''
+): Promise<string> {
+  try {
+    const apiUrl = baseUrl ? `${baseUrl}/api/affiliate-link` : '/api/affiliate-link';
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url }),
+    });
+
+    if (!response.ok) {
+      console.error('[AffiliateLink] API error:', response.status);
+      return url; // Fallback: retourner le lien original
+    }
+
+    const data = await response.json();
+    return data.success ? data.affiliate : url;
+  } catch (error) {
+    console.error('[AffiliateLink] Error:', error);
+    return url; // Fallback: retourner le lien original
+  }
+}
+
+/**
+ * Convertit plusieurs liens en liens affiliés en une seule requête (max 10)
+ */
+export async function generateAffiliateLinks(
+  urls: string[],
+  baseUrl: string = ''
+): Promise<Map<string, string>> {
+  const result = new Map<string, string>();
+
+  try {
+    const apiUrl = baseUrl ? `${baseUrl}/api/affiliate-link` : '/api/affiliate-link';
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ urls }),
+    });
+
+    if (!response.ok) {
+      // Fallback: retourner les liens originaux
+      urls.forEach(url => result.set(url, url));
+      return result;
+    }
+
+    const data = await response.json();
+    const links = data.links || [data];
+
+    for (const link of links) {
+      result.set(link.original, link.success ? link.affiliate : link.original);
+    }
+  } catch {
+    urls.forEach(url => result.set(url, url));
+  }
+
+  return result;
 }
 
 /**

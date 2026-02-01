@@ -1,5 +1,6 @@
 import { createRouteHandlerClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
+import { notifyFollow } from '@/lib/services/notifications';
 
 // POST /api/follows - Follow a user
 export async function POST(request: Request) {
@@ -22,6 +23,14 @@ export async function POST(request: Request) {
       if (error.code === '23505') return NextResponse.json({ error: 'Déjà suivi' }, { status: 409 });
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
+
+    // Send notification (non-blocking)
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('display_name')
+      .eq('id', user.id)
+      .single();
+    notifyFollow(user.id, following_id, profile?.display_name || 'Quelqu\'un').catch(console.error);
 
     return NextResponse.json(data);
   } catch (error) {

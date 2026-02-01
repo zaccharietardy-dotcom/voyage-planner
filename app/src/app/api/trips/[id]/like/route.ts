@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@/lib/supabase/server';
+import { notifyLike } from '@/lib/services/notifications';
 
 // Toggle like on a trip
 export async function POST(
@@ -22,7 +23,7 @@ export async function POST(
     // Check if trip exists and is public
     const { data: trip, error: tripError } = await supabase
       .from('trips')
-      .select('id, visibility')
+      .select('id, visibility, owner_id, destination')
       .eq('id', tripId)
       .single();
 
@@ -79,6 +80,16 @@ export async function POST(
           { error: 'Erreur lors de l\'ajout du like' },
           { status: 500 }
         );
+      }
+
+      // Send notification (non-blocking)
+      if (trip.owner_id) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('display_name')
+          .eq('id', user.id)
+          .single();
+        notifyLike(user.id, trip.owner_id, profile?.display_name || 'Quelqu\'un', tripId, trip.destination || '').catch(console.error);
       }
 
       return NextResponse.json({ liked: true });

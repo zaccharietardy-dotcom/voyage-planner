@@ -26,6 +26,7 @@ export async function GET(request: Request) {
     const destination = searchParams.get('destination');
     const minDays = searchParams.get('minDays');
     const maxDays = searchParams.get('maxDays');
+    const sort = searchParams.get('sort') || 'recent'; // 'recent' or 'trending'
 
     if (tab === 'following' && !user) {
       return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
@@ -224,12 +225,23 @@ export async function GET(request: Request) {
       }
     }
 
-    const enrichedTrips = tripsWithOwner.map((trip: any) => ({
+    let enrichedTrips = tripsWithOwner.map((trip: any) => ({
       ...trip,
       likes_count: likeCounts[trip.id] || 0,
       user_liked: userLikedSet.has(trip.id),
       is_following: followingSet.has(trip.owner_id),
     }));
+
+    // Sort by trending (likes weighted + recency bonus)
+    if (sort === 'trending') {
+      enrichedTrips = enrichedTrips.sort((a: any, b: any) => {
+        const ageA = (Date.now() - new Date(a.created_at).getTime()) / 3600000;
+        const ageB = (Date.now() - new Date(b.created_at).getTime()) / 3600000;
+        const scoreA = (a.likes_count * 3) + (100 / (ageA + 1));
+        const scoreB = (b.likes_count * 3) + (100 / (ageB + 1));
+        return scoreB - scoreA;
+      });
+    }
 
     return NextResponse.json({
       trips: enrichedTrips,

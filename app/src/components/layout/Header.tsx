@@ -3,10 +3,11 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, X, Compass, Map, PlusCircle, Users, Globe } from 'lucide-react';
+import { Menu, X, Compass, Map, PlusCircle, Users, Globe, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { UserMenu } from '@/components/auth/UserMenu';
+import { NotificationBell } from '@/components/notifications/NotificationBell';
 import { cn } from '@/lib/utils';
 
 const navLinks = [
@@ -15,6 +16,7 @@ const navLinks = [
   { href: '/globe', label: 'Globe', icon: Globe },
   { href: '/mes-voyages', label: 'Mes voyages', icon: Map },
   { href: '/community', label: 'Communauté', icon: Users },
+  { href: '/messages', label: 'Messages', icon: MessageCircle },
 ];
 
 export function Header() {
@@ -100,6 +102,7 @@ export function Header() {
 
             {/* Right side */}
             <div className="flex items-center gap-2">
+              <NotificationBell />
               <div className="hidden md:block">
                 <UserMenu />
               </div>

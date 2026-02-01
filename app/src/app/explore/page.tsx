@@ -11,6 +11,8 @@ import {
   Loader2,
   Globe,
   Users as UsersIcon,
+  Flame,
+  Clock,
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/components/auth';
@@ -19,6 +21,7 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { FollowButton } from '@/components/social/FollowButton';
+import { RecommendedUsers } from '@/components/social/RecommendedUsers';
 
 interface FeedTrip {
   id: string;
@@ -83,6 +86,7 @@ export default function ExplorePage() {
   const [hasMore, setHasMore] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [likingTripId, setLikingTripId] = useState<string | null>(null);
+  const [sortMode, setSortMode] = useState<'recent' | 'trending'>('recent');
   const containerRef = useRef<HTMLDivElement>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
@@ -96,6 +100,7 @@ export default function ExplorePage() {
         tab: feedTab,
         page: pageNum.toString(),
         limit: '10',
+        sort: sortMode,
       });
 
       const response = await fetch(`/api/feed?${params}`);
@@ -111,11 +116,11 @@ export default function ExplorePage() {
       setIsLoading(false);
       setIsLoadingMore(false);
     }
-  }, [feedTab]);
+  }, [feedTab, sortMode]);
 
   useEffect(() => {
     fetchFeed(1);
-  }, [feedTab, fetchFeed]);
+  }, [feedTab, sortMode, fetchFeed]);
 
   // Infinite scroll observer
   useEffect(() => {
@@ -162,7 +167,7 @@ export default function ExplorePage() {
   return (
     <div className="min-h-screen bg-black">
       {/* Top tabs - fixed */}
-      <div className="fixed top-16 left-0 right-0 z-50 flex justify-center gap-6 py-3 bg-gradient-to-b from-black/80 to-transparent">
+      <div className="fixed top-16 left-0 right-0 z-50 flex items-center justify-center gap-6 py-3 bg-gradient-to-b from-black/80 to-transparent">
         <button
           onClick={() => setFeedTab('discover')}
           className={cn(
@@ -185,6 +190,17 @@ export default function ExplorePage() {
             Abonnements
           </button>
         )}
+        <span className="text-white/20">|</span>
+        <button
+          onClick={() => setSortMode(sortMode === 'recent' ? 'trending' : 'recent')}
+          className="text-sm font-medium text-white/70 hover:text-white transition-all flex items-center gap-1"
+        >
+          {sortMode === 'trending' ? (
+            <><Flame className="h-4 w-4 text-orange-400" /> Tendances</>
+          ) : (
+            <><Clock className="h-4 w-4" /> Récents</>
+          )}
+        </button>
       </div>
 
       {/* Content */}
@@ -196,11 +212,14 @@ export default function ExplorePage() {
         <div className="flex flex-col items-center justify-center h-screen text-white gap-4">
           <MapPin className="h-16 w-16 text-white/30" />
           <p className="text-xl font-semibold">Aucun voyage</p>
-          <p className="text-white/50 text-center px-8">
+          <p className="text-white/50 text-center px-8 mb-8">
             {feedTab === 'following'
               ? 'Suis des voyageurs pour voir leurs aventures ici'
               : 'Aucun voyage public pour le moment'}
           </p>
+          <div className="px-4">
+            <RecommendedUsers />
+          </div>
         </div>
       ) : (
         <div ref={containerRef} className="snap-y snap-mandatory h-[calc(100vh-4rem)] overflow-y-scroll">
