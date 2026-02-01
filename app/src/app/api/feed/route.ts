@@ -57,11 +57,7 @@ export async function GET(request: Request) {
       // Fetch trips from followed users (use service client to bypass RLS)
       let followingQuery = serviceClient
         .from('trips')
-        .select(`
-          id, title, name, destination, start_date, end_date, duration_days,
-          visibility, created_at, preferences, data, owner_id,
-          owner:owner_id (id, display_name, avatar_url, username)
-        `)
+        .select('id, title, name, destination, start_date, end_date, duration_days, visibility, created_at, preferences, data, owner_id')
         .in('owner_id', followingIds)
         .in('visibility', ['public', 'friends'])
         .order('created_at', { ascending: false });
@@ -73,15 +69,32 @@ export async function GET(request: Request) {
       followingQuery = followingQuery.range(offset, offset + limit - 1);
       const { data: trips, error } = await followingQuery;
 
-      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      if (error) {
+        console.error('Feed following error:', error);
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
 
-      // Filter: show 'friends' trips to followers (we follow them, so we see their 'friends' trips)
+      // Fetch owner profiles separately
+      const fOwnerIds = [...new Set(trips?.map((t: any) => t.owner_id).filter(Boolean) || [])];
+      let fOwnerMap: Record<string, any> = {};
+      if (fOwnerIds.length > 0) {
+        const { data: profiles } = await serviceClient
+          .from('profiles')
+          .select('id, display_name, avatar_url, username')
+          .in('id', fOwnerIds);
+        profiles?.forEach((p: any) => { fOwnerMap[p.id] = p; });
+      }
+
+      // Filter: show 'friends' trips to followers
       const followingIdSet = new Set(followingIds);
       const filteredTrips = trips?.filter((trip: any) => {
         if (trip.visibility === 'public') return true;
         if (trip.visibility === 'friends' && followingIdSet.has(trip.owner_id)) return true;
         return false;
-      }) || [];
+      }).map((t: any) => ({
+        ...t,
+        owner: fOwnerMap[t.owner_id] || { id: t.owner_id, display_name: null, avatar_url: null, username: null },
+      })) || [];
 
       // Get like counts and user likes
       const tripIds = filteredTrips.map(t => t.id);
@@ -100,7 +113,7 @@ export async function GET(request: Request) {
         ...trip,
         likes_count: likeCounts[trip.id] || 0,
         user_liked: userLikedSet.has(trip.id),
-        is_following: true, // We are in 'following' tab, so always true
+        is_following: true,
       }));
 
       return NextResponse.json({
@@ -112,11 +125,7 @@ export async function GET(request: Request) {
     // Discover tab - all public trips (exclude own trips, use service client to bypass RLS)
     let discoverQuery = serviceClient
       .from('trips')
-      .select(`
-        id, title, name, destination, start_date, end_date, duration_days,
-        visibility, created_at, preferences, owner_id,
-        owner:owner_id (id, display_name, avatar_url, username)
-      `)
+      .select('id, title, name, destination, start_date, end_date, duration_days, visibility, created_at, preferences, owner_id')
       .eq('visibility', 'public')
       .order('created_at', { ascending: false });
 
@@ -128,10 +137,29 @@ export async function GET(request: Request) {
     discoverQuery = discoverQuery.range(offset, offset + limit - 1);
     const { data: trips, error } = await discoverQuery;
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) {
+      console.error('Feed discover error:', error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    // Fetch owner profiles separately
+    const ownerIds = [...new Set(trips?.map((t: any) => t.owner_id).filter(Boolean) || [])];
+    let ownerMap: Record<string, any> = {};
+    if (ownerIds.length > 0) {
+      const { data: profiles } = await serviceClient
+        .from('profiles')
+        .select('id, display_name, avatar_url, username')
+        .in('id', ownerIds);
+      profiles?.forEach((p: any) => { ownerMap[p.id] = p; });
+    }
+
+    const tripsWithOwner = trips?.map((t: any) => ({
+      ...t,
+      owner: ownerMap[t.owner_id] || { id: t.owner_id, display_name: null, avatar_url: null, username: null },
+    })) || [];
 
     // Get like counts
-    const tripIds = trips?.map(t => t.id) || [];
+    const tripIds = tripsWithOwner.map(t => t.id);
     const { data: likes } = tripIds.length > 0
       ? await serviceClient.from('trip_likes').select('trip_id').in('trip_id', tripIds)
       : { data: [] };
@@ -149,8 +177,6 @@ export async function GET(request: Request) {
         .eq('user_id', user.id);
       userLikedSet = new Set(userLikes?.map(l => l.trip_id) || []);
 
-      // Get follow status for trip owners
-      const ownerIds = [...new Set(trips?.map((t: any) => t.owner_id).filter(Boolean) || [])];
       if (ownerIds.length > 0) {
         const { data: follows } = await serviceClient
           .from('follows')
@@ -161,16 +187,16 @@ export async function GET(request: Request) {
       }
     }
 
-    const enrichedTrips = trips?.map((trip: any) => ({
+    const enrichedTrips = tripsWithOwner.map((trip: any) => ({
       ...trip,
       likes_count: likeCounts[trip.id] || 0,
       user_liked: userLikedSet.has(trip.id),
       is_following: followingSet.has(trip.owner_id),
-    })) || [];
+    }));
 
     return NextResponse.json({
       trips: enrichedTrips,
-      hasMore: (trips?.length || 0) >= limit,
+      hasMore: tripsWithOwner.length >= limit,
     });
   } catch (error) {
     console.error('Feed error:', error);
