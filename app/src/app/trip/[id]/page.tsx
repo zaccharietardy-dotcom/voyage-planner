@@ -42,6 +42,7 @@ import { ExpensesPanel } from '@/components/trip/expenses/ExpensesPanel';
 import { TravelTips } from '@/components/trip/TravelTips';
 import { PhotoGallery } from '@/components/photos/PhotoGallery';
 import { PhotoUploader } from '@/components/photos/PhotoUploader';
+import { PastTripView } from '@/components/trip/PastTripView';
 import { ProposedChange, createMoveActivityChange } from '@/lib/types/collaboration';
 import { cn } from '@/lib/utils';
 import {
@@ -153,6 +154,9 @@ export default function TripPage() {
   const [localTrip, setLocalTrip] = useState<Trip | null>(null);
   const [localLoading, setLocalLoading] = useState(true);
 
+  // DB-level trip row (for past trips detection and metadata)
+  const [dbTrip, setDbTrip] = useState<any>(null);
+
   // Hook pour le mode collaboratif
   const {
     trip: collaborativeTrip,
@@ -233,21 +237,26 @@ export default function TripPage() {
     fetch(`/api/trips/${tripId}`)
       .then(r => r.ok ? r.json() : null)
       .then(data => {
-        if (data?.data) {
-          const tripData = data.data;
-          if (tripData.createdAt) tripData.createdAt = new Date(tripData.createdAt);
-          if (tripData.updatedAt) tripData.updatedAt = new Date(tripData.updatedAt);
-          if (tripData.preferences?.startDate) tripData.preferences.startDate = new Date(tripData.preferences.startDate);
-          if (tripData.days) {
-            tripData.days = tripData.days.map((day: TripDay) => ({
-              ...day,
-              date: day.date ? new Date(day.date) : new Date(),
-            }));
+        if (data) {
+          // Store DB-level trip for past trip detection
+          setDbTrip(data);
+
+          if (data.data && Object.keys(data.data).length > 0) {
+            const tripData = data.data;
+            if (tripData.createdAt) tripData.createdAt = new Date(tripData.createdAt);
+            if (tripData.updatedAt) tripData.updatedAt = new Date(tripData.updatedAt);
+            if (tripData.preferences?.startDate) tripData.preferences.startDate = new Date(tripData.preferences.startDate);
+            if (tripData.days) {
+              tripData.days = tripData.days.map((day: TripDay) => ({
+                ...day,
+                date: day.date ? new Date(day.date) : new Date(),
+              }));
+            }
+            tripData.id = tripId;
+            setLocalTrip(tripData);
+            // Also cache in localStorage for next time
+            localStorage.setItem('currentTrip', JSON.stringify(tripData));
           }
-          tripData.id = tripId;
-          setLocalTrip(tripData);
-          // Also cache in localStorage for next time
-          localStorage.setItem('currentTrip', JSON.stringify(tripData));
         }
       })
       .catch(e => console.error('Error fetching trip from API:', e))
@@ -544,6 +553,28 @@ export default function TripPage() {
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />
       </div>
+    );
+  }
+
+  if (!trip && !dbTrip) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
+        <p className="text-muted-foreground">Voyage non trouvé</p>
+        <Button onClick={() => router.push('/plan')}>
+          Créer un nouveau voyage
+        </Button>
+      </div>
+    );
+  }
+
+  // Past trip: show simplified photo-focused view
+  const isPastTrip = dbTrip?.preferences?.tripType === 'past' || (collaborativeTrip?.data?.preferences as any)?.tripType === 'past';
+  if (isPastTrip && dbTrip) {
+    return (
+      <PastTripView
+        trip={dbTrip}
+        isOwner={isOwner || dbTrip.owner_id === user?.id}
+      />
     );
   }
 

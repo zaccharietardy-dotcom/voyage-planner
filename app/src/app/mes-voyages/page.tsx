@@ -13,7 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Plus, MapPin, Calendar, Users, Plane, Loader2, Globe, Lock, Users2, ChevronDown } from 'lucide-react';
+import { Plus, MapPin, Calendar, Users, Plane, Loader2, Globe, Lock, Users2, ChevronDown, Camera } from 'lucide-react';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -127,12 +127,20 @@ export default function MesVoyagesPage() {
               Retrouvez tous vos voyages planifiés
             </p>
           </div>
-          <Button asChild>
-            <Link href="/plan">
-              <Plus className="h-4 w-4 mr-2" />
-              Nouveau voyage
-            </Link>
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" asChild>
+              <Link href="/journal/new">
+                <Camera className="h-4 w-4 mr-2" />
+                Voyage passé
+              </Link>
+            </Button>
+            <Button asChild>
+              <Link href="/plan">
+                <Plus className="h-4 w-4 mr-2" />
+                Nouveau voyage
+              </Link>
+            </Button>
+          </div>
         </div>
 
         {isLoading ? (
@@ -170,6 +178,7 @@ export default function MesVoyagesPage() {
             {trips.map((trip) => {
               const tripData = trip.data as Record<string, unknown>;
               const prefs = (trip.preferences || tripData?.preferences || {}) as Record<string, unknown>;
+              const isPastTrip = prefs.tripType === 'past';
               const visibility = (trip as Trip & { visibility?: TripVisibility }).visibility || 'private';
               const visibilityOption = VISIBILITY_OPTIONS.find(o => o.value === visibility) || VISIBILITY_OPTIONS[2];
 
@@ -178,9 +187,17 @@ export default function MesVoyagesPage() {
                   <CardHeader className="pb-2">
                     <div className="flex items-start justify-between">
                       <Link href={`/trip/${trip.id}`} className="flex-1">
-                        <CardTitle className="text-lg hover:text-primary transition-colors">
-                          {trip.title}
-                        </CardTitle>
+                        <div className="flex items-center gap-2">
+                          <CardTitle className="text-lg hover:text-primary transition-colors">
+                            {trip.title}
+                          </CardTitle>
+                          {isPastTrip && (
+                            <Badge variant="secondary" className="text-xs">
+                              <Camera className="h-3 w-3 mr-1" />
+                              Journal
+                            </Badge>
+                          )}
+                        </div>
                         <CardDescription className="flex items-center gap-1">
                           <MapPin className="h-3 w-3" />
                           {trip.destination}
@@ -228,13 +245,13 @@ export default function MesVoyagesPage() {
                         <span>
                           {trip.duration_days} jour{trip.duration_days > 1 ? 's' : ''}
                         </span>
-                        {prefs.groupSize ? (
+                        {!isPastTrip && prefs.groupSize ? (
                           <span className="flex items-center gap-1">
                             <Users className="h-4 w-4" />
                             {String(prefs.groupSize)} pers.
                           </span>
                         ) : null}
-                        {prefs.budgetLevel ? (
+                        {!isPastTrip && prefs.budgetLevel ? (
                           <Badge variant="outline" className="ml-auto">
                             {prefs.budgetLevel === 'budget' ? 'Économique' : prefs.budgetLevel === 'moderate' ? 'Modéré' : prefs.budgetLevel === 'comfort' ? 'Confort' : 'Luxe'}
                           </Badge>
