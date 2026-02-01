@@ -98,7 +98,7 @@ export default function CommunityPage() {
 
   const copyInviteLink = () => {
     if (!user) return;
-    const link = `${window.location.origin}/user/${user.id}`;
+    const link = `${window.location.origin}/invite/${user.id}`;
     navigator.clipboard.writeText(link);
     toast.success('Lien d\'invitation copié !');
   };
