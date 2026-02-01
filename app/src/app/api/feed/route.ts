@@ -85,6 +85,23 @@ export async function GET(request: Request) {
         profiles?.forEach((p: any) => { fOwnerMap[p.id] = p; });
       }
 
+      // Fetch first photo for each trip (cover image)
+      let fPhotoMap: Record<string, string> = {};
+      const fAllTripIds = trips?.map((t: any) => t.id) || [];
+      if (fAllTripIds.length > 0) {
+        const { data: photos } = await serviceClient
+          .from('trip_photos')
+          .select('trip_id, storage_path')
+          .in('trip_id', fAllTripIds)
+          .order('created_at', { ascending: true });
+        photos?.forEach((p: any) => {
+          if (!fPhotoMap[p.trip_id] && p.storage_path) {
+            const { data: urlData } = serviceClient.storage.from('trip-photos').getPublicUrl(p.storage_path);
+            fPhotoMap[p.trip_id] = urlData?.publicUrl || '';
+          }
+        });
+      }
+
       // Filter: show 'friends' trips to followers
       const followingIdSet = new Set(followingIds);
       const filteredTrips = trips?.filter((trip: any) => {
@@ -94,6 +111,7 @@ export async function GET(request: Request) {
       }).map((t: any) => ({
         ...t,
         owner: fOwnerMap[t.owner_id] || { id: t.owner_id, display_name: null, avatar_url: null, username: null },
+        cover_url: fPhotoMap[t.id] || null,
       })) || [];
 
       // Get like counts and user likes
@@ -153,9 +171,28 @@ export async function GET(request: Request) {
       profiles?.forEach((p: any) => { ownerMap[p.id] = p; });
     }
 
+    // Fetch first photo for each trip (cover image)
+    let photoMap: Record<string, string> = {};
+    const allTripIds = trips?.map((t: any) => t.id) || [];
+    if (allTripIds.length > 0) {
+      const { data: photos } = await serviceClient
+        .from('trip_photos')
+        .select('trip_id, storage_path')
+        .in('trip_id', allTripIds)
+        .order('created_at', { ascending: true });
+      // Keep only the first photo per trip
+      photos?.forEach((p: any) => {
+        if (!photoMap[p.trip_id] && p.storage_path) {
+          const { data: urlData } = serviceClient.storage.from('trip-photos').getPublicUrl(p.storage_path);
+          photoMap[p.trip_id] = urlData?.publicUrl || '';
+        }
+      });
+    }
+
     const tripsWithOwner = trips?.map((t: any) => ({
       ...t,
       owner: ownerMap[t.owner_id] || { id: t.owner_id, display_name: null, avatar_url: null, username: null },
+      cover_url: photoMap[t.id] || null,
     })) || [];
 
     // Get like counts
