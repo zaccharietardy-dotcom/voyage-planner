@@ -26,10 +26,9 @@ interface GlobeTrip {
   title: string;
   destination: string;
   ownerId: string;
-  isOwn: boolean;
   owner?: { display_name: string; avatar_url: string; username: string };
   points: { lat: number; lng: number; name: string; type: string }[];
-  photos: any[];
+  cover_url: string | null;
 }
 
 export default function GlobePage() {
@@ -84,6 +83,7 @@ export default function GlobePage() {
           rating: 0,
           itinerary: [],
           isOnline: false,
+          imageUrl: trip.cover_url || undefined,
         });
 
         // Create arcs between consecutive points
@@ -159,21 +159,28 @@ export default function GlobePage() {
           <div className="absolute bottom-6 left-4 right-4 z-10">
             <button
               onClick={() => router.push(`/trip/${selectedTrip.id}`)}
-              className="w-full bg-background/95 backdrop-blur-xl rounded-xl border shadow-lg p-4 text-left hover:bg-accent transition-colors"
+              className="w-full bg-background/95 backdrop-blur-xl rounded-xl border shadow-lg p-3 text-left hover:bg-accent transition-colors flex gap-3 items-center"
             >
-              <h3 className="font-semibold text-base mb-1">
-                {selectedTrip.title || selectedTrip.destination}
-              </h3>
-              <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                <span className="flex items-center gap-1">
-                  <MapPin className="h-3.5 w-3.5" />
-                  {selectedTrip.destination}
-                </span>
-                {selectedTrip.isOwn ? (
-                  <span className="text-primary text-xs font-medium">Mon voyage</span>
-                ) : selectedTrip.owner?.display_name ? (
-                  <span className="text-xs">par {selectedTrip.owner.display_name}</span>
-                ) : null}
+              {selectedTrip.cover_url && (
+                <img
+                  src={selectedTrip.cover_url}
+                  alt={selectedTrip.destination}
+                  className="w-16 h-16 rounded-lg object-cover shrink-0"
+                />
+              )}
+              <div className="min-w-0">
+                <h3 className="font-semibold text-base mb-1 truncate">
+                  {selectedTrip.title || selectedTrip.destination}
+                </h3>
+                <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    <MapPin className="h-3.5 w-3.5" />
+                    {selectedTrip.destination}
+                  </span>
+                  {selectedTrip.owner?.display_name && (
+                    <span className="text-xs">par {selectedTrip.owner.display_name}</span>
+                  )}
+                </div>
               </div>
             </button>
           </div>

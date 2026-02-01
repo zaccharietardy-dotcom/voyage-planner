@@ -16,6 +16,7 @@ export interface Traveler {
   rating: number;
   itinerary: string[];
   isOnline?: boolean;
+  imageUrl?: string;
 }
 
 export interface TripArc {

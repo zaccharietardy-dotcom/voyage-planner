@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Traveler, TripArc } from '@/lib/v2/mockData';
 import { colors } from '@/lib/v2/theme';
 
-// Create a marker icon using canvas
+// Create a simple dot marker (fallback when no image)
 function createMarkerCanvas(Cesium: any, isSelected: boolean, isOnline: boolean): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
   const size = 48;
@@ -16,7 +16,7 @@ function createMarkerCanvas(Cesium: any, isSelected: boolean, isOnline: boolean)
   const centerY = size / 2;
   const radius = isSelected ? 10 : 8;
 
-  // Outer glow for online users
+  // Outer glow
   if (isOnline) {
     const gradient = ctx.createRadialGradient(centerX, centerY, radius, centerX, centerY, radius + 8);
     gradient.addColorStop(0, 'rgba(251, 191, 36, 0.4)');
@@ -46,6 +46,75 @@ function createMarkerCanvas(Cesium: any, isSelected: boolean, isOnline: boolean)
   ctx.fill();
 
   return canvas;
+}
+
+// Create an image marker (circular photo with white border)
+function createImageMarkerCanvas(img: HTMLImageElement, isSelected: boolean): HTMLCanvasElement {
+  const canvas = document.createElement('canvas');
+  const size = 64;
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d')!;
+
+  const centerX = size / 2;
+  const centerY = size / 2;
+  const radius = isSelected ? 26 : 22;
+  const borderWidth = 3;
+
+  // Shadow/glow
+  ctx.shadowColor = isSelected ? 'rgba(99, 102, 241, 0.6)' : 'rgba(0, 0, 0, 0.5)';
+  ctx.shadowBlur = 8;
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, radius + borderWidth, 0, Math.PI * 2);
+  ctx.fillStyle = '#ffffff';
+  ctx.fill();
+  ctx.shadowBlur = 0;
+
+  // White border
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, radius + borderWidth, 0, Math.PI * 2);
+  ctx.fillStyle = isSelected ? '#6366f1' : '#ffffff';
+  ctx.fill();
+
+  // Clip circle for image
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+  ctx.clip();
+
+  // Draw image (cover fill)
+  const imgRatio = img.width / img.height;
+  let drawW = size, drawH = size, drawX = 0, drawY = 0;
+  if (imgRatio > 1) {
+    drawH = size;
+    drawW = size * imgRatio;
+    drawX = -(drawW - size) / 2;
+  } else {
+    drawW = size;
+    drawH = size / imgRatio;
+    drawY = -(drawH - size) / 2;
+  }
+  ctx.drawImage(img, drawX, drawY, drawW, drawH);
+  ctx.restore();
+
+  return canvas;
+}
+
+// Cache for loaded images
+const imageCache = new Map<string, HTMLImageElement>();
+
+function loadImage(url: string): Promise<HTMLImageElement> {
+  if (imageCache.has(url)) return Promise.resolve(imageCache.get(url)!);
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      imageCache.set(url, img);
+      resolve(img);
+    };
+    img.onerror = reject;
+    img.src = url;
+  });
 }
 
 // Major world cities for labels
@@ -281,12 +350,10 @@ export function CesiumGlobe({
     });
     markersRef.current.clear();
 
-    // Add markers for each traveler
-    travelers.forEach((traveler) => {
+    // Add markers for each traveler (with image if available)
+    const addMarker = (traveler: Traveler, markerImage: HTMLCanvasElement) => {
       const isSelected = selectedTraveler?.id === traveler.id;
-      const color = isSelected
-        ? Cesium.Color.fromCssColorString(colors.accentPrimary)
-        : Cesium.Color.fromCssColorString(colors.markerColor);
+      const hasImage = !!traveler.imageUrl;
 
       const entity = viewer.entities.add({
         id: `traveler-${traveler.id}`,
@@ -296,8 +363,8 @@ export function CesiumGlobe({
           100
         ),
         billboard: {
-          image: createMarkerCanvas(Cesium, isSelected, traveler.isOnline ?? false),
-          scale: isSelected ? 0.6 : 0.5,
+          image: markerImage,
+          scale: hasImage ? (isSelected ? 0.9 : 0.75) : (isSelected ? 0.6 : 0.5),
           verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
           heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND,
           disableDepthTestDistance: Number.POSITIVE_INFINITY,
@@ -310,7 +377,7 @@ export function CesiumGlobe({
           outlineWidth: 3,
           style: Cesium.LabelStyle.FILL_AND_OUTLINE,
           verticalOrigin: Cesium.VerticalOrigin.TOP,
-          pixelOffset: new Cesium.Cartesian2(0, 4),
+          pixelOffset: new Cesium.Cartesian2(0, hasImage ? 8 : 4),
           distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0, 3000000),
           heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND,
           disableDepthTestDistance: Number.POSITIVE_INFINITY,
@@ -321,6 +388,21 @@ export function CesiumGlobe({
       });
 
       markersRef.current.set(traveler.id, entity);
+    };
+
+    travelers.forEach((traveler) => {
+      const isSelected = selectedTraveler?.id === traveler.id;
+
+      if (traveler.imageUrl) {
+        // Try to load image, fallback to dot marker
+        loadImage(traveler.imageUrl).then((img) => {
+          addMarker(traveler, createImageMarkerCanvas(img, isSelected));
+        }).catch(() => {
+          addMarker(traveler, createMarkerCanvas(Cesium, isSelected, traveler.isOnline ?? false));
+        });
+      } else {
+        addMarker(traveler, createMarkerCanvas(Cesium, isSelected, traveler.isOnline ?? false));
+      }
     });
 
     // Click handler for markers
