@@ -181,7 +181,7 @@ export async function PATCH(
     if (updates.title !== undefined) updateObj.title = updates.title;
 
     // Mettre à jour le voyage
-    const { data: trip, error } = await supabase
+    const { data: updatedTrip, error } = await supabase
       .from('trips')
       .update(updateObj)
       .eq('id', id)
@@ -200,7 +200,7 @@ export async function PATCH(
       details: { updatedFields: Object.keys(updates) },
     });
 
-    return NextResponse.json(trip);
+    return NextResponse.json(updatedTrip);
   } catch (error) {
     console.error('Error updating trip:', error);
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
