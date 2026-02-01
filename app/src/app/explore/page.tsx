@@ -54,6 +54,7 @@ interface FeedTrip {
   };
   likes_count: number;
   user_liked: boolean;
+  is_following?: boolean;
   comments_count?: number;
 }
 
@@ -301,7 +302,7 @@ export default function ExplorePage() {
                         {user && trip.owner?.id !== user.id && (
                           <FollowButton
                             userId={trip.owner?.id}
-                            initialIsFollowing={false}
+                            initialIsFollowing={trip.is_following || false}
                             initialIsCloseFriend={false}
                             size="sm"
                           />

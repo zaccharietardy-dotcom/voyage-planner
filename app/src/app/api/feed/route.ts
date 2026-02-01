@@ -55,10 +55,11 @@ export async function GET(request: Request) {
 
       if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-      // Filter: show 'friends' trips only if close friend
+      // Filter: show 'friends' trips to followers (we follow them, so we see their 'friends' trips)
+      const followingIdSet = new Set(followingIds);
       const filteredTrips = trips?.filter((trip: any) => {
         if (trip.visibility === 'public') return true;
-        if (trip.visibility === 'friends' && closeFriendIds.has(trip.owner_id)) return true;
+        if (trip.visibility === 'friends' && followingIdSet.has(trip.owner_id)) return true;
         return false;
       }) || [];
 
@@ -79,6 +80,7 @@ export async function GET(request: Request) {
         ...trip,
         likes_count: likeCounts[trip.id] || 0,
         user_liked: userLikedSet.has(trip.id),
+        is_following: true, // We are in 'following' tab, so always true
       }));
 
       return NextResponse.json({
@@ -111,6 +113,7 @@ export async function GET(request: Request) {
     likes?.forEach(l => { likeCounts[l.trip_id] = (likeCounts[l.trip_id] || 0) + 1; });
 
     let userLikedSet = new Set<string>();
+    let followingSet = new Set<string>();
     if (user && tripIds.length > 0) {
       const { data: userLikes } = await supabase
         .from('trip_likes')
@@ -118,12 +121,24 @@ export async function GET(request: Request) {
         .in('trip_id', tripIds)
         .eq('user_id', user.id);
       userLikedSet = new Set(userLikes?.map(l => l.trip_id) || []);
+
+      // Get follow status for trip owners
+      const ownerIds = [...new Set(trips?.map((t: any) => t.owner_id).filter(Boolean) || [])];
+      if (ownerIds.length > 0) {
+        const { data: follows } = await supabase
+          .from('follows')
+          .select('following_id')
+          .eq('follower_id', user.id)
+          .in('following_id', ownerIds);
+        followingSet = new Set(follows?.map(f => f.following_id) || []);
+      }
     }
 
-    const enrichedTrips = trips?.map(trip => ({
+    const enrichedTrips = trips?.map((trip: any) => ({
       ...trip,
       likes_count: likeCounts[trip.id] || 0,
       user_liked: userLikedSet.has(trip.id),
+      is_following: followingSet.has(trip.owner_id),
     })) || [];
 
     return NextResponse.json({
