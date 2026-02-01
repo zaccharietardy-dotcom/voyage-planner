@@ -59,6 +59,8 @@ export function CalendarActivityBlock({
   const slotHeightRef = useRef(slotHeight);
   const rowStartRef = useRef(rowStart);
   const rowSpanRef = useRef(rowSpan);
+  // Flag to suppress onClick after a resize (survives across React batches)
+  const didDragRef = useRef(false);
 
   const handleResizeStart = useCallback(
     (edge: 'top' | 'bottom', e: React.MouseEvent) => {
@@ -67,6 +69,7 @@ export function CalendarActivityBlock({
       e.stopPropagation();
 
       // Snapshot everything at drag start
+      didDragRef.current = true;
       dragItemRef.current = item;
       startYRef.current = e.clientY;
       slotHeightRef.current = slotHeight;
@@ -88,14 +91,13 @@ export function CalendarActivityBlock({
         const deltaSlots = Math.round(dy / slotHeightRef.current);
         const snap = dragItemRef.current;
 
-        // Compute final item
+        // Compute final item - always set startTime, endTime, duration consistently
         if (edge === 'bottom') {
           const newSpan = Math.max(1, rowSpanRef.current + deltaSlots);
           const newDuration = newSpan * 15;
-          const newEndTime = formatTime(parseMinutes(snap.startTime) + newDuration);
-          if (newDuration !== snap.duration) {
-            onUpdate?.({ ...snap, duration: newDuration, endTime: newEndTime });
-          }
+          const startMin = parseMinutes(snap.startTime);
+          const newEndTime = formatTime(startMin + newDuration);
+          onUpdate?.({ ...snap, duration: newDuration, endTime: newEndTime });
         } else {
           const newRowStart = Math.max(1, rowStartRef.current + deltaSlots);
           const newStartMinutes = (newRowStart - 1) * 15;
@@ -105,6 +107,7 @@ export function CalendarActivityBlock({
             onUpdate?.({
               ...snap,
               startTime: formatTime(newStartMinutes),
+              endTime: snap.endTime, // keep endTime, adjust startTime
               duration: newDuration,
             });
           }
@@ -112,6 +115,7 @@ export function CalendarActivityBlock({
 
         setDragState(null);
         onInteraction?.();
+        requestAnimationFrame(() => { didDragRef.current = false; });
       };
 
       window.addEventListener('mousemove', handleMouseMove);
@@ -128,6 +132,7 @@ export function CalendarActivityBlock({
       e.stopPropagation();
 
       const touch = e.touches[0];
+      didDragRef.current = true;
       dragItemRef.current = item;
       startYRef.current = touch.clientY;
       slotHeightRef.current = slotHeight;
@@ -155,10 +160,9 @@ export function CalendarActivityBlock({
         if (edge === 'bottom') {
           const newSpan = Math.max(1, rowSpanRef.current + deltaSlots);
           const newDuration = newSpan * 15;
-          const newEndTime = formatTime(parseMinutes(snap.startTime) + newDuration);
-          if (newDuration !== snap.duration) {
-            onUpdate?.({ ...snap, duration: newDuration, endTime: newEndTime });
-          }
+          const startMin = parseMinutes(snap.startTime);
+          const newEndTime = formatTime(startMin + newDuration);
+          onUpdate?.({ ...snap, duration: newDuration, endTime: newEndTime });
         } else {
           const newRowStart = Math.max(1, rowStartRef.current + deltaSlots);
           const newStartMinutes = (newRowStart - 1) * 15;
@@ -168,6 +172,7 @@ export function CalendarActivityBlock({
             onUpdate?.({
               ...snap,
               startTime: formatTime(newStartMinutes),
+              endTime: snap.endTime,
               duration: newDuration,
             });
           }
@@ -175,6 +180,7 @@ export function CalendarActivityBlock({
 
         setDragState(null);
         onInteraction?.();
+        requestAnimationFrame(() => { didDragRef.current = false; });
       };
 
       window.addEventListener('touchmove', handleTouchMove, { passive: false });
@@ -232,7 +238,7 @@ export function CalendarActivityBlock({
       onClick={(e) => {
         e.stopPropagation();
         onInteraction?.();
-        if (!dragState) {
+        if (!didDragRef.current) {
           onClick?.();
         }
       }}
