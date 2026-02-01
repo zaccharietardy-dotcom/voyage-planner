@@ -190,25 +190,54 @@ export default function TripPage() {
   const isOwner = userRole === 'owner';
   const canEdit = userRole === 'owner' || userRole === 'editor';
 
-  // Charger le trip depuis localStorage
+  // Charger le trip depuis localStorage ou API
   useEffect(() => {
     const stored = localStorage.getItem('currentTrip');
     if (stored) {
-      const parsed = JSON.parse(stored);
-      if (parsed.id === tripId) {
-        parsed.createdAt = new Date(parsed.createdAt);
-        parsed.updatedAt = new Date(parsed.updatedAt);
-        parsed.preferences.startDate = new Date(parsed.preferences.startDate);
-        parsed.days = parsed.days.map((day: TripDay) => ({
-          ...day,
-          date: new Date(day.date),
-        }));
-        setLocalTrip(parsed);
-        setOriginalTransportId(parsed.selectedTransport?.id);
-        setSelectedHotelId(parsed.accommodation?.id);
+      try {
+        const parsed = JSON.parse(stored);
+        if (parsed.id === tripId) {
+          parsed.createdAt = new Date(parsed.createdAt);
+          parsed.updatedAt = new Date(parsed.updatedAt);
+          parsed.preferences.startDate = new Date(parsed.preferences.startDate);
+          parsed.days = parsed.days.map((day: TripDay) => ({
+            ...day,
+            date: new Date(day.date),
+          }));
+          setLocalTrip(parsed);
+          setOriginalTransportId(parsed.selectedTransport?.id);
+          setSelectedHotelId(parsed.accommodation?.id);
+          setLocalLoading(false);
+          return;
+        }
+      } catch (e) {
+        console.error('Error parsing localStorage trip:', e);
       }
     }
-    setLocalLoading(false);
+
+    // Fallback: fetch from API if not in localStorage
+    fetch(`/api/trips/${tripId}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data?.data) {
+          const tripData = data.data;
+          if (tripData.createdAt) tripData.createdAt = new Date(tripData.createdAt);
+          if (tripData.updatedAt) tripData.updatedAt = new Date(tripData.updatedAt);
+          if (tripData.preferences?.startDate) tripData.preferences.startDate = new Date(tripData.preferences.startDate);
+          if (tripData.days) {
+            tripData.days = tripData.days.map((day: TripDay) => ({
+              ...day,
+              date: day.date ? new Date(day.date) : new Date(),
+            }));
+          }
+          tripData.id = tripId;
+          setLocalTrip(tripData);
+          // Also cache in localStorage for next time
+          localStorage.setItem('currentTrip', JSON.stringify(tripData));
+        }
+      })
+      .catch(e => console.error('Error fetching trip from API:', e))
+      .finally(() => setLocalLoading(false));
   }, [tripId]);
 
   // Vérifier si on peut utiliser le mode collaboratif

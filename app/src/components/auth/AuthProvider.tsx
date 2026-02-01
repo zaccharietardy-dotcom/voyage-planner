@@ -76,10 +76,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    // Short timeout fallback (500ms instead of 3s)
+    // Timeout fallback - give enough time for session restore
     const timeout = setTimeout(() => {
       setIsLoading(false);
-    }, 500);
+    }, 3000);
 
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
