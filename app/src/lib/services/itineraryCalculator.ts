@@ -104,9 +104,10 @@ function calculateDistance(
 /**
  * Parse une heure au format "HH:MM" en minutes depuis minuit
  */
-function parseTime(time: string): number {
+function parseTime(time: string | undefined | null): number {
+  if (!time || typeof time !== 'string') return 9 * 60; // default 09:00
   const [hours, minutes] = time.split(':').map(Number);
-  return hours * 60 + (minutes || 0);
+  return (isNaN(hours) ? 9 : hours) * 60 + (isNaN(minutes!) ? 0 : minutes!);
 }
 
 /**

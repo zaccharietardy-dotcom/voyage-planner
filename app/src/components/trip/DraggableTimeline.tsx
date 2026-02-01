@@ -90,7 +90,7 @@ function DroppableDay({
             </Badge>
             {day.date && (
               <Badge variant="outline" className="text-xs">
-                {format(new Date(day.date), 'EEE d MMM', { locale: fr })}
+                {day.date ? format(new Date(day.date), 'EEE d MMM', { locale: fr }) : ''}
               </Badge>
             )}
           </div>
@@ -174,42 +174,47 @@ export function DraggableTimeline({
 
       if (!over || active.id === over.id) return;
 
-      const activeFound = findItemById(localDays, active.id as string);
-      const overPosition = findDropPosition(localDays, over.id as string);
+      try {
+        const activeFound = findItemById(localDays, active.id as string);
+        const overPosition = findDropPosition(localDays, over.id as string);
 
-      if (!activeFound || !overPosition) return;
+        if (!activeFound || !overPosition) return;
 
-      const { dayIndex: fromDayIndex, itemIndex: fromItemIndex, item } = activeFound;
-      const { dayIndex: toDayIndex, itemIndex: toItemIndex } = overPosition;
+        const { dayIndex: fromDayIndex, itemIndex: fromItemIndex, item } = activeFound;
+        const { dayIndex: toDayIndex, itemIndex: toItemIndex } = overPosition;
 
-      // Déplacer l'item
-      const newDays = moveItem(
-        localDays,
-        fromDayIndex,
-        fromItemIndex,
-        toDayIndex,
-        toItemIndex
-      );
-
-      // Recalculer les horaires
-      const recalculatedDays = recalculateTimes(newDays);
-
-      // Si owner, appliquer directement
-      if (isOwner && onDirectUpdate) {
-        onDirectUpdate(recalculatedDays);
-        setLocalDays(recalculatedDays);
-      }
-      // Sinon, créer une proposition
-      else if (onProposalCreate) {
-        const change = createMoveActivityChange(
-          fromDayIndex + 1,
-          toDayIndex + 1,
+        // Déplacer l'item
+        const newDays = moveItem(
+          localDays,
+          fromDayIndex,
           fromItemIndex,
-          toItemIndex,
-          item.title
+          toDayIndex,
+          toItemIndex
         );
-        onProposalCreate(change);
-        // Revenir à l'état initial
+
+        // Recalculer les horaires
+        const recalculatedDays = recalculateTimes(newDays);
+
+        // Si owner, appliquer directement
+        if (isOwner && onDirectUpdate) {
+          onDirectUpdate(recalculatedDays);
+          setLocalDays(recalculatedDays);
+        }
+        // Sinon, créer une proposition
+        else if (onProposalCreate) {
+          const change = createMoveActivityChange(
+            fromDayIndex + 1,
+            toDayIndex + 1,
+            fromItemIndex,
+            toItemIndex,
+            item.title
+          );
+          onProposalCreate(change);
+          // Revenir à l'état initial
+          setLocalDays(filteredDays);
+        }
+      } catch (err) {
+        console.error('Drag-and-drop error:', err);
         setLocalDays(filteredDays);
       }
     },
