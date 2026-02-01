@@ -49,6 +49,20 @@ export function useRealtimeTrip(tripId: string, userId?: string): UseRealtimeTri
 
       const data = await response.json();
 
+      // Deserialize dates from JSON
+      const tripData = data.data as Trip;
+      if (tripData.days) {
+        tripData.days = tripData.days.map((day: any) => ({
+          ...day,
+          date: day.date ? new Date(day.date) : new Date(),
+        }));
+      }
+      if (tripData.preferences?.startDate) {
+        tripData.preferences.startDate = new Date(tripData.preferences.startDate);
+      }
+      if (tripData.createdAt) tripData.createdAt = new Date(tripData.createdAt);
+      if (tripData.updatedAt) tripData.updatedAt = new Date(tripData.updatedAt);
+
       setTrip({
         id: data.id,
         title: data.title,
@@ -57,7 +71,7 @@ export function useRealtimeTrip(tripId: string, userId?: string): UseRealtimeTri
         durationDays: data.duration_days,
         shareCode: data.share_code,
         visibility: data.visibility || 'private',
-        data: data.data,
+        data: tripData,
         members: data.members || [],
         proposals: data.proposals || [],
         userRole: data.userRole,
@@ -87,11 +101,25 @@ export function useRealtimeTrip(tripId: string, userId?: string): UseRealtimeTri
         },
         (payload) => {
           console.log('Trip updated:', payload);
+          const tripData = payload.new.data as Trip;
+          // Deserialize dates from raw Postgres JSON
+          if (tripData.days) {
+            tripData.days = tripData.days.map((day: any) => ({
+              ...day,
+              date: day.date ? new Date(day.date) : new Date(),
+            }));
+          }
+          if (tripData.preferences?.startDate) {
+            tripData.preferences.startDate = new Date(tripData.preferences.startDate);
+          }
+          if (tripData.createdAt) tripData.createdAt = new Date(tripData.createdAt);
+          if (tripData.updatedAt) tripData.updatedAt = new Date(tripData.updatedAt);
+
           setTrip((prev) => {
             if (!prev) return prev;
             return {
               ...prev,
-              data: payload.new.data as Trip,
+              data: tripData,
               title: payload.new.title,
               destination: payload.new.destination,
             };
