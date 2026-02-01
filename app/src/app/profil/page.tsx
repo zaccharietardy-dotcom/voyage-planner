@@ -38,6 +38,7 @@ export default function ProfilPage() {
   const [followers, setFollowers] = useState<any[]>([]);
   const [following, setFollowing] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState('trips');
+  const [dataLoading, setDataLoading] = useState(true);
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -46,19 +47,41 @@ export default function ProfilPage() {
   }, [isLoading, user, router]);
 
   useEffect(() => {
-    if (user) {
-      Promise.all([
-        fetch(`/api/users/${user.id}`).then(r => r.ok ? r.json() : null),
-        fetch('/api/trips').then(r => r.ok ? r.json() : []),
-        fetch('/api/follows?type=followers').then(r => r.ok ? r.json() : []),
-        fetch('/api/follows?type=following').then(r => r.ok ? r.json() : []),
-      ]).then(([profileRes, tripsRes, followersRes, followingRes]) => {
+    if (!user) return;
+
+    const fetchData = async (retries = 0) => {
+      setDataLoading(true);
+      try {
+        const results = await Promise.all([
+          fetch(`/api/users/${user.id}`).then(r => r.ok ? r.json() : null),
+          fetch('/api/trips').then(r => r.ok ? r.json() : null),
+          fetch('/api/follows?type=followers').then(r => r.ok ? r.json() : null),
+          fetch('/api/follows?type=following').then(r => r.ok ? r.json() : null),
+        ]);
+
+        const [profileRes, tripsRes, followersRes, followingRes] = results;
+
+        // If all returned null, auth cookies likely not ready — retry
+        if (!profileRes && !tripsRes && retries < 3) {
+          setTimeout(() => fetchData(retries + 1), (retries + 1) * 800);
+          return;
+        }
+
         if (profileRes) setProfileData(profileRes);
         setTrips(tripsRes || []);
         setFollowers(followersRes || []);
         setFollowing(followingRes || []);
-      });
-    }
+      } catch (e) {
+        if (retries < 3) {
+          setTimeout(() => fetchData(retries + 1), (retries + 1) * 800);
+          return;
+        }
+      } finally {
+        setDataLoading(false);
+      }
+    };
+
+    fetchData();
   }, [user]);
 
   if (isLoading) {
@@ -118,15 +141,21 @@ export default function ProfilPage() {
         {/* Stats */}
         <div className="flex items-center justify-center gap-8 mt-5">
           <button onClick={() => setActiveTab('trips')} className="text-center">
-            <p className="font-bold text-lg">{profileData?.trips_count || trips.length}</p>
+            <p className="font-bold text-lg">
+              {dataLoading ? <Loader2 className="w-4 h-4 animate-spin inline" /> : (profileData?.trips_count ?? trips.length)}
+            </p>
             <p className="text-muted-foreground text-xs">Voyages</p>
           </button>
           <button onClick={() => setActiveTab('followers')} className="text-center">
-            <p className="font-bold text-lg">{profileData?.followers_count || followers.length}</p>
+            <p className="font-bold text-lg">
+              {dataLoading ? <Loader2 className="w-4 h-4 animate-spin inline" /> : (profileData?.followers_count ?? followers.length)}
+            </p>
             <p className="text-muted-foreground text-xs">Abonnés</p>
           </button>
           <button onClick={() => setActiveTab('following')} className="text-center">
-            <p className="font-bold text-lg">{profileData?.following_count || following.length}</p>
+            <p className="font-bold text-lg">
+              {dataLoading ? <Loader2 className="w-4 h-4 animate-spin inline" /> : (profileData?.following_count ?? following.length)}
+            </p>
             <p className="text-muted-foreground text-xs">Abonnements</p>
           </button>
         </div>
