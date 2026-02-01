@@ -15,8 +15,7 @@ export default function NewPastTripPage() {
   const router = useRouter();
   const { user, isLoading: authLoading } = useAuth();
   const [destination, setDestination] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const [tripDate, setTripDate] = useState('');
   const [title, setTitle] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGeocoding, setIsGeocoding] = useState(false);
@@ -41,8 +40,8 @@ export default function NewPastTripPage() {
       toast.error('Veuillez entrer une destination');
       return;
     }
-    if (!startDate) {
-      toast.error('Veuillez entrer une date de début');
+    if (!tripDate) {
+      toast.error('Veuillez entrer une date');
       return;
     }
 
@@ -75,8 +74,8 @@ export default function NewPastTripPage() {
         body: JSON.stringify({
           destination: destination.trim(),
           destinationCoords,
-          startDate,
-          endDate: endDate || startDate,
+          startDate: tripDate,
+          endDate: tripDate,
           title: title.trim() || undefined,
         }),
       });
@@ -143,33 +142,18 @@ export default function NewPastTripPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="startDate">
-                    <Calendar className="inline h-3.5 w-3.5 mr-1" />
-                    Début
-                  </Label>
-                  <Input
-                    id="startDate"
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="endDate">
-                    <Calendar className="inline h-3.5 w-3.5 mr-1" />
-                    Fin
-                  </Label>
-                  <Input
-                    id="endDate"
-                    type="date"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    min={startDate}
-                  />
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="tripDate">
+                  <Calendar className="inline h-3.5 w-3.5 mr-1" />
+                  Date du voyage
+                </Label>
+                <Input
+                  id="tripDate"
+                  type="date"
+                  value={tripDate}
+                  onChange={(e) => setTripDate(e.target.value)}
+                  required
+                />
               </div>
 
               <Button type="submit" className="w-full" disabled={isSubmitting}>
