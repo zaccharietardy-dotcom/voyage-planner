@@ -145,19 +145,19 @@ export default function ProfilPage() {
         <div className="flex items-center justify-center gap-8 mt-5">
           <button onClick={() => setActiveTab('trips')} className="text-center">
             <p className="font-bold text-lg">
-              {dataLoading ? <Loader2 className="w-4 h-4 animate-spin inline" /> : (profileData?.trips_count ?? trips.length)}
+              {dataLoading ? <Loader2 className="w-4 h-4 animate-spin inline" /> : trips.length}
             </p>
             <p className="text-muted-foreground text-xs">Voyages</p>
           </button>
           <button onClick={() => setActiveTab('followers')} className="text-center">
             <p className="font-bold text-lg">
-              {dataLoading ? <Loader2 className="w-4 h-4 animate-spin inline" /> : (profileData?.followers_count ?? followers.length)}
+              {dataLoading ? <Loader2 className="w-4 h-4 animate-spin inline" /> : followers.length}
             </p>
             <p className="text-muted-foreground text-xs">Abonnés</p>
           </button>
           <button onClick={() => setActiveTab('following')} className="text-center">
             <p className="font-bold text-lg">
-              {dataLoading ? <Loader2 className="w-4 h-4 animate-spin inline" /> : (profileData?.following_count ?? following.length)}
+              {dataLoading ? <Loader2 className="w-4 h-4 animate-spin inline" /> : following.length}
             </p>
             <p className="text-muted-foreground text-xs">Abonnements</p>
           </button>
