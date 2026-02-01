@@ -20,15 +20,6 @@ export default function JoinTripPage() {
   const [error, setError] = useState<string>('');
   const [tripInfo, setTripInfo] = useState<{ id: string; title: string; destination: string } | null>(null);
 
-  // Read role from URL query params
-  const [joinRole, setJoinRole] = useState<'viewer' | 'editor'>('viewer');
-
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const role = urlParams.get('role');
-    if (role === 'editor') setJoinRole('editor');
-  }, []);
-
   useEffect(() => {
     if (authLoading) return;
 
@@ -43,6 +34,9 @@ export default function JoinTripPage() {
   async function joinTrip() {
     setStatus('checking');
     const supabase = getSupabaseClient();
+    // Read role synchronously from URL to avoid race condition with useState
+    const urlParams = new URLSearchParams(window.location.search);
+    const joinRole = urlParams.get('role') === 'editor' ? 'editor' : 'viewer';
 
     try {
       // Trouver le voyage par code de partage
