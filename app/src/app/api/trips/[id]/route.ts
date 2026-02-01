@@ -194,6 +194,11 @@ export async function PATCH(
 
     const updates = await request.json();
 
+    // Only owner can change visibility
+    if (updates.visibility !== undefined && !isOwner) {
+      return NextResponse.json({ error: 'Seul le propri\u00e9taire peut changer la visibilit\u00e9' }, { status: 403 });
+    }
+
     // Build update object
     const updateObj: Record<string, any> = {
       updated_at: new Date().toISOString(),

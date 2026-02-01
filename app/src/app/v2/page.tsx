@@ -265,7 +265,7 @@ export default function ExplorePage() {
                         {user && trip.owner?.id !== user.id && (
                           <FollowButton
                             userId={trip.owner?.id}
-                            initialIsFollowing={false}
+                            initialIsFollowing={(trip as any).is_following ?? false}
                             initialIsCloseFriend={false}
                             size="sm"
                           />

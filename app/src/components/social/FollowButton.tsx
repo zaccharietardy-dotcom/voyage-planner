@@ -31,23 +31,36 @@ export function FollowButton({
 
   const handleFollow = async () => {
     setLoading(true);
+    const wasFollowing = isFollowing;
     try {
       if (isFollowing) {
-        await fetch(`/api/follows/${userId}`, { method: 'DELETE' });
+        const res = await fetch(`/api/follows/${userId}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error('Unfollow failed');
         setIsFollowing(false);
         setIsCloseFriend(false);
         onFollowChange?.(false);
       } else {
-        await fetch('/api/follows', {
+        const res = await fetch('/api/follows', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ following_id: userId }),
         });
+        if (!res.ok) {
+          // If 409 (already following), set state to true
+          if (res.status === 409) {
+            setIsFollowing(true);
+            onFollowChange?.(true);
+            return;
+          }
+          throw new Error('Follow failed');
+        }
         setIsFollowing(true);
         onFollowChange?.(true);
       }
     } catch (e) {
       console.error('Follow error:', e);
+      // Rollback state on error
+      setIsFollowing(wasFollowing);
     } finally {
       setLoading(false);
     }

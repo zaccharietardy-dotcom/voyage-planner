@@ -190,7 +190,7 @@ async function testSerpApi(origin: string, destination: string, date: string): P
       return [];
     }
 
-    const data = await response.json();
+    const data: any = await response.json();
     if (data.error) {
       console.log(`  [SerpAPI] API Error: ${data.error}`);
       return [];

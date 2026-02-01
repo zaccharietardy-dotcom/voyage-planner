@@ -22,6 +22,7 @@ import {
   GitPullRequest,
   GripVertical,
   Receipt,
+  Copy,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -34,6 +35,8 @@ import { ProposalsList } from '@/components/trip/ProposalsList';
 import { CreateProposalDialog } from '@/components/trip/CreateProposalDialog';
 import { DraggableTimeline } from '@/components/trip/DraggableTimeline';
 import { ShareTripDialog } from '@/components/trip/ShareTripDialog';
+import { TripVisibilitySelector, VisibilityBadge } from '@/components/trip/TripVisibilitySelector';
+import { CloneTripModal } from '@/components/social/CloneTripModal';
 import { ActivityEditModal } from '@/components/trip/ActivityEditModal';
 import { ExpensesPanel } from '@/components/trip/expenses/ExpensesPanel';
 import { TravelTips } from '@/components/trip/TravelTips';
@@ -177,6 +180,7 @@ export default function TripPage() {
   const [mainTab, setMainTab] = useState('planning');
   const [editingItem, setEditingItem] = useState<TripItem | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showCloneModal, setShowCloneModal] = useState(false);
 
   // Déterminer quel trip utiliser
   const trip = useCollaborativeMode ? collaborativeTrip?.data : localTrip;
@@ -585,42 +589,55 @@ export default function TripPage() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              {/* Bouton régénérer */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="gap-2"
-                    disabled={regenerating}
-                  >
-                    {regenerating ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <RefreshCw className="h-4 w-4" />
-                    )}
-                    <span className="hidden sm:inline">Régénérer</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={handleRegenerateTrip}>
-                    Tout régénérer
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  {trip.days.map((day) => (
-                    <DropdownMenuItem
-                      key={day.dayNumber}
-                      onClick={() => handleRegenerateDay(day.dayNumber)}
+              {/* Visibilité */}
+              {useCollaborativeMode && isOwner && collaborativeTrip && (
+                <TripVisibilitySelector
+                  tripId={tripId}
+                  currentVisibility={collaborativeTrip.visibility || 'private'}
+                />
+              )}
+              {useCollaborativeMode && !isOwner && collaborativeTrip && (
+                <VisibilityBadge visibility={collaborativeTrip.visibility || 'private'} />
+              )}
+
+              {/* Bouton régénérer - owner/editor only */}
+              {canEdit && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-2"
+                      disabled={regenerating}
                     >
-                      Jour {day.dayNumber}
+                      {regenerating ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <RefreshCw className="h-4 w-4" />
+                      )}
+                      <span className="hidden sm:inline">R\u00e9g\u00e9n\u00e9rer</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={handleRegenerateTrip}>
+                      Tout r\u00e9g\u00e9n\u00e9rer
                     </DropdownMenuItem>
-                  ))}
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleRegenerateRestaurants}>
-                    Restaurants uniquement
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                    <DropdownMenuSeparator />
+                    {trip.days.map((day) => (
+                      <DropdownMenuItem
+                        key={day.dayNumber}
+                        onClick={() => handleRegenerateDay(day.dayNumber)}
+                      >
+                        Jour {day.dayNumber}
+                      </DropdownMenuItem>
+                    ))}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleRegenerateRestaurants}>
+                      Restaurants uniquement
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
 
               {/* Bouton mode édition */}
               {canEdit && (
@@ -671,32 +688,51 @@ export default function TripPage() {
                 </Sheet>
               )}
 
-              {/* Bouton dépenses - scroll vers l'onglet */}
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-2"
-                onClick={() => setMainTab('depenses')}
-              >
-                <Receipt className="h-4 w-4" />
-                <span className="hidden sm:inline">Dépenses</span>
-              </Button>
+              {/* Bouton d\u00e9penses - owner/editor only */}
+              {canEdit && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-2"
+                  onClick={() => setMainTab('depenses')}
+                >
+                  <Receipt className="h-4 w-4" />
+                  <span className="hidden sm:inline">D\u00e9penses</span>
+                </Button>
+              )}
 
-              {/* Bouton partage */}
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-2"
-                onClick={() => setShowShareDialog(true)}
-              >
-                <Share2 className="h-4 w-4" />
-                <span className="hidden sm:inline">Partager</span>
-              </Button>
+              {/* Bouton cloner - viewers only */}
+              {!canEdit && useCollaborativeMode && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-2"
+                  onClick={() => setShowCloneModal(true)}
+                >
+                  <Copy className="h-4 w-4" />
+                  <span className="hidden sm:inline">Cloner</span>
+                </Button>
+              )}
 
-              <Button variant="outline" size="sm" className="gap-2" onClick={handleExportDebug}>
-                <Bug className="h-4 w-4" />
-                <span className="hidden sm:inline">Debug</span>
-              </Button>
+              {/* Bouton partage - owner only */}
+              {isOwner && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-2"
+                  onClick={() => setShowShareDialog(true)}
+                >
+                  <Share2 className="h-4 w-4" />
+                  <span className="hidden sm:inline">Partager</span>
+                </Button>
+              )}
+
+              {canEdit && (
+                <Button variant="outline" size="sm" className="gap-2" onClick={handleExportDebug}>
+                  <Bug className="h-4 w-4" />
+                  <span className="hidden sm:inline">Debug</span>
+                </Button>
+              )}
             </div>
           </div>
         </div>
@@ -768,12 +804,12 @@ export default function TripPage() {
         {/* Mobile layout: everything in tabs */}
         <div className="lg:hidden">
           <Tabs value={mainTab} onValueChange={setMainTab}>
-            <TabsList className="w-full grid grid-cols-5 mb-4">
+            <TabsList className={`w-full grid mb-4 ${canEdit ? 'grid-cols-5' : 'grid-cols-3'}`}>
               <TabsTrigger value="planning" className="text-xs sm:text-sm">Planning</TabsTrigger>
               <TabsTrigger value="carte" className="text-xs sm:text-sm">Carte</TabsTrigger>
-              <TabsTrigger value="photos" className="text-xs sm:text-sm">Photos</TabsTrigger>
-              <TabsTrigger value="infos" className="text-xs sm:text-sm">Infos</TabsTrigger>
-              <TabsTrigger value="depenses" className="text-xs sm:text-sm">Dépenses</TabsTrigger>
+              {canEdit && <TabsTrigger value="photos" className="text-xs sm:text-sm">Photos</TabsTrigger>}
+              {canEdit && <TabsTrigger value="infos" className="text-xs sm:text-sm">Infos</TabsTrigger>}
+              {canEdit && <TabsTrigger value="depenses" className="text-xs sm:text-sm">D\u00e9penses</TabsTrigger>}
             </TabsList>
 
             <TabsContent value="planning">
@@ -941,9 +977,9 @@ export default function TripPage() {
             <Tabs value={mainTab} onValueChange={setMainTab}>
               <TabsList className="mb-4">
                 <TabsTrigger value="planning">Planning</TabsTrigger>
-                <TabsTrigger value="photos">Photos</TabsTrigger>
-                <TabsTrigger value="infos">Infos pratiques</TabsTrigger>
-                <TabsTrigger value="depenses">Dépenses</TabsTrigger>
+                {canEdit && <TabsTrigger value="photos">Photos</TabsTrigger>}
+                {canEdit && <TabsTrigger value="infos">Infos pratiques</TabsTrigger>}
+                {canEdit && <TabsTrigger value="depenses">D\u00e9penses</TabsTrigger>}
               </TabsList>
 
               <TabsContent value="planning">
@@ -1122,6 +1158,8 @@ export default function TripPage() {
       {trip && (
         <ShareTripDialog
           open={showShareDialog}
+          isOwner={isOwner}
+          currentVisibility={collaborativeTrip?.visibility || 'private'}
           onOpenChange={(open) => {
             setShowShareDialog(open);
             if (!open) {
@@ -1139,7 +1177,18 @@ export default function TripPage() {
         />
       )}
 
-      {/* Modal d'édition d'activité */}
+      {/* Modal de clonage */}
+      {showCloneModal && trip && (
+        <CloneTripModal
+          isOpen={showCloneModal}
+          onClose={() => setShowCloneModal(false)}
+          tripId={tripId}
+          tripTitle={collaborativeTrip?.title || `Voyage \u00e0 ${trip.preferences.destination}`}
+          originalDuration={trip.preferences.durationDays}
+        />
+      )}
+
+      {/* Modal d'\u00e9dition d'activit\u00e9 */}
       <ActivityEditModal
         item={editingItem}
         isOpen={showEditModal}

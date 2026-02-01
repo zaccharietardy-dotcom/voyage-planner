@@ -22,8 +22,8 @@ interface UserProfile {
   followers_count: number;
   following_count: number;
   trips_count: number;
-  is_following: boolean;
-  is_close_friend: boolean;
+  isFollowing: boolean;
+  isCloseFriend: boolean;
 }
 
 interface UserTrip {
@@ -126,15 +126,15 @@ export default function UserProfilePage() {
           <div className="flex justify-center mt-4">
             <FollowButton
               userId={userId}
-              initialIsFollowing={profile.is_following}
-              initialIsCloseFriend={profile.is_close_friend}
+              initialIsFollowing={profile.isFollowing}
+              initialIsCloseFriend={profile.isCloseFriend}
             />
           </div>
         )}
 
         {/* Trips */}
         <div className="mt-6">
-          <h2 className="font-semibold mb-3">Voyages publics</h2>
+          <h2 className="font-semibold mb-3">Voyages</h2>
           {trips.length === 0 ? (
             <div className="text-center py-10">
               <MapPin className="w-10 h-10 text-muted-foreground mx-auto mb-3" />

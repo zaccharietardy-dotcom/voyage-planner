@@ -25,12 +25,15 @@ import {
   LogIn,
 } from 'lucide-react';
 import Link from 'next/link';
+import { TripVisibilitySelector } from '@/components/trip/TripVisibilitySelector';
 
 interface ShareTripDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   trip: Trip;
   tripId: string;
+  isOwner?: boolean;
+  currentVisibility?: 'public' | 'friends' | 'private';
   onTripSaved?: (savedTripId: string, shareCode: string) => void;
 }
 
@@ -39,6 +42,8 @@ export function ShareTripDialog({
   onOpenChange,
   trip,
   tripId,
+  isOwner = false,
+  currentVisibility = 'private',
   onTripSaved,
 }: ShareTripDialogProps) {
   const { user, isLoading: authLoading } = useAuth();
@@ -46,12 +51,12 @@ export function ShareTripDialog({
   const [savedTripId, setSavedTripId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = useState<'viewer' | 'editor' | false>(false);
   const [showQR, setShowQR] = useState(false);
 
-  const shareUrl = shareCode
-    ? `${typeof window !== 'undefined' ? window.location.origin : ''}/join/${shareCode}`
-    : '';
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+  const shareUrl = shareCode ? `${baseUrl}/join/${shareCode}` : '';
+  const editorShareUrl = shareCode ? `${baseUrl}/join/${shareCode}?role=editor` : '';
 
   // Vérifier si le voyage est déjà sauvegardé quand le dialog s'ouvre
   useEffect(() => {
@@ -127,10 +132,11 @@ export function ShareTripDialog({
   };
 
   // Copier le lien
-  const handleCopy = async () => {
-    if (!shareUrl) return;
-    await navigator.clipboard.writeText(shareUrl);
-    setCopied(true);
+  const handleCopy = async (type: 'viewer' | 'editor') => {
+    const url = type === 'editor' ? editorShareUrl : shareUrl;
+    if (!url) return;
+    await navigator.clipboard.writeText(url);
+    setCopied(type);
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -269,11 +275,22 @@ export function ShareTripDialog({
         {/* Code de partage disponible */}
         {shareCode && (
           <div className="space-y-4 py-4">
-            {/* Lien de partage */}
+            {/* Visibilit\u00e9 */}
+            {isOwner && savedTripId && (
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Visibilit\u00e9 du voyage</label>
+                <TripVisibilitySelector
+                  tripId={savedTripId}
+                  currentVisibility={currentVisibility}
+                />
+              </div>
+            )}
+
+            {/* Lien lecture seule */}
             <div className="space-y-2">
               <label className="text-sm font-medium flex items-center gap-2">
                 <LinkIcon className="h-4 w-4" />
-                Lien de partage
+                Lien lecture seule
               </label>
               <div className="flex gap-2">
                 <Input
@@ -282,15 +299,46 @@ export function ShareTripDialog({
                   className="text-sm bg-muted"
                   onClick={(e) => e.currentTarget.select()}
                 />
-                <Button onClick={handleCopy} variant="outline" size="icon">
-                  {copied ? (
+                <Button onClick={() => handleCopy('viewer')} variant="outline" size="icon">
+                  {copied === 'viewer' ? (
                     <Check className="h-4 w-4 text-green-500" />
                   ) : (
                     <Copy className="h-4 w-4" />
                   )}
                 </Button>
               </div>
+              <p className="text-xs text-muted-foreground">
+                Les personnes qui rejoignent via ce lien pourront voir le voyage.
+              </p>
             </div>
+
+            {/* Lien \u00e9diteur */}
+            {isOwner && (
+              <div className="space-y-2">
+                <label className="text-sm font-medium flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  Lien \u00e9diteur
+                </label>
+                <div className="flex gap-2">
+                  <Input
+                    value={editorShareUrl}
+                    readOnly
+                    className="text-sm bg-muted"
+                    onClick={(e) => e.currentTarget.select()}
+                  />
+                  <Button onClick={() => handleCopy('editor')} variant="outline" size="icon">
+                    {copied === 'editor' ? (
+                      <Check className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Les personnes qui rejoignent via ce lien pourront modifier le voyage.
+                </p>
+              </div>
+            )}
 
             {/* QR Code */}
             <div className="space-y-2">
@@ -349,11 +397,6 @@ export function ShareTripDialog({
               </Button>
             </div>
 
-            {/* Info */}
-            <p className="text-xs text-muted-foreground text-center">
-              Les personnes qui rejoignent via ce lien pourront voir le voyage.
-              Vous pourrez ensuite leur donner les droits de modification.
-            </p>
           </div>
         )}
       </DialogContent>

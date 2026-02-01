@@ -20,6 +20,15 @@ export default function JoinTripPage() {
   const [error, setError] = useState<string>('');
   const [tripInfo, setTripInfo] = useState<{ id: string; title: string; destination: string } | null>(null);
 
+  // Read role from URL query params
+  const [joinRole, setJoinRole] = useState<'viewer' | 'editor'>('viewer');
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const role = urlParams.get('role');
+    if (role === 'editor') setJoinRole('editor');
+  }, []);
+
   useEffect(() => {
     if (authLoading) return;
 
@@ -64,12 +73,12 @@ export default function JoinTripPage() {
         return;
       }
 
-      // Ajouter comme membre viewer (contrainte UNIQUE sur trip_id+user_id gère la race condition)
+      // Ajouter comme membre (contrainte UNIQUE sur trip_id+user_id gère la race condition)
       setStatus('joining');
       const { error: joinError } = await supabase.from('trip_members').insert({
         trip_id: trip.id,
         user_id: user!.id,
-        role: 'viewer',
+        role: joinRole,
       });
 
       if (joinError) {

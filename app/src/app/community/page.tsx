@@ -183,7 +183,7 @@ export default function CommunityPage() {
                         </div>
                         <FollowButton
                           userId={result.id}
-                          initialIsFollowing={false}
+                          initialIsFollowing={(result as any).isFollowing ?? false}
                           initialIsCloseFriend={false}
                           size="sm"
                         />

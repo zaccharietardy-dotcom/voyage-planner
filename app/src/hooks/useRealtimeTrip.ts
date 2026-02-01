@@ -12,6 +12,7 @@ interface TripWithCollaboration {
   startDate: string;
   durationDays: number;
   shareCode: string;
+  visibility: 'public' | 'friends' | 'private';
   data: Trip;
   members: TripMember[];
   proposals: Proposal[];
@@ -55,6 +56,7 @@ export function useRealtimeTrip(tripId: string, userId?: string): UseRealtimeTri
         startDate: data.start_date,
         durationDays: data.duration_days,
         shareCode: data.share_code,
+        visibility: data.visibility || 'private',
         data: data.data,
         members: data.members || [],
         proposals: data.proposals || [],
