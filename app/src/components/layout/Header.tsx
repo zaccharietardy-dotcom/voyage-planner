@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, X, Compass, Map, PlusCircle } from 'lucide-react';
+import { Menu, X, Compass, Map, PlusCircle, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { UserMenu } from '@/components/auth/UserMenu';
@@ -13,6 +13,7 @@ const navLinks = [
   { href: '/plan', label: 'Créer un voyage', icon: PlusCircle },
   { href: '/explore', label: 'Explorer', icon: Compass },
   { href: '/mes-voyages', label: 'Mes voyages', icon: Map },
+  { href: '/community', label: 'Communauté', icon: Users },
 ];
 
 export function Header() {

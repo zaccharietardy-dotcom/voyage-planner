@@ -37,6 +37,8 @@ import { ShareTripDialog } from '@/components/trip/ShareTripDialog';
 import { ActivityEditModal } from '@/components/trip/ActivityEditModal';
 import { ExpensesPanel } from '@/components/trip/expenses/ExpensesPanel';
 import { TravelTips } from '@/components/trip/TravelTips';
+import { PhotoGallery } from '@/components/photos/PhotoGallery';
+import { PhotoUploader } from '@/components/photos/PhotoUploader';
 import { ProposedChange, createMoveActivityChange } from '@/lib/types/collaboration';
 import { cn } from '@/lib/utils';
 import {
@@ -737,11 +739,12 @@ export default function TripPage() {
         {/* Mobile layout: everything in tabs */}
         <div className="lg:hidden">
           <Tabs value={mainTab} onValueChange={setMainTab}>
-            <TabsList className="w-full grid grid-cols-4 mb-4">
+            <TabsList className="w-full grid grid-cols-5 mb-4">
               <TabsTrigger value="planning" className="text-xs sm:text-sm">Planning</TabsTrigger>
               <TabsTrigger value="carte" className="text-xs sm:text-sm">Carte</TabsTrigger>
+              <TabsTrigger value="photos" className="text-xs sm:text-sm">Photos</TabsTrigger>
               <TabsTrigger value="infos" className="text-xs sm:text-sm">Infos</TabsTrigger>
-              <TabsTrigger value="depenses" className="text-xs sm:text-sm">Dépenses partagées</TabsTrigger>
+              <TabsTrigger value="depenses" className="text-xs sm:text-sm">Dépenses</TabsTrigger>
             </TabsList>
 
             <TabsContent value="planning">
@@ -874,6 +877,16 @@ export default function TripPage() {
               </div>
             </TabsContent>
 
+            <TabsContent value="photos">
+              <Card>
+                <CardHeader><CardTitle className="text-lg">Photos</CardTitle></CardHeader>
+                <CardContent className="space-y-4">
+                  {isOwner && <PhotoUploader tripId={tripId} />}
+                  <PhotoGallery tripId={tripId} isOwner={isOwner} />
+                </CardContent>
+              </Card>
+            </TabsContent>
+
             <TabsContent value="depenses">
               <Card>
                 <CardHeader><CardTitle className="text-lg">Dépenses partagées</CardTitle></CardHeader>
@@ -899,8 +912,9 @@ export default function TripPage() {
             <Tabs value={mainTab} onValueChange={setMainTab}>
               <TabsList className="mb-4">
                 <TabsTrigger value="planning">Planning</TabsTrigger>
+                <TabsTrigger value="photos">Photos</TabsTrigger>
                 <TabsTrigger value="infos">Infos pratiques</TabsTrigger>
-                <TabsTrigger value="depenses">Dépenses partagées</TabsTrigger>
+                <TabsTrigger value="depenses">Dépenses</TabsTrigger>
               </TabsList>
 
               <TabsContent value="planning">
@@ -961,6 +975,16 @@ export default function TripPage() {
                   {trip.carbonFootprint && <CarbonFootprint data={trip.carbonFootprint} />}
                   {trip.travelTips && <TravelTips data={trip.travelTips} />}
                 </div>
+              </TabsContent>
+
+              <TabsContent value="photos">
+                <Card>
+                  <CardHeader><CardTitle className="text-lg">Photos</CardTitle></CardHeader>
+                  <CardContent className="space-y-4">
+                    {isOwner && <PhotoUploader tripId={tripId} />}
+                    <PhotoGallery tripId={tripId} isOwner={isOwner} />
+                  </CardContent>
+                </Card>
               </TabsContent>
 
               <TabsContent value="depenses">

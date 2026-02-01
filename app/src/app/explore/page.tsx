@@ -11,10 +11,9 @@ import {
   MapPin,
   Calendar,
   Users,
-  Filter,
-  RefreshCw,
   Copy,
-  ExternalLink,
+  Share2,
+  RefreshCw,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,17 +28,35 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useAuth } from '@/components/auth';
-import { PublicTrip } from '@/lib/supabase/types';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { FollowButton } from '@/components/social/FollowButton';
+import { CloneTripModal } from '@/components/social/CloneTripModal';
 
-interface TripCardData extends PublicTrip {
-  is_liked: boolean;
+interface FeedTrip {
+  id: string;
+  title: string;
+  name: string;
+  destination: string;
+  start_date: string;
+  end_date: string;
+  duration_days: number;
+  visibility: string;
+  created_at: string;
+  preferences: any;
+  owner: {
+    id: string;
+    display_name: string | null;
+    avatar_url: string | null;
+    username: string | null;
+  };
+  likes_count: number;
+  user_liked: boolean;
+  comments_count?: number;
 }
 
-// Destination images (placeholder, could be from API or trip data)
 const DESTINATION_IMAGES: Record<string, string> = {
   'Paris': 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800&q=80',
   'Tokyo': 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=800&q=80',
@@ -53,255 +70,90 @@ const DESTINATION_IMAGES: Record<string, string> = {
 function getDestinationImage(destination: string): string {
   const normalized = destination.toLowerCase();
   for (const [key, url] of Object.entries(DESTINATION_IMAGES)) {
-    if (normalized.includes(key.toLowerCase())) {
-      return url;
-    }
+    if (normalized.includes(key.toLowerCase())) return url;
   }
   return DESTINATION_IMAGES.default;
 }
 
-function TripCard({
-  trip,
-  onLike,
-  isLiking,
-}: {
-  trip: TripCardData;
-  onLike: (tripId: string) => void;
-  isLiking: boolean;
-}) {
+export default function ExplorePage() {
   const router = useRouter();
   const { user } = useAuth();
-
-  const handleLike = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!user) {
-      toast.error('Connectez-vous pour aimer ce voyage');
-      return;
-    }
-    onLike(trip.id);
-  };
-
-  const handleClone = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!user) {
-      toast.error('Connectez-vous pour cloner ce voyage');
-      return;
-    }
-    // Clone functionality would copy the trip to user's trips
-    toast.success('Voyage cloné dans vos voyages !');
-  };
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-    >
-      <Card
-        className="overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
-        onClick={() => router.push(`/trip/${trip.id}`)}
-      >
-        {/* Image */}
-        <div className="relative aspect-[4/3] overflow-hidden">
-          <img
-            src={getDestinationImage(trip.destination)}
-            alt={trip.destination}
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-
-          {/* Duration badge */}
-          <Badge className="absolute top-3 right-3 bg-black/50 text-white border-0">
-            {trip.duration_days} jours
-          </Badge>
-
-          {/* Destination overlay */}
-          <div className="absolute bottom-3 left-3 right-3">
-            <h3 className="text-xl font-bold text-white mb-1">{trip.destination}</h3>
-            {trip.title && trip.title !== trip.destination && (
-              <p className="text-white/80 text-sm truncate">{trip.title}</p>
-            )}
-          </div>
-        </div>
-
-        <CardContent className="p-4">
-          {/* User info */}
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={trip.owner_avatar || undefined} />
-                <AvatarFallback>
-                  {trip.owner_name?.charAt(0).toUpperCase() || 'U'}
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <p className="text-sm font-medium">{trip.owner_name || 'Voyageur'}</p>
-                <p className="text-xs text-muted-foreground">
-                  {format(new Date(trip.created_at), 'd MMM yyyy', { locale: fr })}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-1">
-              <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">
-                {format(new Date(trip.start_date), 'd MMM', { locale: fr })}
-              </span>
-            </div>
-          </div>
-
-          {/* Actions */}
-          <div className="flex items-center justify-between pt-3 border-t">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={handleLike}
-                disabled={isLiking}
-                className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors"
-              >
-                <Heart
-                  className={cn(
-                    'h-5 w-5 transition-all',
-                    trip.is_liked && 'fill-red-500 text-red-500'
-                  )}
-                />
-                <span>{trip.likes_count}</span>
-              </button>
-
-              <button className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors">
-                <MessageCircle className="h-5 w-5" />
-                <span>{trip.comments_count}</span>
-              </button>
-            </div>
-
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleClone}
-              className="text-xs gap-1"
-            >
-              <Copy className="h-4 w-4" />
-              Cloner
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    </motion.div>
-  );
-}
-
-export default function ExplorePage() {
-  const { user } = useAuth();
-  const [trips, setTrips] = useState<TripCardData[]>([]);
+  const [feedTab, setFeedTab] = useState<'discover' | 'following'>('discover');
+  const [trips, setTrips] = useState<FeedTrip[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [likingTripId, setLikingTripId] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-
-  // Filters
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [likingTripId, setLikingTripId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [durationFilter, setDurationFilter] = useState<string>('all');
+  const [cloneTrip, setCloneTrip] = useState<FeedTrip | null>(null);
 
-  const fetchTrips = useCallback(async (pageNum: number, append = false) => {
+  const fetchFeed = useCallback(async (pageNum: number, append = false) => {
     try {
-      if (pageNum === 1) {
-        setIsLoading(true);
-      } else {
-        setIsLoadingMore(true);
-      }
+      if (pageNum === 1) setIsLoading(true);
+      else setIsLoadingMore(true);
 
       const params = new URLSearchParams({
+        tab: feedTab,
         page: pageNum.toString(),
         limit: '12',
       });
 
-      if (searchQuery) {
-        params.set('destination', searchQuery);
-      }
-
+      if (searchQuery) params.set('destination', searchQuery);
       if (durationFilter !== 'all') {
-        if (durationFilter === 'short') {
-          params.set('maxDays', '3');
-        } else if (durationFilter === 'medium') {
-          params.set('minDays', '4');
-          params.set('maxDays', '7');
-        } else if (durationFilter === 'long') {
-          params.set('minDays', '8');
-        }
+        if (durationFilter === 'short') params.set('maxDays', '3');
+        else if (durationFilter === 'medium') { params.set('minDays', '4'); params.set('maxDays', '7'); }
+        else if (durationFilter === 'long') params.set('minDays', '8');
       }
 
-      const response = await fetch(`/api/explore?${params}`);
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error);
+      const response = await fetch(`/api/feed?${params}`);
+      if (response.ok) {
+        const data = await response.json();
+        setTrips(prev => append ? [...prev, ...data.trips] : data.trips);
+        setHasMore(data.hasMore);
+        setPage(pageNum);
       }
-
-      if (append) {
-        setTrips(prev => [...prev, ...data.trips]);
-      } else {
-        setTrips(data.trips);
-      }
-
-      setHasMore(data.hasMore);
-      setPage(pageNum);
-    } catch (error) {
-      console.error('Error fetching trips:', error);
-      toast.error('Erreur lors du chargement des voyages');
+    } catch (e) {
+      console.error('Feed error:', e);
+      toast.error('Erreur lors du chargement');
     } finally {
       setIsLoading(false);
       setIsLoadingMore(false);
     }
-  }, [searchQuery, durationFilter]);
+  }, [feedTab, searchQuery, durationFilter]);
 
   useEffect(() => {
-    fetchTrips(1);
-  }, [fetchTrips]);
+    fetchFeed(1);
+  }, [feedTab, fetchFeed]);
 
   const handleLike = async (tripId: string) => {
+    if (!user) { toast.error('Connectez-vous pour aimer ce voyage'); return; }
     setLikingTripId(tripId);
     try {
-      const response = await fetch(`/api/trips/${tripId}/like`, {
-        method: 'POST',
-      });
+      const trip = trips.find(t => t.id === tripId);
+      // Optimistic update
+      setTrips(prev => prev.map(t =>
+        t.id === tripId
+          ? { ...t, user_liked: !t.user_liked, likes_count: t.likes_count + (t.user_liked ? -1 : 1) }
+          : t
+      ));
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error);
+      if (trip?.user_liked) {
+        await fetch(`/api/trips/${tripId}/like`, { method: 'DELETE' });
+      } else {
+        await fetch(`/api/trips/${tripId}/like`, { method: 'POST' });
       }
-
-      // Update local state
-      setTrips(prev =>
-        prev.map(trip =>
-          trip.id === tripId
-            ? {
-                ...trip,
-                is_liked: data.liked,
-                likes_count: data.liked
-                  ? trip.likes_count + 1
-                  : trip.likes_count - 1,
-              }
-            : trip
-        )
-      );
-    } catch (error) {
-      console.error('Error toggling like:', error);
-      toast.error('Erreur lors du like');
+    } catch (e) {
+      fetchFeed(1); // Revert on error
     } finally {
       setLikingTripId(null);
     }
   };
 
-  const handleLoadMore = () => {
-    if (hasMore && !isLoadingMore) {
-      fetchTrips(page + 1, true);
-    }
-  };
-
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    fetchTrips(1);
+    fetchFeed(1);
   };
 
   return (
@@ -343,6 +195,30 @@ export default function ExplorePage() {
               </Button>
             </form>
           </div>
+
+          {/* Feed tabs */}
+          {user && (
+            <div className="flex gap-4 mt-3">
+              <button
+                onClick={() => setFeedTab('discover')}
+                className={cn(
+                  'text-sm font-medium pb-1 border-b-2 transition-all',
+                  feedTab === 'discover' ? 'text-foreground border-primary' : 'text-muted-foreground border-transparent'
+                )}
+              >
+                Découvrir
+              </button>
+              <button
+                onClick={() => setFeedTab('following')}
+                className={cn(
+                  'text-sm font-medium pb-1 border-b-2 transition-all',
+                  feedTab === 'following' ? 'text-foreground border-primary' : 'text-muted-foreground border-transparent'
+                )}
+              >
+                Abonnements
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -357,42 +233,144 @@ export default function ExplorePage() {
             <MapPin className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
             <h2 className="text-xl font-semibold mb-2">Aucun voyage trouvé</h2>
             <p className="text-muted-foreground mb-4">
-              {searchQuery
-                ? 'Essayez une autre recherche'
-                : 'Soyez le premier à partager un voyage !'}
+              {feedTab === 'following'
+                ? 'Aucun voyage de tes abonnements. Commence à suivre des voyageurs !'
+                : searchQuery
+                  ? 'Essayez une autre recherche'
+                  : 'Soyez le premier à partager un voyage !'}
             </p>
-            <Button onClick={() => fetchTrips(1)}>
+            <Button onClick={() => fetchFeed(1)}>
               <RefreshCw className="h-4 w-4 mr-2" />
               Actualiser
             </Button>
           </div>
         ) : (
           <>
-            {/* Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {trips.map((trip) => (
-                <TripCard
+              {trips.map((trip, i) => (
+                <motion.div
                   key={trip.id}
-                  trip={trip}
-                  onLike={handleLike}
-                  isLiking={likingTripId === trip.id}
-                />
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: i * 0.03 }}
+                >
+                  <Card className="overflow-hidden cursor-pointer hover:shadow-lg transition-shadow">
+                    {/* Image */}
+                    <div
+                      className="relative aspect-[4/3] overflow-hidden"
+                      onClick={() => router.push(`/trip/${trip.id}`)}
+                    >
+                      <img
+                        src={getDestinationImage(trip.destination)}
+                        alt={trip.destination}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                      <Badge className="absolute top-3 right-3 bg-black/50 text-white border-0">
+                        {trip.duration_days} jours
+                      </Badge>
+                      <div className="absolute bottom-3 left-3 right-3">
+                        <h3 className="text-xl font-bold text-white mb-1">{trip.destination}</h3>
+                        {trip.title && trip.title !== trip.destination && (
+                          <p className="text-white/80 text-sm truncate">{trip.title}</p>
+                        )}
+                      </div>
+                    </div>
+
+                    <CardContent className="p-4">
+                      {/* User info + follow */}
+                      <div className="flex items-center justify-between mb-3">
+                        <button
+                          onClick={() => router.push(`/user/${trip.owner?.id}`)}
+                          className="flex items-center gap-2 hover:opacity-80"
+                        >
+                          <Avatar className="h-8 w-8">
+                            <AvatarImage src={trip.owner?.avatar_url || undefined} />
+                            <AvatarFallback>
+                              {(trip.owner?.display_name || '?')[0].toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="text-left">
+                            <p className="text-sm font-medium">{trip.owner?.display_name || 'Voyageur'}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {format(new Date(trip.created_at), 'd MMM', { locale: fr })}
+                            </p>
+                          </div>
+                        </button>
+
+                        {user && trip.owner?.id !== user.id && (
+                          <FollowButton
+                            userId={trip.owner?.id}
+                            initialIsFollowing={false}
+                            initialIsCloseFriend={false}
+                            size="sm"
+                          />
+                        )}
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex items-center justify-between pt-3 border-t">
+                        <div className="flex items-center gap-4">
+                          <button
+                            onClick={() => handleLike(trip.id)}
+                            disabled={likingTripId === trip.id}
+                            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors"
+                          >
+                            <Heart
+                              className={cn(
+                                'h-5 w-5 transition-all',
+                                trip.user_liked && 'fill-red-500 text-red-500'
+                              )}
+                            />
+                            <span>{trip.likes_count || ''}</span>
+                          </button>
+
+                          <button
+                            onClick={() => router.push(`/trip/${trip.id}`)}
+                            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors"
+                          >
+                            <MessageCircle className="h-5 w-5" />
+                          </button>
+                        </div>
+
+                        <div className="flex items-center gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setCloneTrip(trip)}
+                            className="text-xs gap-1"
+                          >
+                            <Copy className="h-4 w-4" />
+                            Cloner
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => {
+                              navigator.clipboard.writeText(`${window.location.origin}/trip/${trip.id}`);
+                              toast.success('Lien copié !');
+                            }}
+                          >
+                            <Share2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
               ))}
             </div>
 
-            {/* Load more */}
             {hasMore && (
               <div className="text-center mt-8">
                 <Button
                   variant="outline"
-                  onClick={handleLoadMore}
+                  onClick={() => fetchFeed(page + 1, true)}
                   disabled={isLoadingMore}
                 >
                   {isLoadingMore ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Chargement...
-                    </>
+                    <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Chargement...</>
                   ) : (
                     'Voir plus de voyages'
                   )}
@@ -402,6 +380,17 @@ export default function ExplorePage() {
           </>
         )}
       </div>
+
+      {/* Clone Modal */}
+      {cloneTrip && (
+        <CloneTripModal
+          isOpen={!!cloneTrip}
+          onClose={() => setCloneTrip(null)}
+          tripId={cloneTrip.id}
+          tripTitle={cloneTrip.title || cloneTrip.name}
+          originalDuration={cloneTrip.duration_days}
+        />
+      )}
     </div>
   );
 }
