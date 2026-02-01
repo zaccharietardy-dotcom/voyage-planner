@@ -184,7 +184,8 @@ export function useRealtimeTrip(tripId: string, userId?: string): UseRealtimeTri
       });
 
       if (!response.ok) {
-        throw new Error('Erreur de mise à jour');
+        console.error('Erreur de mise à jour:', response.status);
+        return;
       }
 
       // Mise à jour optimiste
@@ -211,7 +212,8 @@ export function useRealtimeTrip(tripId: string, userId?: string): UseRealtimeTri
       });
 
       if (!response.ok) {
-        throw new Error('Erreur de mise à jour');
+        console.error('Erreur de mise à jour:', response.status);
+        return;
       }
 
       // Mise à jour optimiste
