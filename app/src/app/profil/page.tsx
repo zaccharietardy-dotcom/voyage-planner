@@ -52,20 +52,23 @@ export default function ProfilPage() {
     const fetchData = async (retries = 0) => {
       setDataLoading(true);
       try {
-        const results = await Promise.all([
-          fetch(`/api/users/${user.id}`).then(r => r.ok ? r.json() : null),
-          fetch('/api/trips').then(r => r.ok ? r.json() : null),
-          fetch('/api/follows?type=followers').then(r => r.ok ? r.json() : null),
-          fetch('/api/follows?type=following').then(r => r.ok ? r.json() : null),
+        const responses = await Promise.all([
+          fetch(`/api/users/${user.id}`),
+          fetch('/api/trips'),
+          fetch('/api/follows?type=followers'),
+          fetch('/api/follows?type=following'),
         ]);
 
-        const [profileRes, tripsRes, followersRes, followingRes] = results;
-
-        // If all returned null, auth cookies likely not ready — retry
-        if (!profileRes && !tripsRes && retries < 3) {
+        // If any response is 401, auth cookies not ready — retry
+        const has401 = responses.some(r => r.status === 401);
+        if (has401 && retries < 3) {
           setTimeout(() => fetchData(retries + 1), (retries + 1) * 800);
           return;
         }
+
+        const [profileRes, tripsRes, followersRes, followingRes] = await Promise.all(
+          responses.map(r => r.ok ? r.json() : null)
+        );
 
         if (profileRes) setProfileData(profileRes);
         setTrips(tripsRes || []);
