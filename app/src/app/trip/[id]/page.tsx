@@ -46,6 +46,7 @@ import { PastTripView } from '@/components/trip/PastTripView';
 import { ProposedChange, createMoveActivityChange } from '@/lib/types/collaboration';
 import { recalculateTimes } from '@/lib/services/itineraryCalculator';
 import { AddActivityModal } from '@/components/trip/AddActivityModal';
+import { CalendarView } from '@/components/trip/CalendarView';
 import { cn } from '@/lib/utils';
 import {
   DropdownMenu,
@@ -189,6 +190,8 @@ export default function TripPage() {
   const [showCloneModal, setShowCloneModal] = useState(false);
   const [showAddActivityModal, setShowAddActivityModal] = useState(false);
   const [addActivityDay, setAddActivityDay] = useState<number>(1);
+  const [addActivityDefaultTime, setAddActivityDefaultTime] = useState<string | undefined>();
+  const [planningView, setPlanningView] = useState<'timeline' | 'calendar'>('timeline');
 
   // Track viewport to avoid mounting two DndContext instances
   const [isDesktop, setIsDesktop] = useState(false);
@@ -408,6 +411,24 @@ export default function TripPage() {
     saveTrip(updatedTrip);
     setShowAddActivityModal(false);
     toast.success(`"${newItem.title}" ajouté au Jour ${newItem.dayNumber}`);
+  };
+
+  // Calendar view: update item (resize, etc.)
+  const handleCalendarUpdateItem = (updatedItem: TripItem) => {
+    if (!trip) return;
+    const updatedDays = trip.days.map((day) => ({
+      ...day,
+      items: day.items.map((item) => item.id === updatedItem.id ? updatedItem : item),
+    }));
+    const updatedTrip = { ...trip, days: updatedDays, updatedAt: new Date() };
+    saveTrip(updatedTrip);
+  };
+
+  // Calendar view: click empty slot → add activity
+  const handleCalendarSlotClick = (dayNumber: number, time: string) => {
+    setAddActivityDay(dayNumber);
+    setAddActivityDefaultTime(time);
+    setShowAddActivityModal(true);
   };
 
   // Helper function for sorting times with after-midnight handling
@@ -907,15 +928,45 @@ export default function TripPage() {
                 <CardHeader className="pb-2">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-lg">Itinéraire</CardTitle>
-                    {editMode && (
-                      <span className="text-xs text-muted-foreground">
-                        Glissez les activités pour les réorganiser
-                      </span>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {editMode && planningView === 'timeline' && (
+                        <span className="text-xs text-muted-foreground hidden sm:block">
+                          Glissez les activités
+                        </span>
+                      )}
+                      <div className="flex items-center gap-0.5 bg-muted rounded-md p-0.5">
+                        <Button
+                          variant={planningView === 'timeline' ? 'default' : 'ghost'}
+                          size="sm"
+                          className="h-6 text-xs px-2"
+                          onClick={() => setPlanningView('timeline')}
+                        >
+                          Timeline
+                        </Button>
+                        <Button
+                          variant={planningView === 'calendar' ? 'default' : 'ghost'}
+                          size="sm"
+                          className="h-6 text-xs px-2"
+                          onClick={() => setPlanningView('calendar')}
+                        >
+                          Calendrier
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  {editMode && !isDesktop ? (
+                  {planningView === 'calendar' ? (
+                    <div className="h-[70vh]">
+                      <CalendarView
+                        days={trip.days}
+                        isEditable={canEdit}
+                        onUpdateItem={handleCalendarUpdateItem}
+                        onClickItem={handleEditItem}
+                        onClickSlot={canEdit ? handleCalendarSlotClick : undefined}
+                      />
+                    </div>
+                  ) : editMode && !isDesktop ? (
                     <DraggableTimeline
                       days={trip.days}
                       isEditable={canEdit}
@@ -923,7 +974,7 @@ export default function TripPage() {
                       onDirectUpdate={isOwner ? handleDirectUpdate : undefined}
                       onProposalCreate={!isOwner && canEdit ? handleProposalFromDrag : undefined}
                       onEditItem={handleEditItem}
-                      onAddItem={(dayNumber) => { setAddActivityDay(dayNumber); setShowAddActivityModal(true); }}
+                      onAddItem={(dayNumber) => { setAddActivityDay(dayNumber); setAddActivityDefaultTime(undefined); setShowAddActivityModal(true); }}
                     />
                   ) : !editMode ? (
                     <Tabs value={activeDay} onValueChange={setActiveDay}>
@@ -1079,15 +1130,45 @@ export default function TripPage() {
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-lg">Itinéraire</CardTitle>
-                      {editMode && (
-                        <span className="text-xs text-muted-foreground">
-                          Glissez les activités pour les réorganiser
-                        </span>
-                      )}
+                      <div className="flex items-center gap-2">
+                        {editMode && planningView === 'timeline' && (
+                          <span className="text-xs text-muted-foreground">
+                            Glissez les activités pour les réorganiser
+                          </span>
+                        )}
+                        <div className="flex items-center gap-0.5 bg-muted rounded-md p-0.5">
+                          <Button
+                            variant={planningView === 'timeline' ? 'default' : 'ghost'}
+                            size="sm"
+                            className="h-6 text-xs px-2"
+                            onClick={() => setPlanningView('timeline')}
+                          >
+                            Timeline
+                          </Button>
+                          <Button
+                            variant={planningView === 'calendar' ? 'default' : 'ghost'}
+                            size="sm"
+                            className="h-6 text-xs px-2"
+                            onClick={() => setPlanningView('calendar')}
+                          >
+                            Calendrier
+                          </Button>
+                        </div>
+                      </div>
                     </div>
                   </CardHeader>
                   <CardContent>
-                    {editMode && isDesktop ? (
+                    {planningView === 'calendar' ? (
+                      <div className="h-[75vh]">
+                        <CalendarView
+                          days={trip.days}
+                          isEditable={canEdit}
+                          onUpdateItem={handleCalendarUpdateItem}
+                          onClickItem={handleEditItem}
+                          onClickSlot={canEdit ? handleCalendarSlotClick : undefined}
+                        />
+                      </div>
+                    ) : editMode && isDesktop ? (
                       <DraggableTimeline
                         days={trip.days}
                         isEditable={canEdit}
@@ -1095,7 +1176,7 @@ export default function TripPage() {
                         onDirectUpdate={isOwner ? handleDirectUpdate : undefined}
                         onProposalCreate={!isOwner && canEdit ? handleProposalFromDrag : undefined}
                         onEditItem={handleEditItem}
-                        onAddItem={(dayNumber) => { setAddActivityDay(dayNumber); setShowAddActivityModal(true); }}
+                        onAddItem={(dayNumber) => { setAddActivityDay(dayNumber); setAddActivityDefaultTime(undefined); setShowAddActivityModal(true); }}
                       />
                     ) : !editMode ? (
                       <Tabs value={activeDay} onValueChange={setActiveDay}>
@@ -1301,6 +1382,7 @@ export default function TripPage() {
           onAdd={handleAddNewItem}
           dayNumber={addActivityDay}
           destination={trip.preferences?.destination || collaborativeTrip?.destination || ''}
+          defaultStartTime={addActivityDefaultTime}
         />
       )}
     </div>

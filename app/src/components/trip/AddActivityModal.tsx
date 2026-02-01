@@ -33,6 +33,7 @@ interface AddActivityModalProps {
   onAdd: (item: TripItem) => void;
   dayNumber: number;
   destination: string;
+  defaultStartTime?: string;
 }
 
 interface SearchResult {
@@ -65,6 +66,7 @@ export function AddActivityModal({
   onAdd,
   dayNumber,
   destination,
+  defaultStartTime,
 }: AddActivityModalProps) {
   const [tab, setTab] = useState<'search' | 'manual'>('search');
   const [query, setQuery] = useState('');
@@ -94,7 +96,7 @@ export function AddActivityModal({
       setType('activity');
       setDescription('');
       setLocationName('');
-      setStartTime('10:00');
+      setStartTime(defaultStartTime || '10:00');
       setDuration(60);
       setEstimatedCost(0);
       setLatitude(undefined);

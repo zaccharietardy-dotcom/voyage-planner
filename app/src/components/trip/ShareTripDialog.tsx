@@ -23,6 +23,8 @@ import {
   Link as LinkIcon,
   Users,
   LogIn,
+  Calendar,
+  Download,
 } from 'lucide-react';
 import Link from 'next/link';
 import { TripVisibilitySelector } from '@/components/trip/TripVisibilitySelector';
@@ -396,6 +398,53 @@ export function ShareTripDialog({
                 <span className="text-xs">Email</span>
               </Button>
             </div>
+
+            {/* Calendar export section */}
+            {savedTripId && (
+              <div className="space-y-2 pt-2 border-t">
+                <label className="text-sm font-medium flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  Calendrier
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    variant="outline"
+                    className="flex flex-col items-center gap-1 h-auto py-3"
+                    onClick={() => {
+                      const url = `webcal://${window.location.host}/api/trips/${savedTripId}/calendar.ics${shareCode ? `?token=${shareCode}` : ''}`;
+                      window.open(url);
+                    }}
+                  >
+                    <Calendar className="h-5 w-5 text-gray-700" />
+                    <span className="text-xs">Apple Calendar</span>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="flex flex-col items-center gap-1 h-auto py-3"
+                    onClick={() => {
+                      const icsUrl = `${baseUrl}/api/trips/${savedTripId}/calendar.ics${shareCode ? `?token=${shareCode}` : ''}`;
+                      const gcalUrl = `https://calendar.google.com/calendar/r?cid=${encodeURIComponent(icsUrl.replace('https://', 'webcal://'))}`;
+                      window.open(gcalUrl, '_blank');
+                    }}
+                  >
+                    <Calendar className="h-5 w-5 text-blue-500" />
+                    <span className="text-xs">Google Calendar</span>
+                  </Button>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full gap-2"
+                  onClick={() => {
+                    const url = `${baseUrl}/api/trips/${savedTripId}/calendar.ics?download=1${shareCode ? `&token=${shareCode}` : ''}`;
+                    window.open(url);
+                  }}
+                >
+                  <Download className="h-4 w-4" />
+                  Télécharger .ics
+                </Button>
+              </div>
+            )}
 
           </div>
         )}
