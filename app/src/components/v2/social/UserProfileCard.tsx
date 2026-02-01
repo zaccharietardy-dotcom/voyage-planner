@@ -19,7 +19,7 @@ export function UserProfileCard({ user, subtitle, showArrow = true }: UserProfil
 
   return (
     <button
-      onClick={() => router.push(`/v2/user/${user.id}`)}
+      onClick={() => router.push(`/user/${user.id}`)}
       className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-[#1a1a24] transition-colors text-left"
     >
       <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center overflow-hidden flex-shrink-0">

@@ -50,7 +50,7 @@ export function CloneTripModal({ isOpen, onClose, tripId, tripTitle, originalDur
 
       const clonedTrip = await response.json();
       onClose();
-      router.push(`/v2/trip/${clonedTrip.id}`);
+      router.push(`/trip/${clonedTrip.id}`);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Erreur inconnue');
     } finally {
