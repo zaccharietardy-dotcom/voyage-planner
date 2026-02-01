@@ -59,21 +59,92 @@ interface FeedTrip {
 }
 
 const DESTINATION_IMAGES: Record<string, string> = {
-  'Paris': 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800&q=80',
-  'Tokyo': 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=800&q=80',
-  'New York': 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=800&q=80',
-  'Londres': 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=800&q=80',
-  'Rome': 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=800&q=80',
-  'Barcelone': 'https://images.unsplash.com/photo-1583422409516-2895a77efded?w=800&q=80',
-  'default': 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=800&q=80',
+  'paris': 'photo-1502602898657-3e91760cbb34',
+  'tokyo': 'photo-1540959733332-eab4deabeeaf',
+  'new york': 'photo-1496442226666-8d4d0e62e6e9',
+  'londres': 'photo-1513635269975-59663e0ac1ad',
+  'london': 'photo-1513635269975-59663e0ac1ad',
+  'rome': 'photo-1552832230-c0197dd311b5',
+  'barcelone': 'photo-1583422409516-2895a77efded',
+  'barcelona': 'photo-1583422409516-2895a77efded',
+  'séville': 'photo-1559386484-97dfc0e15539',
+  'seville': 'photo-1559386484-97dfc0e15539',
+  'madrid': 'photo-1539037116277-4db20889f2d4',
+  'lisbonne': 'photo-1585208798174-6cedd86e019a',
+  'lisbon': 'photo-1585208798174-6cedd86e019a',
+  'amsterdam': 'photo-1534351590666-13e3e96b5017',
+  'berlin': 'photo-1560969184-10fe8719e047',
+  'prague': 'photo-1519677100203-a0e668c92439',
+  'vienne': 'photo-1516550893923-42d28e5677af',
+  'vienna': 'photo-1516550893923-42d28e5677af',
+  'budapest': 'photo-1549289524-06cf8837ace5',
+  'istanbul': 'photo-1524231757912-21f4fe3a7200',
+  'athènes': 'photo-1555993539-1732b0258235',
+  'athens': 'photo-1555993539-1732b0258235',
+  'marrakech': 'photo-1597211833712-5e41faa202ea',
+  'dubai': 'photo-1512453979798-5ea266f8880c',
+  'bangkok': 'photo-1508009603885-50cf7c579365',
+  'bali': 'photo-1537996194471-e657df975ab4',
+  'sydney': 'photo-1506973035872-a4ec16b8e8d9',
+  'rio': 'photo-1483729558449-99ef09a8c325',
+  'mexico': 'photo-1585464231875-d9ef1f5ad396',
+  'montreal': 'photo-1519178614-68673b201f36',
+  'nice': 'photo-1491166617655-0723a0999cfc',
+  'marseille': 'photo-1589394815804-964ed0be2eb5',
+  'lyon': 'photo-1524484485831-a92ffc0de03f',
+  'bordeaux': 'photo-1589981663595-a4f0e4e14fd1',
+  'milan': 'photo-1520440229-6469a149ac59',
+  'florence': 'photo-1543429258-434b0a4a1577',
+  'venise': 'photo-1534113414509-0eec2bfb493f',
+  'venice': 'photo-1534113414509-0eec2bfb493f',
+  'naples': 'photo-1516483638261-f4dbaf036963',
+  'santorini': 'photo-1570077188670-e3a8d69ac5ff',
+  'mykonos': 'photo-1601581875309-fafbf2d3ed3a',
+  'crete': 'photo-1589491106922-a44867ef9e9e',
+  'copenhague': 'photo-1513622470522-26c3c8a854bc',
+  'stockholm': 'photo-1509356843151-3e7d96241e11',
+  'oslo': 'photo-1533929736458-ca588d08c8be',
+  'dublin': 'photo-1549918864-48ac978761a4',
+  'edinburgh': 'photo-1506377585622-bedcbb027afc',
+  'bruxelles': 'photo-1559113513-d5e09c78b9dd',
+  'zurich': 'photo-1515488764276-beab0607c1e6',
+  'new delhi': 'photo-1587474260584-136574528ed5',
+  'singapour': 'photo-1525625293386-3f8f99389edd',
+  'singapore': 'photo-1525625293386-3f8f99389edd',
+  'hong kong': 'photo-1536599018102-9f803c979b13',
+  'seoul': 'photo-1534274988757-a28bf1a57c17',
+  'kyoto': 'photo-1493976040374-85c8e12f0c0e',
+  'los angeles': 'photo-1534190760961-74e8c1c5c3da',
+  'san francisco': 'photo-1501594907352-04cda38ebc29',
+  'chicago': 'photo-1494522855154-9297ac14b55f',
+  'miami': 'photo-1533106497176-45ae19e68ba2',
+  'la havane': 'photo-1500759285222-a95626b934cb',
+  'havana': 'photo-1500759285222-a95626b934cb',
+  'cancun': 'photo-1552074284-5e88ef1aef18',
+  'le caire': 'photo-1572252009286-268acec5ca0a',
+  'cairo': 'photo-1572252009286-268acec5ca0a',
+  'cape town': 'photo-1580060839134-75a5edca2e99',
+  'zanzibar': 'photo-1547471080-7cc2caa01a7e',
+  'maldives': 'photo-1514282401047-d79a71a590e8',
+  'maurice': 'photo-1589979481223-deb893043163',
+  'mauritius': 'photo-1589979481223-deb893043163',
+  'seychelles': 'photo-1589979481223-deb893043163',
+  'phuket': 'photo-1589394815804-964ed0be2eb5',
+  'tokyo': 'photo-1540959733332-eab4deabeeaf',
 };
 
 function getDestinationImage(destination: string): string {
-  const normalized = destination.toLowerCase();
-  for (const [key, url] of Object.entries(DESTINATION_IMAGES)) {
-    if (normalized.includes(key.toLowerCase())) return url;
+  const normalized = destination.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const destNormalized = destination.toLowerCase();
+
+  for (const [key, photoId] of Object.entries(DESTINATION_IMAGES)) {
+    const keyNormalized = key.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    if (normalized.includes(keyNormalized) || destNormalized.includes(key)) {
+      return `https://images.unsplash.com/${photoId}?w=800&q=80`;
+    }
   }
-  return DESTINATION_IMAGES.default;
+  // Fallback: generic travel image
+  return 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=800&q=80';
 }
 
 export default function ExplorePage() {
