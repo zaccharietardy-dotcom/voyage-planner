@@ -40,19 +40,23 @@ export function useRealtimeTrip(tripId: string, userId?: string): UseRealtimeTri
   const retryCountRef = useRef(0);
 
   // Charger les données du voyage
+  const isRetryingRef = useRef(false);
+
   const fetchTrip = useCallback(async () => {
     try {
       setError(null);
+      isRetryingRef.current = false;
 
       const response = await fetch(`/api/trips/${tripId}`);
       if (!response.ok) {
-        if (response.status === 401 && retryCountRef.current < 3) {
-          // Auth not ready yet — retry after delay
+        if ((response.status === 401 || response.status === 403) && retryCountRef.current < 3) {
+          // Auth not ready yet — retry after delay, keep loading state
           retryCountRef.current++;
+          isRetryingRef.current = true;
           setTimeout(() => fetchTrip(), retryCountRef.current * 800);
           return;
         }
-        throw new Error(response.status === 401 ? 'Non authentifié' : 'Voyage non trouvé');
+        throw new Error(response.status === 401 ? 'Non authentifié' : response.status === 403 ? 'Accès refusé' : 'Voyage non trouvé');
       }
       retryCountRef.current = 0;
 
@@ -88,7 +92,9 @@ export function useRealtimeTrip(tripId: string, userId?: string): UseRealtimeTri
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erreur de chargement');
     } finally {
-      setIsLoading(false);
+      if (!isRetryingRef.current) {
+        setIsLoading(false);
+      }
     }
   }, [tripId]);
 
