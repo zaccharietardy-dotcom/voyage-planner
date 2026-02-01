@@ -147,15 +147,27 @@ export async function PATCH(
     }
 
     // Vérifier que l'utilisateur est owner ou editor
-    const { data: member } = await supabase
-      .from('trip_members')
-      .select('role')
-      .eq('trip_id', id)
-      .eq('user_id', user.id)
+    // First check if user is trip owner
+    const { data: trip } = await supabase
+      .from('trips')
+      .select('owner_id')
+      .eq('id', id)
       .single();
 
-    if (!member || member.role === 'viewer') {
-      return NextResponse.json({ error: 'Permission refusée' }, { status: 403 });
+    const isOwner = trip?.owner_id === user.id;
+
+    if (!isOwner) {
+      // Fallback: check trip_members
+      const { data: member } = await supabase
+        .from('trip_members')
+        .select('role')
+        .eq('trip_id', id)
+        .eq('user_id', user.id)
+        .single();
+
+      if (!member || member.role === 'viewer') {
+        return NextResponse.json({ error: 'Permission refusée' }, { status: 403 });
+      }
     }
 
     const updates = await request.json();
