@@ -1,6 +1,14 @@
 import { createRouteHandlerClient } from '@/lib/supabase/server';
+import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 import { Trip, TripDay, TripItem } from '@/lib/types';
+
+function getServiceClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+}
 
 function escapeIcal(str: string): string {
   return (str || '')
@@ -75,11 +83,18 @@ export async function GET(
     const token = request.nextUrl.searchParams.get('token');
     const download = request.nextUrl.searchParams.get('download') === '1';
 
-    const supabase = await createRouteHandlerClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const sc = getServiceClient();
 
-    // Fetch trip
-    const { data: trip, error } = await supabase
+    // Try to get authenticated user (optional - calendar can be accessed via token)
+    let userId: string | null = null;
+    try {
+      const supabase = await createRouteHandlerClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      userId = user?.id || null;
+    } catch { /* not authenticated */ }
+
+    // Fetch trip with service client (bypasses RLS)
+    const { data: trip, error } = await sc
       .from('trips')
       .select('*')
       .eq('id', id)
@@ -96,15 +111,15 @@ export async function GET(
       hasAccess = true;
     } else if (token && trip.share_code === token) {
       hasAccess = true;
-    } else if (user) {
-      if (trip.owner_id === user.id) {
+    } else if (userId) {
+      if (trip.owner_id === userId) {
         hasAccess = true;
       } else {
-        const { data: member } = await supabase
+        const { data: member } = await sc
           .from('trip_members')
           .select('id')
           .eq('trip_id', id)
-          .eq('user_id', user.id)
+          .eq('user_id', userId)
           .single();
         if (member) hasAccess = true;
       }

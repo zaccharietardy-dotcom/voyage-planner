@@ -86,6 +86,17 @@ export async function notifyReply(replierId: string, parentCommentUserId: string
   );
 }
 
+export async function notifyTripInvite(senderId: string, recipientId: string, senderName: string, tripId: string, destination: string) {
+  if (senderId === recipientId) return;
+  await createNotification(
+    recipientId,
+    'trip_invite',
+    'Invitation à un voyage',
+    `${senderName} vous a invité à rejoindre son voyage à ${destination}`,
+    { userId: senderId, tripId, destination }
+  );
+}
+
 export async function notifyMessage(senderId: string, recipientId: string, senderName: string, conversationId: string) {
   if (senderId === recipientId) return;
   await createNotification(

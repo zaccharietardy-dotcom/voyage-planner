@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, MapPin, Loader2, Calendar } from 'lucide-react';
+import { ArrowLeft, MapPin, Loader2, Calendar, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -42,6 +42,25 @@ export default function UserProfilePage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [trips, setTrips] = useState<UserTrip[]>([]);
   const [loading, setLoading] = useState(true);
+  const [startingChat, setStartingChat] = useState(false);
+
+  const handleStartChat = async () => {
+    if (startingChat) return;
+    setStartingChat(true);
+    try {
+      const res = await fetch('/api/messages/conversations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId }),
+      });
+      if (!res.ok) throw new Error('Erreur');
+      const data = await res.json();
+      router.push(`/messages/${data.conversation_id}`);
+    } catch (e) {
+      console.error('Start chat error:', e);
+      setStartingChat(false);
+    }
+  };
 
   useEffect(() => {
     if (userId) {
@@ -121,14 +140,28 @@ export default function UserProfilePage() {
           </div>
         </div>
 
-        {/* Follow button */}
+        {/* Follow + Message buttons */}
         {user && user.id !== userId && (
-          <div className="flex justify-center mt-4">
+          <div className="flex justify-center gap-2 mt-4">
             <FollowButton
               userId={userId}
               initialIsFollowing={profile.isFollowing}
               initialIsCloseFriend={profile.isCloseFriend}
             />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleStartChat}
+              disabled={startingChat}
+              className="gap-1"
+            >
+              {startingChat ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <MessageCircle className="h-4 w-4" />
+              )}
+              Message
+            </Button>
           </div>
         )}
 

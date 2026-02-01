@@ -25,7 +25,9 @@ import {
   LogIn,
   Calendar,
   Download,
+  UserPlus,
 } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
 import { TripVisibilitySelector } from '@/components/trip/TripVisibilitySelector';
 
@@ -55,6 +57,10 @@ export function ShareTripDialog({
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState<'viewer' | 'editor' | false>(false);
   const [showQR, setShowQR] = useState(false);
+  const [friends, setFriends] = useState<any[]>([]);
+  const [friendsLoading, setFriendsLoading] = useState(false);
+  const [sentTo, setSentTo] = useState<Set<string>>(new Set());
+  const [sendingTo, setSendingTo] = useState<string | null>(null);
 
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
   const shareUrl = shareCode ? `${baseUrl}/join/${shareCode}` : '';
@@ -83,6 +89,58 @@ export function ShareTripDialog({
     };
     checkExisting();
   }, [open, user]);
+
+  // Charger abonnés + abonnements quand le dialog s'ouvre et qu'on a un shareCode
+  useEffect(() => {
+    if (!open || !user || !shareCode) return;
+    const fetchFriends = async () => {
+      setFriendsLoading(true);
+      try {
+        const [followingRes, followersRes] = await Promise.all([
+          fetch(`/api/follows?type=following`),
+          fetch(`/api/follows?type=followers`),
+        ]);
+        const followingData = followingRes.ok ? await followingRes.json() : [];
+        const followersData = followersRes.ok ? await followersRes.json() : [];
+
+        // Fusionner et dédupliquer
+        const map = new Map<string, any>();
+        for (const f of followingData) {
+          const u = f.following;
+          if (u && u.id !== user.id) map.set(u.id, u);
+        }
+        for (const f of followersData) {
+          const u = f.follower;
+          if (u && u.id !== user.id && !map.has(u.id)) map.set(u.id, u);
+        }
+        setFriends(Array.from(map.values()));
+      } catch { /* ignore */ }
+      setFriendsLoading(false);
+    };
+    fetchFriends();
+  }, [open, user, shareCode]);
+
+  // Inviter un ami au voyage
+  const inviteFriend = async (friendId: string) => {
+    if (!savedTripId || sendingTo) return;
+    setSendingTo(friendId);
+    try {
+      const res = await fetch(`/api/trips/${savedTripId}/invite`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: friendId, role: 'viewer' }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Erreur invitation');
+      }
+      setSentTo(prev => new Set(prev).add(friendId));
+    } catch (e) {
+      console.error('Invite friend error:', e);
+    } finally {
+      setSendingTo(null);
+    }
+  };
 
   // Sauvegarder le voyage en Supabase pour obtenir un code de partage
   const saveTrip = async () => {
@@ -277,10 +335,10 @@ export function ShareTripDialog({
         {/* Code de partage disponible */}
         {shareCode && (
           <div className="space-y-4 py-4">
-            {/* Visibilit\u00e9 */}
+            {/* Visibilité */}
             {isOwner && savedTripId && (
               <div className="space-y-2">
-                <label className="text-sm font-medium">Visibilit\u00e9 du voyage</label>
+                <label className="text-sm font-medium">Visibilité du voyage</label>
                 <TripVisibilitySelector
                   tripId={savedTripId}
                   currentVisibility={currentVisibility}
@@ -314,12 +372,12 @@ export function ShareTripDialog({
               </p>
             </div>
 
-            {/* Lien \u00e9diteur */}
+            {/* Lien éditeur */}
             {isOwner && (
               <div className="space-y-2">
                 <label className="text-sm font-medium flex items-center gap-2">
                   <Users className="h-4 w-4" />
-                  Lien \u00e9diteur
+                  Lien éditeur
                 </label>
                 <div className="flex gap-2">
                   <Input
@@ -399,6 +457,60 @@ export function ShareTripDialog({
               </Button>
             </div>
 
+            {/* Partager avec des amis */}
+            {friends.length > 0 && (
+              <div className="space-y-2 pt-2 border-t">
+                <label className="text-sm font-medium flex items-center gap-2">
+                  <UserPlus className="h-4 w-4" />
+                  Inviter un ami
+                </label>
+                <div className="max-h-40 overflow-y-auto space-y-1">
+                  {friends.map((friend: any) => (
+                    <div
+                      key={friend.id}
+                      className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted/50"
+                    >
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={friend.avatar_url || undefined} />
+                        <AvatarFallback className="text-xs">
+                          {(friend.display_name || friend.username || '?')[0].toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="flex-1 text-sm font-medium truncate">
+                        {friend.display_name || friend.username || 'Voyageur'}
+                      </span>
+                      <Button
+                        size="sm"
+                        variant={sentTo.has(friend.id) ? 'ghost' : 'outline'}
+                        disabled={sentTo.has(friend.id) || sendingTo === friend.id}
+                        onClick={() => inviteFriend(friend.id)}
+                        className="shrink-0 h-8 gap-1"
+                      >
+                        {sentTo.has(friend.id) ? (
+                          <>
+                            <Check className="h-3 w-3 text-green-500" />
+                            <span className="text-xs">Invité</span>
+                          </>
+                        ) : sendingTo === friend.id ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : (
+                          <>
+                            <UserPlus className="h-3 w-3" />
+                            <span className="text-xs">Inviter</span>
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            {friendsLoading && (
+              <div className="flex justify-center py-2">
+                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+              </div>
+            )}
+
             {/* Calendar export section */}
             {savedTripId && (
               <div className="space-y-2 pt-2 border-t">
@@ -411,8 +523,9 @@ export function ShareTripDialog({
                     variant="outline"
                     className="flex flex-col items-center gap-1 h-auto py-3"
                     onClick={() => {
-                      const url = `webcal://${window.location.host}/api/trips/${savedTripId}/calendar.ics${shareCode ? `?token=${shareCode}` : ''}`;
-                      window.open(url);
+                      const tokenParam = shareCode ? `?token=${shareCode}` : '';
+                      const url = `webcal://${window.location.host}/api/trips/${savedTripId}/calendar.ics${tokenParam}`;
+                      window.location.href = url;
                     }}
                   >
                     <Calendar className="h-5 w-5 text-gray-700" />
@@ -422,8 +535,9 @@ export function ShareTripDialog({
                     variant="outline"
                     className="flex flex-col items-center gap-1 h-auto py-3"
                     onClick={() => {
-                      const icsUrl = `${baseUrl}/api/trips/${savedTripId}/calendar.ics${shareCode ? `?token=${shareCode}` : ''}`;
-                      const gcalUrl = `https://calendar.google.com/calendar/r?cid=${encodeURIComponent(icsUrl.replace('https://', 'webcal://'))}`;
+                      const tokenParam = shareCode ? `?token=${shareCode}` : '';
+                      const icsUrl = `${baseUrl}/api/trips/${savedTripId}/calendar.ics${tokenParam}`;
+                      const gcalUrl = `https://calendar.google.com/calendar/r/settings/addbyurl?url=${encodeURIComponent(icsUrl)}`;
                       window.open(gcalUrl, '_blank');
                     }}
                   >
