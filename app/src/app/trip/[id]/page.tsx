@@ -894,10 +894,10 @@ export default function TripPage() {
         {/* Mobile layout: everything in tabs */}
         <div className="lg:hidden">
           <Tabs value={mainTab} onValueChange={setMainTab}>
-            <TabsList className={`w-full grid mb-4 ${canEdit ? 'grid-cols-5' : 'grid-cols-3'}`}>
+            <TabsList className={`w-full grid mb-4 ${canEdit ? 'grid-cols-5' : user ? 'grid-cols-3' : 'grid-cols-2'}`}>
               <TabsTrigger value="planning" className="text-xs sm:text-sm">Planning</TabsTrigger>
               <TabsTrigger value="carte" className="text-xs sm:text-sm">Carte</TabsTrigger>
-              {canEdit && <TabsTrigger value="photos" className="text-xs sm:text-sm">Photos</TabsTrigger>}
+              {user && <TabsTrigger value="photos" className="text-xs sm:text-sm">Photos</TabsTrigger>}
               {canEdit && <TabsTrigger value="infos" className="text-xs sm:text-sm">Infos</TabsTrigger>}
               {canEdit && <TabsTrigger value="depenses" className="text-xs sm:text-sm">D\u00e9penses</TabsTrigger>}
             </TabsList>
@@ -1038,7 +1038,7 @@ export default function TripPage() {
               <Card>
                 <CardHeader><CardTitle className="text-lg">Photos</CardTitle></CardHeader>
                 <CardContent className="space-y-4">
-                  {isOwner && <PhotoUploader tripId={tripId} />}
+                  {(isOwner || canEdit) && <PhotoUploader tripId={tripId} />}
                   <PhotoGallery tripId={tripId} isOwner={isOwner} />
                 </CardContent>
               </Card>
@@ -1069,7 +1069,7 @@ export default function TripPage() {
             <Tabs value={mainTab} onValueChange={setMainTab}>
               <TabsList className="mb-4">
                 <TabsTrigger value="planning">Planning</TabsTrigger>
-                {canEdit && <TabsTrigger value="photos">Photos</TabsTrigger>}
+                {user && <TabsTrigger value="photos">Photos</TabsTrigger>}
                 {canEdit && <TabsTrigger value="infos">Infos pratiques</TabsTrigger>}
                 {canEdit && <TabsTrigger value="depenses">D\u00e9penses</TabsTrigger>}
               </TabsList>
@@ -1140,7 +1140,7 @@ export default function TripPage() {
                 <Card>
                   <CardHeader><CardTitle className="text-lg">Photos</CardTitle></CardHeader>
                   <CardContent className="space-y-4">
-                    {isOwner && <PhotoUploader tripId={tripId} />}
+                    {(isOwner || canEdit) && <PhotoUploader tripId={tripId} />}
                     <PhotoGallery tripId={tripId} isOwner={isOwner} />
                   </CardContent>
                 </Card>
