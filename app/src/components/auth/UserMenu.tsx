@@ -21,14 +21,13 @@ export function UserMenu() {
   const router = useRouter();
 
   const handleSignOut = async () => {
+    setIsSigningOut(true);
     try {
-      setIsSigningOut(true);
       await signOut();
-      window.location.href = '/';
     } catch (error) {
       console.error('Erreur lors de la déconnexion:', error);
-      setIsSigningOut(false);
     }
+    window.location.href = '/';
   };
 
   if (isLoading) {
