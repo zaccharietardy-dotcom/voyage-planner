@@ -7,6 +7,7 @@ import { SearchBar } from '@/components/v2/ui/SearchBar';
 import { ArrowRight, ArrowLeft, Sparkles, Calendar, Users, Wallet, MapPin, Plane, Check, AlertCircle, Home } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { TripPreferences, ActivityType, BudgetLevel } from '@/lib/types';
+import { GeneratingOverlay } from '@/components/trip/GeneratingOverlay';
 
 const popularDestinations = [
   { name: 'Tokyo', country: 'Japon', emoji: '🇯🇵', image: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=300&h=200&fit=crop' },
@@ -516,6 +517,13 @@ export default function CreatePage() {
           </AnimatePresence>
         </div>
       </div>
+      <GeneratingOverlay
+        isOpen={isGenerating}
+        destination={destination}
+        origin={origin}
+        startDate={dates.start}
+        durationDays={dates.start && dates.end ? Math.ceil((new Date(dates.end).getTime() - new Date(dates.start).getTime()) / (1000 * 60 * 60 * 24)) : 7}
+      />
     </V2Layout>
   );
 }
