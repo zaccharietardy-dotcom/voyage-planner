@@ -13,6 +13,10 @@ export async function GET(request: Request) {
     const limit = parseInt(searchParams.get('limit') || '20');
     const offset = (page - 1) * limit;
 
+    const destination = searchParams.get('destination');
+    const minDays = searchParams.get('minDays');
+    const maxDays = searchParams.get('maxDays');
+
     if (tab === 'following' && !user) {
       return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
     }
@@ -41,7 +45,7 @@ export async function GET(request: Request) {
       );
 
       // Fetch trips from followed users
-      const { data: trips, error } = await supabase
+      let followingQuery = supabase
         .from('trips')
         .select(`
           id, title, name, destination, start_date, end_date, duration_days,
@@ -50,8 +54,14 @@ export async function GET(request: Request) {
         `)
         .in('owner_id', followingIds)
         .in('visibility', ['public', 'friends'])
-        .order('created_at', { ascending: false })
-        .range(offset, offset + limit - 1);
+        .order('created_at', { ascending: false });
+
+      if (destination) followingQuery = followingQuery.ilike('destination', `%${destination}%`);
+      if (minDays) followingQuery = followingQuery.gte('duration_days', parseInt(minDays));
+      if (maxDays) followingQuery = followingQuery.lte('duration_days', parseInt(maxDays));
+
+      followingQuery = followingQuery.range(offset, offset + limit - 1);
+      const { data: trips, error } = await followingQuery;
 
       if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
@@ -89,17 +99,24 @@ export async function GET(request: Request) {
       });
     }
 
-    // Discover tab - all public trips
-    const { data: trips, error } = await supabase
+    // Discover tab - all public trips (exclude own trips)
+    let discoverQuery = supabase
       .from('trips')
       .select(`
         id, title, name, destination, start_date, end_date, duration_days,
-        visibility, created_at, preferences,
+        visibility, created_at, preferences, owner_id,
         owner:owner_id (id, display_name, avatar_url, username)
       `)
       .eq('visibility', 'public')
-      .order('created_at', { ascending: false })
-      .range(offset, offset + limit - 1);
+      .order('created_at', { ascending: false });
+
+    if (user) discoverQuery = discoverQuery.neq('owner_id', user.id);
+    if (destination) discoverQuery = discoverQuery.ilike('destination', `%${destination}%`);
+    if (minDays) discoverQuery = discoverQuery.gte('duration_days', parseInt(minDays));
+    if (maxDays) discoverQuery = discoverQuery.lte('duration_days', parseInt(maxDays));
+
+    discoverQuery = discoverQuery.range(offset, offset + limit - 1);
+    const { data: trips, error } = await discoverQuery;
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 

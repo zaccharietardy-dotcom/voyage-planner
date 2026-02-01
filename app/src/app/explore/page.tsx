@@ -267,9 +267,11 @@ export default function ExplorePage() {
                         className="w-full h-full object-cover"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                      <Badge className="absolute top-3 right-3 bg-black/50 text-white border-0">
-                        {trip.duration_days} jours
-                      </Badge>
+                      {trip.duration_days && (
+                        <Badge className="absolute top-3 right-3 bg-black/50 text-white border-0">
+                          {trip.duration_days} jours
+                        </Badge>
+                      )}
                       <div className="absolute bottom-3 left-3 right-3">
                         <h3 className="text-xl font-bold text-white mb-1">{trip.destination}</h3>
                         {trip.title && trip.title !== trip.destination && (
