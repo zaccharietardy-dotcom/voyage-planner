@@ -205,6 +205,101 @@ export function findDropPosition(
 }
 
 /**
+ * Vérifie si un item est un transport verrouillé (non déplaçable/supprimable)
+ */
+export function isLockedItem(item: TripItem): boolean {
+  return item.type === 'transport' || item.type === 'flight';
+}
+
+/**
+ * Permute deux jours entiers (swap)
+ */
+export function swapDays(
+  days: TripDay[],
+  dayIndexA: number,
+  dayIndexB: number
+): TripDay[] {
+  if (dayIndexA < 0 || dayIndexB < 0 || dayIndexA >= days.length || dayIndexB >= days.length) {
+    return days;
+  }
+  const newDays = days.map((day) => ({ ...day, items: [...day.items] }));
+  // Swap the items and themes but keep dayNumber and date in place
+  const tempItems = newDays[dayIndexA].items;
+  const tempTheme = newDays[dayIndexA].theme;
+  const tempNarrative = newDays[dayIndexA].dayNarrative;
+
+  newDays[dayIndexA].items = newDays[dayIndexB].items;
+  newDays[dayIndexA].theme = newDays[dayIndexB].theme;
+  newDays[dayIndexA].dayNarrative = newDays[dayIndexB].dayNarrative;
+
+  newDays[dayIndexB].items = tempItems;
+  newDays[dayIndexB].theme = tempTheme;
+  newDays[dayIndexB].dayNarrative = tempNarrative;
+
+  // Update dayNumber on items
+  newDays.forEach((day, idx) => {
+    day.items.forEach((item) => {
+      item.dayNumber = idx + 1;
+    });
+  });
+
+  return newDays;
+}
+
+/**
+ * Déplace un item d'une position dans le même jour (haut/bas)
+ */
+export function moveItemInDay(
+  days: TripDay[],
+  dayIndex: number,
+  fromIndex: number,
+  direction: 'up' | 'down'
+): TripDay[] {
+  const toIndex = direction === 'up' ? fromIndex - 1 : fromIndex + 1;
+  if (toIndex < 0 || toIndex >= days[dayIndex].items.length) return days;
+
+  const newDays = days.map((day) => ({ ...day, items: [...day.items] }));
+  const items = newDays[dayIndex].items;
+
+  // Swap
+  [items[fromIndex], items[toIndex]] = [items[toIndex], items[fromIndex]];
+
+  // Update orderIndex
+  items.forEach((item, idx) => { item.orderIndex = idx; });
+
+  return newDays;
+}
+
+/**
+ * Supprime un item d'un jour
+ */
+export function removeItem(
+  days: TripDay[],
+  dayIndex: number,
+  itemIndex: number
+): TripDay[] {
+  const newDays = days.map((day) => ({ ...day, items: [...day.items] }));
+  newDays[dayIndex].items.splice(itemIndex, 1);
+  newDays[dayIndex].items.forEach((item, idx) => { item.orderIndex = idx; });
+  return newDays;
+}
+
+/**
+ * Ajoute un item à un jour
+ */
+export function addItem(
+  days: TripDay[],
+  dayIndex: number,
+  item: TripItem
+): TripDay[] {
+  const newDays = days.map((day) => ({ ...day, items: [...day.items] }));
+  item.dayNumber = dayIndex + 1;
+  item.orderIndex = newDays[dayIndex].items.length;
+  newDays[dayIndex].items.push(item);
+  return newDays;
+}
+
+/**
  * Génère une description pour un déplacement
  */
 export function generateMoveDescription(

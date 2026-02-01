@@ -24,17 +24,30 @@ import { DraggableActivity, ActivityOverlay } from './DraggableActivity';
 import {
   recalculateTimes,
   moveItem,
+  moveItemInDay,
+  removeItem,
+  swapDays,
   findItemById,
   findDropPosition,
-  generateMoveDescription,
+  isLockedItem,
 } from '@/lib/services/itineraryCalculator';
 import { createMoveActivityChange, ProposedChange } from '@/lib/types/collaboration';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Sun, Moon, Sunrise } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+  Calendar,
+  Sun,
+  Moon,
+  Sunrise,
+  ChevronLeft,
+  ChevronRight,
+  Plus,
+} from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 interface DraggableTimelineProps {
   days: TripDay[];
@@ -42,17 +55,29 @@ interface DraggableTimelineProps {
   isOwner: boolean;
   onDirectUpdate?: (updatedDays: TripDay[]) => void;
   onProposalCreate?: (change: ProposedChange) => void;
+  onEditItem?: (item: TripItem) => void;
+  onAddItem?: (dayNumber: number) => void;
 }
 
 // Composant pour un jour droppable
 function DroppableDay({
   day,
+  dayIndex,
+  totalDays,
   isEditable,
   children,
+  onSwapLeft,
+  onSwapRight,
+  onAddItem,
 }: {
   day: TripDay;
+  dayIndex: number;
+  totalDays: number;
   isEditable: boolean;
   children: React.ReactNode;
+  onSwapLeft?: () => void;
+  onSwapRight?: () => void;
+  onAddItem?: () => void;
 }) {
   const { isOver, setNodeRef } = useDroppable({
     id: `day-${day.dayNumber}`,
@@ -79,10 +104,36 @@ function DroppableDay({
     >
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-base flex items-center gap-2">
-            <Calendar className="h-4 w-4" />
-            Jour {day.dayNumber}
-          </CardTitle>
+          <div className="flex items-center gap-1">
+            {/* Swap day left */}
+            {isEditable && dayIndex > 0 && onSwapLeft && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7"
+                onClick={onSwapLeft}
+                title="Permuter avec le jour précédent"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+            )}
+            <CardTitle className="text-base flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
+              Jour {day.dayNumber}
+            </CardTitle>
+            {/* Swap day right */}
+            {isEditable && dayIndex < totalDays - 1 && onSwapRight && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7"
+                onClick={onSwapRight}
+                title="Permuter avec le jour suivant"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
           <div className="flex items-center gap-2">
             <Badge variant="secondary" className="text-xs">
               {getDayPeriodIcon()}
@@ -90,20 +141,23 @@ function DroppableDay({
             </Badge>
             {day.date && (
               <Badge variant="outline" className="text-xs">
-                {day.date ? format(new Date(day.date), 'EEE d MMM', { locale: fr }) : ''}
+                {format(new Date(day.date), 'EEE d MMM', { locale: fr })}
               </Badge>
             )}
           </div>
         </div>
+        {day.theme && (
+          <p className="text-xs text-muted-foreground mt-1">{day.theme}</p>
+        )}
       </CardHeader>
       <CardContent>
         <SortableContext
           items={day.items.map((item) => item.id)}
           strategy={verticalListSortingStrategy}
         >
-          <div className="space-y-2 min-h-[100px]">
+          <div className="space-y-2 min-h-[60px]">
             {day.items.length === 0 ? (
-              <div className="h-[100px] flex items-center justify-center border-2 border-dashed rounded-lg text-muted-foreground text-sm">
+              <div className="h-[60px] flex items-center justify-center border-2 border-dashed rounded-lg text-muted-foreground text-sm">
                 Glissez une activité ici
               </div>
             ) : (
@@ -111,17 +165,22 @@ function DroppableDay({
             )}
           </div>
         </SortableContext>
+
+        {/* Add activity button */}
+        {isEditable && onAddItem && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full mt-3 gap-2 border-dashed"
+            onClick={onAddItem}
+          >
+            <Plus className="h-4 w-4" />
+            Ajouter une activité
+          </Button>
+        )}
       </CardContent>
     </Card>
   );
-}
-
-// Filter out 'transport' items from days (transfers are replaced by ItineraryConnector links)
-function filterTransportItems(days: TripDay[]): TripDay[] {
-  return days.map(day => ({
-    ...day,
-    items: day.items,
-  }));
 }
 
 export function DraggableTimeline({
@@ -130,13 +189,14 @@ export function DraggableTimeline({
   isOwner,
   onDirectUpdate,
   onProposalCreate,
+  onEditItem,
+  onAddItem,
 }: DraggableTimelineProps) {
   const [activeItem, setActiveItem] = useState<TripItem | null>(null);
-  // Filter out transport items for display - memoize to avoid new refs every render
-  const filteredDays = useMemo(() => filterTransportItems(days), [days]);
+  const filteredDays = useMemo(() => days.map(day => ({ ...day, items: [...day.items] })), [days]);
   const [localDays, setLocalDays] = useState(filteredDays);
 
-  // Sync local days when props change (in useEffect, not during render)
+  // Sync local days when props change
   useEffect(() => {
     if (!activeItem) {
       setLocalDays(filteredDays);
@@ -146,7 +206,7 @@ export function DraggableTimeline({
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 8, // Minimum de 8px de déplacement pour activer
+        distance: 8,
       },
     }),
     useSensor(KeyboardSensor, {
@@ -154,11 +214,57 @@ export function DraggableTimeline({
     })
   );
 
+  // Apply update (owner = direct, editor = proposal)
+  const applyUpdate = useCallback((newDays: TripDay[]) => {
+    const recalculated = recalculateTimes(newDays);
+    if (isOwner && onDirectUpdate) {
+      onDirectUpdate(recalculated);
+      setLocalDays(recalculated);
+    }
+  }, [isOwner, onDirectUpdate]);
+
+  // Move item up/down within same day
+  const handleMoveInDay = useCallback((dayIndex: number, itemIndex: number, direction: 'up' | 'down') => {
+    try {
+      const newDays = moveItemInDay(localDays, dayIndex, itemIndex, direction);
+      applyUpdate(newDays);
+    } catch (err) {
+      console.error('Move error:', err);
+    }
+  }, [localDays, applyUpdate]);
+
+  // Delete item
+  const handleDeleteItem = useCallback((dayIndex: number, itemIndex: number, itemTitle: string) => {
+    if (!confirm(`Supprimer "${itemTitle}" ?`)) return;
+    try {
+      const newDays = removeItem(localDays, dayIndex, itemIndex);
+      applyUpdate(newDays);
+      toast.success(`"${itemTitle}" supprimé`);
+    } catch (err) {
+      console.error('Delete error:', err);
+    }
+  }, [localDays, applyUpdate]);
+
+  // Swap days
+  const handleSwapDays = useCallback((dayIndexA: number, dayIndexB: number) => {
+    try {
+      const newDays = swapDays(localDays, dayIndexA, dayIndexB);
+      applyUpdate(newDays);
+      toast.success(`Jour ${dayIndexA + 1} et Jour ${dayIndexB + 1} permutés`);
+    } catch (err) {
+      console.error('Swap error:', err);
+    }
+  }, [localDays, applyUpdate]);
+
   const handleDragStart = useCallback(
     (event: DragStartEvent) => {
       const { active } = event;
       const found = findItemById(localDays, active.id as string);
       if (found) {
+        // Don't allow dragging locked items
+        if (isLockedItem(found.item)) {
+          return;
+        }
         setActiveItem(found.item);
       }
     },
@@ -166,7 +272,7 @@ export function DraggableTimeline({
   );
 
   const handleDragOver = useCallback((event: DragOverEvent) => {
-    // Prévisualisation pendant le drag (optionnel)
+    // Preview during drag (optional)
   }, []);
 
   const handleDragEnd = useCallback(
@@ -182,10 +288,12 @@ export function DraggableTimeline({
 
         if (!activeFound || !overPosition) return;
 
+        // Don't move locked items
+        if (isLockedItem(activeFound.item)) return;
+
         const { dayIndex: fromDayIndex, itemIndex: fromItemIndex, item } = activeFound;
         const { dayIndex: toDayIndex, itemIndex: toItemIndex } = overPosition;
 
-        // Déplacer l'item
         const newDays = moveItem(
           localDays,
           fromDayIndex,
@@ -194,16 +302,12 @@ export function DraggableTimeline({
           toItemIndex
         );
 
-        // Recalculer les horaires
         const recalculatedDays = recalculateTimes(newDays);
 
-        // Si owner, appliquer directement
         if (isOwner && onDirectUpdate) {
           onDirectUpdate(recalculatedDays);
           setLocalDays(recalculatedDays);
-        }
-        // Sinon, créer une proposition
-        else if (onProposalCreate) {
+        } else if (onProposalCreate) {
           const change = createMoveActivityChange(
             fromDayIndex + 1,
             toDayIndex + 1,
@@ -212,7 +316,6 @@ export function DraggableTimeline({
             item.title
           );
           onProposalCreate(change);
-          // Revenir à l'état initial
           setLocalDays(filteredDays);
         }
       } catch (err) {
@@ -238,13 +341,28 @@ export function DraggableTimeline({
       onDragCancel={handleDragCancel}
     >
       <div className="space-y-4">
-        {localDays.map((day) => (
-          <DroppableDay key={day.dayNumber} day={day} isEditable={isEditable}>
-            {day.items.map((item) => (
+        {localDays.map((day, dayIndex) => (
+          <DroppableDay
+            key={day.dayNumber}
+            day={day}
+            dayIndex={dayIndex}
+            totalDays={localDays.length}
+            isEditable={isEditable}
+            onSwapLeft={dayIndex > 0 ? () => handleSwapDays(dayIndex, dayIndex - 1) : undefined}
+            onSwapRight={dayIndex < localDays.length - 1 ? () => handleSwapDays(dayIndex, dayIndex + 1) : undefined}
+            onAddItem={onAddItem ? () => onAddItem(day.dayNumber) : undefined}
+          >
+            {day.items.map((item, itemIndex) => (
               <DraggableActivity
                 key={item.id}
                 item={item}
                 isEditable={isEditable}
+                isFirst={itemIndex === 0}
+                isLast={itemIndex === day.items.length - 1}
+                onMoveUp={() => handleMoveInDay(dayIndex, itemIndex, 'up')}
+                onMoveDown={() => handleMoveInDay(dayIndex, itemIndex, 'down')}
+                onDelete={() => handleDeleteItem(dayIndex, itemIndex, item.title)}
+                onEdit={onEditItem ? () => onEditItem(item) : undefined}
               />
             ))}
           </DroppableDay>

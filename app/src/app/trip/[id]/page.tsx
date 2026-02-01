@@ -44,6 +44,8 @@ import { PhotoGallery } from '@/components/photos/PhotoGallery';
 import { PhotoUploader } from '@/components/photos/PhotoUploader';
 import { PastTripView } from '@/components/trip/PastTripView';
 import { ProposedChange, createMoveActivityChange } from '@/lib/types/collaboration';
+import { recalculateTimes } from '@/lib/services/itineraryCalculator';
+import { AddActivityModal } from '@/components/trip/AddActivityModal';
 import { cn } from '@/lib/utils';
 import {
   DropdownMenu,
@@ -185,6 +187,8 @@ export default function TripPage() {
   const [editingItem, setEditingItem] = useState<TripItem | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showCloneModal, setShowCloneModal] = useState(false);
+  const [showAddActivityModal, setShowAddActivityModal] = useState(false);
+  const [addActivityDay, setAddActivityDay] = useState<number>(1);
 
   // Track viewport to avoid mounting two DndContext instances
   const [isDesktop, setIsDesktop] = useState(false);
@@ -370,6 +374,25 @@ export default function TripPage() {
     const updatedTrip = { ...trip, days: updatedDays, updatedAt: new Date() };
     saveTrip(updatedTrip);
     toast.success('Activité supprimée');
+  };
+
+  const handleAddNewItem = (newItem: TripItem) => {
+    if (!trip) return;
+    const dayIndex = trip.days.findIndex((d) => d.dayNumber === newItem.dayNumber);
+    if (dayIndex === -1) return;
+
+    const updatedDays = trip.days.map((day, idx) => {
+      if (idx !== dayIndex) return day;
+      return {
+        ...day,
+        items: [...day.items, { ...newItem, orderIndex: day.items.length }],
+      };
+    });
+
+    const updatedTrip = { ...trip, days: recalculateTimes(updatedDays), updatedAt: new Date() };
+    saveTrip(updatedTrip);
+    setShowAddActivityModal(false);
+    toast.success(`"${newItem.title}" ajouté au Jour ${newItem.dayNumber}`);
   };
 
   // Helper function for sorting times with after-midnight handling
@@ -681,15 +704,26 @@ export default function TripPage() {
               )}
 
               {/* Bouton mode édition */}
-              {canEdit && (
+              {canEdit && !editMode && (
                 <Button
-                  variant={editMode ? 'default' : 'outline'}
+                  variant="outline"
                   size="sm"
-                  onClick={() => setEditMode(!editMode)}
+                  onClick={() => setEditMode(true)}
                   className="gap-2"
                 >
                   <GripVertical className="h-4 w-4" />
-                  {editMode ? 'Terminer' : 'Éditer'}
+                  Éditer
+                </Button>
+              )}
+              {canEdit && editMode && (
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={() => setEditMode(false)}
+                  className="gap-2"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  Terminer l&apos;édition
                 </Button>
               )}
 
@@ -873,6 +907,8 @@ export default function TripPage() {
                       isOwner={isOwner}
                       onDirectUpdate={isOwner ? handleDirectUpdate : undefined}
                       onProposalCreate={!isOwner && canEdit ? handleProposalFromDrag : undefined}
+                      onEditItem={handleEditItem}
+                      onAddItem={(dayNumber) => { setAddActivityDay(dayNumber); setShowAddActivityModal(true); }}
                     />
                   ) : !editMode ? (
                     <Tabs value={activeDay} onValueChange={setActiveDay}>
@@ -1043,6 +1079,8 @@ export default function TripPage() {
                         isOwner={isOwner}
                         onDirectUpdate={isOwner ? handleDirectUpdate : undefined}
                         onProposalCreate={!isOwner && canEdit ? handleProposalFromDrag : undefined}
+                        onEditItem={handleEditItem}
+                        onAddItem={(dayNumber) => { setAddActivityDay(dayNumber); setShowAddActivityModal(true); }}
                       />
                     ) : !editMode ? (
                       <Tabs value={activeDay} onValueChange={setActiveDay}>
@@ -1240,6 +1278,16 @@ export default function TripPage() {
         onSave={handleSaveItem}
         onDelete={handleDeleteItem}
       />
+
+      {trip && (
+        <AddActivityModal
+          isOpen={showAddActivityModal}
+          onClose={() => setShowAddActivityModal(false)}
+          onAdd={handleAddNewItem}
+          dayNumber={addActivityDay}
+          destination={trip.preferences?.destination || collaborativeTrip?.destination || ''}
+        />
+      )}
     </div>
   );
 }
