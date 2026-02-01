@@ -21,21 +21,21 @@ export async function GET(
       return NextResponse.json(data || []);
     }
 
-    // Check if close friend
-    let isCloseFriend = false;
+    // Check if follower (following this user)
+    let isFollowing = false;
     if (user) {
-      const { data: cf } = await supabase
-        .from('close_friends')
+      const { data: follow } = await supabase
+        .from('follows')
         .select('id')
-        .or(`and(requester_id.eq.${user.id},target_id.eq.${id}),and(requester_id.eq.${id},target_id.eq.${user.id})`)
-        .eq('status', 'accepted')
+        .eq('follower_id', user.id)
+        .eq('following_id', id)
         .single();
-      isCloseFriend = !!cf;
+      isFollowing = !!follow;
     }
 
-    // Build visibility filter
+    // Build visibility filter - followers can see 'friends' trips
     const visibilities: ('public' | 'friends' | 'private')[] = ['public'];
-    if (isCloseFriend) visibilities.push('friends');
+    if (isFollowing) visibilities.push('friends');
 
     const { data } = await supabase
       .from('trips')

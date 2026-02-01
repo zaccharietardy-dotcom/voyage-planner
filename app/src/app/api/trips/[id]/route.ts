@@ -26,19 +26,41 @@ export async function GET(
       return NextResponse.json({ error: 'Voyage non trouvé' }, { status: 404 });
     }
 
-    // Vérifier que l'utilisateur est membre
-    const { data: member } = await supabase
-      .from('trip_members')
-      .select('role')
-      .eq('trip_id', id)
-      .eq('user_id', user.id)
-      .single();
+    // Check access: owner, trip_member, or visibility-based
+    const isOwner = trip.owner_id === user.id;
 
-    if (!member) {
-      return NextResponse.json({ error: 'Accès refusé' }, { status: 403 });
+    let userRole = isOwner ? 'owner' : null;
+
+    if (!isOwner) {
+      // Check trip_members
+      const { data: member } = await supabase
+        .from('trip_members')
+        .select('role')
+        .eq('trip_id', id)
+        .eq('user_id', user.id)
+        .single();
+
+      if (member) {
+        userRole = member.role;
+      } else if (trip.visibility === 'public') {
+        userRole = 'viewer';
+      } else if (trip.visibility === 'friends') {
+        // Check if user follows the owner
+        const { data: follow } = await supabase
+          .from('follows')
+          .select('id')
+          .eq('follower_id', user.id)
+          .eq('following_id', trip.owner_id)
+          .single();
+        if (follow) {
+          userRole = 'viewer';
+        }
+      }
     }
 
-    const userRole = member.role;
+    if (!userRole) {
+      return NextResponse.json({ error: 'Accès refusé' }, { status: 403 });
+    }
 
     // Récupérer les membres avec leurs profils
     const { data: members } = await supabase
