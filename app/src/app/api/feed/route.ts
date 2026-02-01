@@ -1,10 +1,20 @@
 import { createRouteHandlerClient } from '@/lib/supabase/server';
+import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
+
+// Service role client to bypass RLS for reading public trips
+function getServiceClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+}
 
 // GET /api/feed?tab=following|discover&page=1&limit=20
 export async function GET(request: Request) {
   try {
     const supabase = await createRouteHandlerClient();
+    const serviceClient = getServiceClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     const { searchParams } = new URL(request.url);
@@ -44,8 +54,8 @@ export async function GET(request: Request) {
         cfData?.map(cf => cf.requester_id === user.id ? cf.target_id : cf.requester_id) || []
       );
 
-      // Fetch trips from followed users
-      let followingQuery = supabase
+      // Fetch trips from followed users (use service client to bypass RLS)
+      let followingQuery = serviceClient
         .from('trips')
         .select(`
           id, title, name, destination, start_date, end_date, duration_days,
@@ -76,10 +86,10 @@ export async function GET(request: Request) {
       // Get like counts and user likes
       const tripIds = filteredTrips.map(t => t.id);
       const { data: likes } = tripIds.length > 0
-        ? await supabase.from('trip_likes').select('trip_id').in('trip_id', tripIds)
+        ? await serviceClient.from('trip_likes').select('trip_id').in('trip_id', tripIds)
         : { data: [] };
       const { data: userLikes } = tripIds.length > 0
-        ? await supabase.from('trip_likes').select('trip_id').in('trip_id', tripIds).eq('user_id', user.id)
+        ? await serviceClient.from('trip_likes').select('trip_id').in('trip_id', tripIds).eq('user_id', user.id)
         : { data: [] };
 
       const likeCounts: Record<string, number> = {};
@@ -99,8 +109,8 @@ export async function GET(request: Request) {
       });
     }
 
-    // Discover tab - all public trips (exclude own trips)
-    let discoverQuery = supabase
+    // Discover tab - all public trips (exclude own trips, use service client to bypass RLS)
+    let discoverQuery = serviceClient
       .from('trips')
       .select(`
         id, title, name, destination, start_date, end_date, duration_days,
@@ -123,7 +133,7 @@ export async function GET(request: Request) {
     // Get like counts
     const tripIds = trips?.map(t => t.id) || [];
     const { data: likes } = tripIds.length > 0
-      ? await supabase.from('trip_likes').select('trip_id').in('trip_id', tripIds)
+      ? await serviceClient.from('trip_likes').select('trip_id').in('trip_id', tripIds)
       : { data: [] };
 
     const likeCounts: Record<string, number> = {};
@@ -132,7 +142,7 @@ export async function GET(request: Request) {
     let userLikedSet = new Set<string>();
     let followingSet = new Set<string>();
     if (user && tripIds.length > 0) {
-      const { data: userLikes } = await supabase
+      const { data: userLikes } = await serviceClient
         .from('trip_likes')
         .select('trip_id')
         .in('trip_id', tripIds)
@@ -142,7 +152,7 @@ export async function GET(request: Request) {
       // Get follow status for trip owners
       const ownerIds = [...new Set(trips?.map((t: any) => t.owner_id).filter(Boolean) || [])];
       if (ownerIds.length > 0) {
-        const { data: follows } = await supabase
+        const { data: follows } = await serviceClient
           .from('follows')
           .select('following_id')
           .eq('follower_id', user.id)
