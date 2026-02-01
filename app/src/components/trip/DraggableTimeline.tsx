@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import {
   DndContext,
   DragOverlay,
@@ -63,7 +63,7 @@ function DroppableDay({
     const firstItem = day.items[0];
     if (!firstItem) return <Sun className="h-4 w-4" />;
 
-    const hour = parseInt(firstItem.startTime.split(':')[0], 10);
+    const hour = parseInt(firstItem.startTime?.split(':')[0] || '12', 10);
     if (hour < 12) return <Sunrise className="h-4 w-4" />;
     if (hour < 18) return <Sun className="h-4 w-4" />;
     return <Moon className="h-4 w-4" />;
@@ -132,14 +132,16 @@ export function DraggableTimeline({
   onProposalCreate,
 }: DraggableTimelineProps) {
   const [activeItem, setActiveItem] = useState<TripItem | null>(null);
-  // Filter out transport items for display
-  const filteredDays = filterTransportItems(days);
+  // Filter out transport items for display - memoize to avoid new refs every render
+  const filteredDays = useMemo(() => filterTransportItems(days), [days]);
   const [localDays, setLocalDays] = useState(filteredDays);
 
-  // Mettre à jour les jours locaux quand les props changent
-  if (filteredDays !== localDays && !activeItem) {
-    setLocalDays(filteredDays);
-  }
+  // Sync local days when props change (in useEffect, not during render)
+  useEffect(() => {
+    if (!activeItem) {
+      setLocalDays(filteredDays);
+    }
+  }, [filteredDays, activeItem]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {

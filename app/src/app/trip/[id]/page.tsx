@@ -182,6 +182,16 @@ export default function TripPage() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showCloneModal, setShowCloneModal] = useState(false);
 
+  // Track viewport to avoid mounting two DndContext instances
+  const [isDesktop, setIsDesktop] = useState(false);
+  useEffect(() => {
+    const mql = window.matchMedia('(min-width: 1024px)');
+    setIsDesktop(mql.matches);
+    const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
+    mql.addEventListener('change', handler);
+    return () => mql.removeEventListener('change', handler);
+  }, []);
+
   // Déterminer quel trip utiliser
   const trip = useCollaborativeMode ? collaborativeTrip?.data : localTrip;
   const loading = useCollaborativeMode ? collaborativeLoading : localLoading;
@@ -825,7 +835,7 @@ export default function TripPage() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  {editMode ? (
+                  {editMode && !isDesktop ? (
                     <DraggableTimeline
                       days={trip.days}
                       isEditable={canEdit}
@@ -833,7 +843,7 @@ export default function TripPage() {
                       onDirectUpdate={isOwner ? handleDirectUpdate : undefined}
                       onProposalCreate={!isOwner && canEdit ? handleProposalFromDrag : undefined}
                     />
-                  ) : (
+                  ) : !editMode ? (
                     <Tabs value={activeDay} onValueChange={setActiveDay}>
                       <TabsList className="w-full flex-wrap h-auto gap-1 bg-transparent p-0 mb-4">
                         {trip.days.map((day) => (
@@ -860,7 +870,7 @@ export default function TripPage() {
                         </TabsContent>
                       ))}
                     </Tabs>
-                  )}
+                  ) : null}
                 </CardContent>
               </Card>
             </TabsContent>
@@ -995,7 +1005,7 @@ export default function TripPage() {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    {editMode ? (
+                    {editMode && isDesktop ? (
                       <DraggableTimeline
                         days={trip.days}
                         isEditable={canEdit}
@@ -1003,7 +1013,7 @@ export default function TripPage() {
                         onDirectUpdate={isOwner ? handleDirectUpdate : undefined}
                         onProposalCreate={!isOwner && canEdit ? handleProposalFromDrag : undefined}
                       />
-                    ) : (
+                    ) : !editMode ? (
                       <Tabs value={activeDay} onValueChange={setActiveDay}>
                         <TabsList className="w-full flex-wrap h-auto gap-1 bg-transparent p-0 mb-4">
                           {trip.days.map((day) => (
@@ -1030,7 +1040,7 @@ export default function TripPage() {
                           </TabsContent>
                         ))}
                       </Tabs>
-                    )}
+                    ) : null}
                   </CardContent>
                 </Card>
               </TabsContent>
