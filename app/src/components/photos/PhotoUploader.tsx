@@ -2,9 +2,9 @@
 
 import { useState, useRef } from 'react';
 import { Camera, X, MapPin, Loader2, Eye, EyeOff } from 'lucide-react';
-import { getSupabaseClient } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { toast } from 'sonner';
 
 interface PhotoUploaderProps {
   tripId: string;
@@ -44,42 +44,35 @@ export function PhotoUploader({
     setUploading(true);
 
     try {
-      const supabase = getSupabaseClient();
-      const ext = file.name.split('.').pop();
-      const path = `${tripId}/${Date.now()}.${ext}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('trip-photos')
-        .upload(path, file, { contentType: file.type });
-
-      if (uploadError) throw uploadError;
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('caption', caption);
+      formData.append('visibility', visibility);
+      if (latitude != null) formData.append('latitude', String(latitude));
+      if (longitude != null) formData.append('longitude', String(longitude));
+      if (locationName) formData.append('location_name', locationName);
+      if (dayNumber != null) formData.append('day_number', String(dayNumber));
 
       const response = await fetch(`/api/trips/${tripId}/photos`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          storage_path: path,
-          caption,
-          latitude,
-          longitude,
-          location_name: locationName,
-          day_number: dayNumber,
-          visibility,
-          media_type: file.type.startsWith('video/') ? 'video' : 'image',
-          file_size: file.size,
-        }),
+        body: formData,
       });
 
-      if (!response.ok) throw new Error('Erreur sauvegarde');
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({ error: 'Erreur upload' }));
+        throw new Error(err.error || 'Erreur upload');
+      }
 
       const photo = await response.json();
       onUploadComplete?.(photo);
+      toast.success('Photo ajoutée !');
 
       setFile(null);
       setPreview(null);
       setCaption('');
-    } catch (e) {
+    } catch (e: any) {
       console.error('Upload error:', e);
+      toast.error(e.message || 'Erreur lors de l\'upload');
     } finally {
       setUploading(false);
     }
