@@ -11,10 +11,6 @@ export async function GET(
     const supabase = await createRouteHandlerClient();
     const { data: { user } } = await supabase.auth.getUser();
 
-    if (!user) {
-      return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
-    }
-
     // Récupérer le voyage
     const { data: trip, error: tripError } = await supabase
       .from('trips')
@@ -27,39 +23,50 @@ export async function GET(
     }
 
     // Check access: owner, trip_member, or visibility-based
-    const isOwner = trip.owner_id === user.id;
+    let userRole: string | null = null;
 
-    let userRole = isOwner ? 'owner' : null;
+    if (user) {
+      const isOwner = trip.owner_id === user.id;
+      userRole = isOwner ? 'owner' : null;
 
-    if (!isOwner) {
-      // Check trip_members
-      const { data: member } = await supabase
-        .from('trip_members')
-        .select('role')
-        .eq('trip_id', id)
-        .eq('user_id', user.id)
-        .single();
-
-      if (member) {
-        userRole = member.role;
-      } else if (trip.visibility === 'public') {
-        userRole = 'viewer';
-      } else if (trip.visibility === 'friends') {
-        // Check if user follows the owner
-        const { data: follow } = await supabase
-          .from('follows')
-          .select('id')
-          .eq('follower_id', user.id)
-          .eq('following_id', trip.owner_id)
+      if (!isOwner) {
+        // Check trip_members
+        const { data: member } = await supabase
+          .from('trip_members')
+          .select('role')
+          .eq('trip_id', id)
+          .eq('user_id', user.id)
           .single();
-        if (follow) {
+
+        if (member) {
+          userRole = member.role;
+        } else if (trip.visibility === 'public') {
           userRole = 'viewer';
+        } else if (trip.visibility === 'friends') {
+          // Check if user follows the owner
+          const { data: follow } = await supabase
+            .from('follows')
+            .select('id')
+            .eq('follower_id', user.id)
+            .eq('following_id', trip.owner_id)
+            .single();
+          if (follow) {
+            userRole = 'viewer';
+          }
         }
+      }
+    } else {
+      // Unauthenticated: only allow public trips
+      if (trip.visibility === 'public') {
+        userRole = 'viewer';
       }
     }
 
     if (!userRole) {
-      return NextResponse.json({ error: 'Accès refusé' }, { status: 403 });
+      return NextResponse.json(
+        { error: user ? 'Accès refusé' : 'Non authentifié' },
+        { status: user ? 403 : 401 }
+      );
     }
 
     // Récupérer les membres avec leurs profils

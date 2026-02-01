@@ -238,33 +238,48 @@ export default function TripPage() {
     }
 
     // Fallback: fetch from API if not in localStorage
-    fetch(`/api/trips/${tripId}`)
-      .then(r => r.ok ? r.json() : null)
-      .then(data => {
-        if (data) {
-          // Store DB-level trip for past trip detection
-          setDbTrip(data);
-
-          if (data.data && Object.keys(data.data).length > 0) {
-            const tripData = data.data;
-            if (tripData.createdAt) tripData.createdAt = new Date(tripData.createdAt);
-            if (tripData.updatedAt) tripData.updatedAt = new Date(tripData.updatedAt);
-            if (tripData.preferences?.startDate) tripData.preferences.startDate = new Date(tripData.preferences.startDate);
-            if (tripData.days) {
-              tripData.days = tripData.days.map((day: TripDay) => ({
-                ...day,
-                date: day.date ? new Date(day.date) : new Date(),
-              }));
-            }
-            tripData.id = tripId;
-            setLocalTrip(tripData);
-            // Also cache in localStorage for next time
-            localStorage.setItem('currentTrip', JSON.stringify(tripData));
-          }
+    const fetchFromApi = async (retries = 0): Promise<void> => {
+      try {
+        const r = await fetch(`/api/trips/${tripId}`);
+        if (r.status === 401 && retries < 3) {
+          // Auth not ready yet, retry
+          await new Promise(resolve => setTimeout(resolve, (retries + 1) * 800));
+          return fetchFromApi(retries + 1);
         }
-      })
-      .catch(e => console.error('Error fetching trip from API:', e))
-      .finally(() => setLocalLoading(false));
+        if (!r.ok) return;
+        const data = await r.json();
+        handleApiData(data);
+      } catch (e) {
+        console.error('Error fetching trip from API:', e);
+      } finally {
+        setLocalLoading(false);
+      }
+    };
+
+    const handleApiData = (data: any) => {
+      if (data) {
+        // Store DB-level trip for past trip detection
+        setDbTrip(data);
+
+        if (data.data && Object.keys(data.data).length > 0) {
+          const tripData = data.data;
+          if (tripData.createdAt) tripData.createdAt = new Date(tripData.createdAt);
+          if (tripData.updatedAt) tripData.updatedAt = new Date(tripData.updatedAt);
+          if (tripData.preferences?.startDate) tripData.preferences.startDate = new Date(tripData.preferences.startDate);
+          if (tripData.days) {
+            tripData.days = tripData.days.map((day: TripDay) => ({
+              ...day,
+              date: day.date ? new Date(day.date) : new Date(),
+            }));
+          }
+          tripData.id = tripId;
+          setLocalTrip(tripData);
+          localStorage.setItem('currentTrip', JSON.stringify(tripData));
+        }
+      }
+    };
+
+    fetchFromApi();
   }, [tripId]);
 
   // Vérifier si on peut utiliser le mode collaboratif

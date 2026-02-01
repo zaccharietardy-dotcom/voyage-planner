@@ -37,6 +37,8 @@ export function useRealtimeTrip(tripId: string, userId?: string): UseRealtimeTri
   const supabase = getSupabaseClient();
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
+  const retryCountRef = useRef(0);
+
   // Charger les données du voyage
   const fetchTrip = useCallback(async () => {
     try {
@@ -44,8 +46,15 @@ export function useRealtimeTrip(tripId: string, userId?: string): UseRealtimeTri
 
       const response = await fetch(`/api/trips/${tripId}`);
       if (!response.ok) {
-        throw new Error('Voyage non trouvé');
+        if (response.status === 401 && retryCountRef.current < 3) {
+          // Auth not ready yet — retry after delay
+          retryCountRef.current++;
+          setTimeout(() => fetchTrip(), retryCountRef.current * 800);
+          return;
+        }
+        throw new Error(response.status === 401 ? 'Non authentifié' : 'Voyage non trouvé');
       }
+      retryCountRef.current = 0;
 
       const data = await response.json();
 
@@ -85,6 +94,7 @@ export function useRealtimeTrip(tripId: string, userId?: string): UseRealtimeTri
 
   // Configurer les subscriptions temps réel
   useEffect(() => {
+    retryCountRef.current = 0;
     fetchTrip();
 
     // Créer le channel pour ce voyage
