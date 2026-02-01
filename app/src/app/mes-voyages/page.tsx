@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/components/auth';
-import { getSupabaseClient, Trip } from '@/lib/supabase';
+import { Trip } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -71,28 +71,31 @@ export default function MesVoyagesPage() {
   }, [user, authLoading]);
 
   const updateVisibility = async (tripId: string, visibility: TripVisibility) => {
-    const supabase = getSupabaseClient();
+    try {
+      const res = await fetch(`/api/trips/${tripId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ visibility }),
+      });
 
-    const { error } = await supabase
-      .from('trips')
-      .update({ visibility })
-      .eq('id', tripId);
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Erreur');
+      }
 
-    if (error) {
+      // Update local state
+      setTrips(prev =>
+        prev.map(trip =>
+          trip.id === tripId ? { ...trip, visibility } : trip
+        )
+      );
+
+      const option = VISIBILITY_OPTIONS.find(o => o.value === visibility);
+      toast.success(`Voyage maintenant ${option?.label.toLowerCase()}`);
+    } catch (error) {
       console.error('Error updating visibility:', error);
       toast.error('Erreur lors de la mise à jour de la visibilité');
-      return;
     }
-
-    // Update local state
-    setTrips(prev =>
-      prev.map(trip =>
-        trip.id === tripId ? { ...trip, visibility } : trip
-      )
-    );
-
-    const option = VISIBILITY_OPTIONS.find(o => o.value === visibility);
-    toast.success(`Voyage maintenant ${option?.label.toLowerCase()}`);
   };
 
   // Afficher le loader seulement pendant le chargement initial de l'auth

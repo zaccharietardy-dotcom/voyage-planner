@@ -160,13 +160,18 @@ export async function PATCH(
 
     const updates = await request.json();
 
+    // Build update object
+    const updateObj: Record<string, any> = {
+      updated_at: new Date().toISOString(),
+    };
+    if (updates.data !== undefined) updateObj.data = updates.data;
+    if (updates.visibility !== undefined) updateObj.visibility = updates.visibility;
+    if (updates.title !== undefined) updateObj.title = updates.title;
+
     // Mettre à jour le voyage
     const { data: trip, error } = await supabase
       .from('trips')
-      .update({
-        data: updates.data,
-        updated_at: new Date().toISOString(),
-      })
+      .update(updateObj)
       .eq('id', id)
       .select()
       .single();
