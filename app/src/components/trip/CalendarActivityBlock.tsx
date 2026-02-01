@@ -47,134 +47,182 @@ export function CalendarActivityBlock({
   const canResize = isEditable && !locked;
   const color = TRIP_ITEM_COLORS[item.type] || '#6B7280';
 
-  const [resizing, setResizing] = useState<'top' | 'bottom' | null>(null);
+  // Visual-only drag state: delta in slots from the original position
+  const [dragState, setDragState] = useState<{
+    edge: 'top' | 'bottom';
+    deltaSlots: number;
+  } | null>(null);
+
+  // Snapshot of item at drag start (immune to re-renders)
+  const dragItemRef = useRef(item);
   const startYRef = useRef(0);
-  const startRowRef = useRef(rowStart);
-  const startSpanRef = useRef(rowSpan);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const slotHeightRef = useRef(slotHeight);
+  const rowStartRef = useRef(rowStart);
+  const rowSpanRef = useRef(rowSpan);
 
   const handleResizeStart = useCallback(
     (edge: 'top' | 'bottom', e: React.MouseEvent) => {
       if (!canResize) return;
       e.preventDefault();
       e.stopPropagation();
-      setResizing(edge);
+
+      // Snapshot everything at drag start
+      dragItemRef.current = item;
       startYRef.current = e.clientY;
-      startRowRef.current = rowStart;
-      startSpanRef.current = rowSpan;
+      slotHeightRef.current = slotHeight;
+      rowStartRef.current = rowStart;
+      rowSpanRef.current = rowSpan;
+      setDragState({ edge, deltaSlots: 0 });
 
       const handleMouseMove = (ev: MouseEvent) => {
         const dy = ev.clientY - startYRef.current;
-        const dSlots = Math.round(dy / slotHeight);
+        const deltaSlots = Math.round(dy / slotHeightRef.current);
+        setDragState({ edge, deltaSlots });
+      };
 
+      const handleMouseUp = (ev: MouseEvent) => {
+        window.removeEventListener('mousemove', handleMouseMove);
+        window.removeEventListener('mouseup', handleMouseUp);
+
+        const dy = ev.clientY - startYRef.current;
+        const deltaSlots = Math.round(dy / slotHeightRef.current);
+        const snap = dragItemRef.current;
+
+        // Compute final item
         if (edge === 'bottom') {
-          const newSpan = Math.max(1, startSpanRef.current + dSlots);
+          const newSpan = Math.max(1, rowSpanRef.current + deltaSlots);
           const newDuration = newSpan * 15;
-          const newEndTime = formatTime(parseMinutes(item.startTime) + newDuration);
-          if (newDuration !== item.duration) {
-            onUpdate?.({ ...item, duration: newDuration, endTime: newEndTime });
+          const newEndTime = formatTime(parseMinutes(snap.startTime) + newDuration);
+          if (newDuration !== snap.duration) {
+            onUpdate?.({ ...snap, duration: newDuration, endTime: newEndTime });
           }
         } else {
-          // top resize: change startTime, keep endTime
-          const newRowStart = Math.max(1, startRowRef.current + dSlots);
+          const newRowStart = Math.max(1, rowStartRef.current + deltaSlots);
           const newStartMinutes = (newRowStart - 1) * 15;
-          const endMinutes = parseMinutes(item.endTime);
+          const endMinutes = parseMinutes(snap.endTime);
           const newDuration = endMinutes - newStartMinutes;
           if (newDuration >= 15) {
             onUpdate?.({
-              ...item,
+              ...snap,
               startTime: formatTime(newStartMinutes),
               duration: newDuration,
             });
           }
         }
-      };
 
-      const handleMouseUp = () => {
-        setResizing(null);
+        setDragState(null);
         onInteraction?.();
-        window.removeEventListener('mousemove', handleMouseMove);
-        window.removeEventListener('mouseup', handleMouseUp);
       };
 
       window.addEventListener('mousemove', handleMouseMove);
       window.addEventListener('mouseup', handleMouseUp);
     },
-    [canResize, rowStart, rowSpan, slotHeight, item, onUpdate]
+    [canResize, item, slotHeight, rowStart, rowSpan, onUpdate, onInteraction]
   );
 
-  // Touch resize support
+  // Touch resize
   const handleTouchResizeStart = useCallback(
     (edge: 'top' | 'bottom', e: React.TouchEvent) => {
       if (!canResize) return;
       e.preventDefault();
       e.stopPropagation();
-      setResizing(edge);
+
       const touch = e.touches[0];
+      dragItemRef.current = item;
       startYRef.current = touch.clientY;
-      startRowRef.current = rowStart;
-      startSpanRef.current = rowSpan;
+      slotHeightRef.current = slotHeight;
+      rowStartRef.current = rowStart;
+      rowSpanRef.current = rowSpan;
+      setDragState({ edge, deltaSlots: 0 });
 
       const handleTouchMove = (ev: TouchEvent) => {
         const t = ev.touches[0];
         const dy = t.clientY - startYRef.current;
-        const dSlots = Math.round(dy / slotHeight);
+        const deltaSlots = Math.round(dy / slotHeightRef.current);
+        setDragState({ edge, deltaSlots });
+      };
+
+      const handleTouchEnd = (ev: TouchEvent) => {
+        window.removeEventListener('touchmove', handleTouchMove);
+        window.removeEventListener('touchend', handleTouchEnd);
+
+        // Use last known position from changedTouches
+        const t = ev.changedTouches[0];
+        const dy = t.clientY - startYRef.current;
+        const deltaSlots = Math.round(dy / slotHeightRef.current);
+        const snap = dragItemRef.current;
 
         if (edge === 'bottom') {
-          const newSpan = Math.max(1, startSpanRef.current + dSlots);
+          const newSpan = Math.max(1, rowSpanRef.current + deltaSlots);
           const newDuration = newSpan * 15;
-          const newEndTime = formatTime(parseMinutes(item.startTime) + newDuration);
-          if (newDuration !== item.duration) {
-            onUpdate?.({ ...item, duration: newDuration, endTime: newEndTime });
+          const newEndTime = formatTime(parseMinutes(snap.startTime) + newDuration);
+          if (newDuration !== snap.duration) {
+            onUpdate?.({ ...snap, duration: newDuration, endTime: newEndTime });
           }
         } else {
-          const newRowStart = Math.max(1, startRowRef.current + dSlots);
+          const newRowStart = Math.max(1, rowStartRef.current + deltaSlots);
           const newStartMinutes = (newRowStart - 1) * 15;
-          const endMinutes = parseMinutes(item.endTime);
+          const endMinutes = parseMinutes(snap.endTime);
           const newDuration = endMinutes - newStartMinutes;
           if (newDuration >= 15) {
             onUpdate?.({
-              ...item,
+              ...snap,
               startTime: formatTime(newStartMinutes),
               duration: newDuration,
             });
           }
         }
-      };
 
-      const handleTouchEnd = () => {
-        setResizing(null);
+        setDragState(null);
         onInteraction?.();
-        window.removeEventListener('touchmove', handleTouchMove);
-        window.removeEventListener('touchend', handleTouchEnd);
       };
 
       window.addEventListener('touchmove', handleTouchMove, { passive: false });
       window.addEventListener('touchend', handleTouchEnd);
     },
-    [canResize, rowStart, rowSpan, slotHeight, item, onUpdate]
+    [canResize, item, slotHeight, rowStart, rowSpan, onUpdate, onInteraction]
   );
+
+  // Visual position: apply drag delta for smooth preview
+  const visualRowStart = dragState?.edge === 'top'
+    ? Math.max(1, rowStart + dragState.deltaSlots)
+    : rowStart;
+  const visualRowSpan = dragState?.edge === 'bottom'
+    ? Math.max(1, rowSpan + dragState.deltaSlots)
+    : dragState?.edge === 'top'
+      ? Math.max(1, rowSpan - dragState.deltaSlots)
+      : rowSpan;
 
   const widthPercent = totalColumns > 1 ? `${100 / totalColumns}%` : '100%';
   const leftPercent = totalColumns > 1 ? `${(column / totalColumns) * 100}%` : '0%';
 
-  const heightPx = rowSpan * slotHeight;
-  const showDuration = heightPx >= 40;
-  const showTitle = heightPx >= 24;
+  const visualTop = (visualRowStart - 1) * slotHeight;
+  const visualHeight = visualRowSpan * slotHeight;
+  const showDuration = visualHeight >= 40;
+  const showTitle = visualHeight >= 24;
+
+  // Compute displayed times during drag
+  const displayStartTime = dragState?.edge === 'top'
+    ? formatTime(Math.max(0, (visualRowStart - 1) * 15))
+    : item.startTime;
+  const displayEndTime = dragState?.edge === 'bottom'
+    ? formatTime((rowStart - 1) * 15 + visualRowSpan * 15)
+    : dragState?.edge === 'top'
+      ? item.endTime
+      : item.endTime;
 
   return (
     <div
-      ref={containerRef}
       className={cn(
-        'absolute rounded-md border overflow-hidden transition-shadow select-none',
+        'absolute rounded-md border overflow-hidden select-none',
         canResize && 'cursor-pointer hover:shadow-md',
         locked && 'border-dashed opacity-80',
-        resizing && 'shadow-lg ring-2 ring-primary z-50'
+        dragState && 'shadow-lg ring-2 ring-primary z-50',
+        dragState && 'transition-none'
       )}
       style={{
-        gridRow: `${rowStart} / span ${rowSpan}`,
-        top: (rowStart - 1) * slotHeight,
-        height: heightPx,
+        top: visualTop,
+        height: visualHeight,
         left: `calc(${leftPercent} + 2px)`,
         width: `calc(${widthPercent} - 4px)`,
         backgroundColor: `${color}18`,
@@ -184,7 +232,7 @@ export function CalendarActivityBlock({
       onClick={(e) => {
         e.stopPropagation();
         onInteraction?.();
-        if (!resizing) {
+        if (!dragState) {
           onClick?.();
         }
       }}
@@ -210,7 +258,7 @@ export function CalendarActivityBlock({
         )}
         {showDuration && (
           <span className="text-[10px] text-muted-foreground truncate">
-            {item.startTime} – {item.endTime}
+            {displayStartTime} – {displayEndTime}
           </span>
         )}
       </div>
@@ -219,14 +267,14 @@ export function CalendarActivityBlock({
       {canResize && (
         <>
           <div
-            className="absolute top-0 left-0 right-0 h-1.5 cursor-row-resize hover:bg-foreground/10 flex items-center justify-center"
+            className="absolute top-0 left-0 right-0 h-2 cursor-row-resize hover:bg-foreground/10 flex items-center justify-center"
             onMouseDown={(e) => handleResizeStart('top', e)}
             onTouchStart={(e) => handleTouchResizeStart('top', e)}
           >
             <GripHorizontal className="h-2.5 w-2.5 text-muted-foreground/50" />
           </div>
           <div
-            className="absolute bottom-0 left-0 right-0 h-1.5 cursor-row-resize hover:bg-foreground/10 flex items-center justify-center"
+            className="absolute bottom-0 left-0 right-0 h-2 cursor-row-resize hover:bg-foreground/10 flex items-center justify-center"
             onMouseDown={(e) => handleResizeStart('bottom', e)}
             onTouchStart={(e) => handleTouchResizeStart('bottom', e)}
           >
