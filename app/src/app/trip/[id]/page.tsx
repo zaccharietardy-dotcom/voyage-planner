@@ -716,12 +716,12 @@ export default function TripPage() {
                       ) : (
                         <RefreshCw className="h-4 w-4" />
                       )}
-                      <span className="hidden sm:inline">R\u00e9g\u00e9n\u00e9rer</span>
+                      <span className="hidden sm:inline">Régénérer</span>
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem onClick={handleRegenerateTrip}>
-                      Tout r\u00e9g\u00e9n\u00e9rer
+                      Tout régénérer
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     {trip.days.map((day) => (
@@ -800,7 +800,7 @@ export default function TripPage() {
                 </Sheet>
               )}
 
-              {/* Bouton d\u00e9penses - owner/editor only */}
+              {/* Bouton dépenses - owner/editor only */}
               {canEdit && (
                 <Button
                   variant="outline"
@@ -809,7 +809,7 @@ export default function TripPage() {
                   onClick={() => setMainTab('depenses')}
                 >
                   <Receipt className="h-4 w-4" />
-                  <span className="hidden sm:inline">D\u00e9penses</span>
+                  <span className="hidden sm:inline">Dépenses</span>
                 </Button>
               )}
 
@@ -921,7 +921,7 @@ export default function TripPage() {
               <TabsTrigger value="carte" className="text-xs sm:text-sm">Carte</TabsTrigger>
               {user && <TabsTrigger value="photos" className="text-xs sm:text-sm">Photos</TabsTrigger>}
               {canEdit && <TabsTrigger value="infos" className="text-xs sm:text-sm">Infos</TabsTrigger>}
-              {canEdit && <TabsTrigger value="depenses" className="text-xs sm:text-sm">D\u00e9penses</TabsTrigger>}
+              {canEdit && <TabsTrigger value="depenses" className="text-xs sm:text-sm">Dépenses</TabsTrigger>}
             </TabsList>
 
             <TabsContent value="planning">
@@ -1123,7 +1123,7 @@ export default function TripPage() {
                 <TabsTrigger value="planning">Planning</TabsTrigger>
                 {user && <TabsTrigger value="photos">Photos</TabsTrigger>}
                 {canEdit && <TabsTrigger value="infos">Infos pratiques</TabsTrigger>}
-                {canEdit && <TabsTrigger value="depenses">D\u00e9penses</TabsTrigger>}
+                {canEdit && <TabsTrigger value="depenses">Dépenses</TabsTrigger>}
               </TabsList>
 
               <TabsContent value="planning">
@@ -1368,12 +1368,12 @@ export default function TripPage() {
           isOpen={showCloneModal}
           onClose={() => setShowCloneModal(false)}
           tripId={tripId}
-          tripTitle={collaborativeTrip?.title || `Voyage \u00e0 ${trip.preferences.destination}`}
+          tripTitle={collaborativeTrip?.title || `Voyage à ${trip.preferences.destination}`}
           originalDuration={trip.preferences.durationDays}
         />
       )}
 
-      {/* Modal d'\u00e9dition d'activit\u00e9 */}
+      {/* Modal d'édition d'activité */}
       <ActivityEditModal
         item={editingItem}
         isOpen={showEditModal}
