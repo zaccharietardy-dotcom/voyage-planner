@@ -130,7 +130,6 @@ const DESTINATION_IMAGES: Record<string, string> = {
   'mauritius': 'photo-1589979481223-deb893043163',
   'seychelles': 'photo-1589979481223-deb893043163',
   'phuket': 'photo-1589394815804-964ed0be2eb5',
-  'tokyo': 'photo-1540959733332-eab4deabeeaf',
 };
 
 function getDestinationImage(destination: string): string {
