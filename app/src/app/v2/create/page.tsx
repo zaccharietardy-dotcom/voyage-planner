@@ -112,7 +112,40 @@ export default function CreatePage() {
       // Stocker dans localStorage
       localStorage.setItem('currentTrip', JSON.stringify(data));
 
-      // Rediriger vers la page de résultat v2
+      // Sauvegarder dans Supabase pour la persistence
+      try {
+        const saveResponse = await fetch('/api/trips', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...data,
+            destination: destination,
+            startDate: dates.start,
+            durationDays: getDurationDays(),
+            preferences: {
+              origin,
+              destination,
+              startDate: dates.start,
+              durationDays: getDurationDays(),
+              groupSize: travelers,
+              budgetLevel: budget,
+              activities: styles,
+            },
+          }),
+        });
+        if (saveResponse.ok) {
+          const savedTrip = await saveResponse.json();
+          // Mettre à jour localStorage avec l'ID Supabase
+          const tripWithId = { ...data, id: savedTrip.id };
+          localStorage.setItem('currentTrip', JSON.stringify(tripWithId));
+          router.push(`/v2/trip/${savedTrip.id}`);
+          return;
+        }
+      } catch (saveErr) {
+        console.error('Erreur sauvegarde Supabase (non bloquant):', saveErr);
+      }
+
+      // Fallback: rediriger avec l'ID local si la sauvegarde a échoué
       router.push(`/v2/trip/${data.id}`);
     } catch (err) {
       console.error('Erreur:', err);

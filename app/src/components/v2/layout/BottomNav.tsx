@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import { Globe, Map, Plus, Users, User, Compass, Sparkles } from 'lucide-react';
 
 const navItems = [
-  { href: '/v2', icon: Compass, label: 'Explorer' },
+  { href: '/v2', icon: Compass, label: 'Parcourir' },
   { href: '/v2/trips', icon: Map, label: 'Voyages' },
   { href: '/v2/create', icon: Plus, label: 'Créer', isCenter: true },
   { href: '/v2/community', icon: Users, label: 'Amis' },

@@ -25,6 +25,10 @@ import {
 import type { Trip, TripDay, TripItem } from '@/lib/types';
 import { ItineraryConnector } from '@/components/trip/ItineraryConnector';
 import { shouldShowItinerary } from '@/lib/services/itineraryValidator';
+import { PhotoUploader } from '@/components/v2/photos/PhotoUploader';
+import { PhotoGallery } from '@/components/v2/photos/PhotoGallery';
+import { CloneTripModal } from '@/components/v2/trips/CloneTripModal';
+import { useAuth } from '@/components/auth';
 
 const ITEM_TYPE_ICONS: Record<string, any> = {
   activity: Camera,
@@ -53,25 +57,53 @@ const ITEM_TYPE_COLORS: Record<string, string> = {
 export default function TripPage() {
   const params = useParams();
   const router = useRouter();
+  const { user } = useAuth();
   const [trip, setTrip] = useState<Trip | null>(null);
   const [loading, setLoading] = useState(true);
   const [expandedDay, setExpandedDay] = useState<number | null>(1);
+  const [activeSection, setActiveSection] = useState<'itinerary' | 'photos' | 'expenses'>('itinerary');
+  const [showCloneModal, setShowCloneModal] = useState(false);
+  const [isOwner, setIsOwner] = useState(false);
 
   useEffect(() => {
-    // Charger le voyage depuis localStorage
-    const storedTrip = localStorage.getItem('currentTrip');
-    if (storedTrip) {
+    async function loadTrip() {
+      // 1. Essayer localStorage d'abord (cache rapide)
+      const storedTrip = localStorage.getItem('currentTrip');
+      if (storedTrip) {
+        try {
+          const parsedTrip = JSON.parse(storedTrip);
+          if (parsedTrip.id === params.id) {
+            setTrip(parsedTrip);
+            setLoading(false);
+            return;
+          }
+        } catch (e) {
+          console.error('Erreur parsing trip:', e);
+        }
+      }
+
+      // 2. Fallback: charger depuis Supabase
       try {
-        const parsedTrip = JSON.parse(storedTrip);
-        // Vérifier que c'est le bon voyage
-        if (parsedTrip.id === params.id) {
-          setTrip(parsedTrip);
+        const response = await fetch(`/api/trips/${params.id}`);
+        if (response.ok) {
+          const tripData = await response.json();
+          if (tripData.userRole === 'owner') setIsOwner(true);
+          // Le trip Supabase stocke l'itinéraire dans le champ "data"
+          const tripObj = tripData.data && typeof tripData.data === 'object'
+            ? { ...tripData.data, id: tripData.id, supabaseTrip: tripData }
+            : tripData;
+          setTrip(tripObj);
+          // Re-cache dans localStorage
+          localStorage.setItem('currentTrip', JSON.stringify(tripObj));
         }
       } catch (e) {
-        console.error('Erreur parsing trip:', e);
+        console.error('Erreur chargement trip depuis API:', e);
       }
+
+      setLoading(false);
     }
-    setLoading(false);
+
+    loadTrip();
   }, [params.id]);
 
   if (loading) {
@@ -136,7 +168,11 @@ export default function TripPage() {
                 {trip.days?.length || trip.preferences.durationDays} jours de voyage
               </p>
             </div>
-            <button className="p-2 rounded-full bg-white/20 backdrop-blur-sm">
+            <button
+              onClick={() => setShowCloneModal(true)}
+              className="p-2 rounded-full bg-white/20 backdrop-blur-sm"
+              title="Cloner"
+            >
               <Share2 className="w-5 h-5 text-white" />
             </button>
           </div>
@@ -170,8 +206,30 @@ export default function TripPage() {
           </div>
         </div>
 
+        {/* Section Tabs */}
+        <div className="px-4 -mt-1 relative z-10 mb-4">
+          <div className="flex gap-1 bg-[#12121a] rounded-xl p-1 border border-[#2a2a38]">
+            {(['itinerary', 'photos', 'expenses'] as const).map(tab => (
+              <button
+                key={tab}
+                onClick={() => setActiveSection(tab)}
+                className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                  activeSection === tab
+                    ? 'bg-gradient-to-r from-indigo-500 to-violet-600 text-white shadow-lg'
+                    : 'text-gray-400'
+                }`}
+              >
+                {tab === 'itinerary' ? 'Itinéraire' : tab === 'photos' ? 'Photos' : 'Dépenses'}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Content */}
-        <div className="px-4 -mt-3 relative z-10">
+        <div className="px-4 relative z-10">
+          {/* Itinerary Section */}
+          {activeSection === 'itinerary' && (
+          <>
           {/* Flights section */}
           {(trip.outboundFlight || trip.returnFlight) && (
             <div className="bg-[#12121a] rounded-2xl border border-[#2a2a38] p-4 mb-4">
@@ -262,8 +320,76 @@ export default function TripPage() {
               </div>
             </div>
           )}
+          </>
+          )}
+
+          {/* Photos Section */}
+          {activeSection === 'photos' && (
+            <div className="space-y-4">
+              {isOwner && (
+                <PhotoUploader
+                  tripId={params.id as string}
+                  onUploadComplete={() => {
+                    // Force re-render of gallery
+                    setActiveSection('itinerary');
+                    setTimeout(() => setActiveSection('photos'), 10);
+                  }}
+                />
+              )}
+              <PhotoGallery tripId={params.id as string} isOwner={isOwner} />
+            </div>
+          )}
+
+          {/* Expenses Section */}
+          {activeSection === 'expenses' && (
+            <div className="space-y-4">
+              <div className="bg-[#12121a] rounded-2xl border border-[#2a2a38] p-6 text-center">
+                <Wallet className="w-12 h-12 text-indigo-400 mx-auto mb-3" />
+                <h3 className="text-white font-semibold mb-2">Gestion des dépenses</h3>
+                <p className="text-gray-400 text-sm mb-4">
+                  Enregistre les dépenses du voyage et partage les frais avec ton groupe.
+                </p>
+                <button
+                  onClick={() => router.push(`/trip/${params.id}`)}
+                  className="px-6 py-2.5 rounded-xl bg-indigo-500 text-white text-sm font-medium"
+                >
+                  Gérer les dépenses
+                </button>
+              </div>
+
+              {/* Budget summary from trip data */}
+              {trip.costBreakdown && (
+                <div className="bg-[#12121a] rounded-2xl border border-[#2a2a38] p-4">
+                  <h4 className="text-white font-medium mb-3">Budget prévisionnel</h4>
+                  <div className="space-y-2">
+                    {Object.entries(trip.costBreakdown).map(([key, value]) => (
+                      value > 0 && (
+                        <div key={key} className="flex justify-between text-sm">
+                          <span className="text-gray-400 capitalize">{key === 'flights' ? 'Vols' : key === 'accommodation' ? 'Hébergement' : key === 'food' ? 'Restauration' : key === 'activities' ? 'Activités' : key}</span>
+                          <span className="text-white">{formatPrice(value as number)}</span>
+                        </div>
+                      )
+                    ))}
+                    <div className="border-t border-[#2a2a38] pt-2 flex justify-between font-medium">
+                      <span className="text-white">Total estimé</span>
+                      <span className="text-indigo-400">{formatPrice(trip.totalEstimatedCost || 0)}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Clone Modal */}
+      <CloneTripModal
+        isOpen={showCloneModal}
+        onClose={() => setShowCloneModal(false)}
+        tripId={params.id as string}
+        tripTitle={`${trip.preferences?.origin} → ${trip.preferences?.destination}`}
+        originalDuration={trip.days?.length || trip.preferences?.durationDays || 7}
+      />
     </V2Layout>
   );
 }

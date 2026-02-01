@@ -53,6 +53,8 @@ export interface Database {
           data: Json;
           share_code: string;
           visibility: 'public' | 'friends' | 'private';
+          cloned_from: string | null;
+          clone_count: number;
           created_at: string;
           updated_at: string;
         };
@@ -69,6 +71,8 @@ export interface Database {
           data: Json;
           share_code?: string;
           visibility?: 'public' | 'friends' | 'private';
+          cloned_from?: string | null;
+          clone_count?: number;
           created_at?: string;
           updated_at?: string;
         };
@@ -85,6 +89,8 @@ export interface Database {
           data?: Json;
           share_code?: string;
           visibility?: 'public' | 'friends' | 'private';
+          cloned_from?: string | null;
+          clone_count?: number;
           created_at?: string;
           updated_at?: string;
         };
@@ -523,6 +529,156 @@ export interface Database {
           }
         ];
       };
+      follows: {
+        Row: {
+          id: string;
+          follower_id: string;
+          following_id: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          follower_id: string;
+          following_id: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          follower_id?: string;
+          following_id?: string;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "follows_follower_id_fkey";
+            columns: ["follower_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "follows_following_id_fkey";
+            columns: ["following_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      close_friends: {
+        Row: {
+          id: string;
+          requester_id: string;
+          target_id: string;
+          status: 'pending' | 'accepted' | 'rejected';
+          created_at: string;
+          responded_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          requester_id: string;
+          target_id: string;
+          status?: 'pending' | 'accepted' | 'rejected';
+          created_at?: string;
+          responded_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          requester_id?: string;
+          target_id?: string;
+          status?: 'pending' | 'accepted' | 'rejected';
+          created_at?: string;
+          responded_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "close_friends_requester_id_fkey";
+            columns: ["requester_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "close_friends_target_id_fkey";
+            columns: ["target_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      trip_photos: {
+        Row: {
+          id: string;
+          trip_id: string;
+          user_id: string;
+          storage_path: string;
+          thumbnail_path: string | null;
+          caption: string | null;
+          latitude: number | null;
+          longitude: number | null;
+          location_name: string | null;
+          day_number: number | null;
+          visibility: 'public' | 'private';
+          media_type: 'image' | 'video';
+          width: number | null;
+          height: number | null;
+          file_size: number | null;
+          taken_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          trip_id: string;
+          user_id: string;
+          storage_path: string;
+          thumbnail_path?: string | null;
+          caption?: string | null;
+          latitude?: number | null;
+          longitude?: number | null;
+          location_name?: string | null;
+          day_number?: number | null;
+          visibility?: 'public' | 'private';
+          media_type?: 'image' | 'video';
+          width?: number | null;
+          height?: number | null;
+          file_size?: number | null;
+          taken_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          trip_id?: string;
+          user_id?: string;
+          storage_path?: string;
+          thumbnail_path?: string | null;
+          caption?: string | null;
+          latitude?: number | null;
+          longitude?: number | null;
+          location_name?: string | null;
+          day_number?: number | null;
+          visibility?: 'public' | 'private';
+          media_type?: 'image' | 'video';
+          width?: number | null;
+          height?: number | null;
+          file_size?: number | null;
+          taken_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "trip_photos_trip_id_fkey";
+            columns: ["trip_id"];
+            referencedRelation: "trips";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "trip_photos_user_id_fkey";
+            columns: ["user_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
       trip_comments: {
         Row: {
           id: string;
@@ -598,6 +754,9 @@ export type ActivityLog = Database['public']['Tables']['activity_log']['Row'];
 export type UserPreferences = Database['public']['Tables']['user_preferences']['Row'];
 export type TripLike = Database['public']['Tables']['trip_likes']['Row'];
 export type TripComment = Database['public']['Tables']['trip_comments']['Row'];
+export type Follow = Database['public']['Tables']['follows']['Row'];
+export type CloseFriend = Database['public']['Tables']['close_friends']['Row'];
+export type TripPhoto = Database['public']['Tables']['trip_photos']['Row'];
 
 // Extended types with relations
 export interface TripWithMembers extends Trip {

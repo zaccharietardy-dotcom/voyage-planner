@@ -1,28 +1,62 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { V2Layout } from '@/components/v2/layout/V2Layout';
-import { Settings, MapPin, Route, Globe, Award, LogOut, Loader2 } from 'lucide-react';
+import { Settings, MapPin, Globe, LogOut, Loader2, Users, Calendar, UserPlus } from 'lucide-react';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { UserProfileCard } from '@/components/v2/social/UserProfileCard';
+import { motion } from 'framer-motion';
+import Link from 'next/link';
+
+interface ProfileData {
+  followers_count: number;
+  following_count: number;
+  trips_count: number;
+  username: string | null;
+}
+
+interface TripItem {
+  id: string;
+  title: string;
+  name: string;
+  destination: string;
+  start_date: string;
+  duration_days: number;
+  visibility: string;
+}
 
 export default function ProfilePage() {
   const { user, profile, isLoading, signOut } = useAuth();
   const router = useRouter();
+  const [profileData, setProfileData] = useState<ProfileData | null>(null);
+  const [trips, setTrips] = useState<TripItem[]>([]);
+  const [followers, setFollowers] = useState<any[]>([]);
+  const [following, setFollowing] = useState<any[]>([]);
+  const [activeList, setActiveList] = useState<'trips' | 'followers' | 'following'>('trips');
 
-  // Rediriger si non connecté
   useEffect(() => {
     if (!isLoading && !user) {
       router.push('/login');
     }
   }, [isLoading, user, router]);
 
-  const stats = [
-    { icon: MapPin, label: 'Pays visités', value: 0 },
-    { icon: Route, label: 'Km parcourus', value: '0' },
-    { icon: Globe, label: 'Voyages', value: 0 },
-    { icon: Award, label: 'Badges', value: 0 },
-  ];
+  useEffect(() => {
+    if (user) {
+      // Fetch profile data, trips, followers, following in parallel
+      Promise.all([
+        fetch(`/api/users/${user.id}`).then(r => r.ok ? r.json() : null),
+        fetch('/api/trips').then(r => r.ok ? r.json() : []),
+        fetch('/api/follows?type=followers').then(r => r.ok ? r.json() : []),
+        fetch('/api/follows?type=following').then(r => r.ok ? r.json() : []),
+      ]).then(([profileRes, tripsRes, followersRes, followingRes]) => {
+        if (profileRes) setProfileData(profileRes);
+        setTrips(tripsRes || []);
+        setFollowers(followersRes || []);
+        setFollowing(followingRes || []);
+      });
+    }
+  }, [user]);
 
   if (isLoading) {
     return (
@@ -34,99 +68,158 @@ export default function ProfilePage() {
     );
   }
 
-  if (!user) {
-    return null;
-  }
+  if (!user) return null;
 
-  // Données du profil Google ou Supabase
   const displayName = profile?.display_name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'Utilisateur';
   const avatarUrl = profile?.avatar_url || user.user_metadata?.avatar_url || null;
   const email = profile?.email || user.email || '';
-  const username = displayName.toLowerCase().replace(/\s+/g, '_');
+  const username = profileData?.username || displayName.toLowerCase().replace(/\s+/g, '_');
 
-  const handleSignOut = async () => {
-    await signOut();
-    router.push('/');
-  };
+  const formatDate = (date: string) =>
+    new Date(date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
 
   return (
     <V2Layout>
-      <div className="min-h-screen">
-        {/* Header with banner */}
-        <div className="relative h-48 bg-gradient-to-br from-indigo-600 to-violet-700">
-          <button className="absolute top-4 right-4 p-3 rounded-full bg-black/20 backdrop-blur-sm hover:bg-black/30 transition-colors">
-            <Settings className="w-6 h-6 text-white" />
-          </button>
-          <button
-            onClick={handleSignOut}
-            className="absolute top-4 left-4 p-3 rounded-full bg-black/20 backdrop-blur-sm hover:bg-red-500/50 transition-colors"
-          >
-            <LogOut className="w-6 h-6 text-white" />
-          </button>
+      <div className="min-h-screen pb-24">
+        {/* Header */}
+        <div className="relative bg-gradient-to-br from-indigo-600 via-violet-600 to-purple-700 pt-12 pb-20 px-4">
+          <div className="flex justify-between">
+            <button
+              onClick={async () => { await signOut(); router.push('/'); }}
+              className="p-2.5 rounded-full bg-white/20 backdrop-blur-sm"
+            >
+              <LogOut className="w-5 h-5 text-white" />
+            </button>
+            <button className="p-2.5 rounded-full bg-white/20 backdrop-blur-sm">
+              <Settings className="w-5 h-5 text-white" />
+            </button>
+          </div>
         </div>
 
-        {/* Profile info */}
-        <div className="px-4 -mt-20 relative z-10">
+        <div className="px-4 -mt-16 relative z-10">
+          {/* Avatar + name */}
           <div className="flex flex-col items-center">
-            {avatarUrl ? (
-              <img
-                src={avatarUrl}
-                alt={displayName}
-                className="w-36 h-36 rounded-full border-4 border-[#0a0a0f] object-cover shadow-xl"
-              />
-            ) : (
-              <div className="w-36 h-36 rounded-full border-4 border-[#0a0a0f] bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-xl">
-                <span className="text-4xl font-bold text-white">
+            <div className="w-28 h-28 rounded-full border-4 border-[#0a0a0f] overflow-hidden shadow-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center">
+              {avatarUrl ? (
+                <img src={avatarUrl} alt={displayName} className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-3xl font-bold text-white">
                   {displayName.charAt(0).toUpperCase()}
                 </span>
-              </div>
-            )}
-            <h1 className="text-2xl font-bold text-white mt-4">{displayName}</h1>
+              )}
+            </div>
+            <h1 className="text-xl font-bold text-white mt-3">{displayName}</h1>
             <p className="text-gray-400 text-sm">@{username}</p>
-            <p className="text-gray-500 text-xs mt-1">{email}</p>
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-4 gap-3 mt-8">
-            {stats.map((stat) => (
-              <div
-                key={stat.label}
-                className="flex flex-col items-center p-4 rounded-xl bg-[#12121a] border border-[#2a2a38]"
-              >
-                <stat.icon className="w-7 h-7 text-indigo-400 mb-2" />
-                <p className="text-xl font-bold text-white">{stat.value}</p>
-                <p className="text-xs text-gray-500 text-center">{stat.label}</p>
-              </div>
-            ))}
+          <div className="flex items-center justify-center gap-8 mt-5">
+            <button onClick={() => setActiveList('trips')} className="text-center">
+              <p className="text-white font-bold text-lg">{profileData?.trips_count || trips.length}</p>
+              <p className="text-gray-500 text-xs">Voyages</p>
+            </button>
+            <button onClick={() => setActiveList('followers')} className="text-center">
+              <p className="text-white font-bold text-lg">{profileData?.followers_count || followers.length}</p>
+              <p className="text-gray-500 text-xs">Abonnés</p>
+            </button>
+            <button onClick={() => setActiveList('following')} className="text-center">
+              <p className="text-white font-bold text-lg">{profileData?.following_count || following.length}</p>
+              <p className="text-gray-500 text-xs">Abonnements</p>
+            </button>
           </div>
 
           {/* Bio */}
-          <div className="mt-8 p-5 rounded-xl bg-[#12121a] border border-[#2a2a38]">
-            <p className="text-gray-300 text-base leading-relaxed">
-              {profile?.bio || "Passionné de voyages et de découvertes. J'adore explorer de nouvelles cultures et partager mes itinéraires avec la communauté."}
-            </p>
+          {profile?.bio && (
+            <p className="text-gray-300 text-sm text-center mt-4">{profile.bio}</p>
+          )}
+
+          {/* List tabs */}
+          <div className="flex gap-1 bg-[#12121a] rounded-xl p-1 mt-6 border border-[#2a2a38]">
+            {(['trips', 'followers', 'following'] as const).map(tab => (
+              <button
+                key={tab}
+                onClick={() => setActiveList(tab)}
+                className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${
+                  activeList === tab
+                    ? 'bg-gradient-to-r from-indigo-500 to-violet-600 text-white'
+                    : 'text-gray-400'
+                }`}
+              >
+                {tab === 'trips' ? 'Voyages' : tab === 'followers' ? 'Abonnés' : 'Abonnements'}
+              </button>
+            ))}
           </div>
 
-          {/* Visited countries mini-globe placeholder */}
-          <div className="mt-8">
-            <h3 className="text-base font-semibold text-gray-400 mb-4">Mes destinations</h3>
-            <div className="aspect-video rounded-xl bg-[#12121a] border border-[#2a2a38] flex items-center justify-center">
-              <div className="text-center">
-                <Globe className="w-16 h-16 text-gray-600 mx-auto mb-3" />
-                <p className="text-gray-500 text-base">Mini-globe personnel</p>
-                <p className="text-gray-600 text-sm">(À venir)</p>
-              </div>
-            </div>
-          </div>
+          {/* Content */}
+          <div className="mt-4">
+            {activeList === 'trips' && (
+              trips.length === 0 ? (
+                <div className="text-center py-10">
+                  <MapPin className="w-10 h-10 text-gray-600 mx-auto mb-3" />
+                  <p className="text-gray-400">Aucun voyage</p>
+                  <Link href="/v2/create" className="text-indigo-400 text-sm mt-2 inline-block">
+                    Créer un voyage
+                  </Link>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {trips.map((trip, i) => (
+                    <motion.button
+                      key={trip.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.05 }}
+                      onClick={() => router.push(`/v2/trip/${trip.id}`)}
+                      className="w-full bg-[#12121a] rounded-xl border border-[#2a2a38] p-3 text-left"
+                    >
+                      <h4 className="text-white font-medium">{trip.title || trip.name}</h4>
+                      <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
+                        <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {trip.destination}</span>
+                        <span>{trip.duration_days}j</span>
+                        <span>{formatDate(trip.start_date)}</span>
+                      </div>
+                    </motion.button>
+                  ))}
+                </div>
+              )
+            )}
 
-          {/* My trips */}
-          <div className="mt-8 mb-28">
-            <h3 className="text-base font-semibold text-gray-400 mb-4">Mes voyages</h3>
-            <div className="p-6 rounded-xl bg-[#12121a] border border-[#2a2a38] text-center">
-              <MapPin className="w-12 h-12 text-gray-600 mx-auto mb-3" />
-              <p className="text-gray-400">Aucun voyage pour l'instant</p>
-              <p className="text-gray-500 text-sm mt-1">Crée ton premier voyage !</p>
-            </div>
+            {activeList === 'followers' && (
+              followers.length === 0 ? (
+                <div className="text-center py-10">
+                  <Users className="w-10 h-10 text-gray-600 mx-auto mb-3" />
+                  <p className="text-gray-400">Aucun abonné</p>
+                </div>
+              ) : (
+                <div className="space-y-1">
+                  {followers.map((f: any) => (
+                    <UserProfileCard
+                      key={f.id}
+                      user={f.follower || { id: '', display_name: 'Utilisateur', avatar_url: null }}
+                    />
+                  ))}
+                </div>
+              )
+            )}
+
+            {activeList === 'following' && (
+              following.length === 0 ? (
+                <div className="text-center py-10">
+                  <UserPlus className="w-10 h-10 text-gray-600 mx-auto mb-3" />
+                  <p className="text-gray-400">Tu ne suis personne</p>
+                  <p className="text-gray-500 text-sm mt-1">Découvre des voyageurs dans l&apos;onglet Parcourir</p>
+                </div>
+              ) : (
+                <div className="space-y-1">
+                  {following.map((f: any) => (
+                    <UserProfileCard
+                      key={f.id}
+                      user={f.following || { id: '', display_name: 'Utilisateur', avatar_url: null }}
+                    />
+                  ))}
+                </div>
+              )
+            )}
           </div>
         </div>
       </div>
