@@ -119,6 +119,7 @@ export function CalendarDayColumn({
   const handleSlotClick = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
       if (!onClickSlot) return;
+      if (e.target !== e.currentTarget) return; // ignore clicks bubbling from activity blocks
       const rect = e.currentTarget.getBoundingClientRect();
       const y = e.clientY - rect.top;
       const slot = Math.floor(y / slotHeight);

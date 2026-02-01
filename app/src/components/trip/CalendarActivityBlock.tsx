@@ -176,9 +176,10 @@ export function CalendarActivityBlock({
         backgroundColor: `${color}18`,
         borderColor: `${color}60`,
       }}
+      onMouseDown={(e) => e.stopPropagation()}
       onClick={(e) => {
+        e.stopPropagation();
         if (!resizing) {
-          e.stopPropagation();
           onClick?.();
         }
       }}
