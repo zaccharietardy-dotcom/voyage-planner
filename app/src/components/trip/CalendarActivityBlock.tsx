@@ -16,6 +16,7 @@ interface CalendarActivityBlockProps {
   slotHeight: number;
   onUpdate?: (item: TripItem) => void;
   onClick?: () => void;
+  onInteraction?: () => void;
 }
 
 function parseMinutes(time: string | undefined | null): number {
@@ -40,6 +41,7 @@ export function CalendarActivityBlock({
   slotHeight,
   onUpdate,
   onClick,
+  onInteraction,
 }: CalendarActivityBlockProps) {
   const locked = isLockedItem(item);
   const canResize = isEditable && !locked;
@@ -90,6 +92,7 @@ export function CalendarActivityBlock({
 
       const handleMouseUp = () => {
         setResizing(null);
+        onInteraction?.();
         window.removeEventListener('mousemove', handleMouseMove);
         window.removeEventListener('mouseup', handleMouseUp);
       };
@@ -141,6 +144,7 @@ export function CalendarActivityBlock({
 
       const handleTouchEnd = () => {
         setResizing(null);
+        onInteraction?.();
         window.removeEventListener('touchmove', handleTouchMove);
         window.removeEventListener('touchend', handleTouchEnd);
       };
@@ -179,6 +183,7 @@ export function CalendarActivityBlock({
       onMouseDown={(e) => e.stopPropagation()}
       onClick={(e) => {
         e.stopPropagation();
+        onInteraction?.();
         if (!resizing) {
           onClick?.();
         }

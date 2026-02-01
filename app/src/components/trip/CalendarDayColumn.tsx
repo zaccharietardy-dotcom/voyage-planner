@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useCallback } from 'react';
+import { useMemo, useCallback, useRef } from 'react';
 import { TripDay, TripItem } from '@/lib/types';
 import { CalendarActivityBlock } from './CalendarActivityBlock';
 import { cn } from '@/lib/utils';
@@ -113,13 +113,15 @@ export function CalendarDayColumn({
   onClickSlot,
 }: CalendarDayColumnProps) {
   const layoutItems_ = useMemo(() => layoutItems(day.items), [day.items]);
+  const lastInteractionRef = useRef(0);
 
   const totalHeight = TOTAL_SLOTS * slotHeight;
 
   const handleSlotClick = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
       if (!onClickSlot) return;
-      if (e.target !== e.currentTarget) return; // ignore clicks bubbling from activity blocks
+      // Ignore clicks within 300ms of a block interaction (resize end, block click)
+      if (Date.now() - lastInteractionRef.current < 300) return;
       const rect = e.currentTarget.getBoundingClientRect();
       const y = e.clientY - rect.top;
       const slot = Math.floor(y / slotHeight);
@@ -184,6 +186,7 @@ export function CalendarDayColumn({
             slotHeight={slotHeight}
             onUpdate={onUpdateItem}
             onClick={() => onClickItem?.(li.item)}
+            onInteraction={() => { lastInteractionRef.current = Date.now(); }}
           />
         ))}
       </div>
