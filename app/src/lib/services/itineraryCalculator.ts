@@ -212,6 +212,20 @@ export function isLockedItem(item: TripItem): boolean {
 }
 
 /**
+ * Vérifie si un jour contient des items critiques (transport, checkin, checkout, flight)
+ * qui le rendent non-permutable
+ */
+export function isDayLocked(day: TripDay): boolean {
+  return day.items.some(
+    (item) =>
+      item.type === 'checkin' ||
+      item.type === 'checkout' ||
+      item.type === 'flight' ||
+      item.type === 'transport'
+  );
+}
+
+/**
  * Permute deux jours entiers (swap)
  */
 export function swapDays(
@@ -220,6 +234,10 @@ export function swapDays(
   dayIndexB: number
 ): TripDay[] {
   if (dayIndexA < 0 || dayIndexB < 0 || dayIndexA >= days.length || dayIndexB >= days.length) {
+    return days;
+  }
+  // Don't swap locked days (contain transport/checkin/checkout/flight)
+  if (isDayLocked(days[dayIndexA]) || isDayLocked(days[dayIndexB])) {
     return days;
   }
   const newDays = days.map((day) => ({ ...day, items: [...day.items] }));

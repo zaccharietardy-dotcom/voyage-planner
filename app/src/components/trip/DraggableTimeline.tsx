@@ -30,6 +30,7 @@ import {
   findItemById,
   findDropPosition,
   isLockedItem,
+  isDayLocked,
 } from '@/lib/services/itineraryCalculator';
 import { createMoveActivityChange, ProposedChange } from '@/lib/types/collaboration';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -40,9 +41,13 @@ import {
   Sun,
   Moon,
   Sunrise,
-  ChevronLeft,
-  ChevronRight,
   Plus,
+  ArrowUpDown,
+  ChevronUp,
+  ChevronDown,
+  Lock,
+  GripVertical,
+  X,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -59,24 +64,130 @@ interface DraggableTimelineProps {
   onAddItem?: (dayNumber: number) => void;
 }
 
+// Day summary for reorder panel
+function getDaySummary(day: TripDay): string {
+  if (day.theme) return day.theme;
+  const types = day.items.map((i) => i.type);
+  if (types.includes('checkin')) return 'Arrivée & Check-in';
+  if (types.includes('checkout')) return 'Check-out & Départ';
+  if (types.includes('flight')) return 'Vol';
+  const activities = day.items.filter((i) => i.type === 'activity').length;
+  const restaurants = day.items.filter((i) => i.type === 'restaurant').length;
+  const parts: string[] = [];
+  if (activities > 0) parts.push(`${activities} activité${activities > 1 ? 's' : ''}`);
+  if (restaurants > 0) parts.push(`${restaurants} restaurant${restaurants > 1 ? 's' : ''}`);
+  return parts.join(', ') || `${day.items.length} items`;
+}
+
+// Reorder panel showing all days at once
+function DayReorderPanel({
+  days,
+  onSwap,
+  onClose,
+}: {
+  days: TripDay[];
+  onSwap: (a: number, b: number) => void;
+  onClose: () => void;
+}) {
+  return (
+    <Card className="mb-4">
+      <CardHeader className="pb-2">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <ArrowUpDown className="h-4 w-4" />
+            Réorganiser les jours
+          </CardTitle>
+          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onClose}>
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-1">
+        {days.map((day, idx) => {
+          const locked = isDayLocked(day);
+          // Find adjacent unlocked days for swap targets
+          const canMoveUp = !locked && idx > 0 && !isDayLocked(days[idx - 1]);
+          const canMoveDown = !locked && idx < days.length - 1 && !isDayLocked(days[idx + 1]);
+
+          return (
+            <div
+              key={day.dayNumber}
+              className={cn(
+                'flex items-center gap-2 px-3 py-2 rounded-lg transition-colors',
+                locked ? 'bg-muted/50 opacity-70' : 'bg-background hover:bg-accent'
+              )}
+            >
+              {/* Lock or grip icon */}
+              <div className="w-5 flex-shrink-0">
+                {locked ? (
+                  <Lock className="h-4 w-4 text-muted-foreground" />
+                ) : (
+                  <GripVertical className="h-4 w-4 text-muted-foreground" />
+                )}
+              </div>
+
+              {/* Day info */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="font-medium text-sm">Jour {day.dayNumber}</span>
+                  {day.date && (
+                    <span className="text-xs text-muted-foreground">
+                      {format(new Date(day.date), 'EEE d MMM', { locale: fr })}
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground truncate">
+                  {getDaySummary(day)}
+                </p>
+              </div>
+
+              {/* Activity count */}
+              <Badge variant="secondary" className="text-xs flex-shrink-0">
+                {day.items.length}
+              </Badge>
+
+              {/* Move buttons */}
+              <div className="flex flex-col gap-0.5 flex-shrink-0">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6"
+                  disabled={!canMoveUp}
+                  onClick={() => canMoveUp && onSwap(idx, idx - 1)}
+                >
+                  <ChevronUp className="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6"
+                  disabled={!canMoveDown}
+                  onClick={() => canMoveDown && onSwap(idx, idx + 1)}
+                >
+                  <ChevronDown className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            </div>
+          );
+        })}
+        <p className="text-xs text-muted-foreground pt-1">
+          Les jours avec transport, check-in ou check-out sont verrouillés.
+        </p>
+      </CardContent>
+    </Card>
+  );
+}
+
 // Composant pour un jour droppable
 function DroppableDay({
   day,
-  dayIndex,
-  totalDays,
   isEditable,
   children,
-  onSwapLeft,
-  onSwapRight,
   onAddItem,
 }: {
   day: TripDay;
-  dayIndex: number;
-  totalDays: number;
   isEditable: boolean;
   children: React.ReactNode;
-  onSwapLeft?: () => void;
-  onSwapRight?: () => void;
   onAddItem?: () => void;
 }) {
   const { isOver, setNodeRef } = useDroppable({
@@ -104,36 +215,10 @@ function DroppableDay({
     >
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1">
-            {/* Swap day left */}
-            {isEditable && dayIndex > 0 && onSwapLeft && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7"
-                onClick={onSwapLeft}
-                title="Permuter avec le jour précédent"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-            )}
-            <CardTitle className="text-base flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
-              Jour {day.dayNumber}
-            </CardTitle>
-            {/* Swap day right */}
-            {isEditable && dayIndex < totalDays - 1 && onSwapRight && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7"
-                onClick={onSwapRight}
-                title="Permuter avec le jour suivant"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            )}
-          </div>
+          <CardTitle className="text-base flex items-center gap-2">
+            <Calendar className="h-4 w-4" />
+            Jour {day.dayNumber}
+          </CardTitle>
           <div className="flex items-center gap-2">
             <Badge variant="secondary" className="text-xs">
               {getDayPeriodIcon()}
@@ -166,7 +251,6 @@ function DroppableDay({
           </div>
         </SortableContext>
 
-        {/* Add activity button */}
         {isEditable && onAddItem && (
           <Button
             variant="outline"
@@ -193,10 +277,10 @@ export function DraggableTimeline({
   onAddItem,
 }: DraggableTimelineProps) {
   const [activeItem, setActiveItem] = useState<TripItem | null>(null);
+  const [showReorder, setShowReorder] = useState(false);
   const filteredDays = useMemo(() => days.map(day => ({ ...day, items: [...day.items] })), [days]);
   const [localDays, setLocalDays] = useState(filteredDays);
 
-  // Sync local days when props change
   useEffect(() => {
     if (!activeItem) {
       setLocalDays(filteredDays);
@@ -205,16 +289,13 @@ export function DraggableTimeline({
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
+      activationConstraint: { distance: 8 },
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
 
-  // Apply update (owner = direct, editor = proposal)
   const applyUpdate = useCallback((newDays: TripDay[]) => {
     const recalculated = recalculateTimes(newDays);
     if (isOwner && onDirectUpdate) {
@@ -223,7 +304,6 @@ export function DraggableTimeline({
     }
   }, [isOwner, onDirectUpdate]);
 
-  // Move item up/down within same day
   const handleMoveInDay = useCallback((dayIndex: number, itemIndex: number, direction: 'up' | 'down') => {
     try {
       const newDays = moveItemInDay(localDays, dayIndex, itemIndex, direction);
@@ -233,7 +313,6 @@ export function DraggableTimeline({
     }
   }, [localDays, applyUpdate]);
 
-  // Delete item
   const handleDeleteItem = useCallback((dayIndex: number, itemIndex: number, itemTitle: string) => {
     if (!confirm(`Supprimer "${itemTitle}" ?`)) return;
     try {
@@ -245,12 +324,15 @@ export function DraggableTimeline({
     }
   }, [localDays, applyUpdate]);
 
-  // Swap days
   const handleSwapDays = useCallback((dayIndexA: number, dayIndexB: number) => {
     try {
       const newDays = swapDays(localDays, dayIndexA, dayIndexB);
+      if (newDays === localDays) {
+        toast.error('Ce jour ne peut pas être déplacé (transport/checkin/checkout)');
+        return;
+      }
       applyUpdate(newDays);
-      toast.success(`Jour ${dayIndexA + 1} et Jour ${dayIndexB + 1} permutés`);
+      toast.success(`Jour ${dayIndexA + 1} ↔ Jour ${dayIndexB + 1}`);
     } catch (err) {
       console.error('Swap error:', err);
     }
@@ -261,19 +343,14 @@ export function DraggableTimeline({
       const { active } = event;
       const found = findItemById(localDays, active.id as string);
       if (found) {
-        // Don't allow dragging locked items
-        if (isLockedItem(found.item)) {
-          return;
-        }
+        if (isLockedItem(found.item)) return;
         setActiveItem(found.item);
       }
     },
     [localDays]
   );
 
-  const handleDragOver = useCallback((event: DragOverEvent) => {
-    // Preview during drag (optional)
-  }, []);
+  const handleDragOver = useCallback((_event: DragOverEvent) => {}, []);
 
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
@@ -287,21 +364,12 @@ export function DraggableTimeline({
         const overPosition = findDropPosition(localDays, over.id as string);
 
         if (!activeFound || !overPosition) return;
-
-        // Don't move locked items
         if (isLockedItem(activeFound.item)) return;
 
         const { dayIndex: fromDayIndex, itemIndex: fromItemIndex, item } = activeFound;
         const { dayIndex: toDayIndex, itemIndex: toItemIndex } = overPosition;
 
-        const newDays = moveItem(
-          localDays,
-          fromDayIndex,
-          fromItemIndex,
-          toDayIndex,
-          toItemIndex
-        );
-
+        const newDays = moveItem(localDays, fromDayIndex, fromItemIndex, toDayIndex, toItemIndex);
         const recalculatedDays = recalculateTimes(newDays);
 
         if (isOwner && onDirectUpdate) {
@@ -309,11 +377,7 @@ export function DraggableTimeline({
           setLocalDays(recalculatedDays);
         } else if (onProposalCreate) {
           const change = createMoveActivityChange(
-            fromDayIndex + 1,
-            toDayIndex + 1,
-            fromItemIndex,
-            toItemIndex,
-            item.title
+            fromDayIndex + 1, toDayIndex + 1, fromItemIndex, toItemIndex, item.title
           );
           onProposalCreate(change);
           setLocalDays(filteredDays);
@@ -331,6 +395,9 @@ export function DraggableTimeline({
     setLocalDays(filteredDays);
   }, [filteredDays]);
 
+  // Check if there are swappable days (at least 2 non-locked days)
+  const hasSwappableDays = localDays.filter((d) => !isDayLocked(d)).length >= 2;
+
   return (
     <DndContext
       sensors={sensors}
@@ -340,16 +407,35 @@ export function DraggableTimeline({
       onDragEnd={handleDragEnd}
       onDragCancel={handleDragCancel}
     >
+      {/* Reorder days button + panel */}
+      {isEditable && hasSwappableDays && (
+        <>
+          {!showReorder ? (
+            <Button
+              variant="outline"
+              size="sm"
+              className="mb-3 gap-2"
+              onClick={() => setShowReorder(true)}
+            >
+              <ArrowUpDown className="h-4 w-4" />
+              Réorganiser les jours
+            </Button>
+          ) : (
+            <DayReorderPanel
+              days={localDays}
+              onSwap={handleSwapDays}
+              onClose={() => setShowReorder(false)}
+            />
+          )}
+        </>
+      )}
+
       <div className="space-y-4">
         {localDays.map((day, dayIndex) => (
           <DroppableDay
             key={day.dayNumber}
             day={day}
-            dayIndex={dayIndex}
-            totalDays={localDays.length}
             isEditable={isEditable}
-            onSwapLeft={dayIndex > 0 ? () => handleSwapDays(dayIndex, dayIndex - 1) : undefined}
-            onSwapRight={dayIndex < localDays.length - 1 ? () => handleSwapDays(dayIndex, dayIndex + 1) : undefined}
             onAddItem={onAddItem ? () => onAddItem(day.dayNumber) : undefined}
           >
             {day.items.map((item, itemIndex) => (
