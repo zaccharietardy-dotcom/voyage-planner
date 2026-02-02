@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { V2Layout } from '@/components/v2/layout/V2Layout';
-import { Settings, MapPin, Globe, LogOut, Loader2, Users, Calendar, UserPlus } from 'lucide-react';
+import { Settings, MapPin, Globe, LogOut, Loader2, Users, Calendar, UserPlus, Sparkles, Check, CreditCard, Crown } from 'lucide-react';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useRouter } from 'next/navigation';
+import { useSubscription } from '@/hooks/useSubscription';
 import { UserProfileCard } from '@/components/v2/social/UserProfileCard';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
@@ -33,7 +34,10 @@ export default function ProfilePage() {
   const [trips, setTrips] = useState<TripItem[]>([]);
   const [followers, setFollowers] = useState<any[]>([]);
   const [following, setFollowing] = useState<any[]>([]);
-  const [activeList, setActiveList] = useState<'trips' | 'followers' | 'following'>('trips');
+  const [activeList, setActiveList] = useState<'trips' | 'followers' | 'following' | 'pro'>('trips');
+  const { isPro, status, expiresAt, loading: subLoading } = useSubscription();
+  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
+  const [billingPeriod, setBillingPeriod] = useState<'yearly' | 'monthly'>('yearly');
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -69,6 +73,40 @@ export default function ProfilePage() {
   }
 
   if (!user) return null;
+
+  const handleCheckout = async (plan: 'monthly' | 'yearly') => {
+    setCheckoutLoading('pro');
+    try {
+      const res = await fetch('/api/billing/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan }),
+      });
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+    } catch (e) { console.error(e); }
+    finally { setCheckoutLoading(null); }
+  };
+
+  const handleOneTime = async () => {
+    setCheckoutLoading('one-time');
+    try {
+      const res = await fetch('/api/billing/one-time', { method: 'POST' });
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+    } catch (e) { console.error(e); }
+    finally { setCheckoutLoading(null); }
+  };
+
+  const handlePortal = async () => {
+    setCheckoutLoading('portal');
+    try {
+      const res = await fetch('/api/billing/portal', { method: 'POST' });
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+    } catch (e) { console.error(e); }
+    finally { setCheckoutLoading(null); }
+  };
 
   const displayName = profile?.display_name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'Utilisateur';
   const avatarUrl = profile?.avatar_url || user.user_metadata?.avatar_url || null;
@@ -135,17 +173,24 @@ export default function ProfilePage() {
 
           {/* List tabs */}
           <div className="flex gap-1 bg-[#12121a] rounded-xl p-1 mt-6 border border-[#2a2a38]">
-            {(['trips', 'followers', 'following'] as const).map(tab => (
+            {(['trips', 'followers', 'following', 'pro'] as const).map(tab => (
               <button
                 key={tab}
                 onClick={() => setActiveList(tab)}
                 className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${
                   activeList === tab
-                    ? 'bg-gradient-to-r from-indigo-500 to-violet-600 text-white'
+                    ? tab === 'pro'
+                      ? 'bg-gradient-to-r from-[#d4a853] to-[#b8923d] text-white'
+                      : 'bg-gradient-to-r from-indigo-500 to-violet-600 text-white'
                     : 'text-gray-400'
                 }`}
               >
-                {tab === 'trips' ? 'Voyages' : tab === 'followers' ? 'Abonnés' : 'Abonnements'}
+                {tab === 'trips' ? 'Voyages' : tab === 'followers' ? 'Abonnés' : tab === 'following' ? 'Abonnements' : (
+                  <span className="flex items-center justify-center gap-1">
+                    <Crown className="w-3.5 h-3.5" />
+                    Pro
+                  </span>
+                )}
               </button>
             ))}
           </div>
@@ -219,6 +264,128 @@ export default function ProfilePage() {
                   ))}
                 </div>
               )
+            )}
+
+            {activeList === 'pro' && (
+              <div className="space-y-4">
+                {/* Current plan status */}
+                <div className="bg-[#12121a] rounded-xl border border-[#2a2a38] p-4">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                      isPro ? 'bg-[#d4a853]/20' : 'bg-gray-700/50'
+                    }`}>
+                      {isPro ? (
+                        <Crown className="w-5 h-5 text-[#d4a853]" />
+                      ) : (
+                        <CreditCard className="w-5 h-5 text-gray-400" />
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-white font-semibold">
+                        {isPro ? 'Plan Pro actif' : 'Plan Gratuit'}
+                      </p>
+                      <p className="text-gray-500 text-xs">
+                        {isPro && expiresAt
+                          ? `Renouvellement le ${new Date(expiresAt).toLocaleDateString('fr-FR')}`
+                          : '1 voyage IA par mois'}
+                      </p>
+                    </div>
+                  </div>
+                  {isPro && (
+                    <button
+                      onClick={handlePortal}
+                      disabled={!!checkoutLoading}
+                      className="w-full py-2 rounded-lg border border-[#2a2a38] text-gray-300 text-sm hover:bg-white/5 transition-colors"
+                    >
+                      {checkoutLoading === 'portal' ? (
+                        <Loader2 className="w-4 h-4 animate-spin mx-auto" />
+                      ) : (
+                        'Gérer mon abonnement'
+                      )}
+                    </button>
+                  )}
+                </div>
+
+                {!isPro && (
+                  <>
+                    {/* One-time purchase */}
+                    <button
+                      onClick={handleOneTime}
+                      disabled={!!checkoutLoading}
+                      className="w-full bg-[#12121a] rounded-xl border border-[#2a2a38] p-4 text-left hover:border-indigo-500/50 transition-colors"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-white font-medium">Voyage à l&apos;unité</p>
+                          <p className="text-gray-500 text-xs mt-0.5">1 voyage supplémentaire, sans engagement</p>
+                        </div>
+                        <div className="text-right">
+                          {checkoutLoading === 'one-time' ? (
+                            <Loader2 className="w-4 h-4 animate-spin text-white" />
+                          ) : (
+                            <span className="text-white font-bold text-lg">0.99€</span>
+                          )}
+                        </div>
+                      </div>
+                    </button>
+
+                    {/* Pro subscription */}
+                    <div className="bg-gradient-to-br from-[#d4a853]/10 to-[#b8923d]/5 rounded-xl border border-[#d4a853]/30 p-4">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Sparkles className="w-4 h-4 text-[#d4a853]" />
+                        <p className="text-white font-semibold">Passer Pro</p>
+                      </div>
+                      <ul className="space-y-2 mb-4">
+                        {['Voyages illimités', 'Régénération IA illimitée', 'Export PDF & calendrier', 'Badge Pro sur le profil'].map(f => (
+                          <li key={f} className="flex items-center gap-2 text-xs text-gray-300">
+                            <Check className="w-3.5 h-3.5 text-[#d4a853] shrink-0" />
+                            {f}
+                          </li>
+                        ))}
+                      </ul>
+
+                      {/* Period toggle */}
+                      <div className="flex gap-1 bg-black/30 rounded-lg p-1 mb-3">
+                        <button
+                          onClick={() => setBillingPeriod('yearly')}
+                          className={`flex-1 py-1.5 rounded-md text-xs font-medium transition-all ${
+                            billingPeriod === 'yearly' ? 'bg-[#d4a853] text-[#0a1628]' : 'text-gray-400'
+                          }`}
+                        >
+                          Annuel · 9.99€
+                        </button>
+                        <button
+                          onClick={() => setBillingPeriod('monthly')}
+                          className={`flex-1 py-1.5 rounded-md text-xs font-medium transition-all ${
+                            billingPeriod === 'monthly' ? 'bg-[#d4a853] text-[#0a1628]' : 'text-gray-400'
+                          }`}
+                        >
+                          Mensuel · 1.99€
+                        </button>
+                      </div>
+
+                      <button
+                        onClick={() => handleCheckout(billingPeriod)}
+                        disabled={!!checkoutLoading}
+                        className="w-full py-2.5 rounded-lg bg-[#d4a853] hover:bg-[#b8923d] text-[#0a1628] font-semibold text-sm transition-colors"
+                      >
+                        {checkoutLoading === 'pro' ? (
+                          <Loader2 className="w-4 h-4 animate-spin mx-auto" />
+                        ) : billingPeriod === 'yearly' ? (
+                          'S\'abonner — 9.99€/an'
+                        ) : (
+                          'S\'abonner — 1.99€/mois'
+                        )}
+                      </button>
+                      {billingPeriod === 'yearly' && (
+                        <p className="text-center text-[10px] text-gray-500 mt-2">
+                          soit 0.83€/mois · économise 58%
+                        </p>
+                      )}
+                    </div>
+                  </>
+                )}
+              </div>
             )}
           </div>
         </div>
