@@ -24,7 +24,7 @@ const SERPAPI_BASE_URL = 'https://serpapi.com/search.json';
 // ============================================
 
 const ATTRACTIONS_CACHE_DIR = path.join(process.cwd(), '.cache', 'attractions');
-const ATTRACTIONS_CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 jours
+const ATTRACTIONS_CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 jours
 
 function getAttractionsCacheKey(destination: string, cityCenter: { lat: number; lng: number }): string {
   const key = `${destination}-${cityCenter.lat.toFixed(2)}-${cityCenter.lng.toFixed(2)}`;
@@ -214,6 +214,7 @@ export async function searchRestaurantsWithSerpApi(
         phoneNumber: r.phone,
         website: r.website,
         googleMapsUrl, // URL Google Maps fiable avec nom + adresse complète
+        reservationUrl: `https://www.thefork.fr/search?q=${encodeURIComponent(`${r.title} ${destination}`)}`,
         openingHours: parseOpeningHours(r.operating_hours) || {},
         distance: 0, // Sera calculé plus tard
         walkingTime: 0,
@@ -509,21 +510,15 @@ export const QUALITY_THRESHOLDS = {
 // === Requêtes thématiques pour attractions ===
 
 const ATTRACTION_QUERIES = [
-  // Incontournables
-  { query: 'top tourist attractions must see', priority: 1 },
-  { query: 'famous temples shrines churches', priority: 1 },
-  { query: 'iconic landmarks monuments', priority: 1 },
-  // Culture
-  { query: 'best museums art galleries', priority: 2 },
-  { query: 'historical sites heritage', priority: 2 },
-  // Nature & vues
-  { query: 'famous viewpoints observation decks', priority: 2 },
-  { query: 'parks gardens nature walks', priority: 3 },
-  // Marchés & expériences
-  { query: 'famous markets food streets', priority: 2 },
-  { query: 'traditional cultural experiences', priority: 3 },
-  // Quartiers
-  { query: 'famous neighborhoods districts to explore', priority: 3 },
+  // Incontournables (priority 1 — ces requêtes justifient le coût SerpAPI)
+  { query: 'top tourist attractions must see landmarks', priority: 1 },
+  { query: 'famous temples shrines churches monuments', priority: 1 },
+  // Culture & histoire
+  { query: 'best museums art galleries historical sites', priority: 2 },
+  // Vues & marchés
+  { query: 'famous viewpoints markets food streets', priority: 2 },
+  // Note: parks, gardens, neighborhoods, cultural experiences sont
+  // délégués à Overpass API (gratuit) pour économiser les requêtes SerpAPI
 ];
 
 // Types non-touristiques à exclure

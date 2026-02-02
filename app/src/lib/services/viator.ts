@@ -20,7 +20,7 @@ const VIATOR_BASE_URL = 'https://api.viator.com/partner';
 
 // Cache fichier 7 jours
 const CACHE_DIR = path.join(process.cwd(), '.cache', 'viator');
-const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 jours
 
 export function isViatorConfigured(): boolean {
   return !!VIATOR_API_KEY;

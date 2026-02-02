@@ -16,6 +16,11 @@ export interface Database {
           display_name: string | null;
           avatar_url: string | null;
           bio: string | null;
+          stripe_customer_id: string | null;
+          subscription_status: string | null;
+          subscription_id: string | null;
+          subscription_ends_at: string | null;
+          extra_trips: number | null;
           created_at: string;
           updated_at: string;
         };
@@ -25,6 +30,11 @@ export interface Database {
           display_name?: string | null;
           avatar_url?: string | null;
           bio?: string | null;
+          stripe_customer_id?: string | null;
+          subscription_status?: string | null;
+          subscription_id?: string | null;
+          subscription_ends_at?: string | null;
+          extra_trips?: number | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -34,6 +44,11 @@ export interface Database {
           display_name?: string | null;
           avatar_url?: string | null;
           bio?: string | null;
+          stripe_customer_id?: string | null;
+          subscription_status?: string | null;
+          subscription_id?: string | null;
+          subscription_ends_at?: string | null;
+          extra_trips?: number | null;
           created_at?: string;
           updated_at?: string;
         };

@@ -16,7 +16,7 @@ import { Attraction } from './attractions';
 const OVERPASS_API_URL = 'https://overpass-api.de/api/interpreter';
 const WIKIDATA_API_URL = 'https://www.wikidata.org/w/api.php';
 const CACHE_DIR = path.join(process.cwd(), '.cache', 'overpass-attractions');
-const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 jours
+const CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 jours
 
 // Types OSM à exclure (pollution des résultats identifiée lors des tests)
 const EXCLUDED_OSM_TYPES = new Set([
@@ -130,9 +130,13 @@ async function queryOverpass(lat: number, lng: number, radiusKm: number = 10): P
   way["historic"]["wikidata"]["name"](${bbox});
   node["leisure"="park"]["wikidata"]["name"](${bbox});
   way["leisure"="park"]["wikidata"]["name"](${bbox});
+  node["leisure"="garden"]["wikidata"]["name"](${bbox});
+  way["leisure"="garden"]["wikidata"]["name"](${bbox});
   way["bridge"="yes"]["wikidata"]["name"](${bbox});
   node["amenity"="theatre"]["wikidata"]["name"](${bbox});
   way["amenity"="theatre"]["wikidata"]["name"](${bbox});
+  node["amenity"="marketplace"]["wikidata"]["name"](${bbox});
+  way["amenity"="marketplace"]["wikidata"]["name"](${bbox});
 );
 out center body;`;
 

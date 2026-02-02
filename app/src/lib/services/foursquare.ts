@@ -15,7 +15,7 @@ import * as path from 'path';
 
 const FOURSQUARE_API_URL = 'https://api.foursquare.com/v2/venues';
 const CACHE_DIR = path.join(process.cwd(), 'data', 'foursquare-cache');
-const CACHE_TTL = 7 * 24 * 60 * 60 * 1000; // 7 jours
+const CACHE_TTL = 30 * 24 * 60 * 60 * 1000; // 30 jours
 
 // Catégories Foursquare utiles
 export const FOURSQUARE_CATEGORIES = {
