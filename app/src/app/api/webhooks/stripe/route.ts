@@ -43,14 +43,18 @@ export async function POST(request: NextRequest) {
         if (session.mode === 'subscription') {
           const subscriptionId = session.subscription as string;
           const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-          const periodEnd = (subscription as unknown as { current_period_end: number }).current_period_end;
+          // Extract current_period_end safely from the subscription object
+          const subData = JSON.parse(JSON.stringify(subscription));
+          const periodEnd = subData.current_period_end;
+          const endsAt = periodEnd ? new Date(periodEnd * 1000).toISOString() : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+          console.log(`[Stripe] periodEnd raw: ${periodEnd}, endsAt: ${endsAt}`);
 
           const { error: updateError } = await supabase
             .from('profiles')
             .update({
               subscription_status: 'pro',
               subscription_id: subscriptionId,
-              subscription_ends_at: new Date(periodEnd * 1000).toISOString(),
+              subscription_ends_at: endsAt,
             })
             .eq('stripe_customer_id', customerId);
 
@@ -91,13 +95,15 @@ export async function POST(request: NextRequest) {
         const subscription = event.data.object;
         const customerId = subscription.customer as string;
         const status = subscription.status === 'active' ? 'pro' : 'free';
-        const periodEnd = (subscription as unknown as { current_period_end: number }).current_period_end;
+        const subData = JSON.parse(JSON.stringify(subscription));
+        const periodEnd = subData.current_period_end;
+        const endsAt = periodEnd ? new Date(periodEnd * 1000).toISOString() : null;
 
         await supabase
           .from('profiles')
           .update({
             subscription_status: status,
-            subscription_ends_at: new Date(periodEnd * 1000).toISOString(),
+            subscription_ends_at: endsAt,
           })
           .eq('stripe_customer_id', customerId);
 
