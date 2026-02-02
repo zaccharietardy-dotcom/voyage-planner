@@ -57,12 +57,15 @@ import { generateDayWithScheduler, getDayContext, TimeSlot, DayContext } from '.
  * Génère un voyage complet avec toute la logistique
  */
 export async function generateTripWithAI(preferences: TripPreferences): Promise<Trip> {
+  const T0 = Date.now();
+  const elapsed = () => `${((Date.now() - T0) / 1000).toFixed(1)}s`;
   console.log('Generating trip with preferences:', preferences);
 
   // RESET: Nettoyer les trackers de la session précédente pour éviter les doublons inter-voyages
   usedRestaurantIds.clear();
 
   // 1. Trouver les coordonnées et aéroports (avec fallback Nominatim async)
+  console.log(`[PERF ${elapsed()}] Start geocoding`);
   const [originCityCenter, destCityCenter, originAirports, destAirports] = await Promise.all([
     getCityCenterCoordsAsync(preferences.origin),
     getCityCenterCoordsAsync(preferences.destination),
@@ -80,6 +83,7 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
     lng: destAirports[0].longitude,
   } : null);
 
+  console.log(`[PERF ${elapsed()}] Geocoding done`);
   if (!destCoords) {
     console.error(`[AI] ❌ Impossible de géocoder "${preferences.destination}" — aucune coordonnée trouvée`);
     throw new Error(`Destination inconnue: "${preferences.destination}". Impossible de trouver les coordonnées.`);
@@ -130,6 +134,7 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
 
   // Lancer attractions + hôtels en parallèle avec le transport
   console.time('[AI] Attractions pool');
+  console.log(`[PERF ${elapsed()}] Start parallel batch (attractions+hotels+tips+budget)`);
   const attractionsPromise = searchAttractionsMultiQuery(
     preferences.destination,
     destCoords,
@@ -170,6 +175,7 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
   console.timeEnd('[AI] Attractions pool');
   console.timeEnd('[AI] Hotels');
   console.timeEnd('[AI] TravelTips');
+  console.log(`[PERF ${elapsed()}] Parallel batch done`);
   console.timeEnd('[AI] BudgetStrategy');
   console.log(`[AI] Stratégie budget: ${budgetStrategy.accommodationType}, courses=${budgetStrategy.groceryShoppingNeeded}, activités=${budgetStrategy.activitiesLevel}`);
 
@@ -281,6 +287,7 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       console.log(`Aéroports origine: ${originAirports.map(a => a.code).join(', ')}`);
       console.log(`Aéroports destination: ${destAirports.map(a => a.code).join(', ')}`);
 
+      console.log(`[PERF ${elapsed()}] Start flight search`);
       const flightResult = await findBestFlights(
         originAirports,
         destAirports,
@@ -324,6 +331,7 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
   // Recherche spécifique des mustSee
   if (preferences.mustSee?.trim()) {
     console.log('[AI] Recherche des mustSee spécifiques...');
+    console.log(`[PERF ${elapsed()}] Start must-see search`);
     const mustSeeAttractions = await searchMustSeeAttractions(
       preferences.mustSee,
       preferences.destination,
@@ -357,6 +365,7 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
   if (isViatorConfigured()) {
     try {
       console.log('[AI] 🎭 Recherche activités Viator originales...');
+      console.log(`[PERF ${elapsed()}] Start Viator search`);
       const viatorActivities = await searchViatorActivities(preferences.destination, cityCenter, {
         types: preferences.activities,
         limit: 20,
@@ -404,6 +413,7 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
   let dayMetadata: { theme?: string; dayNarrative?: string; isDayTrip?: boolean; dayTripDestination?: string }[] = [];
 
   try {
+    console.log(`[PERF ${elapsed()}] Start Claude itinerary`);
     claudeItinerary = await generateClaudeItinerary({
       destination: preferences.destination,
       durationDays: preferences.durationDays,
@@ -719,6 +729,7 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
   // Si groceryShoppingNeeded=false, on considère que les courses ne sont pas nécessaires (pas de self-catering)
   let groceriesDoneByDay = !budgetStrategy?.groceryShoppingNeeded; // true si pas besoin de courses
 
+  console.log(`[PERF ${elapsed()}] Start day generation loop (${preferences.durationDays} days)`);
   for (let i = 0; i < preferences.durationDays; i++) {
     // Créer la date du jour (startDate est déjà normalisé à midi local)
     const dayDate = new Date(startDate);
@@ -738,6 +749,7 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
     console.log(`\n=== Génération Jour ${dayNumber} ===`);
 
     // Générer le jour complet avec le scheduler
+    console.log(`[PERF ${elapsed()}] Generating day ${dayNumber}`);
     const dayResult = await generateDayWithScheduler({
       dayNumber,
       date: dayDate,
@@ -890,6 +902,7 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
         mealType: item.title.includes('Déjeuner') ? 'lunch' : item.title.includes('Dîner') ? 'dinner' : 'breakfast',
       }));
 
+      console.log(`[PERF ${elapsed()}] Start Gemini enrichment`);
       const enriched = await enrichRestaurantsWithGemini(toEnrich, preferences.destination);
 
       for (const item of allRestaurantItems) {
@@ -925,6 +938,7 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
         console.log(`[AI] 🎭 Matching Viator pour ${activitiesWithoutUrl.length} activités sans lien...`);
         // Limiter à 10 requêtes Viator pour ne pas ralentir
         const toMatch = activitiesWithoutUrl.slice(0, 10);
+        console.log(`[PERF ${elapsed()}] Start Viator matching`);
         const viatorResults = await Promise.all(
           toMatch.map(item => findViatorProduct(item.title, preferences.destination))
         );
@@ -1065,6 +1079,7 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
   // Supprime automatiquement les lieux trop loin de la destination
   validateTripGeography(coherenceValidatedTrip, cityCenter, true);
 
+  console.log(`[PERF ${elapsed()}] ✅ Trip generation complete`);
   return coherenceValidatedTrip;
 }
 
