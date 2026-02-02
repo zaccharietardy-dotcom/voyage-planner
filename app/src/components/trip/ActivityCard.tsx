@@ -1,6 +1,7 @@
 'use client';
 
-import { TripItem, TRIP_ITEM_COLORS } from '@/lib/types';
+import { useState } from 'react';
+import { TripItem, Flight, TRIP_ITEM_COLORS } from '@/lib/types';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -26,6 +27,7 @@ import {
   Briefcase,
   ChevronUp,
   ChevronDown,
+  ChevronRight,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TripItemType } from '@/lib/types';
@@ -231,8 +233,33 @@ export function ActivityCard({
 
               {/* Links row */}
               <div className="flex items-center gap-3 mt-2 flex-wrap">
-                {/* Booking link */}
-                {item.bookingUrl && (
+                {/* Flight booking links: Google Flights + Aviasales */}
+                {item.type === 'flight' && item.bookingUrl && (
+                  <a
+                    href={item.bookingUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+                  >
+                    <ExternalLink className="h-3 w-3" />
+                    Google Flights
+                  </a>
+                )}
+                {item.type === 'flight' && item.aviasalesUrl && (
+                  <a
+                    href={item.aviasalesUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="inline-flex items-center gap-1 text-xs text-orange-600 hover:underline"
+                  >
+                    <Plane className="h-3 w-3" />
+                    Aviasales
+                  </a>
+                )}
+                {/* Non-flight booking link */}
+                {item.type !== 'flight' && item.bookingUrl && (
                   <a
                     href={item.bookingUrl}
                     target="_blank"
@@ -298,6 +325,11 @@ export function ActivityCard({
               <Icon className="h-5 w-5" style={{ color }} />
             </div>
           </div>
+
+          {/* Flight alternatives - scrollable horizontal */}
+          {item.type === 'flight' && item.flightAlternatives && item.flightAlternatives.length > 0 && (
+            <FlightAlternatives alternatives={item.flightAlternatives} />
+          )}
 
           {/* Bouton monter - centré en haut */}
           {onMoveUp && (
@@ -369,5 +401,54 @@ export function ActivityCard({
         </div>
       </div>
     </Card>
+  );
+}
+
+function formatDuration(minutes: number): string {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return m > 0 ? `${h}h${String(m).padStart(2, '0')}` : `${h}h`;
+}
+
+function FlightAlternatives({ alternatives }: { alternatives: Flight[] }) {
+  const [expanded, setExpanded] = useState(false);
+
+  if (alternatives.length === 0) return null;
+
+  return (
+    <div className="mt-2 border-t pt-2" onClick={(e) => e.stopPropagation()}>
+      <button
+        className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+        onClick={() => setExpanded(!expanded)}
+      >
+        <ChevronRight className={cn('h-3 w-3 transition-transform', expanded && 'rotate-90')} />
+        {alternatives.length} autre{alternatives.length > 1 ? 's' : ''} vol{alternatives.length > 1 ? 's' : ''}
+      </button>
+      {expanded && (
+        <div className="flex gap-2 mt-2 overflow-x-auto pb-2 -mx-1 px-1">
+          {alternatives.map((alt) => (
+            <a
+              key={alt.id}
+              href={alt.bookingUrl || '#'}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-shrink-0 border rounded-lg p-2 text-xs hover:border-primary/50 hover:bg-muted/50 transition-colors min-w-[140px]"
+            >
+              <div className="font-medium">{alt.airline}</div>
+              <div className="text-muted-foreground">{alt.flightNumber}</div>
+              <div className="mt-1">
+                {alt.departureTimeDisplay || alt.departureTime?.split('T')[1]?.slice(0, 5)} → {alt.arrivalTimeDisplay || alt.arrivalTime?.split('T')[1]?.slice(0, 5)}
+              </div>
+              <div className="flex items-center justify-between mt-1">
+                <span className="font-semibold text-primary">{alt.pricePerPerson || alt.price}€</span>
+                <span className="text-muted-foreground">
+                  {formatDuration(alt.duration)} · {alt.stops === 0 ? 'Direct' : `${alt.stops} esc.`}
+                </span>
+              </div>
+            </a>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

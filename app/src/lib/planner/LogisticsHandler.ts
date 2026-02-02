@@ -421,6 +421,11 @@ export class LogisticsHandler {
         { date: formatDateForUrl(tripStartDate), passengers: preferences.groupSize }
       );
 
+      const aviasalesUrl = generateFlightLink(
+        { origin: originAirport.code, destination: destAirport.code },
+        { date: formatDateForUrl(tripStartDate), passengers: preferences.groupSize }
+      );
+
       const tripItem = toTripItem(flightItem.slot, dayNumber, this.orderIndex++, {
         id: flightItem.id,
         type: 'flight',
@@ -432,6 +437,8 @@ export class LogisticsHandler {
         estimatedCost: outboundFlight.price,
         bookingUrl,
         flight: outboundFlight,
+        flightAlternatives: this.context.outboundFlightAlternatives,
+        aviasalesUrl,
       });
       // Override heures avec heures locales
       tripItem.startTime = flightStartTime;
@@ -744,6 +751,11 @@ export class LogisticsHandler {
         { date: formatDateForUrl(tripEndDate), passengers: preferences.groupSize }
       );
 
+      const returnAviasalesUrl = generateFlightLink(
+        { origin: destAirport.code, destination: originAirport.code },
+        { date: formatDateForUrl(tripEndDate), passengers: preferences.groupSize }
+      );
+
       const tripItem = toTripItem(flightItem.slot, dayNumber, this.orderIndex++, {
         id: flightItem.id,
         type: 'flight',
@@ -755,6 +767,8 @@ export class LogisticsHandler {
         estimatedCost: returnFlight.price,
         bookingUrl,
         flight: returnFlight,
+        flightAlternatives: this.context.returnFlightAlternatives,
+        aviasalesUrl: returnAviasalesUrl,
       });
       tripItem.startTime = flightStartTime;
       tripItem.endTime = flightEndTime;

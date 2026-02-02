@@ -85,7 +85,9 @@ export interface PlannerContext {
 
   // Transport
   outboundFlight: Flight | null;
+  outboundFlightAlternatives?: Flight[];
   returnFlight: Flight | null;
+  returnFlightAlternatives?: Flight[];
   groundTransport: TransportOption | null;
 
   // Aéroports

@@ -478,7 +478,9 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
 
   // 4. Si avion, rechercher les vols détaillés
   let outboundFlight: Flight | null = null;
+  let outboundFlightAlternatives: Flight[] = [];
   let returnFlight: Flight | null = null;
+  let returnFlightAlternatives: Flight[] = [];
   let originAirport = originAirports[0];
   let destAirport = destAirports[0];
 
@@ -501,7 +503,9 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       );
 
       outboundFlight = flightResult.outboundFlight;
+      outboundFlightAlternatives = flightResult.outboundFlightAlternatives;
       returnFlight = flightResult.returnFlight;
+      returnFlightAlternatives = flightResult.returnFlightAlternatives;
       originAirport = flightResult.originAirport;
       destAirport = flightResult.destAirport;
 
@@ -1042,6 +1046,29 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
     console.warn('[AI] Enrichissement restaurants échoué (non bloquant):', error);
   }
 
+  // Attacher les vols alternatifs et liens Aviasales aux TripItems de vol
+  for (const day of days) {
+    for (const item of day.items) {
+      if (item.type === 'flight' && item.flight) {
+        // Générer le lien Aviasales affilié
+        const isOutbound = item.flight.id === outboundFlight?.id;
+        const isReturn = item.flight.id === returnFlight?.id;
+        const aviasalesUrl = generateFlightLink(
+          { origin: item.flight.departureAirportCode, destination: item.flight.arrivalAirportCode },
+          { date: item.flight.departureTime.split('T')[0], passengers: preferences.groupSize }
+        );
+        item.aviasalesUrl = aviasalesUrl;
+
+        // Attacher les alternatives
+        if (isOutbound && outboundFlightAlternatives.length > 0) {
+          item.flightAlternatives = outboundFlightAlternatives;
+        } else if (isReturn && returnFlightAlternatives.length > 0) {
+          item.flightAlternatives = returnFlightAlternatives;
+        }
+      }
+    }
+  }
+
   // Calculer le coût total
   const costBreakdown = calculateCostBreakdown(days, outboundFlight, returnFlight, parking, preferences, accommodation);
 
@@ -1153,12 +1180,16 @@ async function findBestFlights(
   destCityCoords?: { lat: number; lng: number }
 ): Promise<{
   outboundFlight: Flight | null;
+  outboundFlightAlternatives: Flight[];
   returnFlight: Flight | null;
+  returnFlightAlternatives: Flight[];
   originAirport: AirportInfo;
   destAirport: AirportInfo;
 }> {
   let bestOutboundFlight: Flight | null = null;
+  let bestOutboundAlternatives: Flight[] = [];
   let bestReturnFlight: Flight | null = null;
+  let bestReturnAlternatives: Flight[] = [];
   let bestOriginAirport: AirportInfo = originAirports[0];
   let bestDestAirport: AirportInfo = destAirports[0];
   let bestScore = Infinity; // Lower is better (price + distance penalty)
@@ -1213,7 +1244,9 @@ async function findBestFlights(
             if (score < bestScore || bestOutboundFlight === null) {
               bestScore = score;
               bestOutboundFlight = outbound;
+              bestOutboundAlternatives = flightResults.outboundFlights.filter(f => f.id !== outbound.id);
               bestReturnFlight = returnFlight;
+              bestReturnAlternatives = returnFlight ? flightResults.returnFlights.filter(f => f.id !== returnFlight.id) : [];
               bestOriginAirport = originAirport;
               bestDestAirport = destAirport;
               const penaltyInfo = (originDistancePenalty + destDistancePenalty) > 10
@@ -1231,7 +1264,9 @@ async function findBestFlights(
 
   return {
     outboundFlight: bestOutboundFlight,
+    outboundFlightAlternatives: bestOutboundAlternatives,
     returnFlight: bestReturnFlight,
+    returnFlightAlternatives: bestReturnAlternatives,
     originAirport: bestOriginAirport,
     destAirport: bestDestAirport,
   };

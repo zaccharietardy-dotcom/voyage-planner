@@ -287,6 +287,8 @@ export interface TripItem {
   rating?: number;
   // Données enrichies
   flight?: Flight;
+  flightAlternatives?: Flight[]; // Autres vols disponibles (scrollable)
+  aviasalesUrl?: string; // Lien affilié Aviasales (en plus du bookingUrl Google Flights)
   parking?: ParkingOption;
   restaurant?: Restaurant;
   accommodation?: Accommodation;

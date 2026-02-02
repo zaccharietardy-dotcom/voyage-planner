@@ -41,7 +41,9 @@ import { ClaudeAdvisor } from './ClaudeAdvisor';
 export interface TripPlannerConfig {
   preferences: TripPreferences;
   outboundFlight: Flight | null;
+  outboundFlightAlternatives?: Flight[];
   returnFlight: Flight | null;
+  returnFlightAlternatives?: Flight[];
   groundTransport: TransportOption | null;
   originAirport: AirportInfo;
   destAirport: AirportInfo;
@@ -78,7 +80,9 @@ export class TripPlanner {
     return {
       preferences,
       outboundFlight: this.config.outboundFlight,
+      outboundFlightAlternatives: this.config.outboundFlightAlternatives,
       returnFlight: this.config.returnFlight,
+      returnFlightAlternatives: this.config.returnFlightAlternatives,
       groundTransport: this.config.groundTransport,
       originAirport: this.config.originAirport,
       destAirport: this.config.destAirport,

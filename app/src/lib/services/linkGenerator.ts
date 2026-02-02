@@ -183,7 +183,7 @@ export function generateFlightLink(
 
   searchPath += passengers.toString();
 
-  return `https://www.aviasales.com/search/${searchPath}?currency=eur`;
+  return `https://www.aviasales.com/search/${searchPath}?currency=eur&locale=fr`;
 }
 
 /**
