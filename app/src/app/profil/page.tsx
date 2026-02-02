@@ -301,8 +301,10 @@ export default function ProfilPage() {
                   <div className="flex-1">
                     <p className="font-semibold">{isPro ? 'Plan Pro actif' : 'Plan Gratuit'}</p>
                     <p className="text-xs text-muted-foreground">
-                      {isPro && expiresAt
-                        ? `Renouvellement le ${format(new Date(expiresAt), 'd MMMM yyyy', { locale: fr })}`
+                      {isPro
+                        ? expiresAt
+                          ? `Renouvellement le ${format(new Date(expiresAt), 'd MMMM yyyy', { locale: fr })}`
+                          : 'Voyages illimités'
                         : '1 voyage IA par mois'}
                     </p>
                   </div>
