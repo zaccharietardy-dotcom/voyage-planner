@@ -1,19 +1,21 @@
 /**
- * Service RapidAPI Booking.com
+ * Service RapidAPI Booking.com (booking-com15)
  *
- * API officielle Booking.com via RapidAPI
+ * API Booking.com via RapidAPI - endpoint booking-com15
  * - Disponibilité temps réel
  * - Prix exacts
- * - Liens de réservation directs
+ * - Liens de réservation directs avec dates pré-remplies
  *
- * Tarif: ~500 requêtes pour 1$
+ * Endpoints:
+ * 1. searchDestination → dest_id
+ * 2. searchHotels → liste hôtels dispo avec prix
+ * 3. getHotelDetails → URL Booking.com directe
  */
 
 const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY?.trim();
-const RAPIDAPI_HOST = 'apidojo-booking-v1.p.rapidapi.com';
-const RAPIDAPI_BASE_URL = `https://${RAPIDAPI_HOST}`;
+const RAPIDAPI_HOST = 'booking-com15.p.rapidapi.com';
+const RAPIDAPI_BASE_URL = `https://${RAPIDAPI_HOST}/api/v1/hotels`;
 
-// Log de démarrage
 console.log(`[RapidAPI Booking] Clé configurée: ${RAPIDAPI_KEY ? '✅ Oui (' + RAPIDAPI_KEY.substring(0, 8) + '...)' : '❌ Non'}`);
 
 export interface BookingHotel {
@@ -46,13 +48,27 @@ export function isRapidApiBookingConfigured(): boolean {
 }
 
 /**
- * Recherche le dest_id d'une ville sur Booking.com
+ * Cache simple des dest_id pour éviter les requêtes répétées
+ */
+const destIdCache: Record<string, { destId: string; destType: string; timestamp: number }> = {};
+const CACHE_TTL = 24 * 60 * 60 * 1000; // 24h
+
+/**
+ * Recherche le dest_id d'une ville sur Booking.com (booking-com15)
  */
 async function getDestinationId(city: string): Promise<{ destId: string; destType: string } | null> {
   if (!RAPIDAPI_KEY) return null;
 
+  // Check cache
+  const normalizedCity = city.toLowerCase().trim();
+  const cached = destIdCache[normalizedCity];
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    console.log(`[RapidAPI Booking] Cache hit: ${city} → ${cached.destId}`);
+    return { destId: cached.destId, destType: cached.destType };
+  }
+
   try {
-    const url = `${RAPIDAPI_BASE_URL}/locations/auto-complete?text=${encodeURIComponent(city)}&languagecode=en-us`;
+    const url = `${RAPIDAPI_BASE_URL}/searchDestination?query=${encodeURIComponent(city)}`;
 
     const response = await fetch(url, {
       headers: {
@@ -67,30 +83,69 @@ async function getDestinationId(city: string): Promise<{ destId: string; destTyp
     }
 
     const data = await response.json();
+    const results = data.data || data || [];
 
-    // Chercher la ville (type "ci" = city)
-    const cityResult = data.find((item: any) => item.dest_type === 'city');
+    // Chercher la ville (dest_type "city")
+    const cityResult = Array.isArray(results)
+      ? results.find((item: any) => item.dest_type === 'city' || item.search_type === 'city')
+      : null;
 
-    if (cityResult) {
-      console.log(`[RapidAPI Booking] Ville trouvée: ${cityResult.label} (dest_id: ${cityResult.dest_id})`);
-      return {
-        destId: cityResult.dest_id,
-        destType: cityResult.dest_type,
-      };
-    }
+    const result = cityResult || (Array.isArray(results) && results.length > 0 ? results[0] : null);
 
-    // Fallback sur le premier résultat
-    if (data.length > 0) {
-      console.log(`[RapidAPI Booking] Fallback: ${data[0].label} (dest_id: ${data[0].dest_id})`);
-      return {
-        destId: data[0].dest_id,
-        destType: data[0].dest_type,
-      };
+    if (result) {
+      const destId = result.dest_id?.toString() || result.id?.toString();
+      const destType = result.dest_type || result.search_type || 'city';
+      console.log(`[RapidAPI Booking] Ville trouvée: ${result.name || result.label || city} (dest_id: ${destId})`);
+
+      // Cache
+      destIdCache[normalizedCity] = { destId, destType, timestamp: Date.now() };
+      return { destId, destType };
     }
 
     return null;
   } catch (error) {
     console.error('[RapidAPI Booking] Erreur recherche destination:', error);
+    return null;
+  }
+}
+
+/**
+ * Récupère l'URL Booking.com directe pour un hôtel
+ */
+async function getHotelBookingUrl(
+  hotelId: string,
+  checkIn: string,
+  checkOut: string,
+  adults: number
+): Promise<string | null> {
+  if (!RAPIDAPI_KEY) return null;
+
+  try {
+    const url = `${RAPIDAPI_BASE_URL}/getHotelDetails?hotel_id=${encodeURIComponent(hotelId)}&arrival_date=${checkIn}&departure_date=${checkOut}&adults=${adults}&currency_code=EUR`;
+
+    const response = await fetch(url, {
+      headers: {
+        'x-rapidapi-host': RAPIDAPI_HOST,
+        'x-rapidapi-key': RAPIDAPI_KEY,
+      },
+    });
+
+    if (!response.ok) return null;
+
+    const data = await response.json();
+    const hotelData = data.data || data;
+
+    // Construire l'URL avec dates pré-remplies
+    const slug = hotelData.url || hotelData.hotel_url || hotelData.link;
+    if (slug) {
+      const baseUrl = slug.startsWith('http') ? slug : `https://www.booking.com${slug}`;
+      const separator = baseUrl.includes('?') ? '&' : '?';
+      return `${baseUrl}${separator}checkin=${checkIn}&checkout=${checkOut}&group_adults=${adults}&no_rooms=1`;
+    }
+
+    return null;
+  } catch (error) {
+    console.error(`[RapidAPI Booking] Erreur getHotelDetails ${hotelId}:`, error);
     return null;
   }
 }
@@ -128,46 +183,41 @@ export async function searchHotelsWithBookingApi(
   } = options;
 
   try {
-    // 1. Obtenir le dest_id de la ville
+    // 1. Obtenir le dest_id
     const destInfo = await getDestinationId(destination);
     if (!destInfo) {
       console.error(`[RapidAPI Booking] Ville non trouvée: ${destination}`);
       return [];
     }
 
-    // 2. Construire l'URL de recherche
+    // 2. Rechercher les hôtels
     const params = new URLSearchParams({
-      dest_ids: destInfo.destId,
-      dest_type: destInfo.destType,
+      dest_id: destInfo.destId,
+      search_type: destInfo.destType,
       arrival_date: checkIn,
       departure_date: checkOut,
-      guest_qty: guests.toString(),
+      adults: guests.toString(),
       room_qty: rooms.toString(),
-      search_type: destInfo.destType,
-      offset: '0',
-      price_filter_currencycode: 'EUR',
-      order_by: sortBy,
-      languagecode: 'en-us',
-      travel_purpose: 'leisure',
+      page_number: '1',
+      currency_code: 'EUR',
+      sort_by: sortBy,
+      languagecode: 'fr',
+      units: 'metric',
     });
 
-    // Filtres optionnels
-    if (minStars) {
-      // Format: class::2,class::3,class::4,class::5 pour 2+ étoiles
+    if (minPrice) params.append('price_min', minPrice.toString());
+    if (maxPrice) params.append('price_max', maxPrice.toString());
+
+    // Filtre étoiles
+    if (minStars && minStars > 1) {
       const classes = [];
       for (let i = minStars; i <= 5; i++) {
-        classes.push(`class::${i}`);
+        classes.push(i.toString());
       }
-      params.append('categories_filter', classes.join(','));
+      params.append('categories_filter', `class::${classes.join(',class::')}`);
     }
 
-    if (minPrice || maxPrice) {
-      // Format: price_filter_min::50-price_filter_max::200
-      if (minPrice) params.append('price_filter_min', minPrice.toString());
-      if (maxPrice) params.append('price_filter_max', maxPrice.toString());
-    }
-
-    const url = `${RAPIDAPI_BASE_URL}/properties/list?${params.toString()}`;
+    const url = `${RAPIDAPI_BASE_URL}/searchHotels?${params.toString()}`;
     console.log(`[RapidAPI Booking] Recherche: ${destination}, ${checkIn} → ${checkOut}, ${guests} pers.`);
 
     const response = await fetch(url, {
@@ -184,57 +234,106 @@ export async function searchHotelsWithBookingApi(
     }
 
     const data = await response.json();
-    const properties = data.result || [];
+    const properties = data.data?.hotels || data.data?.result || data.result || [];
 
     // Calculer le nombre de nuits
     const checkInDate = new Date(checkIn);
     const checkOutDate = new Date(checkOut);
     const nights = Math.ceil((checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24));
 
-    // 3. Transformer les résultats
-    // Filtrer: pas de soldout
-    const hotels: BookingHotel[] = properties
+    // 3. Transformer les résultats et récupérer les URLs directes
+    const rawHotels = Array.isArray(properties) ? properties : [];
+    const availableHotels = rawHotels
       .filter((p: any) => {
-        if (p.type !== 'property_card') return false;
-        if (p.soldout === 1) return false;
-        return true;
+        // Exclure les hôtels sold out
+        if (p.soldout === 1 || p.soldout === true) return false;
+        // Garder seulement ceux avec un prix
+        const price = p.property?.priceBreakdown?.grossPrice?.value
+          || p.price_breakdown?.gross_price
+          || p.min_total_price
+          || p.composite_price_breakdown?.gross_amount_per_night?.value
+          || 0;
+        return price > 0;
       })
-      .slice(0, limit)
-      .map((p: any) => {
-        const totalPrice = p.price_breakdown?.gross_price || p.min_total_price || 0;
-        const pricePerNight = nights > 0 ? Math.round(totalPrice / nights) : totalPrice;
+      .slice(0, limit);
 
-        // Construire l'URL avec les dates pré-remplies pour vérification disponibilité
-        // Format: checkin=2026-01-28&checkout=2026-01-30&group_adults=2
-        const baseUrl = p.url || `https://www.booking.com/hotel/search.html?ss=${encodeURIComponent(destination)}`;
-        const urlWithDates = baseUrl.includes('?')
-          ? `${baseUrl}&checkin=${checkIn}&checkout=${checkOut}&group_adults=${guests}&group_children=0&no_rooms=1`
-          : `${baseUrl}?checkin=${checkIn}&checkout=${checkOut}&group_adults=${guests}&group_children=0&no_rooms=1`;
+    // Récupérer les URLs Booking directes pour les 5 premiers (limite API calls)
+    const hotelUrlPromises = availableHotels.slice(0, 5).map(async (p: any) => {
+      const hotelId = p.hotel_id || p.property?.id || p.id;
+      if (hotelId) {
+        return getHotelBookingUrl(hotelId.toString(), checkIn, checkOut, guests);
+      }
+      return null;
+    });
+    const hotelUrls = await Promise.all(hotelUrlPromises);
 
-        return {
-          id: `booking-${p.hotel_id}`,
-          name: p.hotel_name || p.hotel_name_trans,
-          address: p.address || p.address_trans || 'Adresse non disponible',
-          city: p.city || destination,
-          latitude: p.latitude || 0,
-          longitude: p.longitude || 0,
-          stars: Math.round(p.class || 3),
-          rating: p.review_score || 8.0, // Déjà sur 10
-          reviewCount: p.review_nr || 0,
-          pricePerNight,
-          totalPrice: Math.round(totalPrice),
-          currency: 'EUR',
-          breakfastIncluded: p.hotel_include_breakfast === 1,
-          checkIn: p.checkin?.from || '15:00',
-          checkOut: p.checkout?.until || '11:00',
-          distanceToCenter: parseFloat(p.distance_to_cc || p.distance || '0'),
-          photoUrl: p.main_photo_url?.replace('square60', 'square200') || '',
-          bookingUrl: urlWithDates,
-          available: p.soldout !== 1,
-        };
-      });
+    const hotels: BookingHotel[] = availableHotels.map((p: any, index: number) => {
+      // Extraire le prix (plusieurs formats possibles selon la version de l'API)
+      const grossPrice = p.property?.priceBreakdown?.grossPrice?.value
+        || p.price_breakdown?.gross_price
+        || p.min_total_price
+        || p.composite_price_breakdown?.gross_amount_per_night?.value
+        || 0;
+      const totalPrice = Math.round(grossPrice);
+      const pricePerNight = nights > 0 ? Math.round(totalPrice / nights) : totalPrice;
 
-    // Log des résultats
+      // Extraire les coordonnées
+      const latitude = p.property?.latitude || p.latitude || 0;
+      const longitude = p.property?.longitude || p.longitude || 0;
+
+      // Extraire le rating
+      const reviewScore = p.property?.reviewScore || p.review_score || 8.0;
+      const reviewCount = p.property?.reviewCount || p.review_nr || 0;
+
+      // Extraire les étoiles
+      const stars = Math.round(
+        p.property?.propertyClass || p.property?.accuratePropertyClass || p.class || 3
+      );
+
+      // Extraire le check-in/check-out
+      const checkInTime = p.property?.checkin?.fromTime || p.checkin?.from || '15:00';
+      const checkOutTime = p.property?.checkout?.untilTime || p.checkout?.until || '11:00';
+
+      // Petit-déjeuner
+      const breakfastIncluded = p.property?.hasBreakfast === true
+        || p.hotel_include_breakfast === 1
+        || false;
+
+      // URL de réservation : priorité à l'URL directe obtenue via getHotelDetails
+      const directUrl = index < 5 ? hotelUrls[index] : null;
+      const hotelName = p.property?.name || p.hotel_name || p.hotel_name_trans || 'Hotel';
+      const fallbackUrl = `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(`${hotelName} ${destination}`)}&checkin=${checkIn}&checkout=${checkOut}&group_adults=${guests}&no_rooms=1&lang=fr`;
+      const bookingUrl = directUrl || p.property?.url || p.url || fallbackUrl;
+
+      // Photo
+      const photoUrl = p.property?.photoUrls?.[0]
+        || p.main_photo_url?.replace('square60', 'square200')
+        || p.property?.mainPhotoUrl
+        || '';
+
+      return {
+        id: `booking-${p.hotel_id || p.property?.id || p.id || index}`,
+        name: hotelName,
+        address: p.property?.address || p.address || p.address_trans || 'Adresse non disponible',
+        city: p.property?.city || p.city || destination,
+        latitude,
+        longitude,
+        stars,
+        rating: reviewScore,
+        reviewCount,
+        pricePerNight,
+        totalPrice,
+        currency: 'EUR',
+        breakfastIncluded,
+        checkIn: checkInTime,
+        checkOut: checkOutTime,
+        distanceToCenter: parseFloat(p.property?.distanceFromCenter || p.distance_to_cc || p.distance || '0'),
+        photoUrl,
+        bookingUrl: bookingUrl.startsWith('http') ? bookingUrl : `https://www.booking.com${bookingUrl}`,
+        available: true,
+      };
+    });
+
     console.log(`[RapidAPI Booking] ✅ ${hotels.length} hôtels DISPONIBLES trouvés`);
     if (hotels.length > 0) {
       console.log(`[RapidAPI Booking] Premier: ${hotels[0].name} - ${hotels[0].pricePerNight}€/nuit (${hotels[0].stars}⭐)`);
@@ -245,27 +344,4 @@ export async function searchHotelsWithBookingApi(
     console.error('[RapidAPI Booking] Erreur recherche hôtels:', error);
     return [];
   }
-}
-
-/**
- * Cache simple des dest_id pour éviter les requêtes répétées
- */
-const destIdCache: Record<string, { destId: string; destType: string; timestamp: number }> = {};
-const CACHE_TTL = 24 * 60 * 60 * 1000; // 24h
-
-async function getCachedDestinationId(city: string): Promise<{ destId: string; destType: string } | null> {
-  const normalizedCity = city.toLowerCase().trim();
-  const cached = destIdCache[normalizedCity];
-
-  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-    console.log(`[RapidAPI Booking] Cache hit: ${city} → ${cached.destId}`);
-    return { destId: cached.destId, destType: cached.destType };
-  }
-
-  const result = await getDestinationId(city);
-  if (result) {
-    destIdCache[normalizedCity] = { ...result, timestamp: Date.now() };
-  }
-
-  return result;
 }

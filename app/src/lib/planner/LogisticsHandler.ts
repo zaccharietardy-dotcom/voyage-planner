@@ -262,12 +262,13 @@ export class LogisticsHandler {
         locationName: getHotelLocationName(accommodation, preferences.destination),
         latitude: accommodation?.latitude || cityCenter.lat + 0.005,
         longitude: accommodation?.longitude || cityCenter.lng + 0.005,
-        bookingUrl: accommodation?.name
-          ? generateHotelLink(
-              { name: accommodation.name, city: preferences.destination },
-              { checkIn: formatDateForUrl(tripStartDate), checkOut: formatDateForUrl(hotelCheckOutDate) }
-            )
-          : undefined,
+        bookingUrl: accommodation?.bookingUrl
+          || (accommodation?.name
+            ? generateHotelLink(
+                { name: accommodation.name, city: preferences.destination },
+                { checkIn: formatDateForUrl(tripStartDate), checkOut: formatDateForUrl(hotelCheckOutDate) }
+              )
+            : undefined),
       }));
     }
 
@@ -505,9 +506,13 @@ export class LogisticsHandler {
     const hotelEnd = new Date(transferEnd.getTime() + 20 * 60 * 1000);
     const hotelName = accommodation?.name || 'Hébergement';
 
-    // Check-in ou dépôt de bagages selon l'heure d'arrivée
-    if (isLateNight || transferEnd.getHours() >= 14) {
-      // Arrivée après 14h ou tardive → check-in complet
+    // Check-in ou dépôt de bagages selon l'heure d'arrivée vs check-in hôtel
+    const [checkInHour] = hotelCheckInTime.split(':').map(Number);
+    const arrivalHourAtHotel = transferEnd.getHours();
+    const minutesUntilCheckIn = (checkInHour * 60) - (arrivalHourAtHotel * 60 + transferEnd.getMinutes());
+
+    if (isLateNight || arrivalHourAtHotel >= checkInHour || minutesUntilCheckIn <= 0) {
+      // Arrivée après l'heure de check-in ou tardive → check-in complet
       const hotelItem = scheduler.insertFixedItem({
         id: generateId(),
         title: isLateNight ? `Check-in tardif ${hotelName}` : `Check-in ${hotelName}`,
@@ -529,16 +534,52 @@ export class LogisticsHandler {
           locationName: getHotelLocationName(accommodation, preferences.destination),
           latitude: accommodation?.latitude || cityCenter.lat + 0.005,
           longitude: accommodation?.longitude || cityCenter.lng + 0.005,
-          bookingUrl: accommodation?.name
-            ? generateHotelLink(
-                { name: accommodation.name, city: preferences.destination },
-                { checkIn: formatDateForUrl(tripStartDate), checkOut: formatDateForUrl(hotelCheckOutDate) }
-              )
-            : undefined,
+          bookingUrl: accommodation?.bookingUrl
+            || (accommodation?.name
+              ? generateHotelLink(
+                  { name: accommodation.name, city: preferences.destination },
+                  { checkIn: formatDateForUrl(tripStartDate), checkOut: formatDateForUrl(hotelCheckOutDate) }
+                )
+              : undefined),
+        }));
+      }
+    } else if (minutesUntilCheckIn <= 120) {
+      // Arrivée < 2h avant check-in → aller directement à l'hôtel, pas de consigne
+      // La plupart des hôtels acceptent un check-in anticipé d'1-2h
+      console.log(`[Logistics] Arrivée ${minutesUntilCheckIn}min avant check-in → attente à l'hôtel (pas de consigne)`);
+      const hotelItem = scheduler.insertFixedItem({
+        id: generateId(),
+        title: `Check-in ${hotelName}`,
+        type: 'hotel',
+        startTime: transferEnd,
+        endTime: hotelEnd,
+      });
+      if (hotelItem) {
+        const hotelCheckOutDate = new Date(tripStartDate);
+        hotelCheckOutDate.setDate(hotelCheckOutDate.getDate() + preferences.durationDays - 1);
+
+        items.push(toTripItem(hotelItem.slot, dayNumber, this.orderIndex++, {
+          id: hotelItem.id,
+          type: 'hotel',
+          title: hotelItem.title,
+          description: accommodation
+            ? `Check-in anticipé possible | ${accommodation.stars}⭐ | ${accommodation.rating?.toFixed(1)}/10 | ${accommodation.pricePerNight}€/nuit`
+            : 'Arrivée un peu en avance — la plupart des hôtels acceptent un check-in anticipé.',
+          locationName: getHotelLocationName(accommodation, preferences.destination),
+          latitude: accommodation?.latitude || cityCenter.lat + 0.005,
+          longitude: accommodation?.longitude || cityCenter.lng + 0.005,
+          bookingUrl: accommodation?.bookingUrl
+            || (accommodation?.name
+              ? generateHotelLink(
+                  { name: accommodation.name, city: preferences.destination },
+                  { checkIn: formatDateForUrl(tripStartDate), checkOut: formatDateForUrl(hotelCheckOutDate) }
+                )
+              : undefined),
         }));
       }
     } else {
-      // Arrivée avant 14h → déposer les bagages à l'hôtel (la plupart acceptent les bagages avant le check-in)
+      // Arrivée > 2h avant check-in → déposer les bagages à l'hôtel, faire des activités, check-in plus tard
+      console.log(`[Logistics] Arrivée ${minutesUntilCheckIn}min avant check-in → dépôt bagages + activités`);
       const luggageDropEnd = new Date(transferEnd.getTime() + 10 * 60 * 1000);
       const luggageItem = scheduler.insertFixedItem({
         id: generateId(),
@@ -552,7 +593,7 @@ export class LogisticsHandler {
           id: luggageItem.id,
           type: 'hotel',
           title: luggageItem.title,
-          description: 'Déposez vos bagages à la réception avant le check-in officiel. Vous récupérerez votre chambre plus tard.',
+          description: `Déposez vos bagages à la réception. Check-in officiel à ${hotelCheckInTime}.`,
           locationName: getHotelLocationName(accommodation, preferences.destination),
           latitude: accommodation?.latitude || cityCenter.lat + 0.005,
           longitude: accommodation?.longitude || cityCenter.lng + 0.005,
@@ -643,6 +684,13 @@ export class LogisticsHandler {
         locationName: getHotelLocationName(accommodation, preferences.destination),
         latitude: accommodation?.latitude || cityCenter.lat + 0.005,
         longitude: accommodation?.longitude || cityCenter.lng + 0.005,
+        bookingUrl: accommodation?.bookingUrl
+          || (accommodation?.name
+            ? generateHotelLink(
+                { name: accommodation.name, city: preferences.destination },
+                { checkIn: formatDateForUrl(tripStartDate), checkOut: formatDateForUrl(hotelCheckOutDate) }
+              )
+            : undefined),
       }));
     }
 

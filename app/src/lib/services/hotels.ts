@@ -2,8 +2,8 @@
  * Service de recherche d'hôtels
  *
  * Chaîne de priorité:
- * 1. SerpAPI Google Hotels (DISPONIBILITÉ FIABLE - seuls les hôtels avec prix sont vraiment dispo)
- * 2. RapidAPI Booking.com (fallback - soldout pas fiable)
+ * 1. Booking.com RapidAPI (booking-com15) - prix réels + liens directs
+ * 2. TripAdvisor + SerpAPI Google Hotels (fallback/validation)
  * 3. Claude AI (fallback si APIs échouent)
  * 4. Hôtels génériques (fallback final)
  */
@@ -177,12 +177,64 @@ export async function searchHotels(
 
   const targetStars = options.budgetLevel === 'luxury' ? 4 : (options.budgetLevel === 'comfort' || options.budgetLevel === 'moderate') ? 3 : 2;
 
-  // 1. PRIORITÉ: TripAdvisor (découverte) → SerpAPI (validation dispo, 1 requête)
-  // TripAdvisor donne les meilleurs hôtels avec prix comparés multi-providers
-  // SerpAPI Google Hotels confirme la disponibilité (seuls les hôtels avec prix sont dispo)
+  // 1. PRIORITÉ: Booking.com RapidAPI (booking-com15) - prix réels + liens directs
+  if (isRapidApiBookingConfigured()) {
+    try {
+      console.log(`[Hotels] 🔍 Étape 1: Booking.com API (prix réels + liens directs)...`);
+      console.log(`[Hotels] Budget: ${options.budgetLevel}, Prix: ${priceRange.min}-${priceRange.max}€/nuit, ${targetStars}+ étoiles`);
+
+      const bookingHotels = await searchHotelsWithBookingApi(destination, checkInStr, checkOutStr, {
+        guests: options.guests,
+        rooms: 1,
+        minPrice: priceRange.min,
+        maxPrice: priceRange.max,
+        minStars: targetStars,
+        sortBy: options.budgetLevel === 'economic' ? 'price' : 'review_score',
+        limit: 15,
+      });
+
+      if (bookingHotels.length > 0) {
+        const hotels: Accommodation[] = bookingHotels.map((h: BookingHotel) => {
+          if (h.breakfastIncluded) {
+            console.log(`[Hotels] ✅ ${h.name}: Petit-déjeuner INCLUS`);
+          }
+
+          return {
+            id: h.id,
+            name: h.name,
+            type: 'hotel' as const,
+            address: h.address,
+            latitude: h.latitude || options.cityCenter.lat,
+            longitude: h.longitude || options.cityCenter.lng,
+            rating: h.rating,
+            reviewCount: h.reviewCount,
+            stars: h.stars,
+            pricePerNight: h.pricePerNight,
+            totalPrice: h.totalPrice,
+            currency: 'EUR',
+            amenities: h.breakfastIncluded ? ['Petit-déjeuner inclus'] : [],
+            photos: h.photoUrl ? [h.photoUrl] : undefined,
+            checkInTime: validateCheckInTime(h.checkIn),
+            checkOutTime: validateCheckOutTime(h.checkOut),
+            bookingUrl: h.bookingUrl,
+            distanceToCenter: h.distanceToCenter,
+            description: '',
+            breakfastIncluded: h.breakfastIncluded,
+          };
+        });
+
+        console.log(`[Hotels] ✅ ${hotels.length} hôtels via Booking.com (liens directs réservation)`);
+        return adjustHotelPrices(hotels, options);
+      }
+    } catch (error) {
+      console.warn('[Hotels] Booking.com API error, trying TripAdvisor/SerpAPI:', error);
+    }
+  }
+
+  // 2. FALLBACK: TripAdvisor (découverte) → SerpAPI (validation dispo)
   if (isTripAdvisorConfigured()) {
     try {
-      console.log(`[Hotels] 🔍 Étape 1: Découverte via TripAdvisor (prix multi-providers)...`);
+      console.log(`[Hotels] 🔍 Fallback: TripAdvisor (prix multi-providers)...`);
       const taHotels = await searchTripAdvisorHotels(destination, {
         checkIn: checkInStr,
         checkOut: checkOutStr,
@@ -193,7 +245,6 @@ export async function searchHotels(
       });
 
       if (taHotels.length > 0) {
-        // Filtrer par budget
         let filtered = taHotels.filter(h =>
           h.pricePerNight === 0 ||
           (h.pricePerNight >= priceRange.min * 0.7 && h.pricePerNight <= priceRange.hardMax)
@@ -202,32 +253,26 @@ export async function searchHotels(
         if (filtered.length > 0) {
           console.log(`[Hotels] ${filtered.length} candidats TripAdvisor dans le budget`);
 
-          // Étape 2: Valider la dispo via SerpAPI Google Hotels (1 requête)
-          // On cherche par nom de ville — SerpAPI retourne les hôtels DISPONIBLES uniquement
           if (isSerpApiPlacesConfigured()) {
             try {
-              console.log(`[Hotels] 🔍 Étape 2: Validation dispo via SerpAPI Google Hotels...`);
+              console.log(`[Hotels] 🔍 Validation dispo via SerpAPI Google Hotels...`);
               const serpHotels = await searchHotelsWithSerpApi(destination, checkInStr, checkOutStr, {
                 adults: options.guests,
                 minPrice: priceRange.min,
                 maxPrice: Math.round(priceRange.hardMax),
                 hotelClass: targetStars,
                 sort: options.budgetLevel === 'economic' ? 'lowest_price' : 'highest_rating',
-                limit: 30, // Plus large pour matcher
+                limit: 30,
               });
 
               if (serpHotels.length > 0) {
-                // Matcher les candidats TripAdvisor avec les résultats SerpAPI (dispo confirmée)
-                const serpNames = new Set(serpHotels.map((h: any) => h.name?.toLowerCase().trim()));
                 const serpMap = new Map(serpHotels.map((h: any) => [h.name?.toLowerCase().trim(), h]));
 
                 const validated: Accommodation[] = [];
                 for (const taHotel of filtered) {
                   const taNameLower = taHotel.name.toLowerCase().trim();
-                  // Match exact ou partiel (ex: "Hotel Ritz" dans "The Ritz Paris")
                   let serpMatch: any = serpMap.get(taNameLower);
                   if (!serpMatch) {
-                    // Fuzzy match: chercher si un nom SerpAPI contient le nom TA ou vice-versa
                     for (const [serpName, serpData] of serpMap) {
                       if (serpName.includes(taNameLower) || taNameLower.includes(serpName) ||
                           serpName.split(/\s+/).filter((w: string) => w.length > 3).some((w: string) => taNameLower.includes(w))) {
@@ -238,7 +283,6 @@ export async function searchHotels(
                   }
 
                   if (serpMatch) {
-                    // Dispo confirmée ! Utiliser le lien SerpAPI (Google Travel direct avec dates)
                     validated.push({
                       ...taHotel,
                       bookingUrl: serpMatch.bookingUrl || taHotel.bookingUrl,
@@ -255,7 +299,6 @@ export async function searchHotels(
                   return adjustHotelPrices(validated, options);
                 }
 
-                // Aucun match → utiliser les résultats SerpAPI directement (on sait qu'ils sont dispo)
                 console.log(`[Hotels] Aucun match TA↔SerpAPI, utilisation des résultats SerpAPI directs`);
                 const serpAccommodations: Accommodation[] = serpHotels.slice(0, 10).map((h: any) => {
                   const amenities = h.amenities || [];
@@ -293,7 +336,6 @@ export async function searchHotels(
             }
           }
 
-          // Pas de SerpAPI → retourner TripAdvisor tel quel (pas de validation dispo)
           console.log(`[Hotels] ✅ ${filtered.length} hôtels TripAdvisor (dispo non vérifiée)`);
           return adjustHotelPrices(filtered, options);
         }
@@ -303,12 +345,10 @@ export async function searchHotels(
     }
   }
 
-  // 2. FALLBACK: SerpAPI Google Hotels seul (si TripAdvisor échoue)
-  // Seuls les hôtels avec un prix affiché sont vraiment disponibles
+  // 3. FALLBACK: SerpAPI Google Hotels seul
   if (isSerpApiPlacesConfigured()) {
     try {
-      console.log(`[Hotels] 🔍 Recherche via SerpAPI Google Hotels (disponibilité FIABLE)...`);
-      console.log(`[Hotels] Budget: ${options.budgetLevel}, Prix: ${priceRange.min}-${priceRange.max}€/nuit, ${targetStars}+ étoiles`);
+      console.log(`[Hotels] 🔍 Fallback: SerpAPI Google Hotels...`);
 
       const serpHotels = await searchHotelsWithSerpApi(destination, checkInStr, checkOutStr, {
         adults: options.guests,
@@ -320,21 +360,13 @@ export async function searchHotels(
       });
 
       if (serpHotels.length > 0) {
-        // Convertir en format Accommodation
         const hotels: Accommodation[] = serpHotels.map((h: any) => {
           const amenities = h.amenities || [];
           const breakfastIncluded = checkBreakfastIncluded(amenities);
-
-          if (breakfastIncluded) {
-            console.log(`[Hotels] ✅ ${h.name}: Petit-déjeuner INCLUS`);
-          }
-
-          // Parser le nombre d'étoiles correctement
           let stars = 3;
           if (h.stars) {
-            if (typeof h.stars === 'number') {
-              stars = h.stars;
-            } else if (typeof h.stars === 'string') {
+            if (typeof h.stars === 'number') stars = h.stars;
+            else if (typeof h.stars === 'string') {
               const match = h.stars.match(/(\d)/);
               if (match) stars = parseInt(match[1]);
             }
@@ -347,7 +379,7 @@ export async function searchHotels(
             address: h.address || 'Adresse non disponible',
             latitude: h.latitude || options.cityCenter.lat,
             longitude: h.longitude || options.cityCenter.lng,
-            rating: h.rating ? (h.rating <= 5 ? h.rating * 2 : h.rating) : 8, // Convertir en /10 si /5
+            rating: h.rating ? (h.rating <= 5 ? h.rating * 2 : h.rating) : 8,
             reviewCount: h.reviewCount || 0,
             stars,
             pricePerNight: h.pricePerNight || getPriceRange(options.budgetLevel).min,
@@ -363,68 +395,15 @@ export async function searchHotels(
           };
         });
 
-        console.log(`[Hotels] ✅ ${hotels.length} hôtels DISPONIBLES via SerpAPI Google Hotels`);
+        console.log(`[Hotels] ✅ ${hotels.length} hôtels via SerpAPI Google Hotels`);
         return adjustHotelPrices(hotels, options);
       }
     } catch (error) {
-      console.warn('[Hotels] SerpAPI error, trying Booking.com:', error);
+      console.warn('[Hotels] SerpAPI error, trying Claude:', error);
     }
   }
 
-  // 2. Fallback: RapidAPI Booking.com (soldout pas toujours fiable)
-  if (isRapidApiBookingConfigured()) {
-    try {
-      console.log(`[Hotels] 🔍 Fallback: Booking.com API...`);
-
-      const bookingHotels = await searchHotelsWithBookingApi(destination, checkInStr, checkOutStr, {
-        guests: options.guests,
-        rooms: 1,
-        minPrice: priceRange.min,
-        maxPrice: priceRange.max,
-        minStars: targetStars,
-        sortBy: options.budgetLevel === 'economic' ? 'price' : 'review_score',
-        limit: 15,
-      });
-
-      if (bookingHotels.length > 0) {
-        // Convertir BookingHotel en Accommodation
-        const hotels: Accommodation[] = bookingHotels.map((h: BookingHotel) => {
-          if (h.breakfastIncluded) {
-            console.log(`[Hotels] ✅ ${h.name}: Petit-déjeuner INCLUS`);
-          }
-
-          return {
-            id: h.id,
-            name: h.name,
-            type: 'hotel' as const,
-            address: h.address,
-            latitude: h.latitude || options.cityCenter.lat,
-            longitude: h.longitude || options.cityCenter.lng,
-            rating: h.rating, // Déjà sur 10
-            reviewCount: h.reviewCount,
-            stars: h.stars,
-            pricePerNight: h.pricePerNight,
-            totalPrice: h.totalPrice,
-            currency: 'EUR',
-            amenities: h.breakfastIncluded ? ['Petit-déjeuner inclus'] : [],
-            checkInTime: validateCheckInTime(h.checkIn),
-            checkOutTime: validateCheckOutTime(h.checkOut),
-            bookingUrl: h.bookingUrl,
-            distanceToCenter: h.distanceToCenter,
-            description: '',
-            breakfastIncluded: h.breakfastIncluded,
-          };
-        });
-
-        console.log(`[Hotels] ⚠️ ${hotels.length} hôtels via Booking.com (disponibilité non garantie)`);
-        return hotels;
-      }
-    } catch (error) {
-      console.warn('[Hotels] Booking.com API error, trying Claude:', error);
-    }
-  }
-
-  // 3. Fallback: Claude AI (pas de vérification de disponibilité)
+  // 5. Fallback: Claude AI (pas de vérification de disponibilité)
   if (process.env.ANTHROPIC_API_KEY) {
     try {
       console.log(`[Hotels] ⚠️ Fallback Claude AI (disponibilité non garantie)`);
@@ -436,7 +415,7 @@ export async function searchHotels(
     }
   }
 
-  // 4. Dernier fallback: hôtels génériques
+  // 6. Dernier fallback: hôtels génériques
   console.log(`[Hotels] ⚠️ Fallback hôtels génériques (disponibilité non garantie)`);
   return generateFallbackHotels(destination, options);
 }

@@ -653,7 +653,31 @@ export async function searchAttractionsMultiQuery(
     }
   }
 
-  const limited = deduped.slice(0, limit);
+  // Diversification par ActivityType :
+  // - Chaque type ne peut pas dépasser 30% du total
+  // - Exception : attractions très populaires (>5000 reviews ET rating >= 4.6) passent toujours
+  const maxPerType = Math.max(3, Math.ceil(deduped.length * 0.3));
+  const typeCounts: Record<string, number> = {};
+  const diversified = deduped.filter(attr => {
+    const t = attr.type;
+    const reviews = attr.reviewCount || 0;
+    const rating = attr.rating || 0;
+
+    // Laisser passer les incontournables
+    if (reviews > 5000 && rating >= 4.6) {
+      typeCounts[t] = (typeCounts[t] || 0) + 1;
+      return true;
+    }
+
+    typeCounts[t] = (typeCounts[t] || 0) + 1;
+    if (typeCounts[t] > maxPerType) {
+      console.log(`[SerpAPI] Diversité: "${attr.name}" exclu (max ${maxPerType} ${t}, ${reviews} reviews)`);
+      return false;
+    }
+    return true;
+  });
+
+  const limited = diversified.slice(0, limit);
 
   // Marquer les 3 premiers comme mustSee
   const finalAttractions = limited.map((attr, index) => {

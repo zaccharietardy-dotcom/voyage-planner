@@ -2,14 +2,16 @@
  * Service de recherche de restaurants
  *
  * Chaîne de priorité:
- * 1. TripAdvisor (données riches, Michelin) ✅
- * 2. SerpAPI Google Local (RÉELS, 100 req/mois gratuit) ✅ RECOMMANDÉ
- * 3. Google Places API (si configuré)
- * 4. OpenStreetMap Overpass API
- * 5. Gemini + Google Search (données vérifiées sur internet) ✅ DERNIER RECOURS
+ * 0. Base de données locale (données vérifiées < 30 jours)
+ * 1. Gemini + Google Search (grounding - données vérifiées, GRATUIT 500-1500 req/jour) ✅ PRIORITÉ
+ * 2. TripAdvisor (données riches, Michelin) ✅
+ * 3. SerpAPI Google Local (RÉELS, 100 req/mois gratuit) ✅
+ * 4. Google Places API (si configuré)
+ * 5. OpenStreetMap Overpass API
  * 6. Restaurants locaux générés (fallback hardcodé)
  *
- * NOTE: Foursquare supprimé - API v3 incompatible
+ * NOTE: Gemini grounding est gratuit (500-1500 req/jour) et vérifie sur Google Maps.
+ * SerpAPI coûte $0.01/req. On priorise Gemini pour réduire les coûts.
  */
 
 import { Restaurant, DietaryType } from '../types';
@@ -85,11 +87,12 @@ interface RestaurantSearchParams {
  *
  * CHAÎNE DE PRIORITÉ:
  * 0. Base de données locale (données vérifiées < 30 jours)
- * 1. SerpAPI Google Local (si pas en base ou données périmées)
- * 2. Claude AI (fallback)
- * 3. Google Places API (si configuré)
- * 4. OpenStreetMap Overpass API
- * 5. Restaurants locaux générés (dernier recours)
+ * 1. Gemini + Google Search grounding (gratuit 500-1500 req/jour, vérifié Google Maps)
+ * 2. TripAdvisor (données riches, Michelin)
+ * 3. SerpAPI Google Local ($0.01/req, 100 req/mois gratuit)
+ * 4. Google Places API (si configuré)
+ * 5. OpenStreetMap Overpass API
+ * 6. Restaurants locaux générés (dernier recours)
  *
  * IMPORTANT: Le filtre par nom interdit (filterByForbiddenNames) est appliqué
  * à la fin de TOUTES les sources pour garantir qu'aucun restaurant chinois/asiatique
@@ -133,7 +136,39 @@ export async function searchRestaurants(params: RestaurantSearchParams): Promise
     }
   }
 
-  // 1. PRIORITÉ: TripAdvisor (données RÉELLES, rating, cuisine, Michelin)
+  // 1. PRIORITÉ: Gemini + Google Search (grounding gratuit, vérifié sur Google Maps)
+  if (destination && process.env.GOOGLE_AI_API_KEY) {
+    try {
+      const geminiResults = await searchRestaurantsWithGemini(destination, {
+        mealType: mealType || 'lunch',
+        limit: limit + 5,
+        cityCenter: { lat: latitude, lng: longitude },
+      });
+      if (geminiResults.length > 0) {
+        // Sauvegarder en base locale pour cache
+        try {
+          const placesToSave = geminiResults.map(r => restaurantToPlace(r, destination));
+          await savePlacesToDB(placesToSave, 'gemini');
+        } catch (saveError) {
+          console.warn('[Restaurants] Erreur sauvegarde Gemini en base:', saveError);
+        }
+
+        let filtered = filterOutChains(geminiResults);
+        filtered = filterRestaurantsByCuisine(filtered, destination, { strictMode: true, allowNonLocal: true });
+        filtered = filterByForbiddenNames(filtered, destination);
+
+        console.log(`[Restaurants] ${geminiResults.length} restaurants Gemini grounded, ${filtered.length} après filtrage`);
+        if (filtered.length > 0) {
+          finalRestaurants = filtered.slice(0, limit);
+          return applyFinalFilter(finalRestaurants, destination, limit, mealType);
+        }
+      }
+    } catch (error) {
+      console.warn('[Restaurants] Gemini error, trying TripAdvisor:', error);
+    }
+  }
+
+  // 2. FALLBACK: TripAdvisor (données RÉELLES, rating, cuisine, Michelin)
   if (destination && isTripAdvisorConfigured()) {
     try {
       const taRestaurants = await searchTripAdvisorRestaurants(destination, {
@@ -166,7 +201,7 @@ export async function searchRestaurants(params: RestaurantSearchParams): Promise
     }
   }
 
-  // 2. FALLBACK: SerpAPI Google Local (données RÉELLES vérifiées, 100 req/mois gratuit)
+  // 3. FALLBACK: SerpAPI Google Local (données RÉELLES vérifiées, 100 req/mois gratuit)
   if (destination && isSerpApiPlacesConfigured()) {
     try {
       const serpRestaurants = await searchRestaurantsWithSerpApi(destination, {
@@ -202,10 +237,7 @@ export async function searchRestaurants(params: RestaurantSearchParams): Promise
     }
   }
 
-  // 2. NOTE: Claude AI fallback supprimé - Claude hallucine des restaurants inexistants
-  // La chaîne continue avec Google Places, OSM, puis fallback hardcodé (restaurants réels)
-
-  // 3. Essayer Google Places si configuré
+  // 4. Essayer Google Places si configuré
   if (GOOGLE_PLACES_API_KEY) {
     try {
       const googleResults = await searchWithGooglePlaces(params);
@@ -227,7 +259,7 @@ export async function searchRestaurants(params: RestaurantSearchParams): Promise
     }
   }
 
-  // 4. Utiliser OpenStreetMap (Overpass API)
+  // 5. Utiliser OpenStreetMap (Overpass API)
   try {
     const osmResults = await searchWithOverpass(params);
     // Filtrer les chaînes ET les cuisines incohérentes
@@ -245,31 +277,6 @@ export async function searchRestaurants(params: RestaurantSearchParams): Promise
     }
   } catch (error) {
     console.error('[Restaurants] Overpass error, using fallback:', error);
-  }
-
-  // 5. Gemini + Google Search (dernier recours avant hardcodé - données vérifiées sur internet)
-  if (process.env.GOOGLE_AI_API_KEY) {
-    try {
-      const geminiResults = await searchRestaurantsWithGemini(destination || 'unknown', {
-        mealType: mealType || 'lunch',
-        limit: limit,
-        cityCenter: { lat: params.latitude, lng: params.longitude },
-      });
-      if (geminiResults.length > 0) {
-        let filtered = filterOutChains(geminiResults);
-        if (destination) {
-          filtered = filterRestaurantsByCuisine(filtered, destination, { strictMode: true, allowNonLocal: true });
-          filtered = filterByForbiddenNames(filtered, destination);
-        }
-        if (filtered.length > 0) {
-          console.log(`[Restaurants] ${filtered.length} via Gemini + Google Search (après filtre cuisine+nom)`);
-          finalRestaurants = filtered;
-          return applyFinalFilter(finalRestaurants, destination, limit, mealType);
-        }
-      }
-    } catch (error) {
-      console.warn('[Restaurants] Gemini error, using hardcoded fallback:', error);
-    }
   }
 
   // 6. Fallback: générer des restaurants locaux typiques
@@ -301,7 +308,29 @@ export async function searchRestaurantsNearActivity(
 ): Promise<Restaurant[]> {
   const { limit = 3 } = options;
 
-  // 1. Essayer SerpAPI avec recherche GPS
+  // 1. Essayer Gemini grounded (gratuit, vérifié Google Maps)
+  if (destination && process.env.GOOGLE_AI_API_KEY) {
+    try {
+      const geminiResults = await searchRestaurantsWithGemini(destination, {
+        mealType,
+        limit: limit + 5,
+        cityCenter: { lat: activityCoords.lat, lng: activityCoords.lng },
+      });
+      if (geminiResults.length > 0) {
+        let filtered = filterOutChains(geminiResults);
+        filtered = filterRestaurantsByCuisine(filtered, destination, { strictMode: true, allowNonLocal: true });
+        filtered = filterByForbiddenNames(filtered, destination);
+        if (filtered.length > 0) {
+          console.log(`[Restaurants Nearby] ${filtered.length} via Gemini grounded`);
+          return applyFinalFilter(filtered, destination, limit, mealType);
+        }
+      }
+    } catch (error) {
+      console.warn('[Restaurants Nearby] Gemini error, trying SerpAPI:', error);
+    }
+  }
+
+  // 2. Fallback: SerpAPI avec recherche GPS
   if (isSerpApiPlacesConfigured()) {
     try {
       const nearbyRestaurants = await searchRestaurantsNearby(activityCoords, destination, {

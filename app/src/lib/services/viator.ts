@@ -287,6 +287,74 @@ export async function searchViatorActivities(
   }
 }
 
+/**
+ * Cherche un produit Viator correspondant à une activité (ex: "Colosseum, Rome")
+ * Retourne l'URL affiliée et le prix si un match est trouvé.
+ * Utilise un fuzzy match sur le titre pour éviter les faux positifs.
+ */
+export async function findViatorProduct(
+  activityName: string,
+  destinationName: string,
+): Promise<{ url: string; price: number; title: string } | null> {
+  if (!VIATOR_API_KEY) return null;
+
+  try {
+    // Nettoyer le nom de l'activité pour la recherche
+    const searchTerm = activityName
+      .replace(/\b(visite|visit|tour|guided|entry|ticket|billet)\b/gi, '')
+      .trim();
+
+    const response = await fetch(`${VIATOR_BASE_URL}/search/freetext`, {
+      method: 'POST',
+      headers: {
+        'exp-api-key': VIATOR_API_KEY,
+        'Accept-Language': 'fr-FR',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json;version=2.0',
+      },
+      body: JSON.stringify({
+        searchTerm: `${searchTerm} ${destinationName}`,
+        searchTypes: [{
+          searchType: 'PRODUCTS',
+          pagination: { start: 1, count: 5 },
+        }],
+        currency: 'EUR',
+      }),
+    });
+
+    if (!response.ok) return null;
+
+    const data = await response.json();
+    const products = data?.products?.results || [];
+
+    if (products.length === 0) return null;
+
+    // Fuzzy match : vérifier que le produit correspond bien à l'activité
+    const activityWords = activityName.toLowerCase().split(/\s+/).filter(w => w.length > 3);
+
+    for (const product of products) {
+      const productTitle = (product.title || '').toLowerCase();
+      // Au moins 1 mot significatif de l'activité doit être dans le titre Viator
+      const matchCount = activityWords.filter(w => productTitle.includes(w)).length;
+      const matchRatio = activityWords.length > 0 ? matchCount / activityWords.length : 0;
+
+      if (matchRatio >= 0.3 || matchCount >= 2) {
+        const price = product.pricing?.summary?.fromPrice || 0;
+        const url = product.productUrl
+          || `https://www.viator.com/tours/${encodeURIComponent(destinationName)}/${product.productCode}`;
+
+        console.log(`[Viator] ✅ Match trouvé: "${activityName}" → "${product.title}" (${price}€)`);
+        return { url, price: Math.round(price), title: product.title };
+      }
+    }
+
+    return null;
+  } catch (error) {
+    console.warn(`[Viator] Erreur findViatorProduct("${activityName}"):`, error);
+    return null;
+  }
+}
+
 function processViatorResults(
   data: ViatorSearchResponse,
   destination: string,
