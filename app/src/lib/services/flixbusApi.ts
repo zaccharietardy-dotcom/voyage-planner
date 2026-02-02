@@ -219,3 +219,32 @@ export async function findMainFlixbusStation(city: string): Promise<FlixbusStati
   const busStation = stations.find((s) => !s.isTrain);
   return busStation || stations[0];
 }
+
+/**
+ * Build a FlixBus booking URL using city IDs for better deep-linking
+ * Falls back to city names if station lookup fails
+ */
+export async function buildFlixbusBookingUrl(
+  origin: string,
+  destination: string,
+  date?: Date,
+  passengers: number = 1
+): Promise<string> {
+  // Try to resolve city IDs for better URL
+  const [originStation, destStation] = await Promise.all([
+    findMainFlixbusStation(origin).catch(() => null),
+    findMainFlixbusStation(destination).catch(() => null),
+  ]);
+
+  const flixDate = date
+    ? `${String(date.getDate()).padStart(2, '0')}.${String(date.getMonth() + 1).padStart(2, '0')}.${date.getFullYear()}`
+    : '';
+
+  // If we have city IDs, use them for a direct search URL
+  if (originStation?.cityId && destStation?.cityId) {
+    return `https://shop.flixbus.fr/search?departureCity=${originStation.cityId}&arrivalCity=${destStation.cityId}${flixDate ? `&rideDate=${flixDate}` : ''}&adult=${passengers}`;
+  }
+
+  // Fallback: use city names
+  return `https://shop.flixbus.fr/search?departureCity=${encodeURIComponent(origin)}&arrivalCity=${encodeURIComponent(destination)}${flixDate ? `&rideDate=${flixDate}` : ''}&adult=${passengers}`;
+}

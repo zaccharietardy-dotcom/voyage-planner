@@ -630,12 +630,15 @@ function calculateBusOption(params: TransportSearchParams, distance: number): Tr
   // CO2
   const co2 = Math.round(distance * CO2_PER_KM.bus);
 
-  // FlixBus booking URL with date
-  // Format date as DD.MM.YYYY for FlixBus
+  // FlixBus booking URL with date - also provide Omio as alternative
   const flixDate = params.date
     ? `${String(params.date.getDate()).padStart(2, '0')}.${String(params.date.getMonth() + 1).padStart(2, '0')}.${params.date.getFullYear()}`
     : '';
-  const bookingUrl = `https://shop.flixbus.fr/search?departureCity=${encodeURIComponent(params.origin)}&arrivalCity=${encodeURIComponent(params.destination)}${flixDate ? `&rideDate=${flixDate}` : ''}&adult=${params.passengers || 1}`;
+  const omioDate = params.date ? params.date.toISOString().split('T')[0] : '';
+  // Prefer Omio for bus booking (aggregates FlixBus + BlaBlaCar + others, with real prices)
+  const bookingUrl = omioDate
+    ? `https://www.omio.fr/search-frontend/results/bus/${encodeURIComponent(params.origin)}/${encodeURIComponent(params.destination)}/${omioDate}/${params.passengers || 1}`
+    : `https://shop.flixbus.fr/search?departureCity=${encodeURIComponent(params.origin)}&arrivalCity=${encodeURIComponent(params.destination)}${flixDate ? `&rideDate=${flixDate}` : ''}&adult=${params.passengers || 1}`;
 
   return {
     id: 'bus',
@@ -924,77 +927,38 @@ function getTrainOperator(origin: string, destination: string): string {
 
 /**
  * Retourne l'URL de réservation train
+ * Format Trainline.fr: /search/{origin}/{destination}/{date}[/{returnDate}]
+ * Eurostar: format dédié avec codes gare pour Londres
  */
-export function getTrainBookingUrl(origin: string, destination: string, passengers: number = 1, date?: Date): string {
-  // Utiliser le service unifié pour normaliser les villes
+export function getTrainBookingUrl(origin: string, destination: string, passengers: number = 1, date?: Date, returnDate?: Date): string {
   const originNorm = normalizeCitySync(origin);
   const destNorm = normalizeCitySync(destination);
   const originKey = originNorm.normalized.toLowerCase();
   const destKey = destNorm.normalized.toLowerCase();
 
-  // Eurostar: Paris/Bruxelles/Amsterdam ↔ Londres
+  // Eurostar: Paris/Bruxelles/Amsterdam ↔ Londres (deep links avec codes gare)
   const eurostarCities = ['london', 'paris', 'brussels', 'amsterdam', 'lille', 'rotterdam'];
-  const isEurostarRoute = eurostarCities.includes(originKey) || eurostarCities.includes(destKey);
-
-  if (isEurostarRoute && (originKey === 'london' || destKey === 'london')) {
-    // Codes numériques Eurostar (format utilisé par leur site de recherche)
+  if ((originKey === 'london' || destKey === 'london') &&
+      eurostarCities.includes(originKey) && eurostarCities.includes(destKey)) {
     const eurostarCodes: Record<string, string> = {
-      'paris': '8727100',      // Paris Nord
-      'london': '7015400',     // London St Pancras
-      'brussels': '8814001',   // Bruxelles-Midi
-      'amsterdam': '8400058',  // Amsterdam Centraal
-      'lille': '8722326',      // Lille Europe
-      'rotterdam': '8400530',  // Rotterdam Centraal
+      'paris': '8727100', 'london': '7015400', 'brussels': '8814001',
+      'amsterdam': '8400058', 'lille': '8722326', 'rotterdam': '8400530',
     };
-
     const originCode = eurostarCodes[originKey];
     const destCode = eurostarCodes[destKey];
-
-    // Si on a trouvé les codes, générer l'URL avec paramètres incluant la date
     if (originCode && destCode) {
       const dateStr = date ? date.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
-      return `https://www.eurostar.com/search/uk-en?adult=${passengers}&origin=${originCode}&destination=${destCode}&outbound=${dateStr}`;
+      let url = `https://www.eurostar.com/search/uk-en?adult=${passengers}&origin=${originCode}&destination=${destCode}&outbound=${dateStr}`;
+      if (returnDate) url += `&inbound=${returnDate.toISOString().split('T')[0]}`;
+      return url;
     }
-
-    // Fallback: page de recherche Eurostar avec villes pré-remplies
-    return `https://www.eurostar.com/uk-en/travel/booking/search?origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}`;
   }
 
-  // Liste des clés normalisées pour vérification
-  const cities = [originKey, destKey];
-
-  // Cross-border routes: use Trainline (handles multi-country routes well)
-  const frenchCities = ['paris', 'lyon', 'marseille', 'bordeaux', 'toulouse', 'nice', 'strasbourg', 'lille', 'nantes', 'rennes', 'montpellier', 'caen', 'rouen', 'tours', 'dijon', 'avignon', 'angers', 'le mans', 'grenoble', 'clermont-ferrand', 'ajaccio', 'bastia', 'calvi', 'toulon'];
-  const spanishCities = ['barcelona', 'madrid', 'valencia', 'seville', 'malaga'];
-  const germanCities = ['berlin', 'munich', 'frankfurt', 'hamburg', 'cologne'];
-  const italianCities = ['rome', 'milan', 'florence', 'venice', 'naples', 'turin'];
-  const allForeignCities = [...spanishCities, ...germanCities, ...italianCities];
-
-  const hasFrench = cities.some(c => frenchCities.includes(c));
-  const hasForeign = cities.some(c => allForeignCities.includes(c));
-
-  // Cross-border: always use Trainline (SNCF Connect doesn't handle foreign city names well)
-  if (hasFrench && hasForeign) {
-    const dateStr = date ? date.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
-    return `https://www.thetrainline.com/book/results?origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}&outwardDate=${dateStr}T06:00:00&adults=${passengers}`;
-  }
-
-  // SNCF Connect: trajets 100% France (avec date si dispo)
-  if (hasFrench) {
-    const dateParam = date ? `&outwardDate=${date.toISOString().split('T')[0]}` : '';
-    const paxParam = passengers > 1 ? `&passengers=${passengers}` : '';
-    return `https://www.sncf-connect.com/app/home/search?from=${encodeURIComponent(origin)}&to=${encodeURIComponent(destination)}${dateParam}${paxParam}`;
-  }
-
-  // Renfe/Trainline: trajets Espagne
-  if (cities.some(c => spanishCities.includes(c))) {
-    const dateStr = date ? date.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
-    return `https://www.thetrainline.com/book/results?origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}&outwardDate=${dateStr}T06:00:00&adults=${passengers}`;
-  }
-
-  // Trainline: fonctionne pour la plupart des trajets européens
+  // Trainline.fr: format universel fiable pour toute l'Europe
+  // /search/{origin}/{destination}/{date}[/{returnDate}]
   const dateStr = date ? date.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
-  return `https://www.thetrainline.com/book/results?origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}&outwardDate=${dateStr}T06:00:00&adults=${passengers}`;
+  const returnStr = returnDate ? `/${returnDate.toISOString().split('T')[0]}` : '';
+  return `https://www.trainline.fr/search/${encodeURIComponent(origin.toLowerCase())}/${encodeURIComponent(destination.toLowerCase())}/${dateStr}${returnStr}`;
 }
 
 /**

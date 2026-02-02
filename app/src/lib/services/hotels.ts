@@ -565,8 +565,8 @@ Réponds UNIQUEMENT avec un tableau JSON valide.`;
     amenities: h.amenities || ['WiFi gratuit'],
     checkInTime: validateCheckInTime(h.checkInTime),
     checkOutTime: validateCheckOutTime(h.checkOutTime),
-    // NOTE: bookingUrl est généré dynamiquement dans ai.ts avec les dates de séjour
-    bookingUrl: undefined,
+    // Fallback: lien de recherche Booking.com avec le nom de l'hôtel
+    bookingUrl: `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(`${h.name} ${destination}`)}&lang=fr`,
     distanceToCenter: h.distanceToCenter || 1,
     description: h.description,
   }));
@@ -630,6 +630,7 @@ function generateFallbackHotels(
     amenities: ['WiFi gratuit', 'Climatisation'],
     checkInTime: '15:00',
     checkOutTime: '11:00',
+    bookingUrl: `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(`${template.name} ${destination}`)}&checkin=${options.checkInDate.toISOString().split('T')[0]}&checkout=${options.checkOutDate.toISOString().split('T')[0]}&lang=fr`,
     distanceToCenter: 0.5 + Math.random() * 1,
   }));
 }

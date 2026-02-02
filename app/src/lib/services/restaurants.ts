@@ -25,6 +25,16 @@ import { searchRestaurantsWithGemini } from './geminiSearch';
 const GOOGLE_PLACES_API_KEY = process.env.GOOGLE_PLACES_API_KEY;
 
 /**
+ * Construit une URL de réservation pour un restaurant
+ * Priorité: TheFork (Europe) > Google Maps
+ */
+function buildReservationUrl(restaurantName: string, city: string): string {
+  // TheFork couvre la majorité de l'Europe (France, Espagne, Italie, Portugal, etc.)
+  const searchQuery = `${restaurantName} ${city}`;
+  return `https://www.thefork.fr/search?q=${encodeURIComponent(searchQuery)}`;
+}
+
+/**
  * Seuil minimum de notation pour les restaurants
  * Les restaurants avec une note inférieure ne seront pas suggérés
  * Note: les restaurants sans note (null/undefined) sont conservés (bénéfice du doute)
@@ -610,6 +620,7 @@ async function searchWithOverpass(params: RestaurantSearchParams): Promise<Resta
       phoneNumber: element.tags.phone,
       website: element.tags.website,
       googleMapsUrl, // URL Google Maps fiable avec nom + adresse
+      reservationUrl: buildReservationUrl(element.tags.name, params.destination || ''),
       distance,
       walkingTime,
     });
@@ -677,6 +688,7 @@ async function searchWithGooglePlaces(params: RestaurantSearchParams): Promise<R
       openingHours: {},
       isOpenNow: place.opening_hours?.open_now,
       googleMapsUrl, // URL directe vers la fiche Google Maps
+      reservationUrl: `https://www.thefork.fr/search?q=${encodeURIComponent(`${place.name} ${params.destination || ''}`)}`,
       photos: place.photos?.map((p: any) =>
         `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${p.photo_reference}&key=${GOOGLE_PLACES_API_KEY}`
       ),
@@ -876,6 +888,7 @@ function generateLocalRestaurants(params: RestaurantSearchParams, destination?: 
       dietaryOptions,
       specialties: template.specialties,
       googleMapsUrl, // URL Google Maps avec nom + ville
+      reservationUrl: buildReservationUrl(template.name, destination || ''),
       openingHours: generateOpeningHours(mealType),
       isOpenNow: true,
       distance,
@@ -1052,6 +1065,7 @@ function placeToRestaurant(place: PlaceData): Restaurant {
     phoneNumber: place.phone,
     website: place.website,
     googleMapsUrl: place.googleMapsUrl,
+    reservationUrl: place.bookingUrl || buildReservationUrl(place.name, place.city),
     distance: undefined,
     walkingTime: undefined,
   };
@@ -1077,6 +1091,7 @@ function restaurantToPlace(restaurant: Restaurant, city: string): PlaceData {
     phone: restaurant.phoneNumber,
     website: restaurant.website,
     googleMapsUrl: restaurant.googleMapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${restaurant.name}, ${city}`)}`,
+    bookingUrl: restaurant.reservationUrl,
     source: 'serpapi',
     dataReliability: 'verified',
   };
