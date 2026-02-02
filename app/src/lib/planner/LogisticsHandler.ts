@@ -437,12 +437,12 @@ export class LogisticsHandler {
         estimatedCost: outboundFlight.price,
         bookingUrl,
         flight: outboundFlight,
-        flightAlternatives: this.context.outboundFlightAlternatives,
-        aviasalesUrl,
       });
       // Override heures avec heures locales
       tripItem.startTime = flightStartTime;
       tripItem.endTime = flightEndTime;
+      tripItem.flightAlternatives = this.context.outboundFlightAlternatives;
+      tripItem.aviasalesUrl = aviasalesUrl;
       items.push(tripItem);
     }
 
@@ -767,11 +767,11 @@ export class LogisticsHandler {
         estimatedCost: returnFlight.price,
         bookingUrl,
         flight: returnFlight,
-        flightAlternatives: this.context.returnFlightAlternatives,
-        aviasalesUrl: returnAviasalesUrl,
       });
       tripItem.startTime = flightStartTime;
       tripItem.endTime = flightEndTime;
+      tripItem.flightAlternatives = this.context.returnFlightAlternatives;
+      tripItem.aviasalesUrl = returnAviasalesUrl;
       items.push(tripItem);
     }
 
