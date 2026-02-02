@@ -2,7 +2,7 @@ import Stripe from 'stripe';
 import { createRouteHandlerClient } from '@/lib/supabase/server';
 
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-04-30.basil',
+  apiVersion: '2026-01-28.clover',
 });
 
 export async function getOrCreateCustomer(userId: string, email: string): Promise<string> {
