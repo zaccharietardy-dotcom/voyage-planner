@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
         // Abonnement Pro
         const subscriptionId = session.subscription as string;
         const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-        const periodEnd = (subscription as { current_period_end: number }).current_period_end;
+        const periodEnd = (subscription as unknown as { current_period_end: number }).current_period_end;
 
         await supabase
           .from('profiles')
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
       const subscription = event.data.object;
       const customerId = subscription.customer as string;
       const status = subscription.status === 'active' ? 'pro' : 'free';
-      const periodEnd = (subscription as { current_period_end: number }).current_period_end;
+      const periodEnd = (subscription as unknown as { current_period_end: number }).current_period_end;
 
       await supabase
         .from('profiles')
