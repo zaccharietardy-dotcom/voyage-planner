@@ -284,6 +284,8 @@ export interface TripItem {
   duration?: number; // en minutes
   imageUrl?: string;
   bookingUrl?: string;
+  viatorUrl?: string;  // Lien Viator (activités/tours)
+  tiqetsUrl?: string;  // Lien Tiqets (billets musées/attractions)
   rating?: number;
   // Données enrichies
   flight?: Flight;

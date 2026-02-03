@@ -11,6 +11,7 @@ import { getCheapestTrainPrice } from './dbTransport';
 import { checkTransportFeasibility } from './transportFeasibility';
 import { findMultiModalOptions } from './multiModalTransport';
 import { calculateCarCost } from './carCostCalculator';
+import { generateFlightLink } from './linkGenerator';
 
 // Types
 export interface TransportOption {
@@ -435,9 +436,12 @@ function calculatePlaneOption(params: TransportSearchParams, distance: number): 
   else if (distance > 3500) co2Factor = CO2_PER_KM.plane_long;
   const co2 = Math.round(distance * co2Factor);
 
-  // URL Google Flights with date
+  // Générer lien Aviasales affilié
   const dateStr = params.date ? params.date.toISOString().split('T')[0] : '';
-  const bookingUrl = `https://www.google.com/travel/flights?q=Flights%20from%20${encodeURIComponent(params.origin)}%20to%20${encodeURIComponent(params.destination)}${dateStr ? `%20on%20${dateStr}` : ''}`;
+  const bookingUrl = generateFlightLink(
+    { origin: params.origin, destination: params.destination },
+    { date: dateStr, passengers: params.passengers || 1 }
+  );
 
   return {
     id: 'plane',

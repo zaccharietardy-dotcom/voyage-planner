@@ -10,6 +10,7 @@
  */
 
 import { Flight } from '../types';
+import { generateFlightLink } from './linkGenerator';
 
 const GEMINI_API_KEY = process.env.GOOGLE_AI_API_KEY;
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
@@ -196,7 +197,7 @@ Trouve 5-8 vols et réponds UNIQUEMENT avec un JSON valide:
         currency: 'EUR',
         cabinClass: 'economy',
         baggageIncluded: !['FR', 'U2', 'W6'].includes(airlineCode),
-        bookingUrl: f.bookingUrl || flightData.searchUrl || generateGoogleFlightsUrl(origin, destination, date),
+        bookingUrl: f.bookingUrl || flightData.searchUrl || generateFlightLink({ origin, destination }, { date, passengers }),
       });
     }
 

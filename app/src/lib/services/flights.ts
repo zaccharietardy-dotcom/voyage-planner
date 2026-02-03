@@ -23,6 +23,7 @@ import { AIRPORTS } from './geocoding';
 import { searchFlightsWithGemini, isGeminiConfigured } from './geminiSearch';
 import { searchFlightsWithSerpApi, isSerpApiConfigured } from './serpApiSearch';
 import { validateFlightNumber, filterValidFlights } from './flightValidator';
+import { generateFlightLink } from './linkGenerator';
 
 // Configuration Amadeus (optionnel)
 const AMADEUS_API_KEY = process.env.AMADEUS_API_KEY;
@@ -249,8 +250,11 @@ function parseAmadeusResponse(data: any, params: FlightSearchParams): FlightSear
         continue;
       }
 
-      // Générer une URL de réservation spécifique au vol avec format amélioré
-      const bookingUrl = `https://www.google.com/travel/flights?q=${encodeURIComponent(`${flightNumber} ${depCode} to ${arrCode} ${depDate}`)}&curr=EUR&hl=fr`;
+      // Générer un lien Aviasales affilié au lieu de Google Flights
+      const bookingUrl = generateFlightLink(
+        { origin: depCode, destination: arrCode },
+        { date: depDate, passengers: params.adults + (params.children || 0) + (params.infants || 0) }
+      );
 
       console.log(`[Flights] ✅ Vol validé: ${flightNumber} ${depCode} → ${arrCode}`);
 

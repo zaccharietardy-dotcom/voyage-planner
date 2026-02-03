@@ -756,24 +756,9 @@ export async function generateDayWithScheduler(params: {
         }
       }
 
-      // Si on arrive avant le check-in mais gap < 1h30 → déposer bagages à l'hôtel
-      if (hoursBeforeCheckIn > 0 && hoursBeforeCheckIn < 1.5) {
-        const luggageDropItem = scheduler.addItem({
-          id: generateId(),
-          title: `Déposer bagages à ${accommodation?.name || 'l\'hôtel'}`,
-          type: 'activity',
-          duration: 10,
-          travelTime: 5,
-        });
-        if (luggageDropItem) {
-          items.push(schedulerItemToTripItem(luggageDropItem, dayNumber, orderIndex++, {
-            description: 'Déposez vos bagages à la réception avant le check-in officiel.',
-            locationName: getHotelLocationName(accommodation, preferences.destination),
-            latitude: accommodation?.latitude || cityCenter.lat + 0.005,
-            longitude: accommodation?.longitude || cityCenter.lng + 0.005,
-          }));
-        }
-      }
+      // NOTE: Le dépôt de bagages à l'hôtel est géré directement dans le bloc check-in
+      // (ligne ~335) avec le titre conditionnel "Dépôt bagages" vs "Check-in"
+      // On ne crée plus d'item "Déposer bagages" séparé pour éviter les doublons
 
       // Si on a du temps avant le check-in (> 1h30), faire des activités
       if (hoursBeforeCheckIn >= 1.5) {

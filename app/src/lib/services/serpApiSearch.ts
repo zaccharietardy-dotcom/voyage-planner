@@ -11,6 +11,7 @@
  */
 
 import { Flight } from '../types';
+import { generateFlightLink } from './linkGenerator';
 
 // Protection contre les espaces parasites dans les clés
 const SERPAPI_KEY = process.env.SERPAPI_KEY?.trim();
@@ -175,11 +176,20 @@ export async function searchFlightsWithSerpApi(
       const airlineCode = firstLeg.flight_number?.slice(0, 2) ||
         getAirlineCode(firstLeg.airline) || 'XX';
 
-      // Utiliser l'URL Google Flights retournée par SerpAPI
-      // Cette URL pointe vers la même recherche avec les mêmes vols
-      // Le vol le moins cher sera en haut de la liste (même ordre que notre sélection)
-      const finalBookingUrl = googleFlightsUrl;
-      console.log(`[SerpAPI] ✅ Lien Google Flights: ${firstLeg.flight_number} le ${date}`);
+      // Générer un lien Aviasales affilié au lieu de Google Flights
+      // Aviasales est notre partenaire affilié configuré
+      const aviasalesUrl = generateFlightLink(
+        {
+          origin: firstLeg.departure_airport.id,
+          destination: lastLeg.arrival_airport.id,
+        },
+        {
+          date: date,
+          passengers: passengers,
+        }
+      );
+      const finalBookingUrl = aviasalesUrl;
+      console.log(`[SerpAPI] ✅ Lien Aviasales: ${firstLeg.flight_number} le ${date}`);
 
       flights.push({
         id: `serp-${firstLeg.flight_number}-${date}`,

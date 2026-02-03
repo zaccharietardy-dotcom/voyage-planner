@@ -250,89 +250,9 @@ export function ActivityCard({
                 </div>
               )}
 
-              {/* Links row */}
-              <div className="flex items-center gap-3 mt-2 flex-wrap">
-                {/* Flight booking links: Google Flights + Aviasales */}
-                {item.type === 'flight' && item.bookingUrl && (
-                  <a
-                    href={item.bookingUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(e) => e.stopPropagation()}
-                    className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
-                  >
-                    <ExternalLink className="h-3 w-3" />
-                    Google Flights
-                  </a>
-                )}
-                {item.type === 'flight' && item.aviasalesUrl && (
-                  <a
-                    href={item.aviasalesUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(e) => e.stopPropagation()}
-                    className="inline-flex items-center gap-1 text-xs text-orange-600 hover:underline"
-                  >
-                    <Plane className="h-3 w-3" />
-                    Aviasales
-                  </a>
-                )}
-                {/* Non-flight booking link */}
-                {item.type !== 'flight' && item.bookingUrl && (
-                  <a
-                    href={item.bookingUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(e) => e.stopPropagation()}
-                    className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
-                  >
-                    <ExternalLink className="h-3 w-3" />
-                    Réserver
-                  </a>
-                )}
-
-                {/* Google Maps - PRIORITÉ au lien par nom (plus fiable que GPS) */}
-                {item.googleMapsPlaceUrl && (
-                  <a
-                    href={item.googleMapsPlaceUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(e) => e.stopPropagation()}
-                    className="inline-flex items-center gap-1 text-xs text-green-600 hover:underline"
-                  >
-                    <Map className="h-3 w-3" />
-                    Voir sur Maps
-                  </a>
-                )}
-
-                {/* Google Maps itinerary link (if there's travel info) */}
-                {item.googleMapsUrl && !item.googleMapsPlaceUrl && (
-                  <a
-                    href={item.googleMapsUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(e) => e.stopPropagation()}
-                    className="inline-flex items-center gap-1 text-xs text-blue-600 hover:underline"
-                  >
-                    <Navigation className="h-3 w-3" />
-                    Itinéraire
-                  </a>
-                )}
-
-                {/* Google Maps location link (fallback GPS - moins fiable) */}
-                {!item.googleMapsUrl && !item.googleMapsPlaceUrl && item.latitude && item.longitude && (
-                  <a
-                    href={`https://www.google.com/maps/search/?api=1&query=${item.latitude},${item.longitude}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(e) => e.stopPropagation()}
-                    className="inline-flex items-center gap-1 text-xs text-gray-500 hover:underline"
-                    title="Coordonnées GPS (peut être imprécis)"
-                  >
-                    <Map className="h-3 w-3" />
-                    Voir sur Maps
-                  </a>
-                )}
+              {/* Booking buttons row - Gros boutons colorés visibles */}
+              <div className="flex items-center gap-2 mt-2 flex-wrap">
+                <BookingButtons item={item} />
               </div>
             </div>
 
@@ -427,6 +347,154 @@ function formatDuration(minutes: number): string {
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
   return m > 0 ? `${h}h${String(m).padStart(2, '0')}` : `${h}h`;
+}
+
+/**
+ * Composant BookingButtons - Affiche des boutons de réservation colorés
+ * Détecte automatiquement le provider depuis l'URL
+ */
+function BookingButtons({ item }: { item: TripItem }) {
+  const buttons: { label: string; url: string; bgColor: string; icon: React.ReactNode }[] = [];
+
+  // Détecter le provider depuis l'URL du bookingUrl principal
+  const bookingUrl = item.bookingUrl || '';
+
+  // Vol - Aviasales
+  if (item.type === 'flight' && bookingUrl) {
+    if (bookingUrl.includes('aviasales.com')) {
+      buttons.push({
+        label: 'Aviasales',
+        url: bookingUrl,
+        bgColor: 'bg-orange-500 hover:bg-orange-600',
+        icon: <Plane className="h-3.5 w-3.5" />,
+      });
+    } else {
+      buttons.push({
+        label: 'Réserver vol',
+        url: bookingUrl,
+        bgColor: 'bg-blue-500 hover:bg-blue-600',
+        icon: <Plane className="h-3.5 w-3.5" />,
+      });
+    }
+    // Ajouter aussi Aviasales si disponible séparément
+    if (item.aviasalesUrl && item.aviasalesUrl !== bookingUrl) {
+      buttons.push({
+        label: 'Aviasales',
+        url: item.aviasalesUrl,
+        bgColor: 'bg-orange-500 hover:bg-orange-600',
+        icon: <Plane className="h-3.5 w-3.5" />,
+      });
+    }
+  }
+
+  // Hôtel - Booking.com ou Airbnb
+  if ((item.type === 'hotel' || item.type === 'checkout') && bookingUrl) {
+    if (bookingUrl.includes('booking.com')) {
+      buttons.push({
+        label: 'Booking',
+        url: bookingUrl,
+        bgColor: 'bg-blue-600 hover:bg-blue-700',
+        icon: <Bed className="h-3.5 w-3.5" />,
+      });
+    } else if (bookingUrl.includes('airbnb.com')) {
+      buttons.push({
+        label: 'Airbnb',
+        url: bookingUrl,
+        bgColor: 'bg-pink-500 hover:bg-pink-600',
+        icon: <Bed className="h-3.5 w-3.5" />,
+      });
+    } else {
+      buttons.push({
+        label: 'Réserver',
+        url: bookingUrl,
+        bgColor: 'bg-blue-600 hover:bg-blue-700',
+        icon: <Bed className="h-3.5 w-3.5" />,
+      });
+    }
+  }
+
+  // Activité - Viator ou Tiqets
+  if (item.type === 'activity' && bookingUrl) {
+    if (bookingUrl.includes('viator.com')) {
+      buttons.push({
+        label: 'Viator',
+        url: bookingUrl,
+        bgColor: 'bg-green-600 hover:bg-green-700',
+        icon: <ExternalLink className="h-3.5 w-3.5" />,
+      });
+    } else if (bookingUrl.includes('tiqets.com')) {
+      buttons.push({
+        label: 'Tiqets',
+        url: bookingUrl,
+        bgColor: 'bg-orange-500 hover:bg-orange-600',
+        icon: <ExternalLink className="h-3.5 w-3.5" />,
+      });
+    } else {
+      buttons.push({
+        label: 'Réserver',
+        url: bookingUrl,
+        bgColor: 'bg-primary hover:bg-primary/90',
+        icon: <ExternalLink className="h-3.5 w-3.5" />,
+      });
+    }
+  }
+
+  // Tiqets alternatif (si viatorUrl est principal)
+  if (item.tiqetsUrl && !bookingUrl.includes('tiqets.com')) {
+    buttons.push({
+      label: 'Tiqets',
+      url: item.tiqetsUrl,
+      bgColor: 'bg-orange-500 hover:bg-orange-600',
+      icon: <ExternalLink className="h-3.5 w-3.5" />,
+    });
+  }
+
+  // Viator alternatif (si tiqetsUrl est principal)
+  if (item.viatorUrl && !bookingUrl.includes('viator.com')) {
+    buttons.push({
+      label: 'Viator',
+      url: item.viatorUrl,
+      bgColor: 'bg-green-600 hover:bg-green-700',
+      icon: <ExternalLink className="h-3.5 w-3.5" />,
+    });
+  }
+
+  // Google Maps - toujours en dernier
+  const mapsUrl = item.googleMapsPlaceUrl ||
+    item.googleMapsUrl ||
+    (item.latitude && item.longitude ? `https://www.google.com/maps/search/?api=1&query=${item.latitude},${item.longitude}` : null);
+
+  if (mapsUrl) {
+    buttons.push({
+      label: 'Maps',
+      url: mapsUrl,
+      bgColor: 'bg-gray-500 hover:bg-gray-600',
+      icon: <Map className="h-3.5 w-3.5" />,
+    });
+  }
+
+  if (buttons.length === 0) return null;
+
+  return (
+    <>
+      {buttons.map((btn, i) => (
+        <a
+          key={`${btn.label}-${i}`}
+          href={btn.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          className={cn(
+            btn.bgColor,
+            'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-white transition-colors shadow-sm'
+          )}
+        >
+          {btn.icon}
+          {btn.label}
+        </a>
+      ))}
+    </>
+  );
 }
 
 function FlightAlternatives({ alternatives }: { alternatives: Flight[] }) {

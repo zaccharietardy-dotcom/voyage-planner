@@ -1137,6 +1137,52 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
     }
   }
 
+  // Enrichir les coordonnées des items avec des adresses génériques
+  // (items dont les coordonnées sont trop proches du centre-ville)
+  try {
+    console.log(`[PERF ${elapsed()}] Start coordinates enrichment`);
+    let enrichedCount = 0;
+
+    for (const day of days) {
+      for (const item of day.items) {
+        // Skip flights, transports, check-in/out
+        if (['flight', 'transport', 'checkin', 'checkout'].includes(item.type)) continue;
+
+        // Vérifier si les coordonnées semblent être un fallback (très proches du centre)
+        const distFromCenter = calculateDistance(
+          item.latitude || 0, item.longitude || 0,
+          destCoords.lat, destCoords.lng
+        );
+
+        // Si < 200m du centre ET que le titre est explicite, essayer d'enrichir
+        const needsEnrichment = distFromCenter < 0.2 && item.title && !item.title.includes('Centre-ville');
+
+        if (needsEnrichment && item.type === 'activity') {
+          try {
+            // Utiliser geocodeAddress pour obtenir les vraies coordonnées
+            const searchQuery = `${item.title}, ${preferences.destination}`;
+            const coords = await geocodeAddress(searchQuery);
+            if (coords && coords.lat !== destCoords.lat && coords.lng !== destCoords.lng) {
+              const oldCoords = `${item.latitude?.toFixed(4)},${item.longitude?.toFixed(4)}`;
+              item.latitude = coords.lat;
+              item.longitude = coords.lng;
+              enrichedCount++;
+              console.log(`[Coords] ✅ ${item.title}: ${oldCoords} → ${coords.lat.toFixed(4)},${coords.lng.toFixed(4)}`);
+            }
+          } catch (e) {
+            // Ignorer les erreurs d'enrichissement
+          }
+        }
+      }
+    }
+
+    if (enrichedCount > 0) {
+      console.log(`[AI] ✅ ${enrichedCount} items enrichis avec coordonnées précises`);
+    }
+  } catch (error) {
+    console.warn('[AI] Enrichissement coordonnées échoué (non bloquant):', error);
+  }
+
   // Attacher les vols alternatifs et liens Aviasales aux TripItems de vol
   for (const day of days) {
     for (const item of day.items) {
