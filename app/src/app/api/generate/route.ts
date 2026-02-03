@@ -85,7 +85,11 @@ export async function POST(request: NextRequest) {
         try {
           const trip = await generateTripWithAI(preferences);
           clearInterval(keepAlive);
-          controller.enqueue(encoder.encode(`data: {"status":"done","trip":${JSON.stringify(trip)}}\n\n`));
+          // Envoyer le résultat final
+          const finalMessage = `data: {"status":"done","trip":${JSON.stringify(trip)}}\n\n`;
+          controller.enqueue(encoder.encode(finalMessage));
+          // Petit délai pour s'assurer que le message est bien flush avant de fermer
+          await new Promise(resolve => setTimeout(resolve, 100));
           controller.close();
         } catch (error) {
           clearInterval(keepAlive);

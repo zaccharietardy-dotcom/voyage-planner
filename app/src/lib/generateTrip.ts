@@ -74,5 +74,26 @@ export async function generateTripStream(
     }
   }
 
+  // Vérifier le buffer restant avant de throw (message final peut être incomplet)
+  if (buffer.trim()) {
+    // Le buffer peut contenir "data: {...}" sans le \n\n final
+    const dataMatch = buffer.match(/^data:\s*(.+)$/m);
+    if (dataMatch) {
+      try {
+        const msg = JSON.parse(dataMatch[1]);
+        if (msg.status === 'done' && msg.trip) {
+          return msg.trip as Trip;
+        }
+        if (msg.status === 'error') {
+          throw new Error(msg.error || 'Erreur de génération');
+        }
+      } catch (e) {
+        if (!(e instanceof SyntaxError)) throw e;
+        // Log pour debug si JSON invalide
+        console.error('Buffer SSE non parseable:', buffer.substring(0, 200));
+      }
+    }
+  }
+
   throw new Error('Stream terminé sans résultat');
 }
