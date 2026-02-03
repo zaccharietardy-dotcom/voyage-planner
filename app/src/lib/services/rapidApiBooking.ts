@@ -135,14 +135,25 @@ async function getHotelBookingUrl(
     const data = await response.json();
     const hotelData = data.data || data;
 
-    // Construire l'URL avec dates pré-remplies
-    const slug = hotelData.url || hotelData.hotel_url || hotelData.link;
+    // Log pour debug - voir les champs disponibles dans la réponse
+    console.log(`[RapidAPI Booking] getHotelDetails response keys:`, Object.keys(hotelData || {}).slice(0, 15));
+
+    // Chercher le slug dans plusieurs champs possibles
+    const slug = hotelData.url
+      || hotelData.hotel_url
+      || hotelData.link
+      || hotelData.pagename
+      || hotelData.hotel_slug
+      || (hotelData.hotel && hotelData.hotel.url);
+
     if (slug) {
+      console.log(`[RapidAPI Booking] ✅ URL directe trouvée: ${String(slug).substring(0, 60)}...`);
       const baseUrl = slug.startsWith('http') ? slug : `https://www.booking.com${slug}`;
       const separator = baseUrl.includes('?') ? '&' : '?';
       return `${baseUrl}${separator}checkin=${checkIn}&checkout=${checkOut}&group_adults=${adults}&no_rooms=1`;
     }
 
+    console.log(`[RapidAPI Booking] ⚠️ Pas de slug trouvé pour hotel_id=${hotelId}, fallback recherche`);
     return null;
   } catch (error) {
     console.error(`[RapidAPI Booking] Erreur getHotelDetails ${hotelId}:`, error);

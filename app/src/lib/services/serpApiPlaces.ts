@@ -550,6 +550,14 @@ const NON_TOURISTIC_NAME_KEYWORDS = [
   // Concert halls, theaters - on ne "visite" pas ces lieux sans spectacle
   'concert hall', 'concertgebouw', 'philharmonic', 'philharmonie',
   'opera house', 'opéra', 'theater ', 'theatre ', 'théâtre',
+  'music hall', 'concert venue', 'performing arts', 'auditorium',
+  'amphitheater', 'amphithéâtre', 'beurs van berlage',
+  // Amsterdam specific venues
+  'ziggo dome', 'heineken music hall', 'carré', 'muziekgebouw',
+  'melkweg', 'paradiso', 'bimhuis',
+  // Photo spots - not real attractions, just photo opportunities
+  'photo spot', 'photo point', 'instagram spot', 'selfie spot',
+  'i amsterdam', 'iamsterdam', ' letters', ' sign',
   'don quijote', 'donki', 'uniqlo', 'daiso',
   // Restaurants & food establishments (ne sont pas des attractions)
   'restaurant', 'ristorante', 'restaurante', 'restoran',
