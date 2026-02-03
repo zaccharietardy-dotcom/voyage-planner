@@ -223,13 +223,9 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       // Prioriser les apartments en les mettant en premier
       airbnbOptions = apartmentResults;
     } else {
-      console.log('[AI] Aucun apartment trouvé, génération lien de recherche Airbnb...');
-      const checkInStr = startDate.toISOString().split('T')[0];
-      const checkOutStr = endDate.toISOString().split('T')[0];
-      airbnbOptions = await searchAirbnbListings(
-        preferences.destination, checkInStr, checkOutStr,
-        { maxPricePerNight: budgetStrategy.accommodationBudgetPerNight, guests: preferences.groupSize, cityCenter: destCoords },
-      );
+      console.log('[AI] Aucun apartment trouvé dans Booking, utilisation des hôtels existants uniquement');
+      // Ne PAS générer de fallback Airbnb - les résultats Booking.com ont déjà des liens directs
+      // airbnbOptions reste vide
     }
   }
 

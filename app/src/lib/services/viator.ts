@@ -27,27 +27,12 @@ export function isViatorConfigured(): boolean {
 }
 
 /**
- * Build a proper Viator deep link URL
- * Format: /fr-FR/tours/City/tour-title-slug-PRODUCTCODE
+ * Build a Viator search URL as fallback
+ * This always works even if we don't have the exact product URL
  */
-function buildViatorDeepLink(product: any, destination: string): string {
-  const productCode = product.productCode;
-  const citySlug = destination.replace(/\s+/g, '-');
-
-  // Build title slug from product title
-  const titleSlug = (product.title || '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 60); // Keep it reasonable length
-
-  // Viator URL format: /fr-FR/tours/City/title-slug-PRODUCTCODE
-  if (titleSlug) {
-    return `https://www.viator.com/fr-FR/tours/${encodeURIComponent(citySlug)}/${titleSlug}-${productCode}`;
-  }
-
-  // Fallback: just city and product code
-  return `https://www.viator.com/fr-FR/tours/${encodeURIComponent(citySlug)}/d-${productCode}`;
+function buildViatorSearchUrl(productTitle: string, destination: string): string {
+  const searchQuery = `${productTitle} ${destination}`;
+  return `https://www.viator.com/searchResults/all?text=${encodeURIComponent(searchQuery)}`;
 }
 
 // ============================================
@@ -364,8 +349,8 @@ export async function findViatorProduct(
 
       if (matchRatio >= 0.3 || matchCount >= 2) {
         const price = product.pricing?.summary?.fromPrice || 0;
-        // TOUJOURS construire notre propre URL (ignorer productUrl de l'API qui peut être mauvais)
-        const url = buildViatorDeepLink(product, destinationName);
+        // Utiliser productUrl de l'API si disponible, sinon fallback recherche
+        const url = product.productUrl || buildViatorSearchUrl(product.title, destinationName);
 
         console.log(`[Viator] ✅ Match trouvé: "${activityName}" → "${product.title}" (${price}€)`);
         return { url, price: Math.round(price), title: product.title };
@@ -414,8 +399,8 @@ function processViatorResults(
       const rating = p.reviews?.combinedAverageRating || 4.0;
       const reviewCount = p.reviews?.totalReviews || 0;
 
-      // TOUJOURS construire notre propre URL (ignorer productUrl de l'API)
-      const affiliateUrl = buildViatorDeepLink(p, destination);
+      // Utiliser productUrl de l'API si disponible, sinon fallback recherche
+      const affiliateUrl = p.productUrl || buildViatorSearchUrl(p.title, destination);
 
       return {
         id: `viator-${p.productCode}`,

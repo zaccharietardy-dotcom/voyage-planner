@@ -26,6 +26,21 @@ export function getAccommodationBookingUrl(
 }
 
 /**
+ * Génère un lien de recherche Airbnb comme alternative.
+ * Toujours disponible pour que l'utilisateur puisse comparer sur Airbnb.
+ */
+export function getAirbnbSearchUrl(
+  destination: string,
+  checkIn: string | Date,
+  checkOut: string | Date,
+  guests: number = 2
+): string {
+  const checkInStr = typeof checkIn === 'string' ? checkIn : formatDateForUrl(checkIn);
+  const checkOutStr = typeof checkOut === 'string' ? checkOut : formatDateForUrl(checkOut);
+  return `https://www.airbnb.com/s/${encodeURIComponent(destination)}/homes?checkin=${checkInStr}&checkout=${checkOutStr}&adults=${guests}`;
+}
+
+/**
  * Choisit le mode de direction Google Maps en fonction de la distance
  * Walking si < 1.5km, transit si < 15km, driving sinon
  */
