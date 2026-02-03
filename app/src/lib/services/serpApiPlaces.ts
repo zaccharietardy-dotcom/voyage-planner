@@ -566,7 +566,7 @@ const NON_TOURISTIC_NAME_KEYWORDS = [
   'pancake', 'brunch', 'diner', 'food court', 'foodhall',
   'café restaurant', 'wine bar', 'tapas bar', 'ramen',
   'brouwerij', 'brewery', 'pub ', 'beer hall',
-  'little buddha', 'le petit chef',
+  'little buddha', 'le petit chef', 'blin queen', 'blini',
   // Tourist traps
   'madame tussauds', 'tussaud', 'hard rock cafe', 'hard rock café',
   'planet hollywood', 'rainforest cafe', 'rainforest café', 'bubba gump',

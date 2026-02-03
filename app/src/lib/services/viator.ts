@@ -364,6 +364,21 @@ export async function findViatorProduct(
   }
 }
 
+// Keywords to exclude from Viator results (venues, concerts, etc.)
+const VIATOR_EXCLUDED_KEYWORDS = [
+  // Concert halls & venues - on ne "visite" pas ces lieux sans spectacle
+  'concertgebouw', 'concert hall', 'philharmonic', 'philharmonie',
+  'opera house', 'symphony', 'orchestra performance',
+  // Venues without actual tour value
+  'ziggo dome', 'heineken music hall', 'melkweg', 'paradiso',
+  'bimhuis', 'muziekgebouw', 'carré',
+  // Generic photo spots
+  'photo spot', 'instagram spot', 'selfie',
+  // Tourist traps
+  'madame tussauds', 'tussaud', 'wax museum', 'trick eye',
+  'selfie museum', "ripley's",
+];
+
 function processViatorResults(
   data: ViatorSearchResponse,
   destination: string,
@@ -376,7 +391,18 @@ function processViatorResults(
   if (products.length === 0) return [];
 
   const attractions: Attraction[] = products
-    .filter(p => p.title && p.productCode)
+    .filter(p => {
+      if (!p.title || !p.productCode) return false;
+      // Filter out excluded keywords
+      const titleLower = p.title.toLowerCase();
+      for (const kw of VIATOR_EXCLUDED_KEYWORDS) {
+        if (titleLower.includes(kw)) {
+          console.log(`[Viator] Exclusion: "${p.title}" (contient "${kw}")`);
+          return false;
+        }
+      }
+      return true;
+    })
     .map((p): Attraction => {
       // Get best image (medium size ~720px)
       let imageUrl: string | undefined;

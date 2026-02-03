@@ -110,13 +110,28 @@ async function getDestinationId(city: string): Promise<{ destId: string; destTyp
 }
 
 /**
+ * Génère un slug Booking.com à partir du nom de l'hôtel
+ * Ex: "Hotel ClinkMama Amsterdam" → "clinkmama"
+ */
+function generateHotelSlug(hotelName: string): string {
+  return hotelName
+    .toLowerCase()
+    .replace(/\b(hotel|hostel|b&b|bed and breakfast|apartments?|residence|inn)\b/gi, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .replace(/-+/g, '-');
+}
+
+/**
  * Récupère l'URL Booking.com directe pour un hôtel
  */
 async function getHotelBookingUrl(
   hotelId: string,
   checkIn: string,
   checkOut: string,
-  adults: number
+  adults: number,
+  hotelName?: string,
+  countryCode?: string
 ): Promise<string | null> {
   if (!RAPIDAPI_KEY) return null;
 
@@ -130,7 +145,17 @@ async function getHotelBookingUrl(
       },
     });
 
-    if (!response.ok) return null;
+    if (!response.ok) {
+      // Si l'API échoue mais qu'on a le nom de l'hôtel, générer une URL directe
+      if (hotelName) {
+        const slug = generateHotelSlug(hotelName);
+        const cc = countryCode || 'nl';
+        const directUrl = `https://www.booking.com/hotel/${cc}/${slug}.html?checkin=${checkIn}&checkout=${checkOut}&group_adults=${adults}&no_rooms=1`;
+        console.log(`[RapidAPI Booking] ⚠️ API failed, using generated URL: ${directUrl}`);
+        return directUrl;
+      }
+      return null;
+    }
 
     const data = await response.json();
     const hotelData = data.data || data;
@@ -153,10 +178,25 @@ async function getHotelBookingUrl(
       return `${baseUrl}${separator}checkin=${checkIn}&checkout=${checkOut}&group_adults=${adults}&no_rooms=1`;
     }
 
+    // Fallback: générer l'URL à partir du nom de l'hôtel
+    if (hotelName) {
+      const generatedSlug = generateHotelSlug(hotelName);
+      const cc = countryCode || (hotelData.country_code?.toLowerCase()) || 'nl';
+      const directUrl = `https://www.booking.com/hotel/${cc}/${generatedSlug}.html?checkin=${checkIn}&checkout=${checkOut}&group_adults=${adults}&no_rooms=1`;
+      console.log(`[RapidAPI Booking] ⚠️ No slug in API response, using generated: ${directUrl}`);
+      return directUrl;
+    }
+
     console.log(`[RapidAPI Booking] ⚠️ Pas de slug trouvé pour hotel_id=${hotelId}, fallback recherche`);
     return null;
   } catch (error) {
     console.error(`[RapidAPI Booking] Erreur getHotelDetails ${hotelId}:`, error);
+    // Fallback en cas d'erreur
+    if (hotelName) {
+      const slug = generateHotelSlug(hotelName);
+      const cc = countryCode || 'nl';
+      return `https://www.booking.com/hotel/${cc}/${slug}.html?checkin=${checkIn}&checkout=${checkOut}&group_adults=${adults}&no_rooms=1`;
+    }
     return null;
   }
 }
@@ -271,8 +311,10 @@ export async function searchHotelsWithBookingApi(
     // Récupérer les URLs Booking directes pour les 5 premiers (limite API calls)
     const hotelUrlPromises = availableHotels.slice(0, 5).map(async (p: any) => {
       const hotelId = p.hotel_id || p.property?.id || p.id;
+      const hotelName = p.property?.name || p.hotel_name || p.hotel_name_trans;
+      const countryCode = p.property?.countryCode || p.country_trans || p.cc1;
       if (hotelId) {
-        return getHotelBookingUrl(hotelId.toString(), checkIn, checkOut, guests);
+        return getHotelBookingUrl(hotelId.toString(), checkIn, checkOut, guests, hotelName, countryCode);
       }
       return null;
     });
