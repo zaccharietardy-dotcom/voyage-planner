@@ -1137,6 +1137,33 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
     }
   }
 
+  // Corriger les types d'items mal classés (restaurants en activité)
+  const RESTAURANT_KEYWORDS = [
+    'restaurant', 'cafe', 'café', 'bistro', 'pizzeria', 'trattoria',
+    'brasserie', 'diner', 'eatery', 'grill', 'steakhouse', 'sushi',
+    'tapas', 'bar', 'pub', 'tavern', 'cantina', 'osteria', 'bakery',
+    'boulangerie', 'patisserie', 'coffee', 'brunch', 'cuisine'
+  ];
+
+  let typeFixCount = 0;
+  for (const day of days) {
+    for (const item of day.items) {
+      const titleLower = (item.title || '').toLowerCase();
+
+      // Si classé comme activité mais contient un mot-clé restaurant
+      if (item.type === 'activity') {
+        const isRestaurant = RESTAURANT_KEYWORDS.some(kw => titleLower.includes(kw));
+        if (isRestaurant) {
+          item.type = 'restaurant';
+          typeFixCount++;
+        }
+      }
+    }
+  }
+  if (typeFixCount > 0) {
+    console.log(`[AI] ✅ ${typeFixCount} items reclassés en restaurant`);
+  }
+
   // Enrichir les coordonnées des items avec des adresses génériques
   // (items dont les coordonnées sont trop proches du centre-ville)
   try {

@@ -26,7 +26,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { HotelSelector } from '@/components/trip/HotelSelector';
+import { HotelCarouselSelector } from '@/components/trip/HotelCarouselSelector';
 import { generateHotelSearchLinks } from '@/lib/services/linkGenerator';
 import { useAuth } from '@/components/auth';
 import { useRealtimeTrip } from '@/hooks/useRealtimeTrip';
@@ -583,8 +583,8 @@ export default function TripPage() {
   ].join(' · ');
 
   const hotelSelectorElement = trip.accommodationOptions && trip.accommodationOptions.length > 0 ? (
-    <div className="my-3">
-      <HotelSelector
+    <div className="my-6 bg-white rounded-xl p-4 shadow-sm border">
+      <HotelCarouselSelector
         hotels={trip.accommodationOptions}
         selectedId={selectedHotelId || trip.accommodation?.id || trip.accommodationOptions[0]?.id || ''}
         onSelect={(hotelId) => {

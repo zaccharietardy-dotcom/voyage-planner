@@ -551,8 +551,9 @@ export async function generateDayWithScheduler(params: {
         const tripItem = schedulerItemToTripItem(flightItem, dayNumber, orderIndex++, {
           description: `${outboundFlight.flightNumber} | ${formatFlightDuration(outboundFlight.duration)} | ${outboundFlight.stops === 0 ? 'Direct' : `${outboundFlight.stops} escale(s)`} | ${priceDisplay}`,
           locationName: `${originAirport.code} → ${destAirport.code}`,
-          latitude: (originAirport.latitude + destAirport.latitude) / 2,
-          longitude: (originAirport.longitude + destAirport.longitude) / 2,
+          // Utiliser l'aéroport de destination (pas le milieu de l'océan!)
+          latitude: destAirport.latitude,
+          longitude: destAirport.longitude,
           estimatedCost: outboundFlight.price,
           bookingUrl: flightBookingUrl,
         });
@@ -1839,8 +1840,9 @@ export async function generateDayWithScheduler(params: {
         const tripItem = schedulerItemToTripItem(flightItem, dayNumber, orderIndex++, {
           description: `${returnFlight.flightNumber} | ${formatFlightDuration(returnFlight.duration)} | ${returnFlight.stops === 0 ? 'Direct' : `${returnFlight.stops} escale(s)`} | ${returnPriceDisplay}`,
           locationName: `${destAirport.code} → ${originAirport.code}`,
-          latitude: (destAirport.latitude + originAirport.latitude) / 2,
-          longitude: (destAirport.longitude + originAirport.longitude) / 2,
+          // Utiliser l'aéroport de départ (destination du voyage) pour le vol retour
+          latitude: destAirport.latitude,
+          longitude: destAirport.longitude,
           estimatedCost: returnFlight.price,
           bookingUrl: returnFlightBookingUrl,
         });
@@ -1876,8 +1878,9 @@ export async function generateDayWithScheduler(params: {
           endTime: isReturnOvernightDisplay ? `${returnFlightEndTime} (+1j)` : returnFlightEndTime,
           duration: returnFlight.duration,
           locationName: `${destAirport.code} → ${originAirport.code}`,
-          latitude: (destAirport.latitude + originAirport.latitude) / 2,
-          longitude: (destAirport.longitude + originAirport.longitude) / 2,
+          // Utiliser l'aéroport de départ (destination du voyage) pour le vol retour
+          latitude: destAirport.latitude,
+          longitude: destAirport.longitude,
           estimatedCost: returnFlight.price,
           bookingUrl: returnFlightBookingUrl,
           dayNumber,

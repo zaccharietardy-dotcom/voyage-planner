@@ -14,6 +14,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { Attraction } from './attractions';
 import { ActivityType } from '../types';
+import { findKnownViatorProduct } from './viatorKnownProducts';
 
 const VIATOR_API_KEY = process.env.VIATOR_API_KEY?.trim();
 const VIATOR_BASE_URL = 'https://api.viator.com/partner';
@@ -299,18 +300,29 @@ export async function searchViatorActivities(
 /**
  * Cherche un produit Viator correspondant à une activité (ex: "Colosseum, Rome")
  * Retourne l'URL affiliée et le prix si un match est trouvé.
- * Utilise un fuzzy match sur le titre pour éviter les faux positifs.
+ *
+ * Ordre de priorité:
+ * 1. URLs connues (viatorKnownProducts.ts) - garantie de qualité
+ * 2. Exact match dans les résultats API
+ * 3. Fuzzy match avec seuil strict (60%)
  */
 export async function findViatorProduct(
   activityName: string,
   destinationName: string,
 ): Promise<{ url: string; price: number; title: string } | null> {
+  // ===== PRIORITÉ 1: URLs connues =====
+  const knownProduct = findKnownViatorProduct(activityName);
+  if (knownProduct) {
+    return knownProduct;
+  }
+
   if (!VIATOR_API_KEY) return null;
 
   try {
     // Nettoyer le nom de l'activité pour la recherche
+    // Garder plus de mots pour une recherche plus précise
     const searchTerm = activityName
-      .replace(/\b(visite|visit|tour|guided|entry|ticket|billet)\b/gi, '')
+      .replace(/\b(visite|visit|guided|entry|billet)\b/gi, '')
       .trim();
 
     const response = await fetch(`${VIATOR_BASE_URL}/search/freetext`, {
@@ -325,7 +337,7 @@ export async function findViatorProduct(
         searchTerm: `${searchTerm} ${destinationName}`,
         searchTypes: [{
           searchType: 'PRODUCTS',
-          pagination: { start: 1, count: 5 },
+          pagination: { start: 1, count: 10 }, // Plus de résultats pour mieux matcher
         }],
         currency: 'EUR',
       }),
@@ -338,25 +350,58 @@ export async function findViatorProduct(
 
     if (products.length === 0) return null;
 
-    // Fuzzy match : vérifier que le produit correspond bien à l'activité
-    const activityWords = activityName.toLowerCase().split(/\s+/).filter(w => w.length > 3);
+    // Filtrer les produits avec les keywords exclus
+    const filteredProducts = products.filter((p: ViatorProduct) => {
+      const titleLower = (p.title || '').toLowerCase();
+      return !VIATOR_EXCLUDED_KEYWORDS.some(kw => titleLower.includes(kw));
+    });
 
-    for (const product of products) {
+    if (filteredProducts.length === 0) return null;
+
+    const activityNameLower = activityName.toLowerCase();
+    const activityWords = activityNameLower.split(/\s+/).filter(w => w.length > 3);
+
+    // ===== PRIORITÉ 2: Exact match =====
+    // Le nom de l'activité est contenu dans le titre du produit OU vice-versa
+    for (const product of filteredProducts) {
       const productTitle = (product.title || '').toLowerCase();
-      // Au moins 1 mot significatif de l'activité doit être dans le titre Viator
-      const matchCount = activityWords.filter(w => productTitle.includes(w)).length;
-      const matchRatio = activityWords.length > 0 ? matchCount / activityWords.length : 0;
+      const productTitleClean = productTitle.replace(/tour|visit|ticket|skip.*line|guided/gi, '').trim();
 
-      if (matchRatio >= 0.3 || matchCount >= 2) {
+      // Exact match: le titre du produit contient le nom de l'activité
+      if (productTitle.includes(activityNameLower) || activityNameLower.includes(productTitleClean)) {
         const price = product.pricing?.summary?.fromPrice || 0;
-        // Utiliser productUrl de l'API si disponible, sinon fallback recherche
         const url = product.productUrl || buildViatorSearchUrl(product.title, destinationName);
-
-        console.log(`[Viator] ✅ Match trouvé: "${activityName}" → "${product.title}" (${price}€)`);
+        console.log(`[Viator] ✅ Exact match: "${activityName}" → "${product.title}" (${price}€)`);
         return { url, price: Math.round(price), title: product.title };
       }
     }
 
+    // ===== PRIORITÉ 3: Fuzzy match avec seuil strict =====
+    // Au moins 60% des mots significatifs doivent matcher
+    let bestMatch: { product: ViatorProduct; score: number } | null = null;
+
+    for (const product of filteredProducts) {
+      const productTitle = (product.title || '').toLowerCase();
+      const matchCount = activityWords.filter(w => productTitle.includes(w)).length;
+      const matchRatio = activityWords.length > 0 ? matchCount / activityWords.length : 0;
+
+      // Seuil plus strict: 60% minimum OU 3+ mots avec au moins 50%
+      if (matchRatio >= 0.6 || (matchCount >= 3 && matchRatio >= 0.5)) {
+        const score = matchRatio * 100 + matchCount * 10;
+        if (!bestMatch || score > bestMatch.score) {
+          bestMatch = { product, score };
+        }
+      }
+    }
+
+    if (bestMatch) {
+      const price = bestMatch.product.pricing?.summary?.fromPrice || 0;
+      const url = bestMatch.product.productUrl || buildViatorSearchUrl(bestMatch.product.title, destinationName);
+      console.log(`[Viator] ✅ Fuzzy match: "${activityName}" → "${bestMatch.product.title}" (${price}€, score: ${bestMatch.score})`);
+      return { url, price: Math.round(price), title: bestMatch.product.title };
+    }
+
+    console.log(`[Viator] ⚠️ Pas de match pour: "${activityName}"`);
     return null;
   } catch (error) {
     console.warn(`[Viator] Erreur findViatorProduct("${activityName}"):`, error);

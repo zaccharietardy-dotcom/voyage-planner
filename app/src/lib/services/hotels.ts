@@ -12,7 +12,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { Accommodation } from '../types';
 import { tokenTracker } from './tokenTracker';
 import { searchHotelsWithSerpApi, isSerpApiPlacesConfigured, getAvailableHotelNames } from './serpApiPlaces';
-import { searchHotelsWithBookingApi, isRapidApiBookingConfigured, type BookingHotel } from './rapidApiBooking';
+import { searchHotelsWithBookingApi, isRapidApiBookingConfigured, enrichHotelWithGooglePlaces, type BookingHotel } from './rapidApiBooking';
 import { searchTripAdvisorHotels, isTripAdvisorConfigured } from './tripadvisor';
 import { searchPlacesFromDB, savePlacesToDB, type PlaceData } from './placeDatabase';
 import * as fs from 'fs';
@@ -329,7 +329,11 @@ export async function searchHotels(
                     breakfastIncluded,
                   };
                 });
-                return adjustHotelPrices(serpAccommodations, options);
+                // Enrichir les adresses manquantes via Google Places
+                const enrichedSerpAccommodations = await Promise.all(
+                  serpAccommodations.map(h => enrichHotelWithGooglePlaces(h as unknown as BookingHotel) as unknown as Promise<Accommodation>)
+                );
+                return adjustHotelPrices(enrichedSerpAccommodations, options);
               }
             } catch (serpError) {
               console.warn('[Hotels] SerpAPI validation error:', serpError);
@@ -396,7 +400,11 @@ export async function searchHotels(
         });
 
         console.log(`[Hotels] ✅ ${hotels.length} hôtels via SerpAPI Google Hotels`);
-        return adjustHotelPrices(hotels, options);
+        // Enrichir les adresses manquantes via Google Places
+        const enrichedHotels = await Promise.all(
+          hotels.map(h => enrichHotelWithGooglePlaces(h as unknown as BookingHotel) as unknown as Promise<Accommodation>)
+        );
+        return adjustHotelPrices(enrichedHotels, options);
       }
     } catch (error) {
       console.warn('[Hotels] SerpAPI error, trying Claude:', error);
@@ -409,7 +417,11 @@ export async function searchHotels(
       console.log(`[Hotels] ⚠️ Fallback Claude AI (disponibilité non garantie)`);
       const hotels = await fetchHotelsFromClaude(destination, options);
       console.log(`[Hotels] ${hotels.length} hôtels trouvés via Claude AI`);
-      return adjustHotelPrices(hotels, options);
+      // Enrichir les adresses manquantes via Google Places
+      const enrichedHotels = await Promise.all(
+        hotels.map(h => enrichHotelWithGooglePlaces(h as unknown as BookingHotel) as unknown as Promise<Accommodation>)
+      );
+      return adjustHotelPrices(enrichedHotels, options);
     } catch (error) {
       console.error('[Hotels] Claude AI error:', error);
     }

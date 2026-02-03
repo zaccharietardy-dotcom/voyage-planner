@@ -18,6 +18,64 @@ interface TripMapProps {
   };
 }
 
+/**
+ * Ajoute des flèches directionnelles le long d'une polyline
+ * pour montrer le sens du trajet
+ */
+function addDirectionArrows(
+  L: any,
+  map: any,
+  routeCoords: [number, number][],
+  color: string,
+  markersRef: React.MutableRefObject<any[]>
+): void {
+  if (routeCoords.length < 2) return;
+
+  // Placer une flèche tous les 2-3 segments pour ne pas surcharger
+  const step = Math.max(1, Math.floor(routeCoords.length / 5)); // ~5 flèches max
+
+  for (let i = 0; i < routeCoords.length - 1; i += step) {
+    const start = routeCoords[i];
+    const end = routeCoords[Math.min(i + 1, routeCoords.length - 1)];
+
+    // Ignorer si les points sont trop proches (< 0.001 deg)
+    const dist = Math.abs(end[0] - start[0]) + Math.abs(end[1] - start[1]);
+    if (dist < 0.001) continue;
+
+    // Calculer l'angle de direction
+    const deltaLng = end[1] - start[1];
+    const deltaLat = end[0] - start[0];
+    const angleDeg = Math.atan2(deltaLng, deltaLat) * 180 / Math.PI;
+
+    // Position au milieu du segment
+    const midLat = (start[0] + end[0]) / 2;
+    const midLng = (start[1] + end[1]) / 2;
+
+    // Créer le marker flèche
+    const arrowIcon = L.divIcon({
+      className: 'direction-arrow',
+      html: `<div style="
+        font-size: 12px;
+        transform: rotate(${angleDeg}deg);
+        color: ${color};
+        text-shadow: 0 0 3px white, 0 0 3px white;
+        font-weight: bold;
+        pointer-events: none;
+      ">▲</div>`,
+      iconSize: [14, 14],
+      iconAnchor: [7, 7],
+    });
+
+    const arrowMarker = L.marker([midLat, midLng], {
+      icon: arrowIcon,
+      interactive: false, // Non-cliquable
+      zIndexOffset: -100, // Derrière les autres markers
+    }).addTo(map);
+
+    markersRef.current.push(arrowMarker);
+  }
+}
+
 // Type-based colors for numbered markers
 const MARKER_COLORS: Record<string, { bg: string; border: string }> = {
   activity: { bg: '#3B82F6', border: '#2563EB' },
@@ -224,6 +282,9 @@ export function TripMap({ items, center, selectedItemId, onItemClick, hoveredIte
         smoothFactor: 1.5,
         lineJoin: 'round',
       }).addTo(map);
+
+      // Ajouter des flèches directionnelles pour montrer le sens du trajet
+      addDirectionArrows(L, map, routeCoords, '#3B82F6', markersRef);
     }
 
     // Flight arc

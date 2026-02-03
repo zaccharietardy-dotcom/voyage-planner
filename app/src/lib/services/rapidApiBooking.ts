@@ -466,7 +466,7 @@ export async function searchHotelsWithBookingApi(
  */
 const GOOGLE_PLACES_API_KEY = process.env.GOOGLE_PLACES_API_KEY;
 
-async function enrichHotelWithGooglePlaces(hotel: BookingHotel): Promise<BookingHotel> {
+export async function enrichHotelWithGooglePlaces(hotel: BookingHotel): Promise<BookingHotel> {
   // Si l'adresse est déjà valide, pas besoin d'enrichir
   if (hotel.address && hotel.address !== 'Adresse non disponible' && !hotel.address.includes('non disponible')) {
     return hotel;
