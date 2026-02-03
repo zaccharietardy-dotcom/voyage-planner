@@ -26,6 +26,30 @@ export function isViatorConfigured(): boolean {
   return !!VIATOR_API_KEY;
 }
 
+/**
+ * Build a proper Viator deep link URL
+ * Format: /fr-FR/tours/City/tour-title-slug-PRODUCTCODE
+ */
+function buildViatorDeepLink(product: any, destination: string): string {
+  const productCode = product.productCode;
+  const citySlug = destination.replace(/\s+/g, '-');
+
+  // Build title slug from product title
+  const titleSlug = (product.title || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60); // Keep it reasonable length
+
+  // Viator URL format: /fr-FR/tours/City/title-slug-PRODUCTCODE
+  if (titleSlug) {
+    return `https://www.viator.com/fr-FR/tours/${encodeURIComponent(citySlug)}/${titleSlug}-${productCode}`;
+  }
+
+  // Fallback: just city and product code
+  return `https://www.viator.com/fr-FR/tours/${encodeURIComponent(citySlug)}/d-${productCode}`;
+}
+
 // ============================================
 // Mapping catégories Viator → ActivityType
 // ============================================
@@ -340,8 +364,7 @@ export async function findViatorProduct(
 
       if (matchRatio >= 0.3 || matchCount >= 2) {
         const price = product.pricing?.summary?.fromPrice || 0;
-        const url = product.productUrl
-          || `https://www.viator.com/tours/${encodeURIComponent(destinationName)}/${product.productCode}`;
+        const url = product.productUrl || buildViatorDeepLink(product, destinationName);
 
         console.log(`[Viator] ✅ Match trouvé: "${activityName}" → "${product.title}" (${price}€)`);
         return { url, price: Math.round(price), title: product.title };
@@ -390,9 +413,8 @@ function processViatorResults(
       const rating = p.reviews?.combinedAverageRating || 4.0;
       const reviewCount = p.reviews?.totalReviews || 0;
 
-      // Use Viator's pre-built affiliate URL (includes tracking params)
-      const affiliateUrl = p.productUrl
-        || `https://www.viator.com/tours/${encodeURIComponent(destination)}/${p.productCode}`;
+      // Use Viator's pre-built affiliate URL or build proper deep link
+      const affiliateUrl = p.productUrl || buildViatorDeepLink(p, destination);
 
       return {
         id: `viator-${p.productCode}`,

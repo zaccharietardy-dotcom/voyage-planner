@@ -107,8 +107,8 @@ export function TripMap({ items, center, selectedItemId, onItemClick, hoveredIte
     // Zoom control in bottom-right
     L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-    // CartoDB Positron: clean, minimal tile layer
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    // CartoDB Voyager: colorful, modern tile layer
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
       subdomains: 'abcd',
       maxZoom: 19,
@@ -191,8 +191,14 @@ export function TripMap({ items, center, selectedItemId, onItemClick, hoveredIte
       bounds.extend([item.latitude, item.longitude]);
     });
 
+    // Add flight departure coords to bounds before fitBounds (if present)
+    if (flightInfo?.departureCoords) {
+      bounds.extend([flightInfo.departureCoords.lat, flightInfo.departureCoords.lng]);
+    }
+
+    // Single fitBounds call with all points (items + flight origin)
     if (bounds.isValid()) {
-      map.fitBounds(bounds, { padding: [40, 40] });
+      map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
     }
 
     // Draw solid route lines between non-flight items
@@ -233,7 +239,7 @@ export function TripMap({ items, center, selectedItemId, onItemClick, hoveredIte
       ).addTo(map)
         .bindPopup(`<b>Ville de départ</b><br/>${flightInfo.departureCity || 'Origine'}`);
       markersRef.current.push(originMarker);
-      bounds.extend([flightInfo.departureCoords.lat, flightInfo.departureCoords.lng]);
+      // Note: bounds already extended earlier before fitBounds
 
       const firstDestItem = items.find(i => i.type !== 'flight' && i.latitude && i.longitude);
       if (firstDestItem) {
@@ -275,10 +281,6 @@ export function TripMap({ items, center, selectedItemId, onItemClick, hoveredIte
         });
         const planeMarker = L.marker(planePos, { icon: planeIcon, interactive: false }).addTo(map);
         markersRef.current.push(planeMarker);
-      }
-
-      if (bounds.isValid()) {
-        map.fitBounds(bounds, { padding: [40, 40] });
       }
     }
   }, [items, onItemClick, isLoaded, flightInfo, hoveredItemId]);
@@ -326,12 +328,22 @@ export function TripMap({ items, center, selectedItemId, onItemClick, hoveredIte
     };
   }, [hoveredItemId]);
 
-  // Pan to selected item
+  // Pan to selected item with smart zoom
   useEffect(() => {
     if (!selectedItemId || !mapInstanceRef.current) return;
+    const map = mapInstanceRef.current;
     const item = items.find((i) => i.id === selectedItemId);
     if (item?.latitude && item?.longitude) {
-      mapInstanceRef.current.setView([item.latitude, item.longitude], 15, { animate: true });
+      // Keep current zoom if already zoomed in enough, otherwise zoom to 15
+      const currentZoom = map.getZoom();
+      const targetZoom = Math.max(currentZoom, 15);
+      map.setView([item.latitude, item.longitude], targetZoom, { animate: true });
+
+      // Open popup for the selected marker
+      const entry = markerMapRef.current.get(selectedItemId);
+      if (entry?.marker) {
+        entry.marker.openPopup();
+      }
     }
   }, [selectedItemId, items]);
 

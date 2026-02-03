@@ -355,6 +355,22 @@ const ATTRACTIONS: Record<string, Attraction[]> = {
   // Amsterdam
   amsterdam: [
     {
+      id: 'rijksmuseum',
+      name: 'Rijksmuseum',
+      type: 'culture',
+      description: 'Musée national des Pays-Bas avec La Ronde de nuit de Rembrandt',
+      duration: 180,
+      estimatedCost: 22,
+      latitude: 52.3600,
+      longitude: 4.8852,
+      rating: 4.8,
+      reviewCount: 85000,
+      mustSee: true,
+      bookingRequired: true,
+      bookingUrl: 'https://www.rijksmuseum.nl/en/tickets',
+      openingHours: { open: '09:00', close: '17:00' },
+    },
+    {
       id: 'anne-frank',
       name: 'Maison d\'Anne Frank',
       type: 'culture',
@@ -364,6 +380,7 @@ const ATTRACTIONS: Record<string, Attraction[]> = {
       latitude: 52.3752,
       longitude: 4.8840,
       rating: 4.7,
+      reviewCount: 45000,
       mustSee: true,
       bookingRequired: true,
       bookingUrl: 'https://www.annefrank.org/en/museum/tickets/',
@@ -379,6 +396,7 @@ const ATTRACTIONS: Record<string, Attraction[]> = {
       latitude: 52.3584,
       longitude: 4.8811,
       rating: 4.8,
+      reviewCount: 70000,
       mustSee: true,
       bookingRequired: true,
       bookingUrl: 'https://www.vangoghmuseum.nl/en/tickets',
@@ -394,6 +412,7 @@ const ATTRACTIONS: Record<string, Attraction[]> = {
       latitude: 52.3749,
       longitude: 4.8807,
       rating: 4.6,
+      reviewCount: 5000,
       mustSee: true,
       bookingRequired: false,
       openingHours: { open: '00:00', close: '23:59' },
@@ -408,6 +427,7 @@ const ATTRACTIONS: Record<string, Attraction[]> = {
       latitude: 52.3676,
       longitude: 4.9041,
       rating: 4.5,
+      reviewCount: 25000,
       mustSee: true,
       bookingRequired: false,
       openingHours: { open: '10:00', close: '21:00' },
@@ -818,6 +838,7 @@ export function selectAttractionsFromList(
     mustSeeQuery?: string;
     prioritizeMustSee?: boolean;
     maxPerDay?: number;
+    lastCoords?: { lat: number; lng: number }; // For proximity scoring
   }
 ): Attraction[] {
   if (attractions.length === 0) {
@@ -861,9 +882,31 @@ export function selectAttractionsFromList(
     scoreA += a.rating * 2;
     scoreB += b.rating * 2;
 
-    // 4. +5 points si gratuit (incentive les options économiques)
-    if (a.estimatedCost === 0) scoreA += 5;
-    if (b.estimatedCost === 0) scoreB += 5;
+    // 4. +2 points si gratuit (reduced from 5 to avoid favoring unknown free attractions)
+    if (a.estimatedCost === 0) scoreA += 2;
+    if (b.estimatedCost === 0) scoreB += 2;
+
+    // 5. Fame bonus based on review count (more reviews = more famous/important)
+    // Max +15 points at 5000+ reviews
+    const reviewBonusA = Math.min(15, (a.reviewCount || 0) / 350);
+    const reviewBonusB = Math.min(15, (b.reviewCount || 0) / 350);
+    scoreA += reviewBonusA;
+    scoreB += reviewBonusB;
+
+    // 6. Proximity scoring if lastCoords provided (max +20 points for < 1km)
+    if (preferences.lastCoords && a.latitude && a.longitude && b.latitude && b.longitude) {
+      const distA = calculateDistance(
+        preferences.lastCoords.lat, preferences.lastCoords.lng,
+        a.latitude, a.longitude
+      );
+      const distB = calculateDistance(
+        preferences.lastCoords.lat, preferences.lastCoords.lng,
+        b.latitude, b.longitude
+      );
+      // Closer = higher score (max 20 points at 0km, 0 points at 5km+)
+      scoreA += Math.max(0, 20 - distA * 4);
+      scoreB += Math.max(0, 20 - distB * 4);
+    }
 
     // Tri décroissant (meilleur score en premier)
     return scoreB - scoreA;

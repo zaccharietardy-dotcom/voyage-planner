@@ -14,7 +14,7 @@
  * Executer avec: npm test -- importantRules
  */
 
-import { Trip, TripItem, Flight, Restaurant, Accommodation } from '../types';
+import { Trip, TripItem, Flight, Restaurant, Accommodation, TripPreferences } from '../types';
 
 // ============================================
 // HELPERS
@@ -93,16 +93,22 @@ function createRestaurant(
   return {
     id: `restaurant-${name.toLowerCase().replace(/\s/g, '-')}`,
     name,
-    cuisineType,
-    priceRange: '€€',
+    cuisineTypes: [cuisineType],
+    priceLevel: 2,
+    dietaryOptions: [],
     rating: 4.5,
     reviewCount: 150,
     address: 'Test Address',
     latitude: 41.38,
     longitude: 2.17,
     openingHours: {
-      open: '12:00',
-      close: '23:00',
+      monday: { open: '12:00', close: '23:00' },
+      tuesday: { open: '12:00', close: '23:00' },
+      wednesday: { open: '12:00', close: '23:00' },
+      thursday: { open: '12:00', close: '23:00' },
+      friday: { open: '12:00', close: '23:00' },
+      saturday: { open: '12:00', close: '23:00' },
+      sunday: null,
     },
   };
 }
@@ -395,7 +401,7 @@ describe('Regle 4: Restaurants - Cuisine locale et variee', () => {
     const restaurant = createRestaurant('China Garden', 'chinese');
 
     const isForbidden = FORBIDDEN_CUISINES[country]?.includes(
-      restaurant.cuisineType.toLowerCase()
+      restaurant.cuisineTypes[0].toLowerCase()
     );
 
     expect(isForbidden).toBe(true);
@@ -438,7 +444,7 @@ describe('Regle 4: Restaurants - Cuisine locale et variee', () => {
     const localCuisines = LOCAL_CUISINES[country] || [];
     const localCount = restaurants.filter(r =>
       localCuisines.some(cuisine =>
-        r.cuisineType.toLowerCase().includes(cuisine.toLowerCase())
+        r.cuisineTypes[0].toLowerCase().includes(cuisine.toLowerCase())
       )
     ).length;
 
@@ -460,7 +466,7 @@ describe('Regle 4: Restaurants - Cuisine locale et variee', () => {
     let maxConsecutive = 0;
 
     mealSequence.forEach(r => {
-      if (r.cuisineType.toLowerCase() === 'tapas') {
+      if (r.cuisineTypes[0].toLowerCase() === 'tapas') {
         consecutiveTapas++;
         maxConsecutive = Math.max(maxConsecutive, consecutiveTapas);
       } else {
@@ -617,7 +623,7 @@ describe('Validation globale des regles importantes', () => {
     }
 
     // Regle 3: Horaires journee (verifie si nightlife mais journee courte)
-    const hasNightlife = trip.preferences.activityTypes?.includes('nightlife');
+    const hasNightlife = trip.preferences.activities?.includes('nightlife');
     if (hasNightlife) {
       trip.days.forEach((day, index) => {
         if (index > 0 && index < trip.days.length - 1) {
@@ -658,11 +664,17 @@ describe('Validation globale des regles importantes', () => {
       preferences: {
         origin: 'Paris',
         destination: 'Barcelona',
-        startDate: '2026-01-25',
+        startDate: new Date('2026-01-25'),
         durationDays: 3,
         groupSize: 2,
-        activityTypes: ['culture', 'nightlife'],
-      },
+        activities: ['culture', 'nightlife'],
+        transport: 'plane',
+        carRental: false,
+        groupType: 'couple',
+        budgetLevel: 'moderate',
+        dietary: [],
+        mustSee: '',
+      } as TripPreferences,
       outboundFlight: createFlight('AF1234'), // VIOLATION: numero generique
       accommodation: createAccommodation('Hotel Test', '09:00', '16:00'), // VIOLATION: horaires irrealistes
       days: [

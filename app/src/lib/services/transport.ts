@@ -955,11 +955,12 @@ export function getTrainBookingUrl(origin: string, destination: string, passenge
     }
   }
 
-  // Trainline.fr: format universel fiable pour toute l'Europe
-  // /search/{origin}/{destination}/{date}[/{returnDate}]
+  // Omio: meilleurs deep links qui s'ouvrent directement sur les résultats
+  // Format: /search-frontend/results/train/{origin}/{destination}/{date}/{passengers}
   const dateStr = date ? date.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
-  const returnStr = returnDate ? `/${returnDate.toISOString().split('T')[0]}` : '';
-  return `https://www.trainline.fr/search/${encodeURIComponent(origin.toLowerCase())}/${encodeURIComponent(destination.toLowerCase())}/${dateStr}${returnStr}`;
+  const originSlug = origin.toLowerCase().replace(/\s+/g, '-');
+  const destSlug = destination.toLowerCase().replace(/\s+/g, '-');
+  return `https://www.omio.fr/search-frontend/results/train/${encodeURIComponent(originSlug)}/${encodeURIComponent(destSlug)}/${dateStr}/${passengers}`;
 }
 
 /**

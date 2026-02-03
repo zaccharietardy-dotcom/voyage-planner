@@ -196,25 +196,30 @@ Reponds UNIQUEMENT avec un JSON valide:
   }
 }
 
+// Affiliate link for Radical Storage
+const RADICAL_STORAGE_AFFILIATE = 'https://radicalstorage.tpo.lu/nsE8ApQR';
+
 /**
  * Consignes par defaut si la recherche echoue
  */
 function getDefaultStorages(city: string): LuggageStorage[] {
+  const citySlug = city.toLowerCase().replace(/\s+/g, '-');
+
   // Consignes generiques basees sur des services connus
   return [
     {
       id: `luggage-${city}-1`,
-      name: `LuggageHero ${city}`,
+      name: `Radical Storage ${city}`,
       type: 'service',
       address: `Centre-ville de ${city}`,
       latitude: 0,
       longitude: 0,
-      pricePerDay: 8,
+      pricePerDay: 6,
       pricePerHour: 1,
       currency: 'EUR',
-      openingHours: { open: '08:00', close: '22:00' },
-      bookingUrl: `https://luggagehero.com/${city.toLowerCase()}`,
-      notes: 'Plusieurs points de depot en centre-ville',
+      openingHours: { open: '06:00', close: '23:59' },
+      bookingUrl: RADICAL_STORAGE_AFFILIATE,
+      notes: 'Plusieurs points de depot en centre-ville - Reservation en ligne',
     },
     {
       id: `luggage-${city}-2`,
@@ -227,7 +232,7 @@ function getDefaultStorages(city: string): LuggageStorage[] {
       pricePerHour: 1,
       currency: 'EUR',
       openingHours: { open: '00:00', close: '23:59' },
-      bookingUrl: `https://usebounce.com/${city.toLowerCase()}`,
+      bookingUrl: `https://usebounce.com/city/${citySlug}`,
       notes: 'Service 24h dans certains points',
     },
     {
@@ -240,7 +245,7 @@ function getDefaultStorages(city: string): LuggageStorage[] {
       pricePerDay: 6,
       currency: 'EUR',
       openingHours: { open: '09:00', close: '21:00' },
-      bookingUrl: `https://www.nannybag.com/${city.toLowerCase()}`,
+      bookingUrl: `https://www.nannybag.com/luggage-storage/${citySlug}`,
       notes: 'Depot chez des commercants locaux',
     },
   ];

@@ -209,7 +209,8 @@ export class ActivityPlanner {
     const lunchTime = parseTime(date, '12:30');
     const timeBeforeLunchMin = (lunchTime.getTime() - currentTime.getTime()) / (60 * 1000);
 
-    if (timeBeforeLunchMin <= 60) return;
+    // Fill gaps >= 45 min (enough for a short attraction + travel)
+    if (timeBeforeLunchMin <= 45) return;
 
     console.log(`[Jour ${dayNumber}] ${Math.round(timeBeforeLunchMin / 60)}h libre avant déjeuner - remplissage`);
 
@@ -238,7 +239,8 @@ export class ActivityPlanner {
     const dinnerTime = parseTime(date, '19:00');
     const timeBeforeDinnerMin = (dinnerTime.getTime() - currentTime.getTime()) / (60 * 1000);
 
-    if (timeBeforeDinnerMin <= 60) return;
+    // Fill gaps >= 45 min (enough for a short attraction + travel)
+    if (timeBeforeDinnerMin <= 45) return;
 
     console.log(`[Jour ${dayNumber}] ${Math.round(timeBeforeDinnerMin / 60)}h libre avant dîner - remplissage`);
 

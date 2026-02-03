@@ -46,6 +46,7 @@ import { searchAirbnbListings, isAirbnbApiConfigured } from './services/airbnb';
 import { BudgetTracker } from './services/budgetTracker';
 import { enrichRestaurantsWithGemini } from './services/geminiSearch';
 import { findViatorProduct, searchViatorActivities, isViatorConfigured } from './services/viator';
+import { findTiqetsProduct, getKnownTiqetsLink, isTiqetsRelevant } from './services/tiqets';
 
 import { generateId, normalizeToLocalDate, formatDate, formatTime, formatPriceLevel, pickDirectionMode, getAccommodationBookingUrl, getHotelLocationName, getBudgetCabinClass, getBudgetPriceLevel, getReliableGoogleMapsPlaceUrl } from './tripUtils';
 import { findBestFlights, selectFlightByBudget, LateFlightArrivalData } from './tripFlights';
@@ -998,9 +999,24 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
               toMatch[i].estimatedCost = result.price;
             }
             matched++;
+          } else {
+            // Fallback: Try Tiqets for museums and attractions without Viator match
+            const knownTiqetsLink = getKnownTiqetsLink(toMatch[i].title);
+            if (knownTiqetsLink) {
+              toMatch[i].bookingUrl = knownTiqetsLink;
+              console.log(`[AI] 🎫 Tiqets lien direct: ${toMatch[i].title}`);
+              matched++;
+            } else if (isTiqetsRelevant(toMatch[i].title, toMatch[i].type)) {
+              const tiqetsResult = await findTiqetsProduct(toMatch[i].title, preferences.destination);
+              if (tiqetsResult) {
+                toMatch[i].bookingUrl = tiqetsResult.url;
+                console.log(`[AI] 🎫 Tiqets recherche: ${toMatch[i].title}`);
+                matched++;
+              }
+            }
           }
         }
-        console.log(`[AI] ✅ ${matched}/${toMatch.length} activités matchées avec Viator`);
+        console.log(`[AI] ✅ ${matched}/${toMatch.length} activités matchées avec Viator/Tiqets`);
       }
     } catch (error) {
       console.warn('[AI] Viator post-processing error (non bloquant):', error);
