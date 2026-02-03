@@ -1,236 +1,148 @@
 # Voyage - AI Trip Planner
 
-Planificateur de voyage intelligent avec IA, collaboration temps réel et réseau social.
+Planificateur de voyage intelligent avec IA, génération automatique d'itinéraires et liens de réservation directs.
 
-## Vision
+> Dernière mise à jour : Février 2026
 
-Une application web qui permet de :
-1. **Planifier** un voyage en répondant à quelques questions (destination, budget, activités...)
-2. **Générer** automatiquement un itinéraire jour par jour grâce à l'IA
-3. **Collaborer** avec ses amis/famille pour modifier le planning en temps réel
-4. **Partager** ses voyages et s'inspirer de ceux des autres (réseau social)
+## Fonctionnalités
 
----
-
-## Stack technique
-
-| Composant | Techno | Raison |
-|-----------|--------|--------|
-| Framework | Next.js 14 (App Router) | SSR, API routes, déploiement Vercel gratuit |
-| UI | Tailwind CSS + shadcn/ui | Moderne, rapide, composants prêts |
-| BDD | Supabase | PostgreSQL + Auth + Realtime gratuit |
-| Carte | Leaflet + OpenStreetMap | 100% gratuit, pas de clé API |
-| IA | Ollama (local) + Claude API (fallback) | Hybride gratuit/payant |
-| Déploiement | Vercel | Gratuit pour projets perso |
+- **Génération IA** : Itinéraire jour par jour généré par Claude
+- **Liens directs** : Booking.com, Viator, Omio, Google Flights
+- **Carte interactive** : Leaflet avec tous les points d'intérêt
+- **Calendrier** : Vue calendrier drag & drop
+- **Collaboration** : Partage et édition en temps réel (Supabase)
 
 ---
 
-## Roadmap
+## Stack Technique
 
-### Phase 1 - MVP (en cours)
-
-#### Formulaire de préférences (5 étapes)
-
-**Étape 1 - Destination & Dates**
-- Ville de départ (autocomplete)
-- Ville d'arrivée (autocomplete)
-- Date de départ (date picker)
-- Durée du voyage (slider: 1-30 jours)
-
-**Étape 2 - Transport**
-- Moyen de transport principal (chips: Avion, Train, Voiture, Bus)
-- Voiture sur place ? (toggle: Oui/Non)
-
-**Étape 3 - Groupe**
-- Nombre de personnes (counter: 1-20)
-- Type de groupe (chips: Solo, Couple, Amis, Famille avec enfants, Famille sans enfants)
-
-**Étape 4 - Budget**
-- Budget total (slider avec labels)
-  - Économique : < 500€
-  - Modéré : 500 - 1500€
-  - Confort : 1500 - 3000€
-  - Luxe : 3000€+
-- Ou input libre en €
-
-**Étape 5 - Activités & Préférences**
-- Types d'activités (chips multi-select):
-  - Plage & Détente
-  - Nature & Randonnée
-  - Culture & Musées
-  - Gastronomie
-  - Vie nocturne
-  - Shopping
-  - Aventure & Sport
-  - Bien-être & Spa
-- Incontournables à inclure (input texte libre)
-- Régime alimentaire (chips: Aucun, Végétarien, Vegan, Halal, Casher, Sans gluten)
-
-#### Génération IA
-
-L'IA génère :
-- Planning jour par jour avec horaires
-- Suggestions de restaurants (petit-déj, déjeuner, dîner)
-- Suggestions d'hôtels/hébergements
-- Activités avec durée estimée
-- Temps de trajet entre les points
-
-#### Interface résultat
-
-**Layout deux colonnes :**
-- **Gauche** : Planning jour par jour
-  - Accordéon ou tabs par jour
-  - Timeline verticale avec horaires
-  - Chaque item : éditable, supprimable, réordonnable (drag & drop)
-- **Droite** : Carte interactive Leaflet
-  - Markers colorés par type (resto, hôtel, activité, transport)
-  - Itinéraire tracé entre les points
-  - Popup au clic avec détails
-
-**Actions disponibles :**
-- Ajouter une activité manuellement
-- Modifier horaire/lieu
-- Supprimer un élément
-- Réordonner par drag & drop
-- Exporter en PDF
+| Composant | Techno |
+|-----------|--------|
+| Framework | Next.js 16 (App Router) |
+| UI | Tailwind CSS + shadcn/ui |
+| BDD | Supabase (PostgreSQL) + SQLite (cache) |
+| Carte | Leaflet + OpenStreetMap |
+| IA | Claude API (Anthropic) |
+| Déploiement | Vercel |
 
 ---
 
-### Phase 2 - Auth & Sauvegarde
+## APIs Externes
 
-- [ ] Connexion via Supabase Auth (Google, email)
-- [ ] Sauvegarder ses voyages
-- [ ] Voir son historique de voyages
-- [ ] Reprendre un voyage en cours
+| Service | API | Fichier |
+|---------|-----|---------|
+| **Hôtels** | RapidAPI Booking.com | `rapidApiBooking.ts` |
+| **Activités** | Viator Partner API | `viator.ts` |
+| **Attractions** | SerpAPI (Google Maps) | `serpApiPlaces.ts` |
+| **Restaurants** | SerpAPI (Google Maps) | `serpApiPlaces.ts` |
+| **IA** | Claude API | `claudeItinerary.ts` |
 
----
-
-### Phase 3 - Collaboration temps réel
-
-- [ ] Inviter des amis par lien
-- [ ] Édition collaborative (Supabase Realtime)
-- [ ] Voir qui modifie quoi en temps réel
-- [ ] Commentaires sur les activités
-- [ ] Sondages pour décider en groupe
+> Voir `APIS.md` pour la documentation complète
 
 ---
 
-### Phase 4 - Réseau social
-
-- [ ] Profils publics
-- [ ] Partager un voyage publiquement
-- [ ] Cloner le voyage d'un autre utilisateur
-- [ ] Likes et commentaires
-- [ ] Suivre des utilisateurs/influenceurs
-- [ ] Feed de découverte
-
----
-
-## Structure du projet
-
-```
-src/
-├── app/
-│   ├── page.tsx                 # Landing page
-│   ├── plan/
-│   │   └── page.tsx             # Formulaire multi-étapes
-│   ├── trip/
-│   │   └── [id]/
-│   │       └── page.tsx         # Vue du voyage généré
-│   └── api/
-│       └── generate/
-│           └── route.ts         # Endpoint génération IA
-├── components/
-│   ├── ui/                      # Composants shadcn
-│   ├── forms/
-│   │   ├── StepDestination.tsx
-│   │   ├── StepTransport.tsx
-│   │   ├── StepGroup.tsx
-│   │   ├── StepBudget.tsx
-│   │   └── StepActivities.tsx
-│   ├── trip/
-│   │   ├── DayTimeline.tsx
-│   │   ├── ActivityCard.tsx
-│   │   └── TripMap.tsx
-│   └── layout/
-│       ├── Header.tsx
-│       └── Footer.tsx
-├── lib/
-│   ├── ai.ts                    # Logique IA (Ollama + Claude)
-│   ├── supabase.ts              # Client Supabase
-│   └── types.ts                 # Types TypeScript
-└── styles/
-    └── globals.css
-```
-
----
-
-## Modèle de données
-
-### Table `trips`
-
-| Colonne | Type | Description |
-|---------|------|-------------|
-| id | UUID | Identifiant unique |
-| created_at | TIMESTAMP | Date de création |
-| origin | TEXT | Ville de départ |
-| destination | TEXT | Ville d'arrivée |
-| start_date | DATE | Date de départ |
-| duration_days | INT | Nombre de jours |
-| transport | TEXT | Moyen de transport |
-| car_rental | BOOLEAN | Location voiture sur place |
-| group_size | INT | Nombre de personnes |
-| group_type | TEXT | Type de groupe |
-| budget_min | INT | Budget minimum |
-| budget_max | INT | Budget maximum |
-| activities | TEXT[] | Types d'activités |
-| dietary | TEXT[] | Régimes alimentaires |
-| must_see | TEXT | Incontournables |
-| itinerary | JSONB | Planning généré |
-
-### Table `trip_items`
-
-| Colonne | Type | Description |
-|---------|------|-------------|
-| id | UUID | Identifiant unique |
-| trip_id | UUID | Référence au voyage |
-| day_number | INT | Numéro du jour |
-| start_time | TIME | Heure de début |
-| end_time | TIME | Heure de fin |
-| type | TEXT | Type (activity, restaurant, hotel, transport) |
-| title | TEXT | Titre |
-| description | TEXT | Description |
-| location_name | TEXT | Nom du lieu |
-| latitude | DECIMAL | Latitude |
-| longitude | DECIMAL | Longitude |
-| order_index | INT | Ordre dans la journée |
-
----
-
-## Lancer le projet
+## Installation
 
 ```bash
+# Cloner le repo
+git clone https://github.com/zaccharietardy-dotcom/voyage-planner.git
+cd voyage-planner/app
+
 # Installer les dépendances
 npm install
 
+# Configurer les variables d'environnement
+cp .env.example .env.local
+# Éditer .env.local avec vos clés API
+
 # Lancer en développement
 npm run dev
-
-# Build production
-npm run build
 ```
 
 Ouvrir [http://localhost:3000](http://localhost:3000)
 
 ---
 
-## Concurrents analysés
+## Variables d'Environnement
 
-| App | Points forts | Points faibles |
-|-----|--------------|----------------|
-| Wanderlog | Collab temps réel | UX complexe, bugs, paywall |
-| Wonderplan | IA gratuite | Crashes, lent, customisation limitée |
-| Layla/Mindtrip | Bonne IA | Pas vraiment collaboratif |
-| Let's Jetty | Groupe/sondages | Pas d'IA |
+```env
+# IA
+ANTHROPIC_API_KEY=sk-ant-...
 
-**Notre différenciation** : Combiner le meilleur de l'IA (génération intelligente) + collaboration fluide + réseau social voyage.
+# Hôtels (RapidAPI)
+RAPIDAPI_KEY=...
+
+# Attractions/Restaurants
+SERPAPI_KEY=...
+
+# Activités
+VIATOR_API_KEY=...
+
+# Base de données
+DATABASE_URL=file:./dev.db
+NEXT_PUBLIC_SUPABASE_URL=...
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+```
+
+---
+
+## Structure du Projet
+
+```
+src/
+├── app/
+│   ├── page.tsx              # Landing page
+│   ├── plan/page.tsx         # Formulaire de planification
+│   ├── trip/[id]/page.tsx    # Affichage voyage
+│   └── api/
+│       ├── generate/         # Génération voyage
+│       └── trips/            # CRUD voyages
+├── components/
+│   ├── forms/                # Wizard de planification
+│   ├── trip/                 # Composants voyage
+│   └── ui/                   # shadcn/ui
+├── lib/
+│   ├── services/             # Logique métier
+│   ├── ai.ts                 # Orchestration génération
+│   └── types.ts              # Types TypeScript
+└── hooks/                    # Custom hooks
+```
+
+---
+
+## Flow de Génération
+
+```
+Formulaire → API /generate → Recherche parallèle (Hôtels + Activités + Restaurants)
+                                    ↓
+                           Claude génère l'itinéraire
+                                    ↓
+                           Post-processing (liens)
+                                    ↓
+                           Sauvegarde + Affichage
+```
+
+---
+
+## Documentation
+
+- `CLAUDE.md` - Guidelines projet et standards de code
+- `APIS.md` - Documentation complète des APIs
+
+---
+
+## Scripts
+
+```bash
+npm run dev       # Développement
+npm run build     # Build production
+npm run start     # Serveur production
+npm test          # Tests
+npm run lint      # Linting
+```
+
+---
+
+## Licence
+
+MIT

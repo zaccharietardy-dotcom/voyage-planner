@@ -1,181 +1,180 @@
 # Voyage Travel Planner - Project Guidelines
 
+> Dernière mise à jour : Février 2026
+
 ## Quick Commands
 
 ```bash
-npm run dev          # Start development server
+npm run dev          # Start development server (localhost:3000)
+npm run build        # Build for production
 npm test             # Run all tests
-npm run test:watch   # TDD watch mode
-npm run test:e2e     # E2E validation tests
 npm run lint         # Check code style
-npm run db:push      # Push Prisma schema to SQLite
-npm run db:studio    # Open Prisma Studio GUI
-npm run db:generate  # Generate Prisma client
 ```
-
-## Critical Constraints
-
-| Constraint | Value | Notes |
-|------------|-------|-------|
-| SerpAPI quota | 250 req/month | ~213 remaining, use sparingly |
-| Cache TTL | 30 days | SQLite via Prisma |
-| Min restaurant rating | 3.7 | Filter out low quality |
-| Min hotel rating | 4.0 | Quality threshold |
-| Geographic validation | MANDATORY | No activities outside current city |
 
 ## Architecture
 
 ```
 src/
-├── app/                    # Next.js App Router
-│   ├── api/               # API routes (generate, attractions, stats)
-│   ├── plan/              # Trip planning wizard
-│   └── trip/[id]/         # Trip display page
+├── app/                    # Next.js 16 App Router
+│   ├── api/               # API routes
+│   │   ├── generate/      # Génération voyage (POST)
+│   │   ├── attractions/   # Pool d'attractions
+│   │   └── trips/         # CRUD voyages
+│   ├── plan/              # Formulaire de planification
+│   └── trip/[id]/         # Page voyage généré
 ├── components/
-│   ├── forms/             # Step wizard components (StepDestination, etc.)
-│   ├── trip/              # Trip display (ActivityCard, DayTimeline, etc.)
-│   └── ui/                # Radix UI primitives (shadcn/ui)
+│   ├── forms/             # Étapes du wizard (StepDestination, etc.)
+│   ├── trip/              # Affichage voyage (CalendarView, TripMap, etc.)
+│   └── ui/                # Composants shadcn/ui
 ├── lib/
-│   ├── services/          # 35+ business logic services
-│   ├── __tests__/         # Backend tests
-│   ├── types.ts           # Centralized TypeScript types
-│   └── db.ts              # Prisma client
+│   ├── services/          # Logique métier (APIs, génération)
+│   │   ├── rapidApiBooking.ts   # Hôtels Booking.com
+│   │   ├── viator.ts            # Activités Viator
+│   │   ├── serpApiPlaces.ts     # Attractions/Restaurants
+│   │   ├── claudeItinerary.ts   # Génération itinéraire IA
+│   │   └── linkGenerator.ts     # Liens transport/bagages
+│   ├── ai.ts              # Orchestration génération
+│   ├── types.ts           # Types TypeScript
+│   └── tripUtils.ts       # Utilitaires voyage
 └── hooks/                 # Custom React hooks
 ```
 
-## Key Services
+## APIs Utilisées
 
-| Service | Purpose |
-|---------|---------|
-| `placeDatabase.ts` | SQLite CRUD for cached places |
-| `restaurants.ts` | Restaurant search (DB → SerpAPI → Claude) |
-| `hotels.ts` | Hotel search with booking URLs |
-| `serpApiSearch.ts` | SerpAPI integration for flights |
-| `coherenceValidator.ts` | Trip logic validation |
-| `scheduler.ts` | DayScheduler for timeline management |
+| Service | API | Usage |
+|---------|-----|-------|
+| Hôtels | `booking-com15.p.rapidapi.com` | Liens directs Booking.com |
+| Activités | `api.viator.com/partner` | Expériences + liens affiliés |
+| Attractions | `serpapi.com` | Google Maps POI |
+| Restaurants | `serpapi.com` | Google Maps restaurants |
+| IA | `api.anthropic.com` | Claude pour itinéraires |
 
-## Data Flow Priority
+> Voir `APIS.md` pour la documentation complète des APIs
 
-For all place searches (restaurants, hotels, attractions):
+## Clés API (.env.local)
 
-1. **Database first** (SQLite, < 30 days old)
-2. **SerpAPI** (if not in DB or stale)
-3. **Claude AI** (fallback, synthetic data)
-4. **Generic fallback** (last resort)
-
-## Testing (TDD)
-
-### Workflow
-1. **EXPLORE** - Read existing code
-2. **PLAN** - Define test cases
-3. **RED** - Write failing tests
-4. **GREEN** - Implement to pass
-5. **REFACTOR** - Improve code quality
-6. **COMMIT** - Conventional commits
-
-### Test Organization
-- Backend tests: `src/lib/__tests__/*.test.ts`
-- Component tests: `src/components/**/*.test.tsx`
-- Use Jest + React Testing Library
-
-### Running Tests
-```bash
-npm test                           # All tests
-npm test -- --watch               # Watch mode
-npm test -- --coverage            # Coverage report
-npm run test:e2e                  # E2E validation only
+```env
+ANTHROPIC_API_KEY=sk-ant-...     # Claude AI
+RAPIDAPI_KEY=626defeb...          # Booking.com (booking-com15)
+SERPAPI_KEY=aeb3b2c7...           # Google Maps
+VIATOR_API_KEY=...                # Viator Partner
+DATABASE_URL=file:./dev.db        # SQLite
 ```
+
+## Flow de Génération de Voyage
+
+```
+1. Utilisateur remplit le formulaire (plan/)
+   ↓
+2. POST /api/generate avec préférences
+   ↓
+3. Recherche parallèle:
+   - Hôtels via RapidAPI Booking
+   - Activités via Viator + SerpAPI
+   - Restaurants via SerpAPI
+   ↓
+4. Claude génère l'itinéraire jour par jour
+   ↓
+5. Post-processing:
+   - Liens Viator sur les activités
+   - Liens Booking sur l'hôtel
+   - Liens transport (Omio/Google Flights)
+   ↓
+6. Sauvegarde + Affichage (trip/[id]/)
+```
+
+## Génération de Liens
+
+| Type | Lien Généré | Exemple |
+|------|-------------|---------|
+| Hôtel | Direct Booking.com | `/hotel/nl/name.html?checkin=...` |
+| Activité | Viator productUrl ou recherche | `viator.com/tours/...` |
+| Restaurant | Google Maps | `google.com/maps/search/?api=1&query=...` |
+| Train | Omio recherche | `omio.fr/search-frontend/results/train/...` |
+| Avion | Google Flights | `google.com/travel/flights?q=...` |
+| Bagages | Radical Storage (affilié) | `radicalstorage.tpo.lu/nsE8ApQR` |
+
+## Filtres Qualité
+
+### Attractions (serpApiPlaces.ts)
+- **Types exclus** : cinémas, gyms, concert halls, restaurants, theaters, stadiums
+- **Keywords exclus** : photo spots, i amsterdam, selfie spot, madame tussauds
+- **Rating min** : 4.0
+- **Reviews min** : 100
+
+### Restaurants
+- **Rating min** : 3.7
+- **Reviews min** : 50
+
+### Hôtels
+- **Rating min** : 7.0 (sur 10)
+
+## Règles IA (claudeItinerary.ts)
+
+Le prompt Claude inclut des règles strictes :
+- Pas de doublons (ex: 2 croisières)
+- Pas de concert halls/theaters comme visites
+- Must-see obligatoires
+- Diversité catégorielle (max 1 église/jour)
+- Durées réalistes (musée = 2h, quartier = 1h30)
 
 ## Code Standards
 
 ### TypeScript
-- `strict: true` - No shortcuts
-- NO `any` type - Ever
-- Explicit return types for public functions
-- Interfaces for data shapes
+- `strict: true`
+- NO `any` - utiliser types explicites
+- Interfaces pour les données
 
-### Functions
-- Max 50 lines per function
-- Single responsibility
-- Guard clauses first
-- Clear naming (no `x`, `temp`, `data`)
+### Fonctions
+- Max 50 lignes
+- Guard clauses en premier
+- Noms explicites
 
-### Components
-- Max 200 lines per component
-- Functional components only (hooks)
-- Props interfaces defined
-- `'use client'` when needed
+### Composants
+- Max 200 lignes
+- `'use client'` si hooks/state
+- Props interfaces définies
 
-### Comments
-- French for business logic explanations
-- English for technical comments
-- "WHY" not "WHAT"
-
-## API Keys (.env.local)
-
-```env
-ANTHROPIC_API_KEY=      # Claude AI
-SERPAPI_API_KEY=        # SerpAPI (limited!)
-GOOGLE_AI_API_KEY=      # Gemini (optional)
-AMADEUS_API_KEY=        # Flights (sandbox)
-FOURSQUARE_API_KEY=     # Places (optional)
-DATABASE_URL=           # SQLite path
-```
-
-## Common Patterns
-
-### Service with DB Priority
-```typescript
-export async function searchX(params) {
-  // 1. Check database first
-  const cached = await searchPlacesFromDB({ ... });
-  if (cached.length >= MIN_RESULTS) return cached;
-
-  // 2. Call external API
-  const fresh = await externalApiCall();
-
-  // 3. Save to database for next time
-  await savePlacesToDB(fresh, 'serpapi');
-
-  return fresh;
-}
-```
-
-### Component Test Pattern
-```typescript
-import { render, screen } from '@testing-library/react';
-import { MyComponent } from './MyComponent';
-
-describe('MyComponent', () => {
-  it('renders correctly', () => {
-    render(<MyComponent prop="value" />);
-    expect(screen.getByText('expected')).toBeInTheDocument();
-  });
-});
-```
-
-## Validation Rules (from tests)
-
-- Flight numbers: 2-letter code + 1-4 digits (e.g., "VY8012")
-- Airport codes: 3 uppercase letters (e.g., "CDG", "BCN")
-- Check-in: Never before 14:00
-- Check-out: Never after 12:00
-- No Chinese/Asian restaurants in Spain destinations
-- GPS coordinates must be within 20km of city center
-- Return date must be after departure date
+### Commentaires
+- Français pour la logique métier
+- Anglais pour le technique
+- Expliquer le "pourquoi"
 
 ## Git Workflow
 
 ```bash
-# Feature branch
-git checkout -b feat/feature-name
+# Commits conventionnels
+git commit -m "feat: add feature"
+git commit -m "fix: resolve bug"
+git commit -m "refactor: improve X"
 
-# Conventional commits
-git commit -m "feat: add feature description"
-git commit -m "fix: resolve bug description"
-git commit -m "test: add tests for X"
-git commit -m "refactor: improve Y"
-
-# Before PR
-npm test && npm run lint
+# Toujours build avant push
+npm run build && git push
 ```
+
+## Fichiers Clés à Connaître
+
+| Fichier | Rôle |
+|---------|------|
+| `ai.ts` | Orchestration génération voyage |
+| `claudeItinerary.ts` | Prompt et appel Claude |
+| `rapidApiBooking.ts` | API Booking.com |
+| `viator.ts` | API Viator |
+| `serpApiPlaces.ts` | Attractions + Restaurants |
+| `tripUtils.ts` | Helpers (liens, dates, distances) |
+| `linkGenerator.ts` | Génération liens transport |
+| `types.ts` | Types centralisés |
+
+## Debugging
+
+### Logs utiles dans la console serveur
+```
+[RapidAPI Booking] ✅ URL directe trouvée: ...
+[RapidAPI Booking] ⚠️ Pas de slug, fallback recherche
+[Viator] ✅ Match trouvé: "Activity" → "Viator Product"
+[SerpAPI] Exclusion: "Place" (type/keyword)
+```
+
+### Vérifier quota API
+- RapidAPI : Dashboard RapidAPI
+- SerpAPI : Dashboard SerpAPI (100 req/mois gratuit)
