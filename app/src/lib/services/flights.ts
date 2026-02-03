@@ -253,7 +253,7 @@ function parseAmadeusResponse(data: any, params: FlightSearchParams): FlightSear
       // Générer un lien Aviasales affilié au lieu de Google Flights
       const bookingUrl = generateFlightLink(
         { origin: depCode, destination: arrCode },
-        { date: depDate, passengers: params.adults + (params.children || 0) + (params.infants || 0) }
+        { date: depDate, passengers: params.adults }
       );
 
       console.log(`[Flights] ✅ Vol validé: ${flightNumber} ${depCode} → ${arrCode}`);
