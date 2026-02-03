@@ -853,9 +853,16 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
     const dayItems = [...dayResult.items];
     if (groceryDays.has(dayNumber) && groceryStore) {
       // Trouver un bon créneau: après le check-in (jour 1) ou en fin d'après-midi
-      // On cherche le dernier item avant 18h pour insérer les courses juste après
+      // IMPORTANT: Si l'hôtel est loin du centre (>3km), placer les courses en fin de journée
+      // après le retour à l'hôtel, pas au milieu des activités du centre-ville
       const groceryDuration = 40; // minutes
       let insertTime = '17:30'; // défaut: fin d'après-midi
+
+      // Calculer la distance hôtel <-> centre-ville
+      const hotelLat = accommodation?.latitude || cityCenter.lat;
+      const hotelLng = accommodation?.longitude || cityCenter.lng;
+      const hotelDistanceFromCenter = calculateDistance(hotelLat, hotelLng, cityCenter.lat, cityCenter.lng);
+      const isHotelFarFromCenter = hotelDistanceFromCenter > 3; // >3km = considéré loin
 
       if (isFirstDay) {
         // Jour d'arrivée: courses après le check-in hôtel
@@ -864,8 +871,32 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
           const checkinEnd = new Date(checkinItem.endTime);
           insertTime = `${checkinEnd.getHours().toString().padStart(2, '0')}:${checkinEnd.getMinutes().toString().padStart(2, '0')}`;
         }
+      } else if (isHotelFarFromCenter) {
+        // Hôtel loin du centre: courses EN FIN DE JOURNÉE après retour à l'hôtel
+        // Pas au milieu de la journée (sinon aller-retour inutile)
+        // Trouver la dernière activité (hors restaurant dîner) pour placer les courses après
+        const lastActivityBeforeDinner = [...dayItems]
+          .filter(item => item.type === 'activity' && !item.title.toLowerCase().includes('dîner'))
+          .sort((a, b) => {
+            const aTime = a.endTime ? parseTime(dayDate, a.endTime).getTime() : 0;
+            const bTime = b.endTime ? parseTime(dayDate, b.endTime).getTime() : 0;
+            return bTime - aTime;
+          })[0];
+
+        if (lastActivityBeforeDinner?.endTime) {
+          // Courses juste après la dernière activité (on rentre + courses)
+          // Ajouter du temps de trajet depuis le centre vers l'hôtel (~30-45min)
+          const lastEnd = parseTime(dayDate, lastActivityBeforeDinner.endTime);
+          const travelTime = Math.round(hotelDistanceFromCenter * 3); // ~3min/km en transports
+          const groceryStart = new Date(lastEnd.getTime() + travelTime * 60 * 1000);
+          insertTime = `${groceryStart.getHours().toString().padStart(2, '0')}:${groceryStart.getMinutes().toString().padStart(2, '0')}`;
+          console.log(`[Courses] Hôtel à ${hotelDistanceFromCenter.toFixed(1)}km du centre, courses après retour à ${insertTime}`);
+        } else {
+          // Fallback: courses tard (19h) pour être sûr d'être rentré
+          insertTime = '19:00';
+        }
       } else {
-        // Jour intermédiaire: après la dernière activité de l'après-midi ou avant le dîner
+        // Hôtel proche du centre: logique standard (avant le dîner)
         const dinnerItem = dayItems.find(item => item.type === 'restaurant' && (item.title.includes('Dîner') || item.title.includes('dîner')));
         if (dinnerItem && dinnerItem.startTime) {
           // 50 min avant le dîner (40min courses + 10min trajet)
@@ -1111,6 +1142,11 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
             toMatch[i].bookingUrl = result.url;
             if (!toMatch[i].estimatedCost && result.price > 0) {
               toMatch[i].estimatedCost = result.price;
+            }
+            // Stocker le titre Viator pour afficher le vrai nom de l'activité réservable
+            // Ex: "Piazza Navona" → "Rome Walking Tour: Pantheon, Piazza Navona and Trevi Fountain"
+            if (result.title && result.title.toLowerCase() !== toMatch[i].title.toLowerCase()) {
+              (toMatch[i] as any).viatorTitle = result.title;
             }
             matched++;
           } else {

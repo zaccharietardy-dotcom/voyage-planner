@@ -724,11 +724,11 @@ export class LogisticsHandler {
     const flightDeparture = new Date(returnFlight.departureTime);
     const flightArrival = new Date(returnFlight.arrivalTime);
 
-    // Checkout: min(3h30 avant le vol, 12h00) — pas de checkout à 17h30 pour un vol à 21h
-    const checkoutByFlight = new Date(flightDeparture.getTime() - 210 * 60 * 1000);
-    const checkoutByStandard = parseTime(date, '12:00');
-    const checkoutStart = checkoutByFlight < checkoutByStandard ? checkoutByFlight : checkoutByStandard;
-    const checkoutEnd = new Date(checkoutStart.getTime() + 30 * 60 * 1000);
+    // Checkout: juste après le petit-déjeuner, avant 11h (standard hôtelier)
+    // La plupart des hôtels demandent un check-out avant 10h-11h
+    // On fixe à 09:30-10:00 pour laisser du temps après le petit-déjeuner
+    const checkoutStart = parseTime(date, '09:30');
+    const checkoutEnd = new Date(checkoutStart.getTime() + 30 * 60 * 1000); // 10:00
     const hotelName = accommodation?.name || 'Hébergement';
 
     const checkoutItem = scheduler.insertFixedItem({

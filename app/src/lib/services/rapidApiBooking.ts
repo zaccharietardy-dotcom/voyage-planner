@@ -410,10 +410,27 @@ export async function searchHotelsWithBookingApi(
         || false;
 
       // URL de réservation : priorité à l'URL directe obtenue via getHotelDetails
+      // IMPORTANT: Valider que l'URL est bien sur booking.com (pas Facebook, blogs, etc.)
       const directUrl = index < 5 ? hotelUrls[index] : null;
       const hotelName = p.property?.name || p.hotel_name || p.hotel_name_trans || 'Hotel';
       const fallbackUrl = `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(`${hotelName} ${destination}`)}&checkin=${checkIn}&checkout=${checkOut}&group_adults=${guests}&no_rooms=1&lang=fr`;
-      const bookingUrl = directUrl || p.property?.url || p.url || fallbackUrl;
+
+      // Valider que l'URL candidate est bien une URL Booking.com
+      const isValidBookingUrl = (url: string | null | undefined): boolean => {
+        if (!url) return false;
+        const urlLower = url.toLowerCase();
+        return urlLower.includes('booking.com') && !urlLower.includes('facebook') && !urlLower.includes('blogspot');
+      };
+
+      // Priorité: URL directe > URL API > fallback (toujours valide)
+      let bookingUrl = fallbackUrl; // Fallback garanti sur Booking.com
+      if (isValidBookingUrl(directUrl)) {
+        bookingUrl = directUrl!;
+      } else if (isValidBookingUrl(p.property?.url)) {
+        bookingUrl = p.property.url;
+      } else if (isValidBookingUrl(p.url)) {
+        bookingUrl = p.url;
+      }
 
       // Photo
       const photoUrl = p.property?.photoUrls?.[0]

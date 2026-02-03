@@ -301,15 +301,15 @@ export function generateReservationLink(
 }
 
 /**
- * Génère des liens de recherche d'hôtels vers Google Hotels ET Booking.com
- * Ces liens permettent à l'utilisateur de voir les hôtels DISPONIBLES en temps réel
+ * Génère des liens de recherche d'hôtels vers Google Hotels, Booking.com ET Airbnb
+ * Ces liens permettent à l'utilisateur de voir les hébergements DISPONIBLES en temps réel
  */
 export function generateHotelSearchLinks(
   destination: string,
   checkIn: string | Date,
   checkOut: string | Date,
   guests: number = 2
-): { googleHotels: string; booking: string } {
+): { googleHotels: string; booking: string; airbnb: string } {
   const checkInStr = formatDateForUrl(checkIn);
   const checkOutStr = formatDateForUrl(checkOut);
 
@@ -333,8 +333,18 @@ export function generateHotelSearchLinks(
   if (checkInStr) bookingParams.set('checkin', checkInStr);
   if (checkOutStr) bookingParams.set('checkout', checkOutStr);
 
+  // Airbnb URL
+  // Format dates Airbnb: YYYY-MM-DD
+  const airbnbParams = new URLSearchParams({
+    query: destination,
+    adults: guests.toString(),
+  });
+  if (checkInStr) airbnbParams.set('checkin', checkInStr);
+  if (checkOutStr) airbnbParams.set('checkout', checkOutStr);
+
   return {
     googleHotels: `https://www.google.com/travel/hotels?${googleParams.toString()}`,
     booking: `https://www.booking.com/searchresults.html?${bookingParams.toString()}`,
+    airbnb: `https://www.airbnb.fr/s/${encodeURIComponent(destination)}/homes?${airbnbParams.toString()}`,
   };
 }

@@ -13,6 +13,7 @@ interface HotelCarouselSelectorProps {
   searchLinks?: {
     googleHotels?: string;
     booking?: string;
+    airbnb?: string;
   };
 }
 
@@ -30,10 +31,9 @@ export function HotelCarouselSelector({
   // Filtrer les hôtels archivés
   const visibleHotels = hotels.filter(h => !archivedIds.has(h.id));
 
-  // S'assurer que l'hôtel sélectionné est visible en premier
-  const selectedHotel = visibleHotels.find(h => h.id === selectedId);
-  const otherHotels = visibleHotels.filter(h => h.id !== selectedId);
-  const sortedHotels = selectedHotel ? [selectedHotel, ...otherHotels] : visibleHotels;
+  // NE PAS réordonner les hôtels quand on clique (comportement contre-intuitif)
+  // Garder l'ordre original (généralement par prix ou recommandation)
+  const sortedHotels = visibleHotels;
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
@@ -84,7 +84,17 @@ export function HotelCarouselSelector({
               rel="noopener noreferrer"
               className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1"
             >
-              Plus sur Booking <ExternalLink className="h-3 w-3" />
+              Booking <ExternalLink className="h-3 w-3" />
+            </a>
+          )}
+          {searchLinks?.airbnb && (
+            <a
+              href={searchLinks.airbnb}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-rose-500 hover:text-rose-700 flex items-center gap-1"
+            >
+              Airbnb <ExternalLink className="h-3 w-3" />
             </a>
           )}
           {/* Boutons de navigation */}
@@ -120,7 +130,7 @@ export function HotelCarouselSelector({
               hover:shadow-lg
               ${selectedId === hotel.id
                 ? 'border-blue-500 ring-2 ring-blue-200 bg-blue-50/50'
-                : 'border-gray-200 hover:border-gray-300 bg-white'}
+                : 'border-gray-200 hover:border-gray-300 bg-gray-50/80'}
             `}
             onClick={() => onSelect(hotel.id)}
           >

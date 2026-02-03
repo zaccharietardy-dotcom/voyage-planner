@@ -473,7 +473,8 @@ Format EXACT:
 
     // Vérifier les incontournables pour les destinations connues
     // Incontournables with full names for geocoding and proper durations
-  const mustHaveDetails: Record<string, { keyword: string; fullName: string; duration: number; cost: number }[]> = {
+    // 'synonyms' permet d'éviter d'injecter "Colosseum" si "Colisée" existe déjà
+    const mustHaveDetails: Record<string, { keyword: string; fullName: string; duration: number; cost: number; synonyms?: string[] }[]> = {
       'barcelona': [
         { keyword: 'sagrada', fullName: 'Sagrada Família, Barcelona', duration: 120, cost: 26 },
         { keyword: 'batlló', fullName: 'Casa Batlló, Barcelona', duration: 60, cost: 35 },
@@ -488,11 +489,11 @@ Format EXACT:
         { keyword: 'montmartre', fullName: 'Montmartre, Paris', duration: 90, cost: 0 },
       ],
       'rome': [
-        { keyword: 'colisée', fullName: 'Colisée, Rome', duration: 90, cost: 18 },
-        { keyword: 'colosseum', fullName: 'Colosseum, Rome', duration: 90, cost: 18 },
-        { keyword: 'vatican', fullName: 'Musées du Vatican, Rome', duration: 180, cost: 17 },
-        { keyword: 'trevi', fullName: 'Fontaine de Trevi, Rome', duration: 20, cost: 0 },
-        { keyword: 'panthéon', fullName: 'Panthéon, Rome', duration: 45, cost: 0 },
+        // Colisée: un seul entry avec synonymes pour éviter les doublons (colisée=colosseum=colosseo)
+        { keyword: 'colisée', fullName: 'Colisée, Rome', duration: 90, cost: 18, synonyms: ['colosseum', 'colosseo', 'coliseo', 'amphitheatrum'] },
+        { keyword: 'vatican', fullName: 'Musées du Vatican, Rome', duration: 180, cost: 17, synonyms: ['vaticano', 'chapelle sixtine', 'sistine', 'st peter', 'san pietro'] },
+        { keyword: 'trevi', fullName: 'Fontaine de Trevi, Rome', duration: 20, cost: 0, synonyms: ['fontana di trevi'] },
+        { keyword: 'panthéon', fullName: 'Panthéon, Rome', duration: 45, cost: 0, synonyms: ['pantheon'] },
       ],
       'tokyo': [
         { keyword: 'shibuya', fullName: 'Shibuya Crossing, Tokyo', duration: 30, cost: 0 },
@@ -550,9 +551,19 @@ Format EXACT:
     }
 
     // POST-VALIDATION: Inject missing incontournables with proper names and durations
+    // Helper: check if an attraction or any of its synonyms exist in allNames
+    const attractionExists = (detail: { keyword: string; synonyms?: string[] }): boolean => {
+      const allKeywords = [detail.keyword, ...(detail.synonyms || [])];
+      const allNameWords = allNames.split(/\s+/);
+      return allKeywords.some(kw =>
+        allNames.includes(kw) || allNameWords.some(w => w.includes(kw))
+      );
+    };
+
     for (const [city, details] of Object.entries(mustHaveDetails)) {
       if (destLower.includes(city)) {
-        const missingDetails = details.filter(d => !allNames.includes(d.keyword) && !allNames.split(' ').some(w => w.includes(d.keyword)));
+        // Filter out attractions that already exist (checking keyword + synonyms)
+        const missingDetails = details.filter(d => !attractionExists(d));
         for (const detail of missingDetails) {
           // Find the day with the fewest activities (skip day trips and first/last day)
           const candidates = parsed.days.filter(d => !d.isDayTrip && d.dayNumber > 1 && d.dayNumber < request.durationDays);
@@ -563,7 +574,7 @@ Format EXACT:
           console.log(`[ClaudeItinerary] Injecting missing incontournable: "${detail.fullName}" into day ${lightest.dayNumber}`);
           lightest.additionalSuggestions.push({
             name: detail.fullName,
-            whyVisit: `Incontournable de ${request.destination} — ajouté automatiquement`,
+            whyVisit: `Incontournable de ${request.destination}`, // Removed "ajouté automatiquement" - cleaner
             estimatedDuration: detail.duration,
             estimatedCost: detail.cost,
             area: request.destination,

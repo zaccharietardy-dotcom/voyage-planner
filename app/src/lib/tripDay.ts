@@ -13,7 +13,7 @@ import { formatFlightDuration } from './services/flights';
 import { calculateParkingTime } from './services/parking';
 import { estimateMealPrice } from './services/restaurants';
 import { Attraction, estimateTravelTime } from './services/attractions';
-import { getDirections, generateGoogleMapsUrl, generateGoogleMapsSearchUrl } from './services/directions';
+import { getDirections, generateGoogleMapsUrl, generateGoogleMapsSearchUrl, generateGoogleMapsDirectionsUrl } from './services/directions';
 import { TransportOption, getTrainBookingUrl } from './services/transport';
 import { DayScheduler, formatTime as formatScheduleTime, parseTime } from './services/scheduler';
 import { searchLuggageStorage, selectBestStorage, needsLuggageStorage } from './services/luggageStorage';
@@ -103,6 +103,9 @@ export function getDayContext(
  * pour éviter les problèmes de coordonnées GPS incorrectes (hallucinations).
  *
  * Google Maps trouvera automatiquement le vrai lieu par son nom.
+ *
+ * Pour les items de type 'transport', on génère un lien de DIRECTIONS au lieu
+ * d'un lien de RECHERCHE, car le titre contient "A → B" qui n'est pas un lieu.
  */
 export function schedulerItemToTripItem(
   item: import('./services/scheduler').ScheduleItem,
@@ -110,15 +113,35 @@ export function schedulerItemToTripItem(
   orderIndex: number,
   extra: Partial<TripItem> & { dataReliability?: 'verified' | 'estimated' | 'generated' }
 ): TripItem {
-  // Extraire le nom du lieu et la ville depuis les données disponibles
-  const placeName = extra.title || item.title;
   // Extraire la ville depuis locationName (format: "Adresse, Ville" ou "Centre-ville, Barcelona")
   const locationParts = extra.locationName?.split(',') || [];
   const city = locationParts.length > 0 ? locationParts[locationParts.length - 1].trim() : undefined;
 
-  // Générer l'URL de recherche Google Maps par nom (BEAUCOUP plus fiable que GPS!)
-  // Au lieu de coordonnées potentiellement fausses, Google Maps cherche le vrai lieu
-  const googleMapsPlaceUrl = generateGoogleMapsSearchUrl(placeName, city);
+  let googleMapsPlaceUrl: string;
+
+  // Pour les items de type 'transport', générer un lien de DIRECTIONS
+  // car locationName contient "Origine → Destination" (ex: "Rome Fiumicino → Centre-ville")
+  if (item.type === 'transport' && extra.locationName?.includes('→')) {
+    // Extraire origine et destination depuis locationName (format: "Origine → Destination")
+    const [origin, destination] = extra.locationName.split('→').map(s => s.trim());
+    if (origin && destination) {
+      // Utiliser les coordonnées si disponibles, sinon utiliser les noms
+      if (extra.latitude && extra.longitude) {
+        // On a les coordonnées de destination, générer un lien avec coordonnées
+        googleMapsPlaceUrl = `https://www.google.com/maps/dir/?api=1&destination=${extra.latitude},${extra.longitude}&travelmode=transit`;
+      } else {
+        // Utiliser les noms de lieux
+        googleMapsPlaceUrl = generateGoogleMapsDirectionsUrl(origin, destination, city || '', 'transit');
+      }
+    } else {
+      // Fallback: utiliser le nom de destination
+      googleMapsPlaceUrl = generateGoogleMapsSearchUrl(destination || extra.locationName || '', city);
+    }
+  } else {
+    // Pour tous les autres types, utiliser le nom du lieu pour la recherche
+    const placeName = extra.title || item.title;
+    googleMapsPlaceUrl = generateGoogleMapsSearchUrl(placeName, city);
+  }
 
   // Déterminer la fiabilité des données:
   // - 'verified' si passé explicitement (données réelles de SerpAPI)
@@ -138,7 +161,7 @@ export function schedulerItemToTripItem(
     title: item.title,
     orderIndex,
     timeFromPrevious: item.travelTimeFromPrevious,
-    googleMapsPlaceUrl, // Lien fiable par nom (pas de GPS hallucié!)
+    googleMapsPlaceUrl, // Lien fiable par nom ou directions pour transport
     dataReliability: reliability as 'verified' | 'estimated' | 'generated',
     ...extra,
   } as TripItem;

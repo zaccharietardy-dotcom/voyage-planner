@@ -614,12 +614,25 @@ export default function TripPage() {
                 <ArrowLeft className="h-4 w-4" />
               </Button>
               <div>
-                <h1 className="font-bold text-lg">
-                  {trip.preferences.origin && <span className="text-muted-foreground font-normal">{trip.preferences.origin} → </span>}
-                  {trip.preferences.destination}
-                </h1>
+                <div className="flex items-center gap-3">
+                  <h1 className="font-bold text-lg">
+                    {trip.preferences.origin && <span className="text-muted-foreground font-normal">{trip.preferences.origin} → </span>}
+                    {trip.preferences.destination}
+                  </h1>
+                  {/* Budget badge - visible et coloré si over budget */}
+                  <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+                    trip.budgetStatus?.isOverBudget
+                      ? 'bg-red-100 text-red-700'
+                      : 'bg-green-100 text-green-700'
+                  }`}>
+                    <span>~{trip.totalEstimatedCost}€</span>
+                    {trip.budgetStatus?.target && trip.budgetStatus.target > 0 && (
+                      <span className="text-[10px] opacity-70">/ {trip.budgetStatus.target}€</span>
+                    )}
+                  </div>
+                </div>
                 <p className="text-xs text-muted-foreground">
-                  {format(new Date(trip.preferences.startDate), 'd MMM yyyy', { locale: fr })} · {statsText}
+                  {format(new Date(trip.preferences.startDate), 'd MMM yyyy', { locale: fr })} · {trip.days.length} jour{trip.days.length > 1 ? 's' : ''} · {getAllItems().length} activités · {useCollaborativeMode ? members.length : (trip.preferences.groupSize || 1)} {useCollaborativeMode ? 'collaborateurs' : 'voyageurs'}
                 </p>
               </div>
             </div>

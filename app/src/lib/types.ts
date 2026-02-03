@@ -309,6 +309,9 @@ export interface TripItem {
   googleMapsUrl?: string; // Lien pour ouvrir l'itinéraire dans Google Maps
   googleMapsPlaceUrl?: string; // Lien de recherche Google Maps par nom (plus fiable que GPS!)
   dataReliability?: 'verified' | 'estimated' | 'generated'; // Fiabilité des données
+  // Titre de l'activité Viator (si différent du titre de l'activité)
+  // Ex: "Piazza Navona" → "Rome Walking Tour: Pantheon, Piazza Navona and Trevi Fountain"
+  viatorTitle?: string;
 }
 
 export interface TripDay {
