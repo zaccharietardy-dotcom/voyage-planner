@@ -55,6 +55,7 @@ export interface TransportSearchParams {
   destination: string;
   destCoords: { lat: number; lng: number };
   date: Date;
+  returnDate?: Date; // Date retour pour les liens de réservation aller-retour
   passengers: number;
   preferences?: {
     prioritize?: 'price' | 'time' | 'co2' | 'balanced';
@@ -580,7 +581,7 @@ function buildTrainOption(
 
   const co2Factor = isHighSpeed ? CO2_PER_KM.train_highspeed : CO2_PER_KM.train_regular;
   const co2 = Math.round(distance * co2Factor);
-  const bookingUrl = getTrainBookingUrl(params.origin, params.destination, params.passengers, params.date);
+  const bookingUrl = getTrainBookingUrl(params.origin, params.destination, params.passengers, params.date, params.returnDate);
 
   return {
     id: dataSource === 'api' ? 'train_api' : (isHighSpeed ? 'train_highspeed' : 'train'),

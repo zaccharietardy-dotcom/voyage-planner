@@ -1208,10 +1208,18 @@ export async function generateDayWithScheduler(params: {
   // tripUsedAttractionIds est passé en paramètre et partagé entre tous les jours
 
   if (canDoMorningActivities) {
-    // Matin: itérer TOUTES les attractions dans l'ordre de Claude (visitOrder)
-    // Le scheduler s'arrêtera naturellement au déjeuner, les restantes seront traitées l'après-midi
+    // Matin: trier les attractions par proximité géographique depuis la position actuelle
+    // Cela évite les allers-retours incohérents (ex: ouest → est → ouest)
+    const morningAttractions = [...attractions].sort((a, b) => {
+      // mustSee en premier (priorité absolue)
+      if (a.mustSee && !b.mustSee) return -1;
+      if (!a.mustSee && b.mustSee) return 1;
+      const distA = calculateDistance(lastCoords.lat, lastCoords.lng, a.latitude || 0, a.longitude || 0);
+      const distB = calculateDistance(lastCoords.lat, lastCoords.lng, b.latitude || 0, b.longitude || 0);
+      return distA - distB;
+    });
 
-    for (const attraction of attractions) {
+    for (const attraction of morningAttractions) {
       // ANTI-DOUBLON: Skip si déjà utilisée (dans n'importe quel jour du voyage)
       if (tripUsedAttractionIds.has(attraction.id)) {
         console.log(`[Jour ${dayNumber}] Skip "${attraction.name}": déjà utilisée dans le voyage`);
@@ -1687,7 +1695,8 @@ export async function generateDayWithScheduler(params: {
   // Cela évite le bug où le scheduler reste bloqué à 17h et ne propose jamais de dîner
   const daySupportsDinner = endHour >= 20; // Journée assez longue pour un dîner
   const canHaveDinner = scheduler.canFit(90, 15); // 90min diner + 15min trajet
-  const shouldAddDinner = !isLastDay && daySupportsDinner && canHaveDinner;
+  // Dernier jour: autoriser le dîner si la journée finit assez tard (vol/transport tard)
+  const shouldAddDinner = daySupportsDinner && canHaveDinner;
 
   console.log(`[Jour ${dayNumber}] Check dîner: heure=${currentDinnerHour}h, endHour=${endHour}, daySupports=${daySupportsDinner}, canFit=${canHaveDinner}, isLastDay=${isLastDay}, shouldAdd=${shouldAddDinner}`);
 

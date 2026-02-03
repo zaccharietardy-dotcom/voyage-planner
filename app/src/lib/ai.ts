@@ -98,12 +98,17 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
 
   // 2. Comparer les options de transport (lancé en parallèle avec attractions + hôtels)
   console.time('[AI] Transport');
+  // Calculer la date de retour pour les liens de réservation
+  const tripReturnDate = new Date(preferences.startDate);
+  tripReturnDate.setDate(tripReturnDate.getDate() + preferences.durationDays - 1);
+
   const transportPromise = compareTransportOptions({
     origin: preferences.origin,
     originCoords,
     destination: preferences.destination,
     destCoords,
     date: new Date(preferences.startDate),
+    returnDate: tripReturnDate,
     passengers: preferences.groupSize,
     preferences: {
       prioritize: preferences.budgetLevel === 'economic' ? 'price' :
@@ -328,7 +333,8 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
   // 7. Pool d'attractions (déjà récupéré en parallèle ci-dessus)
   let attractionPool = attractionPoolRaw;
 
-  // Recherche spécifique des mustSee
+  // Recherche spécifique des mustSee — ces attractions DOIVENT apparaître dans le voyage
+  const mustSeeNames = new Set<string>();
   if (preferences.mustSee?.trim()) {
     console.log('[AI] Recherche des mustSee spécifiques...');
     console.log(`[PERF ${elapsed()}] Start must-see search`);
@@ -339,11 +345,19 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
     );
     const poolNames = new Set(attractionPool.map(a => a.name.toLowerCase()));
     for (const msAttr of mustSeeAttractions) {
+      // Marquer comme mustSee pour garantir l'inclusion
+      msAttr.mustSee = true;
+      mustSeeNames.add(msAttr.name.toLowerCase());
       if (!poolNames.has(msAttr.name.toLowerCase())) {
         attractionPool.unshift(msAttr);
         poolNames.add(msAttr.name.toLowerCase());
+      } else {
+        // Marquer l'attraction existante dans le pool comme mustSee
+        const existing = attractionPool.find(a => a.name.toLowerCase() === msAttr.name.toLowerCase());
+        if (existing) existing.mustSee = true;
       }
     }
+    console.log(`[AI] ${mustSeeNames.size} mustSee marquées: ${[...mustSeeNames].join(', ')}`);
   }
 
   console.log(`[AI] Pool SerpAPI: ${attractionPool.length} attractions`);
@@ -647,6 +661,33 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
     }
 
     attractionsByDay[i] = reordered;
+  }
+
+  // ENFORCEMENT: Vérifier que tous les mustSee sont dans au moins un jour
+  // Si un mustSee manque, le forcer dans le jour avec le moins d'attractions
+  if (mustSeeNames.size > 0) {
+    const scheduledNames = new Set(
+      attractionsByDay.flat().map(a => a.name.toLowerCase())
+    );
+    const missingMustSees = attractionPool.filter(
+      a => a.mustSee && !scheduledNames.has(a.name.toLowerCase())
+    );
+    for (const missing of missingMustSees) {
+      // Trouver le jour avec le moins d'attractions (pas le premier ni le dernier si possible)
+      let bestDay = 0;
+      let minCount = Infinity;
+      for (let d = 0; d < attractionsByDay.length; d++) {
+        const count = attractionsByDay[d].length;
+        // Préférer les jours intermédiaires
+        const penalty = (d === 0 || d === attractionsByDay.length - 1) ? 2 : 0;
+        if (count + penalty < minCount) {
+          minCount = count + penalty;
+          bestDay = d;
+        }
+      }
+      attractionsByDay[bestDay].unshift(missing);
+      console.log(`[AI] ⚠️ Must-see forcé: "${missing.name}" ajouté au jour ${bestDay + 1}`);
+    }
   }
 
   // 7.5 Sélectionner le meilleur hébergement (hôtels + Airbnb si disponible)
