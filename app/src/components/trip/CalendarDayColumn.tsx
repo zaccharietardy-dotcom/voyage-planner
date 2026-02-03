@@ -52,10 +52,12 @@ function layoutItems(items: TripItem[]): LayoutItem[] {
   // Calculate row positions
   const positioned = sorted.map((item) => {
     const startMin = parseMinutes(item.startTime);
-    const dur = item.duration || 60;
+    const endMin = item.endTime ? parseMinutes(item.endTime) : startMin + (item.duration || 60);
+    // Calculer la durée depuis startTime/endTime pour éviter les incohérences
+    const dur = endMin > startMin ? endMin - startMin : (item.duration || 60);
     const rowStart = Math.floor(startMin / 15) + 1;
     const rowSpan = Math.max(1, Math.ceil(dur / 15));
-    return { item, rowStart, rowSpan, startMin, endMin: startMin + dur };
+    return { item, rowStart, rowSpan, startMin, endMin };
   });
 
   // Detect overlapping groups

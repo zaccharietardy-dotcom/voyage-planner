@@ -525,6 +525,8 @@ const ATTRACTION_QUERIES = [
 const NON_TOURISTIC_TYPES = new Set([
   'movie_theater', 'cinema', 'gym', 'fitness_center',
   'bowling_alley', 'arcade', 'event_venue', 'convention_center',
+  'concert_hall', 'performing_arts_theater', 'theater', 'theatre',
+  'stadium', 'sports_complex', 'arena', 'music_venue',
   'apartment_building', 'residential', 'office', 'bank',
   'hospital', 'dentist', 'car_dealer', 'gas_station',
   'laundry', 'storage', 'parking', 'car_rental',
@@ -544,7 +546,10 @@ const NON_TOURISTIC_NAME_KEYWORDS = [
   'cinema', 'cinéma', 'movie', 'toho', 'imax',
   'gym', 'fitness', 'bowling', 'arcade', 'gaming', 'taito station',
   'tower apartment', 'residence', 'office', 'マンション',
-  'nhk hall', 'line cube', 'gymnasium', 'arena',
+  'nhk hall', 'line cube', 'gymnasium', 'arena', 'stadium',
+  // Concert halls, theaters - on ne "visite" pas ces lieux sans spectacle
+  'concert hall', 'concertgebouw', 'philharmonic', 'philharmonie',
+  'opera house', 'opéra', 'theater ', 'theatre ', 'théâtre',
   'don quijote', 'donki', 'uniqlo', 'daiso',
   // Restaurants & food establishments (ne sont pas des attractions)
   'restaurant', 'ristorante', 'restaurante', 'restoran',

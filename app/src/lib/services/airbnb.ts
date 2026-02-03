@@ -312,43 +312,17 @@ function extractPhotos(item: any): string[] {
 }
 
 /**
- * Fallback: génère un Accommodation "virtuel" avec un lien de recherche Airbnb pré-filtré
+ * Fallback: Ne génère plus de faux Airbnb.
+ * Retourne un tableau vide pour que le système utilise Booking.com
  */
 function generateFallbackAirbnb(
-  destination: string,
-  checkIn: string,
-  checkOut: string,
-  options: AirbnbSearchOptions,
-  cityCenter?: { lat: number; lng: number },
+  _destination: string,
+  _checkIn: string,
+  _checkOut: string,
+  _options: AirbnbSearchOptions,
+  _cityCenter?: { lat: number; lng: number },
 ): Accommodation[] {
-  const nights = Math.max(1, Math.ceil(
-    (new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (1000 * 60 * 60 * 24)
-  ));
-  const maxPrice = options.maxPricePerNight || 80;
-  const guests = options.guests || 2;
-
-  const searchUrl = `https://www.airbnb.com/s/${encodeURIComponent(destination)}/homes?checkin=${checkIn}&checkout=${checkOut}&adults=${guests}&price_max=${maxPrice}&room_types%5B%5D=Entire%20home%2Fapt`;
-
-  console.log(`[Airbnb] Fallback: lien de recherche généré`);
-
-  return [{
-    id: 'airbnb-search-link',
-    name: `Logement entier via Airbnb`,
-    type: 'apartment' as const,
-    address: destination,
-    latitude: cityCenter?.lat || 0,
-    longitude: cityCenter?.lng || 0,
-    rating: 8,
-    reviewCount: 0,
-    pricePerNight: maxPrice,
-    totalPrice: maxPrice * nights,
-    currency: 'EUR',
-    amenities: options.requireKitchen ? ['Logement entier', 'Cuisine équipée', 'WiFi'] : ['WiFi'],
-    checkInTime: '15:00',
-    checkOutTime: '11:00',
-    bookingUrl: searchUrl,
-    distanceToCenter: undefined,
-    breakfastIncluded: false,
-    description: `Rechercher sur Airbnb avec vos critères pré-remplis (${destination}, max ${maxPrice}€/nuit)`,
-  }];
+  console.log(`[Airbnb] Fallback désactivé - pas de génération de faux Airbnb`);
+  // Retourne vide pour que Booking.com soit utilisé à la place
+  return [];
 }

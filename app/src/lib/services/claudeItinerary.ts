@@ -306,10 +306,12 @@ RÈGLES D'OR:
 
 6. FILTRAGE STRICT:
    - EXCLUE: cinémas, arcades, salles de sport, immeubles, bureaux, centres commerciaux génériques
+   - EXCLUE: salles de concert, opéras, théâtres, stades, arènes (sauf s'il y a un spectacle/événement prévu) — on ne "visite" pas une salle de concert vide
    - EXCLUE: rooftop bars, bars d'hôtel, pubs, discothèques comme ACTIVITÉS DE JOUR (OK en suggestion soirée uniquement)
    - EXCLUE: attractions mineures de moins de 30min seules — fusionne-les dans un créneau "exploration quartier"
    - EXCLUE TOUJOURS ces tourist traps: Madame Tussauds, Hard Rock Café, Planet Hollywood, Rainforest Café, Bubba Gump, et autres chaînes touristiques internationales
    - EXCLUE: attractions avec "wax museum", "selfie museum", "trick eye", "ripley's", "believe it or not" dans le nom
+   - JAMAIS de doublon: NE SUGGÈRE PAS 2 fois la même activité ou des variantes quasi-identiques (ex: 2 croisières sur les canaux, 2 food tours, 2 visites guidées similaires). Une seule croisière, un seul food tour, etc.
    - MUST-SEE OBLIGATOIRES: "${request.mustSee || 'aucun'}" → Tu DOIS inclure CHACUN d'entre eux dans les jours 1-3, SANS EXCEPTION
    - Si un must-see n'est PAS dans le pool d'attractions, AJOUTE-LE dans additionalSuggestions avec ses vraies coordonnées
    - Si une attraction ESSENTIELLE de ${request.destination} manque du pool, ajoute-la dans additionalSuggestions
