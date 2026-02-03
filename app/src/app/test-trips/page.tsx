@@ -8,6 +8,7 @@ import { Loader2, Sparkles, Clock, MapPin, Users, Wallet } from 'lucide-react';
 import { TripPreferences } from '@/lib/types';
 import { toast } from 'sonner';
 import { useAuth } from '@/components/auth';
+import { generateTripStream } from '@/lib/generateTrip';
 
 // Date helpers
 function daysFromNow(n: number): Date {
@@ -245,18 +246,7 @@ export default function TestTripsPage() {
     toast.info(`Lancement: ${preset.label}...`);
 
     try {
-      const res = await fetch('/api/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(preset.preferences),
-      });
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || `Erreur ${res.status}`);
-      }
-
-      const trip = await res.json();
+      const trip = await generateTripStream(preset.preferences);
 
       // Save to DB if logged in
       if (user) {

@@ -16,6 +16,7 @@ import {
 import { TripPreferences } from '@/lib/types';
 import { ArrowLeft, ArrowRight, Sparkles, Loader2, UserCog, Check, Shuffle } from 'lucide-react';
 import { generateRandomPreferences } from '@/lib/randomExample';
+import { generateTripStream } from '@/lib/generateTrip';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/components/auth';
 import { useUserPreferences, preferenceOptions } from '@/hooks/useUserPreferences';
@@ -145,20 +146,8 @@ export default function PlanPage() {
   const handleGenerate = async () => {
     setIsGenerating(true);
     try {
-      // 1. Générer le voyage avec l'IA
-      const generateResponse = await fetch('/api/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(preferences),
-      });
-
-      if (!generateResponse.ok) {
-        const errorData = await generateResponse.json().catch(() => ({}));
-        const errorMessage = errorData.error || `Erreur ${generateResponse.status}`;
-        throw new Error(errorMessage);
-      }
-
-      const generatedTrip = await generateResponse.json();
+      // 1. Générer le voyage avec l'IA (streaming pour éviter timeout 504)
+      const generatedTrip = await generateTripStream(preferences);
 
       // 2. Si l'utilisateur est connecté, sauvegarder en base de données
       if (user) {

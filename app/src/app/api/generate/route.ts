@@ -4,7 +4,7 @@ import { TripPreferences } from '@/lib/types';
 import { normalizeCity } from '@/lib/services/cityNormalization';
 import { createRouteHandlerClient } from '@/lib/supabase/server';
 
-export const maxDuration = 300; // 5 minutes max (SerpAPI + Claude Sonnet + pipeline)
+export const maxDuration = 300; // 5 minutes max
 
 const FREE_MONTHLY_LIMIT = 2;
 
@@ -32,7 +32,6 @@ export async function POST(request: NextRequest) {
         .single();
 
       if (!profile?.subscription_status || profile.subscription_status !== 'pro') {
-        // Count trips created this month
         const startOfMonth = new Date();
         startOfMonth.setDate(1);
         startOfMonth.setHours(0, 0, 0, 0);
@@ -54,14 +53,13 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Normaliser les noms de villes (supporte toutes les langues: chinois, arabe, etc.)
+    // Normaliser les noms de villes
     const normalizedOrigin = await normalizeCity(body.origin);
     const normalizedDestination = await normalizeCity(body.destination);
 
     console.log(`[API] Normalisation: "${body.origin}" → "${normalizedOrigin.displayName}" (${normalizedOrigin.confidence})`);
     console.log(`[API] Normalisation: "${body.destination}" → "${normalizedDestination.displayName}" (${normalizedDestination.confidence})`);
 
-    // Convertir la date string en Date object
     const preferences: TripPreferences = {
       ...body,
       origin: normalizedOrigin.displayName,
@@ -69,14 +67,46 @@ export async function POST(request: NextRequest) {
       startDate: new Date(body.startDate),
     };
 
-    // Générer le voyage
-    const trip = await generateTripWithAI(preferences);
+    // Streaming response: envoie des keepalive pings pendant la génération
+    // pour éviter le timeout 504 de Vercel/CDN
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream({
+      async start(controller) {
+        // Envoyer un ping toutes les 10s pour garder la connexion vivante
+        const keepAlive = setInterval(() => {
+          try {
+            controller.enqueue(encoder.encode(`data: {"status":"generating"}\n\n`));
+          } catch {
+            // stream already closed
+            clearInterval(keepAlive);
+          }
+        }, 10_000);
 
-    return NextResponse.json(trip);
+        try {
+          const trip = await generateTripWithAI(preferences);
+          clearInterval(keepAlive);
+          controller.enqueue(encoder.encode(`data: {"status":"done","trip":${JSON.stringify(trip)}}\n\n`));
+          controller.close();
+        } catch (error) {
+          clearInterval(keepAlive);
+          const message = error instanceof Error ? error.message : String(error);
+          console.error('Erreur de génération:', message);
+          controller.enqueue(encoder.encode(`data: {"status":"error","error":"${message.replace(/"/g, '\\"')}"}\n\n`));
+          controller.close();
+        }
+      },
+    });
+
+    return new Response(stream, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+      },
+    });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    const stack = error instanceof Error ? error.stack : undefined;
-    console.error('Erreur de génération:', message, stack);
+    console.error('Erreur de génération:', message);
     return NextResponse.json(
       { error: `Erreur lors de la génération du voyage: ${message}` },
       { status: 500 }
