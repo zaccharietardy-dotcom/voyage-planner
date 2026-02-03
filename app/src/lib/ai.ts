@@ -622,8 +622,12 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
 
   // Post-traitement: corriger durées et coûts irréalistes, filtrer attractions non pertinentes
   const irrelevantPatterns = /\b(temple ganesh|temple hindou|hindu temple|salle de sport|gym|fitness|cinéma|cinema|arcade|bowling|landmark architecture|local architecture|architecture locale|city sightseeing|sightseeing tour|photo spot|photo opportunity|scenic view point|generic|unnamed)\b/i;
+  // Concert halls, venues - on ne "visite" pas une salle de concert sans spectacle
+  const venuePatterns = /\b(concertgebouw|concert hall|philharmonic|philharmonie|opera house|symphony|ziggo dome|heineken music hall|melkweg|paradiso|bimhuis|muziekgebouw|carré theatre|theatre|theater)\b/i;
   // Restaurants/bars/cafes should not be in the attraction pool - they belong in the meal system
   const restaurantPatterns = /\b(restaurant|ristorante|restaurante|restoran|bistrot|bistro|brasserie|trattoria|osteria|taverna|pizzeria|crêperie|creperie|bar à|wine bar|tapas bar|pub |café restaurant|grill|steakhouse|steak house|brouwerij|brewery|pancake|brunch|diner|food court|foodhall|ramen|sushi bar|burger|little buddha|le petit chef|blin queen)\b/i;
+  // Generic location titles that aren't real attractions (e.g., "Amsterdam, Noord-Holland, Netherlands")
+  const genericLocationPattern = /^[A-Z][a-zA-Z\s]+,\s*(Noord-Holland|Zuid-Holland|North Holland|South Holland|Netherlands|Pays-Bas|Nederland)/i;
   for (let i = 0; i < attractionsByDay.length; i++) {
     const before = attractionsByDay[i].length;
     attractionsByDay[i] = attractionsByDay[i]
@@ -633,8 +637,16 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
           console.log(`[AI] Filtré attraction non pertinente: "${a.name}"`);
           return false;
         }
+        if (venuePatterns.test(a.name)) {
+          console.log(`[AI] Filtré salle de concert/venue: "${a.name}"`);
+          return false;
+        }
         if (restaurantPatterns.test(a.name)) {
           console.log(`[AI] Filtré restaurant dans le pool d'attractions: "${a.name}"`);
+          return false;
+        }
+        if (genericLocationPattern.test(a.name)) {
+          console.log(`[AI] Filtré titre générique de localisation: "${a.name}"`);
           return false;
         }
         // Filtrer les attractions de type "gastronomy" qui sont des restaurants déguisés
@@ -947,6 +959,66 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
         console.log(`[Validation] Suppression consigne incohérente Jour ${day.dayNumber}: ${Math.round(gapMinutes)}min entre dépôt et récupération`);
         day.items = day.items.filter((_, idx) => idx !== luggageDropIdx && idx !== luggagePickupIdx);
       }
+    }
+  }
+
+  // POST-PROCESSING FINAL: Nettoyer les items problématiques dans tous les jours
+  // Patterns pour items à supprimer
+  const badItemPatterns = {
+    venues: /\b(concertgebouw|concert hall|philharmonic|philharmonie|opera house|symphony|ziggo dome|heineken music hall|melkweg|paradiso|bimhuis|muziekgebouw)\b/i,
+    genericLocations: /^[A-Z][a-zA-Z\s]+,\s*(Noord-Holland|Zuid-Holland|North Holland|South Holland|Netherlands|Pays-Bas|Nederland)/i,
+  };
+
+  // Tracking pour doublons de croisières/food tours sur tout le voyage
+  const cruiseKeywords = /\b(croisière|cruise|canal tour|boat tour|canal boat|bateau)\b/i;
+  const foodTourKeywords = /\b(food tour|food walk|walking food|culinary tour|gastronomic tour)\b/i;
+  let hasCruise = false;
+  let hasFoodTour = false;
+
+  for (const day of days) {
+    const beforeCount = day.items.length;
+    day.items = day.items.filter(item => {
+      if (item.type !== 'activity') return true; // Keep non-activities
+
+      const title = item.title || '';
+
+      // Filter concert halls/venues
+      if (badItemPatterns.venues.test(title)) {
+        console.log(`[PostProcess] Supprimé venue: "${title}"`);
+        return false;
+      }
+
+      // Filter generic location titles
+      if (badItemPatterns.genericLocations.test(title)) {
+        console.log(`[PostProcess] Supprimé titre générique: "${title}"`);
+        return false;
+      }
+
+      // Filter duplicate cruises (keep only first one)
+      if (cruiseKeywords.test(title)) {
+        if (hasCruise) {
+          console.log(`[PostProcess] Supprimé croisière doublon: "${title}"`);
+          return false;
+        }
+        hasCruise = true;
+      }
+
+      // Filter duplicate food tours (keep only first one)
+      if (foodTourKeywords.test(title)) {
+        if (hasFoodTour) {
+          console.log(`[PostProcess] Supprimé food tour doublon: "${title}"`);
+          return false;
+        }
+        hasFoodTour = true;
+      }
+
+      return true;
+    });
+
+    if (day.items.length < beforeCount) {
+      console.log(`[PostProcess] Jour ${day.dayNumber}: ${beforeCount - day.items.length} item(s) supprimé(s)`);
+      // Re-index orderIndex
+      day.items.forEach((item, idx) => { item.orderIndex = idx; });
     }
   }
 

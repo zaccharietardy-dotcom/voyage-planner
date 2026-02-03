@@ -3,7 +3,8 @@ import { generateHotelLink, formatDateForUrl } from './services/linkGenerator';
 
 /**
  * Génère l'URL de réservation pour un hébergement.
- * Préfère Booking.com sauf si c'est explicitement un appartement Airbnb.
+ * PRIORITÉ: Utilise bookingUrl direct si disponible (contient /hotel/ = lien direct Booking.com)
+ * Sinon génère un lien de recherche.
  */
 export function getAccommodationBookingUrl(
   accom: Accommodation | null | undefined,
@@ -13,12 +14,18 @@ export function getAccommodationBookingUrl(
 ): string | undefined {
   if (!accom?.name) return undefined;
 
-  // Garder le lien Airbnb UNIQUEMENT si c'est explicitement un appartement avec lien Airbnb
+  // PRIORITÉ 1: Utiliser le bookingUrl direct si c'est un vrai lien Booking.com (/hotel/)
+  // Cela inclut les liens générés par rapidApiBooking.ts comme /hotel/nl/clinkmama.html
+  if (accom.bookingUrl?.includes('/hotel/')) {
+    return accom.bookingUrl;
+  }
+
+  // PRIORITÉ 2: Garder le lien Airbnb si c'est un appartement
   if (accom.type === 'apartment' && accom.bookingUrl?.includes('airbnb.com')) {
     return accom.bookingUrl;
   }
 
-  // Pour tout le reste (hôtels, bnb sans lien Airbnb, etc.) → générer lien Booking.com
+  // PRIORITÉ 3: Pour tout le reste → générer lien Booking.com recherche
   return generateHotelLink(
     { name: accom.name, city: destination },
     { checkIn: formatDateForUrl(checkIn), checkOut: formatDateForUrl(checkOut) },
