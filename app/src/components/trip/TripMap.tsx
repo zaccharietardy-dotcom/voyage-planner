@@ -201,10 +201,19 @@ export function TripMap({ items, center, selectedItemId, onItemClick, hoveredIte
       map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
     }
 
-    // Draw solid route lines between non-flight items
+    // Draw solid route lines between non-flight items in CHRONOLOGICAL order
+    // Sort by dayNumber first, then by startTime to get true chronological order
     const routeCoords = items
       .filter((item) => item.latitude && item.longitude && item.type !== 'flight')
-      .sort((a, b) => a.orderIndex - b.orderIndex)
+      .sort((a, b) => {
+        // First sort by day
+        const dayDiff = (a.dayNumber || 0) - (b.dayNumber || 0);
+        if (dayDiff !== 0) return dayDiff;
+        // Then by startTime (HH:MM format)
+        const aTime = a.startTime || '00:00';
+        const bTime = b.startTime || '00:00';
+        return aTime.localeCompare(bTime);
+      })
       .map((item) => [item.latitude, item.longitude] as [number, number]);
 
     if (routeCoords.length > 1) {

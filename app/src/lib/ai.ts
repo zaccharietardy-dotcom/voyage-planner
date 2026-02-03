@@ -965,7 +965,13 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
   // POST-PROCESSING FINAL: Nettoyer les items problématiques dans tous les jours
   // Patterns pour items à supprimer
   const badItemPatterns = {
+    // Concert halls et salles de spectacle (ne pas proposer en activité de jour)
     venues: /\b(concertgebouw|concert hall|philharmonic|philharmonie|opera house|symphony|ziggo dome|heineken music hall|melkweg|paradiso|bimhuis|muziekgebouw)\b/i,
+    // Salles de spectacle/cabarets/shows (Moulin Rouge, etc.) - pas en journée
+    showVenues: /\b(moulin rouge|lido|crazy horse|cabaret|burlesque|revue|show|spectacle|variété|follies|paradis latin)\b/i,
+    // Restaurants Michelin étoilés (ne pas proposer comme activités)
+    michelinRestaurants: /\b(l'ambroisie|ambroisie|l'arpège|arpège|le pré catelan|pré catelan|guy savoy|alain ducasse|le meurice|épicure|epicure|ledoyen|pavillon|cinq|le cinq|taillevent|astrance|alléno|alleno|pierre gagnaire)\b/i,
+    // Titres génériques de lieux
     genericLocations: /^[A-Z][a-zA-Z\s]+,\s*(Noord-Holland|Zuid-Holland|North Holland|South Holland|Netherlands|Pays-Bas|Nederland)/i,
   };
 
@@ -975,16 +981,38 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
   let hasCruise = false;
   let hasFoodTour = false;
 
+  // Helper pour vérifier si c'est une activité en journée (avant 18h)
+  const isDaytimeActivity = (item: TripItem): boolean => {
+    if (!item.startTime) return false;
+    const hour = parseInt(item.startTime.split(':')[0], 10);
+    return hour < 18;
+  };
+
   for (const day of days) {
     const beforeCount = day.items.length;
     day.items = day.items.filter(item => {
       if (item.type !== 'activity') return true; // Keep non-activities
 
       const title = item.title || '';
+      const description = item.description || '';
+      const combined = `${title} ${description}`;
 
-      // Filter concert halls/venues
-      if (badItemPatterns.venues.test(title)) {
+      // Filter concert halls/venues (anytime)
+      if (badItemPatterns.venues.test(combined)) {
         console.log(`[PostProcess] Supprimé venue: "${title}"`);
+        return false;
+      }
+
+      // Filter show venues/cabarets ONLY during daytime (before 18h)
+      // These are OK for evening activities
+      if (isDaytimeActivity(item) && badItemPatterns.showVenues.test(combined)) {
+        console.log(`[PostProcess] Supprimé spectacle en journée: "${title}" à ${item.startTime}`);
+        return false;
+      }
+
+      // Filter Michelin restaurants proposed as activities (not restaurant type)
+      if (badItemPatterns.michelinRestaurants.test(combined)) {
+        console.log(`[PostProcess] Supprimé restaurant Michelin comme activité: "${title}"`);
         return false;
       }
 

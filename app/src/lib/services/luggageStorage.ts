@@ -303,11 +303,19 @@ export function selectBestStorage(
 
 /**
  * Verifie si une consigne est necessaire
+ *
+ * TEMPORAIREMENT DÉSACTIVÉ - La fonctionnalité de consigne à bagages est désactivée
+ * car elle cause des problèmes dans l'itinéraire. TODO: Réactiver après fix.
  */
 export function needsLuggageStorage(
   arrivalTime: string, // HH:mm
   hotelCheckInTime: string // HH:mm
 ): boolean {
+  // TEMPORAIREMENT DÉSACTIVÉ - retourne toujours false
+  // La plupart des hôtels acceptent de garder les bagages gratuitement avant le check-in
+  return false;
+
+  /* ORIGINAL CODE - à réactiver plus tard:
   const arrival = parseTime(arrivalTime);
   const checkIn = parseTime(hotelCheckInTime);
 
@@ -316,6 +324,7 @@ export function needsLuggageStorage(
   // la plupart des hôtels acceptent de garder les bagages même avant le check-in.
   // Payer une consigne + détour pour 1-2h n'a aucun sens.
   return checkIn - arrival > 150;
+  */
 }
 
 /**
