@@ -364,7 +364,8 @@ export async function findViatorProduct(
 
       if (matchRatio >= 0.3 || matchCount >= 2) {
         const price = product.pricing?.summary?.fromPrice || 0;
-        const url = product.productUrl || buildViatorDeepLink(product, destinationName);
+        // TOUJOURS construire notre propre URL (ignorer productUrl de l'API qui peut être mauvais)
+        const url = buildViatorDeepLink(product, destinationName);
 
         console.log(`[Viator] ✅ Match trouvé: "${activityName}" → "${product.title}" (${price}€)`);
         return { url, price: Math.round(price), title: product.title };
@@ -413,8 +414,8 @@ function processViatorResults(
       const rating = p.reviews?.combinedAverageRating || 4.0;
       const reviewCount = p.reviews?.totalReviews || 0;
 
-      // Use Viator's pre-built affiliate URL or build proper deep link
-      const affiliateUrl = p.productUrl || buildViatorDeepLink(p, destination);
+      // TOUJOURS construire notre propre URL (ignorer productUrl de l'API)
+      const affiliateUrl = buildViatorDeepLink(p, destination);
 
       return {
         id: `viator-${p.productCode}`,

@@ -700,15 +700,15 @@ export function selectBestHotel(
       score += 5; // Cheap but might be lower quality
     }
 
-    // 6. Bonus for apartments when budget strategy prefers Airbnb (0-50 points)
+    // 6. Bonus for apartments when budget strategy prefers Airbnb (réduit pour ne pas dominer)
     if (preferences.preferApartment) {
       const isApartment = hotel.type === 'apartment' || hotel.type === 'bnb' ||
         /\b(apartment|flat|appart|résidence|studio|loft)\b/i.test(hotel.name);
       if (isApartment) {
-        score += 50; // Strong preference for apartments
+        score += 15; // Réduit de 50 → 15 pour ne pas écraser les hôtels
       }
       // Also prefer cheaper options when airbnb strategy
-      score += Math.max(0, 20 - (hotel.pricePerNight / 50));
+      score += Math.max(0, 10 - (hotel.pricePerNight / 100));
     }
 
     return { hotel, score };

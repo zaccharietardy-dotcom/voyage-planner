@@ -47,6 +47,7 @@ import { BudgetTracker } from './services/budgetTracker';
 import { enrichRestaurantsWithGemini } from './services/geminiSearch';
 import { findViatorProduct, searchViatorActivities, isViatorConfigured } from './services/viator';
 import { findTiqetsProduct, getKnownTiqetsLink, isTiqetsRelevant } from './services/tiqets';
+import { getMustSeeAttractions } from './services/attractions';
 
 import { generateId, normalizeToLocalDate, formatDate, formatTime, formatPriceLevel, pickDirectionMode, getAccommodationBookingUrl, getHotelLocationName, getBudgetCabinClass, getBudgetPriceLevel, getReliableGoogleMapsPlaceUrl } from './tripUtils';
 import { findBestFlights, selectFlightByBudget, LateFlightArrivalData } from './tripFlights';
@@ -362,6 +363,23 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
   }
 
   console.log(`[AI] Pool SerpAPI: ${attractionPool.length} attractions`);
+
+  // TOUJOURS injecter les must-see curés (Rijksmuseum, etc.) même si SerpAPI les a manqués
+  const curatedMustSee = getMustSeeAttractions(preferences.destination);
+  if (curatedMustSee.length > 0) {
+    const poolNames = new Set(attractionPool.map(a => a.name.toLowerCase()));
+    let injectedCount = 0;
+    for (const curated of curatedMustSee) {
+      if (!poolNames.has(curated.name.toLowerCase())) {
+        attractionPool.unshift(curated); // Ajouter en tête pour priorité
+        poolNames.add(curated.name.toLowerCase());
+        injectedCount++;
+      }
+    }
+    if (injectedCount > 0) {
+      console.log(`[AI] ✅ Injecté ${injectedCount} must-see curés: ${curatedMustSee.slice(0, injectedCount).map(a => a.name).join(', ')}`);
+    }
+  }
 
   // Fallback: Si SerpAPI échoue, utiliser l'ancien système
   if (attractionPool.length < 5) {

@@ -3,7 +3,7 @@ import { generateHotelLink, formatDateForUrl } from './services/linkGenerator';
 
 /**
  * Génère l'URL de réservation pour un hébergement.
- * Préserve le bookingUrl natif (ex: Airbnb) s'il existe, sinon génère un lien Booking.com.
+ * Préfère Booking.com sauf si c'est explicitement un appartement Airbnb.
  */
 export function getAccommodationBookingUrl(
   accom: Accommodation | null | undefined,
@@ -12,10 +12,13 @@ export function getAccommodationBookingUrl(
   checkOut: string | Date,
 ): string | undefined {
   if (!accom?.name) return undefined;
-  // Préserver le lien Airbnb natif s'il existe
-  if (accom.bookingUrl && (accom.bookingUrl.includes('airbnb') || accom.type === 'apartment')) {
+
+  // Garder le lien Airbnb UNIQUEMENT si c'est explicitement un appartement avec lien Airbnb
+  if (accom.type === 'apartment' && accom.bookingUrl?.includes('airbnb.com')) {
     return accom.bookingUrl;
   }
+
+  // Pour tout le reste (hôtels, bnb sans lien Airbnb, etc.) → générer lien Booking.com
   return generateHotelLink(
     { name: accom.name, city: destination },
     { checkIn: formatDateForUrl(checkIn), checkOut: formatDateForUrl(checkOut) },
