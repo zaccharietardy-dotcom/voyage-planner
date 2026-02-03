@@ -529,6 +529,15 @@ const NON_TOURISTIC_TYPES = new Set([
   'hospital', 'dentist', 'car_dealer', 'gas_station',
   'laundry', 'storage', 'parking', 'car_rental',
   'night_club', 'bar',
+  // Restaurants ne sont PAS des attractions — ils appartiennent au système de repas
+  'restaurant', 'food', 'meal_delivery', 'meal_takeaway',
+  'cafe', 'coffee_shop', 'bakery', 'ice_cream_shop',
+  'fast_food_restaurant', 'pizza_restaurant', 'seafood_restaurant',
+  'chinese_restaurant', 'japanese_restaurant', 'indian_restaurant',
+  'italian_restaurant', 'french_restaurant', 'thai_restaurant',
+  'vietnamese_restaurant', 'mexican_restaurant', 'korean_restaurant',
+  'steak_house', 'sushi_restaurant', 'ramen_restaurant',
+  'brunch_restaurant', 'breakfast_restaurant',
 ]);
 
 const NON_TOURISTIC_NAME_KEYWORDS = [
@@ -537,6 +546,14 @@ const NON_TOURISTIC_NAME_KEYWORDS = [
   'tower apartment', 'residence', 'office', 'マンション',
   'nhk hall', 'line cube', 'gymnasium', 'arena',
   'don quijote', 'donki', 'uniqlo', 'daiso',
+  // Restaurants & food establishments (ne sont pas des attractions)
+  'restaurant', 'ristorante', 'restaurante', 'restoran',
+  'bistrot', 'bistro', 'brasserie', 'trattoria', 'osteria', 'taverna',
+  'pizzeria', 'steakhouse', 'grill house', 'burger', 'sushi bar',
+  'pancake', 'brunch', 'diner', 'food court', 'foodhall',
+  'café restaurant', 'wine bar', 'tapas bar', 'ramen',
+  'brouwerij', 'brewery', 'pub ', 'beer hall',
+  'little buddha', 'le petit chef',
   // Tourist traps
   'madame tussauds', 'tussaud', 'hard rock cafe', 'hard rock café',
   'planet hollywood', 'rainforest cafe', 'rainforest café', 'bubba gump',
@@ -1057,6 +1074,14 @@ function meetsAttractionQualityThreshold(place: SerpApiLocalResult): boolean {
   for (const t of allTypes) {
     if (NON_TOURISTIC_TYPES.has(t)) {
       console.log(`[SerpAPI] Exclusion type non-touristique: "${place.title}" (${t})`);
+      return false;
+    }
+  }
+
+  // Exclure les restaurants par type SerpAPI (souvent "Restaurant" ou contient "restaurant")
+  for (const t of allTypes) {
+    if (t.includes('restaurant') || t.includes('food') || t.includes('cafe') || t.includes('coffee') || t.includes('bakery') || t.includes('bar') || t.includes('pub')) {
+      console.log(`[SerpAPI] Exclusion restaurant/food: "${place.title}" (type: ${t})`);
       return false;
     }
   }

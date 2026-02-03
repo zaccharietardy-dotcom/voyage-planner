@@ -12,11 +12,13 @@ import { shouldShowItinerary } from '@/lib/services/itineraryValidator';
 interface DayTimelineProps {
   day: TripDay;
   selectedItemId?: string;
+  globalIndexOffset?: number;
   onSelectItem?: (item: TripItem) => void;
   onEditItem?: (item: TripItem) => void;
   onDeleteItem?: (item: TripItem) => void;
   onAddItem?: (dayNumber: number) => void;
   onMoveItem?: (item: TripItem, direction: 'up' | 'down') => void;
+  onHoverItem?: (itemId: string | null) => void;
   showMoveButtons?: boolean;
 }
 
@@ -41,11 +43,13 @@ function timeToSortableMinutes(time: string): number {
 export function DayTimeline({
   day,
   selectedItemId,
+  globalIndexOffset = 0,
   onSelectItem,
   onEditItem,
   onDeleteItem,
   onAddItem,
   onMoveItem,
+  onHoverItem,
   showMoveButtons = false,
 }: DayTimelineProps) {
   // Filter out 'transport' items (transfers) - they're replaced by ItineraryConnector links
@@ -100,6 +104,7 @@ export function DayTimeline({
 
               <ActivityCard
                 item={item}
+                orderNumber={globalIndexOffset + index + 1}
                 isSelected={selectedItemId === item.id}
                 onSelect={() => onSelectItem?.(item)}
                 onEdit={() => onEditItem?.(item)}
@@ -108,6 +113,8 @@ export function DayTimeline({
                 onMoveDown={showMoveButtons && onMoveItem ? () => onMoveItem(item, 'down') : undefined}
                 canMoveUp={!isFirst}
                 canMoveDown={!isLast}
+                onMouseEnter={() => onHoverItem?.(item.id)}
+                onMouseLeave={() => onHoverItem?.(null)}
               />
 
               {/* Connecteur d'itinéraire vers l'activité suivante */}

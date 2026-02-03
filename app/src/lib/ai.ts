@@ -608,7 +608,7 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
   // Post-traitement: corriger durées et coûts irréalistes, filtrer attractions non pertinentes
   const irrelevantPatterns = /\b(temple ganesh|temple hindou|hindu temple|salle de sport|gym|fitness|cinéma|cinema|arcade|bowling|landmark architecture|local architecture|architecture locale|city sightseeing|sightseeing tour|photo spot|photo opportunity|scenic view point|generic|unnamed)\b/i;
   // Restaurants/bars/cafes should not be in the attraction pool - they belong in the meal system
-  const restaurantPatterns = /\b(restaurant|ristorante|restaurante|bistrot|bistro|brasserie|trattoria|osteria|taverna|pizzeria|crêperie|creperie|bar à|wine bar|pub |café restaurant|grill|steakhouse)\b/i;
+  const restaurantPatterns = /\b(restaurant|ristorante|restaurante|restoran|bistrot|bistro|brasserie|trattoria|osteria|taverna|pizzeria|crêperie|creperie|bar à|wine bar|tapas bar|pub |café restaurant|grill|steakhouse|steak house|brouwerij|brewery|pancake|brunch|diner|food court|foodhall|ramen|sushi bar|burger|little buddha|le petit chef|blin queen)\b/i;
   for (let i = 0; i < attractionsByDay.length; i++) {
     const before = attractionsByDay[i].length;
     attractionsByDay[i] = attractionsByDay[i]
@@ -620,6 +620,11 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
         }
         if (restaurantPatterns.test(a.name)) {
           console.log(`[AI] Filtré restaurant dans le pool d'attractions: "${a.name}"`);
+          return false;
+        }
+        // Filtrer les attractions de type "gastronomy" qui sont des restaurants déguisés
+        if (a.type === 'gastronomy' && !a.mustSee) {
+          console.log(`[AI] Filtré attraction gastronomie: "${a.name}" (type=${a.type})`);
           return false;
         }
         // Filtrer les noms trop génériques (pas un vrai lieu)

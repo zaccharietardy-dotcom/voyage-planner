@@ -15,12 +15,16 @@ import {
   Euro,
   Star,
   ExternalLink,
-  ChevronDown,
-  ChevronUp,
   Check,
+  ChevronDown,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 
 interface TransportOptionsProps {
   options: TransportOptionSummary[];
@@ -61,242 +65,139 @@ function formatDuration(minutes: number): string {
   return `${hours}h${mins.toString().padStart(2, '0')}`;
 }
 
-function ScoreBar({ score, label, color }: { score: number; label: string; color: string }) {
-  return (
-    <div className="flex items-center gap-2">
-      <span className="text-xs text-muted-foreground w-12">{label}</span>
-      <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
-        <div
-          className="h-full rounded-full transition-all"
-          style={{ width: `${score * 10}%`, backgroundColor: color }}
-        />
-      </div>
-      <span className="text-xs font-medium w-6 text-right">{score.toFixed(1)}</span>
-    </div>
-  );
-}
-
-function TransportOptionCard({
-  option,
-  isSelected,
-  isExpanded,
-  onToggleExpand,
-  onSelect,
-}: {
-  option: TransportOptionSummary;
-  isSelected: boolean;
-  isExpanded: boolean;
-  onToggleExpand: () => void;
-  onSelect?: () => void;
-}) {
-  const Icon = MODE_ICONS[option.mode] || Plane;
-  const color = MODE_COLORS[option.mode] || '#666';
-
-  return (
-    <Card
-      className={cn(
-        'p-4 cursor-pointer transition-all hover:shadow-md',
-        isSelected && 'ring-2 ring-primary',
-        option.recommended && !isSelected && 'ring-1 ring-green-500'
-      )}
-      onClick={onToggleExpand}
-    >
-      {/* Header */}
-      <div className="flex items-start justify-between">
-        <div className="flex items-center gap-3">
-          <div
-            className="p-2 rounded-lg"
-            style={{ backgroundColor: `${color}15`, color }}
-          >
-            <Icon className="h-5 w-5" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-semibold">{MODE_LABELS[option.mode]}</span>
-              {option.recommended && (
-                <Badge variant="secondary" className="bg-green-100 text-green-700 text-xs">
-                  Recommandé
-                </Badge>
-              )}
-              {isSelected && (
-                <Badge className="bg-primary text-primary-foreground text-xs">
-                  <Check className="h-3 w-3 mr-1" />
-                  Sélectionné
-                </Badge>
-              )}
-              {option.dataSource === 'api' && (
-                <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 text-xs">
-                  Prix réel
-                </Badge>
-              )}
-              {option.dataSource === 'estimated' && (
-                <Badge variant="secondary" className="bg-amber-100 text-amber-700 text-xs">
-                  Estimé
-                </Badge>
-              )}
-            </div>
-            {option.recommendationReason && (
-              <p className="text-xs text-muted-foreground">{option.recommendationReason}</p>
-            )}
-          </div>
-        </div>
-
-        {/* Score badge */}
-        <div className="flex items-center gap-2">
-          <div
-            className="flex items-center gap-1 px-2 py-1 rounded-full text-white font-bold text-sm"
-            style={{ backgroundColor: option.score >= 7 ? '#22C55E' : option.score >= 5 ? '#F59E0B' : '#EF4444' }}
-          >
-            <Star className="h-3 w-3" />
-            {option.score.toFixed(1)}
-          </div>
-          {isExpanded ? (
-            <ChevronUp className="h-4 w-4 text-muted-foreground" />
-          ) : (
-            <ChevronDown className="h-4 w-4 text-muted-foreground" />
-          )}
-        </div>
-      </div>
-
-      {/* Quick stats */}
-      <div className="flex items-center gap-4 mt-3 text-sm">
-        <div className="flex items-center gap-1">
-          <Clock className="h-4 w-4 text-muted-foreground" />
-          <span className="font-medium">{formatDuration(option.totalDuration)}</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <Euro className="h-4 w-4 text-muted-foreground" />
-          <span className="font-medium">{option.totalPrice}€</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <Leaf className="h-4 w-4 text-muted-foreground" />
-          <span className="font-medium">{option.totalCO2} kg CO₂</span>
-        </div>
-      </div>
-
-      {/* Expanded details */}
-      {isExpanded && (
-        <div className="mt-4 pt-4 border-t space-y-4">
-          {/* Score breakdown */}
-          <div className="space-y-2">
-            <p className="text-xs font-medium text-muted-foreground uppercase">Scores détaillés</p>
-            <ScoreBar score={option.scoreDetails.priceScore} label="Prix" color="#22C55E" />
-            <ScoreBar score={option.scoreDetails.timeScore} label="Temps" color="#3B82F6" />
-            <ScoreBar score={option.scoreDetails.co2Score} label="CO₂" color="#10B981" />
-          </div>
-
-          {/* Segments */}
-          {option.segments.length > 0 && (
-            <div className="space-y-2">
-              <p className="text-xs font-medium text-muted-foreground uppercase">Itinéraire</p>
-              <div className="space-y-2">
-                {option.segments.map((segment, idx) => {
-                  const SegmentIcon = MODE_ICONS[segment.mode] || Plane;
-                  return (
-                    <div key={idx} className="flex items-center gap-2 text-sm">
-                      <SegmentIcon className="h-4 w-4 text-muted-foreground" />
-                      <span>{segment.from} → {segment.to}</span>
-                      <span className="text-muted-foreground">({formatDuration(segment.duration)})</span>
-                      {segment.operator && (
-                        <Badge variant="outline" className="text-xs">{segment.operator}</Badge>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Actions */}
-          <div className="flex items-center gap-2 pt-2">
-            {option.bookingUrl && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-1"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  window.open(option.bookingUrl, '_blank');
-                }}
-              >
-                <ExternalLink className="h-3 w-3" />
-                Réserver
-              </Button>
-            )}
-            {onSelect && !isSelected && (
-              <Button
-                size="sm"
-                className="gap-1"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onSelect();
-                }}
-              >
-                <Check className="h-3 w-3" />
-                Choisir
-              </Button>
-            )}
-          </div>
-        </div>
-      )}
-    </Card>
-  );
-}
-
+/**
+ * Compact transport selector that shows as a button with popover dropdown.
+ * Replaces the old full-page card list.
+ */
 export function TransportOptions({
   options,
   selectedId,
   onSelect,
   className,
 }: TransportOptionsProps) {
-  const [expandedId, setExpandedId] = useState<string | null>(
-    options.find(o => o.recommended)?.id || options[0]?.id || null
-  );
+  const [open, setOpen] = useState(false);
 
-  if (options.length === 0) {
-    return (
-      <Card className={cn('p-4', className)}>
-        <p className="text-muted-foreground text-center">Aucune option de transport disponible</p>
-      </Card>
-    );
-  }
+  if (options.length === 0) return null;
 
-  // Sort by score descending
   const sortedOptions = [...options].sort((a, b) => b.score - a.score);
+  const selected = options.find(o => o.id === selectedId) || sortedOptions[0];
+  const SelectedIcon = MODE_ICONS[selected.mode] || Plane;
+  const selectedColor = MODE_COLORS[selected.mode] || '#666';
 
   return (
-    <div className={cn('space-y-3', className)}>
-      <div className="flex items-center justify-between">
-        <h3 className="font-semibold">Options de transport</h3>
-        <span className="text-xs text-muted-foreground">{options.length} options comparées</span>
-      </div>
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          size="sm"
+          className={cn('gap-2 h-9', className)}
+        >
+          <div style={{ color: selectedColor }}><SelectedIcon className="h-4 w-4" /></div>
+          <span className="font-medium">{MODE_LABELS[selected.mode]}</span>
+          <span className="text-muted-foreground text-xs">
+            {formatDuration(selected.totalDuration)} · {selected.totalPrice}€
+          </span>
+          <ChevronDown className="h-3 w-3 text-muted-foreground" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[380px] p-0" align="start">
+        <div className="p-3 border-b">
+          <p className="text-sm font-medium">Options de transport</p>
+          <p className="text-xs text-muted-foreground">{options.length} options comparées</p>
+        </div>
+        <div className="max-h-[400px] overflow-y-auto">
+          {sortedOptions.map((option) => {
+            const Icon = MODE_ICONS[option.mode] || Plane;
+            const color = MODE_COLORS[option.mode] || '#666';
+            const isSelected = option.id === selectedId;
 
-      {sortedOptions.map((option) => (
-        <TransportOptionCard
-          key={option.id}
-          option={option}
-          isSelected={option.id === selectedId}
-          isExpanded={option.id === expandedId}
-          onToggleExpand={() => setExpandedId(expandedId === option.id ? null : option.id)}
-          onSelect={onSelect ? () => onSelect(option) : undefined}
-        />
-      ))}
+            return (
+              <button
+                key={option.id}
+                onClick={() => {
+                  onSelect?.(option);
+                  setOpen(false);
+                }}
+                className={cn(
+                  'w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-muted/50 transition-colors border-b last:border-b-0',
+                  isSelected && 'bg-primary/5'
+                )}
+              >
+                {/* Icon */}
+                <div
+                  className="p-1.5 rounded-md shrink-0"
+                  style={{ backgroundColor: `${color}15`, color }}
+                >
+                  <Icon className="h-4 w-4" />
+                </div>
 
-      {/* Legend */}
-      <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground pt-2">
-        <div className="flex items-center gap-1">
-          <div className="w-3 h-3 rounded-full bg-green-500" />
-          <span>Score ≥ 7</span>
+                {/* Info */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-sm">{MODE_LABELS[option.mode]}</span>
+                    {option.recommended && (
+                      <Badge variant="secondary" className="bg-green-100 text-green-700 text-[10px] px-1.5 py-0">
+                        Recommandé
+                      </Badge>
+                    )}
+                    {option.dataSource === 'api' && (
+                      <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 text-[10px] px-1.5 py-0">
+                        Prix réel
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-3 mt-0.5 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      {formatDuration(option.totalDuration)}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Euro className="h-3 w-3" />
+                      {option.totalPrice}€
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Leaf className="h-3 w-3" />
+                      {option.totalCO2}kg
+                    </span>
+                  </div>
+                </div>
+
+                {/* Score + check */}
+                <div className="flex items-center gap-2 shrink-0">
+                  <div
+                    className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-white text-xs font-bold"
+                    style={{ backgroundColor: option.score >= 7 ? '#22C55E' : option.score >= 5 ? '#F59E0B' : '#EF4444' }}
+                  >
+                    <Star className="h-2.5 w-2.5" />
+                    {option.score.toFixed(1)}
+                  </div>
+                  {isSelected && (
+                    <Check className="h-4 w-4 text-primary" />
+                  )}
+                </div>
+              </button>
+            );
+          })}
         </div>
-        <div className="flex items-center gap-1">
-          <div className="w-3 h-3 rounded-full bg-amber-500" />
-          <span>Score 5-7</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <div className="w-3 h-3 rounded-full bg-red-500" />
-          <span>Score &lt; 5</span>
-        </div>
-      </div>
-    </div>
+
+        {/* Booking link for selected */}
+        {selected.bookingUrl && (
+          <div className="p-2 border-t">
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full gap-1 text-xs"
+              onClick={(e) => {
+                e.stopPropagation();
+                window.open(selected.bookingUrl, '_blank');
+              }}
+            >
+              <ExternalLink className="h-3 w-3" />
+              Réserver ({MODE_LABELS[selected.mode]})
+            </Button>
+          </div>
+        )}
+      </PopoverContent>
+    </Popover>
   );
 }

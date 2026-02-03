@@ -34,6 +34,7 @@ import { TripItemType } from '@/lib/types';
 
 interface ActivityCardProps {
   item: TripItem;
+  orderNumber?: number;
   isSelected?: boolean;
   isDragging?: boolean;
   onSelect?: () => void;
@@ -43,6 +44,8 @@ interface ActivityCardProps {
   onMoveDown?: () => void;
   canMoveUp?: boolean;
   canMoveDown?: boolean;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
   dragHandleProps?: React.HTMLAttributes<HTMLDivElement>;
 }
 
@@ -90,6 +93,7 @@ const TRANSIT_MODE_COLORS: Record<string, string> = {
 
 export function ActivityCard({
   item,
+  orderNumber,
   isSelected,
   isDragging,
   onSelect,
@@ -99,6 +103,8 @@ export function ActivityCard({
   onMoveDown,
   canMoveUp = true,
   canMoveDown = true,
+  onMouseEnter,
+  onMouseLeave,
   dragHandleProps,
 }: ActivityCardProps) {
   const Icon = TYPE_ICONS[item.type];
@@ -113,6 +119,8 @@ export function ActivityCard({
         isDragging && 'shadow-lg rotate-1 scale-105'
       )}
       onClick={onSelect}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
     >
       <div className="flex">
         {/* Drag handle */}
@@ -125,15 +133,26 @@ export function ActivityCard({
           </div>
         )}
 
-        {/* Time indicator */}
-        <div
-          className="w-1 self-stretch"
-          style={{ backgroundColor: color }}
-        />
+        {/* Order number indicator */}
+        {orderNumber !== undefined ? (
+          <div
+            className="w-8 self-stretch flex items-center justify-center shrink-0"
+            style={{ backgroundColor: `${color}15` }}
+          >
+            <span
+              className="w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold text-white"
+              style={{ backgroundColor: color }}
+            >
+              {orderNumber}
+            </span>
+          </div>
+        ) : (
+          <div className="w-1 self-stretch" style={{ backgroundColor: color }} />
+        )}
 
         {/* Activity image */}
         {item.imageUrl && item.type === 'activity' && (
-          <div className="w-24 h-full min-h-[100px] shrink-0 overflow-hidden">
+          <div className="w-20 self-stretch shrink-0 overflow-hidden">
             <img
               src={item.imageUrl}
               alt={item.title}
@@ -144,17 +163,17 @@ export function ActivityCard({
         )}
 
         {/* Content */}
-        <div className="flex-1 p-4">
-          <div className="flex items-start justify-between gap-4">
+        <div className="flex-1 p-3">
+          <div className="flex items-start justify-between gap-3">
             <div className="flex-1 min-w-0">
-              {/* Time */}
-              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-                <Clock className="h-3.5 w-3.5" />
+              {/* Time + type */}
+              <div className="flex items-center gap-2 text-xs text-muted-foreground mb-0.5">
+                <Clock className="h-3 w-3" />
                 <span>
                   {item.startTime} - {item.endTime}
                 </span>
                 <span
-                  className="px-2 py-0.5 rounded-full text-xs font-medium"
+                  className="px-1.5 py-0 rounded-full text-[10px] font-medium"
                   style={{ backgroundColor: `${color}20`, color }}
                 >
                   {TYPE_LABELS[item.type]}
@@ -162,7 +181,7 @@ export function ActivityCard({
               </div>
 
               {/* Title */}
-              <h4 className="font-semibold text-base mb-1 truncate">{item.title}</h4>
+              <h4 className="font-semibold text-sm mb-0.5 truncate">{item.title}</h4>
 
               {/* Description */}
               <p className="text-sm text-muted-foreground line-clamp-2">
