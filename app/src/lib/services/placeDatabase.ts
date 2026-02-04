@@ -6,6 +6,9 @@
  * - Sauvegarder de nouvelles données vérifiées
  * - Vérifier la fraîcheur des données (cache 30 jours)
  * - Mettre à jour les données existantes
+ *
+ * IMPORTANT: Si prisma est null (pas de DATABASE_URL, ex: Vercel),
+ * toutes les fonctions retournent des résultats vides sans erreur.
  */
 
 import { prisma } from '../db';
@@ -73,19 +76,25 @@ export async function isDataFresh(
   type: PlaceType,
   maxAgeDays: number = DEFAULT_CACHE_DAYS
 ): Promise<boolean> {
-  const cutoffDate = new Date();
-  cutoffDate.setDate(cutoffDate.getDate() - maxAgeDays);
+  if (!prisma) return false;
 
-  // Note: SQLite ne supporte pas mode: 'insensitive', on utilise contains
-  const freshCount = await prisma.place.count({
-    where: {
-      city: { contains: city },
-      type,
-      verifiedAt: { gte: cutoffDate },
-    },
-  });
+  try {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - maxAgeDays);
 
-  return freshCount >= 5; // On considère qu'on a assez de données si >= 5 lieux frais
+    const freshCount = await prisma.place.count({
+      where: {
+        city: { contains: city },
+        type,
+        verifiedAt: { gte: cutoffDate },
+      },
+    });
+
+    return freshCount >= 5;
+  } catch (error) {
+    console.warn('[PlaceDB] Erreur isDataFresh (cache désactivé):', error);
+    return false;
+  }
 }
 
 /**
@@ -94,34 +103,40 @@ export async function isDataFresh(
 export async function searchPlacesFromDB(
   options: PlaceSearchOptions
 ): Promise<PlaceData[]> {
-  const {
-    city,
-    type,
-    maxAgeDays = DEFAULT_CACHE_DAYS,
-    limit = 10,
-    minRating,
-  } = options;
+  if (!prisma) return [];
 
-  const cutoffDate = new Date();
-  cutoffDate.setDate(cutoffDate.getDate() - maxAgeDays);
-
-  // Note: SQLite ne supporte pas mode: 'insensitive', on utilise contains
-  const places = await prisma.place.findMany({
-    where: {
-      city: { contains: city },
+  try {
+    const {
+      city,
       type,
-      verifiedAt: { gte: cutoffDate },
-      ...(minRating !== undefined && { rating: { gte: minRating } }),
-    },
-    orderBy: [
-      { dataReliability: 'asc' }, // 'verified' avant 'estimated' avant 'generated'
-      { rating: 'desc' },
-      { verifiedAt: 'desc' },
-    ],
-    take: limit,
-  });
+      maxAgeDays = DEFAULT_CACHE_DAYS,
+      limit = 10,
+      minRating,
+    } = options;
 
-  return places.map(dbPlaceToPlaceData);
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - maxAgeDays);
+
+    const places = await prisma.place.findMany({
+      where: {
+        city: { contains: city },
+        type,
+        verifiedAt: { gte: cutoffDate },
+        ...(minRating !== undefined && { rating: { gte: minRating } }),
+      },
+      orderBy: [
+        { dataReliability: 'asc' },
+        { rating: 'desc' },
+        { verifiedAt: 'desc' },
+      ],
+      take: limit,
+    });
+
+    return places.map(dbPlaceToPlaceData);
+  } catch (error) {
+    console.warn('[PlaceDB] Erreur searchPlacesFromDB (cache désactivé):', error);
+    return [];
+  }
 }
 
 /**
@@ -131,13 +146,20 @@ export async function getPlaceByExternalId(
   externalId: string,
   source: DataSource
 ): Promise<PlaceData | null> {
-  const place = await prisma.place.findUnique({
-    where: {
-      externalId_source: { externalId, source },
-    },
-  });
+  if (!prisma) return null;
 
-  return place ? dbPlaceToPlaceData(place) : null;
+  try {
+    const place = await prisma.place.findUnique({
+      where: {
+        externalId_source: { externalId, source },
+      },
+    });
+
+    return place ? dbPlaceToPlaceData(place) : null;
+  } catch (error) {
+    console.warn('[PlaceDB] Erreur getPlaceByExternalId (cache désactivé):', error);
+    return null;
+  }
 }
 
 /**
@@ -148,6 +170,8 @@ export async function savePlacesToDB(
   places: PlaceData[],
   source: DataSource
 ): Promise<number> {
+  if (!prisma) return 0;
+
   let savedCount = 0;
 
   for (const place of places) {
@@ -180,7 +204,6 @@ export async function savePlacesToDB(
       };
 
       if (place.externalId) {
-        // Upsert si on a un ID externe
         await prisma.place.upsert({
           where: {
             externalId_source: {
@@ -195,7 +218,6 @@ export async function savePlacesToDB(
           },
         });
       } else {
-        // Créer si pas d'ID externe
         await prisma.place.create({
           data,
         });
@@ -207,7 +229,9 @@ export async function savePlacesToDB(
     }
   }
 
-  console.log(`[PlaceDB] ${savedCount}/${places.length} lieux sauvegardés pour ${places[0]?.city}`);
+  if (savedCount > 0) {
+    console.log(`[PlaceDB] ${savedCount}/${places.length} lieux sauvegardés pour ${places[0]?.city}`);
+  }
   return savedCount;
 }
 
@@ -219,22 +243,27 @@ export async function checkSearchCache(
   city: string,
   params: Record<string, unknown>
 ): Promise<string[] | null> {
-  const queryHash = hashQuery({ queryType, city, ...params });
+  if (!prisma) return null;
 
-  const cached = await prisma.searchCache.findUnique({
-    where: { queryHash },
-  });
+  try {
+    const queryHash = hashQuery({ queryType, city, ...params });
 
-  if (!cached) return null;
+    const cached = await prisma.searchCache.findUnique({
+      where: { queryHash },
+    });
 
-  // Vérifier si le cache est expiré
-  if (new Date() > cached.expiresAt) {
-    // Supprimer le cache expiré
-    await prisma.searchCache.delete({ where: { queryHash } });
+    if (!cached) return null;
+
+    if (new Date() > cached.expiresAt) {
+      await prisma.searchCache.delete({ where: { queryHash } });
+      return null;
+    }
+
+    return JSON.parse(cached.results);
+  } catch (error) {
+    console.warn('[PlaceDB] Erreur checkSearchCache (cache désactivé):', error);
     return null;
   }
-
-  return JSON.parse(cached.results);
 }
 
 /**
@@ -248,29 +277,35 @@ export async function saveSearchCache(
   source: DataSource,
   cacheDays: number = DEFAULT_CACHE_DAYS
 ): Promise<void> {
-  const queryHash = hashQuery({ queryType, city, ...params });
+  if (!prisma) return;
 
-  const expiresAt = new Date();
-  expiresAt.setDate(expiresAt.getDate() + cacheDays);
+  try {
+    const queryHash = hashQuery({ queryType, city, ...params });
 
-  await prisma.searchCache.upsert({
-    where: { queryHash },
-    update: {
-      results: JSON.stringify(placeIds),
-      resultCount: placeIds.length,
-      expiresAt,
-    },
-    create: {
-      queryHash,
-      queryType,
-      city,
-      parameters: JSON.stringify(params),
-      results: JSON.stringify(placeIds),
-      resultCount: placeIds.length,
-      source,
-      expiresAt,
-    },
-  });
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + cacheDays);
+
+    await prisma.searchCache.upsert({
+      where: { queryHash },
+      update: {
+        results: JSON.stringify(placeIds),
+        resultCount: placeIds.length,
+        expiresAt,
+      },
+      create: {
+        queryHash,
+        queryType,
+        city,
+        parameters: JSON.stringify(params),
+        results: JSON.stringify(placeIds),
+        resultCount: placeIds.length,
+        source,
+        expiresAt,
+      },
+    });
+  } catch (error) {
+    console.warn('[PlaceDB] Erreur saveSearchCache (cache désactivé):', error);
+  }
 }
 
 /**
@@ -282,74 +317,93 @@ export async function getDatabaseStats(): Promise<{
   bySource: Record<DataSource, number>;
   citiesCovered: number;
 }> {
-  const [totalPlaces, byTypeRaw, bySourceRaw, citiesRaw] = await Promise.all([
-    prisma.place.count(),
-    prisma.place.groupBy({
-      by: ['type'],
-      _count: true,
-    }),
-    prisma.place.groupBy({
-      by: ['source'],
-      _count: true,
-    }),
-    prisma.place.groupBy({
-      by: ['city'],
-      _count: true,
-    }),
-  ]);
-
-  const byType: Record<PlaceType, number> = {
-    restaurant: 0,
-    hotel: 0,
-    attraction: 0,
+  const emptyStats = {
+    totalPlaces: 0,
+    byType: { restaurant: 0, hotel: 0, attraction: 0 },
+    bySource: { serpapi: 0, foursquare: 0, osm: 0, claude: 0, tripadvisor: 0, gemini: 0 },
+    citiesCovered: 0,
   };
-  byTypeRaw.forEach((item) => {
-    byType[item.type as PlaceType] = item._count;
-  });
 
-  const bySource: Record<DataSource, number> = {
-    serpapi: 0,
-    foursquare: 0,
-    osm: 0,
-    claude: 0,
-    tripadvisor: 0,
-    gemini: 0,
-  };
-  bySourceRaw.forEach((item) => {
-    bySource[item.source as DataSource] = item._count;
-  });
+  if (!prisma) return emptyStats;
 
-  return {
-    totalPlaces,
-    byType,
-    bySource,
-    citiesCovered: citiesRaw.length,
-  };
+  try {
+    const [totalPlaces, byTypeRaw, bySourceRaw, citiesRaw] = await Promise.all([
+      prisma.place.count(),
+      prisma.place.groupBy({
+        by: ['type'],
+        _count: true,
+      }),
+      prisma.place.groupBy({
+        by: ['source'],
+        _count: true,
+      }),
+      prisma.place.groupBy({
+        by: ['city'],
+        _count: true,
+      }),
+    ]);
+
+    const byType: Record<PlaceType, number> = {
+      restaurant: 0,
+      hotel: 0,
+      attraction: 0,
+    };
+    byTypeRaw.forEach((item) => {
+      byType[item.type as PlaceType] = item._count;
+    });
+
+    const bySource: Record<DataSource, number> = {
+      serpapi: 0,
+      foursquare: 0,
+      osm: 0,
+      claude: 0,
+      tripadvisor: 0,
+      gemini: 0,
+    };
+    bySourceRaw.forEach((item) => {
+      bySource[item.source as DataSource] = item._count;
+    });
+
+    return {
+      totalPlaces,
+      byType,
+      bySource,
+      citiesCovered: citiesRaw.length,
+    };
+  } catch (error) {
+    console.warn('[PlaceDB] Erreur getDatabaseStats (cache désactivé):', error);
+    return emptyStats;
+  }
 }
 
 /**
  * Nettoie les données expirées
  */
 export async function cleanupExpiredData(maxAgeDays: number = 90): Promise<number> {
-  const cutoffDate = new Date();
-  cutoffDate.setDate(cutoffDate.getDate() - maxAgeDays);
+  if (!prisma) return 0;
 
-  // Supprimer les caches expirés
-  await prisma.searchCache.deleteMany({
-    where: {
-      expiresAt: { lt: new Date() },
-    },
-  });
+  try {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - maxAgeDays);
 
-  // Supprimer les lieux très anciens (> 90 jours par défaut)
-  const deleted = await prisma.place.deleteMany({
-    where: {
-      verifiedAt: { lt: cutoffDate },
-    },
-  });
+    await prisma.searchCache.deleteMany({
+      where: {
+        expiresAt: { lt: new Date() },
+      },
+    });
 
-  console.log(`[PlaceDB] Nettoyage: ${deleted.count} lieux supprimés (> ${maxAgeDays} jours)`);
-  return deleted.count;
+    const deleted = await prisma.place.deleteMany({
+      where: {
+        verifiedAt: { lt: cutoffDate },
+      },
+    });
+
+    console.log(`[PlaceDB] Nettoyage: ${deleted.count} lieux supprimés (> ${maxAgeDays} jours)`);
+    return deleted.count;
+  } catch (error) {
+    console.warn('[PlaceDB] Erreur cleanupExpiredData (cache désactivé):', error);
+    return 0;
+  }
 }
 
 // Helpers internes
