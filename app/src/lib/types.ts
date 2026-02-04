@@ -22,6 +22,38 @@ export type BudgetLevel = 'economic' | 'moderate' | 'comfort' | 'luxury';
 
 export type MealStrategy = 'self_catered' | 'restaurant' | 'mixed';
 
+// ============================================
+// Types pour le multi-villes / road trip
+// ============================================
+
+export interface CityStage {
+  city: string;
+  days: number;
+  coords?: { lat: number; lng: number };
+}
+
+// ============================================
+// Types pour les suggestions AI
+// ============================================
+
+export interface DurationSuggestion {
+  optimal: number;
+  minimum: number;
+  maximum: number;
+  reasoning: string;
+  highlights: Record<string, string>; // ex: { "3": "Essentiels", "5": "Confortable", "7": "Complet" }
+}
+
+export interface DestinationSuggestion {
+  title: string;
+  type: 'single_city' | 'multi_city' | 'road_trip';
+  stages: CityStage[];
+  highlights: string[];
+  description: string;
+  estimatedBudget: string;
+  bestSeason?: string;
+}
+
 export interface BudgetStrategy {
   accommodationType: 'airbnb_with_kitchen' | 'hotel' | 'hostel';
   accommodationBudgetPerNight: number;
@@ -71,6 +103,10 @@ export interface TripPreferences {
   dietary: DietaryType[];
   mealPreference?: 'auto' | 'mostly_cooking' | 'mostly_restaurants' | 'balanced'; // Préférence repas
   mustSee: string;
+
+  // Multi-villes / Road trip
+  tripMode?: 'precise' | 'inspired';
+  cityPlan?: CityStage[];
 
   // Étape 6 (optionnel) - Détails logistiques
   homeAddress?: string;

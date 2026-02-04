@@ -43,11 +43,13 @@ export function generateRandomPreferences(): Partial<TripPreferences> {
     : groupType === 'couple' ? 2
     : 1 + Math.floor(Math.random() * 6);
 
+  const durationDays = 3 + Math.floor(Math.random() * 12);
+
   return {
     origin,
     destination,
     startDate,
-    durationDays: 3 + Math.floor(Math.random() * 12),
+    durationDays,
     transport: 'optimal',
     carRental: Math.random() > 0.7,
     groupSize,
@@ -55,5 +57,7 @@ export function generateRandomPreferences(): Partial<TripPreferences> {
     budgetLevel: pick(BUDGET_LEVELS),
     activities: pickN(ACTIVITIES, 2, 4),
     dietary: ['none'],
+    tripMode: 'precise' as const,
+    cityPlan: [{ city: destination, days: durationDays }],
   };
 }

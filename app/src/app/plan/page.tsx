@@ -38,6 +38,8 @@ const DEFAULT_PREFERENCES: Partial<TripPreferences> = {
   budgetLevel: 'moderate',
   activities: [],
   dietary: ['none'],
+  tripMode: 'precise',
+  cityPlan: [{ city: '', days: 7 }],
 };
 
 export default function PlanPage() {
@@ -116,8 +118,13 @@ export default function PlanPage() {
 
   const canProceed = () => {
     switch (currentStep) {
-      case 1:
-        return preferences.origin && preferences.destination && preferences.startDate;
+      case 1: {
+        const hasOrigin = !!preferences.origin;
+        const hasDate = !!preferences.startDate;
+        const stages = preferences.cityPlan || [];
+        const hasDestination = stages.length > 0 && stages.every(s => s.city.trim().length > 0);
+        return hasOrigin && hasDate && hasDestination;
+      }
       case 2:
         return preferences.transport;
       case 3:
@@ -146,8 +153,27 @@ export default function PlanPage() {
   const handleGenerate = async () => {
     setIsGenerating(true);
     try {
+      // Sync cityPlan → destination + durationDays for pipeline compatibility
+      const finalPreferences = { ...preferences };
+      if (finalPreferences.cityPlan && finalPreferences.cityPlan.length > 0) {
+        finalPreferences.destination = finalPreferences.cityPlan[0].city;
+        finalPreferences.durationDays = finalPreferences.cityPlan.reduce((sum, s) => sum + s.days, 0);
+
+        // For multi-city trips, enrich mustSee with secondary cities for Claude
+        if (finalPreferences.cityPlan.length > 1) {
+          const secondaryCities = finalPreferences.cityPlan
+            .slice(1)
+            .map(s => `${s.city} (${s.days} jours)`)
+            .join(', ');
+          const multiCityNote = `Itinéraire multi-villes : inclure ${secondaryCities} dans le voyage`;
+          finalPreferences.mustSee = finalPreferences.mustSee
+            ? `${finalPreferences.mustSee}. ${multiCityNote}`
+            : multiCityNote;
+        }
+      }
+
       // 1. Générer le voyage avec l'IA (streaming pour éviter timeout 504)
-      const generatedTrip = await generateTripStream(preferences);
+      const generatedTrip = await generateTripStream(finalPreferences);
 
       // 2. Si l'utilisateur est connecté, sauvegarder en base de données
       if (user) {
@@ -157,7 +183,7 @@ export default function PlanPage() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               ...generatedTrip,
-              preferences,
+              preferences: finalPreferences,
             }),
           });
 
