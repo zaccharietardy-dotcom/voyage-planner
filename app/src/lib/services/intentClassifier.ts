@@ -94,12 +94,14 @@ TYPES D'INTENTIONS POSSIBLES:
 6. reorder_day: Réorganiser un jour ("change l'ordre", "inverse le matin et l'après-midi")
 7. change_restaurant: Changer un restaurant ("autre restaurant", "je veux manger italien plutôt")
 8. adjust_duration: Modifier la durée d'une activité ("plus de temps au Louvre", "moins de temps au musée")
-9. clarification: La demande n'est pas claire, besoin de plus d'informations
-10. general_question: Question générale qui ne nécessite pas de modification
+9. add_day: Ajouter un jour au voyage ("ajoute un jour", "insère une journée libre entre le jour 2 et 3", "rajoute un jour")
+10. clarification: La demande n'est pas claire, besoin de plus d'informations
+11. general_question: Question générale qui ne nécessite pas de modification
 
 RÈGLES:
 - Si l'utilisateur mentionne "matin" ou "me lever", c'est probablement shift_times
 - Si l'utilisateur mentionne un restaurant ou repas spécifique, c'est change_restaurant
+- Si l'utilisateur veut "ajouter un jour", "insérer une journée", "rajouter un jour", c'est add_day. Identifie insertAfterDay (le numéro du jour APRÈS lequel insérer)
 - Si la demande est vague, retourne clarification avec une question
 - Identifie les jours concernés (tous si non spécifié pour shift_times)
 - Identifie l'activité ciblée si applicable (match par nom)
@@ -119,7 +121,8 @@ Réponds UNIQUEMENT en JSON valide (pas de texte avant ou après):
     "direction": "later ou earlier ou null",
     "mealType": "breakfast/lunch/dinner ou null",
     "cuisineType": "type de cuisine ou null",
-    "duration": null
+    "duration": null,
+    "insertAfterDay": null
   },
   "explanation": "Explication courte de ce que l'utilisateur veut"
 }`;
@@ -175,7 +178,7 @@ export async function classifyIntent(
     const validTypes: ModificationIntentType[] = [
       'shift_times', 'swap_activity', 'add_activity', 'remove_activity',
       'extend_free_time', 'reorder_day', 'change_restaurant', 'adjust_duration',
-      'clarification', 'general_question'
+      'add_day', 'clarification', 'general_question'
     ];
 
     if (!validTypes.includes(parsed.type)) {
@@ -195,6 +198,7 @@ export async function classifyIntent(
         mealType: parsed.parameters?.mealType || undefined,
         cuisineType: parsed.parameters?.cuisineType || undefined,
         duration: parsed.parameters?.duration || undefined,
+        insertAfterDay: parsed.parameters?.insertAfterDay || undefined,
       },
       explanation: parsed.explanation || '',
     };

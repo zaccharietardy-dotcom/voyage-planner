@@ -318,6 +318,144 @@ export function addItem(
 }
 
 /**
+ * Insère un nouveau jour dans l'itinéraire après le jour indiqué.
+ * Renumérate tous les jours, recalcule les dates, et crée un jour avec repas par défaut.
+ *
+ * @param days - Les jours actuels
+ * @param afterDayNumber - Insérer APRÈS ce numéro de jour (ex: 2 = entre jour 2 et 3)
+ * @param startDate - Date de début du voyage
+ * @param accommodation - Hébergement (pour coordonnées et calcul de coût)
+ */
+export function insertDay(
+  days: TripDay[],
+  afterDayNumber: number,
+  startDate: Date,
+  accommodation?: { name?: string; latitude?: number; longitude?: number; pricePerNight?: number } | null
+): TripDay[] {
+  // Validation
+  if (days.length < 2) return days; // Voyage trop court
+  if (afterDayNumber < 1 || afterDayNumber > days.length) return days;
+
+  const newDays: TripDay[] = JSON.parse(JSON.stringify(days));
+
+  // Coordonnées par défaut (hôtel ou centre approximatif du trip)
+  const defaultLat = accommodation?.latitude || days[0]?.items?.[0]?.latitude || 0;
+  const defaultLng = accommodation?.longitude || days[0]?.items?.[0]?.longitude || 0;
+  const locationName = accommodation?.name || 'Centre-ville';
+
+  // Créer le nouveau jour avec repas et temps libre
+  const newDayNumber = afterDayNumber + 1; // Temporaire, sera recalculé
+  const newDay: TripDay = {
+    dayNumber: newDayNumber,
+    date: new Date(), // Sera recalculé
+    items: [
+      {
+        id: crypto.randomUUID(),
+        dayNumber: newDayNumber,
+        startTime: '09:00',
+        endTime: '09:45',
+        type: 'restaurant',
+        title: 'Petit-déjeuner',
+        description: 'Petit-déjeuner libre',
+        locationName,
+        latitude: defaultLat,
+        longitude: defaultLng,
+        orderIndex: 0,
+        estimatedCost: 10,
+        duration: 45,
+        dataReliability: 'generated',
+      },
+      {
+        id: crypto.randomUUID(),
+        dayNumber: newDayNumber,
+        startTime: '10:00',
+        endTime: '12:00',
+        type: 'activity',
+        title: 'Temps libre / Exploration',
+        description: 'Profitez de cette journée libre pour explorer à votre rythme',
+        locationName,
+        latitude: defaultLat,
+        longitude: defaultLng,
+        orderIndex: 1,
+        duration: 120,
+        dataReliability: 'generated',
+      },
+      {
+        id: crypto.randomUUID(),
+        dayNumber: newDayNumber,
+        startTime: '12:30',
+        endTime: '13:45',
+        type: 'restaurant',
+        title: 'Déjeuner',
+        description: 'Déjeuner libre',
+        locationName,
+        latitude: defaultLat,
+        longitude: defaultLng,
+        orderIndex: 2,
+        estimatedCost: 15,
+        duration: 75,
+        dataReliability: 'generated',
+      },
+      {
+        id: crypto.randomUUID(),
+        dayNumber: newDayNumber,
+        startTime: '15:00',
+        endTime: '17:00',
+        type: 'activity',
+        title: 'Temps libre',
+        description: 'Après-midi libre',
+        locationName,
+        latitude: defaultLat,
+        longitude: defaultLng,
+        orderIndex: 3,
+        duration: 120,
+        dataReliability: 'generated',
+      },
+      {
+        id: crypto.randomUUID(),
+        dayNumber: newDayNumber,
+        startTime: '19:30',
+        endTime: '21:00',
+        type: 'restaurant',
+        title: 'Dîner',
+        description: 'Dîner libre',
+        locationName,
+        latitude: defaultLat,
+        longitude: defaultLng,
+        orderIndex: 4,
+        estimatedCost: 25,
+        duration: 90,
+        dataReliability: 'generated',
+      },
+    ],
+    theme: 'Journée libre',
+    dayNarrative: 'Une journée libre pour explorer à votre rythme, découvrir des coins cachés ou simplement vous détendre.',
+  };
+
+  // Insérer le nouveau jour à la bonne position
+  newDays.splice(afterDayNumber, 0, newDay);
+
+  // Renuméroter tous les jours et recalculer les dates
+  const baseDate = new Date(startDate);
+  for (let i = 0; i < newDays.length; i++) {
+    newDays[i].dayNumber = i + 1;
+
+    // Recalculer la date
+    const dayDate = new Date(baseDate);
+    dayDate.setDate(baseDate.getDate() + i);
+    dayDate.setHours(12, 0, 0, 0);
+    newDays[i].date = dayDate;
+
+    // Mettre à jour dayNumber de tous les items
+    for (const item of newDays[i].items) {
+      item.dayNumber = i + 1;
+    }
+  }
+
+  return newDays;
+}
+
+/**
  * Génère une description pour un déplacement
  */
 export function generateMoveDescription(

@@ -23,6 +23,7 @@ import {
   GripVertical,
   Receipt,
   Copy,
+  CalendarPlus,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -44,7 +45,7 @@ import { PhotoGallery } from '@/components/photos/PhotoGallery';
 import { PhotoUploader } from '@/components/photos/PhotoUploader';
 import { PastTripView } from '@/components/trip/PastTripView';
 import { ProposedChange, createMoveActivityChange } from '@/lib/types/collaboration';
-import { recalculateTimes } from '@/lib/services/itineraryCalculator';
+import { recalculateTimes, insertDay } from '@/lib/services/itineraryCalculator';
 import { AddActivityModal } from '@/components/trip/AddActivityModal';
 import { CalendarView } from '@/components/trip/CalendarView';
 import { CommentsSection } from '@/components/trip/CommentsSection';
@@ -367,6 +368,70 @@ export default function TripPage() {
     const updatedTrip = { ...trip, days: updatedDays, updatedAt: new Date() };
     saveTrip(updatedTrip);
     toast.success('Activité supprimée');
+  };
+
+  const handleInsertDay = (afterDayNumber: number) => {
+    if (!trip) return;
+    if (trip.days.length < 2) {
+      toast.error('Le voyage est trop court pour ajouter un jour');
+      return;
+    }
+
+    const startDate = trip.preferences?.startDate
+      ? new Date(trip.preferences.startDate)
+      : trip.days[0]?.date ? new Date(trip.days[0].date) : new Date();
+
+    const newDays = insertDay(
+      trip.days,
+      afterDayNumber,
+      startDate,
+      trip.accommodation ? {
+        name: trip.accommodation.name,
+        latitude: trip.accommodation.latitude,
+        longitude: trip.accommodation.longitude,
+        pricePerNight: trip.accommodation.pricePerNight,
+      } : undefined
+    );
+
+    if (newDays.length === trip.days.length) {
+      toast.error("Impossible d'ajouter un jour ici");
+      return;
+    }
+
+    // Mettre à jour preferences.durationDays
+    const updatedPreferences = {
+      ...trip.preferences,
+      durationDays: newDays.length,
+    };
+
+    // Mettre à jour les coûts d'hébergement
+    let updatedCostBreakdown = trip.costBreakdown;
+    let updatedTotalCost = trip.totalEstimatedCost;
+
+    if (updatedCostBreakdown && trip.accommodation?.pricePerNight) {
+      const newNights = newDays.length - 1;
+      const newAccommodationCost = trip.accommodation.pricePerNight * newNights;
+      const costDiff = newAccommodationCost - (updatedCostBreakdown.accommodation || 0);
+      updatedCostBreakdown = {
+        ...updatedCostBreakdown,
+        accommodation: newAccommodationCost,
+      };
+      if (updatedTotalCost) {
+        updatedTotalCost = updatedTotalCost + costDiff;
+      }
+    }
+
+    const updatedTrip: Trip = {
+      ...trip,
+      days: newDays,
+      preferences: updatedPreferences,
+      ...(updatedCostBreakdown ? { costBreakdown: updatedCostBreakdown } : {}),
+      ...(updatedTotalCost !== undefined ? { totalEstimatedCost: updatedTotalCost } : {}),
+      updatedAt: new Date(),
+    };
+
+    saveTrip(updatedTrip);
+    toast.success(`Jour ${afterDayNumber + 1} ajouté ! Votre voyage passe à ${newDays.length} jours.`);
   };
 
   const handleAddNewItem = (newItem: TripItem) => {
@@ -798,9 +863,23 @@ export default function TripPage() {
                         </TabsTrigger>
                       ))}
                     </TabsList>
-                    {trip.days.map((day) => (
+                    {trip.days.map((day, idx) => (
                       <TabsContent key={day.dayNumber} value={day.dayNumber.toString()} className="mt-0">
                         <DayTimeline day={day} selectedItemId={selectedItemId} globalIndexOffset={getDayIndexOffset(day.dayNumber)} onSelectItem={handleSelectItem} onEditItem={handleEditItem} onDeleteItem={handleDeleteItem} onMoveItem={handleMoveItem} onHoverItem={setHoveredItemId} showMoveButtons={true} />
+                        {/* Bouton "Ajouter un jour après" (mobile) */}
+                        {canEdit && idx > 0 && idx < trip.days.length - 1 && (
+                          <div className="flex items-center justify-center py-3 mt-3">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-8 text-xs text-muted-foreground gap-1.5"
+                              onClick={() => handleInsertDay(day.dayNumber)}
+                            >
+                              <CalendarPlus className="h-3.5 w-3.5" />
+                              Ajouter un jour après le jour {day.dayNumber}
+                            </Button>
+                          </div>
+                        )}
                       </TabsContent>
                     ))}
                   </Tabs>
@@ -878,20 +957,37 @@ export default function TripPage() {
                   <DraggableTimeline days={trip.days} isEditable={canEdit} isOwner={isOwner} onDirectUpdate={isOwner ? handleDirectUpdate : undefined} onProposalCreate={!isOwner && canEdit ? handleProposalFromDrag : undefined} onEditItem={handleEditItem} onAddItem={(dayNumber) => { setAddActivityDay(dayNumber); setAddActivityDefaultTime(undefined); setShowAddActivityModal(true); }} />
                 ) : !editMode ? (
                   <div className="space-y-6">
-                    {trip.days.map((day) => (
-                      <DayTimeline
-                        key={day.dayNumber}
-                        day={day}
-                        selectedItemId={selectedItemId}
-                        globalIndexOffset={getDayIndexOffset(day.dayNumber)}
-                        onSelectItem={handleSelectItem}
-                        onEditItem={handleEditItem}
-                        onDeleteItem={handleDeleteItem}
-                        onMoveItem={handleMoveItem}
-                        onHoverItem={setHoveredItemId}
-                        onAddItem={(dayNumber) => { setAddActivityDay(dayNumber); setAddActivityDefaultTime(undefined); setShowAddActivityModal(true); }}
-                        showMoveButtons={true}
-                      />
+                    {trip.days.map((day, idx) => (
+                      <div key={day.dayNumber}>
+                        <DayTimeline
+                          day={day}
+                          selectedItemId={selectedItemId}
+                          globalIndexOffset={getDayIndexOffset(day.dayNumber)}
+                          onSelectItem={handleSelectItem}
+                          onEditItem={handleEditItem}
+                          onDeleteItem={handleDeleteItem}
+                          onMoveItem={handleMoveItem}
+                          onHoverItem={setHoveredItemId}
+                          onAddItem={(dayNumber) => { setAddActivityDay(dayNumber); setAddActivityDefaultTime(undefined); setShowAddActivityModal(true); }}
+                          showMoveButtons={true}
+                        />
+                        {/* Bouton "Ajouter un jour" entre les jours (sauf après le dernier) */}
+                        {canEdit && idx < trip.days.length - 1 && idx > 0 && (
+                          <div className="flex items-center justify-center py-2 group">
+                            <div className="flex-1 h-px bg-border group-hover:bg-primary/30 transition-colors" />
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 text-xs text-muted-foreground hover:text-primary gap-1.5 mx-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                              onClick={() => handleInsertDay(day.dayNumber)}
+                            >
+                              <CalendarPlus className="h-3.5 w-3.5" />
+                              Ajouter un jour
+                            </Button>
+                            <div className="flex-1 h-px bg-border group-hover:bg-primary/30 transition-colors" />
+                          </div>
+                        )}
+                      </div>
                     ))}
                   </div>
                 ) : null}

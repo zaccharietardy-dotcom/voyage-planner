@@ -64,9 +64,44 @@ export async function POST(
 
     // Mettre à jour le voyage avec les nouveaux jours
     const tripData = trip.data as Record<string, unknown>;
+    const preferences = tripData.preferences as Record<string, unknown> | undefined;
+    const oldDaysCount = Array.isArray(tripData.days) ? (tripData.days as unknown[]).length : 0;
+    const newDaysCount = newDays.length;
+    const daysChanged = newDaysCount !== oldDaysCount;
+
+    // Mettre à jour preferences.durationDays si le nombre de jours a changé
+    const updatedPreferences = daysChanged && preferences
+      ? { ...preferences, durationDays: newDaysCount }
+      : preferences;
+
+    // Recalculer les coûts d'hébergement si le nombre de jours a changé
+    let updatedCostBreakdown = tripData.costBreakdown as Record<string, number> | undefined;
+    let updatedTotalCost = tripData.totalEstimatedCost as number | undefined;
+
+    if (daysChanged && updatedCostBreakdown) {
+      const accommodation = tripData.accommodation as { pricePerNight?: number } | undefined;
+      const pricePerNight = accommodation?.pricePerNight || 0;
+      const oldAccommodationCost = updatedCostBreakdown.accommodation || 0;
+      const newNights = newDaysCount - 1; // Nuits = jours - 1
+      const newAccommodationCost = pricePerNight > 0 ? pricePerNight * newNights : oldAccommodationCost;
+      const costDiff = newAccommodationCost - oldAccommodationCost;
+
+      updatedCostBreakdown = {
+        ...updatedCostBreakdown,
+        accommodation: newAccommodationCost,
+      };
+
+      if (updatedTotalCost) {
+        updatedTotalCost = updatedTotalCost + costDiff;
+      }
+    }
+
     const updatedData = {
       ...tripData,
       days: newDays,
+      ...(updatedPreferences ? { preferences: updatedPreferences } : {}),
+      ...(updatedCostBreakdown ? { costBreakdown: updatedCostBreakdown } : {}),
+      ...(updatedTotalCost !== undefined ? { totalEstimatedCost: updatedTotalCost } : {}),
     };
 
     const { error: updateError } = await supabase
@@ -169,11 +204,17 @@ export async function DELETE(
       return NextResponse.json({ error: 'Accès refusé' }, { status: 403 });
     }
 
-    // Restaurer les données
+    // Restaurer les données (y compris durationDays)
     const tripData = trip.data as Record<string, unknown>;
+    const preferences = tripData.preferences as Record<string, unknown> | undefined;
+    const restoredPreferences = preferences
+      ? { ...preferences, durationDays: rollbackDays.length }
+      : preferences;
+
     const restoredData = {
       ...tripData,
       days: rollbackDays,
+      ...(restoredPreferences ? { preferences: restoredPreferences } : {}),
     };
 
     const { error: updateError } = await supabase

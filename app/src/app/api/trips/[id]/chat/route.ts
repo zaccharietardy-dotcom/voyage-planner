@@ -7,8 +7,8 @@
 
 import { createRouteHandlerClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
-import { handleChatMessage } from '@/lib/services/chatbotModifier';
-import { ChatMessage, TripDay } from '@/lib/types';
+import { handleChatMessage, TripModificationContext } from '@/lib/services/chatbotModifier';
+import { ChatMessage, TripDay, Accommodation, TripPreferences } from '@/lib/types';
 
 // POST - Traiter un message
 export async function POST(
@@ -63,7 +63,11 @@ export async function POST(
     }
 
     // Extraire les données du voyage
-    const tripData = trip.data as { preferences?: { destination?: string }; days?: TripDay[] };
+    const tripData = trip.data as {
+      preferences?: TripPreferences;
+      days?: TripDay[];
+      accommodation?: Accommodation;
+    };
     const destination = tripData?.preferences?.destination || 'destination inconnue';
     const days: TripDay[] = tripData?.days || [];
 
@@ -78,8 +82,23 @@ export async function POST(
       });
     }
 
+    // Construire le contexte complet pour les modifications avancées
+    const tripModContext: TripModificationContext = {
+      destination,
+      startDate: tripData?.preferences?.startDate
+        ? new Date(tripData.preferences.startDate)
+        : days[0]?.date ? new Date(days[0].date) : new Date(),
+      accommodation: tripData?.accommodation ? {
+        name: tripData.accommodation.name,
+        latitude: tripData.accommodation.latitude,
+        longitude: tripData.accommodation.longitude,
+        pricePerNight: tripData.accommodation.pricePerNight,
+      } : null,
+      durationDays: tripData?.preferences?.durationDays || days.length,
+    };
+
     // Traiter le message avec le chatbot
-    const response = await handleChatMessage(message, destination, days);
+    const response = await handleChatMessage(message, destination, days, tripModContext);
 
     // Sauvegarder le message utilisateur dans l'historique
     // Note: Using 'any' cast because trip_chat_messages table is created by migration

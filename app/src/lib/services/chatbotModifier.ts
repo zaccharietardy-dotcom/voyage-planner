@@ -22,10 +22,26 @@ import {
   checkTimeBoundaries,
 } from './constraintChecker';
 import { classifyIntent, buildTripContext, shouldUseSonnet } from './intentClassifier';
+import { insertDay } from './itineraryCalculator';
 
 // ============================================
 // Main Chat Handler
 // ============================================
+
+/**
+ * Contexte complet du voyage pour les modifications avancées
+ */
+export interface TripModificationContext {
+  destination: string;
+  startDate: Date;
+  accommodation?: {
+    name?: string;
+    latitude?: number;
+    longitude?: number;
+    pricePerNight?: number;
+  } | null;
+  durationDays: number;
+}
 
 /**
  * Traite un message utilisateur et retourne une réponse avec prévisualisation
@@ -33,7 +49,8 @@ import { classifyIntent, buildTripContext, shouldUseSonnet } from './intentClass
 export async function handleChatMessage(
   message: string,
   destination: string,
-  days: TripDay[]
+  days: TripDay[],
+  tripContext?: TripModificationContext
 ): Promise<ChatResponse> {
   // 1. Classifier l'intention
   const context = buildTripContext(destination, days);
@@ -65,7 +82,7 @@ export async function handleChatMessage(
   }
 
   // 3. Générer les modifications
-  const result = await generateModifications(intent, days);
+  const result = await generateModifications(intent, days, tripContext);
 
   if (!result.success) {
     return {
@@ -98,7 +115,8 @@ export async function handleChatMessage(
  */
 async function generateModifications(
   intent: ModificationIntent,
-  days: TripDay[]
+  days: TripDay[],
+  tripContext?: TripModificationContext
 ): Promise<ModificationResult> {
   const constraints = getConstraints(days);
   const rollbackData = JSON.parse(JSON.stringify(days)); // Deep clone pour undo
@@ -127,6 +145,9 @@ async function generateModifications(
 
     case 'change_restaurant':
       return changeRestaurant(intent, days, constraints, rollbackData);
+
+    case 'add_day':
+      return addDay(intent, days, rollbackData, tripContext);
 
     default:
       return {
@@ -908,6 +929,125 @@ function changeRestaurant(
     success: true,
     changes,
     explanation: `J'ai changé le restaurant: ${changes[0].description}`,
+    warnings,
+    newDays,
+    rollbackData,
+  };
+}
+
+// ============================================
+// Add Day
+// ============================================
+
+function addDay(
+  intent: ModificationIntent,
+  days: TripDay[],
+  rollbackData: TripDay[],
+  tripContext?: TripModificationContext
+): ModificationResult {
+  const warnings: string[] = [];
+
+  // Validation
+  if (days.length < 2) {
+    return {
+      success: false,
+      changes: [],
+      explanation: "Le voyage est trop court pour ajouter un jour. Il faut au moins 2 jours.",
+      warnings: [],
+      newDays: days,
+      rollbackData,
+    };
+  }
+
+  // Déterminer insertAfterDay
+  let afterDayNumber = intent.parameters.insertAfterDay;
+
+  // Si non spécifié, essayer dayNumbers
+  if (!afterDayNumber && intent.parameters.dayNumbers && intent.parameters.dayNumbers.length > 0) {
+    afterDayNumber = intent.parameters.dayNumbers[0];
+  }
+
+  // Si toujours pas spécifié, insérer au milieu
+  if (!afterDayNumber) {
+    afterDayNumber = Math.floor(days.length / 2);
+  }
+
+  // Validation des bornes: pas avant le jour 1, pas après le dernier jour
+  if (afterDayNumber < 1) {
+    return {
+      success: false,
+      changes: [],
+      explanation: "Impossible d'ajouter un jour avant le premier jour (il contient le vol aller et le check-in).",
+      warnings: [],
+      newDays: days,
+      rollbackData,
+    };
+  }
+
+  if (afterDayNumber > days.length) {
+    afterDayNumber = days.length; // Ajouter à la fin
+  }
+
+  // Calculer la date de début du voyage
+  const startDate = tripContext?.startDate
+    ? new Date(tripContext.startDate)
+    : days[0]?.date
+      ? new Date(days[0].date)
+      : new Date();
+
+  // Appeler insertDay
+  const newDays = insertDay(
+    days,
+    afterDayNumber,
+    startDate,
+    tripContext?.accommodation ? {
+      name: tripContext.accommodation.name,
+      latitude: tripContext.accommodation.latitude,
+      longitude: tripContext.accommodation.longitude,
+      pricePerNight: tripContext.accommodation.pricePerNight,
+    } : undefined
+  );
+
+  // Vérifier que l'insertion a fonctionné
+  if (newDays.length === days.length) {
+    return {
+      success: false,
+      changes: [],
+      explanation: "L'insertion du jour n'a pas pu être effectuée. Vérifiez les paramètres.",
+      warnings: [],
+      newDays: days,
+      rollbackData,
+    };
+  }
+
+  // Générer les changes
+  const changes: TripChange[] = [];
+
+  // Le nouveau jour
+  const newDay = newDays[afterDayNumber]; // Le jour inséré (0-indexed: afterDayNumber)
+  for (const item of newDay.items) {
+    changes.push({
+      type: 'add',
+      dayNumber: newDay.dayNumber,
+      newItem: item,
+      description: `Ajout "${item.title}" au nouveau jour ${newDay.dayNumber}`,
+    });
+  }
+
+  // Avertissements sur les jours décalés
+  if (afterDayNumber < days.length) {
+    warnings.push(`Les jours ${afterDayNumber + 1} à ${days.length} ont été renumérotés (+1).`);
+  }
+
+  // Info sur le coût
+  if (tripContext?.accommodation?.pricePerNight) {
+    warnings.push(`Coût supplémentaire estimé : +${tripContext.accommodation.pricePerNight}€ (1 nuit d'hébergement) + repas.`);
+  }
+
+  return {
+    success: true,
+    changes,
+    explanation: `J'ai ajouté une journée libre après le jour ${afterDayNumber}. Le nouveau jour ${afterDayNumber + 1} contient petit-déjeuner, temps libre, déjeuner et dîner. Votre voyage passe de ${days.length} à ${newDays.length} jours.`,
     warnings,
     newDays,
     rollbackData,

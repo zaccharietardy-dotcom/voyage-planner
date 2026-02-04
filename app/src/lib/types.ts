@@ -535,6 +535,7 @@ export type ModificationIntentType =
   | 'reorder_day'      // Réorganiser l'ordre des activités
   | 'change_restaurant'// Changer un restaurant
   | 'adjust_duration'  // Modifier la durée d'une activité
+  | 'add_day'          // Ajouter un jour au voyage
   | 'clarification'    // Besoin de clarification
   | 'general_question';// Question générale (pas de modification)
 
@@ -551,6 +552,7 @@ export interface ModificationIntent {
     mealType?: 'breakfast' | 'lunch' | 'dinner'; // Type de repas si restaurant
     cuisineType?: string;       // Type de cuisine demandée
     duration?: number;          // Durée souhaitée en minutes
+    insertAfterDay?: number;    // Insérer un jour APRÈS ce numéro de jour
   };
   explanation: string; // Explication de ce que l'utilisateur veut
 }
@@ -609,4 +611,5 @@ export const SUGGESTED_CHAT_PROMPTS = [
   { label: 'Ajouter une activité', prompt: 'Ajoute ' },
   { label: 'Supprimer une visite', prompt: 'Supprime ' },
   { label: 'Réorganiser la journée', prompt: 'Réorganise le jour ' },
+  { label: 'Ajouter un jour', prompt: 'Ajoute un jour libre entre le jour ' },
 ] as const;
