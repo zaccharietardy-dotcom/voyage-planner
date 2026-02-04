@@ -1,3 +1,5 @@
+import type { Attraction } from './services/attractions';
+
 // Types pour le formulaire de planification
 
 export type TransportType = 'optimal' | 'plane' | 'train' | 'car' | 'bus';
@@ -379,6 +381,8 @@ export interface Trip {
   accommodationOptions?: Accommodation[];
   // Parking
   parking?: ParkingOption;
+  // Pool d'activités rankées (pour swap et insert day intelligent)
+  attractionPool?: Attraction[];
   // Coûts
   totalEstimatedCost?: number;
   costBreakdown?: {

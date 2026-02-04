@@ -20,6 +20,7 @@ interface DayTimelineProps {
   onMoveItem?: (item: TripItem, direction: 'up' | 'down') => void;
   onHoverItem?: (itemId: string | null) => void;
   showMoveButtons?: boolean;
+  renderSwapButton?: (item: TripItem) => React.ReactNode;
 }
 
 /**
@@ -51,6 +52,7 @@ export function DayTimeline({
   onMoveItem,
   onHoverItem,
   showMoveButtons = false,
+  renderSwapButton,
 }: DayTimelineProps) {
   // Filter out 'transport' items (transfers) - they're replaced by ItineraryConnector links
   // Then sort by startTime with special handling for after-midnight times
@@ -115,6 +117,7 @@ export function DayTimeline({
                 canMoveDown={!isLast}
                 onMouseEnter={() => onHoverItem?.(item.id)}
                 onMouseLeave={() => onHoverItem?.(null)}
+                swapButton={renderSwapButton?.(item)}
               />
 
               {/* Connecteur d'itinéraire vers l'activité suivante */}

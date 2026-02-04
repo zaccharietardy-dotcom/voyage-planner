@@ -1,4 +1,5 @@
 import { TripDay, TripItem } from '@/lib/types';
+import type { Attraction } from './attractions';
 import { DEFAULT_TIME_CONFIG, TimeCalculationConfig } from '@/lib/types/collaboration';
 
 /**
@@ -326,11 +327,90 @@ export function addItem(
  * @param startDate - Date de début du voyage
  * @param accommodation - Hébergement (pour coordonnées et calcul de coût)
  */
+/**
+ * Score une attraction pour le classement
+ */
+function scoreAttraction(a: Attraction): number {
+  let score = 0;
+  score += (a.rating || 0) * 10;                          // Max 50
+  score += a.mustSee ? 30 : 0;                            // Must-see bonus
+  score += Math.min(15, (a.reviewCount || 0) / 350);      // Fame bonus
+  if (a.estimatedCost === 0) score += 5;                   // Free bonus
+  return score;
+}
+
+/**
+ * Convertit une Attraction en TripItem
+ */
+function attractionToTripItem(
+  attraction: Attraction,
+  dayNumber: number,
+  startTime: string,
+  endTime: string,
+  orderIndex: number
+): TripItem {
+  return {
+    id: crypto.randomUUID(),
+    dayNumber,
+    startTime,
+    endTime,
+    type: 'activity',
+    title: attraction.name,
+    description: attraction.description || attraction.tips || '',
+    locationName: attraction.name,
+    latitude: attraction.latitude,
+    longitude: attraction.longitude,
+    orderIndex,
+    estimatedCost: attraction.estimatedCost || 0,
+    duration: attraction.duration || 90,
+    rating: attraction.rating,
+    bookingUrl: attraction.bookingUrl,
+    googleMapsPlaceUrl: attraction.googleMapsUrl,
+    imageUrl: attraction.imageUrl,
+    dataReliability: attraction.dataReliability || 'verified',
+  };
+}
+
+/**
+ * Récupère les activités inutilisées du pool, triées par score
+ */
+export function getUnusedAttractions(
+  pool: Attraction[],
+  days: TripDay[]
+): Attraction[] {
+  // Collecter les noms d'activités déjà utilisées (normalisés)
+  const usedNames = new Set<string>();
+  const usedIds = new Set<string>();
+
+  for (const day of days) {
+    for (const item of day.items) {
+      if (item.type === 'activity') {
+        usedNames.add(item.title.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''));
+        if (item.id) usedIds.add(item.id);
+      }
+    }
+  }
+
+  // Filtrer et trier
+  return pool
+    .filter(a => {
+      if (usedIds.has(a.id)) return false;
+      const normalizedName = a.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      // Vérifier correspondance partielle (ex: "Louvre" match "Musée du Louvre")
+      for (const used of usedNames) {
+        if (normalizedName.includes(used) || used.includes(normalizedName)) return false;
+      }
+      return true;
+    })
+    .sort((a, b) => scoreAttraction(b) - scoreAttraction(a));
+}
+
 export function insertDay(
   days: TripDay[],
   afterDayNumber: number,
   startDate: Date,
-  accommodation?: { name?: string; latitude?: number; longitude?: number; pricePerNight?: number } | null
+  accommodation?: { name?: string; latitude?: number; longitude?: number; pricePerNight?: number } | null,
+  attractionPool?: Attraction[]
 ): TripDay[] {
   // Validation
   if (days.length < 2) return days; // Voyage trop court
@@ -343,93 +423,152 @@ export function insertDay(
   const defaultLng = accommodation?.longitude || days[0]?.items?.[0]?.longitude || 0;
   const locationName = accommodation?.name || 'Centre-ville';
 
-  // Créer le nouveau jour avec repas et temps libre
   const newDayNumber = afterDayNumber + 1; // Temporaire, sera recalculé
+
+  // Sélectionner les activités depuis le pool (si disponible)
+  const unusedAttractions = attractionPool
+    ? getUnusedAttractions(attractionPool, days)
+    : [];
+
+  // Construire les items du jour
+  const items: TripItem[] = [];
+  let orderIdx = 0;
+
+  // Petit-déjeuner
+  items.push({
+    id: crypto.randomUUID(),
+    dayNumber: newDayNumber,
+    startTime: '09:00',
+    endTime: '09:45',
+    type: 'restaurant',
+    title: 'Petit-déjeuner',
+    description: 'Petit-déjeuner libre',
+    locationName,
+    latitude: defaultLat,
+    longitude: defaultLng,
+    orderIndex: orderIdx++,
+    estimatedCost: 10,
+    duration: 45,
+    dataReliability: 'generated',
+  });
+
+  // Activité 1 (matin) — depuis le pool ou temps libre
+  if (unusedAttractions.length >= 1) {
+    const a = unusedAttractions[0];
+    const duration = Math.min(a.duration || 90, 120); // Max 2h
+    const endMinutes = 600 + duration; // 10:00 + duration
+    const endH = Math.floor(endMinutes / 60).toString().padStart(2, '0');
+    const endM = (endMinutes % 60).toString().padStart(2, '0');
+    items.push(attractionToTripItem(a, newDayNumber, '10:00', `${endH}:${endM}`, orderIdx++));
+  } else {
+    items.push({
+      id: crypto.randomUUID(),
+      dayNumber: newDayNumber,
+      startTime: '10:00',
+      endTime: '12:00',
+      type: 'activity',
+      title: 'Temps libre / Exploration',
+      description: 'Profitez de cette journée libre pour explorer à votre rythme',
+      locationName,
+      latitude: defaultLat,
+      longitude: defaultLng,
+      orderIndex: orderIdx++,
+      duration: 120,
+      dataReliability: 'generated',
+    });
+  }
+
+  // Déjeuner
+  items.push({
+    id: crypto.randomUUID(),
+    dayNumber: newDayNumber,
+    startTime: '12:30',
+    endTime: '13:45',
+    type: 'restaurant',
+    title: 'Déjeuner',
+    description: 'Déjeuner libre',
+    locationName,
+    latitude: defaultLat,
+    longitude: defaultLng,
+    orderIndex: orderIdx++,
+    estimatedCost: 15,
+    duration: 75,
+    dataReliability: 'generated',
+  });
+
+  // Activité 2 (début après-midi) — depuis le pool ou temps libre
+  if (unusedAttractions.length >= 2) {
+    const a = unusedAttractions[1];
+    const duration = Math.min(a.duration || 90, 120);
+    const endMinutes = 870 + duration; // 14:30 + duration
+    const endH = Math.floor(endMinutes / 60).toString().padStart(2, '0');
+    const endM = (endMinutes % 60).toString().padStart(2, '0');
+    items.push(attractionToTripItem(a, newDayNumber, '14:30', `${endH}:${endM}`, orderIdx++));
+  } else {
+    items.push({
+      id: crypto.randomUUID(),
+      dayNumber: newDayNumber,
+      startTime: '14:30',
+      endTime: '16:30',
+      type: 'activity',
+      title: 'Temps libre',
+      description: 'Après-midi libre',
+      locationName,
+      latitude: defaultLat,
+      longitude: defaultLng,
+      orderIndex: orderIdx++,
+      duration: 120,
+      dataReliability: 'generated',
+    });
+  }
+
+  // Activité 3 (fin après-midi) — seulement si pool assez fourni
+  if (unusedAttractions.length >= 3) {
+    const a = unusedAttractions[2];
+    const duration = Math.min(a.duration || 60, 90); // Max 1h30
+    const endMinutes = 1020 + duration; // 17:00 + duration
+    const endH = Math.floor(endMinutes / 60).toString().padStart(2, '0');
+    const endM = (endMinutes % 60).toString().padStart(2, '0');
+    items.push(attractionToTripItem(a, newDayNumber, '17:00', `${endH}:${endM}`, orderIdx++));
+  }
+
+  // Dîner
+  items.push({
+    id: crypto.randomUUID(),
+    dayNumber: newDayNumber,
+    startTime: '19:30',
+    endTime: '21:00',
+    type: 'restaurant',
+    title: 'Dîner',
+    description: 'Dîner libre',
+    locationName,
+    latitude: defaultLat,
+    longitude: defaultLng,
+    orderIndex: orderIdx++,
+    estimatedCost: 25,
+    duration: 90,
+    dataReliability: 'generated',
+  });
+
+  // Déterminer le thème du jour
+  const hasPoolActivities = unusedAttractions.length >= 1 && attractionPool;
+  const activityNames = unusedAttractions.slice(0, 3).map(a => a.name);
+  const theme = hasPoolActivities
+    ? activityNames.length <= 2
+      ? activityNames.join(' & ')
+      : `${activityNames[0]} & plus`
+    : 'Journée libre';
+
+  const narrative = hasPoolActivities
+    ? `Découvrez ${activityNames.join(', ')} — activités sélectionnées parmi les mieux notées de la destination.`
+    : 'Une journée libre pour explorer à votre rythme, découvrir des coins cachés ou simplement vous détendre.';
+
   const newDay: TripDay = {
     dayNumber: newDayNumber,
     date: new Date(), // Sera recalculé
-    items: [
-      {
-        id: crypto.randomUUID(),
-        dayNumber: newDayNumber,
-        startTime: '09:00',
-        endTime: '09:45',
-        type: 'restaurant',
-        title: 'Petit-déjeuner',
-        description: 'Petit-déjeuner libre',
-        locationName,
-        latitude: defaultLat,
-        longitude: defaultLng,
-        orderIndex: 0,
-        estimatedCost: 10,
-        duration: 45,
-        dataReliability: 'generated',
-      },
-      {
-        id: crypto.randomUUID(),
-        dayNumber: newDayNumber,
-        startTime: '10:00',
-        endTime: '12:00',
-        type: 'activity',
-        title: 'Temps libre / Exploration',
-        description: 'Profitez de cette journée libre pour explorer à votre rythme',
-        locationName,
-        latitude: defaultLat,
-        longitude: defaultLng,
-        orderIndex: 1,
-        duration: 120,
-        dataReliability: 'generated',
-      },
-      {
-        id: crypto.randomUUID(),
-        dayNumber: newDayNumber,
-        startTime: '12:30',
-        endTime: '13:45',
-        type: 'restaurant',
-        title: 'Déjeuner',
-        description: 'Déjeuner libre',
-        locationName,
-        latitude: defaultLat,
-        longitude: defaultLng,
-        orderIndex: 2,
-        estimatedCost: 15,
-        duration: 75,
-        dataReliability: 'generated',
-      },
-      {
-        id: crypto.randomUUID(),
-        dayNumber: newDayNumber,
-        startTime: '15:00',
-        endTime: '17:00',
-        type: 'activity',
-        title: 'Temps libre',
-        description: 'Après-midi libre',
-        locationName,
-        latitude: defaultLat,
-        longitude: defaultLng,
-        orderIndex: 3,
-        duration: 120,
-        dataReliability: 'generated',
-      },
-      {
-        id: crypto.randomUUID(),
-        dayNumber: newDayNumber,
-        startTime: '19:30',
-        endTime: '21:00',
-        type: 'restaurant',
-        title: 'Dîner',
-        description: 'Dîner libre',
-        locationName,
-        latitude: defaultLat,
-        longitude: defaultLng,
-        orderIndex: 4,
-        estimatedCost: 25,
-        duration: 90,
-        dataReliability: 'generated',
-      },
-    ],
-    theme: 'Journée libre',
-    dayNarrative: 'Une journée libre pour explorer à votre rythme, découvrir des coins cachés ou simplement vous détendre.',
+    items,
+    theme,
+    dayNarrative: narrative,
   };
 
   // Insérer le nouveau jour à la bonne position

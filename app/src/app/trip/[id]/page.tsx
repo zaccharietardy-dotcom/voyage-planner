@@ -45,7 +45,9 @@ import { PhotoGallery } from '@/components/photos/PhotoGallery';
 import { PhotoUploader } from '@/components/photos/PhotoUploader';
 import { PastTripView } from '@/components/trip/PastTripView';
 import { ProposedChange, createMoveActivityChange } from '@/lib/types/collaboration';
-import { recalculateTimes, insertDay } from '@/lib/services/itineraryCalculator';
+import { recalculateTimes, insertDay, getUnusedAttractions } from '@/lib/services/itineraryCalculator';
+import { Attraction } from '@/lib/services/attractions';
+import { ActivitySwapButton } from '@/components/trip/ActivitySwapButton';
 import { AddActivityModal } from '@/components/trip/AddActivityModal';
 import { CalendarView } from '@/components/trip/CalendarView';
 import { CommentsSection } from '@/components/trip/CommentsSection';
@@ -370,6 +372,55 @@ export default function TripPage() {
     toast.success('Activité supprimée');
   };
 
+  const handleSwapActivity = useCallback((oldItem: TripItem, newAttraction: Attraction) => {
+    if (!trip) return;
+
+    // Convertir Attraction → TripItem en conservant le créneau horaire
+    const newItem: TripItem = {
+      id: crypto.randomUUID(),
+      dayNumber: oldItem.dayNumber,
+      startTime: oldItem.startTime,
+      endTime: oldItem.endTime,
+      type: 'activity',
+      title: newAttraction.name,
+      description: newAttraction.description || '',
+      locationName: newAttraction.name,
+      latitude: newAttraction.latitude,
+      longitude: newAttraction.longitude,
+      orderIndex: oldItem.orderIndex,
+      estimatedCost: newAttraction.estimatedCost || 0,
+      duration: newAttraction.duration || oldItem.duration,
+      rating: newAttraction.rating,
+      bookingUrl: newAttraction.bookingUrl,
+      googleMapsPlaceUrl: newAttraction.googleMapsUrl,
+      imageUrl: newAttraction.imageUrl,
+      dataReliability: newAttraction.dataReliability || 'verified',
+    };
+
+    const updatedDays = trip.days.map((day) => ({
+      ...day,
+      items: day.items.map((item) => (item.id === oldItem.id ? newItem : item)),
+    }));
+
+    const updatedTrip: Trip = { ...trip, days: updatedDays, updatedAt: new Date() };
+    saveTrip(updatedTrip);
+    toast.success(`"${oldItem.title}" remplacé par "${newAttraction.name}"`);
+  }, [trip, saveTrip]);
+
+  // Render swap button pour les ActivityCards (si pool disponible)
+  const renderSwapButton = useCallback((item: TripItem) => {
+    if (!trip?.attractionPool || trip.attractionPool.length === 0 || !canEdit) return null;
+    if (item.type !== 'activity') return null;
+    return (
+      <ActivitySwapButton
+        item={item}
+        days={trip.days}
+        attractionPool={trip.attractionPool}
+        onSwap={handleSwapActivity}
+      />
+    );
+  }, [trip?.attractionPool, trip?.days, canEdit, handleSwapActivity]);
+
   const handleInsertDay = (afterDayNumber: number) => {
     if (!trip) return;
     if (trip.days.length < 2) {
@@ -390,7 +441,8 @@ export default function TripPage() {
         latitude: trip.accommodation.latitude,
         longitude: trip.accommodation.longitude,
         pricePerNight: trip.accommodation.pricePerNight,
-      } : undefined
+      } : undefined,
+      trip.attractionPool
     );
 
     if (newDays.length === trip.days.length) {
@@ -865,7 +917,7 @@ export default function TripPage() {
                     </TabsList>
                     {trip.days.map((day, idx) => (
                       <TabsContent key={day.dayNumber} value={day.dayNumber.toString()} className="mt-0">
-                        <DayTimeline day={day} selectedItemId={selectedItemId} globalIndexOffset={getDayIndexOffset(day.dayNumber)} onSelectItem={handleSelectItem} onEditItem={handleEditItem} onDeleteItem={handleDeleteItem} onMoveItem={handleMoveItem} onHoverItem={setHoveredItemId} showMoveButtons={true} />
+                        <DayTimeline day={day} selectedItemId={selectedItemId} globalIndexOffset={getDayIndexOffset(day.dayNumber)} onSelectItem={handleSelectItem} onEditItem={handleEditItem} onDeleteItem={handleDeleteItem} onMoveItem={handleMoveItem} onHoverItem={setHoveredItemId} showMoveButtons={true} renderSwapButton={renderSwapButton} />
                         {/* Bouton "Ajouter un jour après" (mobile) */}
                         {canEdit && idx > 0 && idx < trip.days.length - 1 && (
                           <div className="flex items-center justify-center py-3 mt-3">
@@ -970,6 +1022,7 @@ export default function TripPage() {
                           onHoverItem={setHoveredItemId}
                           onAddItem={(dayNumber) => { setAddActivityDay(dayNumber); setAddActivityDefaultTime(undefined); setShowAddActivityModal(true); }}
                           showMoveButtons={true}
+                          renderSwapButton={renderSwapButton}
                         />
                         {/* Bouton "Ajouter un jour" entre les jours (sauf après le dernier) */}
                         {canEdit && idx < trip.days.length - 1 && idx > 0 && (

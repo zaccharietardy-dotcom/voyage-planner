@@ -67,6 +67,7 @@ export async function POST(
       preferences?: TripPreferences;
       days?: TripDay[];
       accommodation?: Accommodation;
+      attractionPool?: unknown[];
     };
     const destination = tripData?.preferences?.destination || 'destination inconnue';
     const days: TripDay[] = tripData?.days || [];
@@ -95,6 +96,7 @@ export async function POST(
         pricePerNight: tripData.accommodation.pricePerNight,
       } : null,
       durationDays: tripData?.preferences?.durationDays || days.length,
+      attractionPool: (tripData?.attractionPool as import('@/lib/services/attractions').Attraction[]) || undefined,
     };
 
     // Traiter le message avec le chatbot

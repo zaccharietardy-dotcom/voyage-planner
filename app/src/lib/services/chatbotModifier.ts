@@ -23,6 +23,7 @@ import {
 } from './constraintChecker';
 import { classifyIntent, buildTripContext, shouldUseSonnet } from './intentClassifier';
 import { insertDay } from './itineraryCalculator';
+import type { Attraction } from './attractions';
 
 // ============================================
 // Main Chat Handler
@@ -41,6 +42,7 @@ export interface TripModificationContext {
     pricePerNight?: number;
   } | null;
   durationDays: number;
+  attractionPool?: Attraction[];
 }
 
 /**
@@ -995,7 +997,7 @@ function addDay(
       ? new Date(days[0].date)
       : new Date();
 
-  // Appeler insertDay
+  // Appeler insertDay (avec pool d'activités si disponible)
   const newDays = insertDay(
     days,
     afterDayNumber,
@@ -1005,7 +1007,8 @@ function addDay(
       latitude: tripContext.accommodation.latitude,
       longitude: tripContext.accommodation.longitude,
       pricePerNight: tripContext.accommodation.pricePerNight,
-    } : undefined
+    } : undefined,
+    tripContext?.attractionPool
   );
 
   // Vérifier que l'insertion a fonctionné

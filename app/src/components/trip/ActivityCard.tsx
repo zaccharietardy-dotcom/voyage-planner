@@ -47,6 +47,7 @@ interface ActivityCardProps {
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
   dragHandleProps?: React.HTMLAttributes<HTMLDivElement>;
+  swapButton?: React.ReactNode; // Bouton swap avec alternatives du pool
 }
 
 const TYPE_ICONS: Record<TripItemType, React.ComponentType<{ className?: string; style?: React.CSSProperties }>> = {
@@ -106,6 +107,7 @@ export function ActivityCard({
   onMouseEnter,
   onMouseLeave,
   dragHandleProps,
+  swapButton,
 }: ActivityCardProps) {
   const Icon = TYPE_ICONS[item.type];
   const color = TRIP_ITEM_COLORS[item.type];
@@ -308,8 +310,9 @@ export function ActivityCard({
             </div>
           )}
 
-          {/* Action buttons (edit/delete) */}
+          {/* Action buttons (swap/edit/delete) */}
           <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+            {swapButton && item.type === 'activity' && swapButton}
             {onEdit && (
               <Button
                 size="icon"

@@ -1354,6 +1354,8 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       tips: carbonData.tips,
     },
     travelTips: travelTipsData || undefined,
+    // Pool complet d'activités rankées (pour swap et insert day intelligent)
+    attractionPool: selectedAttractions,
   };
 
   // VALIDATION ET CORRECTION AUTOMATIQUE
