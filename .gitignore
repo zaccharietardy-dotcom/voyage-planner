@@ -40,3 +40,5 @@ voyage à debugger/
 *.debug.json
 .claude/
 voyage à debugger/
+.vercel
+.env*.local
