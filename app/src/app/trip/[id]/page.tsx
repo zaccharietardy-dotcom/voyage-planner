@@ -48,6 +48,7 @@ import { recalculateTimes } from '@/lib/services/itineraryCalculator';
 import { AddActivityModal } from '@/components/trip/AddActivityModal';
 import { CalendarView } from '@/components/trip/CalendarView';
 import { CommentsSection } from '@/components/trip/CommentsSection';
+import { ChatPanel, ChatButton } from '@/components/trip/ChatPanel';
 import { cn } from '@/lib/utils';
 import {
   DropdownMenu,
@@ -183,6 +184,7 @@ export default function TripPage() {
   const [addActivityDay, setAddActivityDay] = useState<number>(1);
   const [addActivityDefaultTime, setAddActivityDefaultTime] = useState<string | undefined>();
   const [planningView, setPlanningView] = useState<'timeline' | 'calendar'>('timeline');
+  const [showChatPanel, setShowChatPanel] = useState(false);
 
   const [isDesktop, setIsDesktop] = useState(false);
   useEffect(() => {
@@ -734,6 +736,11 @@ export default function TripPage() {
                   <Bug className="h-3.5 w-3.5" />
                 </Button>
               )}
+
+              {/* Chat Assistant Button */}
+              {canEdit && (
+                <ChatButton onClick={() => setShowChatPanel(true)} />
+              )}
             </div>
           </div>
 
@@ -970,6 +977,20 @@ export default function TripPage() {
 
       {trip && (
         <AddActivityModal isOpen={showAddActivityModal} onClose={() => setShowAddActivityModal(false)} onAdd={handleAddNewItem} dayNumber={addActivityDay} destination={trip.preferences?.destination || collaborativeTrip?.destination || ''} defaultStartTime={addActivityDefaultTime} />
+      )}
+
+      {/* Chat Panel for AI-powered itinerary modifications */}
+      {trip && canEdit && (
+        <ChatPanel
+          tripId={tripId}
+          trip={{
+            days: trip.days,
+            preferences: trip.preferences,
+          }}
+          isOpen={showChatPanel}
+          onClose={() => setShowChatPanel(false)}
+          onDaysUpdate={handleDirectUpdate}
+        />
       )}
     </div>
   );

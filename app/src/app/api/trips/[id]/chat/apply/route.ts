@@ -1,0 +1,206 @@
+/**
+ * Chat Apply API Endpoint
+ *
+ * POST /api/trips/[id]/chat/apply - Applique les modifications confirmées
+ */
+
+import { createRouteHandlerClient } from '@/lib/supabase/server';
+import { NextResponse } from 'next/server';
+import { TripDay, TripChange } from '@/lib/types';
+
+export async function POST(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id: tripId } = await params;
+    const supabase = await createRouteHandlerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
+    }
+
+    // Vérifier l'accès au voyage
+    const { data: trip, error: tripError } = await supabase
+      .from('trips')
+      .select('id, owner_id, data')
+      .eq('id', tripId)
+      .single();
+
+    if (tripError || !trip) {
+      return NextResponse.json({ error: 'Voyage non trouvé' }, { status: 404 });
+    }
+
+    // Vérifier que l'utilisateur est propriétaire ou éditeur
+    const isOwner = trip.owner_id === user.id;
+    let hasAccess = isOwner;
+
+    if (!isOwner) {
+      const { data: member } = await supabase
+        .from('trip_members')
+        .select('role')
+        .eq('trip_id', tripId)
+        .eq('user_id', user.id)
+        .single();
+
+      hasAccess = !!member && ['owner', 'editor'].includes(member.role);
+    }
+
+    if (!hasAccess) {
+      return NextResponse.json({ error: 'Accès refusé' }, { status: 403 });
+    }
+
+    // Parser le body
+    const body = await request.json();
+    const { newDays, changes } = body as {
+      newDays: TripDay[];
+      changes: TripChange[];
+    };
+
+    if (!newDays || !Array.isArray(newDays)) {
+      return NextResponse.json({ error: 'newDays requis' }, { status: 400 });
+    }
+
+    // Mettre à jour le voyage avec les nouveaux jours
+    const tripData = trip.data as Record<string, unknown>;
+    const updatedData = {
+      ...tripData,
+      days: newDays,
+    };
+
+    const { error: updateError } = await supabase
+      .from('trips')
+      .update({
+        data: updatedData as unknown as Record<string, never>,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', tripId);
+
+    if (updateError) {
+      console.error('[Chat Apply] Update error:', updateError);
+      return NextResponse.json(
+        { error: 'Erreur lors de la mise à jour du voyage' },
+        { status: 500 }
+      );
+    }
+
+    // Mettre à jour le dernier message assistant avec les changements appliqués
+    // Note: Using 'any' cast because trip_chat_messages table is created by migration
+    if (changes && changes.length > 0) {
+      const { data: lastMessage } = await (supabase as any)
+        .from('trip_chat_messages')
+        .select('id')
+        .eq('trip_id', tripId)
+        .eq('role', 'assistant')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (lastMessage) {
+        await (supabase as any)
+          .from('trip_chat_messages')
+          .update({ changes_applied: changes })
+          .eq('id', lastMessage.id);
+      }
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: 'Modifications appliquées avec succès',
+    });
+  } catch (error) {
+    console.error('[Chat Apply API] Error:', error);
+    return NextResponse.json(
+      { error: 'Erreur lors de l\'application des modifications' },
+      { status: 500 }
+    );
+  }
+}
+
+// DELETE - Annuler (restaurer l'état précédent)
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id: tripId } = await params;
+    const supabase = await createRouteHandlerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
+    }
+
+    // Parser le body avec les données de rollback
+    const body = await request.json();
+    const { rollbackDays } = body as { rollbackDays: TripDay[] };
+
+    if (!rollbackDays || !Array.isArray(rollbackDays)) {
+      return NextResponse.json({ error: 'rollbackDays requis' }, { status: 400 });
+    }
+
+    // Vérifier l'accès
+    const { data: trip, error: tripError } = await supabase
+      .from('trips')
+      .select('id, owner_id, data')
+      .eq('id', tripId)
+      .single();
+
+    if (tripError || !trip) {
+      return NextResponse.json({ error: 'Voyage non trouvé' }, { status: 404 });
+    }
+
+    const isOwner = trip.owner_id === user.id;
+    let hasAccess = isOwner;
+
+    if (!isOwner) {
+      const { data: member } = await supabase
+        .from('trip_members')
+        .select('role')
+        .eq('trip_id', tripId)
+        .eq('user_id', user.id)
+        .single();
+
+      hasAccess = !!member && ['owner', 'editor'].includes(member.role);
+    }
+
+    if (!hasAccess) {
+      return NextResponse.json({ error: 'Accès refusé' }, { status: 403 });
+    }
+
+    // Restaurer les données
+    const tripData = trip.data as Record<string, unknown>;
+    const restoredData = {
+      ...tripData,
+      days: rollbackDays,
+    };
+
+    const { error: updateError } = await supabase
+      .from('trips')
+      .update({
+        data: restoredData as unknown as Record<string, never>,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', tripId);
+
+    if (updateError) {
+      console.error('[Chat Apply] Rollback error:', updateError);
+      return NextResponse.json(
+        { error: 'Erreur lors de l\'annulation' },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: 'Modifications annulées',
+    });
+  } catch (error) {
+    console.error('[Chat Apply API] Error:', error);
+    return NextResponse.json(
+      { error: 'Erreur lors de l\'annulation' },
+      { status: 500 }
+    );
+  }
+}

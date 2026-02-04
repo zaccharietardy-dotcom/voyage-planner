@@ -1,0 +1,269 @@
+/**
+ * useChatbot Hook
+ *
+ * Gère l'état du chatbot de modification d'itinéraire:
+ * - Messages (historique)
+ * - Envoi de messages
+ * - Prévisualisation des changements
+ * - Application/annulation des modifications
+ * - Undo stack
+ */
+
+import { useState, useCallback, useEffect, useRef } from 'react';
+import { ChatMessage, ChatResponse, TripChange, TripDay } from '@/lib/types';
+
+const MAX_UNDO_DEPTH = 10;
+
+interface UseChatbotOptions {
+  tripId: string;
+  currentDays: TripDay[];
+  onDaysUpdate: (days: TripDay[]) => void;
+}
+
+interface UseChatbotReturn {
+  messages: ChatMessage[];
+  isProcessing: boolean;
+  error: string | null;
+  pendingChanges: TripChange[] | null;
+  previewDays: TripDay[] | null;
+  sendMessage: (text: string) => Promise<void>;
+  confirmChanges: () => Promise<void>;
+  rejectChanges: () => void;
+  undo: () => Promise<void>;
+  canUndo: boolean;
+  clearHistory: () => void;
+}
+
+export function useChatbot({
+  tripId,
+  currentDays,
+  onDaysUpdate,
+}: UseChatbotOptions): UseChatbotReturn {
+  // State
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [pendingChanges, setPendingChanges] = useState<TripChange[] | null>(null);
+  const [previewDays, setPreviewDays] = useState<TripDay[] | null>(null);
+  const [undoStack, setUndoStack] = useState<TripDay[][]>([]);
+
+  // Ref pour garder la version actuelle des jours (pour undo)
+  const currentDaysRef = useRef<TripDay[]>(currentDays);
+  useEffect(() => {
+    currentDaysRef.current = currentDays;
+  }, [currentDays]);
+
+  // Charger l'historique au montage
+  useEffect(() => {
+    loadHistory();
+  }, [tripId]);
+
+  const loadHistory = async () => {
+    try {
+      const response = await fetch(`/api/trips/${tripId}/chat`);
+      if (response.ok) {
+        const data = await response.json();
+        setMessages(data.messages || []);
+      }
+    } catch (err) {
+      console.error('[useChatbot] Error loading history:', err);
+    }
+  };
+
+  // Envoyer un message
+  const sendMessage = useCallback(async (text: string) => {
+    if (!text.trim() || isProcessing) return;
+
+    setIsProcessing(true);
+    setError(null);
+
+    // Ajoute le message utilisateur optimistiquement
+    const userMessage: ChatMessage = {
+      id: `temp-${Date.now()}`,
+      tripId,
+      role: 'user',
+      content: text,
+      createdAt: new Date(),
+    };
+    setMessages(prev => [...prev, userMessage]);
+
+    try {
+      const response = await fetch(`/api/trips/${tripId}/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Erreur lors de l\'envoi du message');
+      }
+
+      const data: ChatResponse = await response.json();
+
+      // Ajoute la réponse assistant
+      const assistantMessage: ChatMessage = {
+        id: `temp-${Date.now() + 1}`,
+        tripId,
+        role: 'assistant',
+        content: data.reply,
+        intent: data.intent,
+        createdAt: new Date(),
+      };
+      setMessages(prev => [...prev, assistantMessage]);
+
+      // Si des changements sont proposés, les stocker pour prévisualisation
+      if (data.requiresConfirmation && data.changes && data.previewDays) {
+        setPendingChanges(data.changes);
+        setPreviewDays(data.previewDays);
+      } else {
+        setPendingChanges(null);
+        setPreviewDays(null);
+      }
+    } catch (err) {
+      console.error('[useChatbot] Error:', err);
+      setError('Erreur lors de l\'envoi du message. Veuillez réessayer.');
+
+      // Ajoute un message d'erreur
+      const errorMessage: ChatMessage = {
+        id: `error-${Date.now()}`,
+        tripId,
+        role: 'assistant',
+        content: 'Désolé, une erreur est survenue. Veuillez réessayer.',
+        createdAt: new Date(),
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsProcessing(false);
+    }
+  }, [tripId, isProcessing]);
+
+  // Confirmer les changements
+  const confirmChanges = useCallback(async () => {
+    if (!pendingChanges || !previewDays) return;
+
+    setIsProcessing(true);
+    setError(null);
+
+    try {
+      // Sauvegarde l'état actuel pour undo
+      setUndoStack(prev => [...prev.slice(-MAX_UNDO_DEPTH + 1), currentDaysRef.current]);
+
+      // Applique les changements via l'API
+      const response = await fetch(`/api/trips/${tripId}/chat/apply`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          newDays: previewDays,
+          changes: pendingChanges,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Erreur lors de l\'application des changements');
+      }
+
+      // Met à jour l'état local
+      onDaysUpdate(previewDays);
+
+      // Ajoute un message de confirmation
+      const confirmMessage: ChatMessage = {
+        id: `confirm-${Date.now()}`,
+        tripId,
+        role: 'assistant',
+        content: '✅ Modifications appliquées ! Vous pouvez annuler pendant quelques secondes si besoin.',
+        changesApplied: pendingChanges,
+        createdAt: new Date(),
+      };
+      setMessages(prev => [...prev, confirmMessage]);
+
+      // Reset les états
+      setPendingChanges(null);
+      setPreviewDays(null);
+    } catch (err) {
+      console.error('[useChatbot] Error applying changes:', err);
+      setError('Erreur lors de l\'application des modifications.');
+    } finally {
+      setIsProcessing(false);
+    }
+  }, [tripId, pendingChanges, previewDays, onDaysUpdate]);
+
+  // Rejeter les changements
+  const rejectChanges = useCallback(() => {
+    setPendingChanges(null);
+    setPreviewDays(null);
+
+    // Ajoute un message d'annulation
+    const cancelMessage: ChatMessage = {
+      id: `cancel-${Date.now()}`,
+      tripId,
+      role: 'assistant',
+      content: 'Modifications annulées. Comment puis-je vous aider autrement ?',
+      createdAt: new Date(),
+    };
+    setMessages(prev => [...prev, cancelMessage]);
+  }, [tripId]);
+
+  // Undo - revenir à l'état précédent
+  const undo = useCallback(async () => {
+    if (undoStack.length === 0) return;
+
+    setIsProcessing(true);
+    setError(null);
+
+    try {
+      const previousDays = undoStack[undoStack.length - 1];
+
+      // Appelle l'API pour restaurer
+      const response = await fetch(`/api/trips/${tripId}/chat/apply`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rollbackDays: previousDays }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Erreur lors de l\'annulation');
+      }
+
+      // Met à jour l'état local
+      onDaysUpdate(previousDays);
+      setUndoStack(prev => prev.slice(0, -1));
+
+      // Ajoute un message de confirmation
+      const undoMessage: ChatMessage = {
+        id: `undo-${Date.now()}`,
+        tripId,
+        role: 'assistant',
+        content: '↩️ Modifications annulées. L\'itinéraire a été restauré.',
+        createdAt: new Date(),
+      };
+      setMessages(prev => [...prev, undoMessage]);
+    } catch (err) {
+      console.error('[useChatbot] Error undoing:', err);
+      setError('Erreur lors de l\'annulation.');
+    } finally {
+      setIsProcessing(false);
+    }
+  }, [tripId, undoStack, onDaysUpdate]);
+
+  // Effacer l'historique local
+  const clearHistory = useCallback(() => {
+    setMessages([]);
+    setPendingChanges(null);
+    setPreviewDays(null);
+    setError(null);
+  }, []);
+
+  return {
+    messages,
+    isProcessing,
+    error,
+    pendingChanges,
+    previewDays,
+    sendMessage,
+    confirmChanges,
+    rejectChanges,
+    undo,
+    canUndo: undoStack.length > 0,
+    clearHistory,
+  };
+}
