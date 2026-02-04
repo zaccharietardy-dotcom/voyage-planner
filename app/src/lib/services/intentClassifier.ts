@@ -8,7 +8,7 @@
  */
 
 import Anthropic from '@anthropic-ai/sdk';
-import { ModificationIntent, ModificationIntentType, TripDay, TripItem } from '../types';
+import { ModificationIntent, ModificationIntentType, TripDay } from '../types';
 
 // ============================================
 // Types
@@ -70,13 +70,12 @@ export function buildTripContext(destination: string, days: TripDay[]): TripCont
 function buildClassificationPrompt(message: string, context: TripContext): string {
   const daySummaries = context.days.map(d => {
     const items = d.items
-      .filter(i => i.type === 'activity' || i.type === 'restaurant')
-      .map(i => `  - ${i.startTime}: ${i.title} (${i.type})`)
+      .map(i => `  - ${i.startTime}-${i.endTime}: ${i.title} (${i.type})`)
       .join('\n');
     return `Jour ${d.dayNumber}${d.theme ? ` - ${d.theme}` : ''}${d.isDayTrip ? ' [Day Trip]' : ''}:\n${items || '  (pas d\'activités)'}`;
   }).join('\n\n');
 
-  return `Tu es un assistant de planification de voyage. Analyse la demande de l'utilisateur et identifie l'intention de modification.
+  return `Tu es un assistant de planification de voyage intelligent. Analyse la demande de l'utilisateur et identifie l'intention de modification.
 
 CONTEXTE DU VOYAGE:
 - Destination: ${context.destination}
@@ -98,13 +97,23 @@ TYPES D'INTENTIONS POSSIBLES:
 10. clarification: La demande n'est pas claire, besoin de plus d'informations
 11. general_question: Question générale qui ne nécessite pas de modification
 
-RÈGLES:
-- Si l'utilisateur mentionne "matin" ou "me lever", c'est probablement shift_times
-- Si l'utilisateur mentionne un restaurant ou repas spécifique, c'est change_restaurant
-- Si l'utilisateur veut "ajouter un jour", "insérer une journée", "rajouter un jour", c'est add_day. Identifie insertAfterDay (le numéro du jour APRÈS lequel insérer)
-- Si la demande est vague, retourne clarification avec une question
+RÈGLES IMPORTANTES:
+- Si l'utilisateur mentionne "matin", "me lever", "grasse matinée", "dormir plus" → c'est shift_times avec scope "morning_only". Ne PAS décaler toute la journée !
+- Si l'utilisateur dit explicitement "décale tout", "pousse tout", "recule tout" → c'est shift_times avec scope "full_day"
+- Par défaut pour shift_times, utilise scope "morning_only" sauf si l'utilisateur dit clairement de tout décaler
+- Si l'utilisateur mentionne un restaurant ou repas spécifique → change_restaurant
+- Si l'utilisateur veut "ajouter un jour", "insérer une journée", "rajouter un jour" → add_day. Identifie insertAfterDay
+- Si la demande est vague → clarification avec une question
 - Identifie les jours concernés (tous si non spécifié pour shift_times)
 - Identifie l'activité ciblée si applicable (match par nom)
+
+CONTRAINTES DE COHÉRENCE:
+- Les vols sont IMMUTABLES (horaires fixes, réservation)
+- Les check-in/check-out sont fixes
+- Les restaurants du midi doivent rester entre 11h30 et 14h00
+- Les restaurants du soir doivent rester entre 18h30 et 21h30
+- Ne jamais proposer de décaler un repas en dehors de ses créneaux normaux
+- Le timeShift par défaut est 60 min, mais si l'utilisateur dit "30 min" ou "2h" adapte en conséquence
 
 MESSAGE UTILISATEUR: "${message}"
 
@@ -119,6 +128,7 @@ Réponds UNIQUEMENT en JSON valide (pas de texte avant ou après):
     "newValue": "nouvelle valeur ou null",
     "timeShift": 60,
     "direction": "later ou earlier ou null",
+    "scope": "morning_only ou full_day ou null",
     "mealType": "breakfast/lunch/dinner ou null",
     "cuisineType": "type de cuisine ou null",
     "duration": null,
@@ -195,6 +205,7 @@ export async function classifyIntent(
         newValue: parsed.parameters?.newValue || undefined,
         timeShift: parsed.parameters?.timeShift || undefined,
         direction: parsed.parameters?.direction || undefined,
+        scope: parsed.parameters?.scope || undefined,
         mealType: parsed.parameters?.mealType || undefined,
         cuisineType: parsed.parameters?.cuisineType || undefined,
         duration: parsed.parameters?.duration || undefined,

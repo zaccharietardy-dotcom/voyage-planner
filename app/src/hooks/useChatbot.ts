@@ -6,6 +6,7 @@
  * - Envoi de messages
  * - Prévisualisation des changements
  * - Application/annulation des modifications
+ * - Demande de modification alternative
  * - Undo stack
  */
 
@@ -29,6 +30,7 @@ interface UseChatbotReturn {
   sendMessage: (text: string) => Promise<void>;
   confirmChanges: () => Promise<void>;
   rejectChanges: () => void;
+  requestModification: (feedback: string) => void;
   undo: () => Promise<void>;
   canUndo: boolean;
   clearHistory: () => void;
@@ -53,6 +55,9 @@ export function useChatbot({
     currentDaysRef.current = currentDays;
   }, [currentDays]);
 
+  // Ref pour la dernière demande (pour le contexte de modification)
+  const lastRequestRef = useRef<string>('');
+
   // Charger l'historique au montage
   useEffect(() => {
     loadHistory();
@@ -76,6 +81,9 @@ export function useChatbot({
 
     setIsProcessing(true);
     setError(null);
+
+    // Sauvegarde la dernière demande pour le contexte de modification
+    lastRequestRef.current = text;
 
     // Ajoute le message utilisateur optimistiquement
     const userMessage: ChatMessage = {
@@ -203,6 +211,21 @@ export function useChatbot({
     setMessages(prev => [...prev, cancelMessage]);
   }, [tripId]);
 
+  // Demander une modification alternative
+  const requestModification = useCallback((feedback: string) => {
+    // Rejette les changements en cours
+    setPendingChanges(null);
+    setPreviewDays(null);
+
+    // Construit un message contextuel avec la demande originale et le feedback
+    const contextMessage = lastRequestRef.current
+      ? `Ma demande initiale était : "${lastRequestRef.current}". Mais je préfère : ${feedback}`
+      : feedback;
+
+    // Envoie automatiquement le nouveau message
+    sendMessage(contextMessage);
+  }, [sendMessage]);
+
   // Undo - revenir à l'état précédent
   const undo = useCallback(async () => {
     if (undoStack.length === 0) return;
@@ -262,6 +285,7 @@ export function useChatbot({
     sendMessage,
     confirmChanges,
     rejectChanges,
+    requestModification,
     undo,
     canUndo: undoStack.length > 0,
     clearHistory,

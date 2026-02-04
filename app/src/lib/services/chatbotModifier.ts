@@ -173,7 +173,7 @@ function shiftTimes(
   constraints: ReturnType<typeof getConstraints>,
   rollbackData: TripDay[]
 ): ModificationResult {
-  const { timeShift = 60, direction = 'later', dayNumbers = [] } = intent.parameters;
+  const { timeShift = 60, direction = 'later', dayNumbers = [], scope = 'morning_only' } = intent.parameters;
   const shiftMinutes = direction === 'later' ? timeShift : -timeShift;
 
   const changes: TripChange[] = [];
@@ -192,32 +192,95 @@ function shiftTimes(
       .map(c => c.itemId)
   );
 
+  // Limite de midi pour le scope morning_only
+  const LUNCH_BOUNDARY = 720; // 12:00
+  const AFTERNOON_BOUNDARY = 840; // 14:00
+
   for (const day of newDays) {
     if (!targetDays.includes(day.dayNumber)) continue;
 
+    // Trouve le premier restaurant du midi (ancre temporelle)
+    const lunchItem = day.items.find(item =>
+      item.type === 'restaurant' &&
+      timeToMinutes(item.startTime) >= 690 && // 11:30
+      timeToMinutes(item.startTime) <= AFTERNOON_BOUNDARY
+    );
+    const lunchStart = lunchItem ? timeToMinutes(lunchItem.startTime) : LUNCH_BOUNDARY;
+
     for (const item of day.items) {
-      // Skip items contraints
+      // Skip items contraints (vols, check-in/out, parking)
       if (constrainedIds.has(item.id)) {
         continue;
       }
-
-      // Skip hotels, flights, etc.
       if (['flight', 'checkin', 'checkout', 'parking'].includes(item.type)) {
         continue;
       }
+
+      const itemStart = timeToMinutes(item.startTime);
+      const itemEnd = timeToMinutes(item.endTime);
+      const itemDuration = itemEnd - itemStart;
+
+      // Décide si cet item doit être décalé selon le scope
+      if (scope === 'morning_only') {
+        // Ne décaler que les items qui COMMENCENT avant le déjeuner
+        if (itemStart >= lunchStart) {
+          continue; // L'après-midi et le soir ne bougent pas
+        }
+
+        // Le restaurant du midi lui-même ne bouge pas
+        if (item.type === 'restaurant' && itemStart >= 690) {
+          continue;
+        }
+      } else if (scope === 'afternoon_only') {
+        // Ne décaler que les items de l'après-midi
+        if (itemStart < lunchStart) {
+          continue;
+        }
+      }
+      // scope === 'full_day' → tout décaler (comportement original)
 
       const oldStart = item.startTime;
       const oldEnd = item.endTime;
 
       // Calcule les nouveaux horaires
-      const newStartMinutes = timeToMinutes(item.startTime) + shiftMinutes;
-      const newEndMinutes = timeToMinutes(item.endTime) + shiftMinutes;
+      let newStartMinutes = itemStart + shiftMinutes;
+      let newEndMinutes = itemEnd + shiftMinutes;
 
-      // Vérifie les limites
+      // Vérifie les limites basses
       if (newStartMinutes < 360) { // 6:00
         warnings.push(`${item.title} ne peut pas commencer avant 6h00.`);
         continue;
       }
+
+      // Pour le scope morning_only : si l'item décalé chevauche le déjeuner
+      if (scope === 'morning_only' && newEndMinutes > lunchStart) {
+        // Option 1 : réduire la durée de l'activité pour qu'elle finisse avant le déjeuner
+        const reducedEnd = lunchStart - 15; // 15 min de marge avant le déjeuner
+        const reducedDuration = reducedEnd - newStartMinutes;
+
+        if (reducedDuration >= 30) {
+          // On raccourcit l'activité (min 30 min)
+          newEndMinutes = reducedEnd;
+          warnings.push(`${item.title} a été raccourcie pour ne pas chevaucher le déjeuner.`);
+        } else {
+          // Pas assez de temps → supprimer l'activité
+          const removeIndex = day.items.findIndex(i => i.id === item.id);
+          if (removeIndex !== -1) {
+            day.items.splice(removeIndex, 1);
+            changes.push({
+              type: 'remove',
+              dayNumber: day.dayNumber,
+              itemId: item.id,
+              before: { title: item.title, startTime: oldStart, endTime: oldEnd },
+              description: `${item.title} supprimée (plus de place avant le déjeuner)`,
+            });
+            warnings.push(`${item.title} a été supprimée car elle ne rentre plus dans le créneau matinal.`);
+          }
+          continue;
+        }
+      }
+
+      // Vérifie la limite haute
       if (newEndMinutes > 1380) { // 23:00
         warnings.push(`${item.title} ne peut pas finir après 23h00.`);
         continue;
@@ -225,6 +288,9 @@ function shiftTimes(
 
       item.startTime = minutesToTime(newStartMinutes);
       item.endTime = minutesToTime(newEndMinutes);
+      if (item.duration) {
+        item.duration = newEndMinutes - newStartMinutes;
+      }
 
       changes.push({
         type: 'update',
@@ -252,10 +318,16 @@ function shiftTimes(
     ? 'tous les jours'
     : `jour${targetDays.length > 1 ? 's' : ''} ${targetDays.join(', ')}`;
 
+  const scopeText = scope === 'morning_only'
+    ? ' du matin'
+    : scope === 'afternoon_only'
+      ? ' de l\'après-midi'
+      : '';
+
   return {
     success: true,
     changes,
-    explanation: `J'ai décalé ${changes.length} activité${changes.length > 1 ? 's' : ''} de ${Math.abs(shiftMinutes)} minutes ${direction === 'later' ? 'plus tard' : 'plus tôt'} (${daysText}).`,
+    explanation: `J'ai décalé ${changes.length} activité${changes.length > 1 ? 's' : ''}${scopeText} de ${Math.abs(shiftMinutes)} minutes ${direction === 'later' ? 'plus tard' : 'plus tôt'} (${daysText}). Le déjeuner et le reste de la journée restent inchangés.`,
     warnings,
     newDays,
     rollbackData,

@@ -11,7 +11,6 @@ import {
   SheetTitle,
   SheetDescription,
 } from '@/components/ui/sheet';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { useChatbot } from '@/hooks/useChatbot';
 import { TripDay, SUGGESTED_CHAT_PROMPTS } from '@/lib/types';
 import { ChatMessageBubble } from './ChatMessage';
@@ -48,6 +47,7 @@ export function ChatPanel({
     sendMessage,
     confirmChanges,
     rejectChanges,
+    requestModification,
     undo,
     canUndo,
   } = useChatbot({
@@ -59,9 +59,13 @@ export function ChatPanel({
   // Auto-scroll vers le bas quand il y a de nouveaux messages
   useEffect(() => {
     if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      setTimeout(() => {
+        if (scrollRef.current) {
+          scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        }
+      }, 50);
     }
-  }, [messages]);
+  }, [messages, isProcessing, error]);
 
   // Focus sur l'input quand le panneau s'ouvre
   useEffect(() => {
@@ -84,13 +88,17 @@ export function ChatPanel({
     inputRef.current?.focus();
   };
 
+  const handleModify = (feedback: string) => {
+    requestModification(feedback);
+  };
+
   const destination = trip.preferences?.destination || 'votre destination';
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <SheetContent
         side="right"
-        className="w-full sm:max-w-md flex flex-col p-0"
+        className="w-full sm:max-w-lg flex flex-col p-0 h-full"
         showCloseButton={false}
       >
         {/* Header */}
@@ -122,8 +130,11 @@ export function ChatPanel({
           </SheetDescription>
         </SheetHeader>
 
-        {/* Messages */}
-        <ScrollArea className="flex-1 px-4" ref={scrollRef}>
+        {/* Messages — div natif avec overflow pour un scroll fiable */}
+        <div
+          ref={scrollRef}
+          className="flex-1 min-h-0 overflow-y-auto px-4"
+        >
           <div className="py-4 space-y-4">
             {/* Message de bienvenue si pas de messages */}
             {messages.length === 0 && (
@@ -159,20 +170,23 @@ export function ChatPanel({
                 {error}
               </div>
             )}
-
-            {/* Prévisualisation des changements */}
-            {pendingChanges && previewDays && (
-              <ChangePreview
-                changes={pendingChanges}
-                currentDays={trip.days}
-                previewDays={previewDays}
-                onConfirm={confirmChanges}
-                onReject={rejectChanges}
-                isProcessing={isProcessing}
-              />
-            )}
           </div>
-        </ScrollArea>
+        </div>
+
+        {/* Prévisualisation des changements — FIXE entre messages et input */}
+        {pendingChanges && previewDays && (
+          <div className="border-t flex-shrink-0 max-h-[40%] overflow-y-auto px-4 py-3">
+            <ChangePreview
+              changes={pendingChanges}
+              currentDays={trip.days}
+              previewDays={previewDays}
+              onConfirm={confirmChanges}
+              onReject={rejectChanges}
+              onModify={handleModify}
+              isProcessing={isProcessing}
+            />
+          </div>
+        )}
 
         {/* Suggestions */}
         {messages.length === 0 && !pendingChanges && (

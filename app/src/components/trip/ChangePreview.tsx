@@ -1,7 +1,7 @@
 'use client';
 
-import React from 'react';
-import { Check, X, Plus, Minus, ArrowRight, Clock, Loader2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { Check, X, Plus, Minus, ArrowRight, Clock, Loader2, MessageSquarePlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { TripChange, TripDay } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -12,6 +12,7 @@ interface ChangePreviewProps {
   previewDays: TripDay[];
   onConfirm: () => void;
   onReject: () => void;
+  onModify?: (feedback: string) => void;
   isProcessing: boolean;
 }
 
@@ -21,10 +22,22 @@ export function ChangePreview({
   previewDays,
   onConfirm,
   onReject,
+  onModify,
   isProcessing,
 }: ChangePreviewProps) {
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [feedbackText, setFeedbackText] = useState('');
+
+  const handleModifySubmit = () => {
+    if (feedbackText.trim() && onModify) {
+      onModify(feedbackText.trim());
+      setFeedbackText('');
+      setShowFeedback(false);
+    }
+  };
+
   return (
-    <div className="bg-muted/50 rounded-lg p-4 space-y-4">
+    <div className="bg-muted/50 rounded-lg p-4 space-y-3">
       <div className="flex items-center justify-between">
         <h4 className="font-medium text-sm">Modifications proposées</h4>
         <span className="text-xs text-muted-foreground">
@@ -33,38 +46,91 @@ export function ChangePreview({
       </div>
 
       {/* Liste des changements */}
-      <div className="space-y-2">
+      <div className="space-y-2 max-h-[200px] overflow-y-auto">
         {changes.map((change, index) => (
           <ChangeItem key={index} change={change} />
         ))}
       </div>
 
+      {/* Zone de feedback pour modifier */}
+      {showFeedback && (
+        <div className="space-y-2 pt-2 border-t">
+          <p className="text-xs text-muted-foreground">
+            Décrivez ce que vous préférez :
+          </p>
+          <textarea
+            value={feedbackText}
+            onChange={(e) => setFeedbackText(e.target.value)}
+            placeholder="Ex: Je préfère décaler de 30 min seulement, garder le déjeuner à la même heure..."
+            className="w-full text-sm rounded-md border border-input bg-background px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-ring"
+            rows={2}
+            autoFocus
+          />
+          <div className="flex gap-2">
+            <Button
+              onClick={handleModifySubmit}
+              disabled={!feedbackText.trim() || isProcessing}
+              size="sm"
+              className="flex-1 gap-1"
+            >
+              {isProcessing ? (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              ) : (
+                <MessageSquarePlus className="h-3 w-3" />
+              )}
+              Envoyer
+            </Button>
+            <Button
+              onClick={() => { setShowFeedback(false); setFeedbackText(''); }}
+              variant="ghost"
+              size="sm"
+            >
+              Retour
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Boutons d'action */}
-      <div className="flex gap-2 pt-2">
-        <Button
-          onClick={onConfirm}
-          disabled={isProcessing}
-          size="sm"
-          className="flex-1 gap-2"
-        >
-          {isProcessing ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Check className="h-4 w-4" />
+      {!showFeedback && (
+        <div className="flex gap-2 pt-2">
+          <Button
+            onClick={onConfirm}
+            disabled={isProcessing}
+            size="sm"
+            className="flex-1 gap-1"
+          >
+            {isProcessing ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Check className="h-4 w-4" />
+            )}
+            Appliquer
+          </Button>
+          {onModify && (
+            <Button
+              onClick={() => setShowFeedback(true)}
+              disabled={isProcessing}
+              variant="outline"
+              size="sm"
+              className="flex-1 gap-1"
+            >
+              <MessageSquarePlus className="h-4 w-4" />
+              Modifier
+            </Button>
           )}
-          Appliquer
-        </Button>
-        <Button
-          onClick={onReject}
-          disabled={isProcessing}
-          variant="outline"
-          size="sm"
-          className="flex-1 gap-2"
-        >
-          <X className="h-4 w-4" />
-          Annuler
-        </Button>
-      </div>
+          <Button
+            onClick={onReject}
+            disabled={isProcessing}
+            variant="ghost"
+            size="sm"
+            className="gap-1"
+          >
+            <X className="h-4 w-4" />
+            Annuler
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
@@ -101,13 +167,13 @@ function ChangeItem({ change }: { change: TripChange }) {
   return (
     <div
       className={cn(
-        'flex items-start gap-3 p-3 rounded-md border text-sm',
+        'flex items-start gap-3 p-2.5 rounded-md border text-sm',
         getBgColor()
       )}
     >
       <div className="flex-shrink-0 mt-0.5">{getIcon()}</div>
       <div className="flex-1 min-w-0">
-        <p className="font-medium truncate">{change.description}</p>
+        <p className="font-medium text-xs leading-snug">{change.description}</p>
 
         {/* Détails du changement */}
         {change.type === 'update' && change.before && change.after && (
@@ -131,7 +197,7 @@ function ChangeItem({ change }: { change: TripChange }) {
         )}
 
         {/* Info du jour */}
-        <p className="text-xs text-muted-foreground mt-1">
+        <p className="text-xs text-muted-foreground mt-0.5">
           Jour {change.dayNumber}
         </p>
       </div>

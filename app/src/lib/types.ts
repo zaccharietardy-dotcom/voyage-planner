@@ -589,6 +589,7 @@ export interface ModificationIntent {
     newValue?: string;          // Nouvelle valeur/activité
     timeShift?: number;         // Décalage en minutes
     direction?: 'later' | 'earlier'; // Direction du décalage
+    scope?: 'morning_only' | 'afternoon_only' | 'full_day'; // Portée du décalage temporel
     mealType?: 'breakfast' | 'lunch' | 'dinner'; // Type de repas si restaurant
     cuisineType?: string;       // Type de cuisine demandée
     duration?: number;          // Durée souhaitée en minutes
