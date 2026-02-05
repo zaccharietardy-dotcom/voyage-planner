@@ -1,13 +1,26 @@
 'use client';
 
-import { TripDay, TripItem } from '@/lib/types';
+import { TripDay, TripItem, Accommodation } from '@/lib/types';
 import { ActivityCard } from './ActivityCard';
+import { HotelCarouselSelector } from './HotelCarouselSelector';
 import { ItineraryConnector } from './ItineraryConnector';
 import { Button } from '@/components/ui/button';
 import { Plus, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { shouldShowItinerary } from '@/lib/services/itineraryValidator';
+
+export interface HotelSelectorData {
+  hotels: Accommodation[];
+  selectedId: string;
+  onSelect: (hotelId: string) => void;
+  searchLinks?: {
+    googleHotels?: string;
+    booking?: string;
+    airbnb?: string;
+  };
+  nights: number;
+}
 
 interface DayTimelineProps {
   day: TripDay;
@@ -21,6 +34,7 @@ interface DayTimelineProps {
   onHoverItem?: (itemId: string | null) => void;
   showMoveButtons?: boolean;
   renderSwapButton?: (item: TripItem) => React.ReactNode;
+  hotelSelectorData?: HotelSelectorData;
 }
 
 /**
@@ -53,6 +67,7 @@ export function DayTimeline({
   onHoverItem,
   showMoveButtons = false,
   renderSwapButton,
+  hotelSelectorData,
 }: DayTimelineProps) {
   // Filter out 'transport' items (transfers) - they're replaced by ItineraryConnector links
   // Then sort by startTime with special handling for after-midnight times
@@ -119,6 +134,19 @@ export function DayTimeline({
                 onMouseLeave={() => onHoverItem?.(null)}
                 swapButton={renderSwapButton?.(item)}
               />
+
+              {/* Sélecteur d'hôtel inline après le check-in */}
+              {item.type === 'checkin' && hotelSelectorData && hotelSelectorData.hotels.length > 0 && (
+                <div className="mt-3 mb-1">
+                  <HotelCarouselSelector
+                    hotels={hotelSelectorData.hotels}
+                    selectedId={hotelSelectorData.selectedId}
+                    onSelect={hotelSelectorData.onSelect}
+                    searchLinks={hotelSelectorData.searchLinks}
+                    nights={hotelSelectorData.nights}
+                  />
+                </div>
+              )}
 
               {/* Connecteur d'itinéraire vers l'activité suivante */}
               {/* FILTRE: N'afficher que les itinéraires pratiques (pas check-in→vol, vol, etc.) */}

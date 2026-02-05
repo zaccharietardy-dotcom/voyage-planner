@@ -72,8 +72,8 @@ export function HotelCarouselSelector({
       {/* Header avec titre et navigation */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900">Choisir votre hôtel</h3>
-          <p className="text-sm text-gray-500">{visibleHotels.length} hôtels disponibles pour {nights} nuit{nights > 1 ? 's' : ''}</p>
+          <h3 className="text-lg font-semibold text-foreground">Choisir votre hôtel</h3>
+          <p className="text-sm text-muted-foreground">{visibleHotels.length} hôtels disponibles pour {nights} nuit{nights > 1 ? 's' : ''}</p>
         </div>
         <div className="flex items-center gap-2">
           {/* Liens de recherche externe */}
@@ -100,17 +100,17 @@ export function HotelCarouselSelector({
           {/* Boutons de navigation */}
           <button
             onClick={() => scroll('left')}
-            className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+            className="p-2 rounded-full hover:bg-muted transition-colors"
             aria-label="Défiler à gauche"
           >
-            <ChevronLeft className="h-5 w-5 text-gray-600" />
+            <ChevronLeft className="h-5 w-5 text-muted-foreground" />
           </button>
           <button
             onClick={() => scroll('right')}
-            className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+            className="p-2 rounded-full hover:bg-muted transition-colors"
             aria-label="Défiler à droite"
           >
-            <ChevronRight className="h-5 w-5 text-gray-600" />
+            <ChevronRight className="h-5 w-5 text-muted-foreground" />
           </button>
         </div>
       </div>
@@ -129,8 +129,8 @@ export function HotelCarouselSelector({
               rounded-xl border-2 transition-all cursor-pointer
               hover:shadow-lg
               ${selectedId === hotel.id
-                ? 'border-blue-500 ring-2 ring-blue-200 bg-blue-50/50'
-                : 'border-gray-200 hover:border-gray-300 bg-gray-50/80'}
+                ? 'border-primary ring-2 ring-primary/20 bg-primary/5'
+                : 'border-border hover:border-muted-foreground/30 bg-card'}
             `}
             onClick={() => onSelect(hotel.id)}
           >
@@ -151,10 +151,10 @@ export function HotelCarouselSelector({
             {/* Bouton archiver */}
             <button
               onClick={(e) => handleArchive(e, hotel.id)}
-              className="absolute top-2 right-2 p-1.5 rounded-full bg-white/90 hover:bg-white shadow-sm transition-colors z-10"
+              className="absolute top-2 right-2 p-1.5 rounded-full bg-card/90 hover:bg-card shadow-sm transition-colors z-10"
               title="Masquer cet hôtel"
             >
-              <Archive className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+              <Archive className="h-4 w-4 text-muted-foreground hover:text-foreground" />
             </button>
 
             {/* Image de l'hôtel (si disponible) */}
@@ -171,7 +171,7 @@ export function HotelCarouselSelector({
             {/* Contenu de la carte */}
             <div className="p-4">
               {/* Nom de l'hôtel */}
-              <h4 className="font-semibold text-gray-900 truncate pr-8" title={hotel.name}>
+              <h4 className="font-semibold text-foreground truncate pr-8" title={hotel.name}>
                 {hotel.name}
               </h4>
 
@@ -179,12 +179,12 @@ export function HotelCarouselSelector({
               <div className="flex items-center gap-2 mt-1.5">
                 {renderStars(hotel.stars)}
                 {hotel.rating && (
-                  <span className="text-sm text-gray-600 font-medium">
+                  <span className="text-sm text-muted-foreground font-medium">
                     {hotel.rating.toFixed(1)}/10
                   </span>
                 )}
                 {hotel.reviewCount && hotel.reviewCount > 0 && (
-                  <span className="text-xs text-gray-400">
+                  <span className="text-xs text-muted-foreground/60">
                     ({hotel.reviewCount} avis)
                   </span>
                 )}
@@ -192,8 +192,8 @@ export function HotelCarouselSelector({
 
               {/* Adresse */}
               <div className="flex items-start gap-1 mt-2">
-                <MapPin className="h-3.5 w-3.5 text-gray-400 flex-shrink-0 mt-0.5" />
-                <p className="text-xs text-gray-500 line-clamp-2">
+                <MapPin className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                <p className="text-xs text-muted-foreground line-clamp-2">
                   {hotel.address && hotel.address !== 'Adresse non disponible'
                     ? hotel.address
                     : 'Centre-ville'}
@@ -210,13 +210,13 @@ export function HotelCarouselSelector({
               )}
 
               {/* Prix */}
-              <div className="mt-3 pt-3 border-t border-gray-100 flex justify-between items-end">
+              <div className="mt-3 pt-3 border-t border-border flex justify-between items-end">
                 <div>
-                  <span className="text-xl font-bold text-gray-900">{formatPrice(hotel.pricePerNight)}</span>
-                  <span className="text-sm text-gray-500">/nuit</span>
+                  <span className="text-xl font-bold text-foreground">{formatPrice(hotel.pricePerNight)}</span>
+                  <span className="text-sm text-muted-foreground">/nuit</span>
                 </div>
                 <div className="text-right">
-                  <span className="text-sm font-semibold text-gray-700">
+                  <span className="text-sm font-semibold text-foreground/80">
                     Total: {formatPrice((hotel.pricePerNight || 0) * nights)}
                   </span>
                 </div>
@@ -229,7 +229,7 @@ export function HotelCarouselSelector({
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={(e) => e.stopPropagation()}
-                  className="mt-3 block w-full text-center bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors"
+                  className="mt-3 block w-full text-center bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-medium py-2 px-4 rounded-lg transition-colors"
                 >
                   Voir sur Booking
                 </a>
@@ -241,7 +241,7 @@ export function HotelCarouselSelector({
 
       {/* Compteur d'hôtels supplémentaires */}
       {visibleHotels.length > 10 && (
-        <p className="text-sm text-gray-500 text-center">
+        <p className="text-sm text-muted-foreground text-center">
           +{visibleHotels.length - 10} autres hôtels disponibles
         </p>
       )}
@@ -251,7 +251,7 @@ export function HotelCarouselSelector({
         <div className="text-center">
           <button
             onClick={() => setArchivedIds(new Set())}
-            className="text-sm text-gray-400 hover:text-gray-600 underline"
+            className="text-sm text-muted-foreground hover:text-foreground underline"
           >
             Afficher les {archivedIds.size} hôtel{archivedIds.size > 1 ? 's' : ''} masqué{archivedIds.size > 1 ? 's' : ''}
           </button>

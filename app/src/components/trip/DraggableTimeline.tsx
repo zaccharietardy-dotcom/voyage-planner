@@ -19,7 +19,9 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { useDroppable } from '@dnd-kit/core';
-import { TripDay, TripItem } from '@/lib/types';
+import { TripDay, TripItem, Accommodation } from '@/lib/types';
+import { HotelCarouselSelector } from './HotelCarouselSelector';
+import type { HotelSelectorData } from './DayTimeline';
 import { DraggableActivity, ActivityOverlay } from './DraggableActivity';
 import {
   recalculateTimes,
@@ -62,6 +64,7 @@ interface DraggableTimelineProps {
   onProposalCreate?: (change: ProposedChange) => void;
   onEditItem?: (item: TripItem) => void;
   onAddItem?: (dayNumber: number) => void;
+  hotelSelectorData?: HotelSelectorData;
 }
 
 // Day summary for reorder panel
@@ -275,6 +278,7 @@ export function DraggableTimeline({
   onProposalCreate,
   onEditItem,
   onAddItem,
+  hotelSelectorData,
 }: DraggableTimelineProps) {
   const [activeItem, setActiveItem] = useState<TripItem | null>(null);
   const [showReorder, setShowReorder] = useState(false);
@@ -439,17 +443,30 @@ export function DraggableTimeline({
             onAddItem={onAddItem ? () => onAddItem(day.dayNumber) : undefined}
           >
             {day.items.map((item, itemIndex) => (
-              <DraggableActivity
-                key={item.id}
-                item={item}
-                isEditable={isEditable}
-                isFirst={itemIndex === 0}
-                isLast={itemIndex === day.items.length - 1}
-                onMoveUp={() => handleMoveInDay(dayIndex, itemIndex, 'up')}
-                onMoveDown={() => handleMoveInDay(dayIndex, itemIndex, 'down')}
-                onDelete={() => handleDeleteItem(dayIndex, itemIndex, item.title)}
-                onEdit={onEditItem ? () => onEditItem(item) : undefined}
-              />
+              <div key={item.id}>
+                <DraggableActivity
+                  item={item}
+                  isEditable={isEditable}
+                  isFirst={itemIndex === 0}
+                  isLast={itemIndex === day.items.length - 1}
+                  onMoveUp={() => handleMoveInDay(dayIndex, itemIndex, 'up')}
+                  onMoveDown={() => handleMoveInDay(dayIndex, itemIndex, 'down')}
+                  onDelete={() => handleDeleteItem(dayIndex, itemIndex, item.title)}
+                  onEdit={onEditItem ? () => onEditItem(item) : undefined}
+                />
+                {/* Sélecteur d'hôtel inline après le check-in */}
+                {item.type === 'checkin' && hotelSelectorData && hotelSelectorData.hotels.length > 0 && (
+                  <div className="mt-3 mb-1">
+                    <HotelCarouselSelector
+                      hotels={hotelSelectorData.hotels}
+                      selectedId={hotelSelectorData.selectedId}
+                      onSelect={hotelSelectorData.onSelect}
+                      searchLinks={hotelSelectorData.searchLinks}
+                      nights={hotelSelectorData.nights}
+                    />
+                  </div>
+                )}
+              </div>
             ))}
           </DroppableDay>
         ))}

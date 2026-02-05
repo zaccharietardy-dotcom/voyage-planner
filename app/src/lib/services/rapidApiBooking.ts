@@ -200,13 +200,11 @@ async function getHotelBookingUrl(
     });
 
     if (!response.ok) {
-      // Si l'API échoue mais qu'on a le nom de l'hôtel, générer une URL directe
+      // Si l'API échoue mais qu'on a le nom de l'hôtel, utiliser une URL de recherche
       if (hotelName) {
-        const slug = generateHotelSlug(hotelName);
-        const cc = countryCode || 'nl';
-        const directUrl = `https://www.booking.com/hotel/${cc}/${slug}.html?checkin=${checkIn}&checkout=${checkOut}&group_adults=${adults}&no_rooms=1`;
-        console.log(`[RapidAPI Booking] ⚠️ API failed, using generated URL: ${directUrl}`);
-        return directUrl;
+        const searchUrl = `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(hotelName)}&checkin=${checkIn}&checkout=${checkOut}&group_adults=${adults}&no_rooms=1&lang=fr`;
+        console.log(`[RapidAPI Booking] ⚠️ API failed, using search URL for: ${hotelName}`);
+        return searchUrl;
       }
       return null;
     }
@@ -226,30 +224,40 @@ async function getHotelBookingUrl(
       || (hotelData.hotel && hotelData.hotel.url);
 
     if (slug) {
-      console.log(`[RapidAPI Booking] ✅ URL directe trouvée: ${String(slug).substring(0, 60)}...`);
-      const baseUrl = slug.startsWith('http') ? slug : `https://www.booking.com${slug}`;
-      const separator = baseUrl.includes('?') ? '&' : '?';
-      return `${baseUrl}${separator}checkin=${checkIn}&checkout=${checkOut}&group_adults=${adults}&no_rooms=1`;
+      const slugStr = String(slug);
+      // Valider que le slug est bien un lien/path Booking.com (pas Facebook, blog, etc.)
+      const isBookingSlug = slugStr.includes('booking.com')
+        || slugStr.startsWith('/hotel/')
+        || slugStr.startsWith('hotel/')
+        || (!slugStr.startsWith('http') && !slugStr.includes('facebook') && !slugStr.includes('blogspot') && !slugStr.includes('instagram') && !slugStr.includes('twitter'));
+
+      if (isBookingSlug) {
+        const baseUrl = slugStr.startsWith('http') ? slugStr : `https://www.booking.com${slugStr.startsWith('/') ? '' : '/'}${slugStr}`;
+        // Double-check: l'URL résolue doit être sur booking.com
+        if (baseUrl.includes('booking.com') && !baseUrl.includes('facebook') && !baseUrl.includes('blogspot')) {
+          console.log(`[RapidAPI Booking] ✅ URL directe trouvée: ${baseUrl.substring(0, 80)}...`);
+          const separator = baseUrl.includes('?') ? '&' : '?';
+          return `${baseUrl}${separator}checkin=${checkIn}&checkout=${checkOut}&group_adults=${adults}&no_rooms=1`;
+        }
+      }
+      console.log(`[RapidAPI Booking] ⚠️ Slug rejeté (pas booking.com): ${slugStr.substring(0, 80)}`);
     }
 
-    // Fallback: générer l'URL à partir du nom de l'hôtel
+    // Fallback: URL de recherche Booking.com avec le nom de l'hôtel (plus fiable que slug généré)
     if (hotelName) {
-      const generatedSlug = generateHotelSlug(hotelName);
       const cc = countryCode || (hotelData.country_code?.toLowerCase()) || 'nl';
-      const directUrl = `https://www.booking.com/hotel/${cc}/${generatedSlug}.html?checkin=${checkIn}&checkout=${checkOut}&group_adults=${adults}&no_rooms=1`;
-      console.log(`[RapidAPI Booking] ⚠️ No slug in API response, using generated: ${directUrl}`);
-      return directUrl;
+      const searchUrl = `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(hotelName)}&dest_type=city&checkin=${checkIn}&checkout=${checkOut}&group_adults=${adults}&no_rooms=1&lang=fr`;
+      console.log(`[RapidAPI Booking] ⚠️ No valid slug, using search URL for: ${hotelName}`);
+      return searchUrl;
     }
 
     console.log(`[RapidAPI Booking] ⚠️ Pas de slug trouvé pour hotel_id=${hotelId}, fallback recherche`);
     return null;
   } catch (error) {
     console.error(`[RapidAPI Booking] Erreur getHotelDetails ${hotelId}:`, error);
-    // Fallback en cas d'erreur
+    // Fallback en cas d'erreur: URL de recherche (plus fiable que slug généré)
     if (hotelName) {
-      const slug = generateHotelSlug(hotelName);
-      const cc = countryCode || 'nl';
-      return `https://www.booking.com/hotel/${cc}/${slug}.html?checkin=${checkIn}&checkout=${checkOut}&group_adults=${adults}&no_rooms=1`;
+      return `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(hotelName)}&checkin=${checkIn}&checkout=${checkOut}&group_adults=${adults}&no_rooms=1&lang=fr`;
     }
     return null;
   }
@@ -419,7 +427,9 @@ export async function searchHotelsWithBookingApi(
       const isValidBookingUrl = (url: string | null | undefined): boolean => {
         if (!url) return false;
         const urlLower = url.toLowerCase();
-        return urlLower.includes('booking.com') && !urlLower.includes('facebook') && !urlLower.includes('blogspot');
+        if (!urlLower.includes('booking.com')) return false;
+        const badDomains = ['facebook', 'blogspot', 'instagram', 'twitter', 'tripadvisor', 'airbnb'];
+        return !badDomains.some(domain => urlLower.includes(domain));
       };
 
       // Priorité: URL directe > URL API > fallback (toujours valide)

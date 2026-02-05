@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { Trip, TripItem, TripDay, Accommodation } from '@/lib/types';
-import { DayTimeline, CarbonFootprint, TransportOptions } from '@/components/trip';
+import { DayTimeline, CarbonFootprint, TransportOptions, BookingChecklist } from '@/components/trip';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -27,7 +27,6 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { HotelCarouselSelector } from '@/components/trip/HotelCarouselSelector';
 import { generateHotelSearchLinks } from '@/lib/services/linkGenerator';
 import { useAuth } from '@/components/auth';
 import { useRealtimeTrip } from '@/hooks/useRealtimeTrip';
@@ -701,26 +700,22 @@ export default function TripPage() {
     `~${trip.totalEstimatedCost}€ (~${Math.round((trip.totalEstimatedCost || 0) / (trip.preferences.groupSize || 1))}€/pers.)`,
   ].join(' · ');
 
-  const hotelSelectorElement = trip.accommodationOptions && trip.accommodationOptions.length > 0 ? (
-    <div className="my-6 bg-white rounded-xl p-4 shadow-sm border">
-      <HotelCarouselSelector
-        hotels={trip.accommodationOptions}
-        selectedId={selectedHotelId || trip.accommodation?.id || trip.accommodationOptions[0]?.id || ''}
-        onSelect={(hotelId) => {
-          setSelectedHotelId(hotelId);
-          const newHotel = trip.accommodationOptions?.find(h => h.id === hotelId);
-          if (newHotel) saveTrip(updateTripWithNewHotel(trip, newHotel));
-        }}
-        searchLinks={generateHotelSearchLinks(
-          trip.preferences.destination,
-          trip.days[0]?.date || trip.preferences.startDate,
-          trip.days[trip.days.length - 1]?.date || trip.preferences.startDate,
-          trip.preferences.groupSize || 1
-        )}
-        nights={trip.preferences.durationDays - 1}
-      />
-    </div>
-  ) : null;
+  const hotelSelectorData = trip.accommodationOptions && trip.accommodationOptions.length > 0 ? {
+    hotels: trip.accommodationOptions,
+    selectedId: selectedHotelId || trip.accommodation?.id || trip.accommodationOptions[0]?.id || '',
+    onSelect: (hotelId: string) => {
+      setSelectedHotelId(hotelId);
+      const newHotel = trip.accommodationOptions?.find(h => h.id === hotelId);
+      if (newHotel) saveTrip(updateTripWithNewHotel(trip, newHotel));
+    },
+    searchLinks: generateHotelSearchLinks(
+      trip.preferences.destination,
+      trip.days[0]?.date || trip.preferences.startDate,
+      trip.days[trip.days.length - 1]?.date || trip.preferences.startDate,
+      trip.preferences.groupSize || 1
+    ),
+    nights: trip.preferences.durationDays - 1,
+  } : undefined;
 
   return (
     <div className="min-h-screen bg-background">
@@ -879,17 +874,17 @@ export default function TripPage() {
         {/* Mobile layout */}
         <div className="lg:hidden">
           <Tabs value={mainTab} onValueChange={setMainTab}>
-            <TabsList className={`w-full grid mb-4 ${canEdit ? 'grid-cols-4' : user ? 'grid-cols-3' : 'grid-cols-2'}`}>
-              <TabsTrigger value="planning" className="text-xs">Planning</TabsTrigger>
-              <TabsTrigger value="carte" className="text-xs">Carte</TabsTrigger>
-              {user && <TabsTrigger value="photos" className="text-xs">Photos</TabsTrigger>}
-              {canEdit && <TabsTrigger value="infos" className="text-xs">Infos</TabsTrigger>}
+            <TabsList className="w-full flex mb-4 overflow-x-auto">
+              <TabsTrigger value="planning" className="text-xs flex-1">Planning</TabsTrigger>
+              <TabsTrigger value="reserver" className="text-xs flex-1">Reserver</TabsTrigger>
+              <TabsTrigger value="carte" className="text-xs flex-1">Carte</TabsTrigger>
+              {user && <TabsTrigger value="photos" className="text-xs flex-1">Photos</TabsTrigger>}
+              {canEdit && <TabsTrigger value="infos" className="text-xs flex-1">Infos</TabsTrigger>}
             </TabsList>
 
             <TabsContent value="planning">
               <div className="space-y-0">
-                {/* Hotel selector inline */}
-                {hotelSelectorElement}
+                {/* Hotel selector moved to check-in in timeline */}
 
                 {/* Planning view toggle */}
                 <div className="flex items-center justify-between mb-3">
@@ -905,7 +900,7 @@ export default function TripPage() {
                     <CalendarView days={trip.days} isEditable={canEdit} onUpdateItem={handleCalendarUpdateItem} onClickItem={handleEditItem} onClickSlot={canEdit ? handleCalendarSlotClick : undefined} />
                   </div>
                 ) : editMode && !isDesktop ? (
-                  <DraggableTimeline days={trip.days} isEditable={canEdit} isOwner={isOwner} onDirectUpdate={isOwner ? handleDirectUpdate : undefined} onProposalCreate={!isOwner && canEdit ? handleProposalFromDrag : undefined} onEditItem={handleEditItem} onAddItem={(dayNumber) => { setAddActivityDay(dayNumber); setAddActivityDefaultTime(undefined); setShowAddActivityModal(true); }} />
+                  <DraggableTimeline days={trip.days} isEditable={canEdit} isOwner={isOwner} onDirectUpdate={isOwner ? handleDirectUpdate : undefined} onProposalCreate={!isOwner && canEdit ? handleProposalFromDrag : undefined} onEditItem={handleEditItem} onAddItem={(dayNumber) => { setAddActivityDay(dayNumber); setAddActivityDefaultTime(undefined); setShowAddActivityModal(true); }} hotelSelectorData={hotelSelectorData} />
                 ) : !editMode ? (
                   <Tabs value={activeDay} onValueChange={setActiveDay}>
                     <TabsList className="w-full flex-wrap h-auto gap-1 bg-transparent p-0 mb-3">
@@ -917,7 +912,7 @@ export default function TripPage() {
                     </TabsList>
                     {trip.days.map((day, idx) => (
                       <TabsContent key={day.dayNumber} value={day.dayNumber.toString()} className="mt-0">
-                        <DayTimeline day={day} selectedItemId={selectedItemId} globalIndexOffset={getDayIndexOffset(day.dayNumber)} onSelectItem={handleSelectItem} onEditItem={handleEditItem} onDeleteItem={handleDeleteItem} onMoveItem={handleMoveItem} onHoverItem={setHoveredItemId} showMoveButtons={true} renderSwapButton={renderSwapButton} />
+                        <DayTimeline day={day} selectedItemId={selectedItemId} globalIndexOffset={getDayIndexOffset(day.dayNumber)} onSelectItem={handleSelectItem} onEditItem={handleEditItem} onDeleteItem={handleDeleteItem} onMoveItem={handleMoveItem} onHoverItem={setHoveredItemId} showMoveButtons={true} renderSwapButton={renderSwapButton} hotelSelectorData={hotelSelectorData} />
                         {/* Bouton "Ajouter un jour après" (mobile) */}
                         {canEdit && idx > 0 && idx < trip.days.length - 1 && (
                           <div className="flex items-center justify-center py-3 mt-3">
@@ -937,6 +932,10 @@ export default function TripPage() {
                   </Tabs>
                 ) : null}
               </div>
+            </TabsContent>
+
+            <TabsContent value="reserver">
+              <BookingChecklist trip={trip} />
             </TabsContent>
 
             <TabsContent value="carte">
@@ -979,13 +978,13 @@ export default function TripPage() {
             <Tabs value={mainTab} onValueChange={setMainTab}>
               <TabsList className="mb-3">
                 <TabsTrigger value="planning" className="text-sm">Planning</TabsTrigger>
+                <TabsTrigger value="reserver" className="text-sm">Reserver</TabsTrigger>
                 {user && <TabsTrigger value="photos" className="text-sm">Photos</TabsTrigger>}
                 {canEdit && <TabsTrigger value="infos" className="text-sm">Infos</TabsTrigger>}
               </TabsList>
 
               <TabsContent value="planning">
-                {/* Hotel selector inline in planning */}
-                {hotelSelectorElement}
+                {/* Hotel selector moved to check-in in timeline */}
 
                 {/* Planning view toggle */}
                 <div className="flex items-center justify-between mb-3">
@@ -1006,7 +1005,7 @@ export default function TripPage() {
                     <CalendarView days={trip.days} isEditable={canEdit} onUpdateItem={handleCalendarUpdateItem} onClickItem={handleEditItem} onClickSlot={canEdit ? handleCalendarSlotClick : undefined} />
                   </div>
                 ) : editMode && isDesktop ? (
-                  <DraggableTimeline days={trip.days} isEditable={canEdit} isOwner={isOwner} onDirectUpdate={isOwner ? handleDirectUpdate : undefined} onProposalCreate={!isOwner && canEdit ? handleProposalFromDrag : undefined} onEditItem={handleEditItem} onAddItem={(dayNumber) => { setAddActivityDay(dayNumber); setAddActivityDefaultTime(undefined); setShowAddActivityModal(true); }} />
+                  <DraggableTimeline days={trip.days} isEditable={canEdit} isOwner={isOwner} onDirectUpdate={isOwner ? handleDirectUpdate : undefined} onProposalCreate={!isOwner && canEdit ? handleProposalFromDrag : undefined} onEditItem={handleEditItem} onAddItem={(dayNumber) => { setAddActivityDay(dayNumber); setAddActivityDefaultTime(undefined); setShowAddActivityModal(true); }} hotelSelectorData={hotelSelectorData} />
                 ) : !editMode ? (
                   <div className="space-y-6">
                     {trip.days.map((day, idx) => (
@@ -1023,6 +1022,7 @@ export default function TripPage() {
                           onAddItem={(dayNumber) => { setAddActivityDay(dayNumber); setAddActivityDefaultTime(undefined); setShowAddActivityModal(true); }}
                           showMoveButtons={true}
                           renderSwapButton={renderSwapButton}
+                          hotelSelectorData={hotelSelectorData}
                         />
                         {/* Bouton "Ajouter un jour" entre les jours (sauf après le dernier) */}
                         {canEdit && idx < trip.days.length - 1 && idx > 0 && (
@@ -1044,6 +1044,10 @@ export default function TripPage() {
                     ))}
                   </div>
                 ) : null}
+              </TabsContent>
+
+              <TabsContent value="reserver">
+                <BookingChecklist trip={trip} />
               </TabsContent>
 
               <TabsContent value="infos">
