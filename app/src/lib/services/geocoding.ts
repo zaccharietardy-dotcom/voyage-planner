@@ -342,42 +342,88 @@ const CITY_CENTERS: Record<string, { lat: number; lng: number }> = {
   'montréal': { lat: 45.5017, lng: -73.5673 },
 };
 
+// In-memory cache for geocoding results (avoids duplicate Nominatim calls within a generation)
+const geocodeCache = new Map<string, Promise<GeocodingResult | null>>();
+
+// Nominatim throttle: max 1 concurrent request with 500ms spacing
+let nominatimLastCall = 0;
+const nominatimMutex = { locked: false, queue: [] as (() => void)[] };
+
+async function withNominatimThrottle<T>(fn: () => Promise<T>): Promise<T> {
+  // Wait for previous call to finish
+  if (nominatimMutex.locked) {
+    await new Promise<void>(resolve => nominatimMutex.queue.push(resolve));
+  }
+  nominatimMutex.locked = true;
+
+  // Ensure at least 500ms between calls
+  const now = Date.now();
+  const wait = Math.max(0, nominatimLastCall + 500 - now);
+  if (wait > 0) await new Promise(r => setTimeout(r, wait));
+
+  try {
+    const result = await fn();
+    return result;
+  } finally {
+    nominatimLastCall = Date.now();
+    nominatimMutex.locked = false;
+    const next = nominatimMutex.queue.shift();
+    if (next) next();
+  }
+}
+
+/** Clear geocode cache (call between generations) */
+export function clearGeocodeCache() {
+  geocodeCache.clear();
+}
+
 /**
- * Géocode une adresse en coordonnées
+ * Géocode une adresse en coordonnées (with in-memory cache + Nominatim throttle)
  */
 export async function geocodeAddress(address: string): Promise<GeocodingResult | null> {
-  try {
-    const encoded = encodeURIComponent(address);
-    const response = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encoded}&limit=1`,
-      {
-        headers: {
-          'User-Agent': 'VoyageApp/1.0',
-        },
+  const cacheKey = address.toLowerCase().trim();
+
+  // Return cached promise if available (deduplicates concurrent calls for same address)
+  const cached = geocodeCache.get(cacheKey);
+  if (cached) return cached;
+
+  const promise = withNominatimThrottle(async () => {
+    try {
+      const encoded = encodeURIComponent(address);
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encoded}&limit=1`,
+        {
+          headers: {
+            'User-Agent': 'VoyageApp/1.0',
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Geocoding request failed');
       }
-    );
 
-    if (!response.ok) {
-      throw new Error('Geocoding request failed');
-    }
+      const data = await response.json();
 
-    const data = await response.json();
+      if (data.length === 0) {
+        return null;
+      }
 
-    if (data.length === 0) {
+      const result = data[0];
+      return {
+        lat: parseFloat(result.lat),
+        lng: parseFloat(result.lon),
+        displayName: result.display_name,
+        type: result.type,
+      };
+    } catch (error) {
+      console.error('Geocoding error:', error);
       return null;
     }
+  });
 
-    const result = data[0];
-    return {
-      lat: parseFloat(result.lat),
-      lng: parseFloat(result.lon),
-      displayName: result.display_name,
-      type: result.type,
-    };
-  } catch (error) {
-    console.error('Geocoding error:', error);
-    return null;
-  }
+  geocodeCache.set(cacheKey, promise);
+  return promise;
 }
 
 /**

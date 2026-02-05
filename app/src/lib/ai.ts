@@ -19,8 +19,9 @@ import {
   TransportOptionSummary,
   Accommodation,
   BudgetStrategy,
+  Restaurant,
 } from './types';
-import { findNearbyAirports, findNearbyAirportsAsync, calculateDistance, AirportInfo, getCityCenterCoords, getCityCenterCoordsAsync, geocodeAddress } from './services/geocoding';
+import { findNearbyAirports, findNearbyAirportsAsync, calculateDistance, AirportInfo, getCityCenterCoords, getCityCenterCoordsAsync, geocodeAddress, clearGeocodeCache } from './services/geocoding';
 import { searchFlights, formatFlightDuration } from './services/flights';
 import { selectBestParking, calculateParkingTime } from './services/parking';
 import { searchRestaurants, selectBestRestaurant, estimateMealPrice } from './services/restaurants';
@@ -65,6 +66,7 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
 
   // RESET: Nettoyer les trackers de la session précédente pour éviter les doublons inter-voyages
   usedRestaurantIds.clear();
+  clearGeocodeCache();
 
   // 1. Trouver les coordonnées et aéroports (avec fallback Nominatim async)
   console.log(`[PERF ${elapsed()}] Start geocoding`);
@@ -170,19 +172,33 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
     preferences.durationDays,
   );
 
-  // Attendre les 5 en parallèle (inclut stratégie budget)
-  const [transportOptions, attractionPoolRaw, accommodationOptions, travelTipsData, budgetStrategy] = await Promise.all([
+  // Lancer must-see + Viator en parallèle (ne dépendent que de destCoords + preferences)
+  const mustSeePromise = preferences.mustSee?.trim()
+    ? searchMustSeeAttractions(preferences.mustSee, preferences.destination, destCoords)
+    : Promise.resolve([] as Attraction[]);
+
+  const viatorMixPromise = isViatorConfigured()
+    ? searchViatorActivities(preferences.destination, destCoords, {
+        types: preferences.activities,
+        limit: 20,
+      }).catch((error: unknown) => { console.warn('[AI] Viator mixing error (non bloquant):', error); return [] as Attraction[]; })
+    : Promise.resolve([] as Attraction[]);
+
+  // Attendre les 7 en parallèle (inclut stratégie budget + must-see + Viator)
+  const [transportOptions, attractionPoolRaw, accommodationOptions, travelTipsData, budgetStrategy, mustSeeAttractions, viatorActivitiesRaw] = await Promise.all([
     transportPromise,
     attractionsPromise,
     hotelsPromise,
     travelTipsPromise,
     budgetStrategyPromise,
+    mustSeePromise,
+    viatorMixPromise,
   ]);
   console.timeEnd('[AI] Transport');
   console.timeEnd('[AI] Attractions pool');
   console.timeEnd('[AI] Hotels');
   console.timeEnd('[AI] TravelTips');
-  console.log(`[PERF ${elapsed()}] Parallel batch done`);
+  console.log(`[PERF ${elapsed()}] Parallel batch done (7 promises)`);
   console.timeEnd('[AI] BudgetStrategy');
   console.log(`[AI] Stratégie budget: ${budgetStrategy.accommodationType}, courses=${budgetStrategy.groceryShoppingNeeded}, activités=${budgetStrategy.activitiesLevel}`);
 
@@ -331,16 +347,9 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
   // 7. Pool d'attractions (déjà récupéré en parallèle ci-dessus)
   let attractionPool = attractionPoolRaw;
 
-  // Recherche spécifique des mustSee — ces attractions DOIVENT apparaître dans le voyage
+  // Injection des mustSee (déjà récupérés en parallèle ci-dessus)
   const mustSeeNames = new Set<string>();
-  if (preferences.mustSee?.trim()) {
-    console.log('[AI] Recherche des mustSee spécifiques...');
-    console.log(`[PERF ${elapsed()}] Start must-see search`);
-    const mustSeeAttractions = await searchMustSeeAttractions(
-      preferences.mustSee,
-      preferences.destination,
-      cityCenter
-    );
+  if (mustSeeAttractions.length > 0) {
     const poolNames = new Set(attractionPool.map(a => a.name.toLowerCase()));
     for (const msAttr of mustSeeAttractions) {
       // Marquer comme mustSee pour garantir l'inclusion
@@ -390,40 +399,27 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
     });
   }
 
-  // Mixer avec des activités Viator originales (food tours, kayak, etc.)
-  if (isViatorConfigured()) {
-    try {
-      console.log('[AI] 🎭 Recherche activités Viator originales...');
-      console.log(`[PERF ${elapsed()}] Start Viator search`);
-      const viatorActivities = await searchViatorActivities(preferences.destination, cityCenter, {
-        types: preferences.activities,
-        limit: 20,
-      });
+  // Mixer avec des activités Viator originales (déjà récupérées en parallèle ci-dessus)
+  if (viatorActivitiesRaw.length > 0) {
+    // Filtrer les doublons (même nom qu'une attraction SerpAPI)
+    const existingNames = new Set(attractionPool.map(a => a.name.toLowerCase()));
+    const uniqueViator = viatorActivitiesRaw.filter(v => {
+      const vName = v.name.toLowerCase();
+      return !existingNames.has(vName) &&
+        ![...existingNames].some(n => n.includes(vName) || vName.includes(n));
+    });
 
-      if (viatorActivities.length > 0) {
-        // Filtrer les doublons (même nom qu'une attraction SerpAPI)
-        const existingNames = new Set(attractionPool.map(a => a.name.toLowerCase()));
-        const uniqueViator = viatorActivities.filter(v => {
-          const vName = v.name.toLowerCase();
-          return !existingNames.has(vName) &&
-            ![...existingNames].some(n => n.includes(vName) || vName.includes(n));
-        });
+    // Prioriser : food tours, outdoor, experiences (pas culture/musées déjà couverts par SerpAPI)
+    const experientialTypes = new Set(['gastronomy', 'adventure', 'nature', 'nightlife', 'wellness', 'beach']);
+    const experiential = uniqueViator.filter(v => experientialTypes.has(v.type));
+    const others = uniqueViator.filter(v => !experientialTypes.has(v.type));
 
-        // Prioriser : food tours, outdoor, experiences (pas culture/musées déjà couverts par SerpAPI)
-        const experientialTypes = new Set(['gastronomy', 'adventure', 'nature', 'nightlife', 'wellness', 'beach']);
-        const experiential = uniqueViator.filter(v => experientialTypes.has(v.type));
-        const others = uniqueViator.filter(v => !experientialTypes.has(v.type));
+    // Ajouter ~2 activités Viator par jour de voyage (expérientielles en priorité)
+    const viatorToAdd = [...experiential, ...others].slice(0, Math.min(preferences.durationDays * 2, 8));
 
-        // Ajouter ~2 activités Viator par jour de voyage (expérientielles en priorité)
-        const viatorToAdd = [...experiential, ...others].slice(0, Math.min(preferences.durationDays * 2, 8));
-
-        if (viatorToAdd.length > 0) {
-          attractionPool.push(...viatorToAdd);
-          console.log(`[AI] ✅ ${viatorToAdd.length} activités Viator ajoutées (${experiential.length} expérientielles)`);
-        }
-      }
-    } catch (error) {
-      console.warn('[AI] Viator mixing error (non bloquant):', error);
+    if (viatorToAdd.length > 0) {
+      attractionPool.push(...viatorToAdd);
+      console.log(`[AI] ✅ ${viatorToAdd.length} activités Viator ajoutées (${experiential.length} expérientielles)`);
     }
   }
 
@@ -473,95 +469,126 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       dayTripDestination: d.dayTripDestination || undefined,
     }));
 
-    // Resolve additional suggestions: use Travel Places API (free) first, SerpAPI fallback
+    // PARALLELIZED: Resolve all additional suggestions across all days at once
+    console.log(`[PERF ${elapsed()}] Start parallel suggestion resolution`);
+
+    // Step 1: Pre-resolve all day trip destination centers in parallel
+    const dayTripDestinations = claudeItinerary.days
+      .filter(d => d.isDayTrip && d.dayTripDestination)
+      .map(d => d.dayTripDestination!);
+    const uniqueDayTripDests = [...new Set(dayTripDestinations)];
+    const dayTripCenterMap = new Map<string, { lat: number; lng: number }>();
+
+    if (uniqueDayTripDests.length > 0) {
+      const dtResults = await Promise.allSettled(
+        uniqueDayTripDests.map(dest => getCityCenterCoordsAsync(dest))
+      );
+      uniqueDayTripDests.forEach((dest, idx) => {
+        const result = dtResults[idx];
+        if (result.status === 'fulfilled' && result.value) {
+          dayTripCenterMap.set(dest, result.value);
+          console.log(`[AI] Day trip center for "${dest}": (${result.value.lat}, ${result.value.lng})`);
+        }
+      });
+    }
+
+    // Step 2: Collect all suggestions into a flat list for parallel resolution
+    const suggestionTasks: Array<{
+      dayIndex: number;
+      genIndex: number;
+      suggestionName: string;
+      isDayTrip: boolean;
+      dayTripDestination?: string;
+      geoContext: string;
+      geoCenter: { lat: number; lng: number } | undefined;
+      dayTripCenter: { lat: number; lng: number } | undefined;
+    }> = [];
+
     for (let i = 0; i < claudeItinerary.days.length; i++) {
       const day = claudeItinerary.days[i];
-      // For day trips, use dayTripDestination as geocoding context
       const geoContext = day.isDayTrip && day.dayTripDestination ? day.dayTripDestination : preferences.destination;
-      const geoCenter = day.isDayTrip && day.dayTripDestination ? undefined : cityCenter; // undefined = let API figure it out
-
-      // For day trips, resolve destination center coords for better geocoding
-      let dayTripCenter: { lat: number; lng: number } | undefined;
-      if (day.isDayTrip && day.dayTripDestination) {
-        const dtCoords = await getCityCenterCoordsAsync(day.dayTripDestination);
-        if (dtCoords) {
-          dayTripCenter = dtCoords;
-          console.log(`[AI] Day trip center for "${day.dayTripDestination}": (${dtCoords.lat}, ${dtCoords.lng})`);
-        }
-      }
+      const geoCenter = day.isDayTrip && day.dayTripDestination ? undefined : cityCenter;
+      const dayTripCenter = day.isDayTrip && day.dayTripDestination
+        ? dayTripCenterMap.get(day.dayTripDestination) : undefined;
 
       for (const suggestion of day.additionalSuggestions) {
         const genIndex = attractionsByDay[i].findIndex(a => a.id.startsWith('claude-') && a.name === suggestion.name);
         if (genIndex < 0) continue;
-
-        // For day trips, try Nominatim first (better for named places outside city center radius)
-        if (day.isDayTrip && day.dayTripDestination) {
-          try {
-            const geo = await geocodeAddress(`${suggestion.name}, ${day.dayTripDestination}`);
-            if (geo && geo.lat && geo.lng) {
-              attractionsByDay[i][genIndex] = {
-                ...attractionsByDay[i][genIndex],
-                latitude: geo.lat,
-                longitude: geo.lng,
-                mustSee: true,
-                dataReliability: 'verified',
-                googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(suggestion.name + ', ' + day.dayTripDestination)}`,
-              };
-              console.log(`[AI]   Résolu day trip via Nominatim: "${suggestion.name}" → (${geo.lat}, ${geo.lng})`);
-              continue;
-            }
-          } catch (e) {
-            console.warn(`[AI]   Nominatim day trip error for "${suggestion.name}":`, e);
-          }
-        }
-
-        // Try Travel Places API first (free, via RapidAPI)
-        const resolved = await resolveAttractionByName(suggestion.name, dayTripCenter || geoCenter || cityCenter);
-        if (resolved) {
-          attractionsByDay[i][genIndex] = {
-            ...attractionsByDay[i][genIndex],
-            latitude: resolved.lat,
-            longitude: resolved.lng,
-            name: resolved.name || suggestion.name,
-            mustSee: true,
-            dataReliability: 'verified',
-          };
-          console.log(`[AI]   Résolu via Travel Places: "${suggestion.name}" → (${resolved.lat}, ${resolved.lng})`);
-          continue;
-        }
-
-        // Fallback 2: SerpAPI
-        const found = await searchMustSeeAttractions(
-          suggestion.name,
-          geoContext,
-          geoCenter || cityCenter
-        );
-        if (found.length > 0) {
-          attractionsByDay[i][genIndex] = { ...found[0], mustSee: true };
-          console.log(`[AI]   Résolu via SerpAPI: "${suggestion.name}" → coordonnées vérifiées`);
-          continue;
-        }
-
-        // Fallback 3: Nominatim geocoding (free, reliable for named places)
-        try {
-          const geo = await geocodeAddress(`${suggestion.name}, ${geoContext}`);
-          if (geo && geo.lat && geo.lng) {
-            attractionsByDay[i][genIndex] = {
-              ...attractionsByDay[i][genIndex],
-              latitude: geo.lat,
-              longitude: geo.lng,
-              mustSee: true,
-              dataReliability: 'verified',
-              googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(suggestion.name + ', ' + geoContext)}`,
-            };
-            console.log(`[AI]   Résolu via Nominatim: "${suggestion.name}" → (${geo.lat}, ${geo.lng})`);
-            continue;
-          }
-        } catch (e) {
-          console.warn(`[AI]   Nominatim error for "${suggestion.name}":`, e);
-        }
+        suggestionTasks.push({
+          dayIndex: i, genIndex, suggestionName: suggestion.name,
+          isDayTrip: !!(day.isDayTrip && day.dayTripDestination),
+          dayTripDestination: day.dayTripDestination || undefined,
+          geoContext, geoCenter, dayTripCenter,
+        });
       }
     }
+
+    console.log(`[AI] Resolving ${suggestionTasks.length} suggestions in parallel...`);
+
+    // Step 3: Resolve all suggestions in parallel (each with sequential fallback chain)
+    // Fallback order: Travel Places (free) → Nominatim (free) → SerpAPI (paid, last resort)
+    await Promise.allSettled(suggestionTasks.map(async (task) => {
+      const { dayIndex, genIndex, suggestionName, isDayTrip, dayTripDestination, geoContext, geoCenter, dayTripCenter } = task;
+
+      // For day trips, try Nominatim first (better for named places outside city center radius)
+      if (isDayTrip && dayTripDestination) {
+        try {
+          const geo = await geocodeAddress(`${suggestionName}, ${dayTripDestination}`);
+          if (geo && geo.lat && geo.lng) {
+            attractionsByDay[dayIndex][genIndex] = {
+              ...attractionsByDay[dayIndex][genIndex],
+              latitude: geo.lat, longitude: geo.lng,
+              mustSee: true, dataReliability: 'verified',
+              googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(suggestionName + ', ' + dayTripDestination)}`,
+            };
+            console.log(`[AI]   Résolu day trip via Nominatim: "${suggestionName}" → (${geo.lat}, ${geo.lng})`);
+            return;
+          }
+        } catch (e) {
+          console.warn(`[AI]   Nominatim day trip error for "${suggestionName}":`, e);
+        }
+      }
+
+      // Fallback 1: Travel Places API (free, via RapidAPI)
+      const resolved = await resolveAttractionByName(suggestionName, dayTripCenter || geoCenter || cityCenter);
+      if (resolved) {
+        attractionsByDay[dayIndex][genIndex] = {
+          ...attractionsByDay[dayIndex][genIndex],
+          latitude: resolved.lat, longitude: resolved.lng,
+          name: resolved.name || suggestionName,
+          mustSee: true, dataReliability: 'verified',
+        };
+        console.log(`[AI]   Résolu via Travel Places: "${suggestionName}" → (${resolved.lat}, ${resolved.lng})`);
+        return;
+      }
+
+      // Fallback 2: Nominatim geocoding (free, reliable for named places)
+      try {
+        const geo = await geocodeAddress(`${suggestionName}, ${geoContext}`);
+        if (geo && geo.lat && geo.lng) {
+          attractionsByDay[dayIndex][genIndex] = {
+            ...attractionsByDay[dayIndex][genIndex],
+            latitude: geo.lat, longitude: geo.lng,
+            mustSee: true, dataReliability: 'verified',
+            googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(suggestionName + ', ' + geoContext)}`,
+          };
+          console.log(`[AI]   Résolu via Nominatim: "${suggestionName}" → (${geo.lat}, ${geo.lng})`);
+          return;
+        }
+      } catch (e) {
+        console.warn(`[AI]   Nominatim error for "${suggestionName}":`, e);
+      }
+
+      // Fallback 3: SerpAPI (paid, last resort — only if free APIs failed)
+      const found = await searchMustSeeAttractions(suggestionName, geoContext, geoCenter || cityCenter);
+      if (found.length > 0) {
+        attractionsByDay[dayIndex][genIndex] = { ...found[0], mustSee: true };
+        console.log(`[AI]   Résolu via SerpAPI: "${suggestionName}" → coordonnées vérifiées`);
+        return;
+      }
+    }));
+
+    console.log(`[PERF ${elapsed()}] Parallel suggestion resolution done`);
 
     // Last resort: any attraction still at city center or (0,0) gets coords and Google Maps URL
     for (let i = 0; i < attractionsByDay.length; i++) {
@@ -569,12 +596,10 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       const isDayTripDay = day?.isDayTrip && day?.dayTripDestination;
       const geoContextCity = isDayTripDay ? day.dayTripDestination! : preferences.destination;
 
-      // For day trip days, get the day trip center for fallback coords
-      let fallbackCenter = cityCenter;
-      if (isDayTripDay) {
-        const dtCoords = await getCityCenterCoordsAsync(day.dayTripDestination!);
-        if (dtCoords) fallbackCenter = dtCoords;
-      }
+      // Use pre-resolved day trip center (already in dayTripCenterMap)
+      const fallbackCenter = isDayTripDay
+        ? (dayTripCenterMap.get(day.dayTripDestination!) || cityCenter)
+        : cityCenter;
 
       const dayAttrs = attractionsByDay[i];
       for (let j = 0; j < dayAttrs.length; j++) {
@@ -760,27 +785,11 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
 
   console.log(`[Budget] ${budgetTracker.getSummary()}`);
 
-  // 8. Recherche supermarché si nécessaire (courses pour self-catering)
+  // 8. Déterminer les jours de courses et préparer les recherches parallèles
   let groceryStore: GroceryStore | null = null;
   const groceryDays = new Set<number>(); // numéros de jours où ajouter les courses
   if (budgetStrategy?.groceryShoppingNeeded) {
-    const accommodationCoords = accommodation
-      ? { lat: accommodation.latitude, lng: accommodation.longitude }
-      : cityCenter;
-    try {
-      const stores = await searchGroceryStores(accommodationCoords, preferences.destination);
-      if (stores.length > 0) {
-        groceryStore = stores[0];
-        console.log(`[AI] Supermarché trouvé: ${groceryStore.name} (${groceryStore.walkingTime}min à pied)`);
-      }
-    } catch (error) {
-      console.warn('[AI] Erreur recherche supermarché:', error);
-    }
-
-    // Déterminer les jours de courses:
-    // - Jour 1 ou 2 (selon heure d'arrivée)
-    // - Si séjour > 4 jours, ajouter un 2e créneau au milieu
-    const firstGroceryDay = preferences.durationDays > 2 ? 2 : 1; // Jour 2 si possible (Jour 1 = arrivée)
+    const firstGroceryDay = preferences.durationDays > 2 ? 2 : 1;
     groceryDays.add(firstGroceryDay);
     if (preferences.durationDays > 4) {
       const midDay = Math.ceil(preferences.durationDays / 2) + 1;
@@ -789,7 +798,123 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
     console.log(`[AI] Courses prévues aux jours: ${[...groceryDays].join(', ')}`);
   }
 
-  // 9. Générer les jours avec le SCHEDULER (évite les chevauchements)
+  // 9. PRÉ-FETCH RESTAURANTS + LUGGAGE + GROCERY EN PARALLÈLE
+  console.log(`[PERF ${elapsed()}] Start parallel pre-fetch (restaurants + luggage + grocery)`);
+  const prefetchedRestaurants = new Map<string, Restaurant | null>();
+  let prefetchedLuggageStoragesResult: LuggageStorage[] | null = null;
+  {
+    const accommodationCoords = {
+      lat: accommodation?.latitude || cityCenter.lat,
+      lng: accommodation?.longitude || cityCenter.lng,
+    };
+
+    const restaurantFetches: Array<{
+      key: string;
+      promise: Promise<Restaurant | null>;
+    }> = [];
+
+    // Pre-compute which days need grocery shopping (deterministic)
+    let groceriesDonePrecomputed = !budgetStrategy?.groceryShoppingNeeded;
+
+    for (let i = 0; i < preferences.durationDays; i++) {
+      const dayNumber = i + 1;
+      const dayAttrs = attractionsByDay[i] || [];
+      const isDayTripDay = dayMetadata[i]?.isDayTrip;
+
+      // Update groceries status for this day (same logic as in day loop)
+      const groceriesAvailable = groceriesDonePrecomputed || groceryDays.has(dayNumber);
+
+      for (const mealType of ['breakfast', 'lunch', 'dinner'] as const) {
+        // Skip self-catered meals
+        if (shouldSelfCater(mealType, dayNumber, budgetStrategy, false, preferences.durationDays, isDayTripDay, groceriesAvailable)) {
+          continue;
+        }
+
+        // Compute approximate coords for this meal
+        let mealCoords: { lat: number; lng: number };
+        if (mealType === 'breakfast') {
+          mealCoords = accommodationCoords;
+        } else if (mealType === 'lunch') {
+          // Near midpoint of morning attractions
+          const morningAttrs = dayAttrs.slice(0, Math.ceil(dayAttrs.length / 2));
+          const lastMorning = morningAttrs[morningAttrs.length - 1];
+          mealCoords = lastMorning && lastMorning.latitude
+            ? { lat: lastMorning.latitude, lng: lastMorning.longitude }
+            : cityCenter;
+        } else {
+          // Dinner: near last attraction of the day
+          const lastAttr = dayAttrs[dayAttrs.length - 1];
+          mealCoords = lastAttr && lastAttr.latitude
+            ? { lat: lastAttr.latitude, lng: lastAttr.longitude }
+            : cityCenter;
+        }
+
+        const key = `${i}-${mealType}`;
+        restaurantFetches.push({
+          key,
+          promise: findRestaurantForMeal(mealType, cityCenter, preferences, dayNumber, mealCoords),
+        });
+      }
+
+      // Track groceries for next day
+      if (groceryDays.has(dayNumber)) {
+        groceriesDonePrecomputed = true;
+      }
+    }
+
+    // Launch luggage storage + grocery store searches in parallel with restaurants
+    const luggagePromise = searchLuggageStorage(preferences.destination, { latitude: cityCenter.lat, longitude: cityCenter.lng })
+      .catch((err: unknown) => { console.warn('[AI] Luggage storage pre-fetch failed:', err); return [] as LuggageStorage[]; });
+
+    const groceryPromise = budgetStrategy?.groceryShoppingNeeded
+      ? searchGroceryStores(
+          accommodationCoords,
+          preferences.destination
+        ).catch((err: unknown) => { console.warn('[AI] Erreur recherche supermarché:', err); return [] as GroceryStore[]; })
+      : Promise.resolve([] as GroceryStore[]);
+
+    // Await all in parallel: restaurants + luggage + grocery
+    const [restaurantResults, luggageStorages, groceryStores] = await Promise.all([
+      restaurantFetches.length > 0
+        ? Promise.allSettled(restaurantFetches.map(f => f.promise))
+        : Promise.resolve([]),
+      luggagePromise,
+      groceryPromise,
+    ]);
+
+    // Process restaurant results
+    if (restaurantFetches.length > 0) {
+      const usedIds = new Set<string>();
+      restaurantFetches.forEach((fetch, idx) => {
+        const result = (restaurantResults as PromiseSettledResult<Restaurant | null>[])[idx];
+        const restaurant = result.status === 'fulfilled' ? result.value : null;
+
+        // Deduplication: if this restaurant ID is already used, store null (will fallback to live fetch)
+        if (restaurant?.id && usedIds.has(restaurant.id)) {
+          prefetchedRestaurants.set(fetch.key, null);
+        } else {
+          if (restaurant?.id) {
+            usedIds.add(restaurant.id);
+            usedRestaurantIds.add(restaurant.id);
+          }
+          prefetchedRestaurants.set(fetch.key, restaurant);
+        }
+      });
+      console.log(`[AI] ✅ ${prefetchedRestaurants.size} restaurants pré-fetchés en parallèle (${restaurantFetches.length} requêtes)`);
+    }
+
+    // Process grocery store results
+    if (groceryStores.length > 0) {
+      groceryStore = groceryStores[0];
+      console.log(`[AI] Supermarché trouvé: ${groceryStore.name} (${groceryStore.walkingTime}min à pied)`);
+    }
+
+    // Luggage storages will be passed to generateDayWithScheduler
+    prefetchedLuggageStoragesResult = luggageStorages.length > 0 ? luggageStorages : null;
+  }
+  console.log(`[PERF ${elapsed()}] Parallel pre-fetch done (restaurants + luggage + grocery)`);
+
+  // 10. Générer les jours avec le SCHEDULER (évite les chevauchements)
   const days: TripDay[] = [];
 
   // ANTI-DOUBLON: Set partagé entre tous les jours pour éviter de répéter une attraction
@@ -847,6 +972,8 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       isDayTrip: (dayMetadata[i] || {} as any).isDayTrip,
       dayTripDestination: (dayMetadata[i] || {} as any).dayTripDestination,
       groceriesDone: groceriesDoneByDay || groceryDays.has(dayNumber), // If groceries planned today, dinner can be self-catered
+      prefetchedRestaurants, // Restaurants pré-fetchés en parallèle
+      prefetchedLuggageStorages: prefetchedLuggageStoragesResult, // Consigne bagages pré-fetchée
     });
 
     // Injecter les courses si ce jour est un jour de courses

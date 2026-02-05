@@ -778,10 +778,9 @@ export async function searchMustSeeAttractions(
           return attraction;
         }
       }
-      // Retry avec variantes (nom anglais, nom complet)
+      // Retry avec 1 variante (économie SerpAPI: 1 retry au lieu de 2)
       const variants = [
         `${item} attraction ${destination}`,
-        `${item} landmark ${destination}`,
       ];
       for (const variant of variants) {
         try {

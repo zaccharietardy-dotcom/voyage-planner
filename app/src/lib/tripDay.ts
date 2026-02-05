@@ -191,6 +191,8 @@ export async function generateDayWithScheduler(params: {
   isDayTrip?: boolean; // Day trip: relax city validation
   dayTripDestination?: string; // Day trip destination city name
   groceriesDone?: boolean; // true si les courses ont déjà été faites (on peut cuisiner)
+  prefetchedRestaurants?: Map<string, import('./types').Restaurant | null>; // Pre-fetched restaurants keyed by "dayIndex-mealType"
+  prefetchedLuggageStorages?: import('./services/luggageStorage').LuggageStorage[] | null; // Pre-fetched luggage storage results
 }): Promise<{ items: TripItem[]; lateFlightForNextDay?: LateFlightArrivalData }> {
   const {
     dayNumber,
@@ -216,6 +218,8 @@ export async function generateDayWithScheduler(params: {
     isDayTrip,
     dayTripDestination,
     groceriesDone,
+    prefetchedRestaurants,
+    prefetchedLuggageStorages,
   } = params;
 
   // Date de début du voyage normalisée (pour les URLs de réservation)
@@ -303,15 +307,19 @@ export async function generateDayWithScheduler(params: {
   // Position actuelle pour les itinéraires (déclaré au niveau fonction)
   let lastCoords = cityCenter;
 
-  // PRÉ-FETCH DU BREAKFAST UNIQUEMENT (optimisation: 3-4s → parallèle avec autres appels)
-  // Le breakfast est toujours proche de l'hôtel, donc on peut le pré-fetch avec cityCenter
-  // Lunch et dinner ont besoin des vraies coordonnées (lastCoords) après les activités
-  console.log(`[Jour ${dayNumber}] Pré-fetch du breakfast...`);
-  const prefetchStart = Date.now();
+  // Utiliser les restaurants pré-fetchés si disponibles, sinon fetch en direct
+  const prefetchKey = (meal: string) => `${dayNumber - 1}-${meal}`;
+  const hasPrefetchedRestaurant = (meal: 'breakfast' | 'lunch' | 'dinner'): boolean =>
+    !!prefetchedRestaurants?.has(prefetchKey(meal));
+  const getPrefetchedRestaurant = (meal: 'breakfast' | 'lunch' | 'dinner'): import('./types').Restaurant | null =>
+    (prefetchedRestaurants?.get(prefetchKey(meal))) ?? null;
+
+  // PRÉ-FETCH DU BREAKFAST UNIQUEMENT (si pas déjà pré-fetché au niveau ai.ts)
   const prefetchedBreakfast = shouldSelfCater('breakfast', dayNumber, budgetStrategy, false, preferences.durationDays, isDayTrip, groceriesDone)
     ? null
-    : await findRestaurantForMeal('breakfast', cityCenter, preferences, dayNumber, cityCenter);
-  console.log(`[Jour ${dayNumber}] Pré-fetch breakfast terminé en ${Date.now() - prefetchStart}ms`);
+    : (hasPrefetchedRestaurant('breakfast')
+        ? getPrefetchedRestaurant('breakfast')
+        : await findRestaurantForMeal('breakfast', cityCenter, preferences, dayNumber, cityCenter));
 
   console.log(`[Jour ${dayNumber}] Plage horaire: ${formatScheduleTime(dayStart)} - ${formatScheduleTime(dayEnd)}`);
   console.log(`[Jour ${dayNumber}] Position: ${isFirstDay ? 'ORIGINE (en transit)' : 'DESTINATION'} | isLastDay: ${isLastDay}`);
@@ -740,7 +748,7 @@ export async function generateDayWithScheduler(params: {
 
       if (flightNeedsStorage && hoursBeforeCheckIn >= 1.5) {
         try {
-          const flightStorages = await searchLuggageStorage(preferences.destination, { latitude: cityCenter.lat, longitude: cityCenter.lng });
+          const flightStorages = prefetchedLuggageStorages ?? await searchLuggageStorage(preferences.destination, { latitude: cityCenter.lat, longitude: cityCenter.lng });
           const flightBestStorage = selectBestStorage(flightStorages, { latitude: cityCenter.lat, longitude: cityCenter.lng });
 
           if (flightBestStorage) {
@@ -821,7 +829,9 @@ export async function generateDayWithScheduler(params: {
               }));
             } else {
               // Rechercher un restaurant proche de la position actuelle
-              const restaurant = await findRestaurantForMeal('lunch', cityCenter, preferences, dayNumber, lastCoords);
+              const restaurant = hasPrefetchedRestaurant('lunch')
+                ? getPrefetchedRestaurant('lunch')
+                : await findRestaurantForMeal('lunch', cityCenter, preferences, dayNumber, lastCoords);
               const restaurantCoords = {
                 lat: restaurant?.latitude || cityCenter.lat,
                 lng: restaurant?.longitude || cityCenter.lng,
@@ -984,7 +994,7 @@ export async function generateDayWithScheduler(params: {
       if (needsStorage) {
         console.log(`[Jour ${dayNumber}] 🧳 Consigne nécessaire: arrivée ${arrivalTimeForLuggage}, check-in ${hotelCheckInTimeStr}`);
         try {
-          const storages = await searchLuggageStorage(preferences.destination, { latitude: cityCenter.lat, longitude: cityCenter.lng });
+          const storages = prefetchedLuggageStorages ?? await searchLuggageStorage(preferences.destination, { latitude: cityCenter.lat, longitude: cityCenter.lng });
           const bestStorage = selectBestStorage(storages, { latitude: cityCenter.lat, longitude: cityCenter.lng });
 
           if (bestStorage) {
@@ -1449,7 +1459,9 @@ export async function generateDayWithScheduler(params: {
         }));
       } else {
         // Rechercher un restaurant proche de la position actuelle (après les activités du matin)
-        const restaurant = await findRestaurantForMeal('lunch', cityCenter, preferences, dayNumber, lastCoords);
+        const restaurant = hasPrefetchedRestaurant('lunch')
+                ? getPrefetchedRestaurant('lunch')
+                : await findRestaurantForMeal('lunch', cityCenter, preferences, dayNumber, lastCoords);
         const restaurantCoords = {
           lat: restaurant?.latitude || cityCenter.lat,
           lng: restaurant?.longitude || cityCenter.lng,
@@ -1749,7 +1761,9 @@ export async function generateDayWithScheduler(params: {
         }));
         lastCoords = accommodationCoords;
       } else {
-        const restaurant = await findRestaurantForMeal('dinner', cityCenter, preferences, dayNumber, lastCoords);
+        const restaurant = hasPrefetchedRestaurant('dinner')
+          ? getPrefetchedRestaurant('dinner')
+          : await findRestaurantForMeal('dinner', cityCenter, preferences, dayNumber, lastCoords);
         const restaurantCoords = {
           lat: restaurant?.latitude || cityCenter.lat,
           lng: restaurant?.longitude || cityCenter.lng,
