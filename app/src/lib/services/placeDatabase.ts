@@ -1,5 +1,5 @@
 /**
- * Service de gestion de la base de données locale pour les lieux vérifiés
+ * Service de gestion du cache des lieux vérifiés via Supabase PostgreSQL
  *
  * Ce service permet de:
  * - Chercher des lieux en base (restaurants, hôtels, attractions)
@@ -7,11 +7,11 @@
  * - Vérifier la fraîcheur des données (cache 30 jours)
  * - Mettre à jour les données existantes
  *
- * IMPORTANT: Si prisma est null (pas de DATABASE_URL, ex: Vercel),
- * toutes les fonctions retournent des résultats vides sans erreur.
+ * Utilise Supabase (PostgreSQL) au lieu de Prisma/SQLite pour
+ * fonctionner sur Vercel serverless.
  */
 
-import { prisma } from '../db';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
 
 // Types
@@ -60,6 +60,28 @@ export interface PlaceSearchOptions {
 // Durée de cache par défaut (30 jours)
 const DEFAULT_CACHE_DAYS = 30;
 
+// ============================================
+// Supabase Admin Client (service role)
+// ============================================
+
+function getSupabaseAdmin(): SupabaseClient | null {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!url || !serviceKey) {
+    console.warn('[PlaceDB] Supabase non configuré — cache désactivé');
+    return null;
+  }
+
+  return createClient(url, serviceKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+}
+
+// ============================================
+// Helpers
+// ============================================
+
 /**
  * Génère un hash pour une requête de recherche (pour le cache)
  */
@@ -67,6 +89,99 @@ function hashQuery(params: Record<string, unknown>): string {
   const sortedParams = JSON.stringify(params, Object.keys(params).sort());
   return crypto.createHash('sha256').update(sortedParams).digest('hex');
 }
+
+// DB row → PlaceData (snake_case → camelCase)
+interface DBPlace {
+  id: string;
+  external_id: string | null;
+  type: string;
+  name: string;
+  city: string;
+  country: string | null;
+  address: string;
+  latitude: number;
+  longitude: number;
+  rating: number | null;
+  review_count: number | null;
+  price_level: number | null;
+  stars: number | null;
+  cuisine_types: string[] | null;
+  amenities: string[] | null;
+  categories: string[] | null;
+  opening_hours: Record<string, { open: string; close: string } | null> | null;
+  phone: string | null;
+  website: string | null;
+  google_maps_url: string;
+  booking_url: string | null;
+  description: string | null;
+  tips: string | null;
+  source: string;
+  data_reliability: string;
+}
+
+function dbPlaceToPlaceData(row: DBPlace): PlaceData {
+  return {
+    externalId: row.external_id || undefined,
+    type: row.type as PlaceType,
+    name: row.name,
+    city: row.city,
+    country: row.country || undefined,
+    address: row.address,
+    latitude: row.latitude,
+    longitude: row.longitude,
+    rating: row.rating || undefined,
+    reviewCount: row.review_count || undefined,
+    priceLevel: row.price_level || undefined,
+    stars: row.stars || undefined,
+    cuisineTypes: row.cuisine_types || undefined,
+    amenities: row.amenities || undefined,
+    categories: row.categories || undefined,
+    openingHours: row.opening_hours || undefined,
+    phone: row.phone || undefined,
+    website: row.website || undefined,
+    googleMapsUrl: row.google_maps_url,
+    bookingUrl: row.booking_url || undefined,
+    description: row.description || undefined,
+    tips: row.tips || undefined,
+    source: row.source as DataSource,
+    dataReliability: row.data_reliability as DataReliability,
+  };
+}
+
+// PlaceData → DB row (camelCase → snake_case)
+function placeDataToDBRow(place: PlaceData, source: DataSource) {
+  return {
+    external_id: place.externalId || null,
+    type: place.type,
+    name: place.name,
+    city: place.city,
+    country: place.country || null,
+    address: place.address,
+    latitude: place.latitude,
+    longitude: place.longitude,
+    rating: place.rating ?? null,
+    review_count: place.reviewCount ?? null,
+    price_level: place.priceLevel ?? null,
+    stars: place.stars ?? null,
+    cuisine_types: place.cuisineTypes || null,
+    amenities: place.amenities || null,
+    categories: place.categories || null,
+    opening_hours: place.openingHours || null,
+    phone: place.phone || null,
+    website: place.website || null,
+    google_maps_url: place.googleMapsUrl,
+    booking_url: place.bookingUrl || null,
+    description: place.description || null,
+    tips: place.tips || null,
+    source,
+    data_reliability: place.dataReliability,
+    verified_at: new Date().toISOString(),
+  };
+}
+
+// ============================================
+// Public API
+// ============================================
 
 /**
  * Vérifie si les données pour une ville et un type sont fraîches
@@ -76,34 +191,36 @@ export async function isDataFresh(
   type: PlaceType,
   maxAgeDays: number = DEFAULT_CACHE_DAYS
 ): Promise<boolean> {
-  if (!prisma) return false;
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return false;
 
   try {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - maxAgeDays);
 
-    const freshCount = await prisma.place.count({
-      where: {
-        city: { contains: city },
-        type,
-        verifiedAt: { gte: cutoffDate },
-      },
-    });
+    const { count, error } = await supabase
+      .from('places')
+      .select('id', { count: 'exact', head: true })
+      .ilike('city', `%${city}%`)
+      .eq('type', type)
+      .gte('verified_at', cutoffDate.toISOString());
 
-    return freshCount >= 5;
+    if (error) throw error;
+    return (count ?? 0) >= 5;
   } catch (error) {
-    console.warn('[PlaceDB] Erreur isDataFresh (cache désactivé):', error);
+    console.warn('[PlaceDB] Erreur isDataFresh:', error);
     return false;
   }
 }
 
 /**
- * Recherche des lieux dans la base de données locale
+ * Recherche des lieux dans la base de données
  */
 export async function searchPlacesFromDB(
   options: PlaceSearchOptions
 ): Promise<PlaceData[]> {
-  if (!prisma) return [];
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return [];
 
   try {
     const {
@@ -117,24 +234,27 @@ export async function searchPlacesFromDB(
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - maxAgeDays);
 
-    const places = await prisma.place.findMany({
-      where: {
-        city: { contains: city },
-        type,
-        verifiedAt: { gte: cutoffDate },
-        ...(minRating !== undefined && { rating: { gte: minRating } }),
-      },
-      orderBy: [
-        { dataReliability: 'asc' },
-        { rating: 'desc' },
-        { verifiedAt: 'desc' },
-      ],
-      take: limit,
-    });
+    let query = supabase
+      .from('places')
+      .select('*')
+      .ilike('city', `%${city}%`)
+      .eq('type', type)
+      .gte('verified_at', cutoffDate.toISOString())
+      .order('data_reliability', { ascending: true })
+      .order('rating', { ascending: false, nullsFirst: false })
+      .order('verified_at', { ascending: false })
+      .limit(limit);
 
-    return places.map(dbPlaceToPlaceData);
+    if (minRating !== undefined) {
+      query = query.gte('rating', minRating);
+    }
+
+    const { data, error } = await query;
+
+    if (error) throw error;
+    return (data || []).map((row: DBPlace) => dbPlaceToPlaceData(row));
   } catch (error) {
-    console.warn('[PlaceDB] Erreur searchPlacesFromDB (cache désactivé):', error);
+    console.warn('[PlaceDB] Erreur searchPlacesFromDB:', error);
     return [];
   }
 }
@@ -146,86 +266,97 @@ export async function getPlaceByExternalId(
   externalId: string,
   source: DataSource
 ): Promise<PlaceData | null> {
-  if (!prisma) return null;
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return null;
 
   try {
-    const place = await prisma.place.findUnique({
-      where: {
-        externalId_source: { externalId, source },
-      },
-    });
+    const { data, error } = await supabase
+      .from('places')
+      .select('*')
+      .eq('external_id', externalId)
+      .eq('source', source)
+      .single();
 
-    return place ? dbPlaceToPlaceData(place) : null;
+    if (error) {
+      if (error.code === 'PGRST116') return null; // Not found
+      throw error;
+    }
+
+    return data ? dbPlaceToPlaceData(data as DBPlace) : null;
   } catch (error) {
-    console.warn('[PlaceDB] Erreur getPlaceByExternalId (cache désactivé):', error);
+    console.warn('[PlaceDB] Erreur getPlaceByExternalId:', error);
     return null;
   }
 }
 
 /**
  * Sauvegarde une liste de lieux dans la base de données
- * Met à jour si le lieu existe déjà (upsert)
+ * Met à jour si le lieu existe déjà (upsert par external_id + source)
  */
 export async function savePlacesToDB(
   places: PlaceData[],
   source: DataSource
 ): Promise<number> {
-  if (!prisma) return 0;
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return 0;
 
   let savedCount = 0;
 
-  for (const place of places) {
+  // Séparer les places avec et sans external_id
+  const placesWithExternalId = places.filter(p => p.externalId);
+  const placesWithoutExternalId = places.filter(p => !p.externalId);
+
+  // Batch upsert pour ceux avec external_id
+  if (placesWithExternalId.length > 0) {
     try {
-      const data = {
-        type: place.type,
-        name: place.name,
-        city: place.city,
-        country: place.country,
-        address: place.address,
-        latitude: place.latitude,
-        longitude: place.longitude,
-        rating: place.rating,
-        reviewCount: place.reviewCount,
-        priceLevel: place.priceLevel,
-        stars: place.stars,
-        cuisineTypes: place.cuisineTypes ? JSON.stringify(place.cuisineTypes) : null,
-        amenities: place.amenities ? JSON.stringify(place.amenities) : null,
-        categories: place.categories ? JSON.stringify(place.categories) : null,
-        openingHours: place.openingHours ? JSON.stringify(place.openingHours) : null,
-        phone: place.phone,
-        website: place.website,
-        googleMapsUrl: place.googleMapsUrl,
-        bookingUrl: place.bookingUrl,
-        description: place.description,
-        tips: place.tips,
-        source,
-        dataReliability: place.dataReliability,
-        verifiedAt: new Date(),
-      };
-
-      if (place.externalId) {
-        await prisma.place.upsert({
-          where: {
-            externalId_source: {
-              externalId: place.externalId,
-              source,
-            },
-          },
-          update: data,
-          create: {
-            ...data,
-            externalId: place.externalId,
-          },
+      const rows = placesWithExternalId.map(p => placeDataToDBRow(p, source));
+      const { error } = await supabase
+        .from('places')
+        .upsert(rows, {
+          onConflict: 'external_id,source',
+          ignoreDuplicates: false,
         });
-      } else {
-        await prisma.place.create({
-          data,
-        });
-      }
 
-      savedCount++;
+      if (error) throw error;
+      savedCount += placesWithExternalId.length;
     } catch (error) {
-      console.error(`[PlaceDB] Erreur sauvegarde ${place.name}:`, error);
+      console.error('[PlaceDB] Erreur batch upsert:', error);
+      // Fallback: essayer un par un
+      for (const place of placesWithExternalId) {
+        try {
+          const row = placeDataToDBRow(place, source);
+          const { error } = await supabase.from('places').upsert(row, {
+            onConflict: 'external_id,source',
+            ignoreDuplicates: false,
+          });
+          if (!error) savedCount++;
+        } catch (e) {
+          console.error(`[PlaceDB] Erreur sauvegarde ${place.name}:`, e);
+        }
+      }
+    }
+  }
+
+  // Insert simple pour ceux sans external_id
+  if (placesWithoutExternalId.length > 0) {
+    try {
+      const rows = placesWithoutExternalId.map(p => placeDataToDBRow(p, source));
+      const { error } = await supabase.from('places').insert(rows);
+
+      if (error) throw error;
+      savedCount += placesWithoutExternalId.length;
+    } catch (error) {
+      console.error('[PlaceDB] Erreur batch insert:', error);
+      // Fallback: essayer un par un
+      for (const place of placesWithoutExternalId) {
+        try {
+          const row = placeDataToDBRow(place, source);
+          const { error } = await supabase.from('places').insert(row);
+          if (!error) savedCount++;
+        } catch (e) {
+          console.error(`[PlaceDB] Erreur sauvegarde ${place.name}:`, e);
+        }
+      }
     }
   }
 
@@ -243,25 +374,34 @@ export async function checkSearchCache(
   city: string,
   params: Record<string, unknown>
 ): Promise<string[] | null> {
-  if (!prisma) return null;
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return null;
 
   try {
     const queryHash = hashQuery({ queryType, city, ...params });
 
-    const cached = await prisma.searchCache.findUnique({
-      where: { queryHash },
-    });
+    const { data, error } = await supabase
+      .from('search_cache')
+      .select('results, expires_at')
+      .eq('query_hash', queryHash)
+      .single();
 
-    if (!cached) return null;
+    if (error) {
+      if (error.code === 'PGRST116') return null; // Not found
+      throw error;
+    }
 
-    if (new Date() > cached.expiresAt) {
-      await prisma.searchCache.delete({ where: { queryHash } });
+    if (!data) return null;
+
+    // Vérifier l'expiration
+    if (new Date() > new Date(data.expires_at)) {
+      await supabase.from('search_cache').delete().eq('query_hash', queryHash);
       return null;
     }
 
-    return JSON.parse(cached.results);
+    return data.results as string[];
   } catch (error) {
-    console.warn('[PlaceDB] Erreur checkSearchCache (cache désactivé):', error);
+    console.warn('[PlaceDB] Erreur checkSearchCache:', error);
     return null;
   }
 }
@@ -277,7 +417,8 @@ export async function saveSearchCache(
   source: DataSource,
   cacheDays: number = DEFAULT_CACHE_DAYS
 ): Promise<void> {
-  if (!prisma) return;
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return;
 
   try {
     const queryHash = hashQuery({ queryType, city, ...params });
@@ -285,26 +426,21 @@ export async function saveSearchCache(
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + cacheDays);
 
-    await prisma.searchCache.upsert({
-      where: { queryHash },
-      update: {
-        results: JSON.stringify(placeIds),
-        resultCount: placeIds.length,
-        expiresAt,
-      },
-      create: {
-        queryHash,
-        queryType,
+    await supabase.from('search_cache').upsert(
+      {
+        query_hash: queryHash,
+        query_type: queryType,
         city,
-        parameters: JSON.stringify(params),
-        results: JSON.stringify(placeIds),
-        resultCount: placeIds.length,
+        parameters: params,
+        results: placeIds,
+        result_count: placeIds.length,
         source,
-        expiresAt,
+        expires_at: expiresAt.toISOString(),
       },
-    });
+      { onConflict: 'query_hash' }
+    );
   } catch (error) {
-    console.warn('[PlaceDB] Erreur saveSearchCache (cache désactivé):', error);
+    console.warn('[PlaceDB] Erreur saveSearchCache:', error);
   }
 }
 
@@ -324,54 +460,51 @@ export async function getDatabaseStats(): Promise<{
     citiesCovered: 0,
   };
 
-  if (!prisma) return emptyStats;
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return emptyStats;
 
   try {
-    const [totalPlaces, byTypeRaw, bySourceRaw, citiesRaw] = await Promise.all([
-      prisma.place.count(),
-      prisma.place.groupBy({
-        by: ['type'],
-        _count: true,
-      }),
-      prisma.place.groupBy({
-        by: ['source'],
-        _count: true,
-      }),
-      prisma.place.groupBy({
-        by: ['city'],
-        _count: true,
-      }),
-    ]);
+    // Total count
+    const { count: totalPlaces } = await supabase
+      .from('places')
+      .select('id', { count: 'exact', head: true });
 
-    const byType: Record<PlaceType, number> = {
-      restaurant: 0,
-      hotel: 0,
-      attraction: 0,
-    };
-    byTypeRaw.forEach((item) => {
-      byType[item.type as PlaceType] = item._count;
-    });
+    // Count by type
+    const byType: Record<PlaceType, number> = { restaurant: 0, hotel: 0, attraction: 0 };
+    for (const t of ['restaurant', 'hotel', 'attraction'] as PlaceType[]) {
+      const { count } = await supabase
+        .from('places')
+        .select('id', { count: 'exact', head: true })
+        .eq('type', t);
+      byType[t] = count ?? 0;
+    }
 
+    // Count by source
     const bySource: Record<DataSource, number> = {
-      serpapi: 0,
-      foursquare: 0,
-      osm: 0,
-      claude: 0,
-      tripadvisor: 0,
-      gemini: 0,
+      serpapi: 0, foursquare: 0, osm: 0, claude: 0, tripadvisor: 0, gemini: 0,
     };
-    bySourceRaw.forEach((item) => {
-      bySource[item.source as DataSource] = item._count;
-    });
+    for (const s of ['serpapi', 'foursquare', 'osm', 'claude', 'tripadvisor', 'gemini'] as DataSource[]) {
+      const { count } = await supabase
+        .from('places')
+        .select('id', { count: 'exact', head: true })
+        .eq('source', s);
+      bySource[s] = count ?? 0;
+    }
+
+    // Distinct cities
+    const { data: citiesData } = await supabase
+      .from('places')
+      .select('city');
+    const uniqueCities = new Set((citiesData || []).map((r: { city: string }) => r.city));
 
     return {
-      totalPlaces,
+      totalPlaces: totalPlaces ?? 0,
       byType,
       bySource,
-      citiesCovered: citiesRaw.length,
+      citiesCovered: uniqueCities.size,
     };
   } catch (error) {
-    console.warn('[PlaceDB] Erreur getDatabaseStats (cache désactivé):', error);
+    console.warn('[PlaceDB] Erreur getDatabaseStats:', error);
     return emptyStats;
   }
 }
@@ -380,85 +513,33 @@ export async function getDatabaseStats(): Promise<{
  * Nettoie les données expirées
  */
 export async function cleanupExpiredData(maxAgeDays: number = 90): Promise<number> {
-  if (!prisma) return 0;
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return 0;
 
   try {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - maxAgeDays);
 
-    await prisma.searchCache.deleteMany({
-      where: {
-        expiresAt: { lt: new Date() },
-      },
-    });
+    // Supprimer les caches expirés
+    await supabase
+      .from('search_cache')
+      .delete()
+      .lt('expires_at', new Date().toISOString());
 
-    const deleted = await prisma.place.deleteMany({
-      where: {
-        verifiedAt: { lt: cutoffDate },
-      },
-    });
+    // Supprimer les lieux trop vieux
+    const { data: deleted } = await supabase
+      .from('places')
+      .delete()
+      .lt('verified_at', cutoffDate.toISOString())
+      .select('id');
 
-    console.log(`[PlaceDB] Nettoyage: ${deleted.count} lieux supprimés (> ${maxAgeDays} jours)`);
-    return deleted.count;
+    const deletedCount = deleted?.length ?? 0;
+    if (deletedCount > 0) {
+      console.log(`[PlaceDB] Nettoyage: ${deletedCount} lieux supprimés (> ${maxAgeDays} jours)`);
+    }
+    return deletedCount;
   } catch (error) {
-    console.warn('[PlaceDB] Erreur cleanupExpiredData (cache désactivé):', error);
+    console.warn('[PlaceDB] Erreur cleanupExpiredData:', error);
     return 0;
   }
-}
-
-// Helpers internes
-
-function dbPlaceToPlaceData(dbPlace: {
-  id: string;
-  externalId: string | null;
-  type: string;
-  name: string;
-  city: string;
-  country: string | null;
-  address: string;
-  latitude: number;
-  longitude: number;
-  rating: number | null;
-  reviewCount: number | null;
-  priceLevel: number | null;
-  stars: number | null;
-  cuisineTypes: string | null;
-  amenities: string | null;
-  categories: string | null;
-  openingHours: string | null;
-  phone: string | null;
-  website: string | null;
-  googleMapsUrl: string;
-  bookingUrl: string | null;
-  description: string | null;
-  tips: string | null;
-  source: string;
-  dataReliability: string;
-}): PlaceData {
-  return {
-    externalId: dbPlace.externalId || undefined,
-    type: dbPlace.type as PlaceType,
-    name: dbPlace.name,
-    city: dbPlace.city,
-    country: dbPlace.country || undefined,
-    address: dbPlace.address,
-    latitude: dbPlace.latitude,
-    longitude: dbPlace.longitude,
-    rating: dbPlace.rating || undefined,
-    reviewCount: dbPlace.reviewCount || undefined,
-    priceLevel: dbPlace.priceLevel || undefined,
-    stars: dbPlace.stars || undefined,
-    cuisineTypes: dbPlace.cuisineTypes ? JSON.parse(dbPlace.cuisineTypes) : undefined,
-    amenities: dbPlace.amenities ? JSON.parse(dbPlace.amenities) : undefined,
-    categories: dbPlace.categories ? JSON.parse(dbPlace.categories) : undefined,
-    openingHours: dbPlace.openingHours ? JSON.parse(dbPlace.openingHours) : undefined,
-    phone: dbPlace.phone || undefined,
-    website: dbPlace.website || undefined,
-    googleMapsUrl: dbPlace.googleMapsUrl,
-    bookingUrl: dbPlace.bookingUrl || undefined,
-    description: dbPlace.description || undefined,
-    tips: dbPlace.tips || undefined,
-    source: dbPlace.source as DataSource,
-    dataReliability: dbPlace.dataReliability as DataReliability,
-  };
 }
