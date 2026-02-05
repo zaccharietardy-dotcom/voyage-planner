@@ -303,6 +303,16 @@ export async function generateDayWithScheduler(params: {
   // Position actuelle pour les itinéraires (déclaré au niveau fonction)
   let lastCoords = cityCenter;
 
+  // PRÉ-FETCH DU BREAKFAST UNIQUEMENT (optimisation: 3-4s → parallèle avec autres appels)
+  // Le breakfast est toujours proche de l'hôtel, donc on peut le pré-fetch avec cityCenter
+  // Lunch et dinner ont besoin des vraies coordonnées (lastCoords) après les activités
+  console.log(`[Jour ${dayNumber}] Pré-fetch du breakfast...`);
+  const prefetchStart = Date.now();
+  const prefetchedBreakfast = shouldSelfCater('breakfast', dayNumber, budgetStrategy, false, preferences.durationDays, isDayTrip, groceriesDone)
+    ? null
+    : await findRestaurantForMeal('breakfast', cityCenter, preferences, dayNumber, cityCenter);
+  console.log(`[Jour ${dayNumber}] Pré-fetch breakfast terminé en ${Date.now() - prefetchStart}ms`);
+
   console.log(`[Jour ${dayNumber}] Plage horaire: ${formatScheduleTime(dayStart)} - ${formatScheduleTime(dayEnd)}`);
   console.log(`[Jour ${dayNumber}] Position: ${isFirstDay ? 'ORIGINE (en transit)' : 'DESTINATION'} | isLastDay: ${isLastDay}`);
 
@@ -810,6 +820,7 @@ export async function generateDayWithScheduler(params: {
                 estimatedCost: 8 * (preferences.groupSize || 1),
               }));
             } else {
+              // Rechercher un restaurant proche de la position actuelle
               const restaurant = await findRestaurantForMeal('lunch', cityCenter, preferences, dayNumber, lastCoords);
               const restaurantCoords = {
                 lat: restaurant?.latitude || cityCenter.lat,
@@ -1182,8 +1193,8 @@ export async function generateDayWithScheduler(params: {
         }));
         lastCoords = accommodationCoords;
       } else {
-        // Petit-déjeuner dans un restaurant externe
-        const restaurant = await findRestaurantForMeal('breakfast', cityCenter, preferences, dayNumber, lastCoords);
+        // Petit-déjeuner dans un restaurant externe - utiliser le pré-fetch
+        const restaurant = prefetchedBreakfast;
         const restaurantCoords = {
           lat: restaurant?.latitude || cityCenter.lat,
           lng: restaurant?.longitude || cityCenter.lng,
@@ -1437,6 +1448,7 @@ export async function generateDayWithScheduler(params: {
           estimatedCost: 8 * (preferences.groupSize || 1), // ~8€/pers
         }));
       } else {
+        // Rechercher un restaurant proche de la position actuelle (après les activités du matin)
         const restaurant = await findRestaurantForMeal('lunch', cityCenter, preferences, dayNumber, lastCoords);
         const restaurantCoords = {
           lat: restaurant?.latitude || cityCenter.lat,
