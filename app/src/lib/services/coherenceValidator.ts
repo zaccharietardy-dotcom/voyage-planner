@@ -664,7 +664,13 @@ function checkDuplicateAttractions(trip: Trip): CoherenceError[] {
  */
 function autoFixTrip(trip: Trip, errors: CoherenceError[]): Trip {
   // Cloner le voyage pour ne pas modifier l'original
-  const fixedTrip = JSON.parse(JSON.stringify(trip)) as Trip;
+  let fixedTrip: Trip;
+  try {
+    fixedTrip = JSON.parse(JSON.stringify(trip)) as Trip;
+  } catch (e) {
+    console.error('[AutoFix] Erreur deep clone, utilisation shallow copy:', e);
+    fixedTrip = { ...trip, days: trip.days.map(d => ({ ...d, items: [...d.items] })) };
+  }
 
   for (const error of errors) {
     if (!error.autoFixable) continue;
@@ -1082,7 +1088,13 @@ export function validateAndFixTrip(trip: Trip): Trip {
   console.log('\n=== Validation de coherence du voyage ===');
 
   // TOUJOURS trier les items par heure (avant et apres validation)
-  const sortedTrip = JSON.parse(JSON.stringify(trip)) as Trip;
+  let sortedTrip: Trip;
+  try {
+    sortedTrip = JSON.parse(JSON.stringify(trip)) as Trip;
+  } catch (e) {
+    console.error('[Validator] Erreur deep clone, utilisation shallow copy:', e);
+    sortedTrip = { ...trip, days: trip.days.map(d => ({ ...d, items: [...d.items] })) };
+  }
   for (const day of sortedTrip.days) {
     day.items.sort((a, b) => parseTimeToMinutes(a.startTime) - parseTimeToMinutes(b.startTime));
     day.items.forEach((item, index) => {

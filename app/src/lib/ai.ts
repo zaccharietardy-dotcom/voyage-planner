@@ -1359,11 +1359,15 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
   };
 
   // VALIDATION ET CORRECTION AUTOMATIQUE
+  console.log(`[PERF ${elapsed()}] Starting coherence validation...`);
+
   // 1. Vérifie la cohérence logique (vol -> transfert -> hotel -> activités)
   const coherenceValidatedTrip = validateAndFixTrip(initialTrip);
+  console.log(`[PERF ${elapsed()}] Coherence validation done`);
 
   // 2. Vérifie la cohérence géographique (toutes les activités dans la destination)
   // Supprime automatiquement les lieux trop loin de la destination
+  console.log(`[PERF ${elapsed()}] Starting geography validation...`);
   validateTripGeography(coherenceValidatedTrip, cityCenter, true);
 
   console.log(`[PERF ${elapsed()}] ✅ Trip generation complete`);

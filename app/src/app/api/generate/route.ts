@@ -83,7 +83,17 @@ export async function POST(request: NextRequest) {
         }, 10_000);
 
         try {
-          const trip = await generateTripWithAI(preferences);
+          // Timeout explicite de 4 minutes (avant le timeout Vercel de 5 min)
+          // pour avoir le temps de renvoyer une erreur propre
+          const timeoutPromise = new Promise<never>((_, reject) => {
+            setTimeout(() => reject(new Error('Timeout: génération trop longue (> 4 min)')), 240_000);
+          });
+
+          const trip = await Promise.race([
+            generateTripWithAI(preferences),
+            timeoutPromise
+          ]);
+
           clearInterval(keepAlive);
           // Envoyer le résultat final
           const finalMessage = `data: {"status":"done","trip":${JSON.stringify(trip)}}\n\n`;
@@ -94,8 +104,17 @@ export async function POST(request: NextRequest) {
         } catch (error) {
           clearInterval(keepAlive);
           const message = error instanceof Error ? error.message : String(error);
+          const stack = error instanceof Error ? error.stack : '';
           console.error('Erreur de génération:', message);
-          controller.enqueue(encoder.encode(`data: {"status":"error","error":"${message.replace(/"/g, '\\"')}"}\n\n`));
+          console.error('Stack trace:', stack);
+
+          // S'assurer que le message d'erreur est bien envoyé
+          try {
+            const safeMessage = message.replace(/"/g, '\\"').replace(/\n/g, ' ');
+            controller.enqueue(encoder.encode(`data: {"status":"error","error":"${safeMessage}"}\n\n`));
+          } catch (e) {
+            console.error('Erreur envoi message erreur:', e);
+          }
           controller.close();
         }
       },
