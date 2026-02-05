@@ -1202,9 +1202,12 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
 
   // Enrichir les coordonnées des items avec des adresses génériques
   // (items dont les coordonnées sont trop proches du centre-ville)
+  // PARALLÉLISÉ: collecte tous les items à enrichir puis batch en parallèle
   try {
     console.log(`[PERF ${elapsed()}] Start coordinates enrichment`);
-    let enrichedCount = 0;
+
+    // Collecter tous les items qui ont besoin d'enrichissement
+    const itemsToEnrich: { item: TripItem; searchQuery: string }[] = [];
 
     for (const day of days) {
       for (const item of day.items) {
@@ -1221,19 +1224,36 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
         const needsEnrichment = distFromCenter < 0.2 && item.title && !item.title.includes('Centre-ville');
 
         if (needsEnrichment && item.type === 'activity') {
-          try {
-            // Utiliser geocodeAddress pour obtenir les vraies coordonnées
-            const searchQuery = `${item.title}, ${preferences.destination}`;
-            const coords = await geocodeAddress(searchQuery);
-            if (coords && coords.lat !== destCoords.lat && coords.lng !== destCoords.lng) {
-              const oldCoords = `${item.latitude?.toFixed(4)},${item.longitude?.toFixed(4)}`;
-              item.latitude = coords.lat;
-              item.longitude = coords.lng;
-              enrichedCount++;
-              console.log(`[Coords] ✅ ${item.title}: ${oldCoords} → ${coords.lat.toFixed(4)},${coords.lng.toFixed(4)}`);
-            }
-          } catch (e) {
-            // Ignorer les erreurs d'enrichissement
+          itemsToEnrich.push({
+            item,
+            searchQuery: `${item.title}, ${preferences.destination}`,
+          });
+        }
+      }
+    }
+
+    // Géocoder en parallèle par lots de 10 pour éviter les rate limits
+    const BATCH_SIZE = 10;
+    let enrichedCount = 0;
+
+    for (let i = 0; i < itemsToEnrich.length; i += BATCH_SIZE) {
+      const batch = itemsToEnrich.slice(i, i + BATCH_SIZE);
+      const results = await Promise.allSettled(
+        batch.map(async ({ item, searchQuery }) => {
+          const coords = await geocodeAddress(searchQuery);
+          return { item, coords };
+        })
+      );
+
+      for (const result of results) {
+        if (result.status === 'fulfilled' && result.value.coords) {
+          const { item, coords } = result.value;
+          if (coords.lat !== destCoords.lat && coords.lng !== destCoords.lng) {
+            const oldCoords = `${item.latitude?.toFixed(4)},${item.longitude?.toFixed(4)}`;
+            item.latitude = coords.lat;
+            item.longitude = coords.lng;
+            enrichedCount++;
+            console.log(`[Coords] ✅ ${item.title}: ${oldCoords} → ${coords.lat.toFixed(4)},${coords.lng.toFixed(4)}`);
           }
         }
       }
