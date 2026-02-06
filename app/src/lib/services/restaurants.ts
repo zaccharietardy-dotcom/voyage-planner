@@ -99,7 +99,7 @@ interface RestaurantSearchParams {
  * ne passe à travers en Espagne, etc.
  */
 export async function searchRestaurants(params: RestaurantSearchParams): Promise<Restaurant[]> {
-  const { latitude, longitude, radius = 1000, limit = 10, destination, mealType } = params;
+  const { latitude, longitude, radius = 1000, limit = 10, destination, mealType, dietary } = params;
 
   // Variable pour stocker le résultat final
   let finalRestaurants: Restaurant[] = [];
@@ -128,7 +128,7 @@ export async function searchRestaurants(params: RestaurantSearchParams): Promise
         filtered = filterByForbiddenNames(filtered, destination);
 
         if (filtered.length >= limit) {
-          return applyFinalFilter(filtered, destination, limit, mealType);
+          return applyFinalFilter(filtered, destination, limit, mealType, dietary);
         }
       }
     } catch (error) {
@@ -160,7 +160,7 @@ export async function searchRestaurants(params: RestaurantSearchParams): Promise
         console.log(`[Restaurants] ${geminiResults.length} restaurants Gemini grounded, ${filtered.length} après filtrage`);
         if (filtered.length > 0) {
           finalRestaurants = filtered.slice(0, limit);
-          return applyFinalFilter(finalRestaurants, destination, limit, mealType);
+          return applyFinalFilter(finalRestaurants, destination, limit, mealType, dietary);
         }
       }
     } catch (error) {
@@ -193,7 +193,7 @@ export async function searchRestaurants(params: RestaurantSearchParams): Promise
         console.log(`[Restaurants] ${taRestaurants.length} restaurants TripAdvisor, ${filtered.length} après filtrage`);
         if (filtered.length > 0) {
           finalRestaurants = filtered.slice(0, limit);
-          return applyFinalFilter(finalRestaurants, destination, limit, mealType);
+          return applyFinalFilter(finalRestaurants, destination, limit, mealType, dietary);
         }
       }
     } catch (error) {
@@ -229,7 +229,7 @@ export async function searchRestaurants(params: RestaurantSearchParams): Promise
         console.log(`[Restaurants] ${serpRestaurants.length} restaurants trouvés via SerpAPI, ${filtered.length} après filtrage cuisine+nom`);
         if (filtered.length > 0) {
           finalRestaurants = filtered.slice(0, limit);
-          return applyFinalFilter(finalRestaurants, destination, limit, mealType);
+          return applyFinalFilter(finalRestaurants, destination, limit, mealType, dietary);
         }
       }
     } catch (error) {
@@ -252,7 +252,7 @@ export async function searchRestaurants(params: RestaurantSearchParams): Promise
         console.log(`[Restaurants] ${filtered.length} via Google Places (après filtre cuisine+nom)`);
         finalRestaurants = filtered;
         // Appliquer le filtre final et retourner
-        return applyFinalFilter(finalRestaurants, destination, limit, mealType);
+        return applyFinalFilter(finalRestaurants, destination, limit, mealType, dietary);
       }
     } catch (error) {
       console.error('[Restaurants] Google Places error, falling back to OSM:', error);
@@ -273,7 +273,7 @@ export async function searchRestaurants(params: RestaurantSearchParams): Promise
       console.log(`[Restaurants] ${filtered.length} via OSM (après filtre cuisine+nom)`);
       finalRestaurants = filtered;
       // Appliquer le filtre final et retourner
-      return applyFinalFilter(finalRestaurants, destination, limit, mealType);
+      return applyFinalFilter(finalRestaurants, destination, limit, mealType, dietary);
     }
   } catch (error) {
     console.error('[Restaurants] Overpass error, using fallback:', error);
@@ -283,7 +283,7 @@ export async function searchRestaurants(params: RestaurantSearchParams): Promise
   // IMPORTANT: generateLocalRestaurants doit UNIQUEMENT générer de la cuisine locale
   finalRestaurants = generateLocalRestaurants(params, destination);
   // Appliquer le filtre final même pour les restaurants générés (sécurité)
-  return applyFinalFilter(finalRestaurants, destination, limit, mealType);
+  return applyFinalFilter(finalRestaurants, destination, limit, mealType, dietary);
 }
 
 /**
@@ -322,7 +322,7 @@ export async function searchRestaurantsNearActivity(
         filtered = filterByForbiddenNames(filtered, destination);
         if (filtered.length > 0) {
           console.log(`[Restaurants Nearby] ${filtered.length} via Gemini grounded`);
-          return applyFinalFilter(filtered, destination, limit, mealType);
+          return applyFinalFilter(filtered, destination, limit, mealType, options.dietary);
         }
       }
     } catch (error) {
@@ -352,7 +352,7 @@ export async function searchRestaurantsNearActivity(
         console.log(`[Restaurants Nearby] ${nearbyRestaurants.length} trouvés via SerpAPI, ${filtered.length} après filtrage`);
 
         if (filtered.length > 0) {
-          return applyFinalFilter(filtered, destination, limit, mealType);
+          return applyFinalFilter(filtered, destination, limit, mealType, options.dietary);
         }
       }
     } catch (error) {
@@ -422,16 +422,18 @@ function filterByForbiddenNames(restaurants: Restaurant[], destination: string):
   // Mots-clés interdits par pays (dans le nom du restaurant)
   // IMPORTANT: Liste exhaustive incluant toutes les variantes possibles
   const FORBIDDEN_KEYWORDS: Record<string, string[]> = {
-    Spain: ['chinese', 'chinois', 'china', 'chino', 'wok', 'asia', 'asian', 'asiatique', 'asiatico', 'oriental', 'oriente', 'sushi', 'ramen', 'noodle', 'pho', 'thai', 'thaï', 'thailand', 'vietnam', 'vietnamita', 'indian', 'indien', 'indio', 'curry', 'tandoori', 'kebab', 'döner', 'doner', 'korean', 'coreen', 'coreano', 'japanese', 'japonais', 'japones', 'pekin', 'peking', 'beijing', 'szechuan', 'sichuan', 'cantonese', 'cantones', 'dim sum', 'hong kong', 'mandarin', 'shanghai', 'tokyo', 'osaka'],
-    Italy: ['chinese', 'chinois', 'china', 'cinese', 'wok', 'asia', 'asian', 'asiatico', 'sushi', 'ramen', 'mexican', 'mexicano', 'tacos', 'burrito', 'indian', 'indiano', 'curry', 'kebab', 'döner', 'pekin', 'peking'],
+    // Garder UNIQUEMENT les vrais pièges à touristes et fast-food non-local
+    // Les restaurants sushi/thai/indian bien notés peuvent être excellents même en Europe
+    Spain: ['wok', 'kebab', 'döner', 'doner', 'pekin', 'peking', 'beijing', 'dim sum', 'chino express'],
+    Italy: ['wok', 'kebab', 'döner', 'doner', 'pekin', 'peking', 'chino express'],
     France: ['burger king', 'mcdonald', 'kfc', 'subway', 'quick', 'five guys'],
-    Portugal: ['chinese', 'chinois', 'china', 'chines', 'wok', 'asia', 'sushi', 'indian', 'indiano', 'curry', 'kebab', 'pekin', 'peking'],
-    Greece: ['chinese', 'chinois', 'china', 'wok', 'asia', 'asian', 'sushi', 'indian', 'curry', 'mexican', 'pekin', 'peking'],
-    Croatia: ['chinese', 'chinois', 'china', 'wok', 'asia', 'asian', 'sushi', 'indian', 'curry', 'mexican', 'pekin', 'peking'],
-    Morocco: ['chinese', 'chinois', 'china', 'wok', 'asia', 'asian', 'sushi', 'indian', 'curry', 'mexican', 'pekin', 'peking', 'japanese', 'japonais'],
-    Malta: ['chinese', 'chinois', 'china', 'wok', 'asia', 'asian', 'sushi', 'indian', 'curry', 'mexican', 'pekin', 'peking'],
-    Turkey: ['chinese', 'chinois', 'china', 'wok', 'asia', 'asian', 'sushi', 'mexican', 'pekin', 'peking'],
-    Cyprus: ['chinese', 'chinois', 'china', 'wok', 'asia', 'asian', 'sushi', 'indian', 'curry', 'mexican', 'pekin', 'peking'],
+    Portugal: ['wok', 'kebab', 'döner', 'doner', 'pekin', 'peking', 'chino express'],
+    Greece: ['wok', 'kebab', 'pekin', 'peking', 'chino express'],
+    Croatia: ['wok', 'kebab', 'pekin', 'peking', 'chino express'],
+    Morocco: ['wok', 'pekin', 'peking', 'chino express'],
+    Malta: ['wok', 'kebab', 'pekin', 'peking', 'chino express'],
+    Turkey: ['wok', 'pekin', 'peking', 'chino express'],
+    Cyprus: ['wok', 'kebab', 'pekin', 'peking', 'chino express'],
   };
 
   const country = getCountryFromDestination(destination);
@@ -443,6 +445,11 @@ function filterByForbiddenNames(restaurants: Restaurant[], destination: string):
     const nameLower = r.name.toLowerCase();
     const isForbidden = forbiddenKeywords.some(keyword => nameLower.includes(keyword));
     if (isForbidden) {
+      // Exception : restaurants très bien notés (authentiques et de qualité)
+      if (r.rating && r.rating >= 4.5 && (r.reviewCount || 0) >= 200) {
+        console.log(`[Restaurants] GARDÉ malgré mot interdit: "${r.name}" (${r.rating}★, ${r.reviewCount} avis)`);
+        return true;
+      }
       console.log(`[Restaurants] EXCLU par nom: "${r.name}" contient un mot interdit`);
     }
     return !isForbidden;
@@ -520,7 +527,35 @@ function filterByMealType(restaurants: Restaurant[], mealType?: 'breakfast' | 'l
   });
 }
 
-function applyFinalFilter(restaurants: Restaurant[], destination: string | undefined, limit: number, mealType?: 'breakfast' | 'lunch' | 'dinner'): Restaurant[] {
+/**
+ * Priorise les restaurants correspondant aux restrictions diététiques de l'utilisateur.
+ * Ne supprime PAS les restaurants non-matching (données souvent incomplètes),
+ * mais les trie pour que les matchs apparaissent en premier.
+ */
+function applyDietaryPreference(restaurants: Restaurant[], dietary?: DietaryType[]): Restaurant[] {
+  if (!dietary || dietary.length === 0 || dietary.includes('none')) return restaurants;
+
+  const dietaryKeywords: Record<string, string[]> = {
+    vegetarian: ['vegetarian', 'végétarien', 'veggie', 'vegetarisch', 'vegetariano'],
+    vegan: ['vegan', 'végan', 'plant-based', 'végétal', 'vegano'],
+    halal: ['halal'],
+    kosher: ['kosher', 'casher', 'cacher'],
+    gluten_free: ['gluten-free', 'sans gluten', 'celiac', 'coeliaque', 'glutenfrei'],
+  };
+
+  const targetKeywords = dietary.flatMap(d => dietaryKeywords[d] || []);
+  if (targetKeywords.length === 0) return restaurants;
+
+  return [...restaurants].sort((a, b) => {
+    const aText = `${a.name} ${a.description || ''} ${(a.cuisineTypes || []).join(' ')}`.toLowerCase();
+    const bText = `${b.name} ${b.description || ''} ${(b.cuisineTypes || []).join(' ')}`.toLowerCase();
+    const aMatch = targetKeywords.some(kw => aText.includes(kw)) ? 1 : 0;
+    const bMatch = targetKeywords.some(kw => bText.includes(kw)) ? 1 : 0;
+    return bMatch - aMatch;
+  });
+}
+
+function applyFinalFilter(restaurants: Restaurant[], destination: string | undefined, limit: number, mealType?: 'breakfast' | 'lunch' | 'dinner', dietary?: DietaryType[]): Restaurant[] {
   if (restaurants.length === 0) {
     return [];
   }
@@ -548,6 +583,9 @@ function applyFinalFilter(restaurants: Restaurant[], destination: string | undef
   } else if (excludedByRating + excludedByMealType > 0) {
     console.log(`[Restaurants] ⚠️ FILTRE FINAL: ${excludedByRating + excludedByMealType} restaurant(s) exclu(s) (${excludedByRating} par note, ${excludedByMealType} par type repas)`);
   }
+
+  // 4. Prioriser les restaurants correspondant aux restrictions diététiques
+  filtered = applyDietaryPreference(filtered, dietary);
 
   return filtered.slice(0, limit);
 }
@@ -650,6 +688,7 @@ async function searchWithOverpass(params: RestaurantSearchParams): Promise<Resta
       website: element.tags.website,
       googleMapsUrl, // URL Google Maps fiable avec nom + adresse
       reservationUrl: buildReservationUrl(element.tags.name, params.destination || ''),
+      dataReliability: 'verified' as const, // Coordonnées réelles OpenStreetMap
       distance,
       walkingTime,
     });
@@ -922,6 +961,7 @@ function generateLocalRestaurants(params: RestaurantSearchParams, destination?: 
       isOpenNow: true,
       distance,
       walkingTime: estimateTravelTime(distance, 'walk'),
+      dataReliability: 'generated' as const, // Coordonnées fictives (centre-ville + jitter)
     });
   }
 

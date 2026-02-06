@@ -9,6 +9,7 @@
 
 import { Trip, TripItem, TripDay } from '../types';
 import { calculateDistance, getCityCenterCoords } from './geocoding';
+import { resolveCoordinates } from './coordsResolver';
 
 // Distance maximale acceptée depuis le centre-ville (en km)
 const MAX_DISTANCE_FROM_CENTER_KM = 50;
@@ -46,7 +47,7 @@ export function isLocationInDestination(
 ): boolean {
   // Coordonnées invalides ou par défaut (0,0)
   if (!location.lat || !location.lng || (location.lat === 0 && location.lng === 0)) {
-    return true; // On laisse passer les lieux sans coordonnées
+    return false; // Coordonnées manquantes ou (0,0) = invalide
   }
 
   const distance = calculateDistance(
@@ -79,37 +80,44 @@ export function getDistanceFromDestination(
 }
 
 /**
- * Corrige les coordonnées d'un item en les ramenant près du centre-ville
- * Au lieu de supprimer l'item, on le recentre avec un petit offset aléatoire
+ * Tente de résoudre les coordonnées d'un item via la chaîne exhaustive d'APIs
+ * Si échec: marque l'item comme 'estimated' (sera visible dans les logs de qualité)
+ * JAMAIS de jitter/random — résolution réelle uniquement
  */
-function fixItemCoordinates(
+async function fixItemCoordinates(
   item: TripItem,
-  destinationCenter: { lat: number; lng: number }
-): void {
-  // Ajouter un offset aléatoire pour éviter que tous les items soient au même endroit
-  // Offset de ±0.01° ≈ ±1km
-  const latOffset = (Math.random() - 0.5) * 0.02;
-  const lngOffset = (Math.random() - 0.5) * 0.02;
-
+  destinationCenter: { lat: number; lng: number },
+  destination: string
+): Promise<boolean> {
   const oldLat = item.latitude;
   const oldLng = item.longitude;
 
-  item.latitude = destinationCenter.lat + latOffset;
-  item.longitude = destinationCenter.lng + lngOffset;
-  item.dataReliability = 'estimated';
+  // Tenter résolution via chaîne exhaustive
+  const resolved = await resolveCoordinates(item.title, destination, destinationCenter, item.type as 'attraction' | 'restaurant');
+  if (resolved) {
+    item.latitude = resolved.lat;
+    item.longitude = resolved.lng;
+    item.dataReliability = 'verified';
+    console.log(`[GeoValidator] ✅ RESOLVED: "${item.title}" (${oldLat?.toFixed(4)}, ${oldLng?.toFixed(4)}) → (${item.latitude.toFixed(4)}, ${item.longitude.toFixed(4)}) via ${resolved.source}`);
+    return true;
+  }
 
-  console.log(`[GeoValidator] CORRIGÉ: "${item.title}" coords (${oldLat?.toFixed(4)}, ${oldLng?.toFixed(4)}) → (${item.latitude.toFixed(4)}, ${item.longitude.toFixed(4)})`);
+  // Échec: garder les coords actuelles mais marquer comme estimated
+  item.dataReliability = 'estimated';
+  console.error(`[GeoValidator] ❌ UNRESOLVED: "${item.title}" — coords aberrantes (${oldLat?.toFixed(4)}, ${oldLng?.toFixed(4)}) conservées, marquées estimated`);
+  return false;
 }
 
 /**
  * Valide la cohérence géographique d'un voyage complet
  * AMÉLIORATION: Au lieu de supprimer les items trop loin, on CORRIGE leurs coordonnées
  */
-export function validateTripGeography(
+export async function validateTripGeography(
   trip: Trip,
   destinationCenter: { lat: number; lng: number },
-  autoFix: boolean = true
-): GeoValidationResult {
+  autoFix: boolean = true,
+  destination: string = ''
+): Promise<GeoValidationResult> {
   const errors: GeoValidationError[] = [];
   let itemsFixed = 0;
 
@@ -144,10 +152,10 @@ export function validateTripGeography(
           message: `"${item.title}" est à ${Math.round(distance)}km de la destination (max: ${maxDistance}km)`
         });
 
-        // NOUVEAU: Corriger les coords au lieu de supprimer
+        // Résolution via chaîne exhaustive d'APIs (pas de jitter)
         if (autoFix) {
-          fixItemCoordinates(item, destinationCenter);
-          itemsFixed++;
+          const fixed = await fixItemCoordinates(item, destinationCenter, destination);
+          if (fixed) itemsFixed++;
         }
       }
     }
@@ -156,11 +164,11 @@ export function validateTripGeography(
   const result: GeoValidationResult = {
     valid: errors.length === 0,
     errors,
-    itemsRemoved: itemsFixed // Renommé mais garde la compatibilité
+    itemsRemoved: itemsFixed
   };
 
   if (errors.length > 0) {
-    console.log(`[GeoValidator] ${errors.length} erreur(s) géographique(s) détectée(s), ${itemsFixed} élément(s) corrigé(s)`);
+    console.log(`[GeoValidator] ${errors.length} erreur(s) géographique(s) détectée(s), ${itemsFixed} résolu(s) via API`);
   } else {
     console.log(`[GeoValidator] Voyage géographiquement cohérent ✓`);
   }

@@ -104,6 +104,31 @@ const KNOWN_TIQETS_LINKS: Record<string, string> = {
   'tower of london': 'https://www.tiqets.com/en/london-attractions-c75260/tickets-for-tower-of-london-p974105',
   'london eye': 'https://www.tiqets.com/en/london-attractions-c75260/tickets-for-london-eye-p974103',
   'buckingham palace': 'https://www.tiqets.com/en/london-attractions-c75260/tickets-for-buckingham-palace-p974101',
+
+  // Tokyo
+  'teamlab': 'https://www.tiqets.com/en/tokyo-c308498/teamlab-borderless-p1031898',
+  'tokyo skytree': 'https://www.tiqets.com/en/tokyo-c308498/tokyo-skytree-p1027489',
+  'skytree': 'https://www.tiqets.com/en/tokyo-c308498/tokyo-skytree-p1027489',
+  'tokyo tower': 'https://www.tiqets.com/en/tokyo-c308498/tokyo-tower-p1027490',
+  'senso-ji': 'https://www.tiqets.com/en/tokyo-c308498/sensoji-temple-asakusa-p1031899',
+  'meiji': 'https://www.tiqets.com/en/tokyo-c308498/meiji-jingu-shrine-p1031900',
+
+  // Istanbul
+  'sainte-sophie': 'https://www.tiqets.com/en/istanbul-c95556/hagia-sophia-p1027491',
+  'hagia sophia': 'https://www.tiqets.com/en/istanbul-c95556/hagia-sophia-p1027491',
+  'topkapi': 'https://www.tiqets.com/en/istanbul-c95556/topkapi-palace-p1027492',
+
+  // Berlin
+  'pergamon': 'https://www.tiqets.com/en/berlin-c75237/pergamon-museum-p974088',
+  'neues museum': 'https://www.tiqets.com/en/berlin-c75237/neues-museum-p974090',
+
+  // Budapest
+  'széchenyi': 'https://www.tiqets.com/en/budapest-c95550/szechenyi-spa-p1027493',
+  'szechenyi': 'https://www.tiqets.com/en/budapest-c95550/szechenyi-spa-p1027493',
+
+  // Prague
+  'prague castle': 'https://www.tiqets.com/en/prague-c95548/prague-castle-p1027494',
+  'château de prague': 'https://www.tiqets.com/en/prague-c95548/prague-castle-p1027494',
 };
 
 /**

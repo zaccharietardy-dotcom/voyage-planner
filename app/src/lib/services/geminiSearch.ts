@@ -703,3 +703,76 @@ function generateGoogleFlightsUrl(origin: string, destination: string, date: str
 export function isGeminiConfigured(): boolean {
   return !!GEMINI_API_KEY;
 }
+
+// ============================================
+// Geocoding via Gemini + Google Search (FREE)
+// ============================================
+
+let geminiGeocodeCallCount = 0;
+const GEMINI_GEOCODE_MAX_CALLS = 50; // Limit per generation — increased for 100% GPS precision
+
+export function resetGeminiGeocodeCounter(): void {
+  geminiGeocodeCallCount = 0;
+}
+
+/**
+ * Geocode a place name using Gemini 2.5 Flash + Google Search grounding.
+ * Returns GPS coordinates if found, null otherwise.
+ * Limited to GEMINI_GEOCODE_MAX_CALLS per generation.
+ */
+export async function geocodeWithGemini(
+  placeName: string,
+  city: string
+): Promise<{ lat: number; lng: number; address?: string } | null> {
+  if (!GEMINI_API_KEY) return null;
+  if (geminiGeocodeCallCount >= GEMINI_GEOCODE_MAX_CALLS) {
+    console.log(`[Gemini Geocode] Limit reached (${GEMINI_GEOCODE_MAX_CALLS} calls), skipping "${placeName}"`);
+    return null;
+  }
+  geminiGeocodeCallCount++;
+
+  const prompt = `What are the exact GPS coordinates of "${placeName}" in ${city}?
+Return ONLY a valid JSON object with no other text:
+{"lat": 35.6762, "lng": 139.6503, "address": "exact street address"}
+If you cannot find this place, return: {"lat": null, "lng": null}`;
+
+  try {
+    const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        tools: [{ googleSearch: {} }],
+        generationConfig: {
+          temperature: 0,
+          maxOutputTokens: 200,
+        },
+      }),
+    });
+
+    if (!response.ok) {
+      console.warn(`[Gemini Geocode] API error ${response.status} for "${placeName}"`);
+      return null;
+    }
+
+    const data: GeminiResponse = await response.json();
+    const textContent = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!textContent) return null;
+
+    const jsonMatch = textContent.match(/\{[\s\S]*?\}/);
+    if (!jsonMatch) return null;
+
+    const parsed = JSON.parse(jsonMatch[0]);
+    if (parsed.lat && parsed.lng && typeof parsed.lat === 'number' && typeof parsed.lng === 'number') {
+      // Sanity check: coordinates should be reasonable (not 0,0 or extreme)
+      if (Math.abs(parsed.lat) > 0.1 && Math.abs(parsed.lng) > 0.1 && Math.abs(parsed.lat) < 90 && Math.abs(parsed.lng) < 180) {
+        console.log(`[Gemini Geocode] ✅ "${placeName}" → (${parsed.lat}, ${parsed.lng})`);
+        return { lat: parsed.lat, lng: parsed.lng, address: parsed.address || undefined };
+      }
+    }
+    return null;
+  } catch (error) {
+    console.warn(`[Gemini Geocode] Error for "${placeName}":`, error);
+    return null;
+  }
+}

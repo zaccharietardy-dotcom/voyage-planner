@@ -205,6 +205,7 @@ export interface Restaurant {
   specialties?: string[]; // spécialités du restaurant
   description?: string; // description courte
   tips?: string; // conseils (réservation, plats signature, etc.)
+  dataReliability?: 'verified' | 'estimated' | 'generated'; // Fiabilité des coordonnées GPS
 }
 
 // ============================================
@@ -233,6 +234,7 @@ export interface Accommodation {
   distanceToActivities?: { activityId: string; distance: number }[];
   breakfastIncluded?: boolean; // true si petit-déjeuner inclus dans le prix
   description?: string;
+  dataReliability?: 'verified' | 'estimated' | 'generated'; // Fiabilité des coordonnées GPS
 }
 
 // ============================================
@@ -350,6 +352,10 @@ export interface TripItem {
   // Titre de l'activité Viator (si différent du titre de l'activité)
   // Ex: "Piazza Navona" → "Rome Walking Tour: Pantheon, Piazza Navona and Trevi Fountain"
   viatorTitle?: string;
+  // Viator product card data
+  viatorImageUrl?: string;
+  viatorRating?: number;
+  viatorReviewCount?: number;
 }
 
 export interface TripDay {

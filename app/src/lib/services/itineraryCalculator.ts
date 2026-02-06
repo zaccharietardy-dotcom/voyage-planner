@@ -1,6 +1,7 @@
 import { TripDay, TripItem } from '@/lib/types';
 import type { Attraction } from './attractions';
 import { DEFAULT_TIME_CONFIG, TimeCalculationConfig } from '@/lib/types/collaboration';
+import { getMealTimes } from './destinationData';
 
 /**
  * Recalcule tous les horaires d'un itinéraire après un déplacement
@@ -410,11 +411,15 @@ export function insertDay(
   afterDayNumber: number,
   startDate: Date,
   accommodation?: { name?: string; latitude?: number; longitude?: number; pricePerNight?: number } | null,
-  attractionPool?: Attraction[]
+  attractionPool?: Attraction[],
+  destination?: string
 ): TripDay[] {
   // Validation
   if (days.length < 2) return days; // Voyage trop court
   if (afterDayNumber < 1 || afterDayNumber > days.length) return days;
+
+  // Get local meal times for this destination
+  const localMealTimes = destination ? getMealTimes(destination) : { breakfast: '09:00', lunch: '12:30', dinner: '19:30' };
 
   const newDays: TripDay[] = JSON.parse(JSON.stringify(days));
 
@@ -434,12 +439,13 @@ export function insertDay(
   const items: TripItem[] = [];
   let orderIdx = 0;
 
-  // Petit-déjeuner
+  // Petit-déjeuner (local meal time)
+  const bfStart = parseTime(localMealTimes.breakfast);
   items.push({
     id: crypto.randomUUID(),
     dayNumber: newDayNumber,
-    startTime: '09:00',
-    endTime: '09:45',
+    startTime: localMealTimes.breakfast,
+    endTime: formatTime(bfStart + 45),
     type: 'restaurant',
     title: 'Petit-déjeuner',
     description: 'Petit-déjeuner libre',
@@ -453,19 +459,19 @@ export function insertDay(
   });
 
   // Activité 1 (matin) — depuis le pool ou temps libre
+  const activity1Start = bfStart + 60; // 1h after breakfast
+  const activity1StartStr = formatTime(activity1Start);
   if (unusedAttractions.length >= 1) {
     const a = unusedAttractions[0];
     const duration = Math.min(a.duration || 90, 120); // Max 2h
-    const endMinutes = 600 + duration; // 10:00 + duration
-    const endH = Math.floor(endMinutes / 60).toString().padStart(2, '0');
-    const endM = (endMinutes % 60).toString().padStart(2, '0');
-    items.push(attractionToTripItem(a, newDayNumber, '10:00', `${endH}:${endM}`, orderIdx++));
+    const endMinutes = activity1Start + duration;
+    items.push(attractionToTripItem(a, newDayNumber, activity1StartStr, formatTime(endMinutes), orderIdx++));
   } else {
     items.push({
       id: crypto.randomUUID(),
       dayNumber: newDayNumber,
-      startTime: '10:00',
-      endTime: '12:00',
+      startTime: activity1StartStr,
+      endTime: formatTime(activity1Start + 120),
       type: 'activity',
       title: 'Temps libre / Exploration',
       description: 'Profitez de cette journée libre pour explorer à votre rythme',
@@ -478,12 +484,13 @@ export function insertDay(
     });
   }
 
-  // Déjeuner
+  // Déjeuner (local meal time)
+  const lunchStart = parseTime(localMealTimes.lunch);
   items.push({
     id: crypto.randomUUID(),
     dayNumber: newDayNumber,
-    startTime: '12:30',
-    endTime: '13:45',
+    startTime: localMealTimes.lunch,
+    endTime: formatTime(lunchStart + 75),
     type: 'restaurant',
     title: 'Déjeuner',
     description: 'Déjeuner libre',
@@ -497,19 +504,19 @@ export function insertDay(
   });
 
   // Activité 2 (début après-midi) — depuis le pool ou temps libre
+  const activity2Start = lunchStart + 90; // 1h30 after lunch start
+  const activity2StartStr = formatTime(activity2Start);
   if (unusedAttractions.length >= 2) {
     const a = unusedAttractions[1];
     const duration = Math.min(a.duration || 90, 120);
-    const endMinutes = 870 + duration; // 14:30 + duration
-    const endH = Math.floor(endMinutes / 60).toString().padStart(2, '0');
-    const endM = (endMinutes % 60).toString().padStart(2, '0');
-    items.push(attractionToTripItem(a, newDayNumber, '14:30', `${endH}:${endM}`, orderIdx++));
+    const endMinutes = activity2Start + duration;
+    items.push(attractionToTripItem(a, newDayNumber, activity2StartStr, formatTime(endMinutes), orderIdx++));
   } else {
     items.push({
       id: crypto.randomUUID(),
       dayNumber: newDayNumber,
-      startTime: '14:30',
-      endTime: '16:30',
+      startTime: activity2StartStr,
+      endTime: formatTime(activity2Start + 120),
       type: 'activity',
       title: 'Temps libre',
       description: 'Après-midi libre',
@@ -523,21 +530,22 @@ export function insertDay(
   }
 
   // Activité 3 (fin après-midi) — seulement si pool assez fourni
+  const activity3Start = activity2Start + 150; // ~2h30 after activity 2 start
+  const activity3StartStr = formatTime(activity3Start);
   if (unusedAttractions.length >= 3) {
     const a = unusedAttractions[2];
     const duration = Math.min(a.duration || 60, 90); // Max 1h30
-    const endMinutes = 1020 + duration; // 17:00 + duration
-    const endH = Math.floor(endMinutes / 60).toString().padStart(2, '0');
-    const endM = (endMinutes % 60).toString().padStart(2, '0');
-    items.push(attractionToTripItem(a, newDayNumber, '17:00', `${endH}:${endM}`, orderIdx++));
+    const endMinutes = activity3Start + duration;
+    items.push(attractionToTripItem(a, newDayNumber, activity3StartStr, formatTime(endMinutes), orderIdx++));
   }
 
-  // Dîner
+  // Dîner (local meal time)
+  const dinnerStart = parseTime(localMealTimes.dinner);
   items.push({
     id: crypto.randomUUID(),
     dayNumber: newDayNumber,
-    startTime: '19:30',
-    endTime: '21:00',
+    startTime: localMealTimes.dinner,
+    endTime: formatTime(dinnerStart + 90),
     type: 'restaurant',
     title: 'Dîner',
     description: 'Dîner libre',

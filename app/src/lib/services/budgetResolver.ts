@@ -14,6 +14,7 @@ import {
   BUDGET_LABELS,
 } from '../types';
 import { tokenTracker } from './tokenTracker';
+import { getDestinationCosts } from './destinationData';
 
 /**
  * Normalise les inputs budget en valeurs exploitables
@@ -79,6 +80,8 @@ export async function generateBudgetStrategy(
 
   const client = new Anthropic({ apiKey });
 
+  const costs = getDestinationCosts(destination);
+
   const prompt = `Tu es un expert en planification de voyages et optimisation de budget.
 
 CONTEXTE:
@@ -89,6 +92,13 @@ CONTEXTE:
 - Activités souhaitées: ${activities.join(', ') || 'variées'}
 
 DÉCIDE la meilleure stratégie pour ce budget. Sois réaliste par rapport au coût de la vie à ${destination}.
+${costs ? `
+RÉFÉRENCE COÛTS pour ${destination}:
+- Repas moyen restaurant: ${costs.avgMeal}€
+- Entrée musée moyenne: ${costs.avgMuseum}€
+- Transport quotidien: ${costs.avgTransit}€
+- Hôtel budget: ${costs.budgetHotel}€/nuit
+UTILISE ces chiffres pour calibrer ta stratégie.` : ''}
 
 Réponds UNIQUEMENT avec un JSON valide (pas de markdown):
 {
@@ -120,7 +130,10 @@ RÈGLES:
 ${mealPreference && mealPreference !== 'auto' ? `- IMPORTANT: L'utilisateur a explicitement choisi la préférence repas "${mealPreference}":
   ${mealPreference === 'mostly_cooking' ? '→ Privilégie self_catered pour la plupart des repas (breakfast + lunch self_catered, dinner mixed)' : ''}
   ${mealPreference === 'mostly_restaurants' ? '→ Privilégie restaurant pour la plupart des repas, groceryShoppingNeeded=false' : ''}
-  ${mealPreference === 'balanced' ? '→ Mets "mixed" pour lunch et dinner, self_catered pour breakfast' : ''}` : ''}`;
+  ${mealPreference === 'balanced' ? '→ Mets "mixed" pour lunch et dinner, self_catered pour breakfast' : ''}` : ''}
+- DESTINATIONS À RESTAURATION BON MARCHÉ: Dans ces pays, manger au restaurant est souvent MOINS CHER que cuisiner soi-même. PRIVILÉGIE "restaurant" ou "mixed" plutôt que "self_catered", MÊME en budget économique:
+  Japon (ramen 5-8€, gyudon 3-5€, konbini 3-5€), Thaïlande (street food 1-3€, resto 3-8€), Vietnam (pho 1-3€), Inde (thali 2-5€), Mexique (tacos 1-3€), Turquie (kebab 3-5€), Corée du Sud (bibimbap 5-8€), Indonésie (nasi goreng 1-3€), Maroc (tagine 3-7€), Portugal (menu du jour 7-10€), Grèce (taverne 8-12€), Taïwan (night market 2-5€)
+  Pour ces destinations: groceryShoppingNeeded=false, mealsStrategy lunch et dinner = "restaurant" ou "mixed"`;
 
   try {
     const response = await client.messages.create({
@@ -168,6 +181,34 @@ ${mealPreference && mealPreference !== 'auto' ? `- IMPORTANT: L'utilisateur a ex
         strategy.groceryShoppingNeeded = true;
       }
       console.log(`[BudgetStrategy] Override from mealPreference=${mealPreference}`);
+    }
+
+    // Guard: cheap restaurant destinations — never self-cater lunch/dinner
+    const cheapRestaurantDestinations = [
+      'japon', 'japan', 'tokyo', 'osaka', 'kyoto',
+      'thaïlande', 'thailand', 'bangkok', 'chiang mai', 'phuket',
+      'vietnam', 'hanoi', 'ho chi minh', 'saigon',
+      'inde', 'india', 'delhi', 'mumbai', 'goa',
+      'mexique', 'mexico', 'cancun', 'playa del carmen',
+      'turquie', 'turkey', 'istanbul', 'antalya',
+      'corée', 'korea', 'seoul', 'busan',
+      'indonésie', 'indonesia', 'bali', 'jakarta',
+      'maroc', 'morocco', 'marrakech', 'fes', 'fès',
+      'portugal', 'lisbonne', 'lisbon', 'porto',
+      'grèce', 'greece', 'athènes', 'athens',
+      'taïwan', 'taiwan', 'taipei',
+    ];
+    const destLowerBudget = destination.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const isCheapRestaurantDest = cheapRestaurantDestinations.some(d => destLowerBudget.includes(d));
+    if (isCheapRestaurantDest && (!mealPreference || mealPreference === 'auto')) {
+      const meals = strategy.mealsStrategy;
+      if (meals.lunch === 'self_catered' || meals.dinner === 'self_catered') {
+        console.log(`[BudgetStrategy] Override: "${destination}" is a cheap restaurant destination → forcing lunch/dinner to restaurant/mixed`);
+        if (meals.lunch === 'self_catered') meals.lunch = 'restaurant';
+        if (meals.dinner === 'self_catered') meals.dinner = 'restaurant';
+        // Groceries still needed only if breakfast is self_catered
+        strategy.groceryShoppingNeeded = meals.breakfast === 'self_catered';
+      }
     }
 
     // Guard: if budget per person per day is high enough (>=80€) AND no explicit meal preference, force all meals to restaurant
@@ -240,4 +281,28 @@ function getDefaultStrategy(budgetLevel: BudgetLevel): BudgetStrategy {
         reasoning: 'Budget luxe, meilleures expériences sans limite',
       };
   }
+}
+
+/**
+ * Valide la conformité budgétaire post-génération.
+ * Vérifie que le coût des activités de chaque jour ne dépasse pas 130% du budget quotidien.
+ */
+export function validateBudgetCompliance(
+  days: Array<{dayNumber: number, items: Array<{type: string, estimatedCost?: number}>}>,
+  dailyActivityBudget: number
+): { warnings: string[]; overBudgetDays: number[] } {
+  const warnings: string[] = [];
+  const overBudgetDays: number[] = [];
+
+  for (const day of days) {
+    const activityCost = day.items
+      .filter(i => i.type === 'activity')
+      .reduce((sum, i) => sum + (i.estimatedCost || 0), 0);
+
+    if (activityCost > dailyActivityBudget * 1.3) {
+      warnings.push(`Jour ${day.dayNumber}: activités ${activityCost}€ > budget ${dailyActivityBudget}€`);
+      overBudgetDays.push(day.dayNumber);
+    }
+  }
+  return { warnings, overBudgetDays };
 }

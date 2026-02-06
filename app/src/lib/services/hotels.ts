@@ -220,6 +220,7 @@ export async function searchHotels(
             distanceToCenter: h.distanceToCenter,
             description: '',
             breakfastIncluded: h.breakfastIncluded,
+            dataReliability: (h.latitude && h.longitude) ? 'verified' as const : 'estimated' as const,
           };
         });
 
@@ -327,6 +328,7 @@ export async function searchHotels(
                     distanceToCenter: 0,
                     description: 'Disponibilité confirmée',
                     breakfastIncluded,
+                    dataReliability: (h.latitude && h.longitude) ? 'verified' as const : 'estimated' as const,
                   };
                 });
                 // Enrichir les adresses manquantes via Google Places
@@ -396,6 +398,7 @@ export async function searchHotels(
             distanceToCenter: 0,
             description: '',
             breakfastIncluded,
+            dataReliability: (h.latitude && h.longitude) ? 'verified' as const : 'estimated' as const,
           };
         });
 
@@ -560,6 +563,7 @@ Réponds UNIQUEMENT avec un tableau JSON valide.`;
     bookingUrl: `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(`${h.name} ${destination}`)}&lang=fr`,
     distanceToCenter: h.distanceToCenter || 1,
     description: h.description,
+    dataReliability: (h.latitude && h.longitude) ? 'verified' as const : 'estimated' as const,
   }));
 }
 

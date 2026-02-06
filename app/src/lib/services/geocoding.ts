@@ -504,7 +504,7 @@ export function findNearbyAirports(city: string): AirportInfo[] {
     'calvi': 'CLY',
     'corse': 'AJA', 'corsica': 'AJA',
     // Japon
-    'tokyo': 'NRT', 'tokio': 'NRT',
+    'tokyo': 'HND', 'tokio': 'HND',
     'osaka': 'KIX',
     'kyoto': 'KIX', // Kyoto utilise Osaka Kansai
     'nagoya': 'NGO',

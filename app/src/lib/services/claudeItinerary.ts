@@ -16,6 +16,7 @@ import { Attraction } from './attractions';
 import { ActivityType, BudgetStrategy } from '../types';
 import * as fs from 'fs';
 import * as path from 'path';
+import { getMealTimes, getReligiousCap, getClosureWarnings, MINIMUM_DURATION_OVERRIDES } from './destinationData';
 
 // ============================================
 // Types
@@ -62,6 +63,7 @@ export interface ClaudeItineraryDay {
     estimatedDuration: number;
     estimatedCost: number;
     area: string;
+    address?: string;
     bestTimeOfDay?: string;
     bookable?: boolean;
     gygSearchQuery?: string;
@@ -222,6 +224,8 @@ IMPORTANT: Les repas self_catered (courses/cuisine) sont AUTOMATIQUEMENT ajouté
 ${request.budgetLevel === 'luxury' || request.budgetLevel === 'comfort' ? `\nBUDGET PREMIUM: Tous les repas sont au restaurant. Mentionne des restaurants gastronomiques ou réputés dans les dayNarrative. Propose des expériences premium (visites privées, coupe-file, croisières VIP).` : ''}
 ` : '';
 
+  const mealTimes = getMealTimes(request.destination);
+
   const prompt = `Tu es un guide de voyage local expert avec 20 ans d'expérience à ${request.destination}. Conçois l'itinéraire PARFAIT de ${request.durationDays} jours.
 
 CONTEXTE DU VOYAGE:
@@ -244,6 +248,11 @@ RÈGLES D'OR:
    - Viewpoints, observatoires → fin d'après-midi/coucher de soleil
    - Quartiers animés, rues commerçantes → fin d'après-midi/soirée
    - Parcs, jardins → selon la lumière et la saison
+   - HORAIRES REPAS LOCAUX pour ${request.destination}:
+     * Petit-déjeuner: ${mealTimes.breakfast}
+     * Déjeuner: ${mealTimes.lunch}
+     * Dîner: ${mealTimes.dinner}
+     RESPECTE ces horaires locaux. En Espagne, le dîner ne peut PAS être avant 20h30. En Allemagne, le dîner est souvent à 18h30.
 
 2. REGROUPEMENT GÉOGRAPHIQUE STRICT:
    - CHAQUE jour doit couvrir UNE zone/quartier principal (max 2 quartiers adjacents). JAMAIS zigzaguer entre est/ouest/nord dans la même journée
@@ -300,9 +309,14 @@ RÈGLES D'OR:
    - Précise le moyen de transport ET la durée du trajet dans la description
    - isDayTrip DOIT être true pour ce jour, avec dayTripDestination et dayTripTransport renseignés
 
-5. SAISONNALITÉ (${season}):
+5. ADAPTATION SAISONNIÈRE pour ${season}:
+   ${season === 'hiver' ? `- HIVER: Privilégie musées, indoor, marchés de Noël. Viewpoints AVANT 17h. Pas d'activités eau/plage sauf climat tropical.` : ''}
+   ${season === 'été' ? `- ÉTÉ: Activités outdoor tôt le matin ou fin d'après-midi (éviter 12h-16h en Méditerranée). Plages, randonnées, terrasses. Coucher de soleil tard.` : ''}
+   ${season === 'printemps' ? `- PRINTEMPS: Jardins, parcs en fleurs, cherry blossoms (Japon mars-avril). Météo variable, prévoir mix indoor/outdoor.` : ''}
+   ${season === 'automne' ? `- AUTOMNE: Couleurs d'automne, vendanges (Europe), festivals. Journées plus courtes, adapter les viewpoints.` : ''}
    - Adapte les suggestions à la saison (cerisiers printemps, illuminations hiver, plages été...)
    - Mentionne les événements/festivals si pertinents pour la date
+   - FERMETURES CONNUES: ${getClosureWarnings(request.destination)}
 
 6. FILTRAGE STRICT:
    - EXCLUE: cinémas, arcades, salles de sport, immeubles, bureaux, centres commerciaux génériques
@@ -328,7 +342,7 @@ RÈGLES D'OR:
 
 6c. DIVERSITÉ CATÉGORIELLE OBLIGATOIRE:
    - Maximum 1 lieu religieux (église, temple, cathédrale, mosquée, synagogue, sanctuaire) par jour
-   - Maximum 3 lieux religieux sur TOUT le séjour
+   - Max ${getReligiousCap(request.destination)} sites religieux au total pour ${request.destination}
    - JAMAIS 2 lieux du même type consécutifs (2 musées d'affilée, 2 églises d'affilée)
    - Chaque jour doit mixer au moins 2 catégories différentes (culture + nature, shopping + gastronomie, monument + quartier...)
    - PRIORITÉ aux attractions ICONIQUES et DIVERSIFIÉES plutôt qu'à l'exhaustivité d'une seule catégorie
@@ -345,6 +359,9 @@ RÈGLES D'OR:
      * Mets ces infos dans additionalSuggestions avec les détails logistiques dans whyVisit
 
 7. COMPLÉTER LE POOL + EXPÉRIENCES UNIQUES:
+   - Pour CHAQUE additionalSuggestion, le "name" doit être le NOM EXACT du lieu (pas "Cours de cuisine" mais "Eataly Roma, Piazzale XII Ottobre 1492").
+     Si c'est une expérience (food tour, kayak), indique le POINT DE DÉPART réel.
+     Le champ "area" doit être le QUARTIER EXACT (pas "Centre-ville" mais "Trastevere" ou "Le Marais").
    - Le pool SerpAPI contient surtout des monuments et musées. Il MANQUE les expériences/activités réservables.
    - Pour CHAQUE jour, ajoute au moins 1-2 EXPÉRIENCES dans additionalSuggestions parmi:
      * Activités outdoor: kayak, vélo, randonnée, snorkeling, paddle, escalade...
@@ -497,8 +514,17 @@ Format EXACT:
       ],
       'tokyo': [
         { keyword: 'shibuya', fullName: 'Shibuya Crossing, Tokyo', duration: 30, cost: 0 },
-        { keyword: 'senso-ji', fullName: 'Senso-ji Temple, Tokyo', duration: 60, cost: 0 },
-        { keyword: 'meiji', fullName: 'Meiji Jingu Shrine, Tokyo', duration: 60, cost: 0 },
+        { keyword: 'senso-ji', fullName: 'Senso-ji Temple, Asakusa, Tokyo', duration: 60, cost: 0, synonyms: ['sensoji', 'asakusa temple', 'asakusa'] },
+        { keyword: 'meiji', fullName: 'Meiji Jingu Shrine, Tokyo', duration: 60, cost: 0, synonyms: ['meiji shrine', 'meiji jingu'] },
+        { keyword: 'shinjuku', fullName: 'Shinjuku Gyoen National Garden, Tokyo', duration: 90, cost: 2, synonyms: ['shinjuku gyoen', 'shinjuku garden'] },
+        { keyword: 'akihabara', fullName: 'Akihabara Electric Town, Tokyo', duration: 90, cost: 0 },
+        { keyword: 'harajuku', fullName: 'Harajuku & Takeshita Street, Tokyo', duration: 60, cost: 0, synonyms: ['takeshita', 'takeshita street'] },
+        { keyword: 'tsukiji', fullName: 'Tsukiji Outer Market, Tokyo', duration: 60, cost: 0, synonyms: ['toyosu', 'fish market', 'marché aux poissons'] },
+        { keyword: 'skytree', fullName: 'Tokyo Skytree, Tokyo', duration: 60, cost: 21, synonyms: ['sky tree'] },
+        { keyword: 'imperial palace', fullName: 'Imperial Palace & East Gardens, Tokyo', duration: 60, cost: 0, synonyms: ['palais impérial', 'kokyo', 'east gardens'] },
+        { keyword: 'ueno', fullName: 'Ueno Park & National Museum, Tokyo', duration: 120, cost: 10, synonyms: ['ueno park', 'tokyo national museum'] },
+        { keyword: 'teamlab', fullName: 'teamLab Borderless, Tokyo', duration: 120, cost: 38, synonyms: ['team lab', 'teamlab planets'] },
+        { keyword: 'ginza', fullName: 'Ginza District, Tokyo', duration: 60, cost: 0 },
       ],
       'london': [
         { keyword: 'big ben', fullName: 'Big Ben, London', duration: 20, cost: 0 },
@@ -511,14 +537,304 @@ Format EXACT:
         { keyword: 'central park', fullName: 'Central Park, New York', duration: 120, cost: 0 },
         { keyword: 'empire state', fullName: 'Empire State Building, New York', duration: 60, cost: 42 },
         { keyword: 'times square', fullName: 'Times Square, New York', duration: 30, cost: 0 },
+        { keyword: 'brooklyn bridge', fullName: 'Brooklyn Bridge, New York', duration: 45, cost: 0 },
+      ],
+      'amsterdam': [
+        { keyword: 'rijksmuseum', fullName: 'Rijksmuseum, Amsterdam', duration: 150, cost: 22, synonyms: ['rijks museum'] },
+        { keyword: 'anne frank', fullName: 'Anne Frank House, Amsterdam', duration: 90, cost: 16, synonyms: ['anne frank huis'] },
+        { keyword: 'van gogh', fullName: 'Van Gogh Museum, Amsterdam', duration: 120, cost: 20 },
+        { keyword: 'vondelpark', fullName: 'Vondelpark, Amsterdam', duration: 60, cost: 0 },
+        { keyword: 'jordaan', fullName: 'Jordaan Quarter, Amsterdam', duration: 90, cost: 0 },
+      ],
+      'lisbonne': [
+        { keyword: 'belém', fullName: 'Tour de Belém, Lisbonne', duration: 45, cost: 8, synonyms: ['belem', 'torre de belem'] },
+        { keyword: 'alfama', fullName: 'Quartier Alfama, Lisbonne', duration: 90, cost: 0 },
+        { keyword: 'jerónimos', fullName: 'Monastère des Hiéronymites, Lisbonne', duration: 60, cost: 10, synonyms: ['jeronimos', 'hieronymites'] },
+        { keyword: 'pastéis', fullName: 'Pastéis de Belém, Lisbonne', duration: 30, cost: 5, synonyms: ['pasteis de belem'] },
+      ],
+      'istanbul': [
+        { keyword: 'sainte-sophie', fullName: 'Sainte-Sophie, Istanbul', duration: 60, cost: 0, synonyms: ['hagia sophia', 'ayasofya'] },
+        { keyword: 'mosquée bleue', fullName: 'Mosquée Bleue, Istanbul', duration: 45, cost: 0, synonyms: ['blue mosque', 'sultanahmet'] },
+        { keyword: 'grand bazar', fullName: 'Grand Bazar, Istanbul', duration: 90, cost: 0, synonyms: ['grand bazaar', 'kapali carsi'] },
+        { keyword: 'bosphore', fullName: 'Croisière sur le Bosphore, Istanbul', duration: 120, cost: 15, synonyms: ['bosphorus', 'boğaz'] },
+      ],
+      'bangkok': [
+        { keyword: 'grand palais', fullName: 'Grand Palais, Bangkok', duration: 120, cost: 15, synonyms: ['grand palace', 'phra borom'] },
+        { keyword: 'wat pho', fullName: 'Wat Pho, Bangkok', duration: 60, cost: 5, synonyms: ['temple du bouddha couché'] },
+        { keyword: 'wat arun', fullName: 'Wat Arun, Bangkok', duration: 45, cost: 2, synonyms: ['temple de l\'aube'] },
+        { keyword: 'chatuchak', fullName: 'Marché de Chatuchak, Bangkok', duration: 120, cost: 0 },
+      ],
+      'berlin': [
+        { keyword: 'brandebourg', fullName: 'Porte de Brandebourg, Berlin', duration: 20, cost: 0, synonyms: ['brandenburg', 'brandenburger'] },
+        { keyword: 'mur de berlin', fullName: 'East Side Gallery, Berlin', duration: 60, cost: 0, synonyms: ['berlin wall', 'east side'] },
+        { keyword: 'île aux musées', fullName: 'Île aux Musées, Berlin', duration: 180, cost: 19, synonyms: ['museum island', 'museumsinsel'] },
+        { keyword: 'reichstag', fullName: 'Reichstag, Berlin', duration: 60, cost: 0 },
+      ],
+      'budapest': [
+        { keyword: 'parlement', fullName: 'Parlement de Budapest', duration: 60, cost: 12, synonyms: ['parliament', 'országház'] },
+        { keyword: 'széchenyi', fullName: 'Bains Széchenyi, Budapest', duration: 180, cost: 25, synonyms: ['szechenyi', 'thermal bath'] },
+        { keyword: 'bastion des pêcheurs', fullName: 'Bastion des Pêcheurs, Budapest', duration: 45, cost: 0, synonyms: ['fisherman', 'halászbástya'] },
+      ],
+      'prague': [
+        { keyword: 'pont charles', fullName: 'Pont Charles, Prague', duration: 30, cost: 0, synonyms: ['charles bridge', 'karlův most'] },
+        { keyword: 'château', fullName: 'Château de Prague', duration: 120, cost: 15, synonyms: ['prague castle', 'pražský hrad'] },
+        { keyword: 'horloge astronomique', fullName: 'Horloge Astronomique, Prague', duration: 20, cost: 0, synonyms: ['astronomical clock', 'orloj'] },
+      ],
+      'marrakech': [
+        { keyword: 'jemaa', fullName: 'Place Jemaa el-Fna, Marrakech', duration: 90, cost: 0, synonyms: ['jemaa el-fna', 'djemaa'] },
+        { keyword: 'majorelle', fullName: 'Jardin Majorelle, Marrakech', duration: 60, cost: 12 },
+        { keyword: 'souks', fullName: 'Souks de Marrakech', duration: 120, cost: 0, synonyms: ['souk', 'médina'] },
+        { keyword: 'bahia', fullName: 'Palais Bahia, Marrakech', duration: 45, cost: 7 },
+      ],
+      // --- Nouvelles villes Phase 3 ---
+      'vienna': [
+        { keyword: 'stephansdom', fullName: 'Cathédrale Saint-Étienne, Vienne', duration: 60, cost: 6, synonyms: ['st stephen', 'saint-étienne', 'stefansdom'] },
+        { keyword: 'schönbrunn', fullName: 'Château de Schönbrunn, Vienne', duration: 150, cost: 22, synonyms: ['schonbrunn', 'schoenbrunn'] },
+        { keyword: 'hofburg', fullName: 'Palais Hofburg, Vienne', duration: 120, cost: 16 },
+        { keyword: 'belvedere', fullName: 'Palais du Belvédère, Vienne', duration: 90, cost: 16, synonyms: ['belvedère'] },
+      ],
+      'vienne': [
+        { keyword: 'stephansdom', fullName: 'Cathédrale Saint-Étienne, Vienne', duration: 60, cost: 6, synonyms: ['st stephen', 'saint-étienne', 'stefansdom'] },
+        { keyword: 'schönbrunn', fullName: 'Château de Schönbrunn, Vienne', duration: 150, cost: 22, synonyms: ['schonbrunn', 'schoenbrunn'] },
+        { keyword: 'hofburg', fullName: 'Palais Hofburg, Vienne', duration: 120, cost: 16 },
+        { keyword: 'belvedere', fullName: 'Palais du Belvédère, Vienne', duration: 90, cost: 16, synonyms: ['belvedère'] },
+      ],
+      'athens': [
+        { keyword: 'acropole', fullName: 'Acropole & Parthénon, Athènes', duration: 150, cost: 20, synonyms: ['acropolis', 'parthenon', 'parthénon'] },
+        { keyword: 'plaka', fullName: 'Quartier Plaka, Athènes', duration: 90, cost: 0 },
+        { keyword: 'agora', fullName: 'Agora Antique, Athènes', duration: 60, cost: 10, synonyms: ['ancient agora'] },
+      ],
+      'athenes': [
+        { keyword: 'acropole', fullName: 'Acropole & Parthénon, Athènes', duration: 150, cost: 20, synonyms: ['acropolis', 'parthenon', 'parthénon'] },
+        { keyword: 'plaka', fullName: 'Quartier Plaka, Athènes', duration: 90, cost: 0 },
+        { keyword: 'agora', fullName: 'Agora Antique, Athènes', duration: 60, cost: 10, synonyms: ['ancient agora'] },
+      ],
+      'florence': [
+        { keyword: 'duomo', fullName: 'Cathédrale Santa Maria del Fiore, Florence', duration: 90, cost: 18, synonyms: ['santa maria del fiore', 'brunelleschi'] },
+        { keyword: 'uffizi', fullName: 'Galerie des Offices, Florence', duration: 150, cost: 20, synonyms: ['galleria degli uffizi', 'offices'] },
+        { keyword: 'ponte vecchio', fullName: 'Ponte Vecchio, Florence', duration: 30, cost: 0 },
+        { keyword: 'david', fullName: "David de Michel-Ange, Galleria dell'Accademia, Florence", duration: 60, cost: 12, synonyms: ['accademia', 'michel-ange', 'michelangelo'] },
+      ],
+      'venice': [
+        { keyword: 'saint-marc', fullName: 'Place Saint-Marc & Basilique, Venise', duration: 90, cost: 3, synonyms: ['san marco', 'piazza san marco', 'st mark'] },
+        { keyword: 'rialto', fullName: 'Pont du Rialto, Venise', duration: 30, cost: 0 },
+        { keyword: 'murano', fullName: 'Île de Murano, Venise', duration: 120, cost: 0 },
+        { keyword: 'doge', fullName: 'Palais des Doges, Venise', duration: 90, cost: 25, synonyms: ['palazzo ducale', 'ducal'] },
+      ],
+      'venise': [
+        { keyword: 'saint-marc', fullName: 'Place Saint-Marc & Basilique, Venise', duration: 90, cost: 3, synonyms: ['san marco', 'piazza san marco', 'st mark'] },
+        { keyword: 'rialto', fullName: 'Pont du Rialto, Venise', duration: 30, cost: 0 },
+        { keyword: 'murano', fullName: 'Île de Murano, Venise', duration: 120, cost: 0 },
+        { keyword: 'doge', fullName: 'Palais des Doges, Venise', duration: 90, cost: 25, synonyms: ['palazzo ducale', 'ducal'] },
+      ],
+      'seoul': [
+        { keyword: 'gyeongbokgung', fullName: 'Palais Gyeongbokgung, Séoul', duration: 120, cost: 3, synonyms: ['gyeongbok'] },
+        { keyword: 'bukchon', fullName: 'Village Hanok de Bukchon, Séoul', duration: 90, cost: 0, synonyms: ['bukchon hanok'] },
+        { keyword: 'namsan', fullName: 'N Seoul Tower, Namsan, Séoul', duration: 60, cost: 11, synonyms: ['n tower', 'seoul tower'] },
+        { keyword: 'myeongdong', fullName: 'Myeong-dong, Séoul', duration: 90, cost: 0, synonyms: ['myeong dong'] },
+      ],
+      'kyoto': [
+        { keyword: 'fushimi', fullName: 'Fushimi Inari Taisha, Kyoto', duration: 120, cost: 0, synonyms: ['fushimi inari', 'inari'] },
+        { keyword: 'kinkaku', fullName: "Kinkaku-ji (Pavillon d'Or), Kyoto", duration: 60, cost: 4, synonyms: ['kinkakuji', "pavillon d'or", 'golden pavilion'] },
+        { keyword: 'arashiyama', fullName: "Forêt de Bambous d'Arashiyama, Kyoto", duration: 120, cost: 0, synonyms: ['bamboo grove', 'bambou'] },
+        { keyword: 'gion', fullName: 'Quartier Gion, Kyoto', duration: 90, cost: 0, synonyms: ['geisha district'] },
+      ],
+      'singapore': [
+        { keyword: 'marina bay', fullName: 'Marina Bay Sands, Singapour', duration: 60, cost: 23, synonyms: ['marina bay sands', 'mbs'] },
+        { keyword: 'gardens by the bay', fullName: 'Gardens by the Bay, Singapour', duration: 120, cost: 28, synonyms: ['supertree', 'cloud forest'] },
+        { keyword: 'little india', fullName: 'Little India, Singapour', duration: 90, cost: 0 },
+        { keyword: 'sentosa', fullName: 'Île de Sentosa, Singapour', duration: 240, cost: 0 },
+      ],
+      'singapour': [
+        { keyword: 'marina bay', fullName: 'Marina Bay Sands, Singapour', duration: 60, cost: 23, synonyms: ['marina bay sands', 'mbs'] },
+        { keyword: 'gardens by the bay', fullName: 'Gardens by the Bay, Singapour', duration: 120, cost: 28, synonyms: ['supertree', 'cloud forest'] },
+        { keyword: 'little india', fullName: 'Little India, Singapour', duration: 90, cost: 0 },
+        { keyword: 'sentosa', fullName: 'Île de Sentosa, Singapour', duration: 240, cost: 0 },
+      ],
+      'dubai': [
+        { keyword: 'burj khalifa', fullName: 'Burj Khalifa, Dubaï', duration: 90, cost: 40, synonyms: ['burj'] },
+        { keyword: 'dubai mall', fullName: 'Dubai Mall & Fontaines', duration: 120, cost: 0 },
+        { keyword: 'gold souk', fullName: "Gold Souk, Dubaï", duration: 60, cost: 0, synonyms: ["souk de l'or"] },
+        { keyword: 'palm', fullName: 'Palm Jumeirah, Dubaï', duration: 60, cost: 0, synonyms: ['palm jumeirah'] },
+      ],
+      'sydney': [
+        { keyword: 'opera', fullName: 'Opéra de Sydney', duration: 60, cost: 25, synonyms: ['opera house', 'sydney opera'] },
+        { keyword: 'harbour bridge', fullName: 'Sydney Harbour Bridge', duration: 45, cost: 0, synonyms: ['harbor bridge'] },
+        { keyword: 'bondi', fullName: 'Bondi Beach, Sydney', duration: 180, cost: 0, synonyms: ['bondi beach'] },
+        { keyword: 'rocks', fullName: 'The Rocks, Sydney', duration: 90, cost: 0 },
+      ],
+      'cape town': [
+        { keyword: 'table mountain', fullName: 'Table Mountain, Le Cap', duration: 180, cost: 18, synonyms: ['montagne de la table'] },
+        { keyword: 'bo-kaap', fullName: 'Bo-Kaap, Le Cap', duration: 60, cost: 0, synonyms: ['bo kaap', 'malay quarter'] },
+        { keyword: 'robben', fullName: 'Robben Island, Le Cap', duration: 240, cost: 25, synonyms: ['robben island'] },
+        { keyword: 'waterfront', fullName: 'V&A Waterfront, Le Cap', duration: 120, cost: 0 },
+      ],
+      'copenhagen': [
+        { keyword: 'tivoli', fullName: 'Jardins de Tivoli, Copenhague', duration: 120, cost: 19 },
+        { keyword: 'nyhavn', fullName: 'Nyhavn, Copenhague', duration: 45, cost: 0 },
+        { keyword: 'petite sirène', fullName: 'La Petite Sirène, Copenhague', duration: 20, cost: 0, synonyms: ['little mermaid', 'den lille havfrue'] },
+      ],
+      'copenhague': [
+        { keyword: 'tivoli', fullName: 'Jardins de Tivoli, Copenhague', duration: 120, cost: 19 },
+        { keyword: 'nyhavn', fullName: 'Nyhavn, Copenhague', duration: 45, cost: 0 },
+        { keyword: 'petite sirène', fullName: 'La Petite Sirène, Copenhague', duration: 20, cost: 0, synonyms: ['little mermaid', 'den lille havfrue'] },
+      ],
+      'dublin': [
+        { keyword: 'trinity', fullName: 'Trinity College & Book of Kells, Dublin', duration: 90, cost: 18, synonyms: ['book of kells'] },
+        { keyword: 'temple bar', fullName: 'Temple Bar, Dublin', duration: 90, cost: 0 },
+        { keyword: 'guinness', fullName: 'Guinness Storehouse, Dublin', duration: 120, cost: 26 },
+      ],
+      'edinburgh': [
+        { keyword: 'castle', fullName: "Château d'Édimbourg", duration: 120, cost: 19, synonyms: ['edinburgh castle'] },
+        { keyword: 'royal mile', fullName: 'Royal Mile, Édimbourg', duration: 90, cost: 0 },
+        { keyword: 'arthur', fullName: "Arthur's Seat, Édimbourg", duration: 120, cost: 0 },
+      ],
+      'edimbourg': [
+        { keyword: 'castle', fullName: "Château d'Édimbourg", duration: 120, cost: 19, synonyms: ['edinburgh castle'] },
+        { keyword: 'royal mile', fullName: 'Royal Mile, Édimbourg', duration: 90, cost: 0 },
+        { keyword: 'arthur', fullName: "Arthur's Seat, Édimbourg", duration: 120, cost: 0 },
+      ],
+      'milan': [
+        { keyword: 'duomo', fullName: 'Duomo di Milano', duration: 90, cost: 16, synonyms: ['cathédrale de milan'] },
+        { keyword: 'cène', fullName: 'La Cène de Léonard de Vinci, Milan', duration: 45, cost: 15, synonyms: ['last supper', 'cenacolo', 'ultima cena'] },
+        { keyword: 'galleria vittorio', fullName: 'Galleria Vittorio Emanuele II, Milan', duration: 45, cost: 0 },
+      ],
+      'seville': [
+        { keyword: 'alcazar', fullName: 'Real Alcázar, Séville', duration: 120, cost: 14, synonyms: ['real alcazar'] },
+        { keyword: 'giralda', fullName: 'Cathédrale & Giralda, Séville', duration: 90, cost: 10, synonyms: ['cathédrale de séville'] },
+        { keyword: 'plaza de españa', fullName: 'Plaza de España, Séville', duration: 60, cost: 0, synonyms: ['plaza españa'] },
+      ],
+      'porto': [
+        { keyword: 'ribeira', fullName: 'Quartier Ribeira, Porto', duration: 90, cost: 0 },
+        { keyword: 'livraria lello', fullName: 'Livraria Lello, Porto', duration: 30, cost: 5, synonyms: ['lello'] },
+        { keyword: 'cave', fullName: 'Caves de Porto (Vila Nova de Gaia)', duration: 90, cost: 15, synonyms: ['port wine', 'vila nova de gaia'] },
+        { keyword: 'clérigos', fullName: 'Tour des Clérigos, Porto', duration: 45, cost: 6, synonyms: ['clerigos'] },
+      ],
+      'split': [
+        { keyword: 'dioclétien', fullName: 'Palais de Dioclétien, Split', duration: 90, cost: 0, synonyms: ['diocletian', 'diocletian palace'] },
+        { keyword: 'riva', fullName: 'Promenade Riva, Split', duration: 45, cost: 0 },
+      ],
+      'dubrovnik': [
+        { keyword: 'remparts', fullName: 'Remparts de Dubrovnik', duration: 120, cost: 30, synonyms: ['city walls', 'murailles'] },
+        { keyword: 'stradun', fullName: 'Stradun (Placa), Dubrovnik', duration: 45, cost: 0, synonyms: ['placa'] },
+      ],
+      'munich': [
+        { keyword: 'marienplatz', fullName: 'Marienplatz, Munich', duration: 45, cost: 0 },
+        { keyword: 'nymphenburg', fullName: 'Château de Nymphenburg, Munich', duration: 120, cost: 8, synonyms: ['nymphenburg palace'] },
+        { keyword: 'englischer garten', fullName: 'Englischer Garten, Munich', duration: 90, cost: 0, synonyms: ['english garden', 'jardin anglais'] },
+      ],
+      'bruges': [
+        { keyword: 'beffroi', fullName: 'Beffroi de Bruges', duration: 60, cost: 14, synonyms: ['belfry', 'belfort'] },
+        { keyword: 'béguinage', fullName: 'Béguinage de Bruges', duration: 30, cost: 0, synonyms: ['beguinage', 'begijnhof'] },
+        { keyword: 'canaux', fullName: 'Promenade en bateau sur les canaux, Bruges', duration: 30, cost: 12, synonyms: ['boat tour', 'canal'] },
+      ],
+      'stockholm': [
+        { keyword: 'vasa', fullName: 'Musée Vasa, Stockholm', duration: 120, cost: 17, synonyms: ['vasamuseet'] },
+        { keyword: 'gamla stan', fullName: 'Gamla Stan (Vieille Ville), Stockholm', duration: 120, cost: 0, synonyms: ['old town'] },
+        { keyword: 'skansen', fullName: 'Skansen, Stockholm', duration: 120, cost: 20 },
+      ],
+      'krakow': [
+        { keyword: 'wawel', fullName: 'Château du Wawel, Cracovie', duration: 120, cost: 12 },
+        { keyword: 'rynek', fullName: 'Grand-Place (Rynek Główny), Cracovie', duration: 60, cost: 0, synonyms: ['rynek główny', 'main square'] },
+        { keyword: 'kazimierz', fullName: 'Quartier Kazimierz, Cracovie', duration: 90, cost: 0 },
+      ],
+      'cracovie': [
+        { keyword: 'wawel', fullName: 'Château du Wawel, Cracovie', duration: 120, cost: 12 },
+        { keyword: 'rynek', fullName: 'Grand-Place (Rynek Główny), Cracovie', duration: 60, cost: 0, synonyms: ['rynek główny', 'main square'] },
+        { keyword: 'kazimierz', fullName: 'Quartier Kazimierz, Cracovie', duration: 90, cost: 0 },
+      ],
+      'nice': [
+        { keyword: 'promenade des anglais', fullName: 'Promenade des Anglais, Nice', duration: 60, cost: 0 },
+        { keyword: 'vieux nice', fullName: 'Vieux Nice', duration: 90, cost: 0, synonyms: ['old nice', 'old town'] },
+        { keyword: 'colline du château', fullName: 'Colline du Château, Nice', duration: 60, cost: 0, synonyms: ['castle hill'] },
+      ],
+      'hong kong': [
+        { keyword: 'victoria peak', fullName: 'Victoria Peak, Hong Kong', duration: 90, cost: 5, synonyms: ['the peak', 'peak tram'] },
+        { keyword: 'star ferry', fullName: 'Star Ferry, Hong Kong', duration: 30, cost: 1 },
+        { keyword: 'temple street', fullName: 'Temple Street Night Market, Hong Kong', duration: 90, cost: 0, synonyms: ['night market'] },
+      ],
+      'taipei': [
+        { keyword: 'taipei 101', fullName: 'Taipei 101', duration: 60, cost: 15, synonyms: ['101'] },
+        { keyword: 'shilin', fullName: 'Marché de nuit de Shilin, Taipei', duration: 120, cost: 0, synonyms: ['shilin night market'] },
+        { keyword: 'longshan', fullName: 'Temple Longshan, Taipei', duration: 45, cost: 0, synonyms: ['longshan temple'] },
+      ],
+      'bali': [
+        { keyword: 'ubud', fullName: 'Rizières de Tegallalang, Ubud, Bali', duration: 120, cost: 3, synonyms: ['tegallalang', 'rice terraces'] },
+        { keyword: 'tanah lot', fullName: 'Temple Tanah Lot, Bali', duration: 60, cost: 3 },
+        { keyword: 'uluwatu', fullName: 'Temple Uluwatu, Bali', duration: 90, cost: 3 },
+      ],
+      'mexico': [
+        { keyword: 'zocalo', fullName: 'Zócalo & Palacio Nacional, Mexico City', duration: 90, cost: 0, synonyms: ['zócalo', 'plaza de la constitución'] },
+        { keyword: 'teotihuacan', fullName: 'Pyramides de Teotihuacán', duration: 300, cost: 5, synonyms: ['teotihuacán', 'pyramides'] },
+        { keyword: 'coyoacan', fullName: 'Coyoacán & Maison de Frida Kahlo', duration: 120, cost: 11, synonyms: ['coyoacán', 'frida kahlo'] },
+      ],
+      'buenos aires': [
+        { keyword: 'la boca', fullName: 'La Boca & Caminito, Buenos Aires', duration: 90, cost: 0, synonyms: ['caminito'] },
+        { keyword: 'recoleta', fullName: 'Cimetière de Recoleta, Buenos Aires', duration: 60, cost: 0 },
+        { keyword: 'san telmo', fullName: 'San Telmo, Buenos Aires', duration: 90, cost: 0 },
+      ],
+      'cairo': [
+        { keyword: 'pyramides', fullName: 'Pyramides de Gizeh, Le Caire', duration: 180, cost: 12, synonyms: ['giza', 'gizeh', 'sphinx'] },
+        { keyword: 'musée égyptien', fullName: 'Musée Égyptien du Caire', duration: 150, cost: 10, synonyms: ['egyptian museum', 'tahrir'] },
+        { keyword: 'khan el-khalili', fullName: 'Khan el-Khalili, Le Caire', duration: 90, cost: 0, synonyms: ['khan khalili'] },
+      ],
+      'le caire': [
+        { keyword: 'pyramides', fullName: 'Pyramides de Gizeh, Le Caire', duration: 180, cost: 12, synonyms: ['giza', 'gizeh', 'sphinx'] },
+        { keyword: 'musée égyptien', fullName: 'Musée Égyptien du Caire', duration: 150, cost: 10, synonyms: ['egyptian museum', 'tahrir'] },
+        { keyword: 'khan el-khalili', fullName: 'Khan el-Khalili, Le Caire', duration: 90, cost: 0, synonyms: ['khan khalili'] },
+      ],
+      'san francisco': [
+        { keyword: 'golden gate', fullName: 'Golden Gate Bridge, San Francisco', duration: 60, cost: 0 },
+        { keyword: 'alcatraz', fullName: 'Alcatraz Island, San Francisco', duration: 180, cost: 41 },
+        { keyword: 'fisherman', fullName: "Fisherman's Wharf, San Francisco", duration: 90, cost: 0, synonyms: ['pier 39'] },
+      ],
+      'melbourne': [
+        { keyword: 'laneways', fullName: 'Laneways & Street Art, Melbourne', duration: 90, cost: 0, synonyms: ['hosier lane', 'street art'] },
+        { keyword: 'queen victoria', fullName: 'Queen Victoria Market, Melbourne', duration: 90, cost: 0, synonyms: ['vic market'] },
       ],
     };
+
+    const destLower = request.destination.toLowerCase();
+
+    // Day trip must-haves: inject iconic day trips for long stays (≥4 days)
+    if (request.durationDays >= 4) {
+      const dayTripMustHaves: Record<string, { keyword: string; fullName: string; duration: number; cost: number; synonyms?: string[] }> = {
+        'tokyo': { keyword: 'fuji', fullName: 'Mont Fuji & Lac Kawaguchi', duration: 480, cost: 30, synonyms: ['kawaguchi', 'kawaguchiko', 'mount fuji', 'mt fuji', 'fujisan'] },
+        'rome': { keyword: 'pompéi', fullName: 'Ruines de Pompéi', duration: 480, cost: 18, synonyms: ['pompeii', 'pompei'] },
+        'paris': { keyword: 'versailles', fullName: 'Château de Versailles', duration: 480, cost: 21, synonyms: ['chateau de versailles'] },
+        'barcelona': { keyword: 'montserrat', fullName: 'Monastère de Montserrat', duration: 480, cost: 0, synonyms: ['montserrat monastery'] },
+        'bangkok': { keyword: 'ayutthaya', fullName: "Parc historique d'Ayutthaya", duration: 480, cost: 5, synonyms: ['ayuthaya'] },
+        // --- Nouveaux day trips Phase 3 ---
+        'london': { keyword: 'stonehenge', fullName: 'Stonehenge & Bath', duration: 480, cost: 22, synonyms: ['bath'] },
+        'amsterdam': { keyword: 'zaanse', fullName: 'Zaanse Schans Windmills', duration: 300, cost: 0, synonyms: ['zaanse schans'] },
+        'lisbonne': { keyword: 'sintra', fullName: 'Palais de Pena, Sintra', duration: 480, cost: 14, synonyms: ['pena palace'] },
+        'prague': { keyword: 'kutná', fullName: 'Kutná Hora & Sedlec', duration: 360, cost: 12, synonyms: ['kutna hora', 'sedlec'] },
+        'istanbul': { keyword: 'princes', fullName: 'Îles des Princes', duration: 360, cost: 5, synonyms: ['princes islands', 'büyükada'] },
+        'budapest': { keyword: 'szentendre', fullName: 'Szentendre Art Village', duration: 300, cost: 0 },
+        'berlin': { keyword: 'potsdam', fullName: 'Sanssouci Palace, Potsdam', duration: 360, cost: 19, synonyms: ['sans souci', 'sanssouci'] },
+        'athens': { keyword: 'delphi', fullName: 'Delphes (site antique)', duration: 480, cost: 12, synonyms: ['delphes', 'delphi'] },
+        'athenes': { keyword: 'delphi', fullName: 'Delphes (site antique)', duration: 480, cost: 12, synonyms: ['delphes', 'delphi'] },
+        'florence': { keyword: 'pisa', fullName: 'Tour de Pise', duration: 300, cost: 20, synonyms: ['pise', 'leaning tower'] },
+        'dublin': { keyword: 'cliffs', fullName: 'Falaises de Moher', duration: 480, cost: 0, synonyms: ['cliffs of moher', 'moher'] },
+        'kyoto': { keyword: 'nara', fullName: 'Nara & ses daims', duration: 360, cost: 0, synonyms: ['nara park'] },
+        'seoul': { keyword: 'dmz', fullName: 'Zone Démilitarisée (DMZ)', duration: 480, cost: 45 },
+        'sydney': { keyword: 'blue mountains', fullName: 'Blue Mountains', duration: 480, cost: 0 },
+        'krakow': { keyword: 'auschwitz', fullName: 'Auschwitz-Birkenau Memorial', duration: 420, cost: 0, synonyms: ['oświęcim'] },
+        'cracovie': { keyword: 'auschwitz', fullName: 'Auschwitz-Birkenau Memorial', duration: 420, cost: 0, synonyms: ['oświęcim'] },
+        'nice': { keyword: 'monaco', fullName: 'Monaco & Monte-Carlo', duration: 360, cost: 0, synonyms: ['monte carlo', 'monte-carlo'] },
+        'melbourne': { keyword: 'great ocean', fullName: 'Great Ocean Road & Twelve Apostles', duration: 480, cost: 0, synonyms: ['twelve apostles'] },
+      };
+      for (const [city, dt] of Object.entries(dayTripMustHaves)) {
+        if (destLower.includes(city) && mustHaveDetails[city]) {
+          mustHaveDetails[city].push(dt);
+        }
+      }
+    }
+
     const mustHaveChecks: Record<string, string[]> = {};
     for (const [city, details] of Object.entries(mustHaveDetails)) {
       mustHaveChecks[city] = details.map(d => d.keyword);
     }
-
-    const destLower = request.destination.toLowerCase();
     for (const [city, landmarks] of Object.entries(mustHaveChecks)) {
       if (destLower.includes(city)) {
         const missing = landmarks.filter(l => !allNames.includes(l) && !allNames.split(' ').some(w => w.includes(l)));
@@ -528,8 +844,8 @@ Format EXACT:
       }
     }
 
-    // POST-VALIDATION: Enforce religious diversity cap (max 3 across entire trip)
-    const MAX_RELIGIOUS_TOTAL = 3;
+    // POST-VALIDATION: Enforce religious diversity cap (adaptive per destination)
+    const MAX_RELIGIOUS_TOTAL = getReligiousCap(request.destination);
     const religiousPatterns = /\b(église|church|cathedral|cathédrale|basilique|basilica|chapel|chapelle|mosquée|mosque|synagogue|temple|sanctuaire|shrine)\b/i;
     let religiousTotal = 0;
     for (const day of parsed.days) {
@@ -589,12 +905,17 @@ Format EXACT:
     const majorMuseums = /\b(louvre|british museum|metropolitan|met museum|prado|uffizi|hermitage|vatican museum|rijksmuseum|national gallery|musée d'orsay|orsay)\b/i;
     // Duration caps by attraction type name patterns
     const durationCaps: [RegExp, number][] = [
+      [/\b(gate|porte|portal|entrance|torii|kaminarimon)\b/i, 30],
+      [/\b(crossing|carrefour|intersection)\b/i, 30],
       [/\b(chapelle|chapel|sainte-chapelle)\b/i, 60],
       [/\b(place|square|plaza|piazza)\b/i, 30],
-      [/\b(pont|bridge|fontaine|fountain|obélisque|obelisk|statue|colonne|column)\b/i, 30],
-      [/\b(jardin|garden|parc|park)\b/i, 75],
-      [/\b(église|church|cathedral|cathédrale|basilique|basilica)\b/i, 60],
-      [/\b(marché|market)\b/i, 60],
+      [/\b(pont|bridge|fontaine|fountain|obélisque|obelisk|statue|colonne|column)\b/i, 45],
+      [/\b(street|rue|avenue|boulevard|allée|dori|dōri)\b/i, 60],
+      [/\b(jardin|garden|parc|park|gyoen)\b/i, 90],
+      [/\b(église|church|cathedral|cathédrale|basilique|basilica|shrine|sanctuaire|jinja)\b/i, 60],
+      [/\b(marché|market|mercado|mercato|bazar|bazaar|souk)\b/i, 75],
+      [/\b(tower|tour|torre)\b/i, 90],
+      [/\b(viewpoint|panorama|observation|lookout|mirador)\b/i, 45],
     ];
 
     for (const day of parsed.days) {
@@ -688,18 +1009,31 @@ Format EXACT:
       });
 
       for (const s of day.additionalSuggestions) {
+        // Apply minimum duration overrides for major museums
+        for (const [pattern, minDuration] of MINIMUM_DURATION_OVERRIDES) {
+          if (pattern.test(s.name) && s.estimatedDuration < minDuration) {
+            console.log(`[Duration] Override: "${s.name}" ${s.estimatedDuration}min → ${minDuration}min`);
+            s.estimatedDuration = minDuration;
+            break;
+          }
+        }
+
         // Duration cap: max 4h unless major museum
         if (s.estimatedDuration > 240 && !majorMuseums.test(s.name)) {
           console.log(`[ClaudeItinerary] Cap duration "${s.name}": ${s.estimatedDuration}min → 120min`);
           s.estimatedDuration = 120;
         }
-        // Type-based duration caps
+        // Type-based duration caps (apply if duration exceeds max by 20%+)
         for (const [pattern, maxMin] of durationCaps) {
-          if (pattern.test(s.name) && s.estimatedDuration > maxMin * 1.5) {
+          if (pattern.test(s.name) && s.estimatedDuration > maxMin * 1.2) {
             console.log(`[ClaudeItinerary] Cap duration "${s.name}": ${s.estimatedDuration}min → ${maxMin}min`);
             s.estimatedDuration = maxMin;
             break;
           }
+        }
+        // Minimum duration floor: no attraction should be less than 15 min
+        if (s.estimatedDuration < 15) {
+          s.estimatedDuration = 15;
         }
 
         // Evening-only enforcement for shows/cabarets
@@ -875,6 +1209,9 @@ export function mapItineraryToAttractions(
 
     // Add additionalSuggestions as generated attractions
     for (const suggestion of day.additionalSuggestions) {
+      // Store area in tips field so geocoding can use it for precise queries
+      const areaInfo = suggestion.area ? `[area:${suggestion.area}]` : '';
+      const tipsValue = areaInfo + (suggestion.address ? ` [address:${suggestion.address}]` : '');
       dayAttractions.push({
         id: `claude-${suggestion.name.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 30)}-${Date.now()}`,
         name: suggestion.name,
@@ -890,6 +1227,7 @@ export function mapItineraryToAttractions(
         bookingUrl: suggestion.bookingUrl,
         openingHours: { open: '09:00', close: '18:00' },
         dataReliability: 'generated' as const,
+        tips: tipsValue || undefined,
       });
     }
 
@@ -950,8 +1288,22 @@ function deduplicateAttractions(attractions: Attraction[]): Attraction[] {
 }
 
 /**
+ * Calcule la distance totale d'une liste ordonnée de points (en km)
+ */
+function calculateTotalDistance(list: {latitude:number, longitude:number}[]): number {
+  let total = 0;
+  for (let i = 0; i < list.length - 1; i++) {
+    const dLat = (list[i].latitude - list[i+1].latitude) * 111;
+    const dLng = (list[i].longitude - list[i+1].longitude) * 111 * Math.cos(list[i].latitude * Math.PI / 180);
+    total += Math.sqrt(dLat*dLat + dLng*dLng);
+  }
+  return total;
+}
+
+/**
  * Réordonne les attractions par proximité géographique (nearest-neighbor greedy)
  * Commence par la première attraction, puis visite toujours la plus proche non visitée
+ * Only applies reordering if distance savings > 30% compared to Claude's original order
  */
 function reorderByProximity(attractions: Attraction[]): Attraction[] {
   if (attractions.length <= 2) return attractions;
@@ -987,5 +1339,15 @@ function reorderByProximity(attractions: Attraction[]): Attraction[] {
     current = nearest;
   }
 
-  return [...result, ...withoutCoords];
+  // Compare Claude's original order vs greedy reorder — only apply if savings > 30%
+  const originalDistance = calculateTotalDistance(withCoords);
+  const reorderedDistance = calculateTotalDistance(result);
+
+  if (originalDistance > 0 && (originalDistance - reorderedDistance) / originalDistance > 0.30) {
+    console.log(`[Reorder] Applied: ${originalDistance.toFixed(1)}km → ${reorderedDistance.toFixed(1)}km (${((1 - reorderedDistance / originalDistance) * 100).toFixed(0)}% savings)`);
+    return [...result, ...withoutCoords];
+  }
+
+  // Keep Claude's original order
+  return attractions;
 }

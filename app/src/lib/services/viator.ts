@@ -306,10 +306,19 @@ export async function searchViatorActivities(
  * 2. Exact match dans les résultats API
  * 3. Fuzzy match avec seuil strict (60%)
  */
+export interface ViatorProductResult {
+  url: string;
+  price: number;
+  title: string;
+  imageUrl?: string;
+  rating?: number;
+  reviewCount?: number;
+}
+
 export async function findViatorProduct(
   activityName: string,
   destinationName: string,
-): Promise<{ url: string; price: number; title: string } | null> {
+): Promise<ViatorProductResult | null> {
   // ===== PRIORITÉ 1: URLs connues =====
   const knownProduct = findKnownViatorProduct(activityName);
   if (knownProduct) {
@@ -371,8 +380,9 @@ export async function findViatorProduct(
       if (productTitle.includes(activityNameLower) || activityNameLower.includes(productTitleClean)) {
         const price = product.pricing?.summary?.fromPrice || 0;
         const url = product.productUrl || buildViatorSearchUrl(product.title, destinationName);
+        const imageUrl = product.images?.[0]?.variants?.find((v: { width?: number; url?: string }) => v.width && v.width >= 480 && v.width <= 800)?.url || product.images?.[0]?.variants?.[0]?.url;
         console.log(`[Viator] ✅ Exact match: "${activityName}" → "${product.title}" (${price}€)`);
-        return { url, price: Math.round(price), title: product.title };
+        return { url, price: Math.round(price), title: product.title, imageUrl, rating: product.reviews?.combinedAverageRating, reviewCount: product.reviews?.totalReviews };
       }
     }
 
@@ -397,8 +407,9 @@ export async function findViatorProduct(
     if (bestMatch) {
       const price = bestMatch.product.pricing?.summary?.fromPrice || 0;
       const url = bestMatch.product.productUrl || buildViatorSearchUrl(bestMatch.product.title, destinationName);
+      const imageUrl = bestMatch.product.images?.[0]?.variants?.find((v: { width?: number; url?: string }) => v.width && v.width >= 480 && v.width <= 800)?.url || bestMatch.product.images?.[0]?.variants?.[0]?.url;
       console.log(`[Viator] ✅ Fuzzy match: "${activityName}" → "${bestMatch.product.title}" (${price}€, score: ${bestMatch.score})`);
-      return { url, price: Math.round(price), title: bestMatch.product.title };
+      return { url, price: Math.round(price), title: bestMatch.product.title, imageUrl, rating: bestMatch.product.reviews?.combinedAverageRating, reviewCount: bestMatch.product.reviews?.totalReviews };
     }
 
     console.log(`[Viator] ⚠️ Pas de match pour: "${activityName}"`);

@@ -15,6 +15,7 @@ import * as path from 'path';
 import { Restaurant, DietaryType, ActivityType } from '../types';
 import { Attraction } from './attractions';
 import { calculateDistance } from './geocoding';
+import { getDestinationSize, getCostMultiplier, getDestinationArchetypes } from './destinationData';
 
 const SERPAPI_KEY = process.env.SERPAPI_KEY?.trim();
 const SERPAPI_BASE_URL = 'https://serpapi.com/search.json';
@@ -503,22 +504,73 @@ export function isSerpApiPlacesConfigured(): boolean {
 // === Constantes de qualité ===
 
 export const QUALITY_THRESHOLDS = {
-  attractions: { minRating: 4.3, minReviews: 500 },
-  restaurants: { minRating: 4.3, minReviews: 100, maxDistanceMeters: 500 },
+  attractions: {
+    major:  { minRating: 4.0, minReviews: 300 },
+    medium: { minRating: 3.8, minReviews: 100 },
+    small:  { minRating: 3.5, minReviews: 30 },
+  },
+  restaurants: { minRating: 4.0, minReviews: 80, maxDistanceMeters: 800 },
 };
 
-// === Requêtes thématiques pour attractions ===
+// === Requêtes thématiques pour attractions (adaptatives) ===
 
+/**
+ * Génère des requêtes SerpAPI adaptatives selon la destination et les préférences utilisateur.
+ * Les requêtes varient selon l'archétype de la destination (plage, culture, nature...)
+ * et les activités choisies par l'utilisateur.
+ */
+function getAdaptiveQueries(
+  destination: string,
+  activities?: ActivityType[]
+): { query: string; priority: number }[] {
+  const base = [
+    // Incontournables (toujours inclus)
+    { query: 'top tourist attractions must see landmarks', priority: 1 },
+    // Culture & histoire
+    { query: 'best museums art galleries historical sites', priority: 2 },
+    // Vues & marchés
+    { query: 'famous viewpoints markets food streets', priority: 2 },
+  ];
+
+  const archetypes = getDestinationArchetypes(destination);
+
+  // Requête temples/églises UNIQUEMENT pour destinations culturelles/religieuses
+  const religiousCities = ['rome', 'istanbul', 'kyoto', 'bangkok', 'jerusalem', 'bali', 'varanasi', 'cairo', 'seville', 'florence'];
+  if (religiousCities.some(c => destination.toLowerCase().includes(c)) || archetypes.includes('cultural')) {
+    base.push({ query: 'famous temples shrines churches monuments', priority: 2 });
+  }
+
+  // Queries adaptatives selon archétype destination + préférences utilisateur
+  if (archetypes.includes('beach') || activities?.includes('beach')) {
+    base.push({ query: 'best beaches swimming spots coastal walks seaside', priority: 2 });
+  }
+  if (activities?.includes('nature') || archetypes.includes('nature')) {
+    base.push({ query: 'parks gardens botanical hiking trails nature reserves', priority: 2 });
+  }
+  if (activities?.includes('nightlife') || archetypes.includes('nightlife')) {
+    base.push({ query: 'best nightlife areas rooftop bars evening entertainment districts', priority: 3 });
+  }
+  if (activities?.includes('gastronomy') || archetypes.includes('gastronomy')) {
+    base.push({ query: 'food markets street food districts local cuisine neighborhoods', priority: 2 });
+  }
+  if (activities?.includes('adventure') || archetypes.includes('adventure')) {
+    base.push({ query: 'outdoor activities water sports adventure experiences', priority: 2 });
+  }
+  if (activities?.includes('wellness') || archetypes.includes('wellness')) {
+    base.push({ query: 'spas thermal baths wellness retreats hot springs', priority: 3 });
+  }
+  if (activities?.includes('shopping')) {
+    base.push({ query: 'best shopping districts markets boutiques local crafts', priority: 3 });
+  }
+
+  return base;
+}
+
+// Fallback statique (si aucune activité fournie)
 const ATTRACTION_QUERIES = [
-  // Incontournables (priority 1 — ces requêtes justifient le coût SerpAPI)
   { query: 'top tourist attractions must see landmarks', priority: 1 },
-  { query: 'famous temples shrines churches monuments', priority: 1 },
-  // Culture & histoire
   { query: 'best museums art galleries historical sites', priority: 2 },
-  // Vues & marchés
   { query: 'famous viewpoints markets food streets', priority: 2 },
-  // Note: parks, gardens, neighborhoods, cultural experiences sont
-  // délégués à Overpass API (gratuit) pour économiser les requêtes SerpAPI
 ];
 
 // Types non-touristiques à exclure
@@ -583,6 +635,7 @@ export async function searchAttractionsMultiQuery(
   cityCenter: { lat: number; lng: number },
   options: {
     types?: ActivityType[];
+    activities?: ActivityType[];
     limit?: number;
   } = {}
 ): Promise<Attraction[]> {
@@ -605,8 +658,15 @@ export async function searchAttractionsMultiQuery(
 
   console.log(`[SerpAPI Attractions Multi] Recherche attractions à ${destination} (${cityCenter.lat}, ${cityCenter.lng})...`);
 
+  // Utiliser les requêtes adaptatives si activités fournies, sinon le fallback statique
+  const queries = options.activities
+    ? getAdaptiveQueries(destination, options.activities)
+    : ATTRACTION_QUERIES;
+
+  console.log(`[SerpAPI Attractions Multi] ${queries.length} requêtes adaptatives pour ${destination}`);
+
   // Exécuter les requêtes en parallèle pour optimiser le temps
-  const promises = ATTRACTION_QUERIES.map(async ({ query, priority }) => {
+  const promises = queries.map(async ({ query, priority }) => {
     const params = new URLSearchParams({
       api_key: SERPAPI_KEY!,
       engine: 'google_maps',
@@ -641,8 +701,8 @@ export async function searchAttractionsMultiQuery(
   // Traiter et dédupliquer les résultats
   for (const queryResults of results) {
     for (const { place, priority } of queryResults) {
-      // Filtrage qualité
-      if (!meetsAttractionQualityThreshold(place)) continue;
+      // Filtrage qualité (seuils adaptatifs selon la taille de la destination)
+      if (!meetsAttractionQualityThreshold(place, destination)) continue;
 
       // Clé de déduplication: place_id ou nom normalisé
       const key = place.place_id || place.title.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -1076,10 +1136,69 @@ export async function searchGroceryStores(
 }
 
 /**
+ * Geocode un lieu spécifique via SerpAPI Google Maps (payant, dernier recours)
+ * Utilisé par coordsResolver.ts quand toutes les APIs gratuites ont échoué
+ *
+ * Coût: ~$0.01 par appel (quota SerpAPI)
+ */
+export async function geocodeViaSerpApi(
+  placeName: string,
+  city: string,
+  nearbyCoords?: { lat: number; lng: number },
+): Promise<{ lat: number; lng: number; address?: string } | null> {
+  if (!SERPAPI_KEY || !placeName.trim()) return null;
+
+  const countryCode = getCountryCode(city);
+  const query = `${placeName} ${city}`;
+
+  const params = new URLSearchParams({
+    api_key: SERPAPI_KEY,
+    engine: 'google_maps',
+    q: query,
+    hl: 'fr',
+    gl: countryCode,
+  });
+
+  // Si on a des coordonnées de référence, centrer la recherche
+  if (nearbyCoords) {
+    params.set('ll', `@${nearbyCoords.lat},${nearbyCoords.lng},14z`);
+  }
+
+  try {
+    console.log(`[SerpAPI Geocode] Recherche: "${query}"`);
+    const response = await fetch(`${SERPAPI_BASE_URL}?${params}`);
+    if (!response.ok) {
+      console.warn(`[SerpAPI Geocode] HTTP ${response.status} pour "${query}"`);
+      return null;
+    }
+
+    const data = await response.json();
+    const places: SerpApiLocalResult[] = data.local_results || [];
+
+    if (places.length > 0 && places[0].gps_coordinates) {
+      const result = {
+        lat: places[0].gps_coordinates.latitude,
+        lng: places[0].gps_coordinates.longitude,
+        address: places[0].address,
+      };
+      console.log(`[SerpAPI Geocode] ✅ "${placeName}" → (${result.lat.toFixed(4)}, ${result.lng.toFixed(4)}) - ${result.address || 'no address'}`);
+      return result;
+    }
+
+    console.log(`[SerpAPI Geocode] ❌ Aucun résultat pour "${query}"`);
+    return null;
+  } catch (error) {
+    console.error(`[SerpAPI Geocode] Erreur pour "${query}":`, error);
+    return null;
+  }
+}
+
+/**
  * Vérifie si une attraction répond aux critères de qualité
  */
-function meetsAttractionQualityThreshold(place: SerpApiLocalResult): boolean {
-  const { minRating, minReviews } = QUALITY_THRESHOLDS.attractions;
+function meetsAttractionQualityThreshold(place: SerpApiLocalResult, destination?: string): boolean {
+  const destSize = destination ? getDestinationSize(destination) : 'major';
+  const { minRating, minReviews } = QUALITY_THRESHOLDS.attractions[destSize];
 
   // Exclure les types non-touristiques
   const allTypes = [place.type, ...(place.types || []), ...(place.type_ids || [])].filter(Boolean).map(t => t!.toLowerCase());
@@ -1139,7 +1258,7 @@ function convertToAttraction(
     type: activityType,
     description: place.description || `${place.title} à ${destination}`,
     duration: estimateDuration(activityType),
-    estimatedCost: estimateCost(place.price),
+    estimatedCost: estimateCost(place.price, destination),
     latitude: place.gps_coordinates.latitude,
     longitude: place.gps_coordinates.longitude,
     rating: place.rating || 4.0,
@@ -1203,13 +1322,14 @@ function estimateDuration(type: ActivityType): number {
 }
 
 /**
- * Estime le coût selon le niveau de prix
+ * Estime le coût selon le niveau de prix, ajusté au coût de la vie local
  */
-function estimateCost(price?: string): number {
-  if (!price) return 15;
+function estimateCost(price?: string, destination?: string): number {
+  if (!price) return Math.round(15 * getCostMultiplier(destination || ''));
   const level = parsePriceLevel(price);
-  const costs = { 1: 10, 2: 20, 3: 35, 4: 50 };
-  return costs[level];
+  const baseCosts: Record<number, number> = { 1: 10, 2: 20, 3: 35, 4: 50 };
+  const baseCost = baseCosts[level] || 15;
+  return Math.round(baseCost * getCostMultiplier(destination || ''));
 }
 
 /**

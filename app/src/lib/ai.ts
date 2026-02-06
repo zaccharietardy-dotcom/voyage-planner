@@ -40,12 +40,13 @@ import { createLocationTracker, TravelerLocation } from './services/locationTrac
 import { generateFlightLink, generateHotelLink, formatDateForUrl } from './services/linkGenerator';
 import { searchAttractionsMultiQuery, searchMustSeeAttractions, searchGroceryStores, type GroceryStore } from './services/serpApiPlaces';
 import { resolveAttractionByName } from './services/overpassAttractions';
+import { resolveCoordinates, resetResolutionStats, getResolutionStats } from './services/coordsResolver';
 import { generateClaudeItinerary, summarizeAttractions, mapItineraryToAttractions } from './services/claudeItinerary';
 import { generateTravelTips } from './services/travelTips';
 import { resolveBudget, generateBudgetStrategy } from './services/budgetResolver';
 import { searchAirbnbListings, isAirbnbApiConfigured } from './services/airbnb';
 import { BudgetTracker } from './services/budgetTracker';
-import { enrichRestaurantsWithGemini } from './services/geminiSearch';
+import { enrichRestaurantsWithGemini, geocodeWithGemini, resetGeminiGeocodeCounter } from './services/geminiSearch';
 import { findViatorProduct, searchViatorActivities, isViatorConfigured } from './services/viator';
 import { findTiqetsProduct, getKnownTiqetsLink, isTiqetsRelevant } from './services/tiqets';
 import { getMustSeeAttractions } from './services/attractions';
@@ -55,6 +56,26 @@ import { findBestFlights, selectFlightByBudget, LateFlightArrivalData } from './
 import { fixAttractionDuration, fixAttractionCost, estimateTotalAvailableTime, preAllocateAttractions } from './tripAttractions';
 import { shouldSelfCater, findRestaurantForMeal, usedRestaurantIds } from './tripMeals';
 import { generateDayWithScheduler, getDayContext, TimeSlot, DayContext } from './tripDay';
+
+/**
+ * Vérifie si des coordonnées sont proches du centre-ville (fallback non résolu)
+ */
+function isCoordsNearCenter(lat: number, lng: number, center: {lat: number, lng: number}, thresholdKm = 0.3): boolean {
+  const dLat = (lat - center.lat) * 111;
+  const dLng = (lng - center.lng) * 111 * Math.cos(center.lat * Math.PI / 180);
+  return Math.sqrt(dLat * dLat + dLng * dLng) < thresholdKm;
+}
+
+/**
+ * Nettoie un nom d'attraction pour améliorer le géocodage
+ * Supprime les préfixes génériques qui perturbent Nominatim
+ */
+function cleanNameForGeocoding(name: string): string {
+  return name
+    .replace(/^(cours de|visite de|tour de|balade|promenade|excursion|atelier|dégustation)\s+/i, '')
+    .replace(/^(cooking class|food tour|walking tour|guided tour|wine tasting)\s+/i, '')
+    .trim();
+}
 
 /**
  * Génère un voyage complet avec toute la logistique
@@ -67,6 +88,7 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
   // RESET: Nettoyer les trackers de la session précédente pour éviter les doublons inter-voyages
   usedRestaurantIds.clear();
   clearGeocodeCache();
+  resetGeminiGeocodeCounter();
 
   // 1. Trouver les coordonnées et aéroports (avec fallback Nominatim async)
   console.log(`[PERF ${elapsed()}] Start geocoding`);
@@ -147,7 +169,7 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
   const attractionsPromise = searchAttractionsMultiQuery(
     preferences.destination,
     destCoords,
-    { types: preferences.activities, limit: preferences.durationDays >= 5 ? 80 : 50 }
+    { types: preferences.activities, activities: preferences.activities, limit: preferences.durationDays >= 5 ? 80 : 50 }
   );
 
   console.time('[AI] Hotels');
@@ -414,8 +436,11 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
     const experiential = uniqueViator.filter(v => experientialTypes.has(v.type));
     const others = uniqueViator.filter(v => !experientialTypes.has(v.type));
 
-    // Ajouter ~2 activités Viator par jour de voyage (expérientielles en priorité)
-    const viatorToAdd = [...experiential, ...others].slice(0, Math.min(preferences.durationDays * 2, 8));
+    // Ajouter ~3 activités Viator par jour (boost si gastro/adventure/nightlife/wellness/beach)
+    const experientialBoost = preferences.activities.some(a =>
+      ['gastronomy', 'adventure', 'nightlife', 'wellness', 'beach'].includes(a)) ? 4 : 0;
+    const viatorCap = Math.min(preferences.durationDays * 3 + experientialBoost, 15);
+    const viatorToAdd = [...experiential, ...others].slice(0, viatorCap);
 
     if (viatorToAdd.length > 0) {
       attractionPool.push(...viatorToAdd);
@@ -497,6 +522,7 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       dayIndex: number;
       genIndex: number;
       suggestionName: string;
+      suggestionArea?: string;
       isDayTrip: boolean;
       dayTripDestination?: string;
       geoContext: string;
@@ -516,6 +542,7 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
         if (genIndex < 0) continue;
         suggestionTasks.push({
           dayIndex: i, genIndex, suggestionName: suggestion.name,
+          suggestionArea: suggestion.area || undefined,
           isDayTrip: !!(day.isDayTrip && day.dayTripDestination),
           dayTripDestination: day.dayTripDestination || undefined,
           geoContext, geoCenter, dayTripCenter,
@@ -528,12 +555,22 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
     // Step 3: Resolve all suggestions in parallel (each with sequential fallback chain)
     // Fallback order: Travel Places (free) → Nominatim (free) → SerpAPI (paid, last resort)
     await Promise.allSettled(suggestionTasks.map(async (task) => {
-      const { dayIndex, genIndex, suggestionName, isDayTrip, dayTripDestination, geoContext, geoCenter, dayTripCenter } = task;
+      const { dayIndex, genIndex, suggestionName, suggestionArea, isDayTrip, dayTripDestination, geoContext, geoCenter, dayTripCenter } = task;
+
+      // Clean name for better geocoding (strip generic prefixes like "Cours de", "Food tour")
+      const cleanedName = cleanNameForGeocoding(suggestionName);
+      // Build geocoding query: use area if available for precision
+      const geoQuery = suggestionArea
+        ? `${cleanedName}, ${suggestionArea}, ${geoContext}`
+        : `${cleanedName}, ${geoContext}`;
 
       // For day trips, try Nominatim first (better for named places outside city center radius)
       if (isDayTrip && dayTripDestination) {
         try {
-          const geo = await geocodeAddress(`${suggestionName}, ${dayTripDestination}`);
+          const dayTripQuery = suggestionArea
+            ? `${cleanedName}, ${suggestionArea}, ${dayTripDestination}`
+            : `${cleanedName}, ${dayTripDestination}`;
+          const geo = await geocodeAddress(dayTripQuery);
           if (geo && geo.lat && geo.lng) {
             attractionsByDay[dayIndex][genIndex] = {
               ...attractionsByDay[dayIndex][genIndex],
@@ -550,7 +587,7 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       }
 
       // Fallback 1: Travel Places API (free, via RapidAPI)
-      const resolved = await resolveAttractionByName(suggestionName, dayTripCenter || geoCenter || cityCenter);
+      const resolved = await resolveAttractionByName(cleanedName, dayTripCenter || geoCenter || cityCenter);
       if (resolved) {
         attractionsByDay[dayIndex][genIndex] = {
           ...attractionsByDay[dayIndex][genIndex],
@@ -564,7 +601,7 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
 
       // Fallback 2: Nominatim geocoding (free, reliable for named places)
       try {
-        const geo = await geocodeAddress(`${suggestionName}, ${geoContext}`);
+        const geo = await geocodeAddress(geoQuery);
         if (geo && geo.lat && geo.lng) {
           attractionsByDay[dayIndex][genIndex] = {
             ...attractionsByDay[dayIndex][genIndex],
@@ -579,7 +616,24 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
         console.warn(`[AI]   Nominatim error for "${suggestionName}":`, e);
       }
 
-      // Fallback 3: SerpAPI (paid, last resort — only if free APIs failed)
+      // Fallback 3: Gemini 2.5 Flash + Google Search grounding (free, good for well-known places)
+      try {
+        const geminiGeo = await geocodeWithGemini(suggestionName, geoContext);
+        if (geminiGeo && geminiGeo.lat && geminiGeo.lng) {
+          attractionsByDay[dayIndex][genIndex] = {
+            ...attractionsByDay[dayIndex][genIndex],
+            latitude: geminiGeo.lat, longitude: geminiGeo.lng,
+            mustSee: true, dataReliability: 'verified' as const,
+            googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(suggestionName + ', ' + geoContext)}`,
+          };
+          console.log(`[AI]   Résolu via Gemini: "${suggestionName}" → (${geminiGeo.lat}, ${geminiGeo.lng})`);
+          return;
+        }
+      } catch (e) {
+        console.warn(`[AI]   Gemini geocode error for "${suggestionName}":`, e);
+      }
+
+      // Fallback 4: SerpAPI (paid, last resort — only if free APIs failed)
       const found = await searchMustSeeAttractions(suggestionName, geoContext, geoCenter || cityCenter);
       if (found.length > 0) {
         attractionsByDay[dayIndex][genIndex] = { ...found[0], mustSee: true };
@@ -590,7 +644,19 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
 
     console.log(`[PERF ${elapsed()}] Parallel suggestion resolution done`);
 
-    // Last resort: any attraction still at city center or (0,0) gets coords and Google Maps URL
+    // Post-enrichment check: mark items still at city center as estimated
+    for (const dayAttrs of attractionsByDay) {
+      for (const attr of dayAttrs) {
+        if (attr.dataReliability === 'generated' &&
+            isCoordsNearCenter(attr.latitude, attr.longitude, cityCenter)) {
+          attr.dataReliability = 'estimated';
+          console.warn(`[AI] UNRESOLVED coords: "${attr.name}" still at city center`);
+        }
+      }
+    }
+
+    // 100% GPS: Resolve any attraction still at (0,0) or city center via exhaustive API chain
+    // NO jitter, NO random offsets — resolve or replace
     for (let i = 0; i < attractionsByDay.length; i++) {
       const day = claudeItinerary.days[i];
       const isDayTripDay = day?.isDayTrip && day?.dayTripDestination;
@@ -602,17 +668,40 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
         : cityCenter;
 
       const dayAttrs = attractionsByDay[i];
-      for (let j = 0; j < dayAttrs.length; j++) {
+      for (let j = dayAttrs.length - 1; j >= 0; j--) {
         const a = dayAttrs[j];
-        if (a.latitude === 0 && a.longitude === 0) {
-          console.log(`[AI] Coords fallback pour "${a.name}" → ${geoContextCity} (${fallbackCenter.lat}, ${fallbackCenter.lng})`);
-          dayAttrs[j] = { ...a, latitude: fallbackCenter.lat, longitude: fallbackCenter.lng };
+        const needsResolution = (a.latitude === 0 && a.longitude === 0)
+          || (a.id.startsWith('claude-') && calculateDistance(a.latitude, a.longitude, fallbackCenter.lat, fallbackCenter.lng) < 0.05);
+
+        if (needsResolution) {
+          console.log(`[AI] 🔍 Résolution GPS pour "${a.name}" à ${geoContextCity}...`);
+          const resolved = await resolveCoordinates(a.name, geoContextCity, fallbackCenter, 'attraction');
+          if (resolved) {
+            dayAttrs[j] = { ...a, latitude: resolved.lat, longitude: resolved.lng, dataReliability: 'verified' as const };
+            console.log(`[AI] ✅ Résolu: "${a.name}" → (${resolved.lat.toFixed(4)}, ${resolved.lng.toFixed(4)}) via ${resolved.source}`);
+          } else {
+            // REMPLACEMENT: trouver une alternative vérifiée dans le pool
+            const replacement = selectedAttractions.find(pool =>
+              pool.latitude && pool.longitude &&
+              pool.dataReliability === 'verified' &&
+              !dayAttrs.some(existing => existing.id === pool.id) &&
+              calculateDistance(pool.latitude, pool.longitude, fallbackCenter.lat, fallbackCenter.lng) < 30
+            );
+            if (replacement) {
+              console.warn(`[AI] 🔄 REPLACED: "${a.name}" → "${replacement.name}" (coords non trouvables)`);
+              dayAttrs[j] = { ...replacement, mustSee: a.mustSee };
+            } else {
+              // Dernier recours: supprimer plutôt que mentir
+              console.error(`[AI] ❌ REMOVED: "${a.name}" — aucune coordonnée trouvable, aucun remplacement`);
+              dayAttrs.splice(j, 1);
+            }
+          }
         }
-        // Ensure all attractions have a Google Maps URL for the user
-        if (!a.googleMapsUrl && a.id.startsWith('claude-')) {
+        // Ensure all attractions have a Google Maps URL
+        if (dayAttrs[j] && !dayAttrs[j].googleMapsUrl && dayAttrs[j].id?.startsWith('claude-')) {
           dayAttrs[j] = {
             ...dayAttrs[j],
-            googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(a.name + ', ' + geoContextCity)}`,
+            googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(dayAttrs[j].name + ', ' + geoContextCity)}`,
           };
         }
       }
@@ -753,6 +842,34 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
     attractions: selectedAttractions,
     preferApartment: budgetStrategy.accommodationType.includes('airbnb'),
   });
+
+  // 7.5b Validate hotel coordinates — if too close to city center, likely a default
+  if (accommodation && cityCenter) {
+    const hotelDistFromCenter = calculateDistance(
+      accommodation.latitude, accommodation.longitude, cityCenter.lat, cityCenter.lng
+    );
+    if (hotelDistFromCenter < 0.2) { // < 200m from city center = probably a default
+      console.log(`[AI] Hotel "${accommodation.name}" coords too close to city center (${(hotelDistFromCenter * 1000).toFixed(0)}m), resolving...`);
+      try {
+        const hotelGeo = await geocodeAddress(`${accommodation.name}, ${preferences.destination}`);
+        if (hotelGeo && hotelGeo.lat && hotelGeo.lng) {
+          accommodation.latitude = hotelGeo.lat;
+          accommodation.longitude = hotelGeo.lng;
+          console.log(`[AI] Hotel resolved via Nominatim: (${hotelGeo.lat}, ${hotelGeo.lng})`);
+        } else {
+          // Try Gemini fallback
+          const geminiGeo = await geocodeWithGemini(accommodation.name, preferences.destination);
+          if (geminiGeo) {
+            accommodation.latitude = geminiGeo.lat;
+            accommodation.longitude = geminiGeo.lng;
+            console.log(`[AI] Hotel resolved via Gemini: (${geminiGeo.lat}, ${geminiGeo.lng})`);
+          }
+        }
+      } catch (e) {
+        console.warn(`[AI] Hotel geocode error:`, e);
+      }
+    }
+  }
   console.log(`Hébergement sélectionné: ${accommodation?.name || 'Aucun'} (type: ${accommodation?.type || 'N/A'})`);
 
   // 7.6 Initialiser le BudgetTracker et rebalancer le budget
@@ -821,10 +938,14 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       const dayAttrs = attractionsByDay[i] || [];
       const isDayTripDay = dayMetadata[i]?.isDayTrip;
 
-      // Update groceries status for this day (same logic as in day loop)
-      const groceriesAvailable = groceriesDonePrecomputed || groceryDays.has(dayNumber);
+      // Update groceries status for this day
+      // On grocery day itself: breakfast/lunch = not available yet, dinner = available (shopping done during day)
+      const isGroceryDay = groceryDays.has(dayNumber);
 
       for (const mealType of ['breakfast', 'lunch', 'dinner'] as const) {
+        // Groceries: available if done on a previous day, or if it's grocery day AND it's dinner (shopping done by then)
+        const groceriesAvailable = groceriesDonePrecomputed || (isGroceryDay && mealType === 'dinner');
+
         // Skip self-catered meals
         if (shouldSelfCater(mealType, dayNumber, budgetStrategy, false, preferences.durationDays, isDayTripDay, groceriesAvailable)) {
           continue;
@@ -835,18 +956,30 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
         if (mealType === 'breakfast') {
           mealCoords = accommodationCoords;
         } else if (mealType === 'lunch') {
-          // Near midpoint of morning attractions
-          const morningAttrs = dayAttrs.slice(0, Math.ceil(dayAttrs.length / 2));
-          const lastMorning = morningAttrs[morningAttrs.length - 1];
-          mealCoords = lastMorning && lastMorning.latitude
-            ? { lat: lastMorning.latitude, lng: lastMorning.longitude }
-            : cityCenter;
+          // Centroïde des attractions du matin (plus précis que le dernier point seul)
+          const morningAttrs = dayAttrs.slice(0, Math.ceil(dayAttrs.length / 2))
+            .filter(a => a.latitude && a.longitude);
+          if (morningAttrs.length > 0) {
+            const lunchLat = morningAttrs.reduce((s, a) => s + a.latitude, 0) / morningAttrs.length;
+            const lunchLng = morningAttrs.reduce((s, a) => s + a.longitude, 0) / morningAttrs.length;
+            mealCoords = { lat: lunchLat, lng: lunchLng };
+          } else {
+            mealCoords = cityCenter;
+          }
         } else {
-          // Dinner: near last attraction of the day
-          const lastAttr = dayAttrs[dayAttrs.length - 1];
-          mealCoords = lastAttr && lastAttr.latitude
-            ? { lat: lastAttr.latitude, lng: lastAttr.longitude }
-            : cityCenter;
+          // Dinner: centroïde des attractions de l'après-midi
+          const afternoonAttrs = dayAttrs.slice(Math.ceil(dayAttrs.length / 2))
+            .filter(a => a.latitude && a.longitude);
+          if (afternoonAttrs.length > 0) {
+            const dinnerLat = afternoonAttrs.reduce((s, a) => s + a.latitude, 0) / afternoonAttrs.length;
+            const dinnerLng = afternoonAttrs.reduce((s, a) => s + a.longitude, 0) / afternoonAttrs.length;
+            mealCoords = { lat: dinnerLat, lng: dinnerLng };
+          } else {
+            const lastAttr = dayAttrs[dayAttrs.length - 1];
+            mealCoords = lastAttr && lastAttr.latitude
+              ? { lat: lastAttr.latitude, lng: lastAttr.longitude }
+              : cityCenter;
+          }
         }
 
         const key = `${i}-${mealType}`;
@@ -1255,11 +1388,15 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
 
       if (activitiesWithoutUrl.length > 0) {
         console.log(`[AI] 🎭 Matching Viator pour ${activitiesWithoutUrl.length} activités sans lien...`);
-        // Limiter à 10 requêtes Viator pour ne pas ralentir
-        const toMatch = activitiesWithoutUrl.slice(0, 10);
+        // Limiter à 12 requêtes Viator pour ne pas ralentir
+        const toMatch = activitiesWithoutUrl.slice(0, 12);
         console.log(`[PERF ${elapsed()}] Start Viator matching`);
         const viatorResults = await Promise.all(
-          toMatch.map(item => findViatorProduct(item.title, preferences.destination))
+          toMatch.map(item => {
+            // Use activity title + destination for better matching
+            const searchTerm = `${item.title} ${preferences.destination}`;
+            return findViatorProduct(searchTerm, preferences.destination);
+          })
         );
 
         let matched = 0;
@@ -1271,10 +1408,13 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
               toMatch[i].estimatedCost = result.price;
             }
             // Stocker le titre Viator pour afficher le vrai nom de l'activité réservable
-            // Ex: "Piazza Navona" → "Rome Walking Tour: Pantheon, Piazza Navona and Trevi Fountain"
             if (result.title && result.title.toLowerCase() !== toMatch[i].title.toLowerCase()) {
               (toMatch[i] as any).viatorTitle = result.title;
             }
+            // Stocker image, rating, review count pour affichage carte produit
+            if (result.imageUrl) (toMatch[i] as any).viatorImageUrl = result.imageUrl;
+            if (result.rating) (toMatch[i] as any).viatorRating = result.rating;
+            if (result.reviewCount) (toMatch[i] as any).viatorReviewCount = result.reviewCount;
             matched++;
           } else {
             // Fallback: Try Tiqets for museums and attractions without Viator match
@@ -1327,67 +1467,56 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
     console.log(`[AI] ✅ ${typeFixCount} items reclassés en restaurant`);
   }
 
-  // Enrichir les coordonnées des items avec des adresses génériques
-  // (items dont les coordonnées sont trop proches du centre-ville)
-  // PARALLÉLISÉ: collecte tous les items à enrichir puis batch en parallèle
+  // === 100% GPS PRECISION: Passe finale exhaustive ===
+  // Vérifie TOUS les items non-vérifiés via chaîne complète (Travel Places → Nominatim → Gemini → SerpAPI)
   try {
-    console.log(`[PERF ${elapsed()}] Start coordinates enrichment`);
+    console.log(`[PERF ${elapsed()}] Start exhaustive coordinates verification`);
+    resetResolutionStats();
 
-    // Collecter tous les items qui ont besoin d'enrichissement
-    const itemsToEnrich: { item: TripItem; searchQuery: string }[] = [];
+    // Collecter TOUS les items qui ont besoin de vérification
+    const itemsToVerify: TripItem[] = [];
 
     for (const day of days) {
       for (const item of day.items) {
-        // Skip flights, transports, check-in/out
-        if (['flight', 'transport', 'checkin', 'checkout'].includes(item.type)) continue;
+        // Skip flights et transports (coords aéroport = toujours verified)
+        if (['flight', 'transport'].includes(item.type)) continue;
 
-        // Vérifier si les coordonnées semblent être un fallback (très proches du centre)
-        const distFromCenter = calculateDistance(
-          item.latitude || 0, item.longitude || 0,
-          destCoords.lat, destCoords.lng
-        );
+        // Item sans coords ou marqué non-verified
+        const hasNoCoords = !item.latitude || !item.longitude;
+        const isNearCenter = item.latitude && item.longitude && destCoords &&
+          calculateDistance(item.latitude, item.longitude, destCoords.lat, destCoords.lng) < 0.2;
+        const isNotVerified = item.dataReliability !== 'verified';
 
-        // Si < 200m du centre ET que le titre est explicite, essayer d'enrichir
-        const needsEnrichment = distFromCenter < 0.2 && item.title && !item.title.includes('Centre-ville');
+        // Items logistiques au centre-ville (check-in, checkout) → acceptable si hébergement n'a pas de coords
+        const isLogistic = ['checkin', 'checkout', 'hotel'].includes(item.type);
 
-        if (needsEnrichment && item.type === 'activity') {
-          itemsToEnrich.push({
-            item,
-            searchQuery: `${item.title}, ${preferences.destination}`,
-          });
-        }
-      }
-    }
-
-    // Géocoder en parallèle par lots de 10 pour éviter les rate limits
-    const BATCH_SIZE = 10;
-    let enrichedCount = 0;
-
-    for (let i = 0; i < itemsToEnrich.length; i += BATCH_SIZE) {
-      const batch = itemsToEnrich.slice(i, i + BATCH_SIZE);
-      const results = await Promise.allSettled(
-        batch.map(async ({ item, searchQuery }) => {
-          const coords = await geocodeAddress(searchQuery);
-          return { item, coords };
-        })
-      );
-
-      for (const result of results) {
-        if (result.status === 'fulfilled' && result.value.coords) {
-          const { item, coords } = result.value;
-          if (coords.lat !== destCoords.lat && coords.lng !== destCoords.lng) {
-            const oldCoords = `${item.latitude?.toFixed(4)},${item.longitude?.toFixed(4)}`;
-            item.latitude = coords.lat;
-            item.longitude = coords.lng;
-            enrichedCount++;
-            console.log(`[Coords] ✅ ${item.title}: ${oldCoords} → ${coords.lat.toFixed(4)},${coords.lng.toFixed(4)}`);
+        if ((hasNoCoords || (isNearCenter && isNotVerified)) && !isLogistic) {
+          if (item.title && !item.title.includes('Centre-ville') && !item.title.includes('pique-nique')) {
+            itemsToVerify.push(item);
           }
         }
       }
     }
 
+    console.log(`[AI] 🔍 ${itemsToVerify.length} items à vérifier via chaîne exhaustive`);
+
+    // Résolution séquentielle pour respecter les rate limits
+    let enrichedCount = 0;
+    for (const item of itemsToVerify) {
+      const resolved = await resolveCoordinates(item.title, preferences.destination, destCoords, item.type as 'attraction' | 'restaurant');
+      if (resolved) {
+        const oldCoords = `${item.latitude?.toFixed(4)},${item.longitude?.toFixed(4)}`;
+        item.latitude = resolved.lat;
+        item.longitude = resolved.lng;
+        item.dataReliability = 'verified';
+        enrichedCount++;
+        console.log(`[Coords] ✅ ${item.title}: ${oldCoords} → ${resolved.lat.toFixed(4)},${resolved.lng.toFixed(4)} (${resolved.source})`);
+      }
+    }
+
+    const stats = getResolutionStats();
     if (enrichedCount > 0) {
-      console.log(`[AI] ✅ ${enrichedCount} items enrichis avec coordonnées précises`);
+      console.log(`[AI] ✅ ${enrichedCount} items enrichis via chaîne exhaustive (${JSON.stringify(stats.bySource)})`);
     }
   } catch (error) {
     console.warn('[AI] Enrichissement coordonnées échoué (non bloquant):', error);
@@ -1515,7 +1644,33 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
   // 2. Vérifie la cohérence géographique (toutes les activités dans la destination)
   // Supprime automatiquement les lieux trop loin de la destination
   console.log(`[PERF ${elapsed()}] Starting geography validation...`);
-  validateTripGeography(coherenceValidatedTrip, cityCenter, true);
+  await validateTripGeography(coherenceValidatedTrip, cityCenter, true, preferences.destination);
+
+  // Quality summary — 100% GPS precision target
+  let verifiedCount = 0, estimatedCount = 0, generatedCount = 0, totalCount = 0;
+  const unverifiedItems: string[] = [];
+  for (const day of coherenceValidatedTrip.days) {
+    for (const item of (day.items || [])) {
+      if (['flight', 'transport'].includes(item.type)) continue; // Skip transport items
+      totalCount++;
+      if (item.dataReliability === 'verified') verifiedCount++;
+      else if (item.dataReliability === 'estimated') {
+        estimatedCount++;
+        unverifiedItems.push(`${item.title} (estimated)`);
+      } else if (item.dataReliability === 'generated') {
+        generatedCount++;
+        unverifiedItems.push(`${item.title} (generated)`);
+      } else {
+        estimatedCount++;
+        unverifiedItems.push(`${item.title} (unmarked)`);
+      }
+    }
+  }
+  const pct = totalCount > 0 ? Math.round((verifiedCount / totalCount) * 100) : 0;
+  console.log(`[AI] ✅ Qualité GPS: ${verifiedCount}/${totalCount} verified (${pct}%) | ${estimatedCount} estimated, ${generatedCount} generated`);
+  if (unverifiedItems.length > 0) {
+    console.warn(`[AI] ⚠️ Items non-vérifiés:`, unverifiedItems);
+  }
 
   console.log(`[PERF ${elapsed()}] ✅ Trip generation complete`);
   return coherenceValidatedTrip;

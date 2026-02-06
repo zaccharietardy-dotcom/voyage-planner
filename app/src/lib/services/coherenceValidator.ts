@@ -83,12 +83,22 @@ export function validateTripCoherence(trip: Trip): CoherenceResult {
     const dayErrors = validateDayCoherence(day, isFirstDay, isLastDay);
     errors.push(...dayErrors.filter(e => e.severity === 'critical'));
     warnings.push(...dayErrors.filter(e => e.severity === 'warning'));
+
+    // Verifier la faisabilite du transit entre activites
+    const transitErrors = checkTransitFeasibility(day.dayNumber, day.items);
+    errors.push(...transitErrors.filter(e => e.severity === 'critical'));
+    warnings.push(...transitErrors.filter(e => e.severity === 'warning'));
   }
 
   // Verifier les attractions en double sur tout le voyage
   const duplicateErrors = checkDuplicateAttractions(trip);
   errors.push(...duplicateErrors.filter(e => e.severity === 'critical'));
   warnings.push(...duplicateErrors.filter(e => e.severity === 'warning'));
+
+  // Verifier la coherence geographique des day trips
+  const dayTripErrors = checkDayTripCoherence(trip.days);
+  errors.push(...dayTripErrors.filter(e => e.severity === 'critical'));
+  warnings.push(...dayTripErrors.filter(e => e.severity === 'warning'));
 
   const result: CoherenceResult = {
     valid: errors.length === 0,
@@ -163,6 +173,24 @@ const GENERIC_ACTIVITY_PATTERNS = [
   /^bar [àa] /i,  // Bar à cocktails, Bar à tapas, etc.
   /^rooftop bar/i,
   /^jazz club/i,
+  // Espagnol
+  /^pausa caf[eé]/i, /^paseo por/i, /^calle principal/i,
+  /^plaza (central|mayor)/i, /^barrio histórico/i,
+  /^helado artesanal/i, /^mirador panorámico$/i,
+  // Italien
+  /^passeggiata/i, /^piazza (centrale|principale)/i,
+  /^gelato artigianale/i, /^quartiere storico/i,
+  // Allemand
+  /^kaffeepause/i, /^historisches viertel/i,
+  /^marktplatz$/i, /^aussichtspunkt$/i,
+  // Portugais
+  /^café local/i, /^bairro histórico/i, /^miradouro$/i,
+  // Néerlandais
+  /^koffiepauze/i,
+  // Anglais manquants
+  /^free time$/i, /^rest day$/i, /^optional activity$/i,
+  /^local exploration$/i, /^wander around$/i,
+  /^coffee break$/i, /^ice cream stop$/i,
 ];
 
 /**
@@ -656,6 +684,86 @@ function checkDuplicateAttractions(trip: Trip): CoherenceError[] {
     }
   }
 
+  return errors;
+}
+
+/**
+ * Vérifie la cohérence géographique des day trips
+ * S'assure que les activités ne sont pas trop éloignées du centre du day trip
+ */
+function checkDayTripCoherence(days: any[]): CoherenceError[] {
+  const errors: CoherenceError[] = [];
+  for (const day of days) {
+    if (!day.isDayTrip || !day.dayTripDestination) continue;
+
+    const activities = (day.items || []).filter((i: any) => i.type === 'activity' && i.latitude && i.longitude);
+    if (activities.length < 2) continue;
+
+    const centerLat = activities.reduce((s: number, a: any) => s + a.latitude, 0) / activities.length;
+    const centerLng = activities.reduce((s: number, a: any) => s + a.longitude, 0) / activities.length;
+
+    for (const item of activities) {
+      const dLat = (item.latitude - centerLat) * 111;
+      const dLng = (item.longitude - centerLng) * 111 * Math.cos(centerLat * Math.PI / 180);
+      const distKm = Math.sqrt(dLat * dLat + dLng * dLng);
+
+      if (distKm > 30) {
+        errors.push({
+          type: 'ILLOGICAL_SEQUENCE',
+          dayNumber: day.dayNumber,
+          message: `"${item.title}" est à ${distKm.toFixed(0)}km du centre du day trip "${day.dayTripDestination}"`,
+          severity: 'warning',
+          autoFixable: false,
+          items: [item],
+        });
+      }
+    }
+  }
+  return errors;
+}
+
+/**
+ * Vérifie la faisabilité du transit entre activités consécutives
+ * Détecte les cas où le temps de trajet estimé dépasse le temps disponible
+ */
+function checkTransitFeasibility(dayNumber: number, items: any[]): CoherenceError[] {
+  const errors: CoherenceError[] = [];
+  const activityItems = items
+    .filter((i: any) => ['activity', 'restaurant'].includes(i.type) && i.latitude && i.longitude)
+    .sort((a: any, b: any) => (a.startTime || '').localeCompare(b.startTime || ''));
+
+  for (let i = 0; i < activityItems.length - 1; i++) {
+    const curr = activityItems[i];
+    const next = activityItems[i + 1];
+
+    const dLat = (curr.latitude - next.latitude) * 111;
+    const dLng = (curr.longitude - next.longitude) * 111 * Math.cos(curr.latitude * Math.PI / 180);
+    const distKm = Math.sqrt(dLat * dLat + dLng * dLng);
+
+    const transitMinutes = Math.ceil((distKm / 20) * 60) + 10;
+
+    // Parse times
+    const parseTime = (t: string) => {
+      if (!t) return 0;
+      const [h, m] = t.split(':').map(Number);
+      return h * 60 + (m || 0);
+    };
+
+    const endMinutes = parseTime(curr.endTime || '');
+    const startMinutes = parseTime(next.startTime || '');
+    const gapMinutes = startMinutes - endMinutes;
+
+    if (transitMinutes > gapMinutes + 5 && distKm > 1) {
+      errors.push({
+        type: 'OVERLAP',
+        dayNumber,
+        message: `Transit ${curr.title} → ${next.title}: ${distKm.toFixed(1)}km nécessite ~${transitMinutes}min mais seulement ${gapMinutes}min disponibles`,
+        severity: 'warning',
+        autoFixable: false,
+        items: [curr, next],
+      });
+    }
+  }
   return errors;
 }
 

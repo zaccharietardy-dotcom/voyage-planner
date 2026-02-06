@@ -390,10 +390,13 @@ export async function generateDayWithScheduler(params: {
             : `${overnightAccommodation.stars ? overnightAccommodation.stars + '⭐ | ' : ''}${overnightAccommodation.rating?.toFixed(1)}/10 | ${overnightAccommodation.pricePerNight}€/nuit`)
           : 'Déposez vos affaires et installez-vous.',
         locationName: getHotelLocationName(overnightAccommodation, preferences.destination),
-        latitude: overnightAccommodation?.latitude || cityCenter.lat + 0.005,
-        longitude: overnightAccommodation?.longitude || cityCenter.lng + 0.005,
+        latitude: overnightAccommodation?.latitude || cityCenter.lat,
+        longitude: overnightAccommodation?.longitude || cityCenter.lng,
         bookingUrl: hotelBookingUrl,
       }));
+      if (!overnightAccommodation?.latitude) {
+        console.warn(`[TripDay] ⚠️ Hébergement sans coordonnées vérifiées`);
+      }
     }
 
     // Avancer le curseur après le check-in hôtel
@@ -823,8 +826,8 @@ export async function generateDayWithScheduler(params: {
                 title: 'Déjeuner pique-nique / maison',
                 description: 'Repas préparé avec les courses | Option économique',
                 locationName: `Centre-ville, ${preferences.destination}`,
-                latitude: lastCoords.lat,
-                longitude: lastCoords.lng,
+                latitude: accommodation?.latitude || lastCoords.lat,
+                longitude: accommodation?.longitude || lastCoords.lng,
                 estimatedCost: 8 * (preferences.groupSize || 1),
               }));
             } else {
@@ -833,9 +836,12 @@ export async function generateDayWithScheduler(params: {
                 ? getPrefetchedRestaurant('lunch')
                 : await findRestaurantForMeal('lunch', cityCenter, preferences, dayNumber, lastCoords);
               const restaurantCoords = {
-                lat: restaurant?.latitude || cityCenter.lat,
-                lng: restaurant?.longitude || cityCenter.lng,
+                lat: restaurant?.latitude || lastCoords.lat,
+                lng: restaurant?.longitude || lastCoords.lng,
               };
+              if (!restaurant?.latitude || !restaurant?.longitude) {
+                console.warn(`[TripDay] ⚠️ Restaurant "${restaurant?.name || 'unknown'}" sans coordonnées — utilise position actuelle`);
+              }
               const restaurantGoogleMapsUrl = getReliableGoogleMapsPlaceUrl(restaurant, preferences.destination);
 
               items.push(schedulerItemToTripItem(lunchItem, dayNumber, orderIndex++, {
@@ -886,6 +892,9 @@ export async function generateDayWithScheduler(params: {
               lat: attraction.latitude || cityCenter.lat,
               lng: attraction.longitude || cityCenter.lng,
             };
+            if (!attraction.latitude || !attraction.longitude) {
+              console.warn(`[TripDay] ⚠️ Attraction "${attraction.name}" sans coordonnées vérifiées — utilise cityCenter`);
+            }
             items.push(schedulerItemToTripItem(activityItem, dayNumber, orderIndex++, {
               description: attraction.description,
               locationName: `${attraction.name}, ${preferences.destination}`,
@@ -894,7 +903,7 @@ export async function generateDayWithScheduler(params: {
               estimatedCost: attraction.estimatedCost * preferences.groupSize,
               rating: attraction.rating,
               bookingUrl: attraction.bookingUrl,
-              dataReliability: attraction.dataReliability || 'verified',
+              dataReliability: attraction.dataReliability || 'estimated',
             }));
             lastCoords = attractionCoords;
             console.log(`[Jour ${dayNumber}] Activité avant check-in: ${attraction.name}`);
@@ -922,10 +931,13 @@ export async function generateDayWithScheduler(params: {
         items.push(schedulerItemToTripItem(hotelItem, dayNumber, orderIndex++, {
           description: accommodation ? `${accommodation.stars ? accommodation.stars + '⭐ | ' : ''}${accommodation.rating?.toFixed(1)}/10 | ${accommodation.pricePerNight}€/nuit` : 'Déposez vos affaires et installez-vous.',
           locationName: getHotelLocationName(accommodation, preferences.destination),
-          latitude: accommodation?.latitude || cityCenter.lat + 0.005,
-          longitude: accommodation?.longitude || cityCenter.lng + 0.005,
+          latitude: accommodation?.latitude || cityCenter.lat,
+          longitude: accommodation?.longitude || cityCenter.lng,
           bookingUrl: hotelBookingUrl,
         }));
+        if (!accommodation?.latitude) {
+          console.warn(`[TripDay] ⚠️ Hébergement sans coordonnées vérifiées`);
+        }
       }
 
       // Avancer le curseur après le check-in hôtel
@@ -1064,10 +1076,13 @@ export async function generateDayWithScheduler(params: {
         items.push(schedulerItemToTripItem(hotelItem, dayNumber, orderIndex++, {
           description: accommodation ? `${accommodation.stars ? accommodation.stars + '⭐ | ' : ''}${accommodation.rating?.toFixed(1)}/10 | ${accommodation.pricePerNight}€/nuit` : 'Déposez vos affaires et installez-vous.',
           locationName: getHotelLocationName(accommodation, preferences.destination),
-          latitude: accommodation?.latitude || cityCenter.lat + 0.005,
-          longitude: accommodation?.longitude || cityCenter.lng + 0.005,
+          latitude: accommodation?.latitude || cityCenter.lat,
+          longitude: accommodation?.longitude || cityCenter.lng,
           bookingUrl: hotelBookingUrl3,
         }));
+        if (!accommodation?.latitude) {
+          console.warn(`[TripDay] ⚠️ Hébergement sans coordonnées vérifiées`);
+        }
       }
 
       // NE PAS avancer le curseur au check-in: laisser du temps pour des activités avant
@@ -1206,9 +1221,12 @@ export async function generateDayWithScheduler(params: {
         // Petit-déjeuner dans un restaurant externe - utiliser le pré-fetch
         const restaurant = prefetchedBreakfast;
         const restaurantCoords = {
-          lat: restaurant?.latitude || cityCenter.lat,
-          lng: restaurant?.longitude || cityCenter.lng,
+          lat: restaurant?.latitude || lastCoords.lat,
+          lng: restaurant?.longitude || lastCoords.lng,
         };
+        if (!restaurant?.latitude || !restaurant?.longitude) {
+          console.warn(`[TripDay] ⚠️ Restaurant "${restaurant?.name || 'unknown'}" sans coordonnées — utilise position actuelle`);
+        }
         const googleMapsUrl = generateGoogleMapsUrl(lastCoords, restaurantCoords, pickDirectionMode(lastCoords, restaurantCoords));
         const restaurantGoogleMapsUrl = restaurant?.googleMapsUrl ||
           getReliableGoogleMapsPlaceUrl(restaurant, preferences.destination);
@@ -1321,9 +1339,12 @@ export async function generateDayWithScheduler(params: {
       }
       tripUsedAttractionIds.add(attraction.id); // ANTI-DOUBLON (trip-level)
       const attractionCoords = {
-        lat: attraction.latitude || cityCenter.lat + (Math.random() - 0.5) * 0.02,
-        lng: attraction.longitude || cityCenter.lng + (Math.random() - 0.5) * 0.02,
+        lat: attraction.latitude || cityCenter.lat,
+        lng: attraction.longitude || cityCenter.lng,
       };
+      if (!attraction.latitude || !attraction.longitude) {
+        console.warn(`[TripDay] ⚠️ Attraction "${attraction.name}" sans coordonnées vérifiées — utilise cityCenter`);
+      }
       // Générer le lien Google Maps avec itinéraire depuis le point précédent
       const googleMapsUrl = generateGoogleMapsUrl(lastCoords, attractionCoords, pickDirectionMode(lastCoords, attractionCoords));
       items.push(schedulerItemToTripItem(activityItem, dayNumber, orderIndex++, {
@@ -1337,7 +1358,7 @@ export async function generateDayWithScheduler(params: {
         bookingUrl: attraction.bookingUrl,
         timeFromPrevious: travelTime,
         googleMapsUrl,
-        dataReliability: attraction.dataReliability || 'verified', // POI réel de SerpAPI
+        dataReliability: attraction.dataReliability || 'estimated', // POI réel de SerpAPI
       }));
       lastCoords = attractionCoords;
     }
@@ -1419,7 +1440,7 @@ export async function generateDayWithScheduler(params: {
             bookingUrl: attraction.bookingUrl,
             timeFromPrevious: estimatedTravelTimeMorning,
             googleMapsUrl: googleMapsUrlMorning,
-            dataReliability: attraction.dataReliability || 'verified',
+            dataReliability: attraction.dataReliability || 'estimated',
           }));
           lastCoords = attractionCoordsMorning;
           console.log(`[Jour ${dayNumber}] Attraction matin supplémentaire ajoutée: ${attraction.name}`);
@@ -1453,8 +1474,8 @@ export async function generateDayWithScheduler(params: {
           title: 'Déjeuner pique-nique / maison',
           description: 'Repas préparé avec les courses | Option économique',
           locationName: `Centre-ville, ${preferences.destination}`,
-          latitude: lastCoords.lat,
-          longitude: lastCoords.lng,
+          latitude: accommodation?.latitude || lastCoords.lat,
+          longitude: accommodation?.longitude || lastCoords.lng,
           estimatedCost: 8 * (preferences.groupSize || 1), // ~8€/pers
         }));
       } else {
@@ -1463,9 +1484,12 @@ export async function generateDayWithScheduler(params: {
                 ? getPrefetchedRestaurant('lunch')
                 : await findRestaurantForMeal('lunch', cityCenter, preferences, dayNumber, lastCoords);
         const restaurantCoords = {
-          lat: restaurant?.latitude || cityCenter.lat,
-          lng: restaurant?.longitude || cityCenter.lng,
+          lat: restaurant?.latitude || lastCoords.lat,
+          lng: restaurant?.longitude || lastCoords.lng,
         };
+        if (!restaurant?.latitude || !restaurant?.longitude) {
+          console.warn(`[TripDay] ⚠️ Restaurant "${restaurant?.name || 'unknown'}" sans coordonnées — utilise position actuelle`);
+        }
         const googleMapsUrl = generateGoogleMapsUrl(lastCoords, restaurantCoords, pickDirectionMode(lastCoords, restaurantCoords));
         const restaurantGoogleMapsUrl = restaurant?.googleMapsUrl ||
           getReliableGoogleMapsPlaceUrl(restaurant, preferences.destination);
@@ -1573,9 +1597,12 @@ export async function generateDayWithScheduler(params: {
       }
       tripUsedAttractionIds.add(attraction.id); // ANTI-DOUBLON (trip-level)
       const attractionCoords = {
-        lat: attraction.latitude || cityCenter.lat + (Math.random() - 0.5) * 0.02,
-        lng: attraction.longitude || cityCenter.lng + (Math.random() - 0.5) * 0.02,
+        lat: attraction.latitude || cityCenter.lat,
+        lng: attraction.longitude || cityCenter.lng,
       };
+      if (!attraction.latitude || !attraction.longitude) {
+        console.warn(`[TripDay] ⚠️ Attraction "${attraction.name}" sans coordonnées vérifiées — utilise cityCenter`);
+      }
       // Générer le lien Google Maps avec itinéraire depuis le point précédent
       const googleMapsUrl = generateGoogleMapsUrl(lastCoords, attractionCoords, pickDirectionMode(lastCoords, attractionCoords));
       items.push(schedulerItemToTripItem(activityItem, dayNumber, orderIndex++, {
@@ -1589,7 +1616,7 @@ export async function generateDayWithScheduler(params: {
         bookingUrl: attraction.bookingUrl,
         timeFromPrevious: travelTime,
         googleMapsUrl,
-        dataReliability: attraction.dataReliability || 'verified', // POI réel de SerpAPI
+        dataReliability: attraction.dataReliability || 'estimated', // POI réel de SerpAPI
       }));
       lastCoords = attractionCoords;
     }
@@ -1697,6 +1724,9 @@ export async function generateDayWithScheduler(params: {
             lat: attraction.latitude || cityCenter.lat,
             lng: attraction.longitude || cityCenter.lng,
           };
+          if (!attraction.latitude || !attraction.longitude) {
+            console.warn(`[TripDay] ⚠️ Attraction "${attraction.name}" sans coordonnées vérifiées — utilise cityCenter`);
+          }
           const googleMapsUrl = generateGoogleMapsUrl(lastCoords, attractionCoords, pickDirectionMode(lastCoords, attractionCoords));
 
           items.push(schedulerItemToTripItem(activityItem, dayNumber, orderIndex++, {
@@ -1709,7 +1739,7 @@ export async function generateDayWithScheduler(params: {
             bookingUrl: attraction.bookingUrl,
             timeFromPrevious: estimatedTravelTime,
             googleMapsUrl,
-            dataReliability: attraction.dataReliability || 'verified',
+            dataReliability: attraction.dataReliability || 'estimated',
           }));
           lastCoords = attractionCoords;
           console.log(`[Jour ${dayNumber}] Attraction supplémentaire ajoutée: ${attraction.name}`);
@@ -1765,9 +1795,12 @@ export async function generateDayWithScheduler(params: {
           ? getPrefetchedRestaurant('dinner')
           : await findRestaurantForMeal('dinner', cityCenter, preferences, dayNumber, lastCoords);
         const restaurantCoords = {
-          lat: restaurant?.latitude || cityCenter.lat,
-          lng: restaurant?.longitude || cityCenter.lng,
+          lat: restaurant?.latitude || lastCoords.lat,
+          lng: restaurant?.longitude || lastCoords.lng,
         };
+        if (!restaurant?.latitude || !restaurant?.longitude) {
+          console.warn(`[TripDay] ⚠️ Restaurant "${restaurant?.name || 'unknown'}" sans coordonnées — utilise position actuelle`);
+        }
         const googleMapsUrl = generateGoogleMapsUrl(lastCoords, restaurantCoords, pickDirectionMode(lastCoords, restaurantCoords));
         const restaurantGoogleMapsUrl = restaurant?.googleMapsUrl ||
           getReliableGoogleMapsPlaceUrl(restaurant, preferences.destination);
@@ -1829,9 +1862,12 @@ export async function generateDayWithScheduler(params: {
         items.push(schedulerItemToTripItem(checkoutItem, dayNumber, orderIndex++, {
           description: 'Libérez votre hébergement.',
           locationName: getHotelLocationName(accommodation, preferences.destination),
-          latitude: accommodation?.latitude || cityCenter.lat + 0.005,
-          longitude: accommodation?.longitude || cityCenter.lng + 0.005,
+          latitude: accommodation?.latitude || cityCenter.lat,
+          longitude: accommodation?.longitude || cityCenter.lng,
         }));
+        if (!accommodation?.latitude) {
+          console.warn(`[TripDay] ⚠️ Hébergement sans coordonnées vérifiées`);
+        }
       }
 
       // Transfert hôtel → aéroport (2h avant vol)
@@ -1986,8 +2022,8 @@ export async function generateDayWithScheduler(params: {
         items.push(schedulerItemToTripItem(checkoutItem, dayNumber, orderIndex++, {
           description: 'Libérez votre hébergement.',
           locationName: getHotelLocationName(accommodation, preferences.destination),
-          latitude: accommodation?.latitude || cityCenter.lat + 0.005,
-          longitude: accommodation?.longitude || cityCenter.lng + 0.005,
+          latitude: accommodation?.latitude || cityCenter.lat,
+          longitude: accommodation?.longitude || cityCenter.lng,
         }));
         // Update lastCoords to hotel position for post-checkout activities
         lastCoords = {

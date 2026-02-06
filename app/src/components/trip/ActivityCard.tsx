@@ -189,6 +189,11 @@ export function ActivityCard({
               <p className="text-sm text-muted-foreground line-clamp-2">
                 {item.description}
               </p>
+              {item.type === 'flight' && (
+                <p className="text-[10px] text-muted-foreground/60 mt-0.5 italic">
+                  Prix indicatif — cliquez pour voir les tarifs actuels
+                </p>
+              )}
 
               {/* Location */}
               {item.locationName && (
@@ -252,10 +257,44 @@ export function ActivityCard({
                 </div>
               )}
 
+              {/* Viator product card */}
+              {item.viatorImageUrl && item.bookingUrl?.includes('viator.com') && (
+                <a
+                  href={item.bookingUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  className="flex items-center gap-2.5 mt-2 p-2 rounded-lg border bg-muted/30 hover:bg-muted/60 transition-colors"
+                >
+                  <img
+                    src={item.viatorImageUrl}
+                    alt={item.viatorTitle || item.title}
+                    className="w-14 h-14 rounded-md object-cover shrink-0"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-medium line-clamp-2">{item.viatorTitle || item.title}</p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      {item.viatorRating && (
+                        <span className="flex items-center gap-0.5 text-[10px]">
+                          <Star className="h-2.5 w-2.5 fill-yellow-400 text-yellow-400" />
+                          {item.viatorRating.toFixed(1)}
+                          {item.viatorReviewCount && <span className="text-muted-foreground">({item.viatorReviewCount})</span>}
+                        </span>
+                      )}
+                      {item.estimatedCost && item.estimatedCost > 0 && (
+                        <span className="text-[10px] font-medium text-green-600">dès {item.estimatedCost}€</span>
+                      )}
+                    </div>
+                  </div>
+                </a>
+              )}
+
               {/* Booking buttons row - Gros boutons colorés visibles */}
-              <div className="flex items-center gap-2 mt-2 flex-wrap">
-                <BookingButtons item={item} />
-              </div>
+              {!(item.viatorImageUrl && item.bookingUrl?.includes('viator.com')) && (
+                <div className="flex items-center gap-2 mt-2 flex-wrap">
+                  <BookingButtons item={item} />
+                </div>
+              )}
             </div>
 
             {/* Icon */}

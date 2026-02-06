@@ -496,12 +496,27 @@ async function swapActivity(
       }
 
       const oldTitle = item.title;
-
-      // Mise à jour simple (titre uniquement pour l'instant)
-      // TODO: Utiliser Claude pour enrichir avec coordonnées, description, etc.
       item.title = newValue;
-      item.description = `Remplace ${oldTitle}`;
-      item.dataReliability = 'generated';
+      item.dataReliability = 'estimated';
+
+      // Enrichir avec coordonnées GPS et métadonnées
+      try {
+        const { geocodeAddress } = await import('./geocoding');
+        const destination = days[0]?.items?.find((i: any) => i.type === 'checkin')?.locationName || '';
+        const searchQuery = `${newValue}, ${destination}`;
+        const coords = await geocodeAddress(searchQuery);
+        if (coords) {
+          item.latitude = coords.lat;
+          item.longitude = coords.lng;
+        }
+        item.description = newValue;
+        item.googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(newValue)}`;
+        // Estimer la durée
+        item.duration = estimateSwapDuration(newValue);
+      } catch (err) {
+        console.warn('[Swap] Enrichment failed:', err);
+        item.description = `Remplace ${oldTitle}`;
+      }
 
       changes.push({
         type: 'update',
@@ -870,10 +885,13 @@ async function addActivity(
   // Cherche un créneau entre 10h et 20h
   for (let time = 600; time < 1200; time += 30) {
     const slotEnd = time + slotDuration;
+    // Add 20min transit buffer between activities
     const hasConflict = existingTimes.some(
-      t => (time >= t.start && time < t.end) || (slotEnd > t.start && slotEnd <= t.end)
+      (t: any) => (time < t.end + 20) && (slotEnd > t.start - 20)
     );
-    if (!hasConflict) {
+    // Avoid meal windows (±30min around lunch 12h-13h30 and dinner 19h-20h30)
+    const inMealWindow = (time >= 720 && time <= 810) || (time >= 1140 && time <= 1230);
+    if (!hasConflict && !inMealWindow) {
       slotStart = time;
       break;
     }
@@ -1177,6 +1195,18 @@ Réponds de manière concise et utile (max 2-3 phrases). Si c'est une question s
 function timeToMinutes(time: string): number {
   const [hours, minutes] = time.split(':').map(Number);
   return hours * 60 + minutes;
+}
+
+function estimateSwapDuration(name: string): number {
+  const nameLower = name.toLowerCase();
+  if (/museum|musée|galerie|gallery/i.test(nameLower)) return 120;
+  if (/parc|park|jardin|garden/i.test(nameLower)) return 90;
+  if (/église|church|cathédrale|cathedral|temple|mosque|mosquée/i.test(nameLower)) return 60;
+  if (/marché|market|bazar|bazaar/i.test(nameLower)) return 90;
+  if (/plage|beach/i.test(nameLower)) return 180;
+  if (/tour|tower|viewpoint|mirador/i.test(nameLower)) return 60;
+  if (/quartier|neighborhood|district|barrio/i.test(nameLower)) return 120;
+  return 90; // default
 }
 
 function normalizeString(str: string): string {
