@@ -92,14 +92,19 @@ async function fixItemCoordinates(
   const oldLat = item.latitude;
   const oldLng = item.longitude;
 
-  // Tenter résolution via chaîne exhaustive
+  // Tenter résolution via chaîne exhaustive (inclut maintenant validation distance)
   const resolved = await resolveCoordinates(item.title, destination, destinationCenter, item.type as 'attraction' | 'restaurant');
   if (resolved) {
-    item.latitude = resolved.lat;
-    item.longitude = resolved.lng;
-    item.dataReliability = 'verified';
-    console.log(`[GeoValidator] ✅ RESOLVED: "${item.title}" (${oldLat?.toFixed(4)}, ${oldLng?.toFixed(4)}) → (${item.latitude.toFixed(4)}, ${item.longitude.toFixed(4)}) via ${resolved.source}`);
-    return true;
+    // Double-check: vérifier que le résultat est bien dans la zone de destination
+    if (isLocationInDestination({ lat: resolved.lat, lng: resolved.lng }, destinationCenter, MAX_DISTANCE_FROM_CENTER_KM)) {
+      item.latitude = resolved.lat;
+      item.longitude = resolved.lng;
+      item.dataReliability = 'verified';
+      console.log(`[GeoValidator] ✅ RESOLVED: "${item.title}" (${oldLat?.toFixed(4)}, ${oldLng?.toFixed(4)}) → (${item.latitude.toFixed(4)}, ${item.longitude.toFixed(4)}) via ${resolved.source}`);
+      return true;
+    } else {
+      console.warn(`[GeoValidator] ⚠️ RESOLVED but too far: "${item.title}" → (${resolved.lat.toFixed(4)}, ${resolved.lng.toFixed(4)}) — rejected`);
+    }
   }
 
   // Échec: garder les coords actuelles mais marquer comme estimated
@@ -120,10 +125,12 @@ export async function validateTripGeography(
 ): Promise<GeoValidationResult> {
   const errors: GeoValidationError[] = [];
   let itemsFixed = 0;
+  const itemsToRemove: { dayIndex: number; itemId: string; title: string }[] = [];
 
   console.log(`\n[GeoValidator] Validation géographique - Centre destination: ${destinationCenter.lat}, ${destinationCenter.lng}`);
 
-  for (const day of trip.days) {
+  for (let dayIdx = 0; dayIdx < trip.days.length; dayIdx++) {
+    const day = trip.days[dayIdx];
     for (const item of day.items) {
       // Ignorer les éléments sans coordonnées ou logistiques
       if (!item.latitude || !item.longitude) continue;
@@ -155,20 +162,40 @@ export async function validateTripGeography(
         // Résolution via chaîne exhaustive d'APIs (pas de jitter)
         if (autoFix) {
           const fixed = await fixItemCoordinates(item, destinationCenter, destination);
-          if (fixed) itemsFixed++;
+          if (fixed) {
+            itemsFixed++;
+          } else if (distance > 100) {
+            // Item outrageusement loin (>100km) ET toutes les APIs ont échoué
+            // Supprimer plutôt que garder avec des coordonnées dans le mauvais pays
+            itemsToRemove.push({ dayIndex: dayIdx, itemId: item.id, title: item.title });
+            console.error(`[GeoValidator] 🗑️ SUPPRESSION: "${item.title}" — ${Math.round(distance)}km de la destination, irréparable`);
+          }
         }
       }
+    }
+  }
+
+  // Supprimer les items irréparables et ré-indexer
+  let itemsRemoved = 0;
+  for (const { dayIndex, itemId, title } of itemsToRemove) {
+    const day = trip.days[dayIndex];
+    const beforeLen = day.items.length;
+    day.items = day.items.filter(item => item.id !== itemId);
+    if (day.items.length < beforeLen) {
+      itemsRemoved++;
+      day.items.forEach((item, idx) => { item.orderIndex = idx; });
+      console.log(`[GeoValidator] ✅ "${title}" supprimé du jour ${day.dayNumber}`);
     }
   }
 
   const result: GeoValidationResult = {
     valid: errors.length === 0,
     errors,
-    itemsRemoved: itemsFixed
+    itemsRemoved: itemsFixed + itemsRemoved
   };
 
   if (errors.length > 0) {
-    console.log(`[GeoValidator] ${errors.length} erreur(s) géographique(s) détectée(s), ${itemsFixed} résolu(s) via API`);
+    console.log(`[GeoValidator] ${errors.length} erreur(s) géographique(s) détectée(s), ${itemsFixed} résolu(s) via API, ${itemsRemoved} supprimé(s)`);
   } else {
     console.log(`[GeoValidator] Voyage géographiquement cohérent ✓`);
   }

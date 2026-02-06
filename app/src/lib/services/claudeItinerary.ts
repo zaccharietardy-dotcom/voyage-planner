@@ -47,6 +47,8 @@ export interface ClaudeItineraryRequest {
   groupSize?: number;
   attractionPool: AttractionSummary[];
   budgetStrategy?: BudgetStrategy;
+  dailyActivityBudget?: number;
+  maxPricePerActivity?: number;
 }
 
 export interface ClaudeItineraryDay {
@@ -241,6 +243,13 @@ ${JSON.stringify(poolCompact)}
 
 ⚠️ BIAIS DONNÉES: Le pool provient d'OpenStreetMap et peut surreprésenter les lieux religieux (églises, temples). IGNORE les églises/temples mineurs et PRIORISE les attractions iconiques mondiales (musées majeurs, monuments emblématiques, quartiers célèbres). Si le Louvre, le Musée d'Orsay ou d'autres grands musées manquent du pool, AJOUTE-LES dans additionalSuggestions.
 
+💰 CONTRAINTE BUDGET STRICTE:
+- Budget quotidien activités: ${request.dailyActivityBudget || 30}€/personne/jour MAXIMUM
+- Prix max par activité individuelle: ${request.maxPricePerActivity || 50}€/personne
+- NE SÉLECTIONNE PAS d'activités dont estimatedCost > ${request.maxPricePerActivity || 50}€/personne
+- Privilégie les attractions GRATUITES ou peu chères (parcs, quartiers, marchés, extérieurs de monuments)
+- TOTAL activités sur tout le séjour: MAX ${(request.dailyActivityBudget || 30) * request.durationDays}€/personne
+
 RÈGLES D'OR:
 1. TIMING INTELLIGENT:
    - Temples, sanctuaires, marchés → tôt le matin (moins de monde, plus authentique)
@@ -308,6 +317,8 @@ RÈGLES D'OR:
    - Ajoute le day trip dans additionalSuggestions avec les vraies coordonnées
    - Précise le moyen de transport ET la durée du trajet dans la description
    - isDayTrip DOIT être true pour ce jour, avec dayTripDestination et dayTripTransport renseignés
+   - IMPORTANT: Pour les jours isDayTrip=true, selectedAttractionIds DOIT être VIDE [] (les attractions du pool sont dans la ville principale, pas au day trip)
+   - TOUTES les activités du day trip doivent être dans additionalSuggestions avec noms de lieux AU day trip (PAS des attractions de la ville principale)
 
 5. ADAPTATION SAISONNIÈRE pour ${season}:
    ${season === 'hiver' ? `- HIVER: Privilégie musées, indoor, marchés de Noël. Viewpoints AVANT 17h. Pas d'activités eau/plage sauf climat tropical.` : ''}
@@ -497,6 +508,9 @@ Format EXACT:
         { keyword: 'batlló', fullName: 'Casa Batlló, Barcelona', duration: 60, cost: 35 },
         { keyword: 'güell', fullName: 'Parc Güell, Barcelona', duration: 90, cost: 10 },
         { keyword: 'rambla', fullName: 'La Rambla, Barcelona', duration: 60, cost: 0 },
+        { keyword: 'pedrera', fullName: 'Casa Milà (La Pedrera), Barcelona', duration: 75, cost: 25, synonyms: ['milà', 'mila'] },
+        { keyword: 'boqueria', fullName: 'Mercat de la Boqueria, Barcelona', duration: 45, cost: 0, synonyms: ['boquería'] },
+        { keyword: 'gòtic', fullName: 'Barri Gòtic, Barcelona', duration: 90, cost: 0, synonyms: ['gotic', 'gothic quarter', 'quartier gothique'] },
       ],
       'paris': [
         { keyword: 'eiffel', fullName: 'Tour Eiffel, Paris', duration: 90, cost: 29 },
@@ -868,12 +882,16 @@ Format EXACT:
 
     // POST-VALIDATION: Inject missing incontournables with proper names and durations
     // Helper: check if an attraction or any of its synonyms exist in allNames
+    // Normalisation sans accents pour matcher "colisée" avec "colisee", "Panthéon" avec "pantheon", etc.
+    const stripAccents = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const allNamesNormalized = stripAccents(allNames);
+    const allNameWordsNormalized = allNamesNormalized.split(/\s+/);
     const attractionExists = (detail: { keyword: string; synonyms?: string[] }): boolean => {
       const allKeywords = [detail.keyword, ...(detail.synonyms || [])];
-      const allNameWords = allNames.split(/\s+/);
-      return allKeywords.some(kw =>
-        allNames.includes(kw) || allNameWords.some(w => w.includes(kw))
-      );
+      return allKeywords.some(kw => {
+        const kwNorm = stripAccents(kw.toLowerCase());
+        return allNamesNormalized.includes(kwNorm) || allNameWordsNormalized.some(w => w.includes(kwNorm));
+      });
     };
 
     for (const [city, details] of Object.entries(mustHaveDetails)) {
@@ -896,6 +914,15 @@ Format EXACT:
             area: request.destination,
           });
         }
+      }
+    }
+
+    // POST-VALIDATION: Check minimum activities per full day
+    for (const day of parsed.days) {
+      const totalActivities = day.selectedAttractionIds.length + day.additionalSuggestions.length;
+      const isFullDay = day.dayNumber > 1 && day.dayNumber < request.durationDays;
+      if (isFullDay && !day.isDayTrip && totalActivities < 4) {
+        console.warn(`[ClaudeItinerary] ⚠️ Jour ${day.dayNumber} "${day.theme}": seulement ${totalActivities} activités (minimum recommandé: 4)`);
       }
     }
 
@@ -1028,6 +1055,26 @@ Format EXACT:
           if (pattern.test(s.name) && s.estimatedDuration > maxMin * 1.2) {
             console.log(`[ClaudeItinerary] Cap duration "${s.name}": ${s.estimatedDuration}min → ${maxMin}min`);
             s.estimatedDuration = maxMin;
+            break;
+          }
+        }
+        // Duration floors for major museums: minimum realistic visit time
+        const durationFloors: [RegExp, number][] = [
+          [/\b(vatican|vaticano|musées du vatican|vatican museum|chapelle sixtine|sistine)\b/i, 120],
+          [/\b(louvre|musée du louvre)\b/i, 150],
+          [/\b(british museum)\b/i, 120],
+          [/\b(uffizi|offices|galerie des offices)\b/i, 120],
+          [/\b(prado|museo del prado)\b/i, 120],
+          [/\b(rijksmuseum)\b/i, 120],
+          [/\b(hermitage|ermitage)\b/i, 120],
+          [/\b(metropolitan|met museum)\b/i, 120],
+          [/\b(musée d'orsay|orsay)\b/i, 90],
+          [/\b(colosseum|colisée|colosseo|coliseum|colisee)\b/i, 90],
+        ];
+        for (const [pattern, minMin] of durationFloors) {
+          if (pattern.test(s.name) && s.estimatedDuration < minMin) {
+            console.log(`[ClaudeItinerary] Duration floor "${s.name}": ${s.estimatedDuration}min → ${minMin}min`);
+            s.estimatedDuration = minMin;
             break;
           }
         }
@@ -1175,6 +1222,7 @@ export function mapItineraryToAttractions(
   itinerary: ClaudeItineraryResponse,
   attractionPool: Attraction[],
   cityCenter?: { lat: number; lng: number },
+  dayTripCenterMap?: Map<string, { lat: number; lng: number }>,
 ): Attraction[][] {
   const poolMap = new Map<string, Attraction>();
   for (const a of attractionPool) {
@@ -1215,7 +1263,7 @@ export function mapItineraryToAttractions(
       dayAttractions.push({
         id: `claude-${suggestion.name.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 30)}-${Date.now()}`,
         name: suggestion.name,
-        type: 'culture' as ActivityType,
+        type: 'culture' as ActivityType, // Maps to TripItemType 'activity' in tripDay.ts
         description: suggestion.whyVisit,
         duration: suggestion.estimatedDuration,
         estimatedCost: suggestion.estimatedCost,
@@ -1231,8 +1279,35 @@ export function mapItineraryToAttractions(
       });
     }
 
+    // Day trip validation: pour les jours isDayTrip, filtrer les attractions trop loin du day trip center
+    let filtered = dayAttractions;
+    if (day.isDayTrip && day.dayTripDestination && dayTripCenterMap) {
+      const dtCenter = dayTripCenterMap.get(day.dayTripDestination);
+      if (dtCenter) {
+        const before = filtered.length;
+        filtered = filtered.filter(a => {
+          // Skip items sans coords (seront résolus plus tard)
+          if (!a.latitude || !a.longitude || (a.latitude === 0 && a.longitude === 0)) return true;
+          // Si c'est cityCenter par défaut (additionalSuggestions), garder (sera résolu)
+          if (cityCenter && a.latitude === cityCenter.lat && a.longitude === cityCenter.lng) return true;
+          // Calculer distance au day trip center
+          const dlat = a.latitude - dtCenter.lat;
+          const dlng = a.longitude - dtCenter.lng;
+          const approxKm = Math.sqrt(dlat * dlat + dlng * dlng) * 111; // Approximation rapide
+          if (approxKm > 30) {
+            console.warn(`[DayTrip] ❌ "${a.name}" est à ~${approxKm.toFixed(0)}km de ${day.dayTripDestination} — RETIRÉ du day trip`);
+            return false;
+          }
+          return true;
+        });
+        if (filtered.length < before) {
+          console.log(`[DayTrip] Filtrage: ${before - filtered.length} attractions retirées du jour ${day.dayNumber} (${day.dayTripDestination})`);
+        }
+      }
+    }
+
     // Deduplicate: if two attractions have very similar names, keep the one from pool (better coords)
-    const deduped = deduplicateAttractions(dayAttractions);
+    const deduped = deduplicateAttractions(filtered);
 
     // Reorder attractions by geographic proximity (nearest-neighbor) to minimize travel
     return reorderByProximity(deduped);
@@ -1242,7 +1317,7 @@ export function mapItineraryToAttractions(
 /**
  * Normalize name for comparison: lowercase, strip accents, strip suffixes
  */
-function normalizeName(name: string): string {
+export function normalizeName(name: string): string {
   return name
     .toLowerCase()
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // strip accents
@@ -1256,7 +1331,7 @@ function normalizeName(name: string): string {
 /**
  * Check if two names are similar enough to be duplicates
  */
-function areNamesSimilar(a: string, b: string): boolean {
+export function areNamesSimilar(a: string, b: string): boolean {
   const na = normalizeName(a);
   const nb = normalizeName(b);
   if (na === nb) return true;

@@ -203,6 +203,7 @@ export async function searchViatorActivities(
   options?: {
     types?: ActivityType[];
     limit?: number;
+    maxPricePerActivity?: number;
   }
 ): Promise<Attraction[]> {
   if (!VIATOR_API_KEY) {
@@ -283,14 +284,14 @@ export async function searchViatorActivities(
           return [];
         }
         const data: ViatorSearchResponse = await retryResponse.json();
-        return processViatorResults(data, destination, cityCenter, cacheKey);
+        return processViatorResults(data, destination, cityCenter, cacheKey, options?.maxPricePerActivity);
       }
       console.warn(`[Viator] Search failed: ${response.status}`);
       return [];
     }
 
     const data: ViatorSearchResponse = await response.json();
-    return processViatorResults(data, destination, cityCenter, cacheKey);
+    return processViatorResults(data, destination, cityCenter, cacheKey, options?.maxPricePerActivity);
   } catch (error) {
     console.warn('[Viator] Erreur recherche:', error);
     return [];
@@ -386,8 +387,12 @@ export async function findViatorProduct(
       }
     }
 
-    // ===== PRIORITÉ 3: Fuzzy match avec seuil strict =====
-    // Au moins 60% des mots significatifs doivent matcher
+    // ===== PRIORITÉ 3: Fuzzy match avec seuil dynamique =====
+    // Seuil plus strict pour les noms ambigus (palazzo, museum, church, etc.)
+    const ambiguousNamePattern = /\b(palazzo|museum|musée|musee|church|église|eglise|basilica|basilique|temple|castle|château|chateau|cathedral|cathédrale|cathedrale|gallery|galerie)\b/i;
+    const isAmbiguousName = ambiguousNamePattern.test(activityNameLower);
+    const minThreshold = isAmbiguousName ? 0.75 : 0.6;
+
     let bestMatch: { product: ViatorProduct; score: number } | null = null;
 
     for (const product of filteredProducts) {
@@ -395,8 +400,8 @@ export async function findViatorProduct(
       const matchCount = activityWords.filter(w => productTitle.includes(w)).length;
       const matchRatio = activityWords.length > 0 ? matchCount / activityWords.length : 0;
 
-      // Seuil plus strict: 60% minimum OU 3+ mots avec au moins 50%
-      if (matchRatio >= 0.6 || (matchCount >= 3 && matchRatio >= 0.5)) {
+      // Seuil dynamique: plus strict pour les noms ambigus (palazzo, museum, etc.)
+      if (matchRatio >= minThreshold || (matchCount >= 3 && matchRatio >= 0.5)) {
         const score = matchRatio * 100 + matchCount * 10;
         if (!bestMatch || score > bestMatch.score) {
           bestMatch = { product, score };
@@ -433,13 +438,20 @@ const VIATOR_EXCLUDED_KEYWORDS = [
   // Tourist traps
   'madame tussauds', 'tussaud', 'wax museum', 'trick eye',
   'selfie museum', "ripley's",
+  // Wellness/spa — non pertinent pour tourisme standard
+  'massage', 'thai massage', 'spa treatment', 'hammam', 'thermal bath treatment',
+  // Ultra-luxe inaccessible pour budgets normaux
+  'private yacht', 'luxury sailing', 'private sailing', 'private boat charter',
+  'helicopter', 'helicoptère', 'limousine', 'limo tour',
+  'ferrari', 'lamborghini', 'supercar', 'sports car',
 ];
 
 function processViatorResults(
   data: ViatorSearchResponse,
   destination: string,
   cityCenter: { lat: number; lng: number },
-  cacheKey: string
+  cacheKey: string,
+  maxPricePerActivity: number = 200
 ): Attraction[] {
   const products = data.products || [];
   console.log(`[Viator] ${products.length} activités trouvées pour ${destination}`);
@@ -456,6 +468,12 @@ function processViatorResults(
           console.log(`[Viator] Exclusion: "${p.title}" (contient "${kw}")`);
           return false;
         }
+      }
+      // Filter out overpriced activities
+      const price = p.pricing?.summary?.fromPrice || 0;
+      if (price > maxPricePerActivity) {
+        console.log(`[Viator] Exclusion prix: "${p.title}" (${price}€ > max ${maxPricePerActivity}€)`);
+        return false;
       }
       return true;
     })

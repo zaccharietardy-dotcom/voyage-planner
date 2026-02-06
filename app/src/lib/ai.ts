@@ -41,7 +41,7 @@ import { generateFlightLink, generateHotelLink, formatDateForUrl } from './servi
 import { searchAttractionsMultiQuery, searchMustSeeAttractions, searchGroceryStores, type GroceryStore } from './services/serpApiPlaces';
 import { resolveAttractionByName } from './services/overpassAttractions';
 import { resolveCoordinates, resetResolutionStats, getResolutionStats } from './services/coordsResolver';
-import { generateClaudeItinerary, summarizeAttractions, mapItineraryToAttractions } from './services/claudeItinerary';
+import { generateClaudeItinerary, summarizeAttractions, mapItineraryToAttractions, areNamesSimilar } from './services/claudeItinerary';
 import { generateTravelTips } from './services/travelTips';
 import { resolveBudget, generateBudgetStrategy } from './services/budgetResolver';
 import { searchAirbnbListings, isAirbnbApiConfigured } from './services/airbnb';
@@ -423,9 +423,19 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
 
   // Mixer avec des activités Viator originales (déjà récupérées en parallèle ci-dessus)
   if (viatorActivitiesRaw.length > 0) {
+    // Filtrer par prix max selon budget
+    const maxActivityPrice = budgetStrategy.maxPricePerActivity || 100;
+    const viatorPriceFiltered = viatorActivitiesRaw.filter(v => {
+      if (v.estimatedCost && v.estimatedCost > maxActivityPrice) {
+        console.log(`[AI] Viator exclusion prix: "${v.name}" (${v.estimatedCost}€ > max ${maxActivityPrice}€)`);
+        return false;
+      }
+      return true;
+    });
+
     // Filtrer les doublons (même nom qu'une attraction SerpAPI)
     const existingNames = new Set(attractionPool.map(a => a.name.toLowerCase()));
-    const uniqueViator = viatorActivitiesRaw.filter(v => {
+    const uniqueViator = viatorPriceFiltered.filter(v => {
       const vName = v.name.toLowerCase();
       return !existingNames.has(vName) &&
         ![...existingNames].some(n => n.includes(vName) || vName.includes(n));
@@ -477,6 +487,8 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       groupSize: preferences.groupSize || 2,
       attractionPool: summarizeAttractions(attractionPool),
       budgetStrategy,
+      dailyActivityBudget: budgetStrategy.dailyActivityBudget,
+      maxPricePerActivity: budgetStrategy.maxPricePerActivity,
     });
   } catch (error) {
     console.error('[AI] Claude curation error:', error);
@@ -484,7 +496,6 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
 
   if (claudeItinerary) {
     console.log('[AI] ✅ Itinéraire Claude reçu, mapping des attractions...');
-    attractionsByDay = mapItineraryToAttractions(claudeItinerary, attractionPool, cityCenter);
 
     // Stocker les métadonnées par jour
     dayMetadata = claudeItinerary.days.map(d => ({
@@ -497,7 +508,7 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
     // PARALLELIZED: Resolve all additional suggestions across all days at once
     console.log(`[PERF ${elapsed()}] Start parallel suggestion resolution`);
 
-    // Step 1: Pre-resolve all day trip destination centers in parallel
+    // Step 1: Pre-resolve all day trip destination centers in parallel (AVANT mapping pour filtrer)
     const dayTripDestinations = claudeItinerary.days
       .filter(d => d.isDayTrip && d.dayTripDestination)
       .map(d => d.dayTripDestination!);
@@ -516,6 +527,9 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
         }
       });
     }
+
+    // Mapper APRÈS résolution des day trip centers pour filtrer les attractions hors zone
+    attractionsByDay = mapItineraryToAttractions(claudeItinerary, attractionPool, cityCenter, dayTripCenterMap);
 
     // Step 2: Collect all suggestions into a flat list for parallel resolution
     const suggestionTasks: Array<{
@@ -811,13 +825,18 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
 
   // ENFORCEMENT: Vérifier que tous les mustSee sont dans au moins un jour
   // Si un mustSee manque, le forcer dans le jour avec le moins d'attractions
+  // Utilise une comparaison normalisée (sans accents) pour matcher "Colisée" = "Colosseum" etc.
   if (mustSeeNames.size > 0) {
-    const scheduledNames = new Set(
-      attractionsByDay.flat().map(a => a.name.toLowerCase())
-    );
-    const missingMustSees = attractionPool.filter(
-      a => a.mustSee && !scheduledNames.has(a.name.toLowerCase())
-    );
+    const stripAccents = (s: string) => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+    const scheduledNamesNormalized = attractionsByDay.flat().map(a => stripAccents(a.name));
+    const missingMustSees = attractionPool.filter(a => {
+      if (!a.mustSee) return false;
+      const normalizedName = stripAccents(a.name);
+      // Matching normalisé: exact ou inclusion bidirectionnelle
+      return !scheduledNamesNormalized.some(sn =>
+        sn === normalizedName || sn.includes(normalizedName) || normalizedName.includes(sn)
+      );
+    });
     for (const missing of missingMustSees) {
       // Trouver le jour avec le moins d'attractions (pas le premier ni le dernier si possible)
       let bestDay = 0;
@@ -1025,6 +1044,19 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
         // Deduplication: if this restaurant ID is already used, store null (will fallback to live fetch)
         if (restaurant?.id && usedIds.has(restaurant.id)) {
           prefetchedRestaurants.set(fetch.key, null);
+        } else if (restaurant?.latitude && restaurant?.longitude && cityCenter) {
+          // Pré-validation: rejeter les restaurants trop loin de la destination (>15km)
+          const distFromCenter = calculateDistance(restaurant.latitude, restaurant.longitude, cityCenter.lat, cityCenter.lng);
+          if (distFromCenter > 15) {
+            console.warn(`[AI] Restaurant rejeté (${Math.round(distFromCenter)}km du centre): "${restaurant.name}"`);
+            prefetchedRestaurants.set(fetch.key, null);
+          } else {
+            if (restaurant.id) {
+              usedIds.add(restaurant.id);
+              usedRestaurantIds.add(restaurant.id);
+            }
+            prefetchedRestaurants.set(fetch.key, restaurant);
+          }
         } else {
           if (restaurant?.id) {
             usedIds.add(restaurant.id);
@@ -1213,6 +1245,32 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       dayTripDestination: meta.dayTripDestination,
     });
 
+    // POST-VALIDATION: Vérifier cohérence isDayTrip vs contenu réel
+    const lastDay = days[days.length - 1];
+    if (lastDay.isDayTrip && lastDay.dayTripDestination) {
+      const destLower = lastDay.dayTripDestination.toLowerCase();
+      const hasMatchingItem = lastDay.items.some(item => {
+        const combined = `${item.title} ${item.locationName || ''} ${item.description || ''}`.toLowerCase();
+        return combined.includes(destLower);
+      });
+      if (!hasMatchingItem) {
+        console.warn(`[AI] Jour ${lastDay.dayNumber}: isDayTrip="${lastDay.dayTripDestination}" mais AUCUN item ne correspond → reset`);
+        lastDay.isDayTrip = false;
+        lastDay.dayTripDestination = undefined;
+      }
+    }
+
+    // POST-VALIDATION: Si dernier jour avec uniquement logistique, override le thème
+    if (isLastDay) {
+      const activityItems = lastDay.items.filter(item => ['activity', 'restaurant'].includes(item.type));
+      if (activityItems.length === 0) {
+        lastDay.theme = `Départ - Retour à ${preferences.origin || 'la maison'}`;
+        lastDay.dayNarrative = undefined;
+        lastDay.isDayTrip = false;
+        lastDay.dayTripDestination = undefined;
+      }
+    }
+
     // Si ce jour a un vol tardif, le stocker pour le jour suivant
     // ET redistribuer les attractions non utilisées aux jours suivants
     pendingLateFlightData = dayResult.lateFlightForNextDay;
@@ -1232,6 +1290,111 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
           if (targetDayIndex < preferences.durationDays) {
             attractionsByDay[targetDayIndex].push(unusedAttractions[j]);
             console.log(`[AI]   "${unusedAttractions[j].name}" → Jour ${targetDayIndex + 1}`);
+          }
+        }
+      }
+    }
+  }
+
+  // DÉDUPLICATION CROSS-DAY: Supprimer les activités en doublon entre jours différents (garder la plus longue)
+  const seenActivities = new Map<string, { dayIndex: number; itemIndex: number; durationMin: number; title: string }>();
+  for (let d = 0; d < days.length; d++) {
+    for (let i = 0; i < days[d].items.length; i++) {
+      const item = days[d].items[i];
+      if (item.type !== 'activity') continue;
+
+      const title = item.title;
+      // Calculer durée en minutes
+      let durationMin = item.duration || 0;
+      if (!durationMin && item.startTime && item.endTime) {
+        const start = parseTime(days[d].date, item.startTime);
+        const end = parseTime(days[d].date, item.endTime);
+        durationMin = Math.max(0, (end.getTime() - start.getTime()) / 60000);
+      }
+
+      // Chercher un doublon parmi les activités déjà vues
+      let foundDupeKey: string | null = null;
+      for (const [seenTitle, seenData] of seenActivities) {
+        if (areNamesSimilar(title, seenData.title)) {
+          foundDupeKey = seenTitle;
+          break;
+        }
+      }
+
+      if (foundDupeKey) {
+        const seenData = seenActivities.get(foundDupeKey)!;
+        if (durationMin > seenData.durationMin) {
+          // L'item actuel est plus long → supprimer l'ancien
+          console.log(`[AI] Dédup cross-day: suppression "${seenData.title}" (${seenData.durationMin}min) Jour ${seenData.dayIndex + 1}, conservation "${title}" (${durationMin}min) Jour ${d + 1}`);
+          days[seenData.dayIndex].items.splice(seenData.itemIndex, 1);
+          days[seenData.dayIndex].items.forEach((it, idx) => { it.orderIndex = idx; });
+          // Ajuster les index dans seenActivities si nécessaire
+          for (const [k, v] of seenActivities) {
+            if (v.dayIndex === seenData.dayIndex && v.itemIndex > seenData.itemIndex) {
+              v.itemIndex--;
+            }
+          }
+          seenActivities.delete(foundDupeKey);
+          seenActivities.set(title, { dayIndex: d, itemIndex: i, durationMin, title });
+        } else {
+          // L'ancien est plus long → supprimer l'item actuel
+          console.log(`[AI] Dédup cross-day: suppression "${title}" (${durationMin}min) Jour ${d + 1}, conservation "${seenData.title}" (${seenData.durationMin}min) Jour ${seenData.dayIndex + 1}`);
+          days[d].items.splice(i, 1);
+          days[d].items.forEach((it, idx) => { it.orderIndex = idx; });
+          i--; // Ajuster l'index après splice
+        }
+      } else {
+        seenActivities.set(title, { dayIndex: d, itemIndex: i, durationMin, title });
+      }
+    }
+  }
+
+  // VALIDATION FINALE MUST-SEE: Vérifier que tous les must-see demandés par l'utilisateur sont dans le trip final
+  if (preferences.mustSee?.trim()) {
+    const stripAccentsFinal = (s: string) => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+    const mustSeeList = preferences.mustSee.split(',').map(s => stripAccentsFinal(s)).filter(s => s.length > 0);
+    const allItemTitlesNormalized = days.flatMap(d => d.items.filter(i => i.type === 'activity').map(i => stripAccentsFinal(i.title)));
+    const allTitlesJoined = allItemTitlesNormalized.join(' ');
+
+    for (const ms of mustSeeList) {
+      // Chercher par mots significatifs (>2 chars) du must-see
+      const words = ms.split(/\s+/).filter(w => w.length > 2);
+      const found = words.some(w => allTitlesJoined.includes(w));
+      if (!found) {
+        console.error(`[AI] ⚠️ MUST-SEE MANQUANT DU TRIP FINAL: "${ms}"`);
+        // Chercher dans le pool et forcer l'ajout
+        const poolMatch = attractionPool.find(a => {
+          const norm = stripAccentsFinal(a.name);
+          return words.some(w => norm.includes(w));
+        });
+        if (poolMatch) {
+          // Trouver le jour intermédiaire le moins chargé
+          let bestDayIdx = Math.min(1, days.length - 1);
+          let minItems = Infinity;
+          for (let d = 1; d < Math.max(2, days.length - 1); d++) {
+            const actCount = days[d]?.items.filter(i => i.type === 'activity').length || 0;
+            if (actCount < minItems) { minItems = actCount; bestDayIdx = d; }
+          }
+          const day = days[bestDayIdx];
+          if (day) {
+            const newItem: TripItem = {
+              id: Math.random().toString(36).substring(2, 15),
+              dayNumber: day.dayNumber,
+              startTime: '10:00',
+              endTime: '12:00',
+              type: 'activity',
+              title: poolMatch.name,
+              description: poolMatch.description || '',
+              locationName: `${poolMatch.name}, ${preferences.destination}`,
+              latitude: poolMatch.latitude,
+              longitude: poolMatch.longitude,
+              estimatedCost: poolMatch.estimatedCost || 0,
+              orderIndex: day.items.length,
+              rating: poolMatch.rating,
+              dataReliability: 'verified',
+            };
+            day.items.push(newItem);
+            console.log(`[AI] ✅ Must-see forcé dans trip final: "${poolMatch.name}" → Jour ${day.dayNumber}`);
           }
         }
       }
@@ -1380,10 +1543,24 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
   // Post-processing Viator: attacher des liens Viator aux activités sans bookingUrl
   if (isViatorConfigured()) {
     try {
+      // Patterns d'activités gratuites par nature — skip Viator matching
+      const FREE_ACTIVITY_PATTERNS = /\b(rambla|passeig|promenade|place|square|plaza|platz|piazza|pont|bridge|quartier|barrio|neighbourhood|parc|park|jardin|garden|plage|beach|marché|market|mercat|mercado|balade|walk|stroll)\b/i;
+
       const activitiesWithoutUrl = days.flatMap(day =>
-        day.items.filter(item =>
-          item.type === 'activity' && !item.bookingUrl && item.title
-        )
+        day.items.filter(item => {
+          if (item.type !== 'activity' || item.bookingUrl || !item.title) return false;
+          // Skip activités gratuites (cost = 0)
+          if (item.estimatedCost === 0) {
+            console.log(`[AI] Skip Viator (gratuit): "${item.title}"`);
+            return false;
+          }
+          // Skip activités gratuites par nature (places, parcs, rues...)
+          if (FREE_ACTIVITY_PATTERNS.test(item.title)) {
+            console.log(`[AI] Skip Viator (lieu gratuit): "${item.title}"`);
+            return false;
+          }
+          return true;
+        })
       );
 
       if (activitiesWithoutUrl.length > 0) {
@@ -1445,7 +1622,18 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
     'restaurant', 'cafe', 'café', 'bistro', 'pizzeria', 'trattoria',
     'brasserie', 'diner', 'eatery', 'grill', 'steakhouse', 'sushi',
     'tapas', 'bar', 'pub', 'tavern', 'cantina', 'osteria', 'bakery',
-    'boulangerie', 'patisserie', 'coffee', 'brunch', 'cuisine'
+    'boulangerie', 'patisserie', 'coffee', 'brunch',
+  ];
+
+  // Anti-restaurant keywords: si présent, ne JAMAIS reclasser en restaurant
+  const ACTIVITY_OVERRIDE_KEYWORDS = [
+    'tour', 'excursion', 'croisière', 'cruise', 'sailing', 'voile',
+    'kayak', 'vélo', 'bike', 'guide', 'visite guidée', 'guided',
+    'experience', 'expérience', 'atelier', 'workshop', 'class', 'cours',
+    'trek', 'hike', 'randonnée', 'snorkeling', 'surf', 'plongée',
+    'spectacle', 'show', 'concert', 'flamenco', 'balade', 'walk',
+    'discovering', 'découverte', 'exploration', 'safari', 'diving',
+    'climbing', 'escalade', 'paddle', 'canoe', 'rafting',
   ];
 
   let typeFixCount = 0;
@@ -1454,9 +1642,11 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       const titleLower = (item.title || '').toLowerCase();
 
       // Si classé comme activité mais contient un mot-clé restaurant
+      // MAIS PAS un mot-clé d'activité → reclasser
       if (item.type === 'activity') {
-        const isRestaurant = RESTAURANT_KEYWORDS.some(kw => titleLower.includes(kw));
-        if (isRestaurant) {
+        const hasRestaurantKw = RESTAURANT_KEYWORDS.some(kw => titleLower.includes(kw));
+        const hasActivityKw = ACTIVITY_OVERRIDE_KEYWORDS.some(kw => titleLower.includes(kw));
+        if (hasRestaurantKw && !hasActivityKw) {
           item.type = 'restaurant';
           typeFixCount++;
         }
@@ -1500,18 +1690,22 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
 
     console.log(`[AI] 🔍 ${itemsToVerify.length} items à vérifier via chaîne exhaustive`);
 
-    // Résolution séquentielle pour respecter les rate limits
+    // Résolution par batch de 5 en parallèle (respecte rate limits tout en accélérant)
     let enrichedCount = 0;
-    for (const item of itemsToVerify) {
-      const resolved = await resolveCoordinates(item.title, preferences.destination, destCoords, item.type as 'attraction' | 'restaurant');
-      if (resolved) {
-        const oldCoords = `${item.latitude?.toFixed(4)},${item.longitude?.toFixed(4)}`;
-        item.latitude = resolved.lat;
-        item.longitude = resolved.lng;
-        item.dataReliability = 'verified';
-        enrichedCount++;
-        console.log(`[Coords] ✅ ${item.title}: ${oldCoords} → ${resolved.lat.toFixed(4)},${resolved.lng.toFixed(4)} (${resolved.source})`);
-      }
+    const BATCH_SIZE = 5;
+    for (let i = 0; i < itemsToVerify.length; i += BATCH_SIZE) {
+      const batch = itemsToVerify.slice(i, i + BATCH_SIZE);
+      await Promise.allSettled(batch.map(async (item) => {
+        const resolved = await resolveCoordinates(item.title, preferences.destination, destCoords, item.type as 'attraction' | 'restaurant');
+        if (resolved) {
+          const oldCoords = `${item.latitude?.toFixed(4)},${item.longitude?.toFixed(4)}`;
+          item.latitude = resolved.lat;
+          item.longitude = resolved.lng;
+          item.dataReliability = 'verified';
+          enrichedCount++;
+          console.log(`[Coords] ✅ ${item.title}: ${oldCoords} → ${resolved.lat.toFixed(4)},${resolved.lng.toFixed(4)} (${resolved.source})`);
+        }
+      }));
     }
 
     const stats = getResolutionStats();

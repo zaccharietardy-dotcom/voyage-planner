@@ -1258,7 +1258,7 @@ function convertToAttraction(
     type: activityType,
     description: place.description || `${place.title} à ${destination}`,
     duration: estimateDuration(activityType),
-    estimatedCost: estimateCost(place.price, destination),
+    estimatedCost: estimateCost(place.price, destination, place.title),
     latitude: place.gps_coordinates.latitude,
     longitude: place.gps_coordinates.longitude,
     rating: place.rating || 4.0,
@@ -1322,9 +1322,47 @@ function estimateDuration(type: ActivityType): number {
 }
 
 /**
- * Estime le coût selon le niveau de prix, ajusté au coût de la vie local
+ * Patterns pour les attractions gratuites par nature (espaces publics, fontaines, places, etc.)
  */
-function estimateCost(price?: string, destination?: string): number {
+const FREE_ATTRACTION_PATTERNS = /\b(fontaine|fountain|fontana|fuente|piazza|place|plaza|square|platz|pont|bridge|puente|brücke|viewpoint|panorama|belvedere|mirador|promenade|boulevard|quartier|quarter|barrio|viertel|trastevere|steps|escalier|scalinata|crossing|carrefour|campo|rambla|passeig)\b/i;
+
+const FREE_KNOWN_LANDMARKS: Record<string, boolean> = {
+  'fontaine de trevi': true, 'trevi fountain': true, 'fontana di trevi': true,
+  'pantheon': true, 'panthéon': true,
+  'piazza navona': true, 'piazza di spagna': true, 'spanish steps': true,
+  'piazza san marco': true, 'place saint-marc': true,
+  'trastevere': true, 'quartier du trastevere': true,
+  'campo de\' fiori': true, 'campo de fiori': true,
+  'champs-élysées': true, 'champs elysees': true,
+  'puerta del sol': true, 'gran vía': true, 'gran via': true,
+  'piccadilly circus': true, 'trafalgar square': true,
+  'dam square': true, 'museumplein': true,
+  'shibuya crossing': true, 'times square': true,
+  'brooklyn bridge': true, 'high line': true, 'central park': true,
+  'arc de triomphe du carrousel': true,
+  'piazza del popolo': true, 'capitole': true,
+  'janicule': true, 'gianicolo': true,
+};
+
+/**
+ * Estime le coût selon le niveau de prix, ajusté au coût de la vie local
+ * Détecte les attractions gratuites (fontaines, places, espaces publics) pour retourner 0
+ */
+function estimateCost(price?: string, destination?: string, placeName?: string): number {
+  // Vérifier si l'attraction est connue comme gratuite
+  if (placeName) {
+    const nameLower = placeName.toLowerCase().trim();
+    if (FREE_KNOWN_LANDMARKS[nameLower]) return 0;
+    // Vérifier aussi sans accents
+    const nameNormalized = nameLower.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    for (const landmark of Object.keys(FREE_KNOWN_LANDMARKS)) {
+      const landmarkNorm = landmark.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      if (nameNormalized === landmarkNorm || nameNormalized.includes(landmarkNorm) || landmarkNorm.includes(nameNormalized)) return 0;
+    }
+    // Vérifier les patterns d'attractions gratuites
+    if (FREE_ATTRACTION_PATTERNS.test(nameLower)) return 0;
+  }
+
   if (!price) return Math.round(15 * getCostMultiplier(destination || ''));
   const level = parsePriceLevel(price);
   const baseCosts: Record<number, number> = { 1: 10, 2: 20, 3: 35, 4: 50 };
