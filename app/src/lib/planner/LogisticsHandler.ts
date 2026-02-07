@@ -637,8 +637,21 @@ export class LogisticsHandler {
     this.orderIndex = 0;
     const cityCenter = this.context.cityCenter;
 
-    const departureTime = parseTime(date, '08:00');
-    const arrivalTime = new Date(departureTime.getTime() + groundTransport.totalDuration * 60 * 1000);
+    // Utiliser les horaires réels des transitLegs si disponibles, sinon 08:00 + duration
+    let departureTime: Date;
+    let arrivalTime: Date;
+    if (groundTransport.transitLegs?.length) {
+      const firstLeg = groundTransport.transitLegs[0];
+      const lastLeg = groundTransport.transitLegs[groundTransport.transitLegs.length - 1];
+      const realDep = new Date(firstLeg.departure);
+      const realArr = new Date(lastLeg.arrival);
+      // Buffer 30min avant le départ pour aller à la gare
+      departureTime = new Date(realDep.getTime() - 30 * 60 * 1000);
+      arrivalTime = realArr;
+    } else {
+      departureTime = parseTime(date, '08:00');
+      arrivalTime = new Date(departureTime.getTime() + groundTransport.totalDuration * 60 * 1000);
+    }
 
     const modeLabels: Record<string, string> = { train: 'Train', bus: 'Bus', car: 'Voiture', combined: 'Transport combiné' };
     const modeIcons: Record<string, string> = { train: '🚄', bus: '🚌', car: '🚗', combined: '🔄' };
@@ -912,9 +925,20 @@ export class LogisticsHandler {
       }));
     }
 
-    // Transport retour
-    const transportStart = parseTime(date, '14:00');
-    const transportEnd = new Date(transportStart.getTime() + groundTransport.totalDuration * 60 * 1000);
+    // Transport retour — horaires réels si disponibles, sinon 14:00 + duration
+    let transportStart: Date;
+    let transportEnd: Date;
+    if (groundTransport.transitLegs?.length) {
+      const firstLeg = groundTransport.transitLegs[0];
+      const lastLeg = groundTransport.transitLegs[groundTransport.transitLegs.length - 1];
+      const realDep = new Date(firstLeg.departure);
+      const realArr = new Date(lastLeg.arrival);
+      transportStart = new Date(realDep.getTime() - 30 * 60 * 1000);
+      transportEnd = realArr;
+    } else {
+      transportStart = parseTime(date, '14:00');
+      transportEnd = new Date(transportStart.getTime() + groundTransport.totalDuration * 60 * 1000);
+    }
     const modeLabels: Record<string, string> = { train: 'Train', bus: 'Bus', car: 'Voiture', combined: 'Transport combiné' };
     const modeIcons: Record<string, string> = { train: '🚄', bus: '🚌', car: '🚗', combined: '🔄' };
 

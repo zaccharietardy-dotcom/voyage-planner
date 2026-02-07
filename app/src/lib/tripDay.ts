@@ -66,10 +66,16 @@ export function getDayContext(
       // +1h30 pour bagages + transfert + check-in hôtel
       availableFrom = new Date(arrivalTime.getTime() + 90 * 60 * 1000);
     } else if (groundTransport) {
-      // Transport terrestre: départ à 8h + durée du trajet + 30min check-in
-      const departureTime = new Date(date);
-      departureTime.setHours(8, 0, 0, 0);
-      const arrivalTime = new Date(departureTime.getTime() + groundTransport.totalDuration * 60 * 1000);
+      // Transport terrestre: utiliser horaires réels si dispo, sinon 8h + durée
+      let arrivalTime: Date;
+      if (groundTransport.transitLegs?.length) {
+        const lastLeg = groundTransport.transitLegs[groundTransport.transitLegs.length - 1];
+        arrivalTime = new Date(lastLeg.arrival);
+      } else {
+        const departureTime = new Date(date);
+        departureTime.setHours(8, 0, 0, 0);
+        arrivalTime = new Date(departureTime.getTime() + groundTransport.totalDuration * 60 * 1000);
+      }
       availableFrom = new Date(arrivalTime.getTime() + 50 * 60 * 1000); // +50min pour arriver à l'hôtel et s'installer
     }
   }
@@ -81,9 +87,15 @@ export function getDayContext(
       // -3h30 pour check-out + transfert + enregistrement
       availableUntil = new Date(departureTime.getTime() - 210 * 60 * 1000);
     } else if (groundTransport) {
-      // Transport terrestre: départ à 14h, donc disponible jusqu'à 10h (check-out + dernières activités)
-      availableUntil = new Date(date);
-      availableUntil.setHours(12, 0, 0, 0); // Disponible jusqu'à midi avant check-out
+      // Transport terrestre: disponible jusqu'à 1h30 avant le départ (check-out + se rendre à la gare)
+      if (groundTransport.transitLegs?.length) {
+        const firstLeg = groundTransport.transitLegs[0];
+        const realDep = new Date(firstLeg.departure);
+        availableUntil = new Date(realDep.getTime() - 90 * 60 * 1000);
+      } else {
+        availableUntil = new Date(date);
+        availableUntil.setHours(12, 0, 0, 0); // Disponible jusqu'à midi avant check-out
+      }
     }
   }
 
@@ -255,8 +267,14 @@ export async function generateDayWithScheduler(params: {
       }
     } else if (groundTransport) {
       // Transport terrestre: disponible après arrivée + check-in hôtel
-      const departureTime = parseTime(date, '08:00');
-      const arrivalTime = new Date(departureTime.getTime() + groundTransport.totalDuration * 60 * 1000);
+      let arrivalTime: Date;
+      if (groundTransport.transitLegs?.length) {
+        const lastLeg = groundTransport.transitLegs[groundTransport.transitLegs.length - 1];
+        arrivalTime = new Date(lastLeg.arrival);
+      } else {
+        const departureTime = parseTime(date, '08:00');
+        arrivalTime = new Date(departureTime.getTime() + groundTransport.totalDuration * 60 * 1000);
+      }
       dayStart = new Date(arrivalTime.getTime() + 15 * 60 * 1000); // +15min buffer (check-in est un fixed item)
       console.log(`[Jour ${dayNumber}] Transport terrestre arrive à ${arrivalTime.toLocaleTimeString('fr-FR')}, activités possibles à partir de ${dayStart.toLocaleTimeString('fr-FR')}`);
     }
@@ -951,9 +969,20 @@ export async function generateDayWithScheduler(params: {
       } // Fin du bloc else (vol NON tardif)
 
     } else if (groundTransport) {
-      // Transport terrestre
-      const transportStart = parseTime(date, '08:00');
-      const transportEnd = new Date(transportStart.getTime() + groundTransport.totalDuration * 60 * 1000);
+      // Transport terrestre — horaires réels si disponibles, sinon 08:00 + duration
+      let transportStart: Date;
+      let transportEnd: Date;
+      if (groundTransport.transitLegs?.length) {
+        const firstLeg = groundTransport.transitLegs[0];
+        const lastLeg = groundTransport.transitLegs[groundTransport.transitLegs.length - 1];
+        const realDep = new Date(firstLeg.departure);
+        const realArr = new Date(lastLeg.arrival);
+        transportStart = new Date(realDep.getTime() - 30 * 60 * 1000);
+        transportEnd = realArr;
+      } else {
+        transportStart = parseTime(date, '08:00');
+        transportEnd = new Date(transportStart.getTime() + groundTransport.totalDuration * 60 * 1000);
+      }
 
       const modeIcons: Record<string, string> = { train: '🚄', bus: '🚌', car: '🚗', combined: '🔄' };
       const modeLabels: Record<string, string> = { train: 'Train', bus: 'Bus', car: 'Voiture', combined: 'Transport combiné' };
@@ -2035,9 +2064,20 @@ export async function generateDayWithScheduler(params: {
         };
       }
 
-      // Transport retour
-      const transportStart = parseTime(date, '14:00');
-      const transportEnd = new Date(transportStart.getTime() + groundTransport.totalDuration * 60 * 1000);
+      // Transport retour — horaires réels si disponibles, sinon 14:00 + duration
+      let transportStart: Date;
+      let transportEnd: Date;
+      if (groundTransport.transitLegs?.length) {
+        const firstLeg = groundTransport.transitLegs[0];
+        const lastLeg = groundTransport.transitLegs[groundTransport.transitLegs.length - 1];
+        const realDep = new Date(firstLeg.departure);
+        const realArr = new Date(lastLeg.arrival);
+        transportStart = new Date(realDep.getTime() - 30 * 60 * 1000);
+        transportEnd = realArr;
+      } else {
+        transportStart = parseTime(date, '14:00');
+        transportEnd = new Date(transportStart.getTime() + groundTransport.totalDuration * 60 * 1000);
+      }
       const modeIcons: Record<string, string> = { train: '🚄', bus: '🚌', car: '🚗', combined: '🔄' };
       const modeLabels: Record<string, string> = { train: 'Train', bus: 'Bus', car: 'Voiture', combined: 'Transport combiné' };
 
