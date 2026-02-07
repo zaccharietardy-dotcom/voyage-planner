@@ -1,376 +1,467 @@
 /**
- * URLs Viator connues pour les attractions majeures
+ * Données Viator connues pour les attractions majeures
  *
- * Cette liste permet de court-circuiter la recherche API
- * et garantir des liens de qualité vers les bonnes expériences.
+ * Ces entrées fournissent:
+ * - Des prix indicatifs (pour l'estimation budgétaire)
+ * - Des liens de recherche Viator fiables (pas des URLs de produits inventés)
  *
- * Format: { 'keyword': 'full_viator_url' }
+ * Les URLs utilisent le format /searchResults/all?text=... qui montre
+ * toujours des résultats pertinents, contrairement aux URLs de produits
+ * qui peuvent 404 si le code produit change.
+ *
+ * Format: { 'keyword': { city, price, searchTerms } }
  * Les keywords sont en minuscules pour faciliter le matching.
  */
 
-export const KNOWN_VIATOR_PRODUCTS: Record<string, { url: string; price?: number }> = {
+interface KnownViatorEntry {
+  city: string;
+  price?: number;
+  searchTerms: string; // What to search on Viator
+}
+
+export const KNOWN_VIATOR_PRODUCTS: Record<string, KnownViatorEntry> = {
   // ===== NEW YORK =====
   'statue of liberty': {
-    url: 'https://www.viator.com/tours/New-York-City/Statue-of-Liberty-and-Ellis-Island-Guided-Tour/d687-5250LIBERTYELLIS',
+    city: 'New York',
     price: 65,
+    searchTerms: 'Statue of Liberty Ellis Island Tour',
   },
   'statue de la liberté': {
-    url: 'https://www.viator.com/tours/New-York-City/Statue-of-Liberty-and-Ellis-Island-Guided-Tour/d687-5250LIBERTYELLIS',
+    city: 'New York',
     price: 65,
+    searchTerms: 'Statue of Liberty Ellis Island Tour',
   },
   'ellis island': {
-    url: 'https://www.viator.com/tours/New-York-City/Statue-of-Liberty-and-Ellis-Island-Guided-Tour/d687-5250LIBERTYELLIS',
+    city: 'New York',
     price: 65,
+    searchTerms: 'Statue of Liberty Ellis Island Tour',
   },
   'empire state building': {
-    url: 'https://www.viator.com/tours/New-York-City/Empire-State-Building-Tickets/d687-5077ESB',
+    city: 'New York',
     price: 47,
+    searchTerms: 'Empire State Building Tickets',
   },
   'top of the rock': {
-    url: 'https://www.viator.com/tours/New-York-City/Top-of-the-Rock-Observation-Deck-New-York-City/d687-3604TOP',
+    city: 'New York',
     price: 43,
+    searchTerms: 'Top of the Rock Observation Deck',
   },
   '9/11 memorial': {
-    url: 'https://www.viator.com/tours/New-York-City/9-11-Memorial-Museum-Admission/d687-5765P8',
+    city: 'New York',
     price: 33,
+    searchTerms: '9/11 Memorial Museum Admission',
   },
   'mémorial du 11 septembre': {
-    url: 'https://www.viator.com/tours/New-York-City/9-11-Memorial-Museum-Admission/d687-5765P8',
+    city: 'New York',
     price: 33,
+    searchTerms: '9/11 Memorial Museum Admission',
   },
   'one world observatory': {
-    url: 'https://www.viator.com/tours/New-York-City/One-World-Observatory-Ticket/d687-7437P3',
+    city: 'New York',
     price: 43,
+    searchTerms: 'One World Observatory Ticket',
   },
   'metropolitan museum': {
-    url: 'https://www.viator.com/tours/New-York-City/Metropolitan-Museum-of-Art-Admission/d687-7151MET',
+    city: 'New York',
     price: 30,
+    searchTerms: 'Metropolitan Museum of Art Admission',
   },
   'met museum': {
-    url: 'https://www.viator.com/tours/New-York-City/Metropolitan-Museum-of-Art-Admission/d687-7151MET',
+    city: 'New York',
     price: 30,
+    searchTerms: 'Metropolitan Museum of Art Admission',
   },
   'central park': {
-    url: 'https://www.viator.com/tours/New-York-City/Central-Park-Walking-Tour/d687-3848CENTRAL',
+    city: 'New York',
     price: 35,
+    searchTerms: 'Central Park Walking Tour',
   },
   'high line': {
-    url: 'https://www.viator.com/tours/New-York-City/High-Line-Chelsea-and-Meatpacking-District-Walking-Tour/d687-6435HIGHLINE',
+    city: 'New York',
     price: 39,
+    searchTerms: 'High Line Chelsea Walking Tour',
   },
   'brooklyn bridge': {
-    url: 'https://www.viator.com/tours/New-York-City/Brooklyn-Bridge-and-DUMBO-Walking-Tour/d687-5095BROOKLYN',
+    city: 'New York',
     price: 35,
+    searchTerms: 'Brooklyn Bridge DUMBO Walking Tour',
   },
   'guggenheim': {
-    url: 'https://www.viator.com/tours/New-York-City/Guggenheim-Museum-Admission/d687-7151GUGG',
+    city: 'New York',
     price: 25,
+    searchTerms: 'Guggenheim Museum Admission',
   },
   'moma': {
-    url: 'https://www.viator.com/tours/New-York-City/Museum-of-Modern-Art-MoMA-Admission/d687-3551MOMA',
+    city: 'New York',
     price: 25,
+    searchTerms: 'Museum of Modern Art MoMA Admission',
   },
   'museum of modern art': {
-    url: 'https://www.viator.com/tours/New-York-City/Museum-of-Modern-Art-MoMA-Admission/d687-3551MOMA',
+    city: 'New York',
     price: 25,
+    searchTerms: 'Museum of Modern Art MoMA Admission',
   },
 
   // ===== PARIS =====
   'tour eiffel': {
-    url: 'https://www.viator.com/tours/Paris/Skip-the-Line-Eiffel-Tower-Tour/d479-5765EIFFEL',
+    city: 'Paris',
     price: 65,
+    searchTerms: 'Eiffel Tower Skip the Line Tour',
   },
   'eiffel tower': {
-    url: 'https://www.viator.com/tours/Paris/Skip-the-Line-Eiffel-Tower-Tour/d479-5765EIFFEL',
+    city: 'Paris',
     price: 65,
+    searchTerms: 'Eiffel Tower Skip the Line Tour',
   },
   'louvre': {
-    url: 'https://www.viator.com/tours/Paris/Skip-the-Line-Louvre-Museum-Guided-Tour/d479-5765LOUVRE',
+    city: 'Paris',
     price: 59,
+    searchTerms: 'Louvre Museum Skip the Line Guided Tour',
   },
   'musée du louvre': {
-    url: 'https://www.viator.com/tours/Paris/Skip-the-Line-Louvre-Museum-Guided-Tour/d479-5765LOUVRE',
+    city: 'Paris',
     price: 59,
+    searchTerms: 'Louvre Museum Skip the Line Guided Tour',
   },
   'versailles': {
-    url: 'https://www.viator.com/tours/Paris/Skip-the-Line-Versailles-Palace/d479-5765VERSAILLES',
+    city: 'Paris',
     price: 89,
+    searchTerms: 'Versailles Palace Skip the Line',
   },
   'château de versailles': {
-    url: 'https://www.viator.com/tours/Paris/Skip-the-Line-Versailles-Palace/d479-5765VERSAILLES',
+    city: 'Paris',
     price: 89,
+    searchTerms: 'Versailles Palace Skip the Line',
   },
   "arc de triomphe": {
-    url: 'https://www.viator.com/tours/Paris/Arc-de-Triomphe-Skip-the-Line-Ticket/d479-6741ARCDETRIOMPHE',
+    city: 'Paris',
     price: 16,
+    searchTerms: 'Arc de Triomphe Skip the Line Ticket',
   },
   'notre dame': {
-    url: 'https://www.viator.com/tours/Paris/Notre-Dame-Island-Walking-Tour/d479-5765NOTREDAME',
+    city: 'Paris',
     price: 29,
+    searchTerms: 'Notre Dame Island Walking Tour',
   },
   'notre-dame': {
-    url: 'https://www.viator.com/tours/Paris/Notre-Dame-Island-Walking-Tour/d479-5765NOTREDAME',
+    city: 'Paris',
     price: 29,
+    searchTerms: 'Notre Dame Island Walking Tour',
   },
   'sacré-coeur': {
-    url: 'https://www.viator.com/tours/Paris/Montmartre-Walking-Tour-with-Sacre-Coeur/d479-5765MONTMARTRE',
+    city: 'Paris',
     price: 35,
+    searchTerms: 'Montmartre Walking Tour Sacre Coeur',
   },
   'montmartre': {
-    url: 'https://www.viator.com/tours/Paris/Montmartre-Walking-Tour-with-Sacre-Coeur/d479-5765MONTMARTRE',
+    city: 'Paris',
     price: 35,
+    searchTerms: 'Montmartre Walking Tour Sacre Coeur',
   },
   "musée d'orsay": {
-    url: 'https://www.viator.com/tours/Paris/Musee-dOrsay-Skip-the-Line-Ticket/d479-5765ORSAY',
+    city: 'Paris',
     price: 16,
+    searchTerms: 'Musee d Orsay Skip the Line Ticket',
   },
   'orsay museum': {
-    url: 'https://www.viator.com/tours/Paris/Musee-dOrsay-Skip-the-Line-Ticket/d479-5765ORSAY',
+    city: 'Paris',
     price: 16,
+    searchTerms: 'Musee d Orsay Skip the Line Ticket',
   },
 
   // ===== ROME =====
   'colosseum': {
-    url: 'https://www.viator.com/tours/Rome/Skip-the-Line-Colosseum-Roman-Forum-Palatine-Hill/d511-3691COLOS',
+    city: 'Rome',
     price: 59,
+    searchTerms: 'Colosseum Roman Forum Palatine Hill Skip the Line',
   },
   'colisée': {
-    url: 'https://www.viator.com/tours/Rome/Skip-the-Line-Colosseum-Roman-Forum-Palatine-Hill/d511-3691COLOS',
+    city: 'Rome',
     price: 59,
+    searchTerms: 'Colosseum Roman Forum Palatine Hill Skip the Line',
   },
   'colosseo': {
-    url: 'https://www.viator.com/tours/Rome/Skip-the-Line-Colosseum-Roman-Forum-Palatine-Hill/d511-3691COLOS',
+    city: 'Rome',
     price: 59,
+    searchTerms: 'Colosseum Roman Forum Palatine Hill Skip the Line',
   },
   'vatican': {
-    url: 'https://www.viator.com/tours/Rome/Skip-the-Line-Vatican-Museums-and-Sistine-Chapel/d511-2660VATICAN',
+    city: 'Rome',
     price: 69,
+    searchTerms: 'Vatican Museums Sistine Chapel Skip the Line',
   },
   'vatican museums': {
-    url: 'https://www.viator.com/tours/Rome/Skip-the-Line-Vatican-Museums-and-Sistine-Chapel/d511-2660VATICAN',
+    city: 'Rome',
     price: 69,
+    searchTerms: 'Vatican Museums Sistine Chapel Skip the Line',
   },
   'musées du vatican': {
-    url: 'https://www.viator.com/tours/Rome/Skip-the-Line-Vatican-Museums-and-Sistine-Chapel/d511-2660VATICAN',
+    city: 'Rome',
     price: 69,
+    searchTerms: 'Vatican Museums Sistine Chapel Skip the Line',
   },
   'sistine chapel': {
-    url: 'https://www.viator.com/tours/Rome/Skip-the-Line-Vatican-Museums-and-Sistine-Chapel/d511-2660VATICAN',
+    city: 'Rome',
     price: 69,
+    searchTerms: 'Vatican Museums Sistine Chapel Skip the Line',
   },
   'chapelle sixtine': {
-    url: 'https://www.viator.com/tours/Rome/Skip-the-Line-Vatican-Museums-and-Sistine-Chapel/d511-2660VATICAN',
+    city: 'Rome',
     price: 69,
+    searchTerms: 'Vatican Museums Sistine Chapel Skip the Line',
   },
   'roman forum': {
-    url: 'https://www.viator.com/tours/Rome/Skip-the-Line-Colosseum-Roman-Forum-Palatine-Hill/d511-3691COLOS',
+    city: 'Rome',
     price: 59,
+    searchTerms: 'Colosseum Roman Forum Palatine Hill Skip the Line',
   },
   'forum romain': {
-    url: 'https://www.viator.com/tours/Rome/Skip-the-Line-Colosseum-Roman-Forum-Palatine-Hill/d511-3691COLOS',
+    city: 'Rome',
     price: 59,
+    searchTerms: 'Colosseum Roman Forum Palatine Hill Skip the Line',
   },
   'pantheon': {
-    url: 'https://www.viator.com/tours/Rome/Pantheon-Guided-Tour/d511-35972P1',
+    city: 'Rome',
     price: 25,
+    searchTerms: 'Pantheon Guided Tour Rome',
   },
   'trevi fountain': {
-    url: 'https://www.viator.com/tours/Rome/Trevi-Fountain-and-Underground-Rome-Tour/d511-15873TREVI',
+    city: 'Rome',
     price: 39,
+    searchTerms: 'Trevi Fountain Underground Rome Tour',
   },
   'fontaine de trevi': {
-    url: 'https://www.viator.com/tours/Rome/Trevi-Fountain-and-Underground-Rome-Tour/d511-15873TREVI',
+    city: 'Rome',
     price: 39,
+    searchTerms: 'Trevi Fountain Underground Rome Tour',
   },
 
   // ===== BARCELONA =====
   'sagrada familia': {
-    url: 'https://www.viator.com/tours/Barcelona/Skip-the-Line-La-Sagrada-Familia-Tour/d562-5765SAGRADA',
+    city: 'Barcelona',
     price: 47,
+    searchTerms: 'Sagrada Familia Skip the Line Tour',
   },
   'park güell': {
-    url: 'https://www.viator.com/tours/Barcelona/Skip-the-Line-Park-Guell-Guided-Tour/d562-5765PARKGUELL',
+    city: 'Barcelona',
     price: 35,
+    searchTerms: 'Park Guell Skip the Line Guided Tour',
   },
   'parc güell': {
-    url: 'https://www.viator.com/tours/Barcelona/Skip-the-Line-Park-Guell-Guided-Tour/d562-5765PARKGUELL',
+    city: 'Barcelona',
     price: 35,
+    searchTerms: 'Park Guell Skip the Line Guided Tour',
   },
   'casa batlló': {
-    url: 'https://www.viator.com/tours/Barcelona/Skip-the-Line-Casa-Batllo-Ticket/d562-5765CASABATLLO',
+    city: 'Barcelona',
     price: 35,
+    searchTerms: 'Casa Batllo Skip the Line Ticket',
   },
   'casa milà': {
-    url: 'https://www.viator.com/tours/Barcelona/Skip-the-Line-La-Pedrera-Audio-Tour/d562-5765PEDRERA',
+    city: 'Barcelona',
     price: 29,
+    searchTerms: 'La Pedrera Casa Mila Audio Tour',
   },
   'la pedrera': {
-    url: 'https://www.viator.com/tours/Barcelona/Skip-the-Line-La-Pedrera-Audio-Tour/d562-5765PEDRERA',
+    city: 'Barcelona',
     price: 29,
+    searchTerms: 'La Pedrera Casa Mila Audio Tour',
   },
   'camp nou': {
-    url: 'https://www.viator.com/tours/Barcelona/FC-Barcelona-Camp-Nou-Experience-Tour/d562-5765CAMPNOU',
+    city: 'Barcelona',
     price: 28,
+    searchTerms: 'FC Barcelona Camp Nou Experience Tour',
   },
   'la rambla': {
-    url: 'https://www.viator.com/tours/Barcelona/Gothic-Quarter-and-La-Rambla-Walking-Tour/d562-5765GOTHIC',
+    city: 'Barcelona',
     price: 25,
+    searchTerms: 'Gothic Quarter La Rambla Walking Tour',
   },
   'gothic quarter': {
-    url: 'https://www.viator.com/tours/Barcelona/Gothic-Quarter-and-La-Rambla-Walking-Tour/d562-5765GOTHIC',
+    city: 'Barcelona',
     price: 25,
+    searchTerms: 'Gothic Quarter La Rambla Walking Tour',
   },
   'barri gòtic': {
-    url: 'https://www.viator.com/tours/Barcelona/Gothic-Quarter-and-La-Rambla-Walking-Tour/d562-5765GOTHIC',
+    city: 'Barcelona',
     price: 25,
+    searchTerms: 'Gothic Quarter La Rambla Walking Tour',
   },
 
   // ===== LONDON =====
   'tower of london': {
-    url: 'https://www.viator.com/tours/London/Tower-of-London-Ticket/d737-5765TOWER',
+    city: 'London',
     price: 35,
+    searchTerms: 'Tower of London Ticket',
   },
   'tour de londres': {
-    url: 'https://www.viator.com/tours/London/Tower-of-London-Ticket/d737-5765TOWER',
+    city: 'London',
     price: 35,
+    searchTerms: 'Tower of London Ticket',
   },
   'buckingham palace': {
-    url: 'https://www.viator.com/tours/London/Buckingham-Palace-Tour/d737-5765BUCKINGHAM',
+    city: 'London',
     price: 30,
+    searchTerms: 'Buckingham Palace Tour',
   },
   'westminster abbey': {
-    url: 'https://www.viator.com/tours/London/Westminster-Abbey-Tour/d737-5765WESTMINSTER',
+    city: 'London',
     price: 27,
+    searchTerms: 'Westminster Abbey Tour',
   },
   'british museum': {
-    url: 'https://www.viator.com/tours/London/British-Museum-Guided-Tour/d737-5765BRITISHMUSEUM',
+    city: 'London',
     price: 29,
+    searchTerms: 'British Museum Guided Tour',
   },
   'london eye': {
-    url: 'https://www.viator.com/tours/London/London-Eye-Standard-Ticket/d737-5765LONDONEYE',
+    city: 'London',
     price: 34,
+    searchTerms: 'London Eye Standard Ticket',
   },
   'big ben': {
-    url: 'https://www.viator.com/tours/London/Houses-of-Parliament-and-Big-Ben-Tour/d737-5765BIGBEN',
+    city: 'London',
     price: 35,
+    searchTerms: 'Houses of Parliament Big Ben Tour',
   },
   "st paul's cathedral": {
-    url: 'https://www.viator.com/tours/London/St-Pauls-Cathedral-Admission-Ticket/d737-5765STPAULS',
+    city: 'London',
     price: 23,
+    searchTerms: 'St Pauls Cathedral Admission Ticket',
   },
   'tower bridge': {
-    url: 'https://www.viator.com/tours/London/Tower-Bridge-Exhibition-Ticket/d737-5765TOWERBRIDGE',
+    city: 'London',
     price: 13,
+    searchTerms: 'Tower Bridge Exhibition Ticket',
   },
 
   // ===== AMSTERDAM =====
   'anne frank house': {
-    url: 'https://www.viator.com/tours/Amsterdam/Anne-Frank-Walking-Tour/d525-5765ANNEFRANK',
+    city: 'Amsterdam',
     price: 29,
+    searchTerms: 'Anne Frank Walking Tour Amsterdam',
   },
   'maison anne frank': {
-    url: 'https://www.viator.com/tours/Amsterdam/Anne-Frank-Walking-Tour/d525-5765ANNEFRANK',
+    city: 'Amsterdam',
     price: 29,
+    searchTerms: 'Anne Frank Walking Tour Amsterdam',
   },
   'rijksmuseum': {
-    url: 'https://www.viator.com/tours/Amsterdam/Skip-the-Line-Rijksmuseum-Admission/d525-5765RIJKS',
+    city: 'Amsterdam',
     price: 22,
+    searchTerms: 'Rijksmuseum Skip the Line Admission',
   },
   'van gogh museum': {
-    url: 'https://www.viator.com/tours/Amsterdam/Skip-the-Line-Van-Gogh-Museum-Admission/d525-5765VANGOGH',
+    city: 'Amsterdam',
     price: 22,
+    searchTerms: 'Van Gogh Museum Skip the Line Admission',
   },
   'musée van gogh': {
-    url: 'https://www.viator.com/tours/Amsterdam/Skip-the-Line-Van-Gogh-Museum-Admission/d525-5765VANGOGH',
+    city: 'Amsterdam',
     price: 22,
+    searchTerms: 'Van Gogh Museum Skip the Line Admission',
   },
   'canal cruise amsterdam': {
-    url: 'https://www.viator.com/tours/Amsterdam/Amsterdam-Canal-Cruise/d525-5765CANAL',
+    city: 'Amsterdam',
     price: 16,
+    searchTerms: 'Amsterdam Canal Cruise',
   },
   'keukenhof': {
-    url: 'https://www.viator.com/tours/Amsterdam/Keukenhof-Gardens-and-Tulip-Fields-Tour/d525-5765KEUKENHOF',
+    city: 'Amsterdam',
     price: 59,
+    searchTerms: 'Keukenhof Gardens Tulip Fields Tour',
   },
 
   // ===== VENICE =====
   "st mark's basilica": {
-    url: 'https://www.viator.com/tours/Venice/Skip-the-Line-St-Marks-Basilica-Tour/d773-5765STMARKS',
+    city: 'Venice',
     price: 39,
+    searchTerms: 'St Marks Basilica Skip the Line Tour Venice',
   },
   'basilique saint-marc': {
-    url: 'https://www.viator.com/tours/Venice/Skip-the-Line-St-Marks-Basilica-Tour/d773-5765STMARKS',
+    city: 'Venice',
     price: 39,
+    searchTerms: 'St Marks Basilica Skip the Line Tour Venice',
   },
   "doge's palace": {
-    url: 'https://www.viator.com/tours/Venice/Skip-the-Line-Doges-Palace-Tour/d773-5765DOGES',
+    city: 'Venice',
     price: 45,
+    searchTerms: 'Doges Palace Skip the Line Tour Venice',
   },
   'palais des doges': {
-    url: 'https://www.viator.com/tours/Venice/Skip-the-Line-Doges-Palace-Tour/d773-5765DOGES',
+    city: 'Venice',
     price: 45,
+    searchTerms: 'Doges Palace Skip the Line Tour Venice',
   },
   'murano': {
-    url: 'https://www.viator.com/tours/Venice/Murano-Burano-and-Torcello-Islands-Tour/d773-5765MURANO',
+    city: 'Venice',
     price: 25,
+    searchTerms: 'Murano Burano Torcello Islands Tour',
   },
   'burano': {
-    url: 'https://www.viator.com/tours/Venice/Murano-Burano-and-Torcello-Islands-Tour/d773-5765MURANO',
+    city: 'Venice',
     price: 25,
+    searchTerms: 'Murano Burano Torcello Islands Tour',
   },
   'gondola ride': {
-    url: 'https://www.viator.com/tours/Venice/Venice-Gondola-Ride/d773-5765GONDOLA',
+    city: 'Venice',
     price: 33,
+    searchTerms: 'Venice Gondola Ride',
   },
   'rialto bridge': {
-    url: 'https://www.viator.com/tours/Venice/Venice-Walking-Tour-and-Gondola-Ride/d773-5765RIALTO',
+    city: 'Venice',
     price: 45,
+    searchTerms: 'Venice Walking Tour Gondola Ride Rialto',
   },
 
   // ===== FLORENCE =====
   'uffizi gallery': {
-    url: 'https://www.viator.com/tours/Florence/Skip-the-Line-Uffizi-Gallery-Tour/d519-5765UFFIZI',
+    city: 'Florence',
     price: 55,
+    searchTerms: 'Uffizi Gallery Skip the Line Tour',
   },
   'galerie des offices': {
-    url: 'https://www.viator.com/tours/Florence/Skip-the-Line-Uffizi-Gallery-Tour/d519-5765UFFIZI',
+    city: 'Florence',
     price: 55,
+    searchTerms: 'Uffizi Gallery Skip the Line Tour',
   },
   'accademia gallery': {
-    url: 'https://www.viator.com/tours/Florence/Skip-the-Line-Accademia-Gallery-Tour/d519-5765ACCADEMIA',
+    city: 'Florence',
     price: 49,
+    searchTerms: 'Accademia Gallery Skip the Line Tour Florence',
   },
   'david michelangelo': {
-    url: 'https://www.viator.com/tours/Florence/Skip-the-Line-Accademia-Gallery-Tour/d519-5765ACCADEMIA',
+    city: 'Florence',
     price: 49,
+    searchTerms: 'Accademia Gallery Skip the Line Tour Florence',
   },
   'duomo florence': {
-    url: 'https://www.viator.com/tours/Florence/Skip-the-Line-Florence-Duomo-Dome-Climb/d519-5765DUOMO',
+    city: 'Florence',
     price: 35,
+    searchTerms: 'Florence Duomo Dome Climb Skip the Line',
   },
   'ponte vecchio': {
-    url: 'https://www.viator.com/tours/Florence/Florence-Walking-Tour-with-Accademia/d519-5765WALKING',
+    city: 'Florence',
     price: 39,
+    searchTerms: 'Florence Walking Tour Ponte Vecchio',
   },
 };
 
 /**
- * Cherche une URL Viator connue pour une activité
- * @param activityName Nom de l'activité à chercher
- * @returns URL Viator et prix si trouvé, null sinon
+ * Cherche des données Viator connues pour une activité
+ * Retourne une URL de recherche Viator (toujours fonctionnelle) + prix indicatif
  */
 export function findKnownViatorProduct(
   activityName: string
 ): { url: string; price: number; title: string } | null {
   const searchName = activityName.toLowerCase().trim();
 
-  // Chercher une correspondance exacte ou partielle
   for (const [keyword, data] of Object.entries(KNOWN_VIATOR_PRODUCTS)) {
-    // Match exact ou si le nom de l'activité contient le keyword
     if (searchName.includes(keyword) || keyword.includes(searchName)) {
-      console.log(`[Viator Known] ✅ Match trouvé: "${activityName}" → "${keyword}"`);
+      const url = `https://www.viator.com/searchResults/all?text=${encodeURIComponent(data.searchTerms)}`;
+      console.log(`[Viator Known] ✅ Match trouvé: "${activityName}" → recherche "${data.searchTerms}"`);
       return {
-        url: data.url,
+        url,
         price: data.price || 0,
         title: activityName,
       };

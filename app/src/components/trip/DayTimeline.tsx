@@ -145,7 +145,7 @@ export function DayTimeline({
               />
 
               {/* Sélecteur d'hôtel inline après le check-in */}
-              {item.type === 'checkin' && hotelSelectorData && hotelSelectorData.hotels.length > 0 && (
+              {item.type === 'hotel' && hotelSelectorData && hotelSelectorData.hotels.length > 0 && (
                 <div className="mt-3 mb-1">
                   <HotelCarouselSelector
                     hotels={hotelSelectorData.hotels}

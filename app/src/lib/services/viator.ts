@@ -36,6 +36,43 @@ function buildViatorSearchUrl(productTitle: string, destination: string): string
   return `https://www.viator.com/searchResults/all?text=${encodeURIComponent(searchQuery)}`;
 }
 
+/**
+ * Validate and normalize a Viator product URL.
+ * Priority: API productUrl (if valid viator.com URL) > search URL fallback.
+ *
+ * We don't try to construct product URLs from productCode alone because
+ * Viator product URLs require a destination ID (e.g., d511 for Rome) that
+ * the API doesn't always provide alongside the code.
+ */
+function normalizeViatorUrl(
+  productUrl: string | undefined,
+  productTitle: string,
+  destination: string,
+  _productCode?: string, // Reserved for future use if API provides dest ID
+): string {
+  // 1. Try API-provided productUrl (most reliable when present)
+  if (productUrl && productUrl.trim() !== '') {
+    // Relative URL → prepend Viator base
+    if (productUrl.startsWith('/')) {
+      return `https://www.viator.com${productUrl}`;
+    }
+    // Must be a proper http(s) URL on viator.com
+    if (productUrl.startsWith('http')) {
+      try {
+        const url = new URL(productUrl);
+        if (url.hostname.includes('viator.com')) {
+          return productUrl;
+        }
+      } catch {
+        // Invalid URL, fall through
+      }
+    }
+  }
+
+  // 2. Fallback: search URL (always shows relevant results)
+  return buildViatorSearchUrl(productTitle, destination);
+}
+
 // ============================================
 // Mapping catégories Viator → ActivityType
 // ============================================
@@ -380,9 +417,9 @@ export async function findViatorProduct(
       // Exact match: le titre du produit contient le nom de l'activité
       if (productTitle.includes(activityNameLower) || activityNameLower.includes(productTitleClean)) {
         const price = product.pricing?.summary?.fromPrice || 0;
-        const url = product.productUrl || buildViatorSearchUrl(product.title, destinationName);
+        const url = normalizeViatorUrl(product.productUrl, product.title, destinationName, product.productCode);
         const imageUrl = product.images?.[0]?.variants?.find((v: { width?: number; url?: string }) => v.width && v.width >= 480 && v.width <= 800)?.url || product.images?.[0]?.variants?.[0]?.url;
-        console.log(`[Viator] ✅ Exact match: "${activityName}" → "${product.title}" (${price}€)`);
+        console.log(`[Viator] ✅ Exact match: "${activityName}" → "${product.title}" (${price}€) URL: ${url}`);
         return { url, price: Math.round(price), title: product.title, imageUrl, rating: product.reviews?.combinedAverageRating, reviewCount: product.reviews?.totalReviews };
       }
     }
@@ -411,9 +448,9 @@ export async function findViatorProduct(
 
     if (bestMatch) {
       const price = bestMatch.product.pricing?.summary?.fromPrice || 0;
-      const url = bestMatch.product.productUrl || buildViatorSearchUrl(bestMatch.product.title, destinationName);
+      const url = normalizeViatorUrl(bestMatch.product.productUrl, bestMatch.product.title, destinationName, bestMatch.product.productCode);
       const imageUrl = bestMatch.product.images?.[0]?.variants?.find((v: { width?: number; url?: string }) => v.width && v.width >= 480 && v.width <= 800)?.url || bestMatch.product.images?.[0]?.variants?.[0]?.url;
-      console.log(`[Viator] ✅ Fuzzy match: "${activityName}" → "${bestMatch.product.title}" (${price}€, score: ${bestMatch.score})`);
+      console.log(`[Viator] ✅ Fuzzy match: "${activityName}" → "${bestMatch.product.title}" (${price}€, score: ${bestMatch.score}) URL: ${url}`);
       return { url, price: Math.round(price), title: bestMatch.product.title, imageUrl, rating: bestMatch.product.reviews?.combinedAverageRating, reviewCount: bestMatch.product.reviews?.totalReviews };
     }
 
@@ -499,8 +536,8 @@ function processViatorResults(
       const rating = p.reviews?.combinedAverageRating || 4.0;
       const reviewCount = p.reviews?.totalReviews || 0;
 
-      // Utiliser productUrl de l'API si disponible, sinon fallback recherche
-      const affiliateUrl = p.productUrl || buildViatorSearchUrl(p.title, destination);
+      // Utiliser productUrl de l'API si disponible, sinon construire depuis productCode, sinon recherche
+      const affiliateUrl = normalizeViatorUrl(p.productUrl, p.title, destination, p.productCode);
 
       return {
         id: `viator-${p.productCode}`,

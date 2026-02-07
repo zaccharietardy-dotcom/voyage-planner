@@ -350,6 +350,11 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
     }
   }
 
+  // 4a. Validation: si transport avion mais pas de vol retour trouvé
+  if ((selectedTransport?.mode === 'plane' || selectedTransport?.mode === 'combined') && !returnFlight) {
+    console.error('[AI] ⚠️ CRITICAL: Transport is plane/combined but no return flight found!');
+  }
+
   // 4b. Initialiser le tracker de localisation pour la cohérence géographique
   // CRITIQUE: Empêche les activités à Barcelona avant d'avoir atterri
   const locationTracker = createLocationTracker(preferences.origin, preferences.origin);
@@ -1306,6 +1311,35 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       }
     }
 
+    // POST-VALIDATION: Vérifier que le thème correspond aux activités réelles
+    if (lastDay.theme && !isLastDay) {
+      const activityTitles = lastDay.items
+        .filter(it => it.type === 'activity')
+        .map(it => it.title.toLowerCase());
+
+      if (activityTitles.length > 0) {
+        const genericWords = new Set(['centre', 'historique', 'premier', 'contact', 'quartier', 'journée', 'visite', 'découverte', 'exploration', 'romantique', 'entre', 'dans', 'avec', 'pour', 'jour', 'art', 'spiritualité', 'villas', 'jardins', 'exception', 'fontaines', 'quartiers', 'bohèmes']);
+        const themeWords = lastDay.theme.toLowerCase()
+          .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+          .split(/[\s\-–—&,]+/)
+          .filter(w => w.length > 3 && !genericWords.has(w));
+
+        const matchCount = themeWords.filter(tw =>
+          activityTitles.some(at => at.normalize('NFD').replace(/[\u0300-\u036f]/g, '').includes(tw))
+        ).length;
+
+        if (themeWords.length > 0 && matchCount === 0) {
+          const mainActivities = lastDay.items
+            .filter(it => it.type === 'activity')
+            .slice(0, 3)
+            .map(it => it.title);
+          lastDay.theme = mainActivities.join(', ');
+          lastDay.dayNarrative = undefined;
+          console.log(`[AI] Theme mismatch Jour ${lastDay.dayNumber}: regenerated to "${lastDay.theme}"`);
+        }
+      }
+    }
+
     // Si ce jour a un vol tardif, le stocker pour le jour suivant
     // ET redistribuer les attractions non utilisées aux jours suivants
     pendingLateFlightData = dayResult.lateFlightForNextDay;
@@ -1328,6 +1362,38 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
           }
         }
       }
+    }
+  }
+
+  // VALIDATION: Vol retour présent dans le dernier jour
+  if (returnFlight && days.length > 0) {
+    const lastDay = days[days.length - 1];
+    const hasReturnFlight = lastDay.items.some(item => item.type === 'flight' && item.dayNumber === preferences.durationDays);
+    if (!hasReturnFlight) {
+      console.error(`[AI] ⚠️ Return flight ${returnFlight.flightNumber} missing from last day items, force-adding`);
+      const rf = returnFlight;
+      const rfPrice = rf.price || 0;
+      const rfGroupSize = preferences.groupSize || 1;
+      const rfPricePerPerson = rf.pricePerPerson || (rfPrice > 0 ? Math.round(rfPrice / rfGroupSize) : 0);
+      const rfPriceDisplay = rfGroupSize > 1 && rfPricePerPerson > 0
+        ? `${rfPricePerPerson}€/pers (${rfPrice}€ total)`
+        : rfPrice > 0 ? `${rfPrice}€` : 'Prix non disponible';
+      lastDay.items.push({
+        id: generateId(),
+        type: 'flight' as any,
+        title: `Vol ${rf.flightNumber} → ${preferences.origin}`,
+        description: `${rf.flightNumber} | ${formatFlightDuration(rf.duration)} | ${rf.stops === 0 ? 'Direct' : `${rf.stops} escale(s)`} | ${rfPriceDisplay}`,
+        startTime: rf.departureTimeDisplay || formatTime(new Date(rf.departureTime)),
+        endTime: rf.arrivalTimeDisplay || formatTime(new Date(rf.arrivalTime)),
+        locationName: `${destAirport.code} → ${originAirport?.code || ''}`,
+        latitude: destAirport.latitude,
+        longitude: destAirport.longitude,
+        estimatedCost: rfPrice,
+        bookingUrl: rf.bookingUrl,
+        dayNumber: preferences.durationDays,
+        orderIndex: lastDay.items.length,
+        dataReliability: 'verified' as any,
+      });
     }
   }
 
@@ -1537,6 +1603,38 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       // Re-index orderIndex
       day.items.forEach((item, idx) => { item.orderIndex = idx; });
     }
+  }
+
+  // VALIDATION FINALE: Corriger les chevauchements de créneaux horaires
+  for (const day of days) {
+    // Trier par heure de début
+    day.items.sort((a, b) => {
+      const aMin = parseInt(a.startTime.split(':')[0]) * 60 + parseInt(a.startTime.split(':')[1] || '0');
+      const bMin = parseInt(b.startTime.split(':')[0]) * 60 + parseInt(b.startTime.split(':')[1] || '0');
+      return aMin - bMin;
+    });
+
+    for (let j = 1; j < day.items.length; j++) {
+      const prev = day.items[j - 1];
+      const curr = day.items[j];
+      // Parse endTime en gérant le format "+1j" pour les vols overnight
+      const prevEndClean = prev.endTime.replace(/\s*\(\+1j\)/, '');
+      const currStartClean = curr.startTime.replace(/\s*\(\+1j\)/, '');
+      const prevEndMin = parseInt(prevEndClean.split(':')[0]) * 60 + parseInt(prevEndClean.split(':')[1] || '0');
+      const currStartMin = parseInt(currStartClean.split(':')[0]) * 60 + parseInt(currStartClean.split(':')[1] || '0');
+
+      if (currStartMin < prevEndMin && prevEndMin > 0 && currStartMin >= 0) {
+        const currEndClean = curr.endTime.replace(/\s*\(\+1j\)/, '');
+        const currEndMin = parseInt(currEndClean.split(':')[0]) * 60 + parseInt(currEndClean.split(':')[1] || '0');
+        const duration = Math.max(currEndMin - currStartMin, 15);
+        const newStart = prevEndMin + 5;
+        curr.startTime = `${Math.floor(newStart / 60).toString().padStart(2, '0')}:${(newStart % 60).toString().padStart(2, '0')}`;
+        const newEnd = newStart + duration;
+        curr.endTime = `${Math.floor(newEnd / 60).toString().padStart(2, '0')}:${(newEnd % 60).toString().padStart(2, '0')}`;
+        console.log(`[Validation] Overlap fix Jour ${day.dayNumber}: "${curr.title}" shifted to ${curr.startTime}-${curr.endTime}`);
+      }
+    }
+    day.items.forEach((item, idx) => { item.orderIndex = idx; });
   }
 
   // Enrichir les restaurants avec descriptions et spécialités (batch par voyage)

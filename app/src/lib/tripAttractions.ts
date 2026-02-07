@@ -8,6 +8,11 @@ export function fixAttractionDuration(attraction: Attraction): Attraction {
   const name = attraction.name.toLowerCase();
   const d = attraction.duration;
 
+  // Major museums: never cap their duration (Vatican, Louvre, etc.)
+  if (/\b(vatican|vaticano|musées du vatican|chapelle sixtine|sistine|louvre|uffizi|prado|british museum|hermitage|metropolitan|rijksmuseum)\b/i.test(name)) {
+    return attraction;
+  }
+
   // Places et squares: max 30min
   if (/\b(place|square|piazza|platz)\b/.test(name)) {
     if (d > 30) return { ...attraction, duration: 25 };
@@ -17,7 +22,7 @@ export function fixAttractionDuration(attraction: Attraction): Attraction {
     if (d > 60) return { ...attraction, duration: 60 };
   }
   // Petites églises: max 30min (pas les cathédrales/basiliques)
-  if (/\b(église|eglise|church|chapelle|chapel)\b/.test(name) && !/\b(cathédrale|cathedrale|cathedral|basilique|basilica|notre-dame|sacré|sacre|sainte-chapelle)\b/.test(name)) {
+  if (/\b(église|eglise|church|chapelle|chapel)\b/.test(name) && !/\b(cathédrale|cathedrale|cathedral|basilique|basilica|notre-dame|sacré|sacre|sainte-chapelle|vatican|vaticano|sixtine|sistine)\b/.test(name)) {
     if (d > 30) return { ...attraction, duration: 20 };
   }
   // Cathédrales, basiliques: max 60min
@@ -65,9 +70,13 @@ export function fixAttractionCost(attraction: Attraction): Attraction {
   if (/\b(jardin|parc|park|garden|place|square|piazza|champ|esplanade|promenade|quartier|neighborhood|district|boulevard|rue|street|vigne|vignoble|beach|plage|playa|spiaggia|gate|porte|porta|puerta|stairs|escalier|old town|vieille ville|centro storico|altstadt|harbour|harbor|port|marina|waterfront|pier|quai|boardwalk)\b/i.test(name)) {
     if (cost > 0) return { ...attraction, estimatedCost: 0 };
   }
+  // Major museums: ne pas écraser le coût source (SerpAPI/Viator/pool)
+  if (/\b(vatican|vaticano|musées du vatican|musei vaticani|vatican museum|chapelle sixtine|sistine chapel|cappella sistina|louvre|uffizi|prado|british museum|hermitage|metropolitan|rijksmuseum|musée d'orsay|colosseum|colisée|colosseo)\b/i.test(name)) {
+    return attraction;
+  }
   // Églises et cathédrales: généralement gratuit (sauf tours/cryptes)
   if (/\b(église|eglise|cathédrale|cathedrale|basilique|church|cathedral|basilica|mosquée|mosque|temple|synagogue|chapel|chapelle)\b/i.test(name)) {
-    if (cost > 0 && !/\b(tour|tower|crypte|crypt|sainte-chapelle)\b/i.test(name)) {
+    if (cost > 0 && !/\b(tour|tower|crypte|crypt|sainte-chapelle|vatican|vaticano|sixtine|sistine)\b/i.test(name)) {
       return { ...attraction, estimatedCost: 0 };
     }
   }
