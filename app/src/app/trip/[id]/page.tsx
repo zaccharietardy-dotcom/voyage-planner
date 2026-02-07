@@ -204,8 +204,8 @@ export default function TripPage() {
   const proposals = collaborativeTrip?.proposals || [];
   const userRole = collaborativeTrip?.userRole;
   const shareCode = collaborativeTrip?.shareCode || '';
-  const isOwner = userRole === 'owner';
-  const canEdit = userRole === 'owner' || userRole === 'editor';
+  const isOwner = useCollaborativeMode ? userRole === 'owner' : true;
+  const canEdit = useCollaborativeMode ? (userRole === 'owner' || userRole === 'editor') : true;
 
   useEffect(() => {
     const stored = localStorage.getItem('currentTrip');
