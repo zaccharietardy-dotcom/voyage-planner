@@ -978,6 +978,8 @@ export async function generateDayWithScheduler(params: {
           longitude: cityCenter.lng,
           estimatedCost: groundTransport.totalPrice,
           bookingUrl: groundTransport.bookingUrl,
+          transitLegs: groundTransport.transitLegs,
+          transitDataSource: groundTransport.dataSource,
         }));
 
         // LOCATION TRACKING: Arrivée = à destination (activités possibles)
@@ -2091,6 +2093,8 @@ export async function generateDayWithScheduler(params: {
           longitude: cityCenter.lng,
           estimatedCost: groundTransport.totalPrice,
           bookingUrl: returnBookingUrl,
+          transitLegs: groundTransport.transitLegs,
+          transitDataSource: groundTransport.dataSource,
         }));
       }
     } else {

@@ -7,7 +7,7 @@
 
 import { calculateDistance } from './geocoding';
 import { normalizeCitySync } from './cityNormalization';
-import { getCheapestTrainPrice } from './dbTransport';
+import { getCheapestTrainPrice, type DBLeg } from './dbTransport';
 import { checkTransportFeasibility } from './transportFeasibility';
 import { findMultiModalOptions } from './multiModalTransport';
 import { calculateCarCost } from './carCostCalculator';
@@ -32,6 +32,17 @@ export interface TransportOption {
   recommendationReason?: string;
   budgetNote?: string;
   dataSource?: 'api' | 'estimated';
+  // Legs détaillés DB HAFAS (horaires réels, numéros de train, correspondances)
+  transitLegs?: {
+    mode: 'train' | 'bus' | 'ferry';
+    from: string;
+    to: string;
+    departure: string;
+    arrival: string;
+    duration: number;
+    operator?: string;
+    line?: string;
+  }[];
 }
 
 export interface TransportSegment {
@@ -511,13 +522,14 @@ async function calculateTrainOptionInner(params: TransportSearchParams, distance
       console.log(`[Train] Skipping train: no high-speed rail, distance > 1000km, and no DB API result`);
       return null;
     }
-    return buildTrainOption(params, distance, dbResult.duration, dbResult.price || 0, dbResult.operator, 'api');
+    return buildTrainOption(params, distance, dbResult.duration, dbResult.price || 0, dbResult.operator, 'api', dbResult.legs);
   }
 
   let travelTime: number;
   let price: number;
   let operator: string;
   let dataSource: 'api' | 'estimated' = 'estimated';
+  let dbLegs: DBLeg[] | undefined;
 
   // 1. Try DB Transport REST API (real-time prices + schedules)
   try {
@@ -527,7 +539,8 @@ async function calculateTrainOptionInner(params: TransportSearchParams, distance
       price = dbResult.price > 0 ? dbResult.price : 0;
       operator = dbResult.operator;
       dataSource = 'api';
-      console.log(`[Train] DB API result: ${travelTime}min, ${price > 0 ? price + '€' : 'no price'}, ${operator}, ${dbResult.transfers} transfers`);
+      dbLegs = dbResult.legs;
+      console.log(`[Train] DB API result: ${travelTime}min, ${price > 0 ? price + '€' : 'no price'}, ${operator}, ${dbResult.transfers} transfers, ${dbLegs.length} legs`);
 
       if (price === 0) {
         const knownRoute = findKnownRoute(params.origin, params.destination);
@@ -541,7 +554,7 @@ async function calculateTrainOptionInner(params: TransportSearchParams, distance
         }
       }
 
-      return buildTrainOption(params, distance, travelTime, price, operator, dataSource);
+      return buildTrainOption(params, distance, travelTime, price, operator, dataSource, dbLegs);
     }
   } catch (err) {
     console.warn(`[Train] DB API error, falling back:`, err instanceof Error ? err.message : err);
@@ -576,7 +589,8 @@ function buildTrainOption(
   travelTime: number,
   price: number,
   operator: string,
-  dataSource: 'api' | 'estimated'
+  dataSource: 'api' | 'estimated',
+  dbLegs?: DBLeg[]
 ): TransportOption {
   const isHighSpeed = travelTime > 0 && distance > 0 && (distance / (travelTime / 60)) > 150;
   const totalDuration = travelTime +
@@ -586,6 +600,20 @@ function buildTrainOption(
   const co2Factor = isHighSpeed ? CO2_PER_KM.train_highspeed : CO2_PER_KM.train_regular;
   const co2 = Math.round(distance * co2Factor);
   const bookingUrl = getTrainBookingUrl(params.origin, params.destination, params.passengers, params.date, params.returnDate);
+
+  // Convertir les legs DB HAFAS pour TransportOption (filtrer walk/transfer)
+  const transitLegs = dbLegs
+    ?.filter(leg => leg.mode === 'train' || leg.mode === 'bus' || leg.mode === 'ferry')
+    .map(leg => ({
+      mode: leg.mode as 'train' | 'bus' | 'ferry',
+      from: leg.from,
+      to: leg.to,
+      departure: leg.departure,
+      arrival: leg.arrival,
+      duration: leg.duration,
+      operator: leg.operator,
+      line: leg.line,
+    }));
 
   return {
     id: dataSource === 'api' ? 'train_api' : (isHighSpeed ? 'train_highspeed' : 'train'),
@@ -610,6 +638,7 @@ function buildTrainOption(
     scoreDetails: { priceScore: 0, timeScore: 0, co2Score: 0 },
     bookingUrl,
     dataSource,
+    transitLegs,
   };
 }
 

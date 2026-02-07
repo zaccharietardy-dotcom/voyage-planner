@@ -348,6 +348,18 @@ export interface TripItem {
     steps?: string[]; // Instructions textuelles
     source?: 'google' | 'openroute' | 'estimated';
   };
+  // Legs détaillés du trajet (DB HAFAS) — horaires réels, numéros de train, correspondances
+  transitLegs?: {
+    mode: 'train' | 'bus' | 'ferry';
+    from: string;           // Gare de départ (ex: "Paris Gare du Nord")
+    to: string;             // Gare d'arrivée (ex: "Amsterdam Centraal")
+    departure: string;      // ISO datetime
+    arrival: string;        // ISO datetime
+    duration: number;       // minutes
+    operator?: string;      // "Deutsche Bahn", "SNCF", etc.
+    line?: string;          // "ICE 775", "TGV 9321", "Eurostar 9141"
+  }[];
+  transitDataSource?: 'api' | 'estimated'; // Source des données transit
   googleMapsUrl?: string; // Lien pour ouvrir l'itinéraire dans Google Maps
   googleMapsPlaceUrl?: string; // Lien de recherche Google Maps par nom (plus fiable que GPS!)
   dataReliability?: 'verified' | 'estimated' | 'generated'; // Fiabilité des données

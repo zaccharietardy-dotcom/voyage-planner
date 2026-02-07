@@ -94,6 +94,8 @@ function toTripItem(
     bookingUrl?: string;
     flight?: Flight;
     parking?: ParkingOption;
+    transitLegs?: TripItem['transitLegs'];
+    transitDataSource?: TripItem['transitDataSource'];
   }
 ): TripItem {
   return {
@@ -112,6 +114,8 @@ function toTripItem(
     bookingUrl: data.bookingUrl,
     flight: data.flight,
     parking: data.parking,
+    transitLegs: data.transitLegs,
+    transitDataSource: data.transitDataSource,
   };
 }
 
@@ -655,6 +659,8 @@ export class LogisticsHandler {
         longitude: cityCenter.lng,
         estimatedCost: groundTransport.totalPrice,
         bookingUrl: groundTransport.bookingUrl,
+        transitLegs: groundTransport.transitLegs,
+        transitDataSource: groundTransport.dataSource,
       }));
     }
 
@@ -927,6 +933,8 @@ export class LogisticsHandler {
         longitude: cityCenter.lng,
         estimatedCost: groundTransport.totalPrice,
         bookingUrl: groundTransport.bookingUrl,
+        transitLegs: groundTransport.transitLegs,
+        transitDataSource: groundTransport.dataSource,
       }));
     }
 

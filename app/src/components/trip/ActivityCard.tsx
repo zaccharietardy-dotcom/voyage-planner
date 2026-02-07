@@ -29,6 +29,7 @@ import {
   ChevronDown,
   ChevronRight,
   Search,
+  ArrowRight,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TripItemType } from '@/lib/types';
@@ -567,7 +568,6 @@ function TransportCard({ item }: { item: TripItem }) {
   const isOmio = bookingUrl.includes('omio') || bookingUrl.includes('sjv.io');
 
   // Extraire origin/destination du title
-  // Le title est généralement "Train Paris → Amsterdam" ou "Bus Lyon → Nice"
   const parts = item.title?.match(/(.+?)\s*[→>–\-]\s*(.+)/);
   const origin = parts?.[1]?.replace(/^(Train|Bus|Vol|Ferry)\s+/i, '').trim() || '';
   const destination = parts?.[2]?.trim() || '';
@@ -575,6 +575,29 @@ function TransportCard({ item }: { item: TripItem }) {
   // Mode de transport
   const isBus = item.title?.toLowerCase().includes('bus');
   const ModeIcon = isBus ? Bus : TrainFront;
+
+  // Données DB HAFAS réelles
+  const legs = item.transitLegs;
+  const hasRealData = legs && legs.length > 0;
+  const isRealTime = item.transitDataSource === 'api';
+
+  // Formatter un horaire ISO en HH:mm
+  const formatTime = (iso: string) => {
+    try {
+      const d = new Date(iso);
+      return d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    } catch { return ''; }
+  };
+
+  // Formatter la durée
+  const formatDuration = (min: number) => {
+    if (min >= 60) {
+      const h = Math.floor(min / 60);
+      const m = min % 60;
+      return m > 0 ? `${h}h${String(m).padStart(2, '0')}` : `${h}h`;
+    }
+    return `${min}min`;
+  };
 
   return (
     <a
@@ -590,32 +613,83 @@ function TransportCard({ item }: { item: TripItem }) {
         <span className="text-white font-medium text-sm truncate">
           {origin && destination ? `${origin} → ${destination}` : item.title}
         </span>
+        {isRealTime && (
+          <span className="ml-auto text-[10px] bg-white/20 text-white px-1.5 py-0.5 rounded-full">
+            Horaires réels
+          </span>
+        )}
       </div>
 
       {/* Contenu */}
-      <div className="px-4 py-3 space-y-2">
-        {/* Infos trajet */}
-        <div className="flex items-center gap-3 text-sm text-muted-foreground">
-          {item.startTime && item.endTime && (
-            <span className="flex items-center gap-1">
-              <Clock className="h-3.5 w-3.5" />
-              {item.startTime} → {item.endTime}
-            </span>
-          )}
-          {item.duration && item.duration > 0 && (
-            <span className="text-xs">
-              ~{item.duration >= 60 ? `${Math.floor(item.duration / 60)}h${item.duration % 60 > 0 ? String(item.duration % 60).padStart(2, '0') : ''}` : `${item.duration}min`}
-            </span>
-          )}
-          {item.estimatedCost != null && item.estimatedCost > 0 && (
-            <span className="font-medium text-blue-600 dark:text-blue-400">
-              à partir de ~{item.estimatedCost}€
-            </span>
-          )}
-        </div>
+      <div className="px-4 py-3 space-y-2.5">
 
-        {/* Transit lines (Eurostar, Thalys, etc.) */}
-        {item.transitInfo?.lines && item.transitInfo.lines.length > 0 && (
+        {/* Legs détaillés DB HAFAS */}
+        {hasRealData ? (
+          <div className="space-y-1.5">
+            {legs.map((leg, idx) => (
+              <div key={idx} className="flex items-center gap-2 text-sm">
+                {/* Horaires */}
+                <div className="flex items-center gap-1 text-muted-foreground min-w-[90px]">
+                  <Clock className="h-3 w-3 shrink-0" />
+                  <span className="font-mono text-xs">
+                    {formatTime(leg.departure)} → {formatTime(leg.arrival)}
+                  </span>
+                </div>
+                {/* Ligne / opérateur */}
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-white dark:bg-gray-800 border font-medium">
+                  {leg.mode === 'bus' ? <Bus className="h-3 w-3" /> : <TrainFront className="h-3 w-3" />}
+                  {leg.line || leg.operator || 'Train'}
+                </span>
+                {/* Durée */}
+                <span className="text-xs text-muted-foreground">
+                  {formatDuration(leg.duration)}
+                </span>
+                {/* Correspondance */}
+                {idx < legs.length - 1 && (
+                  <span className="text-[10px] text-orange-600 dark:text-orange-400 ml-auto">
+                    ↓ correspondance
+                  </span>
+                )}
+              </div>
+            ))}
+            {/* Résumé : durée totale + correspondances */}
+            {legs.length > 1 && (
+              <div className="text-xs text-muted-foreground pt-0.5">
+                {legs.length - 1} correspondance{legs.length > 2 ? 's' : ''} · durée totale ~{item.duration ? formatDuration(item.duration) : ''}
+              </div>
+            )}
+          </div>
+        ) : (
+          /* Fallback : ancien affichage si pas de données DB */
+          <div className="flex items-center gap-3 text-sm text-muted-foreground">
+            {item.startTime && item.endTime && (
+              <span className="flex items-center gap-1">
+                <Clock className="h-3.5 w-3.5" />
+                {item.startTime} → {item.endTime}
+              </span>
+            )}
+            {item.duration && item.duration > 0 && (
+              <span className="text-xs">
+                ~{formatDuration(item.duration)}
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Prix estimé */}
+        {item.estimatedCost != null && item.estimatedCost > 0 && (
+          <div className="flex items-center gap-1.5">
+            <span className="font-medium text-sm text-blue-600 dark:text-blue-400">
+              {isRealTime ? '' : 'à partir de ~'}{item.estimatedCost}€
+            </span>
+            {!isRealTime && (
+              <span className="text-[10px] text-muted-foreground">(estimé)</span>
+            )}
+          </div>
+        )}
+
+        {/* Transit lines from transitInfo (Eurostar, Thalys badges - si pas de legs DB) */}
+        {!hasRealData && item.transitInfo?.lines && item.transitInfo.lines.length > 0 && (
           <div className="flex items-center gap-1.5 flex-wrap">
             {item.transitInfo.lines.map((line, idx) => {
               const LineIcon = TRANSIT_MODE_ICONS[line.mode] || Bus;
@@ -635,11 +709,11 @@ function TransportCard({ item }: { item: TripItem }) {
         {/* CTA */}
         <div className="flex items-center justify-between pt-1">
           <span className="text-xs text-muted-foreground italic">
-            Prix et horaires exacts sur {isOmio ? 'Omio' : 'le site'}
+            {isRealTime ? 'Réserver sur' : 'Prix et horaires exacts sur'} {isOmio ? 'Omio' : 'le site'}
           </span>
           <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-600 text-white text-xs font-medium">
             <Search className="h-3 w-3" />
-            Voir les {isBus ? 'bus' : 'trains'}
+            {isRealTime ? 'Réserver' : `Voir les ${isBus ? 'bus' : 'trains'}`}
           </span>
         </div>
       </div>
