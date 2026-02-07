@@ -152,14 +152,22 @@ export async function findRestaurantForMeal(
     const scoredRestaurants = availableRestaurants.map(r => {
       let score = r.rating * 10; // Note sur 50
 
-      // Bonus si proche du point précédent
+      // Bonus/pénalité basée sur la distance au point précédent
       if (lastCoords) {
         const distFromPrevious = calculateDistance(
           lastCoords.lat, lastCoords.lng,
           r.latitude, r.longitude
         );
-        // Moins c'est loin, plus le score est élevé (max +20 pour < 500m)
-        score += Math.max(0, 20 - distFromPrevious * 20);
+        // Forte préférence pour les restaurants proches (< 1km)
+        if (distFromPrevious <= 0.5) {
+          score += 25; // Très proche: gros bonus
+        } else if (distFromPrevious <= 1) {
+          score += 15;
+        } else if (distFromPrevious <= 2) {
+          score += 5;
+        } else {
+          score -= Math.min(20, (distFromPrevious - 2) * 5); // Pénalité au-delà de 2km
+        }
       }
 
       // Petit bonus aléatoire pour varier (0-5)

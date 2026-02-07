@@ -429,7 +429,7 @@ export function getClosureWarnings(destination: string): string {
 
 export const MINIMUM_DURATION_OVERRIDES: [RegExp, number][] = [
   [/\blouvre\b/i, 180],
-  [/\bvatican museum|musées du vatican|musei vaticani\b/i, 180],
+  [/\b(vatican|vaticano|musées du vatican|musei vaticani|vatican museum|chapelle sixtine|sistine chapel|cappella sistina)\b/i, 180],
   [/\bbritish museum\b/i, 180],
   [/\buffizi|galleria degli uffizi|galerie des offices\b/i, 150],
   [/\bprado|museo del prado\b/i, 150],

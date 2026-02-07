@@ -37,11 +37,13 @@ const DURATION_CAPS: [RegExp, number][] = [
   [/\b(marché|market|mercado|mercato|bazar|bazaar|souk)\b/i, 75],
   [/\b(tower|tour|torre)\b/i, 90],
   [/\b(viewpoint|panorama|observation|lookout|mirador)\b/i, 45],
+  // Monuments/temples antiques sans musée: visite rapide
+  [/\b(pantheon|panthéon|capitole|capitol|campidoglio|terme|baths|thermes)\b/i, 60],
 ];
 
 // Duration floors for major museums: minimum realistic visit time
 const DURATION_FLOORS: [RegExp, number][] = [
-  [/\b(vatican|vaticano|musées du vatican|vatican museum|chapelle sixtine|sistine)\b/i, 120],
+  [/\b(vatican|vaticano|musées du vatican|vatican museum|chapelle sixtine|sistine)\b/i, 180],
   [/\b(louvre|musée du louvre)\b/i, 150],
   [/\b(british museum)\b/i, 120],
   [/\b(uffizi|offices|galerie des offices)\b/i, 120],
@@ -82,9 +84,9 @@ export function applyDurationRules(name: string, duration: number): number {
     result = 120;
   }
 
-  // 3. Type-based duration caps (apply if duration exceeds max by 20%+)
+  // 3. Type-based duration caps (apply if duration exceeds max)
   for (const [pattern, maxMin] of DURATION_CAPS) {
-    if (pattern.test(name) && result > maxMin * 1.2) {
+    if (pattern.test(name) && result > maxMin) {
       console.log(`[Duration] Type cap: "${name}" ${result}min → ${maxMin}min`);
       result = maxMin;
       break;
@@ -152,8 +154,8 @@ export interface ClaudeItineraryDay {
   additionalSuggestions: {
     name: string;
     whyVisit: string;
-    estimatedDuration: number;
-    estimatedCost: number;
+    estimatedDuration?: number;
+    estimatedCost?: number;
     area: string;
     address?: string;
     bestTimeOfDay?: string;
@@ -364,6 +366,8 @@ RÈGLES D'OR:
      * Place du Tertre → TOUJOURS avec Sacré-Cœur/Montmartre
      * Île de la Cité → TOUJOURS avec Notre-Dame
      * Rambla → TOUJOURS avec Barri Gòtic
+     * Colosseum/Colisée → TOUJOURS avec Forum Romain + Mont Palatin (billet combiné inclus, coût 0€ pour Forum)
+     * Musées du Vatican → TOUJOURS avec Chapelle Sixtine + Basilique Saint-Pierre (même zone)
    - Ce principe s'applique à TOUTE destination: les petites attractions (places, jardins, ponts) doivent être groupées avec le monument majeur le plus proche
    - Attractions distantes de < 500m DOIVENT être le même jour
    - Ne propose JAMAIS Champ de Mars ou Trocadéro sans Tour Eiffel le même jour
@@ -375,24 +379,8 @@ RÈGLES D'OR:
    - TOTAL MINIMUM: au moins ${Math.max(request.durationDays * 4, 15)} attractions sur tout le séjour (selectedAttractionIds + additionalSuggestions combinés)
    - Alterne intense (musée 2h) et léger (balade quartier 30min)
    - Prévois des pauses café/repos entre les visites intensives
-   - DURÉES estimatedDuration RÉALISTES (en minutes):
-     * Grand musée (Louvre, Orsay, British Museum, Prado): 150-180
-     * Musée moyen (Marmottan, Rodin, Picasso): 90-120
-     * Cathédrale/église (intérieur): 45-60
-     * Monument extérieur (Arc de Triomphe, pyramide): 30-45
-     * Place publique (Concorde, Trocadéro): 15-25
-     * Viewpoint/panorama: 30-45
-     * Quartier à explorer (Montmartre, Marais, Shibuya): 90-120
-     * Jardin/parc (Tuileries, Luxembourg): 45-60
-     * Marché: 45-60
-     * NE METS JAMAIS 180min pour un simple monument, une place ou une église !
-   - COÛTS estimatedCost RÉALISTES (par personne en €):
-     * Gratuit (0€): parcs, jardins, places, extérieurs de monuments, églises, marchés (visite), quartiers
-     * 5-15€: petits musées, tours d'église/cryptes, expositions temporaires
-     * 15-25€: grands musées (Louvre 22€, Orsay 16€), monuments payants (Arc de Triomphe 16€, Tour Eiffel 29€)
-     * 25-40€: expériences réservables (food tour, croisière, vélo guidé)
-     * 40-80€: expériences premium (spectacle, montgolfière, VIP)
-     * NE METS PAS 30€ pour une attraction GRATUITE (Sacré-Cœur, Tuileries, Notre-Dame extérieur) !
+   - NE FOURNIS PAS estimatedDuration ni estimatedCost dans additionalSuggestions — le système les détermine automatiquement depuis des sources vérifiées (Viator, données terrain). Si tu les fournis, ils seront ignorés.
+   - Concentre-toi sur le NOM EXACT du lieu/activité, le quartier (area), et pourquoi le visiter (whyVisit).
 
 4. DAY TRIPS (OBLIGATOIRE si séjour >= 4 jours):
    - Pour ${request.durationDays} jours, propose AU MOINS 1 day trip hors de la ville
@@ -526,8 +514,8 @@ Format EXACT:
       "selectedAttractionIds": ["id1", "id2"],
       "visitOrder": ["id2", "id1"],
       "additionalSuggestions": [
-        {"name": "Nom lieu/monument", "whyVisit": "Pourquoi", "estimatedDuration": 90, "estimatedCost": 0, "area": "Quartier", "bestTimeOfDay": "morning"},
-        {"name": "Kayak dans l'archipel", "whyVisit": "Expérience nature unique", "estimatedDuration": 180, "estimatedCost": 55, "area": "Archipel", "bestTimeOfDay": "morning", "bookable": true, "gygSearchQuery": "kayak archipelago Stockholm"}
+        {"name": "Nom lieu/monument", "whyVisit": "Pourquoi", "area": "Quartier", "bestTimeOfDay": "morning"},
+        {"name": "Kayak dans l'archipel", "whyVisit": "Expérience nature unique", "area": "Archipel", "bestTimeOfDay": "morning", "bookable": true, "gygSearchQuery": "kayak archipelago Stockholm"}
       ],
       "bookingAdvice": [
         {"attractionName": "Tour Eiffel", "attractionId": "id-si-dans-pool", "urgency": "essential", "reason": "Réservez 2 semaines avant, créneaux complets en haute saison", "bookingSearchQuery": "Tour Eiffel billets sommet réservation officielle"}
@@ -1114,7 +1102,7 @@ Format EXACT:
 
       for (const s of day.additionalSuggestions) {
         // Apply all duration rules (overrides, caps, floors) via shared function
-        s.estimatedDuration = applyDurationRules(s.name, s.estimatedDuration);
+        s.estimatedDuration = applyDurationRules(s.name, s.estimatedDuration ?? 60);
 
         // Evening-only enforcement for shows/cabarets
         if (eveningOnlyPattern.test(s.name) && s.bestTimeOfDay !== 'evening') {
@@ -1301,8 +1289,8 @@ export function mapItineraryToAttractions(
         name: suggestion.name,
         type: 'culture' as ActivityType, // Maps to TripItemType 'activity' in tripDay.ts
         description: suggestion.whyVisit,
-        duration: applyDurationRules(suggestion.name, suggestion.estimatedDuration),
-        estimatedCost: suggestion.estimatedCost,
+        duration: applyDurationRules(suggestion.name, suggestion.estimatedDuration ?? 60),
+        estimatedCost: suggestion.estimatedCost ?? 0,
         latitude: cityCenter?.lat || 0, // Default to city center; resolved later via API
         longitude: cityCenter?.lng || 0,
         rating: 4.5,

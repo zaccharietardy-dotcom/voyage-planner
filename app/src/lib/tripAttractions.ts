@@ -1,143 +1,86 @@
 import { Attraction } from './services/attractions';
 import { Flight } from './types';
+import { findKnownViatorProduct } from './services/viatorKnownProducts';
+import { applyDurationRules } from './services/claudeItinerary';
 
 /**
- * Post-traitement: corrige les durées irréalistes que Claude assigne
+ * Post-traitement: corrige les durées irréalistes
+ * Si l'attraction a dataReliability 'verified' → skip (données fiables Viator/API)
+ * Sinon → déléguer à applyDurationRules() (caps/floors partagés)
  */
 export function fixAttractionDuration(attraction: Attraction): Attraction {
-  const name = attraction.name.toLowerCase();
-  const d = attraction.duration;
-
-  // Major museums: never cap their duration (Vatican, Louvre, etc.)
-  if (/\b(vatican|vaticano|musées du vatican|chapelle sixtine|sistine|louvre|uffizi|prado|british museum|hermitage|metropolitan|rijksmuseum)\b/i.test(name)) {
+  // Données vérifiées (Viator API, viatorKnownProducts) → ne pas toucher
+  if (attraction.dataReliability === 'verified') {
     return attraction;
   }
 
-  // Places et squares: max 30min
-  if (/\b(place|square|piazza|platz)\b/.test(name)) {
-    if (d > 30) return { ...attraction, duration: 25 };
-  }
-  // Jardins et parcs: max 60min
-  if (/\b(jardin|parc|park|garden)\b/.test(name)) {
-    if (d > 60) return { ...attraction, duration: 60 };
-  }
-  // Petites églises: max 30min (pas les cathédrales/basiliques)
-  if (/\b(église|eglise|church|chapelle|chapel)\b/.test(name) && !/\b(cathédrale|cathedrale|cathedral|basilique|basilica|notre-dame|sacré|sacre|sainte-chapelle|vatican|vaticano|sixtine|sistine)\b/.test(name)) {
-    if (d > 30) return { ...attraction, duration: 20 };
-  }
-  // Cathédrales, basiliques: max 60min
-  if (/\b(cathédrale|cathedral|basilique|basilica)\b/.test(name)) {
-    if (d > 60) return { ...attraction, duration: 50 };
-  }
-  // Vignes, petits vignobles urbains: max 20min
-  if (/\b(vigne|vignoble|vineyard)\b/.test(name) && !/\b(domaine|château|cave|cellar|dégustation|tasting)\b/.test(name)) {
-    if (d > 20) return { ...attraction, duration: 15 };
-  }
-  // Monuments, arcs, statues: max 45min
-  if (/\b(arc de|monument|statue|fontaine|fountain|colonne|column|obélisque|obelisk|tower|tour)\b/.test(name) && !/\bmusée\b/.test(name)) {
-    if (d > 45) return { ...attraction, duration: 40 };
-  }
-  // Champ-de-Mars, esplanade: max 30min
-  if (/\b(champ|esplanade|promenade|boulevard)\b/.test(name)) {
-    if (d > 45) return { ...attraction, duration: 30 };
-  }
-  // Ancient/old buildings without museum: max 30min (facades, palaces without exhibit)
-  if (/\b(ancien|old|palais|palazzo|palace|hôtel de ville|town hall|mairie)\b/.test(name) && !/\b(musée|museum|exposition|exhibit|galerie|gallery)\b/.test(name)) {
-    if (d > 45) return { ...attraction, duration: 30 };
-  }
-  // Quartiers à explorer: 60-90min
-  if (/\b(quartier|neighborhood|district|marché|market)\b/.test(name)) {
-    if (d > 120) return { ...attraction, duration: 90 };
-  }
-  // Grands musées: 150-180min OK, ne pas toucher
-  // Musées moyens: max 120min si pas un "grand"
-  if (/\b(musée|museum)\b/.test(name)) {
-    const isGrand = /\b(louvre|orsay|british|prado|hermitage|metropolitan|smithsonian|uffizi)\b/.test(name);
-    if (!isGrand && d > 120) return { ...attraction, duration: 120 };
+  // Déléguer à applyDurationRules (DURATION_CAPS, DURATION_FLOORS, MINIMUM_DURATION_OVERRIDES)
+  const fixedDuration = applyDurationRules(attraction.name, attraction.duration);
+  if (fixedDuration !== attraction.duration) {
+    return { ...attraction, duration: fixedDuration };
   }
 
   return attraction;
 }
 
 /**
- * Post-traitement: corrige les coûts irréalistes (tout à 30€)
+ * Post-traitement: corrige les coûts irréalistes
+ * Si l'attraction a dataReliability 'verified' → skip (prix Viator fiable)
+ * Sinon → appliquer les règles de prix (gratuit/prix plancher/cap)
  */
 export function fixAttractionCost(attraction: Attraction): Attraction {
+  // Données vérifiées (Viator API, viatorKnownProducts) → ne pas toucher
+  if (attraction.dataReliability === 'verified') {
+    return attraction;
+  }
+
   const name = attraction.name.toLowerCase();
   const cost = attraction.estimatedCost;
 
-  // Gratuit: parcs, jardins, places, extérieurs, quartiers, vignes urbaines, plages, portes, escaliers, vieille ville, ports
+  // Supermarchés / grocery: coût 0 (filet de sécurité)
+  if (/\b(supermarket|supermarché|supermercato|conad|carrefour|lidl|aldi|esselunga|grocery|épicerie)\b/i.test(name)) {
+    return { ...attraction, estimatedCost: 0 };
+  }
+
+  // Lieux gratuits: parcs, jardins, places, quartiers, plages, portes, vieille ville, ports
   if (/\b(jardin|parc|park|garden|place|square|piazza|champ|esplanade|promenade|quartier|neighborhood|district|boulevard|rue|street|vigne|vignoble|beach|plage|playa|spiaggia|gate|porte|porta|puerta|stairs|escalier|old town|vieille ville|centro storico|altstadt|harbour|harbor|port|marina|waterfront|pier|quai|boardwalk)\b/i.test(name)) {
     if (cost > 0) return { ...attraction, estimatedCost: 0 };
   }
-  // Major museums: ne pas écraser le coût source (SerpAPI/Viator/pool)
-  if (/\b(vatican|vaticano|musées du vatican|musei vaticani|vatican museum|chapelle sixtine|sistine chapel|cappella sistina|louvre|uffizi|prado|british museum|hermitage|metropolitan|rijksmuseum|musée d'orsay|colosseum|colisée|colosseo)\b/i.test(name)) {
-    return attraction;
-  }
-  // Églises et cathédrales: généralement gratuit (sauf tours/cryptes)
+
+  // Églises et cathédrales: généralement gratuit (sauf tours/cryptes/chapelles payantes)
   if (/\b(église|eglise|cathédrale|cathedrale|basilique|church|cathedral|basilica|mosquée|mosque|temple|synagogue|chapel|chapelle)\b/i.test(name)) {
     if (cost > 0 && !/\b(tour|tower|crypte|crypt|sainte-chapelle|vatican|vaticano|sixtine|sistine)\b/i.test(name)) {
       return { ...attraction, estimatedCost: 0 };
     }
   }
-  // Sainte-Chapelle: 13€
-  if (/sainte-chapelle/.test(name)) {
-    return { ...attraction, estimatedCost: 13 };
-  }
-  // Grands musées avec prix connus
-  if (/\blouvre\b/.test(name) && /\bmusée\b/.test(name)) {
-    return { ...attraction, estimatedCost: 22 };
-  }
-  if (/\borsay\b/.test(name)) {
-    return { ...attraction, estimatedCost: 16 };
-  }
-  // Arc de Triomphe du Carrousel: gratuit (en plein air)
-  if (/\barc de triomphe\b/.test(name) && /\bcarrousel\b/i.test(name)) {
-    return { ...attraction, estimatedCost: 0 };
-  }
-  if (/\barc de triomphe\b/.test(name)) {
-    return { ...attraction, estimatedCost: 16 };
-  }
-  if (/\btour eiffel\b/.test(name) || /\beiffel tower\b/.test(name)) {
-    return { ...attraction, estimatedCost: 29 };
-  }
-  if (/\bnotre-dame\b/.test(name) || /\bnotre dame\b/.test(name)) {
-    return { ...attraction, estimatedCost: 0 };
-  }
-  // Versailles: 21€
-  if (/\bversailles\b/.test(name)) {
-    return { ...attraction, estimatedCost: 21 };
-  }
-  // Panthéon: 11€
-  if (/\bpanthéon\b/.test(name) || /\bpantheon\b/.test(name)) {
-    return { ...attraction, estimatedCost: 11 };
-  }
-  // Conciergerie: 11.50€
-  if (/\bconciergerie\b/.test(name)) {
-    return { ...attraction, estimatedCost: 12 };
-  }
 
-  // Règles génériques pour toutes les villes:
-  // Monuments/arcs/statues en plein air → gratuit (Arc de Triomphe Barcelone, etc.)
+  // Monuments/arcs/statues en plein air → gratuit
   if (/\b(arc de|arco|monument|statue|fontaine|fountain|colonne|column|obélisque|obelisk)\b/.test(name)) {
     if (cost > 0 && !/\b(musée|museum|tour|tower|observation|mirador|deck)\b/.test(name)) {
       return { ...attraction, estimatedCost: 0 };
     }
   }
 
-  // Miradors/viewpoints/observation points gratuits (sauf si observatoire payant avec "deck"/"tower")
+  // Viewpoints/miradors gratuits (sauf observatoire payant)
   if (/\b(mirador|viewpoint|lookout|panoramic|observation point|vidikovac|belvedere|belvédère)\b/i.test(name)) {
     if (cost > 0 && !/\b(observatory|deck|tower|tour|ticket)\b/i.test(name)) {
       return { ...attraction, estimatedCost: 0 };
     }
   }
 
-  // Street food / food markets / marchés → cap à 15€/pers max
+  // Prix plancher depuis viatorKnownProducts (musées majeurs dont le prix est sous-estimé)
+  const viatorData = findKnownViatorProduct(attraction.name);
+  if (viatorData && viatorData.price > 0 && cost < viatorData.price * 0.5) {
+    console.log(`[Cost] Floor: "${attraction.name}" ${cost}€ → ${viatorData.price}€ (Viator known price)`);
+    return { ...attraction, estimatedCost: viatorData.price };
+  }
+
+  // Street food / marchés → cap à 15€/pers
   if (/\b(street food|food market|marché|mercado|market hall|food hall)\b/i.test(name)) {
     if (cost > 15) return { ...attraction, estimatedCost: 15 };
   }
 
-  // Cap générique: si coût >= 30€/pers et pas bookable → probablement faux, cap à 15€
+  // Cap générique: si coût >= 30€/pers et pas bookable → probablement faux
   if (cost >= 30 && !attraction.bookingUrl) {
     return { ...attraction, estimatedCost: 15 };
   }

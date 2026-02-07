@@ -2093,6 +2093,26 @@ export async function generateDayWithScheduler(params: {
           bookingUrl: returnBookingUrl,
         }));
       }
+    } else {
+      // Pas de vol ni de transport retour → checkout simple à 11h
+      const checkoutStart = parseTime(date, '11:00');
+      const checkoutEnd = new Date(checkoutStart.getTime() + 30 * 60 * 1000);
+      const hotelNameFallback = accommodation?.name || 'Hébergement';
+      const checkoutItem = scheduler.insertFixedItem({
+        id: generateId(),
+        title: `Check-out ${hotelNameFallback}`,
+        type: 'checkout',
+        startTime: checkoutStart,
+        endTime: checkoutEnd,
+      });
+      if (checkoutItem) {
+        items.push(schedulerItemToTripItem(checkoutItem, dayNumber, orderIndex++, {
+          description: 'Libérez votre hébergement.',
+          locationName: getHotelLocationName(accommodation, preferences.destination),
+          latitude: accommodation?.latitude || cityCenter.lat,
+          longitude: accommodation?.longitude || cityCenter.lng,
+        }));
+      }
     }
   }
 

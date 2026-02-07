@@ -48,6 +48,7 @@ import { searchAirbnbListings, isAirbnbApiConfigured } from './services/airbnb';
 import { BudgetTracker } from './services/budgetTracker';
 import { enrichRestaurantsWithGemini, geocodeWithGemini, resetGeminiGeocodeCounter } from './services/geminiSearch';
 import { findViatorProduct, searchViatorActivities, isViatorConfigured } from './services/viator';
+import { findKnownViatorProduct } from './services/viatorKnownProducts';
 import { findTiqetsProduct, getKnownTiqetsLink, isTiqetsRelevant } from './services/tiqets';
 import { getMustSeeAttractions } from './services/attractions';
 
@@ -463,6 +464,49 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
     }
   }
 
+  // === Enrichissement pré-Claude : remplacer les estimations SerpAPI par des données Viator vérifiées ===
+  {
+    let enrichedCount = 0;
+    for (const attraction of attractionPool) {
+      // Ne pas toucher les attractions déjà vérifiées (Viator API, curated)
+      if (attraction.dataReliability === 'verified') continue;
+
+      // 1. Chercher dans viatorActivitiesRaw (données API Viator, déjà en mémoire)
+      const viatorMatch = viatorActivitiesRaw.find(v => areNamesSimilar(attraction.name, v.name));
+      if (viatorMatch) {
+        if (viatorMatch.duration && viatorMatch.duration > 0) {
+          attraction.duration = viatorMatch.duration;
+        }
+        if (viatorMatch.estimatedCost && viatorMatch.estimatedCost > 0) {
+          attraction.estimatedCost = viatorMatch.estimatedCost;
+        }
+        attraction.dataReliability = 'verified';
+        attraction.providerName = attraction.providerName || 'Viator';
+        enrichedCount++;
+        continue;
+      }
+
+      // 2. Chercher dans viatorKnownProducts (base statique, lookup instant)
+      const knownMatch = findKnownViatorProduct(attraction.name);
+      if (knownMatch) {
+        if (knownMatch.duration && knownMatch.duration > 0) {
+          attraction.duration = knownMatch.duration;
+        }
+        if (knownMatch.price && knownMatch.price > 0) {
+          attraction.estimatedCost = knownMatch.price;
+        }
+        attraction.dataReliability = 'verified';
+        enrichedCount++;
+        continue;
+      }
+
+      // 3. Sinon : garder les estimations SerpAPI (fallback)
+      // dataReliability reste 'estimated' ou 'generated'
+    }
+    const totalNonViator = attractionPool.filter(a => a.providerName !== 'Viator').length;
+    console.log(`[AI] Viator enrichment: ${enrichedCount}/${totalNonViator} attractions SerpAPI enrichies avec données vérifiées`);
+  }
+
   let selectedAttractions = attractionPool;
 
   // Protection finale: s'assurer que groupSize est valide pour eviter NaN
@@ -662,6 +706,49 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
     }));
 
     console.log(`[PERF ${elapsed()}] Parallel suggestion resolution done`);
+
+    // === Enrichissement post-Claude : remplacer les defaults (60min, 0€) par des données Viator vérifiées ===
+    {
+      let suggestionEnriched = 0;
+      let suggestionTotal = 0;
+      for (const dayAttrs of attractionsByDay) {
+        for (const attr of dayAttrs) {
+          // Uniquement les suggestions Claude (pas les attractions du pool, déjà enrichies)
+          if (!attr.id.startsWith('claude-')) continue;
+          suggestionTotal++;
+
+          // 1. Chercher dans viatorActivitiesRaw (données API Viator)
+          const viatorMatch = viatorActivitiesRaw.find(v => areNamesSimilar(attr.name, v.name));
+          if (viatorMatch) {
+            if (viatorMatch.duration && viatorMatch.duration > 0) {
+              attr.duration = viatorMatch.duration;
+            }
+            if (viatorMatch.estimatedCost && viatorMatch.estimatedCost > 0) {
+              attr.estimatedCost = viatorMatch.estimatedCost;
+            }
+            attr.providerName = attr.providerName || 'Viator';
+            suggestionEnriched++;
+            continue;
+          }
+
+          // 2. Chercher dans viatorKnownProducts (base statique)
+          const knownMatch = findKnownViatorProduct(attr.name);
+          if (knownMatch) {
+            if (knownMatch.duration && knownMatch.duration > 0) {
+              attr.duration = knownMatch.duration;
+            }
+            if (knownMatch.price && knownMatch.price > 0) {
+              attr.estimatedCost = knownMatch.price;
+            }
+            suggestionEnriched++;
+            continue;
+          }
+
+          // 3. Pas de match Viator → garder les defaults (60min, 0€) + applyDurationRules déjà appliqué
+        }
+      }
+      console.log(`[AI] Viator suggestion enrichment: ${suggestionEnriched}/${suggestionTotal} suggestions enrichies`);
+    }
 
     // Post-enrichment check: mark items still at city center as estimated
     for (const dayAttrs of attractionsByDay) {
@@ -1312,7 +1399,7 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
     }
 
     // POST-VALIDATION: Vérifier que le thème correspond aux activités réelles
-    if (lastDay.theme && !isLastDay) {
+    if (lastDay.theme) {
       const activityTitles = lastDay.items
         .filter(it => it.type === 'activity')
         .map(it => it.title.toLowerCase());
@@ -1333,7 +1420,18 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
             .filter(it => it.type === 'activity')
             .slice(0, 3)
             .map(it => it.title);
-          lastDay.theme = mainActivities.join(', ');
+          // Format plus lisible: max 2 items + "et plus" au lieu d'une longue liste
+          if (mainActivities.length > 2) {
+            lastDay.theme = `${mainActivities[0]}, ${mainActivities[1]} et plus`;
+          } else if (mainActivities.length > 0) {
+            lastDay.theme = mainActivities.join(' & ');
+          }
+          // Si isDayTrip mais thème ne match pas, reset le day trip
+          if (lastDay.isDayTrip) {
+            console.log(`[AI] Jour ${lastDay.dayNumber}: Day trip "${lastDay.dayTripDestination}" sans activités correspondantes → reset`);
+            lastDay.isDayTrip = false;
+            lastDay.dayTripDestination = undefined;
+          }
           lastDay.dayNarrative = undefined;
           console.log(`[AI] Theme mismatch Jour ${lastDay.dayNumber}: regenerated to "${lastDay.theme}"`);
         }

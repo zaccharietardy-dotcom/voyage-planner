@@ -611,6 +611,16 @@ const NON_TOURISTIC_NAME_KEYWORDS = [
   'photo spot', 'photo point', 'instagram spot', 'selfie spot',
   'i amsterdam', 'iamsterdam', ' letters', ' sign',
   'don quijote', 'donki', 'uniqlo', 'daiso',
+  // Educational institutions (not tourist attractions)
+  'college', 'collège', 'university', 'università', 'lycée', 'school', 'école', 'scuola',
+  'faculty', 'faculté', 'facoltà', 'institute', 'istituto', 'akademie',
+  // Street food / fast food places (belong to meal system, not attractions)
+  'street food', 'fast food', 'kebab', 'mortadella', 'panini shop', 'piadineria',
+  'friggitoria', 'supplizio', 'rosticceria', 'focacceria', 'gelateria',
+  // Supermarkets/grocery (not tourist attractions)
+  'conad', 'carrefour', 'lidl', 'aldi', 'esselunga', 'coop ', 'pam ', 'despar',
+  'simply', 'eurospin', 'penny', 'spar', 'albert heijn', 'tesco', 'sainsbury',
+  'supermarket', 'supermarché', 'supermercato', 'grocery',
   // Restaurants & food establishments (ne sont pas des attractions)
   'restaurant', 'ristorante', 'restaurante', 'restoran',
   'bistrot', 'bistro', 'brasserie', 'trattoria', 'osteria', 'taverna',
