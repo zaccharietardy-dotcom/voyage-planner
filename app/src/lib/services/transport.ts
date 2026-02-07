@@ -635,15 +635,9 @@ function calculateBusOption(params: TransportSearchParams, distance: number): Tr
   // CO2
   const co2 = Math.round(distance * CO2_PER_KM.bus);
 
-  // FlixBus booking URL with date - also provide Omio as alternative
-  const flixDate = params.date
-    ? `${String(params.date.getDate()).padStart(2, '0')}.${String(params.date.getMonth() + 1).padStart(2, '0')}.${params.date.getFullYear()}`
-    : '';
-  const omioDate = params.date ? params.date.toISOString().split('T')[0] : '';
-  // Prefer Omio for bus booking (aggregates FlixBus + BlaBlaCar + others, with real prices)
-  const bookingUrl = omioDate
-    ? `https://www.omio.fr/search-frontend/results/bus/${encodeURIComponent(params.origin)}/${encodeURIComponent(params.destination)}/${omioDate}/${params.passengers || 1}`
-    : `https://shop.flixbus.fr/search?departureCity=${encodeURIComponent(params.origin)}&arrivalCity=${encodeURIComponent(params.destination)}${flixDate ? `&rideDate=${flixDate}` : ''}&adult=${params.passengers || 1}`;
+  // Full Omio pour les bus aussi (agrège FlixBus + BlaBlaCar + autres) → affilié Impact
+  const omioDate = params.date ? params.date.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+  const bookingUrl = `https://www.omio.fr/search-frontend/results/bus/${encodeURIComponent(params.origin)}/${encodeURIComponent(params.destination)}/${omioDate}/${params.passengers || 1}`;
 
   return {
     id: 'bus',
@@ -941,25 +935,7 @@ export function getTrainBookingUrl(origin: string, destination: string, passenge
   const originKey = originNorm.normalized.toLowerCase();
   const destKey = destNorm.normalized.toLowerCase();
 
-  // Eurostar: Paris/Bruxelles/Amsterdam ↔ Londres (deep links avec codes gare)
-  const eurostarCities = ['london', 'paris', 'brussels', 'amsterdam', 'lille', 'rotterdam'];
-  if ((originKey === 'london' || destKey === 'london') &&
-      eurostarCities.includes(originKey) && eurostarCities.includes(destKey)) {
-    const eurostarCodes: Record<string, string> = {
-      'paris': '8727100', 'london': '7015400', 'brussels': '8814001',
-      'amsterdam': '8400058', 'lille': '8722326', 'rotterdam': '8400530',
-    };
-    const originCode = eurostarCodes[originKey];
-    const destCode = eurostarCodes[destKey];
-    if (originCode && destCode) {
-      const dateStr = date ? date.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
-      let url = `https://www.eurostar.com/search/uk-en?adult=${passengers}&origin=${originCode}&destination=${destCode}&outbound=${dateStr}`;
-      if (returnDate) url += `&inbound=${returnDate.toISOString().split('T')[0]}`;
-      return url;
-    }
-  }
-
-  // Omio: meilleurs deep links qui s'ouvrent directement sur les résultats
+  // Full Omio: tous les trains (y compris Eurostar) passent par Omio → affilié Impact
   // Format: /search-frontend/results/train/{origin}/{destination}/{date}/{passengers}
   const dateStr = date ? date.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
   const originSlug = origin.toLowerCase().replace(/\s+/g, '-');
