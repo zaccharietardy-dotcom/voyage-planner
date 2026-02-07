@@ -373,6 +373,7 @@ export interface TripItem {
   viatorRating?: number;
   viatorReviewCount?: number;
   viatorPrice?: number; // Prix du produit Viator (peut différer de estimatedCost qui est le prix d'entrée officiel)
+  viatorDuration?: number; // Durée réelle du produit Viator en minutes
 }
 
 export interface TripDay {

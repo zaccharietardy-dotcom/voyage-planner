@@ -1850,6 +1850,53 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
             if (result.imageUrl) (toMatch[i] as any).viatorImageUrl = result.imageUrl;
             if (result.rating) (toMatch[i] as any).viatorRating = result.rating;
             if (result.reviewCount) (toMatch[i] as any).viatorReviewCount = result.reviewCount;
+
+            // Propager la durée Viator et recalculer le planning si nécessaire
+            if (result.duration && result.duration > 0) {
+              const item = toMatch[i];
+              item.viatorDuration = result.duration;
+              const currentDuration = item.duration || 0;
+
+              // Recalculer endTime si la durée Viator est significativement différente (>15min)
+              if (Math.abs(result.duration - currentDuration) > 15 && item.startTime && item.endTime) {
+                const [startH, startM] = item.startTime.split(':').map(Number);
+                const startMinutes = startH * 60 + startM;
+                const newEndMinutes = startMinutes + result.duration;
+                const newEndH = Math.floor(newEndMinutes / 60);
+                const newEndM = newEndMinutes % 60;
+                const newEndTime = `${String(newEndH).padStart(2, '0')}:${String(newEndM).padStart(2, '0')}`;
+
+                const oldEndTime = item.endTime;
+                item.endTime = newEndTime;
+                item.duration = result.duration;
+
+                // Décaler les items suivants dans le même jour
+                const day = days.find(d => d.items.some(it => it.id === item.id));
+                if (day) {
+                  const itemIndex = day.items.findIndex(it => it.id === item.id);
+                  if (itemIndex >= 0 && itemIndex < day.items.length - 1) {
+                    const [oldEndH, oldEndM] = oldEndTime.split(':').map(Number);
+                    const shiftMinutes = (newEndH * 60 + newEndM) - (oldEndH * 60 + oldEndM);
+
+                    if (shiftMinutes > 0) {
+                      for (let j = itemIndex + 1; j < day.items.length; j++) {
+                        const next = day.items[j];
+                        if (next.startTime && next.endTime) {
+                          const [sH, sM] = next.startTime.split(':').map(Number);
+                          const [eH, eM] = next.endTime.split(':').map(Number);
+                          const newStartMin = sH * 60 + sM + shiftMinutes;
+                          const newEndMin = eH * 60 + eM + shiftMinutes;
+                          next.startTime = `${String(Math.floor(newStartMin / 60)).padStart(2, '0')}:${String(newStartMin % 60).padStart(2, '0')}`;
+                          next.endTime = `${String(Math.floor(newEndMin / 60)).padStart(2, '0')}:${String(newEndMin % 60).padStart(2, '0')}`;
+                        }
+                      }
+                      console.log(`[AI] ⏱ Durée Viator "${item.title}": ${currentDuration}min → ${result.duration}min, décalage +${shiftMinutes}min sur ${day.items.length - itemIndex - 1} items`);
+                    }
+                  }
+                }
+              }
+            }
+
             matched++;
           }
           // Pas de fallback Tiqets — en attente API Distributor

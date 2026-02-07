@@ -351,6 +351,7 @@ export interface ViatorProductResult {
   imageUrl?: string;
   rating?: number;
   reviewCount?: number;
+  duration?: number; // Durée en minutes du produit Viator
 }
 
 export async function findViatorProduct(
@@ -419,8 +420,9 @@ export async function findViatorProduct(
         const price = product.pricing?.summary?.fromPrice || 0;
         const url = normalizeViatorUrl(product.productUrl, product.title, destinationName, product.productCode);
         const imageUrl = product.images?.[0]?.variants?.find((v: { width?: number; url?: string }) => v.width && v.width >= 480 && v.width <= 800)?.url || product.images?.[0]?.variants?.[0]?.url;
-        console.log(`[Viator] ✅ Exact match: "${activityName}" → "${product.title}" (${price}€) URL: ${url}`);
-        return { url, price: Math.round(price), title: product.title, imageUrl, rating: product.reviews?.combinedAverageRating, reviewCount: product.reviews?.totalReviews };
+        const duration = product.duration?.fixedDurationInMinutes || product.duration?.variableDurationFromMinutes;
+        console.log(`[Viator] ✅ Exact match: "${activityName}" → "${product.title}" (${price}€, ${duration || '?'}min) URL: ${url}`);
+        return { url, price: Math.round(price), title: product.title, imageUrl, rating: product.reviews?.combinedAverageRating, reviewCount: product.reviews?.totalReviews, duration };
       }
     }
 
@@ -450,8 +452,9 @@ export async function findViatorProduct(
       const price = bestMatch.product.pricing?.summary?.fromPrice || 0;
       const url = normalizeViatorUrl(bestMatch.product.productUrl, bestMatch.product.title, destinationName, bestMatch.product.productCode);
       const imageUrl = bestMatch.product.images?.[0]?.variants?.find((v: { width?: number; url?: string }) => v.width && v.width >= 480 && v.width <= 800)?.url || bestMatch.product.images?.[0]?.variants?.[0]?.url;
-      console.log(`[Viator] ✅ Fuzzy match: "${activityName}" → "${bestMatch.product.title}" (${price}€, score: ${bestMatch.score}) URL: ${url}`);
-      return { url, price: Math.round(price), title: bestMatch.product.title, imageUrl, rating: bestMatch.product.reviews?.combinedAverageRating, reviewCount: bestMatch.product.reviews?.totalReviews };
+      const duration = bestMatch.product.duration?.fixedDurationInMinutes || bestMatch.product.duration?.variableDurationFromMinutes;
+      console.log(`[Viator] ✅ Fuzzy match: "${activityName}" → "${bestMatch.product.title}" (${price}€, ${duration || '?'}min, score: ${bestMatch.score}) URL: ${url}`);
+      return { url, price: Math.round(price), title: bestMatch.product.title, imageUrl, rating: bestMatch.product.reviews?.combinedAverageRating, reviewCount: bestMatch.product.reviews?.totalReviews, duration };
     }
 
     console.log(`[Viator] ⚠️ Pas de match pour: "${activityName}"`);
