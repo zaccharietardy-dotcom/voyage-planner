@@ -605,10 +605,10 @@ function TransportCard({ item }: { item: TripItem }) {
       target="_blank"
       rel="noopener noreferrer"
       onClick={(e) => e.stopPropagation()}
-      className="block mt-3 rounded-xl border bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 hover:shadow-md transition-all overflow-hidden"
+      className="block mt-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 hover:shadow-md transition-all overflow-hidden"
     >
-      {/* Header avec gradient */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2.5 flex items-center gap-2">
+      {/* Header */}
+      <div className="bg-slate-800 dark:bg-slate-800 px-4 py-2.5 flex items-center gap-2">
         <ModeIcon className="h-4 w-4 text-white" />
         <span className="text-white font-medium text-sm truncate">
           {origin && destination ? `${origin} → ${destination}` : item.title}
