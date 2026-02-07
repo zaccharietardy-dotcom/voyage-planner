@@ -3866,7 +3866,16 @@ export function normalizeCity(city: string): string {
  */
 export function getAttractions(destination: string): Attraction[] {
   const normalized = normalizeCity(destination);
-  return ATTRACTIONS[normalized] || [];
+  const attractions = ATTRACTIONS[normalized] || [];
+  // Marquer toutes les entrées curated comme vérifiées
+  // pour éviter que le pré-Claude enrichment n'écrase les prix officiels
+  // avec des prix de tours Viator (ex: Rijksmuseum 22€ → 125€ tour guidé)
+  for (const a of attractions) {
+    if (!a.dataReliability) {
+      a.dataReliability = 'verified';
+    }
+  }
+  return attractions;
 }
 
 // NOTE: getAttractionsAsync est dans attractionsServer.ts (serveur uniquement)

@@ -1789,6 +1789,14 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       const activitiesWithoutUrl = days.flatMap(day =>
         day.items.filter(item => {
           if (item.type !== 'activity' || item.bookingUrl || !item.title) return false;
+          // Skip activités dont le titre est juste le nom de la ville (ex: "Amsterdam")
+          // Claude génère parfois des activités vagues qui matchent avec des transferts aéroport
+          const titleNorm = item.title.toLowerCase().trim();
+          const destNorm = preferences.destination.toLowerCase().trim();
+          if (titleNorm === destNorm || titleNorm === `visite de ${destNorm}` || titleNorm === `découverte de ${destNorm}`) {
+            console.log(`[AI] Skip Viator (titre = destination): "${item.title}"`);
+            return false;
+          }
           // Skip activités gratuites (cost = 0)
           if (item.estimatedCost === 0) {
             console.log(`[AI] Skip Viator (gratuit): "${item.title}"`);
@@ -1838,7 +1846,8 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
             if (result.rating) (toMatch[i] as any).viatorRating = result.rating;
             if (result.reviewCount) (toMatch[i] as any).viatorReviewCount = result.reviewCount;
             // Ajouter aussi Tiqets comme alternative (billets simples, souvent moins cher)
-            if (isTiqetsRelevant(toMatch[i].title, toMatch[i].type)) {
+            // Ne pas proposer Tiqets pour les activités gratuites (parcs, places, etc.)
+            if ((toMatch[i].estimatedCost || 0) > 0 && isTiqetsRelevant(toMatch[i].title, toMatch[i].type)) {
               const tiqetsLink = getKnownTiqetsLink(toMatch[i].title);
               if (tiqetsLink) {
                 toMatch[i].tiqetsUrl = tiqetsLink;
