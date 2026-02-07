@@ -105,19 +105,19 @@ export const KNOWN_VIATOR_PRODUCTS: Record<string, KnownViatorEntry> = {
     city: 'New York',
     price: 25, // Prix officiel adulte
     duration: 120,
-    searchTerms: 'Guggenheim Museum Admission',
+    searchTerms: 'Guggenheim Museum New York Admission',
   },
   'moma': {
     city: 'New York',
     price: 25, // Prix officiel adulte
     duration: 120,
-    searchTerms: 'Museum of Modern Art MoMA Admission',
+    searchTerms: 'Museum of Modern Art MoMA New York Admission',
   },
   'museum of modern art': {
     city: 'New York',
     price: 25,
     duration: 120,
-    searchTerms: 'Museum of Modern Art MoMA Admission',
+    searchTerms: 'Museum of Modern Art MoMA New York Admission',
   },
 
   // ===== PARIS =====
@@ -125,79 +125,79 @@ export const KNOWN_VIATOR_PRODUCTS: Record<string, KnownViatorEntry> = {
     city: 'Paris',
     price: 29, // Sommet par ascenseur (officiel)
     duration: 90,
-    searchTerms: 'Eiffel Tower Skip the Line Tour',
+    searchTerms: 'Eiffel Tower Summit Access Paris',
   },
   'eiffel tower': {
     city: 'Paris',
     price: 29,
     duration: 90,
-    searchTerms: 'Eiffel Tower Skip the Line Tour',
+    searchTerms: 'Eiffel Tower Summit Access Paris',
   },
   'louvre': {
     city: 'Paris',
     price: 22, // Prix officiel adulte
     duration: 150,
-    searchTerms: 'Louvre Museum Skip the Line Guided Tour',
+    searchTerms: 'Louvre Museum Paris Skip the Line Guided Tour',
   },
   'musée du louvre': {
     city: 'Paris',
     price: 22,
     duration: 150,
-    searchTerms: 'Louvre Museum Skip the Line Guided Tour',
+    searchTerms: 'Louvre Museum Paris Skip the Line Guided Tour',
   },
   'versailles': {
     city: 'Paris',
     price: 21, // Château seul (officiel)
     duration: 240,
-    searchTerms: 'Versailles Palace Skip the Line',
+    searchTerms: 'Versailles Palace Paris Guided Tour',
   },
   'château de versailles': {
     city: 'Paris',
     price: 21,
     duration: 240,
-    searchTerms: 'Versailles Palace Skip the Line',
+    searchTerms: 'Versailles Palace Paris Guided Tour',
   },
   "arc de triomphe": {
     city: 'Paris',
     price: 16, // Prix officiel adulte
     duration: 45,
-    searchTerms: 'Arc de Triomphe Skip the Line Ticket',
+    searchTerms: 'Arc de Triomphe Paris Skip the Line Ticket',
   },
   'notre dame': {
     city: 'Paris',
     price: 0, // Entrée cathédrale gratuite
     duration: 60,
-    searchTerms: 'Notre Dame Island Walking Tour',
+    searchTerms: 'Notre Dame Paris Island Walking Tour',
   },
   'notre-dame': {
     city: 'Paris',
     price: 0,
     duration: 60,
-    searchTerms: 'Notre Dame Island Walking Tour',
+    searchTerms: 'Notre Dame Paris Island Walking Tour',
   },
   'sacré-coeur': {
     city: 'Paris',
     price: 0, // Basilique gratuite (dôme 7€ optionnel)
     duration: 45,
-    searchTerms: 'Montmartre Walking Tour Sacre Coeur',
+    searchTerms: 'Montmartre Paris Walking Tour Sacre Coeur',
   },
   'montmartre': {
     city: 'Paris',
     price: 0, // Quartier gratuit
     duration: 90,
-    searchTerms: 'Montmartre Walking Tour Sacre Coeur',
+    searchTerms: 'Montmartre Paris Walking Tour Sacre Coeur',
   },
   "musée d'orsay": {
     city: 'Paris',
     price: 16, // Prix officiel adulte
     duration: 120,
-    searchTerms: 'Musee d Orsay Skip the Line Ticket',
+    searchTerms: 'Musee d Orsay Paris Skip the Line Ticket',
   },
   'orsay museum': {
     city: 'Paris',
     price: 16,
     duration: 120,
-    searchTerms: 'Musee d Orsay Skip the Line Ticket',
+    searchTerms: 'Musee d Orsay Paris Skip the Line Ticket',
   },
 
   // ===== ROME =====
@@ -291,31 +291,31 @@ export const KNOWN_VIATOR_PRODUCTS: Record<string, KnownViatorEntry> = {
     city: 'Barcelona',
     price: 10, // Prix officiel zone monumentale
     duration: 75,
-    searchTerms: 'Park Guell Skip the Line Guided Tour',
+    searchTerms: 'Park Guell Barcelona Skip the Line Guided Tour',
   },
   'parc güell': {
     city: 'Barcelona',
     price: 10,
     duration: 75,
-    searchTerms: 'Park Guell Skip the Line Guided Tour',
+    searchTerms: 'Park Guell Barcelona Skip the Line Guided Tour',
   },
   'casa batlló': {
     city: 'Barcelona',
     price: 35, // Prix officiel adulte
     duration: 60,
-    searchTerms: 'Casa Batllo Skip the Line Ticket',
+    searchTerms: 'Casa Batllo Barcelona Skip the Line Ticket',
   },
   'casa milà': {
     city: 'Barcelona',
     price: 25, // Prix officiel adulte
     duration: 60,
-    searchTerms: 'La Pedrera Casa Mila Audio Tour',
+    searchTerms: 'La Pedrera Casa Mila Barcelona Tour',
   },
   'la pedrera': {
     city: 'Barcelona',
     price: 25,
     duration: 60,
-    searchTerms: 'La Pedrera Casa Mila Audio Tour',
+    searchTerms: 'La Pedrera Casa Mila Barcelona Tour',
   },
   'camp nou': {
     city: 'Barcelona',
@@ -327,19 +327,19 @@ export const KNOWN_VIATOR_PRODUCTS: Record<string, KnownViatorEntry> = {
     city: 'Barcelona',
     price: 0, // Rue publique gratuite
     duration: 60,
-    searchTerms: 'Gothic Quarter La Rambla Walking Tour',
+    searchTerms: 'Gothic Quarter La Rambla Barcelona Walking Tour',
   },
   'gothic quarter': {
     city: 'Barcelona',
     price: 0, // Quartier public gratuit
     duration: 75,
-    searchTerms: 'Gothic Quarter La Rambla Walking Tour',
+    searchTerms: 'Gothic Quarter La Rambla Barcelona Walking Tour',
   },
   'barri gòtic': {
     city: 'Barcelona',
     price: 0,
     duration: 75,
-    searchTerms: 'Gothic Quarter La Rambla Walking Tour',
+    searchTerms: 'Gothic Quarter La Rambla Barcelona Walking Tour',
   },
 
   // ===== LONDON =====
@@ -415,19 +415,19 @@ export const KNOWN_VIATOR_PRODUCTS: Record<string, KnownViatorEntry> = {
     city: 'Amsterdam',
     price: 22, // Prix officiel adulte (correct)
     duration: 150,
-    searchTerms: 'Rijksmuseum Skip the Line Admission',
+    searchTerms: 'Rijksmuseum Amsterdam Guided Tour',
   },
   'van gogh museum': {
     city: 'Amsterdam',
     price: 20, // Prix officiel adulte
     duration: 90,
-    searchTerms: 'Van Gogh Museum Skip the Line Admission',
+    searchTerms: 'Amsterdam Van Gogh Museum Tour',
   },
   'musée van gogh': {
     city: 'Amsterdam',
     price: 20,
     duration: 90,
-    searchTerms: 'Van Gogh Museum Skip the Line Admission',
+    searchTerms: 'Amsterdam Van Gogh Museum Tour',
   },
   'canal cruise amsterdam': {
     city: 'Amsterdam',
