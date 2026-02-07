@@ -51,6 +51,7 @@ import { findViatorProduct, searchViatorActivities, isViatorConfigured } from '.
 import { findKnownViatorProduct } from './services/viatorKnownProducts';
 // Tiqets retiré temporairement — en attente API Distributor
 // import { findTiqetsProduct, getKnownTiqetsLink, isTiqetsRelevant, buildTiqetsSearchUrl } from './services/tiqets';
+import { isImpactConfigured, createTrackingLinks } from './services/impactTracking';
 import { getMustSeeAttractions } from './services/attractions';
 
 import { generateId, normalizeToLocalDate, formatDate, formatTime, formatPriceLevel, pickDirectionMode, getAccommodationBookingUrl, getHotelLocationName, getBudgetCabinClass, getBudgetPriceLevel, getReliableGoogleMapsPlaceUrl } from './tripUtils';
@@ -1859,6 +1860,41 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
     }
   } else if (elapsedMs >= 255_000) {
     console.log(`[AI] ⏩ Skip Viator matching (${(elapsedMs / 1000).toFixed(0)}s écoulés, proche du timeout)`);
+  }
+
+  // Post-processing Impact/Omio: convertir les URLs Omio en liens affiliés trackés
+  if (isImpactConfigured()) {
+    try {
+      const omioItems: TripItem[] = [];
+      for (const day of days) {
+        for (const item of day.items) {
+          if (item.type === 'transport' && item.bookingUrl?.includes('omio.fr')) {
+            omioItems.push(item);
+          }
+        }
+      }
+
+      if (omioItems.length > 0) {
+        console.log(`[AI] 🔗 Wrapping ${omioItems.length} URLs Omio via Impact tracking...`);
+        console.log(`[PERF ${elapsed()}] Start Impact tracking`);
+        const omioUrls = omioItems.map(item => item.bookingUrl!);
+        const trackingMap = await createTrackingLinks(omioUrls);
+
+        let wrapped = 0;
+        for (const item of omioItems) {
+          const tracked = trackingMap.get(item.bookingUrl!);
+          if (tracked) {
+            item.originalOmioUrl = item.bookingUrl;
+            item.bookingUrl = tracked;
+            wrapped++;
+          }
+        }
+        console.log(`[AI] ✅ ${wrapped}/${omioItems.length} transport items wrapped avec Impact tracking`);
+        console.log(`[PERF ${elapsed()}] Impact tracking done`);
+      }
+    } catch (error) {
+      console.warn('[AI] Impact tracking post-processing error (non bloquant):', error);
+    }
   }
 
   // Corriger les types d'items mal classés (restaurants en activité)

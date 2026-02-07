@@ -332,6 +332,7 @@ export interface TripItem {
   flight?: Flight;
   flightAlternatives?: Flight[]; // Autres vols disponibles (scrollable)
   aviasalesUrl?: string; // Lien affilié Aviasales (en plus du bookingUrl Google Flights)
+  originalOmioUrl?: string; // URL Omio directe avant wrapping Impact tracking
   parking?: ParkingOption;
   restaurant?: Restaurant;
   accommodation?: Accommodation;

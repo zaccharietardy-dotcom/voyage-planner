@@ -455,7 +455,7 @@ function BookingButtons({ item }: { item: TripItem }) {
 
   // Transport - Omio, Trainline, FlixBus
   if (item.type === 'transport' && bookingUrl) {
-    if (bookingUrl.includes('omio.fr') || bookingUrl.includes('omio.com')) {
+    if (bookingUrl.includes('omio.fr') || bookingUrl.includes('omio.com') || bookingUrl.includes('omio.sjv.io')) {
       buttons.push({
         label: 'Omio',
         url: bookingUrl,
