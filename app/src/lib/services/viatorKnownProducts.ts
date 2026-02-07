@@ -25,56 +25,56 @@ export const KNOWN_VIATOR_PRODUCTS: Record<string, KnownViatorEntry> = {
   // ===== NEW YORK =====
   'statue of liberty': {
     city: 'New York',
-    price: 65,
-    duration: 240, // Ferry + île + musée
+    price: 24, // Ferry + accès île (officiel NPS)
+    duration: 240,
     searchTerms: 'Statue of Liberty Ellis Island Tour',
   },
   'statue de la liberté': {
     city: 'New York',
-    price: 65,
+    price: 24,
     duration: 240,
     searchTerms: 'Statue of Liberty Ellis Island Tour',
   },
   'ellis island': {
     city: 'New York',
-    price: 65,
+    price: 24,
     duration: 240,
     searchTerms: 'Statue of Liberty Ellis Island Tour',
   },
   'empire state building': {
     city: 'New York',
-    price: 47,
-    duration: 60, // Observation deck
+    price: 44, // Main Deck (86th floor) officiel
+    duration: 60,
     searchTerms: 'Empire State Building Tickets',
   },
   'top of the rock': {
     city: 'New York',
-    price: 43,
+    price: 40, // Prix officiel adulte
     duration: 45,
     searchTerms: 'Top of the Rock Observation Deck',
   },
   '9/11 memorial': {
     city: 'New York',
-    price: 33,
-    duration: 120, // Musée + mémorial
+    price: 28, // Musée officiel (mémorial extérieur gratuit)
+    duration: 120,
     searchTerms: '9/11 Memorial Museum Admission',
   },
   'mémorial du 11 septembre': {
     city: 'New York',
-    price: 33,
+    price: 28,
     duration: 120,
     searchTerms: '9/11 Memorial Museum Admission',
   },
   'one world observatory': {
     city: 'New York',
-    price: 43,
+    price: 38, // Prix officiel standard
     duration: 60,
     searchTerms: 'One World Observatory Ticket',
   },
   'metropolitan museum': {
     city: 'New York',
-    price: 30,
-    duration: 180, // Grand musée
+    price: 30, // Prix officiel adulte
+    duration: 180,
     searchTerms: 'Metropolitan Museum of Art Admission',
   },
   'met museum': {
@@ -85,31 +85,31 @@ export const KNOWN_VIATOR_PRODUCTS: Record<string, KnownViatorEntry> = {
   },
   'central park': {
     city: 'New York',
-    price: 35,
-    duration: 90, // Walking tour
+    price: 0, // Parc public gratuit
+    duration: 90,
     searchTerms: 'Central Park Walking Tour',
   },
   'high line': {
     city: 'New York',
-    price: 39,
-    duration: 75, // Walking tour
+    price: 0, // Parc public gratuit
+    duration: 75,
     searchTerms: 'High Line Chelsea Walking Tour',
   },
   'brooklyn bridge': {
     city: 'New York',
-    price: 35,
-    duration: 90, // Walking tour
+    price: 0, // Pont public gratuit
+    duration: 60,
     searchTerms: 'Brooklyn Bridge DUMBO Walking Tour',
   },
   'guggenheim': {
     city: 'New York',
-    price: 25,
+    price: 25, // Prix officiel adulte
     duration: 120,
     searchTerms: 'Guggenheim Museum Admission',
   },
   'moma': {
     city: 'New York',
-    price: 25,
+    price: 25, // Prix officiel adulte
     duration: 120,
     searchTerms: 'Museum of Modern Art MoMA Admission',
   },
@@ -123,74 +123,74 @@ export const KNOWN_VIATOR_PRODUCTS: Record<string, KnownViatorEntry> = {
   // ===== PARIS =====
   'tour eiffel': {
     city: 'Paris',
-    price: 65,
-    duration: 90, // Montée + vue
+    price: 29, // Sommet par ascenseur (officiel)
+    duration: 90,
     searchTerms: 'Eiffel Tower Skip the Line Tour',
   },
   'eiffel tower': {
     city: 'Paris',
-    price: 65,
+    price: 29,
     duration: 90,
     searchTerms: 'Eiffel Tower Skip the Line Tour',
   },
   'louvre': {
     city: 'Paris',
-    price: 59,
-    duration: 150, // Grand musée
+    price: 22, // Prix officiel adulte
+    duration: 150,
     searchTerms: 'Louvre Museum Skip the Line Guided Tour',
   },
   'musée du louvre': {
     city: 'Paris',
-    price: 59,
+    price: 22,
     duration: 150,
     searchTerms: 'Louvre Museum Skip the Line Guided Tour',
   },
   'versailles': {
     city: 'Paris',
-    price: 89,
-    duration: 240, // Château + jardins (day trip)
+    price: 21, // Château seul (officiel)
+    duration: 240,
     searchTerms: 'Versailles Palace Skip the Line',
   },
   'château de versailles': {
     city: 'Paris',
-    price: 89,
+    price: 21,
     duration: 240,
     searchTerms: 'Versailles Palace Skip the Line',
   },
   "arc de triomphe": {
     city: 'Paris',
-    price: 16,
-    duration: 45, // Montée + vue panoramique
+    price: 16, // Prix officiel adulte
+    duration: 45,
     searchTerms: 'Arc de Triomphe Skip the Line Ticket',
   },
   'notre dame': {
     city: 'Paris',
-    price: 29,
-    duration: 60, // Walking tour île
+    price: 0, // Entrée cathédrale gratuite
+    duration: 60,
     searchTerms: 'Notre Dame Island Walking Tour',
   },
   'notre-dame': {
     city: 'Paris',
-    price: 29,
+    price: 0,
     duration: 60,
     searchTerms: 'Notre Dame Island Walking Tour',
   },
   'sacré-coeur': {
     city: 'Paris',
-    price: 35,
-    duration: 90, // Walking tour Montmartre
+    price: 0, // Basilique gratuite (dôme 7€ optionnel)
+    duration: 45,
     searchTerms: 'Montmartre Walking Tour Sacre Coeur',
   },
   'montmartre': {
     city: 'Paris',
-    price: 35,
+    price: 0, // Quartier gratuit
     duration: 90,
     searchTerms: 'Montmartre Walking Tour Sacre Coeur',
   },
   "musée d'orsay": {
     city: 'Paris',
-    price: 16,
-    duration: 120, // Musée moyen-grand
+    price: 16, // Prix officiel adulte
+    duration: 120,
     searchTerms: 'Musee d Orsay Skip the Line Ticket',
   },
   'orsay museum': {
@@ -203,141 +203,141 @@ export const KNOWN_VIATOR_PRODUCTS: Record<string, KnownViatorEntry> = {
   // ===== ROME =====
   'colosseum': {
     city: 'Rome',
-    price: 59,
-    duration: 90, // Visite intérieure
+    price: 18, // Billet combiné Colisée+Forum+Palatin (officiel)
+    duration: 90,
     searchTerms: 'Colosseum Roman Forum Palatine Hill Skip the Line',
   },
   'colisée': {
     city: 'Rome',
-    price: 59,
+    price: 18,
     duration: 90,
     searchTerms: 'Colosseum Roman Forum Palatine Hill Skip the Line',
   },
   'colosseo': {
     city: 'Rome',
-    price: 59,
+    price: 18,
     duration: 90,
     searchTerms: 'Colosseum Roman Forum Palatine Hill Skip the Line',
   },
   'vatican': {
     city: 'Rome',
-    price: 69,
-    duration: 180, // Musées + Sixtine + Basilique
+    price: 17, // Musées du Vatican (officiel, inclut Sixtine)
+    duration: 180,
     searchTerms: 'Vatican Museums Sistine Chapel Skip the Line',
   },
   'vatican museums': {
     city: 'Rome',
-    price: 69,
+    price: 17,
     duration: 180,
     searchTerms: 'Vatican Museums Sistine Chapel Skip the Line',
   },
   'musées du vatican': {
     city: 'Rome',
-    price: 69,
+    price: 17,
     duration: 180,
     searchTerms: 'Vatican Museums Sistine Chapel Skip the Line',
   },
   'sistine chapel': {
     city: 'Rome',
-    price: 69,
+    price: 17, // Inclus dans billet musées du Vatican
     duration: 180,
     searchTerms: 'Vatican Museums Sistine Chapel Skip the Line',
   },
   'chapelle sixtine': {
     city: 'Rome',
-    price: 69,
+    price: 17,
     duration: 180,
     searchTerms: 'Vatican Museums Sistine Chapel Skip the Line',
   },
   'roman forum': {
     city: 'Rome',
-    price: 59,
-    duration: 90, // Inclus avec Colisée
+    price: 18, // Inclus dans billet Colisée
+    duration: 90,
     searchTerms: 'Colosseum Roman Forum Palatine Hill Skip the Line',
   },
   'forum romain': {
     city: 'Rome',
-    price: 59,
+    price: 18,
     duration: 90,
     searchTerms: 'Colosseum Roman Forum Palatine Hill Skip the Line',
   },
   'pantheon': {
     city: 'Rome',
-    price: 25,
-    duration: 45, // Visite intérieure rapide
+    price: 5, // Prix officiel depuis 2023
+    duration: 45,
     searchTerms: 'Pantheon Guided Tour Rome',
   },
   'trevi fountain': {
     city: 'Rome',
-    price: 39,
-    duration: 30, // Photo + visite rapide
+    price: 0, // Gratuit (fontaine publique)
+    duration: 20,
     searchTerms: 'Trevi Fountain Underground Rome Tour',
   },
   'fontaine de trevi': {
     city: 'Rome',
-    price: 39,
-    duration: 30,
+    price: 0,
+    duration: 20,
     searchTerms: 'Trevi Fountain Underground Rome Tour',
   },
 
   // ===== BARCELONA =====
   'sagrada familia': {
     city: 'Barcelona',
-    price: 47,
-    duration: 90, // Intérieur + tours
+    price: 26, // Prix officiel adulte
+    duration: 90,
     searchTerms: 'Sagrada Familia Skip the Line Tour',
   },
   'park güell': {
     city: 'Barcelona',
-    price: 35,
-    duration: 75, // Zone monumentale
+    price: 10, // Prix officiel zone monumentale
+    duration: 75,
     searchTerms: 'Park Guell Skip the Line Guided Tour',
   },
   'parc güell': {
     city: 'Barcelona',
-    price: 35,
+    price: 10,
     duration: 75,
     searchTerms: 'Park Guell Skip the Line Guided Tour',
   },
   'casa batlló': {
     city: 'Barcelona',
-    price: 35,
-    duration: 60, // Audio tour
+    price: 35, // Prix officiel adulte
+    duration: 60,
     searchTerms: 'Casa Batllo Skip the Line Ticket',
   },
   'casa milà': {
     city: 'Barcelona',
-    price: 29,
-    duration: 60, // Audio tour
+    price: 25, // Prix officiel adulte
+    duration: 60,
     searchTerms: 'La Pedrera Casa Mila Audio Tour',
   },
   'la pedrera': {
     city: 'Barcelona',
-    price: 29,
+    price: 25,
     duration: 60,
     searchTerms: 'La Pedrera Casa Mila Audio Tour',
   },
   'camp nou': {
     city: 'Barcelona',
-    price: 28,
-    duration: 90, // Stade + musée
+    price: 28, // Tour + musée officiel
+    duration: 90,
     searchTerms: 'FC Barcelona Camp Nou Experience Tour',
   },
   'la rambla': {
     city: 'Barcelona',
-    price: 25,
-    duration: 75, // Walking tour
+    price: 0, // Rue publique gratuite
+    duration: 60,
     searchTerms: 'Gothic Quarter La Rambla Walking Tour',
   },
   'gothic quarter': {
     city: 'Barcelona',
-    price: 25,
+    price: 0, // Quartier public gratuit
     duration: 75,
     searchTerms: 'Gothic Quarter La Rambla Walking Tour',
   },
   'barri gòtic': {
     city: 'Barcelona',
-    price: 25,
+    price: 0,
     duration: 75,
     searchTerms: 'Gothic Quarter La Rambla Walking Tour',
   },
@@ -345,188 +345,188 @@ export const KNOWN_VIATOR_PRODUCTS: Record<string, KnownViatorEntry> = {
   // ===== LONDON =====
   'tower of london': {
     city: 'London',
-    price: 35,
-    duration: 120, // Joyaux + tours + histoire
+    price: 33, // Prix officiel adulte (~£29.90)
+    duration: 120,
     searchTerms: 'Tower of London Ticket',
   },
   'tour de londres': {
     city: 'London',
-    price: 35,
+    price: 33,
     duration: 120,
     searchTerms: 'Tower of London Ticket',
   },
   'buckingham palace': {
     city: 'London',
-    price: 30,
-    duration: 90, // State rooms
+    price: 30, // State rooms (été, officiel ~£30)
+    duration: 90,
     searchTerms: 'Buckingham Palace Tour',
   },
   'westminster abbey': {
     city: 'London',
-    price: 27,
+    price: 27, // Prix officiel adulte (~£25)
     duration: 75,
     searchTerms: 'Westminster Abbey Tour',
   },
   'british museum': {
     city: 'London',
-    price: 29,
-    duration: 150, // Grand musée
+    price: 0, // Gratuit (donations bienvenues)
+    duration: 150,
     searchTerms: 'British Museum Guided Tour',
   },
   'london eye': {
     city: 'London',
-    price: 34,
-    duration: 45, // Rotation ~30min + queue
+    price: 34, // Prix officiel standard (~£32)
+    duration: 45,
     searchTerms: 'London Eye Standard Ticket',
   },
   'big ben': {
     city: 'London',
-    price: 35,
-    duration: 60, // Walking tour extérieur
+    price: 0, // Extérieur gratuit (tour intérieur UK residents only)
+    duration: 30,
     searchTerms: 'Houses of Parliament Big Ben Tour',
   },
   "st paul's cathedral": {
     city: 'London',
-    price: 23,
-    duration: 75, // Intérieur + dôme
+    price: 23, // Prix officiel adulte (~£21)
+    duration: 75,
     searchTerms: 'St Pauls Cathedral Admission Ticket',
   },
   'tower bridge': {
     city: 'London',
-    price: 13,
-    duration: 45, // Exhibition + passerelle
+    price: 13, // Exhibition officiel (~£12)
+    duration: 45,
     searchTerms: 'Tower Bridge Exhibition Ticket',
   },
 
   // ===== AMSTERDAM =====
   'anne frank house': {
     city: 'Amsterdam',
-    price: 29,
-    duration: 75, // Walking tour
+    price: 16, // Prix officiel adulte
+    duration: 75,
     searchTerms: 'Anne Frank Walking Tour Amsterdam',
   },
   'maison anne frank': {
     city: 'Amsterdam',
-    price: 29,
+    price: 16,
     duration: 75,
     searchTerms: 'Anne Frank Walking Tour Amsterdam',
   },
   'rijksmuseum': {
     city: 'Amsterdam',
-    price: 22,
-    duration: 150, // Grand musée
+    price: 22, // Prix officiel adulte (correct)
+    duration: 150,
     searchTerms: 'Rijksmuseum Skip the Line Admission',
   },
   'van gogh museum': {
     city: 'Amsterdam',
-    price: 22,
-    duration: 90, // Musée moyen
+    price: 20, // Prix officiel adulte
+    duration: 90,
     searchTerms: 'Van Gogh Museum Skip the Line Admission',
   },
   'musée van gogh': {
     city: 'Amsterdam',
-    price: 22,
+    price: 20,
     duration: 90,
     searchTerms: 'Van Gogh Museum Skip the Line Admission',
   },
   'canal cruise amsterdam': {
     city: 'Amsterdam',
-    price: 16,
-    duration: 60, // Croisière standard
+    price: 16, // Prix standard croisière (correct)
+    duration: 60,
     searchTerms: 'Amsterdam Canal Cruise',
   },
   'keukenhof': {
     city: 'Amsterdam',
-    price: 59,
-    duration: 240, // Day trip jardins
+    price: 20, // Prix officiel entrée (sans transport)
+    duration: 240,
     searchTerms: 'Keukenhof Gardens Tulip Fields Tour',
   },
 
   // ===== VENICE =====
   "st mark's basilica": {
     city: 'Venice',
-    price: 39,
-    duration: 45, // Visite intérieure
+    price: 3, // Entrée basilique (officiel, gratuit base + 3€ réservation)
+    duration: 45,
     searchTerms: 'St Marks Basilica Skip the Line Tour Venice',
   },
   'basilique saint-marc': {
     city: 'Venice',
-    price: 39,
+    price: 3,
     duration: 45,
     searchTerms: 'St Marks Basilica Skip the Line Tour Venice',
   },
   "doge's palace": {
     city: 'Venice',
-    price: 45,
-    duration: 90, // Palais + prison
+    price: 30, // Prix officiel adulte
+    duration: 90,
     searchTerms: 'Doges Palace Skip the Line Tour Venice',
   },
   'palais des doges': {
     city: 'Venice',
-    price: 45,
+    price: 30,
     duration: 90,
     searchTerms: 'Doges Palace Skip the Line Tour Venice',
   },
   'murano': {
     city: 'Venice',
-    price: 25,
-    duration: 240, // Tour 3 îles
+    price: 20, // Vaporetto aller-retour (ACTV)
+    duration: 240,
     searchTerms: 'Murano Burano Torcello Islands Tour',
   },
   'burano': {
     city: 'Venice',
-    price: 25,
+    price: 20,
     duration: 240,
     searchTerms: 'Murano Burano Torcello Islands Tour',
   },
   'gondola ride': {
     city: 'Venice',
-    price: 33,
-    duration: 30, // Balade gondole standard
+    price: 80, // Tarif officiel gondole (80€ de jour, 100€ de nuit, pour le bateau)
+    duration: 30,
     searchTerms: 'Venice Gondola Ride',
   },
   'rialto bridge': {
     city: 'Venice',
-    price: 45,
-    duration: 90, // Walking tour
+    price: 0, // Pont public gratuit
+    duration: 30,
     searchTerms: 'Venice Walking Tour Gondola Ride Rialto',
   },
 
   // ===== FLORENCE =====
   'uffizi gallery': {
     city: 'Florence',
-    price: 55,
-    duration: 150, // Grand musée
+    price: 20, // Prix officiel adulte (hors période haute)
+    duration: 150,
     searchTerms: 'Uffizi Gallery Skip the Line Tour',
   },
   'galerie des offices': {
     city: 'Florence',
-    price: 55,
+    price: 20,
     duration: 150,
     searchTerms: 'Uffizi Gallery Skip the Line Tour',
   },
   'accademia gallery': {
     city: 'Florence',
-    price: 49,
-    duration: 60, // David + quelques salles
+    price: 12, // Prix officiel adulte
+    duration: 60,
     searchTerms: 'Accademia Gallery Skip the Line Tour Florence',
   },
   'david michelangelo': {
     city: 'Florence',
-    price: 49,
+    price: 12,
     duration: 60,
     searchTerms: 'Accademia Gallery Skip the Line Tour Florence',
   },
   'duomo florence': {
     city: 'Florence',
-    price: 35,
-    duration: 75, // Montée coupole
+    price: 30, // Pass coupole (officiel Brunelleschi)
+    duration: 75,
     searchTerms: 'Florence Duomo Dome Climb Skip the Line',
   },
   'ponte vecchio': {
     city: 'Florence',
-    price: 39,
-    duration: 75, // Walking tour
+    price: 0, // Pont public gratuit
+    duration: 30,
     searchTerms: 'Florence Walking Tour Ponte Vecchio',
   },
 };
