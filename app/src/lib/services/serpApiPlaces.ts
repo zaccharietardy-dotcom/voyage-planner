@@ -1324,7 +1324,7 @@ function estimateDuration(type: ActivityType): number {
 /**
  * Patterns pour les attractions gratuites par nature (espaces publics, fontaines, places, etc.)
  */
-const FREE_ATTRACTION_PATTERNS = /\b(fontaine|fountain|fontana|fuente|piazza|place|plaza|square|platz|pont|bridge|puente|brücke|viewpoint|panorama|belvedere|mirador|promenade|boulevard|quartier|quarter|barrio|viertel|trastevere|steps|escalier|scalinata|crossing|carrefour|campo|rambla|passeig)\b/i;
+const FREE_ATTRACTION_PATTERNS = /\b(fontaine|fountain|fontana|fuente|piazza|place|plaza|square|platz|pont|bridge|puente|brücke|viewpoint|panorama|belvedere|mirador|promenade|boulevard|quartier|quarter|barrio|viertel|trastevere|steps|escalier|scalinata|crossing|carrefour|campo|rambla|passeig|via|viale|corso|calle|rue|strasse|straße|street|road|lane|alley|ruelle|vicolo|passage|paseo|avenida)\b/i;
 
 const FREE_KNOWN_LANDMARKS: Record<string, boolean> = {
   'fontaine de trevi': true, 'trevi fountain': true, 'fontana di trevi': true,
@@ -1342,6 +1342,8 @@ const FREE_KNOWN_LANDMARKS: Record<string, boolean> = {
   'arc de triomphe du carrousel': true,
   'piazza del popolo': true, 'capitole': true,
   'janicule': true, 'gianicolo': true,
+  'via dei coronari': true, 'via del corso': true,
+  'via condotti': true, 'via appia antica': true, 'appian way': true,
 };
 
 /**

@@ -664,6 +664,7 @@ export function selectBestHotel(
     budgetLevel: 'economic' | 'moderate' | 'comfort' | 'luxury';
     attractions?: Array<{ latitude?: number; longitude?: number; name?: string }>;
     preferApartment?: boolean;
+    cityCenter?: { lat: number; lng: number };
   }
 ): Accommodation | null {
   if (hotels.length === 0) return null;
@@ -683,6 +684,32 @@ export function selectBestHotel(
     }
   }
 
+  // HARD DISTANCE CAP: filter out hotels > 5km from city center (using GPS coords, not unreliable distanceToCenter)
+  const MAX_HOTEL_DISTANCE_KM = 5;
+  if (preferences.cityCenter) {
+    const { lat: cLat, lng: cLng } = preferences.cityCenter;
+    const hotelsWithTrueDistance = affordableHotels.map(h => {
+      const latDiff = h.latitude - cLat;
+      const lngDiff = h.longitude - cLng;
+      const trueDistKm = Math.sqrt(Math.pow(latDiff * 111, 2) + Math.pow(lngDiff * 85, 2));
+      return { hotel: h, trueDistKm };
+    });
+
+    const withinRange = hotelsWithTrueDistance.filter(h => h.trueDistKm <= MAX_HOTEL_DISTANCE_KM);
+    if (withinRange.length > 0) {
+      const excluded = affordableHotels.length - withinRange.length;
+      if (excluded > 0) {
+        console.log(`[Hotels] Distance cap: ${excluded} hôtels exclus (>${MAX_HOTEL_DISTANCE_KM}km du centre)`);
+      }
+      affordableHotels = withinRange.map(h => h.hotel);
+    } else {
+      // All hotels are far — keep the 3 closest
+      console.warn(`[Hotels] ⚠️ Aucun hôtel dans un rayon de ${MAX_HOTEL_DISTANCE_KM}km, sélection des 3 plus proches`);
+      hotelsWithTrueDistance.sort((a, b) => a.trueDistKm - b.trueDistKm);
+      affordableHotels = hotelsWithTrueDistance.slice(0, 3).map(h => h.hotel);
+    }
+  }
+
   // Score all affordable hotels (including SerpAPI ones — don't blindly take first)
   const attractions = preferences.attractions || [];
 
@@ -692,9 +719,15 @@ export function selectBestHotel(
     // 1. Note de l'hôtel (0-100 points, note sur 10 * 10)
     score += hotel.rating * 10;
 
-    // 2. Proximité au centre-ville (0-20 points)
-    const centerDistance = hotel.distanceToCenter || 0;
-    score += Math.max(0, 20 - centerDistance * 10);
+    // 2. Proximité au centre-ville (0-40 points) — weighted higher to avoid far hotels
+    // Use true GPS distance if cityCenter is available (distanceToCenter from API is often unreliable: 0 or 1km)
+    let centerDist = hotel.distanceToCenter || 0;
+    if (preferences.cityCenter) {
+      const latDiff = hotel.latitude - preferences.cityCenter.lat;
+      const lngDiff = hotel.longitude - preferences.cityCenter.lng;
+      centerDist = Math.sqrt(Math.pow(latDiff * 111, 2) + Math.pow(lngDiff * 85, 2));
+    }
+    score += Math.max(0, 40 - centerDist * 15);
 
     // 3. Proximité aux attractions (0-30 points)
     if (attractions.length > 0) {

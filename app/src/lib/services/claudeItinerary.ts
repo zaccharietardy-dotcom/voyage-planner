@@ -19,6 +19,96 @@ import * as path from 'path';
 import { getMealTimes, getReligiousCap, getClosureWarnings, MINIMUM_DURATION_OVERRIDES } from './destinationData';
 
 // ============================================
+// Duration Rules (module-level constants)
+// ============================================
+
+const MAJOR_MUSEUMS = /\b(louvre|british museum|metropolitan|met museum|prado|uffizi|hermitage|vatican museum|rijksmuseum|national gallery|musée d'orsay|orsay)\b/i;
+
+// Duration caps by attraction type name patterns
+const DURATION_CAPS: [RegExp, number][] = [
+  [/\b(gate|porte|portal|entrance|torii|kaminarimon)\b/i, 30],
+  [/\b(crossing|carrefour|intersection)\b/i, 30],
+  [/\b(chapelle|chapel|sainte-chapelle)\b/i, 60],
+  [/\b(place|square|plaza|piazza)\b/i, 30],
+  [/\b(pont|bridge|fontaine|fountain|obélisque|obelisk|statue|colonne|column)\b/i, 45],
+  [/\b(street|rue|avenue|boulevard|allée|dori|dōri|via|viale|corso)\b/i, 60],
+  [/\b(jardin|garden|parc|park|gyoen)\b/i, 90],
+  [/\b(église|church|cathedral|cathédrale|basilique|basilica|shrine|sanctuaire|jinja)\b/i, 60],
+  [/\b(marché|market|mercado|mercato|bazar|bazaar|souk)\b/i, 75],
+  [/\b(tower|tour|torre)\b/i, 90],
+  [/\b(viewpoint|panorama|observation|lookout|mirador)\b/i, 45],
+];
+
+// Duration floors for major museums: minimum realistic visit time
+const DURATION_FLOORS: [RegExp, number][] = [
+  [/\b(vatican|vaticano|musées du vatican|vatican museum|chapelle sixtine|sistine)\b/i, 120],
+  [/\b(louvre|musée du louvre)\b/i, 150],
+  [/\b(british museum)\b/i, 120],
+  [/\b(uffizi|offices|galerie des offices)\b/i, 120],
+  [/\b(prado|museo del prado)\b/i, 120],
+  [/\b(rijksmuseum)\b/i, 120],
+  [/\b(hermitage|ermitage)\b/i, 120],
+  [/\b(metropolitan|met museum)\b/i, 120],
+  [/\b(musée d'orsay|orsay)\b/i, 90],
+  [/\b(colosseum|colisée|colosseo|coliseum|colisee)\b/i, 90],
+];
+
+/**
+ * Applique toutes les règles de durée (overrides, caps, floors) à une attraction.
+ * Utilisable pour les attractions du pool ET les additionalSuggestions.
+ *
+ * Ordre d'application:
+ * 1. MINIMUM_DURATION_OVERRIDES (grands musées: Vatican ≥ 180min, Louvre ≥ 180min, etc.)
+ * 2. Hard cap 4h (sauf grands musées)
+ * 3. Type-based caps (piazza → 30min, pont → 45min, église → 60min, etc.)
+ * 4. Duration floors (Vatican ≥ 120min, Colisée ≥ 90min, etc.)
+ * 5. Minimum absolu: 15 minutes
+ */
+export function applyDurationRules(name: string, duration: number): number {
+  let result = duration;
+
+  // 1. Apply MINIMUM_DURATION_OVERRIDES (from destinationData)
+  for (const [pattern, minDuration] of MINIMUM_DURATION_OVERRIDES) {
+    if (pattern.test(name) && result < minDuration) {
+      console.log(`[Duration] Override: "${name}" ${result}min → ${minDuration}min`);
+      result = minDuration;
+      break;
+    }
+  }
+
+  // 2. Hard cap: max 4h unless major museum
+  if (result > 240 && !MAJOR_MUSEUMS.test(name)) {
+    console.log(`[Duration] Cap: "${name}" ${result}min → 120min (non-major museum)`);
+    result = 120;
+  }
+
+  // 3. Type-based duration caps (apply if duration exceeds max by 20%+)
+  for (const [pattern, maxMin] of DURATION_CAPS) {
+    if (pattern.test(name) && result > maxMin * 1.2) {
+      console.log(`[Duration] Type cap: "${name}" ${result}min → ${maxMin}min`);
+      result = maxMin;
+      break;
+    }
+  }
+
+  // 4. Duration floors for major museums
+  for (const [pattern, minMin] of DURATION_FLOORS) {
+    if (pattern.test(name) && result < minMin) {
+      console.log(`[Duration] Floor: "${name}" ${result}min → ${minMin}min`);
+      result = minMin;
+      break;
+    }
+  }
+
+  // 5. Absolute minimum: 15 minutes
+  if (result < 15) {
+    result = 15;
+  }
+
+  return result;
+}
+
+// ============================================
 // Types
 // ============================================
 
@@ -929,21 +1019,8 @@ Format EXACT:
     // POST-VALIDATION: Duration caps, timing, audience filtering
     const nightlifePattern = /\b(moulin rouge|lido|crazy horse|cabaret|nightclub|strip club|burlesque)\b/i;
     const eveningOnlyPattern = /\b(cabaret|spectacle|show|concert|opéra|opera|flamenco|jazz club|moulin rouge)\b/i;
-    const majorMuseums = /\b(louvre|british museum|metropolitan|met museum|prado|uffizi|hermitage|vatican museum|rijksmuseum|national gallery|musée d'orsay|orsay)\b/i;
-    // Duration caps by attraction type name patterns
-    const durationCaps: [RegExp, number][] = [
-      [/\b(gate|porte|portal|entrance|torii|kaminarimon)\b/i, 30],
-      [/\b(crossing|carrefour|intersection)\b/i, 30],
-      [/\b(chapelle|chapel|sainte-chapelle)\b/i, 60],
-      [/\b(place|square|plaza|piazza)\b/i, 30],
-      [/\b(pont|bridge|fontaine|fountain|obélisque|obelisk|statue|colonne|column)\b/i, 45],
-      [/\b(street|rue|avenue|boulevard|allée|dori|dōri)\b/i, 60],
-      [/\b(jardin|garden|parc|park|gyoen)\b/i, 90],
-      [/\b(église|church|cathedral|cathédrale|basilique|basilica|shrine|sanctuaire|jinja)\b/i, 60],
-      [/\b(marché|market|mercado|mercato|bazar|bazaar|souk)\b/i, 75],
-      [/\b(tower|tour|torre)\b/i, 90],
-      [/\b(viewpoint|panorama|observation|lookout|mirador)\b/i, 45],
-    ];
+    // Duration caps/floors/overrides now use module-level DURATION_CAPS, DURATION_FLOORS, MAJOR_MUSEUMS
+    // and the shared applyDurationRules() function
 
     for (const day of parsed.days) {
       // Clean suggestion names: remove city/country suffixes like ", Paris, France"
@@ -1036,52 +1113,8 @@ Format EXACT:
       });
 
       for (const s of day.additionalSuggestions) {
-        // Apply minimum duration overrides for major museums
-        for (const [pattern, minDuration] of MINIMUM_DURATION_OVERRIDES) {
-          if (pattern.test(s.name) && s.estimatedDuration < minDuration) {
-            console.log(`[Duration] Override: "${s.name}" ${s.estimatedDuration}min → ${minDuration}min`);
-            s.estimatedDuration = minDuration;
-            break;
-          }
-        }
-
-        // Duration cap: max 4h unless major museum
-        if (s.estimatedDuration > 240 && !majorMuseums.test(s.name)) {
-          console.log(`[ClaudeItinerary] Cap duration "${s.name}": ${s.estimatedDuration}min → 120min`);
-          s.estimatedDuration = 120;
-        }
-        // Type-based duration caps (apply if duration exceeds max by 20%+)
-        for (const [pattern, maxMin] of durationCaps) {
-          if (pattern.test(s.name) && s.estimatedDuration > maxMin * 1.2) {
-            console.log(`[ClaudeItinerary] Cap duration "${s.name}": ${s.estimatedDuration}min → ${maxMin}min`);
-            s.estimatedDuration = maxMin;
-            break;
-          }
-        }
-        // Duration floors for major museums: minimum realistic visit time
-        const durationFloors: [RegExp, number][] = [
-          [/\b(vatican|vaticano|musées du vatican|vatican museum|chapelle sixtine|sistine)\b/i, 120],
-          [/\b(louvre|musée du louvre)\b/i, 150],
-          [/\b(british museum)\b/i, 120],
-          [/\b(uffizi|offices|galerie des offices)\b/i, 120],
-          [/\b(prado|museo del prado)\b/i, 120],
-          [/\b(rijksmuseum)\b/i, 120],
-          [/\b(hermitage|ermitage)\b/i, 120],
-          [/\b(metropolitan|met museum)\b/i, 120],
-          [/\b(musée d'orsay|orsay)\b/i, 90],
-          [/\b(colosseum|colisée|colosseo|coliseum|colisee)\b/i, 90],
-        ];
-        for (const [pattern, minMin] of durationFloors) {
-          if (pattern.test(s.name) && s.estimatedDuration < minMin) {
-            console.log(`[ClaudeItinerary] Duration floor "${s.name}": ${s.estimatedDuration}min → ${minMin}min`);
-            s.estimatedDuration = minMin;
-            break;
-          }
-        }
-        // Minimum duration floor: no attraction should be less than 15 min
-        if (s.estimatedDuration < 15) {
-          s.estimatedDuration = 15;
-        }
+        // Apply all duration rules (overrides, caps, floors) via shared function
+        s.estimatedDuration = applyDurationRules(s.name, s.estimatedDuration);
 
         // Evening-only enforcement for shows/cabarets
         if (eveningOnlyPattern.test(s.name) && s.bestTimeOfDay !== 'evening') {
@@ -1241,8 +1274,10 @@ export function mapItineraryToAttractions(
     for (const id of orderedIds) {
       const attraction = poolMap.get(id);
       if (attraction) {
-        attraction.name = cleanName(attraction.name);
-        dayAttractions.push(attraction);
+        // Clone to avoid mutating the shared pool object
+        const clone = { ...attraction, name: cleanName(attraction.name) };
+        clone.duration = applyDurationRules(clone.name, clone.duration);
+        dayAttractions.push(clone);
         selectedSet.delete(id);
       }
     }
@@ -1250,8 +1285,9 @@ export function mapItineraryToAttractions(
     for (const id of selectedSet) {
       const attraction = poolMap.get(id);
       if (attraction) {
-        attraction.name = cleanName(attraction.name);
-        dayAttractions.push(attraction);
+        const clone = { ...attraction, name: cleanName(attraction.name) };
+        clone.duration = applyDurationRules(clone.name, clone.duration);
+        dayAttractions.push(clone);
       }
     }
 
@@ -1265,7 +1301,7 @@ export function mapItineraryToAttractions(
         name: suggestion.name,
         type: 'culture' as ActivityType, // Maps to TripItemType 'activity' in tripDay.ts
         description: suggestion.whyVisit,
-        duration: suggestion.estimatedDuration,
+        duration: applyDurationRules(suggestion.name, suggestion.estimatedDuration),
         estimatedCost: suggestion.estimatedCost,
         latitude: cityCenter?.lat || 0, // Default to city center; resolved later via API
         longitude: cityCenter?.lng || 0,

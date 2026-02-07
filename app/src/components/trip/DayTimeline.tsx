@@ -41,15 +41,16 @@ interface DayTimelineProps {
 /**
  * Convertit une heure HH:MM en minutes depuis minuit, avec gestion des horaires après minuit.
  * Les heures entre 00:00 et 05:59 sont considérées comme "après minuit" (lendemain)
- * et reçoivent +1440 minutes (24h) pour être triées après les heures normales.
+ * UNIQUEMENT si le jour contient aussi des items tardifs (après 22h = nightlife).
+ * Sinon, ce sont des matins tôt (ex: trajet aéroport à 04:45) → tri normal.
  */
-function timeToSortableMinutes(time: string): number {
+function timeToSortableMinutes(time: string, treatEarlyAsAfterMidnight: boolean = true): number {
   const [hours, minutes] = time.split(':').map(Number);
   const totalMinutes = hours * 60 + minutes;
 
-  // Si l'heure est entre 00:00 et 05:59, c'est probablement après minuit
-  // On ajoute 24h (1440 minutes) pour que ça trie APRÈS les heures de la journée
-  if (hours < 6) {
+  // Seulement si le jour a des items après 22h (nightlife), traiter 00:00-05:59 comme "après minuit"
+  // Sinon, les items tôt le matin (vol à 4h45, trajet aéroport à 5h) restent en début de journée
+  if (treatEarlyAsAfterMidnight && hours < 6) {
     return totalMinutes + 1440;
   }
 
@@ -71,10 +72,16 @@ export function DayTimeline({
   renderSwapButton,
   hotelSelectorData,
 }: DayTimelineProps) {
-  // Filter out 'transport' items (transfers) - they're replaced by ItineraryConnector links
-  // Then sort by startTime with special handling for after-midnight times
+  // Sort by startTime with smart handling for early morning vs after-midnight times
+  // Déterminer si ce jour a des items de fin de soirée (après 22h = nightlife)
+  // Si oui → les items 00:00-05:59 sont "après minuit" (triés après 22h)
+  // Si non → les items 00:00-05:59 sont des matins tôt (ex: trajet aéroport à 4h45)
+  const hasLateNightItems = day.items.some(item => {
+    const [h] = item.startTime.split(':').map(Number);
+    return h >= 22;
+  });
   const sortedItems = [...day.items]
-    .sort((a, b) => timeToSortableMinutes(a.startTime) - timeToSortableMinutes(b.startTime));
+    .sort((a, b) => timeToSortableMinutes(a.startTime, hasLateNightItems) - timeToSortableMinutes(b.startTime, hasLateNightItems));
 
   return (
     <div className="space-y-4">

@@ -860,6 +860,7 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
     budgetLevel: resolvedBudget.budgetLevel as 'economic' | 'moderate' | 'luxury',
     attractions: selectedAttractions,
     preferApartment: budgetStrategy.accommodationType.includes('airbnb'),
+    cityCenter: cityCenter ? { lat: cityCenter.lat, lng: cityCenter.lng } : undefined,
   });
 
   // 7.5b Validate hotel coordinates — if too close to city center, likely a default
@@ -889,6 +890,40 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       }
     }
   }
+
+  // 7.5c Validate hotel coordinates — if too far from city center, try to re-resolve
+  if (accommodation && cityCenter) {
+    const hotelDistFromCenter2 = calculateDistance(
+      accommodation.latitude, accommodation.longitude, cityCenter.lat, cityCenter.lng
+    );
+    if (hotelDistFromCenter2 > 5) { // > 5km from city center
+      console.warn(`[AI] Hotel "${accommodation.name}" is ${hotelDistFromCenter2.toFixed(1)}km from city center, attempting re-resolve...`);
+      try {
+        const hotelGeo2 = await geocodeAddress(`${accommodation.name}, ${preferences.destination}`);
+        if (hotelGeo2 && hotelGeo2.lat && hotelGeo2.lng) {
+          const newDist = calculateDistance(hotelGeo2.lat, hotelGeo2.lng, cityCenter.lat, cityCenter.lng);
+          if (newDist < hotelDistFromCenter2) {
+            accommodation.latitude = hotelGeo2.lat;
+            accommodation.longitude = hotelGeo2.lng;
+            console.log(`[AI] Hotel re-resolved via Nominatim: (${hotelGeo2.lat}, ${hotelGeo2.lng}), now ${newDist.toFixed(1)}km from center`);
+          }
+        } else {
+          const geminiGeo2 = await geocodeWithGemini(accommodation.name, preferences.destination);
+          if (geminiGeo2) {
+            const newDist = calculateDistance(geminiGeo2.lat, geminiGeo2.lng, cityCenter.lat, cityCenter.lng);
+            if (newDist < hotelDistFromCenter2) {
+              accommodation.latitude = geminiGeo2.lat;
+              accommodation.longitude = geminiGeo2.lng;
+              console.log(`[AI] Hotel re-resolved via Gemini: (${geminiGeo2.lat}, ${geminiGeo2.lng}), now ${newDist.toFixed(1)}km from center`);
+            }
+          }
+        }
+      } catch (e) {
+        console.warn(`[AI] Hotel re-geocode error:`, e);
+      }
+    }
+  }
+
   console.log(`Hébergement sélectionné: ${accommodation?.name || 'Aucun'} (type: ${accommodation?.type || 'N/A'})`);
 
   // 7.6 Initialiser le BudgetTracker et rebalancer le budget
