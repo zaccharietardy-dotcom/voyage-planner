@@ -109,6 +109,22 @@ export function getDayContext(
 }
 
 /**
+ * Récupère les coordonnées du dernier item placé qui a des coordonnées valides.
+ * Utilisé pour passer une position précise à findRestaurantForMeal().
+ */
+function getLastItemCoords(
+  items: TripItem[],
+  fallback: { lat: number; lng: number }
+): { lat: number; lng: number } {
+  for (let i = items.length - 1; i >= 0; i--) {
+    if (items[i].latitude && items[i].longitude) {
+      return { lat: items[i].latitude!, lng: items[i].longitude! };
+    }
+  }
+  return fallback;
+}
+
+/**
  * Convertit un ScheduleItem en TripItem
  *
  * IMPORTANT: Génère automatiquement googleMapsPlaceUrl par recherche de nom
@@ -318,6 +334,37 @@ export async function generateDayWithScheduler(params: {
   const scheduler = new DayScheduler(date, dayStart, dayEnd);
   const items: TripItem[] = [];
   let orderIndex = 0;
+
+  // === INSERTION PRÉCOCE: Transport retour dernier jour ===
+  // Insérer le transport retour comme fixed item AVANT les activités,
+  // pour que le scheduler refuse automatiquement tout ce qui chevauche.
+  let returnTransportAlreadyInserted = false;
+  let earlyReturnTransportItem: import('./services/scheduler').ScheduleItem | null = null;
+
+  if (isLastDay && groundTransport) {
+    let earlyStart: Date;
+    let earlyEnd: Date;
+    if (groundTransport.transitLegs?.length) {
+      const firstLeg = groundTransport.transitLegs[0];
+      const lastLeg = groundTransport.transitLegs[groundTransport.transitLegs.length - 1];
+      earlyStart = new Date(new Date(firstLeg.departure).getTime() - 30 * 60 * 1000);
+      earlyEnd = new Date(lastLeg.arrival);
+    } else {
+      earlyStart = parseTime(date, '14:00');
+      earlyEnd = new Date(earlyStart.getTime() + groundTransport.totalDuration * 60 * 1000);
+    }
+    earlyReturnTransportItem = scheduler.insertFixedItem({
+      id: generateId(),
+      title: `Transport retour → ${preferences.origin}`,
+      type: 'transport',
+      startTime: earlyStart,
+      endTime: earlyEnd,
+    });
+    if (earlyReturnTransportItem) {
+      returnTransportAlreadyInserted = true;
+      console.log(`[Jour ${dayNumber}] ✅ Transport retour pré-inséré: ${formatScheduleTime(earlyStart)} - ${formatScheduleTime(earlyEnd)}`);
+    }
+  }
 
   // Variable pour stocker les infos d'un vol tardif à reporter au jour suivant
   let lateFlightForNextDay: LateFlightArrivalData | undefined;
@@ -850,6 +897,7 @@ export async function generateDayWithScheduler(params: {
               }));
             } else {
               // Rechercher un restaurant proche de la position actuelle
+              lastCoords = getLastItemCoords(items, cityCenter);
               const restaurant = hasPrefetchedRestaurant('lunch')
                 ? getPrefetchedRestaurant('lunch')
                 : await findRestaurantForMeal('lunch', cityCenter, preferences, dayNumber, lastCoords);
@@ -1516,6 +1564,7 @@ export async function generateDayWithScheduler(params: {
             estimatedCost: 8 * (preferences.groupSize || 1),
           }));
         } else {
+          lastCoords = getLastItemCoords(items, cityCenter);
           const restaurant = hasPrefetchedRestaurant('lunch')
                   ? getPrefetchedRestaurant('lunch')
                   : await findRestaurantForMeal('lunch', cityCenter, preferences, dayNumber, lastCoords);
@@ -1666,9 +1715,10 @@ export async function generateDayWithScheduler(params: {
   // Si on a du temps libre avant le dîner (> 60min), essayer d'ajouter des attractions supplémentaires
   // Prendre des attractions qui n'ont pas encore été utilisées dans le voyage
   // CORRIGÉ: Seuil de 60min au lieu de 90min pour éviter les trous d'1h+
-  const currentHourAfterAttractions = scheduler.getCurrentTime().getHours();
-  const currentMinAfterAttractions = scheduler.getCurrentTime().getMinutes();
-  const timeBeforeDinnerMin = 19 * 60 - (currentHourAfterAttractions * 60 + currentMinAfterAttractions);
+  // Borne effective pour le gap-fill: min(dayEnd, 19:00) — respecte le dernier jour
+  const gapFillBoundary = dayEnd < parseTime(date, '19:00') ? dayEnd : parseTime(date, '19:00');
+  const timeBeforeBoundaryMs = gapFillBoundary.getTime() - scheduler.getCurrentTime().getTime();
+  const timeBeforeDinnerMin = timeBeforeBoundaryMs / (1000 * 60);
 
   if (timeBeforeDinnerMin > 60) {
     console.log(`[Jour ${dayNumber}] ${Math.round(timeBeforeDinnerMin / 60)}h de temps libre avant dîner - tentative de remplissage avec attractions supplémentaires`);
@@ -1712,14 +1762,13 @@ export async function generateDayWithScheduler(params: {
 
       for (const attraction of unusedAttractions) {
         if (gapFillAdded >= MAX_GAP_FILL) break;
-        // Vérifier qu'on a le temps avant le dîner (19:00)
-        const dinnerTime = parseTime(date, '19:00');
+        // Vérifier qu'on a le temps avant la borne (min(dayEnd, 19:00))
         const estimatedTravelTime = estimateTravelTime({ latitude: lastCoords.lat, longitude: lastCoords.lng } as Attraction, attraction);
         const estimatedEndTime = new Date(scheduler.getCurrentTime().getTime() + (estimatedTravelTime + attraction.duration + 15) * 60 * 1000);
 
-        if (estimatedEndTime > dinnerTime) {
+        if (estimatedEndTime > gapFillBoundary) {
           // CORRIGÉ: continue au lieu de break pour essayer les autres attractions (plus courtes)
-          console.log(`[Jour ${dayNumber}] Skip "${attraction.name}": trop longue (${attraction.duration}min) avant dîner`);
+          console.log(`[Jour ${dayNumber}] Skip "${attraction.name}": trop longue (${attraction.duration}min) avant borne ${formatScheduleTime(gapFillBoundary)}`);
           continue;
         }
 
@@ -1831,6 +1880,7 @@ export async function generateDayWithScheduler(params: {
         }));
         lastCoords = accommodationCoords;
       } else {
+        lastCoords = getLastItemCoords(items, cityCenter);
         const restaurant = hasPrefetchedRestaurant('dinner')
           ? getPrefetchedRestaurant('dinner')
           : await findRestaurantForMeal('dinner', cityCenter, preferences, dayNumber, lastCoords);
@@ -2089,14 +2139,17 @@ export async function generateDayWithScheduler(params: {
       const modeIcons: Record<string, string> = { train: '🚄', bus: '🚌', car: '🚗', combined: '🔄' };
       const modeLabels: Record<string, string> = { train: 'Train', bus: 'Bus', car: 'Voiture', combined: 'Transport combiné' };
 
-      const transportItem = scheduler.insertFixedItem({
-        id: generateId(),
-        title: `${modeIcons[groundTransport.mode] || '🚊'} ${modeLabels[groundTransport.mode] || groundTransport.mode || 'Transport'} → ${preferences.origin}`,
-        type: 'transport',
-        startTime: transportStart,
-        endTime: transportEnd,
-        data: { transport: groundTransport },
-      });
+      // Si le transport retour a été pré-inséré au début, réutiliser le scheduler item
+      const transportItem = returnTransportAlreadyInserted
+        ? earlyReturnTransportItem
+        : scheduler.insertFixedItem({
+            id: generateId(),
+            title: `${modeIcons[groundTransport.mode] || '🚊'} ${modeLabels[groundTransport.mode] || groundTransport.mode || 'Transport'} → ${preferences.origin}`,
+            type: 'transport',
+            startTime: transportStart,
+            endTime: transportEnd,
+            data: { transport: groundTransport },
+          });
       if (transportItem) {
         // Generate return booking URL with correct direction and date
         // For combined transport, generate URL for the first bookable segment
@@ -2251,7 +2304,30 @@ export async function generateDayWithScheduler(params: {
 
   // Reconstruire la liste des items à partir du scheduler (certains ont été supprimés)
   const validItemIds = new Set(scheduler.getItems().map(i => i.id));
-  const filteredItems = items.filter(item => validItemIds.has(item.id));
+  let filteredItems = items.filter(item => validItemIds.has(item.id));
+
+  // === FILTRE DE SÉCURITÉ: Supprimer les activités/restaurants après le transport retour ===
+  if (isLastDay && groundTransport && returnTransportAlreadyInserted) {
+    const returnItem = filteredItems.find(i => i.type === 'transport' && i.title.includes('→'));
+    if (returnItem?.startTime) {
+      const returnStartMinutes = parseTime(date, returnItem.startTime).getTime();
+      const protectedTypes = new Set(['transport', 'flight', 'hotel', 'checkin', 'checkout', 'parking']);
+      const beforeFilter = filteredItems.length;
+      filteredItems = filteredItems.filter(i => {
+        if (protectedTypes.has(i.type)) return true;
+        const itemStartMinutes = parseTime(date, i.startTime).getTime();
+        if (itemStartMinutes >= returnStartMinutes) {
+          console.log(`[Jour ${dayNumber}] ⚠ Suppression "${i.title}" (${i.startTime}) — après transport retour (${returnItem.startTime})`);
+          return false;
+        }
+        return true;
+      });
+      const removed = beforeFilter - filteredItems.length;
+      if (removed > 0) {
+        console.log(`[Jour ${dayNumber}] 🛡 Filtre sécurité: ${removed} item(s) supprimé(s) après transport retour`);
+      }
+    }
+  }
 
   // Trier par heure de début
   const sortedItems = filteredItems.sort((a, b) => {
