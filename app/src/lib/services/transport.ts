@@ -636,8 +636,10 @@ function calculateBusOption(params: TransportSearchParams, distance: number): Tr
   const co2 = Math.round(distance * CO2_PER_KM.bus);
 
   // Full Omio pour les bus aussi (agrège FlixBus + BlaBlaCar + autres) → affilié Impact
-  const omioDate = params.date ? params.date.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
-  const bookingUrl = `https://www.omio.fr/search-frontend/results/bus/${encodeURIComponent(params.origin)}/${encodeURIComponent(params.destination)}/${omioDate}/${params.passengers || 1}`;
+  // Format landing page: /bus/{origin}/{destination} (l'ancien /search-frontend/results/... est cassé)
+  const originSlug = params.origin.toLowerCase().replace(/\s+/g, '-');
+  const destSlug = params.destination.toLowerCase().replace(/\s+/g, '-');
+  const bookingUrl = `https://www.omio.fr/bus/${encodeURIComponent(originSlug)}/${encodeURIComponent(destSlug)}`;
 
   return {
     id: 'bus',
@@ -936,11 +938,10 @@ export function getTrainBookingUrl(origin: string, destination: string, passenge
   const destKey = destNorm.normalized.toLowerCase();
 
   // Full Omio: tous les trains (y compris Eurostar) passent par Omio → affilié Impact
-  // Format: /search-frontend/results/train/{origin}/{destination}/{date}/{passengers}
-  const dateStr = date ? date.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+  // Format landing page: /trains/{origin}/{destination} (l'ancien /search-frontend/results/... est cassé)
   const originSlug = origin.toLowerCase().replace(/\s+/g, '-');
   const destSlug = destination.toLowerCase().replace(/\s+/g, '-');
-  return `https://www.omio.fr/search-frontend/results/train/${encodeURIComponent(originSlug)}/${encodeURIComponent(destSlug)}/${dateStr}/${passengers}`;
+  return `https://www.omio.fr/trains/${encodeURIComponent(originSlug)}/${encodeURIComponent(destSlug)}`;
 }
 
 /**
