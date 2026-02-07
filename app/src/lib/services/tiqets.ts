@@ -78,57 +78,45 @@ export async function findTiqetsProduct(
  * These are hand-curated for better UX
  */
 const KNOWN_TIQETS_LINKS: Record<string, string> = {
-  // Amsterdam
-  'rijksmuseum': 'https://www.tiqets.com/en/amsterdam-attractions-c75227/tickets-for-rijksmuseum-p974100',
-  'van gogh museum': 'https://www.tiqets.com/en/amsterdam-attractions-c75227/tickets-for-van-gogh-museum-p974097',
-  'anne frank': 'https://www.tiqets.com/en/amsterdam-attractions-c75227/tickets-for-anne-frank-house-p974096',
+  // Amsterdam (vérifié fév 2025)
+  'van gogh museum': 'https://www.tiqets.com/en/van-gogh-museum-tickets-l144593/',
+  'musée van gogh': 'https://www.tiqets.com/en/van-gogh-museum-tickets-l144593/',
 
-  // Paris
-  'louvre': 'https://www.tiqets.com/en/paris-attractions-c75270/tickets-for-louvre-museum-p974113',
-  'tour eiffel': 'https://www.tiqets.com/en/paris-attractions-c75270/tickets-for-eiffel-tower-p974110',
-  'musée d\'orsay': 'https://www.tiqets.com/en/paris-attractions-c75270/tickets-for-musee-d-orsay-p974116',
-  'versailles': 'https://www.tiqets.com/en/paris-attractions-c75270/tickets-for-palace-of-versailles-p974118',
+  // Paris (vérifié fév 2025)
+  'louvre': 'https://www.tiqets.com/en/louvre-museum-tickets-l124297/',
+  'musée du louvre': 'https://www.tiqets.com/en/louvre-museum-tickets-l124297/',
+  'tour eiffel': 'https://www.tiqets.com/en/eiffel-tower-tickets-l144586/',
+  'eiffel tower': 'https://www.tiqets.com/en/eiffel-tower-tickets-l144586/',
+  'musée d\'orsay': 'https://www.tiqets.com/en/musee-d-orsay-tickets-l141867/',
+  'orsay': 'https://www.tiqets.com/en/musee-d-orsay-tickets-l141867/',
+  'versailles': 'https://www.tiqets.com/en/palace-of-versailles-tickets-l141873/',
+  'château de versailles': 'https://www.tiqets.com/en/palace-of-versailles-tickets-l141873/',
 
-  // Barcelona
-  'sagrada familia': 'https://www.tiqets.com/en/barcelona-attractions-c75229/tickets-for-sagrada-familia-p974080',
-  'park guell': 'https://www.tiqets.com/en/barcelona-attractions-c75229/tickets-for-park-guell-p974082',
-  'casa batllo': 'https://www.tiqets.com/en/barcelona-attractions-c75229/tickets-for-casa-batllo-p974078',
+  // Barcelona (vérifié fév 2025)
+  'sagrada familia': 'https://www.tiqets.com/en/sagrada-familia-tickets-l133161/',
+  'park güell': 'https://www.tiqets.com/en/park-guell-tickets-l141902/',
+  'parc güell': 'https://www.tiqets.com/en/park-guell-tickets-l141902/',
+  'park guell': 'https://www.tiqets.com/en/park-guell-tickets-l141902/',
+  'casa batlló': 'https://www.tiqets.com/en/casa-batllo-tickets-l141895/',
+  'casa batllo': 'https://www.tiqets.com/en/casa-batllo-tickets-l141895/',
 
-  // Rome
-  'colosseum': 'https://www.tiqets.com/en/rome-attractions-c75280/tickets-for-colosseum-p974126',
-  'colisée': 'https://www.tiqets.com/en/rome-attractions-c75280/tickets-for-colosseum-p974126',
-  'vatican': 'https://www.tiqets.com/en/rome-attractions-c75280/tickets-for-vatican-museums-sistine-chapel-p974128',
-  'chapelle sixtine': 'https://www.tiqets.com/en/rome-attractions-c75280/tickets-for-vatican-museums-sistine-chapel-p974128',
+  // Rome (vérifié fév 2025)
+  'colosseum': 'https://www.tiqets.com/en/colosseum-l145769/',
+  'colisée': 'https://www.tiqets.com/en/colosseum-l145769/',
+  'colosseo': 'https://www.tiqets.com/en/colosseum-l145769/',
+  'vatican': 'https://www.tiqets.com/en/vatican-museums-tickets-l145158/',
+  'chapelle sixtine': 'https://www.tiqets.com/en/vatican-museums-tickets-l145158/',
+  'sistine': 'https://www.tiqets.com/en/vatican-museums-tickets-l145158/',
+  'pantheon': 'https://www.tiqets.com/en/rome-pantheon-tickets-l142007/',
+  'panthéon': 'https://www.tiqets.com/en/rome-pantheon-tickets-l142007/',
 
-  // London
-  'tower of london': 'https://www.tiqets.com/en/london-attractions-c75260/tickets-for-tower-of-london-p974105',
-  'london eye': 'https://www.tiqets.com/en/london-attractions-c75260/tickets-for-london-eye-p974103',
-  'buckingham palace': 'https://www.tiqets.com/en/london-attractions-c75260/tickets-for-buckingham-palace-p974101',
-
-  // Tokyo
-  'teamlab': 'https://www.tiqets.com/en/tokyo-c308498/teamlab-borderless-p1031898',
-  'tokyo skytree': 'https://www.tiqets.com/en/tokyo-c308498/tokyo-skytree-p1027489',
-  'skytree': 'https://www.tiqets.com/en/tokyo-c308498/tokyo-skytree-p1027489',
-  'tokyo tower': 'https://www.tiqets.com/en/tokyo-c308498/tokyo-tower-p1027490',
-  'senso-ji': 'https://www.tiqets.com/en/tokyo-c308498/sensoji-temple-asakusa-p1031899',
-  'meiji': 'https://www.tiqets.com/en/tokyo-c308498/meiji-jingu-shrine-p1031900',
-
-  // Istanbul
-  'sainte-sophie': 'https://www.tiqets.com/en/istanbul-c95556/hagia-sophia-p1027491',
-  'hagia sophia': 'https://www.tiqets.com/en/istanbul-c95556/hagia-sophia-p1027491',
-  'topkapi': 'https://www.tiqets.com/en/istanbul-c95556/topkapi-palace-p1027492',
-
-  // Berlin
-  'pergamon': 'https://www.tiqets.com/en/berlin-c75237/pergamon-museum-p974088',
-  'neues museum': 'https://www.tiqets.com/en/berlin-c75237/neues-museum-p974090',
-
-  // Budapest
-  'széchenyi': 'https://www.tiqets.com/en/budapest-c95550/szechenyi-spa-p1027493',
-  'szechenyi': 'https://www.tiqets.com/en/budapest-c95550/szechenyi-spa-p1027493',
-
-  // Prague
-  'prague castle': 'https://www.tiqets.com/en/prague-c95548/prague-castle-p1027494',
-  'château de prague': 'https://www.tiqets.com/en/prague-c95548/prague-castle-p1027494',
+  // London (vérifié fév 2025)
+  'tower of london': 'https://www.tiqets.com/en/tower-of-london-tickets-l124320/',
+  'tour de londres': 'https://www.tiqets.com/en/tower-of-london-tickets-l124320/',
+  'london eye': 'https://www.tiqets.com/en/london-eye-tickets-l133176/',
+  'buckingham palace': 'https://www.tiqets.com/en/the-state-rooms-buckingham-palace-p975855/',
+  'westminster abbey': 'https://www.tiqets.com/en/westminster-abbey-p976342/',
+  "st paul's cathedral": 'https://www.tiqets.com/en/st-pauls-cathedral-p975047/',
 };
 
 /**
