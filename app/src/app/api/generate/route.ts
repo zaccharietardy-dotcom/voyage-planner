@@ -83,10 +83,10 @@ export async function POST(request: NextRequest) {
         }, 10_000);
 
         try {
-          // Timeout explicite de 4 minutes (avant le timeout Vercel de 5 min)
+          // Timeout explicite de 4min45 (avant le timeout Vercel de 5 min)
           // pour avoir le temps de renvoyer une erreur propre
           const timeoutPromise = new Promise<never>((_, reject) => {
-            setTimeout(() => reject(new Error('Timeout: génération trop longue (> 4 min)')), 240_000);
+            setTimeout(() => reject(new Error('Timeout: génération trop longue (> 4min45)')), 285_000);
           });
 
           const trip = await Promise.race([

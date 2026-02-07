@@ -1643,14 +1643,22 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       day.items.filter(item => item.type === 'restaurant' && item.title && !item.title.includes('Petit-déjeuner à l') && !item.title.includes('Pique-nique') && !item.title.includes('Dîner à l\'appartement'))
     );
     if (allRestaurantItems.length > 0) {
-      const toEnrich = allRestaurantItems.map(item => ({
+      // Cap à 12 restaurants pour limiter le temps Gemini sur les longs voyages
+      const restaurantsToEnrich = allRestaurantItems.length > 12
+        ? allRestaurantItems.slice(0, 12)
+        : allRestaurantItems;
+      if (allRestaurantItems.length > 12) {
+        console.log(`[AI] Gemini enrichment: capped à 12/${allRestaurantItems.length} restaurants`);
+      }
+
+      const toEnrich = restaurantsToEnrich.map(item => ({
         name: item.title,
         address: item.locationName || '',
         cuisineTypes: item.description?.split(' | ')[0]?.split(', ') || ['local'],
         mealType: item.title.includes('Déjeuner') ? 'lunch' : item.title.includes('Dîner') ? 'dinner' : 'breakfast',
       }));
 
-      console.log(`[PERF ${elapsed()}] Start Gemini enrichment`);
+      console.log(`[PERF ${elapsed()}] Start Gemini enrichment (${toEnrich.length} restos)`);
       const enriched = await enrichRestaurantsWithGemini(toEnrich, preferences.destination);
 
       for (const item of allRestaurantItems) {
@@ -1674,7 +1682,8 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
   }
 
   // Post-processing Viator: attacher des liens Viator aux activités sans bookingUrl
-  if (isViatorConfigured()) {
+  const elapsedMs = Date.now() - T0;
+  if (isViatorConfigured() && elapsedMs < 255_000) {
     try {
       // Patterns d'activités gratuites par nature — skip Viator matching
       const FREE_ACTIVITY_PATTERNS = /\b(rambla|passeig|promenade|place|square|plaza|platz|piazza|pont|bridge|quartier|barrio|neighbourhood|parc|park|jardin|garden|plage|beach|marché|market|mercat|mercado|balade|walk|stroll)\b/i;
@@ -1698,8 +1707,8 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
 
       if (activitiesWithoutUrl.length > 0) {
         console.log(`[AI] 🎭 Matching Viator pour ${activitiesWithoutUrl.length} activités sans lien...`);
-        // Limiter à 12 requêtes Viator pour ne pas ralentir
-        const toMatch = activitiesWithoutUrl.slice(0, 12);
+        // Limiter à 8 requêtes Viator pour ne pas ralentir
+        const toMatch = activitiesWithoutUrl.slice(0, 8);
         console.log(`[PERF ${elapsed()}] Start Viator matching`);
         const viatorResults = await Promise.all(
           toMatch.map(item => {
@@ -1748,6 +1757,8 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
     } catch (error) {
       console.warn('[AI] Viator post-processing error (non bloquant):', error);
     }
+  } else if (elapsedMs >= 255_000) {
+    console.log(`[AI] ⏩ Skip Viator matching (${(elapsedMs / 1000).toFixed(0)}s écoulés, proche du timeout)`);
   }
 
   // Corriger les types d'items mal classés (restaurants en activité)
