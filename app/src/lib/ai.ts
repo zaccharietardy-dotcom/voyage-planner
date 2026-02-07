@@ -49,7 +49,7 @@ import { BudgetTracker } from './services/budgetTracker';
 import { enrichRestaurantsWithGemini, geocodeWithGemini, resetGeminiGeocodeCounter } from './services/geminiSearch';
 import { findViatorProduct, searchViatorActivities, isViatorConfigured } from './services/viator';
 import { findKnownViatorProduct } from './services/viatorKnownProducts';
-import { findTiqetsProduct, getKnownTiqetsLink, isTiqetsRelevant } from './services/tiqets';
+import { findTiqetsProduct, getKnownTiqetsLink, isTiqetsRelevant, buildTiqetsSearchUrl } from './services/tiqets';
 import { getMustSeeAttractions } from './services/attractions';
 
 import { generateId, normalizeToLocalDate, formatDate, formatTime, formatPriceLevel, pickDirectionMode, getAccommodationBookingUrl, getHotelLocationName, getBudgetCabinClass, getBudgetPriceLevel, getReliableGoogleMapsPlaceUrl } from './tripUtils';
@@ -1837,6 +1837,15 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
             if (result.imageUrl) (toMatch[i] as any).viatorImageUrl = result.imageUrl;
             if (result.rating) (toMatch[i] as any).viatorRating = result.rating;
             if (result.reviewCount) (toMatch[i] as any).viatorReviewCount = result.reviewCount;
+            // Ajouter aussi Tiqets comme alternative (billets simples, souvent moins cher)
+            if (isTiqetsRelevant(toMatch[i].title, toMatch[i].type)) {
+              const tiqetsLink = getKnownTiqetsLink(toMatch[i].title);
+              if (tiqetsLink) {
+                toMatch[i].tiqetsUrl = tiqetsLink;
+              } else {
+                toMatch[i].tiqetsUrl = buildTiqetsSearchUrl(toMatch[i].title, preferences.destination);
+              }
+            }
             matched++;
           } else {
             // Fallback: Try Tiqets for museums and attractions without Viator match
