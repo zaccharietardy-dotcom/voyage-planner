@@ -28,6 +28,7 @@ import {
   ChevronUp,
   ChevronDown,
   ChevronRight,
+  Search,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TripItemType } from '@/lib/types';
@@ -224,8 +225,8 @@ export function ActivityCard({
                   </div>
                 )}
 
-                {/* Cost */}
-                {item.estimatedCost && item.estimatedCost > 0 && (
+                {/* Cost (masqué pour transport car affiché dans TransportCard) */}
+                {item.estimatedCost && item.estimatedCost > 0 && item.type !== 'transport' && (
                   <div className="text-xs">
                     <span className="font-medium text-primary">
                       ~{item.estimatedCost}€
@@ -237,8 +238,8 @@ export function ActivityCard({
                 )}
               </div>
 
-              {/* Transit lines */}
-              {item.transitInfo?.lines && item.transitInfo.lines.length > 0 && (
+              {/* Transit lines (masqué pour transport avec bookingUrl car affiché dans TransportCard) */}
+              {item.transitInfo?.lines && item.transitInfo.lines.length > 0 && !(item.type === 'transport' && item.bookingUrl) && (
                 <div className="flex items-center gap-2 mt-2 flex-wrap">
                   {item.transitInfo.lines.map((line, idx) => {
                     const ModeIcon = TRANSIT_MODE_ICONS[line.mode] || Bus;
@@ -255,6 +256,11 @@ export function ActivityCard({
                     );
                   })}
                 </div>
+              )}
+
+              {/* Transport card - mini-widget Omio */}
+              {item.type === 'transport' && item.bookingUrl && (
+                <TransportCard item={item} />
               )}
 
               {/* Viator product card */}
@@ -551,6 +557,93 @@ function BookingButtons({ item }: { item: TripItem }) {
         </a>
       ))}
     </>
+  );
+}
+
+function TransportCard({ item }: { item: TripItem }) {
+  if (item.type !== 'transport' || !item.bookingUrl) return null;
+
+  const bookingUrl = item.bookingUrl;
+  const isOmio = bookingUrl.includes('omio') || bookingUrl.includes('sjv.io');
+
+  // Extraire origin/destination du title
+  // Le title est généralement "Train Paris → Amsterdam" ou "Bus Lyon → Nice"
+  const parts = item.title?.match(/(.+?)\s*[→>–\-]\s*(.+)/);
+  const origin = parts?.[1]?.replace(/^(Train|Bus|Vol|Ferry)\s+/i, '').trim() || '';
+  const destination = parts?.[2]?.trim() || '';
+
+  // Mode de transport
+  const isBus = item.title?.toLowerCase().includes('bus');
+  const ModeIcon = isBus ? Bus : TrainFront;
+
+  return (
+    <a
+      href={bookingUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      onClick={(e) => e.stopPropagation()}
+      className="block mt-3 rounded-xl border bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 hover:shadow-md transition-all overflow-hidden"
+    >
+      {/* Header avec gradient */}
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2.5 flex items-center gap-2">
+        <ModeIcon className="h-4 w-4 text-white" />
+        <span className="text-white font-medium text-sm truncate">
+          {origin && destination ? `${origin} → ${destination}` : item.title}
+        </span>
+      </div>
+
+      {/* Contenu */}
+      <div className="px-4 py-3 space-y-2">
+        {/* Infos trajet */}
+        <div className="flex items-center gap-3 text-sm text-muted-foreground">
+          {item.startTime && item.endTime && (
+            <span className="flex items-center gap-1">
+              <Clock className="h-3.5 w-3.5" />
+              {item.startTime} → {item.endTime}
+            </span>
+          )}
+          {item.duration && item.duration > 0 && (
+            <span className="text-xs">
+              ~{item.duration >= 60 ? `${Math.floor(item.duration / 60)}h${item.duration % 60 > 0 ? String(item.duration % 60).padStart(2, '0') : ''}` : `${item.duration}min`}
+            </span>
+          )}
+          {item.estimatedCost != null && item.estimatedCost > 0 && (
+            <span className="font-medium text-blue-600 dark:text-blue-400">
+              à partir de ~{item.estimatedCost}€
+            </span>
+          )}
+        </div>
+
+        {/* Transit lines (Eurostar, Thalys, etc.) */}
+        {item.transitInfo?.lines && item.transitInfo.lines.length > 0 && (
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {item.transitInfo.lines.map((line, idx) => {
+              const LineIcon = TRANSIT_MODE_ICONS[line.mode] || Bus;
+              return (
+                <span
+                  key={`${line.mode}-${line.number}-${idx}`}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-white dark:bg-gray-800 border text-muted-foreground"
+                >
+                  <LineIcon className="h-3 w-3" />
+                  {line.number}
+                </span>
+              );
+            })}
+          </div>
+        )}
+
+        {/* CTA */}
+        <div className="flex items-center justify-between pt-1">
+          <span className="text-xs text-muted-foreground italic">
+            Prix et horaires exacts sur {isOmio ? 'Omio' : 'le site'}
+          </span>
+          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-600 text-white text-xs font-medium">
+            <Search className="h-3 w-3" />
+            Voir les {isBus ? 'bus' : 'trains'}
+          </span>
+        </div>
+      </div>
+    </a>
   );
 }
 
