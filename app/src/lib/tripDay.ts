@@ -15,7 +15,7 @@ import { estimateMealPrice } from './services/restaurants';
 import { Attraction, estimateTravelTime } from './services/attractions';
 import { getDirections, generateGoogleMapsUrl, generateGoogleMapsSearchUrl, generateGoogleMapsDirectionsUrl } from './services/directions';
 import { TransportOption, getTrainBookingUrl } from './services/transport';
-import { DayScheduler, ScheduleItem, formatTime as formatScheduleTime, parseTime } from './services/scheduler';
+import { DayScheduler, formatTime as formatScheduleTime, parseTime } from './services/scheduler';
 import { searchLuggageStorage, selectBestStorage, needsLuggageStorage } from './services/luggageStorage';
 import { createLocationTracker } from './services/locationTracker';
 import { generateFlightLink, formatDateForUrl } from './services/linkGenerator';
@@ -1279,27 +1279,9 @@ export async function generateDayWithScheduler(params: {
     }
   }
 
-  // PRÉ-RÉSERVER le créneau déjeuner AVANT les activités du matin
-  // pour que le scheduler planifie les activités AUTOUR du repas (pas par-dessus)
+  // Déterminer si le déjeuner est prévu pour cette journée
   const isDay1WithEarlyArrival = isFirstDay && groundTransport && !outboundFlight;
   const shouldHaveLunch = (!isFirstDay || isDay1WithEarlyArrival) && endHour >= 14;
-  const lunchTargetTime = parseTime(date, '12:30');
-  let lunchSlotReserved: ScheduleItem | null = null;
-
-  if (shouldHaveLunch) {
-    lunchSlotReserved = scheduler.insertFixedItem({
-      id: generateId(),
-      title: 'Déjeuner',
-      type: 'restaurant',
-      startTime: lunchTargetTime,
-      endTime: new Date(lunchTargetTime.getTime() + 75 * 60 * 1000),
-    });
-    if (lunchSlotReserved) {
-      console.log(`[Jour ${dayNumber}] Slot déjeuner pré-réservé à 12:30-13:45`);
-    } else {
-      console.log(`[Jour ${dayNumber}] Impossible de réserver le slot déjeuner (conflit — probablement transport en cours)`);
-    }
-  }
 
   // Activites du matin - SEULEMENT si on est deja sur place (pas le jour 1)
   // Le jour 1, on arrive generalement l'apres-midi, donc pas d'activites matin
@@ -1503,48 +1485,72 @@ export async function generateDayWithScheduler(params: {
     }
   }
 
-  // Remplir les détails du déjeuner (le slot a été pré-réservé avant les activités du matin)
-  if (lunchSlotReserved) {
-    if (shouldSelfCater('lunch', dayNumber, budgetStrategy, false, preferences.durationDays, isDayTrip, groceriesDone)) {
-      items.push(schedulerItemToTripItem(lunchSlotReserved, dayNumber, orderIndex++, {
-        title: 'Déjeuner pique-nique / maison',
-        description: 'Repas préparé avec les courses | Option économique',
-        locationName: `Centre-ville, ${preferences.destination}`,
-        latitude: accommodation?.latitude || lastCoords.lat,
-        longitude: accommodation?.longitude || lastCoords.lng,
-        estimatedCost: 8 * (preferences.groupSize || 1),
-      }));
-    } else {
-      const restaurant = hasPrefetchedRestaurant('lunch')
-              ? getPrefetchedRestaurant('lunch')
-              : await findRestaurantForMeal('lunch', cityCenter, preferences, dayNumber, lastCoords);
-      const restaurantCoords = {
-        lat: restaurant?.latitude || lastCoords.lat,
-        lng: restaurant?.longitude || lastCoords.lng,
-      };
-      if (!restaurant?.latitude || !restaurant?.longitude) {
-        console.warn(`[TripDay] ⚠️ Restaurant "${restaurant?.name || 'unknown'}" sans coordonnées — utilise position actuelle`);
-      }
-      const googleMapsUrl = generateGoogleMapsUrl(lastCoords, restaurantCoords, pickDirectionMode(lastCoords, restaurantCoords));
-      const restaurantGoogleMapsUrl = restaurant?.googleMapsUrl ||
-        getReliableGoogleMapsPlaceUrl(restaurant, preferences.destination);
+  // Déjeuner — fenêtre flexible entre 12:00 et 13:30
+  // Se cale juste après la dernière activité du matin (pas de trou inutile)
+  if (shouldHaveLunch) {
+    const lunchEarliest = parseTime(date, '12:00');
+    const lunchLatest = parseTime(date, '13:30');
+    const cursorNow = scheduler.getCurrentTime();
+    // Le déjeuner commence au plus tôt à 12:00, ou juste après le curseur si on est déjà passé 12:00
+    const lunchStartTime = cursorNow > lunchEarliest ? cursorNow : lunchEarliest;
 
-      items.push(schedulerItemToTripItem(lunchSlotReserved, dayNumber, orderIndex++, {
-        title: restaurant?.name || 'Déjeuner',
-        description: restaurant ? `${restaurant.cuisineTypes.join(', ')} | ⭐ ${restaurant.rating?.toFixed(1)}/5` : 'Déjeuner local',
-        locationName: restaurant ? `${restaurant.name}, ${preferences.destination}` : `Centre-ville, ${preferences.destination}`,
-        latitude: restaurantCoords.lat,
-        longitude: restaurantCoords.lng,
-        estimatedCost: estimateMealPrice(restaurant?.priceLevel || getBudgetPriceLevel(preferences.budgetLevel), 'lunch') * preferences.groupSize,
-        rating: restaurant?.rating,
-        googleMapsUrl,
-        googleMapsPlaceUrl: restaurantGoogleMapsUrl,
-      }));
-      lastCoords = restaurantCoords;
+    if (lunchStartTime <= lunchLatest) {
+      const lunchDuration = 75; // 1h15
+      const lunchEndTime = new Date(lunchStartTime.getTime() + lunchDuration * 60 * 1000);
+      const lunchItem = scheduler.insertFixedItem({
+        id: generateId(),
+        title: 'Déjeuner',
+        type: 'restaurant',
+        startTime: lunchStartTime,
+        endTime: lunchEndTime,
+      });
+
+      if (lunchItem) {
+        if (shouldSelfCater('lunch', dayNumber, budgetStrategy, false, preferences.durationDays, isDayTrip, groceriesDone)) {
+          items.push(schedulerItemToTripItem(lunchItem, dayNumber, orderIndex++, {
+            title: 'Déjeuner pique-nique / maison',
+            description: 'Repas préparé avec les courses | Option économique',
+            locationName: `Centre-ville, ${preferences.destination}`,
+            latitude: accommodation?.latitude || lastCoords.lat,
+            longitude: accommodation?.longitude || lastCoords.lng,
+            estimatedCost: 8 * (preferences.groupSize || 1),
+          }));
+        } else {
+          const restaurant = hasPrefetchedRestaurant('lunch')
+                  ? getPrefetchedRestaurant('lunch')
+                  : await findRestaurantForMeal('lunch', cityCenter, preferences, dayNumber, lastCoords);
+          const restaurantCoords = {
+            lat: restaurant?.latitude || lastCoords.lat,
+            lng: restaurant?.longitude || lastCoords.lng,
+          };
+          if (!restaurant?.latitude || !restaurant?.longitude) {
+            console.warn(`[TripDay] ⚠️ Restaurant "${restaurant?.name || 'unknown'}" sans coordonnées — utilise position actuelle`);
+          }
+          const googleMapsUrl = generateGoogleMapsUrl(lastCoords, restaurantCoords, pickDirectionMode(lastCoords, restaurantCoords));
+          const restaurantGoogleMapsUrl = restaurant?.googleMapsUrl ||
+            getReliableGoogleMapsPlaceUrl(restaurant, preferences.destination);
+
+          items.push(schedulerItemToTripItem(lunchItem, dayNumber, orderIndex++, {
+            title: restaurant?.name || 'Déjeuner',
+            description: restaurant ? `${restaurant.cuisineTypes.join(', ')} | ⭐ ${restaurant.rating?.toFixed(1)}/5` : 'Déjeuner local',
+            locationName: restaurant ? `${restaurant.name}, ${preferences.destination}` : `Centre-ville, ${preferences.destination}`,
+            latitude: restaurantCoords.lat,
+            longitude: restaurantCoords.lng,
+            estimatedCost: estimateMealPrice(restaurant?.priceLevel || getBudgetPriceLevel(preferences.budgetLevel), 'lunch') * preferences.groupSize,
+            rating: restaurant?.rating,
+            googleMapsUrl,
+            googleMapsPlaceUrl: restaurantGoogleMapsUrl,
+          }));
+          lastCoords = restaurantCoords;
+        }
+        scheduler.advanceTo(lunchEndTime);
+        console.log(`[Jour ${dayNumber}] Déjeuner ajouté à ${lunchStartTime.toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'})}-${lunchEndTime.toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'})}`);
+      } else {
+        console.log(`[Jour ${dayNumber}] Impossible d'insérer le déjeuner (conflit — probablement transport en cours)`);
+      }
+    } else {
+      console.log(`[Jour ${dayNumber}] Fenêtre déjeuner dépassée (curseur à ${cursorNow.toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'})})`);
     }
-    const lunchEndTime = new Date(lunchTargetTime.getTime() + 75 * 60 * 1000);
-    scheduler.advanceTo(lunchEndTime);
-    console.log(`[Jour ${dayNumber}] Déjeuner rempli à ${lunchTargetTime.toLocaleTimeString('fr-FR')}, curseur avancé à ${lunchEndTime.toLocaleTimeString('fr-FR')}`);
   }
 
   // Activités de l'après-midi
