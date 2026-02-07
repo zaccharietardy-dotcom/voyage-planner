@@ -294,6 +294,7 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
     recommended: opt.recommended,
     recommendationReason: opt.recommendationReason,
     dataSource: opt.dataSource,
+    priceRange: opt.priceRange,
   }));
 
   // Sélectionner la meilleure option (ou celle choisie par l'utilisateur via preferences.transport)

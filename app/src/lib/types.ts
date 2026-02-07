@@ -419,6 +419,7 @@ export interface TransportOptionSummary {
   recommended?: boolean;
   recommendationReason?: string;
   dataSource?: 'api' | 'estimated';
+  priceRange?: [number, number]; // [min, max] prix pour affichage
 }
 
 export interface Trip {

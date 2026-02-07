@@ -122,7 +122,7 @@ interface KnownTrainRoute {
 }
 
 function getRouteKey(a: string, b: string): string {
-  return [a, b].sort().join('→');
+  return [a.toLowerCase(), b.toLowerCase()].sort().join('→');
 }
 
 const KNOWN_TRAIN_ROUTES: Record<string, KnownTrainRoute> = {
@@ -497,18 +497,19 @@ async function calculateTrainOption(params: TransportSearchParams, distance: num
   try {
     return await calculateTrainOptionInner(params, distance);
   } catch (err) {
-    // Safety net: if anything fails, fall back to pure estimation
+    // Safety net: if anything fails, fall back to known route or pure estimation
     console.error(`[Train] Unexpected error in calculateTrainOption, using estimate:`, err instanceof Error ? err.message : err);
     const isHighSpeed = hasDirectHighSpeedRail(params.origin, params.destination);
     if (!isHighSpeed && distance > 1000) return null;
+    const knownRoute = findKnownRoute(params.origin, params.destination);
     const speed = isHighSpeed ? SPEEDS.train_highspeed : SPEEDS.train_regular;
-    const travelTime = Math.round((distance / speed) * 60);
+    const travelTime = knownRoute?.duration || Math.round((distance / speed) * 60);
     const pricePerKm = isHighSpeed ? PRICE_PER_KM.train_highspeed : PRICE_PER_KM.train_regular;
-    let price = Math.round(distance * pricePerKm);
-    if (distance > 500) price = Math.round(price * 0.85);
+    let price = knownRoute?.price || Math.round(distance * pricePerKm);
+    if (!knownRoute && distance > 500) price = Math.round(price * 0.85);
     price = Math.max(price, 15);
-    const operator = isHighSpeed ? getTrainOperator(params.origin, params.destination) : 'Train régional';
-    return buildTrainOption(params, distance, travelTime, price, operator, 'estimated');
+    const operator = knownRoute?.operator || (isHighSpeed ? getTrainOperator(params.origin, params.destination) : 'Train régional');
+    return buildTrainOption(params, distance, travelTime, price, operator, 'estimated', undefined, knownRoute?.priceRange);
   }
 }
 
