@@ -258,9 +258,9 @@ export function ActivityCard({
               )}
 
               {/* Viator product card */}
-              {item.viatorImageUrl && item.bookingUrl?.includes('viator.com') && (
+              {item.viatorImageUrl && (item.bookingUrl?.includes('viator.com') || item.viatorUrl) && (
                 <a
-                  href={item.bookingUrl}
+                  href={item.viatorUrl || item.bookingUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={(e) => e.stopPropagation()}
@@ -290,11 +290,9 @@ export function ActivityCard({
               )}
 
               {/* Booking buttons row - Gros boutons colorés visibles */}
-              {!(item.viatorImageUrl && item.bookingUrl?.includes('viator.com')) && (
-                <div className="flex items-center gap-2 mt-2 flex-wrap">
-                  <BookingButtons item={item} />
-                </div>
-              )}
+              <div className="flex items-center gap-2 mt-2 flex-wrap">
+                <BookingButtons item={item} />
+              </div>
             </div>
 
             {/* Icon */}
@@ -455,7 +453,40 @@ function BookingButtons({ item }: { item: TripItem }) {
     }
   }
 
-  // Activité - Viator ou Tiqets
+  // Transport - Omio, Trainline, FlixBus
+  if (item.type === 'transport' && bookingUrl) {
+    if (bookingUrl.includes('omio.fr') || bookingUrl.includes('omio.com')) {
+      buttons.push({
+        label: 'Omio',
+        url: bookingUrl,
+        bgColor: 'bg-blue-500 hover:bg-blue-600',
+        icon: <TrainFront className="h-3.5 w-3.5" />,
+      });
+    } else if (bookingUrl.includes('trainline')) {
+      buttons.push({
+        label: 'Trainline',
+        url: bookingUrl,
+        bgColor: 'bg-blue-500 hover:bg-blue-600',
+        icon: <TrainFront className="h-3.5 w-3.5" />,
+      });
+    } else if (bookingUrl.includes('flixbus')) {
+      buttons.push({
+        label: 'FlixBus',
+        url: bookingUrl,
+        bgColor: 'bg-green-500 hover:bg-green-600',
+        icon: <Bus className="h-3.5 w-3.5" />,
+      });
+    } else {
+      buttons.push({
+        label: 'Réserver transport',
+        url: bookingUrl,
+        bgColor: 'bg-blue-500 hover:bg-blue-600',
+        icon: <TrainFront className="h-3.5 w-3.5" />,
+      });
+    }
+  }
+
+  // Activité - Site officiel ou Viator
   if (item.type === 'activity' && bookingUrl) {
     if (bookingUrl.includes('viator.com')) {
       buttons.push({
@@ -464,35 +495,19 @@ function BookingButtons({ item }: { item: TripItem }) {
         bgColor: 'bg-green-600 hover:bg-green-700',
         icon: <ExternalLink className="h-3.5 w-3.5" />,
       });
-    } else if (bookingUrl.includes('tiqets.com')) {
-      buttons.push({
-        label: 'Tiqets',
-        url: bookingUrl,
-        bgColor: 'bg-orange-500 hover:bg-orange-600',
-        icon: <ExternalLink className="h-3.5 w-3.5" />,
-      });
     } else {
+      // URL officielle (rijksmuseum.nl, annefrank.org, etc.)
       buttons.push({
-        label: 'Réserver',
+        label: 'Site officiel',
         url: bookingUrl,
-        bgColor: 'bg-primary hover:bg-primary/90',
+        bgColor: 'bg-indigo-600 hover:bg-indigo-700',
         icon: <ExternalLink className="h-3.5 w-3.5" />,
       });
     }
   }
 
-  // Tiqets alternatif (si viatorUrl est principal)
-  if (item.tiqetsUrl && !bookingUrl.includes('tiqets.com')) {
-    buttons.push({
-      label: 'Tiqets',
-      url: item.tiqetsUrl,
-      bgColor: 'bg-orange-500 hover:bg-orange-600',
-      icon: <ExternalLink className="h-3.5 w-3.5" />,
-    });
-  }
-
-  // Viator alternatif (si tiqetsUrl est principal)
-  if (item.viatorUrl && !bookingUrl.includes('viator.com')) {
+  // Viator alternatif (quand bookingUrl est un site officiel)
+  if (item.viatorUrl && !bookingUrl.includes('viator.com') && !item.viatorImageUrl) {
     buttons.push({
       label: 'Viator',
       url: item.viatorUrl,

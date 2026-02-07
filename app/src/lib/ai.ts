@@ -49,7 +49,8 @@ import { BudgetTracker } from './services/budgetTracker';
 import { enrichRestaurantsWithGemini, geocodeWithGemini, resetGeminiGeocodeCounter } from './services/geminiSearch';
 import { findViatorProduct, searchViatorActivities, isViatorConfigured } from './services/viator';
 import { findKnownViatorProduct } from './services/viatorKnownProducts';
-import { findTiqetsProduct, getKnownTiqetsLink, isTiqetsRelevant, buildTiqetsSearchUrl } from './services/tiqets';
+// Tiqets retiré temporairement — en attente API Distributor
+// import { findTiqetsProduct, getKnownTiqetsLink, isTiqetsRelevant, buildTiqetsSearchUrl } from './services/tiqets';
 import { getMustSeeAttractions } from './services/attractions';
 
 import { generateId, normalizeToLocalDate, formatDate, formatTime, formatPriceLevel, pickDirectionMode, getAccommodationBookingUrl, getHotelLocationName, getBudgetCabinClass, getBudgetPriceLevel, getReliableGoogleMapsPlaceUrl } from './tripUtils';
@@ -1828,6 +1829,8 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
         for (let i = 0; i < toMatch.length; i++) {
           const result = viatorResults[i];
           if (result) {
+            // Viator = viatorUrl (experience premium) + bookingUrl (fallback si pas de lien officiel)
+            toMatch[i].viatorUrl = result.url;
             toMatch[i].bookingUrl = result.url;
             if (!toMatch[i].estimatedCost && result.price > 0) {
               toMatch[i].estimatedCost = result.price;
@@ -1845,35 +1848,11 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
             if (result.imageUrl) (toMatch[i] as any).viatorImageUrl = result.imageUrl;
             if (result.rating) (toMatch[i] as any).viatorRating = result.rating;
             if (result.reviewCount) (toMatch[i] as any).viatorReviewCount = result.reviewCount;
-            // Ajouter aussi Tiqets comme alternative (billets simples, souvent moins cher)
-            // Ne pas proposer Tiqets pour les activités gratuites (parcs, places, etc.)
-            if ((toMatch[i].estimatedCost || 0) > 0 && isTiqetsRelevant(toMatch[i].title, toMatch[i].type)) {
-              const tiqetsLink = getKnownTiqetsLink(toMatch[i].title);
-              if (tiqetsLink) {
-                toMatch[i].tiqetsUrl = tiqetsLink;
-              } else {
-                toMatch[i].tiqetsUrl = buildTiqetsSearchUrl(toMatch[i].title, preferences.destination);
-              }
-            }
             matched++;
-          } else {
-            // Fallback: Try Tiqets for museums and attractions without Viator match
-            const knownTiqetsLink = getKnownTiqetsLink(toMatch[i].title);
-            if (knownTiqetsLink) {
-              toMatch[i].bookingUrl = knownTiqetsLink;
-              console.log(`[AI] 🎫 Tiqets lien direct: ${toMatch[i].title}`);
-              matched++;
-            } else if (isTiqetsRelevant(toMatch[i].title, toMatch[i].type)) {
-              const tiqetsResult = await findTiqetsProduct(toMatch[i].title, preferences.destination);
-              if (tiqetsResult) {
-                toMatch[i].bookingUrl = tiqetsResult.url;
-                console.log(`[AI] 🎫 Tiqets recherche: ${toMatch[i].title}`);
-                matched++;
-              }
-            }
           }
+          // Pas de fallback Tiqets — en attente API Distributor
         }
-        console.log(`[AI] ✅ ${matched}/${toMatch.length} activités matchées avec Viator/Tiqets`);
+        console.log(`[AI] ✅ ${matched}/${toMatch.length} activités matchées avec Viator`);
       }
     } catch (error) {
       console.warn('[AI] Viator post-processing error (non bloquant):', error);
