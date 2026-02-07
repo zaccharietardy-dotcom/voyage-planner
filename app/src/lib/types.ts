@@ -357,6 +357,7 @@ export interface TripItem {
   viatorImageUrl?: string;
   viatorRating?: number;
   viatorReviewCount?: number;
+  viatorPrice?: number; // Prix du produit Viator (peut différer de estimatedCost qui est le prix d'entrée officiel)
 }
 
 export interface TripDay {

@@ -1824,6 +1824,11 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
             if (!toMatch[i].estimatedCost && result.price > 0) {
               toMatch[i].estimatedCost = result.price;
             }
+            // Stocker le prix Viator séparément (pour affichage carte produit)
+            // estimatedCost = prix d'entrée officiel (budget), viatorPrice = prix tour Viator
+            if (result.price > 0) {
+              (toMatch[i] as any).viatorPrice = result.price;
+            }
             // Stocker le titre Viator pour afficher le vrai nom de l'activité réservable
             if (result.title && result.title.toLowerCase() !== toMatch[i].title.toLowerCase()) {
               (toMatch[i] as any).viatorTitle = result.title;

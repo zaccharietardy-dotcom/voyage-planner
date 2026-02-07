@@ -281,8 +281,8 @@ export function ActivityCard({
                           {item.viatorReviewCount && <span className="text-muted-foreground">({item.viatorReviewCount})</span>}
                         </span>
                       )}
-                      {item.estimatedCost && item.estimatedCost > 0 && (
-                        <span className="text-[10px] font-medium text-green-600">dès {item.estimatedCost}€</span>
+                      {(item.viatorPrice || item.estimatedCost) && (item.viatorPrice || item.estimatedCost)! > 0 && (
+                        <span className="text-[10px] font-medium text-green-600">dès {item.viatorPrice || item.estimatedCost}€</span>
                       )}
                     </div>
                   </div>
