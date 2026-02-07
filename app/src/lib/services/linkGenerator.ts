@@ -187,6 +187,21 @@ export function generateFlightLink(
 }
 
 /**
+ * Génère un lien Omio pour recherche de vols
+ * Format: /vols/{origin}/{destination}?departure_date=YYYY-MM-DD
+ */
+export function generateFlightOmioLink(
+  origin: string,
+  destination: string,
+  date?: string
+): string {
+  const originSlug = origin.toLowerCase().replace(/\s+/g, '-');
+  const destSlug = destination.toLowerCase().replace(/\s+/g, '-');
+  const dateParam = date ? `?departure_date=${date}` : '';
+  return `https://www.omio.fr/vols/${encodeURIComponent(originSlug)}/${encodeURIComponent(destSlug)}${dateParam}`;
+}
+
+/**
  * Convertit un lien Aviasales (ou autre) en lien affilié Travelpayouts
  * Appelle l'API interne /api/affiliate-link
  *

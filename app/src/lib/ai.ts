@@ -37,7 +37,7 @@ import { validateTripGeography } from './services/geoValidator';
 import { searchLuggageStorage, selectBestStorage, needsLuggageStorage, LuggageStorage } from './services/luggageStorage';
 import { calculateFlightScore, EARLY_MORNING_PENALTY } from './services/flightScoring';
 import { createLocationTracker, TravelerLocation } from './services/locationTracker';
-import { generateFlightLink, generateHotelLink, formatDateForUrl } from './services/linkGenerator';
+import { generateFlightLink, generateFlightOmioLink, generateHotelLink, formatDateForUrl } from './services/linkGenerator';
 import { searchAttractionsMultiQuery, searchMustSeeAttractions, searchGroceryStores, type GroceryStore } from './services/serpApiPlaces';
 import { resolveAttractionByName } from './services/overpassAttractions';
 import { resolveCoordinates, resetResolutionStats, getResolutionStats } from './services/coordsResolver';
@@ -2009,6 +2009,11 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
           { date: item.flight.departureTime.split('T')[0], passengers: preferences.groupSize }
         );
         item.aviasalesUrl = aviasalesUrl;
+        item.omioFlightUrl = generateFlightOmioLink(
+          item.flight.departureCity || item.flight.departureAirportCode,
+          item.flight.arrivalCity || item.flight.arrivalAirportCode,
+          item.flight.departureTime.split('T')[0]
+        );
 
         // Attacher les alternatives
         if (isOutbound && outboundFlightAlternatives.length > 0) {

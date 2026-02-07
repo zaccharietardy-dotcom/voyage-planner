@@ -11,7 +11,7 @@ import { getCheapestTrainPrice, type DBLeg } from './dbTransport';
 import { checkTransportFeasibility } from './transportFeasibility';
 import { findMultiModalOptions } from './multiModalTransport';
 import { calculateCarCost } from './carCostCalculator';
-import { generateFlightLink } from './linkGenerator';
+import { generateFlightLink, generateFlightOmioLink } from './linkGenerator';
 
 // Types
 export interface TransportOption {
@@ -45,6 +45,7 @@ export interface TransportOption {
   }[];
   // Range de prix [min, max] pour affichage "de X€ à Y€"
   priceRange?: [number, number];
+  omioFlightUrl?: string;
 }
 
 export interface TransportSegment {
@@ -460,6 +461,7 @@ function calculatePlaneOption(params: TransportSearchParams, distance: number): 
     { origin: params.origin, destination: params.destination },
     { date: dateStr, passengers: params.passengers || 1 }
   );
+  const omioFlightUrl = generateFlightOmioLink(params.origin, params.destination, dateStr);
 
   return {
     id: 'plane',
@@ -482,6 +484,7 @@ function calculatePlaneOption(params: TransportSearchParams, distance: number): 
     score: 0, // Calculé après
     scoreDetails: { priceScore: 0, timeScore: 0, co2Score: 0 },
     bookingUrl,
+    omioFlightUrl,
   };
 }
 

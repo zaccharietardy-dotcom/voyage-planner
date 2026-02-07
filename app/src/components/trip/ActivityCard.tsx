@@ -432,6 +432,15 @@ function BookingButtons({ item }: { item: TripItem }) {
         icon: <Plane className="h-3.5 w-3.5" />,
       });
     }
+    // Ajouter Omio comme 2e comparateur de vols
+    if (item.omioFlightUrl) {
+      buttons.push({
+        label: 'Omio',
+        url: item.omioFlightUrl,
+        bgColor: 'bg-blue-500 hover:bg-blue-600',
+        icon: <Plane className="h-3.5 w-3.5" />,
+      });
+    }
   }
 
   // Hôtel - Booking.com ou Airbnb
