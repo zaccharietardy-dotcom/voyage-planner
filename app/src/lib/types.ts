@@ -360,6 +360,7 @@ export interface TripItem {
     line?: string;          // "ICE 775", "TGV 9321", "Eurostar 9141"
   }[];
   transitDataSource?: 'api' | 'estimated'; // Source des données transit
+  priceRange?: [number, number]; // [min, max] pour affichage "de X€ à Y€"
   googleMapsUrl?: string; // Lien pour ouvrir l'itinéraire dans Google Maps
   googleMapsPlaceUrl?: string; // Lien de recherche Google Maps par nom (plus fiable que GPS!)
   dataReliability?: 'verified' | 'estimated' | 'generated'; // Fiabilité des données

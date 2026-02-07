@@ -980,6 +980,7 @@ export async function generateDayWithScheduler(params: {
           bookingUrl: groundTransport.bookingUrl,
           transitLegs: groundTransport.transitLegs,
           transitDataSource: groundTransport.dataSource,
+          priceRange: groundTransport.priceRange,
         }));
 
         // LOCATION TRACKING: Arrivée = à destination (activités possibles)
@@ -2095,6 +2096,7 @@ export async function generateDayWithScheduler(params: {
           bookingUrl: returnBookingUrl,
           transitLegs: groundTransport.transitLegs,
           transitDataSource: groundTransport.dataSource,
+          priceRange: groundTransport.priceRange,
         }));
       }
     } else {

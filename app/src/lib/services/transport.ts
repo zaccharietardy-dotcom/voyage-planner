@@ -43,6 +43,8 @@ export interface TransportOption {
     operator?: string;
     line?: string;
   }[];
+  // Range de prix [min, max] pour affichage "de X€ à Y€"
+  priceRange?: [number, number];
 }
 
 export interface TransportSegment {
@@ -124,56 +126,61 @@ function getRouteKey(a: string, b: string): string {
 }
 
 const KNOWN_TRAIN_ROUTES: Record<string, KnownTrainRoute> = {
-  // France interne
-  [getRouteKey('Paris', 'Lyon')]: { duration: 120, price: 50, priceRange: [25, 90], operator: 'SNCF TGV INOUI', highSpeed: true },
-  [getRouteKey('Paris', 'Marseille')]: { duration: 195, price: 65, priceRange: [30, 120], operator: 'SNCF TGV INOUI', highSpeed: true },
-  [getRouteKey('Paris', 'Bordeaux')]: { duration: 130, price: 55, priceRange: [25, 95], operator: 'SNCF TGV INOUI', highSpeed: true },
-  [getRouteKey('Paris', 'Lille')]: { duration: 62, price: 35, priceRange: [15, 60], operator: 'SNCF TGV INOUI', highSpeed: true },
-  [getRouteKey('Paris', 'Strasbourg')]: { duration: 105, price: 50, priceRange: [25, 85], operator: 'SNCF TGV INOUI', highSpeed: true },
-  [getRouteKey('Paris', 'Nantes')]: { duration: 135, price: 45, priceRange: [20, 80], operator: 'SNCF TGV INOUI', highSpeed: true },
-  [getRouteKey('Paris', 'Rennes')]: { duration: 90, price: 40, priceRange: [18, 70], operator: 'SNCF TGV INOUI', highSpeed: true },
-  [getRouteKey('Paris', 'Toulouse')]: { duration: 265, price: 65, priceRange: [30, 110], operator: 'SNCF TGV INOUI', highSpeed: true },
-  [getRouteKey('Paris', 'Nice')]: { duration: 340, price: 75, priceRange: [35, 130], operator: 'SNCF TGV INOUI', highSpeed: true },
-  [getRouteKey('Paris', 'Montpellier')]: { duration: 210, price: 55, priceRange: [25, 95], operator: 'SNCF TGV INOUI', highSpeed: true },
-  [getRouteKey('Paris', 'Caen')]: { duration: 115, price: 30, priceRange: [15, 45], operator: 'SNCF Intercités / Nomad', highSpeed: false },
-  [getRouteKey('Paris', 'Rouen')]: { duration: 85, price: 25, priceRange: [12, 38], operator: 'SNCF Intercités / Nomad', highSpeed: false },
-  [getRouteKey('Paris', 'Tours')]: { duration: 75, price: 35, priceRange: [15, 55], operator: 'SNCF TGV INOUI', highSpeed: true },
-  [getRouteKey('Paris', 'Dijon')]: { duration: 100, price: 40, priceRange: [20, 65], operator: 'SNCF TGV INOUI', highSpeed: true },
-  [getRouteKey('Paris', 'Avignon')]: { duration: 160, price: 50, priceRange: [25, 85], operator: 'SNCF TGV INOUI', highSpeed: true },
-  [getRouteKey('Paris', 'Angers')]: { duration: 95, price: 35, priceRange: [15, 55], operator: 'SNCF TGV INOUI', highSpeed: true },
-  [getRouteKey('Paris', 'Le Mans')]: { duration: 55, price: 30, priceRange: [12, 48], operator: 'SNCF TGV INOUI', highSpeed: true },
-  [getRouteKey('Lyon', 'Marseille')]: { duration: 105, price: 40, priceRange: [20, 65], operator: 'SNCF TGV INOUI', highSpeed: true },
-  [getRouteKey('Lyon', 'Montpellier')]: { duration: 120, price: 40, priceRange: [18, 60], operator: 'SNCF TGV INOUI', highSpeed: true },
-  // France → International
-  [getRouteKey('Paris', 'London')]: { duration: 135, price: 80, priceRange: [40, 250], operator: 'Eurostar', highSpeed: true },
-  [getRouteKey('Paris', 'Brussels')]: { duration: 82, price: 55, priceRange: [29, 120], operator: 'Eurostar / Thalys', highSpeed: true },
-  [getRouteKey('Paris', 'Amsterdam')]: { duration: 195, price: 65, priceRange: [35, 150], operator: 'Eurostar / Thalys', highSpeed: true },
-  [getRouteKey('Paris', 'Geneva')]: { duration: 195, price: 50, priceRange: [25, 90], operator: 'SNCF TGV Lyria', highSpeed: true },
-  [getRouteKey('Paris', 'Barcelona')]: { duration: 390, price: 80, priceRange: [39, 180], operator: 'SNCF TGV / Renfe AVE', highSpeed: true },
-  [getRouteKey('Paris', 'Frankfurt')]: { duration: 240, price: 60, priceRange: [29, 120], operator: 'SNCF TGV / ICE', highSpeed: true },
-  [getRouteKey('Paris', 'Milan')]: { duration: 425, price: 70, priceRange: [35, 150], operator: 'SNCF TGV / Trenitalia', highSpeed: true },
-  // Allemagne
-  [getRouteKey('Berlin', 'Munich')]: { duration: 240, price: 50, priceRange: [18, 130], operator: 'Deutsche Bahn ICE', highSpeed: true },
-  [getRouteKey('Berlin', 'Frankfurt')]: { duration: 255, price: 50, priceRange: [18, 120], operator: 'Deutsche Bahn ICE', highSpeed: true },
-  [getRouteKey('Berlin', 'Hamburg')]: { duration: 105, price: 35, priceRange: [15, 80], operator: 'Deutsche Bahn ICE', highSpeed: true },
-  [getRouteKey('Frankfurt', 'Munich')]: { duration: 200, price: 45, priceRange: [18, 100], operator: 'Deutsche Bahn ICE', highSpeed: true },
-  [getRouteKey('Frankfurt', 'Cologne')]: { duration: 65, price: 30, priceRange: [15, 60], operator: 'Deutsche Bahn ICE', highSpeed: true },
-  // Italie
-  [getRouteKey('Rome', 'Milan')]: { duration: 180, price: 50, priceRange: [20, 90], operator: 'Trenitalia Frecciarossa', highSpeed: true },
-  [getRouteKey('Rome', 'Florence')]: { duration: 95, price: 35, priceRange: [15, 60], operator: 'Trenitalia Frecciarossa', highSpeed: true },
-  [getRouteKey('Rome', 'Naples')]: { duration: 70, price: 25, priceRange: [10, 45], operator: 'Trenitalia Frecciarossa', highSpeed: true },
-  [getRouteKey('Milan', 'Florence')]: { duration: 100, price: 35, priceRange: [15, 55], operator: 'Trenitalia Frecciarossa', highSpeed: true },
-  [getRouteKey('Milan', 'Venice')]: { duration: 145, price: 30, priceRange: [12, 50], operator: 'Trenitalia Frecciarossa', highSpeed: true },
-  // Espagne
-  [getRouteKey('Madrid', 'Barcelona')]: { duration: 155, price: 45, priceRange: [20, 90], operator: 'Renfe AVE', highSpeed: true },
-  [getRouteKey('Madrid', 'Seville')]: { duration: 155, price: 40, priceRange: [20, 75], operator: 'Renfe AVE', highSpeed: true },
-  [getRouteKey('Madrid', 'Valencia')]: { duration: 100, price: 30, priceRange: [15, 55], operator: 'Renfe AVE', highSpeed: true },
-  // UK
-  [getRouteKey('London', 'Edinburgh')]: { duration: 270, price: 60, priceRange: [25, 150], operator: 'LNER', highSpeed: true },
-  [getRouteKey('London', 'Manchester')]: { duration: 130, price: 45, priceRange: [20, 100], operator: 'Avanti West Coast', highSpeed: true },
+  // France interne — prix Omio 2026
+  [getRouteKey('Paris', 'Lyon')]: { duration: 120, price: 60, priceRange: [30, 100], operator: 'SNCF TGV INOUI', highSpeed: true },
+  [getRouteKey('Paris', 'Marseille')]: { duration: 195, price: 80, priceRange: [40, 140], operator: 'SNCF TGV INOUI', highSpeed: true },
+  [getRouteKey('Paris', 'Bordeaux')]: { duration: 130, price: 65, priceRange: [30, 110], operator: 'SNCF TGV INOUI', highSpeed: true },
+  [getRouteKey('Paris', 'Lille')]: { duration: 62, price: 40, priceRange: [20, 70], operator: 'SNCF TGV INOUI', highSpeed: true },
+  [getRouteKey('Paris', 'Strasbourg')]: { duration: 105, price: 60, priceRange: [30, 100], operator: 'SNCF TGV INOUI', highSpeed: true },
+  [getRouteKey('Paris', 'Nantes')]: { duration: 135, price: 55, priceRange: [25, 90], operator: 'SNCF TGV INOUI', highSpeed: true },
+  [getRouteKey('Paris', 'Rennes')]: { duration: 90, price: 50, priceRange: [25, 80], operator: 'SNCF TGV INOUI', highSpeed: true },
+  [getRouteKey('Paris', 'Toulouse')]: { duration: 265, price: 80, priceRange: [40, 130], operator: 'SNCF TGV INOUI', highSpeed: true },
+  [getRouteKey('Paris', 'Nice')]: { duration: 340, price: 90, priceRange: [45, 160], operator: 'SNCF TGV INOUI', highSpeed: true },
+  [getRouteKey('Paris', 'Montpellier')]: { duration: 210, price: 70, priceRange: [35, 110], operator: 'SNCF TGV INOUI', highSpeed: true },
+  [getRouteKey('Paris', 'Caen')]: { duration: 115, price: 35, priceRange: [18, 55], operator: 'SNCF Intercités / Nomad', highSpeed: false },
+  [getRouteKey('Paris', 'Rouen')]: { duration: 85, price: 30, priceRange: [15, 45], operator: 'SNCF Intercités / Nomad', highSpeed: false },
+  [getRouteKey('Paris', 'Tours')]: { duration: 75, price: 40, priceRange: [20, 65], operator: 'SNCF TGV INOUI', highSpeed: true },
+  [getRouteKey('Paris', 'Dijon')]: { duration: 100, price: 50, priceRange: [25, 80], operator: 'SNCF TGV INOUI', highSpeed: true },
+  [getRouteKey('Paris', 'Avignon')]: { duration: 160, price: 65, priceRange: [30, 100], operator: 'SNCF TGV INOUI', highSpeed: true },
+  [getRouteKey('Paris', 'Angers')]: { duration: 95, price: 40, priceRange: [20, 65], operator: 'SNCF TGV INOUI', highSpeed: true },
+  [getRouteKey('Paris', 'Le Mans')]: { duration: 55, price: 35, priceRange: [18, 55], operator: 'SNCF TGV INOUI', highSpeed: true },
+  [getRouteKey('Lyon', 'Marseille')]: { duration: 105, price: 50, priceRange: [25, 80], operator: 'SNCF TGV INOUI', highSpeed: true },
+  [getRouteKey('Lyon', 'Montpellier')]: { duration: 120, price: 50, priceRange: [25, 75], operator: 'SNCF TGV INOUI', highSpeed: true },
+  [getRouteKey('Marseille', 'Nice')]: { duration: 155, price: 35, priceRange: [15, 55], operator: 'SNCF TER / ZOU!', highSpeed: false },
+  // France → International — prix Omio 2026
+  [getRouteKey('Paris', 'London')]: { duration: 135, price: 150, priceRange: [80, 300], operator: 'Eurostar', highSpeed: true },
+  [getRouteKey('Paris', 'Brussels')]: { duration: 82, price: 80, priceRange: [50, 150], operator: 'Eurostar', highSpeed: true },
+  [getRouteKey('Paris', 'Amsterdam')]: { duration: 195, price: 130, priceRange: [85, 200], operator: 'Eurostar', highSpeed: true },
+  [getRouteKey('Paris', 'Geneva')]: { duration: 195, price: 65, priceRange: [35, 110], operator: 'SNCF TGV Lyria', highSpeed: true },
+  [getRouteKey('Paris', 'Barcelona')]: { duration: 390, price: 120, priceRange: [60, 220], operator: 'SNCF TGV / Renfe AVE', highSpeed: true },
+  [getRouteKey('Paris', 'Frankfurt')]: { duration: 240, price: 80, priceRange: [40, 150], operator: 'SNCF TGV / ICE', highSpeed: true },
+  [getRouteKey('Paris', 'Milan')]: { duration: 425, price: 100, priceRange: [50, 180], operator: 'SNCF TGV / Trenitalia', highSpeed: true },
+  [getRouteKey('Lyon', 'Milan')]: { duration: 300, price: 70, priceRange: [35, 130], operator: 'SNCF TGV / Trenitalia', highSpeed: true },
+  [getRouteKey('London', 'Amsterdam')]: { duration: 225, price: 140, priceRange: [80, 250], operator: 'Eurostar', highSpeed: true },
+  [getRouteKey('London', 'Brussels')]: { duration: 120, price: 100, priceRange: [55, 200], operator: 'Eurostar', highSpeed: true },
+  [getRouteKey('Brussels', 'Amsterdam')]: { duration: 115, price: 45, priceRange: [25, 80], operator: 'Eurostar / NS International', highSpeed: true },
+  // Allemagne — prix DB 2026
+  [getRouteKey('Berlin', 'Munich')]: { duration: 240, price: 70, priceRange: [30, 150], operator: 'Deutsche Bahn ICE', highSpeed: true },
+  [getRouteKey('Berlin', 'Frankfurt')]: { duration: 255, price: 70, priceRange: [30, 140], operator: 'Deutsche Bahn ICE', highSpeed: true },
+  [getRouteKey('Berlin', 'Hamburg')]: { duration: 105, price: 45, priceRange: [20, 90], operator: 'Deutsche Bahn ICE', highSpeed: true },
+  [getRouteKey('Frankfurt', 'Munich')]: { duration: 200, price: 60, priceRange: [25, 120], operator: 'Deutsche Bahn ICE', highSpeed: true },
+  [getRouteKey('Frankfurt', 'Cologne')]: { duration: 65, price: 40, priceRange: [20, 70], operator: 'Deutsche Bahn ICE', highSpeed: true },
+  // Italie — prix Trenitalia 2026
+  [getRouteKey('Rome', 'Milan')]: { duration: 180, price: 60, priceRange: [30, 110], operator: 'Trenitalia Frecciarossa', highSpeed: true },
+  [getRouteKey('Rome', 'Florence')]: { duration: 95, price: 45, priceRange: [20, 75], operator: 'Trenitalia Frecciarossa', highSpeed: true },
+  [getRouteKey('Rome', 'Naples')]: { duration: 70, price: 30, priceRange: [15, 55], operator: 'Trenitalia Frecciarossa', highSpeed: true },
+  [getRouteKey('Milan', 'Florence')]: { duration: 100, price: 45, priceRange: [20, 70], operator: 'Trenitalia Frecciarossa', highSpeed: true },
+  [getRouteKey('Milan', 'Venice')]: { duration: 145, price: 40, priceRange: [18, 65], operator: 'Trenitalia Frecciarossa', highSpeed: true },
+  // Espagne — prix Renfe 2026
+  [getRouteKey('Madrid', 'Barcelona')]: { duration: 155, price: 60, priceRange: [30, 110], operator: 'Renfe AVE', highSpeed: true },
+  [getRouteKey('Madrid', 'Seville')]: { duration: 155, price: 50, priceRange: [25, 90], operator: 'Renfe AVE', highSpeed: true },
+  [getRouteKey('Madrid', 'Valencia')]: { duration: 100, price: 40, priceRange: [20, 70], operator: 'Renfe AVE', highSpeed: true },
+  // UK — prix 2026
+  [getRouteKey('London', 'Edinburgh')]: { duration: 270, price: 80, priceRange: [35, 180], operator: 'LNER', highSpeed: true },
+  [getRouteKey('London', 'Manchester')]: { duration: 130, price: 60, priceRange: [30, 120], operator: 'Avanti West Coast', highSpeed: true },
   // Suisse
-  [getRouteKey('Zurich', 'Geneva')]: { duration: 170, price: 50, priceRange: [30, 80], operator: 'SBB/CFF', highSpeed: true },
-  [getRouteKey('Zurich', 'Bern')]: { duration: 56, price: 25, priceRange: [15, 40], operator: 'SBB/CFF', highSpeed: true },
+  [getRouteKey('Zurich', 'Geneva')]: { duration: 170, price: 55, priceRange: [35, 90], operator: 'SBB/CFF', highSpeed: true },
+  [getRouteKey('Zurich', 'Bern')]: { duration: 56, price: 30, priceRange: [20, 50], operator: 'SBB/CFF', highSpeed: true },
   // Japon
   [getRouteKey('Tokyo', 'Kyoto')]: { duration: 135, price: 115, priceRange: [110, 120], operator: 'JR Shinkansen Nozomi', highSpeed: true },
   [getRouteKey('Tokyo', 'Osaka')]: { duration: 150, price: 120, priceRange: [115, 125], operator: 'JR Shinkansen Nozomi', highSpeed: true },
@@ -512,6 +519,8 @@ async function calculateTrainOptionInner(params: TransportSearchParams, distance
   }
 
   const isHighSpeed = hasDirectHighSpeedRail(params.origin, params.destination);
+  // Toujours chercher la known route pour le priceRange
+  const knownRouteForRange = findKnownRoute(params.origin, params.destination);
 
   console.log(`[Train] calculateTrainOption: ${params.origin} → ${params.destination}, distance: ${Math.round(distance)}km, isHighSpeed: ${isHighSpeed}`);
 
@@ -522,7 +531,8 @@ async function calculateTrainOptionInner(params: TransportSearchParams, distance
       console.log(`[Train] Skipping train: no high-speed rail, distance > 1000km, and no DB API result`);
       return null;
     }
-    return buildTrainOption(params, distance, dbResult.duration, dbResult.price || 0, dbResult.operator, 'api', dbResult.legs);
+    const price = dbResult.price || knownRouteForRange?.price || 0;
+    return buildTrainOption(params, distance, dbResult.duration, price, dbResult.operator, 'api', dbResult.legs, knownRouteForRange?.priceRange);
   }
 
   let travelTime: number;
@@ -531,7 +541,7 @@ async function calculateTrainOptionInner(params: TransportSearchParams, distance
   let dataSource: 'api' | 'estimated' = 'estimated';
   let dbLegs: DBLeg[] | undefined;
 
-  // 1. Try DB Transport REST API (real-time prices + schedules)
+  // 1. Try Transitous/Google API (real-time schedules)
   try {
     const dbResult = await getCheapestTrainPrice(params.origin, params.destination, params.date);
     if (dbResult && dbResult.duration > 0) {
@@ -540,12 +550,11 @@ async function calculateTrainOptionInner(params: TransportSearchParams, distance
       operator = dbResult.operator;
       dataSource = 'api';
       dbLegs = dbResult.legs;
-      console.log(`[Train] DB API result: ${travelTime}min, ${price > 0 ? price + '€' : 'no price'}, ${operator}, ${dbResult.transfers} transfers, ${dbLegs.length} legs`);
+      console.log(`[Train] API result: ${travelTime}min, ${price > 0 ? price + '€' : 'no price'}, ${operator}, ${dbResult.transfers} transfers, ${dbLegs.length} legs`);
 
       if (price === 0) {
-        const knownRoute = findKnownRoute(params.origin, params.destination);
-        if (knownRoute) {
-          price = knownRoute.price;
+        if (knownRouteForRange) {
+          price = knownRouteForRange.price;
           console.log(`[Train] Using known route price as supplement: ${price}€`);
         } else {
           const pricePerKm = isHighSpeed ? PRICE_PER_KM.train_highspeed : PRICE_PER_KM.train_regular;
@@ -554,21 +563,20 @@ async function calculateTrainOptionInner(params: TransportSearchParams, distance
         }
       }
 
-      return buildTrainOption(params, distance, travelTime, price, operator, dataSource, dbLegs);
+      return buildTrainOption(params, distance, travelTime, price, operator, dataSource, dbLegs, knownRouteForRange?.priceRange);
     }
   } catch (err) {
-    console.warn(`[Train] DB API error, falling back:`, err instanceof Error ? err.message : err);
+    console.warn(`[Train] API error, falling back:`, err instanceof Error ? err.message : err);
   }
 
   // 2. Try known routes database
-  const knownRoute = findKnownRoute(params.origin, params.destination);
-  if (knownRoute) {
-    travelTime = knownRoute.duration;
-    price = knownRoute.price;
-    operator = knownRoute.operator;
+  if (knownRouteForRange) {
+    travelTime = knownRouteForRange.duration;
+    price = knownRouteForRange.price;
+    operator = knownRouteForRange.operator;
     dataSource = 'api';
     console.log(`[Train] Using known route: ${travelTime}min, ${price}€, ${operator}`);
-    return buildTrainOption(params, distance, travelTime, price, operator, dataSource);
+    return buildTrainOption(params, distance, travelTime, price, operator, dataSource, undefined, knownRouteForRange.priceRange);
   }
 
   // 3. Fallback: distance-based estimation
@@ -590,7 +598,8 @@ function buildTrainOption(
   price: number,
   operator: string,
   dataSource: 'api' | 'estimated',
-  dbLegs?: DBLeg[]
+  dbLegs?: DBLeg[],
+  priceRange?: [number, number]
 ): TransportOption {
   const isHighSpeed = travelTime > 0 && distance > 0 && (distance / (travelTime / 60)) > 150;
   const totalDuration = travelTime +
@@ -639,6 +648,7 @@ function buildTrainOption(
     bookingUrl,
     dataSource,
     transitLegs,
+    priceRange,
   };
 }
 

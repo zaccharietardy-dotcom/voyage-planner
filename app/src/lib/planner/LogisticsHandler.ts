@@ -96,6 +96,7 @@ function toTripItem(
     parking?: ParkingOption;
     transitLegs?: TripItem['transitLegs'];
     transitDataSource?: TripItem['transitDataSource'];
+    priceRange?: TripItem['priceRange'];
   }
 ): TripItem {
   return {
@@ -116,6 +117,7 @@ function toTripItem(
     parking: data.parking,
     transitLegs: data.transitLegs,
     transitDataSource: data.transitDataSource,
+    priceRange: data.priceRange,
   };
 }
 
@@ -661,6 +663,7 @@ export class LogisticsHandler {
         bookingUrl: groundTransport.bookingUrl,
         transitLegs: groundTransport.transitLegs,
         transitDataSource: groundTransport.dataSource,
+        priceRange: groundTransport.priceRange,
       }));
     }
 
@@ -935,6 +938,7 @@ export class LogisticsHandler {
         bookingUrl: groundTransport.bookingUrl,
         transitLegs: groundTransport.transitLegs,
         transitDataSource: groundTransport.dataSource,
+        priceRange: groundTransport.priceRange,
       }));
     }
 

@@ -411,6 +411,13 @@ function parseTransitousItinerary(it: TransitousItinerary): DBJourney | null {
       : isBus ? 'bus' as const
       : 'train' as const;
 
+    // Nettoyer le nom de ligne : les codes GTFS comme "FRPNO -> BEBMI" ne sont pas lisibles
+    let lineName = leg.routeShortName || leg.routeLongName || '';
+    if (lineName.includes('->') || lineName.includes(' -> ') || /^[A-Z]{3,}[0-9]*$/.test(lineName)) {
+      // Code GTFS technique → utiliser l'opérateur comme fallback
+      lineName = leg.agencyName || lineName;
+    }
+
     legs.push({
       mode,
       from: leg.from.name,
@@ -419,7 +426,7 @@ function parseTransitousItinerary(it: TransitousItinerary): DBJourney | null {
       arrival: leg.endTime,
       duration: Math.round(leg.duration / 60),
       operator: leg.agencyName,
-      line: leg.routeShortName || leg.routeLongName,
+      line: lineName || undefined,
     });
   }
 
@@ -499,8 +506,8 @@ export async function getCheapestTrainPrice(
 
   if (journeys.length === 0) return null;
 
-  // Prendre le trajet le plus rapide (puisqu'on n'a pas les prix)
-  const best = journeys.reduce((a, b) => a.duration < b.duration ? a : b);
+  // Prendre le premier trajet chronologiquement (le plus tôt après l'heure demandée)
+  const best = journeys.reduce((a, b) => a.departureTime < b.departureTime ? a : b);
   const operator = best.legs[0]?.operator || best.legs[0]?.line || 'Train';
 
   return {

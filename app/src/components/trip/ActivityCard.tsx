@@ -635,10 +635,17 @@ function TransportCard({ item }: { item: TripItem }) {
                     {formatTime(leg.departure)} → {formatTime(leg.arrival)}
                   </span>
                 </div>
-                {/* Ligne / opérateur */}
+                {/* Ligne / opérateur — nettoyer les codes GTFS */}
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-white dark:bg-gray-800 border font-medium">
                   {leg.mode === 'bus' ? <Bus className="h-3 w-3" /> : <TrainFront className="h-3 w-3" />}
-                  {leg.line || leg.operator || 'Train'}
+                  {(() => {
+                    const raw = leg.line || leg.operator || 'Train';
+                    // Si c'est un code GTFS (contient "->"), afficher l'opérateur à la place
+                    if (raw.includes('->') || /^[A-Z]{3,}[0-9]*$/.test(raw)) {
+                      return leg.operator || 'Train';
+                    }
+                    return raw;
+                  })()}
                 </span>
                 {/* Durée */}
                 <span className="text-xs text-muted-foreground">
@@ -676,17 +683,22 @@ function TransportCard({ item }: { item: TripItem }) {
           </div>
         )}
 
-        {/* Prix estimé */}
-        {item.estimatedCost != null && item.estimatedCost > 0 && (
+        {/* Prix — range de prix si disponible, sinon estimé */}
+        {item.priceRange ? (
           <div className="flex items-center gap-1.5">
             <span className="font-medium text-sm text-blue-600 dark:text-blue-400">
-              {isRealTime ? '' : 'à partir de ~'}{item.estimatedCost}€
+              de {item.priceRange[0]}€ à {item.priceRange[1]}€
             </span>
-            {!isRealTime && (
-              <span className="text-[10px] text-muted-foreground">(estimé)</span>
-            )}
+            <span className="text-[10px] text-muted-foreground">/ pers.</span>
           </div>
-        )}
+        ) : item.estimatedCost != null && item.estimatedCost > 0 ? (
+          <div className="flex items-center gap-1.5">
+            <span className="font-medium text-sm text-blue-600 dark:text-blue-400">
+              à partir de ~{item.estimatedCost}€
+            </span>
+            <span className="text-[10px] text-muted-foreground">(estimé)</span>
+          </div>
+        ) : null}
 
         {/* Transit lines from transitInfo (Eurostar, Thalys badges - si pas de legs DB) */}
         {!hasRealData && item.transitInfo?.lines && item.transitInfo.lines.length > 0 && (
