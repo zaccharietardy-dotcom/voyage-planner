@@ -599,137 +599,103 @@ function TransportCard({ item }: { item: TripItem }) {
     return `${min}min`;
   };
 
+  // Nettoyer un nom de ligne GTFS
+  const cleanLineName = (leg: { line?: string; operator?: string }) => {
+    const raw = leg.line || leg.operator || 'Train';
+    if (raw.includes('->') || /^[A-Z]{3,}[0-9]*$/.test(raw)) {
+      return leg.operator || 'Train';
+    }
+    return raw;
+  };
+
   return (
-    <a
-      href={bookingUrl}
-      target="_blank"
-      rel="noopener noreferrer"
-      onClick={(e) => e.stopPropagation()}
-      className="block mt-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 hover:shadow-md transition-all overflow-hidden"
-    >
-      {/* Header */}
-      <div className="bg-slate-800 dark:bg-slate-800 px-4 py-2.5 flex items-center gap-2">
-        <ModeIcon className="h-4 w-4 text-white" />
-        <span className="text-white font-medium text-sm truncate">
-          {origin && destination ? `${origin} → ${destination}` : item.title}
-        </span>
-        {isRealTime && (
-          <span className="ml-auto text-[10px] bg-white/20 text-white px-1.5 py-0.5 rounded-full">
-            Horaires réels
-          </span>
-        )}
-      </div>
-
-      {/* Contenu */}
-      <div className="px-4 py-3 space-y-2.5">
-
-        {/* Legs détaillés DB HAFAS */}
-        {hasRealData ? (
-          <div className="space-y-1.5">
-            {legs.map((leg, idx) => (
-              <div key={idx} className="flex items-center gap-2 text-sm">
-                {/* Horaires */}
-                <div className="flex items-center gap-1 text-muted-foreground min-w-[90px]">
-                  <Clock className="h-3 w-3 shrink-0" />
-                  <span className="font-mono text-xs">
-                    {formatTime(leg.departure)} → {formatTime(leg.arrival)}
-                  </span>
-                </div>
-                {/* Ligne / opérateur — nettoyer les codes GTFS */}
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-white dark:bg-gray-800 border font-medium">
-                  {leg.mode === 'bus' ? <Bus className="h-3 w-3" /> : <TrainFront className="h-3 w-3" />}
-                  {(() => {
-                    const raw = leg.line || leg.operator || 'Train';
-                    // Si c'est un code GTFS (contient "->"), afficher l'opérateur à la place
-                    if (raw.includes('->') || /^[A-Z]{3,}[0-9]*$/.test(raw)) {
-                      return leg.operator || 'Train';
-                    }
-                    return raw;
-                  })()}
-                </span>
-                {/* Durée */}
-                <span className="text-xs text-muted-foreground">
-                  {formatDuration(leg.duration)}
-                </span>
-                {/* Correspondance */}
-                {idx < legs.length - 1 && (
-                  <span className="text-[10px] text-orange-600 dark:text-orange-400 ml-auto">
-                    ↓ correspondance
-                  </span>
-                )}
-              </div>
-            ))}
-            {/* Résumé : durée totale + correspondances */}
-            {legs.length > 1 && (
-              <div className="text-xs text-muted-foreground pt-0.5">
-                {legs.length - 1} correspondance{legs.length > 2 ? 's' : ''} · durée totale ~{item.duration ? formatDuration(item.duration) : ''}
-              </div>
-            )}
-          </div>
-        ) : (
-          /* Fallback : ancien affichage si pas de données DB */
-          <div className="flex items-center gap-3 text-sm text-muted-foreground">
-            {item.startTime && item.endTime && (
-              <span className="flex items-center gap-1">
-                <Clock className="h-3.5 w-3.5" />
-                {item.startTime} → {item.endTime}
+    <div className="mt-2.5 space-y-2" onClick={(e) => e.stopPropagation()}>
+      {/* Horaires réels + legs */}
+      {hasRealData ? (
+        <div className="space-y-1.5">
+          {legs.map((leg, idx) => (
+            <div key={idx} className="flex items-center gap-2.5 text-sm">
+              <span className="font-mono text-xs text-primary font-semibold min-w-[100px]">
+                {formatTime(leg.departure)} → {formatTime(leg.arrival)}
               </span>
-            )}
-            {item.duration && item.duration > 0 && (
-              <span className="text-xs">
-                ~{formatDuration(item.duration)}
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs border border-primary/30 bg-primary/5 text-foreground font-medium">
+                {leg.mode === 'bus' ? <Bus className="h-3 w-3 text-primary" /> : <TrainFront className="h-3 w-3 text-primary" />}
+                {cleanLineName(leg)}
               </span>
-            )}
-          </div>
-        )}
-
-        {/* Prix — range de prix si disponible, sinon estimé */}
-        {item.priceRange ? (
-          <div className="flex items-center gap-1.5">
-            <span className="font-medium text-sm text-blue-600 dark:text-blue-400">
-              de {item.priceRange[0]}€ à {item.priceRange[1]}€
-            </span>
-            <span className="text-[10px] text-muted-foreground">/ pers.</span>
-          </div>
-        ) : item.estimatedCost != null && item.estimatedCost > 0 ? (
-          <div className="flex items-center gap-1.5">
-            <span className="font-medium text-sm text-blue-600 dark:text-blue-400">
-              à partir de ~{item.estimatedCost}€
-            </span>
-            <span className="text-[10px] text-muted-foreground">(estimé)</span>
-          </div>
-        ) : null}
-
-        {/* Transit lines from transitInfo (Eurostar, Thalys badges - si pas de legs DB) */}
-        {!hasRealData && item.transitInfo?.lines && item.transitInfo.lines.length > 0 && (
-          <div className="flex items-center gap-1.5 flex-wrap">
-            {item.transitInfo.lines.map((line, idx) => {
-              const LineIcon = TRANSIT_MODE_ICONS[line.mode] || Bus;
-              return (
-                <span
-                  key={`${line.mode}-${line.number}-${idx}`}
-                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-white dark:bg-gray-800 border text-muted-foreground"
-                >
-                  <LineIcon className="h-3 w-3" />
-                  {line.number}
+              <span className="text-xs text-muted-foreground">
+                {formatDuration(leg.duration)}
+              </span>
+              {idx < legs.length - 1 && (
+                <span className="text-[10px] text-primary/60 ml-auto">
+                  ↓ correspondance
                 </span>
-              );
-            })}
-          </div>
-        )}
-
-        {/* CTA */}
-        <div className="flex items-center justify-between pt-1">
-          <span className="text-xs text-muted-foreground italic">
-            {isRealTime ? 'Réserver sur' : 'Prix et horaires exacts sur'} {isOmio ? 'Omio' : 'le site'}
-          </span>
-          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-600 text-white text-xs font-medium">
-            <Search className="h-3 w-3" />
-            {isRealTime ? 'Réserver' : `Voir les ${isBus ? 'bus' : 'trains'}`}
-          </span>
+              )}
+            </div>
+          ))}
+          {legs.length > 1 && (
+            <div className="text-[11px] text-muted-foreground">
+              {legs.length - 1} correspondance{legs.length > 2 ? 's' : ''} · ~{item.duration ? formatDuration(item.duration) : ''}
+            </div>
+          )}
         </div>
+      ) : (
+        <div className="flex items-center gap-3 text-sm text-muted-foreground">
+          {item.startTime && item.endTime && (
+            <span className="flex items-center gap-1">
+              <Clock className="h-3.5 w-3.5" />
+              {item.startTime} → {item.endTime}
+            </span>
+          )}
+          {item.duration && item.duration > 0 && (
+            <span className="text-xs">~{formatDuration(item.duration)}</span>
+          )}
+        </div>
+      )}
+
+      {/* Transit lines badges si pas de legs réels */}
+      {!hasRealData && item.transitInfo?.lines && item.transitInfo.lines.length > 0 && (
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {item.transitInfo.lines.map((line, idx) => {
+            const LineIcon = TRANSIT_MODE_ICONS[line.mode] || Bus;
+            return (
+              <span
+                key={`${line.mode}-${line.number}-${idx}`}
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs border border-primary/30 bg-primary/5 text-muted-foreground"
+              >
+                <LineIcon className="h-3 w-3" />
+                {line.number}
+              </span>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Prix + CTA sur une ligne */}
+      <div className="flex items-center justify-between">
+        <div>
+          {item.priceRange ? (
+            <span className="text-sm">
+              <span className="font-semibold text-primary">{item.priceRange[0]}€ – {item.priceRange[1]}€</span>
+              <span className="text-[10px] text-muted-foreground ml-1">/ pers.</span>
+            </span>
+          ) : item.estimatedCost != null && item.estimatedCost > 0 ? (
+            <span className="text-sm">
+              <span className="font-semibold text-primary">~{item.estimatedCost}€</span>
+              <span className="text-[10px] text-muted-foreground ml-1">(estimé)</span>
+            </span>
+          ) : null}
+        </div>
+        <a
+          href={bookingUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-primary text-primary-foreground text-xs font-medium hover:opacity-90 transition-opacity"
+        >
+          <ExternalLink className="h-3 w-3" />
+          {isRealTime ? 'Réserver' : `Voir sur ${isOmio ? 'Omio' : 'le site'}`}
+        </a>
       </div>
-    </a>
+    </div>
   );
 }
 
