@@ -158,6 +158,13 @@ ${mealPreference && mealPreference !== 'auto' ? `- IMPORTANT: L'utilisateur a ex
 
     const strategy: BudgetStrategy = JSON.parse(jsonStr);
 
+    // Derive maxPricePerActivity from budget level if not set by Claude
+    if (!strategy.maxPricePerActivity) {
+      strategy.maxPricePerActivity = resolved.budgetLevel === 'economic' ? 25
+        : resolved.budgetLevel === 'moderate' ? 50
+        : resolved.budgetLevel === 'comfort' ? 80 : 200;
+    }
+
     // Guard: apply user meal preference override
     if (mealPreference && mealPreference !== 'auto') {
       const meals = strategy.mealsStrategy;
@@ -244,6 +251,7 @@ function getDefaultStrategy(budgetLevel: BudgetLevel): BudgetStrategy {
         groceryShoppingNeeded: true,
         activitiesLevel: 'mostly_free',
         dailyActivityBudget: 10,
+        maxPricePerActivity: 25,
         transportTips: 'Privilégier transports en commun et marche',
         reasoning: 'Budget serré, Airbnb avec cuisine pour économiser sur les repas',
       };
@@ -255,6 +263,7 @@ function getDefaultStrategy(budgetLevel: BudgetLevel): BudgetStrategy {
         groceryShoppingNeeded: false,
         activitiesLevel: 'mixed',
         dailyActivityBudget: 25,
+        maxPricePerActivity: 50,
         transportTips: 'Mix transports en commun et quelques taxis',
         reasoning: 'Budget modéré, hôtel correct avec restaurants',
       };
@@ -266,6 +275,7 @@ function getDefaultStrategy(budgetLevel: BudgetLevel): BudgetStrategy {
         groceryShoppingNeeded: false,
         activitiesLevel: 'mixed',
         dailyActivityBudget: 40,
+        maxPricePerActivity: 80,
         transportTips: 'Transports variés selon confort',
         reasoning: 'Budget confortable, hôtel et restaurants sans restriction',
       };
@@ -277,6 +287,7 @@ function getDefaultStrategy(budgetLevel: BudgetLevel): BudgetStrategy {
         groceryShoppingNeeded: false,
         activitiesLevel: 'premium',
         dailyActivityBudget: 80,
+        maxPricePerActivity: 200,
         transportTips: 'Taxis et transferts privés',
         reasoning: 'Budget luxe, meilleures expériences sans limite',
       };

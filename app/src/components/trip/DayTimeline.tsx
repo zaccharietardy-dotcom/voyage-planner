@@ -26,6 +26,7 @@ interface DayTimelineProps {
   day: TripDay;
   selectedItemId?: string;
   globalIndexOffset?: number;
+  mapNumbers?: Map<string, number>;
   onSelectItem?: (item: TripItem) => void;
   onEditItem?: (item: TripItem) => void;
   onDeleteItem?: (item: TripItem) => void;
@@ -59,6 +60,7 @@ export function DayTimeline({
   day,
   selectedItemId,
   globalIndexOffset = 0,
+  mapNumbers,
   onSelectItem,
   onEditItem,
   onDeleteItem,
@@ -121,7 +123,7 @@ export function DayTimeline({
 
               <ActivityCard
                 item={item}
-                orderNumber={globalIndexOffset + index + 1}
+                orderNumber={mapNumbers?.get(item.id) ?? (globalIndexOffset + index + 1)}
                 isSelected={selectedItemId === item.id}
                 onSelect={() => onSelectItem?.(item)}
                 onEdit={() => onEditItem?.(item)}

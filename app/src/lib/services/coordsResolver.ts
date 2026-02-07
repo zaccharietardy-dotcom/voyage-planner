@@ -13,9 +13,30 @@
  */
 
 import { resolveAttractionByName } from './overpassAttractions';
-import { geocodeAddress } from './geocoding';
+import { geocodeAddress, calculateDistance } from './geocoding';
 import { geocodeWithGemini } from './geminiSearch';
 import { geocodeViaSerpApi } from './serpApiPlaces';
+
+// Distance maximale acceptée entre le résultat API et le centre de destination
+const MAX_RESOLUTION_DISTANCE_KM = 30;
+
+/**
+ * Vérifie que les coordonnées résolues sont bien proches de la destination
+ * Rejette les résultats d'une autre ville (ex: Lisbonne pour un trip Barcelone)
+ */
+function isResultNearDestination(
+  result: { lat: number; lng: number },
+  nearbyCoords: { lat: number; lng: number },
+  name: string,
+  source: string
+): boolean {
+  const distance = calculateDistance(result.lat, result.lng, nearbyCoords.lat, nearbyCoords.lng);
+  if (distance > MAX_RESOLUTION_DISTANCE_KM) {
+    console.warn(`[CoordsResolver] ❌ ${source} rejeté pour "${name}": ${distance.toFixed(1)}km de la destination (max ${MAX_RESOLUTION_DISTANCE_KM}km)`);
+    return false;
+  }
+  return true;
+}
 
 export interface ResolutionResult {
   lat: number;
@@ -90,16 +111,19 @@ export async function resolveCoordinates(
   try {
     const travelResult = await resolveAttractionByName(name, nearbyCoords);
     if (travelResult && travelResult.lat && travelResult.lng) {
-      const result: ResolutionResult = {
-        lat: travelResult.lat,
-        lng: travelResult.lng,
-        source: 'travel_places',
-      };
-      resolutionCache.set(cacheKey, result);
-      resolutionsBySource.travel_places++;
-      totalResolved++;
-      console.log(`[CoordsResolver] ✅ Travel Places: "${name}" → (${result.lat.toFixed(4)}, ${result.lng.toFixed(4)})`);
-      return result;
+      if (isResultNearDestination(travelResult, nearbyCoords, name, 'Travel Places')) {
+        const result: ResolutionResult = {
+          lat: travelResult.lat,
+          lng: travelResult.lng,
+          source: 'travel_places',
+        };
+        resolutionCache.set(cacheKey, result);
+        resolutionsBySource.travel_places++;
+        totalResolved++;
+        console.log(`[CoordsResolver] ✅ Travel Places: "${name}" → (${result.lat.toFixed(4)}, ${result.lng.toFixed(4)})`);
+        return result;
+      }
+      // Result too far from destination, try next API
     }
   } catch (e) {
     console.warn(`[CoordsResolver] Travel Places échoué pour "${name}":`, e);
@@ -110,17 +134,20 @@ export async function resolveCoordinates(
     const geoQuery = `${name}, ${city}`;
     const geo = await geocodeAddress(geoQuery);
     if (geo && geo.lat && geo.lng) {
-      const result: ResolutionResult = {
-        lat: geo.lat,
-        lng: geo.lng,
-        source: 'nominatim',
-        address: geo.displayName,
-      };
-      resolutionCache.set(cacheKey, result);
-      resolutionsBySource.nominatim++;
-      totalResolved++;
-      console.log(`[CoordsResolver] ✅ Nominatim: "${name}" → (${result.lat.toFixed(4)}, ${result.lng.toFixed(4)})`);
-      return result;
+      if (isResultNearDestination(geo, nearbyCoords, name, 'Nominatim')) {
+        const result: ResolutionResult = {
+          lat: geo.lat,
+          lng: geo.lng,
+          source: 'nominatim',
+          address: geo.displayName,
+        };
+        resolutionCache.set(cacheKey, result);
+        resolutionsBySource.nominatim++;
+        totalResolved++;
+        console.log(`[CoordsResolver] ✅ Nominatim: "${name}" → (${result.lat.toFixed(4)}, ${result.lng.toFixed(4)})`);
+        return result;
+      }
+      // Result too far from destination, try next API
     }
   } catch (e) {
     console.warn(`[CoordsResolver] Nominatim échoué pour "${name}":`, e);
@@ -130,17 +157,20 @@ export async function resolveCoordinates(
   try {
     const geminiResult = await geocodeWithGemini(name, city);
     if (geminiResult && geminiResult.lat && geminiResult.lng) {
-      const result: ResolutionResult = {
-        lat: geminiResult.lat,
-        lng: geminiResult.lng,
-        source: 'gemini',
-        address: geminiResult.address,
-      };
-      resolutionCache.set(cacheKey, result);
-      resolutionsBySource.gemini++;
-      totalResolved++;
-      console.log(`[CoordsResolver] ✅ Gemini: "${name}" → (${result.lat.toFixed(4)}, ${result.lng.toFixed(4)})`);
-      return result;
+      if (isResultNearDestination(geminiResult, nearbyCoords, name, 'Gemini')) {
+        const result: ResolutionResult = {
+          lat: geminiResult.lat,
+          lng: geminiResult.lng,
+          source: 'gemini',
+          address: geminiResult.address,
+        };
+        resolutionCache.set(cacheKey, result);
+        resolutionsBySource.gemini++;
+        totalResolved++;
+        console.log(`[CoordsResolver] ✅ Gemini: "${name}" → (${result.lat.toFixed(4)}, ${result.lng.toFixed(4)})`);
+        return result;
+      }
+      // Result too far from destination, try next API
     }
   } catch (e) {
     console.warn(`[CoordsResolver] Gemini échoué pour "${name}":`, e);
@@ -150,17 +180,20 @@ export async function resolveCoordinates(
   try {
     const serpResult = await geocodeViaSerpApi(name, city, nearbyCoords);
     if (serpResult && serpResult.lat && serpResult.lng) {
-      const result: ResolutionResult = {
-        lat: serpResult.lat,
-        lng: serpResult.lng,
-        source: 'serpapi',
-        address: serpResult.address,
-      };
-      resolutionCache.set(cacheKey, result);
-      resolutionsBySource.serpapi++;
-      totalResolved++;
-      console.log(`[CoordsResolver] ✅ SerpAPI: "${name}" → (${result.lat.toFixed(4)}, ${result.lng.toFixed(4)})`);
-      return result;
+      if (isResultNearDestination(serpResult, nearbyCoords, name, 'SerpAPI')) {
+        const result: ResolutionResult = {
+          lat: serpResult.lat,
+          lng: serpResult.lng,
+          source: 'serpapi',
+          address: serpResult.address,
+        };
+        resolutionCache.set(cacheKey, result);
+        resolutionsBySource.serpapi++;
+        totalResolved++;
+        console.log(`[CoordsResolver] ✅ SerpAPI: "${name}" → (${result.lat.toFixed(4)}, ${result.lng.toFixed(4)})`);
+        return result;
+      }
+      // Result too far from destination, try next API
     }
   } catch (e) {
     console.warn(`[CoordsResolver] SerpAPI échoué pour "${name}":`, e);

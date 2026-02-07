@@ -65,6 +65,7 @@ export interface BudgetStrategy {
   groceryShoppingNeeded: boolean;
   activitiesLevel: 'mostly_free' | 'mixed' | 'premium';
   dailyActivityBudget: number;
+  maxPricePerActivity: number; // Prix max par activité individuelle (€/personne)
   transportTips: string;
   reasoning: string;
 }

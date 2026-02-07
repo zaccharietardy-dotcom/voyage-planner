@@ -9,6 +9,7 @@ interface TripMapProps {
   selectedItemId?: string;
   onItemClick?: (item: TripItem) => void;
   hoveredItemId?: string;
+  mapNumbers?: Map<string, number>;
   flightInfo?: {
     departureCity?: string;
     departureCoords?: { lat: number; lng: number };
@@ -122,7 +123,7 @@ function getPopupContent(item: TripItem, index: number): string {
   `;
 }
 
-export function TripMap({ items, center, selectedItemId, onItemClick, hoveredItemId, flightInfo }: TripMapProps) {
+export function TripMap({ items, center, selectedItemId, onItemClick, hoveredItemId, mapNumbers, flightInfo }: TripMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
@@ -229,7 +230,8 @@ export function TripMap({ items, center, selectedItemId, onItemClick, hoveredIte
 
     items.forEach((item) => {
       if (!item.latitude || !item.longitude) return;
-      const num = globalIndex++;
+      // Use pre-computed mapNumbers if available (synced with planning view), otherwise auto-increment
+      const num = mapNumbers?.get(item.id) ?? globalIndex++;
       const isHovered = item.id === hoveredItemId;
       const icon = createNumberedIcon(num, item.type, isHovered);
 

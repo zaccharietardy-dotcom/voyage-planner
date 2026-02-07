@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { Trip, TripItem, TripDay, Accommodation } from '@/lib/types';
@@ -650,7 +650,29 @@ export default function TripPage() {
     URL.revokeObjectURL(url);
   };
 
-  // Compute global index offsets for each day
+  // Unified map numbers: same numbering for both map markers and planning view
+  // Only items with valid coords and non-flight type get a number (matching TripMap logic)
+  const itemMapNumbers = useMemo(() => {
+    if (!trip) return new Map<string, number>();
+    const numMap = new Map<string, number>();
+    let num = 1;
+    for (const day of trip.days) {
+      // Sort items by startTime to match chronological map order
+      const sorted = [...day.items].sort((a, b) => {
+        const aTime = a.startTime || '00:00';
+        const bTime = b.startTime || '00:00';
+        return aTime.localeCompare(bTime);
+      });
+      for (const item of sorted) {
+        if (item.latitude && item.longitude && item.type !== 'flight') {
+          numMap.set(item.id, num++);
+        }
+      }
+    }
+    return numMap;
+  }, [trip]);
+
+  // Legacy offset function kept for backward compatibility but uses map numbers
   const getDayIndexOffset = (dayNumber: number): number => {
     if (!trip) return 0;
     let offset = 0;
@@ -912,7 +934,7 @@ export default function TripPage() {
                     </TabsList>
                     {trip.days.map((day, idx) => (
                       <TabsContent key={day.dayNumber} value={day.dayNumber.toString()} className="mt-0">
-                        <DayTimeline day={day} selectedItemId={selectedItemId} globalIndexOffset={getDayIndexOffset(day.dayNumber)} onSelectItem={handleSelectItem} onEditItem={handleEditItem} onDeleteItem={handleDeleteItem} onMoveItem={handleMoveItem} onHoverItem={setHoveredItemId} showMoveButtons={true} renderSwapButton={renderSwapButton} hotelSelectorData={hotelSelectorData} />
+                        <DayTimeline day={day} selectedItemId={selectedItemId} globalIndexOffset={getDayIndexOffset(day.dayNumber)} mapNumbers={itemMapNumbers} onSelectItem={handleSelectItem} onEditItem={handleEditItem} onDeleteItem={handleDeleteItem} onMoveItem={handleMoveItem} onHoverItem={setHoveredItemId} showMoveButtons={true} renderSwapButton={renderSwapButton} hotelSelectorData={hotelSelectorData} />
                         {/* Bouton "Ajouter un jour après" (mobile) */}
                         {canEdit && idx > 0 && idx < trip.days.length - 1 && (
                           <div className="flex items-center justify-center py-3 mt-3">
@@ -940,7 +962,7 @@ export default function TripPage() {
 
             <TabsContent value="carte">
               <div className="h-[70vh] rounded-lg overflow-hidden">
-                <TripMap items={editMode ? getAllItems() : getActiveDayItems()} selectedItemId={selectedItemId} hoveredItemId={hoveredItemId || undefined} onItemClick={handleSelectItem} flightInfo={{ departureCity: trip.preferences.origin, departureCoords: trip.preferences.originCoords, arrivalCity: trip.preferences.destination, arrivalCoords: trip.preferences.destinationCoords, stopoverCities: trip.outboundFlight?.stopCities }} />
+                <TripMap items={editMode ? getAllItems() : getActiveDayItems()} selectedItemId={selectedItemId} hoveredItemId={hoveredItemId || undefined} onItemClick={handleSelectItem} mapNumbers={itemMapNumbers} flightInfo={{ departureCity: trip.preferences.origin, departureCoords: trip.preferences.originCoords, arrivalCity: trip.preferences.destination, arrivalCoords: trip.preferences.destinationCoords, stopoverCities: trip.outboundFlight?.stopCities }} />
               </div>
             </TabsContent>
 
@@ -1014,6 +1036,7 @@ export default function TripPage() {
                           day={day}
                           selectedItemId={selectedItemId}
                           globalIndexOffset={getDayIndexOffset(day.dayNumber)}
+                          mapNumbers={itemMapNumbers}
                           onSelectItem={handleSelectItem}
                           onEditItem={handleEditItem}
                           onDeleteItem={handleDeleteItem}
@@ -1085,6 +1108,7 @@ export default function TripPage() {
                 selectedItemId={selectedItemId}
                 hoveredItemId={hoveredItemId || undefined}
                 onItemClick={handleSelectItem}
+                mapNumbers={itemMapNumbers}
                 flightInfo={{
                   departureCity: trip.preferences.origin,
                   departureCoords: trip.preferences.originCoords,
