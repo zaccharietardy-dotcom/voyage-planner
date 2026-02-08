@@ -1,7 +1,7 @@
 'use client';
 
 import { Card } from '@/components/ui/card';
-import { Leaf, Plane, Building2, Bus, TreeDeciduous, Car, AlertCircle } from 'lucide-react';
+import { Leaf, Plane, Building2, Bus, TreeDeciduous, Car, AlertCircle, UtensilsCrossed, Ticket } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface CarbonFootprintProps {
@@ -10,6 +10,8 @@ interface CarbonFootprintProps {
     flights: number;
     accommodation: number;
     localTransport: number;
+    food?: number;
+    activities?: number;
     rating: 'A' | 'B' | 'C' | 'D' | 'E';
     equivalents: {
       treesNeeded: number;
@@ -28,16 +30,30 @@ const RATING_COLORS: Record<string, { bg: string; text: string; label: string }>
   E: { bg: 'bg-red-500', text: 'text-red-700', label: 'Très élevé' },
 };
 
+const SECTORS = [
+  { key: 'flights', label: 'Transport', icon: Plane, color: 'bg-pink-500', iconColor: 'text-pink-500' },
+  { key: 'accommodation', label: 'Hébergement', icon: Building2, color: 'bg-purple-500', iconColor: 'text-purple-500' },
+  { key: 'food', label: 'Alimentation', icon: UtensilsCrossed, color: 'bg-orange-500', iconColor: 'text-orange-500' },
+  { key: 'activities', label: 'Activités', icon: Ticket, color: 'bg-blue-500', iconColor: 'text-blue-500' },
+  { key: 'localTransport', label: 'Transports locaux', icon: Bus, color: 'bg-green-500', iconColor: 'text-green-500' },
+] as const;
+
 export function CarbonFootprint({ data, className }: CarbonFootprintProps) {
   const ratingInfo = RATING_COLORS[data.rating];
-  const totalPercent = data.total > 0 ? 100 : 0;
-  const flightPercent = data.total > 0 ? (data.flights / data.total) * 100 : 0;
-  const accommodationPercent = data.total > 0 ? (data.accommodation / data.total) * 100 : 0;
-  const transportPercent = data.total > 0 ? (data.localTransport / data.total) * 100 : 0;
+  const food = data.food ?? 0;
+  const activities = data.activities ?? 0;
+
+  const sectorValues: Record<string, number> = {
+    flights: data.flights,
+    accommodation: data.accommodation,
+    food,
+    activities,
+    localTransport: data.localTransport,
+  };
 
   return (
     <Card className={cn('p-4', className)}>
-      {/* Header with rating */}
+      {/* Header avec note */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <div className="p-2 rounded-full bg-green-100">
@@ -45,7 +61,7 @@ export function CarbonFootprint({ data, className }: CarbonFootprintProps) {
           </div>
           <div>
             <h3 className="font-semibold">Empreinte carbone</h3>
-            <p className="text-sm text-muted-foreground">Impact environnemental</p>
+            <p className="text-sm text-muted-foreground">ADEME Base Carbone 2023</p>
           </div>
         </div>
         <div className="text-right">
@@ -65,58 +81,29 @@ export function CarbonFootprint({ data, className }: CarbonFootprintProps) {
         <p className="text-sm text-muted-foreground">CO₂ équivalent</p>
       </div>
 
-      {/* Breakdown */}
+      {/* Détail par secteur */}
       <div className="mt-4 space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Plane className="h-4 w-4 text-pink-500" />
-            <span className="text-sm">Vols</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
-              <div
-                className="h-full bg-pink-500 rounded-full"
-                style={{ width: `${flightPercent}%` }}
-              />
+        {SECTORS.map(({ key, label, icon: Icon, color, iconColor }) => {
+          const value = sectorValues[key];
+          const percent = data.total > 0 ? (value / data.total) * 100 : 0;
+          return (
+            <div key={key} className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Icon className={cn('h-4 w-4', iconColor)} />
+                <span className="text-sm">{label}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
+                  <div className={cn('h-full rounded-full', color)} style={{ width: `${percent}%` }} />
+                </div>
+                <span className="text-sm font-medium w-16 text-right">{value} kg</span>
+              </div>
             </div>
-            <span className="text-sm font-medium w-16 text-right">{data.flights} kg</span>
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Building2 className="h-4 w-4 text-purple-500" />
-            <span className="text-sm">Hébergement</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
-              <div
-                className="h-full bg-purple-500 rounded-full"
-                style={{ width: `${accommodationPercent}%` }}
-              />
-            </div>
-            <span className="text-sm font-medium w-16 text-right">{data.accommodation} kg</span>
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Bus className="h-4 w-4 text-green-500" />
-            <span className="text-sm">Transports locaux</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
-              <div
-                className="h-full bg-green-500 rounded-full"
-                style={{ width: `${transportPercent}%` }}
-              />
-            </div>
-            <span className="text-sm font-medium w-16 text-right">{data.localTransport} kg</span>
-          </div>
-        </div>
+          );
+        })}
       </div>
 
-      {/* Equivalents */}
+      {/* Équivalences */}
       <div className="mt-4 pt-4 border-t grid grid-cols-2 gap-4">
         <div className="flex items-center gap-2 p-2 bg-green-50 rounded-lg">
           <TreeDeciduous className="h-5 w-5 text-green-600" />
@@ -134,7 +121,7 @@ export function CarbonFootprint({ data, className }: CarbonFootprintProps) {
         </div>
       </div>
 
-      {/* Tips */}
+      {/* Conseils */}
       {data.tips.length > 0 && (
         <div className="mt-4 pt-4 border-t">
           <div className="flex items-center gap-2 mb-2">

@@ -1865,6 +1865,20 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
     'spectacle', 'show', 'concert', 'flamenco', 'balade', 'walk',
     'discovering', 'découverte', 'exploration', 'safari', 'diving',
     'climbing', 'escalade', 'paddle', 'canoe', 'rafting',
+    // Lieux / monuments / espaces publics — ne jamais reclasser
+    'parc', 'park', 'parque', 'garden', 'jardin', 'jardí',
+    'avenue', 'passeig', 'paseo', 'boulevard', 'rambla', 'via',
+    'place', 'plaza', 'plaça', 'piazza', 'square', 'platz',
+    'market', 'marché', 'mercat', 'mercado', 'mercato',
+    'plage', 'playa', 'beach', 'platja', 'spiaggia',
+    'zoo', 'aquarium', 'aquàrium',
+    'musée', 'museum', 'museo', 'galerie', 'gallery',
+    'église', 'church', 'iglesia', 'cathédrale', 'cathedral', 'basilica',
+    'quartier', 'quarter', 'barrio', 'barri', 'district', 'neighborhood',
+    'monument', 'fontaine', 'fountain', 'fuente', 'font',
+    'torre', 'tower', 'mirador', 'viewpoint', 'lookout',
+    'castle', 'château', 'castillo', 'castell', 'palace', 'palais', 'palau',
+    'port', 'harbour', 'harbor', 'marina', 'pier',
   ];
 
   let typeFixCount = 0;
@@ -1875,6 +1889,9 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       // Si classé comme activité mais contient un mot-clé restaurant
       // MAIS PAS un mot-clé d'activité → reclasser
       if (item.type === 'activity') {
+        // Ne JAMAIS reclasser un item vérifié (venant du pool SerpAPI/Google Places)
+        // ou un item gratuit (un restaurant a toujours un coût > 0)
+        if (item.dataReliability === 'verified' || item.estimatedCost === 0) continue;
         const hasRestaurantKw = RESTAURANT_KEYWORDS.some(kw => titleLower.includes(kw));
         const hasActivityKw = ACTIVITY_OVERRIDE_KEYWORDS.some(kw => titleLower.includes(kw));
         if (hasRestaurantKw && !hasActivityKw) {
@@ -1983,29 +2000,41 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
     ? selectedTransport.totalCO2 * (returnFlight || selectedTransport.mode !== 'plane' ? 2 : 1)
     : 0;
 
+  // Mapper le regime alimentaire pour le calcul carbone
+  const carbonDietType = (() => {
+    if (preferences.dietary?.includes('vegan')) return 'vegan';
+    if (preferences.dietary?.includes('vegetarian')) return 'vegetarian';
+    return 'tourist_default';
+  })();
+
   const carbonData = calculateTripCarbon({
     flightDistanceKm: selectedTransport?.mode === 'plane' ? travelDistance : 0,
     returnFlight: true,
     passengers: preferences.groupSize,
     cabinClass: outboundFlight?.cabinClass || 'economy',
     nights: preferences.durationDays - 1,
-    accommodationType: 'hotel',
-    accommodationStars: preferences.budgetLevel === 'luxury' ? 5 : preferences.budgetLevel === 'comfort' ? 4 : 3,
-    localTransportKm: preferences.durationDays * 15, // ~15km/jour
+    accommodationType: accommodation?.type === 'apartment' || accommodation?.type === 'bnb'
+      ? 'apartment'
+      : accommodation?.type === 'hostel' ? 'hostel' : 'hotel',
+    accommodationStars: accommodation?.stars
+      || (preferences.budgetLevel === 'luxury' ? 5
+        : preferences.budgetLevel === 'comfort' ? 4 : 3),
+    localTransportKm: preferences.durationDays * 15,
+    dietType: carbonDietType,
+    activityTypes: preferences.activities || [],
   });
 
   // Ajuster le CO2 si transport non-avion
   if (selectedTransport && selectedTransport.mode !== 'plane') {
-    // Remplacer le CO2 des vols par celui du transport sélectionné
     carbonData.flights = transportCO2;
-    carbonData.total = carbonData.flights + carbonData.accommodation + carbonData.localTransport;
-    // Recalculer la note
-    if (carbonData.total < 100) carbonData.rating = 'A';
-    else if (carbonData.total < 250) carbonData.rating = 'B';
-    else if (carbonData.total < 500) carbonData.rating = 'C';
-    else if (carbonData.total < 1000) carbonData.rating = 'D';
+    carbonData.total = carbonData.flights + carbonData.accommodation
+      + carbonData.localTransport + carbonData.food + carbonData.activities;
+    // Recalculer la note (seuils ADEME ajustes)
+    if (carbonData.total < 200) carbonData.rating = 'A';
+    else if (carbonData.total < 400) carbonData.rating = 'B';
+    else if (carbonData.total < 700) carbonData.rating = 'C';
+    else if (carbonData.total < 1200) carbonData.rating = 'D';
     else carbonData.rating = 'E';
-    // Recalculer les équivalents
     carbonData.equivalents.treesNeeded = Math.ceil(carbonData.total / 25);
     carbonData.equivalents.carKmEquivalent = Math.round(carbonData.total / 0.21);
   }
@@ -2047,6 +2076,8 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       flights: carbonData.flights,
       accommodation: carbonData.accommodation,
       localTransport: carbonData.localTransport,
+      food: carbonData.food,
+      activities: carbonData.activities,
       rating: carbonData.rating,
       equivalents: {
         treesNeeded: carbonData.equivalents.treesNeeded,

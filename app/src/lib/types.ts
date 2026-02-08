@@ -494,6 +494,8 @@ export interface Trip {
     flights: number;
     accommodation: number;
     localTransport: number;
+    food: number;
+    activities: number;
     rating: 'A' | 'B' | 'C' | 'D' | 'E';
     equivalents: {
       treesNeeded: number;
