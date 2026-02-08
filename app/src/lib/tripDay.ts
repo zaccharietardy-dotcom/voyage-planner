@@ -380,7 +380,7 @@ export async function generateDayWithScheduler(params: {
       const checkoutByStandard = parseTime(date, '12:00');
       checkoutStart = checkoutByFlight < checkoutByStandard ? checkoutByFlight : checkoutByStandard;
     } else if (groundTransport) {
-      checkoutStart = parseTime(date, '10:00');
+      checkoutStart = parseTime(date, accommodation?.checkOutTime || '10:00');
     } else {
       checkoutStart = parseTime(date, '11:00');
     }
@@ -1270,27 +1270,33 @@ export async function generateDayWithScheduler(params: {
   // Sinon, on cherche un restaurant pour le petit-déjeuner
   const hotelHasBreakfast = accommodation?.breakfastIncluded === true;
 
-  // Dernier jour avec vol: calculer le checkout et forcer le breakfast avant
+  // Dernier jour avec vol OU transport terrestre: calculer le checkout et forcer le breakfast avant
   let lastDayCheckoutTime: Date | null = null;
   let skipBreakfastLastDay = false;
-  if (isLastDay && returnFlight && !isFirstDay) {
-    const flightDep = new Date(returnFlight.departureTime);
-    const checkoutByFlight = new Date(flightDep.getTime() - 210 * 60 * 1000); // 3h30 avant vol
-    const checkoutByStandard = parseTime(date, '12:00');
-    lastDayCheckoutTime = checkoutByFlight < checkoutByStandard ? checkoutByFlight : checkoutByStandard;
-    const checkoutH = lastDayCheckoutTime.getHours();
+  if (isLastDay && (returnFlight || groundTransport) && !isFirstDay) {
+    if (returnFlight) {
+      const flightDep = new Date(returnFlight.departureTime);
+      const checkoutByFlight = new Date(flightDep.getTime() - 210 * 60 * 1000); // 3h30 avant vol
+      const checkoutByStandard = parseTime(date, '12:00');
+      lastDayCheckoutTime = checkoutByFlight < checkoutByStandard ? checkoutByFlight : checkoutByStandard;
+    } else if (groundTransport) {
+      // Transport terrestre: checkout = heure de l'hôtel (ou 10:00 par défaut)
+      lastDayCheckoutTime = parseTime(date, accommodation?.checkOutTime || '10:00');
+    }
+    const checkoutH = lastDayCheckoutTime!.getHours();
     if (checkoutH < 8) {
-      // Vol trop tôt: skip breakfast, pas le temps
+      // Départ trop tôt: skip breakfast, pas le temps
       skipBreakfastLastDay = true;
-      console.log(`[Jour ${dayNumber}] Checkout à ${checkoutH}h: pas de petit-déjeuner (vol tôt)`);
+      console.log(`[Jour ${dayNumber}] Checkout à ${checkoutH}h: pas de petit-déjeuner (départ tôt)`);
     } else {
       // Forcer le breakfast tôt: au moins 1h avant checkout
-      const latestBreakfastStart = new Date(lastDayCheckoutTime.getTime() - 60 * 60 * 1000);
+      const latestBreakfastStart = new Date(lastDayCheckoutTime!.getTime() - 60 * 60 * 1000);
       const earlyBreakfastTime = parseTime(date, '07:00');
       const breakfastTarget = earlyBreakfastTime < latestBreakfastStart ? earlyBreakfastTime : latestBreakfastStart;
       if (scheduler.getCurrentTime() <= breakfastTarget) {
         scheduler.advanceTo(breakfastTarget);
       }
+      console.log(`[Jour ${dayNumber}] Breakfast forcé avant checkout à ${checkoutH}h`);
     }
   }
 
@@ -1581,6 +1587,7 @@ export async function generateDayWithScheduler(params: {
 
   // Déjeuner — fenêtre flexible entre 12:00 et 13:30
   // Se cale juste après la dernière activité du matin (pas de trou inutile)
+  let lunchWasInserted = false; // Track across all strategies
   if (shouldHaveLunch) {
     const lunchEarliest = parseTime(date, '12:00');
     const lunchLatest = parseTime(date, '13:30');
@@ -1639,6 +1646,7 @@ export async function generateDayWithScheduler(params: {
           lastCoords = restaurantCoords;
         }
         scheduler.advanceTo(lunchEndTime);
+        lunchWasInserted = true;
         console.log(`[Jour ${dayNumber}] Déjeuner ajouté à ${lunchStartTime.toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'})}-${lunchEndTime.toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'})}`);
       } else {
         // Fallback: insertFixedItem a échoué (conflit), essayer avec des créneaux alternatifs
@@ -1695,6 +1703,7 @@ export async function generateDayWithScheduler(params: {
             scheduler.advanceTo(fallbackEnd);
             console.log(`[Jour ${dayNumber}] Déjeuner fallback ajouté à ${slot}`);
             lunchInserted = true;
+            lunchWasInserted = true;
             break;
           }
         }
@@ -1746,6 +1755,7 @@ export async function generateDayWithScheduler(params: {
                 }));
                 lastCoords = restaurantCoords;
               }
+              lunchWasInserted = true;
               console.log(`[Jour ${dayNumber}] Déjeuner cursor-based ajouté à ${formatScheduleTime(cursorLunchItem.slot.start)}`);
             } else {
               console.log(`[Jour ${dayNumber}] Déjeuner cursor-based trop tardif (${formatScheduleTime(cursorLunchItem.slot.start)}), abandonné`);
@@ -1757,6 +1767,62 @@ export async function generateDayWithScheduler(params: {
       }
     } else {
       console.log(`[Jour ${dayNumber}] Fenêtre déjeuner dépassée (curseur à ${cursorNow.toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'})})`);
+    }
+  }
+
+  // === DERNIER RECOURS DÉJEUNER ===
+  // Si shouldHaveLunch mais aucun déjeuner n'a été inséré par les 3 stratégies,
+  // forcer l'insertion au cursor actuel tant qu'il est avant 15:30
+  if (shouldHaveLunch && !lunchWasInserted) {
+    const lastResortLimit = parseTime(date, '15:30');
+    if (scheduler.getCurrentTime() < lastResortLimit) {
+      console.log(`[Jour ${dayNumber}] ⚠ DERNIER RECOURS: insertion déjeuner au cursor (${formatScheduleTime(scheduler.getCurrentTime())})`);
+      const lastResortLunch = scheduler.addItem({
+        id: generateId(),
+        title: 'Déjeuner',
+        type: 'restaurant',
+        duration: 60, // Réduit à 1h en dernier recours
+        travelTime: 5,
+      });
+      if (lastResortLunch && lastResortLunch.slot.start < lastResortLimit) {
+        if (shouldSelfCater('lunch', dayNumber, budgetStrategy, false, preferences.durationDays, isDayTrip, groceriesDone)) {
+          items.push(schedulerItemToTripItem(lastResortLunch, dayNumber, orderIndex++, {
+            title: 'Déjeuner pique-nique / maison',
+            description: 'Repas préparé avec les courses | Option économique',
+            locationName: `Centre-ville, ${preferences.destination}`,
+            latitude: accommodation?.latitude || lastCoords.lat,
+            longitude: accommodation?.longitude || lastCoords.lng,
+            estimatedCost: 8 * (preferences.groupSize || 1),
+          }));
+        } else {
+          const restaurant = hasPrefetchedRestaurant('lunch')
+            ? getPrefetchedRestaurant('lunch')
+            : await findRestaurantForMeal('lunch', cityCenter, preferences, dayNumber, lastCoords);
+          const restaurantCoords = {
+            lat: restaurant?.latitude || lastCoords.lat,
+            lng: restaurant?.longitude || lastCoords.lng,
+          };
+          const googleMapsUrl = generateGoogleMapsUrl(lastCoords, restaurantCoords, pickDirectionMode(lastCoords, restaurantCoords));
+          const restaurantGoogleMapsUrl = restaurant?.googleMapsUrl ||
+            getReliableGoogleMapsPlaceUrl(restaurant, preferences.destination);
+          items.push(schedulerItemToTripItem(lastResortLunch, dayNumber, orderIndex++, {
+            title: restaurant?.name || 'Déjeuner',
+            description: restaurant ? `${restaurant.cuisineTypes.join(', ')} | ⭐ ${restaurant.rating?.toFixed(1)}/5` : 'Déjeuner local',
+            locationName: restaurant ? `${restaurant.name}, ${preferences.destination}` : `Centre-ville, ${preferences.destination}`,
+            latitude: restaurantCoords.lat,
+            longitude: restaurantCoords.lng,
+            estimatedCost: estimateMealPrice(restaurant?.priceLevel || getBudgetPriceLevel(preferences.budgetLevel), 'lunch') * preferences.groupSize,
+            rating: restaurant?.rating,
+            googleMapsUrl,
+            googleMapsPlaceUrl: restaurantGoogleMapsUrl,
+          }));
+          lastCoords = restaurantCoords;
+        }
+        lunchWasInserted = true;
+        console.log(`[Jour ${dayNumber}] ✅ Déjeuner dernier recours ajouté à ${formatScheduleTime(lastResortLunch.slot.start)}`);
+      }
+    } else {
+      console.log(`[Jour ${dayNumber}] ⚠ Impossible d'insérer le déjeuner: curseur déjà à ${formatScheduleTime(scheduler.getCurrentTime())} (> 15:30)`);
     }
   }
 
@@ -1809,6 +1875,12 @@ export async function generateDayWithScheduler(params: {
     // Si on arrive avant l'ouverture, on attend
     if (actualStartTime < openTime && openTime >= scheduler.getCurrentTime()) {
       actualStartTime = new Date(openTime);
+    }
+
+    // GUARD: Si on arrive APRÈS la fermeture, skip immédiatement
+    if (actualStartTime >= closeTime) {
+      console.log(`[Planning] Skip "${attraction.name}": arrive à ${formatScheduleTime(actualStartTime)} mais ferme à ${formatScheduleTime(closeTime)}`);
+      continue;
     }
 
     // Calculer l'heure de fin reelle
@@ -1939,6 +2011,12 @@ export async function generateDayWithScheduler(params: {
         let actualStartTime = new Date(scheduler.getCurrentTime().getTime() + estimatedTravelTime * 60 * 1000);
         if (actualStartTime < openTime) {
           actualStartTime = openTime;
+        }
+
+        // GUARD: Si on arrive APRÈS la fermeture, skip immédiatement
+        if (actualStartTime >= closeTime) {
+          console.log(`[Jour ${dayNumber}] Skip "${attraction.name}": arrive à ${formatScheduleTime(actualStartTime)} mais ferme à ${formatScheduleTime(closeTime)}`);
+          continue;
         }
 
         const potentialEndTime = new Date(actualStartTime.getTime() + attraction.duration * 60 * 1000);
@@ -2549,49 +2627,56 @@ export async function generateDayWithScheduler(params: {
 
   // === FILTRE SANITY: Rejeter les items avec horaires > 23:59 ===
   // Ceinture de sécurité: si un item a été inséré avec des horaires invalides (minuit+), le supprimer
+  // Double vérification: comparaison Date ET vérification textuelle des heures
   const dayEndGuard = parseTime(date, '23:59');
   const beforeSanity = filteredItems.length;
   filteredItems = filteredItems.filter(item => {
-    const itemEnd = parseTime(date, item.endTime);
     // Les transports/vols peuvent légitimement dépasser minuit (vol de nuit, train de nuit)
-    if (itemEnd > dayEndGuard && item.type !== 'transport' && item.type !== 'flight') {
+    if (item.type === 'transport' || item.type === 'flight') return true;
+
+    // Vérification textuelle: heures >= 24 sont toujours invalides (ex: "24:42", "25:13")
+    const startHour = parseInt(item.startTime.split(':')[0], 10);
+    const endHour = parseInt(item.endTime.split(':')[0], 10);
+    if (startHour >= 24 || endHour >= 24) {
+      console.warn(`[Jour ${dayNumber}] ⚠ Suppression "${item.title}" (${item.startTime}-${item.endTime}): heure >= 24 invalide`);
+      return false;
+    }
+
+    // Vérification Date: endTime > 23:59
+    const itemEnd = parseTime(date, item.endTime);
+    if (itemEnd > dayEndGuard) {
       console.warn(`[Jour ${dayNumber}] ⚠ Suppression "${item.title}" (${item.startTime}-${item.endTime}): dépasse 23:59`);
       return false;
     }
+
+    // Vérification supplémentaire: startTime > 23:00 pour les non-restaurants (dîner OK jusqu'à 23h)
+    const itemStart = parseTime(date, item.startTime);
+    const lateGuard = parseTime(date, '23:00');
+    if (itemStart > lateGuard && item.type !== 'restaurant') {
+      console.warn(`[Jour ${dayNumber}] ⚠ Suppression "${item.title}" (${item.startTime}): commence après 23:00 (type: ${item.type})`);
+      return false;
+    }
+
     return true;
   });
   if (filteredItems.length < beforeSanity) {
     console.log(`[Jour ${dayNumber}] 🛡 Filtre sanity: ${beforeSanity - filteredItems.length} item(s) avec horaires invalides supprimé(s)`);
   }
 
-  // === INSERTION DES BLOCS TRANSIT ENTRE ACTIVITÉS ===
-  // Post-processing: pour chaque paire consécutive d'items avec coordonnées,
-  // calculer la distance et insérer un bloc "Trajet vers [activité]" si > 100m
-  const transitItems = await insertTransitBlocks(filteredItems, date, dayNumber);
-
-  // Fusionner et filtrer les transits orphelins (pointant vers un item supprimé)
-  const itemTitles = new Set(filteredItems.map(i => i.title));
-  const validTransitItems = transitItems.filter(item => {
-    if (item.title.startsWith('Trajet vers ')) {
-      const target = item.title.replace('Trajet vers ', '');
-      if (!itemTitles.has(target)) {
-        console.warn(`[Jour ${dayNumber}] ⚠ Transit orphelin supprimé: "${item.title}" (cible "${target}" absente)`);
-        return false;
-      }
-    }
-    return true;
-  });
-
-  const allItems = [...filteredItems, ...validTransitItems];
+  // === ENRICHIR LES ITEMS AVEC DONNÉES DE TRANSIT ===
+  // Au lieu de créer des blocs "Trajet vers X" séparés, on enrichit chaque item
+  // avec distanceFromPrevious, transportToPrevious, timeFromPrevious.
+  // Le frontend ItineraryConnector affiche déjà ces données comme petits connecteurs bleus.
+  await enrichItemsWithTransitData(filteredItems, date, dayNumber);
 
   // Trier par heure de début
-  const sortedItems = allItems.sort((a, b) => {
+  const sortedItems = filteredItems.sort((a, b) => {
     const aTime = parseTime(date, a.startTime).getTime();
     const bTime = parseTime(date, b.startTime).getTime();
     return aTime - bTime;
   });
 
-  // Ré-indexer les orderIndex après insertion des blocs transit
+  // Ré-indexer les orderIndex
   sortedItems.forEach((item, idx) => { item.orderIndex = idx; });
 
   // Vérification minimum activités par jour (3 activités sauf jour arrivée/départ)
@@ -2606,17 +2691,21 @@ export async function generateDayWithScheduler(params: {
 }
 
 /**
- * Post-processing: insère des blocs "Trajet vers [activité]" entre les paires d'items consécutifs
- * qui ont des coordonnées GPS et une distance > 100m.
+ * Post-processing: enrichit les items existants avec les données de transit
+ * (distanceFromPrevious, transportToPrevious, timeFromPrevious).
+ *
+ * Au lieu de créer des blocs "Trajet vers X" séparés qui polluaient la timeline,
+ * on enrichit chaque item. Le frontend ItineraryConnector affiche ces données
+ * comme de petits connecteurs bleus cliquables entre les cartes.
  *
  * Utilise Google Directions API (avec fallback) pour les distances > 100m.
  * Batching: 4 appels simultanés max, 200ms entre batches.
  */
-async function insertTransitBlocks(
+async function enrichItemsWithTransitData(
   items: TripItem[],
   date: Date,
   dayNumber: number,
-): Promise<TripItem[]> {
+): Promise<void> {
   // Trier par startTime pour traiter dans l'ordre chronologique
   const sorted = [...items].sort((a, b) => {
     const aTime = parseTime(date, a.startTime).getTime();
@@ -2625,15 +2714,14 @@ async function insertTransitBlocks(
   });
 
   // Types à exclure des paires (déjà des transports ou logistique)
-  const skipTypes = new Set(['transport', 'flight', 'checkin', 'checkout', 'parking', 'hotel', 'luggage']);
+  const skipTypes = new Set(['transport', 'flight', 'checkin', 'checkout', 'parking', 'luggage']);
 
-  // Collecter les paires qui nécessitent un bloc transit
-  // CORRECTION: Filtrer d'abord les items non-logistique, puis itérer les paires consécutives.
-  // Avant, on itérait sorted[i] et sorted[i+1] et skip si l'un est skipType,
-  // ce qui empêchait de pairer activité1 → [transport] → activité2.
+  // Filtrer les items avec coordonnées et non-logistique
   const transitableItems = sorted.filter(item =>
     !skipTypes.has(item.type) && item.latitude && item.longitude
   );
+
+  // Collecter les paires qui nécessitent un enrichissement transit
   const pairs: Array<{ prev: TripItem; next: TripItem; distance: number }> = [];
 
   for (let i = 0; i < transitableItems.length - 1; i++) {
@@ -2648,13 +2736,12 @@ async function insertTransitBlocks(
     }
   }
 
-  if (pairs.length === 0) return [];
+  if (pairs.length === 0) return;
 
-  console.log(`[Jour ${dayNumber}] ${pairs.length} paires nécessitent un bloc transit`);
+  console.log(`[Jour ${dayNumber}] ${pairs.length} paires à enrichir avec données transit`);
 
   // Batch les appels getDirections (4 simultanés max)
   const BATCH_SIZE = 4;
-  const transitItems: TripItem[] = [];
 
   for (let batchStart = 0; batchStart < pairs.length; batchStart += BATCH_SIZE) {
     const batch = pairs.slice(batchStart, batchStart + BATCH_SIZE);
@@ -2662,17 +2749,19 @@ async function insertTransitBlocks(
     const results = await Promise.all(
       batch.map(async ({ prev, next, distance }) => {
         try {
+          const mode = distance > 3 ? 'transit' : 'walking';
           const directions = await getDirections({
             from: { lat: prev.latitude!, lng: prev.longitude! },
             to: { lat: next.latitude!, lng: next.longitude! },
-            mode: distance > 3 ? 'transit' : 'walking',
+            mode,
           });
-          return { prev, next, distance, directions };
+          return { prev, next, distance, directions, mode };
         } catch {
           // Fallback: estimation basée sur la distance
           const estimatedDuration = Math.max(5, Math.round(distance * 3)); // ~3min/km
+          const mode = distance > 1 ? 'transit' : 'walking';
           return {
-            prev, next, distance,
+            prev, next, distance, mode,
             directions: {
               duration: estimatedDuration,
               distance,
@@ -2681,7 +2770,7 @@ async function insertTransitBlocks(
               googleMapsUrl: generateGoogleMapsUrl(
                 { lat: prev.latitude!, lng: prev.longitude! },
                 { lat: next.latitude!, lng: next.longitude! },
-                'transit'
+                mode === 'transit' ? 'transit' : 'walking'
               ),
               source: 'estimated' as const,
             },
@@ -2690,48 +2779,22 @@ async function insertTransitBlocks(
       })
     );
 
-    for (const { prev, next, distance, directions } of results) {
-      // Seulement si le trajet > 3 min (pas de micro-déplacements)
-      if (directions.duration < 3) continue;
+    for (const { next, distance, directions, mode } of results) {
+      // Seulement si le trajet > 2 min (pas de micro-déplacements)
+      if (directions.duration < 2) continue;
 
-      // Calculer les heures du bloc transit
-      const prevEndTime = parseTime(date, prev.endTime);
-      const nextStartTime = parseTime(date, next.startTime);
-      const gapMinutes = (nextStartTime.getTime() - prevEndTime.getTime()) / (60 * 1000);
+      // Enrichir l'item NEXT avec les données de transit
+      next.distanceFromPrevious = Math.round(distance * 10) / 10; // Arrondi 1 décimale
+      next.timeFromPrevious = Math.round(directions.duration);
+      next.transportToPrevious = mode === 'walking' ? 'walk' : distance > 10 ? 'car' : 'public';
 
-      // Si le gap entre les items est très petit, ne pas insérer de bloc
-      if (gapMinutes < 3) continue;
+      // Mettre à jour le googleMapsUrl si pas déjà défini ou si on a un meilleur itinéraire
+      if (!next.googleMapsUrl || next.googleMapsUrl === '') {
+        next.googleMapsUrl = directions.googleMapsUrl;
+      }
 
-      // Le transit remplit le gap existant (le scheduler a déjà réservé du travelTime)
-      const transitDuration = Math.min(directions.duration, gapMinutes);
-      const transitStart = prevEndTime;
-      const transitEnd = new Date(transitStart.getTime() + transitDuration * 60 * 1000);
-
-      // Description du trajet
       const distStr = distance < 1 ? `${Math.round(distance * 1000)}m` : `${distance.toFixed(1)}km`;
-      const linesDesc = directions.transitLines.length > 0
-        ? directions.transitLines.map(l => `${l.mode === 'metro' ? 'M' : l.mode === 'bus' ? 'Bus' : l.mode === 'tram' ? 'Tram' : ''}${l.number}`).join(' → ')
-        : distance < 1 ? 'Marche' : 'Transport';
-      const description = `${Math.round(transitDuration)} min | ${distStr} | ${linesDesc}`;
-
-      transitItems.push({
-        id: generateId(),
-        type: 'transport' as TripItemType,
-        title: `Trajet vers ${next.title}`,
-        description,
-        startTime: formatScheduleTime(transitStart),
-        endTime: formatScheduleTime(transitEnd),
-        duration: transitDuration,
-        locationName: `${prev.title} → ${next.title}`,
-        latitude: next.latitude!,
-        longitude: next.longitude!,
-        googleMapsUrl: directions.googleMapsUrl,
-        dayNumber,
-        orderIndex: 0, // Will be re-indexed later
-        dataReliability: 'verified',
-      });
-
-      console.log(`[Jour ${dayNumber}] Transit: ${prev.title} → ${next.title} (${Math.round(transitDuration)}min, ${distStr})`);
+      console.log(`[Jour ${dayNumber}] Enrichi "${next.title}": ${distStr}, ${Math.round(directions.duration)}min (${next.transportToPrevious})`);
     }
 
     // Pause entre les batches (200ms) pour ne pas surcharger les APIs
@@ -2739,6 +2802,4 @@ async function insertTransitBlocks(
       await new Promise(resolve => setTimeout(resolve, 200));
     }
   }
-
-  return transitItems;
 }
