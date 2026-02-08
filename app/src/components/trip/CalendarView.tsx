@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { TripDay, TripItem } from '@/lib/types';
 import { CalendarDayColumn, TimeGutter } from './CalendarDayColumn';
 import { MobileDayList } from './MobileDayList';
@@ -18,12 +18,26 @@ import {
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence, type PanInfo } from 'framer-motion';
 
+function parseMinutes(time: string | undefined | null): number {
+  if (!time) return 9 * 60;
+  const [h, m] = time.split(':').map(Number);
+  return (isNaN(h) ? 9 : h) * 60 + (isNaN(m!) ? 0 : m!);
+}
+
+function formatTime(minutes: number): string {
+  const h = Math.floor(minutes / 60) % 24;
+  const m = minutes % 60;
+  return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+}
+
 interface CalendarViewProps {
   days: TripDay[];
   isEditable: boolean;
   onUpdateItem?: (item: TripItem) => void;
   onClickItem?: (item: TripItem) => void;
   onClickSlot?: (dayNumber: number, time: string) => void;
+  onCreateSlotRange?: (dayNumber: number, startTime: string, endTime: string) => void;
+  onMoveItemCrossDay?: (item: TripItem, fromDayNumber: number, toDayNumber: number, newStartTime: string) => void;
 }
 
 export function CalendarView({
@@ -32,6 +46,8 @@ export function CalendarView({
   onUpdateItem,
   onClickItem,
   onClickSlot,
+  onCreateSlotRange,
+  onMoveItemCrossDay,
 }: CalendarViewProps) {
   const [viewMode, setViewMode] = useState<'day' | 'trip'>('trip');
   const [selectedDay, setSelectedDay] = useState(0);
@@ -41,6 +57,21 @@ export function CalendarView({
   const pillsRef = useRef<HTMLDivElement>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [showSwipeHint, setShowSwipeHint] = useState(false);
+
+  // Measure day column width for cross-day drag
+  const [dayColumnWidth, setDayColumnWidth] = useState(0);
+  const dayColumnMeasureRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (viewMode !== 'trip' || !dayColumnMeasureRef.current) return;
+    const observer = new ResizeObserver((entries) => {
+      if (entries[0]) {
+        setDayColumnWidth(entries[0].contentRect.width);
+      }
+    });
+    observer.observe(dayColumnMeasureRef.current);
+    return () => observer.disconnect();
+  }, [viewMode, days.length]);
 
   // Responsive slot height + mobile detection
   const [slotHeight, setSlotHeight] = useState(16);
@@ -128,6 +159,43 @@ export function CalendarView({
       localStorage.setItem('voyage-calendar-swipe-hint-seen', 'true');
     }
   };
+
+  // Handle move from CalendarActivityBlock
+  const handleMoveItem = useCallback(
+    (item: TripItem, deltaSlots: number, deltaDays: number) => {
+      const startMin = parseMinutes(item.startTime);
+      const duration = item.duration || (parseMinutes(item.endTime) - startMin) || 60;
+      const newStartMin = Math.max(0, Math.min(23 * 60 + 45, startMin + deltaSlots * 15));
+      const newStartTime = formatTime(newStartMin);
+      const newEndTime = formatTime(newStartMin + duration);
+
+      if (deltaDays === 0) {
+        // Same-day move: just update start/end times
+        onUpdateItem?.({
+          ...item,
+          startTime: newStartTime,
+          endTime: newEndTime,
+        });
+      } else {
+        // Cross-day move
+        const currentDayIndex = days.findIndex((d) => d.dayNumber === item.dayNumber);
+        const targetDayIndex = currentDayIndex + deltaDays;
+        if (targetDayIndex >= 0 && targetDayIndex < days.length) {
+          const targetDay = days[targetDayIndex];
+          onMoveItemCrossDay?.(item, item.dayNumber, targetDay.dayNumber, newStartTime);
+        }
+      }
+    },
+    [days, onUpdateItem, onMoveItemCrossDay]
+  );
+
+  // In day view, deltaDays is always 0
+  const handleMoveItemDayView = useCallback(
+    (item: TripItem, deltaSlots: number, _deltaDays: number) => {
+      handleMoveItem(item, deltaSlots, 0);
+    },
+    [handleMoveItem]
+  );
 
   // Slide animation variants for day transitions
   const daySlideVariants = {
@@ -324,23 +392,33 @@ export function CalendarView({
                         slotHeight={slotHeight}
                         isEditable={isEditable}
                         onUpdateItem={onUpdateItem}
+                        onMoveItem={handleMoveItemDayView}
                         onClickItem={onClickItem}
                         onClickSlot={onClickSlot}
+                        onCreateSlotRange={onCreateSlotRange}
                       />
                     )}
                   </motion.div>
                 </AnimatePresence>
               </div>
             ) : (
-              days.map((day) => (
-                <div key={day.dayNumber} className="flex-1 border-l min-w-[120px]">
+              days.map((day, idx) => (
+                <div
+                  key={day.dayNumber}
+                  ref={idx === 0 ? dayColumnMeasureRef : undefined}
+                  className="flex-1 border-l min-w-[120px]"
+                  style={{ scrollSnapAlign: 'start' }}
+                >
                   <CalendarDayColumn
                     day={day}
                     slotHeight={slotHeight}
                     isEditable={isEditable}
+                    dayColumnWidth={dayColumnWidth}
                     onUpdateItem={onUpdateItem}
+                    onMoveItem={handleMoveItem}
                     onClickItem={onClickItem}
                     onClickSlot={onClickSlot}
+                    onCreateSlotRange={onCreateSlotRange}
                   />
                 </div>
               ))

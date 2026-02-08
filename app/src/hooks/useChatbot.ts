@@ -61,13 +61,19 @@ export function useChatbot({
   // Ref pour la dernière demande (pour le contexte de modification)
   const lastRequestRef = useRef<string>('');
 
-  // Charger les suggestions contextuelles
+  // Charger les suggestions contextuelles (avec timeout de 8s pour éviter les blocages)
   const loadSuggestions = useCallback(async () => {
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
+
       const response = await fetch(`/api/trips/${tripId}/chat/suggestions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
       });
+      clearTimeout(timeoutId);
+
       if (response.ok) {
         const data = await response.json();
         if (data.suggestions?.length > 0) {
@@ -75,7 +81,11 @@ export function useChatbot({
         }
       }
     } catch (err) {
-      console.error('[useChatbot] Error loading suggestions:', err);
+      if (err instanceof DOMException && err.name === 'AbortError') {
+        console.warn('[useChatbot] Suggestions request timed out');
+      } else {
+        console.error('[useChatbot] Error loading suggestions:', err);
+      }
     }
   }, [tripId]);
 

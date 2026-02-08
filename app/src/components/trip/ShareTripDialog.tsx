@@ -512,53 +512,71 @@ export function ShareTripDialog({
             )}
 
             {/* Calendar export section */}
-            {savedTripId && (
-              <div className="space-y-2 pt-2 border-t">
-                <label className="text-sm font-medium flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  Calendrier
-                </label>
-                <div className="grid grid-cols-2 gap-2">
+            {savedTripId && (() => {
+              const isPublicUrl = !baseUrl.includes('localhost') && !baseUrl.includes('127.0.0.1');
+              const tokenParam = shareCode ? `?token=${shareCode}` : '';
+              const icsDownloadUrl = `${baseUrl}/api/trips/${savedTripId}/calendar.ics?download=1${shareCode ? `&token=${shareCode}` : ''}`;
+
+              return (
+                <div className="space-y-2 pt-2 border-t">
+                  <label className="text-sm font-medium flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
+                    Calendrier
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button
+                      variant="outline"
+                      className="flex flex-col items-center gap-1 h-auto py-3"
+                      onClick={() => {
+                        if (isPublicUrl) {
+                          const url = `webcal://${window.location.host}/api/trips/${savedTripId}/calendar.ics${tokenParam}`;
+                          window.location.href = url;
+                        } else {
+                          // In localhost, download the .ics file directly — macOS opens it in Calendar
+                          window.open(icsDownloadUrl);
+                        }
+                      }}
+                    >
+                      <Calendar className="h-5 w-5 text-gray-700" />
+                      <span className="text-xs">Apple Calendar</span>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="flex flex-col items-center gap-1 h-auto py-3"
+                      onClick={() => {
+                        if (isPublicUrl) {
+                          // On deployed URL, use subscription approach
+                          const icsUrl = `${baseUrl}/api/trips/${savedTripId}/calendar.ics${tokenParam}`;
+                          const gcalUrl = `https://calendar.google.com/calendar/r/settings/addbyurl?url=${encodeURIComponent(icsUrl)}`;
+                          window.open(gcalUrl, '_blank');
+                        } else {
+                          // On localhost, download .ics and show import instructions
+                          window.open(icsDownloadUrl);
+                          // Small delay to show instructions after download starts
+                          setTimeout(() => {
+                            alert('Fichier .ics téléchargé !\n\nPour l\'importer dans Google Calendar :\n1. Ouvrez calendar.google.com\n2. Cliquez sur ⚙️ Paramètres\n3. Importation et exportation\n4. Sélectionnez le fichier .ics téléchargé');
+                          }, 500);
+                        }
+                      }}
+                    >
+                      <Calendar className="h-5 w-5 text-blue-500" />
+                      <span className="text-xs">Google Calendar</span>
+                    </Button>
+                  </div>
                   <Button
                     variant="outline"
-                    className="flex flex-col items-center gap-1 h-auto py-3"
+                    size="sm"
+                    className="w-full gap-2"
                     onClick={() => {
-                      const tokenParam = shareCode ? `?token=${shareCode}` : '';
-                      const url = `webcal://${window.location.host}/api/trips/${savedTripId}/calendar.ics${tokenParam}`;
-                      window.location.href = url;
+                      window.open(icsDownloadUrl);
                     }}
                   >
-                    <Calendar className="h-5 w-5 text-gray-700" />
-                    <span className="text-xs">Apple Calendar</span>
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="flex flex-col items-center gap-1 h-auto py-3"
-                    onClick={() => {
-                      const tokenParam = shareCode ? `?token=${shareCode}` : '';
-                      const icsUrl = `${baseUrl}/api/trips/${savedTripId}/calendar.ics${tokenParam}`;
-                      const gcalUrl = `https://calendar.google.com/calendar/r/settings/addbyurl?url=${encodeURIComponent(icsUrl)}`;
-                      window.open(gcalUrl, '_blank');
-                    }}
-                  >
-                    <Calendar className="h-5 w-5 text-blue-500" />
-                    <span className="text-xs">Google Calendar</span>
+                    <Download className="h-4 w-4" />
+                    Télécharger .ics
                   </Button>
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full gap-2"
-                  onClick={() => {
-                    const url = `${baseUrl}/api/trips/${savedTripId}/calendar.ics?download=1${shareCode ? `&token=${shareCode}` : ''}`;
-                    window.open(url);
-                  }}
-                >
-                  <Download className="h-4 w-4" />
-                  Télécharger .ics
-                </Button>
-              </div>
-            )}
+              );
+            })()}
 
           </div>
         )}

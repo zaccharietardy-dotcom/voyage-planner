@@ -7,7 +7,7 @@
 import { createRouteHandlerClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 import { generateContextualSuggestions } from '@/lib/services/intentClassifier';
-import { TripDay, TripPreferences } from '@/lib/types';
+import { TripDay, TripPreferences, SUGGESTED_CHAT_PROMPTS } from '@/lib/types';
 
 export async function POST(
   request: Request,
@@ -64,8 +64,21 @@ export async function POST(
       return NextResponse.json({ suggestions: [] });
     }
 
-    // Générer les suggestions contextuelles
-    const suggestions = await generateContextualSuggestions(destination, days);
+    // Générer les suggestions contextuelles (avec timeout de 6s pour éviter les timeouts Vercel)
+    const timeoutPromise = new Promise<null>((resolve) =>
+      setTimeout(() => resolve(null), 6000)
+    );
+
+    const result = await Promise.race([
+      generateContextualSuggestions(destination, days),
+      timeoutPromise,
+    ]);
+
+    const suggestions = result || SUGGESTED_CHAT_PROMPTS.slice(0, 4).map(s => ({
+      label: s.label,
+      prompt: s.prompt,
+      icon: undefined,
+    }));
 
     return NextResponse.json({ suggestions });
   } catch (error) {

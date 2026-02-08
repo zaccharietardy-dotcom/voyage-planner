@@ -14,7 +14,9 @@ interface CalendarActivityBlockProps {
   column?: number;
   totalColumns?: number;
   slotHeight: number;
+  dayColumnWidth?: number;
   onUpdate?: (item: TripItem) => void;
+  onMove?: (item: TripItem, deltaSlots: number, deltaDays: number) => void;
   onClick?: () => void;
   onInteraction?: () => void;
 }
@@ -31,6 +33,8 @@ function formatTime(minutes: number): string {
   return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
 }
 
+const MOVE_ACTIVATION_DISTANCE = 5;
+
 export function CalendarActivityBlock({
   item,
   isEditable,
@@ -39,12 +43,15 @@ export function CalendarActivityBlock({
   column = 0,
   totalColumns = 1,
   slotHeight,
+  dayColumnWidth = 0,
   onUpdate,
+  onMove,
   onClick,
   onInteraction,
 }: CalendarActivityBlockProps) {
   const locked = isLockedItem(item);
   const canResize = isEditable && !locked;
+  const canMove = isEditable && !locked;
   const color = TRIP_ITEM_COLORS[item.type] || '#6B7280';
 
   // Dark mode detection for better contrast
@@ -57,20 +64,35 @@ export function CalendarActivityBlock({
     return () => observer.disconnect();
   }, []);
 
-  // Visual-only drag state: delta in slots from the original position
+  // ── Resize state ─────────────────────────────────────────────────
   const [dragState, setDragState] = useState<{
     edge: 'top' | 'bottom';
     deltaSlots: number;
   } | null>(null);
 
-  // Snapshot of item at drag start (immune to re-renders)
+  // ── Move state ───────────────────────────────────────────────────
+  const [moveState, setMoveState] = useState<{
+    deltaSlots: number;
+    deltaDays: number;
+    isDragging: boolean;
+  } | null>(null);
+
+  // Shared refs
   const dragItemRef = useRef(item);
   const startYRef = useRef(0);
+  const startXRef = useRef(0);
   const slotHeightRef = useRef(slotHeight);
   const rowStartRef = useRef(rowStart);
   const rowSpanRef = useRef(rowSpan);
-  // Flag to suppress onClick after a resize (survives across React batches)
+  const dayColumnWidthRef = useRef(dayColumnWidth);
   const didDragRef = useRef(false);
+
+  // Keep refs in sync
+  useEffect(() => {
+    dayColumnWidthRef.current = dayColumnWidth;
+  }, [dayColumnWidth]);
+
+  // ── Resize handlers (unchanged logic) ────────────────────────────
 
   const handleResizeStart = useCallback(
     (edge: 'top' | 'bottom', e: React.MouseEvent) => {
@@ -78,7 +100,6 @@ export function CalendarActivityBlock({
       e.preventDefault();
       e.stopPropagation();
 
-      // Snapshot everything at drag start
       didDragRef.current = true;
       dragItemRef.current = item;
       startYRef.current = e.clientY;
@@ -101,7 +122,6 @@ export function CalendarActivityBlock({
         const deltaSlots = Math.round(dy / slotHeightRef.current);
         const snap = dragItemRef.current;
 
-        // Compute final item - always set startTime, endTime, duration consistently
         if (edge === 'bottom') {
           const newSpan = Math.max(1, rowSpanRef.current + deltaSlots);
           const newDuration = newSpan * 15;
@@ -117,7 +137,7 @@ export function CalendarActivityBlock({
             onUpdate?.({
               ...snap,
               startTime: formatTime(newStartMinutes),
-              endTime: snap.endTime, // keep endTime, adjust startTime
+              endTime: snap.endTime,
               duration: newDuration,
             });
           }
@@ -134,7 +154,6 @@ export function CalendarActivityBlock({
     [canResize, item, slotHeight, rowStart, rowSpan, onUpdate, onInteraction]
   );
 
-  // Touch resize
   const handleTouchResizeStart = useCallback(
     (edge: 'top' | 'bottom', e: React.TouchEvent) => {
       if (!canResize) return;
@@ -161,7 +180,6 @@ export function CalendarActivityBlock({
         window.removeEventListener('touchmove', handleTouchMove);
         window.removeEventListener('touchend', handleTouchEnd);
 
-        // Use last known position from changedTouches
         const t = ev.changedTouches[0];
         const dy = t.clientY - startYRef.current;
         const deltaSlots = Math.round(dy / slotHeightRef.current);
@@ -199,15 +217,180 @@ export function CalendarActivityBlock({
     [canResize, item, slotHeight, rowStart, rowSpan, onUpdate, onInteraction]
   );
 
-  // Visual position: apply drag delta for smooth preview
-  const visualRowStart = dragState?.edge === 'top'
+  // ── Move handlers (drag-to-move block) ───────────────────────────
+
+  const handleMoveStart = useCallback(
+    (e: React.MouseEvent) => {
+      if (!canMove) return;
+      // Don't interfere with resize handles
+      if ((e.target as HTMLElement).closest('.resize-handle')) return;
+      e.preventDefault();
+      e.stopPropagation();
+
+      dragItemRef.current = item;
+      startXRef.current = e.clientX;
+      startYRef.current = e.clientY;
+      slotHeightRef.current = slotHeight;
+      rowStartRef.current = rowStart;
+      rowSpanRef.current = rowSpan;
+      setMoveState({ deltaSlots: 0, deltaDays: 0, isDragging: false });
+
+      const handleMouseMove = (ev: MouseEvent) => {
+        const dx = ev.clientX - startXRef.current;
+        const dy = ev.clientY - startYRef.current;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance > MOVE_ACTIVATION_DISTANCE) {
+          didDragRef.current = true;
+          const deltaSlots = Math.round(dy / slotHeightRef.current);
+          const deltaDays = dayColumnWidthRef.current > 0
+            ? Math.round(dx / dayColumnWidthRef.current)
+            : 0;
+          setMoveState({ deltaSlots, deltaDays, isDragging: true });
+        }
+      };
+
+      const handleMouseUp = (ev: MouseEvent) => {
+        window.removeEventListener('mousemove', handleMouseMove);
+        window.removeEventListener('mouseup', handleMouseUp);
+
+        const dx = ev.clientX - startXRef.current;
+        const dy = ev.clientY - startYRef.current;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance > MOVE_ACTIVATION_DISTANCE) {
+          const deltaSlots = Math.round(dy / slotHeightRef.current);
+          const deltaDays = dayColumnWidthRef.current > 0
+            ? Math.round(dx / dayColumnWidthRef.current)
+            : 0;
+
+          if (deltaSlots !== 0 || deltaDays !== 0) {
+            onMove?.(dragItemRef.current, deltaSlots, deltaDays);
+          }
+        }
+
+        setMoveState(null);
+        onInteraction?.();
+        requestAnimationFrame(() => { didDragRef.current = false; });
+      };
+
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+    },
+    [canMove, item, slotHeight, rowStart, rowSpan, onMove, onInteraction]
+  );
+
+  const handleTouchMoveStart = useCallback(
+    (e: React.TouchEvent) => {
+      if (!canMove) return;
+      if ((e.target as HTMLElement).closest('.resize-handle')) return;
+
+      const touch = e.touches[0];
+      dragItemRef.current = item;
+      startXRef.current = touch.clientX;
+      startYRef.current = touch.clientY;
+      slotHeightRef.current = slotHeight;
+      rowStartRef.current = rowStart;
+      rowSpanRef.current = rowSpan;
+
+      // Use a long-press timer for touch — 200ms hold to activate move
+      let activated = false;
+      const longPressTimer = setTimeout(() => {
+        activated = true;
+        setMoveState({ deltaSlots: 0, deltaDays: 0, isDragging: false });
+      }, 200);
+
+      const handleTouchMove = (ev: TouchEvent) => {
+        if (!activated) {
+          // Check if movement is too large before activation — cancel
+          const t = ev.touches[0];
+          const dist = Math.sqrt(
+            (t.clientX - startXRef.current) ** 2 +
+            (t.clientY - startYRef.current) ** 2
+          );
+          if (dist > 10) {
+            clearTimeout(longPressTimer);
+            cleanup();
+            return;
+          }
+          return;
+        }
+
+        ev.preventDefault();
+        const t = ev.touches[0];
+        const dx = t.clientX - startXRef.current;
+        const dy = t.clientY - startYRef.current;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance > MOVE_ACTIVATION_DISTANCE) {
+          didDragRef.current = true;
+          const deltaSlots = Math.round(dy / slotHeightRef.current);
+          const deltaDays = dayColumnWidthRef.current > 0
+            ? Math.round(dx / dayColumnWidthRef.current)
+            : 0;
+          setMoveState({ deltaSlots, deltaDays, isDragging: true });
+        }
+      };
+
+      const cleanup = () => {
+        window.removeEventListener('touchmove', handleTouchMove);
+        window.removeEventListener('touchend', handleTouchEnd);
+      };
+
+      const handleTouchEnd = (ev: TouchEvent) => {
+        clearTimeout(longPressTimer);
+        cleanup();
+
+        if (!activated) {
+          setMoveState(null);
+          return;
+        }
+
+        const t = ev.changedTouches[0];
+        const dx = t.clientX - startXRef.current;
+        const dy = t.clientY - startYRef.current;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance > MOVE_ACTIVATION_DISTANCE) {
+          const deltaSlots = Math.round(dy / slotHeightRef.current);
+          const deltaDays = dayColumnWidthRef.current > 0
+            ? Math.round(dx / dayColumnWidthRef.current)
+            : 0;
+
+          if (deltaSlots !== 0 || deltaDays !== 0) {
+            onMove?.(dragItemRef.current, deltaSlots, deltaDays);
+          }
+        }
+
+        setMoveState(null);
+        onInteraction?.();
+        requestAnimationFrame(() => { didDragRef.current = false; });
+      };
+
+      window.addEventListener('touchmove', handleTouchMove, { passive: false });
+      window.addEventListener('touchend', handleTouchEnd);
+    },
+    [canMove, item, slotHeight, rowStart, rowSpan, onMove, onInteraction]
+  );
+
+  // ── Visual position computation ──────────────────────────────────
+
+  // Resize visuals
+  const resizeRowStart = dragState?.edge === 'top'
     ? Math.max(1, rowStart + dragState.deltaSlots)
     : rowStart;
-  const visualRowSpan = dragState?.edge === 'bottom'
+  const resizeRowSpan = dragState?.edge === 'bottom'
     ? Math.max(1, rowSpan + dragState.deltaSlots)
     : dragState?.edge === 'top'
       ? Math.max(1, rowSpan - dragState.deltaSlots)
       : rowSpan;
+
+  // Move visuals — during move, shift the entire block
+  const moveOffsetY = moveState?.isDragging ? moveState.deltaSlots * slotHeight : 0;
+  const moveOffsetX = moveState?.isDragging ? moveState.deltaDays * dayColumnWidth : 0;
+
+  const visualRowStart = dragState ? resizeRowStart : rowStart;
+  const visualRowSpan = dragState ? resizeRowSpan : rowSpan;
 
   const widthPercent = totalColumns > 1 ? `${100 / totalColumns}%` : '100%';
   const leftPercent = totalColumns > 1 ? `${(column / totalColumns) * 100}%` : '0%';
@@ -217,24 +400,29 @@ export function CalendarActivityBlock({
   const showDuration = visualHeight >= 40;
   const showTitle = visualHeight >= 24;
 
-  // Compute displayed times during drag
+  const isActive = !!dragState || (moveState?.isDragging ?? false);
+
+  // Compute displayed times during drag/move
   const displayStartTime = dragState?.edge === 'top'
     ? formatTime(Math.max(0, (visualRowStart - 1) * 15))
-    : item.startTime;
+    : moveState?.isDragging
+      ? formatTime(Math.max(0, (rowStart - 1 + moveState.deltaSlots) * 15))
+      : item.startTime;
   const displayEndTime = dragState?.edge === 'bottom'
     ? formatTime((rowStart - 1) * 15 + visualRowSpan * 15)
-    : dragState?.edge === 'top'
-      ? item.endTime
+    : moveState?.isDragging
+      ? formatTime(Math.max(0, (rowStart - 1 + moveState.deltaSlots + rowSpan) * 15))
       : item.endTime;
 
   return (
     <div
       className={cn(
         'absolute rounded-md border overflow-hidden select-none',
-        canResize && 'cursor-pointer hover:shadow-md',
+        canMove && 'cursor-grab',
+        canMove && isActive && 'cursor-grabbing',
         locked && 'border-dashed opacity-80',
-        dragState && 'shadow-lg ring-2 ring-primary z-50',
-        dragState && 'transition-none'
+        isActive && 'shadow-lg ring-2 ring-primary z-50',
+        isActive && 'transition-none'
       )}
       style={{
         top: visualTop,
@@ -243,8 +431,13 @@ export function CalendarActivityBlock({
         width: `calc(${widthPercent} - 4px)`,
         backgroundColor: `${color}${isDark ? '28' : '18'}`,
         borderColor: `${color}${isDark ? '80' : '60'}`,
+        transform: moveState?.isDragging
+          ? `translate(${moveOffsetX}px, ${moveOffsetY}px)`
+          : undefined,
+        zIndex: isActive ? 50 : undefined,
       }}
-      onMouseDown={(e) => e.stopPropagation()}
+      onMouseDown={handleMoveStart}
+      onTouchStart={handleTouchMoveStart}
       onClick={(e) => {
         e.stopPropagation();
         onInteraction?.();
@@ -283,14 +476,14 @@ export function CalendarActivityBlock({
       {canResize && (
         <>
           <div
-            className="absolute top-0 left-0 right-0 h-2 cursor-row-resize hover:bg-foreground/10 flex items-center justify-center"
+            className="resize-handle absolute top-0 left-0 right-0 h-2 cursor-row-resize hover:bg-foreground/10 flex items-center justify-center"
             onMouseDown={(e) => handleResizeStart('top', e)}
             onTouchStart={(e) => handleTouchResizeStart('top', e)}
           >
             <GripHorizontal className="h-2.5 w-2.5 text-muted-foreground/50" />
           </div>
           <div
-            className="absolute bottom-0 left-0 right-0 h-2 cursor-row-resize hover:bg-foreground/10 flex items-center justify-center"
+            className="resize-handle absolute bottom-0 left-0 right-0 h-2 cursor-row-resize hover:bg-foreground/10 flex items-center justify-center"
             onMouseDown={(e) => handleResizeStart('bottom', e)}
             onTouchStart={(e) => handleTouchResizeStart('bottom', e)}
           >

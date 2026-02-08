@@ -34,6 +34,7 @@ interface AddActivityModalProps {
   dayNumber: number;
   destination: string;
   defaultStartTime?: string;
+  defaultEndTime?: string;
 }
 
 interface SearchResult {
@@ -67,6 +68,7 @@ export function AddActivityModal({
   dayNumber,
   destination,
   defaultStartTime,
+  defaultEndTime,
 }: AddActivityModalProps) {
   const [tab, setTab] = useState<'search' | 'manual'>('search');
   const [query, setQuery] = useState('');
@@ -97,7 +99,14 @@ export function AddActivityModal({
       setDescription('');
       setLocationName('');
       setStartTime(defaultStartTime || '10:00');
-      setDuration(60);
+      if (defaultStartTime && defaultEndTime) {
+        const [sh, sm] = defaultStartTime.split(':').map(Number);
+        const [eh, em] = defaultEndTime.split(':').map(Number);
+        const dur = (eh * 60 + em) - (sh * 60 + sm);
+        setDuration(dur > 0 ? dur : 60);
+      } else {
+        setDuration(60);
+      }
       setEstimatedCost(0);
       setLatitude(undefined);
       setLongitude(undefined);

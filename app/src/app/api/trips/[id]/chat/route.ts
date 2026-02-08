@@ -100,16 +100,24 @@ export async function POST(
     };
 
     // Récupérer l'historique récent pour le contexte conversationnel (5 paires = 10 messages)
-    const { data: recentMessages } = await (supabase as any)
-      .from('trip_chat_messages')
-      .select('role, content, intent')
-      .eq('trip_id', tripId)
-      .order('created_at', { ascending: false })
-      .limit(10);
+    // Wrappé dans un try-catch pour ne pas bloquer le chat si l'historique est inaccessible
+    let conversationHistory: ConversationContext = { recentExchanges: [] };
+    try {
+      const { data: recentMessages, error: historyError } = await (supabase as any)
+        .from('trip_chat_messages')
+        .select('role, content, intent')
+        .eq('trip_id', tripId)
+        .order('created_at', { ascending: false })
+        .limit(10);
 
-    const conversationHistory = buildConversationContext(
-      (recentMessages || []).reverse()
-    );
+      if (historyError) {
+        console.warn('[Chat API] Error fetching conversation history:', historyError.message);
+      } else if (recentMessages && recentMessages.length > 0) {
+        conversationHistory = buildConversationContext(recentMessages.reverse());
+      }
+    } catch (err) {
+      console.warn('[Chat API] Failed to load conversation history:', err);
+    }
 
     // Traiter le message avec le chatbot (avec contexte conversationnel)
     const response = await handleChatMessage(message, destination, days, tripModContext, conversationHistory);

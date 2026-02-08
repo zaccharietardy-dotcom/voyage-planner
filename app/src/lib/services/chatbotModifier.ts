@@ -14,6 +14,7 @@ import {
   TripItem,
   ChatResponse,
   ConversationContext,
+  ContextualSuggestion,
 } from '../types';
 import {
   getConstraints,
@@ -86,14 +87,15 @@ export async function handleChatMessage(
   // 3. Générer les modifications
   const result = await generateModifications(intent, days, tripContext);
 
-  // 4. Générer les suggestions contextuelles en parallèle (non bloquant)
-  // On utilise les jours modifiés si dispo, sinon les jours actuels
-  const suggestionsPromise = generateContextualSuggestions(
-    destination,
-    result.success ? result.newDays : days
-  ).catch(() => undefined);
-
-  const suggestions = await suggestionsPromise;
+  // 4. Générer les suggestions contextuelles seulement en cas de succès
+  // (les échecs ont déjà errorInfo.alternativeSuggestion, pas besoin d'un appel Haiku supplémentaire)
+  let suggestions: ContextualSuggestion[] | undefined;
+  if (result.success) {
+    suggestions = await generateContextualSuggestions(
+      destination,
+      result.newDays
+    ).catch(() => undefined);
+  }
 
   if (!result.success) {
     return {

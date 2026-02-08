@@ -1,10 +1,9 @@
 'use client';
 
-import { useMemo, useCallback, useRef } from 'react';
+import { useMemo, useCallback, useRef, useState, useEffect } from 'react';
 import { TripDay, TripItem } from '@/lib/types';
 import { CalendarActivityBlock } from './CalendarActivityBlock';
-import { cn } from '@/lib/utils';
-import { format } from 'date-fns';
+import { format, isSameDay } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
 // 24h = 96 slots of 15min (00:00 → 23:45)
@@ -16,9 +15,12 @@ interface CalendarDayColumnProps {
   slotHeight: number;
   isEditable: boolean;
   showHeader?: boolean;
+  dayColumnWidth?: number;
   onUpdateItem?: (item: TripItem) => void;
+  onMoveItem?: (item: TripItem, deltaSlots: number, deltaDays: number) => void;
   onClickItem?: (item: TripItem) => void;
   onClickSlot?: (dayNumber: number, time: string) => void;
+  onCreateSlotRange?: (dayNumber: number, startTime: string, endTime: string) => void;
 }
 
 function parseMinutes(time: string | undefined | null): number {
@@ -105,34 +107,196 @@ function layoutItems(items: TripItem[]): LayoutItem[] {
   return result;
 }
 
+// ── Current time indicator (red line) ────────────────────────────────
+
+function CurrentTimeIndicator({ slotHeight, dayDate }: { slotHeight: number; dayDate: Date }) {
+  const [now, setNow] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 60000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const isToday = dayDate && isSameDay(new Date(dayDate), now);
+  if (!isToday) return null;
+
+  const minutes = now.getHours() * 60 + now.getMinutes();
+  const top = (minutes / 15) * slotHeight;
+
+  return (
+    <div
+      className="absolute left-0 right-0 z-20 pointer-events-none"
+      style={{ top }}
+    >
+      <div className="flex items-center">
+        <div className="w-2.5 h-2.5 rounded-full bg-red-500 -ml-1 shrink-0" />
+        <div className="flex-1 h-[2px] bg-red-500" />
+      </div>
+    </div>
+  );
+}
+
+// ── Main component ───────────────────────────────────────────────────
+
 export function CalendarDayColumn({
   day,
   slotHeight,
   isEditable,
   showHeader = true,
+  dayColumnWidth = 0,
   onUpdateItem,
+  onMoveItem,
   onClickItem,
   onClickSlot,
+  onCreateSlotRange,
 }: CalendarDayColumnProps) {
   const layoutItems_ = useMemo(() => layoutItems(day.items), [day.items]);
   const lastInteractionRef = useRef(0);
 
   const totalHeight = TOTAL_SLOTS * slotHeight;
 
-  const handleSlotClick = useCallback(
+  // ── Drag-to-create state ─────────────────────────────────────────
+  const [createDrag, setCreateDrag] = useState<{
+    startSlot: number;
+    currentSlot: number;
+  } | null>(null);
+  const createDragRef = useRef(false);
+
+  const handleGridMouseDown = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
-      if (!onClickSlot) return;
-      // Ignore clicks within 300ms of a block interaction (resize end, block click)
+      if (!isEditable) return;
+      // Ignore clicks within 300ms of a block interaction
       if (Date.now() - lastInteractionRef.current < 300) return;
+      // Only respond to direct clicks on the grid (not on blocks)
+      if ((e.target as HTMLElement).closest('.calendar-block')) return;
+
       const rect = e.currentTarget.getBoundingClientRect();
       const y = e.clientY - rect.top;
       const slot = Math.floor(y / slotHeight);
-      const minutes = slot * 15;
-      const time = formatTime(minutes);
-      onClickSlot(day.dayNumber, time);
+
+      setCreateDrag({ startSlot: slot, currentSlot: slot });
+      createDragRef.current = false;
+
+      const handleMouseMove = (ev: MouseEvent) => {
+        const currentY = ev.clientY - rect.top;
+        const currentSlot = Math.max(0, Math.min(TOTAL_SLOTS - 1, Math.floor(currentY / slotHeight)));
+        createDragRef.current = true;
+        setCreateDrag((prev) => prev ? { ...prev, currentSlot } : null);
+      };
+
+      const handleMouseUp = (ev: MouseEvent) => {
+        window.removeEventListener('mousemove', handleMouseMove);
+        window.removeEventListener('mouseup', handleMouseUp);
+
+        const currentY = ev.clientY - rect.top;
+        const endSlot = Math.max(0, Math.min(TOTAL_SLOTS - 1, Math.floor(currentY / slotHeight)));
+
+        setCreateDrag(null);
+
+        if (createDragRef.current && Math.abs(endSlot - slot) >= 1) {
+          // Drag-to-create: range selection
+          const minSlot = Math.min(slot, endSlot);
+          const maxSlot = Math.max(slot, endSlot) + 1;
+          const startTime = formatTime(minSlot * 15);
+          const endTime = formatTime(maxSlot * 15);
+          onCreateSlotRange?.(day.dayNumber, startTime, endTime);
+        } else {
+          // Simple click — existing behavior
+          const time = formatTime(slot * 15);
+          onClickSlot?.(day.dayNumber, time);
+        }
+      };
+
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
     },
-    [onClickSlot, day.dayNumber, slotHeight]
+    [isEditable, slotHeight, day.dayNumber, onClickSlot, onCreateSlotRange]
   );
+
+  // Touch drag-to-create
+  const handleGridTouchStart = useCallback(
+    (e: React.TouchEvent<HTMLDivElement>) => {
+      if (!isEditable) return;
+      if (Date.now() - lastInteractionRef.current < 300) return;
+      if ((e.target as HTMLElement).closest('.calendar-block')) return;
+
+      const rect = e.currentTarget.getBoundingClientRect();
+      const touch = e.touches[0];
+      const y = touch.clientY - rect.top;
+      const slot = Math.floor(y / slotHeight);
+
+      // Long press to activate drag-to-create on touch
+      let activated = false;
+      const timer = setTimeout(() => {
+        activated = true;
+        setCreateDrag({ startSlot: slot, currentSlot: slot });
+      }, 300);
+
+      const handleTouchMove = (ev: TouchEvent) => {
+        if (!activated) {
+          const t = ev.touches[0];
+          const dist = Math.abs(t.clientY - touch.clientY);
+          if (dist > 10) {
+            clearTimeout(timer);
+            cleanup();
+          }
+          return;
+        }
+        ev.preventDefault();
+        const t = ev.touches[0];
+        const currentY = t.clientY - rect.top;
+        const currentSlot = Math.max(0, Math.min(TOTAL_SLOTS - 1, Math.floor(currentY / slotHeight)));
+        createDragRef.current = true;
+        setCreateDrag((prev) => prev ? { ...prev, currentSlot } : null);
+      };
+
+      const cleanup = () => {
+        window.removeEventListener('touchmove', handleTouchMove);
+        window.removeEventListener('touchend', handleTouchEnd);
+      };
+
+      const handleTouchEnd = () => {
+        clearTimeout(timer);
+        cleanup();
+
+        if (!activated) {
+          // Simple tap
+          const time = formatTime(slot * 15);
+          onClickSlot?.(day.dayNumber, time);
+          setCreateDrag(null);
+          return;
+        }
+
+        setCreateDrag((current) => {
+          if (current && Math.abs(current.currentSlot - current.startSlot) >= 1) {
+            const minSlot = Math.min(current.startSlot, current.currentSlot);
+            const maxSlot = Math.max(current.startSlot, current.currentSlot) + 1;
+            const startTime = formatTime(minSlot * 15);
+            const endTime = formatTime(maxSlot * 15);
+            onCreateSlotRange?.(day.dayNumber, startTime, endTime);
+          } else {
+            const time = formatTime(slot * 15);
+            onClickSlot?.(day.dayNumber, time);
+          }
+          return null;
+        });
+      };
+
+      window.addEventListener('touchmove', handleTouchMove, { passive: false });
+      window.addEventListener('touchend', handleTouchEnd);
+    },
+    [isEditable, slotHeight, day.dayNumber, onClickSlot, onCreateSlotRange]
+  );
+
+  // Compute drag-to-create highlight
+  const createHighlight = createDrag ? (() => {
+    const minSlot = Math.min(createDrag.startSlot, createDrag.currentSlot);
+    const maxSlot = Math.max(createDrag.startSlot, createDrag.currentSlot);
+    return {
+      top: minSlot * slotHeight,
+      height: (maxSlot - minSlot + 1) * slotHeight,
+    };
+  })() : null;
 
   return (
     <div className="flex flex-col min-w-0">
@@ -155,7 +319,8 @@ export function CalendarDayColumn({
       <div
         className="relative"
         style={{ height: totalHeight }}
-        onClick={isEditable ? handleSlotClick : undefined}
+        onMouseDown={isEditable ? handleGridMouseDown : undefined}
+        onTouchStart={isEditable ? handleGridTouchStart : undefined}
       >
         {/* Hour lines */}
         {HOURS.map((hour) => (
@@ -175,6 +340,28 @@ export function CalendarDayColumn({
           />
         ))}
 
+        {/* Current time indicator */}
+        {day.date && (
+          <CurrentTimeIndicator slotHeight={slotHeight} dayDate={new Date(day.date)} />
+        )}
+
+        {/* Drag-to-create highlight */}
+        {createHighlight && (
+          <div
+            className="absolute left-1 right-1 bg-primary/15 border-2 border-primary/30 rounded-md z-10 pointer-events-none"
+            style={{
+              top: createHighlight.top,
+              height: createHighlight.height,
+            }}
+          >
+            <div className="px-2 py-0.5 text-[10px] text-primary font-medium">
+              {formatTime(Math.min(createDrag!.startSlot, createDrag!.currentSlot) * 15)}
+              {' – '}
+              {formatTime((Math.max(createDrag!.startSlot, createDrag!.currentSlot) + 1) * 15)}
+            </div>
+          </div>
+        )}
+
         {/* Activity blocks */}
         {layoutItems_.map((li) => (
           <CalendarActivityBlock
@@ -186,7 +373,9 @@ export function CalendarDayColumn({
             column={li.column}
             totalColumns={li.totalColumns}
             slotHeight={slotHeight}
+            dayColumnWidth={dayColumnWidth}
             onUpdate={onUpdateItem}
+            onMove={onMoveItem}
             onClick={() => onClickItem?.(li.item)}
             onInteraction={() => { lastInteractionRef.current = Date.now(); }}
           />

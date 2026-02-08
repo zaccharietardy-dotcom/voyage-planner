@@ -915,7 +915,7 @@ export async function generateDayWithScheduler(params: {
                 latitude: restaurantCoords.lat,
                 longitude: restaurantCoords.lng,
                 estimatedCost: estimateMealPrice(restaurant?.priceLevel || getBudgetPriceLevel(preferences.budgetLevel), 'lunch') * preferences.groupSize,
-                rating: restaurant?.rating,
+                rating: restaurant?.rating ? Math.round(restaurant.rating * 10) / 10 : undefined,
                 googleMapsPlaceUrl: restaurantGoogleMapsUrl,
               }));
               lastCoords = restaurantCoords;
@@ -968,7 +968,7 @@ export async function generateDayWithScheduler(params: {
               latitude: attractionCoords.lat,
               longitude: attractionCoords.lng,
               estimatedCost: attraction.estimatedCost * preferences.groupSize,
-              rating: attraction.rating,
+              rating: attraction.rating ? Math.round(attraction.rating * 10) / 10 : undefined,
               bookingUrl: attraction.bookingUrl,
               dataReliability: attraction.dataReliability || 'estimated',
             }));
@@ -1308,7 +1308,7 @@ export async function generateDayWithScheduler(params: {
           latitude: restaurantCoords.lat,
           longitude: restaurantCoords.lng,
           estimatedCost: estimateMealPrice(restaurant?.priceLevel || getBudgetPriceLevel(preferences.budgetLevel), 'breakfast') * preferences.groupSize,
-          rating: restaurant?.rating,
+          rating: restaurant?.rating ? Math.round(restaurant.rating * 10) / 10 : undefined,
           googleMapsUrl,
           googleMapsPlaceUrl: restaurantGoogleMapsUrl,
         }));
@@ -1426,7 +1426,7 @@ export async function generateDayWithScheduler(params: {
         latitude: attractionCoords.lat,
         longitude: attractionCoords.lng,
         estimatedCost: attraction.estimatedCost * preferences.groupSize,
-        rating: attraction.rating,
+        rating: attraction.rating ? Math.round(attraction.rating * 10) / 10 : undefined,
         bookingUrl: attraction.bookingUrl,
         timeFromPrevious: travelTime,
         googleMapsUrl,
@@ -1510,7 +1510,7 @@ export async function generateDayWithScheduler(params: {
             latitude: attractionCoordsMorning.lat,
             longitude: attractionCoordsMorning.lng,
             estimatedCost: attraction.estimatedCost * preferences.groupSize,
-            rating: attraction.rating,
+            rating: attraction.rating ? Math.round(attraction.rating * 10) / 10 : undefined,
             bookingUrl: attraction.bookingUrl,
             timeFromPrevious: estimatedTravelTimeMorning,
             googleMapsUrl: googleMapsUrlMorning,
@@ -1576,7 +1576,7 @@ export async function generateDayWithScheduler(params: {
             latitude: restaurantCoords.lat,
             longitude: restaurantCoords.lng,
             estimatedCost: estimateMealPrice(restaurant?.priceLevel || getBudgetPriceLevel(preferences.budgetLevel), 'lunch') * preferences.groupSize,
-            rating: restaurant?.rating,
+            rating: restaurant?.rating ? Math.round(restaurant.rating * 10) / 10 : undefined,
             googleMapsUrl,
             googleMapsPlaceUrl: restaurantGoogleMapsUrl,
           }));
@@ -1629,7 +1629,7 @@ export async function generateDayWithScheduler(params: {
                 latitude: restaurantCoords.lat,
                 longitude: restaurantCoords.lng,
                 estimatedCost: estimateMealPrice(restaurant?.priceLevel || getBudgetPriceLevel(preferences.budgetLevel), 'lunch') * preferences.groupSize,
-                rating: restaurant?.rating,
+                rating: restaurant?.rating ? Math.round(restaurant.rating * 10) / 10 : undefined,
                 googleMapsUrl,
                 googleMapsPlaceUrl: restaurantGoogleMapsUrl,
               }));
@@ -1683,7 +1683,7 @@ export async function generateDayWithScheduler(params: {
                   latitude: restaurantCoords.lat,
                   longitude: restaurantCoords.lng,
                   estimatedCost: estimateMealPrice(restaurant?.priceLevel || getBudgetPriceLevel(preferences.budgetLevel), 'lunch') * preferences.groupSize,
-                  rating: restaurant?.rating,
+                  rating: restaurant?.rating ? Math.round(restaurant.rating * 10) / 10 : undefined,
                   googleMapsUrl,
                   googleMapsPlaceUrl: restaurantGoogleMapsUrl,
                 }));
@@ -1741,7 +1741,7 @@ export async function generateDayWithScheduler(params: {
             latitude: restaurantCoords.lat,
             longitude: restaurantCoords.lng,
             estimatedCost: estimateMealPrice(restaurant?.priceLevel || getBudgetPriceLevel(preferences.budgetLevel), 'lunch') * preferences.groupSize,
-            rating: restaurant?.rating,
+            rating: restaurant?.rating ? Math.round(restaurant.rating * 10) / 10 : undefined,
             googleMapsUrl,
             googleMapsPlaceUrl: restaurantGoogleMapsUrl,
           }));
@@ -1751,6 +1751,76 @@ export async function generateDayWithScheduler(params: {
       }
     } else {
     }
+  }
+
+  // === FALLBACK ULTIME DÉJEUNER ===
+  // Si malgré toutes les stratégies le déjeuner n'est pas inséré, le forcer directement dans items
+  // Cela ne doit JAMAIS arriver en production — c'est un filet de sécurité
+  if (shouldHaveLunch && !lunchWasInserted) {
+    console.error(`[Jour ${dayNumber}] ❌ CRITIQUE: Déjeuner non inséré par le scheduler — forçage direct`);
+    // Trouver le meilleur créneau: juste après la dernière activité du matin, ou 13:00 par défaut
+    const existingItemsByTime = [...items].sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''));
+    let forcedStart = '13:00';
+    let forcedEnd = '14:00';
+    // Chercher un item qui finit entre 11:30 et 14:00 — placer le lunch juste après
+    for (const it of existingItemsByTime) {
+      if (it.endTime && it.endTime >= '11:30' && it.endTime <= '14:00') {
+        const [eh, em] = it.endTime.split(':').map(Number);
+        const startMin = eh * 60 + em + 10; // 10min de battement
+        forcedStart = `${String(Math.floor(startMin / 60)).padStart(2, '0')}:${String(startMin % 60).padStart(2, '0')}`;
+        const endMin = startMin + 60;
+        forcedEnd = `${String(Math.floor(endMin / 60)).padStart(2, '0')}:${String(endMin % 60).padStart(2, '0')}`;
+      }
+    }
+    // Décaler les items de l'après-midi qui chevauchent le créneau lunch
+    const lunchStartMin = parseInt(forcedStart.split(':')[0]) * 60 + parseInt(forcedStart.split(':')[1]);
+    const lunchEndMin = parseInt(forcedEnd.split(':')[0]) * 60 + parseInt(forcedEnd.split(':')[1]);
+    for (const it of items) {
+      if (!it.startTime || !it.endTime) continue;
+      const [sh, sm] = it.startTime.split(':').map(Number);
+      const [eeh, eem] = it.endTime.split(':').map(Number);
+      const itStart = sh * 60 + sm;
+      const itEnd = eeh * 60 + eem;
+      // Si cet item chevauche le créneau lunch et commence après 12:00, le décaler
+      if (itStart >= lunchStartMin - 10 && itStart < lunchEndMin && sh >= 12) {
+        const shift = lunchEndMin - itStart + 10;
+        const newStart = itStart + shift;
+        const newEnd = itEnd + shift;
+        it.startTime = `${String(Math.floor(newStart / 60)).padStart(2, '0')}:${String(newStart % 60).padStart(2, '0')}`;
+        it.endTime = `${String(Math.floor(newEnd / 60)).padStart(2, '0')}:${String(newEnd % 60).padStart(2, '0')}`;
+      }
+    }
+    if (shouldSelfCater('lunch', dayNumber, budgetStrategy, false, preferences.durationDays, isDayTrip, groceriesDone)) {
+      items.push({
+        id: generateId(), dayNumber, orderIndex: orderIndex++,
+        startTime: forcedStart, endTime: forcedEnd, type: 'restaurant',
+        title: 'Déjeuner pique-nique / maison',
+        description: 'Repas préparé avec les courses | Option économique',
+        locationName: `Centre-ville, ${preferences.destination}`,
+        latitude: accommodation?.latitude || lastCoords.lat,
+        longitude: accommodation?.longitude || lastCoords.lng,
+        estimatedCost: 8 * (preferences.groupSize || 1),
+      } as TripItem);
+    } else {
+      const restaurant = await findRestaurantForMeal('lunch', cityCenter, preferences, dayNumber, lastCoords);
+      const restaurantCoords = {
+        lat: restaurant?.latitude || lastCoords.lat,
+        lng: restaurant?.longitude || lastCoords.lng,
+      };
+      items.push({
+        id: generateId(), dayNumber, orderIndex: orderIndex++,
+        startTime: forcedStart, endTime: forcedEnd, type: 'restaurant',
+        title: restaurant?.name || 'Déjeuner',
+        description: restaurant ? `${restaurant.cuisineTypes.join(', ')} | ⭐ ${restaurant.rating?.toFixed(1)}/5` : 'Déjeuner local',
+        locationName: restaurant ? `${restaurant.name}, ${preferences.destination}` : `Centre-ville, ${preferences.destination}`,
+        latitude: restaurantCoords.lat,
+        longitude: restaurantCoords.lng,
+        estimatedCost: estimateMealPrice(restaurant?.priceLevel || getBudgetPriceLevel(preferences.budgetLevel), 'lunch') * preferences.groupSize,
+        rating: restaurant?.rating ? Math.round(restaurant.rating * 10) / 10 : undefined,
+      } as TripItem);
+      lastCoords = restaurantCoords;
+    }
+    lunchWasInserted = true;
   }
 
   // Activités de l'après-midi
@@ -1853,7 +1923,7 @@ export async function generateDayWithScheduler(params: {
         latitude: attractionCoords.lat,
         longitude: attractionCoords.lng,
         estimatedCost: attraction.estimatedCost * preferences.groupSize,
-        rating: attraction.rating,
+        rating: attraction.rating ? Math.round(attraction.rating * 10) / 10 : undefined,
         bookingUrl: attraction.bookingUrl,
         timeFromPrevious: travelTime,
         googleMapsUrl,
@@ -1976,7 +2046,7 @@ export async function generateDayWithScheduler(params: {
             latitude: attractionCoords.lat,
             longitude: attractionCoords.lng,
             estimatedCost: attraction.estimatedCost * preferences.groupSize,
-            rating: attraction.rating,
+            rating: attraction.rating ? Math.round(attraction.rating * 10) / 10 : undefined,
             bookingUrl: attraction.bookingUrl,
             timeFromPrevious: estimatedTravelTime,
             googleMapsUrl,
@@ -2052,7 +2122,7 @@ export async function generateDayWithScheduler(params: {
           latitude: restaurantCoords.lat,
           longitude: restaurantCoords.lng,
           estimatedCost: estimateMealPrice(restaurant?.priceLevel || getBudgetPriceLevel(preferences.budgetLevel), 'dinner') * preferences.groupSize,
-          rating: restaurant?.rating,
+          rating: restaurant?.rating ? Math.round(restaurant.rating * 10) / 10 : undefined,
           googleMapsUrl,
           googleMapsPlaceUrl: restaurantGoogleMapsUrl,
         }));

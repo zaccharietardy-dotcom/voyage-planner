@@ -111,8 +111,14 @@ export async function findRestaurantForMeal(
     // Si tous ont été filtrés, utiliser la liste originale mais avec warning
     const filteredList = cuisineFilteredRestaurants.length > 0 ? cuisineFilteredRestaurants : restaurants;
 
-    // FILTRE DISTANCE: Exclure les restaurants trop loin de la position actuelle (> 5km)
-    const MAX_RESTAURANT_DISTANCE_KM = 5;
+    // FILTRE DISTANCE: Exclure les restaurants trop loin de la position actuelle
+    // Le lunch doit être proche (on est en pleine visite), le dîner peut être plus loin
+    const MAX_DISTANCE_BY_MEAL: Record<string, number> = {
+      breakfast: 2,
+      lunch: 1.5,
+      dinner: 3,
+    };
+    const MAX_RESTAURANT_DISTANCE_KM = MAX_DISTANCE_BY_MEAL[mealType] || 3;
     const nearbyRestaurants = filteredList.filter(r => {
       if (!r.latitude || !r.longitude) return true; // Garder si pas de coordonnées
       const dist = calculateDistance(searchLocation.lat, searchLocation.lng, r.latitude, r.longitude);
@@ -168,15 +174,31 @@ export async function findRestaurantForMeal(
           lastCoords.lat, lastCoords.lng,
           r.latitude, r.longitude
         );
-        // Forte préférence pour les restaurants proches (< 1km)
-        if (distFromPrevious <= 0.5) {
-          score += 25; // Très proche: gros bonus
-        } else if (distFromPrevious <= 1) {
-          score += 15;
-        } else if (distFromPrevious <= 2) {
-          score += 5;
+        if (mealType === 'lunch') {
+          // Lunch: très forte préférence pour les restaurants proches (< 800m)
+          // On est en pleine visite, pas envie de traverser la ville
+          if (distFromPrevious <= 0.3) {
+            score += 30;
+          } else if (distFromPrevious <= 0.5) {
+            score += 25;
+          } else if (distFromPrevious <= 0.8) {
+            score += 15;
+          } else if (distFromPrevious <= 1.2) {
+            score += 5;
+          } else {
+            score -= Math.min(30, (distFromPrevious - 1) * 15); // Pénalité agressive
+          }
         } else {
-          score -= Math.min(20, (distFromPrevious - 2) * 5); // Pénalité au-delà de 2km
+          // Dinner/breakfast: scoring plus souple
+          if (distFromPrevious <= 0.5) {
+            score += 25;
+          } else if (distFromPrevious <= 1) {
+            score += 15;
+          } else if (distFromPrevious <= 2) {
+            score += 5;
+          } else {
+            score -= Math.min(20, (distFromPrevious - 2) * 5);
+          }
         }
       }
 
