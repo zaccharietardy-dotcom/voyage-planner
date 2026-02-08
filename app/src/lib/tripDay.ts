@@ -870,10 +870,11 @@ export async function generateDayWithScheduler(params: {
 
       // Si on a du temps avant le check-in (> 1h30), faire des activités
       if (hoursBeforeCheckIn >= 1.5) {
-        // Déjeuner si on est dans la plage horaire (11h30 - 14h)
+        // Déjeuner si on est dans la plage horaire (11h - 14h)
+        // CORRECTION: l'ancienne condition (currentHour >= 11 && currentMin >= 30) était vraie
+        // pour 15h30, 18h45, etc. car >= 11 est vrai pour toute heure ≥ 11
         const currentHour = transferEnd.getHours();
-        const currentMin = transferEnd.getMinutes();
-        const canDoLunch = (currentHour >= 11 && currentMin >= 30) || (currentHour >= 12 && currentHour < 14);
+        const canDoLunch = currentHour >= 11 && currentHour < 14;
 
         if (canDoLunch && hoursBeforeCheckIn >= 2.5) {
           const lunchItem = scheduler.addItem({
@@ -882,6 +883,8 @@ export async function generateDayWithScheduler(params: {
             type: 'restaurant',
             duration: 75,
             travelTime: 15,
+            minStartTime: parseTime(date, '11:30'),  // Pas de déjeuner avant 11h30
+            maxEndTime: parseTime(date, '14:30'),     // Pas de déjeuner après 14h30
           });
           if (lunchItem) {
             if (shouldSelfCater('lunch', dayNumber, budgetStrategy, false, preferences.durationDays, isDayTrip, groceriesDone)) {
@@ -1650,6 +1653,7 @@ export async function generateDayWithScheduler(params: {
             duration: lunchDuration,
             travelTime: 10,
             minStartTime: parseTime(date, '12:00'),
+            maxEndTime: parseTime(date, '14:30'),  // Le lunch ne peut PAS finir après 14:30
           });
           if (cursorLunchItem) {
             const cursorLunchEnd = cursorLunchItem.slot.end;
@@ -1691,12 +1695,15 @@ export async function generateDayWithScheduler(params: {
               }
               lunchWasInserted = true;
             } else {
+              console.warn(`[Jour ${dayNumber}] ⚠️ Stratégie 3: Lunch placé à ${formatScheduleTime(cursorLunchItem.slot.start)} — rejeté (après 14:30)`);
             }
           } else {
+            console.warn(`[Jour ${dayNumber}] ⚠️ Stratégie 3: scheduler.addItem a échoué pour le déjeuner`);
           }
         }
       }
     } else {
+      console.warn(`[Jour ${dayNumber}] ⚠️ Stratégie 1: lunchStartTime (${formatScheduleTime(lunchStartTime)}) > 13:30 — skip`);
     }
   }
 
@@ -1712,6 +1719,8 @@ export async function generateDayWithScheduler(params: {
         type: 'restaurant',
         duration: 60, // Réduit à 1h en dernier recours
         travelTime: 5,
+        minStartTime: parseTime(date, '12:00'),  // Pas de déjeuner avant 12h
+        maxEndTime: parseTime(date, '15:30'),     // Limite étendue en dernier recours
       });
       if (lastResortLunch && lastResortLunch.slot.start < lastResortLimit) {
         if (shouldSelfCater('lunch', dayNumber, budgetStrategy, false, preferences.durationDays, isDayTrip, groceriesDone)) {
@@ -1748,8 +1757,11 @@ export async function generateDayWithScheduler(params: {
           lastCoords = restaurantCoords;
         }
         lunchWasInserted = true;
+      } else {
+        console.warn(`[Jour ${dayNumber}] ⚠️ Stratégie 4: Lunch rejeté (slot trop tard ou échec scheduler)`);
       }
     } else {
+      console.warn(`[Jour ${dayNumber}] ⚠️ Stratégie 4: curseur déjà à ${formatScheduleTime(scheduler.getCurrentTime())} (> 15:30) — skip`);
     }
   }
 
@@ -2660,11 +2672,17 @@ export async function generateDayWithScheduler(params: {
     const item = sortedItems[i];
     if (item.type === 'restaurant') {
       const hour = parseInt(item.startTime.split(':')[0] || '12', 10);
-      // "Déjeuner" planifié après 17h → "Dîner"
-      if (item.title === 'Déjeuner' && hour >= 17) {
-        item.title = 'Dîner';
+      // "Déjeuner" planifié après 16h → supprimer (c'est un bug de placement, pas un dîner)
+      if (item.title === 'Déjeuner' && hour >= 16) {
+        console.warn(`[Jour ${dayNumber}] ⚠️ Déjeuner placé à ${item.startTime} — suppression (horaire invalide, > 16h)`);
+        itemsToRemove.add(i);
       }
-      // "Dîner" planifié avant 17h → "Déjeuner"
+      // "Déjeuner" avec un nom de restaurant planifié après 16h → supprimer aussi
+      if (item.title !== 'Déjeuner' && item.title !== 'Dîner' && item.type === 'restaurant' && hour >= 16 && hour < 19) {
+        // C'est un restaurant de déjeuner avec un nom spécifique, placé trop tard
+        // On le laisse, le dîner sera à 19h+
+      }
+      // "Dîner" planifié avant 17h → renommer en "Déjeuner"
       if (item.title === 'Dîner' && hour < 17 && hour >= 11) {
         item.title = 'Déjeuner';
       }
