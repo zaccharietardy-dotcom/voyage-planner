@@ -339,9 +339,9 @@ export default function TripPage() {
     }
   };
 
-  const handleSelectItem = (item: TripItem) => {
+  const handleSelectItem = useCallback((item: TripItem) => {
     setSelectedItemId(item.id);
-  };
+  }, []);
 
   const handleEditItem = (item: TripItem) => {
     setEditingItem(item);
@@ -612,17 +612,21 @@ export default function TripPage() {
     }
   };
 
-  const getAllItems = (): TripItem[] => {
+  const allItems = useMemo(() => {
     if (!trip) return [];
     return trip.days.flatMap((day) => day.items);
-  };
+  }, [trip]);
 
-  const getActiveDayItems = (): TripItem[] => {
+  const activeDayItems = useMemo(() => {
     if (!trip) return [];
     const dayNumber = parseInt(activeDay);
     const day = trip.days.find((d) => d.dayNumber === dayNumber);
     return day?.items || [];
-  };
+  }, [trip, activeDay]);
+
+  // Keep backward-compat function signatures for non-map callers
+  const getAllItems = (): TripItem[] => allItems;
+  const getActiveDayItems = (): TripItem[] => activeDayItems;
 
   const handleExportDebug = () => {
     if (!trip) return;
@@ -962,7 +966,7 @@ export default function TripPage() {
 
             <TabsContent value="carte">
               <div className="h-[70vh] rounded-lg overflow-hidden">
-                <TripMap items={editMode ? getAllItems() : getActiveDayItems()} selectedItemId={selectedItemId} hoveredItemId={hoveredItemId || undefined} onItemClick={handleSelectItem} mapNumbers={itemMapNumbers} flightInfo={{ departureCity: trip.preferences.origin, departureCoords: trip.preferences.originCoords, arrivalCity: trip.preferences.destination, arrivalCoords: trip.preferences.destinationCoords, stopoverCities: trip.outboundFlight?.stopCities }} />
+                <TripMap items={editMode ? allItems : activeDayItems} selectedItemId={selectedItemId} hoveredItemId={hoveredItemId || undefined} onItemClick={handleSelectItem} mapNumbers={itemMapNumbers} isVisible={mainTab === 'carte'} flightInfo={{ departureCity: trip.preferences.origin, departureCoords: trip.preferences.originCoords, arrivalCity: trip.preferences.destination, arrivalCoords: trip.preferences.destinationCoords, stopoverCities: trip.outboundFlight?.stopCities }} />
               </div>
             </TabsContent>
 
@@ -1104,11 +1108,12 @@ export default function TripPage() {
           <div className="flex-[2] min-w-0">
             <div className="sticky top-[73px] h-[calc(100vh-73px-2rem)] rounded-lg overflow-hidden border">
               <TripMap
-                items={getAllItems()}
+                items={allItems}
                 selectedItemId={selectedItemId}
                 hoveredItemId={hoveredItemId || undefined}
                 onItemClick={handleSelectItem}
                 mapNumbers={itemMapNumbers}
+                isVisible={true}
                 flightInfo={{
                   departureCity: trip.preferences.origin,
                   departureCoords: trip.preferences.originCoords,
