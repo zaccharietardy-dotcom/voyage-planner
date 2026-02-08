@@ -1,25 +1,11 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Search, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 
 export function Hero() {
-  const router = useRouter();
-  const [destination, setDestination] = useState('');
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (destination.trim()) {
-      router.push(`/plan?destination=${encodeURIComponent(destination.trim())}`);
-    } else {
-      router.push('/plan');
-    }
-  };
-
   return (
     <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
       {/* Background gradient */}
@@ -79,29 +65,20 @@ export function Hero() {
             activités incontournables et hébergements adaptés à ton budget.
           </motion.p>
 
-          {/* Search form */}
-          <motion.form
+          {/* CTA Button */}
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            onSubmit={handleSubmit}
-            className="flex flex-col sm:flex-row gap-3 max-w-xl mx-auto mb-12"
+            className="mb-12"
           >
-            <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="Où veux-tu aller ? (ex: Tokyo, Barcelone...)"
-                value={destination}
-                onChange={(e) => setDestination(e.target.value)}
-                className="pl-12 h-14 text-base rounded-xl border-2 focus:border-primary"
-              />
-            </div>
-            <Button type="submit" size="lg" className="h-14 px-8 rounded-xl text-base">
-              Créer mon voyage
-              <ArrowRight className="ml-2 h-5 w-5" />
+            <Button asChild size="lg" className="h-14 px-8 rounded-xl text-base">
+              <Link href="/plan">
+                Créer mon voyage
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
             </Button>
-          </motion.form>
+          </motion.div>
 
         </div>
       </div>
