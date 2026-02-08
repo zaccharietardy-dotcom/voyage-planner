@@ -203,6 +203,12 @@ export class DayScheduler {
       }
     }
 
+    // REJET IMMÉDIAT: si on arrive APRÈS la fermeture, inutile de continuer
+    if (maxEndTime && startTime >= maxEndTime) {
+      console.log(`[Scheduler] Rejeté "${title}": arrive à ${formatTime(startTime)} mais ferme à ${formatTime(maxEndTime)}`);
+      return null;
+    }
+
     // Contraindre à l'heure de fermeture si spécifiée
     let effectiveDuration = duration;
     if (maxEndTime && endTime > maxEndTime && maxEndTime > startTime) {
