@@ -944,12 +944,17 @@ export async function generateDayWithScheduler(params: {
             continue;
           }
 
+          const openTimeJ1 = parseTime(date, attraction.openingHours.open);
+          const closeTimeJ1 = parseTime(date, attraction.openingHours.close);
+
           const activityItem = scheduler.addItem({
             id: generateId(),
             title: attraction.name,
             type: 'activity',
             duration: attraction.duration,
             travelTime,
+            minStartTime: openTimeJ1,
+            maxEndTime: closeTimeJ1,
           });
 
           if (activityItem) {
@@ -1413,6 +1418,7 @@ export async function generateDayWithScheduler(params: {
       duration: attraction.duration,
       travelTime,
       minStartTime: openTime,
+      maxEndTime: closeTime,
       data: { attraction },
     });
 
@@ -1504,6 +1510,7 @@ export async function generateDayWithScheduler(params: {
           duration: attraction.duration,
           travelTime: estimatedTravelTimeMorning,
           minStartTime: openTimeMorning,
+          maxEndTime: closeTimeMorning,
         });
 
         if (activityItemMorning) {
@@ -1595,7 +1602,119 @@ export async function generateDayWithScheduler(params: {
         scheduler.advanceTo(lunchEndTime);
         console.log(`[Jour ${dayNumber}] Déjeuner ajouté à ${lunchStartTime.toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'})}-${lunchEndTime.toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'})}`);
       } else {
-        console.log(`[Jour ${dayNumber}] Impossible d'insérer le déjeuner (conflit — probablement transport en cours)`);
+        // Fallback: insertFixedItem a échoué (conflit), essayer avec des créneaux alternatifs
+        console.log(`[Jour ${dayNumber}] insertFixedItem déjeuner échoué, tentative créneaux alternatifs...`);
+        const fallbackSlots = ['12:15', '12:45', '13:15', '13:45', '14:00'];
+        let lunchInserted = false;
+        for (const slot of fallbackSlots) {
+          const fallbackStart = parseTime(date, slot);
+          const fallbackEnd = new Date(fallbackStart.getTime() + lunchDuration * 60 * 1000);
+          // Rejeter si le déjeuner commencerait après 14:30
+          if (fallbackStart > parseTime(date, '14:30')) break;
+          const fallbackItem = scheduler.insertFixedItem({
+            id: generateId(),
+            title: 'Déjeuner',
+            type: 'restaurant',
+            startTime: fallbackStart,
+            endTime: fallbackEnd,
+          });
+          if (fallbackItem) {
+            if (shouldSelfCater('lunch', dayNumber, budgetStrategy, false, preferences.durationDays, isDayTrip, groceriesDone)) {
+              items.push(schedulerItemToTripItem(fallbackItem, dayNumber, orderIndex++, {
+                title: 'Déjeuner pique-nique / maison',
+                description: 'Repas préparé avec les courses | Option économique',
+                locationName: `Centre-ville, ${preferences.destination}`,
+                latitude: accommodation?.latitude || lastCoords.lat,
+                longitude: accommodation?.longitude || lastCoords.lng,
+                estimatedCost: 8 * (preferences.groupSize || 1),
+              }));
+            } else {
+              lastCoords = getLastItemCoords(items, cityCenter);
+              const restaurant = hasPrefetchedRestaurant('lunch')
+                ? getPrefetchedRestaurant('lunch')
+                : await findRestaurantForMeal('lunch', cityCenter, preferences, dayNumber, lastCoords);
+              const restaurantCoords = {
+                lat: restaurant?.latitude || lastCoords.lat,
+                lng: restaurant?.longitude || lastCoords.lng,
+              };
+              const googleMapsUrl = generateGoogleMapsUrl(lastCoords, restaurantCoords, pickDirectionMode(lastCoords, restaurantCoords));
+              const restaurantGoogleMapsUrl = restaurant?.googleMapsUrl ||
+                getReliableGoogleMapsPlaceUrl(restaurant, preferences.destination);
+              items.push(schedulerItemToTripItem(fallbackItem, dayNumber, orderIndex++, {
+                title: restaurant?.name || 'Déjeuner',
+                description: restaurant ? `${restaurant.cuisineTypes.join(', ')} | ⭐ ${restaurant.rating?.toFixed(1)}/5` : 'Déjeuner local',
+                locationName: restaurant ? `${restaurant.name}, ${preferences.destination}` : `Centre-ville, ${preferences.destination}`,
+                latitude: restaurantCoords.lat,
+                longitude: restaurantCoords.lng,
+                estimatedCost: estimateMealPrice(restaurant?.priceLevel || getBudgetPriceLevel(preferences.budgetLevel), 'lunch') * preferences.groupSize,
+                rating: restaurant?.rating,
+                googleMapsUrl,
+                googleMapsPlaceUrl: restaurantGoogleMapsUrl,
+              }));
+              lastCoords = restaurantCoords;
+            }
+            scheduler.advanceTo(fallbackEnd);
+            console.log(`[Jour ${dayNumber}] Déjeuner fallback ajouté à ${slot}`);
+            lunchInserted = true;
+            break;
+          }
+        }
+        if (!lunchInserted) {
+          // Dernier recours: addItem() cursor-based avec minStartTime 12:00
+          const cursorLunchItem = scheduler.addItem({
+            id: generateId(),
+            title: 'Déjeuner',
+            type: 'restaurant',
+            duration: lunchDuration,
+            travelTime: 10,
+            minStartTime: parseTime(date, '12:00'),
+          });
+          if (cursorLunchItem) {
+            const cursorLunchEnd = cursorLunchItem.slot.end;
+            // Rejeter si le déjeuner commence après 14:30
+            if (cursorLunchItem.slot.start <= parseTime(date, '14:30')) {
+              if (shouldSelfCater('lunch', dayNumber, budgetStrategy, false, preferences.durationDays, isDayTrip, groceriesDone)) {
+                items.push(schedulerItemToTripItem(cursorLunchItem, dayNumber, orderIndex++, {
+                  title: 'Déjeuner pique-nique / maison',
+                  description: 'Repas préparé avec les courses | Option économique',
+                  locationName: `Centre-ville, ${preferences.destination}`,
+                  latitude: accommodation?.latitude || lastCoords.lat,
+                  longitude: accommodation?.longitude || lastCoords.lng,
+                  estimatedCost: 8 * (preferences.groupSize || 1),
+                }));
+              } else {
+                lastCoords = getLastItemCoords(items, cityCenter);
+                const restaurant = hasPrefetchedRestaurant('lunch')
+                  ? getPrefetchedRestaurant('lunch')
+                  : await findRestaurantForMeal('lunch', cityCenter, preferences, dayNumber, lastCoords);
+                const restaurantCoords = {
+                  lat: restaurant?.latitude || lastCoords.lat,
+                  lng: restaurant?.longitude || lastCoords.lng,
+                };
+                const googleMapsUrl = generateGoogleMapsUrl(lastCoords, restaurantCoords, pickDirectionMode(lastCoords, restaurantCoords));
+                const restaurantGoogleMapsUrl = restaurant?.googleMapsUrl ||
+                  getReliableGoogleMapsPlaceUrl(restaurant, preferences.destination);
+                items.push(schedulerItemToTripItem(cursorLunchItem, dayNumber, orderIndex++, {
+                  title: restaurant?.name || 'Déjeuner',
+                  description: restaurant ? `${restaurant.cuisineTypes.join(', ')} | ⭐ ${restaurant.rating?.toFixed(1)}/5` : 'Déjeuner local',
+                  locationName: restaurant ? `${restaurant.name}, ${preferences.destination}` : `Centre-ville, ${preferences.destination}`,
+                  latitude: restaurantCoords.lat,
+                  longitude: restaurantCoords.lng,
+                  estimatedCost: estimateMealPrice(restaurant?.priceLevel || getBudgetPriceLevel(preferences.budgetLevel), 'lunch') * preferences.groupSize,
+                  rating: restaurant?.rating,
+                  googleMapsUrl,
+                  googleMapsPlaceUrl: restaurantGoogleMapsUrl,
+                }));
+                lastCoords = restaurantCoords;
+              }
+              console.log(`[Jour ${dayNumber}] Déjeuner cursor-based ajouté à ${formatScheduleTime(cursorLunchItem.slot.start)}`);
+            } else {
+              console.log(`[Jour ${dayNumber}] Déjeuner cursor-based trop tardif (${formatScheduleTime(cursorLunchItem.slot.start)}), abandonné`);
+            }
+          } else {
+            console.log(`[Jour ${dayNumber}] Impossible d'insérer le déjeuner (conflit — probablement transport en cours)`);
+          }
+        }
       }
     } else {
       console.log(`[Jour ${dayNumber}] Fenêtre déjeuner dépassée (curseur à ${cursorNow.toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'})})`);
@@ -1676,6 +1795,7 @@ export async function generateDayWithScheduler(params: {
       duration: attraction.duration,
       travelTime,
       minStartTime: openTime,
+      maxEndTime: closeTime,
       data: { attraction },
     });
 
@@ -1801,6 +1921,7 @@ export async function generateDayWithScheduler(params: {
           duration: attraction.duration,
           travelTime: estimatedTravelTime,
           minStartTime: openTime,
+          maxEndTime: closeTime,
         });
 
         if (activityItem) {
@@ -2136,6 +2257,55 @@ export async function generateDayWithScheduler(params: {
         transportStart = parseTime(date, '14:00');
         transportEnd = new Date(transportStart.getTime() + groundTransport.totalDuration * 60 * 1000);
       }
+
+      // === TRANSFERT VERS LA GARE/STATION ===
+      // Insérer un bloc transfert entre la dernière activité et le transport retour
+      {
+        const isTrainOrBus = groundTransport.mode === 'train' || groundTransport.mode === 'bus' || groundTransport.mode === 'combined';
+        if (isTrainOrBus) {
+          // Déterminer les coordonnées et le nom de la gare
+          let stationCoords = cityCenter;
+          let stationName = 'la gare';
+          if (groundTransport.transitLegs?.length) {
+            const firstLeg = groundTransport.transitLegs[0];
+            if (firstLeg.from) {
+              stationName = firstLeg.from;
+            }
+          }
+
+          // Estimer le temps de trajet vers la gare
+          const distToStation = calculateDistance(lastCoords.lat, lastCoords.lng, stationCoords.lat, stationCoords.lng);
+          // Estimation: 3min/km en transport urbain, minimum 10min, max 45min
+          const transferDuration = Math.max(10, Math.min(45, Math.round(distToStation * 3)));
+
+          // Calculer les heures du transfert (arriver 30min avant le transport)
+          const transferEndTime = transportStart;
+          const transferStartTime = new Date(transferEndTime.getTime() - transferDuration * 60 * 1000);
+
+          if (transferStartTime > scheduler.getCurrentTime()) {
+            const transferItem = scheduler.insertFixedItem({
+              id: generateId(),
+              title: `Transfert vers ${stationName}`,
+              type: 'transport',
+              startTime: transferStartTime,
+              endTime: transferEndTime,
+            });
+            if (transferItem) {
+              const googleMapsUrl = generateGoogleMapsUrl(lastCoords, stationCoords, 'transit');
+              items.push(schedulerItemToTripItem(transferItem, dayNumber, orderIndex++, {
+                description: `${transferDuration} min | Rejoindre ${stationName} pour le départ`,
+                locationName: `${preferences.destination} → ${stationName}`,
+                latitude: stationCoords.lat,
+                longitude: stationCoords.lng,
+                googleMapsUrl,
+              }));
+              lastCoords = stationCoords;
+              console.log(`[Jour ${dayNumber}] Transfert vers ${stationName} ajouté: ${formatScheduleTime(transferStartTime)}-${formatScheduleTime(transferEndTime)}`);
+            }
+          }
+        }
+      }
+
       const modeIcons: Record<string, string> = { train: '🚄', bus: '🚌', car: '🚗', combined: '🔄' };
       const modeLabels: Record<string, string> = { train: 'Train', bus: 'Bus', car: 'Voiture', combined: 'Transport combiné' };
 
@@ -2329,12 +2499,21 @@ export async function generateDayWithScheduler(params: {
     }
   }
 
+  // === INSERTION DES BLOCS TRANSIT ENTRE ACTIVITÉS ===
+  // Post-processing: pour chaque paire consécutive d'items avec coordonnées,
+  // calculer la distance et insérer un bloc "Trajet vers [activité]" si > 100m
+  const transitItems = await insertTransitBlocks(filteredItems, date, dayNumber);
+  const allItems = [...filteredItems, ...transitItems];
+
   // Trier par heure de début
-  const sortedItems = filteredItems.sort((a, b) => {
+  const sortedItems = allItems.sort((a, b) => {
     const aTime = parseTime(date, a.startTime).getTime();
     const bTime = parseTime(date, b.startTime).getTime();
     return aTime - bTime;
   });
+
+  // Ré-indexer les orderIndex après insertion des blocs transit
+  sortedItems.forEach((item, idx) => { item.orderIndex = idx; });
 
   // Vérification minimum activités par jour (3 activités sauf jour arrivée/départ)
   const activityCount = sortedItems.filter(i => i.type === 'activity').length;
@@ -2345,4 +2524,142 @@ export async function generateDayWithScheduler(params: {
 
   return { items: sortedItems, lateFlightForNextDay };
 
+}
+
+/**
+ * Post-processing: insère des blocs "Trajet vers [activité]" entre les paires d'items consécutifs
+ * qui ont des coordonnées GPS et une distance > 100m.
+ *
+ * Utilise Google Directions API (avec fallback) pour les distances > 100m.
+ * Batching: 4 appels simultanés max, 200ms entre batches.
+ */
+async function insertTransitBlocks(
+  items: TripItem[],
+  date: Date,
+  dayNumber: number,
+): Promise<TripItem[]> {
+  // Trier par startTime pour traiter dans l'ordre chronologique
+  const sorted = [...items].sort((a, b) => {
+    const aTime = parseTime(date, a.startTime).getTime();
+    const bTime = parseTime(date, b.startTime).getTime();
+    return aTime - bTime;
+  });
+
+  // Types à exclure des paires (déjà des transports ou logistique)
+  const skipTypes = new Set(['transport', 'flight', 'checkin', 'checkout', 'parking', 'hotel', 'luggage']);
+
+  // Collecter les paires qui nécessitent un bloc transit
+  const pairs: Array<{ prev: TripItem; next: TripItem; distance: number }> = [];
+
+  for (let i = 0; i < sorted.length - 1; i++) {
+    const prev = sorted[i];
+    const next = sorted[i + 1];
+
+    // Skip si l'un des deux est un transport/logistique
+    if (skipTypes.has(prev.type) || skipTypes.has(next.type)) continue;
+
+    // Skip si pas de coordonnées
+    if (!prev.latitude || !prev.longitude || !next.latitude || !next.longitude) continue;
+
+    const distance = calculateDistance(prev.latitude, prev.longitude, next.latitude, next.longitude);
+
+    // Seulement si distance > 100m (0.1 km)
+    if (distance > 0.1) {
+      pairs.push({ prev, next, distance });
+    }
+  }
+
+  if (pairs.length === 0) return [];
+
+  console.log(`[Jour ${dayNumber}] ${pairs.length} paires nécessitent un bloc transit`);
+
+  // Batch les appels getDirections (4 simultanés max)
+  const BATCH_SIZE = 4;
+  const transitItems: TripItem[] = [];
+
+  for (let batchStart = 0; batchStart < pairs.length; batchStart += BATCH_SIZE) {
+    const batch = pairs.slice(batchStart, batchStart + BATCH_SIZE);
+
+    const results = await Promise.all(
+      batch.map(async ({ prev, next, distance }) => {
+        try {
+          const directions = await getDirections({
+            from: { lat: prev.latitude!, lng: prev.longitude! },
+            to: { lat: next.latitude!, lng: next.longitude! },
+            mode: distance > 3 ? 'transit' : 'walking',
+          });
+          return { prev, next, distance, directions };
+        } catch {
+          // Fallback: estimation basée sur la distance
+          const estimatedDuration = Math.max(5, Math.round(distance * 3)); // ~3min/km
+          return {
+            prev, next, distance,
+            directions: {
+              duration: estimatedDuration,
+              distance,
+              steps: [],
+              transitLines: [],
+              googleMapsUrl: generateGoogleMapsUrl(
+                { lat: prev.latitude!, lng: prev.longitude! },
+                { lat: next.latitude!, lng: next.longitude! },
+                'transit'
+              ),
+              source: 'estimated' as const,
+            },
+          };
+        }
+      })
+    );
+
+    for (const { prev, next, distance, directions } of results) {
+      // Seulement si le trajet > 3 min (pas de micro-déplacements)
+      if (directions.duration < 3) continue;
+
+      // Calculer les heures du bloc transit
+      const prevEndTime = parseTime(date, prev.endTime);
+      const nextStartTime = parseTime(date, next.startTime);
+      const gapMinutes = (nextStartTime.getTime() - prevEndTime.getTime()) / (60 * 1000);
+
+      // Si le gap entre les items est très petit, ne pas insérer de bloc
+      if (gapMinutes < 3) continue;
+
+      // Le transit remplit le gap existant (le scheduler a déjà réservé du travelTime)
+      const transitDuration = Math.min(directions.duration, gapMinutes);
+      const transitStart = prevEndTime;
+      const transitEnd = new Date(transitStart.getTime() + transitDuration * 60 * 1000);
+
+      // Description du trajet
+      const distStr = distance < 1 ? `${Math.round(distance * 1000)}m` : `${distance.toFixed(1)}km`;
+      const linesDesc = directions.transitLines.length > 0
+        ? directions.transitLines.map(l => `${l.mode === 'metro' ? 'M' : l.mode === 'bus' ? 'Bus' : l.mode === 'tram' ? 'Tram' : ''}${l.number}`).join(' → ')
+        : distance < 1 ? 'Marche' : 'Transport';
+      const description = `${Math.round(transitDuration)} min | ${distStr} | ${linesDesc}`;
+
+      transitItems.push({
+        id: generateId(),
+        type: 'transport' as TripItemType,
+        title: `Trajet vers ${next.title}`,
+        description,
+        startTime: formatScheduleTime(transitStart),
+        endTime: formatScheduleTime(transitEnd),
+        duration: transitDuration,
+        locationName: `${prev.title} → ${next.title}`,
+        latitude: next.latitude!,
+        longitude: next.longitude!,
+        googleMapsUrl: directions.googleMapsUrl,
+        dayNumber,
+        orderIndex: 0, // Will be re-indexed later
+        dataReliability: 'verified',
+      });
+
+      console.log(`[Jour ${dayNumber}] Transit: ${prev.title} → ${next.title} (${Math.round(transitDuration)}min, ${distStr})`);
+    }
+
+    // Pause entre les batches (200ms) pour ne pas surcharger les APIs
+    if (batchStart + BATCH_SIZE < pairs.length) {
+      await new Promise(resolve => setTimeout(resolve, 200));
+    }
+  }
+
+  return transitItems;
 }

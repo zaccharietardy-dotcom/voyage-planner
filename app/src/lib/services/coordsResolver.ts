@@ -43,6 +43,7 @@ export interface ResolutionResult {
   lng: number;
   source: 'cache' | 'travel_places' | 'nominatim' | 'gemini' | 'serpapi';
   address?: string;
+  operatingHours?: Record<string, string>;
 }
 
 // In-memory resolution cache (avoids re-resolving the same item in a single generation)
@@ -186,6 +187,7 @@ export async function resolveCoordinates(
           lng: serpResult.lng,
           source: 'serpapi',
           address: serpResult.address,
+          operatingHours: serpResult.operatingHours,
         };
         resolutionCache.set(cacheKey, result);
         resolutionsBySource.serpapi++;

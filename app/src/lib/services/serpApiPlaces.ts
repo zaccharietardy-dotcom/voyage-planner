@@ -1155,7 +1155,7 @@ export async function geocodeViaSerpApi(
   placeName: string,
   city: string,
   nearbyCoords?: { lat: number; lng: number },
-): Promise<{ lat: number; lng: number; address?: string } | null> {
+): Promise<{ lat: number; lng: number; address?: string; operatingHours?: Record<string, string> } | null> {
   if (!SERPAPI_KEY || !placeName.trim()) return null;
 
   const countryCode = getCountryCode(city);
@@ -1190,6 +1190,7 @@ export async function geocodeViaSerpApi(
         lat: places[0].gps_coordinates.latitude,
         lng: places[0].gps_coordinates.longitude,
         address: places[0].address,
+        operatingHours: places[0].operating_hours,
       };
       console.log(`[SerpAPI Geocode] ✅ "${placeName}" → (${result.lat.toFixed(4)}, ${result.lng.toFixed(4)}) - ${result.address || 'no address'}`);
       return result;
@@ -1386,13 +1387,30 @@ function estimateCost(price?: string, destination?: string, placeName?: string):
 /**
  * Parse les horaires d'ouverture en format simple
  */
-function parseSimpleOpeningHours(hours: Record<string, string>): { open: string; close: string } | undefined {
+export function parseSimpleOpeningHours(hours: Record<string, string>): { open: string; close: string } | undefined {
   // Prendre le premier jour avec des horaires
   for (const value of Object.values(hours)) {
     if (value && !value.toLowerCase().includes('fermé') && !value.toLowerCase().includes('closed')) {
-      const match = value.match(/(\d{1,2}:\d{2})\s*(?:AM|PM)?\s*[-–]\s*(\d{1,2}:\d{2})\s*(?:AM|PM)?/i);
+      // Match formats: "9:00 AM – 5:00 PM", "09:00–17:00", "9 AM – 5 PM"
+      const match = value.match(/(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?\s*[-–]\s*(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?/i);
       if (match) {
-        return { open: match[1], close: match[2] };
+        let openH = parseInt(match[1]);
+        const openM = match[2] || '00';
+        const openAmPm = match[3];
+        let closeH = parseInt(match[4]);
+        const closeM = match[5] || '00';
+        const closeAmPm = match[6];
+
+        // Convert AM/PM to 24h
+        if (openAmPm?.toUpperCase() === 'PM' && openH < 12) openH += 12;
+        if (openAmPm?.toUpperCase() === 'AM' && openH === 12) openH = 0;
+        if (closeAmPm?.toUpperCase() === 'PM' && closeH < 12) closeH += 12;
+        if (closeAmPm?.toUpperCase() === 'AM' && closeH === 12) closeH = 0;
+
+        return {
+          open: `${String(openH).padStart(2, '0')}:${openM}`,
+          close: `${String(closeH).padStart(2, '0')}:${closeM}`,
+        };
       }
     }
   }

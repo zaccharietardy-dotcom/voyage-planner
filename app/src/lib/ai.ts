@@ -38,7 +38,7 @@ import { searchLuggageStorage, selectBestStorage, needsLuggageStorage, LuggageSt
 import { calculateFlightScore, EARLY_MORNING_PENALTY } from './services/flightScoring';
 import { createLocationTracker, TravelerLocation } from './services/locationTracker';
 import { generateFlightLink, generateFlightOmioLink, generateHotelLink, formatDateForUrl } from './services/linkGenerator';
-import { searchAttractionsMultiQuery, searchMustSeeAttractions, searchGroceryStores, type GroceryStore } from './services/serpApiPlaces';
+import { searchAttractionsMultiQuery, searchMustSeeAttractions, searchGroceryStores, parseSimpleOpeningHours, type GroceryStore } from './services/serpApiPlaces';
 import { resolveAttractionByName } from './services/overpassAttractions';
 import { resolveCoordinates, resetResolutionStats, getResolutionStats } from './services/coordsResolver';
 import { generateClaudeItinerary, summarizeAttractions, mapItineraryToAttractions, areNamesSimilar } from './services/claudeItinerary';
@@ -49,8 +49,6 @@ import { BudgetTracker } from './services/budgetTracker';
 import { enrichRestaurantsWithGemini, geocodeWithGemini, resetGeminiGeocodeCounter } from './services/geminiSearch';
 import { findViatorProduct, searchViatorActivities, isViatorConfigured } from './services/viator';
 import { findKnownViatorProduct } from './services/viatorKnownProducts';
-// Tiqets retiré temporairement — en attente API Distributor
-// import { findTiqetsProduct, getKnownTiqetsLink, isTiqetsRelevant, buildTiqetsSearchUrl } from './services/tiqets';
 import { isImpactConfigured, createTrackingLinks } from './services/impactTracking';
 import { getMustSeeAttractions } from './services/attractions';
 
@@ -780,13 +778,29 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       for (let j = dayAttrs.length - 1; j >= 0; j--) {
         const a = dayAttrs[j];
         const needsResolution = (a.latitude === 0 && a.longitude === 0)
-          || (a.id.startsWith('claude-') && calculateDistance(a.latitude, a.longitude, fallbackCenter.lat, fallbackCenter.lng) < 0.05);
+          || (a.id.startsWith('claude-') && calculateDistance(a.latitude, a.longitude, fallbackCenter.lat, fallbackCenter.lng) < 0.05)
+          || (a.dataReliability !== 'verified' && isCoordsNearCenter(a.latitude, a.longitude, fallbackCenter));
 
         if (needsResolution) {
           console.log(`[AI] 🔍 Résolution GPS pour "${a.name}" à ${geoContextCity}...`);
           const resolved = await resolveCoordinates(a.name, geoContextCity, fallbackCenter, 'attraction');
           if (resolved) {
-            dayAttrs[j] = { ...a, latitude: resolved.lat, longitude: resolved.lng, dataReliability: 'verified' as const };
+            // Propager les horaires d'ouverture réels si disponibles
+            let resolvedOpeningHours = a.openingHours;
+            if (resolved.operatingHours) {
+              const parsedHours = parseSimpleOpeningHours(resolved.operatingHours);
+              if (parsedHours) {
+                resolvedOpeningHours = parsedHours;
+                console.log(`[AI] 🕐 Horaires réels pour "${a.name}": ${parsedHours.open}-${parsedHours.close}`);
+              }
+            }
+            dayAttrs[j] = {
+              ...a,
+              latitude: resolved.lat,
+              longitude: resolved.lng,
+              dataReliability: 'verified' as const,
+              openingHours: resolvedOpeningHours,
+            };
             console.log(`[AI] ✅ Résolu: "${a.name}" → (${resolved.lat.toFixed(4)}, ${resolved.lng.toFixed(4)}) via ${resolved.source}`);
           } else {
             // REMPLACEMENT: trouver une alternative vérifiée dans le pool
@@ -1852,59 +1866,53 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
             if (result.reviewCount) (toMatch[i] as any).viatorReviewCount = result.reviewCount;
 
             // Propager la durée Viator et recalculer le planning si nécessaire
+            // Viator est la source de vérité pour les activités réservables
             if (result.duration && result.duration > 0) {
               const item = toMatch[i];
               const currentDuration = item.duration || 30;
-
-              // Garde-fou: rejeter les durées Viator déraisonnables
               const durationRatio = result.duration / Math.max(currentDuration, 30);
               const [sH = 0, sM = 0] = (item.startTime || '10:00').split(':').map(Number);
-              const wouldEndMinutes = sH * 60 + sM + result.duration;
-              const isUnreasonable =
-                durationRatio > 2.5 ||           // Plus de 2.5x la durée originale
-                wouldEndMinutes >= 21 * 60 ||     // Finirait après 21h
-                result.duration > 300;            // Plus de 5h
 
-              if (isUnreasonable) {
-                console.warn(`[AI] Durée Viator rejetée: "${item.title}" ${result.duration}min (original ${currentDuration}min, ratio ${durationRatio.toFixed(1)}x)`);
-                item.viatorDuration = result.duration; // Stocker pour info uniquement
-              } else {
-                item.viatorDuration = result.duration;
+              // Warning informatif (pas de rejet)
+              if (durationRatio > 2.5 || result.duration > 300) {
+                console.warn(`[AI] Durée Viator notable: "${item.title}" ${result.duration}min (original ${currentDuration}min, ratio ${durationRatio.toFixed(1)}x)`);
+              }
 
-                // Recalculer endTime si la durée Viator est significativement différente (>15min)
-                if (Math.abs(result.duration - currentDuration) > 15 && item.startTime && item.endTime) {
-                  const startMinutes = sH * 60 + sM;
-                  const newEndMinutes = startMinutes + result.duration;
-                  const newEndH = Math.floor(newEndMinutes / 60);
-                  const newEndM = newEndMinutes % 60;
-                  const newEndTime = `${String(newEndH).padStart(2, '0')}:${String(newEndM).padStart(2, '0')}`;
+              item.viatorDuration = result.duration;
 
-                  const oldEndTime = item.endTime;
-                  item.endTime = newEndTime;
-                  item.duration = result.duration;
+              // Recalculer endTime si la durée Viator est significativement différente (>15min)
+              if (Math.abs(result.duration - currentDuration) > 15 && item.startTime && item.endTime) {
+                const startMinutes = sH * 60 + sM;
+                const newEndMinutes = startMinutes + result.duration;
+                const newEndH = Math.floor(newEndMinutes / 60);
+                const newEndM = newEndMinutes % 60;
+                const newEndTime = `${String(newEndH).padStart(2, '0')}:${String(newEndM).padStart(2, '0')}`;
 
-                  // Décaler les items suivants dans le même jour
-                  const day = days.find(d => d.items.some(it => it.id === item.id));
-                  if (day) {
-                    const itemIndex = day.items.findIndex(it => it.id === item.id);
-                    if (itemIndex >= 0 && itemIndex < day.items.length - 1) {
-                      const [oldEndH, oldEndM] = oldEndTime.split(':').map(Number);
-                      const shiftMinutes = (newEndH * 60 + newEndM) - (oldEndH * 60 + oldEndM);
+                const oldEndTime = item.endTime;
+                item.endTime = newEndTime;
+                item.duration = result.duration;
 
-                      if (shiftMinutes > 0) {
-                        for (let j = itemIndex + 1; j < day.items.length; j++) {
-                          const next = day.items[j];
-                          if (next.startTime && next.endTime) {
-                            const [nsH, nsM] = next.startTime.split(':').map(Number);
-                            const [neH, neM] = next.endTime.split(':').map(Number);
-                            const newStartMin = nsH * 60 + nsM + shiftMinutes;
-                            const newEndMin = neH * 60 + neM + shiftMinutes;
-                            next.startTime = `${String(Math.floor(newStartMin / 60)).padStart(2, '0')}:${String(newStartMin % 60).padStart(2, '0')}`;
-                            next.endTime = `${String(Math.floor(newEndMin / 60)).padStart(2, '0')}:${String(newEndMin % 60).padStart(2, '0')}`;
-                          }
+                // Décaler les items suivants dans le même jour
+                const day = days.find(d => d.items.some(it => it.id === item.id));
+                if (day) {
+                  const itemIndex = day.items.findIndex(it => it.id === item.id);
+                  if (itemIndex >= 0 && itemIndex < day.items.length - 1) {
+                    const [oldEndH, oldEndM] = oldEndTime.split(':').map(Number);
+                    const shiftMinutes = (newEndH * 60 + newEndM) - (oldEndH * 60 + oldEndM);
+
+                    if (shiftMinutes > 0) {
+                      for (let j = itemIndex + 1; j < day.items.length; j++) {
+                        const next = day.items[j];
+                        if (next.startTime && next.endTime) {
+                          const [nsH, nsM] = next.startTime.split(':').map(Number);
+                          const [neH, neM] = next.endTime.split(':').map(Number);
+                          const newStartMin = nsH * 60 + nsM + shiftMinutes;
+                          const newEndMin = neH * 60 + neM + shiftMinutes;
+                          next.startTime = `${String(Math.floor(newStartMin / 60)).padStart(2, '0')}:${String(newStartMin % 60).padStart(2, '0')}`;
+                          next.endTime = `${String(Math.floor(newEndMin / 60)).padStart(2, '0')}:${String(newEndMin % 60).padStart(2, '0')}`;
                         }
-                        console.log(`[AI] ⏱ Durée Viator "${item.title}": ${currentDuration}min → ${result.duration}min, décalage +${shiftMinutes}min sur ${day.items.length - itemIndex - 1} items`);
                       }
+                      console.log(`[AI] ⏱ Durée Viator "${item.title}": ${currentDuration}min → ${result.duration}min, décalage +${shiftMinutes}min sur ${day.items.length - itemIndex - 1} items`);
                     }
                   }
                 }

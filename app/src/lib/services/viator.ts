@@ -549,14 +549,14 @@ function processViatorResults(
         description: p.description?.substring(0, 200) || p.title,
         duration: durationMinutes,
         estimatedCost: Math.round(price),
-        latitude: cityCenter.lat, // Viator doesn't always return exact coords
+        latitude: cityCenter.lat, // Viator doesn't return exact coords — resolved later via coordsResolver
         longitude: cityCenter.lng,
         rating: Math.min(5, Math.round(rating * 10) / 10),
         mustSee: (reviewCount > 500 && rating >= 4.5),
         bookingRequired: true,
         bookingUrl: affiliateUrl,
         openingHours: { open: '09:00', close: '18:00' },
-        dataReliability: 'verified',
+        dataReliability: 'estimated', // coords are city center, not exact — will be resolved
         imageUrl,
         providerName: 'Viator',
         reviewCount,

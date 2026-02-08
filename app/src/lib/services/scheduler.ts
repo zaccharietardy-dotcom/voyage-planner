@@ -106,9 +106,10 @@ export class DayScheduler {
     duration: number; // minutes
     travelTime?: number; // temps de trajet depuis le lieu précédent
     minStartTime?: Date; // heure minimum de début (ex: ouverture)
+    maxEndTime?: Date; // heure maximum de fin (ex: fermeture)
     data?: any;
   }): ScheduleItem | null {
-    const { id, title, type, duration, travelTime = 0, minStartTime, data } = params;
+    const { id, title, type, duration, travelTime = 0, minStartTime, maxEndTime, data } = params;
 
     // Buffer time entre activités (sauf pour transport/flight/checkin/checkout)
     const BUFFER_MINUTES = 5;
@@ -202,9 +203,22 @@ export class DayScheduler {
       }
     }
 
+    // Contraindre à l'heure de fermeture si spécifiée
+    let effectiveDuration = duration;
+    if (maxEndTime && endTime > maxEndTime && maxEndTime > startTime) {
+      const clampedDuration = Math.round((maxEndTime.getTime() - startTime.getTime()) / (60 * 1000));
+      if (clampedDuration < 30) {
+        console.log(`[Scheduler] Cannot fit "${title}" before closing at ${formatTime(maxEndTime)} (only ${clampedDuration}min available)`);
+        return null;
+      }
+      endTime = new Date(maxEndTime);
+      effectiveDuration = clampedDuration;
+      console.log(`[Scheduler] Clamped "${title}" to closing: ${formatTime(endTime)} (${effectiveDuration}min instead of ${duration}min)`);
+    }
+
     // Vérifier qu'on ne dépasse pas la fin de journée
     if (endTime > this.dayEnd) {
-      console.log(`[Scheduler] Cannot fit "${title}" (${duration}min) - ends at ${formatTime(endTime)}, day ends at ${formatTime(this.dayEnd)}`);
+      console.log(`[Scheduler] Cannot fit "${title}" (${effectiveDuration}min) - ends at ${formatTime(endTime)}, day ends at ${formatTime(this.dayEnd)}`);
       return null;
     }
 
@@ -214,7 +228,7 @@ export class DayScheduler {
       title,
       type,
       slot: { start: startTime, end: endTime },
-      duration,
+      duration: effectiveDuration,
       travelTimeFromPrevious: travelTime > 0 ? travelTime : undefined,
       data,
     };
