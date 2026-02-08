@@ -17,6 +17,7 @@ import { ActivityType, BudgetStrategy } from '../types';
 import * as fs from 'fs';
 import * as path from 'path';
 import { getMealTimes, getReligiousCap, getClosureWarnings, MINIMUM_DURATION_OVERRIDES } from './destinationData';
+import { findNearbyAttractions } from './dayTripHandler';
 
 // ============================================
 // Duration Rules (module-level constants)
@@ -276,17 +277,21 @@ export async function generateClaudeItinerary(
   });
 
   // Compact attraction pool for the prompt
-  const poolCompact = filteredPool.map(a => ({
-    id: a.id,
-    name: a.name,
-    type: a.type,
-    rating: a.rating,
-    desc: a.description.substring(0, 80),
-    lat: +a.latitude.toFixed(4),
-    lng: +a.longitude.toFixed(4),
-    dur: a.estimatedDuration,
-    cost: a.estimatedCost || 0,
-  }));
+  const poolCompact = filteredPool.map(a => {
+    const rc = a.reviewCount || 0;
+    return {
+      id: a.id,
+      name: a.name,
+      type: a.type,
+      rating: a.rating,
+      rc, // nombre d'avis (proxy de popularité)
+      desc: a.description.substring(0, 80),
+      lat: +a.latitude.toFixed(4),
+      lng: +a.longitude.toFixed(4),
+      dur: a.estimatedDuration,
+      cost: a.estimatedCost || 0,
+    };
+  });
 
   const budgetContext = {
     economic: 'Privilégie les attractions gratuites ou pas chères. Parcs, temples, quartiers à explorer à pied, marchés.',
@@ -426,8 +431,9 @@ RÈGLES D'OR:
    - INCONTOURNABLES MONDIAUX OBLIGATOIRES: MÊME si l'utilisateur n'a PAS coché "culture", tu DOIS inclure les sites mondialement célèbres de ${request.destination}.
      Exemples: Barcelona → Sagrada Família, Casa Batlló, Parc Güell, La Rambla, Barri Gòtic. Paris → Tour Eiffel, Louvre, Sacré-Cœur, Notre-Dame, Montmartre. Rome → Colisée, Vatican, Fontaine de Trevi, Panthéon. Tokyo → Shibuya, Senso-ji, Meiji, Shinjuku, Akihabara. Londres → Big Ben, Tower, British Museum, Buckingham, Camden.
      New York → Statue de la Liberté, Empire State Building, Central Park, Times Square, Brooklyn Bridge, MoMA ou Met Museum, Top of the Rock ou One World Observatory, 5th Avenue, SoHo/Greenwich Village.
-     Amsterdam → Rijksmuseum, Anne Frank, canaux, Vondelpark, Jordaan. Lisbonne → Belém, Alfama, LX Factory, Pastéis de Belém. Berlin → Porte de Brandebourg, Mur, Île aux Musées, Reichstag. Istanbul → Sainte-Sophie, Mosquée Bleue, Grand Bazar, Bosphore. Marrakech → Jemaa el-Fna, Majorelle, Souks, Palais Bahia. Bangkok → Grand Palais, Wat Pho, Wat Arun, Chatuchak, Khao San Road. Prague → Pont Charles, Château, Place Vieille Ville, Horloge astronomique. Budapest → Parlement, Bains Széchenyi, Bastion des Pêcheurs, Ruin Bars.
+     Amsterdam → Rijksmuseum, Van Gogh Museum, Anne Frank, canaux, Vondelpark, Jordaan. Lisbonne → Belém, Alfama, LX Factory, Pastéis de Belém. Berlin → Porte de Brandebourg, Mur, Île aux Musées, Reichstag. Istanbul → Sainte-Sophie, Mosquée Bleue, Grand Bazar, Bosphore. Marrakech → Jemaa el-Fna, Majorelle, Souks, Palais Bahia. Bangkok → Grand Palais, Wat Pho, Wat Arun, Chatuchak, Khao San Road. Prague → Pont Charles, Château, Place Vieille Ville, Horloge astronomique. Budapest → Parlement, Bains Széchenyi, Bastion des Pêcheurs, Ruin Bars.
      Ces incontournables sont PRIORITAIRES sur les attractions secondaires (musées mineurs, rooftop bars, etc.). Si un incontournable manque du pool, AJOUTE-LE dans additionalSuggestions.
+   - POPULARITÉ: Le champ "rc" (review count) indique le nombre d'avis Google Maps. Les attractions avec rc > 1000 et rating ≥ 4.3 sont des INCONTOURNABLES — tu DOIS les inclure en priorité. Ne néglige JAMAIS une attraction très populaire (rc élevé) au profit d'attractions mineures (rc faible ou 0).
 
 6c. DIVERSITÉ CATÉGORIELLE OBLIGATOIRE:
    - Maximum 1 lieu religieux (église, temple, cathédrale, mosquée, synagogue, sanctuaire) par jour
@@ -995,6 +1001,106 @@ Format EXACT:
       }
     }
 
+    // POST-VALIDATION: Inject high-popularity pool attractions that Claude overlooked
+    // Score = rating × log2(reviewCount) — factual, data-driven, works for any destination
+    const allSelectedIdsAfterInjection = new Set(parsed.days.flatMap(d => d.selectedAttractionIds));
+    const allSuggestionNamesAfterInjection = new Set(
+      parsed.days.flatMap(d => d.additionalSuggestions.map(s => stripAccents(s.name.toLowerCase())))
+    );
+    const POPULARITY_THRESHOLD = 15; // rating(4.5) × log2(1000≈10) = ~45, seuil conservateur
+    const popularMissing = filteredPool
+      .filter(a => {
+        if (allSelectedIdsAfterInjection.has(a.id)) return false;
+        // Vérifier si déjà dans additionalSuggestions (par nom)
+        const nameNorm = stripAccents(a.name.toLowerCase());
+        if ([...allSuggestionNamesAfterInjection].some(sn => sn.includes(nameNorm) || nameNorm.includes(sn))) return false;
+        const rc = a.reviewCount || 0;
+        if (rc < 500 || a.rating < 4.3) return false;
+        const score = a.rating * Math.log2(Math.max(rc, 1));
+        return score >= POPULARITY_THRESHOLD;
+      })
+      .sort((a, b) => {
+        const scoreA = a.rating * Math.log2(Math.max(a.reviewCount || 1, 1));
+        const scoreB = b.rating * Math.log2(Math.max(b.reviewCount || 1, 1));
+        return scoreB - scoreA;
+      })
+      .slice(0, 3); // Max 3 injections pour ne pas surcharger
+
+    for (const attraction of popularMissing) {
+      // Trouver le jour non-day-trip avec le moins d'activités
+      const candidates = parsed.days.filter(d => !d.isDayTrip);
+      if (candidates.length === 0) continue;
+      const lightest = candidates.reduce((min, d) =>
+        d.selectedAttractionIds.length + d.additionalSuggestions.length <
+        min.selectedAttractionIds.length + min.additionalSuggestions.length ? d : min
+      );
+      console.log(`[ClaudeItinerary] Injecting popular attraction: "${attraction.name}" (rating=${attraction.rating}, reviews=${attraction.reviewCount}) into day ${lightest.dayNumber}`);
+      lightest.selectedAttractionIds.push(attraction.id);
+    }
+
+    // POST-VALIDATION: Day trip consistency — ensure day trips have matching activities
+    for (const day of parsed.days) {
+      if (!day.isDayTrip || !day.dayTripDestination) continue;
+
+      const destLowerTrip = day.dayTripDestination.toLowerCase();
+
+      // Check if any additionalSuggestion or selectedAttraction relates to the day trip destination
+      const hasDayTripActivity =
+        day.additionalSuggestions.some(s => s.name.toLowerCase().includes(destLowerTrip) || s.area?.toLowerCase().includes(destLowerTrip)) ||
+        day.selectedAttractionIds.some(id => {
+          const a = poolCompact.find(p => p.id === id);
+          return a && a.name.toLowerCase().includes(destLowerTrip);
+        });
+
+      if (!hasDayTripActivity) {
+        // Try to inject known activities for this day trip destination
+        const nearbyNames = findNearbyAttractions(day.dayTripDestination);
+        if (nearbyNames.length > 0) {
+          console.log(`[ClaudeItinerary] Day trip "${day.dayTripDestination}" (jour ${day.dayNumber}): aucune activité correspondante, injection de ${nearbyNames.length} activités`);
+          for (const name of nearbyNames) {
+            day.additionalSuggestions.push({
+              name: `${name} (${day.dayTripDestination})`,
+              whyVisit: `Activité incontournable de ${day.dayTripDestination}`,
+              estimatedDuration: 60,
+              estimatedCost: 0,
+              area: day.dayTripDestination,
+            });
+          }
+        } else {
+          // Unknown day trip destination with no activities — remove day trip flag
+          console.warn(`[ClaudeItinerary] ⚠️ Day trip "${day.dayTripDestination}" (jour ${day.dayNumber}): aucune activité et destination inconnue — suppression du flag isDayTrip`);
+          day.isDayTrip = false;
+          delete day.dayTripDestination;
+          delete day.dayTripTransport;
+        }
+      }
+    }
+
+    // POST-VALIDATION: Theme cross-reference — warn if theme references attractions from other days
+    for (const day of parsed.days) {
+      if (!day.theme) continue;
+      const themeLower = day.theme.toLowerCase();
+      const dayAttractionNames = [
+        ...day.selectedAttractionIds.map(id => poolCompact.find(p => p.id === id)?.name?.toLowerCase()).filter(Boolean),
+        ...day.additionalSuggestions.map(s => s.name.toLowerCase()),
+      ] as string[];
+
+      for (const otherDay of parsed.days) {
+        if (otherDay.dayNumber === day.dayNumber) continue;
+        const otherNames = [
+          ...otherDay.selectedAttractionIds.map(id => poolCompact.find(p => p.id === id)?.name?.toLowerCase()).filter(Boolean),
+          ...otherDay.additionalSuggestions.map(s => s.name.toLowerCase()),
+        ] as string[];
+
+        for (const otherName of otherNames) {
+          // Only flag specific attraction names (>5 chars to avoid matching generic words)
+          if (otherName.length > 5 && themeLower.includes(otherName) && !dayAttractionNames.some(n => n.includes(otherName))) {
+            console.warn(`[ClaudeItinerary] ⚠️ Jour ${day.dayNumber} theme mentionne "${otherName}" qui est sur le jour ${otherDay.dayNumber}`);
+          }
+        }
+      }
+    }
+
     // POST-VALIDATION: Check minimum activities per full day
     for (const day of parsed.days) {
       const totalActivities = day.selectedAttractionIds.length + day.additionalSuggestions.length;
@@ -1284,13 +1390,21 @@ export function mapItineraryToAttractions(
       // Store area in tips field so geocoding can use it for precise queries
       const areaInfo = suggestion.area ? `[area:${suggestion.area}]` : '';
       const tipsValue = areaInfo + (suggestion.address ? ` [address:${suggestion.address}]` : '');
+      // Apply restaurant cost floor if estimatedCost is 0 or missing
+      let suggestionCost = suggestion.estimatedCost ?? 0;
+      const RESTAURANT_PATTERN = /\b(restaurant|brasserie|café|taverne|trattoria|ristorante|bistrot|auberge|taverna|osteria|gastropub|steakhouse)\b/i;
+      if (suggestionCost === 0 && RESTAURANT_PATTERN.test(suggestion.name)) {
+        suggestionCost = 20; // Floor raisonnable pour un repas
+        console.log(`[ClaudeItinerary] Restaurant cost floor: "${suggestion.name}" → ${suggestionCost}€`);
+      }
+
       dayAttractions.push({
         id: `claude-${suggestion.name.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 30)}-${Date.now()}`,
         name: suggestion.name,
         type: 'culture' as ActivityType, // Maps to TripItemType 'activity' in tripDay.ts
         description: suggestion.whyVisit,
         duration: applyDurationRules(suggestion.name, suggestion.estimatedDuration ?? 60),
-        estimatedCost: suggestion.estimatedCost ?? 0,
+        estimatedCost: suggestionCost,
         latitude: cityCenter?.lat || 0, // Default to city center; resolved later via API
         longitude: cityCenter?.lng || 0,
         rating: 4.5,

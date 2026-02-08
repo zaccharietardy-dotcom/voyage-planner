@@ -262,11 +262,11 @@ export class MealScheduler {
     const shouldHaveLunch = !isFirstDay && endHour >= 14;
     if (!shouldHaveLunch) return null;
 
-    const lunchTargetTime = parseTime(date, '12:30');
-
-    // Détecter si une activité longue (>3h) est en cours à 12h30 → picnic
+    // Détecter si une activité longue (>3h) couvre la fenêtre déjeuner → picnic
+    const lunchWindowStart = parseTime(date, '12:00');
+    const lunchWindowEnd = parseTime(date, '14:00');
     const longActivityAtLunch = plannedActivities?.find(a => {
-      return a.startTime <= lunchTargetTime && a.endTime > lunchTargetTime && a.duration > 180;
+      return a.startTime < lunchWindowEnd && a.endTime > lunchWindowStart && a.duration > 180;
     });
 
     // Si activité Viator (bookée) en cours → pas de repas (souvent inclus/pause prévue)
@@ -283,22 +283,50 @@ export class MealScheduler {
     const isPicnic = !!longActivityAtLunch || isSelfCatered;
     const picnicDuration = isPicnic ? 30 : 75;
 
-    const lunchEndTime = new Date(lunchTargetTime.getTime() + picnicDuration * 60 * 1000);
+    // Essayer plusieurs créneaux dans la fenêtre déjeuner (12:00-14:00)
+    const lunchSlots = ['12:30', '12:00', '13:00', '13:30'];
+    let lunchItem = null;
 
-    const lunchItem = scheduler.insertFixedItem({
-      id: generateId(),
-      title: isPicnic ? 'Pique-nique' : 'Déjeuner',
-      type: 'restaurant',
-      startTime: lunchTargetTime,
-      endTime: lunchEndTime,
-    });
+    for (const slot of lunchSlots) {
+      const targetTime = parseTime(date, slot);
+      const endTime = new Date(targetTime.getTime() + picnicDuration * 60 * 1000);
+      lunchItem = scheduler.insertFixedItem({
+        id: generateId(),
+        title: isPicnic ? 'Pique-nique' : 'Déjeuner',
+        type: 'restaurant',
+        startTime: targetTime,
+        endTime,
+      });
+      if (lunchItem) break;
+    }
+
+    // Si tous les créneaux fixes échouent, essayer juste après l'activité bloquante
+    if (!lunchItem && plannedActivities) {
+      const blockingActivity = plannedActivities.find(a => {
+        return a.startTime < lunchWindowEnd && a.endTime > lunchWindowStart;
+      });
+      if (blockingActivity) {
+        const afterActivity = new Date(blockingActivity.endTime.getTime() + 5 * 60 * 1000);
+        const afterEnd = new Date(afterActivity.getTime() + picnicDuration * 60 * 1000);
+        // Seulement si c'est encore une heure raisonnable pour déjeuner (avant 14:30)
+        if (afterActivity.getHours() < 14 || (afterActivity.getHours() === 14 && afterActivity.getMinutes() <= 30)) {
+          lunchItem = scheduler.insertFixedItem({
+            id: generateId(),
+            title: isPicnic ? 'Pique-nique' : 'Déjeuner',
+            type: 'restaurant',
+            startTime: afterActivity,
+            endTime: afterEnd,
+          });
+        }
+      }
+    }
 
     if (!lunchItem) return null;
 
     const { preferences } = context;
 
     // Avancer le curseur après le déjeuner
-    scheduler.advanceTo(lunchEndTime);
+    scheduler.advanceTo(lunchItem.slot.end);
 
     // Picnic
     if (isPicnic) {

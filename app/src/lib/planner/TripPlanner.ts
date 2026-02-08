@@ -173,6 +173,18 @@ export class TripPlanner {
     }
 
     // ============================================
+    // 1b. PRÉ-CONTRAINTE RETOUR (dernier jour)
+    // Limiter le dayEnd du scheduler pour ne pas planifier d'activités
+    // après l'heure de départ du transport/vol retour
+    // ============================================
+    if (isLastDay) {
+      const returnConstraints = this.logistics.getReturnConstraints(date);
+      if (returnConstraints) {
+        scheduler.setDayEnd(returnConstraints.latestActivityEnd);
+      }
+    }
+
+    // ============================================
     // 2. ACTIVITÉS + REPAS
     // ============================================
 

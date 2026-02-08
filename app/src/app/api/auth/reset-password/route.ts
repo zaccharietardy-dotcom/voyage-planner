@@ -2,7 +2,11 @@ import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { createClient } from '@supabase/supabase-js';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+function getResend() {
+  const key = process.env.RESEND_API_KEY;
+  if (!key) throw new Error('RESEND_API_KEY is not configured');
+  return new Resend(key);
+}
 
 // Client admin Supabase pour générer les liens de réinitialisation
 const supabaseAdmin = createClient(
@@ -55,7 +59,7 @@ export async function POST(request: Request) {
 }
 
 async function sendResetEmail(email: string, resetUrl: string) {
-  const { error } = await resend.emails.send({
+  const { error } = await getResend().emails.send({
     from: 'Narae Voyage <noreply@naraevoyage.com>',
     to: email,
     subject: 'Réinitialisez votre mot de passe - Narae Voyage',

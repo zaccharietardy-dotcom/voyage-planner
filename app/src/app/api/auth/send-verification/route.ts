@@ -2,7 +2,11 @@ import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { createClient } from '@supabase/supabase-js';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+function getResend() {
+  const key = process.env.RESEND_API_KEY;
+  if (!key) throw new Error('RESEND_API_KEY is not configured');
+  return new Resend(key);
+}
 
 // Client admin Supabase pour générer les liens de vérification
 const supabaseAdmin = createClient(
@@ -59,7 +63,7 @@ export async function POST(request: Request) {
 }
 
 async function sendVerificationEmail(email: string, firstName: string | undefined, verificationUrl: string) {
-  const { data, error } = await resend.emails.send({
+  const { data, error } = await getResend().emails.send({
     from: 'Narae Voyage <noreply@naraevoyage.com>',
     to: email,
     subject: 'Confirmez votre adresse email - Narae Voyage',

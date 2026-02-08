@@ -42,7 +42,7 @@ export class DayScheduler {
   private items: ScheduleItem[] = [];
   private currentTime: Date;
   private readonly dayStart: Date;
-  private readonly dayEnd: Date;
+  private dayEnd: Date;
   private readonly date: Date;
 
   constructor(date: Date, availableFrom: Date, availableUntil: Date) {
@@ -58,6 +58,17 @@ export class DayScheduler {
     }
 
     this.currentTime = new Date(availableFrom);
+  }
+
+  /**
+   * Réduit la fin de journée (ne peut que la rapprocher, pas la repousser).
+   * Utile pour contraindre les activités avant un vol/train retour.
+   */
+  setDayEnd(time: Date): void {
+    if (time < this.dayEnd) {
+      console.log(`[Scheduler] dayEnd réduit: ${formatTime(this.dayEnd)} → ${formatTime(time)}`);
+      this.dayEnd = new Date(time);
+    }
   }
 
   /**

@@ -19,7 +19,7 @@ import { AirportInfo, getCityCenterCoords, calculateDistance } from '../services
 import { DayScheduler, formatTime, parseTime } from '../services/scheduler';
 import { formatFlightDuration } from '../services/flights';
 import { calculateParkingTime } from '../services/parking';
-import { TransportOption } from '../services/transport';
+import { TransportOption, getTrainBookingUrl } from '../services/transport';
 import { generateFlightLink, generateHotelLink, formatDateForUrl } from '../services/linkGenerator';
 import { LogisticsResult, LateFlightData, PlannerContext, DayType, Coordinates } from './types';
 
@@ -68,6 +68,63 @@ function estimateAirportTransfer(
   const cost = baseCost * taxiGroups;
 
   return { duration, cost };
+}
+
+/**
+ * Inverse les transitLegs de l'aller pour créer ceux du retour.
+ * Swap from/to, inverse l'ordre, ajuste les dates vers returnDate.
+ */
+function reverseTransitLegs(
+  transitLegs: TransportOption['transitLegs'],
+  returnDate: Date,
+): TransportOption['transitLegs'] {
+  if (!transitLegs || transitLegs.length === 0) return transitLegs;
+
+  // Décalage en jours entre la date originale (aller) et la date de retour
+  const originalFirstDep = new Date(transitLegs[0].departure);
+  const originalDay = new Date(originalFirstDep.getFullYear(), originalFirstDep.getMonth(), originalFirstDep.getDate());
+  const returnDay = new Date(returnDate.getFullYear(), returnDate.getMonth(), returnDate.getDate());
+  const dayOffsetMs = returnDay.getTime() - originalDay.getTime();
+
+  return [...transitLegs].reverse().map(leg => ({
+    mode: leg.mode,
+    from: leg.to,
+    to: leg.from,
+    departure: new Date(new Date(leg.departure).getTime() + dayOffsetMs).toISOString(),
+    arrival: new Date(new Date(leg.arrival).getTime() + dayOffsetMs).toISOString(),
+    duration: leg.duration,
+    operator: leg.operator,
+    line: leg.line,
+  }));
+}
+
+/**
+ * Génère un bookingUrl pour le transport retour (destination → origin, date retour).
+ */
+function getReturnBookingUrl(
+  groundTransport: TransportOption,
+  preferences: TripPreferences,
+  returnDate: Date,
+): string | undefined {
+  if (groundTransport.mode === 'train') {
+    return getTrainBookingUrl(
+      preferences.destination,
+      preferences.origin,
+      preferences.groupSize || 1,
+      returnDate,
+    );
+  }
+  // Pour bus/car, remplacer la date dans l'URL existante si possible
+  if (groundTransport.bookingUrl) {
+    const dateStr = formatDateForUrl(returnDate);
+    return groundTransport.bookingUrl
+      .replace(/departure_date=[\d-]+/, `departure_date=${dateStr}`)
+      .replace(
+        new RegExp(`${encodeURIComponent(preferences.origin.toLowerCase().replace(/\s+/g, '-'))}/${encodeURIComponent(preferences.destination.toLowerCase().replace(/\s+/g, '-'))}`),
+        `${encodeURIComponent(preferences.destination.toLowerCase().replace(/\s+/g, '-'))}/${encodeURIComponent(preferences.origin.toLowerCase().replace(/\s+/g, '-'))}`,
+      );
+  }
+  return groundTransport.bookingUrl;
 }
 
 function getHotelLocationName(accommodation: Accommodation | null, destination: string): string {
@@ -645,9 +702,14 @@ export class LogisticsHandler {
       const lastLeg = groundTransport.transitLegs[groundTransport.transitLegs.length - 1];
       const realDep = new Date(firstLeg.departure);
       const realArr = new Date(lastLeg.arrival);
-      // Buffer 30min avant le départ pour aller à la gare
-      departureTime = new Date(realDep.getTime() - 30 * 60 * 1000);
-      arrivalTime = realArr;
+      // Cohérence timezone : extraire H:M et reconstruire via parseTime
+      // Évite les décalages entre new Date(ISO) et formatTime(Europe/Paris)
+      const depH = realDep.getHours(), depM = realDep.getMinutes();
+      const bufferMin = 30;
+      const totalMin = depH * 60 + depM - bufferMin;
+      departureTime = parseTime(date, `${String(Math.floor(totalMin / 60)).padStart(2, '0')}:${String(totalMin % 60).padStart(2, '0')}`);
+      const arrH = realArr.getHours(), arrM = realArr.getMinutes();
+      arrivalTime = parseTime(date, `${String(arrH).padStart(2, '0')}:${String(arrM).padStart(2, '0')}`);
     } else {
       departureTime = parseTime(date, '08:00');
       arrivalTime = new Date(departureTime.getTime() + groundTransport.totalDuration * 60 * 1000);
@@ -885,6 +947,47 @@ export class LogisticsHandler {
     };
   }
 
+  /**
+   * Retourne les contraintes de retour (heure limite pour les activités)
+   * sans créer d'items dans le scheduler. Permet de pré-contraindre le dayEnd.
+   */
+  getReturnConstraints(date: Date): { latestActivityEnd: Date } | null {
+    const { returnFlight, groundTransport, destAirport, accommodation, preferences } = this.context;
+
+    if (returnFlight) {
+      const flightDep = new Date(returnFlight.departureTime);
+      // Transfert hôtel → aéroport : estimation dynamique
+      const hotelLat = accommodation?.latitude || this.context.cityCenter.lat;
+      const hotelLng = accommodation?.longitude || this.context.cityCenter.lng;
+      const transfer = preferences.carRental
+        ? { duration: 40 }
+        : estimateAirportTransfer(destAirport.latitude, destAirport.longitude, hotelLat, hotelLng, flightDep.getHours(), preferences.groupSize || 1);
+      // activités doivent finir avant : checkout (30min) + transfert + 2h aéroport
+      const transferStart = new Date(flightDep.getTime() - (120 + transfer.duration) * 60 * 1000);
+      const latestActivityEnd = new Date(transferStart.getTime() - 30 * 60 * 1000);
+      return { latestActivityEnd };
+    }
+
+    if (groundTransport) {
+      let transportDepartureTime: Date;
+      const returnLegs = reverseTransitLegs(groundTransport.transitLegs, date);
+      if (returnLegs?.length) {
+        const firstReturnLeg = returnLegs[0];
+        const realDep = new Date(firstReturnLeg.departure);
+        // Extraire H:M et reconstruire via parseTime (cohérence timezone)
+        const depH = realDep.getHours(), depM = realDep.getMinutes();
+        transportDepartureTime = parseTime(date, `${String(depH).padStart(2, '0')}:${String(depM).padStart(2, '0')}`);
+      } else {
+        transportDepartureTime = parseTime(date, '14:00');
+      }
+      // 30min buffer pour aller à la gare + 30min de marge
+      const latestActivityEnd = new Date(transportDepartureTime.getTime() - 60 * 60 * 1000);
+      return { latestActivityEnd };
+    }
+
+    return null;
+  }
+
   // ============================================
   // Private: Ground Return (Last Day)
   // ============================================
@@ -925,16 +1028,26 @@ export class LogisticsHandler {
       }));
     }
 
-    // Transport retour — horaires réels si disponibles, sinon 14:00 + duration
+    // Transport retour — inverser les transitLegs de l'aller et ajuster les dates
+    const returnLegs = reverseTransitLegs(groundTransport.transitLegs, date);
     let transportStart: Date;
     let transportEnd: Date;
-    if (groundTransport.transitLegs?.length) {
-      const firstLeg = groundTransport.transitLegs[0];
-      const lastLeg = groundTransport.transitLegs[groundTransport.transitLegs.length - 1];
-      const realDep = new Date(firstLeg.departure);
-      const realArr = new Date(lastLeg.arrival);
-      transportStart = new Date(realDep.getTime() - 30 * 60 * 1000);
-      transportEnd = realArr;
+    if (returnLegs?.length) {
+      const firstReturnLeg = returnLegs[0];
+      const lastReturnLeg = returnLegs[returnLegs.length - 1];
+      const realDep = new Date(firstReturnLeg.departure);
+      const realArr = new Date(lastReturnLeg.arrival);
+      // Cohérence timezone : extraire H:M et reconstruire via parseTime
+      const depH = realDep.getHours(), depM = realDep.getMinutes();
+      const bufferMin = 30;
+      const totalMin = depH * 60 + depM - bufferMin;
+      transportStart = parseTime(date, `${String(Math.floor(totalMin / 60)).padStart(2, '0')}:${String(totalMin % 60).padStart(2, '0')}`);
+      const arrH = realArr.getHours(), arrM = realArr.getMinutes();
+      transportEnd = parseTime(date, `${String(arrH).padStart(2, '0')}:${String(arrM).padStart(2, '0')}`);
+      // Si l'arrivée est le lendemain (ex: transit overnight), ajouter 24h
+      if (transportEnd <= transportStart) {
+        transportEnd = new Date(transportEnd.getTime() + 24 * 60 * 60 * 1000);
+      }
     } else {
       transportStart = parseTime(date, '14:00');
       transportEnd = new Date(transportStart.getTime() + groundTransport.totalDuration * 60 * 1000);
@@ -950,6 +1063,7 @@ export class LogisticsHandler {
       endTime: transportEnd,
     });
     if (transportItem) {
+      const returnBookingUrl = getReturnBookingUrl(groundTransport, preferences, date);
       items.push(toTripItem(transportItem.slot, dayNumber, this.orderIndex++, {
         id: transportItem.id,
         type: 'transport',
@@ -959,8 +1073,8 @@ export class LogisticsHandler {
         latitude: cityCenter.lat,
         longitude: cityCenter.lng,
         estimatedCost: groundTransport.totalPrice,
-        bookingUrl: groundTransport.bookingUrl,
-        transitLegs: groundTransport.transitLegs,
+        bookingUrl: returnBookingUrl,
+        transitLegs: returnLegs,
         transitDataSource: groundTransport.dataSource,
         priceRange: groundTransport.priceRange,
       }));
@@ -969,7 +1083,7 @@ export class LogisticsHandler {
     return {
       items,
       activitiesStartTime: parseTime(date, '08:00'),
-      activitiesEndTime: parseTime(date, '09:30'), // 30min avant checkout
+      activitiesEndTime: new Date(transportStart.getTime() - 30 * 60 * 1000),
       arrivedAtDestination: true,
     };
   }

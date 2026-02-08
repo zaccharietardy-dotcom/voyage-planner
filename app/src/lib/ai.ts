@@ -1854,43 +1854,57 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
             // Propager la durée Viator et recalculer le planning si nécessaire
             if (result.duration && result.duration > 0) {
               const item = toMatch[i];
-              item.viatorDuration = result.duration;
-              const currentDuration = item.duration || 0;
+              const currentDuration = item.duration || 30;
 
-              // Recalculer endTime si la durée Viator est significativement différente (>15min)
-              if (Math.abs(result.duration - currentDuration) > 15 && item.startTime && item.endTime) {
-                const [startH, startM] = item.startTime.split(':').map(Number);
-                const startMinutes = startH * 60 + startM;
-                const newEndMinutes = startMinutes + result.duration;
-                const newEndH = Math.floor(newEndMinutes / 60);
-                const newEndM = newEndMinutes % 60;
-                const newEndTime = `${String(newEndH).padStart(2, '0')}:${String(newEndM).padStart(2, '0')}`;
+              // Garde-fou: rejeter les durées Viator déraisonnables
+              const durationRatio = result.duration / Math.max(currentDuration, 30);
+              const [sH = 0, sM = 0] = (item.startTime || '10:00').split(':').map(Number);
+              const wouldEndMinutes = sH * 60 + sM + result.duration;
+              const isUnreasonable =
+                durationRatio > 2.5 ||           // Plus de 2.5x la durée originale
+                wouldEndMinutes >= 21 * 60 ||     // Finirait après 21h
+                result.duration > 300;            // Plus de 5h
 
-                const oldEndTime = item.endTime;
-                item.endTime = newEndTime;
-                item.duration = result.duration;
+              if (isUnreasonable) {
+                console.warn(`[AI] Durée Viator rejetée: "${item.title}" ${result.duration}min (original ${currentDuration}min, ratio ${durationRatio.toFixed(1)}x)`);
+                item.viatorDuration = result.duration; // Stocker pour info uniquement
+              } else {
+                item.viatorDuration = result.duration;
 
-                // Décaler les items suivants dans le même jour
-                const day = days.find(d => d.items.some(it => it.id === item.id));
-                if (day) {
-                  const itemIndex = day.items.findIndex(it => it.id === item.id);
-                  if (itemIndex >= 0 && itemIndex < day.items.length - 1) {
-                    const [oldEndH, oldEndM] = oldEndTime.split(':').map(Number);
-                    const shiftMinutes = (newEndH * 60 + newEndM) - (oldEndH * 60 + oldEndM);
+                // Recalculer endTime si la durée Viator est significativement différente (>15min)
+                if (Math.abs(result.duration - currentDuration) > 15 && item.startTime && item.endTime) {
+                  const startMinutes = sH * 60 + sM;
+                  const newEndMinutes = startMinutes + result.duration;
+                  const newEndH = Math.floor(newEndMinutes / 60);
+                  const newEndM = newEndMinutes % 60;
+                  const newEndTime = `${String(newEndH).padStart(2, '0')}:${String(newEndM).padStart(2, '0')}`;
 
-                    if (shiftMinutes > 0) {
-                      for (let j = itemIndex + 1; j < day.items.length; j++) {
-                        const next = day.items[j];
-                        if (next.startTime && next.endTime) {
-                          const [sH, sM] = next.startTime.split(':').map(Number);
-                          const [eH, eM] = next.endTime.split(':').map(Number);
-                          const newStartMin = sH * 60 + sM + shiftMinutes;
-                          const newEndMin = eH * 60 + eM + shiftMinutes;
-                          next.startTime = `${String(Math.floor(newStartMin / 60)).padStart(2, '0')}:${String(newStartMin % 60).padStart(2, '0')}`;
-                          next.endTime = `${String(Math.floor(newEndMin / 60)).padStart(2, '0')}:${String(newEndMin % 60).padStart(2, '0')}`;
+                  const oldEndTime = item.endTime;
+                  item.endTime = newEndTime;
+                  item.duration = result.duration;
+
+                  // Décaler les items suivants dans le même jour
+                  const day = days.find(d => d.items.some(it => it.id === item.id));
+                  if (day) {
+                    const itemIndex = day.items.findIndex(it => it.id === item.id);
+                    if (itemIndex >= 0 && itemIndex < day.items.length - 1) {
+                      const [oldEndH, oldEndM] = oldEndTime.split(':').map(Number);
+                      const shiftMinutes = (newEndH * 60 + newEndM) - (oldEndH * 60 + oldEndM);
+
+                      if (shiftMinutes > 0) {
+                        for (let j = itemIndex + 1; j < day.items.length; j++) {
+                          const next = day.items[j];
+                          if (next.startTime && next.endTime) {
+                            const [nsH, nsM] = next.startTime.split(':').map(Number);
+                            const [neH, neM] = next.endTime.split(':').map(Number);
+                            const newStartMin = nsH * 60 + nsM + shiftMinutes;
+                            const newEndMin = neH * 60 + neM + shiftMinutes;
+                            next.startTime = `${String(Math.floor(newStartMin / 60)).padStart(2, '0')}:${String(newStartMin % 60).padStart(2, '0')}`;
+                            next.endTime = `${String(Math.floor(newEndMin / 60)).padStart(2, '0')}:${String(newEndMin % 60).padStart(2, '0')}`;
+                          }
                         }
+                        console.log(`[AI] ⏱ Durée Viator "${item.title}": ${currentDuration}min → ${result.duration}min, décalage +${shiftMinutes}min sur ${day.items.length - itemIndex - 1} items`);
                       }
-                      console.log(`[AI] ⏱ Durée Viator "${item.title}": ${currentDuration}min → ${result.duration}min, décalage +${shiftMinutes}min sur ${day.items.length - itemIndex - 1} items`);
                     }
                   }
                 }
