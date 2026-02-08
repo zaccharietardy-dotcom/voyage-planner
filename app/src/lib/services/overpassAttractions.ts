@@ -281,11 +281,8 @@ export async function searchAttractionsOverpass(
   const cacheKey = getCacheKey(cityCenter.lat, cityCenter.lng);
   const cached = readCache(cacheKey);
   if (cached) {
-    console.log(`[Overpass] Cache hit pour ${destination} (${cached.length} attractions)`);
     return cached.slice(0, limit);
   }
-
-  console.log(`[Overpass] Recherche attractions à ${destination} (${cityCenter.lat}, ${cityCenter.lng})...`);
 
   // 1. Query Overpass
   let elements: OverpassElement[];
@@ -295,8 +292,6 @@ export async function searchAttractionsOverpass(
     console.error('[Overpass] Query error:', error);
     return [];
   }
-
-  console.log(`[Overpass] ${elements.length} éléments bruts trouvés`);
 
   // 2. Deduplicate by wikidata QID and extract info
   const seen = new Set<string>();
@@ -323,8 +318,6 @@ export async function searchAttractionsOverpass(
 
     pois.push({ name, qid, lat, lng, tags });
   }
-
-  console.log(`[Overpass] ${pois.length} POI uniques après filtrage`);
 
   // 3. Enrich ALL with Wikidata (batched)
   const allQids = pois.map(p => p.qid);
@@ -398,7 +391,6 @@ export async function searchAttractionsOverpass(
       || /\b(église|church|cathedral|cathédrale|basilique|basilica|chapel|chapelle|mosquée|mosque|synagogue|temple|sanctuaire|shrine)\b/i.test(a.name);
     if (isReligious) {
       if (a.popularity < MIN_RELIGIOUS_POPULARITY) {
-        console.log(`[Overpass] Filtered minor religious: "${a.name}" (popularity=${a.popularity})`);
         return false;
       }
       religiousCount++;
@@ -409,8 +401,6 @@ export async function searchAttractionsOverpass(
 
   // Take top N
   const result: Attraction[] = diversified.slice(0, limit).map(({ popularity, ...attr }) => attr);
-
-  console.log(`[Overpass] ✅ ${result.length} attractions de qualité trouvées (top: ${result[0]?.name || 'none'})`);
 
   // Cache
   writeCache(cacheKey, result);

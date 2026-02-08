@@ -208,8 +208,6 @@ export function findNearbyAttractions(dayTripDestination: string): string[] {
 export async function planDayTrip(context: DayTripContext): Promise<DayTripPlan> {
   const { mainDestination, dayTripDestination, dayTripCoords, mainCoords, preferences } = context;
 
-  console.log(`[DayTrip] Planification excursion: ${mainDestination} → ${dayTripDestination}`);
-
   // 1. Calculer le transport aller
   const transportAller = estimateDayTripTransport(
     mainCoords,
@@ -241,10 +239,6 @@ export async function planDayTrip(context: DayTripContext): Promise<DayTripPlan>
 
   // 4. Trouver les attractions à proximité
   const nearbyAttractions = findNearbyAttractions(dayTripDestination);
-
-  console.log(`[DayTrip] Transport: ${transportAller.mode} (${transportAller.duration}min, ~${transportAller.estimatedCost}€)`);
-  console.log(`[DayTrip] Restaurant: ${suggestedRestaurant?.name || 'Non trouvé'}`);
-  console.log(`[DayTrip] Attractions proches: ${nearbyAttractions.join(', ') || 'Aucune connue'}`);
 
   return {
     transportAller,

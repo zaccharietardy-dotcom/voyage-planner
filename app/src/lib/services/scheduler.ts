@@ -66,7 +66,6 @@ export class DayScheduler {
    */
   setDayEnd(time: Date): void {
     if (time < this.dayEnd) {
-      console.log(`[Scheduler] dayEnd réduit: ${formatTime(this.dayEnd)} → ${formatTime(time)}`);
       this.dayEnd = new Date(time);
     }
   }
@@ -115,27 +114,19 @@ export class DayScheduler {
     const BUFFER_MINUTES = 5;
     const needsBuffer = !['flight', 'transport', 'checkin', 'checkout', 'parking'].includes(type);
 
-    // DEBUG: Afficher l'etat du curseur
-    console.log(`[Scheduler] addItem("${title}") - curseur: ${formatTime(this.currentTime)}, trajet: ${travelTime}min`);
-
     // Calculer l'heure de debut (curseur actuel + temps de trajet + buffer)
     const bufferTime = needsBuffer ? BUFFER_MINUTES : 0;
     let startTime = new Date(this.currentTime.getTime() + (travelTime + bufferTime) * 60 * 1000);
-    console.log(`[Scheduler]   -> startTime initial: ${formatTime(startTime)} (buffer: ${bufferTime}min)`);
 
     // Respecter l'heure minimum si specifiee (ex: horaire d'ouverture)
     // L'attraction peut avoir une heure d'ouverture APRES notre arrivee
     if (minStartTime) {
-      console.log(`[Scheduler]   -> minStartTime (ouverture): ${formatTime(minStartTime)}`);
       // Si on arrive AVANT l'ouverture, on attend
       if (startTime < minStartTime) {
         // MAIS: seulement si l'ouverture est APRES le curseur actuel
         // Sinon ca veut dire qu'on arrive APRES l'ouverture, donc pas besoin d'attendre
         if (minStartTime > this.currentTime) {
-          console.log(`[Scheduler]   -> On attend l'ouverture: ${formatTime(minStartTime)}`);
           startTime = new Date(minStartTime);
-        } else {
-          console.log(`[Scheduler]   -> Lieu deja ouvert, on garde startTime`);
         }
       }
     }
@@ -155,7 +146,6 @@ export class DayScheduler {
     // Bug #6: Arrondir à l'heure la plus proche pour éviter 19h12, 20h42
     // Sauf pour les vols et transports qui ont des horaires fixes
     if (type !== 'flight' && type !== 'transport' && type !== 'checkin') {
-      const beforeRound = formatTime(startTime);
       startTime = roundToNearestHour(startTime);
       // S'assurer qu'on n'a pas reculé avant le curseur après arrondi
       if (startTime.getTime() < cursorTime) {
@@ -163,7 +153,6 @@ export class DayScheduler {
         startTime.setMinutes(0, 0, 0);
         startTime.setHours(startTime.getHours() + 1);
       }
-      console.log(`[Scheduler]   -> Arrondi: ${beforeRound} → ${formatTime(startTime)}`);
     }
 
     // Calculer l'heure de fin
@@ -177,15 +166,9 @@ export class DayScheduler {
     const conflictingItem = this.findConflictingItem(proposedSlot);
 
     if (conflictingItem) {
-      console.log(`[Scheduler] CONFLIT détecté: "${title}" chevauche "${conflictingItem.title}"`);
-      console.log(`[Scheduler]   -> Proposé: ${formatTime(startTime)}-${formatTime(endTime)}`);
-      console.log(`[Scheduler]   -> Existant: ${formatTime(conflictingItem.slot.start)}-${formatTime(conflictingItem.slot.end)}`);
-
       // Décaler après l'item en conflit + buffer
       startTime = new Date(conflictingItem.slot.end.getTime() + BUFFER_MINUTES * 60 * 1000);
       endTime = new Date(startTime.getTime() + duration * 60 * 1000);
-
-      console.log(`[Scheduler]   -> Décalé à: ${formatTime(startTime)}-${formatTime(endTime)}`);
 
       // Re-vérifier après décalage (peut y avoir un autre conflit)
       const secondConflict = this.findConflictingItem({ start: startTime, end: endTime });
@@ -195,9 +178,7 @@ export class DayScheduler {
         if (nextFreeSlot) {
           startTime = nextFreeSlot.start;
           endTime = nextFreeSlot.end;
-          console.log(`[Scheduler]   -> Prochain créneau libre: ${formatTime(startTime)}-${formatTime(endTime)}`);
         } else {
-          console.log(`[Scheduler] Aucun créneau libre trouvé pour "${title}"`);
           return null;
         }
       }
@@ -205,7 +186,6 @@ export class DayScheduler {
 
     // REJET IMMÉDIAT: si on arrive APRÈS la fermeture, inutile de continuer
     if (maxEndTime && startTime >= maxEndTime) {
-      console.log(`[Scheduler] Rejeté "${title}": arrive à ${formatTime(startTime)} mais ferme à ${formatTime(maxEndTime)}`);
       return null;
     }
 
@@ -214,17 +194,14 @@ export class DayScheduler {
     if (maxEndTime && endTime > maxEndTime && maxEndTime > startTime) {
       const clampedDuration = Math.round((maxEndTime.getTime() - startTime.getTime()) / (60 * 1000));
       if (clampedDuration < 30) {
-        console.log(`[Scheduler] Cannot fit "${title}" before closing at ${formatTime(maxEndTime)} (only ${clampedDuration}min available)`);
         return null;
       }
       endTime = new Date(maxEndTime);
       effectiveDuration = clampedDuration;
-      console.log(`[Scheduler] Clamped "${title}" to closing: ${formatTime(endTime)} (${effectiveDuration}min instead of ${duration}min)`);
     }
 
     // Vérifier qu'on ne dépasse pas la fin de journée
     if (endTime > this.dayEnd) {
-      console.log(`[Scheduler] Cannot fit "${title}" (${effectiveDuration}min) - ends at ${formatTime(endTime)}, day ends at ${formatTime(this.dayEnd)}`);
       return null;
     }
 
@@ -242,8 +219,6 @@ export class DayScheduler {
     // Ajouter et avancer le curseur
     this.items.push(item);
     this.currentTime = endTime;
-
-    console.log(`[Scheduler] Added "${title}" ${formatTime(startTime)}-${formatTime(endTime)}`);
 
     return item;
   }
@@ -333,8 +308,6 @@ export class DayScheduler {
       this.currentTime = endTime;
     }
 
-    console.log(`[Scheduler] Fixed "${title}" ${formatTime(startTime)}-${formatTime(endTime)}`);
-
     return item;
   }
 
@@ -343,12 +316,8 @@ export class DayScheduler {
    * Utile pour sauter des périodes
    */
   advanceTo(time: Date): void {
-    const before = formatTime(this.currentTime);
     if (time > this.currentTime) {
       this.currentTime = new Date(time);
-      console.log(`[Scheduler] advanceTo: ${before} -> ${formatTime(this.currentTime)}`);
-    } else {
-      console.log(`[Scheduler] advanceTo: ${formatTime(time)} <= ${before}, curseur inchange`);
     }
   }
 
@@ -445,9 +414,6 @@ export class DayScheduler {
           const toRemove = priorityA <= priorityB ? itemA : itemB;
           const toKeep = priorityA <= priorityB ? itemB : itemA;
 
-          console.log(`[Scheduler] CONFLIT: "${itemA.title}" (${formatTime(itemA.slot.start)}-${formatTime(itemA.slot.end)}) vs "${itemB.title}" (${formatTime(itemB.slot.start)}-${formatTime(itemB.slot.end)})`);
-          console.log(`[Scheduler] → Suppression de "${toRemove.title}" (priorité ${this.getTypePriority(toRemove.type)}) au profit de "${toKeep.title}" (priorité ${this.getTypePriority(toKeep.type)})`);
-
           // Supprimer l'item
           const index = this.items.findIndex(item => item.id === toRemove.id);
           if (index !== -1) {
@@ -473,7 +439,6 @@ export class DayScheduler {
 
     for (const item of this.items) {
       if (item.slot.start < time && !protectedTypes.includes(item.type)) {
-        console.log(`[Scheduler] Suppression de "${item.title}" (${formatTime(item.slot.start)}) - commence avant ${formatTime(time)}`);
         toRemove.push(item.id);
       }
     }
@@ -493,16 +458,7 @@ export class DayScheduler {
    * Debug: affiche l'emploi du temps
    */
   debug(): void {
-    console.log(`\n=== Day Schedule (${this.date.toLocaleDateString('fr-FR')}) ===`);
-    console.log(`Available: ${formatTime(this.dayStart)} - ${formatTime(this.dayEnd)}`);
-    console.log(`Current cursor: ${formatTime(this.currentTime)}`);
-    console.log(`Remaining: ${this.getRemainingMinutes()} min`);
-    console.log('Items:');
-    for (const item of this.getItems()) {
-      const travel = item.travelTimeFromPrevious ? ` (+${item.travelTimeFromPrevious}min trajet)` : '';
-      console.log(`  ${formatTime(item.slot.start)}-${formatTime(item.slot.end)} | ${item.type} | ${item.title}${travel}`);
-    }
-    console.log('');
+    // No-op: debug logging removed
   }
 }
 

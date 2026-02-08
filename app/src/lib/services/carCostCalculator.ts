@@ -95,7 +95,6 @@ function estimateTolls(origin: string, destination: string, distance: number): n
 
   if (!originCountry && !destCountry) {
     // Default to France rate as conservative estimate
-    console.log(`[Car Cost] No country detected for "${origin}" / "${destination}", using France default`);
     return Math.round(distance * 0.09);
   }
 
@@ -128,34 +127,25 @@ export async function calculateCarCost(
 
   // Fuel calculation
   const fuel = Math.round((distance / 100) * consumption * fuelPrice);
-  console.log(`[Car Cost] Fuel: ${distance}km * ${consumption}L/100km * ${fuelPrice}EUR/L = ${fuel}EUR`);
-
   // Toll calculation - try Gemini first
   let tolls = 0;
   let tollRoute: string | undefined;
   let tollSource: 'gemini' | 'estimated' = 'estimated';
 
   try {
-    console.log(`[Car Cost] Searching toll cost via Gemini: ${origin} -> ${destination}`);
     const geminiResult = await searchTollCost(origin, destination);
     if (geminiResult && geminiResult.toll > 0) {
       tolls = Math.round(geminiResult.toll);
       tollRoute = geminiResult.route;
       tollSource = 'gemini';
-      console.log(`[Car Cost] Gemini toll: ${tolls}EUR (route: ${tollRoute ?? 'unknown'})`);
     } else {
-      console.log(`[Car Cost] Gemini returned no toll data, falling back to estimate`);
       tolls = estimateTolls(origin, destination, distance);
-      console.log(`[Car Cost] Estimated toll: ${tolls}EUR`);
     }
   } catch (err) {
-    console.log(`[Car Cost] Gemini toll lookup failed, using estimate:`, err);
     tolls = estimateTolls(origin, destination, distance);
-    console.log(`[Car Cost] Estimated toll: ${tolls}EUR`);
   }
 
   const total = fuel + tolls;
-  console.log(`[Car Cost] Total: ${total}EUR (fuel: ${fuel} + tolls: ${tolls})`);
 
   return {
     fuel,

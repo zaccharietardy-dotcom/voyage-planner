@@ -13,6 +13,7 @@ import {
   TripDay,
   TripItem,
   ChatResponse,
+  ConversationContext,
 } from '../types';
 import {
   getConstraints,
@@ -21,7 +22,7 @@ import {
   minutesToTime,
   checkTimeBoundaries,
 } from './constraintChecker';
-import { classifyIntent, buildTripContext, shouldUseSonnet } from './intentClassifier';
+import { classifyIntent, buildTripContext, shouldUseSonnet, generateContextualSuggestions } from './intentClassifier';
 import { insertDay } from './itineraryCalculator';
 import type { Attraction } from './attractions';
 
@@ -52,13 +53,12 @@ export async function handleChatMessage(
   message: string,
   destination: string,
   days: TripDay[],
-  tripContext?: TripModificationContext
+  tripContext?: TripModificationContext,
+  conversationHistory?: ConversationContext
 ): Promise<ChatResponse> {
-  // 1. Classifier l'intention
+  // 1. Classifier l'intention (avec historique conversationnel pour le contexte)
   const context = buildTripContext(destination, days);
-  const intent = await classifyIntent(message, context);
-
-  console.log('[ChatbotModifier] Intent:', intent.type, 'confidence:', intent.confidence);
+  const intent = await classifyIntent(message, context, conversationHistory);
 
   // 2. Gérer les cas spéciaux
   if (intent.type === 'clarification') {
@@ -74,7 +74,7 @@ export async function handleChatMessage(
 
   if (intent.type === 'general_question') {
     return {
-      reply: await generateGeneralResponse(message, destination, days),
+      reply: await generateGeneralResponse(message, destination, days, conversationHistory),
       intent,
       changes: null,
       previewDays: null,
@@ -86,6 +86,15 @@ export async function handleChatMessage(
   // 3. Générer les modifications
   const result = await generateModifications(intent, days, tripContext);
 
+  // 4. Générer les suggestions contextuelles en parallèle (non bloquant)
+  // On utilise les jours modifiés si dispo, sinon les jours actuels
+  const suggestionsPromise = generateContextualSuggestions(
+    destination,
+    result.success ? result.newDays : days
+  ).catch(() => undefined);
+
+  const suggestions = await suggestionsPromise;
+
   if (!result.success) {
     return {
       reply: result.explanation,
@@ -94,10 +103,12 @@ export async function handleChatMessage(
       previewDays: null,
       requiresConfirmation: false,
       warnings: result.warnings,
+      errorInfo: result.errorInfo,
+      suggestions,
     };
   }
 
-  // 4. Retourner la prévisualisation
+  // 5. Retourner la prévisualisation
   return {
     reply: result.explanation,
     intent,
@@ -105,6 +116,7 @@ export async function handleChatMessage(
     previewDays: result.newDays,
     requiresConfirmation: true,
     warnings: result.warnings,
+    suggestions,
   };
 }
 
@@ -311,6 +323,14 @@ function shiftTimes(
       warnings,
       newDays: days,
       rollbackData,
+      errorInfo: {
+        type: 'constraint_violation',
+        message: "Aucune activité n'a pu être décalée car les horaires fixes (vols, hôtel) bloquent le changement.",
+        alternativeSuggestion: {
+          label: 'Libérer du temps libre',
+          prompt: "J'aimerais plus de temps libre l'après-midi",
+        },
+      },
     };
   }
 
@@ -354,6 +374,10 @@ function removeActivity(
       warnings: [],
       newDays: days,
       rollbackData,
+      errorInfo: {
+        type: 'item_not_found',
+        message: "Je n'ai pas compris quelle activité vous souhaitez supprimer. Pouvez-vous préciser le nom exact ?",
+      },
     };
   }
 
@@ -391,6 +415,14 @@ function removeActivity(
           warnings: [],
           newDays: days,
           rollbackData,
+          errorInfo: {
+            type: 'immutable_item',
+            message: `« ${item.title} » ne peut pas être supprimé(e). ${constraint.reason}`,
+            alternativeSuggestion: {
+              label: 'Décaler les activités autour',
+              prompt: `Décale les activités autour de "${item.title}" pour libérer du temps`,
+            },
+          },
         };
       }
 
@@ -420,13 +452,29 @@ function removeActivity(
   }
 
   if (!itemFound) {
+    // Trouver le jour avec le plus d'activités pour suggérer une alternative
+    const busiestDay = days.reduce((max, d) => {
+      const count = d.items.filter(i => i.type === 'activity').length;
+      const maxCount = max.items.filter(i => i.type === 'activity').length;
+      return count > maxCount ? d : max;
+    }, days[0]);
+    const firstActivity = busiestDay?.items.find(i => i.type === 'activity');
+
     return {
       success: false,
       changes: [],
-      explanation: `Je n'ai pas trouvé d'activité correspondant à "${targetActivity}". Vérifiez le nom exact dans votre itinéraire.`,
+      explanation: `Je n'ai pas trouvé d'activité correspondant à « ${targetActivity} ». Vérifiez le nom exact dans votre itinéraire.`,
       warnings: [],
       newDays: days,
       rollbackData,
+      errorInfo: {
+        type: 'item_not_found',
+        message: `Je n'ai pas trouvé « ${targetActivity} » dans votre itinéraire. Vérifiez le nom exact ou précisez le jour.`,
+        alternativeSuggestion: firstActivity ? {
+          label: `Supprimer « ${firstActivity.title} »`,
+          prompt: `Supprime "${firstActivity.title}" du jour ${busiestDay.dayNumber}`,
+        } : undefined,
+      },
     };
   }
 
@@ -460,6 +508,14 @@ async function swapActivity(
       warnings: [],
       newDays: days,
       rollbackData,
+      errorInfo: {
+        type: 'item_not_found',
+        message: "Pour remplacer une activité, précisez l'activité à remplacer et la nouvelle activité souhaitée.",
+        alternativeSuggestion: {
+          label: 'Ajouter une activité',
+          prompt: `Ajoute ${newValue || 'une nouvelle activité'}`,
+        },
+      },
     };
   }
 
@@ -488,6 +544,14 @@ async function swapActivity(
           warnings: [],
           newDays: days,
           rollbackData,
+          errorInfo: {
+            type: 'immutable_item',
+            message: `« ${item.title} » ne peut pas être remplacé(e). ${constraint.reason}`,
+            alternativeSuggestion: {
+              label: `Ajouter « ${newValue} » à côté`,
+              prompt: `Ajoute "${newValue}" au même jour que "${item.title}"`,
+            },
+          },
         };
       }
 
@@ -535,10 +599,18 @@ async function swapActivity(
     return {
       success: false,
       changes: [],
-      explanation: `Je n'ai pas trouvé "${targetActivity}" dans votre itinéraire.`,
+      explanation: `Je n'ai pas trouvé « ${targetActivity} » dans votre itinéraire.`,
       warnings: [],
       newDays: days,
       rollbackData,
+      errorInfo: {
+        type: 'item_not_found',
+        message: `Je n'ai pas trouvé « ${targetActivity} » dans votre itinéraire. Vérifiez le nom exact ou précisez le jour.`,
+        alternativeSuggestion: newValue ? {
+          label: `Ajouter « ${newValue} »`,
+          prompt: `Ajoute "${newValue}"`,
+        } : undefined,
+      },
     };
   }
 
@@ -617,6 +689,14 @@ function extendFreeTime(
       warnings,
       newDays: days,
       rollbackData,
+      errorInfo: {
+        type: 'constraint_violation',
+        message: "Votre itinéraire a déjà peu d'activités l'après-midi. Il n'y a rien à supprimer pour libérer du temps.",
+        alternativeSuggestion: {
+          label: 'Décaler le matin',
+          prompt: 'Je veux me lever plus tard le matin',
+        },
+      },
     };
   }
 
@@ -676,8 +756,22 @@ function adjustDuration(
         : Math.max(timeToMinutes(item.startTime) + 30, endMinutes - durationChange);
 
       if (newEndMinutes > 1380) {
-        warnings.push(`L'activité "${item.title}" finirait après 23h00.`);
-        continue;
+        return {
+          success: false,
+          changes: [],
+          explanation: `L'activité « ${item.title} » finirait après 23h00 avec cette durée supplémentaire.`,
+          warnings: [`L'activité "${item.title}" finirait après 23h00.`],
+          newDays: days,
+          rollbackData,
+          errorInfo: {
+            type: 'schedule_conflict',
+            message: `L'activité « ${item.title} » finirait après 23h00 avec ${durationChange} minutes en plus.`,
+            alternativeSuggestion: {
+              label: `Ajouter seulement 15 min`,
+              prompt: `Ajoute 15 minutes de plus à "${item.title}"`,
+            },
+          },
+        };
       }
 
       item.endTime = minutesToTime(newEndMinutes);
@@ -700,10 +794,14 @@ function adjustDuration(
     return {
       success: false,
       changes: [],
-      explanation: `Je n'ai pas trouvé "${targetActivity}" dans votre itinéraire.`,
+      explanation: `Je n'ai pas trouvé « ${targetActivity} » dans votre itinéraire.`,
       warnings,
       newDays: days,
       rollbackData,
+      errorInfo: {
+        type: 'item_not_found',
+        message: `Je n'ai pas trouvé « ${targetActivity} » dans votre itinéraire. Vérifiez le nom exact.`,
+      },
     };
   }
 
@@ -863,6 +961,13 @@ async function addActivity(
   }
 
   if (!targetDay) {
+    // Trouver le jour le moins chargé pour suggérer
+    const leastBusy = days.reduce((min, d) => {
+      const c = d.items.filter(i => i.type === 'activity').length;
+      const mc = min.items.filter(i => i.type === 'activity').length;
+      return c < mc ? d : min;
+    }, days[0]);
+
     return {
       success: false,
       changes: [],
@@ -870,6 +975,14 @@ async function addActivity(
       warnings: [],
       newDays: days,
       rollbackData,
+      errorInfo: {
+        type: 'no_slot_available',
+        message: `Il n'y a pas de jour disponible pour ajouter cette activité.`,
+        alternativeSuggestion: leastBusy ? {
+          label: `Ajouter au jour ${leastBusy.dayNumber}`,
+          prompt: `Ajoute "${newValue}" au jour ${leastBusy.dayNumber}`,
+        } : undefined,
+      },
     };
   }
 
@@ -1007,6 +1120,9 @@ function changeRestaurant(
   }
 
   if (changes.length === 0) {
+    // Trouver le premier restaurant existant pour suggérer
+    const firstRestaurant = days.flatMap(d => d.items).find(i => i.type === 'restaurant');
+
     return {
       success: false,
       changes: [],
@@ -1014,6 +1130,14 @@ function changeRestaurant(
       warnings: [],
       newDays: days,
       rollbackData,
+      errorInfo: {
+        type: 'item_not_found',
+        message: "Je n'ai pas trouvé de restaurant correspondant. Précisez le jour ou le type de repas (déjeuner, dîner).",
+        alternativeSuggestion: firstRestaurant ? {
+          label: `Changer « ${firstRestaurant.title} »`,
+          prompt: `Change le restaurant "${firstRestaurant.title}" pour ${cuisineType ? `un restaurant ${cuisineType}` : 'un autre restaurant'}`,
+        } : undefined,
+      },
     };
   }
 
@@ -1154,7 +1278,8 @@ function addDay(
 async function generateGeneralResponse(
   message: string,
   destination: string,
-  days: TripDay[]
+  days: TripDay[],
+  conversationHistory?: ConversationContext
 ): Promise<string> {
   // Pour les questions générales, on peut répondre directement
   // ou utiliser Claude pour une réponse plus élaborée
@@ -1162,6 +1287,16 @@ async function generateGeneralResponse(
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     return "Je peux vous aider à modifier votre itinéraire. Dites-moi ce que vous souhaitez changer !";
+  }
+
+  // Construire le contexte conversationnel
+  let historySection = '';
+  if (conversationHistory && conversationHistory.recentExchanges.length > 0) {
+    const exchanges = conversationHistory.recentExchanges
+      .slice(-3) // Limiter à 3 échanges pour les questions générales
+      .map(e => `Utilisateur: "${e.userMessage}"\nAssistant: "${e.assistantReply}"`)
+      .join('\n---\n');
+    historySection = `\nHistorique récent:\n${exchanges}\n`;
   }
 
   try {
@@ -1173,10 +1308,10 @@ async function generateGeneralResponse(
       messages: [{
         role: 'user',
         content: `Tu es un assistant de voyage amical. L'utilisateur planifie un voyage à ${destination} de ${days.length} jours.
-
+${historySection}
 Question de l'utilisateur: "${message}"
 
-Réponds de manière concise et utile (max 2-3 phrases). Si c'est une question sur l'itinéraire, propose de l'aider à le modifier.`,
+Réponds de manière concise et utile en français (max 2-3 phrases). Si c'est une question sur l'itinéraire, propose de l'aider à le modifier. Tiens compte de l'historique de conversation si présent.`,
       }],
     });
 

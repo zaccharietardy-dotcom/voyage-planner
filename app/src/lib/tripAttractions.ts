@@ -71,7 +71,6 @@ export function fixAttractionCost(attraction: Attraction): Attraction {
   // Prix plancher depuis viatorKnownProducts (musées majeurs dont le prix est sous-estimé)
   const viatorData = findKnownViatorProduct(attraction.name);
   if (viatorData && viatorData.price > 0 && cost < viatorData.price * 0.5) {
-    console.log(`[Cost] Floor: "${attraction.name}" ${cost}€ → ${viatorData.price}€ (Viator known price)`);
     return { ...attraction, estimatedCost: viatorData.price };
   }
 
@@ -262,13 +261,6 @@ export function preAllocateAttractions(
 
     result[bestDay].push(attraction);
     usedIds.add(attraction.id);
-  }
-
-  console.log(`[Pre-allocation] ${usedIds.size} attractions uniques réparties sur ${totalDays} jours`);
-  for (let d = 0; d < totalDays; d++) {
-    const count = result[d].length;
-    const status = count < minPerDay ? '⚠️ SOUS-MINIMUM' : count >= minPerDay ? '✓' : '';
-    console.log(`  Jour ${d + 1}: ${result[d].map(a => a.name).join(', ') || 'aucune'} ${status}`);
   }
 
   return result;

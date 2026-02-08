@@ -162,7 +162,7 @@ Reponds UNIQUEMENT avec un tableau JSON valide, sans texte avant ou apres.`;
     estimatedCost: Math.max(0, a.estimatedCost || 0),
     latitude: a.latitude || 0,
     longitude: a.longitude || 0,
-    rating: Math.max(1, Math.min(5, a.rating || 4)),
+    rating: Math.round(Math.max(1, Math.min(5, a.rating || 4)) * 10) / 10,
     mustSee: Boolean(a.mustSee),
     bookingRequired: Boolean(a.bookingRequired),
     bookingUrl: a.bookingUrl || undefined,
@@ -219,8 +219,6 @@ Réponds UNIQUEMENT en JSON: {"durations": {"Nom exact": minutes, ...}}`,
     const parsed = JSON.parse(jsonStr);
     const durations: Record<string, number> = parsed.durations || parsed;
 
-    console.log(`[Server] ✅ Durées estimées pour ${Object.keys(durations).length} attractions`);
-
     return attractions.map(a => {
       if (a.duration !== 90) return a; // Already has real duration
       const estimated = durations[a.name];
@@ -262,14 +260,12 @@ export async function searchAttractionsFromCache(
   // 0. Lancer Viator en parallèle (non-bloquant, await au moment du merge)
   const viatorPromise: Promise<Attraction[]> = (isViatorConfigured() && options?.cityCenter)
     ? searchViatorActivities(destination, options.cityCenter, { types: options?.types, limit: 20 })
-        .then(results => { console.log(`[Server] ${results.length} expériences Viator trouvées`); return results; })
         .catch(err => { console.warn('[Server] Viator error:', err); return [] as Attraction[]; })
     : Promise.resolve([]);
 
   // 1. PRIORITÉ: Overpass + Wikidata (gratuit, illimité)
   if (isOverpassConfigured() && options?.cityCenter) {
     try {
-      console.log(`[Server] Recherche attractions via Overpass+Wikidata pour ${destination}...`);
       const attractions = await searchAttractionsOverpass(destination, options.cityCenter, {
         limit: (options.maxResults || 15) + 10,
       });
@@ -283,7 +279,6 @@ export async function searchAttractionsFromCache(
         };
         saveCache(cache);
 
-        console.log(`[Server] ✅ ${attractions.length} attractions via Overpass+Wikidata`);
         const withDurations = await estimateAttractionDurations(attractions, destination);
         const viatorResults = await viatorPromise;
         const merged = mergeWithViator(withDurations, viatorResults, options?.types, options?.dailyActivityBudget);
@@ -303,14 +298,12 @@ export async function searchAttractionsFromCache(
 
       // Si on a les coordonnées du centre-ville, utiliser la recherche multi-requêtes améliorée
       if (options?.cityCenter) {
-        console.log(`[Server] Recherche attractions via SerpAPI Multi-Query pour ${destination}...`);
         attractions = await searchAttractionsMultiQuery(destination, options.cityCenter, {
           types: options.types,
           limit: (options.maxResults || 15) + 5,
         });
       } else {
         // Fallback: recherche simple
-        console.log(`[Server] Recherche attractions via SerpAPI Simple pour ${destination}...`);
         const serpAttractions = await searchAttractionsWithSerpApi(destination, {
           limit: (options?.maxResults || 15) + 5,
         });
@@ -324,7 +317,7 @@ export async function searchAttractionsFromCache(
           estimatedCost: estimateCostByType(mapCategoryToActivityType(a.type || 'culture'), destination),
           latitude: a.latitude || 0,
           longitude: a.longitude || 0,
-          rating: a.rating || 4,
+          rating: Math.round((a.rating || 4) * 10) / 10,
           mustSee: false,
           bookingRequired: false,
           bookingUrl: a.website,
@@ -343,7 +336,6 @@ export async function searchAttractionsFromCache(
         };
         saveCache(cache);
 
-        console.log(`[Server] ✅ ${attractions.length} attractions RÉELLES via SerpAPI`);
         const withDurations = await estimateAttractionDurations(attractions, destination);
         const viatorResults = await viatorPromise;
         const merged = mergeWithViator(withDurations, viatorResults, options?.types, options?.dailyActivityBudget);
@@ -364,7 +356,6 @@ export async function searchAttractionsFromCache(
     !options?.forceRefresh &&
     new Date().getTime() - new Date(cached.fetchedAt).getTime() < cacheMaxAge
   ) {
-    console.log(`[Server] Cache hit pour ${destination} (${cached.attractions.length} attractions)`);
     const withDurations = await estimateAttractionDurations(cached.attractions, destination);
     const merged = mergeWithViator(withDurations, viatorResults, options?.types, options?.dailyActivityBudget);
     return filterAttractions(merged, options?.types, options?.maxResults, destination);
@@ -372,8 +363,6 @@ export async function searchAttractionsFromCache(
 
   // 4. Claude AI (fallback)
   if (process.env.ANTHROPIC_API_KEY) {
-    console.log(`[Server] Cache miss pour ${destination}, appel Claude API...`);
-
     try {
       const attractions = await fetchAttractionsFromClaude(destination, options?.types);
 
@@ -383,8 +372,6 @@ export async function searchAttractionsFromCache(
         version: 1,
       };
       saveCache(cache);
-
-      console.log(`[Server] ${attractions.length} attractions mises en cache pour ${destination}`);
 
       const withDurations = await estimateAttractionDurations(attractions, destination);
       const merged = mergeWithViator(withDurations, viatorResults, options?.types, options?.dailyActivityBudget);

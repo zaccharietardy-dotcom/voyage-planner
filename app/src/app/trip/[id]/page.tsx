@@ -51,6 +51,7 @@ import { AddActivityModal } from '@/components/trip/AddActivityModal';
 import { CalendarView } from '@/components/trip/CalendarView';
 import { CommentsSection } from '@/components/trip/CommentsSection';
 import { ChatPanel, ChatButton } from '@/components/trip/ChatPanel';
+import { TripOnboarding } from '@/components/trip/TripOnboarding';
 import { cn } from '@/lib/utils';
 import {
   DropdownMenu,
@@ -762,8 +763,8 @@ export default function TripPage() {
                   {/* Budget badge - visible et coloré si over budget */}
                   <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
                     trip.budgetStatus?.isOverBudget
-                      ? 'bg-red-100 text-red-700'
-                      : 'bg-green-100 text-green-700'
+                      ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                      : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
                   }`}>
                     <span>~{trip.totalEstimatedCost}€</span>
                     {trip.budgetStatus?.target && trip.budgetStatus.target > 0 && (
@@ -823,7 +824,7 @@ export default function TripPage() {
               )}
 
               {canEdit && !editMode && (
-                <Button variant="outline" size="sm" className="gap-1.5 h-8" onClick={() => setEditMode(true)}>
+                <Button variant="outline" size="sm" className="gap-1.5 h-8" onClick={() => setEditMode(true)} data-tour="edit-mode">
                   <GripVertical className="h-3.5 w-3.5" />
                   <span className="hidden sm:inline text-xs">Éditer</span>
                 </Button>
@@ -864,7 +865,7 @@ export default function TripPage() {
               )}
 
               {isOwner && (
-                <Button variant="outline" size="sm" className="gap-1.5 h-8" onClick={() => setShowShareDialog(true)}>
+                <Button variant="outline" size="sm" className="gap-1.5 h-8" onClick={() => setShowShareDialog(true)} data-tour="share-button">
                   <Share2 className="h-3.5 w-3.5" />
                 </Button>
               )}
@@ -877,15 +878,17 @@ export default function TripPage() {
 
               {/* Chat Assistant Button */}
               {canEdit && (
-                <ChatButton onClick={() => setShowChatPanel(true)} />
+                <div data-tour="chat-button">
+                  <ChatButton onClick={() => setShowChatPanel(true)} />
+                </div>
               )}
             </div>
           </div>
 
           {/* Transport changed warning */}
           {transportChanged && (
-            <div className="flex items-center justify-between gap-3 mt-2 p-2 bg-amber-50 border border-amber-200 rounded-lg text-sm">
-              <p className="text-amber-800 text-xs">Transport modifié — régénérez pour mettre à jour les horaires</p>
+            <div className="flex items-center justify-between gap-3 mt-2 p-2 bg-amber-50 border border-amber-200 rounded-lg text-sm dark:bg-amber-900/20 dark:border-amber-700">
+              <p className="text-amber-800 dark:text-amber-300 text-xs">Transport modifié — régénérez pour mettre à jour les horaires</p>
               <Button size="sm" className="h-7 text-xs bg-amber-600 hover:bg-amber-700" onClick={handleRegenerateTrip} disabled={regenerating}>
                 {regenerating ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <RefreshCw className="h-3 w-3 mr-1" />}
                 Régénérer
@@ -900,7 +903,7 @@ export default function TripPage() {
         {/* Mobile layout */}
         <div className="lg:hidden">
           <Tabs value={mainTab} onValueChange={setMainTab}>
-            <TabsList className="w-full flex mb-4 overflow-x-auto">
+            <TabsList className="w-full flex mb-4 overflow-x-auto" data-tour="tabs">
               <TabsTrigger value="planning" className="text-xs flex-1">Planning</TabsTrigger>
               <TabsTrigger value="reserver" className="text-xs flex-1">Reserver</TabsTrigger>
               <TabsTrigger value="carte" className="text-xs flex-1">Carte</TabsTrigger>
@@ -915,7 +918,7 @@ export default function TripPage() {
                 {/* Planning view toggle */}
                 <div className="flex items-center justify-between mb-3">
                   <h2 className="font-semibold">Itinéraire</h2>
-                  <div className="flex items-center gap-0.5 bg-muted rounded-md p-0.5">
+                  <div className="flex items-center gap-0.5 bg-muted rounded-md p-0.5" data-tour="view-toggle">
                     <Button variant={planningView === 'timeline' ? 'default' : 'ghost'} size="sm" className="h-6 text-xs px-2" onClick={() => setPlanningView('timeline')}>Timeline</Button>
                     <Button variant={planningView === 'calendar' ? 'default' : 'ghost'} size="sm" className="h-6 text-xs px-2" onClick={() => setPlanningView('calendar')}>Calendrier</Button>
                   </div>
@@ -1002,7 +1005,7 @@ export default function TripPage() {
           {/* Left: Planning */}
           <div className="flex-[3] min-w-0">
             <Tabs value={mainTab} onValueChange={setMainTab}>
-              <TabsList className="mb-3">
+              <TabsList className="mb-3" data-tour="tabs">
                 <TabsTrigger value="planning" className="text-sm">Planning</TabsTrigger>
                 <TabsTrigger value="reserver" className="text-sm">Reserver</TabsTrigger>
                 {user && <TabsTrigger value="photos" className="text-sm">Photos</TabsTrigger>}
@@ -1019,7 +1022,7 @@ export default function TripPage() {
                     {editMode && planningView === 'timeline' && (
                       <span className="text-xs text-muted-foreground">Glissez pour réorganiser</span>
                     )}
-                    <div className="flex items-center gap-0.5 bg-muted rounded-md p-0.5">
+                    <div className="flex items-center gap-0.5 bg-muted rounded-md p-0.5" data-tour="view-toggle">
                       <Button variant={planningView === 'timeline' ? 'default' : 'ghost'} size="sm" className="h-6 text-xs px-2" onClick={() => setPlanningView('timeline')}>Timeline</Button>
                       <Button variant={planningView === 'calendar' ? 'default' : 'ghost'} size="sm" className="h-6 text-xs px-2" onClick={() => setPlanningView('calendar')}>Calendrier</Button>
                     </div>
@@ -1105,7 +1108,7 @@ export default function TripPage() {
           </div>
 
           {/* Right: Sticky map */}
-          <div className="flex-[2] min-w-0">
+          <div className="flex-[2] min-w-0" data-tour="map-panel">
             <div className="sticky top-[73px] h-[calc(100vh-73px-2rem)] rounded-lg overflow-hidden border">
               <TripMap
                 items={allItems}
@@ -1174,6 +1177,9 @@ export default function TripPage() {
           onDaysUpdate={handleDirectUpdate}
         />
       )}
+
+      {/* Tour guidé pour les nouveaux utilisateurs */}
+      {trip && <TripOnboarding />}
     </div>
   );
 }

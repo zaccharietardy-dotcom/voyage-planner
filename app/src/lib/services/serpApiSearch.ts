@@ -17,9 +17,6 @@ import { generateFlightLink } from './linkGenerator';
 const SERPAPI_KEY = process.env.SERPAPI_KEY?.trim();
 const SERPAPI_BASE_URL = 'https://serpapi.com/search.json';
 
-// Log de démarrage pour diagnostiquer
-console.log(`[SerpAPI] Clé configurée: ${SERPAPI_KEY ? '✅ Oui (' + SERPAPI_KEY.substring(0, 8) + '...)' : '❌ Non'}`);
-
 interface SerpApiFlightOffer {
   flights: Array<{
     departure_airport: { name: string; id: string; time: string };
@@ -84,8 +81,6 @@ export async function searchFlightsWithSerpApi(
   });
 
   try {
-    console.log(`[SerpAPI] Recherche vols ${origin} → ${destination} le ${date}...`);
-    console.log(`[SerpAPI] URL: ${SERPAPI_BASE_URL}?departure_id=${origin}&arrival_id=${destination}&outbound_date=${date}&type=2`);
     const response = await fetch(`${SERPAPI_BASE_URL}?${params}`);
 
     if (!response.ok) {
@@ -106,25 +101,13 @@ export async function searchFlightsWithSerpApi(
 
     // Traiter les meilleurs vols
     const allFlights = [...(data.best_flights || []), ...(data.other_flights || [])];
-    console.log(`[SerpAPI] ═══════════════════════════════════════════════════════`);
-    console.log(`[SerpAPI] ${allFlights.length} offres de vols reçues pour ${origin} → ${destination} le ${date}`);
-    console.log(`[SerpAPI] ═══════════════════════════════════════════════════════`);
 
     for (const flightOffer of allFlights.slice(0, 10)) {
-      // DEBUG: Log la structure brute pour diagnostic
-      if (allFlights.indexOf(flightOffer) === 0) {
-        console.log(`[SerpAPI] DEBUG - Structure première offre:`, JSON.stringify(flightOffer, null, 2).slice(0, 1500));
-      }
 
       const firstLeg = flightOffer.flights[0];
       const lastLeg = flightOffer.flights[flightOffer.flights.length - 1];
 
       if (!firstLeg || !lastLeg) continue;
-
-      // DEBUG: Afficher la structure complète du vol
-      console.log(`[SerpAPI] Offre: ${flightOffer.flights.length} segment(s), prix=${flightOffer.price}€`);
-      console.log(`[SerpAPI]   - Premier segment: ${firstLeg.departure_airport.id} → ${firstLeg.arrival_airport.id}`);
-      console.log(`[SerpAPI]   - Dernier segment: ${lastLeg.departure_airport.id} → ${lastLeg.arrival_airport.id}`);
 
       // VALIDATION: Vérifier que le vol arrive bien à la destination demandée
       if (lastLeg.arrival_airport.id !== destination) {
@@ -156,8 +139,6 @@ export async function searchFlightsWithSerpApi(
       }
 
       // Parser les horaires
-      // DEBUG: Log les heures brutes de SerpAPI
-      console.log(`[SerpAPI] Vol ${firstLeg.flight_number}: departure_airport.time = "${firstLeg.departure_airport.time}", arrival_airport.time = "${lastLeg.arrival_airport.time}"`);
 
       const departureTime = parseFlightTime(date, firstLeg.departure_airport.time);
       const arrivalTime = parseFlightTime(date, lastLeg.arrival_airport.time);
@@ -189,7 +170,6 @@ export async function searchFlightsWithSerpApi(
         }
       );
       const finalBookingUrl = aviasalesUrl;
-      console.log(`[SerpAPI] ✅ Lien Aviasales: ${firstLeg.flight_number} le ${date}`);
 
       flights.push({
         id: `serp-${firstLeg.flight_number}-${date}`,
@@ -223,15 +203,6 @@ export async function searchFlightsWithSerpApi(
     // NOTE: On garde l'ordre "best flights" de Google Flights (prix + durée + escales)
     // pour que le premier vol corresponde à celui affiché sur Google Flights
 
-    console.log(`[SerpAPI] ═══════════════════════════════════════════════════════`);
-    console.log(`[SerpAPI] RÉSULTAT FINAL: ${flights.length} vols VALIDES pour ${origin} → ${destination}`);
-    if (flights.length > 0) {
-      console.log(`[SerpAPI] Premier vol: ${flights[0].flightNumber} à ${flights[0].pricePerPerson}€/pers`);
-      console.log(`[SerpAPI] Arrive à: ${flights[0].arrivalAirportCode} (${flights[0].arrivalAirport})`);
-    } else {
-      console.log(`[SerpAPI] ⚠️ AUCUN VOL VALIDE - tous les vols rejetés car destination incorrecte`);
-    }
-    console.log(`[SerpAPI] ═══════════════════════════════════════════════════════`);
     return flights;
   } catch (error) {
     console.error('[SerpAPI] Erreur:', error);
@@ -333,8 +304,6 @@ function parseFlightTime(date: string, timeStr: string): Date {
 
     result.setHours(hours, minutes, 0, 0);
 
-    // DEBUG: Log la conversion
-    console.log(`[SerpAPI] parseFlightTime: "${timeStr}" → ${hours}:${minutes.toString().padStart(2, '0')} → ISO: ${result.toISOString()}`);
   }
 
   return result;

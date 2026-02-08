@@ -88,8 +88,11 @@ export function getDayContext(
       availableUntil = new Date(departureTime.getTime() - 210 * 60 * 1000);
     } else if (groundTransport) {
       // Transport terrestre: disponible jusqu'à 1h30 avant le départ (check-out + se rendre à la gare)
-      if (groundTransport.transitLegs?.length) {
-        const firstLeg = groundTransport.transitLegs[0];
+      // Vérifier que les transitLegs correspondent au jour retour (pas l'aller)
+      const legsMatchDate = groundTransport.transitLegs?.length &&
+        new Date(groundTransport.transitLegs[0].departure).toDateString() === date.toDateString();
+      if (legsMatchDate) {
+        const firstLeg = groundTransport.transitLegs![0];
         const realDep = new Date(firstLeg.departure);
         availableUntil = new Date(realDep.getTime() - 90 * 60 * 1000);
       } else {
@@ -261,17 +264,12 @@ export async function generateDayWithScheduler(params: {
   const hasNightlife = preferences.activities?.includes('nightlife') ?? false;
   let dayEnd = parseTime(date, hasNightlife ? '23:59' : '23:00');
 
-  // DEBUG: Afficher les infos de transport
-  console.log(`[Jour ${dayNumber}] DEBUG: isFirstDay=${isFirstDay}, outboundFlight=${outboundFlight ? 'OUI' : 'NON'}, groundTransport=${groundTransport ? groundTransport.mode : 'NON'}`);
-
   // Ajuster selon les contraintes de transport
   // JOUR 1: On NE PEUT PAS faire d'activités à destination AVANT d'y arriver!
   if (isFirstDay) {
     if (outboundFlight) {
       // Vol aller: disponible après arrivée + transfert + check-in hôtel
       const arrivalTime = new Date(outboundFlight.arrivalTime);
-      console.log(`[Jour ${dayNumber}] DEBUG: Vol arrivée raw = "${outboundFlight.arrivalTime}", parsed = ${arrivalTime.toISOString()}`);
-
       // Vérifier que la date est valide
       if (isNaN(arrivalTime.getTime())) {
         console.error(`[Jour ${dayNumber}] ERREUR: arrivalTime invalide, utilisation de 20:00 par défaut`);
@@ -279,7 +277,6 @@ export async function generateDayWithScheduler(params: {
       } else {
         // +1h30 après arrivée (transfert aéroport + check-in hôtel)
         dayStart = new Date(arrivalTime.getTime() + 90 * 60 * 1000);
-        console.log(`[Jour ${dayNumber}] Vol arrive à ${arrivalTime.toLocaleTimeString('fr-FR')}, activités possibles à partir de ${dayStart.toLocaleTimeString('fr-FR')}`);
       }
     } else if (groundTransport) {
       // Transport terrestre: disponible après arrivée + check-in hôtel
@@ -292,7 +289,6 @@ export async function generateDayWithScheduler(params: {
         arrivalTime = new Date(departureTime.getTime() + groundTransport.totalDuration * 60 * 1000);
       }
       dayStart = new Date(arrivalTime.getTime() + 15 * 60 * 1000); // +15min buffer (check-in est un fixed item)
-      console.log(`[Jour ${dayNumber}] Transport terrestre arrive à ${arrivalTime.toLocaleTimeString('fr-FR')}, activités possibles à partir de ${dayStart.toLocaleTimeString('fr-FR')}`);
     }
   }
 
@@ -307,12 +303,10 @@ export async function generateDayWithScheduler(params: {
       const transferToAirport = new Date(departureTime.getTime() - 120 * 60 * 1000);
 
       if (checkoutTime <= dayStart) {
-        console.log(`[Jour ${dayNumber}] Vol matinal → Pas d'activités`);
         dayEnd = dayStart;
       } else {
         // Activités entre checkout et transfert (pas juste jusqu'au checkout)
         dayEnd = transferToAirport > checkoutTime ? transferToAirport : checkoutTime;
-        console.log(`[Jour ${dayNumber}] Dernier jour - checkout ${checkoutTime.toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'})}, activités jusqu'à ${dayEnd.toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'})}`);
       }
     } else if (groundTransport) {
       // Dernier jour transport terrestre: activités possibles APRÈS check-out (10:30) jusqu'au départ (14:00)
@@ -321,11 +315,9 @@ export async function generateDayWithScheduler(params: {
       const targetEnd = parseTime(date, '13:30'); // 30min avant transport retour (14:00)
 
       if (targetEnd <= dayStart) {
-        console.log(`[Jour ${dayNumber}] Transport matinal - pas d'activités possibles`);
         dayEnd = dayStart;
       } else {
         dayEnd = targetEnd;
-        console.log(`[Jour ${dayNumber}] Dernier jour ground - activités jusqu'à 13:30 (départ 14:00)`);
       }
     }
   }
@@ -344,9 +336,12 @@ export async function generateDayWithScheduler(params: {
   if (isLastDay && groundTransport) {
     let earlyStart: Date;
     let earlyEnd: Date;
-    if (groundTransport.transitLegs?.length) {
-      const firstLeg = groundTransport.transitLegs[0];
-      const lastLeg = groundTransport.transitLegs[groundTransport.transitLegs.length - 1];
+    // Vérifier que les transitLegs correspondent au jour retour (pas ceux de l'aller)
+    const legsMatchReturnDate = groundTransport.transitLegs?.length &&
+      new Date(groundTransport.transitLegs[0].departure).toDateString() === date.toDateString();
+    if (legsMatchReturnDate) {
+      const firstLeg = groundTransport.transitLegs![0];
+      const lastLeg = groundTransport.transitLegs![groundTransport.transitLegs!.length - 1];
       earlyStart = new Date(new Date(firstLeg.departure).getTime() - 30 * 60 * 1000);
       earlyEnd = new Date(lastLeg.arrival);
     } else {
@@ -362,7 +357,6 @@ export async function generateDayWithScheduler(params: {
     });
     if (earlyReturnTransportItem) {
       returnTransportAlreadyInserted = true;
-      console.log(`[Jour ${dayNumber}] ✅ Transport retour pré-inséré: ${formatScheduleTime(earlyStart)} - ${formatScheduleTime(earlyEnd)}`);
     }
   }
 
@@ -395,7 +389,6 @@ export async function generateDayWithScheduler(params: {
     });
     if (earlyCheckoutItem) {
       checkoutAlreadyInserted = true;
-      console.log(`[Jour ${dayNumber}] ✅ Checkout pré-inséré: ${formatScheduleTime(checkoutStart)}-${formatScheduleTime(checkoutEnd)}`);
     }
   }
 
@@ -419,9 +412,6 @@ export async function generateDayWithScheduler(params: {
         ? getPrefetchedRestaurant('breakfast')
         : await findRestaurantForMeal('breakfast', cityCenter, preferences, dayNumber, cityCenter));
 
-  console.log(`[Jour ${dayNumber}] Plage horaire: ${formatScheduleTime(dayStart)} - ${formatScheduleTime(dayEnd)}`);
-  console.log(`[Jour ${dayNumber}] Position: ${isFirstDay ? 'ORIGINE (en transit)' : 'DESTINATION'} | isLastDay: ${isLastDay}`);
-
   // === TRAITER UN VOL OVERNIGHT DU JOUR PRÉCÉDENT ===
   // Pour un vol overnight (arrivée le lendemain), le transfert et check-in hôtel
   // n'ont PAS été faits la veille - on les fait ce matin
@@ -430,9 +420,6 @@ export async function generateDayWithScheduler(params: {
     const overnightArrival = new Date(overnightFlight.arrivalTime);
     const overnightDestAirport = lateFlightArrivalData.destAirport;
     const overnightAccommodation = lateFlightArrivalData.accommodation;
-
-    console.log(`[Jour ${dayNumber}] VOL OVERNIGHT arrivé: transfert et check-in hôtel à faire ce matin`);
-    console.log(`[Jour ${dayNumber}] Arrivée vol: ${overnightArrival.toLocaleTimeString('fr-FR')}`);
 
     // Transfert aéroport → hôtel (après l'arrivée du vol overnight)
     const transferStart = new Date(overnightArrival.getTime() + 30 * 60 * 1000); // 30min après atterrissage
@@ -448,8 +435,6 @@ export async function generateDayWithScheduler(params: {
     if (transferItem) {
       // LOCATION TRACKING: Atterrissage = arrivé à destination
       locationTracker.landFlight(preferences.destination, formatScheduleTime(transferEnd));
-      console.log(`[LocationTracker] Atterrissage overnight: arrivé à ${preferences.destination} à ${formatScheduleTime(transferEnd)}`);
-
       items.push(schedulerItemToTripItem(transferItem, dayNumber, orderIndex++, {
         description: preferences.carRental ? 'Récupérez votre voiture de location.' : 'Taxi ou transports en commun.',
         locationName: `${overnightDestAirport.name} → Centre-ville`,
@@ -499,7 +484,6 @@ export async function generateDayWithScheduler(params: {
 
     // Avancer le curseur après le check-in hôtel
     scheduler.advanceTo(hotelCheckinEnd);
-    console.log(`[Jour ${dayNumber}] VOL OVERNIGHT: Transfert et check-in terminés à ${formatScheduleTime(hotelCheckinEnd)}`);
   }
 
   // === JOUR 1: LOGISTIQUE DEPART ===
@@ -558,8 +542,6 @@ export async function generateDayWithScheduler(params: {
         // Estimation coût: TGV ~40-80€, voiture ~0.15€/km
         estimatedTravelCost = distanceToAirport > 200 ? 70 : Math.round(distanceToAirport * 0.15);
 
-        console.log(`[Jour ${dayNumber}] Origine "${preferences.origin}" ≠ Aéroport "${originAirport.city}" → Ajout trajet ${travelTimeMinutes}min`);
-
         // Calculer l'heure de départ (avant parking ou arrivée aéroport)
         const transferToAirportEnd = parking
           ? new Date(airportArrival.getTime() - calculateParkingTime(parking) * 60 * 1000)
@@ -569,7 +551,7 @@ export async function generateDayWithScheduler(params: {
 
         const originTransferItem = scheduler.insertFixedItem({
           id: generateId(),
-          title: `Trajet ${preferences.origin} → ${originAirport.city}`,
+          title: `Trajet ${preferences.origin} → ${originAirport.city === preferences.origin ? originAirport.name : originAirport.city}`,
           type: 'transport',
           startTime: transferToAirportStart,
           endTime: transferToAirportEnd,
@@ -658,8 +640,6 @@ export async function generateDayWithScheduler(params: {
       // Utiliser les heures d'affichage (heures locales aéroport) si disponibles
       const outboundFlightStartTime = outboundFlight.departureTimeDisplay || formatTime(flightDeparture);
       const outboundFlightEndTime = outboundFlight.arrivalTimeDisplay || formatTime(flightArrival);
-      console.log(`[AI] Vol aller ${outboundFlight.flightNumber}: ${outboundFlightStartTime} - ${outboundFlightEndTime}`);
-
       const flightItem = scheduler.insertFixedItem({
         id: generateId(),
         title: `Vol ${outboundFlight.flightNumber} → ${preferences.destination}`,
@@ -671,8 +651,6 @@ export async function generateDayWithScheduler(params: {
       if (flightItem) {
         // LOCATION TRACKING: Embarquement = en transit (pas d'activités possibles)
         locationTracker.boardFlight(preferences.origin, preferences.destination);
-        console.log(`[LocationTracker] Embarquement: ${preferences.origin} → ${preferences.destination} (en transit)`);
-
         // Utiliser l'URL de réservation du vol (Google Flights) si disponible
         // Sinon fallback sur Skyscanner via linkGenerator
         const tripEndDate = new Date(tripStartDate);
@@ -722,8 +700,6 @@ export async function generateDayWithScheduler(params: {
       // Le Jour 1 ne contient QUE la logistique de départ (parking, enregistrement, vol)
       // Le transfert et check-in hôtel seront faits au Jour 2
       if (isOvernightFlight) {
-        console.log(`[Jour ${dayNumber}] VOL OVERNIGHT détecté: départ ${flightDeparture.toDateString()}, arrivée ${flightArrival.toDateString()} (lendemain!)`);
-        console.log(`[Jour ${dayNumber}] → Jour 1 = uniquement logistique départ, Jour 2 = arrivée + activités`);
         // Stocker les infos pour le jour suivant
         lateFlightForNextDay = {
           flight: outboundFlight,
@@ -732,8 +708,6 @@ export async function generateDayWithScheduler(params: {
         };
         // NE PAS ajouter de transfert/check-in hôtel aujourd'hui - ils seront au Jour 2
       } else if (isLateNightFlight) {
-        console.log(`[Jour ${dayNumber}] VOL TARDIF détecté: arrivée à ${arrivalHour}h → Transfert et hôtel ce soir, activités demain`);
-
         // MÊME pour un vol tardif, on fait le transfert et check-in hôtel le même soir
         // Cela évite que le voyageur "dorme à l'aéroport"
 
@@ -751,8 +725,6 @@ export async function generateDayWithScheduler(params: {
         if (lateTransferItem) {
           // LOCATION TRACKING: Atterrissage tardif = arrivé à destination
           locationTracker.landFlight(preferences.destination, formatScheduleTime(lateTransferEnd));
-          console.log(`[LocationTracker] Atterrissage tardif: arrivé à ${preferences.destination} à ${formatScheduleTime(lateTransferEnd)}`);
-
           items.push(schedulerItemToTripItem(lateTransferItem, dayNumber, orderIndex++, {
             description: preferences.carRental ? 'Récupérez votre voiture de location.' : 'Taxi ou Uber vers votre hôtel.',
             locationName: `${destAirport.name} → Hôtel`,
@@ -792,8 +764,6 @@ export async function generateDayWithScheduler(params: {
 
         // PAS de report au jour suivant pour le transfert/hôtel, c'est fait!
         // Les activités du jour 2 commenceront normalement à 08:00
-        console.log(`[Jour ${dayNumber}] VOL TARDIF: Transfert et check-in hôtel programmés pour ${formatScheduleTime(lateTransferStart)}-${formatScheduleTime(lateCheckinEnd)}`);
-
       } else {
         // Vol normal (arrivée avant 22h) - générer les activités post-arrivée normalement
 
@@ -819,8 +789,6 @@ export async function generateDayWithScheduler(params: {
         // LOCATION TRACKING: Atterrissage = arrivé à destination (activités possibles)
         const arrivalTimeStr = formatScheduleTime(transferEnd);
         locationTracker.landFlight(preferences.destination, arrivalTimeStr);
-        console.log(`[LocationTracker] Atterrissage: arrivé à ${preferences.destination} à ${arrivalTimeStr}`);
-
         items.push(schedulerItemToTripItem(transferItem, dayNumber, orderIndex++, {
           description: preferences.carRental ? 'Récupérez votre voiture de location.' : 'Taxi ou transports en commun. Déposez vos bagages à l\'hôtel (bagagerie) si possible.',
           locationName: `${destAirport.name} → Centre-ville`,
@@ -840,8 +808,6 @@ export async function generateDayWithScheduler(params: {
       // Calculer le temps disponible avant le check-in
       const timeBeforeCheckInMs = actualCheckInTime.getTime() - transferEnd.getTime();
       const hoursBeforeCheckIn = timeBeforeCheckInMs / (1000 * 60 * 60);
-
-      console.log(`[Jour ${dayNumber}] Arrivée à ${formatScheduleTime(transferEnd)}, check-in à ${checkInHour}:${String(checkInMin).padStart(2, '0')} → ${hoursBeforeCheckIn.toFixed(1)}h disponibles`);
 
       // === CONSIGNE À BAGAGES (vol) ===
       const flightArrivalTimeStr = `${transferEnd.getHours().toString().padStart(2, '0')}:${transferEnd.getMinutes().toString().padStart(2, '0')}`;
@@ -871,7 +837,6 @@ export async function generateDayWithScheduler(params: {
                 estimatedCost: flightBestStorage.pricePerDay * preferences.groupSize,
                 bookingUrl: flightBestStorage.bookingUrl,
               }));
-              console.log(`[Jour ${dayNumber}] 🧳 Dépôt bagages (vol) ajouté: ${flightBestStorage.name}`);
             }
 
             // Récupération bagages avant check-in
@@ -955,7 +920,6 @@ export async function generateDayWithScheduler(params: {
               }));
               lastCoords = restaurantCoords;
             }
-            console.log(`[Jour ${dayNumber}] Déjeuner ajouté avant check-in`);
           }
         }
 
@@ -968,7 +932,6 @@ export async function generateDayWithScheduler(params: {
           const activityEndTime = new Date(scheduler.getCurrentTime().getTime() + (travelTime + attraction.duration + 15) * 60 * 1000);
 
           if (activityEndTime > checkInBuffer) {
-            console.log(`[Jour ${dayNumber}] Plus de temps pour activités avant check-in`);
             break;
           }
 
@@ -1010,7 +973,6 @@ export async function generateDayWithScheduler(params: {
               dataReliability: attraction.dataReliability || 'estimated',
             }));
             lastCoords = attractionCoords;
-            console.log(`[Jour ${dayNumber}] Activité avant check-in: ${attraction.name}`);
           }
         }
       }
@@ -1084,8 +1046,6 @@ export async function generateDayWithScheduler(params: {
       if (transportItem) {
         // LOCATION TRACKING: Transport terrestre = en transit pendant le trajet
         locationTracker.boardFlight(preferences.origin, preferences.destination);
-        console.log(`[LocationTracker] Départ transport terrestre: ${preferences.origin} → ${preferences.destination}`);
-
         items.push(schedulerItemToTripItem(transportItem, dayNumber, orderIndex++, {
           description: groundTransport.segments?.map(s => `${s.from} → ${s.to}`).join(' | ') + ` | ${groundTransport.totalPrice}€`,
           locationName: `${preferences.origin} → ${preferences.destination}`,
@@ -1101,7 +1061,6 @@ export async function generateDayWithScheduler(params: {
         // LOCATION TRACKING: Arrivée = à destination (activités possibles)
         const arrivalTimeStr = formatScheduleTime(transportEnd);
         locationTracker.landFlight(preferences.destination, arrivalTimeStr);
-        console.log(`[LocationTracker] Arrivée transport terrestre: ${preferences.destination} à ${arrivalTimeStr}`);
       }
 
       // Check-in hôtel - IMPORTANT: ne pas programmer avant l'heure officielle de check-in
@@ -1122,7 +1081,6 @@ export async function generateDayWithScheduler(params: {
       const needsStorage = preferences.durationDays > 1 && needsLuggageStorage(arrivalTimeForLuggage, hotelCheckInTimeStr);
 
       if (needsStorage) {
-        console.log(`[Jour ${dayNumber}] 🧳 Consigne nécessaire: arrivée ${arrivalTimeForLuggage}, check-in ${hotelCheckInTimeStr}`);
         try {
           const storages = prefetchedLuggageStorages ?? await searchLuggageStorage(preferences.destination, { latitude: cityCenter.lat, longitude: cityCenter.lng });
           const bestStorage = selectBestStorage(storages, { latitude: cityCenter.lat, longitude: cityCenter.lng });
@@ -1147,7 +1105,6 @@ export async function generateDayWithScheduler(params: {
                 estimatedCost: bestStorage.pricePerDay * preferences.groupSize,
                 bookingUrl: bestStorage.bookingUrl,
               }));
-              console.log(`[Jour ${dayNumber}] 🧳 Dépôt bagages ajouté: ${bestStorage.name} (${bestStorage.pricePerDay}€/jour)`);
             }
 
             // Récupération bagages (15min) 30min avant check-in hôtel
@@ -1168,7 +1125,6 @@ export async function generateDayWithScheduler(params: {
                   latitude: bestStorage.latitude || cityCenter.lat,
                   longitude: bestStorage.longitude || cityCenter.lng,
                 }));
-                console.log(`[Jour ${dayNumber}] 🧳 Récupération bagages ajoutée avant check-in`);
               }
             }
           }
@@ -1209,7 +1165,6 @@ export async function generateDayWithScheduler(params: {
       const afterArrival = new Date(transportEnd.getTime() + 30 * 60 * 1000);
       if (afterArrival < hotelStart) {
         scheduler.advanceTo(afterArrival);
-        console.log(`[Jour ${dayNumber}] ⏰ ${Math.round((hotelStart.getTime() - afterArrival.getTime()) / 60000)}min de temps libre avant check-in`);
       } else {
         scheduler.advanceTo(hotelEnd);
       }
@@ -1242,13 +1197,9 @@ export async function generateDayWithScheduler(params: {
 
     if (minActivityStart) {
       const currentCursor = scheduler.getCurrentTime();
-      console.log(`[Jour ${dayNumber}] PROTECTION: Vérification curseur (${currentCursor.toLocaleTimeString('fr-FR')}) vs arrivée transport + check-in (${minActivityStart.toLocaleTimeString('fr-FR')})`);
-
       if (currentCursor < minActivityStart) {
-        console.log(`[Jour ${dayNumber}] PROTECTION: ⚠️ Curseur AVANT arrivée! Forçage à ${minActivityStart.toLocaleTimeString('fr-FR')}`);
         scheduler.advanceTo(minActivityStart);
       } else {
-        console.log(`[Jour ${dayNumber}] PROTECTION: ✓ Curseur OK, activités peuvent commencer`);
       }
     }
   }
@@ -1256,8 +1207,6 @@ export async function generateDayWithScheduler(params: {
   // === ACTIVITÉS ET REPAS ===
   const currentHour = scheduler.getCurrentTime().getHours();
   const endHour = dayEnd.getHours();
-
-  console.log(`[Jour ${dayNumber}] Début des activités - curseur à ${scheduler.getCurrentTime().toLocaleTimeString('fr-FR')}, fin de journée à ${dayEnd.toLocaleTimeString('fr-FR')}`);
 
   // Sur les jours suivants, réinitialiser au centre-ville (le petit-déjeuner mettra à jour vers l'hôtel)
   // Sur le jour 1 avec check-in hôtel, lastCoords est déjà à la position de l'hôtel
@@ -1287,7 +1236,6 @@ export async function generateDayWithScheduler(params: {
     if (checkoutH < 8) {
       // Départ trop tôt: skip breakfast, pas le temps
       skipBreakfastLastDay = true;
-      console.log(`[Jour ${dayNumber}] Checkout à ${checkoutH}h: pas de petit-déjeuner (départ tôt)`);
     } else {
       // Forcer le breakfast tôt: au moins 1h avant checkout
       const latestBreakfastStart = new Date(lastDayCheckoutTime!.getTime() - 60 * 60 * 1000);
@@ -1296,7 +1244,6 @@ export async function generateDayWithScheduler(params: {
       if (scheduler.getCurrentTime() <= breakfastTarget) {
         scheduler.advanceTo(breakfastTarget);
       }
-      console.log(`[Jour ${dayNumber}] Breakfast forcé avant checkout à ${checkoutH}h`);
     }
   }
 
@@ -1312,7 +1259,6 @@ export async function generateDayWithScheduler(params: {
     if (breakfastItem) {
       if (hotelHasBreakfast) {
         // Petit-déjeuner à l'hôtel (inclus dans le prix)
-        console.log(`[Jour ${dayNumber}] 🍳 Petit-déjeuner INCLUS à l'hôtel ${accommodation?.name}`);
         items.push(schedulerItemToTripItem(breakfastItem, dayNumber, orderIndex++, {
           title: `Petit-déjeuner à l'hôtel`,
           description: `Inclus dans le prix de l'hôtel | ${accommodation?.name}`,
@@ -1398,7 +1344,6 @@ export async function generateDayWithScheduler(params: {
     for (const attraction of morningAttractions) {
       // ANTI-DOUBLON: Skip si déjà utilisée (dans n'importe quel jour du voyage)
       if (tripUsedAttractionIds.has(attraction.id)) {
-        console.log(`[Jour ${dayNumber}] Skip "${attraction.name}": déjà utilisée dans le voyage`);
         continue;
       }
 
@@ -1410,7 +1355,6 @@ export async function generateDayWithScheduler(params: {
           name: attraction.name,
         });
         if (!locationValidation.valid) {
-          console.log(`[LocationTracker] Skip "${attraction.name}": ${locationValidation.reason}`);
           continue;
         }
       }
@@ -1421,7 +1365,6 @@ export async function generateDayWithScheduler(params: {
       const lunchTime = parseTime(date, shouldHaveLunch ? '12:00' : '12:30');
       if (scheduler.getCurrentTime().getTime() + 30 * 60 * 1000 + attraction.duration * 60 * 1000 > lunchTime.getTime()) {
         // CORRIGÉ: continue au lieu de break pour essayer les autres attractions (plus courtes)
-        console.log(`[Jour ${dayNumber}] Skip matin "${attraction.name}": trop longue (${attraction.duration}min) avant déjeuner`);
         continue;
       }
 
@@ -1441,14 +1384,12 @@ export async function generateDayWithScheduler(params: {
     // Verifier que le lieu sera encore ouvert quand on aura fini (avec marge de 30min)
     const potentialEndTime = new Date(actualStartTime.getTime() + attraction.duration * 60 * 1000);
     if (potentialEndTime > safeCloseTime) {
-      console.log(`[Planning] Skip "${attraction.name}": ferme a ${formatScheduleTime(closeTime)} (dernière entrée ${formatScheduleTime(safeCloseTime)}), on finirait a ${formatScheduleTime(potentialEndTime)}`);
       continue;
     }
 
     // Budget check: skip if activity costs more than remaining budget
     const activityCost = (attraction.estimatedCost || 0) * (preferences.groupSize || 1);
     if (activityCost > 0 && budgetTracker && !budgetTracker.canAfford('activities', activityCost)) {
-      console.log(`[Jour ${dayNumber}] Skip "${attraction.name}": coût ${activityCost}€ dépasse le budget restant`);
       continue;
     }
 
@@ -1507,8 +1448,6 @@ export async function generateDayWithScheduler(params: {
     const timeBeforeLunchMin = gapFillMorningLimitH * 60 + gapFillMorningLimitM - (currentHourBeforeLunch * 60 + currentMinBeforeLunch);
 
     if (timeBeforeLunchMin > 60) {
-      console.log(`[Jour ${dayNumber}] ${Math.round(timeBeforeLunchMin / 60)}h de temps libre avant déjeuner - tentative de remplissage`);
-
       // Chercher des attractions pas encore utilisées : d'abord dans la sélection du jour, puis allAttractions
       const unusedFromDay = attractions.filter(a => !tripUsedAttractionIds.has(a.id));
       const unusedFromAll = allAttractions
@@ -1529,7 +1468,6 @@ export async function generateDayWithScheduler(params: {
 
         if (estimatedEndTimeMorning > lunchTime) {
           // CORRIGÉ: continue au lieu de break pour essayer les autres attractions (plus courtes)
-          console.log(`[Jour ${dayNumber}] Skip "${attraction.name}": trop longue (${attraction.duration}min) avant déjeuner`);
           continue;
         }
 
@@ -1579,7 +1517,6 @@ export async function generateDayWithScheduler(params: {
             dataReliability: attraction.dataReliability || 'estimated',
           }));
           lastCoords = attractionCoordsMorning;
-          console.log(`[Jour ${dayNumber}] Attraction matin supplémentaire ajoutée: ${attraction.name}`);
         }
       }
     }
@@ -1647,10 +1584,8 @@ export async function generateDayWithScheduler(params: {
         }
         scheduler.advanceTo(lunchEndTime);
         lunchWasInserted = true;
-        console.log(`[Jour ${dayNumber}] Déjeuner ajouté à ${lunchStartTime.toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'})}-${lunchEndTime.toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'})}`);
       } else {
         // Fallback: insertFixedItem a échoué (conflit), essayer avec des créneaux alternatifs
-        console.log(`[Jour ${dayNumber}] insertFixedItem déjeuner échoué, tentative créneaux alternatifs...`);
         const fallbackSlots = ['12:15', '12:45', '13:15', '13:45', '14:00'];
         let lunchInserted = false;
         for (const slot of fallbackSlots) {
@@ -1701,7 +1636,6 @@ export async function generateDayWithScheduler(params: {
               lastCoords = restaurantCoords;
             }
             scheduler.advanceTo(fallbackEnd);
-            console.log(`[Jour ${dayNumber}] Déjeuner fallback ajouté à ${slot}`);
             lunchInserted = true;
             lunchWasInserted = true;
             break;
@@ -1756,17 +1690,13 @@ export async function generateDayWithScheduler(params: {
                 lastCoords = restaurantCoords;
               }
               lunchWasInserted = true;
-              console.log(`[Jour ${dayNumber}] Déjeuner cursor-based ajouté à ${formatScheduleTime(cursorLunchItem.slot.start)}`);
             } else {
-              console.log(`[Jour ${dayNumber}] Déjeuner cursor-based trop tardif (${formatScheduleTime(cursorLunchItem.slot.start)}), abandonné`);
             }
           } else {
-            console.log(`[Jour ${dayNumber}] Impossible d'insérer le déjeuner (conflit — probablement transport en cours)`);
           }
         }
       }
     } else {
-      console.log(`[Jour ${dayNumber}] Fenêtre déjeuner dépassée (curseur à ${cursorNow.toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'})})`);
     }
   }
 
@@ -1776,7 +1706,6 @@ export async function generateDayWithScheduler(params: {
   if (shouldHaveLunch && !lunchWasInserted) {
     const lastResortLimit = parseTime(date, '15:30');
     if (scheduler.getCurrentTime() < lastResortLimit) {
-      console.log(`[Jour ${dayNumber}] ⚠ DERNIER RECOURS: insertion déjeuner au cursor (${formatScheduleTime(scheduler.getCurrentTime())})`);
       const lastResortLunch = scheduler.addItem({
         id: generateId(),
         title: 'Déjeuner',
@@ -1819,10 +1748,8 @@ export async function generateDayWithScheduler(params: {
           lastCoords = restaurantCoords;
         }
         lunchWasInserted = true;
-        console.log(`[Jour ${dayNumber}] ✅ Déjeuner dernier recours ajouté à ${formatScheduleTime(lastResortLunch.slot.start)}`);
       }
     } else {
-      console.log(`[Jour ${dayNumber}] ⚠ Impossible d'insérer le déjeuner: curseur déjà à ${formatScheduleTime(scheduler.getCurrentTime())} (> 15:30)`);
     }
   }
 
@@ -1839,7 +1766,6 @@ export async function generateDayWithScheduler(params: {
   for (const attraction of afternoonAttractions) {
     // ANTI-DOUBLON: Skip si déjà utilisée dans n'importe quel jour du voyage
     if (tripUsedAttractionIds.has(attraction.id)) {
-      console.log(`[Jour ${dayNumber}] Skip "${attraction.name}": déjà utilisée dans le voyage`);
       continue;
     }
 
@@ -1849,7 +1775,6 @@ export async function generateDayWithScheduler(params: {
       name: attraction.name,
     });
     if (!locationValidation.valid) {
-      console.log(`[LocationTracker] Skip "${attraction.name}": ${locationValidation.reason}`);
       continue;
     }
 
@@ -1859,7 +1784,6 @@ export async function generateDayWithScheduler(params: {
 
     if (scheduler.getCurrentTime().getTime() + 30 * 60 * 1000 + attraction.duration * 60 * 1000 > maxTime.getTime()) {
       // CORRIGÉ: continue au lieu de break pour essayer les autres attractions (plus courtes)
-      console.log(`[Jour ${dayNumber}] Skip "${attraction.name}": pas assez de temps (${attraction.duration}min)`);
       continue;
     }
 
@@ -1879,7 +1803,6 @@ export async function generateDayWithScheduler(params: {
 
     // GUARD: Si on arrive APRÈS la fermeture, skip immédiatement
     if (actualStartTime >= closeTime) {
-      console.log(`[Planning] Skip "${attraction.name}": arrive à ${formatScheduleTime(actualStartTime)} mais ferme à ${formatScheduleTime(closeTime)}`);
       continue;
     }
 
@@ -1888,14 +1811,12 @@ export async function generateDayWithScheduler(params: {
 
     // Vérifier que le lieu sera encore ouvert quand on aura fini (avec marge de 30min)
     if (potentialEndTime > safeCloseTime) {
-      console.log(`[Planning] Skip "${attraction.name}": ferme a ${formatScheduleTime(closeTime)} (dernière entrée ${formatScheduleTime(safeCloseTime)}), on finirait a ${formatScheduleTime(potentialEndTime)}`);
       continue;
     }
 
     // Budget check: skip if activity costs more than remaining budget
     const activityCostPM = (attraction.estimatedCost || 0) * (preferences.groupSize || 1);
     if (activityCostPM > 0 && budgetTracker && !budgetTracker.canAfford('activities', activityCostPM)) {
-      console.log(`[Jour ${dayNumber}] Skip "${attraction.name}": coût ${activityCostPM}€ dépasse le budget restant`);
       continue;
     }
 
@@ -1952,8 +1873,6 @@ export async function generateDayWithScheduler(params: {
   const timeBeforeDinnerMin = timeBeforeBoundaryMs / (1000 * 60);
 
   if (timeBeforeDinnerMin > 60) {
-    console.log(`[Jour ${dayNumber}] ${Math.round(timeBeforeDinnerMin / 60)}h de temps libre avant dîner - tentative de remplissage avec attractions supplémentaires`);
-
     // Smart gap filling: use allAttractions but filter by proximity + diversity
     const dayTypes = new Set(attractions.filter(a => tripUsedAttractionIds.has(a.id)).map(a => a.type));
     const dayHasReligious = attractions.some(a => tripUsedAttractionIds.has(a.id) && /church|cathedral|basilica|chapel|mosque|synagogue|temple|shrine/i.test(a.name));
@@ -1989,8 +1908,6 @@ export async function generateDayWithScheduler(params: {
         const distB = calculateDistance(lastCoords.lat, lastCoords.lng, b.latitude || 0, b.longitude || 0);
         return distA - distB;
       });
-      console.log(`[Jour ${dayNumber}] ${unusedAttractions.length} attractions non utilisées disponibles pour remplissage`);
-
       for (const attraction of unusedAttractions) {
         if (gapFillAdded >= MAX_GAP_FILL) break;
         // Vérifier qu'on a le temps avant la borne (min(dayEnd, 19:00))
@@ -1999,7 +1916,6 @@ export async function generateDayWithScheduler(params: {
 
         if (estimatedEndTime > gapFillBoundary) {
           // CORRIGÉ: continue au lieu de break pour essayer les autres attractions (plus courtes)
-          console.log(`[Jour ${dayNumber}] Skip "${attraction.name}": trop longue (${attraction.duration}min) avant borne ${formatScheduleTime(gapFillBoundary)}`);
           continue;
         }
 
@@ -2015,13 +1931,11 @@ export async function generateDayWithScheduler(params: {
 
         // GUARD: Si on arrive APRÈS la fermeture, skip immédiatement
         if (actualStartTime >= closeTime) {
-          console.log(`[Jour ${dayNumber}] Skip "${attraction.name}": arrive à ${formatScheduleTime(actualStartTime)} mais ferme à ${formatScheduleTime(closeTime)}`);
           continue;
         }
 
         const potentialEndTime = new Date(actualStartTime.getTime() + attraction.duration * 60 * 1000);
         if (potentialEndTime > safeCloseTime) {
-          console.log(`[Jour ${dayNumber}] Skip "${attraction.name}": ferme trop tôt`);
           continue;
         }
 
@@ -2069,11 +1983,9 @@ export async function generateDayWithScheduler(params: {
             dataReliability: attraction.dataReliability || 'estimated',
           }));
           lastCoords = attractionCoords;
-          console.log(`[Jour ${dayNumber}] Attraction supplémentaire ajoutée: ${attraction.name}`);
         }
       }
     } else {
-      console.log(`[Jour ${dayNumber}] Pas d'attractions supplémentaires disponibles - temps libre`);
     }
   }
 
@@ -2089,8 +2001,6 @@ export async function generateDayWithScheduler(params: {
   const tooLateForDinner = currentTimeForDinner >= parseTime(date, '22:00');
   // Dernier jour: autoriser le dîner si la journée finit assez tard (vol/transport tard)
   const shouldAddDinner = daySupportsDinner && canHaveDinner && !tooLateForDinner;
-
-  console.log(`[Jour ${dayNumber}] Check dîner: heure=${currentDinnerHour}h, endHour=${endHour}, daySupports=${daySupportsDinner}, canFit=${canHaveDinner}, tooLate=${tooLateForDinner}, isLastDay=${isLastDay}, shouldAdd=${shouldAddDinner}`);
 
   if (shouldAddDinner) {
     // Forcer le dîner à commencer à 19h minimum (pas avant, restaurants fermés + gens pas faim)
@@ -2156,14 +2066,11 @@ export async function generateDayWithScheduler(params: {
   // Sauf si l'utilisateur a explicitement demandé "nightlife" - dans ce cas on ajoute UNE activité nocturne
   const currentTimeAfterDinnerCheck = scheduler.getCurrentTime();
   const hoursAfterDinner = currentTimeAfterDinnerCheck.getHours();
-  console.log(`[Jour ${dayNumber}] Après dîner: ${hoursAfterDinner}h, hasNightlife: ${hasNightlife}, isLastDay: ${isLastDay}`);
-
   // Activité nocturne UNIQUEMENT si nightlife demandé explicitement
   if (hasNightlife && !isLastDay && hoursAfterDinner >= 20 && hoursAfterDinner < 23) {
     const canFitNightlife = scheduler.canFit(90, 15);
 
     if (canFitNightlife) {
-      console.log(`[Jour ${dayNumber}] Ajout d'une activité nocturne (nightlife explicitement demandé)`);
       // Note: Ces activités sont génériques mais acceptables car l'utilisateur a demandé "nightlife"
       // TODO: Remplacer par des vrais bars/clubs récupérés via SerpAPI
     }
@@ -2226,8 +2133,6 @@ export async function generateDayWithScheduler(params: {
       // Utiliser les heures d'affichage si disponibles (heures locales de l'aéroport)
       const returnFlightStartTime = returnFlight.departureTimeDisplay || formatTime(flightDeparture);
       const returnFlightEndTime = returnFlight.arrivalTimeDisplay || formatTime(flightArrival);
-
-      console.log(`[AI] Vol retour ${returnFlight.flightNumber}: ${returnFlightStartTime} - ${returnFlightEndTime}`);
 
       const flightItem = scheduler.insertFixedItem({
         id: generateId(),
@@ -2334,7 +2239,6 @@ export async function generateDayWithScheduler(params: {
           }
         } else {
           // Vol retour overnight: le parking sera récupéré le lendemain (pas dans ce voyage)
-          console.log(`[Jour ${dayNumber}] Vol retour overnight - récupération parking le lendemain (hors voyage)`);
         }
       }
 
@@ -2366,12 +2270,18 @@ export async function generateDayWithScheduler(params: {
         };
       }
 
-      // Transport retour — horaires réels si disponibles, sinon 14:00 + duration
+      // Transport retour — vérifier si les transitLegs correspondent au jour retour
+      // Les transitLegs peuvent être ceux de l'aller (dates différentes), dans ce cas on utilise le timing estimé
       let transportStart: Date;
       let transportEnd: Date;
-      if (groundTransport.transitLegs?.length) {
-        const firstLeg = groundTransport.transitLegs[0];
-        const lastLeg = groundTransport.transitLegs[groundTransport.transitLegs.length - 1];
+      const hasReturnDateLegs = groundTransport.transitLegs?.length &&
+        (() => {
+          const legDate = new Date(groundTransport.transitLegs![0].departure);
+          return legDate.toDateString() === date.toDateString();
+        })();
+      if (hasReturnDateLegs) {
+        const firstLeg = groundTransport.transitLegs![0];
+        const lastLeg = groundTransport.transitLegs![groundTransport.transitLegs!.length - 1];
         const realDep = new Date(firstLeg.departure);
         const realArr = new Date(lastLeg.arrival);
         transportStart = new Date(realDep.getTime() - 30 * 60 * 1000);
@@ -2390,9 +2300,10 @@ export async function generateDayWithScheduler(params: {
           let stationCoords = cityCenter;
           let stationName = 'la gare';
           if (groundTransport.transitLegs?.length) {
-            const firstLeg = groundTransport.transitLegs[0];
-            if (firstLeg.from) {
-              stationName = firstLeg.from;
+            // Pour le retour, la gare de départ est la destination d'arrivée de l'aller (dernière leg)
+            const lastLegOfOutbound = groundTransport.transitLegs[groundTransport.transitLegs.length - 1];
+            if (lastLegOfOutbound.to) {
+              stationName = lastLegOfOutbound.to;
             }
           }
 
@@ -2423,7 +2334,6 @@ export async function generateDayWithScheduler(params: {
                 googleMapsUrl,
               }));
               lastCoords = stationCoords;
-              console.log(`[Jour ${dayNumber}] Transfert vers ${stationName} ajouté: ${formatScheduleTime(transferStartTime)}-${formatScheduleTime(transferEndTime)}`);
             }
           }
         }
@@ -2488,7 +2398,15 @@ export async function generateDayWithScheduler(params: {
           longitude: cityCenter.lng,
           estimatedCost: groundTransport.totalPrice,
           bookingUrl: returnBookingUrl,
-          transitLegs: groundTransport.transitLegs,
+          transitLegs: groundTransport.transitLegs?.length
+            ? groundTransport.transitLegs.slice().reverse().map(leg => ({
+                ...leg,
+                from: leg.to,
+                to: leg.from,
+                departure: '',  // Timestamps de l'aller, pas valides pour le retour
+                arrival: '',
+              }))
+            : undefined,
           transitDataSource: groundTransport.dataSource,
           priceRange: groundTransport.priceRange,
         }));
@@ -2548,7 +2466,6 @@ export async function generateDayWithScheduler(params: {
       if (!protectedTypes.includes(item.type)) {
         // Supprimer si AVANT le départ vers l'aéroport (on est encore à l'origine)
         if (item.slot.start < airportArrivalTime) {
-          console.log(`[Jour ${dayNumber}] Suppression "${item.title}" (${formatScheduleTime(item.slot.start)}) - activité à l'origine avant départ aéroport`);
           itemsRemoved++;
         }
         // OU supprimer si APRÈS le vol mais AVANT l'arrivée réelle + transfert (impossible d'être là)
@@ -2556,7 +2473,6 @@ export async function generateDayWithScheduler(params: {
           // Vol court: vérifier que l'item est APRÈS l'arrivée + transfert
           const minActivityTime = new Date(flightArr.getTime() + 90 * 60 * 1000); // arrivée + 1h30
           if (item.slot.start < minActivityTime) {
-            console.log(`[Jour ${dayNumber}] Suppression "${item.title}" (${formatScheduleTime(item.slot.start)}) - avant arrivée à destination (${formatScheduleTime(minActivityTime)})`);
             itemsRemoved++;
           }
         }
@@ -2568,25 +2484,16 @@ export async function generateDayWithScheduler(params: {
     if (!isOvernight) {
       const arrivalTime = new Date(outboundFlight.arrivalTime);
       const minActivityTime = new Date(arrivalTime.getTime() + 90 * 60 * 1000); // arrivée + 1h30
-      const removed = scheduler.removeItemsBefore(minActivityTime, protectedTypes);
-      if (removed > 0) {
-        console.log(`[Jour ${dayNumber}] ${removed} item(s) supprimé(s) car planifiés avant l'arrivée effective à destination`);
-      }
+      scheduler.removeItemsBefore(minActivityTime, protectedTypes);
     } else {
       // Vol overnight: le jour 1 ne contient QUE la logistique de départ
       // Supprimer TOUT ce qui n'est pas logistique car on n'arrive que le lendemain
-      const removed = scheduler.removeItemsBefore(new Date(dayEnd.getTime() + 24 * 60 * 60 * 1000), protectedTypes);
-      if (removed > 0) {
-        console.log(`[Jour ${dayNumber}] Vol overnight - ${removed} item(s) non-logistique supprimé(s)`);
-      }
+      scheduler.removeItemsBefore(new Date(dayEnd.getTime() + 24 * 60 * 60 * 1000), protectedTypes);
     }
   }
 
   // Étape 2: Supprimer les items en conflit (chevauchements)
-  const conflictsRemoved = scheduler.removeConflicts();
-  if (conflictsRemoved > 0) {
-    console.log(`[Jour ${dayNumber}] ${conflictsRemoved} conflit(s) résolu(s) par suppression`);
-  }
+  scheduler.removeConflicts();
 
   // Validation finale (devrait être propre maintenant)
   const validation = scheduler.validate();
@@ -2613,15 +2520,10 @@ export async function generateDayWithScheduler(params: {
         if (protectedTypes.has(i.type)) return true;
         const itemStartMinutes = parseTime(date, i.startTime).getTime();
         if (itemStartMinutes >= returnStartMinutes) {
-          console.log(`[Jour ${dayNumber}] ⚠ Suppression "${i.title}" (${i.startTime}) — après transport retour (${returnItem.startTime})`);
           return false;
         }
         return true;
       });
-      const removed = beforeFilter - filteredItems.length;
-      if (removed > 0) {
-        console.log(`[Jour ${dayNumber}] 🛡 Filtre sécurité: ${removed} item(s) supprimé(s) après transport retour`);
-      }
     }
   }
 
@@ -2659,10 +2561,6 @@ export async function generateDayWithScheduler(params: {
 
     return true;
   });
-  if (filteredItems.length < beforeSanity) {
-    console.log(`[Jour ${dayNumber}] 🛡 Filtre sanity: ${beforeSanity - filteredItems.length} item(s) avec horaires invalides supprimé(s)`);
-  }
-
   // === ENRICHIR LES ITEMS AVEC DONNÉES DE TRANSIT ===
   // Au lieu de créer des blocs "Trajet vers X" séparés, on enrichit chaque item
   // avec distanceFromPrevious, transportToPrevious, timeFromPrevious.
@@ -2686,7 +2584,42 @@ export async function generateDayWithScheduler(params: {
     console.warn(`[Jour ${dayNumber}] ⚠️ Seulement ${activityCount} activités (minimum recommandé: 3)`);
   }
 
-  return { items: sortedItems, lateFlightForNextDay };
+  // Post-traitement: corriger les labels de repas selon l'heure effective
+  const itemsToRemove = new Set<number>();
+  for (let i = 0; i < sortedItems.length; i++) {
+    const item = sortedItems[i];
+    if (item.type === 'restaurant') {
+      const hour = parseInt(item.startTime.split(':')[0] || '12', 10);
+      // "Déjeuner" planifié après 17h → "Dîner"
+      if (item.title === 'Déjeuner' && hour >= 17) {
+        item.title = 'Dîner';
+      }
+      // "Dîner" planifié avant 17h → "Déjeuner"
+      if (item.title === 'Dîner' && hour < 17 && hour >= 11) {
+        item.title = 'Déjeuner';
+      }
+      // Vérifier les horaires d'ouverture depuis la description (pattern "de Xh à Yh" ou "Xh-Yh")
+      if (item.description) {
+        const closingMatch = item.description.match(/(?:de\s+\d+h\s*(?:\d+)?\s*(?:à|a)\s*|jusqu'à\s*)(\d+)h\s*(\d+)?/i);
+        if (closingMatch) {
+          const closingHour = parseInt(closingMatch[1], 10);
+          if (hour >= closingHour) {
+            console.warn(`[Jour ${dayNumber}] ⚠️ "${item.title}" planifié à ${item.startTime} mais ferme à ${closingHour}h — suppression`);
+            itemsToRemove.add(i);
+          }
+        }
+      }
+    }
+  }
+  // Supprimer les items marqués (restaurants hors horaires)
+  const finalItems = itemsToRemove.size > 0
+    ? sortedItems.filter((_, idx) => !itemsToRemove.has(idx))
+    : sortedItems;
+  if (itemsToRemove.size > 0) {
+    finalItems.forEach((item, idx) => { item.orderIndex = idx; });
+  }
+
+  return { items: finalItems.length > 0 ? finalItems : sortedItems, lateFlightForNextDay };
 
 }
 
@@ -2737,8 +2670,6 @@ async function enrichItemsWithTransitData(
   }
 
   if (pairs.length === 0) return;
-
-  console.log(`[Jour ${dayNumber}] ${pairs.length} paires à enrichir avec données transit`);
 
   // Batch les appels getDirections (4 simultanés max)
   const BATCH_SIZE = 4;
@@ -2793,8 +2724,6 @@ async function enrichItemsWithTransitData(
         next.googleMapsUrl = directions.googleMapsUrl;
       }
 
-      const distStr = distance < 1 ? `${Math.round(distance * 1000)}m` : `${distance.toFixed(1)}km`;
-      console.log(`[Jour ${dayNumber}] Enrichi "${next.title}": ${distStr}, ${Math.round(directions.duration)}min (${next.transportToPrevious})`);
     }
 
     // Pause entre les batches (200ms) pour ne pas surcharger les APIs

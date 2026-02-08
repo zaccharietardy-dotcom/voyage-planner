@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Card, CardContent } from '@/components/ui/card';
@@ -50,6 +51,23 @@ export default function PlanPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [preferences, setPreferences] = useState<Partial<TripPreferences>>(DEFAULT_PREFERENCES);
   const [preferencesApplied, setPreferencesApplied] = useState(false);
+  const directionRef = useRef(1); // 1 = forward, -1 = backward
+
+  // Animation variants for step transitions
+  const stepVariants = {
+    enter: (dir: number) => ({
+      x: dir > 0 ? 80 : -80,
+      opacity: 0,
+    }),
+    center: {
+      x: 0,
+      opacity: 1,
+    },
+    exit: (dir: number) => ({
+      x: dir > 0 ? -80 : 80,
+      opacity: 0,
+    }),
+  };
 
   // Function to apply user preferences to trip form
   const applyUserPreferences = () => {
@@ -140,12 +158,14 @@ export default function PlanPage() {
 
   const handleNext = () => {
     if (currentStep < 5) {
+      directionRef.current = 1;
       setCurrentStep(currentStep + 1);
     }
   };
 
   const handleBack = () => {
     if (currentStep > 1) {
+      directionRef.current = -1;
       setCurrentStep(currentStep - 1);
     }
   };
@@ -329,25 +349,50 @@ export default function PlanPage() {
             {STEPS.map((step) => (
               <button
                 key={step.id}
-                onClick={() => step.id < currentStep && setCurrentStep(step.id)}
+                onClick={() => {
+                  if (step.id < currentStep) {
+                    directionRef.current = -1;
+                    setCurrentStep(step.id);
+                  }
+                }}
                 disabled={step.id > currentStep}
                 className={cn(
-                  'flex flex-col items-center gap-1 transition-all',
-                  step.id === currentStep && 'scale-110',
+                  'relative flex flex-col items-center gap-1 transition-all',
                   step.id < currentStep && 'cursor-pointer opacity-70 hover:opacity-100',
                   step.id > currentStep && 'opacity-40 cursor-not-allowed'
                 )}
               >
-                <span className="text-2xl">{step.icon}</span>
-                <span className="text-xs font-medium hidden sm:block">{step.title}</span>
+                {step.id === currentStep && (
+                  <motion.div
+                    layoutId="step-active-pill"
+                    className="absolute -inset-1.5 rounded-xl bg-primary/10 border border-primary/20"
+                    transition={{ type: 'spring', stiffness: 350, damping: 30 }}
+                  />
+                )}
+                <span className="relative text-2xl">{step.icon}</span>
+                <span className="relative text-xs font-medium hidden sm:block">{step.title}</span>
               </button>
             ))}
           </div>
         </div>
 
         {/* Form card */}
-        <Card className="shadow-lg">
-          <CardContent className="p-6 sm:p-8">{renderStep()}</CardContent>
+        <Card className="shadow-lg overflow-hidden">
+          <CardContent className="p-6 sm:p-8">
+            <AnimatePresence mode="wait" custom={directionRef.current}>
+              <motion.div
+                key={currentStep}
+                custom={directionRef.current}
+                variants={stepVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
+              >
+                {renderStep()}
+              </motion.div>
+            </AnimatePresence>
+          </CardContent>
         </Card>
 
         {/* Navigation buttons */}

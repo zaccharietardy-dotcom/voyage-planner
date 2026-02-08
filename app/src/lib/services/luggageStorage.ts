@@ -93,14 +93,11 @@ export async function searchLuggageStorage(
     const cached = cache[cacheKey];
     const age = Date.now() - new Date(cached.fetchedAt).getTime();
     if (age < CACHE_TTL) {
-      console.log(`[LuggageStorage] Cache hit pour ${city}`);
       return cached.storages;
     }
   }
 
   // Recherche via Claude
-  console.log(`[LuggageStorage] Recherche consignes a ${city}...`);
-
   const prompt = `Tu es un assistant de voyage. Trouve 5-8 VRAIES consignes a bagages a ${city}.
 
 Inclus:
@@ -188,7 +185,6 @@ Reponds UNIQUEMENT avec un JSON valide:
     };
     saveCache(cache);
 
-    console.log(`[LuggageStorage] ${storages.length} consignes trouvees pour ${city}`);
     return storages;
   } catch (error) {
     console.error('[LuggageStorage] Erreur recherche:', error);

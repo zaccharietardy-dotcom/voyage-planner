@@ -134,7 +134,6 @@ export async function searchAirbnbListings(
 
   try {
     // Étape 1: Résoudre la destination
-    console.log(`[Airbnb] Résolution destination: "${destination}"...`);
     const place = await resolveDestinationId(destination);
 
     if (!place) {
@@ -142,18 +141,13 @@ export async function searchAirbnbListings(
       return generateFallbackAirbnb(destination, checkIn, checkOut, options, options.cityCenter);
     }
 
-    console.log(`[Airbnb] Place ID: ${place.id} (${place.name})`);
-
     // Étape 2: Rechercher les propriétés via v2
-    console.log(`[Airbnb] Recherche propriétés (${checkIn} → ${checkOut})...`);
     const listings = await searchByPlaceId(place.id, checkIn, checkOut, options);
 
     if (listings.length === 0) {
       console.warn('[Airbnb] Aucun résultat, fallback');
       return generateFallbackAirbnb(destination, checkIn, checkOut, options, options.cityCenter);
     }
-
-    console.log(`[Airbnb] ${listings.length} propriétés trouvées`);
 
     const nights = Math.max(1, Math.ceil(
       (new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (1000 * 60 * 60 * 24)
@@ -208,7 +202,6 @@ export async function searchAirbnbListings(
     if (options.requireKitchen) {
       const entireHomes = accommodations.filter(a => a.type === 'apartment');
       if (entireHomes.length > 0) {
-        console.log(`[Airbnb] ✅ ${entireHomes.length} logements entiers (avec cuisine probable)`);
         filtered = entireHomes;
       }
     }
@@ -218,18 +211,14 @@ export async function searchAirbnbListings(
 
     // Log le range de prix trouvé
     if (filtered.length > 0) {
-      console.log(`[Airbnb] Prix: ${filtered[0].pricePerNight}€ - ${filtered[filtered.length - 1].pricePerNight}€/nuit`);
       if (options.maxPricePerNight) {
         const affordable = filtered.filter(a => a.pricePerNight <= options.maxPricePerNight! * 1.5);
         if (affordable.length > 0) {
-          console.log(`[Airbnb] ${affordable.length} logements ≤ ${Math.round(options.maxPricePerNight * 1.5)}€/nuit`);
           return affordable;
         }
-        console.log(`[Airbnb] Aucun logement ≤ ${options.maxPricePerNight}€, on retourne les moins chers`);
       }
     }
 
-    console.log(`[Airbnb] ✅ ${filtered.length} logements valides`);
     return filtered;
   } catch (error) {
     console.error('[Airbnb] Erreur:', error);
@@ -322,7 +311,6 @@ function generateFallbackAirbnb(
   _options: AirbnbSearchOptions,
   _cityCenter?: { lat: number; lng: number },
 ): Accommodation[] {
-  console.log(`[Airbnb] Fallback désactivé - pas de génération de faux Airbnb`);
   // Retourne vide pour que Booking.com soit utilisé à la place
   return [];
 }

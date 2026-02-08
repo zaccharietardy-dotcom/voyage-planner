@@ -116,7 +116,6 @@ export function useRealtimeTrip(tripId: string, userId?: string): UseRealtimeTri
           filter: `id=eq.${tripId}`,
         },
         (payload) => {
-          console.log('Trip updated:', payload);
           const tripData = payload.new.data as Trip;
           // Deserialize dates from raw Postgres JSON
           if (tripData.days) {
@@ -152,7 +151,6 @@ export function useRealtimeTrip(tripId: string, userId?: string): UseRealtimeTri
           filter: `trip_id=eq.${tripId}`,
         },
         async (payload) => {
-          console.log('New proposal:', payload);
           // Recharger les propositions avec les détails de l'auteur
           const response = await fetch(`/api/trips/${tripId}/proposals`);
           if (response.ok) {
@@ -174,7 +172,6 @@ export function useRealtimeTrip(tripId: string, userId?: string): UseRealtimeTri
           filter: `trip_id=eq.${tripId}`,
         },
         async (payload) => {
-          console.log('Proposal updated:', payload);
           // Recharger les propositions
           const response = await fetch(`/api/trips/${tripId}/proposals`);
           if (response.ok) {

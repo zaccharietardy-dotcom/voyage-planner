@@ -169,14 +169,11 @@ export async function GET(request: NextRequest) {
 
   // Normaliser la ville (supporte toutes les langues)
   const normalizedCity = await normalizeCity(destination);
-  console.log(`[API Attractions] Recherche pour "${destination}" → "${normalizedCity.displayName}" (${normalizedCity.confidence})`);
-
   // Si mustSee=true, retourner uniquement les incontournables de la base locale
   if (mustSeeOnly) {
     const localAttractions = getMustSeeAttractions(normalizedCity.displayName);
 
     if (localAttractions.length > 0) {
-      console.log(`[API Attractions] ${localAttractions.length} incontournables trouvés dans la base locale`);
       return NextResponse.json({
         attractions: localAttractions.map(a => ({
           id: a.id,
@@ -194,12 +191,8 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Pas d'attractions locales, on va essayer le cache/Claude
-    console.log(`[API Attractions] Aucune attraction locale pour ${normalizedCity.displayName}, fallback vers cache/Claude`);
+    // Pas d'attractions locales, fallback vers cache/Claude
   }
-
-  // Log pour debug
-  console.log(`[API Attractions] Parameters: mustSeeOnly=${mustSeeOnly}, forceRefresh=${forceRefresh}, types=${typesParam}`);
 
   const types = typesParam ? typesParam.split(',') as ActivityType[] : undefined;
   const normalizedDest = normalizeDestination(destination);
@@ -213,7 +206,6 @@ export async function GET(request: NextRequest) {
     !forceRefresh &&
     new Date().getTime() - new Date(cached.fetchedAt).getTime() < cacheMaxAge
   ) {
-    console.log(`Cache hit pour ${destination} (${cached.attractions.length} attractions)`);
     return NextResponse.json({
       attractions: cached.attractions,
       source: 'cache',
@@ -221,25 +213,20 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  console.log(`Cache miss pour ${destination}, recherche d'attractions...`);
-
   try {
     let attractions: Attraction[] = [];
 
     // Priorite 1: SerpAPI (Google Places) - gratuit 100 req/mois
     if (isSerpApiPlacesConfigured()) {
-      console.log(`[API Attractions] Tentative SerpAPI pour ${destination}...`);
       try {
         attractions = await searchAttractionsWithSerpApi(destination, { limit: 15 });
-        console.log(`[API Attractions] SerpAPI: ${attractions.length} attractions trouvees`);
       } catch (serpError) {
-        console.warn(`[API Attractions] SerpAPI erreur:`, serpError);
+        console.warn('[API Attractions] SerpAPI erreur:', serpError);
       }
     }
 
     // Priorite 2: Claude AI (si SerpAPI echoue ou retourne peu de resultats)
     if (attractions.length < 5) {
-      console.log(`[API Attractions] Fallback vers Claude API...`);
       const claudeAttractions = await fetchAttractionsFromClaude(destination, types);
       // Merger sans doublons
       const existingIds = new Set(attractions.map(a => a.id));
@@ -257,8 +244,6 @@ export async function GET(request: NextRequest) {
       version: 1,
     };
     saveCache(cache);
-
-    console.log(`${attractions.length} attractions trouvées et mises en cache pour ${destination}`);
 
     return NextResponse.json({
       attractions,

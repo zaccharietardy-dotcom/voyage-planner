@@ -83,7 +83,6 @@ export async function createTrackingLink(deepLinkUrl: string): Promise<string | 
   const cacheKey = getCacheKey(deepLinkUrl);
   const cached = readCache(cacheKey);
   if (cached) {
-    console.log(`[Impact] ✅ Cache hit: ${deepLinkUrl.substring(0, 60)}...`);
     return cached;
   }
 
@@ -115,7 +114,6 @@ export async function createTrackingLink(deepLinkUrl: string): Promise<string | 
     const data = await response.json() as { TrackingURL?: string };
 
     if (data.TrackingURL) {
-      console.log(`[Impact API] ✅ Tracking link créé: ${deepLinkUrl.substring(0, 60)}...`);
       writeCache(cacheKey, data.TrackingURL);
       return data.TrackingURL;
     }
@@ -141,8 +139,6 @@ export async function createTrackingLinks(
 
   // Dédupliquer (même route = même URL)
   const uniqueUrls = [...new Set(urls)];
-  console.log(`[Impact] 🔗 Création de ${uniqueUrls.length} tracking links...`);
-
   const promises = uniqueUrls.map(async (url) => {
     const trackingUrl = await createTrackingLink(url);
     if (trackingUrl) {
@@ -151,6 +147,5 @@ export async function createTrackingLinks(
   });
 
   await Promise.all(promises);
-  console.log(`[Impact] ✅ ${results.size}/${uniqueUrls.length} liens trackés créés`);
   return results;
 }

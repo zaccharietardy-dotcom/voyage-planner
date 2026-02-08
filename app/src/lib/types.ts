@@ -642,6 +642,7 @@ export interface ModificationResult {
   warnings: string[];       // Avertissements (conflits potentiels)
   newDays: TripDay[];       // Nouvel état des jours après modification
   rollbackData: TripDay[];  // État avant modification (pour undo)
+  errorInfo?: ChatErrorInfo; // Info d'erreur structurée (quand success === false)
 }
 
 export interface ChatMessage {
@@ -652,6 +653,7 @@ export interface ChatMessage {
   content: string;
   intent?: ModificationIntent | null;
   changesApplied?: TripChange[] | null;
+  errorInfo?: ChatErrorInfo | null;
   createdAt: Date;
 }
 
@@ -662,6 +664,49 @@ export interface ChatResponse {
   previewDays: TripDay[] | null;
   requiresConfirmation: boolean;
   warnings: string[];
+  suggestions?: ContextualSuggestion[];
+  errorInfo?: ChatErrorInfo;
+}
+
+// ============================================
+// Suggestions contextuelles
+// ============================================
+
+export interface ContextualSuggestion {
+  label: string;    // Texte court affiché sur le chip
+  prompt: string;   // Message complet envoyé au chatbot
+  icon?: string;    // Emoji optionnel pour le chip
+}
+
+// ============================================
+// Mémoire conversationnelle
+// ============================================
+
+export interface ConversationContext {
+  recentExchanges: Array<{
+    userMessage: string;
+    assistantReply: string;
+    intent?: string;
+  }>;
+}
+
+// ============================================
+// Erreurs structurées
+// ============================================
+
+export type ChatErrorType =
+  | 'schedule_conflict'
+  | 'budget_exceeded'
+  | 'immutable_item'
+  | 'item_not_found'
+  | 'no_slot_available'
+  | 'constraint_violation'
+  | 'unknown';
+
+export interface ChatErrorInfo {
+  type: ChatErrorType;
+  message: string;
+  alternativeSuggestion?: ContextualSuggestion;
 }
 
 export interface TripConstraint {

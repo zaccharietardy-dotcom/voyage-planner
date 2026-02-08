@@ -16,7 +16,6 @@ const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY?.trim();
 const RAPIDAPI_HOST = 'booking-com15.p.rapidapi.com';
 const RAPIDAPI_BASE_URL = `https://${RAPIDAPI_HOST}/api/v1/hotels`;
 
-console.log(`[RapidAPI Booking] Clé configurée: ${RAPIDAPI_KEY ? '✅ Oui (' + RAPIDAPI_KEY.substring(0, 8) + '...)' : '❌ Non'}`);
 
 export interface BookingHotel {
   id: string;
@@ -63,7 +62,6 @@ async function getDestinationId(city: string): Promise<{ destId: string; destTyp
   const normalizedCity = city.toLowerCase().trim();
   const cached = destIdCache[normalizedCity];
   if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-    console.log(`[RapidAPI Booking] Cache hit: ${city} → ${cached.destId}`);
     return { destId: cached.destId, destType: cached.destType };
   }
 
@@ -95,7 +93,6 @@ async function getDestinationId(city: string): Promise<{ destId: string; destTyp
     if (result) {
       const destId = result.dest_id?.toString() || result.id?.toString();
       const destType = result.dest_type || result.search_type || 'city';
-      console.log(`[RapidAPI Booking] Ville trouvée: ${result.name || result.label || city} (dest_id: ${destId})`);
 
       // Cache
       destIdCache[normalizedCity] = { destId, destType, timestamp: Date.now() };
@@ -203,7 +200,6 @@ async function getHotelBookingUrl(
       // Si l'API échoue mais qu'on a le nom de l'hôtel, utiliser une URL de recherche
       if (hotelName) {
         const searchUrl = `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(hotelName)}&checkin=${checkIn}&checkout=${checkOut}&group_adults=${adults}&no_rooms=1&lang=fr`;
-        console.log(`[RapidAPI Booking] ⚠️ API failed, using search URL for: ${hotelName}`);
         return searchUrl;
       }
       return null;
@@ -213,7 +209,6 @@ async function getHotelBookingUrl(
     const hotelData = data.data || data;
 
     // Log pour debug - voir les champs disponibles dans la réponse
-    console.log(`[RapidAPI Booking] getHotelDetails response keys:`, Object.keys(hotelData || {}).slice(0, 15));
 
     // Chercher le slug dans plusieurs champs possibles
     const slug = hotelData.url
@@ -235,23 +230,19 @@ async function getHotelBookingUrl(
         const baseUrl = slugStr.startsWith('http') ? slugStr : `https://www.booking.com${slugStr.startsWith('/') ? '' : '/'}${slugStr}`;
         // Double-check: l'URL résolue doit être sur booking.com
         if (baseUrl.includes('booking.com') && !baseUrl.includes('facebook') && !baseUrl.includes('blogspot')) {
-          console.log(`[RapidAPI Booking] ✅ URL directe trouvée: ${baseUrl.substring(0, 80)}...`);
           const separator = baseUrl.includes('?') ? '&' : '?';
           return `${baseUrl}${separator}checkin=${checkIn}&checkout=${checkOut}&group_adults=${adults}&no_rooms=1`;
         }
       }
-      console.log(`[RapidAPI Booking] ⚠️ Slug rejeté (pas booking.com): ${slugStr.substring(0, 80)}`);
     }
 
     // Fallback: URL de recherche Booking.com avec le nom de l'hôtel (plus fiable que slug généré)
     if (hotelName) {
       const cc = countryCode || (hotelData.country_code?.toLowerCase()) || 'nl';
       const searchUrl = `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(hotelName)}&dest_type=city&checkin=${checkIn}&checkout=${checkOut}&group_adults=${adults}&no_rooms=1&lang=fr`;
-      console.log(`[RapidAPI Booking] ⚠️ No valid slug, using search URL for: ${hotelName}`);
       return searchUrl;
     }
 
-    console.log(`[RapidAPI Booking] ⚠️ Pas de slug trouvé pour hotel_id=${hotelId}, fallback recherche`);
     return null;
   } catch (error) {
     console.error(`[RapidAPI Booking] Erreur getHotelDetails ${hotelId}:`, error);
@@ -331,7 +322,6 @@ export async function searchHotelsWithBookingApi(
     }
 
     const url = `${RAPIDAPI_BASE_URL}/searchHotels?${params.toString()}`;
-    console.log(`[RapidAPI Booking] Recherche: ${destination}, ${checkIn} → ${checkOut}, ${guests} pers.`);
 
     const response = await fetch(url, {
       headers: {
@@ -456,7 +446,7 @@ export async function searchHotelsWithBookingApi(
         latitude,
         longitude,
         stars,
-        rating: reviewScore,
+        rating: Math.round((reviewScore || 0) * 10) / 10,
         reviewCount,
         pricePerNight,
         totalPrice,
@@ -471,14 +461,9 @@ export async function searchHotelsWithBookingApi(
       };
     });
 
-    console.log(`[RapidAPI Booking] ✅ ${hotels.length} hôtels DISPONIBLES trouvés`);
-    if (hotels.length > 0) {
-      console.log(`[RapidAPI Booking] Premier: ${hotels[0].name} - ${hotels[0].pricePerNight}€/nuit (${hotels[0].stars}⭐)`);
-    }
-
     // Enrichir les hôtels sans adresse avec Google Places
     const enrichedHotels = await Promise.all(
-      hotels.map(hotel => enrichHotelWithGooglePlaces(hotel))
+      hotels.map(hotel => enrichHotelWithGooglePlaces(hotel, destination))
     );
 
     return enrichedHotels;
@@ -493,7 +478,7 @@ export async function searchHotelsWithBookingApi(
  */
 const GOOGLE_PLACES_API_KEY = process.env.GOOGLE_PLACES_API_KEY;
 
-export async function enrichHotelWithGooglePlaces(hotel: BookingHotel): Promise<BookingHotel> {
+export async function enrichHotelWithGooglePlaces(hotel: BookingHotel, destinationCity?: string): Promise<BookingHotel> {
   // Si l'adresse est déjà valide, pas besoin d'enrichir
   if (hotel.address && hotel.address !== 'Adresse non disponible' && !hotel.address.includes('non disponible')) {
     return hotel;
@@ -501,12 +486,10 @@ export async function enrichHotelWithGooglePlaces(hotel: BookingHotel): Promise<
 
   // Si pas de clé Google Places, on ne peut pas enrichir
   if (!GOOGLE_PLACES_API_KEY) {
-    console.log(`[RapidAPI Booking] ⚠️ Pas de clé Google Places pour enrichir ${hotel.name}`);
     return hotel;
   }
 
   try {
-    console.log(`[RapidAPI Booking] 🔍 Enrichissement Google Places pour: ${hotel.name}`);
 
     // Recherche Google Places Text Search
     const searchQuery = `${hotel.name} ${hotel.city || ''} hotel`;
@@ -523,10 +506,32 @@ export async function enrichHotelWithGooglePlaces(hotel: BookingHotel): Promise<
     if (data.results && data.results.length > 0) {
       const place = data.results[0];
 
+      // Valider que le résultat Google Places est dans la bonne ville/pays
+      const addressLower = (place.formatted_address || '').toLowerCase();
+      const cityLower = (hotel.city || '').toLowerCase();
+      const destLower = (destinationCity || '').toLowerCase();
+      const cityInAddress = cityLower && addressLower.includes(cityLower);
+      const destInAddress = destLower && addressLower.includes(destLower);
+
+      // Vérification par distance si coordonnées existantes non-nulles
+      let distanceOk = true;
+      if (place.geometry?.location && hotel.latitude && hotel.longitude) {
+        const dLat = place.geometry.location.lat - hotel.latitude;
+        const dLng = place.geometry.location.lng - hotel.longitude;
+        const approxDistKm = Math.sqrt(dLat * dLat + dLng * dLng) * 111;
+        if (approxDistKm > 50) {
+          distanceOk = false;
+        }
+      }
+
+      if (!cityInAddress && !destInAddress && !distanceOk) {
+        console.warn(`[RapidAPI Booking] ❌ Google Places résultat rejeté pour "${hotel.name}": "${place.formatted_address}" n'est pas dans ${hotel.city || destinationCity}`);
+        return hotel;
+      }
+
       // Mettre à jour l'adresse
       if (place.formatted_address) {
         hotel.address = place.formatted_address;
-        console.log(`[RapidAPI Booking] ✅ Adresse trouvée: ${hotel.address}`);
       }
 
       // Mettre à jour les coordonnées si elles semblent être des fallback (0,0 ou très génériques)
@@ -539,11 +544,8 @@ export async function enrichHotelWithGooglePlaces(hotel: BookingHotel): Promise<
             (Math.abs(hotel.latitude - newLat) > 0.01 && hotel.latitude === Math.round(hotel.latitude * 100) / 100)) {
           hotel.latitude = newLat;
           hotel.longitude = newLng;
-          console.log(`[RapidAPI Booking] ✅ Coordonnées mises à jour: ${newLat}, ${newLng}`);
         }
       }
-    } else {
-      console.log(`[RapidAPI Booking] ⚠️ Aucun résultat Google Places pour ${hotel.name}`);
     }
   } catch (error) {
     console.warn(`[RapidAPI Booking] Erreur enrichissement Google Places:`, error);

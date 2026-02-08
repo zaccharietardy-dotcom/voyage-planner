@@ -280,7 +280,6 @@ function isIslandRouteBlocked(origin: string, destination: string): boolean {
     }
   }
 
-  console.log(`[Transport] ⛔ Route terrestre bloquée: ${origin} → ${destination} (île détectée)`);
   return true; // Île sans connexion terrestre → bloqué
 }
 
@@ -319,8 +318,6 @@ export async function compareTransportOptions(
     params.destCoords.lng
   );
 
-  console.log(`Comparaison transport ${params.origin} → ${params.destination} (${Math.round(distance)} km)`);
-
   // Feasibility check — filtre les modes impossibles
   const feasibility = checkTransportFeasibility(
     params.origin,
@@ -333,7 +330,6 @@ export async function compareTransportOptions(
     feasibility.filter(f => f.feasible).map(f => f.mode)
   );
   const ferryRequired = feasibility.some(f => f.requiresFerry);
-  console.log(`[Transport] Modes faisables: ${[...feasibleModes].join(', ')}${ferryRequired ? ' (ferry requis)' : ''}`);
 
   const options: TransportOption[] = [];
 
@@ -413,8 +409,6 @@ export async function compareTransportOptions(
     }
   }
 
-  console.log(`[Transport] Options générées: ${options.map(o => o.mode).join(', ')}`);
-
   // Calculer les scores
   const scoredOptions = calculateScores(options, params.preferences?.prioritize || 'balanced');
 
@@ -423,7 +417,6 @@ export async function compareTransportOptions(
 
   // Trier par score décroissant
   const sorted = scoredOptions.sort((a, b) => b.score - a.score);
-  console.log(`[Transport] Options finales: ${sorted.map(o => `${o.mode}(${o.score})`).join(', ')}`);
 
   return sorted;
 }
@@ -526,13 +519,10 @@ async function calculateTrainOptionInner(params: TransportSearchParams, distance
   // Toujours chercher la known route pour le priceRange
   const knownRouteForRange = findKnownRoute(params.origin, params.destination);
 
-  console.log(`[Train] calculateTrainOption: ${params.origin} → ${params.destination}, distance: ${Math.round(distance)}km, isHighSpeed: ${isHighSpeed}`);
-
   // Si pas de train direct et distance > 1000km, pas d'option train simple
   if (!isHighSpeed && distance > 1000) {
     const dbResult = await getCheapestTrainPrice(params.origin, params.destination, params.date).catch(() => null);
     if (!dbResult) {
-      console.log(`[Train] Skipping train: no high-speed rail, distance > 1000km, and no DB API result`);
       return null;
     }
     const price = dbResult.price || knownRouteForRange?.price || 0;
@@ -554,12 +544,9 @@ async function calculateTrainOptionInner(params: TransportSearchParams, distance
       operator = dbResult.operator;
       dataSource = 'api';
       dbLegs = dbResult.legs;
-      console.log(`[Train] API result: ${travelTime}min, ${price > 0 ? price + '€' : 'no price'}, ${operator}, ${dbResult.transfers} transfers, ${dbLegs.length} legs`);
-
       if (price === 0) {
         if (knownRouteForRange) {
           price = knownRouteForRange.price;
-          console.log(`[Train] Using known route price as supplement: ${price}€`);
         } else {
           const pricePerKm = isHighSpeed ? PRICE_PER_KM.train_highspeed : PRICE_PER_KM.train_regular;
           price = Math.max(Math.round(distance * pricePerKm), 15);
@@ -579,7 +566,6 @@ async function calculateTrainOptionInner(params: TransportSearchParams, distance
     price = knownRouteForRange.price;
     operator = knownRouteForRange.operator;
     dataSource = 'api';
-    console.log(`[Train] Using known route: ${travelTime}min, ${price}€, ${operator}`);
     return buildTrainOption(params, distance, travelTime, price, operator, dataSource, undefined, knownRouteForRange.priceRange);
   }
 
@@ -929,11 +915,6 @@ function hasDirectHighSpeedRail(origin: string, destination: string): boolean {
 
   const hasFromOrigin = originRoutes.some(city => normalizeCity(city) === normalizedDest);
   const hasFromDest = destRoutes.some(city => normalizeCity(city) === normalizedOrigin);
-
-  console.log(`[Train] Checking high-speed rail: ${origin} (${normalizedOrigin}) → ${destination} (${normalizedDest})`);
-  console.log(`[Train] Routes from ${normalizedOrigin}: ${originRoutes.join(', ')}`);
-  console.log(`[Train] Routes from ${normalizedDest}: ${destRoutes.join(', ')}`);
-  console.log(`[Train] Has direct: ${hasFromOrigin || hasFromDest}`);
 
   return hasFromOrigin || hasFromDest;
 }

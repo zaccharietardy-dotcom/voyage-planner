@@ -235,7 +235,6 @@ async function searchWithGoogle(
       .map((route: GoogleRoute) => parseGoogleRoute(route))
       .filter((j: DBJourney | null): j is DBJourney => j !== null);
 
-    console.log(`[Google Transit] Found ${journeys.length} journeys for ${origin} → ${destination}`);
     return journeys;
   } catch (err) {
     if (err instanceof Error && err.name === 'AbortError') {
@@ -374,7 +373,6 @@ async function searchWithTransitous(
       .map(parseTransitousItinerary)
       .filter((j): j is DBJourney => j !== null);
 
-    console.log(`[Transitous] Found ${journeys.length} journeys for ${origin} → ${destination}`);
     return journeys;
   } catch (err) {
     if (err instanceof Error && err.name === 'AbortError') {
@@ -461,24 +459,19 @@ export async function searchTrainJourneys(
   const cacheKey = `${origin.toLowerCase()}→${destination.toLowerCase()}→${dateStr}`;
   const cached = journeyCache.get(cacheKey);
   if (cached && Date.now() - cached.timestamp < JOURNEY_CACHE_TTL) {
-    console.log(`[TrainSchedule] Cache hit for ${origin} → ${destination}`);
     return cached.data;
   }
 
   // Only search European routes
   if (!isEuropeanCity(origin) || !isEuropeanCity(destination)) {
-    console.log(`[TrainSchedule] Skipping: non-European route (${origin} → ${destination})`);
     return [];
   }
-
-  console.log(`[TrainSchedule] Searching ${origin} → ${destination} on ${dateStr}`);
 
   // 1. Try Google Directions API (mode=transit, transit_mode=rail)
   let journeys = await searchWithGoogle(origin, destination, date);
 
   // 2. Fallback: Transitous / MOTIS API
   if (journeys.length === 0) {
-    console.log(`[TrainSchedule] Google returned nothing, trying Transitous...`);
     journeys = await searchWithTransitous(origin, destination, date, results);
   }
 

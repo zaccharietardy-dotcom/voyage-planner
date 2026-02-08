@@ -84,9 +84,6 @@ class TokenTracker {
 
     this.history.push(log);
 
-    // Log en console pour suivi temps réel
-    console.log(`[TokenTracker] ${operation || 'Request'}: ${inputTokens} in + ${outputTokens} out = ${inputTokens + outputTokens} tokens (~$${totalCost.toFixed(4)})`);
-
     return log;
   }
 
@@ -122,17 +119,7 @@ class TokenTracker {
   printSummary(): void {
     const stats = this.getStats();
 
-    console.log('\n╔════════════════════════════════════════════╗');
-    console.log('║       📊 CONSOMMATION API CLAUDE           ║');
-    console.log('╠════════════════════════════════════════════╣');
-    console.log(`║  Requêtes:        ${stats.totalRequests.toString().padStart(8)}              ║`);
-    console.log(`║  Tokens input:    ${stats.totalInputTokens.toLocaleString().padStart(8)}              ║`);
-    console.log(`║  Tokens output:   ${stats.totalOutputTokens.toLocaleString().padStart(8)}              ║`);
-    console.log(`║  Total tokens:    ${stats.totalTokens.toLocaleString().padStart(8)}              ║`);
-    console.log('╠════════════════════════════════════════════╣');
-    console.log(`║  Coût estimé:     $${stats.estimatedCostUSD.toFixed(4).padStart(7)}              ║`);
-    console.log(`║  Durée session:   ${stats.sessionDurationMinutes.toString().padStart(5)} min             ║`);
-    console.log('╚════════════════════════════════════════════╝\n');
+    // Summary is available via getStats() — no console output
   }
 
   /**
@@ -141,7 +128,6 @@ class TokenTracker {
   reset(): void {
     this.history = [];
     this.sessionStart = new Date();
-    console.log('[TokenTracker] Statistiques réinitialisées');
   }
 
   /**

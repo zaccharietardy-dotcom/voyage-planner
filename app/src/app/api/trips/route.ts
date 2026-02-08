@@ -57,24 +57,16 @@ export async function POST(request: Request) {
 
     const tripData = await request.json();
 
-    // Diagnostic logging
-    console.log('[API/trips] Saving trip for user:', user.id);
-    console.log('[API/trips] TripData keys:', Object.keys(tripData));
-
     // Extract and validate required fields
     const destination = tripData.destination || tripData.preferences?.destination;
     const startDate = tripData.startDate || tripData.preferences?.startDate;
     const durationDays = tripData.durationDays || tripData.preferences?.durationDays;
 
-    console.log('[API/trips] Extracted fields:', { destination, startDate, durationDays });
-
     if (!destination) {
-      console.error('[API/trips] Missing destination');
       return NextResponse.json({ error: 'Destination requise' }, { status: 400 });
     }
 
     if (!startDate) {
-      console.error('[API/trips] Missing startDate');
       return NextResponse.json({ error: 'Date de départ requise' }, { status: 400 });
     }
 
@@ -103,8 +95,6 @@ export async function POST(request: Request) {
       share_code: shareCode,
     };
 
-    console.log('[API/trips] Insert data:', JSON.stringify(insertData, null, 2).substring(0, 500));
-
     // Créer le voyage
     const { data: trip, error: tripError } = await supabase
       .from('trips')
@@ -114,8 +104,6 @@ export async function POST(request: Request) {
 
     if (tripError) {
       console.error('[API/trips] Error creating trip:', tripError);
-      console.error('[API/trips] Error details:', JSON.stringify({ code: tripError.code, details: tripError.details, hint: tripError.hint, message: tripError.message }));
-      // Renvoyer TOUS les détails pour le debug
       return NextResponse.json({
         error: tripError.message,
         code: tripError.code,
@@ -123,8 +111,6 @@ export async function POST(request: Request) {
         hint: tripError.hint,
       }, { status: 500 });
     }
-
-    console.log('[API/trips] Trip created successfully:', trip.id);
 
     // Ajouter le créateur comme membre owner
     await supabase.from('trip_members').insert({

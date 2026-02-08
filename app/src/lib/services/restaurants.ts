@@ -115,7 +115,6 @@ export async function searchRestaurants(params: RestaurantSearchParams): Promise
       });
 
       if (dbRestaurants.length >= limit) {
-        console.log(`[Restaurants] ✅ ${dbRestaurants.length} restaurants trouvés en base locale pour ${destination}`);
 
         // Convertir PlaceData → Restaurant
         const restaurants = dbRestaurants.map(placeToRestaurant);
@@ -157,7 +156,6 @@ export async function searchRestaurants(params: RestaurantSearchParams): Promise
         filtered = filterRestaurantsByCuisine(filtered, destination, { strictMode: true, allowNonLocal: true });
         filtered = filterByForbiddenNames(filtered, destination);
 
-        console.log(`[Restaurants] ${geminiResults.length} restaurants Gemini grounded, ${filtered.length} après filtrage`);
         if (filtered.length > 0) {
           finalRestaurants = filtered.slice(0, limit);
           return applyFinalFilter(finalRestaurants, destination, limit, mealType, dietary);
@@ -190,7 +188,6 @@ export async function searchRestaurants(params: RestaurantSearchParams): Promise
         });
         filtered = filterByForbiddenNames(filtered, destination);
 
-        console.log(`[Restaurants] ${taRestaurants.length} restaurants TripAdvisor, ${filtered.length} après filtrage`);
         if (filtered.length > 0) {
           finalRestaurants = filtered.slice(0, limit);
           return applyFinalFilter(finalRestaurants, destination, limit, mealType, dietary);
@@ -226,7 +223,6 @@ export async function searchRestaurants(params: RestaurantSearchParams): Promise
         // Filtrer par nom (ex: "Chino Peking")
         filtered = filterByForbiddenNames(filtered, destination);
 
-        console.log(`[Restaurants] ${serpRestaurants.length} restaurants trouvés via SerpAPI, ${filtered.length} après filtrage cuisine+nom`);
         if (filtered.length > 0) {
           finalRestaurants = filtered.slice(0, limit);
           return applyFinalFilter(finalRestaurants, destination, limit, mealType, dietary);
@@ -249,7 +245,6 @@ export async function searchRestaurants(params: RestaurantSearchParams): Promise
         filtered = filterByForbiddenNames(filtered, destination);
       }
       if (filtered.length > 0) {
-        console.log(`[Restaurants] ${filtered.length} via Google Places (après filtre cuisine+nom)`);
         finalRestaurants = filtered;
         // Appliquer le filtre final et retourner
         return applyFinalFilter(finalRestaurants, destination, limit, mealType, dietary);
@@ -270,7 +265,6 @@ export async function searchRestaurants(params: RestaurantSearchParams): Promise
       filtered = filterByForbiddenNames(filtered, destination);
     }
     if (filtered.length > 0) {
-      console.log(`[Restaurants] ${filtered.length} via OSM (après filtre cuisine+nom)`);
       finalRestaurants = filtered;
       // Appliquer le filtre final et retourner
       return applyFinalFilter(finalRestaurants, destination, limit, mealType, dietary);
@@ -321,7 +315,6 @@ export async function searchRestaurantsNearActivity(
         filtered = filterRestaurantsByCuisine(filtered, destination, { strictMode: true, allowNonLocal: true });
         filtered = filterByForbiddenNames(filtered, destination);
         if (filtered.length > 0) {
-          console.log(`[Restaurants Nearby] ${filtered.length} via Gemini grounded`);
           return applyFinalFilter(filtered, destination, limit, mealType, options.dietary);
         }
       }
@@ -348,8 +341,6 @@ export async function searchRestaurantsNearActivity(
           allowNonLocal: true,
         });
         filtered = filterByForbiddenNames(filtered, destination);
-
-        console.log(`[Restaurants Nearby] ${nearbyRestaurants.length} trouvés via SerpAPI, ${filtered.length} après filtrage`);
 
         if (filtered.length > 0) {
           return applyFinalFilter(filtered, destination, limit, mealType, options.dietary);
@@ -447,10 +438,8 @@ function filterByForbiddenNames(restaurants: Restaurant[], destination: string):
     if (isForbidden) {
       // Exception : restaurants très bien notés (authentiques et de qualité)
       if (r.rating && r.rating >= 4.5 && (r.reviewCount || 0) >= 200) {
-        console.log(`[Restaurants] GARDÉ malgré mot interdit: "${r.name}" (${r.rating}★, ${r.reviewCount} avis)`);
         return true;
       }
-      console.log(`[Restaurants] EXCLU par nom: "${r.name}" contient un mot interdit`);
     }
     return !isForbidden;
   });
@@ -519,7 +508,6 @@ function filterByMealType(restaurants: Restaurant[], mealType?: 'breakfast' | 'l
     );
 
     if (isInappropriate) {
-      console.log(`[Restaurants] Exclu pour dîner: "${r.name}" (type inapproprié)`);
       return false;
     }
 
@@ -575,13 +563,6 @@ function applyFinalFilter(restaurants: Restaurant[], destination: string | undef
     filtered = filterByForbiddenNames(filtered, destination);
     const excludedByName = beforeNameFilter - filtered.length;
 
-    // Log détaillé des exclusions
-    const totalExcluded = excludedByRating + excludedByMealType + excludedByName;
-    if (totalExcluded > 0) {
-      console.log(`[Restaurants] ⚠️ FILTRE FINAL: ${totalExcluded} restaurant(s) exclu(s) (${excludedByRating} par note, ${excludedByMealType} par type repas, ${excludedByName} par nom)`);
-    }
-  } else if (excludedByRating + excludedByMealType > 0) {
-    console.log(`[Restaurants] ⚠️ FILTRE FINAL: ${excludedByRating + excludedByMealType} restaurant(s) exclu(s) (${excludedByRating} par note, ${excludedByMealType} par type repas)`);
   }
 
   // 4. Prioriser les restaurants correspondant aux restrictions diététiques
@@ -678,7 +659,7 @@ async function searchWithOverpass(params: RestaurantSearchParams): Promise<Resta
       address,
       latitude: element.lat,
       longitude: element.lon,
-      rating: 4.0 + Math.random() * 0.8, // OSM n'a pas de ratings, on génère
+      rating: Math.round((4.0 + Math.random() * 0.8) * 10) / 10, // OSM n'a pas de ratings, on génère
       reviewCount: Math.floor(50 + Math.random() * 500),
       priceLevel,
       cuisineTypes,
@@ -748,7 +729,7 @@ async function searchWithGooglePlaces(params: RestaurantSearchParams): Promise<R
       address: place.vicinity,
       latitude: place.geometry.location.lat,
       longitude: place.geometry.location.lng,
-      rating: place.rating || 4.0,
+      rating: Math.round((place.rating || 4.0) * 10) / 10,
       reviewCount: place.user_ratings_total || 0,
       priceLevel: place.price_level || 2,
       cuisineTypes: place.types?.filter((t: string) => !['restaurant', 'food', 'establishment'].includes(t)) || [],
@@ -949,7 +930,7 @@ function generateLocalRestaurants(params: RestaurantSearchParams, destination?: 
       address: destination ? `Centre-ville, ${destination}` : 'Centre-ville',
       latitude: restLat,
       longitude: restLng,
-      rating: 4.2 + Math.random() * 0.6, // Bonnes notes pour restaurants recommandés
+      rating: Math.round((4.2 + Math.random() * 0.6) * 10) / 10, // Bonnes notes pour restaurants recommandés
       reviewCount: Math.floor(200 + Math.random() * 600),
       priceLevel: template.price,
       cuisineTypes: template.cuisine,
@@ -1086,12 +1067,6 @@ export function selectBestRestaurant(
   // Trier par score décroissant
   scored.sort((a, b) => b.score - a.score);
 
-  // Log le choix pour debug
-  if (scored.length > 0 && preferences.destination) {
-    const best = scored[0];
-    console.log(`[Restaurants] Sélection: ${best.restaurant.name} (score: ${best.score.toFixed(0)}, cuisines: ${best.restaurant.cuisineTypes.join(', ')})`);
-  }
-
   return scored[0]?.restaurant || null;
 }
 
@@ -1125,7 +1100,7 @@ function placeToRestaurant(place: PlaceData): Restaurant {
     address: place.address,
     latitude: place.latitude,
     longitude: place.longitude,
-    rating: place.rating || 4.0,
+    rating: Math.round((place.rating || 4.0) * 10) / 10,
     reviewCount: place.reviewCount || 0,
     priceLevel: (place.priceLevel as 1 | 2 | 3 | 4) || 2,
     cuisineTypes: place.cuisineTypes || [],

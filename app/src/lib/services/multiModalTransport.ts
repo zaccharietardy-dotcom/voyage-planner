@@ -138,8 +138,6 @@ export async function findMultiModalOptions(
   originCoords?: { lat: number; lng: number },
   destCoords?: { lat: number; lng: number }
 ): Promise<MultiModalOption[]> {
-  const log = (msg: string) => console.log(`[MultiModal] ${msg}`);
-
   // Calcul de distance si coordonnées disponibles
   let distance = 0;
   if (originCoords && destCoords) {
@@ -149,15 +147,11 @@ export async function findMultiModalOptions(
     );
   }
 
-  log(`${origin} -> ${destination}, ${distance}km, budget=${budgetLevel}`);
-
   // Skip si distance trop courte ou trop longue
   if (distance > 0 && distance < 300) {
-    log('Distance < 300km, multi-modal non pertinent');
     return [];
   }
   if (distance > 5000) {
-    log('Distance > 5000km, vol direct recommandé');
     return [];
   }
 
@@ -168,14 +162,12 @@ export async function findMultiModalOptions(
 
   // Scénario A: destination insulaire (ferry nécessaire)
   if (isIslandDestination(destKey)) {
-    log(`Destination insulaire détectée: ${destination}`);
     const ferryOptions = await buildFerryOptions(origin, originKey, destination, destKey, date, passengers);
     options.push(...ferryOptions);
   }
 
   // Scénario B: longue distance + budget serré -> hub aérien moins cher
   if (distance > 800 && (budgetLevel === 'economic' || budgetLevel === 'moderate') && !isIslandDestination(destKey)) {
-    log('Longue distance + budget serré, recherche hub aérien');
     const hubOptions = await buildHubFlightOptions(origin, originKey, destination, destKey, date, passengers);
     options.push(...hubOptions);
   }

@@ -360,9 +360,6 @@ export async function savePlacesToDB(
     }
   }
 
-  if (savedCount > 0) {
-    console.log(`[PlaceDB] ${savedCount}/${places.length} lieux sauvegardés pour ${places[0]?.city}`);
-  }
   return savedCount;
 }
 
@@ -534,9 +531,6 @@ export async function cleanupExpiredData(maxAgeDays: number = 90): Promise<numbe
       .select('id');
 
     const deletedCount = deleted?.length ?? 0;
-    if (deletedCount > 0) {
-      console.log(`[PlaceDB] Nettoyage: ${deletedCount} lieux supprimés (> ${maxAgeDays} jours)`);
-    }
     return deletedCount;
   } catch (error) {
     console.warn('[PlaceDB] Erreur cleanupExpiredData:', error);

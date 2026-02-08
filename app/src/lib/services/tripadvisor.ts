@@ -144,7 +144,6 @@ export async function searchTripAdvisorRestaurants(
   const cacheKey = `restos-${location.locationId}`;
   const cached = readCache<Restaurant[]>(cacheKey);
   if (cached) {
-    console.log(`[TripAdvisor] Cache hit restaurants ${destination} (${cached.length})`);
     return cached.slice(0, limit);
   }
 
@@ -159,8 +158,6 @@ export async function searchTripAdvisorRestaurants(
 
     const data = await response.json();
     const results: TripAdvisorRestaurant[] = data?.data?.data || [];
-
-    console.log(`[TripAdvisor] ${results.length} restaurants trouvés pour "${destination}"`);
 
     const restaurants: Restaurant[] = results
       .filter(r => r.name && r.averageRating > 0)
@@ -264,7 +261,6 @@ export async function searchTripAdvisorHotels(
   const cacheKey = `hotels-${location.locationId}-${checkIn}-${checkOut}-${adults}-${rooms}`;
   const cached = readCache<Accommodation[]>(cacheKey);
   if (cached) {
-    console.log(`[TripAdvisor] Cache hit hotels ${destination} (${cached.length})`);
     return cached.slice(0, limit);
   }
 
@@ -288,8 +284,6 @@ export async function searchTripAdvisorHotels(
 
     const data = await response.json();
     const results: TripAdvisorHotel[] = data?.data?.data || [];
-
-    console.log(`[TripAdvisor] ${results.length} hôtels trouvés pour "${destination}"`);
 
     // Calculate nights
     const nights = Math.max(1, Math.round(

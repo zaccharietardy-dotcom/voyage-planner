@@ -432,7 +432,6 @@ export function filterRestaurantsByCuisine<T extends { cuisineTypes: string[] }>
 
     // En mode strict, exclure les restaurants avec cuisine interdite
     if (strictMode && !validation.isValid) {
-      console.log(`[CuisineValidator] Exclu: ${validation.reason}`);
       return false;
     }
 

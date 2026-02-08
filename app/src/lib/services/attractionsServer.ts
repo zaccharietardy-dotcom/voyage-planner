@@ -33,11 +33,8 @@ export async function getAttractionsAsync(
 
   // 1. Récupérer les attractions locales (base de données codée en dur)
   const localAttractions = getAttractions(destination);
-  console.log(`Attractions locales pour ${destination}: ${localAttractions.length}`);
-
   // 2. Vérifier le cache mémoire AI
   if (AI_ATTRACTIONS_CACHE[normalized] && !options?.forceAI) {
-    console.log(`Cache mémoire AI pour ${destination}: ${AI_ATTRACTIONS_CACHE[normalized].length}`);
     // Combiner les attractions locales et le cache AI (dédupliquer par nom)
     const combined = [...localAttractions];
     const localNames = new Set(localAttractions.map(a => a.name.toLowerCase()));
@@ -46,13 +43,11 @@ export async function getAttractionsAsync(
         combined.push(attraction);
       }
     }
-    console.log(`Total combiné (local + cache): ${combined.length}`);
     return combined;
   }
 
   // 3. TOUJOURS chercher sur les APIs externes pour avoir plus d'attractions
   // (même si on a des attractions locales, on veut en avoir plus pour remplir les journées)
-  console.log(`Recherche d'attractions pour ${destination} via API...`);
   try {
     const aiAttractions = await searchAttractionsFromCache(destination, {
       types: options?.types,
@@ -72,7 +67,6 @@ export async function getAttractionsAsync(
 
       // Stocker le résultat combiné dans le cache
       AI_ATTRACTIONS_CACHE[normalized] = combined;
-      console.log(`Total combiné (local + API): ${combined.length}`);
       return combined;
     }
   } catch (error) {

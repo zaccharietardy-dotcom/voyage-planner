@@ -4050,8 +4050,6 @@ export function selectAttractionsFromList(
     return scoreB - scoreA;
   });
 
-  console.log(`[Attractions] Triées par score - Top 3: ${attractions.slice(0, 3).map(a => `${a.name} (type=${a.type}, mustSee=${a.mustSee})`).join(', ')}`);
-
   // Sélectionner selon le temps disponible avec temps de trajet réaliste
   const selected: Attraction[] = [];
   let totalDuration = 0;

@@ -50,18 +50,9 @@ interface FlightSearchParams {
  * Si aucun vol trouvé → retourne liste vide + erreur (pas de faux vols!)
  */
 export async function searchFlights(params: FlightSearchParams): Promise<FlightSearchResult> {
-  // === DEBUG: Afficher quelles APIs sont configurées ===
-  console.log('[Flights] ═══════════════════════════════════════');
-  console.log('[Flights] APIs configurées:');
-  console.log(`[Flights]   • SerpAPI: ${isSerpApiConfigured() ? '✅ OUI' : '❌ NON'}`);
-  console.log(`[Flights]   • Gemini: ${isGeminiConfigured() ? '✅ OUI' : '❌ NON'}`);
-  console.log(`[Flights]   • Amadeus: ${!!(AMADEUS_API_KEY && AMADEUS_API_SECRET) ? '✅ OUI' : '❌ NON'}`);
-  console.log('[Flights] ═══════════════════════════════════════');
-
   // 1. PRIORITE ABSOLUE: SerpAPI (scrape Google Flights = données RÉELLES)
   if (isSerpApiConfigured()) {
     try {
-      console.log('[Flights] 🔍 Recherche via SerpAPI (Google Flights)...');
       const outboundFlights = await searchFlightsWithSerpApi(
         params.originCode,
         params.destinationCode,
@@ -85,7 +76,6 @@ export async function searchFlights(params: FlightSearchParams): Promise<FlightS
       const validReturn = filterValidFlights(returnFlights);
 
       if (validOutbound.length > 0) {
-        console.log(`[Flights] ✅ ${validOutbound.length} vols VALIDES via SerpAPI (${outboundFlights.length - validOutbound.length} rejetés)`);
         return {
           outboundFlights: validOutbound,
           returnFlights: validReturn,
@@ -100,7 +90,6 @@ export async function searchFlights(params: FlightSearchParams): Promise<FlightS
   // 2. Fallback: Gemini + Google Search
   if (isGeminiConfigured()) {
     try {
-      console.log('[Flights] 🔍 Recherche via Gemini + Google Search...');
       const outboundFlights = await searchFlightsWithGemini(
         params.originCode,
         params.destinationCode,
@@ -123,7 +112,6 @@ export async function searchFlights(params: FlightSearchParams): Promise<FlightS
       const validReturn = filterValidFlights(returnFlights);
 
       if (validOutbound.length > 0) {
-        console.log(`[Flights] ✅ ${validOutbound.length} vols VALIDES via Gemini (${outboundFlights.length - validOutbound.length} rejetés)`);
         return {
           outboundFlights: validOutbound,
           returnFlights: validReturn,
@@ -138,10 +126,8 @@ export async function searchFlights(params: FlightSearchParams): Promise<FlightS
   // 3. Si Amadeus est configure, l'utiliser
   if (AMADEUS_API_KEY && AMADEUS_API_SECRET) {
     try {
-      console.log('[Flights] Recherche via Amadeus API...');
       const result = await searchWithAmadeus(params);
       if (result.outboundFlights.length > 0) {
-        console.log(`[Flights] ${result.outboundFlights.length} vols trouves via Amadeus`);
         return result;
       }
     } catch (error) {
@@ -255,8 +241,6 @@ function parseAmadeusResponse(data: any, params: FlightSearchParams): FlightSear
         { origin: depCode, destination: arrCode },
         { date: depDate, passengers: params.adults }
       );
-
-      console.log(`[Flights] ✅ Vol validé: ${flightNumber} ${depCode} → ${arrCode}`);
 
       // Extraire les heures d'affichage (HH:MM) depuis les dates ISO
       // Amadeus retourne les heures en heure locale de l'aéroport

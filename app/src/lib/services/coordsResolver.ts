@@ -101,12 +101,9 @@ export async function resolveCoordinates(
     if (cached) {
       resolutionsBySource.cache++;
       totalResolved++;
-      console.log(`[CoordsResolver] ✅ Cache hit: "${name}" → (${cached.lat.toFixed(4)}, ${cached.lng.toFixed(4)})`);
     }
     return cached || null;
   }
-
-  console.log(`[CoordsResolver] Résolution de "${name}" à ${city} (type: ${itemType})...`);
 
   // Step 1: Travel Places API (gratuit via RapidAPI)
   try {
@@ -121,7 +118,6 @@ export async function resolveCoordinates(
         resolutionCache.set(cacheKey, result);
         resolutionsBySource.travel_places++;
         totalResolved++;
-        console.log(`[CoordsResolver] ✅ Travel Places: "${name}" → (${result.lat.toFixed(4)}, ${result.lng.toFixed(4)})`);
         return result;
       }
       // Result too far from destination, try next API
@@ -145,7 +141,6 @@ export async function resolveCoordinates(
         resolutionCache.set(cacheKey, result);
         resolutionsBySource.nominatim++;
         totalResolved++;
-        console.log(`[CoordsResolver] ✅ Nominatim: "${name}" → (${result.lat.toFixed(4)}, ${result.lng.toFixed(4)})`);
         return result;
       }
       // Result too far from destination, try next API
@@ -168,7 +163,6 @@ export async function resolveCoordinates(
         resolutionCache.set(cacheKey, result);
         resolutionsBySource.gemini++;
         totalResolved++;
-        console.log(`[CoordsResolver] ✅ Gemini: "${name}" → (${result.lat.toFixed(4)}, ${result.lng.toFixed(4)})`);
         return result;
       }
       // Result too far from destination, try next API
@@ -192,7 +186,6 @@ export async function resolveCoordinates(
         resolutionCache.set(cacheKey, result);
         resolutionsBySource.serpapi++;
         totalResolved++;
-        console.log(`[CoordsResolver] ✅ SerpAPI: "${name}" → (${result.lat.toFixed(4)}, ${result.lng.toFixed(4)})`);
         return result;
       }
       // Result too far from destination, try next API

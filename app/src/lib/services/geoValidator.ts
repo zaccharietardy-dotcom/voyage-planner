@@ -100,7 +100,6 @@ async function fixItemCoordinates(
       item.latitude = resolved.lat;
       item.longitude = resolved.lng;
       item.dataReliability = 'verified';
-      console.log(`[GeoValidator] ✅ RESOLVED: "${item.title}" (${oldLat?.toFixed(4)}, ${oldLng?.toFixed(4)}) → (${item.latitude.toFixed(4)}, ${item.longitude.toFixed(4)}) via ${resolved.source}`);
       return true;
     } else {
       console.warn(`[GeoValidator] ⚠️ RESOLVED but too far: "${item.title}" → (${resolved.lat.toFixed(4)}, ${resolved.lng.toFixed(4)}) — rejected`);
@@ -126,8 +125,6 @@ export async function validateTripGeography(
   const errors: GeoValidationError[] = [];
   let itemsFixed = 0;
   const itemsToRemove: { dayIndex: number; itemId: string; title: string }[] = [];
-
-  console.log(`\n[GeoValidator] Validation géographique - Centre destination: ${destinationCenter.lat}, ${destinationCenter.lng}`);
 
   for (let dayIdx = 0; dayIdx < trip.days.length; dayIdx++) {
     const day = trip.days[dayIdx];
@@ -184,7 +181,6 @@ export async function validateTripGeography(
     if (day.items.length < beforeLen) {
       itemsRemoved++;
       day.items.forEach((item, idx) => { item.orderIndex = idx; });
-      console.log(`[GeoValidator] ✅ "${title}" supprimé du jour ${day.dayNumber}`);
     }
   }
 
@@ -193,12 +189,6 @@ export async function validateTripGeography(
     errors,
     itemsRemoved: itemsFixed + itemsRemoved
   };
-
-  if (errors.length > 0) {
-    console.log(`[GeoValidator] ${errors.length} erreur(s) géographique(s) détectée(s), ${itemsFixed} résolu(s) via API, ${itemsRemoved} supprimé(s)`);
-  } else {
-    console.log(`[GeoValidator] Voyage géographiquement cohérent ✓`);
-  }
 
   return result;
 }
@@ -221,7 +211,6 @@ export function filterPlacesByDestination<T extends { latitude?: number; longitu
     );
 
     if (distance > maxDistanceKm) {
-      console.log(`[GeoValidator] Filtré: "${place.name || 'inconnu'}" - ${Math.round(distance)}km (max: ${maxDistanceKm}km)`);
       return false;
     }
 
@@ -330,7 +319,6 @@ export function isCountryMatchingDestination(
                   expectedCountryNormalized.includes(itemCountryNormalized);
 
   if (!matches) {
-    console.log(`[GeoValidator] Pays incorrect: "${itemCountry}" != "${expectedCountry}" pour destination "${destinationCity}"`);
   }
 
   return matches;

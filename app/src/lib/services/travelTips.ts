@@ -102,7 +102,6 @@ Si la destination est dans un pays francophone ÉTRANGER (ex: France→Belgique,
     }
 
     const result = JSON.parse(jsonMatch[0]) as TravelTipsResult;
-    console.log(`[TravelTips] Generated for ${destination}: ${result.vocabulary.phrases.length} phrases, ${result.packing.essentials.length} items`);
     return result;
   } catch (error) {
     console.error('[TravelTips] Error:', error);

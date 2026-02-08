@@ -543,7 +543,6 @@ export function findKnownViatorProduct(
   for (const [keyword, data] of Object.entries(KNOWN_VIATOR_PRODUCTS)) {
     if (searchName.includes(keyword) || keyword.includes(searchName)) {
       const url = `https://www.viator.com/searchResults/all?text=${encodeURIComponent(data.searchTerms)}`;
-      console.log(`[Viator Known] ✅ Match trouvé: "${activityName}" → recherche "${data.searchTerms}"`);
       return {
         url,
         price: data.price || 0,

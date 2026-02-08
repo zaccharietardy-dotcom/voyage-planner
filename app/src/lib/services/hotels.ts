@@ -162,7 +162,6 @@ export async function searchHotels(
 ): Promise<Accommodation[]> {
   // IMPORTANT: PAS DE CACHE pour les hôtels !
   // La disponibilité change en temps réel, un hôtel peut être complet à tout moment.
-  console.log(`[Hotels] Recherche FRAÎCHE pour ${destination} (pas de cache - disponibilité temps réel)`);
 
   const checkInStr = options.checkInDate.toISOString().split('T')[0];
   const checkOutStr = options.checkOutDate.toISOString().split('T')[0];
@@ -172,7 +171,6 @@ export async function searchHotels(
   if (options.maxPricePerNight) {
     priceRange.max = Math.min(priceRange.max, options.maxPricePerNight);
     priceRange.hardMax = Math.min(priceRange.hardMax, options.maxPricePerNight * 1.2);
-    console.log(`[Hotels] Budget strategy: plafond ${options.maxPricePerNight}€/nuit → max ajusté à ${priceRange.max}€`);
   }
 
   const targetStars = options.budgetLevel === 'luxury' ? 4 : (options.budgetLevel === 'comfort' || options.budgetLevel === 'moderate') ? 3 : 2;
@@ -180,8 +178,6 @@ export async function searchHotels(
   // 1. PRIORITÉ: Booking.com RapidAPI (booking-com15) - prix réels + liens directs
   if (isRapidApiBookingConfigured()) {
     try {
-      console.log(`[Hotels] 🔍 Étape 1: Booking.com API (prix réels + liens directs)...`);
-      console.log(`[Hotels] Budget: ${options.budgetLevel}, Prix: ${priceRange.min}-${priceRange.max}€/nuit, ${targetStars}+ étoiles`);
 
       const bookingHotels = await searchHotelsWithBookingApi(destination, checkInStr, checkOutStr, {
         guests: options.guests,
@@ -195,10 +191,6 @@ export async function searchHotels(
 
       if (bookingHotels.length > 0) {
         const hotels: Accommodation[] = bookingHotels.map((h: BookingHotel) => {
-          if (h.breakfastIncluded) {
-            console.log(`[Hotels] ✅ ${h.name}: Petit-déjeuner INCLUS`);
-          }
-
           return {
             id: h.id,
             name: h.name,
@@ -224,7 +216,6 @@ export async function searchHotels(
           };
         });
 
-        console.log(`[Hotels] ✅ ${hotels.length} hôtels via Booking.com (liens directs réservation)`);
         return adjustHotelPrices(hotels, options);
       }
     } catch (error) {
@@ -235,7 +226,6 @@ export async function searchHotels(
   // 2. FALLBACK: TripAdvisor (découverte) → SerpAPI (validation dispo)
   if (isTripAdvisorConfigured()) {
     try {
-      console.log(`[Hotels] 🔍 Fallback: TripAdvisor (prix multi-providers)...`);
       const taHotels = await searchTripAdvisorHotels(destination, {
         checkIn: checkInStr,
         checkOut: checkOutStr,
@@ -252,11 +242,9 @@ export async function searchHotels(
         );
 
         if (filtered.length > 0) {
-          console.log(`[Hotels] ${filtered.length} candidats TripAdvisor dans le budget`);
 
           if (isSerpApiPlacesConfigured()) {
             try {
-              console.log(`[Hotels] 🔍 Validation dispo via SerpAPI Google Hotels...`);
               const serpHotels = await searchHotelsWithSerpApi(destination, checkInStr, checkOutStr, {
                 adults: options.guests,
                 minPrice: priceRange.min,
@@ -291,16 +279,13 @@ export async function searchHotels(
                       longitude: serpMatch.longitude || taHotel.longitude,
                       description: (taHotel.description || '') + ' • Disponibilité confirmée',
                     });
-                    console.log(`[Hotels] ✅ ${taHotel.name}: DISPONIBLE (confirmé Google Hotels)`);
                   }
                 }
 
                 if (validated.length > 0) {
-                  console.log(`[Hotels] ✅ ${validated.length}/${filtered.length} hôtels confirmés disponibles`);
                   return adjustHotelPrices(validated, options);
                 }
 
-                console.log(`[Hotels] Aucun match TA↔SerpAPI, utilisation des résultats SerpAPI directs`);
                 const serpAccommodations: Accommodation[] = serpHotels.slice(0, 10).map((h: any) => {
                   const amenities = h.amenities || [];
                   const breakfastIncluded = checkBreakfastIncluded(amenities);
@@ -315,7 +300,7 @@ export async function searchHotels(
                     address: h.address || 'Adresse non disponible',
                     latitude: h.latitude || options.cityCenter.lat,
                     longitude: h.longitude || options.cityCenter.lng,
-                    rating: h.rating ? (h.rating <= 5 ? h.rating * 2 : h.rating) : 8,
+                    rating: Math.round((h.rating ? (h.rating <= 5 ? h.rating * 2 : h.rating) : 8) * 10) / 10,
                     reviewCount: h.reviewCount || 0,
                     stars,
                     pricePerNight: h.pricePerNight || priceRange.min,
@@ -333,7 +318,7 @@ export async function searchHotels(
                 });
                 // Enrichir les adresses manquantes via Google Places
                 const enrichedSerpAccommodations = await Promise.all(
-                  serpAccommodations.map(h => enrichHotelWithGooglePlaces(h as unknown as BookingHotel) as unknown as Promise<Accommodation>)
+                  serpAccommodations.map(h => enrichHotelWithGooglePlaces(h as unknown as BookingHotel, destination) as unknown as Promise<Accommodation>)
                 );
                 return adjustHotelPrices(enrichedSerpAccommodations, options);
               }
@@ -342,7 +327,6 @@ export async function searchHotels(
             }
           }
 
-          console.log(`[Hotels] ✅ ${filtered.length} hôtels TripAdvisor (dispo non vérifiée)`);
           return adjustHotelPrices(filtered, options);
         }
       }
@@ -354,7 +338,6 @@ export async function searchHotels(
   // 3. FALLBACK: SerpAPI Google Hotels seul
   if (isSerpApiPlacesConfigured()) {
     try {
-      console.log(`[Hotels] 🔍 Fallback: SerpAPI Google Hotels...`);
 
       const serpHotels = await searchHotelsWithSerpApi(destination, checkInStr, checkOutStr, {
         adults: options.guests,
@@ -385,7 +368,7 @@ export async function searchHotels(
             address: h.address || 'Adresse non disponible',
             latitude: h.latitude || options.cityCenter.lat,
             longitude: h.longitude || options.cityCenter.lng,
-            rating: h.rating ? (h.rating <= 5 ? h.rating * 2 : h.rating) : 8,
+            rating: Math.round((h.rating ? (h.rating <= 5 ? h.rating * 2 : h.rating) : 8) * 10) / 10,
             reviewCount: h.reviewCount || 0,
             stars,
             pricePerNight: h.pricePerNight || getPriceRange(options.budgetLevel).min,
@@ -402,10 +385,9 @@ export async function searchHotels(
           };
         });
 
-        console.log(`[Hotels] ✅ ${hotels.length} hôtels via SerpAPI Google Hotels`);
         // Enrichir les adresses manquantes via Google Places
         const enrichedHotels = await Promise.all(
-          hotels.map(h => enrichHotelWithGooglePlaces(h as unknown as BookingHotel) as unknown as Promise<Accommodation>)
+          hotels.map(h => enrichHotelWithGooglePlaces(h as unknown as BookingHotel, destination) as unknown as Promise<Accommodation>)
         );
         return adjustHotelPrices(enrichedHotels, options);
       }
@@ -417,12 +399,10 @@ export async function searchHotels(
   // 5. Fallback: Claude AI (pas de vérification de disponibilité)
   if (process.env.ANTHROPIC_API_KEY) {
     try {
-      console.log(`[Hotels] ⚠️ Fallback Claude AI (disponibilité non garantie)`);
       const hotels = await fetchHotelsFromClaude(destination, options);
-      console.log(`[Hotels] ${hotels.length} hôtels trouvés via Claude AI`);
       // Enrichir les adresses manquantes via Google Places
       const enrichedHotels = await Promise.all(
-        hotels.map(h => enrichHotelWithGooglePlaces(h as unknown as BookingHotel) as unknown as Promise<Accommodation>)
+        hotels.map(h => enrichHotelWithGooglePlaces(h as unknown as BookingHotel, destination) as unknown as Promise<Accommodation>)
       );
       return adjustHotelPrices(enrichedHotels, options);
     } catch (error) {
@@ -431,7 +411,6 @@ export async function searchHotels(
   }
 
   // 6. Dernier fallback: hôtels génériques
-  console.log(`[Hotels] ⚠️ Fallback hôtels génériques (disponibilité non garantie)`);
   return generateFallbackHotels(destination, options);
 }
 
@@ -551,7 +530,7 @@ Réponds UNIQUEMENT avec un tableau JSON valide.`;
     address: h.address || 'Adresse non disponible',
     latitude: h.latitude || options.cityCenter.lat + (Math.random() - 0.5) * 0.02,
     longitude: h.longitude || options.cityCenter.lng + (Math.random() - 0.5) * 0.02,
-    rating: Math.min(10, Math.max(1, h.rating || 8)),
+    rating: Math.round(Math.min(10, Math.max(1, h.rating || 8)) * 10) / 10,
     reviewCount: h.reviewCount || 500,
     stars: Math.min(5, Math.max(1, h.stars || 3)),
     pricePerNight: h.pricePerNight || (priceRange.min + priceRange.max) / 2,
@@ -616,7 +595,7 @@ function generateFallbackHotels(
     address: `Centre-ville, ${destination}`,
     latitude: options.cityCenter.lat + (Math.random() - 0.5) * 0.01,
     longitude: options.cityCenter.lng + (Math.random() - 0.5) * 0.01,
-    rating: 7.5 + Math.random() * 1.5,
+    rating: Math.round((7.5 + Math.random() * 1.5) * 10) / 10,
     reviewCount: 500 + Math.floor(Math.random() * 2000),
     stars: template.stars,
     pricePerNight: template.basePrice,
@@ -665,6 +644,7 @@ export function selectBestHotel(
     attractions?: Array<{ latitude?: number; longitude?: number; name?: string }>;
     preferApartment?: boolean;
     cityCenter?: { lat: number; lng: number };
+    maxBudgetPerNight?: number;
   }
 ): Accommodation | null {
   if (hotels.length === 0) return null;
@@ -677,11 +657,6 @@ export function selectBestHotel(
     // No hotels within hard max — take the cheapest available
     console.warn(`[Hotels] ⚠️ Aucun hôtel sous ${priceRange.hardMax}€/nuit, sélection du moins cher`);
     affordableHotels = [...hotels].sort((a, b) => a.pricePerNight - b.pricePerNight).slice(0, 3);
-  } else {
-    const removed = hotels.length - affordableHotels.length;
-    if (removed > 0) {
-      console.log(`[Hotels] Budget ${preferences.budgetLevel}: ${removed} hôtels exclus (>${priceRange.hardMax}€/nuit)`);
-    }
   }
 
   // HARD DISTANCE CAP: filter out hotels > 5km from city center (using GPS coords, not unreliable distanceToCenter)
@@ -697,10 +672,6 @@ export function selectBestHotel(
 
     const withinRange = hotelsWithTrueDistance.filter(h => h.trueDistKm <= MAX_HOTEL_DISTANCE_KM);
     if (withinRange.length > 0) {
-      const excluded = affordableHotels.length - withinRange.length;
-      if (excluded > 0) {
-        console.log(`[Hotels] Distance cap: ${excluded} hôtels exclus (>${MAX_HOTEL_DISTANCE_KM}km du centre)`);
-      }
       affordableHotels = withinRange.map(h => h.hotel);
     } else {
       // All hotels are far — keep the 3 closest
@@ -749,6 +720,12 @@ export function selectBestHotel(
       score += 5; // Cheap but might be lower quality
     }
 
+    // 5b. Pénalité forte si dépassement du budget stratégique par nuit
+    if (preferences.maxBudgetPerNight && hotel.pricePerNight > preferences.maxBudgetPerNight) {
+      const overBudgetRatio = hotel.pricePerNight / preferences.maxBudgetPerNight;
+      score -= (overBudgetRatio - 1) * 50; // -50 points par 100% de dépassement
+    }
+
     // 6. Bonus for apartments when budget strategy prefers Airbnb (réduit pour ne pas dominer)
     if (preferences.preferApartment) {
       const isApartment = hotel.type === 'apartment' || hotel.type === 'bnb' ||
@@ -766,10 +743,6 @@ export function selectBestHotel(
   scored.sort((a, b) => b.score - a.score);
 
   const best = scored[0];
-  console.log(`[Hotels] Sélectionné: ${best.hotel.name} (score=${best.score.toFixed(1)}, ${best.hotel.pricePerNight}€/nuit)`);
-  if (best.hotel.id?.startsWith('booking-')) {
-    console.log(`[Hotels] ⚠️ Source Booking.com: disponibilité non garantie à 100%`);
-  }
 
   return best.hotel;
 }
@@ -790,7 +763,7 @@ function placeToAccommodation(
     address: place.address,
     latitude: place.latitude,
     longitude: place.longitude,
-    rating: (place.rating || 4) * 2, // Convertir note /5 en note /10
+    rating: Math.round(((place.rating || 4) * 2) * 10) / 10, // Convertir note /5 en note /10
     reviewCount: place.reviewCount || 0,
     stars: place.stars || 3,
     pricePerNight: place.priceLevel || Math.round((priceRange.min + priceRange.max) / 2),

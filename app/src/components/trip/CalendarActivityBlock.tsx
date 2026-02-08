@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useCallback, useState } from 'react';
+import { useRef, useCallback, useState, useEffect } from 'react';
 import { TripItem, TRIP_ITEM_COLORS } from '@/lib/types';
 import { isLockedItem } from '@/lib/services/itineraryCalculator';
 import { cn } from '@/lib/utils';
@@ -46,6 +46,16 @@ export function CalendarActivityBlock({
   const locked = isLockedItem(item);
   const canResize = isEditable && !locked;
   const color = TRIP_ITEM_COLORS[item.type] || '#6B7280';
+
+  // Dark mode detection for better contrast
+  const [isDark, setIsDark] = useState(false);
+  useEffect(() => {
+    const check = () => setIsDark(document.documentElement.classList.contains('dark'));
+    check();
+    const observer = new MutationObserver(check);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    return () => observer.disconnect();
+  }, []);
 
   // Visual-only drag state: delta in slots from the original position
   const [dragState, setDragState] = useState<{
@@ -231,8 +241,8 @@ export function CalendarActivityBlock({
         height: visualHeight,
         left: `calc(${leftPercent} + 2px)`,
         width: `calc(${widthPercent} - 4px)`,
-        backgroundColor: `${color}18`,
-        borderColor: `${color}60`,
+        backgroundColor: `${color}${isDark ? '28' : '18'}`,
+        borderColor: `${color}${isDark ? '80' : '60'}`,
       }}
       onMouseDown={(e) => e.stopPropagation()}
       onClick={(e) => {

@@ -43,7 +43,6 @@ function readAttractionsCache(key: string): Attraction[] | null {
       return null;
     }
 
-    console.log(`[SerpAPI Cache] ✅ Cache hit pour "${key}"`);
     return JSON.parse(fs.readFileSync(filePath, 'utf-8'));
   } catch {
     return null;
@@ -56,7 +55,6 @@ function writeAttractionsCache(key: string, data: Attraction[]): void {
       fs.mkdirSync(ATTRACTIONS_CACHE_DIR, { recursive: true });
     }
     fs.writeFileSync(path.join(ATTRACTIONS_CACHE_DIR, `${key}.json`), JSON.stringify(data));
-    console.log(`[SerpAPI Cache] 💾 Cache écrit pour "${key}" (${data.length} attractions)`);
   } catch (error) {
     console.warn('[SerpAPI Cache] Erreur écriture:', error);
   }
@@ -156,7 +154,6 @@ export async function searchRestaurantsWithSerpApi(
   });
 
   try {
-    console.log(`[SerpAPI Places] Recherche restaurants à ${destination}...`);
     const response = await fetch(`${SERPAPI_BASE_URL}?${params}`);
 
     if (!response.ok) {
@@ -172,7 +169,6 @@ export async function searchRestaurantsWithSerpApi(
     }
 
     const results = data.local_results || [];
-    console.log(`[SerpAPI Places] ${results.length} restaurants trouvés`);
 
     // Filtrer les restaurants fermés définitivement
     const openResults = results.filter(r => {
@@ -182,13 +178,10 @@ export async function searchRestaurantsWithSerpApi(
           openState.includes('fermé définitivement') ||
           openState.includes('cerrado permanentemente') ||
           openState.includes('chiuso definitivamente')) {
-        console.log(`[SerpAPI Places] Exclusion de "${r.title}": ${r.open_state}`);
         return false;
       }
       return true;
     });
-
-    console.log(`[SerpAPI Places] ${openResults.length} restaurants après filtre (${results.length - openResults.length} fermés exclus)`);
 
     // Convertir en format Restaurant
     const restaurants: Restaurant[] = openResults.slice(0, limit).map((r, index) => {
@@ -288,7 +281,6 @@ export async function searchHotelsWithSerpApi(
   }
 
   try {
-    console.log(`[SerpAPI Hotels] Recherche hôtels à ${destination}...`);
     const response = await fetch(`${SERPAPI_BASE_URL}?${params}`);
 
     if (!response.ok) {
@@ -304,20 +296,16 @@ export async function searchHotelsWithSerpApi(
     }
 
     const properties = data.properties || [];
-    console.log(`[SerpAPI Hotels] ${properties.length} hôtels trouvés au total`);
 
     // FILTRER les hôtels DISPONIBLES uniquement (ceux qui ont un prix)
     // Si rate_per_night est null, l'hôtel est probablement complet pour ces dates
     const availableProperties = properties.filter((h: any) => {
       const hasPrice = h.rate_per_night?.lowest || h.total_rate?.lowest;
       if (!hasPrice) {
-        console.log(`[SerpAPI Hotels] ⚠️ ${h.name}: COMPLET (pas de prix disponible)`);
         return false;
       }
       return true;
     });
-
-    console.log(`[SerpAPI Hotels] ✅ ${availableProperties.length} hôtels DISPONIBLES (${properties.length - availableProperties.length} complets)`);
 
     return availableProperties.slice(0, limit).map((h: any) => {
       // UTILISER LE LIEN DIRECT FOURNI PAR GOOGLE
@@ -379,7 +367,6 @@ export async function getAvailableHotelNames(
   });
 
   try {
-    console.log(`[SerpAPI] Vérification disponibilité hôtels à ${destination}...`);
     const response = await fetch(`${SERPAPI_BASE_URL}?${params}`);
 
     if (!response.ok) {
@@ -407,7 +394,6 @@ export async function getAvailableHotelNames(
       }
     });
 
-    console.log(`[SerpAPI] ✅ ${availableNames.size} hôtels confirmés DISPONIBLES sur Google Hotels`);
     return availableNames;
   } catch (error) {
     console.error('[SerpAPI] Erreur vérification disponibilité:', error);
@@ -451,10 +437,7 @@ export async function searchAttractionsWithSerpApi(
     gl: countryCode,
   });
 
-  console.log(`[SerpAPI Attractions] Query: "${query}", location: "${locationQuery}", gl: ${countryCode}`);
-
   try {
-    console.log(`[SerpAPI Attractions] Recherche attractions à ${destination}...`);
     const response = await fetch(`${SERPAPI_BASE_URL}?${params}`);
 
     if (!response.ok) {
@@ -470,7 +453,6 @@ export async function searchAttractionsWithSerpApi(
     }
 
     const results = data.local_results || [];
-    console.log(`[SerpAPI Attractions] ${results.length} attractions trouvées`);
 
     return results.slice(0, limit).map((a, index) => ({
       id: `serp-attr-${a.place_id || index}`,
@@ -666,14 +648,10 @@ export async function searchAttractionsMultiQuery(
   const allAttractions: Map<string, Attraction & { priority: number }> = new Map();
   const countryCode = getCountryCode(destination);
 
-  console.log(`[SerpAPI Attractions Multi] Recherche attractions à ${destination} (${cityCenter.lat}, ${cityCenter.lng})...`);
-
   // Utiliser les requêtes adaptatives si activités fournies, sinon le fallback statique
   const queries = options.activities
     ? getAdaptiveQueries(destination, options.activities)
     : ATTRACTION_QUERIES;
-
-  console.log(`[SerpAPI Attractions Multi] ${queries.length} requêtes adaptatives pour ${destination}`);
 
   // Exécuter les requêtes en parallèle pour optimiser le temps
   const promises = queries.map(async ({ query, priority }) => {
@@ -748,8 +726,6 @@ export async function searchAttractionsMultiQuery(
     });
     if (!isDuplicate) {
       deduped.push(attr);
-    } else {
-      console.log(`[SerpAPI] Dédup GPS: "${attr.name}" doublon de lieu proche, ignoré`);
     }
   }
 
@@ -771,7 +747,6 @@ export async function searchAttractionsMultiQuery(
 
     typeCounts[t] = (typeCounts[t] || 0) + 1;
     if (typeCounts[t] > maxPerType) {
-      console.log(`[SerpAPI] Diversité: "${attr.name}" exclu (max ${maxPerType} ${t}, ${reviews} reviews)`);
       return false;
     }
     return true;
@@ -787,8 +762,6 @@ export async function searchAttractionsMultiQuery(
       mustSee: index < 3,
     };
   });
-
-  console.log(`[SerpAPI Attractions Multi] ✅ ${finalAttractions.length} attractions de qualité trouvées`);
 
   // Sauvegarder en cache
   writeAttractionsCache(cacheKey, finalAttractions);
@@ -820,8 +793,6 @@ export async function searchMustSeeAttractions(
   const countryCode = getCountryCode(destination);
   const results: Attraction[] = [];
 
-  console.log(`[SerpAPI MustSee] Recherche de ${items.length} lieux spécifiques...`);
-
   const promises = items.map(async (item) => {
     const params = new URLSearchParams({
       api_key: SERPAPI_KEY!,
@@ -844,7 +815,6 @@ export async function searchMustSeeAttractions(
         const attraction = convertToAttraction(places[0], destination, 0);
         if (attraction) {
           attraction.mustSee = true;
-          console.log(`[SerpAPI MustSee] ✅ Trouvé: "${item}" → ${attraction.name}`);
           return attraction;
         }
       }
@@ -870,14 +840,12 @@ export async function searchMustSeeAttractions(
               const retryAttraction = convertToAttraction(retryPlaces[0], destination, 0);
               if (retryAttraction) {
                 retryAttraction.mustSee = true;
-                console.log(`[SerpAPI MustSee] ✅ Trouvé (retry): "${item}" → ${retryAttraction.name}`);
                 return retryAttraction;
               }
             }
           }
         } catch { /* ignore retry errors */ }
       }
-      console.log(`[SerpAPI MustSee] ❌ Non trouvé après retries: "${item}"`);
       return null;
     } catch (error) {
       console.error(`[SerpAPI MustSee] Erreur pour "${item}":`, error);
@@ -890,7 +858,6 @@ export async function searchMustSeeAttractions(
     if (attr) results.push(attr);
   }
 
-  console.log(`[SerpAPI MustSee] ${results.length}/${items.length} lieux trouvés`);
   return results;
 }
 
@@ -954,7 +921,6 @@ export async function searchRestaurantsNearby(
   });
 
   try {
-    console.log(`[SerpAPI Restaurants Nearby] Recherche ${mealType} près de (${activityCoords.lat}, ${activityCoords.lng})...`);
     const response = await fetch(`${SERPAPI_BASE_URL}?${params}`);
 
     if (!response.ok) {
@@ -1023,7 +989,6 @@ export async function searchRestaurantsNearby(
     // Trier par distance
     restaurants.sort((a, b) => (a.distance || 0) - (b.distance || 0));
 
-    console.log(`[SerpAPI Restaurants Nearby] ✅ ${restaurants.length} restaurants à moins de ${maxDistance}m trouvés`);
     return restaurants.slice(0, limit);
   } catch (error) {
     console.error('[SerpAPI Restaurants Nearby] Erreur:', error);
@@ -1089,7 +1054,6 @@ export async function searchGroceryStores(
   });
 
   try {
-    console.log(`[SerpAPI Grocery] Recherche supermarchés près de (${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)})...`);
     const response = await fetch(`${SERPAPI_BASE_URL}?${params}`);
 
     if (!response.ok) {
@@ -1137,7 +1101,6 @@ export async function searchGroceryStores(
     }
 
     stores.sort((a, b) => (a.distance || 0) - (b.distance || 0));
-    console.log(`[SerpAPI Grocery] ✅ ${stores.length} supermarchés trouvés à moins de ${maxDistance}m`);
     return stores.slice(0, limit);
   } catch (error) {
     console.error('[SerpAPI Grocery] Erreur:', error);
@@ -1175,7 +1138,6 @@ export async function geocodeViaSerpApi(
   }
 
   try {
-    console.log(`[SerpAPI Geocode] Recherche: "${query}"`);
     const response = await fetch(`${SERPAPI_BASE_URL}?${params}`);
     if (!response.ok) {
       console.warn(`[SerpAPI Geocode] HTTP ${response.status} pour "${query}"`);
@@ -1192,11 +1154,9 @@ export async function geocodeViaSerpApi(
         address: places[0].address,
         operatingHours: places[0].operating_hours,
       };
-      console.log(`[SerpAPI Geocode] ✅ "${placeName}" → (${result.lat.toFixed(4)}, ${result.lng.toFixed(4)}) - ${result.address || 'no address'}`);
       return result;
     }
 
-    console.log(`[SerpAPI Geocode] ❌ Aucun résultat pour "${query}"`);
     return null;
   } catch (error) {
     console.error(`[SerpAPI Geocode] Erreur pour "${query}":`, error);
@@ -1215,7 +1175,6 @@ function meetsAttractionQualityThreshold(place: SerpApiLocalResult, destination?
   const allTypes = [place.type, ...(place.types || []), ...(place.type_ids || [])].filter(Boolean).map(t => t!.toLowerCase());
   for (const t of allTypes) {
     if (NON_TOURISTIC_TYPES.has(t)) {
-      console.log(`[SerpAPI] Exclusion type non-touristique: "${place.title}" (${t})`);
       return false;
     }
   }
@@ -1223,7 +1182,6 @@ function meetsAttractionQualityThreshold(place: SerpApiLocalResult, destination?
   // Exclure les restaurants par type SerpAPI (souvent "Restaurant" ou contient "restaurant")
   for (const t of allTypes) {
     if (t.includes('restaurant') || t.includes('food') || t.includes('cafe') || t.includes('coffee') || t.includes('bakery') || t.includes('bar') || t.includes('pub')) {
-      console.log(`[SerpAPI] Exclusion restaurant/food: "${place.title}" (type: ${t})`);
       return false;
     }
   }
@@ -1232,7 +1190,6 @@ function meetsAttractionQualityThreshold(place: SerpApiLocalResult, destination?
   const nameLower = place.title.toLowerCase();
   for (const keyword of NON_TOURISTIC_NAME_KEYWORDS) {
     if (nameLower.includes(keyword)) {
-      console.log(`[SerpAPI] Exclusion par nom: "${place.title}" (contient "${keyword}")`);
       return false;
     }
   }

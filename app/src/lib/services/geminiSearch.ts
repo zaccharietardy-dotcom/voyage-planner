@@ -122,15 +122,6 @@ Trouve 5-8 vols et réponds UNIQUEMENT avec un JSON valide:
       return [];
     }
 
-    // Log les sources utilisées
-    const sources = data.candidates?.[0]?.groundingMetadata?.groundingChunks;
-    if (sources && sources.length > 0) {
-      console.log('[Gemini] Sources utilisées:');
-      sources.slice(0, 3).forEach(s => {
-        console.log(`  - ${s.web?.title}: ${s.web?.uri}`);
-      });
-    }
-
     // Parser le JSON
     const jsonMatch = textContent.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
@@ -204,7 +195,6 @@ Trouve 5-8 vols et réponds UNIQUEMENT avec un JSON valide:
     // Trier par prix
     flights.sort((a, b) => a.price - b.price);
 
-    console.log(`[Gemini] ${flights.length} vols réels trouvés pour ${origin}-${destination}`);
     return flights;
   } catch (error) {
     console.error('[Gemini] Erreur recherche vols:', error);
@@ -317,7 +307,6 @@ Réponds UNIQUEMENT en JSON valide (pas de markdown):
 priceLevel: 1 (€) à 4 (€€€€)`;
 
   try {
-    console.log(`[Gemini Restaurants] Recherche ${mealType} à ${destination}...`);
     const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -342,12 +331,6 @@ priceLevel: 1 (€) à 4 (€€€€)`;
     const textContent = data.candidates?.[0]?.content?.parts?.[0]?.text;
     if (!textContent) return [];
 
-    // Log sources
-    const sources = data.candidates?.[0]?.groundingMetadata?.groundingChunks;
-    if (sources?.length) {
-      console.log('[Gemini Restaurants] Sources:', sources.slice(0, 3).map(s => s.web?.title).join(', '));
-    }
-
     // Parse JSON (peut être dans un array ou un objet)
     let jsonStr = textContent.trim();
     if (jsonStr.startsWith('```')) {
@@ -368,7 +351,7 @@ priceLevel: 1 (€) à 4 (€€€€)`;
         address: r.address || 'Adresse non disponible',
         latitude: r.latitude || cityCenter.lat + (Math.random() - 0.5) * 0.01,
         longitude: r.longitude || cityCenter.lng + (Math.random() - 0.5) * 0.01,
-        rating: Math.min(5, Math.max(1, r.rating || 4)),
+        rating: Math.round(Math.min(5, Math.max(1, r.rating || 4)) * 10) / 10,
         reviewCount: r.reviewCount || 50,
         priceLevel: (Math.min(4, Math.max(1, r.priceLevel || 2)) as 1 | 2 | 3 | 4),
         cuisineTypes: r.cuisineTypes || ['local'],
@@ -381,7 +364,6 @@ priceLevel: 1 (€) à 4 (€€€€)`;
         dataReliability: 'verified' as const, // Vérifié via Google Search
       }));
 
-    console.log(`[Gemini Restaurants] ✅ ${restaurants.length} restaurants trouvés à ${destination}`);
     return restaurants;
   } catch (error) {
     console.error('[Gemini Restaurants] Erreur:', error);
@@ -444,15 +426,20 @@ Réponds UNIQUEMENT en JSON (pas de markdown):
     const enriched = JSON.parse(jsonMatch[0]);
     for (const item of enriched) {
       if (item.name) {
+        // Filtrer les descriptions qui sont des messages d'erreur de vérification
+        const desc = item.description || '';
+        const isErrorDesc = /n'est pas situ[eé]|trop g[eé]n[eé]rique|aucun r[eé]sultat|introuvable|cette entr[eé]e|l'adresse fournie|impossible de|ne correspond pas|veuillez v[eé]rifier|veuillez fournir|veuillez sp[eé]cifier/i.test(desc);
         result.set(item.name, {
-          description: item.description || '',
+          description: isErrorDesc ? '' : desc,
           specialties: item.specialties || [],
           tips: item.tips || '',
         });
+        if (isErrorDesc) {
+          console.warn(`[Gemini Enrich] ⚠️ Description erreur filtrée pour "${item.name}"`);
+        }
       }
     }
 
-    console.log(`[Gemini Enrich] ✅ ${result.size} restaurants enrichis via Google Search`);
   } catch (error) {
     console.warn('[Gemini Enrich] Erreur:', error);
   }
@@ -486,7 +473,6 @@ Retourne UNIQUEMENT un JSON valide, sans commentaire:
 Si aucun prix trouvé, retourne: { "price": null }`;
 
   try {
-    console.log(`[Gemini] Recherche train ${origin} → ${dest} le ${date}...`);
     const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -514,10 +500,6 @@ Si aucun prix trouvé, retourne: { "price": null }`;
       return null;
     }
 
-    const sources = data.candidates?.[0]?.groundingMetadata?.groundingChunks;
-    if (sources?.length) {
-      console.log('[Gemini] Train sources:', sources.slice(0, 3).map(s => s.web?.title).join(', '));
-    }
 
     const jsonMatch = textContent.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
@@ -526,7 +508,6 @@ Si aucun prix trouvé, retourne: { "price": null }`;
     }
 
     const result = JSON.parse(jsonMatch[0]);
-    console.log(`[Gemini] Train ${origin}-${dest}: ${result.price != null ? result.price + '€' : 'non trouvé'}`);
     return result;
   } catch (error) {
     console.error('[Gemini] Erreur recherche train:', error);
@@ -569,7 +550,6 @@ Retourne UNIQUEMENT un JSON valide:
 Si aucun ferry trouvé, retourne: { "price": null }`;
 
   try {
-    console.log(`[Gemini] Recherche ferry ${origin} → ${dest} le ${date}...`);
     const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -597,10 +577,6 @@ Si aucun ferry trouvé, retourne: { "price": null }`;
       return null;
     }
 
-    const sources = data.candidates?.[0]?.groundingMetadata?.groundingChunks;
-    if (sources?.length) {
-      console.log('[Gemini] Ferry sources:', sources.slice(0, 3).map(s => s.web?.title).join(', '));
-    }
 
     const jsonMatch = textContent.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
@@ -609,7 +585,6 @@ Si aucun ferry trouvé, retourne: { "price": null }`;
     }
 
     const result = JSON.parse(jsonMatch[0]);
-    console.log(`[Gemini] Ferry ${origin}-${dest}: ${result.price != null ? result.price + '€' : 'non trouvé'}`);
     return result;
   } catch (error) {
     console.error('[Gemini] Erreur recherche ferry:', error);
@@ -640,7 +615,6 @@ Retourne UNIQUEMENT un JSON valide:
 Si péages gratuits (ex: Allemagne), retourne: { "toll": 0, "route": "Autobahn (gratuit)" }`;
 
   try {
-    console.log(`[Gemini] Recherche péages ${origin} → ${dest}...`);
     const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -668,10 +642,6 @@ Si péages gratuits (ex: Allemagne), retourne: { "toll": 0, "route": "Autobahn (
       return null;
     }
 
-    const sources = data.candidates?.[0]?.groundingMetadata?.groundingChunks;
-    if (sources?.length) {
-      console.log('[Gemini] Toll sources:', sources.slice(0, 3).map(s => s.web?.title).join(', '));
-    }
 
     const jsonMatch = textContent.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
@@ -680,7 +650,6 @@ Si péages gratuits (ex: Allemagne), retourne: { "toll": 0, "route": "Autobahn (
     }
 
     const result = JSON.parse(jsonMatch[0]);
-    console.log(`[Gemini] Péages ${origin}-${dest}: ${result.toll}€ via ${result.route || 'N/A'}`);
     return result;
   } catch (error) {
     console.error('[Gemini] Erreur recherche péages:', error);
@@ -726,7 +695,6 @@ export async function geocodeWithGemini(
 ): Promise<{ lat: number; lng: number; address?: string } | null> {
   if (!GEMINI_API_KEY) return null;
   if (geminiGeocodeCallCount >= GEMINI_GEOCODE_MAX_CALLS) {
-    console.log(`[Gemini Geocode] Limit reached (${GEMINI_GEOCODE_MAX_CALLS} calls), skipping "${placeName}"`);
     return null;
   }
   geminiGeocodeCallCount++;
@@ -766,7 +734,6 @@ If you cannot find this place, return: {"lat": null, "lng": null}`;
     if (parsed.lat && parsed.lng && typeof parsed.lat === 'number' && typeof parsed.lng === 'number') {
       // Sanity check: coordinates should be reasonable (not 0,0 or extreme)
       if (Math.abs(parsed.lat) > 0.1 && Math.abs(parsed.lng) > 0.1 && Math.abs(parsed.lat) < 90 && Math.abs(parsed.lng) < 180) {
-        console.log(`[Gemini Geocode] ✅ "${placeName}" → (${parsed.lat}, ${parsed.lng})`);
         return { lat: parsed.lat, lng: parsed.lng, address: parsed.address || undefined };
       }
     }

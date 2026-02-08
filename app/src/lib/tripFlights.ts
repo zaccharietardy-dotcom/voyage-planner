@@ -45,7 +45,6 @@ export async function findBestFlights(
   for (const originAirport of originAirports) {
     for (const destAirport of destAirports) {
       try {
-        console.log(`Recherche vols ${originAirport.code} → ${destAirport.code}...`);
 
         const flightResults = await searchFlights({
           originCode: originAirport.code,
@@ -96,7 +95,6 @@ export async function findBestFlights(
               const penaltyInfo = (originDistancePenalty + destDistancePenalty) > 10
                 ? ` (prix: ${totalPrice}€, pénalité distance: +${Math.round(originDistancePenalty + destDistancePenalty)}€)`
                 : '';
-              console.log(`→ Meilleure option: ${originAirport.code}→${destAirport.code} score=${Math.round(score)}€${penaltyInfo}`);
             }
           }
         }
@@ -133,7 +131,6 @@ export function selectFlightByBudget(flights: Flight[], budgetLevel?: BudgetLeve
     console.warn(`⚠️ Tous les vols dépassent ${MAX_DURATION_RATIO}x la durée minimale (${minDuration}min)`);
   } else if (filteredFlights.length < flights.length) {
     const excluded = flights.length - filteredFlights.length;
-    console.log(`✂️ ${excluded} vol(s) exclu(s) car durée > ${maxAcceptableDuration}min (${MAX_DURATION_RATIO}x le vol le plus court de ${minDuration}min)`);
   }
 
   // Calculer le score de chaque vol

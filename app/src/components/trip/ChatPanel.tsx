@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageCircle, Send, X, Undo2, Loader2 } from 'lucide-react';
+import { MessageCircle, Send, X, Undo2, Loader2, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -44,6 +44,7 @@ export function ChatPanel({
     error,
     pendingChanges,
     previewDays,
+    suggestions,
     sendMessage,
     confirmChanges,
     rejectChanges,
@@ -84,6 +85,11 @@ export function ChatPanel({
   };
 
   const handleSuggestionClick = (prompt: string) => {
+    // Envoyer directement le message (pas juste prefill)
+    sendMessage(prompt);
+  };
+
+  const handleStaticSuggestionClick = (prompt: string) => {
     setInputValue(prompt);
     inputRef.current?.focus();
   };
@@ -93,6 +99,10 @@ export function ChatPanel({
   };
 
   const destination = trip.preferences?.destination || 'votre destination';
+
+  // Déterminer quelles suggestions afficher
+  const hasContextualSuggestions = suggestions.length > 0;
+  const showSuggestions = !pendingChanges && !isProcessing;
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -153,7 +163,11 @@ export function ChatPanel({
 
             {/* Liste des messages */}
             {messages.map((message) => (
-              <ChatMessageBubble key={message.id} message={message} />
+              <ChatMessageBubble
+                key={message.id}
+                message={message}
+                onSuggestionClick={sendMessage}
+              />
             ))}
 
             {/* Indicateur de chargement */}
@@ -188,15 +202,44 @@ export function ChatPanel({
           </div>
         )}
 
-        {/* Suggestions */}
-        {messages.length === 0 && !pendingChanges && (
+        {/* Suggestions contextuelles dynamiques */}
+        {showSuggestions && hasContextualSuggestions && (
+          <div className="px-4 py-2 border-t flex-shrink-0">
+            <div className="flex items-center gap-1 mb-2">
+              <Sparkles className="h-3 w-3 text-blue-500" />
+              <p className="text-xs text-muted-foreground">Suggestions :</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {suggestions.map((suggestion, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleSuggestionClick(suggestion.prompt)}
+                  disabled={isProcessing}
+                  className="text-xs px-3 py-1.5 rounded-full
+                    bg-blue-50 dark:bg-blue-950/30
+                    text-blue-700 dark:text-blue-300
+                    border border-blue-200 dark:border-blue-800
+                    hover:bg-blue-100 dark:hover:bg-blue-900/40
+                    disabled:opacity-50 disabled:cursor-not-allowed
+                    transition-colors"
+                >
+                  {suggestion.icon && <span className="mr-1">{suggestion.icon}</span>}
+                  {suggestion.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Suggestions statiques de fallback (seulement si pas de suggestions contextuelles et pas de messages) */}
+        {showSuggestions && !hasContextualSuggestions && messages.length === 0 && (
           <div className="px-4 py-2 border-t flex-shrink-0">
             <p className="text-xs text-muted-foreground mb-2">Suggestions :</p>
             <div className="flex flex-wrap gap-2">
               {SUGGESTED_CHAT_PROMPTS.slice(0, 4).map((suggestion) => (
                 <button
                   key={suggestion.label}
-                  onClick={() => handleSuggestionClick(suggestion.prompt)}
+                  onClick={() => handleStaticSuggestionClick(suggestion.prompt)}
                   className="text-xs px-2 py-1 rounded-full bg-muted hover:bg-muted/80 transition-colors"
                 >
                   {suggestion.label}

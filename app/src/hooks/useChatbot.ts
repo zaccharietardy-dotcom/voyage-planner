@@ -8,10 +8,11 @@
  * - Application/annulation des modifications
  * - Demande de modification alternative
  * - Undo stack
+ * - Suggestions contextuelles
  */
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { ChatMessage, ChatResponse, TripChange, TripDay } from '@/lib/types';
+import { ChatMessage, ChatResponse, TripChange, TripDay, ContextualSuggestion } from '@/lib/types';
 
 const MAX_UNDO_DEPTH = 10;
 
@@ -27,6 +28,7 @@ interface UseChatbotReturn {
   error: string | null;
   pendingChanges: TripChange[] | null;
   previewDays: TripDay[] | null;
+  suggestions: ContextualSuggestion[];
   sendMessage: (text: string) => Promise<void>;
   confirmChanges: () => Promise<void>;
   rejectChanges: () => void;
@@ -48,6 +50,7 @@ export function useChatbot({
   const [pendingChanges, setPendingChanges] = useState<TripChange[] | null>(null);
   const [previewDays, setPreviewDays] = useState<TripDay[] | null>(null);
   const [undoStack, setUndoStack] = useState<TripDay[][]>([]);
+  const [suggestions, setSuggestions] = useState<ContextualSuggestion[]>([]);
 
   // Ref pour garder la version actuelle des jours (pour undo)
   const currentDaysRef = useRef<TripDay[]>(currentDays);
@@ -58,9 +61,28 @@ export function useChatbot({
   // Ref pour la dernière demande (pour le contexte de modification)
   const lastRequestRef = useRef<string>('');
 
+  // Charger les suggestions contextuelles
+  const loadSuggestions = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/trips/${tripId}/chat/suggestions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        if (data.suggestions?.length > 0) {
+          setSuggestions(data.suggestions);
+        }
+      }
+    } catch (err) {
+      console.error('[useChatbot] Error loading suggestions:', err);
+    }
+  }, [tripId]);
+
   // Charger l'historique au montage
   useEffect(() => {
     loadHistory();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tripId]);
 
   const loadHistory = async () => {
@@ -69,6 +91,9 @@ export function useChatbot({
       if (response.ok) {
         const data = await response.json();
         setMessages(data.messages || []);
+
+        // Charger les suggestions initiales après l'historique
+        loadSuggestions();
       }
     } catch (err) {
       console.error('[useChatbot] Error loading history:', err);
@@ -108,13 +133,14 @@ export function useChatbot({
 
       const data: ChatResponse = await response.json();
 
-      // Ajoute la réponse assistant
+      // Ajoute la réponse assistant (avec errorInfo si présent)
       const assistantMessage: ChatMessage = {
         id: `temp-${Date.now() + 1}`,
         tripId,
         role: 'assistant',
         content: data.reply,
         intent: data.intent,
+        errorInfo: data.errorInfo || null,
         createdAt: new Date(),
       };
       setMessages(prev => [...prev, assistantMessage]);
@@ -126,6 +152,11 @@ export function useChatbot({
       } else {
         setPendingChanges(null);
         setPreviewDays(null);
+      }
+
+      // Mettre à jour les suggestions si la réponse en contient
+      if (data.suggestions && data.suggestions.length > 0) {
+        setSuggestions(data.suggestions);
       }
     } catch (err) {
       console.error('[useChatbot] Error:', err);
@@ -187,13 +218,16 @@ export function useChatbot({
       // Reset les états
       setPendingChanges(null);
       setPreviewDays(null);
+
+      // Régénérer les suggestions après confirmation (basées sur le nouvel itinéraire)
+      loadSuggestions();
     } catch (err) {
       console.error('[useChatbot] Error applying changes:', err);
       setError('Erreur lors de l\'application des modifications.');
     } finally {
       setIsProcessing(false);
     }
-  }, [tripId, pendingChanges, previewDays, onDaysUpdate]);
+  }, [tripId, pendingChanges, previewDays, onDaysUpdate, loadSuggestions]);
 
   // Rejeter les changements
   const rejectChanges = useCallback(() => {
@@ -274,6 +308,7 @@ export function useChatbot({
     setPendingChanges(null);
     setPreviewDays(null);
     setError(null);
+    setSuggestions([]);
   }, []);
 
   return {
@@ -282,6 +317,7 @@ export function useChatbot({
     error,
     pendingChanges,
     previewDays,
+    suggestions,
     sendMessage,
     confirmChanges,
     rejectChanges,

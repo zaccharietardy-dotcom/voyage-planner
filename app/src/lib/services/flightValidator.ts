@@ -76,7 +76,6 @@ export function filterValidFlights<T extends { flightNumber: string; departureAi
     const isArrValid = validateAirportCode(flight.arrivalAirportCode);
 
     if (!isFlightValid || !isDepValid || !isArrValid) {
-      console.log(`[FlightValidator] Vol exclu: ${flight.flightNumber} (${flight.departureAirportCode} → ${flight.arrivalAirportCode})`);
       return false;
     }
 

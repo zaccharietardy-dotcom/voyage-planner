@@ -83,16 +83,12 @@ function cleanNameForGeocoding(name: string): string {
  */
 export async function generateTripWithAI(preferences: TripPreferences): Promise<Trip> {
   const T0 = Date.now();
-  const elapsed = () => `${((Date.now() - T0) / 1000).toFixed(1)}s`;
-  console.log('Generating trip with preferences:', preferences);
-
   // RESET: Nettoyer les trackers de la session précédente pour éviter les doublons inter-voyages
   usedRestaurantIds.clear();
   clearGeocodeCache();
   resetGeminiGeocodeCounter();
 
   // 1. Trouver les coordonnées et aéroports (avec fallback Nominatim async)
-  console.log(`[PERF ${elapsed()}] Start geocoding`);
   const [originCityCenter, destCityCenter, originAirports, destAirports] = await Promise.all([
     getCityCenterCoordsAsync(preferences.origin),
     getCityCenterCoordsAsync(preferences.destination),
@@ -110,21 +106,18 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
     lng: destAirports[0].longitude,
   } : null);
 
-  console.log(`[PERF ${elapsed()}] Geocoding done`);
   if (!destCoords) {
     console.error(`[AI] ❌ Impossible de géocoder "${preferences.destination}" — aucune coordonnée trouvée`);
     throw new Error(`Destination inconnue: "${preferences.destination}". Impossible de trouver les coordonnées.`);
   }
 
-  console.log(`[AI] Centre-ville destination: ${preferences.destination} → ${destCoords.lat.toFixed(4)}, ${destCoords.lng.toFixed(4)}`);
   if (destCityCenter) {
-    console.log(`[AI] ✓ Utilisation des coords centre-ville`);
+    // Using city center coords
   } else {
     console.warn(`[AI] ⚠ Coords via fallback aéroport pour "${preferences.destination}"`);
   }
 
   // 2. Comparer les options de transport (lancé en parallèle avec attractions + hôtels)
-  console.time('[AI] Transport');
   // Calculer la date de retour pour les liens de réservation
   const tripReturnDate = new Date(preferences.startDate);
   tripReturnDate.setDate(tripReturnDate.getDate() + preferences.durationDays - 1);
@@ -148,12 +141,8 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
   const startDate = normalizeToLocalDate(preferences.startDate);
   const endDate = new Date(startDate);
   endDate.setDate(endDate.getDate() + preferences.durationDays - 1);
-  console.log(`[AI] Date de départ normalisée: ${startDate.toDateString()} (input: ${preferences.startDate})`);
-
   // Résoudre le budget et générer la stratégie
-  console.time('[AI] BudgetStrategy');
   const resolvedBudget = resolveBudget(preferences);
-  console.log(`[AI] Budget résolu: ${resolvedBudget.totalBudget}€ total, ${resolvedBudget.perPersonPerDay.toFixed(0)}€/pers/jour, niveau=${resolvedBudget.budgetLevel}`);
 
   const budgetStrategyPromise = generateBudgetStrategy(
     resolvedBudget,
@@ -165,15 +154,12 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
   );
 
   // Lancer attractions + hôtels en parallèle avec le transport
-  console.time('[AI] Attractions pool');
-  console.log(`[PERF ${elapsed()}] Start parallel batch (attractions+hotels+tips+budget)`);
   const attractionsPromise = searchAttractionsMultiQuery(
     preferences.destination,
     destCoords,
     { types: preferences.activities, activities: preferences.activities, limit: preferences.durationDays >= 5 ? 80 : 50 }
   );
 
-  console.time('[AI] Hotels');
   // Estimer le plafond prix/nuit avant d'avoir la stratégie complète
   const estimatedMaxPricePerNight = resolvedBudget.budgetLevel === 'economic' ? 80 :
     resolvedBudget.budgetLevel === 'moderate' ? 120 : undefined;
@@ -187,7 +173,6 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
   });
 
   // Lancer les travel tips en parallèle aussi
-  console.time('[AI] TravelTips');
   const travelTipsPromise = generateTravelTips(
     preferences.origin,
     preferences.destination,
@@ -217,19 +202,11 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
     mustSeePromise,
     viatorMixPromise,
   ]);
-  console.timeEnd('[AI] Transport');
-  console.timeEnd('[AI] Attractions pool');
-  console.timeEnd('[AI] Hotels');
-  console.timeEnd('[AI] TravelTips');
-  console.log(`[PERF ${elapsed()}] Parallel batch done (7 promises)`);
-  console.timeEnd('[AI] BudgetStrategy');
-  console.log(`[AI] Stratégie budget: ${budgetStrategy.accommodationType}, courses=${budgetStrategy.groceryShoppingNeeded}, activités=${budgetStrategy.activitiesLevel}`);
 
   // Si la stratégie recommande Airbnb, lancer une recherche en parallèle
   let airbnbOptions: Accommodation[] = [];
   if (budgetStrategy.accommodationType.includes('airbnb') && isAirbnbApiConfigured()) {
     // API Airbnb disponible → recherche directe
-    console.time('[AI] Airbnb');
     try {
       const checkInStr = startDate.toISOString().split('T')[0];
       const checkOutStr = endDate.toISOString().split('T')[0];
@@ -244,25 +221,20 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
           cityCenter: destCoords,
         },
       );
-      console.log(`[AI] ✅ ${airbnbOptions.length} Airbnb trouvés`);
     } catch (error) {
       console.warn('[AI] Recherche Airbnb échouée, fallback hôtels:', error);
     }
-    console.timeEnd('[AI] Airbnb');
   } else if (budgetStrategy.accommodationType.includes('airbnb') && !isAirbnbApiConfigured()) {
     // Pas d'API Airbnb → filtrer les appartements/flats dans les résultats hôtel existants
-    console.log('[AI] Pas d\'API Airbnb configurée, recherche d\'apartments dans les résultats Booking...');
     const apartmentKeywords = /\b(apartment|flat|appart|résidence|studio|loft|suite.*kitchen|self.?catering)\b/i;
     const apartmentResults = accommodationOptions.filter(h =>
       apartmentKeywords.test(h.name) || apartmentKeywords.test(h.description || '') ||
       (h.amenities && h.amenities.some((a: string) => /kitchen|cuisine|kitchenette/i.test(a)))
     );
     if (apartmentResults.length > 0) {
-      console.log(`[AI] ✅ ${apartmentResults.length} apartments trouvés dans les résultats hôtel`);
       // Prioriser les apartments en les mettant en premier
       airbnbOptions = apartmentResults;
     } else {
-      console.log('[AI] Aucun apartment trouvé dans Booking, utilisation des hôtels existants uniquement');
       // Ne PAS générer de fallback Airbnb - les résultats Booking.com ont déjà des liens directs
       // airbnbOptions reste vide
     }
@@ -303,16 +275,13 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
     const userPreferred = transportOptions.find(t => t.mode === preferences.transport);
     if (userPreferred) {
       selectedTransport = userPreferred;
-      console.log(`Mode de transport choisi par l'utilisateur: ${preferences.transport}`);
     } else {
       console.warn(`Mode de transport "${preferences.transport}" demandé mais non disponible pour cette destination`);
       console.warn(`Options disponibles: ${transportOptions.map(t => t.mode).join(', ')}`);
     }
   } else {
-    console.log(`Mode optimal: meilleure option sélectionnée automatiquement`);
+    // Mode optimal: best option selected automatically
   }
-
-  console.log(`Transport sélectionné: ${selectedTransport?.mode} (score: ${selectedTransport?.score}/10)`);
 
   // 4. Si avion, rechercher les vols détaillés
   let outboundFlight: Flight | null = null;
@@ -327,10 +296,6 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       console.warn('Pas d\'aéroports trouvés, utilisation du transport alternatif');
       selectedTransport = transportOptions.find(t => t.mode !== 'plane') || selectedTransport;
     } else {
-      console.log(`Aéroports origine: ${originAirports.map(a => a.code).join(', ')}`);
-      console.log(`Aéroports destination: ${destAirports.map(a => a.code).join(', ')}`);
-
-      console.log(`[PERF ${elapsed()}] Start flight search`);
       const flightResult = await findBestFlights(
         originAirports,
         destAirports,
@@ -348,7 +313,6 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       originAirport = flightResult.originAirport;
       destAirport = flightResult.destAirport;
 
-      console.log(`Sélection finale: ${originAirport.code} → ${destAirport.code}`);
     }
   }
 
@@ -360,7 +324,6 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
   // 4b. Initialiser le tracker de localisation pour la cohérence géographique
   // CRITIQUE: Empêche les activités à Barcelona avant d'avoir atterri
   const locationTracker = createLocationTracker(preferences.origin, preferences.origin);
-  console.log(`[LocationTracker] Initialisé à ${preferences.origin}`);
 
   // 5. Centre-ville de destination
   // IMPORTANT: Utiliser destCoords (le vrai centre-ville) et NON l'aéroport
@@ -393,10 +356,7 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
         if (existing) existing.mustSee = true;
       }
     }
-    console.log(`[AI] ${mustSeeNames.size} mustSee marquées: ${[...mustSeeNames].join(', ')}`);
   }
-
-  console.log(`[AI] Pool SerpAPI: ${attractionPool.length} attractions`);
 
   // TOUJOURS injecter les must-see curés (Rijksmuseum, etc.) même si SerpAPI les a manqués
   const curatedMustSee = getMustSeeAttractions(preferences.destination);
@@ -411,7 +371,6 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       }
     }
     if (injectedCount > 0) {
-      console.log(`[AI] ✅ Injecté ${injectedCount} must-see curés: ${curatedMustSee.slice(0, injectedCount).map(a => a.name).join(', ')}`);
     }
   }
 
@@ -434,7 +393,6 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
     const maxActivityPrice = budgetStrategy.maxPricePerActivity || 100;
     const viatorPriceFiltered = viatorActivitiesRaw.filter(v => {
       if (v.estimatedCost && v.estimatedCost > maxActivityPrice) {
-        console.log(`[AI] Viator exclusion prix: "${v.name}" (${v.estimatedCost}€ > max ${maxActivityPrice}€)`);
         return false;
       }
       return true;
@@ -461,7 +419,6 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
 
     if (viatorToAdd.length > 0) {
       attractionPool.push(...viatorToAdd);
-      console.log(`[AI] ✅ ${viatorToAdd.length} activités Viator ajoutées (${experiential.length} expérientielles)`);
     }
   }
 
@@ -505,7 +462,6 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       // dataReliability reste 'estimated' ou 'generated'
     }
     const totalNonViator = attractionPool.filter(a => a.providerName !== 'Viator').length;
-    console.log(`[AI] Viator enrichment: ${enrichedCount}/${totalNonViator} attractions SerpAPI enrichies avec données vérifiées`);
   }
 
   let selectedAttractions = attractionPool;
@@ -517,13 +473,11 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
   }
 
   // Étape 2: Claude organise l'itinéraire intelligemment
-  console.log('[AI] Étape 2: Curation Claude Sonnet...');
   let claudeItinerary: Awaited<ReturnType<typeof generateClaudeItinerary>> = null;
   let attractionsByDay: Attraction[][];
   let dayMetadata: { theme?: string; dayNarrative?: string; isDayTrip?: boolean; dayTripDestination?: string }[] = [];
 
   try {
-    console.log(`[PERF ${elapsed()}] Start Claude itinerary`);
     claudeItinerary = await generateClaudeItinerary({
       destination: preferences.destination,
       durationDays: preferences.durationDays,
@@ -545,7 +499,6 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
   }
 
   if (claudeItinerary) {
-    console.log('[AI] ✅ Itinéraire Claude reçu, mapping des attractions...');
 
     // Stocker les métadonnées par jour
     dayMetadata = claudeItinerary.days.map(d => ({
@@ -556,7 +509,6 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
     }));
 
     // PARALLELIZED: Resolve all additional suggestions across all days at once
-    console.log(`[PERF ${elapsed()}] Start parallel suggestion resolution`);
 
     // Step 1: Pre-resolve all day trip destination centers in parallel (AVANT mapping pour filtrer)
     const dayTripDestinations = claudeItinerary.days
@@ -573,7 +525,6 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
         const result = dtResults[idx];
         if (result.status === 'fulfilled' && result.value) {
           dayTripCenterMap.set(dest, result.value);
-          console.log(`[AI] Day trip center for "${dest}": (${result.value.lat}, ${result.value.lng})`);
         }
       });
     }
@@ -614,7 +565,6 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       }
     }
 
-    console.log(`[AI] Resolving ${suggestionTasks.length} suggestions in parallel...`);
 
     // Step 3: Resolve all suggestions in parallel (each with sequential fallback chain)
     // Fallback order: Travel Places (free) → Nominatim (free) → SerpAPI (paid, last resort)
@@ -642,7 +592,6 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
               mustSee: true, dataReliability: 'verified',
               googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(suggestionName + ', ' + dayTripDestination)}`,
             };
-            console.log(`[AI]   Résolu day trip via Nominatim: "${suggestionName}" → (${geo.lat}, ${geo.lng})`);
             return;
           }
         } catch (e) {
@@ -659,7 +608,6 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
           name: resolved.name || suggestionName,
           mustSee: true, dataReliability: 'verified',
         };
-        console.log(`[AI]   Résolu via Travel Places: "${suggestionName}" → (${resolved.lat}, ${resolved.lng})`);
         return;
       }
 
@@ -673,7 +621,6 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
             mustSee: true, dataReliability: 'verified',
             googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(suggestionName + ', ' + geoContext)}`,
           };
-          console.log(`[AI]   Résolu via Nominatim: "${suggestionName}" → (${geo.lat}, ${geo.lng})`);
           return;
         }
       } catch (e) {
@@ -690,7 +637,6 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
             mustSee: true, dataReliability: 'verified' as const,
             googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(suggestionName + ', ' + geoContext)}`,
           };
-          console.log(`[AI]   Résolu via Gemini: "${suggestionName}" → (${geminiGeo.lat}, ${geminiGeo.lng})`);
           return;
         }
       } catch (e) {
@@ -701,12 +647,10 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       const found = await searchMustSeeAttractions(suggestionName, geoContext, geoCenter || cityCenter);
       if (found.length > 0) {
         attractionsByDay[dayIndex][genIndex] = { ...found[0], mustSee: true };
-        console.log(`[AI]   Résolu via SerpAPI: "${suggestionName}" → coordonnées vérifiées`);
         return;
       }
     }));
 
-    console.log(`[PERF ${elapsed()}] Parallel suggestion resolution done`);
 
     // === Enrichissement post-Claude : remplacer les defaults (60min, 0€) par des données Viator vérifiées ===
     {
@@ -748,7 +692,6 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
           // 3. Pas de match Viator → garder les defaults (60min, 0€) + applyDurationRules déjà appliqué
         }
       }
-      console.log(`[AI] Viator suggestion enrichment: ${suggestionEnriched}/${suggestionTotal} suggestions enrichies`);
     }
 
     // Post-enrichment check: mark items still at city center as estimated
@@ -782,7 +725,6 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
           || (a.dataReliability !== 'verified' && isCoordsNearCenter(a.latitude, a.longitude, fallbackCenter));
 
         if (needsResolution) {
-          console.log(`[AI] 🔍 Résolution GPS pour "${a.name}" à ${geoContextCity}...`);
           const resolved = await resolveCoordinates(a.name, geoContextCity, fallbackCenter, 'attraction');
           if (resolved) {
             // Propager les horaires d'ouverture réels si disponibles
@@ -791,7 +733,6 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
               const parsedHours = parseSimpleOpeningHours(resolved.operatingHours);
               if (parsedHours) {
                 resolvedOpeningHours = parsedHours;
-                console.log(`[AI] 🕐 Horaires réels pour "${a.name}": ${parsedHours.open}-${parsedHours.close}`);
               }
             }
             dayAttrs[j] = {
@@ -801,7 +742,6 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
               dataReliability: 'verified' as const,
               openingHours: resolvedOpeningHours,
             };
-            console.log(`[AI] ✅ Résolu: "${a.name}" → (${resolved.lat.toFixed(4)}, ${resolved.lng.toFixed(4)}) via ${resolved.source}`);
           } else {
             // REMPLACEMENT: trouver une alternative vérifiée dans le pool
             const replacement = selectedAttractions.find(pool =>
@@ -832,24 +772,18 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       // Day trip validation: filter out attractions that are in the base city (not near day trip destination)
       if (isDayTripDay && fallbackCenter.lat !== cityCenter.lat) {
         const MAX_DIST_FROM_DAY_TRIP_KM = 30; // attractions must be within 30km of day trip destination
-        const beforeCount = dayAttrs.length;
         attractionsByDay[i] = dayAttrs.filter(a => {
           const distFromDayTrip = calculateDistance(a.latitude, a.longitude, fallbackCenter.lat, fallbackCenter.lng);
           const distFromBase = calculateDistance(a.latitude, a.longitude, cityCenter.lat, cityCenter.lng);
           // Keep if closer to day trip destination than to base city, or within range of day trip
           if (distFromDayTrip <= MAX_DIST_FROM_DAY_TRIP_KM) return true;
           if (distFromDayTrip < distFromBase) return true;
-          console.log(`[AI] Day trip filter: "${a.name}" removed (${Math.round(distFromDayTrip)}km from ${day.dayTripDestination}, ${Math.round(distFromBase)}km from ${preferences.destination})`);
           return false;
         });
-        if (attractionsByDay[i].length < beforeCount) {
-          console.log(`[AI] Day trip filter: ${beforeCount - attractionsByDay[i].length} attractions removed for day ${i + 1} (too far from ${day.dayTripDestination})`);
-        }
       }
     }
   } else {
     // Fallback: pré-allocation simple par rating
-    console.log('[AI] Fallback: pré-allocation par rating...');
     attractionsByDay = preAllocateAttractions(
       selectedAttractions,
       preferences.durationDays,
@@ -871,40 +805,30 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       .filter(a => {
         if (a.mustSee) return true;
         if (irrelevantPatterns.test(a.name)) {
-          console.log(`[AI] Filtré attraction non pertinente: "${a.name}"`);
           return false;
         }
         if (venuePatterns.test(a.name)) {
-          console.log(`[AI] Filtré salle de concert/venue: "${a.name}"`);
           return false;
         }
         if (restaurantPatterns.test(a.name)) {
-          console.log(`[AI] Filtré restaurant dans le pool d'attractions: "${a.name}"`);
           return false;
         }
         if (genericLocationPattern.test(a.name)) {
-          console.log(`[AI] Filtré titre générique de localisation: "${a.name}"`);
           return false;
         }
         // Filtrer les attractions de type "gastronomy" qui sont des restaurants déguisés
         if (a.type === 'gastronomy' && !a.mustSee) {
-          console.log(`[AI] Filtré attraction gastronomie: "${a.name}" (type=${a.type})`);
           return false;
         }
         // Filtrer les noms trop génériques (pas un vrai lieu)
         const nameLower = a.name.toLowerCase().trim();
         if (nameLower.split(/\s+/).length <= 2 && /^(landmark|architecture|culture|history|nature|scenic|local|traditional|ancient|modern|famous|popular|beautiful)\s/i.test(nameLower)) {
-          console.log(`[AI] Filtré attraction générique: "${a.name}"`);
           return false;
         }
         return true;
       })
       .map(a => fixAttractionCost(fixAttractionDuration(a)));
-    if (attractionsByDay[i].length < before) {
-      console.log(`[AI] Jour ${i + 1}: ${before - attractionsByDay[i].length} attraction(s) filtrée(s)`);
-    }
   }
-  console.log('[AI] ✅ Post-traitement durées/coûts/filtrage appliqué');
 
   // Scoring diversité : réordonner pour éviter les activités consécutives du même type
   for (let i = 0; i < attractionsByDay.length; i++) {
@@ -960,16 +884,27 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
         }
       }
       attractionsByDay[bestDay].unshift(missing);
-      console.log(`[AI] ⚠️ Must-see forcé: "${missing.name}" ajouté au jour ${bestDay + 1}`);
     }
   }
 
   // 7.5 Sélectionner le meilleur hébergement (hôtels + Airbnb si disponible)
-  const accommodation = selectBestHotel(allAccommodationOptions, {
+  // Pré-filtrer par budget stratégique si disponible
+  const maxBudgetPerNight = budgetStrategy.accommodationBudgetPerNight
+    ? budgetStrategy.accommodationBudgetPerNight * 1.2  // 20% de tolérance
+    : undefined;
+  let accommodationCandidates = allAccommodationOptions;
+  if (maxBudgetPerNight) {
+    const budgetFiltered = allAccommodationOptions.filter(h => h.pricePerNight <= maxBudgetPerNight);
+    if (budgetFiltered.length >= 2) {
+      accommodationCandidates = budgetFiltered;
+    }
+  }
+  const accommodation = selectBestHotel(accommodationCandidates, {
     budgetLevel: resolvedBudget.budgetLevel as 'economic' | 'moderate' | 'luxury',
     attractions: selectedAttractions,
     preferApartment: budgetStrategy.accommodationType.includes('airbnb'),
     cityCenter: cityCenter ? { lat: cityCenter.lat, lng: cityCenter.lng } : undefined,
+    maxBudgetPerNight,
   });
 
   // 7.5b Validate hotel coordinates — if too close to city center, likely a default
@@ -978,20 +913,17 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       accommodation.latitude, accommodation.longitude, cityCenter.lat, cityCenter.lng
     );
     if (hotelDistFromCenter < 0.2) { // < 200m from city center = probably a default
-      console.log(`[AI] Hotel "${accommodation.name}" coords too close to city center (${(hotelDistFromCenter * 1000).toFixed(0)}m), resolving...`);
       try {
         const hotelGeo = await geocodeAddress(`${accommodation.name}, ${preferences.destination}`);
         if (hotelGeo && hotelGeo.lat && hotelGeo.lng) {
           accommodation.latitude = hotelGeo.lat;
           accommodation.longitude = hotelGeo.lng;
-          console.log(`[AI] Hotel resolved via Nominatim: (${hotelGeo.lat}, ${hotelGeo.lng})`);
         } else {
           // Try Gemini fallback
           const geminiGeo = await geocodeWithGemini(accommodation.name, preferences.destination);
           if (geminiGeo) {
             accommodation.latitude = geminiGeo.lat;
             accommodation.longitude = geminiGeo.lng;
-            console.log(`[AI] Hotel resolved via Gemini: (${geminiGeo.lat}, ${geminiGeo.lng})`);
           }
         }
       } catch (e) {
@@ -1014,7 +946,6 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
           if (newDist < hotelDistFromCenter2) {
             accommodation.latitude = hotelGeo2.lat;
             accommodation.longitude = hotelGeo2.lng;
-            console.log(`[AI] Hotel re-resolved via Nominatim: (${hotelGeo2.lat}, ${hotelGeo2.lng}), now ${newDist.toFixed(1)}km from center`);
           }
         } else {
           const geminiGeo2 = await geocodeWithGemini(accommodation.name, preferences.destination);
@@ -1023,7 +954,6 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
             if (newDist < hotelDistFromCenter2) {
               accommodation.latitude = geminiGeo2.lat;
               accommodation.longitude = geminiGeo2.lng;
-              console.log(`[AI] Hotel re-resolved via Gemini: (${geminiGeo2.lat}, ${geminiGeo2.lng}), now ${newDist.toFixed(1)}km from center`);
             }
           }
         }
@@ -1033,7 +963,6 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
     }
   }
 
-  console.log(`Hébergement sélectionné: ${accommodation?.name || 'Aucun'} (type: ${accommodation?.type || 'N/A'})`);
 
   // 7.6 Initialiser le BudgetTracker et rebalancer le budget
   const budgetTracker = new BudgetTracker(resolvedBudget.totalBudget, preferences.groupSize, preferences.durationDays);
@@ -1055,15 +984,11 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
     // Économies : redistribuer vers food et activités
     const perDay = savings / preferences.durationDays;
     budgetStrategy.dailyActivityBudget += Math.round(perDay * 0.4);
-    console.log(`[Budget] ✅ Économies de ${Math.round(savings)}€ → activités +${Math.round(perDay * 0.4)}€/jour`);
   } else if (savings < -50) {
     // Dépassement : réduire food et activités
     const cutPerDay = Math.abs(savings) / preferences.durationDays;
     budgetStrategy.dailyActivityBudget = Math.max(0, budgetStrategy.dailyActivityBudget - Math.round(cutPerDay * 0.4));
-    console.log(`[Budget] ⚠️ Dépassement de ${Math.round(Math.abs(savings))}€ → activités -${Math.round(cutPerDay * 0.4)}€/jour`);
   }
-
-  console.log(`[Budget] ${budgetTracker.getSummary()}`);
 
   // 8. Déterminer les jours de courses et préparer les recherches parallèles
   let groceryStore: GroceryStore | null = null;
@@ -1075,11 +1000,9 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       const midDay = Math.ceil(preferences.durationDays / 2) + 1;
       groceryDays.add(midDay);
     }
-    console.log(`[AI] Courses prévues aux jours: ${[...groceryDays].join(', ')}`);
   }
 
   // 9. PRÉ-FETCH RESTAURANTS + LUGGAGE + GROCERY EN PARALLÈLE
-  console.log(`[PERF ${elapsed()}] Start parallel pre-fetch (restaurants + luggage + grocery)`);
   const prefetchedRestaurants = new Map<string, Restaurant | null>();
   let prefetchedLuggageStoragesResult: LuggageStorage[] | null = null;
   {
@@ -1209,19 +1132,16 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
           prefetchedRestaurants.set(fetch.key, restaurant);
         }
       });
-      console.log(`[AI] ✅ ${prefetchedRestaurants.size} restaurants pré-fetchés en parallèle (${restaurantFetches.length} requêtes)`);
     }
 
     // Process grocery store results
     if (groceryStores.length > 0) {
       groceryStore = groceryStores[0];
-      console.log(`[AI] Supermarché trouvé: ${groceryStore.name} (${groceryStore.walkingTime}min à pied)`);
     }
 
     // Luggage storages will be passed to generateDayWithScheduler
     prefetchedLuggageStoragesResult = luggageStorages.length > 0 ? luggageStorages : null;
   }
-  console.log(`[PERF ${elapsed()}] Parallel pre-fetch done (restaurants + luggage + grocery)`);
 
   // 10. Générer les jours avec le SCHEDULER (évite les chevauchements)
   const days: TripDay[] = [];
@@ -1236,7 +1156,6 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
   // Si groceryShoppingNeeded=false, on considère que les courses ne sont pas nécessaires (pas de self-catering)
   let groceriesDoneByDay = !budgetStrategy?.groceryShoppingNeeded; // true si pas besoin de courses
 
-  console.log(`[PERF ${elapsed()}] Start day generation loop (${preferences.durationDays} days)`);
   for (let i = 0; i < preferences.durationDays; i++) {
     // Créer la date du jour (startDate est déjà normalisé à midi local)
     const dayDate = new Date(startDate);
@@ -1248,15 +1167,10 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
     const isLastDay = i === preferences.durationDays - 1;
     const dayNumber = i + 1;
 
-    console.log(`[AI] Jour ${dayNumber}: ${dayDate.toDateString()}`);
-
     // Récupérer les attractions pré-allouées pour ce jour
     const dayAttractions = attractionsByDay[i] || [];
 
-    console.log(`\n=== Génération Jour ${dayNumber} ===`);
-
     // Générer le jour complet avec le scheduler
-    console.log(`[PERF ${elapsed()}] Generating day ${dayNumber}`);
     const dayResult = await generateDayWithScheduler({
       dayNumber,
       date: dayDate,
@@ -1326,7 +1240,6 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
           const travelTime = Math.round(hotelDistanceFromCenter * 3); // ~3min/km en transports
           const groceryStart = new Date(lastEnd.getTime() + travelTime * 60 * 1000);
           insertTime = `${groceryStart.getHours().toString().padStart(2, '0')}:${groceryStart.getMinutes().toString().padStart(2, '0')}`;
-          console.log(`[Courses] Hôtel à ${hotelDistanceFromCenter.toFixed(1)}km du centre, courses après retour à ${insertTime}`);
         } else {
           // Fallback: courses tard (19h) pour être sûr d'être rentré
           insertTime = '19:00';
@@ -1373,7 +1286,6 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       dayItems.forEach((item, idx) => { item.orderIndex = idx; });
 
       if (budgetTracker) budgetTracker.spend('food', 25 * (preferences.groupSize || 1));
-      console.log(`[Jour ${dayNumber}] 🛒 Courses ajoutées: ${groceryStore.name} à ${insertTime}`);
       // Les courses sont faites → on peut cuisiner à partir de maintenant
       groceriesDoneByDay = true;
     }
@@ -1445,12 +1357,10 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
           }
           // Si isDayTrip mais thème ne match pas, reset le day trip
           if (lastDay.isDayTrip) {
-            console.log(`[AI] Jour ${lastDay.dayNumber}: Day trip "${lastDay.dayTripDestination}" sans activités correspondantes → reset`);
-            lastDay.isDayTrip = false;
+              lastDay.isDayTrip = false;
             lastDay.dayTripDestination = undefined;
           }
           lastDay.dayNarrative = undefined;
-          console.log(`[AI] Theme mismatch Jour ${lastDay.dayNumber}: regenerated to "${lastDay.theme}"`);
         }
       }
     }
@@ -1459,21 +1369,16 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
     // ET redistribuer les attractions non utilisées aux jours suivants
     pendingLateFlightData = dayResult.lateFlightForNextDay;
     if (pendingLateFlightData && i < preferences.durationDays - 1) {
-      console.log(`[AI] Vol tardif détecté au Jour ${dayNumber}, les activités d'arrivée seront au Jour ${dayNumber + 1}`);
-
       // Redistribuer les attractions du Jour 1 aux jours suivants
       // Car le Jour 1 est un jour de voyage et ne peut pas faire d'activités à destination
       const unusedAttractions = dayAttractions.filter(a => !tripUsedAttractionIds.has(a.id));
       if (unusedAttractions.length > 0) {
-        console.log(`[AI] ${unusedAttractions.length} attraction(s) non utilisée(s) au Jour ${dayNumber}, redistribution aux jours suivants`);
-
         // Répartir équitablement sur les jours restants
         const remainingDays = preferences.durationDays - 1 - i;
         for (let j = 0; j < unusedAttractions.length; j++) {
           const targetDayIndex = i + 1 + (j % remainingDays);
           if (targetDayIndex < preferences.durationDays) {
             attractionsByDay[targetDayIndex].push(unusedAttractions[j]);
-            console.log(`[AI]   "${unusedAttractions[j].name}" → Jour ${targetDayIndex + 1}`);
           }
         }
       }
@@ -1541,7 +1446,6 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
         const seenData = seenActivities.get(foundDupeKey)!;
         if (durationMin > seenData.durationMin) {
           // L'item actuel est plus long → supprimer l'ancien
-          console.log(`[AI] Dédup cross-day: suppression "${seenData.title}" (${seenData.durationMin}min) Jour ${seenData.dayIndex + 1}, conservation "${title}" (${durationMin}min) Jour ${d + 1}`);
           days[seenData.dayIndex].items.splice(seenData.itemIndex, 1);
           days[seenData.dayIndex].items.forEach((it, idx) => { it.orderIndex = idx; });
           // Ajuster les index dans seenActivities si nécessaire
@@ -1554,7 +1458,6 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
           seenActivities.set(title, { dayIndex: d, itemIndex: i, durationMin, title });
         } else {
           // L'ancien est plus long → supprimer l'item actuel
-          console.log(`[AI] Dédup cross-day: suppression "${title}" (${durationMin}min) Jour ${d + 1}, conservation "${seenData.title}" (${seenData.durationMin}min) Jour ${seenData.dayIndex + 1}`);
           days[d].items.splice(i, 1);
           days[d].items.forEach((it, idx) => { it.orderIndex = idx; });
           i--; // Ajuster l'index après splice
@@ -1610,7 +1513,6 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
               dataReliability: 'verified',
             };
             day.items.push(newItem);
-            console.log(`[AI] ✅ Must-see forcé dans trip final: "${poolMatch.name}" → Jour ${day.dayNumber}`);
           }
         }
       }
@@ -1626,7 +1528,6 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       const pickupStart = parseTime(day.date, day.items[luggagePickupIdx].startTime);
       const gapMinutes = (pickupStart.getTime() - dropEnd.getTime()) / (60 * 1000);
       if (gapMinutes < 120) {
-        console.log(`[Validation] Suppression consigne incohérente Jour ${day.dayNumber}: ${Math.round(gapMinutes)}min entre dépôt et récupération`);
         day.items = day.items.filter((_, idx) => idx !== luggageDropIdx && idx !== luggagePickupIdx);
       }
     }
@@ -1669,33 +1570,28 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
 
       // Filter concert halls/venues (anytime)
       if (badItemPatterns.venues.test(combined)) {
-        console.log(`[PostProcess] Supprimé venue: "${title}"`);
         return false;
       }
 
       // Filter show venues/cabarets ONLY during daytime (before 18h)
       // These are OK for evening activities
       if (isDaytimeActivity(item) && badItemPatterns.showVenues.test(combined)) {
-        console.log(`[PostProcess] Supprimé spectacle en journée: "${title}" à ${item.startTime}`);
         return false;
       }
 
       // Filter Michelin restaurants proposed as activities (not restaurant type)
       if (badItemPatterns.michelinRestaurants.test(combined)) {
-        console.log(`[PostProcess] Supprimé restaurant Michelin comme activité: "${title}"`);
         return false;
       }
 
       // Filter generic location titles
       if (badItemPatterns.genericLocations.test(title)) {
-        console.log(`[PostProcess] Supprimé titre générique: "${title}"`);
         return false;
       }
 
       // Filter duplicate cruises (keep only first one)
       if (cruiseKeywords.test(title)) {
         if (hasCruise) {
-          console.log(`[PostProcess] Supprimé croisière doublon: "${title}"`);
           return false;
         }
         hasCruise = true;
@@ -1704,7 +1600,6 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       // Filter duplicate food tours (keep only first one)
       if (foodTourKeywords.test(title)) {
         if (hasFoodTour) {
-          console.log(`[PostProcess] Supprimé food tour doublon: "${title}"`);
           return false;
         }
         hasFoodTour = true;
@@ -1714,7 +1609,6 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
     });
 
     if (day.items.length < beforeCount) {
-      console.log(`[PostProcess] Jour ${day.dayNumber}: ${beforeCount - day.items.length} item(s) supprimé(s)`);
       // Re-index orderIndex
       day.items.forEach((item, idx) => { item.orderIndex = idx; });
     }
@@ -1746,7 +1640,6 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
         curr.startTime = `${Math.floor(newStart / 60).toString().padStart(2, '0')}:${(newStart % 60).toString().padStart(2, '0')}`;
         const newEnd = newStart + duration;
         curr.endTime = `${Math.floor(newEnd / 60).toString().padStart(2, '0')}:${(newEnd % 60).toString().padStart(2, '0')}`;
-        console.log(`[Validation] Overlap fix Jour ${day.dayNumber}: "${curr.title}" shifted to ${curr.startTime}-${curr.endTime}`);
       }
     }
     day.items.forEach((item, idx) => { item.orderIndex = idx; });
@@ -1763,7 +1656,6 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
         ? allRestaurantItems.slice(0, 12)
         : allRestaurantItems;
       if (allRestaurantItems.length > 12) {
-        console.log(`[AI] Gemini enrichment: capped à 12/${allRestaurantItems.length} restaurants`);
       }
 
       const toEnrich = restaurantsToEnrich.map(item => ({
@@ -1773,24 +1665,23 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
         mealType: item.title.includes('Déjeuner') ? 'lunch' : item.title.includes('Dîner') ? 'dinner' : 'breakfast',
       }));
 
-      console.log(`[PERF ${elapsed()}] Start Gemini enrichment (${toEnrich.length} restos)`);
       const enriched = await enrichRestaurantsWithGemini(toEnrich, preferences.destination);
 
       for (const item of allRestaurantItems) {
         const data = enriched.get(item.title);
         if (data) {
-          // Build rich description
+          // Build rich description — filtrer les messages d'erreur de vérification
+          const isErrorText = (t: string) => /n'est pas situ[eé]|trop g[eé]n[eé]rique|cette entr[eé]e|l'adresse fournie|veuillez/i.test(t);
           const parts: string[] = [];
-          if (data.description) parts.push(data.description);
+          if (data.description && !isErrorText(data.description)) parts.push(data.description);
           if (data.specialties?.length) parts.push(`🍽️ ${data.specialties.join(', ')}`);
-          if (data.tips) parts.push(`💡 ${data.tips}`);
+          if (data.tips && !isErrorText(data.tips)) parts.push(`💡 ${data.tips}`);
           // Keep existing rating info
           const ratingPart = item.description?.match(/⭐.*$/)?.[0];
           if (ratingPart) parts.push(ratingPart);
           item.description = parts.join(' | ');
         }
       }
-      console.log(`[AI] ✅ ${enriched.size} restaurants enrichis avec descriptions et spécialités`);
     }
   } catch (error) {
     console.warn('[AI] Enrichissement restaurants échoué (non bloquant):', error);
@@ -1811,17 +1702,14 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
           const titleNorm = item.title.toLowerCase().trim();
           const destNorm = preferences.destination.toLowerCase().trim();
           if (titleNorm === destNorm || titleNorm === `visite de ${destNorm}` || titleNorm === `découverte de ${destNorm}`) {
-            console.log(`[AI] Skip Viator (titre = destination): "${item.title}"`);
             return false;
           }
           // Skip activités gratuites (cost = 0)
           if (item.estimatedCost === 0) {
-            console.log(`[AI] Skip Viator (gratuit): "${item.title}"`);
             return false;
           }
           // Skip activités gratuites par nature (places, parcs, rues...)
           if (FREE_ACTIVITY_PATTERNS.test(item.title)) {
-            console.log(`[AI] Skip Viator (lieu gratuit): "${item.title}"`);
             return false;
           }
           return true;
@@ -1829,10 +1717,8 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       );
 
       if (activitiesWithoutUrl.length > 0) {
-        console.log(`[AI] 🎭 Matching Viator pour ${activitiesWithoutUrl.length} activités sans lien...`);
         // Limiter à 8 requêtes Viator pour ne pas ralentir
         const toMatch = activitiesWithoutUrl.slice(0, 8);
-        console.log(`[PERF ${elapsed()}] Start Viator matching`);
         const viatorResults = await Promise.all(
           toMatch.map(item => {
             // Use activity title + destination for better matching
@@ -1881,16 +1767,18 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
               item.viatorDuration = result.duration;
 
               // Recalculer endTime si la durée Viator est significativement différente (>15min)
-              if (Math.abs(result.duration - currentDuration) > 15 && item.startTime && item.endTime) {
+              // Viator est la source de vérité — toujours appliquer sa durée au planning
+              const effectiveDuration = result.duration;
+              if (Math.abs(effectiveDuration - currentDuration) > 15 && item.startTime && item.endTime) {
                 const startMinutes = sH * 60 + sM;
-                const newEndMinutes = startMinutes + result.duration;
+                const newEndMinutes = startMinutes + effectiveDuration;
                 const newEndH = Math.floor(newEndMinutes / 60);
                 const newEndM = newEndMinutes % 60;
                 const newEndTime = `${String(newEndH).padStart(2, '0')}:${String(newEndM).padStart(2, '0')}`;
 
                 const oldEndTime = item.endTime;
                 item.endTime = newEndTime;
-                item.duration = result.duration;
+                item.duration = effectiveDuration;
 
                 // Décaler les items suivants dans le même jour
                 const day = days.find(d => d.items.some(it => it.id === item.id));
@@ -1912,7 +1800,6 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
                           next.endTime = `${String(Math.floor(newEndMin / 60)).padStart(2, '0')}:${String(newEndMin % 60).padStart(2, '0')}`;
                         }
                       }
-                      console.log(`[AI] ⏱ Durée Viator "${item.title}": ${currentDuration}min → ${result.duration}min, décalage +${shiftMinutes}min sur ${day.items.length - itemIndex - 1} items`);
                     }
                   }
                 }
@@ -1923,13 +1810,11 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
           }
           // Pas de fallback Tiqets — en attente API Distributor
         }
-        console.log(`[AI] ✅ ${matched}/${toMatch.length} activités matchées avec Viator`);
       }
     } catch (error) {
       console.warn('[AI] Viator post-processing error (non bloquant):', error);
     }
   } else if (elapsedMs >= 255_000) {
-    console.log(`[AI] ⏩ Skip Viator matching (${(elapsedMs / 1000).toFixed(0)}s écoulés, proche du timeout)`);
   }
 
   // Post-processing Impact/Omio: convertir les URLs Omio en liens affiliés trackés
@@ -1945,8 +1830,6 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       }
 
       if (omioItems.length > 0) {
-        console.log(`[AI] 🔗 Wrapping ${omioItems.length} URLs Omio via Impact tracking...`);
-        console.log(`[PERF ${elapsed()}] Start Impact tracking`);
         const omioUrls = omioItems.map(item => item.bookingUrl!);
         const trackingMap = await createTrackingLinks(omioUrls);
 
@@ -1959,8 +1842,6 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
             wrapped++;
           }
         }
-        console.log(`[AI] ✅ ${wrapped}/${omioItems.length} transport items wrapped avec Impact tracking`);
-        console.log(`[PERF ${elapsed()}] Impact tracking done`);
       }
     } catch (error) {
       console.warn('[AI] Impact tracking post-processing error (non bloquant):', error);
@@ -2004,13 +1885,11 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
     }
   }
   if (typeFixCount > 0) {
-    console.log(`[AI] ✅ ${typeFixCount} items reclassés en restaurant`);
   }
 
   // === 100% GPS PRECISION: Passe finale exhaustive ===
   // Vérifie TOUS les items non-vérifiés via chaîne complète (Travel Places → Nominatim → Gemini → SerpAPI)
   try {
-    console.log(`[PERF ${elapsed()}] Start exhaustive coordinates verification`);
     resetResolutionStats();
 
     // Collecter TOUS les items qui ont besoin de vérification
@@ -2038,7 +1917,6 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       }
     }
 
-    console.log(`[AI] 🔍 ${itemsToVerify.length} items à vérifier via chaîne exhaustive`);
 
     // Résolution par batch de 5 en parallèle (respecte rate limits tout en accélérant)
     let enrichedCount = 0;
@@ -2053,14 +1931,12 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
           item.longitude = resolved.lng;
           item.dataReliability = 'verified';
           enrichedCount++;
-          console.log(`[Coords] ✅ ${item.title}: ${oldCoords} → ${resolved.lat.toFixed(4)},${resolved.lng.toFixed(4)} (${resolved.source})`);
         }
       }));
     }
 
     const stats = getResolutionStats();
     if (enrichedCount > 0) {
-      console.log(`[AI] ✅ ${enrichedCount} items enrichis via chaîne exhaustive (${JSON.stringify(stats.bySource)})`);
     }
   } catch (error) {
     console.warn('[AI] Enrichissement coordonnées échoué (non bloquant):', error);
@@ -2184,15 +2060,11 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
   };
 
   // VALIDATION ET CORRECTION AUTOMATIQUE
-  console.log(`[PERF ${elapsed()}] Starting coherence validation...`);
-
   // 1. Vérifie la cohérence logique (vol -> transfert -> hotel -> activités)
   const coherenceValidatedTrip = validateAndFixTrip(initialTrip);
-  console.log(`[PERF ${elapsed()}] Coherence validation done`);
 
   // 2. Vérifie la cohérence géographique (toutes les activités dans la destination)
   // Supprime automatiquement les lieux trop loin de la destination
-  console.log(`[PERF ${elapsed()}] Starting geography validation...`);
   await validateTripGeography(coherenceValidatedTrip, cityCenter, true, preferences.destination);
 
   // Quality summary — 100% GPS precision target
@@ -2215,13 +2087,10 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       }
     }
   }
-  const pct = totalCount > 0 ? Math.round((verifiedCount / totalCount) * 100) : 0;
-  console.log(`[AI] ✅ Qualité GPS: ${verifiedCount}/${totalCount} verified (${pct}%) | ${estimatedCount} estimated, ${generatedCount} generated`);
   if (unverifiedItems.length > 0) {
     console.warn(`[AI] ⚠️ Items non-vérifiés:`, unverifiedItems);
   }
 
-  console.log(`[PERF ${elapsed()}] ✅ Trip generation complete`);
   return coherenceValidatedTrip;
 }
 

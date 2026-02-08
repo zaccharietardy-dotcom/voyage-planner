@@ -38,7 +38,6 @@ export async function POST(request: NextRequest) {
       case 'checkout.session.completed': {
         const session = event.data.object;
         const customerId = session.customer as string;
-        console.log(`[Stripe] checkout.session.completed - customer: ${customerId}, mode: ${session.mode}`);
 
         if (session.mode === 'subscription') {
           const subscriptionId = session.subscription as string;
@@ -47,7 +46,6 @@ export async function POST(request: NextRequest) {
           const subData = JSON.parse(JSON.stringify(subscription));
           const periodEnd = subData.current_period_end;
           const endsAt = periodEnd ? new Date(periodEnd * 1000).toISOString() : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
-          console.log(`[Stripe] periodEnd raw: ${periodEnd}, endsAt: ${endsAt}`);
 
           const { error: updateError } = await supabase
             .from('profiles')
@@ -63,7 +61,6 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: `DB error: ${updateError.message}` }, { status: 500 });
           }
 
-          console.log(`[Stripe] Subscription activated for customer ${customerId}`);
         } else if (session.mode === 'payment') {
           const metadata = session.metadata as Record<string, string> | null;
           if (metadata?.type === 'one_time_trip') {
@@ -85,7 +82,6 @@ export async function POST(request: NextRequest) {
               return NextResponse.json({ error: `DB error: ${updateError.message}` }, { status: 500 });
             }
 
-            console.log(`[Stripe] Extra trip purchased for customer ${customerId}`);
           }
         }
         break;
@@ -107,7 +103,6 @@ export async function POST(request: NextRequest) {
           })
           .eq('stripe_customer_id', customerId);
 
-        console.log(`[Stripe] Subscription updated for customer ${customerId}: ${status}`);
         break;
       }
 
@@ -124,7 +119,6 @@ export async function POST(request: NextRequest) {
           })
           .eq('stripe_customer_id', customerId);
 
-        console.log(`[Stripe] Subscription canceled for customer ${customerId}`);
         break;
       }
 

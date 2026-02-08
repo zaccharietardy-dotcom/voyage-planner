@@ -1,17 +1,19 @@
 'use client';
 
 import React from 'react';
-import { User, Bot, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { User, Bot, CheckCircle2, AlertTriangle, Lightbulb } from 'lucide-react';
 import { ChatMessage } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
 interface ChatMessageBubbleProps {
   message: ChatMessage;
+  onSuggestionClick?: (prompt: string) => void;
 }
 
-export function ChatMessageBubble({ message }: ChatMessageBubbleProps) {
+export function ChatMessageBubble({ message, onSuggestionClick }: ChatMessageBubbleProps) {
   const isUser = message.role === 'user';
   const hasChangesApplied = message.changesApplied && message.changesApplied.length > 0;
+  const hasErrorInfo = message.errorInfo && message.errorInfo.message;
 
   return (
     <div
@@ -44,6 +46,33 @@ export function ChatMessageBubble({ message }: ChatMessageBubbleProps) {
         )}
       >
         <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+
+        {/* Bloc d'erreur structuré avec suggestion alternative */}
+        {hasErrorInfo && (
+          <div className="mt-2 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg p-2.5">
+            <div className="flex items-start gap-2">
+              <AlertTriangle className="h-3.5 w-3.5 text-red-500 flex-shrink-0 mt-0.5" />
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-red-800 dark:text-red-200">
+                  {message.errorInfo!.message}
+                </p>
+                {message.errorInfo!.alternativeSuggestion && onSuggestionClick && (
+                  <button
+                    onClick={() => onSuggestionClick(message.errorInfo!.alternativeSuggestion!.prompt)}
+                    className="mt-1.5 inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full
+                      bg-red-100 dark:bg-red-900/30
+                      text-red-700 dark:text-red-300
+                      hover:bg-red-200 dark:hover:bg-red-800/40
+                      transition-colors"
+                  >
+                    <Lightbulb className="h-3 w-3" />
+                    {message.errorInfo!.alternativeSuggestion!.label}
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Indicateur de changements appliqués */}
         {hasChangesApplied && (

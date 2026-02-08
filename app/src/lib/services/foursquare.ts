@@ -158,7 +158,6 @@ export async function searchPlaces(options: {
     const cached = cache[cacheKey];
     const age = Date.now() - new Date(cached.fetchedAt).getTime();
     if (age < CACHE_TTL) {
-      console.log(`[Foursquare] Cache hit pour "${query || categories}"`);
       return cached.places;
     }
   }
@@ -231,8 +230,6 @@ export async function searchPlaces(options: {
       website: v.url,
       stats: v.stats,
     }));
-
-    console.log(`[Foursquare] ${places.length} lieux trouvés pour "${query || categories}"`);
 
     // Sauvegarder en cache
     cache[cacheKey] = {

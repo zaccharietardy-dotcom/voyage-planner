@@ -187,7 +187,6 @@ ${mealPreference && mealPreference !== 'auto' ? `- IMPORTANT: L'utilisateur a ex
         meals.dinner = 'mixed';
         strategy.groceryShoppingNeeded = true;
       }
-      console.log(`[BudgetStrategy] Override from mealPreference=${mealPreference}`);
     }
 
     // Guard: cheap restaurant destinations — never self-cater lunch/dinner
@@ -210,7 +209,6 @@ ${mealPreference && mealPreference !== 'auto' ? `- IMPORTANT: L'utilisateur a ex
     if (isCheapRestaurantDest && (!mealPreference || mealPreference === 'auto')) {
       const meals = strategy.mealsStrategy;
       if (meals.lunch === 'self_catered' || meals.dinner === 'self_catered') {
-        console.log(`[BudgetStrategy] Override: "${destination}" is a cheap restaurant destination → forcing lunch/dinner to restaurant/mixed`);
         if (meals.lunch === 'self_catered') meals.lunch = 'restaurant';
         if (meals.dinner === 'self_catered') meals.dinner = 'restaurant';
         // Groceries still needed only if breakfast is self_catered
@@ -223,16 +221,12 @@ ${mealPreference && mealPreference !== 'auto' ? `- IMPORTANT: L'utilisateur a ex
       const meals = strategy.mealsStrategy;
       const needsOverride = meals.breakfast !== 'restaurant' || meals.lunch !== 'restaurant' || meals.dinner !== 'restaurant';
       if (needsOverride) {
-        console.log(`[BudgetStrategy] Override: ${resolved.perPersonPerDay.toFixed(0)}€/pers/jour → forcing ALL meals to restaurant`);
         meals.breakfast = 'restaurant';
         meals.lunch = 'restaurant';
         meals.dinner = 'restaurant';
         strategy.groceryShoppingNeeded = false;
       }
     }
-
-    console.log(`[BudgetStrategy] ${destination}: ${strategy.accommodationType}, activités=${strategy.activitiesLevel}, courses=${strategy.groceryShoppingNeeded}`);
-    console.log(`[BudgetStrategy] Reasoning: ${strategy.reasoning}`);
 
     return strategy;
   } catch (error) {

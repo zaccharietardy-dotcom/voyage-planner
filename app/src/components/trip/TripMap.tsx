@@ -83,24 +83,24 @@ function getPopupContent(item: TripItem, index: number): string {
     : '';
 
   let details = '';
-  if (item.estimatedCost) details += `<span style="color:#666;font-size:11px;">~${item.estimatedCost}€</span>`;
-  if (item.rating) details += `${details ? ' · ' : ''}<span style="color:#666;font-size:11px;">${item.rating.toFixed(1)}★</span>`;
-  if (item.timeFromPrevious) details += `${details ? ' · ' : ''}<span style="color:#666;font-size:11px;">${item.timeFromPrevious}min</span>`;
+  if (item.estimatedCost) details += `<span style="color:var(--color-muted-foreground);font-size:11px;">~${item.estimatedCost}€</span>`;
+  if (item.rating) details += `${details ? ' · ' : ''}<span style="color:var(--color-muted-foreground);font-size:11px;">${item.rating.toFixed(1)}★</span>`;
+  if (item.timeFromPrevious) details += `${details ? ' · ' : ''}<span style="color:var(--color-muted-foreground);font-size:11px;">${item.timeFromPrevious}min</span>`;
 
   const maxW = typeof window !== 'undefined' ? Math.min(280, window.innerWidth - 60) : 280;
 
   return `
-    <div style="min-width:200px;max-width:${maxW}px;font-family:system-ui,-apple-system,sans-serif;">
+    <div style="min-width:200px;max-width:${maxW}px;font-family:system-ui,-apple-system,sans-serif;color:var(--color-card-foreground);">
       ${imageHtml}
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
         <div style="width:24px;height:24px;border-radius:50%;background:${color};color:white;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${index}</div>
         <div style="font-size:14px;font-weight:600;line-height:1.2;">${item.title}</div>
       </div>
-      <div style="font-size:12px;color:#888;margin-bottom:4px;">${item.startTime} - ${item.endTime}</div>
-      ${item.description ? `<div style="font-size:12px;color:#555;margin-bottom:6px;line-height:1.3;">${item.description.slice(0, 120)}${item.description.length > 120 ? '...' : ''}</div>` : ''}
+      <div style="font-size:12px;color:var(--color-muted-foreground);margin-bottom:4px;">${item.startTime} - ${item.endTime}</div>
+      ${item.description ? `<div style="font-size:12px;color:var(--color-muted-foreground);margin-bottom:6px;line-height:1.3;">${item.description.slice(0, 120)}${item.description.length > 120 ? '...' : ''}</div>` : ''}
       ${details ? `<div style="margin-bottom:6px;">${details}</div>` : ''}
-      <div style="display:flex;gap:8px;padding-top:6px;border-top:1px solid #eee;">
-        <a href="${googleMapsUrl}" target="_blank" style="color:#1a73e8;font-size:12px;text-decoration:none;font-weight:500;">Google Maps</a>
+      <div style="display:flex;gap:8px;padding-top:6px;border-top:1px solid var(--color-border);">
+        <a href="${googleMapsUrl}" target="_blank" style="color:var(--color-primary);font-size:12px;text-decoration:none;font-weight:500;">Google Maps</a>
         ${item.bookingUrl ? `<a href="${item.bookingUrl}" target="_blank" style="color:#34a853;font-size:12px;text-decoration:none;font-weight:500;">Réserver</a>` : ''}
       </div>
     </div>
@@ -179,6 +179,8 @@ const LEAFLET_STYLE_OVERRIDES = `
   box-shadow: 0 4px 20px rgba(0,0,0,0.12);
   padding: 0;
   overflow: hidden;
+  background: var(--color-card);
+  color: var(--color-card-foreground);
 }
 .clean-popup .leaflet-popup-content {
   margin: 12px;
@@ -192,6 +194,10 @@ const LEAFLET_STYLE_OVERRIDES = `
 }
 .clean-popup .leaflet-popup-tip {
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  background: var(--color-card);
+}
+.dark .clean-popup .leaflet-popup-content-wrapper {
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
 }
 .direction-arrow, .numbered-marker, .origin-marker, .plane-marker {
   background: none !important;

@@ -103,7 +103,6 @@ export async function findRestaurantForMeal(
       );
 
       if (hasForbiddenCuisine || hasForbiddenName) {
-        console.log(`[Restaurants] EXCLU: "${r.name}" - cuisine non-locale (${r.cuisineTypes?.join(', ')})${hasForbiddenName ? ' [mot interdit détecté]' : ''}`);
         return false;
       }
       return true;
@@ -112,8 +111,20 @@ export async function findRestaurantForMeal(
     // Si tous ont été filtrés, utiliser la liste originale mais avec warning
     const filteredList = cuisineFilteredRestaurants.length > 0 ? cuisineFilteredRestaurants : restaurants;
 
+    // FILTRE DISTANCE: Exclure les restaurants trop loin de la position actuelle (> 5km)
+    const MAX_RESTAURANT_DISTANCE_KM = 5;
+    const nearbyRestaurants = filteredList.filter(r => {
+      if (!r.latitude || !r.longitude) return true; // Garder si pas de coordonnées
+      const dist = calculateDistance(searchLocation.lat, searchLocation.lng, r.latitude, r.longitude);
+      if (dist > MAX_RESTAURANT_DISTANCE_KM) {
+        return false;
+      }
+      return true;
+    });
+    const distanceFilteredList = nearbyRestaurants.length > 0 ? nearbyRestaurants : filteredList;
+
     // Filtrer les restaurants déjà utilisés
-    let availableRestaurants = filteredList.filter(r => !usedRestaurantIds.has(r.id));
+    let availableRestaurants = distanceFilteredList.filter(r => !usedRestaurantIds.has(r.id));
 
     // Si tous ont été utilisés, try wider search before allowing repeats
     if (availableRestaurants.length === 0) {
@@ -133,7 +144,6 @@ export async function findRestaurantForMeal(
           const widerFiltered = widerResults.filter(r => !usedRestaurantIds.has(r.id));
           if (widerFiltered.length > 0) {
             availableRestaurants = widerFiltered;
-            console.log(`[Restaurants] Rayon élargi à ${expandedRadius}m: ${widerFiltered.length} nouveaux restos`);
             break;
           }
         } catch {

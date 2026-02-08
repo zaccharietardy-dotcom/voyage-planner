@@ -8,7 +8,7 @@
 import { createRouteHandlerClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 import { handleChatMessage, TripModificationContext } from '@/lib/services/chatbotModifier';
-import { ChatMessage, TripDay, Accommodation, TripPreferences } from '@/lib/types';
+import { ChatMessage, TripDay, Accommodation, TripPreferences, ConversationContext } from '@/lib/types';
 
 // POST - Traiter un message
 export async function POST(
@@ -99,8 +99,20 @@ export async function POST(
       attractionPool: (tripData?.attractionPool as import('@/lib/services/attractions').Attraction[]) || undefined,
     };
 
-    // Traiter le message avec le chatbot
-    const response = await handleChatMessage(message, destination, days, tripModContext);
+    // Récupérer l'historique récent pour le contexte conversationnel (5 paires = 10 messages)
+    const { data: recentMessages } = await (supabase as any)
+      .from('trip_chat_messages')
+      .select('role, content, intent')
+      .eq('trip_id', tripId)
+      .order('created_at', { ascending: false })
+      .limit(10);
+
+    const conversationHistory = buildConversationContext(
+      (recentMessages || []).reverse()
+    );
+
+    // Traiter le message avec le chatbot (avec contexte conversationnel)
+    const response = await handleChatMessage(message, destination, days, tripModContext, conversationHistory);
 
     // Sauvegarder le message utilisateur dans l'historique
     // Note: Using 'any' cast because trip_chat_messages table is created by migration
@@ -221,4 +233,41 @@ export async function GET(
       { status: 500 }
     );
   }
+}
+
+// ============================================
+// Helpers
+// ============================================
+
+interface RecentMessageRow {
+  role: string;
+  content: string;
+  intent: { type?: string } | null;
+}
+
+/**
+ * Construit un résumé conversationnel compact à partir des messages récents.
+ * Regroupe les messages par paires user/assistant pour le contexte.
+ */
+function buildConversationContext(messages: RecentMessageRow[]): ConversationContext {
+  const exchanges: ConversationContext['recentExchanges'] = [];
+
+  for (let i = 0; i < messages.length - 1; i++) {
+    const msg = messages[i];
+    const next = messages[i + 1];
+
+    if (msg.role === 'user' && next.role === 'assistant') {
+      exchanges.push({
+        userMessage: msg.content.slice(0, 200), // Tronquer pour économiser les tokens
+        assistantReply: next.content.slice(0, 200),
+        intent: next.intent?.type || undefined,
+      });
+      i++; // Skip le message assistant déjà traité
+    }
+  }
+
+  // Garder au maximum 5 échanges (les plus récents)
+  return {
+    recentExchanges: exchanges.slice(-5),
+  };
 }

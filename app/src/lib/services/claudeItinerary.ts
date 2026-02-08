@@ -73,7 +73,6 @@ export function applyDurationRules(name: string, duration: number): number {
   // 1. Apply MINIMUM_DURATION_OVERRIDES (from destinationData)
   for (const [pattern, minDuration] of MINIMUM_DURATION_OVERRIDES) {
     if (pattern.test(name) && result < minDuration) {
-      console.log(`[Duration] Override: "${name}" ${result}min → ${minDuration}min`);
       result = minDuration;
       break;
     }
@@ -81,14 +80,12 @@ export function applyDurationRules(name: string, duration: number): number {
 
   // 2. Hard cap: max 4h unless major museum
   if (result > 240 && !MAJOR_MUSEUMS.test(name)) {
-    console.log(`[Duration] Cap: "${name}" ${result}min → 120min (non-major museum)`);
     result = 120;
   }
 
   // 3. Type-based duration caps (apply if duration exceeds max)
   for (const [pattern, maxMin] of DURATION_CAPS) {
     if (pattern.test(name) && result > maxMin) {
-      console.log(`[Duration] Type cap: "${name}" ${result}min → ${maxMin}min`);
       result = maxMin;
       break;
     }
@@ -97,7 +94,6 @@ export function applyDurationRules(name: string, duration: number): number {
   // 4. Duration floors for major museums
   for (const [pattern, minMin] of DURATION_FLOORS) {
     if (pattern.test(name) && result < minMin) {
-      console.log(`[Duration] Floor: "${name}" ${result}min → ${minMin}min`);
       result = minMin;
       break;
     }
@@ -252,7 +248,6 @@ export async function generateClaudeItinerary(
   const cacheKey = getCacheKey(request);
   const cached = readCache(cacheKey);
   if (cached) {
-    console.log('[ClaudeItinerary] Cache hit');
     return cached;
   }
 
@@ -537,7 +532,6 @@ Format EXACT:
 }`;
 
   try {
-    console.log(`[ClaudeItinerary] Appel Claude Sonnet pour ${request.destination} (${request.durationDays}j, ${poolCompact.length} attractions)...`);
 
     const message = await client.messages.create({
       model: 'claude-sonnet-4-20250514',
@@ -560,11 +554,6 @@ Format EXACT:
     if (!parsed.days || !Array.isArray(parsed.days) || parsed.days.length === 0) {
       console.error('[ClaudeItinerary] Structure invalide');
       return null;
-    }
-
-    console.log(`[ClaudeItinerary] ✅ Itinéraire généré: ${parsed.days.length} jours`);
-    for (const day of parsed.days) {
-      console.log(`  Jour ${day.dayNumber}: ${day.theme} (${day.selectedAttractionIds.length} attractions${day.isDayTrip ? ', DAY TRIP: ' + day.dayTripDestination : ''})`);
     }
 
     // VALIDATION: Day trip obligatoire si >= 4 jours
@@ -953,7 +942,6 @@ Format EXACT:
         if (religiousPatterns.test(attraction.name)) {
           religiousTotal++;
           if (religiousTotal > MAX_RELIGIOUS_TOTAL) {
-            console.log(`[ClaudeItinerary] Removed religious overflow: ${attraction.name}`);
             return false;
           }
         }
@@ -989,7 +977,6 @@ Format EXACT:
             d.selectedAttractionIds.length + d.additionalSuggestions.length <
             min.selectedAttractionIds.length + min.additionalSuggestions.length ? d : min
           );
-          console.log(`[ClaudeItinerary] Injecting missing incontournable: "${detail.fullName}" into day ${lightest.dayNumber}`);
           lightest.additionalSuggestions.push({
             name: detail.fullName,
             whyVisit: `Incontournable de ${request.destination}`, // Removed "ajouté automatiquement" - cleaner
@@ -1034,7 +1021,6 @@ Format EXACT:
         d.selectedAttractionIds.length + d.additionalSuggestions.length <
         min.selectedAttractionIds.length + min.additionalSuggestions.length ? d : min
       );
-      console.log(`[ClaudeItinerary] Injecting popular attraction: "${attraction.name}" (rating=${attraction.rating}, reviews=${attraction.reviewCount}) into day ${lightest.dayNumber}`);
       lightest.selectedAttractionIds.push(attraction.id);
     }
 
@@ -1056,7 +1042,6 @@ Format EXACT:
         // Try to inject known activities for this day trip destination
         const nearbyNames = findNearbyAttractions(day.dayTripDestination);
         if (nearbyNames.length > 0) {
-          console.log(`[ClaudeItinerary] Day trip "${day.dayTripDestination}" (jour ${day.dayNumber}): aucune activité correspondante, injection de ${nearbyNames.length} activités`);
           for (const name of nearbyNames) {
             day.additionalSuggestions.push({
               name: `${name} (${day.dayTripDestination})`,
@@ -1142,7 +1127,6 @@ Format EXACT:
       day.additionalSuggestions = day.additionalSuggestions.filter(s => {
         for (const pattern of SUGGESTION_BLACKLIST) {
           if (pattern.test(s.name)) {
-            console.log(`[ClaudeItinerary] Blacklisted suggestion: "${s.name}"`);
             return false;
           }
         }
@@ -1155,7 +1139,6 @@ Format EXACT:
         if (!attraction) return true;
         for (const pattern of SUGGESTION_BLACKLIST) {
           if (pattern.test(attraction.name)) {
-            console.log(`[ClaudeItinerary] Blacklisted pool attraction: "${attraction.name}"`);
             return false;
           }
         }
@@ -1169,7 +1152,6 @@ Format EXACT:
             const dlng = (attraction.lng - centroidLng) * 111 * Math.cos(centroidLat * Math.PI / 180);
             const distKm = Math.sqrt(dlat * dlat + dlng * dlng);
             if (distKm > 30) {
-              console.log(`[ClaudeItinerary] Filtered distant attraction: "${attraction.name}" (${distKm.toFixed(1)}km from center)`);
               return false;
             }
           }
@@ -1187,7 +1169,6 @@ Format EXACT:
           const attraction = poolCompact.find(a => a.id === id);
           if (!attraction) return true;
           if (nightlifePattern.test(attraction.name)) {
-            console.log(`[ClaudeItinerary] Removed pool attraction "${attraction.name}": not kid-friendly`);
             return false;
           }
           return true;
@@ -1200,7 +1181,6 @@ Format EXACT:
       // Filter additionalSuggestions
       day.additionalSuggestions = day.additionalSuggestions.filter(s => {
         if (request.groupType === 'family_with_kids' && nightlifePattern.test(s.name)) {
-          console.log(`[ClaudeItinerary] Removed "${s.name}": not kid-friendly`);
           return false;
         }
         return true;
@@ -1212,7 +1192,6 @@ Format EXACT:
 
         // Evening-only enforcement for shows/cabarets
         if (eveningOnlyPattern.test(s.name) && s.bestTimeOfDay !== 'evening') {
-          console.log(`[ClaudeItinerary] Force evening for "${s.name}"`);
           s.bestTimeOfDay = 'evening';
         }
       }
@@ -1395,7 +1374,6 @@ export function mapItineraryToAttractions(
       const RESTAURANT_PATTERN = /\b(restaurant|brasserie|café|taverne|trattoria|ristorante|bistrot|auberge|taverna|osteria|gastropub|steakhouse)\b/i;
       if (suggestionCost === 0 && RESTAURANT_PATTERN.test(suggestion.name)) {
         suggestionCost = 20; // Floor raisonnable pour un repas
-        console.log(`[ClaudeItinerary] Restaurant cost floor: "${suggestion.name}" → ${suggestionCost}€`);
       }
 
       dayAttractions.push({
@@ -1438,9 +1416,6 @@ export function mapItineraryToAttractions(
           }
           return true;
         });
-        if (filtered.length < before) {
-          console.log(`[DayTrip] Filtrage: ${before - filtered.length} attractions retirées du jour ${day.dayNumber} (${day.dayTripDestination})`);
-        }
       }
     }
 
@@ -1492,7 +1467,6 @@ function deduplicateAttractions(attractions: Attraction[]): Attraction[] {
   for (const a of attractions) {
     const isDupe = result.some(existing => areNamesSimilar(existing.name, a.name));
     if (isDupe) {
-      console.log(`[ClaudeItinerary] Dedup: removed "${a.name}" (similar to existing)`);
       continue;
     }
     result.push(a);
@@ -1557,7 +1531,6 @@ function reorderByProximity(attractions: Attraction[]): Attraction[] {
   const reorderedDistance = calculateTotalDistance(result);
 
   if (originalDistance > 0 && (originalDistance - reorderedDistance) / originalDistance > 0.30) {
-    console.log(`[Reorder] Applied: ${originalDistance.toFixed(1)}km → ${reorderedDistance.toFixed(1)}km (${((1 - reorderedDistance / originalDistance) * 100).toFixed(0)}% savings)`);
     return [...result, ...withoutCoords];
   }
 

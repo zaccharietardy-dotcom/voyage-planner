@@ -212,7 +212,7 @@ export function ShareTripDialog({
       });
     } catch (err) {
       // L'utilisateur a annulé ou erreur
-      console.log('Share cancelled or failed:', err);
+      // Share cancelled or failed
     }
   };
 

@@ -108,7 +108,6 @@ export function validateTripCoherence(trip: Trip): CoherenceResult {
 
   // Si des erreurs sont trouvees, essayer de corriger automatiquement
   if (!result.valid) {
-    console.log(`[CoherenceValidator] ${errors.length} erreurs detectees, tentative de correction...`);
     const fixedTrip = autoFixTrip(trip, errors);
     result.fixedTrip = fixedTrip;
   }
@@ -754,12 +753,14 @@ function checkTransitFeasibility(dayNumber: number, items: any[]): CoherenceErro
     const gapMinutes = startMinutes - endMinutes;
 
     if (transitMinutes > gapMinutes + 5 && distKm > 1) {
+      // Distance > 10km avec pas assez de temps = critique et auto-fixable (supprimer l'item le plus loin)
+      const isCriticalDistance = distKm > 10 && gapMinutes < transitMinutes * 0.5;
       errors.push({
         type: 'OVERLAP',
         dayNumber,
         message: `Transit ${curr.title} → ${next.title}: ${distKm.toFixed(1)}km nécessite ~${transitMinutes}min mais seulement ${gapMinutes}min disponibles`,
-        severity: 'warning',
-        autoFixable: false,
+        severity: isCriticalDistance ? 'critical' : 'warning',
+        autoFixable: isCriticalDistance,
         items: [curr, next],
       });
     }
@@ -783,7 +784,6 @@ function autoFixTrip(trip: Trip, errors: CoherenceError[]): Trip {
   for (const error of errors) {
     if (!error.autoFixable) continue;
 
-    console.log(`[AutoFix] Correction: ${error.type} - ${error.message}`);
 
     switch (error.type) {
       case 'ACTIVITY_BEFORE_HOTEL_CHECKIN':
@@ -853,12 +853,10 @@ function fixActivityTiming(trip: Trip, error: CoherenceError): void {
   // VALIDATION: verifier que l'activite rentre dans la journee (avant 23:00)
   const MAX_END_TIME = 23 * 60; // 23:00
   if (newEndMinutes > MAX_END_TIME) {
-    console.log(`[AutoFix] Activite "${activityItem.title}" ne peut pas etre replanifiee (finirait a ${Math.floor(newEndMinutes/60)}:${newEndMinutes%60})`);
     // Supprimer l'activite car elle ne rentre pas dans la journee
     const index = day.items.findIndex(i => i.id === activityItem.id);
     if (index !== -1) {
       day.items.splice(index, 1);
-      console.log(`[AutoFix] Activite "${activityItem.title}" supprimee (pas assez de temps)`);
     }
     return;
   }
@@ -868,7 +866,6 @@ function fixActivityTiming(trip: Trip, error: CoherenceError): void {
   if (itemToFix) {
     itemToFix.startTime = minutesToTime(newStartMinutes);
     itemToFix.endTime = minutesToTime(newEndMinutes);
-    console.log(`[AutoFix] Activite "${activityItem.title}" deplacee a ${itemToFix.startTime}-${itemToFix.endTime}`);
   }
 }
 
@@ -890,13 +887,11 @@ function fixOverlap(trip: Trip, error: CoherenceError): void {
   // VALIDATION: verifier que l'item rentre dans la journee (avant 23:00)
   const MAX_END_TIME = 23 * 60; // 23:00
   if (newEnd > MAX_END_TIME) {
-    console.log(`[AutoFix] "${item2.title}" ne peut pas etre decale (finirait a ${Math.floor(newEnd/60)}:${newEnd%60})`);
     // Si c'est une activite, la supprimer
     if (item2.type === 'activity') {
       const index = day.items.findIndex(i => i.id === item2.id);
       if (index !== -1) {
         day.items.splice(index, 1);
-        console.log(`[AutoFix] Activite "${item2.title}" supprimee (pas assez de temps)`);
       }
     }
     return;
@@ -906,7 +901,6 @@ function fixOverlap(trip: Trip, error: CoherenceError): void {
   if (itemToFix) {
     itemToFix.startTime = minutesToTime(newStart);
     itemToFix.endTime = minutesToTime(newEnd);
-    console.log(`[AutoFix] "${item2.title}" decale a ${itemToFix.startTime}-${itemToFix.endTime}`);
   }
 }
 
@@ -992,7 +986,6 @@ function fixLogisticsOrder(trip: Trip, error: CoherenceError): void {
           const duration = parseTimeToMinutes(item.endTime) - parseTimeToMinutes(item.startTime);
           item.startTime = minutesToTime(arrivalEnd + 15);
           item.endTime = minutesToTime(arrivalEnd + 15 + duration);
-          console.log(`[AutoFix] Activite "${item.title}" decalee apres arrivee: ${item.startTime}-${item.endTime}`);
         }
       }
     }
@@ -1018,7 +1011,6 @@ function fixLogisticsOrder(trip: Trip, error: CoherenceError): void {
 
         // VALIDATION: verifier que l'activite peut etre decalee (pas avant 8h)
         if (newStart < MIN_START_TIME) {
-          console.log(`[AutoFix] Activite "${activity.title}" ne peut pas etre decalee (commencerait a ${Math.floor(newStart/60)}:${newStart%60})`);
           activitiesToRemove.push(activity.id);
           continue;
         }
@@ -1033,12 +1025,10 @@ function fixLogisticsOrder(trip: Trip, error: CoherenceError): void {
       const index = day.items.findIndex(i => i.id === id);
       if (index !== -1) {
         const removed = day.items.splice(index, 1)[0];
-        console.log(`[AutoFix] Activite "${removed.title}" supprimee (pas assez de temps le dernier jour)`);
       }
     }
   }
 
-  console.log(`[AutoFix] Ordre logistique corrige pour le jour ${day.dayNumber}`);
 }
 
 /**
@@ -1053,7 +1043,6 @@ function removeDuplicate(trip: Trip, error: CoherenceError): void {
   const index = day.items.findIndex(i => i.id === duplicateItem.id);
   if (index !== -1) {
     day.items.splice(index, 1);
-    console.log(`[AutoFix] Attraction en double "${duplicateItem.title}" supprimee du jour ${day.dayNumber}`);
   }
 }
 
@@ -1071,7 +1060,6 @@ function removeInvalidActivity(trip: Trip, error: CoherenceError): void {
       const reason = error.type === 'GENERIC_ACTIVITY'
         ? 'activite generique'
         : 'heure impossible';
-      console.log(`[AutoFix] "${item.title}" supprimee (${reason}) du jour ${day.dayNumber}`);
     }
   }
 }
@@ -1107,7 +1095,6 @@ function fixMealOrder(trip: Trip, error: CoherenceError): void {
     }
   }
 
-  console.log(`[AutoFix] Ordre des repas corrige pour le jour ${day.dayNumber}`);
 }
 
 // ============================================
@@ -1193,7 +1180,6 @@ function getLastDayLogisticsOrder(type: string, title: string = ''): number {
  * Cela garantit que l'affichage est toujours chronologique.
  */
 export function validateAndFixTrip(trip: Trip): Trip {
-  console.log('\n=== Validation de coherence du voyage ===');
 
   // TOUJOURS trier les items par heure (avant et apres validation)
   let sortedTrip: Trip;
@@ -1213,27 +1199,13 @@ export function validateAndFixTrip(trip: Trip): Trip {
   const result = validateTripCoherence(sortedTrip);
 
   if (result.valid) {
-    console.log('Voyage valide! Aucune incoherence detectee.');
     return sortedTrip;  // Retourner la version triee
-  }
-
-  console.log(`${result.errors.length} erreur(s) critique(s) detectee(s):`);
-  for (const error of result.errors) {
-    console.log(`  - [${error.type}] ${error.message}`);
-  }
-
-  if (result.warnings.length > 0) {
-    console.log(`${result.warnings.length} avertissement(s):`);
-    for (const warning of result.warnings) {
-      console.log(`  - [${warning.type}] ${warning.message}`);
-    }
   }
 
   if (result.fixedTrip) {
     // Re-valider apres correction
     const revalidation = validateTripCoherence(result.fixedTrip);
     if (revalidation.valid) {
-      console.log('Voyage corrige avec succes!');
       return result.fixedTrip;
     } else {
       console.warn('Certaines erreurs n\'ont pas pu etre corrigees automatiquement:');

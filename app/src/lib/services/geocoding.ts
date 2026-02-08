@@ -663,7 +663,6 @@ export function getCityCenterCoords(city: string): { lat: number; lng: number } 
 
   // Chercher dans notre base de centres-villes
   if (CITY_CENTERS[normalizedCity]) {
-    console.log(`[Geocoding] Centre-ville trouvé pour "${city}": ${JSON.stringify(CITY_CENTERS[normalizedCity])}`);
     return CITY_CENTERS[normalizedCity];
   }
 
@@ -671,12 +670,10 @@ export function getCityCenterCoords(city: string): { lat: number; lng: number } 
   for (const [key, coords] of Object.entries(CITY_CENTERS)) {
     const normalizedKey = key.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     if (normalizedKey === normalizedCity || normalizedCity.includes(normalizedKey) || normalizedKey.includes(normalizedCity)) {
-      console.log(`[Geocoding] Centre-ville trouvé (fuzzy) pour "${city}": ${JSON.stringify(coords)}`);
       return coords;
     }
   }
 
-  console.log(`[Geocoding] Pas de centre-ville connu pour "${city}"`);
   return null;
 }
 
@@ -690,14 +687,12 @@ export async function getCityCenterCoordsAsync(city: string): Promise<{ lat: num
   if (hardcoded) return hardcoded;
 
   // 2. Fallback Nominatim (gratuit)
-  console.log(`[Geocoding] Nominatim fallback pour "${city}"...`);
   const result = await geocodeAddress(city);
   if (result && result.lat && result.lng) {
     const coords = { lat: result.lat, lng: result.lng };
     // Stocker pour le reste de la session
     const normalizedCity = city.toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     CITY_CENTERS[normalizedCity] = coords;
-    console.log(`[Geocoding] ✅ Nominatim: "${city}" → ${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)}`);
     return coords;
   }
 
@@ -723,7 +718,6 @@ export async function findNearbyAirportsAsync(city: string): Promise<AirportInfo
   }
 
   // Pas Paris → trouver l'aéroport le plus proche par coordonnées
-  console.log(`[Geocoding] Recherche aéroport le plus proche pour "${city}" via géocodage...`);
   const coords = await getCityCenterCoordsAsync(city);
   if (!coords) return result; // Nominatim a échoué, on garde le fallback
 
@@ -735,7 +729,6 @@ export async function findNearbyAirportsAsync(city: string): Promise<AirportInfo
   airportsWithDistance.sort((a, b) => a.distance - b.distance);
 
   const nearest = airportsWithDistance.slice(0, 3).map(a => a.airport);
-  console.log(`[Geocoding] ✅ Aéroports les plus proches de "${city}": ${nearest.map(a => `${a.code} (${Math.round(airportsWithDistance.find(x => x.airport.code === a.code)!.distance)}km)`).join(', ')}`);
   return nearest;
 }
 

@@ -57,9 +57,6 @@ export async function POST(request: NextRequest) {
     const normalizedOrigin = await normalizeCity(body.origin);
     const normalizedDestination = await normalizeCity(body.destination);
 
-    console.log(`[API] Normalisation: "${body.origin}" → "${normalizedOrigin.displayName}" (${normalizedOrigin.confidence})`);
-    console.log(`[API] Normalisation: "${body.destination}" → "${normalizedDestination.displayName}" (${normalizedDestination.confidence})`);
-
     const preferences: TripPreferences = {
       ...body,
       origin: normalizedOrigin.displayName,

@@ -141,7 +141,6 @@ function readCache(key: string): Attraction[] | null {
       fs.unlinkSync(filePath);
       return null;
     }
-    console.log(`[Viator Cache] ✅ Cache hit pour "${key}"`);
     return JSON.parse(fs.readFileSync(filePath, 'utf-8'));
   } catch {
     return null;
@@ -220,10 +219,8 @@ async function findDestinationId(destination: string): Promise<string | null> {
     const destinations = data?.destinations?.results;
     if (destinations && destinations.length > 0) {
       const id = destinations[0].id || destinations[0].ref;
-      console.log(`[Viator] Destination "${destination}" → ID ${id}`);
       return id ? String(id) : null;
     }
-    console.log(`[Viator] Aucune destination trouvée pour "${destination}"`);
     return null;
   } catch (error) {
     console.warn('[Viator] Erreur recherche destination:', error);
@@ -244,7 +241,6 @@ export async function searchViatorActivities(
   }
 ): Promise<Attraction[]> {
   if (!VIATOR_API_KEY) {
-    console.log('[Viator] API key non configurée, skip');
     return [];
   }
 
@@ -254,8 +250,6 @@ export async function searchViatorActivities(
   // Check cache
   const cached = readCache(cacheKey);
   if (cached) return cached;
-
-  console.log(`[Viator] 🔍 Recherche d'activités pour ${destination}...`);
 
   try {
     // 1. Find destination ID
@@ -304,7 +298,6 @@ export async function searchViatorActivities(
     if (!response.ok) {
       // If quality filter fails, retry without it
       if (response.status === 400) {
-        console.log('[Viator] Retry sans filtre qualité...');
         delete (searchBody.filtering as Record<string, unknown>).tags;
         const retryResponse = await fetch(`${VIATOR_BASE_URL}/products/search`, {
           method: 'POST',
@@ -421,7 +414,6 @@ export async function findViatorProduct(
         const url = normalizeViatorUrl(product.productUrl, product.title, destinationName, product.productCode);
         const imageUrl = product.images?.[0]?.variants?.find((v: { width?: number; url?: string }) => v.width && v.width >= 480 && v.width <= 800)?.url || product.images?.[0]?.variants?.[0]?.url;
         const duration = product.duration?.fixedDurationInMinutes || product.duration?.variableDurationFromMinutes;
-        console.log(`[Viator] ✅ Exact match: "${activityName}" → "${product.title}" (${price}€, ${duration || '?'}min) URL: ${url}`);
         return { url, price: Math.round(price), title: product.title, imageUrl, rating: product.reviews?.combinedAverageRating, reviewCount: product.reviews?.totalReviews, duration };
       }
     }
@@ -453,11 +445,9 @@ export async function findViatorProduct(
       const url = normalizeViatorUrl(bestMatch.product.productUrl, bestMatch.product.title, destinationName, bestMatch.product.productCode);
       const imageUrl = bestMatch.product.images?.[0]?.variants?.find((v: { width?: number; url?: string }) => v.width && v.width >= 480 && v.width <= 800)?.url || bestMatch.product.images?.[0]?.variants?.[0]?.url;
       const duration = bestMatch.product.duration?.fixedDurationInMinutes || bestMatch.product.duration?.variableDurationFromMinutes;
-      console.log(`[Viator] ✅ Fuzzy match: "${activityName}" → "${bestMatch.product.title}" (${price}€, ${duration || '?'}min, score: ${bestMatch.score}) URL: ${url}`);
       return { url, price: Math.round(price), title: bestMatch.product.title, imageUrl, rating: bestMatch.product.reviews?.combinedAverageRating, reviewCount: bestMatch.product.reviews?.totalReviews, duration };
     }
 
-    console.log(`[Viator] ⚠️ Pas de match pour: "${activityName}"`);
     return null;
   } catch (error) {
     console.warn(`[Viator] Erreur findViatorProduct("${activityName}"):`, error);
@@ -494,8 +484,6 @@ function processViatorResults(
   maxPricePerActivity: number = 200
 ): Attraction[] {
   const products = data.products || [];
-  console.log(`[Viator] ${products.length} activités trouvées pour ${destination}`);
-
   if (products.length === 0) return [];
 
   const attractions: Attraction[] = products
@@ -505,14 +493,12 @@ function processViatorResults(
       const titleLower = p.title.toLowerCase();
       for (const kw of VIATOR_EXCLUDED_KEYWORDS) {
         if (titleLower.includes(kw)) {
-          console.log(`[Viator] Exclusion: "${p.title}" (contient "${kw}")`);
           return false;
         }
       }
       // Filter out overpriced activities
       const price = p.pricing?.summary?.fromPrice || 0;
       if (price > maxPricePerActivity) {
-        console.log(`[Viator] Exclusion prix: "${p.title}" (${price}€ > max ${maxPricePerActivity}€)`);
         return false;
       }
       return true;
@@ -568,6 +554,5 @@ function processViatorResults(
     writeCache(cacheKey, attractions);
   }
 
-  console.log(`[Viator] ✅ ${attractions.length} activités mappées`);
   return attractions;
 }
