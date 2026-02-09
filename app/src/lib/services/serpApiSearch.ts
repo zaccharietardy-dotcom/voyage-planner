@@ -67,7 +67,7 @@ export async function searchFlightsWithSerpApi(
   }
 
   const params = new URLSearchParams({
-    api_key: getSerpApiKey(),
+    api_key: getSerpApiKey() || '',
     engine: 'google_flights',
     departure_id: origin,
     arrival_id: destination,
@@ -231,7 +231,7 @@ export async function verifyPlaceWithSerpApi(
 
   const query = `${placeName}, ${city}`;
   const params = new URLSearchParams({
-    api_key: getSerpApiKey(),
+    api_key: getSerpApiKey() || '',
     engine: 'google_maps',
     q: query,
     hl: 'fr',

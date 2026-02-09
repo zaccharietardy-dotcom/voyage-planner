@@ -71,7 +71,7 @@ async function getDestinationId(city: string): Promise<{ destId: string; destTyp
     const response = await fetch(url, {
       headers: {
         'x-rapidapi-host': RAPIDAPI_HOST,
-        'x-rapidapi-key': getRapidApiKey(),
+        'x-rapidapi-key': getRapidApiKey() || '',
       },
     });
 
@@ -192,7 +192,7 @@ async function getHotelBookingUrl(
     const response = await fetch(url, {
       headers: {
         'x-rapidapi-host': RAPIDAPI_HOST,
-        'x-rapidapi-key': getRapidApiKey(),
+        'x-rapidapi-key': getRapidApiKey() || '',
       },
     });
 
@@ -326,7 +326,7 @@ export async function searchHotelsWithBookingApi(
     const response = await fetch(url, {
       headers: {
         'x-rapidapi-host': RAPIDAPI_HOST,
-        'x-rapidapi-key': getRapidApiKey(),
+        'x-rapidapi-key': getRapidApiKey() || '',
       },
     });
 

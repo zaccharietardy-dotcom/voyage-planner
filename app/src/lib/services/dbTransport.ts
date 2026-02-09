@@ -204,7 +204,7 @@ async function searchWithGoogle(
       transit_mode: 'rail',
       alternatives: 'true',
       language: 'fr',
-      key: getGoogleMapsKey(),
+      key: getGoogleMapsKey() || '',
     });
 
     if (date) {

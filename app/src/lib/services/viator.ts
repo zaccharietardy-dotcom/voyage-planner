@@ -195,7 +195,7 @@ async function findDestinationId(destination: string): Promise<string | null> {
     const response = await fetch(`${VIATOR_BASE_URL}/search/freetext`, {
       method: 'POST',
       headers: {
-        'exp-api-key': getViatorApiKey(),
+        'exp-api-key': getViatorApiKey() || '',
         'Accept-Language': 'en-US',
         'Content-Type': 'application/json',
         'Accept': 'application/json;version=2.0',
@@ -287,7 +287,7 @@ export async function searchViatorActivities(
     const response = await fetch(`${VIATOR_BASE_URL}/products/search`, {
       method: 'POST',
       headers: {
-        'exp-api-key': getViatorApiKey(),
+        'exp-api-key': getViatorApiKey() || '',
         'Accept-Language': 'fr-FR',
         'Content-Type': 'application/json',
         'Accept': 'application/json;version=2.0',
@@ -302,7 +302,7 @@ export async function searchViatorActivities(
         const retryResponse = await fetch(`${VIATOR_BASE_URL}/products/search`, {
           method: 'POST',
           headers: {
-            'exp-api-key': getViatorApiKey(),
+            'exp-api-key': getViatorApiKey() || '',
             'Accept-Language': 'fr-FR',
             'Content-Type': 'application/json',
             'Accept': 'application/json;version=2.0',
@@ -369,7 +369,7 @@ export async function findViatorProduct(
     const response = await fetch(`${VIATOR_BASE_URL}/search/freetext`, {
       method: 'POST',
       headers: {
-        'exp-api-key': getViatorApiKey(),
+        'exp-api-key': getViatorApiKey() || '',
         'Accept-Language': 'fr-FR',
         'Content-Type': 'application/json',
         'Accept': 'application/json;version=2.0',
