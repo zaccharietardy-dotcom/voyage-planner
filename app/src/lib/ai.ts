@@ -830,31 +830,10 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       .map(a => fixAttractionCost(fixAttractionDuration(a)));
   }
 
-  // Scoring diversité : réordonner pour éviter les activités consécutives du même type
-  for (let i = 0; i < attractionsByDay.length; i++) {
-    const dayAttrs = attractionsByDay[i];
-    if (dayAttrs.length <= 2) continue;
-
-    const reordered: Attraction[] = [];
-    const remaining = [...dayAttrs];
-
-    // Garder le premier (souvent mustSee)
-    reordered.push(remaining.shift()!);
-
-    while (remaining.length > 0) {
-      const lastType = reordered[reordered.length - 1].type;
-      // Chercher la prochaine attraction d'un type DIFFÉRENT
-      const diffTypeIdx = remaining.findIndex(a => a.type !== lastType);
-      if (diffTypeIdx >= 0) {
-        reordered.push(remaining.splice(diffTypeIdx, 1)[0]);
-      } else {
-        // Tous du même type restant, ajouter tel quel
-        reordered.push(remaining.shift()!);
-      }
-    }
-
-    attractionsByDay[i] = reordered;
-  }
+  // NOTE: Le réordonnancement de diversité (éviter 2 activités consécutives du même type)
+  // a été supprimé car il détruisait l'ordre géographique optimisé par reorderByProximity.
+  // La diversité est déjà demandée dans le prompt Claude (règle 6c).
+  // L'optimisation de distance dans tripDay.ts (optimizeAttractionOrder) gère l'ordre final.
 
   // ENFORCEMENT: Vérifier que tous les mustSee sont dans au moins un jour
   // Si un mustSee manque, le forcer dans le jour avec le moins d'attractions

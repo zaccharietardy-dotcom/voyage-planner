@@ -1526,11 +1526,12 @@ function reorderByProximity(attractions: Attraction[]): Attraction[] {
     current = nearest;
   }
 
-  // Compare Claude's original order vs greedy reorder — only apply if savings > 30%
+  // Compare Claude's original order vs greedy reorder — only apply if savings > 15%
+  // Seuil abaissé de 30% à 15% car tripDay.ts applique ensuite un 2-opt pour affiner
   const originalDistance = calculateTotalDistance(withCoords);
   const reorderedDistance = calculateTotalDistance(result);
 
-  if (originalDistance > 0 && (originalDistance - reorderedDistance) / originalDistance > 0.30) {
+  if (originalDistance > 0 && (originalDistance - reorderedDistance) / originalDistance > 0.15) {
     return [...result, ...withoutCoords];
   }
 

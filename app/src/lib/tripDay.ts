@@ -198,6 +198,142 @@ export function schedulerItemToTripItem(
   } as TripItem;
 }
 
+// ============================================
+// Route Optimization: minimise la distance intra-journée
+// ============================================
+
+/**
+ * Calcule la distance totale d'un itinéraire depuis un point de départ.
+ */
+function totalRouteDistance(
+  attractions: Attraction[],
+  startCoords: { lat: number; lng: number }
+): number {
+  let total = 0;
+  let prev = startCoords;
+  for (const a of attractions) {
+    total += calculateDistance(prev.lat, prev.lng, a.latitude || 0, a.longitude || 0);
+    prev = { lat: a.latitude || prev.lat, lng: a.longitude || prev.lng };
+  }
+  return total;
+}
+
+/**
+ * Vérifie que l'ordre proposé respecte les contraintes d'horaires d'ouverture.
+ * Simule le parcours séquentiel pour s'assurer qu'on arrive avant la fermeture.
+ */
+function validateTimeConstraints(
+  attractions: Attraction[],
+  startCoords: { lat: number; lng: number },
+  date: Date,
+  periodEnd: Date,
+  currentTime: Date,
+): boolean {
+  let simulatedTime = currentTime.getTime();
+  let prev = startCoords;
+
+  for (const a of attractions) {
+    const travelTime = estimateTravelTime(
+      { latitude: prev.lat, longitude: prev.lng } as Attraction,
+      a
+    );
+    simulatedTime += travelTime * 60 * 1000;
+
+    const openTime = parseTime(date, a.openingHours.open).getTime();
+    const closeTime = parseTime(date, a.openingHours.close).getTime();
+    const safeClose = closeTime - 30 * 60 * 1000;
+
+    // Si on arrive avant l'ouverture, on attend
+    if (simulatedTime < openTime) {
+      simulatedTime = openTime;
+    }
+
+    // Si on arrive après la fermeture (marge 30min), invalide
+    if (simulatedTime > safeClose) {
+      return false;
+    }
+
+    // Vérifier qu'on finit avant la limite de période
+    const endTime = simulatedTime + a.duration * 60 * 1000;
+    if (endTime > periodEnd.getTime()) {
+      return false;
+    }
+
+    simulatedTime = endTime;
+    prev = { lat: a.latitude || prev.lat, lng: a.longitude || prev.lng };
+  }
+  return true;
+}
+
+/**
+ * Optimise l'ordre des attractions pour minimiser la distance totale,
+ * en respectant les contraintes d'horaires d'ouverture.
+ *
+ * Phase 1: Nearest-neighbor itératif depuis startCoords
+ * Phase 2: 2-opt avec validation des contraintes temporelles
+ */
+function optimizeAttractionOrder(
+  attractions: Attraction[],
+  startCoords: { lat: number; lng: number },
+  date: Date,
+  periodEnd: Date,
+  currentTime: Date,
+): Attraction[] {
+  if (attractions.length <= 2) return attractions;
+
+  // Phase 1: Nearest-neighbor itératif
+  const result: Attraction[] = [];
+  const remaining = new Set<number>(attractions.map((_, i) => i));
+  let currentPos = { lat: startCoords.lat, lng: startCoords.lng };
+
+  while (remaining.size > 0) {
+    let bestIdx = -1;
+    let bestDist = Infinity;
+    for (const idx of remaining) {
+      const a = attractions[idx];
+      const dist = calculateDistance(currentPos.lat, currentPos.lng, a.latitude || 0, a.longitude || 0);
+      if (dist < bestDist) {
+        bestDist = dist;
+        bestIdx = idx;
+      }
+    }
+    result.push(attractions[bestIdx]);
+    currentPos = {
+      lat: attractions[bestIdx].latitude || currentPos.lat,
+      lng: attractions[bestIdx].longitude || currentPos.lng,
+    };
+    remaining.delete(bestIdx);
+  }
+
+  // Phase 2: 2-opt — essayer d'inverser des segments pour réduire la distance
+  const ordered = [...result];
+  let improved = true;
+
+  while (improved) {
+    improved = false;
+    for (let i = 0; i < ordered.length - 1; i++) {
+      for (let j = i + 1; j < ordered.length; j++) {
+        const candidate = [...ordered];
+        const segment = candidate.splice(i, j - i + 1);
+        segment.reverse();
+        candidate.splice(i, 0, ...segment);
+
+        const oldDist = totalRouteDistance(ordered, startCoords);
+        const newDist = totalRouteDistance(candidate, startCoords);
+
+        if (newDist < oldDist - 0.01) {
+          if (validateTimeConstraints(candidate, startCoords, date, periodEnd, currentTime)) {
+            ordered.splice(0, ordered.length, ...candidate);
+            improved = true;
+          }
+        }
+      }
+    }
+  }
+
+  return ordered;
+}
+
 export async function generateDayWithScheduler(params: {
   dayNumber: number;
   date: Date;
@@ -1332,17 +1468,24 @@ export async function generateDayWithScheduler(params: {
   // IMPORTANT: Utiliser le Set partagé au niveau du voyage pour éviter les doublons
   // tripUsedAttractionIds est passé en paramètre et partagé entre tous les jours
 
+  // Compteur d'activités placées le matin — permet d'autoriser 1 activité longue (musée 2h+)
+  // puis de bloquer les suivantes pour protéger le créneau déjeuner.
+  // Déclaré ici (hors du if) pour être accessible dans le bloc remplissage de trous.
+  let morningActivityCount = 0;
+
   if (canDoMorningActivities) {
-    // Matin: trier les attractions par proximité géographique depuis la position actuelle
-    // Cela évite les allers-retours incohérents (ex: ouest → est → ouest)
-    const morningAttractions = [...attractions].sort((a, b) => {
-      // mustSee en premier (priorité absolue)
-      if (a.mustSee && !b.mustSee) return -1;
-      if (!a.mustSee && b.mustSee) return 1;
-      const distA = calculateDistance(lastCoords.lat, lastCoords.lng, a.latitude || 0, a.longitude || 0);
-      const distB = calculateDistance(lastCoords.lat, lastCoords.lng, b.latitude || 0, b.longitude || 0);
-      return distA - distB;
-    });
+    // Matin: optimiser l'ordre des attractions pour minimiser la distance totale
+    // Nearest-neighbor itératif + 2-opt avec respect des contraintes horaires
+    const lunchTimeMorning = parseTime(date, shouldHaveLunch ? '12:00' : '12:30');
+    const mustSeeAttractions = attractions.filter(a => a.mustSee);
+    const normalAttractions = attractions.filter(a => !a.mustSee);
+    const optimizedMustSee = optimizeAttractionOrder(
+      mustSeeAttractions, lastCoords, date, lunchTimeMorning, scheduler.getCurrentTime()
+    );
+    const optimizedNormal = optimizeAttractionOrder(
+      normalAttractions, lastCoords, date, lunchTimeMorning, scheduler.getCurrentTime()
+    );
+    const morningAttractions = [...optimizedMustSee, ...optimizedNormal];
 
     for (const attraction of morningAttractions) {
       // ANTI-DOUBLON: Skip si déjà utilisée (dans n'importe quel jour du voyage)
@@ -1362,12 +1505,17 @@ export async function generateDayWithScheduler(params: {
         }
       }
 
-      // Verifier qu'on a le temps avant le dejeuner
-      // CORRECTION: 12:00 au lieu de 12:30 si shouldHaveLunch — protège le créneau déjeuner
-      // Le scheduler arrondit + buffer 5min, donc une activité "juste" à 12:30 déborde souvent à 13:00+
-      const lunchTime = parseTime(date, shouldHaveLunch ? '12:00' : '12:30');
-      if (scheduler.getCurrentTime().getTime() + 30 * 60 * 1000 + attraction.duration * 60 * 1000 > lunchTime.getTime()) {
-        // CORRIGÉ: continue au lieu de break pour essayer les autres attractions (plus courtes)
+      // LOGIQUE "1 ACTIVITÉ LONGUE LE MATIN":
+      // - 1ère activité : peut aller jusqu'à 13:00 (ex: Rijksmuseum 10:20→12:50, déjeuner à 13:00)
+      // - Activités suivantes : bloquées à 12:00 pour protéger le créneau déjeuner
+      // Cela évite un matin vide ET un après-midi surchargé de 3 musées
+      const morningDeadline = shouldHaveLunch
+        ? parseTime(date, morningActivityCount === 0 ? '13:00' : '12:00')
+        : parseTime(date, '12:30');
+
+      // Verifier qu'on a le temps avant le deadline du matin
+      if (scheduler.getCurrentTime().getTime() + 30 * 60 * 1000 + attraction.duration * 60 * 1000 > morningDeadline.getTime()) {
+        // continue au lieu de break pour essayer les autres attractions (plus courtes)
         continue;
       }
 
@@ -1396,6 +1544,12 @@ export async function generateDayWithScheduler(params: {
       continue;
     }
 
+    // PROTECTION DÉJEUNER avec deadline dynamique:
+    // 1ère activité → peut finir jusqu'à 13:00 | Suivantes → bloquées à 12:00
+    const morningMaxEnd = shouldHaveLunch
+      ? new Date(Math.min(closeTime.getTime(), morningDeadline.getTime()))
+      : closeTime;
+
     const activityItem = scheduler.addItem({
       id: generateId(),
       title: attraction.name,
@@ -1403,11 +1557,12 @@ export async function generateDayWithScheduler(params: {
       duration: attraction.duration,
       travelTime,
       minStartTime: openTime,
-      maxEndTime: closeTime,
+      maxEndTime: morningMaxEnd,
       data: { attraction },
     });
 
     if (activityItem) {
+      morningActivityCount++;
       // Track spending
       if (activityCost > 0 && budgetTracker) {
         budgetTracker.spend('activities', activityCost);
@@ -1463,14 +1618,15 @@ export async function generateDayWithScheduler(params: {
       const unusedAttractionsMorning = [...unusedFromDay, ...unusedFromAll];
 
       for (const attraction of unusedAttractionsMorning) {
-        // Vérifier qu'on a le temps avant le déjeuner
-        // CORRECTION: 12:00 au lieu de 12:30 si shouldHaveLunch — protège le créneau déjeuner
-        const lunchTime = parseTime(date, shouldHaveLunch ? '12:00' : '12:30');
+        // Même logique "1 activité longue" que le bloc matin
+        const gapFillDeadline = shouldHaveLunch
+          ? parseTime(date, morningActivityCount === 0 ? '13:00' : '12:00')
+          : parseTime(date, '12:30');
+
         const estimatedTravelTimeMorning = estimateTravelTime({ latitude: lastCoords.lat, longitude: lastCoords.lng } as Attraction, attraction);
         const estimatedEndTimeMorning = new Date(scheduler.getCurrentTime().getTime() + (estimatedTravelTimeMorning + attraction.duration + 15) * 60 * 1000);
 
-        if (estimatedEndTimeMorning > lunchTime) {
-          // CORRIGÉ: continue au lieu de break pour essayer les autres attractions (plus courtes)
+        if (estimatedEndTimeMorning > gapFillDeadline) {
           continue;
         }
 
@@ -1485,9 +1641,14 @@ export async function generateDayWithScheduler(params: {
         }
 
         const potentialEndTimeMorning = new Date(actualStartTimeMorning.getTime() + attraction.duration * 60 * 1000);
-        if (potentialEndTimeMorning > safeCloseTimeMorning || potentialEndTimeMorning > lunchTime) {
+        if (potentialEndTimeMorning > safeCloseTimeMorning || potentialEndTimeMorning > gapFillDeadline) {
           continue;
         }
+
+        // PROTECTION DÉJEUNER: deadline dynamique selon morningActivityCount
+        const gapFillMaxEnd = shouldHaveLunch
+          ? new Date(Math.min(closeTimeMorning.getTime(), gapFillDeadline.getTime()))
+          : closeTimeMorning;
 
         const activityItemMorning = scheduler.addItem({
           id: generateId(),
@@ -1496,10 +1657,11 @@ export async function generateDayWithScheduler(params: {
           duration: attraction.duration,
           travelTime: estimatedTravelTimeMorning,
           minStartTime: openTimeMorning,
-          maxEndTime: closeTimeMorning,
+          maxEndTime: gapFillMaxEnd,
         });
 
         if (activityItemMorning) {
+          morningActivityCount++;
           tripUsedAttractionIds.add(attraction.id);
           const attractionCoordsMorning = {
             lat: attraction.latitude || cityCenter.lat,
@@ -1722,7 +1884,9 @@ export async function generateDayWithScheduler(params: {
         minStartTime: parseTime(date, '12:00'),  // Pas de déjeuner avant 12h
         maxEndTime: parseTime(date, '15:30'),     // Limite étendue en dernier recours
       });
-      if (lastResortLunch && lastResortLunch.slot.start < lastResortLimit) {
+      // CORRECTION: Rejeter si le lunch commence après 14:30 — forcer le passage au fallback ultime
+      // qui réorganise les activités pour faire de la place au lunch à 13:00
+      if (lastResortLunch && lastResortLunch.slot.start < parseTime(date, '14:30')) {
         if (shouldSelfCater('lunch', dayNumber, budgetStrategy, false, preferences.durationDays, isDayTrip, groceriesDone)) {
           items.push(schedulerItemToTripItem(lastResortLunch, dayNumber, orderIndex++, {
             title: 'Déjeuner pique-nique / maison',
@@ -1836,14 +2000,12 @@ export async function generateDayWithScheduler(params: {
   }
 
   // Activités de l'après-midi
-  // Re-sort remaining attractions by proximity to current position (after lunch, position may have changed)
-  // This prevents geographic back-and-forth (e.g., going west, coming back to center for lunch, then west again)
-  const afternoonAttractions = [...attractions].sort((a, b) => {
-    // Already-used attractions will be skipped in the loop, no need to filter here
-    const distA = calculateDistance(lastCoords.lat, lastCoords.lng, a.latitude || 0, a.longitude || 0);
-    const distB = calculateDistance(lastCoords.lat, lastCoords.lng, b.latitude || 0, b.longitude || 0);
-    return distA - distB;
-  });
+  // Optimiser l'ordre pour minimiser la distance totale (nearest-neighbor + 2-opt)
+  const dinnerTimeAfternoon = parseTime(date, '19:30');
+  const afternoonEnd = endHour >= 20 ? dinnerTimeAfternoon : dayEnd;
+  const afternoonAttractions = optimizeAttractionOrder(
+    [...attractions], lastCoords, date, afternoonEnd, scheduler.getCurrentTime()
+  );
 
   for (const attraction of afternoonAttractions) {
     // ANTI-DOUBLON: Skip si déjà utilisée dans n'importe quel jour du voyage
@@ -2672,9 +2834,9 @@ export async function generateDayWithScheduler(params: {
     const item = sortedItems[i];
     if (item.type === 'restaurant') {
       const hour = parseInt(item.startTime.split(':')[0] || '12', 10);
-      // "Déjeuner" planifié après 16h → supprimer (c'est un bug de placement, pas un dîner)
-      if (item.title === 'Déjeuner' && hour >= 16) {
-        console.warn(`[Jour ${dayNumber}] ⚠️ Déjeuner placé à ${item.startTime} — suppression (horaire invalide, > 16h)`);
+      // "Déjeuner" planifié après 15h → supprimer (un déjeuner à 15h+ est toujours anormal)
+      if (item.title === 'Déjeuner' && hour >= 15) {
+        console.warn(`[Jour ${dayNumber}] ⚠️ Déjeuner placé à ${item.startTime} — suppression (horaire invalide, >= 15h)`);
         itemsToRemove.add(i);
       }
       // "Déjeuner" avec un nom de restaurant planifié après 16h → supprimer aussi
