@@ -36,7 +36,20 @@ export async function generateTripV2(preferences: TripPreferences): Promise<Trip
   } total)`);
 
   // Resolve best transport early (needed for clustering rebalancing and scheduling)
-  const bestTransport = data.transportOptions?.find(t => t.recommended) || data.transportOptions?.[0] || null;
+  // IMPORTANT: Respect user's transport preference (train, bus, car, plane)
+  // If user chose a specific mode, select that mode even if another is "recommended"
+  let bestTransport: TransportOptionSummary | null = null;
+  if (preferences.transport && preferences.transport !== 'optimal' && data.transportOptions?.length) {
+    bestTransport = data.transportOptions.find(t => t.mode === preferences.transport) || null;
+    if (!bestTransport) {
+      console.warn(`[Pipeline V2] Transport mode "${preferences.transport}" requested but not available, falling back to recommended`);
+      bestTransport = data.transportOptions.find(t => t.recommended) || data.transportOptions[0] || null;
+    } else {
+      console.log(`[Pipeline V2] Using user-preferred transport: ${bestTransport.mode} (${bestTransport.totalDuration}min, €${bestTransport.totalPrice})`);
+    }
+  } else {
+    bestTransport = data.transportOptions?.find(t => t.recommended) || data.transportOptions?.[0] || null;
+  }
 
   // Step 3: Geographic clustering (~0ms)
   console.log('[Pipeline V2] === Step 3: Clustering... ===');
@@ -145,13 +158,11 @@ function rebalanceClustersForFlights(
         : new Date(returnFlight.departureTime).getHours();
       available = Math.max(0, depHour - 3 - 8);
     } else if (isLast && isGroundTransport) {
-      // Ground transport return: estimate departure around 14:00
-      let depHour = 14;
-      if (transport!.transitLegs?.length) {
-        const firstLeg = transport!.transitLegs[0];
-        depHour = new Date(firstLeg.departure).getHours();
-      }
-      available = Math.max(0, depHour - 1 - 8);
+      // Ground transport return: estimate departure around 14:00-16:00
+      // Note: transitLegs have outbound dates, so we use the hour only as a rough guide
+      // For return, we estimate a comfortable afternoon departure
+      const depHour = 15; // Default: leave at 15:00, giving morning for activities
+      available = Math.max(0, depHour - 1 - 8); // available = 6h (8:00 to 14:00)
     }
 
     return available;
@@ -163,6 +174,7 @@ function rebalanceClustersForFlights(
   const maxPerDay = hoursPerDay.map(h => Math.max(0, Math.floor(h / 1.5)));
 
   // Phase 1: Empty days — merge activities into nearest non-day-trip day with capacity
+  // BUT: ensure the day keeps at least its must-sees if it has ANY usable time
   for (let ci = 0; ci < clusters.length; ci++) {
     if (isDayTrip[ci]) continue;
     if (maxPerDay[ci] > 0) continue; // Day has time, skip
@@ -189,6 +201,7 @@ function rebalanceClustersForFlights(
   }
 
   // Phase 2: Overfull days — trim to max capacity
+  // IMPORTANT: Never move must-see activities — they must stay in the schedule
   for (let ci = 0; ci < clusters.length; ci++) {
     if (isDayTrip[ci]) continue;
 
@@ -197,6 +210,17 @@ function rebalanceClustersForFlights(
     if (maxCount === 0) continue; // Already emptied
 
     while (cluster.activities.length > maxCount) {
+      // Find the last NON-must-see activity to move
+      let moveIdx = -1;
+      for (let ai = cluster.activities.length - 1; ai >= 0; ai--) {
+        if (!cluster.activities[ai].mustSee) {
+          moveIdx = ai;
+          break;
+        }
+      }
+      // If all remaining are must-sees, stop — keep them all even if over capacity
+      if (moveIdx === -1) break;
+
       // Find a receiver with remaining capacity
       let bestTarget = -1;
       let bestCapacity = -Infinity;
@@ -210,9 +234,54 @@ function rebalanceClustersForFlights(
       }
       if (bestTarget === -1 || bestCapacity <= 0) break;
 
-      // Move the last activity (least important)
-      const moved = cluster.activities.pop()!;
+      // Move the non-must-see activity
+      const [moved] = cluster.activities.splice(moveIdx, 1);
       clusters[bestTarget].activities.push(moved);
+    }
+  }
+
+  // Phase 3: Ensure no cluster has 0 activities unless it's truly impossible
+  // Days with available time but 0 activities should steal from overfull neighbours
+  for (let ci = 0; ci < clusters.length; ci++) {
+    if (isDayTrip[ci]) continue;
+    if (clusters[ci].activities.length > 0) continue;
+    if (maxPerDay[ci] === 0) continue; // No time available, skip
+
+    // This day has available hours but no activities — steal from the fullest cluster
+    const slotsToFill = Math.min(maxPerDay[ci], 2); // Fill at least 1-2 activities
+    for (let s = 0; s < slotsToFill; s++) {
+      let bestSource = -1;
+      let bestCount = 0;
+      for (let ti = 0; ti < clusters.length; ti++) {
+        if (ti === ci || isDayTrip[ti]) continue;
+        // Only steal from clusters that have more than their minimum (don't empty them)
+        const nonMustSees = clusters[ti].activities.filter(a => !a.mustSee).length;
+        if (nonMustSees > 1 && clusters[ti].activities.length > bestCount) {
+          bestCount = clusters[ti].activities.length;
+          bestSource = ti;
+        }
+      }
+      if (bestSource === -1) break;
+
+      // Move the lowest-scored non-must-see from the source
+      const source = clusters[bestSource];
+      const moveIdx = source.activities.findIndex(a => !a.mustSee);
+      if (moveIdx === -1) break;
+
+      // Pick lowest score among non-must-sees
+      let worstIdx = -1;
+      let worstScore = Infinity;
+      for (let ai = 0; ai < source.activities.length; ai++) {
+        if (source.activities[ai].mustSee) continue;
+        if (source.activities[ai].score < worstScore) {
+          worstScore = source.activities[ai].score;
+          worstIdx = ai;
+        }
+      }
+      if (worstIdx === -1) break;
+
+      const [moved] = source.activities.splice(worstIdx, 1);
+      clusters[ci].activities.push(moved);
     }
   }
 

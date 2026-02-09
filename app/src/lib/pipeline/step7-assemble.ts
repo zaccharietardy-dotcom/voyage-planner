@@ -64,21 +64,14 @@ export async function assembleTripSchedule(
     }
 
     // Compute return departure hour for ground transport
+    // Transit legs have outbound dates — they almost never match the return day
+    // Use estimated afternoon departure (15:00 gives a full morning for activities)
     let groundDepartureHour: number | null = null;
     if (hasReturnTransport && transport) {
-      if (transport.transitLegs?.length) {
-        const firstLeg = transport.transitLegs[0];
-        const legDate = new Date(firstLeg.departure);
-        // Only use real times if they match the return day
-        if (legDate.toDateString() === dayDate.toDateString()) {
-          groundDepartureHour = legDate.getHours();
-        } else {
-          // Estimated return: depart in the afternoon
-          groundDepartureHour = 14;
-        }
-      } else {
-        groundDepartureHour = 14;
-      }
+      // Estimate based on total duration: leave at 15:00 by default
+      // If the trip is very long (>4h), leave earlier (14:00) to arrive at reasonable time
+      const durationHours = (transport.totalDuration || 120) / 60;
+      groundDepartureHour = durationHours > 4 ? 14 : 15;
     }
 
     if (isFirstDay && flights.outbound) {
@@ -166,6 +159,33 @@ export async function assembleTripSchedule(
       // Ground transport return
       const { start: tStart, end: tEnd } = getGroundTransportTimes(transport, dayDate, 'return');
       const modeLabels: Record<string, string> = { train: '🚄 Train', bus: '🚌 Bus', car: '🚗 Voiture', combined: '🔄 Transport', ferry: '⛴️ Ferry' };
+
+      // Build return transit legs with CORRECT dates (not outbound dates)
+      let returnTransitLegs: typeof transport.transitLegs = undefined;
+      if (transport.transitLegs?.length) {
+        returnTransitLegs = transport.transitLegs.slice().reverse().map((leg) => {
+          // Swap from/to for return direction
+          // Fix dates: shift to the return day (dayDate)
+          const returnDep = new Date(dayDate);
+          returnDep.setHours(tStart.getHours(), tStart.getMinutes(), 0, 0);
+
+          const returnArr = new Date(dayDate);
+          returnArr.setHours(tEnd.getHours(), tEnd.getMinutes(), 0, 0);
+
+          // For multi-leg journeys, distribute times proportionally
+          return {
+            mode: leg.mode,
+            from: leg.to,
+            to: leg.from,
+            departure: returnDep.toISOString(),
+            arrival: returnArr.toISOString(),
+            duration: leg.duration,
+            operator: leg.operator,
+            line: leg.line,
+          };
+        });
+      }
+
       scheduler.insertFixedItem({
         id: `transport-ret-${balancedDay.dayNumber}`,
         title: `${modeLabels[transport.mode] || '🚊 Transport'} → ${preferences.origin}`,
@@ -176,13 +196,7 @@ export async function assembleTripSchedule(
           ...transport,
           description: transport.segments?.map(s => `${s.to} → ${s.from}`).join(' | '),
           locationName: `${preferences.destination} → ${preferences.origin}`,
-          transitLegs: transport.transitLegs?.length
-            ? transport.transitLegs.slice().reverse().map((leg: { mode: string; from: string; to: string; departure: string; arrival: string; duration: number; operator?: string; line?: string }) => ({
-                ...leg,
-                from: leg.to,
-                to: leg.from,
-              }))
-            : undefined,
+          transitLegs: returnTransitLegs,
           transitDataSource: transport.dataSource,
           priceRange: transport.priceRange,
           estimatedCost: transport.totalPrice,
@@ -199,9 +213,13 @@ export async function assembleTripSchedule(
 
     // Determine which meals to skip based on time constraints
     const hasReturnTravel = !!(flights.return || hasReturnTransport);
+    // Skip breakfast only if we physically can't have it (arriving after 10am)
     const skipBreakfast = isFirstDay && dayStartHour >= 10;
-    const skipLunch = isLastDay && hasReturnTravel && dayEndHour < 12;
-    const skipDinner = isLastDay && hasReturnTravel && dayEndHour < 19;
+    // Skip lunch only if the day ends before lunch time (e.g. very early departure)
+    const skipLunch = isLastDay && hasReturnTravel && dayEndHour <= 12;
+    // Skip dinner only if the day ends before dinner time
+    const skipDinner = (isLastDay && hasReturnTravel && dayEndHour < 19) ||
+                       (isFirstDay && dayStartHour >= 20);
 
     // 3. Hotel check-in (first day) / check-out (last day)
     // IMPORTANT: On the last day, insert breakfast BEFORE checkout.
@@ -240,14 +258,15 @@ export async function assembleTripSchedule(
     }
 
     // Last day: insert breakfast BEFORE checkout so cursor is still early
-    if (isLastDay && breakfast?.restaurant && !skipBreakfast && dayStartHour < 10) {
+    // Use maxEndTime of 10:30 to give a bit more room
+    if (isLastDay && breakfast?.restaurant && !skipBreakfast && dayStartHour <= 10) {
       scheduler.addItem({
         id: `meal-${balancedDay.dayNumber}-breakfast`,
         title: `Petit-déjeuner — ${breakfast.restaurant.name}`,
         type: 'restaurant',
         duration: 45,
         minStartTime: parseTime(dayDate, `${String(Math.max(7, dayStartHour)).padStart(2, '0')}:00`),
-        maxEndTime: parseTime(dayDate, '10:00'),
+        maxEndTime: parseTime(dayDate, '10:30'),
         data: breakfast.restaurant,
       });
     }
@@ -280,23 +299,41 @@ export async function assembleTripSchedule(
     const orderedActivities = reorderByPlan(cluster, balancedDay.activityOrder);
 
     // 5. Insert breakfast for non-last days (last day already handled above)
-    if (!isLastDay && breakfast?.restaurant && !skipBreakfast && dayStartHour < 10) {
+    if (!isLastDay && breakfast?.restaurant && !skipBreakfast && dayStartHour <= 10) {
       scheduler.addItem({
         id: `meal-${balancedDay.dayNumber}-breakfast`,
         title: `Petit-déjeuner — ${breakfast.restaurant.name}`,
         type: 'restaurant',
         duration: 45,
         minStartTime: parseTime(dayDate, `${String(Math.max(7, dayStartHour)).padStart(2, '0')}:00`),
-        maxEndTime: parseTime(dayDate, '10:00'),
+        maxEndTime: parseTime(dayDate, '10:30'),
         data: breakfast.restaurant,
       });
     }
 
-    // 6. Interleave activities with lunch and dinner at appropriate positions
-    // Strategy: insert activities one by one, inserting meals when the time is right
+    // 6. Pre-insert lunch if the day starts late (after 14:30 — arrival day)
+    // In this case, the interleave loop will never hit the 11:30-14:30 window
     let lunchInserted = false;
     let dinnerInserted = false;
 
+    const initialCursor = scheduler.getCurrentTime();
+    const initialHour = initialCursor.getHours() + initialCursor.getMinutes() / 60;
+
+    // If cursor starts between 11:30 and 14:30, insert lunch NOW before activities
+    if (!skipLunch && lunch?.restaurant && initialHour >= 11.5 && initialHour < 14.5 && orderedActivities.length > 0) {
+      const result = scheduler.addItem({
+        id: `meal-${balancedDay.dayNumber}-lunch`,
+        title: `Déjeuner — ${lunch.restaurant.name}`,
+        type: 'restaurant',
+        duration: 60,
+        minStartTime: parseTime(dayDate, '12:00'),
+        maxEndTime: parseTime(dayDate, '14:30'),
+        data: lunch.restaurant,
+      });
+      if (result) lunchInserted = true;
+    }
+
+    // 7. Interleave activities with lunch and dinner at appropriate positions
     for (let i = 0; i < orderedActivities.length; i++) {
       const activity = orderedActivities[i];
       const prev = i === 0 ? hotel : orderedActivities[i - 1];
@@ -351,28 +388,62 @@ export async function assembleTripSchedule(
         ? Math.max(activity.duration || 120, 180) // At least 3h for day-trip activities
         : (activity.duration || 60);
 
+      // Enforce closing hours for outdoor activities (parks, gardens, viewpoints)
+      // These typically close at sunset — cap at 19:30 (generous for summer)
+      const activityMaxEndTime = getActivityMaxEndTime(activity, dayDate);
+
       scheduler.addItem({
         id: activity.id,
         title: activity.name,
         type: 'activity',
         duration: activityDuration,
         travelTime,
+        maxEndTime: activityMaxEndTime,
         data: activity,
       });
+
+      // After day-trip activity, add explicit return travel to hotel
+      // This prevents dinner from showing 7h travel time from the day-trip location
+      if (balancedDay.isDayTrip && hotel && i === orderedActivities.length - 1) {
+        const distKm = calculateDistance(
+          activity.latitude, activity.longitude,
+          hotel.latitude, hotel.longitude
+        );
+        const returnTravelMin = Math.round((distKm / 50) * 60);
+        if (returnTravelMin > 15) {
+          scheduler.addItem({
+            id: `daytrip-return-${balancedDay.dayNumber}`,
+            title: `Retour vers ${preferences.destination}`,
+            type: 'transport',
+            duration: returnTravelMin,
+            travelTime: 0, // Travel IS the item
+            data: {
+              description: `Retour depuis ${activity.name}`,
+              locationName: hotel.name,
+              latitude: hotel.latitude,
+              longitude: hotel.longitude,
+            },
+          });
+        }
+      }
     }
 
-    // 7. Insert any remaining meals after all activities
+    // 8. Insert any remaining meals after all activities
+    // Use wider time windows for fallback (the scheduler handles conflicts)
     if (!lunchInserted && !skipLunch && lunch?.restaurant) {
-      // Always try to insert lunch — the scheduler will handle time constraints
-      scheduler.addItem({
+      // Try with an extended window — better to have lunch a bit late than not at all
+      const lunchMinStart = parseTime(dayDate, `${String(Math.max(11, dayStartHour)).padStart(2, '0')}:30`);
+      const lunchMaxEnd = parseTime(dayDate, '15:30');
+      const result = scheduler.addItem({
         id: `meal-${balancedDay.dayNumber}-lunch`,
         title: `Déjeuner — ${lunch.restaurant.name}`,
         type: 'restaurant',
         duration: 60,
-        minStartTime: parseTime(dayDate, '12:00'),
-        maxEndTime: parseTime(dayDate, '15:00'),
+        minStartTime: lunchMinStart,
+        maxEndTime: lunchMaxEnd,
         data: lunch.restaurant,
       });
+      if (result) lunchInserted = true;
     }
 
     if (!dinnerInserted && !skipDinner && dinner?.restaurant) {
@@ -512,38 +583,20 @@ function getGroundTransportTimes(
   dayDate: Date,
   direction: 'outbound' | 'return'
 ): { start: Date; end: Date } {
-  if (transport.transitLegs?.length) {
-    if (direction === 'outbound') {
-      const firstLeg = transport.transitLegs[0];
-      const lastLeg = transport.transitLegs[transport.transitLegs.length - 1];
-      const realDep = new Date(firstLeg.departure);
-      const realArr = new Date(lastLeg.arrival);
-      // Start 30min before first departure (time to get to station)
-      return {
-        start: new Date(realDep.getTime() - 30 * 60 * 1000),
-        end: realArr,
-      };
-    } else {
-      // Return: check if legs match the return date
-      const firstLeg = transport.transitLegs[0];
-      const legDate = new Date(firstLeg.departure);
-      if (legDate.toDateString() === dayDate.toDateString()) {
-        const lastLeg = transport.transitLegs[transport.transitLegs.length - 1];
-        return {
-          start: new Date(new Date(firstLeg.departure).getTime() - 30 * 60 * 1000),
-          end: new Date(lastLeg.arrival),
-        };
-      }
-      // Legs don't match return date — estimate afternoon departure
-      const estStart = parseTime(dayDate, '14:00');
-      return {
-        start: estStart,
-        end: new Date(estStart.getTime() + transport.totalDuration * 60 * 1000),
-      };
-    }
+  if (direction === 'outbound' && transport.transitLegs?.length) {
+    // Outbound: use real HAFAS departure/arrival times
+    const firstLeg = transport.transitLegs[0];
+    const lastLeg = transport.transitLegs[transport.transitLegs.length - 1];
+    const realDep = new Date(firstLeg.departure);
+    const realArr = new Date(lastLeg.arrival);
+    // Start 30min before first departure (time to get to station)
+    return {
+      start: new Date(realDep.getTime() - 30 * 60 * 1000),
+      end: realArr,
+    };
   }
 
-  // No real legs — estimate based on total duration
+  // Return direction OR no real legs — estimate based on total duration
   if (direction === 'outbound') {
     const estStart = parseTime(dayDate, '08:00');
     return {
@@ -551,7 +604,11 @@ function getGroundTransportTimes(
       end: new Date(estStart.getTime() + transport.totalDuration * 60 * 1000),
     };
   } else {
-    const estStart = parseTime(dayDate, '14:00');
+    // Return: always estimate based on the return day date
+    // Transit legs have outbound dates and are unreliable for return
+    const durationHours = (transport.totalDuration || 120) / 60;
+    const depHour = durationHours > 4 ? 14 : 15;
+    const estStart = parseTime(dayDate, `${String(depHour).padStart(2, '0')}:00`);
     return {
       start: estStart,
       end: new Date(estStart.getTime() + transport.totalDuration * 60 * 1000),
@@ -561,6 +618,7 @@ function getGroundTransportTimes(
 
 /**
  * Estimate travel time between two locations using Haversine.
+ * For long distances (>15km, e.g. day-trip return), uses car/bus speed.
  */
 function estimateTravel(from: any, to: any): number {
   const fromLat = from?.latitude || from?.lat;
@@ -579,8 +637,66 @@ function estimateTravel(from: any, to: any): number {
   if (distKm < 1) return Math.max(5, Math.round(distKm * 12));
   if (distKm < 3) return Math.round(distKm * 8);
   if (distKm < 15) return Math.round(distKm * 4);
-  // Long distance: car/bus speed
+  // Long distance: car/bus speed (day-trip returns, inter-city)
   return Math.round((distKm / 50) * 60);
+}
+
+/**
+ * Check if an activity is a day-trip (far from city center).
+ */
+function isDayTripActivity(activity: any, cityCenter: { lat: number; lng: number }): boolean {
+  if (!activity?.latitude || !activity?.longitude) return false;
+  return calculateDistance(activity.latitude, activity.longitude, cityCenter.lat, cityCenter.lng) > 25;
+}
+
+/**
+ * Keywords identifying outdoor activities that close at sunset/evening.
+ */
+const OUTDOOR_ACTIVITY_KEYWORDS = [
+  'park', 'parc', 'garden', 'jardin', 'botanical', 'botanique',
+  'viewpoint', 'belvedere', 'belvédère', 'mirador',
+  'cemetery', 'cimetière', 'zoo', 'beach', 'plage',
+  'trail', 'randonnée', 'sentier', 'promenade',
+  'square', 'place', 'plaza',
+];
+
+/**
+ * Keywords identifying indoor activities that stay open late.
+ */
+const INDOOR_ACTIVITY_KEYWORDS = [
+  'museum', 'musée', 'gallery', 'galerie', 'theatre', 'théâtre',
+  'cinema', 'cinéma', 'restaurant', 'bar', 'club', 'pub',
+  'show', 'spectacle', 'concert', 'opera', 'opéra',
+  'mall', 'centre commercial', 'shopping',
+  'spa', 'hammam', 'wellness',
+  'casino', 'bowling',
+  'church', 'église', 'cathedral', 'cathédrale', 'basilica', 'basilique',
+  'mosque', 'mosquée', 'synagogue', 'temple',
+];
+
+/**
+ * Get maximum end time for an activity based on its type.
+ * Outdoor activities (parks, gardens) get a 19:30 cap.
+ * Indoor activities have no special cap.
+ */
+function getActivityMaxEndTime(activity: ScoredActivity, dayDate: Date): Date | undefined {
+  const name = (activity.name || '').toLowerCase();
+  const type = (activity.type || '').toLowerCase();
+  const allText = `${name} ${type}`;
+
+  // Check if indoor first (takes priority)
+  const isIndoor = INDOOR_ACTIVITY_KEYWORDS.some(k => allText.includes(k));
+  if (isIndoor) return undefined; // No cap for indoor
+
+  // Check if outdoor
+  const isOutdoor = OUTDOOR_ACTIVITY_KEYWORDS.some(k => allText.includes(k));
+  if (isOutdoor) {
+    // Cap at 19:30 (generous — most parks close earlier in winter)
+    return parseTime(dayDate, '19:30');
+  }
+
+  // Unknown type — no cap (err on the side of flexibility)
+  return undefined;
 }
 
 /**

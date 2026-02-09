@@ -115,8 +115,44 @@ function detectRealGPS(restaurants: Restaurant[]): boolean {
 }
 
 /**
+ * Cuisine types that are inappropriate for breakfast.
+ * These serve heavy dinner-style food, not breakfast items.
+ */
+const BREAKFAST_EXCLUDED_CUISINES = [
+  'steakhouse', 'steak', 'grill', 'bbq', 'barbecue',
+  'sushi', 'ramen', 'chinese', 'indian', 'thai', 'korean',
+  'mexican', 'tapas', 'fondue', 'raclette',
+  'seafood', 'fish', 'fruits de mer', 'poisson',
+  'pub', 'bar', 'cocktail', 'wine bar',
+  'nightclub', 'disco',
+  'fast food', 'burger', 'pizza', 'kebab', 'shawarma',
+];
+
+/**
+ * Check if a restaurant is appropriate for a given meal type.
+ */
+function isAppropriateForMeal(restaurant: Restaurant, mealType: 'breakfast' | 'lunch' | 'dinner'): boolean {
+  if (mealType !== 'breakfast') return true; // No filtering for lunch/dinner
+
+  const name = (restaurant.name || '').toLowerCase();
+  const cuisine = ((restaurant as any).cuisineType || (restaurant as any).cuisine || '').toLowerCase();
+  const type = ((restaurant as any).type || '').toLowerCase();
+  const allText = `${name} ${cuisine} ${type}`;
+
+  // Exclude inappropriate cuisine types for breakfast
+  for (const excluded of BREAKFAST_EXCLUDED_CUISINES) {
+    if (allText.includes(excluded)) return false;
+  }
+
+  // Bonus: prefer places with breakfast-friendly keywords
+  // (but don't require them — a generic restaurant is still OK for breakfast)
+  return true;
+}
+
+/**
  * Find the best restaurant for a meal slot.
  * Score = (rating × log10(reviewCount)) / distance
+ * For breakfast: filters out inappropriate cuisines (steakhouse, BBQ, etc.)
  */
 function findBestRestaurant(
   pool: Restaurant[],
@@ -133,6 +169,9 @@ function findBestRestaurant(
     if (usedIds.has(r.id)) continue;
     if (!r.latitude || !r.longitude || r.latitude === 0) continue;
 
+    // Filter by cuisine appropriateness for the meal type
+    if (!isAppropriateForMeal(r, mealType)) continue;
+
     const dist = calculateDistance(
       refCoords.lat, refCoords.lng,
       r.latitude, r.longitude
@@ -145,7 +184,17 @@ function findBestRestaurant(
     const qualityScore = rating * Math.log10(reviews);
     const distancePenalty = Math.max(0.05, dist); // min 50m
 
-    const score = qualityScore / distancePenalty;
+    // For breakfast: boost cafés, bakeries, and breakfast-oriented places
+    let mealTypeBonus = 0;
+    if (mealType === 'breakfast') {
+      const nameAndCuisine = `${(r.name || '').toLowerCase()} ${((r as any).cuisineType || '').toLowerCase()}`;
+      const isBreakfastFriendly = ['café', 'cafe', 'bakery', 'boulangerie', 'pâtisserie', 'patisserie',
+        'brunch', 'breakfast', 'petit-déjeuner', 'coffeeshop', 'coffee', 'tea', 'thé',
+        'croissant', 'pancake', 'deli'].some(k => nameAndCuisine.includes(k));
+      if (isBreakfastFriendly) mealTypeBonus = 3;
+    }
+
+    const score = (qualityScore + mealTypeBonus) / distancePenalty;
 
     if (score > bestScore) {
       bestScore = score;
