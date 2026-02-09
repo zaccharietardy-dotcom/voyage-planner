@@ -8,8 +8,8 @@
  */
 
 // Configuration des API
-const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY;
-const OPENROUTE_API_KEY = process.env.OPENROUTE_API_KEY;
+function getGoogleMapsKey() { return process.env.GOOGLE_MAPS_API_KEY; }
+function getOpenRouteKey() { return process.env.OPENROUTE_API_KEY; }
 
 // Types
 export interface Coordinates {
@@ -62,7 +62,7 @@ export async function getDirections(request: DirectionsRequest): Promise<Directi
   const googleMapsUrl = generateGoogleMapsUrl(from, to, mode);
 
   // 1. Essayer Google Directions API
-  if (GOOGLE_MAPS_API_KEY) {
+  if (getGoogleMapsKey()) {
     try {
       const result = await searchWithGoogle(from, to, mode, departureTime);
       return { ...result, googleMapsUrl };
@@ -72,7 +72,7 @@ export async function getDirections(request: DirectionsRequest): Promise<Directi
   }
 
   // 2. Essayer OpenRouteService
-  if (OPENROUTE_API_KEY) {
+  if (getOpenRouteKey()) {
     try {
       const result = await searchWithOpenRouteService(from, to, mode);
       return { ...result, googleMapsUrl };
@@ -98,7 +98,7 @@ async function searchWithGoogle(
     origin: `${from.lat},${from.lng}`,
     destination: `${to.lat},${to.lng}`,
     mode: mode,
-    key: GOOGLE_MAPS_API_KEY!,
+    key: getGoogleMapsKey()!,
     language: 'fr',
   });
 
@@ -175,7 +175,7 @@ async function searchWithOpenRouteService(
   const orsProfile = mode === 'walking' ? 'foot-walking' : 'driving-car';
 
   const response = await fetch(
-    `https://api.openrouteservice.org/v2/directions/${orsProfile}?api_key=${OPENROUTE_API_KEY}&start=${from.lng},${from.lat}&end=${to.lng},${to.lat}`,
+    `https://api.openrouteservice.org/v2/directions/${orsProfile}?api_key=${getOpenRouteKey()}&start=${from.lng},${from.lat}&end=${to.lng},${to.lat}`,
     {
       headers: {
         'Accept': 'application/json, application/geo+json',
@@ -297,11 +297,11 @@ export function generateGoogleMapsEmbedUrl(
   to: Coordinates,
   mode: 'transit' | 'walking' | 'driving' = 'transit'
 ): string | null {
-  if (!GOOGLE_MAPS_API_KEY) return null;
+  if (!getGoogleMapsKey()) return null;
 
   const travelMode = mode === 'transit' ? 'transit' : mode === 'walking' ? 'walking' : 'driving';
 
-  return `https://www.google.com/maps/embed/v1/directions?key=${GOOGLE_MAPS_API_KEY}&origin=${from.lat},${from.lng}&destination=${to.lat},${to.lng}&mode=${travelMode}`;
+  return `https://www.google.com/maps/embed/v1/directions?key=${getGoogleMapsKey()}&origin=${from.lat},${from.lng}&destination=${to.lat},${to.lng}&mode=${travelMode}`;
 }
 
 /**

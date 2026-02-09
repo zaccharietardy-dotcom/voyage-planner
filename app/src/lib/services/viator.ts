@@ -16,7 +16,7 @@ import { Attraction } from './attractions';
 import { ActivityType } from '../types';
 import { findKnownViatorProduct } from './viatorKnownProducts';
 
-const VIATOR_API_KEY = process.env.VIATOR_API_KEY?.trim();
+function getViatorApiKey() { return process.env.VIATOR_API_KEY?.trim(); }
 const VIATOR_BASE_URL = 'https://api.viator.com/partner';
 
 // Cache fichier 7 jours
@@ -24,7 +24,7 @@ const CACHE_DIR = path.join(process.cwd(), '.cache', 'viator');
 const CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 jours
 
 export function isViatorConfigured(): boolean {
-  return !!VIATOR_API_KEY;
+  return !!getViatorApiKey();
 }
 
 /**
@@ -188,14 +188,14 @@ interface ViatorSearchResponse {
  * Recherche la destination ID Viator pour une ville
  */
 async function findDestinationId(destination: string): Promise<string | null> {
-  if (!VIATOR_API_KEY) return null;
+  if (!getViatorApiKey()) return null;
 
   try {
     // Note: freetext search works best in English for destination names
     const response = await fetch(`${VIATOR_BASE_URL}/search/freetext`, {
       method: 'POST',
       headers: {
-        'exp-api-key': VIATOR_API_KEY,
+        'exp-api-key': getViatorApiKey(),
         'Accept-Language': 'en-US',
         'Content-Type': 'application/json',
         'Accept': 'application/json;version=2.0',
@@ -240,7 +240,7 @@ export async function searchViatorActivities(
     maxPricePerActivity?: number;
   }
 ): Promise<Attraction[]> {
-  if (!VIATOR_API_KEY) {
+  if (!getViatorApiKey()) {
     return [];
   }
 
@@ -287,7 +287,7 @@ export async function searchViatorActivities(
     const response = await fetch(`${VIATOR_BASE_URL}/products/search`, {
       method: 'POST',
       headers: {
-        'exp-api-key': VIATOR_API_KEY,
+        'exp-api-key': getViatorApiKey(),
         'Accept-Language': 'fr-FR',
         'Content-Type': 'application/json',
         'Accept': 'application/json;version=2.0',
@@ -302,7 +302,7 @@ export async function searchViatorActivities(
         const retryResponse = await fetch(`${VIATOR_BASE_URL}/products/search`, {
           method: 'POST',
           headers: {
-            'exp-api-key': VIATOR_API_KEY,
+            'exp-api-key': getViatorApiKey(),
             'Accept-Language': 'fr-FR',
             'Content-Type': 'application/json',
             'Accept': 'application/json;version=2.0',
@@ -357,7 +357,7 @@ export async function findViatorProduct(
     return knownProduct;
   }
 
-  if (!VIATOR_API_KEY) return null;
+  if (!getViatorApiKey()) return null;
 
   try {
     // Nettoyer le nom de l'activité pour la recherche
@@ -369,7 +369,7 @@ export async function findViatorProduct(
     const response = await fetch(`${VIATOR_BASE_URL}/search/freetext`, {
       method: 'POST',
       headers: {
-        'exp-api-key': VIATOR_API_KEY,
+        'exp-api-key': getViatorApiKey(),
         'Accept-Language': 'fr-FR',
         'Content-Type': 'application/json',
         'Accept': 'application/json;version=2.0',

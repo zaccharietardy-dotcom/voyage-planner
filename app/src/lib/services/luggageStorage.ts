@@ -16,7 +16,9 @@ import { tokenTracker } from './tokenTracker';
 import * as fs from 'fs';
 import * as path from 'path';
 
-const anthropic = new Anthropic();
+function getAnthropicClient() {
+  return new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+}
 
 export interface LuggageStorage {
   id: string;
@@ -132,7 +134,7 @@ Reponds UNIQUEMENT avec un JSON valide:
 }`;
 
   try {
-    const response = await anthropic.messages.create({
+    const response = await getAnthropicClient().messages.create({
       model: 'claude-3-5-haiku-20241022',
       max_tokens: 2000,
       messages: [

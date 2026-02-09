@@ -46,11 +46,9 @@ export function roundToNearestHour(date: Date): Date {
   rounded.setSeconds(0);
   rounded.setMilliseconds(0);
 
-  // Arrondir à la demi-heure la plus proche (réduit les gaps vs arrondi à l'heure)
-  if (minutes < 15) {
+  // Arrondir à l'heure la plus proche
+  if (minutes < 30) {
     rounded.setMinutes(0);
-  } else if (minutes < 45) {
-    rounded.setMinutes(30);
   } else {
     rounded.setMinutes(0);
     rounded.setHours(rounded.getHours() + 1);

@@ -24,7 +24,7 @@ import { searchTripAdvisorRestaurants, isTripAdvisorConfigured } from './tripadv
 import { searchRestaurantsWithGemini } from './geminiSearch';
 
 // Configuration optionnelle Google Places
-const GOOGLE_PLACES_API_KEY = process.env.GOOGLE_PLACES_API_KEY;
+function getGooglePlacesKey() { return process.env.GOOGLE_PLACES_API_KEY; }
 
 /**
  * Construit une URL de réservation pour un restaurant
@@ -85,14 +85,14 @@ interface RestaurantSearchParams {
  * Recherche des restaurants à proximité
  * Privilégie les restaurants locaux authentiques via Claude AI
  *
- * CHAÎNE DE PRIORITÉ:
- * 0. Base de données locale (données vérifiées < 30 jours)
- * 1. Gemini + Google Search grounding (gratuit 500-1500 req/jour, vérifié Google Maps)
- * 2. TripAdvisor (données riches, Michelin)
- * 3. SerpAPI Google Local ($0.01/req, 100 req/mois gratuit)
- * 4. Google Places API (si configuré)
- * 5. OpenStreetMap Overpass API
- * 6. Restaurants locaux générés (dernier recours)
+ * CHAÎNE DE PRIORITÉ (optimisée coût/qualité):
+ * 0. Base de données locale (cache < 30 jours)
+ * 1. Gemini + Google Search (gratuit, 1500 req/jour)
+ * 2. TripAdvisor RapidAPI (données riches, Michelin, réservations)
+ * 3. Google Places API (gratuit, $200 crédit/mois)
+ * 4. SerpAPI Google Local (~$0.01/req, dernier recours payant)
+ * 5. OpenStreetMap Overpass API (gratuit, données limitées)
+ * 6. Restaurants locaux générés (fallback)
  *
  * IMPORTANT: Le filtre par nom interdit (filterByForbiddenNames) est appliqué
  * à la fin de TOUTES les sources pour garantir qu'aucun restaurant chinois/asiatique
@@ -166,7 +166,7 @@ export async function searchRestaurants(params: RestaurantSearchParams): Promise
     }
   }
 
-  // 2. FALLBACK: TripAdvisor (données RÉELLES, rating, cuisine, Michelin)
+  // 2. TripAdvisor (données riches — ratings, cuisine, Michelin, réservations)
   if (destination && isTripAdvisorConfigured()) {
     try {
       const taRestaurants = await searchTripAdvisorRestaurants(destination, {
@@ -174,7 +174,7 @@ export async function searchRestaurants(params: RestaurantSearchParams): Promise
       });
 
       if (taRestaurants.length > 0) {
-        // Sauvegarder en base locale
+        // Sauvegarder en base locale pour cache
         try {
           const placesToSave = taRestaurants.map(r => restaurantToPlace(r, destination));
           await savePlacesToDB(placesToSave, 'tripadvisor');
@@ -188,26 +188,51 @@ export async function searchRestaurants(params: RestaurantSearchParams): Promise
         });
         filtered = filterByForbiddenNames(filtered, destination);
 
+        console.log(`[Restaurants] ${taRestaurants.length} restaurants TripAdvisor, ${filtered.length} après filtrage`);
         if (filtered.length > 0) {
           finalRestaurants = filtered.slice(0, limit);
           return applyFinalFilter(finalRestaurants, destination, limit, mealType, dietary);
         }
       }
     } catch (error) {
-      console.warn('[Restaurants] TripAdvisor error, trying SerpAPI:', error);
+      console.warn('[Restaurants] TripAdvisor error, trying alternatives:', error);
     }
   }
 
-  // 3. FALLBACK: SerpAPI Google Local (données RÉELLES vérifiées, 100 req/mois gratuit)
+  // 3. Google Places (gratuit, $200 crédit/mois)
+  if (getGooglePlacesKey()) {
+    try {
+      console.log(`[Restaurants] Google Places: recherche (${latitude}, ${longitude}), radius=${Math.max(radius, 2000)}`);
+      const googleResults = await searchWithGooglePlaces(params);
+      console.log(`[Restaurants] Google Places: ${googleResults.length} résultats bruts`);
+      // Filtrer les chaînes ET les cuisines incohérentes
+      let filtered = filterOutChains(googleResults);
+      if (destination) {
+        filtered = filterRestaurantsByCuisine(filtered, destination, { strictMode: true, allowNonLocal: true });
+        filtered = filterByForbiddenNames(filtered, destination);
+      }
+      if (filtered.length > 0) {
+        finalRestaurants = filtered;
+        return applyFinalFilter(finalRestaurants, destination, limit, mealType, dietary);
+      }
+    } catch (error) {
+      console.error('[Restaurants] Google Places error, trying SerpAPI:', error);
+    }
+  }
+
+  // 4. SerpAPI Google Local (payant ~$0.01/req, 100 req/mois gratuit — dernier recours payant)
   if (destination && isSerpApiPlacesConfigured()) {
     try {
+      console.log(`[Restaurants] SerpAPI: recherche "${destination}" (${latitude}, ${longitude})`);
       const serpRestaurants = await searchRestaurantsWithSerpApi(destination, {
         mealType,
-        limit: limit + 10, // Demander plus pour filtrer ensuite
+        limit: limit + 10,
+        latitude,
+        longitude,
       });
+      console.log(`[Restaurants] SerpAPI: ${serpRestaurants.length} résultats bruts`);
 
       if (serpRestaurants.length > 0) {
-        // SAUVEGARDER EN BASE pour les prochaines requêtes
         try {
           const placesToSave = serpRestaurants.map(r => restaurantToPlace(r, destination));
           await savePlacesToDB(placesToSave, 'serpapi');
@@ -215,12 +240,10 @@ export async function searchRestaurants(params: RestaurantSearchParams): Promise
           console.warn('[Restaurants] Erreur sauvegarde en base:', saveError);
         }
 
-        // Filtrer les cuisines incohérentes avec la destination
         let filtered = filterRestaurantsByCuisine(serpRestaurants, destination, {
           strictMode: true,
           allowNonLocal: true,
         });
-        // Filtrer par nom (ex: "Chino Peking")
         filtered = filterByForbiddenNames(filtered, destination);
 
         if (filtered.length > 0) {
@@ -229,28 +252,7 @@ export async function searchRestaurants(params: RestaurantSearchParams): Promise
         }
       }
     } catch (error) {
-      console.warn('[Restaurants] SerpAPI error, trying alternatives:', error);
-    }
-  }
-
-  // 4. Essayer Google Places si configuré
-  if (GOOGLE_PLACES_API_KEY) {
-    try {
-      const googleResults = await searchWithGooglePlaces(params);
-      // Filtrer les chaînes ET les cuisines incohérentes
-      let filtered = filterOutChains(googleResults);
-      if (destination) {
-        filtered = filterRestaurantsByCuisine(filtered, destination, { strictMode: true, allowNonLocal: true });
-        // NOUVEAU: Ajouter le filtre par nom pour Google Places aussi
-        filtered = filterByForbiddenNames(filtered, destination);
-      }
-      if (filtered.length > 0) {
-        finalRestaurants = filtered;
-        // Appliquer le filtre final et retourner
-        return applyFinalFilter(finalRestaurants, destination, limit, mealType, dietary);
-      }
-    } catch (error) {
-      console.error('[Restaurants] Google Places error, falling back to OSM:', error);
+      console.warn('[Restaurants] SerpAPI error, trying OSM:', error);
     }
   }
 
@@ -275,6 +277,7 @@ export async function searchRestaurants(params: RestaurantSearchParams): Promise
 
   // 6. Fallback: générer des restaurants locaux typiques
   // IMPORTANT: generateLocalRestaurants doit UNIQUEMENT générer de la cuisine locale
+  console.warn(`[Restaurants] ⚠️ FALLBACK: Toutes les APIs ont échoué pour "${destination || 'unknown'}". Génération de restaurants locaux.`);
   finalRestaurants = generateLocalRestaurants(params, destination);
   // Appliquer le filtre final même pour les restaurants générés (sécurité)
   return applyFinalFilter(finalRestaurants, destination, limit, mealType, dietary);
@@ -702,9 +705,10 @@ async function searchWithGooglePlaces(params: RestaurantSearchParams): Promise<R
 
   const url = new URL('https://maps.googleapis.com/maps/api/place/nearbysearch/json');
   url.searchParams.append('location', `${latitude},${longitude}`);
-  url.searchParams.append('radius', radius.toString());
+  url.searchParams.append('radius', Math.max(radius, 2000).toString());
   url.searchParams.append('type', 'restaurant');
-  url.searchParams.append('key', GOOGLE_PLACES_API_KEY!);
+  url.searchParams.append('language', 'fr');
+  url.searchParams.append('key', getGooglePlacesKey()!);
 
   if (params.priceLevel) {
     url.searchParams.append('maxprice', params.priceLevel.toString());
@@ -739,7 +743,7 @@ async function searchWithGooglePlaces(params: RestaurantSearchParams): Promise<R
       googleMapsUrl, // URL directe vers la fiche Google Maps
       reservationUrl: `https://www.thefork.fr/search?q=${encodeURIComponent(`${place.name} ${params.destination || ''}`)}`,
       photos: place.photos?.map((p: any) =>
-        `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${p.photo_reference}&key=${GOOGLE_PLACES_API_KEY}`
+        `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${p.photo_reference}&key=${getGooglePlacesKey()}`
       ),
       distance: calculateDistance(latitude, longitude, place.geometry.location.lat, place.geometry.location.lng),
       walkingTime: estimateTravelTime(

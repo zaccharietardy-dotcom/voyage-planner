@@ -30,7 +30,7 @@ export interface DBLeg {
   direction?: string;
 }
 
-const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY;
+function getGoogleMapsKey() { return process.env.GOOGLE_MAPS_API_KEY; }
 const TIMEOUT_MS = 8000;
 
 // Coordonnées des principales villes européennes pour Google + Transitous
@@ -190,7 +190,7 @@ async function searchWithGoogle(
   destination: string,
   date?: Date
 ): Promise<DBJourney[]> {
-  if (!GOOGLE_MAPS_API_KEY) return [];
+  if (!getGoogleMapsKey()) return [];
 
   const originCoords = getCityCoords(origin);
   const destCoords = getCityCoords(destination);
@@ -204,7 +204,7 @@ async function searchWithGoogle(
       transit_mode: 'rail',
       alternatives: 'true',
       language: 'fr',
-      key: GOOGLE_MAPS_API_KEY,
+      key: getGoogleMapsKey(),
     });
 
     if (date) {

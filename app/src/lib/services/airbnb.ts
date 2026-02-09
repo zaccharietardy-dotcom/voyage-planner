@@ -7,19 +7,19 @@
  * Flow: searchDestination (v1) → searchPropertyByPlaceId (v2)
  *
  * Variables d'environnement requises :
- * - RAPIDAPI_KEY : clé RapidAPI
- * - RAPIDAPI_AIRBNB_HOST : host de l'API (défaut: airbnb19.p.rapidapi.com)
+ * - getRapidApiKey() : clé RapidAPI
+ * - getAirbnbHost() : host de l'API (défaut: airbnb19.p.rapidapi.com)
  *
  * Fallback: si l'API échoue, génère un lien de recherche Airbnb pré-filtré
  */
 
 import { Accommodation } from '../types';
 
-const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY || '';
-const RAPIDAPI_AIRBNB_HOST = process.env.RAPIDAPI_AIRBNB_HOST || 'airbnb19.p.rapidapi.com';
+function getRapidApiKey() { return process.env.RAPIDAPI_KEY || ''; }
+function getAirbnbHost() { return process.env.RAPIDAPI_AIRBNB_HOST || 'airbnb19.p.rapidapi.com'; }
 
 export function isAirbnbApiConfigured(): boolean {
-  return !!RAPIDAPI_KEY;
+  return !!getRapidApiKey();
 }
 
 interface AirbnbSearchOptions {
@@ -38,8 +38,8 @@ async function resolveDestinationId(destination: string): Promise<{ id: string; 
   try {
     const params = new URLSearchParams({ query: destination });
     const data = await fetchWithRetry(
-      `https://${RAPIDAPI_AIRBNB_HOST}/api/v1/searchDestination?${params}`,
-      { 'x-rapidapi-key': RAPIDAPI_KEY, 'x-rapidapi-host': RAPIDAPI_AIRBNB_HOST },
+      `https://${getAirbnbHost()}/api/v1/searchDestination?${params}`,
+      { 'x-rapidapi-key': getRapidApiKey(), 'x-rapidapi-host': getAirbnbHost() },
     );
 
     if (!data || !data.status || !data.data || data.data.length === 0) return null;
@@ -106,8 +106,8 @@ async function searchByPlaceId(
   if (options.minPricePerNight) params.set('priceMin', options.minPricePerNight.toString());
 
   const data = await fetchWithRetry(
-    `https://${RAPIDAPI_AIRBNB_HOST}/api/v2/searchPropertyByPlaceId?${params}`,
-    { 'x-rapidapi-key': RAPIDAPI_KEY, 'x-rapidapi-host': RAPIDAPI_AIRBNB_HOST },
+    `https://${getAirbnbHost()}/api/v2/searchPropertyByPlaceId?${params}`,
+    { 'x-rapidapi-key': getRapidApiKey(), 'x-rapidapi-host': getAirbnbHost() },
   );
 
   if (!data || !data.status || !data.data) {
@@ -127,8 +127,8 @@ export async function searchAirbnbListings(
   checkOut: string,
   options: AirbnbSearchOptions = {},
 ): Promise<Accommodation[]> {
-  if (!RAPIDAPI_KEY) {
-    console.warn('[Airbnb] RAPIDAPI_KEY non configurée, fallback lien de recherche');
+  if (!getRapidApiKey()) {
+    console.warn('[Airbnb] getRapidApiKey() non configurée, fallback lien de recherche');
     return generateFallbackAirbnb(destination, checkIn, checkOut, options, options.cityCenter);
   }
 

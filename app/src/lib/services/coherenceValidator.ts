@@ -973,19 +973,19 @@ function fixLogisticsOrder(trip: Trip, error: CoherenceError): void {
        l.title.toLowerCase().includes('transfert'))
     ) || logistics.find(l => l.type === 'flight');
 
-    // NE PAS décaler les activités après le check-in - elles peuvent être avant!
-    // On vérifie seulement qu'elles sont après l'ARRIVÉE (transfert ou vol)
-    if (arrivalLogistic) {
-      const arrivalEnd = parseTimeToMinutes(arrivalLogistic.endTime);
+    // S'assurer que toutes les activités sont après toute la logistique d'arrivée
+    // (vol + transfert + check-in hôtel)
+    const lastLogisticEnd = Math.max(...logistics.map(l => parseTimeToMinutes(l.endTime)));
+    if (lastLogisticEnd > 0) {
       const activities = nonLogistics.filter(i => i.type === 'activity');
 
       for (const item of activities) {
         const activityStart = parseTimeToMinutes(item.startTime);
-        // Si l'activité commence AVANT l'arrivée, la décaler juste après
-        if (activityStart < arrivalEnd) {
+        // Si l'activité commence AVANT la fin de la dernière logistique, la décaler
+        if (activityStart < lastLogisticEnd) {
           const duration = parseTimeToMinutes(item.endTime) - parseTimeToMinutes(item.startTime);
-          item.startTime = minutesToTime(arrivalEnd + 15);
-          item.endTime = minutesToTime(arrivalEnd + 15 + duration);
+          item.startTime = minutesToTime(lastLogisticEnd + 15);
+          item.endTime = minutesToTime(lastLogisticEnd + 15 + duration);
         }
       }
     }

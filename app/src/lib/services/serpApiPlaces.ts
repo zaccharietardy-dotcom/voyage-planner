@@ -17,7 +17,7 @@ import { Attraction } from './attractions';
 import { calculateDistance } from './geocoding';
 import { getDestinationSize, getCostMultiplier, getDestinationArchetypes } from './destinationData';
 
-const SERPAPI_KEY = process.env.SERPAPI_KEY?.trim();
+function getSerpApiKey() { return process.env.SERPAPI_KEY?.trim(); }
 const SERPAPI_BASE_URL = 'https://serpapi.com/search.json';
 
 // ============================================
@@ -116,9 +116,11 @@ export async function searchRestaurantsWithSerpApi(
     mealType?: 'breakfast' | 'lunch' | 'dinner';
     cuisineType?: string;
     limit?: number;
+    latitude?: number;
+    longitude?: number;
   } = {}
 ): Promise<Restaurant[]> {
-  if (!SERPAPI_KEY) {
+  if (!getSerpApiKey()) {
     console.warn('[SerpAPI Places] SERPAPI_KEY non configurée');
     return [];
   }
@@ -144,31 +146,61 @@ export async function searchRestaurantsWithSerpApi(
     query = 'restaurant local cuisine'; // Privilégier la cuisine locale
   }
 
-  const params = new URLSearchParams({
-    api_key: SERPAPI_KEY,
+  const serpParams: Record<string, string> = {
+    api_key: getSerpApiKey()!,
     engine: 'google_local',
     q: query,
-    location: destination,
     hl: 'fr',
     gl: getCountryCode(destination),
-  });
+  };
+  // Utiliser les coordonnées GPS si disponibles (plus fiable pour les villes hors Europe/US)
+  if (options.latitude && options.longitude) {
+    serpParams.ll = `@${options.latitude},${options.longitude},14z`;
+  }
+  // Pour les villes hors Europe/US, le param `location` échoue souvent ("Unsupported location")
+  // Stratégie: essayer d'abord avec location, puis fallback avec le nom de la ville dans la query
+  serpParams.location = destination;
+
+  const tryFetch = async (p: Record<string, string>): Promise<SerpApiLocalResponse | null> => {
+    const url = `${SERPAPI_BASE_URL}?${new URLSearchParams(p)}`;
+    const resp = await fetch(url);
+    if (!resp.ok) {
+      const body = await resp.text();
+      // HTTP 400 = "Unsupported location" — fallback possible
+      if (resp.status === 400) return null;
+      console.error(`[SerpAPI Places] Erreur HTTP ${resp.status}:`, body.substring(0, 200));
+      return null;
+    }
+    const data: SerpApiLocalResponse = await resp.json();
+    if (data.error) {
+      // "Unsupported location" → fallback
+      if (data.error.includes('Unsupported') || data.error.includes('location')) return null;
+      console.error('[SerpAPI Places] Erreur:', data.error);
+      return null;
+    }
+    return data;
+  };
 
   try {
-    const response = await fetch(`${SERPAPI_BASE_URL}?${params}`);
+    console.log(`[SerpAPI Places] Requête: q="${query}", location="${destination}", ll="${serpParams.ll || 'none'}", gl="${serpParams.gl}"`);
+    let data = await tryFetch(serpParams);
 
-    if (!response.ok) {
-      console.error('[SerpAPI Places] Erreur HTTP:', response.status);
-      return [];
+    // Fallback: si location échoue, mettre le nom de la ville dans la query
+    if (!data) {
+      console.log(`[SerpAPI Places] Location "${destination}" non supportée, fallback → query avec nom de ville`);
+      const fallbackParams = { ...serpParams };
+      delete fallbackParams.location;
+      fallbackParams.q = `${query} ${destination}`;
+      data = await tryFetch(fallbackParams);
     }
 
-    const data: SerpApiLocalResponse = await response.json();
-
-    if (data.error) {
-      console.error('[SerpAPI Places] Erreur:', data.error);
+    if (!data) {
+      console.warn('[SerpAPI Places] Toutes les tentatives ont échoué');
       return [];
     }
 
     const results = data.local_results || [];
+    console.log(`[SerpAPI Places] ${results.length} résultats local_results`);
 
     // Filtrer les restaurants fermés définitivement
     const openResults = results.filter(r => {
@@ -239,7 +271,7 @@ export async function searchHotelsWithSerpApi(
     sort?: 'relevance' | 'lowest_price' | 'highest_rating';
   } = {}
 ): Promise<any[]> {
-  if (!SERPAPI_KEY) {
+  if (!getSerpApiKey()) {
     console.warn('[SerpAPI Hotels] SERPAPI_KEY non configurée');
     return [];
   }
@@ -247,7 +279,7 @@ export async function searchHotelsWithSerpApi(
   const { adults = 2, limit = 10, minPrice, maxPrice, hotelClass, sort } = options;
 
   const params = new URLSearchParams({
-    api_key: SERPAPI_KEY,
+    api_key: getSerpApiKey()!,
     engine: 'google_hotels',
     q: destination,
     check_in_date: checkInDate,
@@ -349,13 +381,13 @@ export async function getAvailableHotelNames(
   checkOutDate: string,
   adults: number = 2
 ): Promise<Set<string>> {
-  if (!SERPAPI_KEY) {
+  if (!getSerpApiKey()) {
     console.warn('[SerpAPI] Clé non configurée - skip vérification disponibilité');
     return new Set(); // Retourne un set vide = on ne peut pas vérifier
   }
 
   const params = new URLSearchParams({
-    api_key: SERPAPI_KEY,
+    api_key: getSerpApiKey()!,
     engine: 'google_hotels',
     q: destination,
     check_in_date: checkInDate,
@@ -411,7 +443,7 @@ export async function searchAttractionsWithSerpApi(
     limit?: number;
   } = {}
 ): Promise<any[]> {
-  if (!SERPAPI_KEY) {
+  if (!getSerpApiKey()) {
     console.warn('[SerpAPI Attractions] SERPAPI_KEY non configurée');
     return [];
   }
@@ -429,7 +461,7 @@ export async function searchAttractionsWithSerpApi(
     : `tourist attractions ${locationQuery}`;
 
   const params = new URLSearchParams({
-    api_key: SERPAPI_KEY,
+    api_key: getSerpApiKey()!,
     engine: 'google_local',
     q: query,
     location: locationQuery,
@@ -480,7 +512,7 @@ export async function searchAttractionsWithSerpApi(
  * Vérifie si SerpAPI Places est configurée
  */
 export function isSerpApiPlacesConfigured(): boolean {
-  return !!SERPAPI_KEY;
+  return !!getSerpApiKey();
 }
 
 // === Constantes de qualité ===
@@ -631,7 +663,7 @@ export async function searchAttractionsMultiQuery(
     limit?: number;
   } = {}
 ): Promise<Attraction[]> {
-  if (!SERPAPI_KEY) {
+  if (!getSerpApiKey()) {
     console.warn('[SerpAPI Attractions Multi] SERPAPI_KEY non configurée');
     return [];
   }
@@ -656,7 +688,7 @@ export async function searchAttractionsMultiQuery(
   // Exécuter les requêtes en parallèle pour optimiser le temps
   const promises = queries.map(async ({ query, priority }) => {
     const params = new URLSearchParams({
-      api_key: SERPAPI_KEY!,
+      api_key: getSerpApiKey()!,
       engine: 'google_maps',
       q: `${query} ${destination}`,
       ll: `@${cityCenter.lat},${cityCenter.lng},14z`, // 14z = ~1km de rayon
@@ -777,7 +809,7 @@ export async function searchMustSeeAttractions(
   destination: string,
   cityCenter: { lat: number; lng: number },
 ): Promise<Attraction[]> {
-  if (!SERPAPI_KEY || !mustSee.trim()) return [];
+  if (!getSerpApiKey() || !mustSee.trim()) return [];
 
   // Split by comma, then expand "&" / "et" into separate items
   const rawItems = mustSee.split(',').map(s => s.trim()).filter(Boolean);
@@ -795,7 +827,7 @@ export async function searchMustSeeAttractions(
 
   const promises = items.map(async (item) => {
     const params = new URLSearchParams({
-      api_key: SERPAPI_KEY!,
+      api_key: getSerpApiKey()!,
       engine: 'google_maps',
       q: `${item} ${destination}`,
       ll: `@${cityCenter.lat},${cityCenter.lng},14z`,
@@ -825,7 +857,7 @@ export async function searchMustSeeAttractions(
       for (const variant of variants) {
         try {
           const retryParams = new URLSearchParams({
-            api_key: SERPAPI_KEY!,
+            api_key: getSerpApiKey()!,
             engine: 'google_maps',
             q: variant,
             ll: `@${cityCenter.lat},${cityCenter.lng},14z`,
@@ -876,7 +908,7 @@ export async function searchRestaurantsNearby(
     limit?: number;
   } = {}
 ): Promise<Restaurant[]> {
-  if (!SERPAPI_KEY) {
+  if (!getSerpApiKey()) {
     console.warn('[SerpAPI Restaurants Nearby] SERPAPI_KEY non configurée');
     return [];
   }
@@ -912,7 +944,7 @@ export async function searchRestaurantsNearby(
 
   // Zoom 16z = ~300m de rayon, parfait pour proximité
   const params = new URLSearchParams({
-    api_key: SERPAPI_KEY,
+    api_key: getSerpApiKey()!,
     engine: 'google_maps',
     q: query,
     ll: `@${activityCoords.lat},${activityCoords.lng},16z`,
@@ -1025,7 +1057,7 @@ export async function searchGroceryStores(
     limit?: number;
   } = {}
 ): Promise<GroceryStore[]> {
-  if (!SERPAPI_KEY) {
+  if (!getSerpApiKey()) {
     console.warn('[SerpAPI Grocery] SERPAPI_KEY non configurée');
     return [];
   }
@@ -1045,7 +1077,7 @@ export async function searchGroceryStores(
   const query = queryMap[countryCode] || 'supermarket grocery store';
 
   const params = new URLSearchParams({
-    api_key: SERPAPI_KEY,
+    api_key: getSerpApiKey()!,
     engine: 'google_maps',
     q: query,
     ll: `@${coords.lat},${coords.lng},15z`,
@@ -1119,13 +1151,13 @@ export async function geocodeViaSerpApi(
   city: string,
   nearbyCoords?: { lat: number; lng: number },
 ): Promise<{ lat: number; lng: number; address?: string; operatingHours?: Record<string, string> } | null> {
-  if (!SERPAPI_KEY || !placeName.trim()) return null;
+  if (!getSerpApiKey() || !placeName.trim()) return null;
 
   const countryCode = getCountryCode(city);
   const query = `${placeName} ${city}`;
 
   const params = new URLSearchParams({
-    api_key: SERPAPI_KEY,
+    api_key: getSerpApiKey()!,
     engine: 'google_maps',
     q: query,
     hl: 'fr',

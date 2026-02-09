@@ -26,8 +26,8 @@ import { validateFlightNumber, filterValidFlights } from './flightValidator';
 import { generateFlightLink } from './linkGenerator';
 
 // Configuration Amadeus (optionnel)
-const AMADEUS_API_KEY = process.env.AMADEUS_API_KEY;
-const AMADEUS_API_SECRET = process.env.AMADEUS_API_SECRET;
+function getAmadeusApiKey() { return process.env.AMADEUS_API_KEY; }
+function getAmadeusApiSecret() { return process.env.AMADEUS_API_SECRET; }
 
 interface FlightSearchParams {
   originCode: string;
@@ -124,7 +124,7 @@ export async function searchFlights(params: FlightSearchParams): Promise<FlightS
   }
 
   // 3. Si Amadeus est configure, l'utiliser
-  if (AMADEUS_API_KEY && AMADEUS_API_SECRET) {
+  if (getAmadeusApiKey() && getAmadeusApiSecret()) {
     try {
       const result = await searchWithAmadeus(params);
       if (result.outboundFlights.length > 0) {
@@ -143,7 +143,7 @@ export async function searchFlights(params: FlightSearchParams): Promise<FlightS
   console.error('[Flights] APIs testées:');
   console.error(`[Flights]   • SerpAPI: ${isSerpApiConfigured() ? '✅ configurée mais 0 résultats' : '❌ NON configurée'}`);
   console.error(`[Flights]   • Gemini: ${isGeminiConfigured() ? '✅ configurée mais 0 résultats' : '❌ NON configurée'}`);
-  console.error(`[Flights]   • Amadeus: ${!!(AMADEUS_API_KEY && AMADEUS_API_SECRET) ? '✅ configurée mais 0 résultats' : '❌ NON configurée'}`);
+  console.error(`[Flights]   • Amadeus: ${!!(getAmadeusApiKey() && getAmadeusApiSecret()) ? '✅ configurée mais 0 résultats' : '❌ NON configurée'}`);
   console.error('[Flights] ');
   console.error('[Flights] Solution: Configurez SERPAPI_KEY dans .env.local');
   console.error('[Flights] Créer un compte gratuit: https://serpapi.com/');
@@ -168,7 +168,7 @@ async function searchWithAmadeus(params: FlightSearchParams): Promise<FlightSear
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
     },
-    body: `grant_type=client_credentials&client_id=${AMADEUS_API_KEY}&client_secret=${AMADEUS_API_SECRET}`,
+    body: `grant_type=client_credentials&client_id=${getAmadeusApiKey()}&client_secret=${getAmadeusApiSecret()}`,
   });
 
   if (!tokenResponse.ok) {

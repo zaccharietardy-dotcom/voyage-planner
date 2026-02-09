@@ -10,7 +10,10 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:e2e": "jest --testPathPatterns=e2e-validation",
-    "analyze": "ANALYZE=true next build"
+    "analyze": "ANALYZE=true next build",
+    "debug:generate": "npx tsx scripts/debug-pipeline/generate-trip.ts",
+    "debug:analyze": "npx tsx scripts/debug-pipeline/analyze-trip.ts",
+    "debug:run": "npx tsx scripts/debug-pipeline/generate-trip.ts --all-and-analyze"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.71.2",

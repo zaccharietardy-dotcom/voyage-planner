@@ -12,7 +12,7 @@
  * 3. getHotelDetails → URL Booking.com directe
  */
 
-const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY?.trim();
+function getRapidApiKey() { return process.env.RAPIDAPI_KEY?.trim(); }
 const RAPIDAPI_HOST = 'booking-com15.p.rapidapi.com';
 const RAPIDAPI_BASE_URL = `https://${RAPIDAPI_HOST}/api/v1/hotels`;
 
@@ -43,7 +43,7 @@ export interface BookingHotel {
  * Vérifie si RapidAPI Booking est configuré
  */
 export function isRapidApiBookingConfigured(): boolean {
-  return !!RAPIDAPI_KEY;
+  return !!getRapidApiKey();
 }
 
 /**
@@ -56,7 +56,7 @@ const CACHE_TTL = 24 * 60 * 60 * 1000; // 24h
  * Recherche le dest_id d'une ville sur Booking.com (booking-com15)
  */
 async function getDestinationId(city: string): Promise<{ destId: string; destType: string } | null> {
-  if (!RAPIDAPI_KEY) return null;
+  if (!getRapidApiKey()) return null;
 
   // Check cache
   const normalizedCity = city.toLowerCase().trim();
@@ -71,7 +71,7 @@ async function getDestinationId(city: string): Promise<{ destId: string; destTyp
     const response = await fetch(url, {
       headers: {
         'x-rapidapi-host': RAPIDAPI_HOST,
-        'x-rapidapi-key': RAPIDAPI_KEY,
+        'x-rapidapi-key': getRapidApiKey(),
       },
     });
 
@@ -184,7 +184,7 @@ async function getHotelBookingUrl(
   hotelName?: string,
   countryCode?: string
 ): Promise<string | null> {
-  if (!RAPIDAPI_KEY) return null;
+  if (!getRapidApiKey()) return null;
 
   try {
     const url = `${RAPIDAPI_BASE_URL}/getHotelDetails?hotel_id=${encodeURIComponent(hotelId)}&arrival_date=${checkIn}&departure_date=${checkOut}&adults=${adults}&currency_code=EUR`;
@@ -192,7 +192,7 @@ async function getHotelBookingUrl(
     const response = await fetch(url, {
       headers: {
         'x-rapidapi-host': RAPIDAPI_HOST,
-        'x-rapidapi-key': RAPIDAPI_KEY,
+        'x-rapidapi-key': getRapidApiKey(),
       },
     });
 
@@ -271,7 +271,7 @@ export async function searchHotelsWithBookingApi(
     limit?: number;
   } = {}
 ): Promise<BookingHotel[]> {
-  if (!RAPIDAPI_KEY) {
+  if (!getRapidApiKey()) {
     console.warn('[RapidAPI Booking] Clé API non configurée');
     return [];
   }
@@ -326,7 +326,7 @@ export async function searchHotelsWithBookingApi(
     const response = await fetch(url, {
       headers: {
         'x-rapidapi-host': RAPIDAPI_HOST,
-        'x-rapidapi-key': RAPIDAPI_KEY,
+        'x-rapidapi-key': getRapidApiKey(),
       },
     });
 
@@ -476,7 +476,7 @@ export async function searchHotelsWithBookingApi(
 /**
  * Enrichit un hôtel avec Google Places si l'adresse est manquante
  */
-const GOOGLE_PLACES_API_KEY = process.env.GOOGLE_PLACES_API_KEY;
+function getGooglePlacesKey() { return process.env.GOOGLE_PLACES_API_KEY; }
 
 export async function enrichHotelWithGooglePlaces(hotel: BookingHotel, destinationCity?: string): Promise<BookingHotel> {
   // Si l'adresse est déjà valide, pas besoin d'enrichir
@@ -485,7 +485,7 @@ export async function enrichHotelWithGooglePlaces(hotel: BookingHotel, destinati
   }
 
   // Si pas de clé Google Places, on ne peut pas enrichir
-  if (!GOOGLE_PLACES_API_KEY) {
+  if (!getGooglePlacesKey()) {
     return hotel;
   }
 
@@ -493,7 +493,7 @@ export async function enrichHotelWithGooglePlaces(hotel: BookingHotel, destinati
 
     // Recherche Google Places Text Search
     const searchQuery = `${hotel.name} ${hotel.city || ''} hotel`;
-    const url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(searchQuery)}&key=${GOOGLE_PLACES_API_KEY}`;
+    const url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(searchQuery)}&key=${getGooglePlacesKey()}`;
 
     const response = await fetch(url);
     if (!response.ok) {

@@ -1017,33 +1017,42 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
         }
 
         // Compute approximate coords for this meal
+        // IMPORTANT: filtrer les attractions avec des coordonnées aberrantes (>30km du centre)
+        // avant le calcul du centroïde, pour que le restaurant soit proche des activités réelles
+        const validAttrs = dayAttrs.filter(a => {
+          if (!a.latitude || !a.longitude) return false;
+          const dist = calculateDistance(a.latitude, a.longitude, cityCenter.lat, cityCenter.lng);
+          if (dist > 30) {
+            console.warn(`[AI] ⚠️ Attraction "${a.name}" exclue du centroïde: ${dist.toFixed(1)}km du centre`);
+            return false;
+          }
+          return true;
+        });
+
         let mealCoords: { lat: number; lng: number };
         if (mealType === 'breakfast') {
           mealCoords = accommodationCoords;
         } else if (mealType === 'lunch') {
-          // Centroïde des attractions du matin (plus précis que le dernier point seul)
-          const morningAttrs = dayAttrs.slice(0, Math.ceil(dayAttrs.length / 2))
-            .filter(a => a.latitude && a.longitude);
+          // Centroïde des attractions du matin (proches de l'activité précédente)
+          const morningAttrs = validAttrs.slice(0, Math.ceil(validAttrs.length / 2));
           if (morningAttrs.length > 0) {
-            const lunchLat = morningAttrs.reduce((s, a) => s + a.latitude, 0) / morningAttrs.length;
-            const lunchLng = morningAttrs.reduce((s, a) => s + a.longitude, 0) / morningAttrs.length;
-            mealCoords = { lat: lunchLat, lng: lunchLng };
+            // Prendre la DERNIÈRE attraction du matin (pas le centroïde) pour être au plus proche
+            const lastMorning = morningAttrs[morningAttrs.length - 1];
+            mealCoords = { lat: lastMorning.latitude, lng: lastMorning.longitude };
           } else {
             mealCoords = cityCenter;
           }
         } else {
-          // Dinner: centroïde des attractions de l'après-midi
-          const afternoonAttrs = dayAttrs.slice(Math.ceil(dayAttrs.length / 2))
-            .filter(a => a.latitude && a.longitude);
+          // Dinner: dernière attraction de l'après-midi (ou dernière attraction de la journée)
+          const afternoonAttrs = validAttrs.slice(Math.ceil(validAttrs.length / 2));
           if (afternoonAttrs.length > 0) {
-            const dinnerLat = afternoonAttrs.reduce((s, a) => s + a.latitude, 0) / afternoonAttrs.length;
-            const dinnerLng = afternoonAttrs.reduce((s, a) => s + a.longitude, 0) / afternoonAttrs.length;
-            mealCoords = { lat: dinnerLat, lng: dinnerLng };
+            const lastAfternoon = afternoonAttrs[afternoonAttrs.length - 1];
+            mealCoords = { lat: lastAfternoon.latitude, lng: lastAfternoon.longitude };
+          } else if (validAttrs.length > 0) {
+            const lastValid = validAttrs[validAttrs.length - 1];
+            mealCoords = { lat: lastValid.latitude, lng: lastValid.longitude };
           } else {
-            const lastAttr = dayAttrs[dayAttrs.length - 1];
-            mealCoords = lastAttr && lastAttr.latitude
-              ? { lat: lastAttr.latitude, lng: lastAttr.longitude }
-              : cityCenter;
+            mealCoords = cityCenter;
           }
         }
 

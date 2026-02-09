@@ -14,7 +14,7 @@ import { Flight } from '../types';
 import { generateFlightLink } from './linkGenerator';
 
 // Protection contre les espaces parasites dans les clés
-const SERPAPI_KEY = process.env.SERPAPI_KEY?.trim();
+function getSerpApiKey() { return process.env.SERPAPI_KEY?.trim(); }
 const SERPAPI_BASE_URL = 'https://serpapi.com/search.json';
 
 interface SerpApiFlightOffer {
@@ -61,13 +61,13 @@ export async function searchFlightsWithSerpApi(
   passengers: number = 1,
   isReturn: boolean = false // true pour vol retour (affecte les liens Vueling)
 ): Promise<Flight[]> {
-  if (!SERPAPI_KEY) {
+  if (!getSerpApiKey()) {
     console.warn('[SerpAPI] SERPAPI_KEY non configurée');
     return [];
   }
 
   const params = new URLSearchParams({
-    api_key: SERPAPI_KEY,
+    api_key: getSerpApiKey(),
     engine: 'google_flights',
     departure_id: origin,
     arrival_id: destination,
@@ -225,13 +225,13 @@ export async function verifyPlaceWithSerpApi(
   latitude?: number;
   longitude?: number;
 } | null> {
-  if (!SERPAPI_KEY) {
+  if (!getSerpApiKey()) {
     return null;
   }
 
   const query = `${placeName}, ${city}`;
   const params = new URLSearchParams({
-    api_key: SERPAPI_KEY,
+    api_key: getSerpApiKey(),
     engine: 'google_maps',
     q: query,
     hl: 'fr',
@@ -396,5 +396,5 @@ function generateDirectAirlineBookingUrl(
  * Vérifie si SerpAPI est configurée
  */
 export function isSerpApiConfigured(): boolean {
-  return !!SERPAPI_KEY;
+  return !!getSerpApiKey();
 }

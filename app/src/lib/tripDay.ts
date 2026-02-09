@@ -1516,6 +1516,7 @@ export async function generateDayWithScheduler(params: {
       // Verifier qu'on a le temps avant le deadline du matin
       if (scheduler.getCurrentTime().getTime() + 30 * 60 * 1000 + attraction.duration * 60 * 1000 > morningDeadline.getTime()) {
         // continue au lieu de break pour essayer les autres attractions (plus courtes)
+        console.log(`[Jour ${dayNumber}] Skip "${attraction.name}" (matin): dépasse deadline (${attraction.duration}min)`);
         continue;
       }
 
@@ -1535,12 +1536,16 @@ export async function generateDayWithScheduler(params: {
     // Verifier que le lieu sera encore ouvert quand on aura fini (avec marge de 30min)
     const potentialEndTime = new Date(actualStartTime.getTime() + attraction.duration * 60 * 1000);
     if (potentialEndTime > safeCloseTime) {
+      console.log(`[Jour ${dayNumber}] Skip "${attraction.name}" (matin): lieu fermé avant fin de visite`);
       continue;
     }
 
     // Budget check: skip if activity costs more than remaining budget
+    // EXCEPTION: activités gratuites et must-see passent toujours
     const activityCost = (attraction.estimatedCost || 0) * (preferences.groupSize || 1);
-    if (activityCost > 0 && budgetTracker && !budgetTracker.canAfford('activities', activityCost)) {
+    const isMustSee = (attraction as any).mustSee === true;
+    if (activityCost > 0 && !isMustSee && budgetTracker && !budgetTracker.canAfford('activities', activityCost)) {
+      console.warn(`[Jour ${dayNumber}] ⚠️ "${attraction.name}" skippée (matin): budget épuisé (coût: ${activityCost}€)`);
       continue;
     }
 
@@ -1567,7 +1572,8 @@ export async function generateDayWithScheduler(params: {
       if (activityCost > 0 && budgetTracker) {
         budgetTracker.spend('activities', activityCost);
       }
-      tripUsedAttractionIds.add(attraction.id); // ANTI-DOUBLON (trip-level)
+      tripUsedAttractionIds.add(attraction.id);
+      console.log(`[Jour ${dayNumber}] ✅ "${attraction.name}" schedulée (matin, ${attraction.duration}min, ${activityCost}€)`);
       const attractionCoords = {
         lat: attraction.latitude || cityCenter.lat,
         lng: attraction.longitude || cityCenter.lng,
@@ -2047,6 +2053,7 @@ export async function generateDayWithScheduler(params: {
 
     // GUARD: Si on arrive APRÈS la fermeture, skip immédiatement
     if (actualStartTime >= closeTime) {
+      console.log(`[Jour ${dayNumber}] Skip "${attraction.name}" (après-midi): arrive après fermeture`);
       continue;
     }
 
@@ -2055,12 +2062,16 @@ export async function generateDayWithScheduler(params: {
 
     // Vérifier que le lieu sera encore ouvert quand on aura fini (avec marge de 30min)
     if (potentialEndTime > safeCloseTime) {
+      console.log(`[Jour ${dayNumber}] Skip "${attraction.name}" (après-midi): lieu fermé avant fin de visite`);
       continue;
     }
 
     // Budget check: skip if activity costs more than remaining budget
+    // EXCEPTION: activités gratuites et must-see passent toujours
     const activityCostPM = (attraction.estimatedCost || 0) * (preferences.groupSize || 1);
-    if (activityCostPM > 0 && budgetTracker && !budgetTracker.canAfford('activities', activityCostPM)) {
+    const isMustSeePM = (attraction as any).mustSee === true;
+    if (activityCostPM > 0 && !isMustSeePM && budgetTracker && !budgetTracker.canAfford('activities', activityCostPM)) {
+      console.warn(`[Jour ${dayNumber}] ⚠️ "${attraction.name}" skippée (après-midi): budget épuisé (coût: ${activityCostPM}€)`);
       continue;
     }
 
@@ -2080,7 +2091,8 @@ export async function generateDayWithScheduler(params: {
       if (activityCostPM > 0 && budgetTracker) {
         budgetTracker.spend('activities', activityCostPM);
       }
-      tripUsedAttractionIds.add(attraction.id); // ANTI-DOUBLON (trip-level)
+      tripUsedAttractionIds.add(attraction.id);
+      console.log(`[Jour ${dayNumber}] ✅ "${attraction.name}" schedulée (après-midi, ${attraction.duration}min, ${activityCostPM}€)`);
       const attractionCoords = {
         lat: attraction.latitude || cityCenter.lat,
         lng: attraction.longitude || cityCenter.lng,

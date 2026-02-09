@@ -12,8 +12,118 @@
 import { Flight } from '../types';
 import { generateFlightLink } from './linkGenerator';
 
-const GEMINI_API_KEY = process.env.GOOGLE_AI_API_KEY;
+function getGeminiApiKey() { return process.env.GOOGLE_AI_API_KEY; }
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+
+/**
+ * Nettoie le JSON généré par un LLM (trailing commas, commentaires, guillemets typographiques, etc.)
+ */
+function cleanLlmJson(raw: string): string {
+  return raw
+    // Remplacer les guillemets typographiques par des guillemets droits
+    .replace(/[\u201C\u201D\u201E\u201F\u2033\u2036]/g, '"')
+    .replace(/[\u2018\u2019\u201A\u201B\u2032\u2035]/g, "'")
+    // Supprimer les commentaires // en fin de ligne (hors strings)
+    .replace(/\/\/[^\n"]*$/gm, '')
+    // Supprimer les trailing commas avant } ou ]
+    .replace(/,\s*([\]}])/g, '$1')
+    // Supprimer les caractères de contrôle invalides
+    .replace(/[\x00-\x1f\x7f]/g, (ch) => ch === '\n' || ch === '\r' || ch === '\t' ? ch : '')
+    .trim();
+}
+
+/**
+ * Parse du JSON de façon résiliente — tente un fix si le parse échoue
+ */
+function parseLlmJson(raw: string): any {
+  const cleaned = cleanLlmJson(raw);
+  try {
+    return JSON.parse(cleaned);
+  } catch (firstError) {
+    // Tentative 2: réparer les strings cassées (sauts de ligne, guillemets non-échappés)
+    try {
+      // Stratégie: reconstruire le JSON en échappant les valeurs string problématiques
+      // On parcourt char par char pour trouver les vrais délimiteurs de string
+      let fixed = '';
+      let inString = false;
+      let escaped = false;
+      for (let i = 0; i < cleaned.length; i++) {
+        const ch = cleaned[i];
+        if (escaped) {
+          fixed += ch;
+          escaped = false;
+          continue;
+        }
+        if (ch === '\\' && inString) {
+          fixed += ch;
+          escaped = true;
+          continue;
+        }
+        if (ch === '"') {
+          inString = !inString;
+          fixed += ch;
+          continue;
+        }
+        if (inString) {
+          // Échapper les caractères problématiques dans les strings
+          if (ch === '\n') { fixed += '\\n'; continue; }
+          if (ch === '\r') { fixed += '\\r'; continue; }
+          if (ch === '\t') { fixed += '\\t'; continue; }
+          fixed += ch;
+        } else {
+          fixed += ch;
+        }
+      }
+      return JSON.parse(fixed);
+    } catch {
+      // Tentative 3: extraire les objets individuellement (supporte les nested arrays/objects)
+      try {
+        const objects: any[] = [];
+        let depth = 0;
+        let start = -1;
+        for (let i = 0; i < cleaned.length; i++) {
+          const ch = cleaned[i];
+          if (ch === '{') {
+            if (depth === 0) start = i;
+            depth++;
+          } else if (ch === '}') {
+            depth--;
+            if (depth === 0 && start >= 0) {
+              const objStr = cleaned.substring(start, i + 1);
+              try {
+                objects.push(JSON.parse(cleanLlmJson(objStr)));
+              } catch {
+                // Tenter aussi avec le fix de strings
+                try {
+                  let fixedObj = '';
+                  let inStr = false;
+                  let esc = false;
+                  for (let j = 0; j < objStr.length; j++) {
+                    const c = objStr[j];
+                    if (esc) { fixedObj += c; esc = false; continue; }
+                    if (c === '\\' && inStr) { fixedObj += c; esc = true; continue; }
+                    if (c === '"') { inStr = !inStr; fixedObj += c; continue; }
+                    if (inStr) {
+                      if (c === '\n') { fixedObj += '\\n'; continue; }
+                      if (c === '\r') { fixedObj += '\\r'; continue; }
+                      if (c === '\t') { fixedObj += '\\t'; continue; }
+                    }
+                    fixedObj += c;
+                  }
+                  objects.push(JSON.parse(cleanLlmJson(fixedObj)));
+                } catch { /* skip truly invalid object */ }
+              }
+              start = -1;
+            }
+          }
+        }
+        if (objects.length > 0) return objects;
+      } catch { /* ignore */ }
+
+      throw firstError;
+    }
+  }
+}
 
 interface GeminiResponse {
   candidates?: Array<{
@@ -49,7 +159,7 @@ export async function searchFlightsWithGemini(
   date: string, // YYYY-MM-DD
   passengers: number = 1
 ): Promise<Flight[]> {
-  if (!GEMINI_API_KEY) {
+  if (!getGeminiApiKey()) {
     console.warn('[Gemini] GOOGLE_AI_API_KEY non configurée');
     return [];
   }
@@ -80,7 +190,7 @@ Trouve 5-8 vols et réponds UNIQUEMENT avec un JSON valide:
 }`;
 
   try {
-    const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+    const response = await fetch(`${GEMINI_API_URL}?key=${getGeminiApiKey()}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -129,7 +239,7 @@ Trouve 5-8 vols et réponds UNIQUEMENT avec un JSON valide:
       return [];
     }
 
-    const flightData = JSON.parse(jsonMatch[0]);
+    const flightData = parseLlmJson(jsonMatch[0]);
     const flights: Flight[] = [];
 
     for (const f of flightData.flights || []) {
@@ -215,7 +325,7 @@ export async function verifyPlaceExists(
   rating?: number;
   googleMapsUrl?: string;
 }> {
-  if (!GEMINI_API_KEY) {
+  if (!getGeminiApiKey()) {
     return { exists: false };
   }
 
@@ -235,7 +345,7 @@ Réponds en JSON:
 }`;
 
   try {
-    const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+    const response = await fetch(`${GEMINI_API_URL}?key=${getGeminiApiKey()}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -255,7 +365,7 @@ Réponds en JSON:
     const jsonMatch = textContent.match(/\{[\s\S]*\}/);
     if (!jsonMatch) return { exists: false };
 
-    return JSON.parse(jsonMatch[0]);
+    return parseLlmJson(jsonMatch[0]);
   } catch (error) {
     console.error('[Gemini] Erreur vérification lieu:', error);
     return { exists: false };
@@ -274,46 +384,45 @@ export async function searchRestaurantsWithGemini(
     cityCenter: { lat: number; lng: number };
   }
 ): Promise<import('../types').Restaurant[]> {
-  if (!GEMINI_API_KEY) {
+  if (!getGeminiApiKey()) {
     console.warn('[Gemini Restaurants] GOOGLE_AI_API_KEY non configurée');
     return [];
   }
 
   const { mealType, limit = 8, cityCenter } = options;
+  // Limiter à 5 restaurants pour éviter la troncature JSON avec maxOutputTokens
+  const effectiveLimit = Math.min(limit, 5);
   const mealLabels = { breakfast: 'petit-déjeuner/brunch', lunch: 'déjeuner', dinner: 'dîner' };
 
   const prompt = `Recherche sur Google les meilleurs restaurants pour ${mealLabels[mealType]} à ${destination}.
 
 IMPORTANT: Je veux UNIQUEMENT des restaurants qui EXISTENT VRAIMENT. Vérifie sur Google Maps.
 - Privilégie la cuisine LOCALE de ${destination} (pas de chaînes, pas de fast-food)
-- Donne ${limit} restaurants avec des données VÉRIFIÉES
+- Donne ${effectiveLimit} restaurants avec des données VÉRIFIÉES
 
-Réponds UNIQUEMENT en JSON valide (pas de markdown):
+Réponds UNIQUEMENT en JSON valide (pas de markdown, pas de commentaires):
 [{
   "name": "Nom exact du restaurant",
-  "address": "Adresse complète vérifiée",
-  "latitude": 41.3851,
-  "longitude": 2.1734,
+  "address": "Adresse complète",
+  "latitude": 31.6295,
+  "longitude": -7.9811,
   "rating": 4.5,
   "reviewCount": 850,
   "priceLevel": 2,
-  "cuisineTypes": ["catalane", "tapas"],
-  "description": "2 phrases: ambiance + cuisine",
-  "specialties": ["Plat 1", "Plat 2"],
-  "tips": "Conseil pratique court",
+  "cuisineTypes": ["locale", "traditionnelle"],
   "googleMapsUrl": "https://www.google.com/maps/place/..."
 }]
 
-priceLevel: 1 (€) à 4 (€€€€)`;
+priceLevel: 1 (€) à 4 (€€€€). IMPORTANT: Pas de champ description, tips ou specialties.`;
 
   try {
-    const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+    const response = await fetch(`${GEMINI_API_URL}?key=${getGeminiApiKey()}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
         tools: [{ googleSearch: {} }],
-        generationConfig: { temperature: 0.1, maxOutputTokens: 4000 },
+        generationConfig: { temperature: 0.1, maxOutputTokens: 8000 },
       }),
     });
 
@@ -342,7 +451,24 @@ priceLevel: 1 (€) à 4 (€€€€)`;
       return [];
     }
 
-    const rawRestaurants = JSON.parse(jsonMatch[0]);
+    let rawRestaurants: any[];
+    try {
+      rawRestaurants = parseLlmJson(jsonMatch[0]);
+    } catch (parseError) {
+      // Log détaillé pour debug
+      const errMsg = String(parseError);
+      const posMatch = errMsg.match(/position (\d+)/);
+      if (posMatch) {
+        const pos = parseInt(posMatch[1]);
+        const before = jsonMatch[0].substring(Math.max(0, pos - 100), pos);
+        const after = jsonMatch[0].substring(pos, pos + 30);
+        const charCode = jsonMatch[0].charCodeAt(pos);
+        console.error(`[Gemini Restaurants] JSON error at pos ${pos}, char='${jsonMatch[0][pos]}' (U+${charCode.toString(16).padStart(4, '0')})`);
+        console.error(`[Gemini Restaurants] BEFORE: ${JSON.stringify(before)}`);
+        console.error(`[Gemini Restaurants] AFTER:  ${JSON.stringify(after)}`);
+      }
+      throw parseError;
+    }
     const restaurants: import('../types').Restaurant[] = rawRestaurants
       .filter((r: any) => r.name && r.address)
       .map((r: any, i: number) => ({
@@ -364,6 +490,7 @@ priceLevel: 1 (€) à 4 (€€€€)`;
         dataReliability: 'verified' as const, // Vérifié via Google Search
       }));
 
+    console.log(`[Gemini Restaurants] ✅ ${restaurants.length} restaurants trouvés pour "${destination}"`);
     return restaurants;
   } catch (error) {
     console.error('[Gemini Restaurants] Erreur:', error);
@@ -381,7 +508,7 @@ export async function enrichRestaurantsWithGemini(
 ): Promise<Map<string, { description: string; specialties: string[]; tips: string }>> {
   const result = new Map<string, { description: string; specialties: string[]; tips: string }>();
 
-  if (restaurants.length === 0 || !GEMINI_API_KEY) return result;
+  if (restaurants.length === 0 || !getGeminiApiKey()) return result;
 
   const restaurantList = restaurants.map((r, i) =>
     `${i + 1}. "${r.name}" - ${r.address}`
@@ -400,7 +527,7 @@ Réponds UNIQUEMENT en JSON (pas de markdown):
 }]`;
 
   try {
-    const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+    const response = await fetch(`${GEMINI_API_URL}?key=${getGeminiApiKey()}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -423,7 +550,7 @@ Réponds UNIQUEMENT en JSON (pas de markdown):
     const jsonMatch = jsonStr.match(/\[[\s\S]*\]/);
     if (!jsonMatch) return result;
 
-    const enriched = JSON.parse(jsonMatch[0]);
+    const enriched = parseLlmJson(jsonMatch[0]);
     for (const item of enriched) {
       if (item.name) {
         // Filtrer les descriptions qui sont des messages d'erreur de vérification
@@ -456,7 +583,7 @@ export async function searchTrainPrice(
   date: string,
   passengers: number = 1
 ): Promise<{ price: number | null; operator?: string; source?: string; duration?: number } | null> {
-  if (!GEMINI_API_KEY) {
+  if (!getGeminiApiKey()) {
     console.warn('[Gemini] GOOGLE_AI_API_KEY non configurée');
     return null;
   }
@@ -473,7 +600,7 @@ Retourne UNIQUEMENT un JSON valide, sans commentaire:
 Si aucun prix trouvé, retourne: { "price": null }`;
 
   try {
-    const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+    const response = await fetch(`${GEMINI_API_URL}?key=${getGeminiApiKey()}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -507,7 +634,7 @@ Si aucun prix trouvé, retourne: { "price": null }`;
       return null;
     }
 
-    const result = JSON.parse(jsonMatch[0]);
+    const result = parseLlmJson(jsonMatch[0]);
     return result;
   } catch (error) {
     console.error('[Gemini] Erreur recherche train:', error);
@@ -531,7 +658,7 @@ export async function searchFerryInfo(
   departurePort?: string;
   arrivalPort?: string;
 } | null> {
-  if (!GEMINI_API_KEY) {
+  if (!getGeminiApiKey()) {
     console.warn('[Gemini] GOOGLE_AI_API_KEY non configurée');
     return null;
   }
@@ -550,7 +677,7 @@ Retourne UNIQUEMENT un JSON valide:
 Si aucun ferry trouvé, retourne: { "price": null }`;
 
   try {
-    const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+    const response = await fetch(`${GEMINI_API_URL}?key=${getGeminiApiKey()}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -584,7 +711,7 @@ Si aucun ferry trouvé, retourne: { "price": null }`;
       return null;
     }
 
-    const result = JSON.parse(jsonMatch[0]);
+    const result = parseLlmJson(jsonMatch[0]);
     return result;
   } catch (error) {
     console.error('[Gemini] Erreur recherche ferry:', error);
@@ -599,7 +726,7 @@ export async function searchTollCost(
   origin: string,
   dest: string
 ): Promise<{ toll: number; route?: string; source?: string } | null> {
-  if (!GEMINI_API_KEY) {
+  if (!getGeminiApiKey()) {
     console.warn('[Gemini] GOOGLE_AI_API_KEY non configurée');
     return null;
   }
@@ -615,7 +742,7 @@ Retourne UNIQUEMENT un JSON valide:
 Si péages gratuits (ex: Allemagne), retourne: { "toll": 0, "route": "Autobahn (gratuit)" }`;
 
   try {
-    const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+    const response = await fetch(`${GEMINI_API_URL}?key=${getGeminiApiKey()}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -649,7 +776,7 @@ Si péages gratuits (ex: Allemagne), retourne: { "toll": 0, "route": "Autobahn (
       return null;
     }
 
-    const result = JSON.parse(jsonMatch[0]);
+    const result = parseLlmJson(jsonMatch[0]);
     return result;
   } catch (error) {
     console.error('[Gemini] Erreur recherche péages:', error);
@@ -670,7 +797,7 @@ function generateGoogleFlightsUrl(origin: string, destination: string, date: str
  * Vérifie si Gemini est configuré
  */
 export function isGeminiConfigured(): boolean {
-  return !!GEMINI_API_KEY;
+  return !!getGeminiApiKey();
 }
 
 // ============================================
@@ -693,7 +820,7 @@ export async function geocodeWithGemini(
   placeName: string,
   city: string
 ): Promise<{ lat: number; lng: number; address?: string } | null> {
-  if (!GEMINI_API_KEY) return null;
+  if (!getGeminiApiKey()) return null;
   if (geminiGeocodeCallCount >= GEMINI_GEOCODE_MAX_CALLS) {
     return null;
   }
@@ -705,7 +832,7 @@ Return ONLY a valid JSON object with no other text:
 If you cannot find this place, return: {"lat": null, "lng": null}`;
 
   try {
-    const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+    const response = await fetch(`${GEMINI_API_URL}?key=${getGeminiApiKey()}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -730,7 +857,7 @@ If you cannot find this place, return: {"lat": null, "lng": null}`;
     const jsonMatch = textContent.match(/\{[\s\S]*?\}/);
     if (!jsonMatch) return null;
 
-    const parsed = JSON.parse(jsonMatch[0]);
+    const parsed = parseLlmJson(jsonMatch[0]);
     if (parsed.lat && parsed.lng && typeof parsed.lat === 'number' && typeof parsed.lng === 'number') {
       // Sanity check: coordinates should be reasonable (not 0,0 or extreme)
       if (Math.abs(parsed.lat) > 0.1 && Math.abs(parsed.lng) > 0.1 && Math.abs(parsed.lat) < 90 && Math.abs(parsed.lng) < 180) {

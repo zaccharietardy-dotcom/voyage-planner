@@ -35,12 +35,9 @@ export function ItineraryConnector({
     : 'driving';
 
   // Générer l'URL Google Maps avec itinéraire
-  // Utiliser les noms pour une meilleure précision que les coordonnées GPS
-  // Use coordinates for unambiguous routing (names alone can resolve to wrong city)
-  const hasFromCoords = from.latitude && from.longitude;
-  const hasToCoords = to.latitude && to.longitude;
-  const origin = hasFromCoords ? `${from.latitude},${from.longitude}` : encodeURIComponent(from.name);
-  const destination = hasToCoords ? `${to.latitude},${to.longitude}` : encodeURIComponent(to.name);
+  // Préférer les noms de lieux (plus lisible pour l'utilisateur), coordonnées en fallback
+  const origin = from.name ? encodeURIComponent(from.name) : `${from.latitude},${from.longitude}`;
+  const destination = to.name ? encodeURIComponent(to.name) : `${to.latitude},${to.longitude}`;
   const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&travelmode=${googleMapsMode}`;
 
   // Icône selon le mode de transport

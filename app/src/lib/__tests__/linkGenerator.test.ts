@@ -135,7 +135,7 @@ describe('Link Generator (Bug #10)', () => {
   });
 
   describe('generateFlightLink', () => {
-    it('generates Google Flights link with origin, destination, and date', () => {
+    it('generates Aviasales link with origin, destination, and date', () => {
       const flight = {
         origin: 'CDG',
         destination: 'BCN',
@@ -147,10 +147,11 @@ describe('Link Generator (Bug #10)', () => {
 
       const link = generateFlightLink(flight, context);
 
-      expect(link).toContain('google.com/travel/flights');
+      expect(link).toContain('aviasales.com/search');
       expect(link).toContain('CDG');
       expect(link).toContain('BCN');
-      expect(link).toContain('2026-01-28');
+      // Aviasales format: DDMM (2801 pour 28 janvier)
+      expect(link).toContain('2801');
     });
 
     it('supports round trip flights', () => {
@@ -166,8 +167,9 @@ describe('Link Generator (Bug #10)', () => {
 
       const link = generateFlightLink(flight, context);
 
-      expect(link).toContain('2026-01-28');
-      expect(link).toContain('2026-01-31');
+      // Aviasales format: DDMM
+      expect(link).toContain('2801');
+      expect(link).toContain('3101');
     });
 
     it('handles city names as well as airport codes', () => {
@@ -182,8 +184,8 @@ describe('Link Generator (Bug #10)', () => {
 
       const link = generateFlightLink(flight, context);
 
-      expect(link).toContain('Paris');
-      expect(link).toContain('Barcelona');
+      expect(link).toContain('PARIS');
+      expect(link).toContain('BARCELONA');
     });
   });
 
@@ -270,7 +272,7 @@ describe('Link Generator (Bug #10)', () => {
 
       const link = generateReservationLink(element, context);
 
-      expect(link).toContain('google.com/travel/flights');
+      expect(link).toContain('aviasales.com/search');
     });
 
     it('generates attraction link', () => {
