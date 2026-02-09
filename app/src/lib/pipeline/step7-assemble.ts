@@ -46,13 +46,52 @@ export async function assembleTripSchedule(
     let dayStartHour = parseInt(balancedDay.suggestedStartTime?.split(':')[0] || '9', 10);
     let dayEndHour = 22;
 
+    // Detect ground transport (train/bus/car) — used when no flights
+    const isGroundTransport = transport && transport.mode !== 'plane';
+    const hasOutboundTransport = isFirstDay && isGroundTransport;
+    const hasReturnTransport = isLastDay && isGroundTransport;
+
+    // Compute outbound arrival hour for ground transport
+    let groundArrivalHour: number | null = null;
+    if (hasOutboundTransport && transport) {
+      if (transport.transitLegs?.length) {
+        const lastLeg = transport.transitLegs[transport.transitLegs.length - 1];
+        groundArrivalHour = new Date(lastLeg.arrival).getHours();
+      } else {
+        // Estimated: depart 08:00 + total duration
+        groundArrivalHour = 8 + Math.ceil(transport.totalDuration / 60);
+      }
+    }
+
+    // Compute return departure hour for ground transport
+    let groundDepartureHour: number | null = null;
+    if (hasReturnTransport && transport) {
+      if (transport.transitLegs?.length) {
+        const firstLeg = transport.transitLegs[0];
+        const legDate = new Date(firstLeg.departure);
+        // Only use real times if they match the return day
+        if (legDate.toDateString() === dayDate.toDateString()) {
+          groundDepartureHour = legDate.getHours();
+        } else {
+          // Estimated return: depart in the afternoon
+          groundDepartureHour = 14;
+        }
+      } else {
+        groundDepartureHour = 14;
+      }
+    }
+
     if (isFirstDay && flights.outbound) {
       // Use display time (local airport time) if available, otherwise parse ISO
       const arrivalHour = flights.outbound.arrivalTimeDisplay
         ? parseInt(flights.outbound.arrivalTimeDisplay.split(':')[0], 10)
         : new Date(flights.outbound.arrivalTime).getHours();
       dayStartHour = Math.max(dayStartHour, arrivalHour + 1); // +1h for transfer
+    } else if (hasOutboundTransport && groundArrivalHour !== null) {
+      // Ground transport: activities start after arrival
+      dayStartHour = Math.max(dayStartHour, groundArrivalHour + 1);
     }
+
     if (isLastDay && flights.return) {
       const departureHour = flights.return.departureTimeDisplay
         ? parseInt(flights.return.departureTimeDisplay.split(':')[0], 10)
@@ -64,6 +103,12 @@ export async function assembleTripSchedule(
       if (departureHour <= 12) {
         dayStartHour = Math.min(dayStartHour, 7);
       }
+    } else if (hasReturnTransport && groundDepartureHour !== null) {
+      // Ground transport: need to be at station ~30min before
+      dayEndHour = Math.max(dayStartHour + 3, groundDepartureHour - 1);
+      if (groundDepartureHour <= 12) {
+        dayStartHour = Math.min(dayStartHour, 7);
+      }
     }
 
     const dayStart = parseTime(dayDate, `${String(dayStartHour).padStart(2, '0')}:00`);
@@ -71,7 +116,7 @@ export async function assembleTripSchedule(
 
     const scheduler = new DayScheduler(dayDate, dayStart, dayEnd);
 
-    // 1. Fixed items: flights
+    // 1. Fixed items: flights OR ground transport
     if (isFirstDay && flights.outbound) {
       const depTime = new Date(flights.outbound.departureTime);
       const arrTime = new Date(flights.outbound.arrivalTime);
@@ -83,7 +128,29 @@ export async function assembleTripSchedule(
         endTime: arrTime,
         data: flights.outbound,
       });
+    } else if (hasOutboundTransport && transport) {
+      // Ground transport outbound (train, bus, car)
+      const { start: tStart, end: tEnd } = getGroundTransportTimes(transport, dayDate, 'outbound');
+      const modeLabels: Record<string, string> = { train: '🚄 Train', bus: '🚌 Bus', car: '🚗 Voiture', combined: '🔄 Transport', ferry: '⛴️ Ferry' };
+      scheduler.insertFixedItem({
+        id: `transport-out-${balancedDay.dayNumber}`,
+        title: `${modeLabels[transport.mode] || '🚊 Transport'} → ${preferences.destination}`,
+        type: 'transport',
+        startTime: tStart,
+        endTime: tEnd,
+        data: {
+          ...transport,
+          description: transport.segments?.map(s => `${s.from} → ${s.to}`).join(' | '),
+          locationName: `${preferences.origin} → ${preferences.destination}`,
+          transitLegs: transport.transitLegs,
+          transitDataSource: transport.dataSource,
+          priceRange: transport.priceRange,
+          estimatedCost: transport.totalPrice,
+          bookingUrl: transport.bookingUrl,
+        },
+      });
     }
+
     if (isLastDay && flights.return) {
       const depTime = new Date(flights.return.departureTime);
       const arrTime = new Date(flights.return.arrivalTime);
@@ -95,6 +162,33 @@ export async function assembleTripSchedule(
         endTime: arrTime,
         data: flights.return,
       });
+    } else if (hasReturnTransport && transport) {
+      // Ground transport return
+      const { start: tStart, end: tEnd } = getGroundTransportTimes(transport, dayDate, 'return');
+      const modeLabels: Record<string, string> = { train: '🚄 Train', bus: '🚌 Bus', car: '🚗 Voiture', combined: '🔄 Transport', ferry: '⛴️ Ferry' };
+      scheduler.insertFixedItem({
+        id: `transport-ret-${balancedDay.dayNumber}`,
+        title: `${modeLabels[transport.mode] || '🚊 Transport'} → ${preferences.origin}`,
+        type: 'transport',
+        startTime: tStart,
+        endTime: tEnd,
+        data: {
+          ...transport,
+          description: transport.segments?.map(s => `${s.to} → ${s.from}`).join(' | '),
+          locationName: `${preferences.destination} → ${preferences.origin}`,
+          transitLegs: transport.transitLegs?.length
+            ? transport.transitLegs.slice().reverse().map((leg: { mode: string; from: string; to: string; departure: string; arrival: string; duration: number; operator?: string; line?: string }) => ({
+                ...leg,
+                from: leg.to,
+                to: leg.from,
+              }))
+            : undefined,
+          transitDataSource: transport.dataSource,
+          priceRange: transport.priceRange,
+          estimatedCost: transport.totalPrice,
+          bookingUrl: transport.bookingUrl,
+        },
+      });
     }
 
     // 2. Prepare meal data early (needed for scheduling order decisions)
@@ -104,9 +198,10 @@ export async function assembleTripSchedule(
     const dinner = dayMeals.find(m => m.mealType === 'dinner');
 
     // Determine which meals to skip based on time constraints
+    const hasReturnTravel = !!(flights.return || hasReturnTransport);
     const skipBreakfast = isFirstDay && dayStartHour >= 10;
-    const skipLunch = isLastDay && flights.return && dayEndHour < 12;
-    const skipDinner = isLastDay && flights.return && dayEndHour < 19;
+    const skipLunch = isLastDay && hasReturnTravel && dayEndHour < 12;
+    const skipDinner = isLastDay && hasReturnTravel && dayEndHour < 19;
 
     // 3. Hotel check-in (first day) / check-out (last day)
     // IMPORTANT: On the last day, insert breakfast BEFORE checkout.
@@ -126,6 +221,12 @@ export async function assembleTripSchedule(
         const earliestCheckinWithTransfer = new Date(earliestCheckin.getTime() + 60 * 60 * 1000);
         if (earliestCheckinWithTransfer > checkinTime) {
           checkinTime = earliestCheckinWithTransfer;
+        }
+      } else if (hasOutboundTransport && groundArrivalHour !== null) {
+        // Ground transport: check-in after arrival at destination
+        const earliestCheckin = parseTime(dayDate, `${String(groundArrivalHour).padStart(2, '0')}:30`);
+        if (earliestCheckin > checkinTime) {
+          checkinTime = earliestCheckin;
         }
       }
       scheduler.insertFixedItem({
@@ -308,11 +409,11 @@ export async function assembleTripSchedule(
         type: item.type as TripItem['type'],
         title: item.title,
         description: itemData.description || '',
-        locationName: itemData.address || itemData.name || item.title,
+        locationName: itemData.locationName || itemData.address || itemData.name || item.title,
         latitude: itemData.latitude || 0,
         longitude: itemData.longitude || 0,
         orderIndex: idx,
-        estimatedCost: itemData.estimatedCost || itemData.priceLevel ? (itemData.priceLevel || 1) * 15 : 0,
+        estimatedCost: itemData.estimatedCost || (itemData.priceLevel ? (itemData.priceLevel || 1) * 15 : 0),
         duration: item.duration,
         rating: itemData.rating,
         bookingUrl: itemData.bookingUrl || itemData.reservationUrl,
@@ -321,6 +422,10 @@ export async function assembleTripSchedule(
         restaurant: item.type === 'restaurant' ? itemData : undefined,
         accommodation: (item.type === 'checkin' || item.type === 'checkout') ? itemData : undefined,
         flight: item.type === 'flight' ? itemData : undefined,
+        // Transport-specific fields (train/bus legs, price range)
+        transitLegs: itemData.transitLegs,
+        transitDataSource: itemData.transitDataSource,
+        priceRange: itemData.priceRange,
         dataReliability: itemData.dataReliability || 'verified',
         imageUrl: itemData.photos?.[0] || itemData.imageUrl,
       };
@@ -343,7 +448,7 @@ export async function assembleTripSchedule(
   );
 
   // 12. Build cost breakdown
-  const costBreakdown = computeCostBreakdown(days, flights, hotel, preferences);
+  const costBreakdown = computeCostBreakdown(days, flights, hotel, preferences, transport);
 
   // 13. Assemble final Trip
   const trip: Trip = {
@@ -396,6 +501,62 @@ function reorderByPlan(
   }
 
   return ordered;
+}
+
+/**
+ * Compute start/end times for ground transport (train, bus, car).
+ * Uses real HAFAS departure/arrival if available, otherwise estimates.
+ */
+function getGroundTransportTimes(
+  transport: TransportOptionSummary,
+  dayDate: Date,
+  direction: 'outbound' | 'return'
+): { start: Date; end: Date } {
+  if (transport.transitLegs?.length) {
+    if (direction === 'outbound') {
+      const firstLeg = transport.transitLegs[0];
+      const lastLeg = transport.transitLegs[transport.transitLegs.length - 1];
+      const realDep = new Date(firstLeg.departure);
+      const realArr = new Date(lastLeg.arrival);
+      // Start 30min before first departure (time to get to station)
+      return {
+        start: new Date(realDep.getTime() - 30 * 60 * 1000),
+        end: realArr,
+      };
+    } else {
+      // Return: check if legs match the return date
+      const firstLeg = transport.transitLegs[0];
+      const legDate = new Date(firstLeg.departure);
+      if (legDate.toDateString() === dayDate.toDateString()) {
+        const lastLeg = transport.transitLegs[transport.transitLegs.length - 1];
+        return {
+          start: new Date(new Date(firstLeg.departure).getTime() - 30 * 60 * 1000),
+          end: new Date(lastLeg.arrival),
+        };
+      }
+      // Legs don't match return date — estimate afternoon departure
+      const estStart = parseTime(dayDate, '14:00');
+      return {
+        start: estStart,
+        end: new Date(estStart.getTime() + transport.totalDuration * 60 * 1000),
+      };
+    }
+  }
+
+  // No real legs — estimate based on total duration
+  if (direction === 'outbound') {
+    const estStart = parseTime(dayDate, '08:00');
+    return {
+      start: estStart,
+      end: new Date(estStart.getTime() + transport.totalDuration * 60 * 1000),
+    };
+  } else {
+    const estStart = parseTime(dayDate, '14:00');
+    return {
+      start: estStart,
+      end: new Date(estStart.getTime() + transport.totalDuration * 60 * 1000),
+    };
+  }
 }
 
 /**
@@ -495,11 +656,18 @@ function computeCostBreakdown(
   days: TripDay[],
   flights: { outbound: Flight | null; return: Flight | null },
   hotel: Accommodation | null,
-  preferences: TripPreferences
+  preferences: TripPreferences,
+  groundTransport?: TransportOptionSummary | null
 ) {
   let flightCost = 0;
   if (flights.outbound?.price) flightCost += flights.outbound.price;
   if (flights.return?.price) flightCost += flights.return.price;
+
+  // Ground transport cost (train, bus, car) — round trip = 2× one-way price
+  let transportCost = 0;
+  if (groundTransport && groundTransport.mode !== 'plane') {
+    transportCost = (groundTransport.totalPrice || 0) * 2;
+  }
 
   const accommodationCost = (hotel?.pricePerNight || 0) * preferences.durationDays;
 
@@ -512,7 +680,7 @@ function computeCostBreakdown(
     }
   }
 
-  const total = flightCost + accommodationCost + foodCost + activitiesCost;
+  const total = flightCost + accommodationCost + foodCost + activitiesCost + transportCost;
 
   return {
     total: Math.round(total),
@@ -521,7 +689,7 @@ function computeCostBreakdown(
       accommodation: Math.round(accommodationCost),
       food: Math.round(foodCost),
       activities: Math.round(activitiesCost),
-      transport: 0,
+      transport: Math.round(transportCost),
       parking: 0,
       other: 0,
     },

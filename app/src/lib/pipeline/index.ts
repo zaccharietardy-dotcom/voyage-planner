@@ -7,7 +7,7 @@
  * Target: 20-40s per trip generation.
  */
 
-import type { Trip, TripPreferences, Flight } from '../types';
+import type { Trip, TripPreferences, Flight, TransportOptionSummary } from '../types';
 import type { ActivityCluster, ScoredActivity } from './types';
 import { fetchAllData } from './step1-fetch';
 import { scoreAndSelectActivities } from './step2-score';
@@ -35,12 +35,15 @@ export async function generateTripV2(preferences: TripPreferences): Promise<Trip
     data.googlePlacesAttractions.length + data.serpApiAttractions.length + data.overpassAttractions.length + data.viatorActivities.length
   } total)`);
 
+  // Resolve best transport early (needed for clustering rebalancing and scheduling)
+  const bestTransport = data.transportOptions?.find(t => t.recommended) || data.transportOptions?.[0] || null;
+
   // Step 3: Geographic clustering (~0ms)
   console.log('[Pipeline V2] === Step 3: Clustering... ===');
   const clusters = clusterActivities(selectedActivities, preferences.durationDays, data.destCoords);
 
-  // Rebalance: first/last day get fewer activities based on flight times
-  rebalanceClustersForFlights(clusters, data.outboundFlight, data.returnFlight, preferences.durationDays);
+  // Rebalance: first/last day get fewer activities based on flight/transport times
+  rebalanceClustersForFlights(clusters, data.outboundFlight, data.returnFlight, preferences.durationDays, bestTransport);
 
   console.log(`[Pipeline V2] Step 3: ${clusters.length} clusters created`);
   for (const c of clusters) {
@@ -76,7 +79,6 @@ export async function generateTripV2(preferences: TripPreferences): Promise<Trip
   // Step 6: Claude day balancing (~10-15s)
   console.log('[Pipeline V2] === Step 6: Claude balancing... ===');
   const T6 = Date.now();
-  const bestTransport = data.transportOptions?.find(t => t.recommended) || data.transportOptions?.[0] || null;
   const plan = await balanceDaysWithClaude(clusters, meals, hotel, bestTransport, preferences);
   console.log(`[Pipeline V2] Step 6 done in ${Date.now() - T6}ms — "${plan.dayOrderReason}"`);
 
@@ -104,9 +106,12 @@ function rebalanceClustersForFlights(
   clusters: ActivityCluster[],
   outboundFlight: Flight | null,
   returnFlight: Flight | null,
-  numDays: number
+  numDays: number,
+  transport?: TransportOptionSummary | null
 ): void {
   if (clusters.length < 2) return;
+
+  const isGroundTransport = transport && transport.mode !== 'plane';
 
   // Detect day-trip clusters (single-activity clusters with far-off locations)
   const isDayTrip = clusters.map(c => c.activities.length === 1);
@@ -124,6 +129,14 @@ function rebalanceClustersForFlights(
         ? parseInt(outboundFlight.arrivalTimeDisplay.split(':')[0], 10)
         : new Date(outboundFlight.arrivalTime).getHours();
       available = Math.max(0, 22 - (arrHour + 1.5));
+    } else if (isFirst && isGroundTransport) {
+      // Ground transport: estimate arrival hour
+      let arrHour = 8 + Math.ceil((transport!.totalDuration || 120) / 60);
+      if (transport!.transitLegs?.length) {
+        const lastLeg = transport!.transitLegs[transport!.transitLegs.length - 1];
+        arrHour = new Date(lastLeg.arrival).getHours();
+      }
+      available = Math.max(0, 22 - (arrHour + 1));
     }
 
     if (isLast && returnFlight) {
@@ -131,6 +144,14 @@ function rebalanceClustersForFlights(
         ? parseInt(returnFlight.departureTimeDisplay.split(':')[0], 10)
         : new Date(returnFlight.departureTime).getHours();
       available = Math.max(0, depHour - 3 - 8);
+    } else if (isLast && isGroundTransport) {
+      // Ground transport return: estimate departure around 14:00
+      let depHour = 14;
+      if (transport!.transitLegs?.length) {
+        const firstLeg = transport!.transitLegs[0];
+        depHour = new Date(firstLeg.departure).getHours();
+      }
+      available = Math.max(0, depHour - 1 - 8);
     }
 
     return available;

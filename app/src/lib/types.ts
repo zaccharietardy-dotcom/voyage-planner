@@ -422,6 +422,17 @@ export interface TransportOptionSummary {
   recommendationReason?: string;
   dataSource?: 'api' | 'estimated';
   priceRange?: [number, number]; // [min, max] prix pour affichage
+  // Legs détaillés DB HAFAS (horaires réels, numéros de train, correspondances)
+  transitLegs?: {
+    mode: 'train' | 'bus' | 'ferry';
+    from: string;
+    to: string;
+    departure: string;
+    arrival: string;
+    duration: number;
+    operator?: string;
+    line?: string;
+  }[];
 }
 
 export interface Trip {
