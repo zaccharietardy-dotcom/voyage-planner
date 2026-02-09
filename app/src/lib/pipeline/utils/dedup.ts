@@ -34,7 +34,12 @@ export function deduplicateByProximity(
       // Keep the one with more reviews (better data)
       if ((activity.reviewCount || 0) > (duplicate.reviewCount || 0)) {
         const idx = result.indexOf(duplicate);
+        // Preserve mustSee flag from either version
+        if (duplicate.mustSee) activity.mustSee = true;
         result[idx] = activity;
+      } else {
+        // Preserve mustSee flag on the kept item
+        if (activity.mustSee) duplicate.mustSee = true;
       }
     } else {
       result.push(activity);
@@ -51,6 +56,7 @@ export function isIrrelevantAttraction(activity: ScoredActivity): boolean {
   const name = (activity.name || '').toLowerCase();
   const type = (activity.type || '').toLowerCase();
 
+  // 1. Irrelevant facility types
   const irrelevantTypes = [
     'restaurant', 'cafe', 'bar', 'pub', 'nightclub',
     'cinema', 'movie_theater', 'gym', 'fitness',
@@ -64,13 +70,39 @@ export function isIrrelevantAttraction(activity: ScoredActivity): boolean {
 
   if (irrelevantTypes.some(t => type.includes(t))) return true;
 
+  // 2. Low-value tourist traps and chains
   const irrelevantNames = [
     'madame tussaud', 'selfie museum', 'escape room',
     'hard rock cafe', 'starbucks', 'mcdonalds', 'mcdonald',
     'burger king', 'kfc', 'subway',
+    'red light secrets', 'ripley', 'body worlds',
   ];
 
   if (irrelevantNames.some(n => name.includes(n))) return true;
+
+  // 3. Generic places/streets/squares that are NOT real activities
+  // (walking through a street is not a 1h activity)
+  const genericPlacePatterns = [
+    /^(the )?\d+ streets$/,           // "The 9 Streets"
+    /\bsquare$/,                       // "Dam Square"
+    /\bplein$/,                        // "Museumplein"
+    /\bstraat$/,                       // street names
+    /\bgracht$/,                       // canal names like "Prinsengracht"
+    /\bstreet$/,                       // "Oxford Street"
+    /\bavenue$/,                       // "Champs Élysées" (as place only)
+    /^(rue|boulevard|place|piazza|plaza|platz|calle) /,  // French/Italian/Spanish/German streets
+  ];
+
+  // Don't filter if the name contains keywords suggesting it's a real attraction
+  const attractionKeywords = ['museum', 'musée', 'palace', 'palais', 'garden', 'jardin',
+    'church', 'église', 'cathedral', 'cathédrale', 'tower', 'tour',
+    'castle', 'château', 'temple', 'mosque', 'synagogue', 'monument',
+    'market', 'marché', 'zoo', 'aquarium', 'gallery', 'galerie',
+    'bridge', 'pont', 'park', 'parc', 'basilica', 'basilique', 'fort',
+    'library', 'bibliothèque', 'opera', 'opéra', 'theatre', 'théâtre'];
+  const hasAttractionKeyword = attractionKeywords.some(k => name.includes(k));
+
+  if (!hasAttractionKeyword && genericPlacePatterns.some(p => p.test(name))) return true;
 
   return false;
 }

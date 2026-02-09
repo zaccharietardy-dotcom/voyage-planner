@@ -97,7 +97,20 @@ export async function assembleTripSchedule(
       });
     }
 
-    // 2. Hotel check-in (first day) / check-out (last day)
+    // 2. Prepare meal data early (needed for scheduling order decisions)
+    const dayMeals = meals.filter(m => m.dayNumber === balancedDay.dayNumber);
+    const breakfast = dayMeals.find(m => m.mealType === 'breakfast');
+    const lunch = dayMeals.find(m => m.mealType === 'lunch');
+    const dinner = dayMeals.find(m => m.mealType === 'dinner');
+
+    // Determine which meals to skip based on time constraints
+    const skipBreakfast = isFirstDay && dayStartHour >= 10;
+    const skipLunch = isLastDay && flights.return && dayEndHour < 12;
+    const skipDinner = isLastDay && flights.return && dayEndHour < 19;
+
+    // 3. Hotel check-in (first day) / check-out (last day)
+    // IMPORTANT: On the last day, insert breakfast BEFORE checkout.
+    // Otherwise checkout advances the cursor past breakfast's maxEndTime (10:00).
     if (isFirstDay && hotel) {
       let checkinTime = parseTime(dayDate, hotel.checkInTime || '15:00');
       // If there's a flight, check-in must be AFTER arrival + transfer
@@ -124,6 +137,20 @@ export async function assembleTripSchedule(
         data: hotel,
       });
     }
+
+    // Last day: insert breakfast BEFORE checkout so cursor is still early
+    if (isLastDay && breakfast?.restaurant && !skipBreakfast && dayStartHour < 10) {
+      scheduler.addItem({
+        id: `meal-${balancedDay.dayNumber}-breakfast`,
+        title: `Petit-déjeuner — ${breakfast.restaurant.name}`,
+        type: 'restaurant',
+        duration: 45,
+        minStartTime: parseTime(dayDate, `${String(Math.max(7, dayStartHour)).padStart(2, '0')}:00`),
+        maxEndTime: parseTime(dayDate, '10:00'),
+        data: breakfast.restaurant,
+      });
+    }
+
     if (isLastDay && hotel) {
       let checkoutTime = parseTime(dayDate, hotel.checkOutTime || '11:00');
       // If there's a return flight, check-out must be well before departure
@@ -147,29 +174,18 @@ export async function assembleTripSchedule(
       });
     }
 
-    // 3. Get activities in Claude-specified order
+    // 4. Get activities in Claude-specified order
     const cluster = clusters.find(c => c.dayNumber === balancedDay.dayNumber);
     const orderedActivities = reorderByPlan(cluster, balancedDay.activityOrder);
 
-    // 4. Prepare meal data
-    const dayMeals = meals.filter(m => m.dayNumber === balancedDay.dayNumber);
-    const breakfast = dayMeals.find(m => m.mealType === 'breakfast');
-    const lunch = dayMeals.find(m => m.mealType === 'lunch');
-    const dinner = dayMeals.find(m => m.mealType === 'dinner');
-
-    // Determine which meals to skip based on time constraints
-    const skipBreakfast = isFirstDay && dayStartHour >= 10;
-    const skipLunch = isLastDay && flights.return && dayEndHour < 12;
-    const skipDinner = isLastDay && flights.return && dayEndHour < 19;
-
-    // 5. Insert breakfast (only if day starts early enough)
-    if (breakfast?.restaurant && !skipBreakfast && dayStartHour < 10) {
+    // 5. Insert breakfast for non-last days (last day already handled above)
+    if (!isLastDay && breakfast?.restaurant && !skipBreakfast && dayStartHour < 10) {
       scheduler.addItem({
         id: `meal-${balancedDay.dayNumber}-breakfast`,
         title: `Petit-déjeuner — ${breakfast.restaurant.name}`,
         type: 'restaurant',
         duration: 45,
-        minStartTime: parseTime(dayDate, '07:30'),
+        minStartTime: parseTime(dayDate, `${String(Math.max(7, dayStartHour)).padStart(2, '0')}:00`),
         maxEndTime: parseTime(dayDate, '10:00'),
         data: breakfast.restaurant,
       });
@@ -195,12 +211,12 @@ export async function assembleTripSchedule(
         travelTime = Math.round((distKm / 50) * 60);
       }
 
-      // Check if it's time for lunch (cursor between 12:00 and 14:30)
+      // Check if it's time for lunch (cursor between 11:30 and 14:30)
       const cursorTime = scheduler.getCurrentTime();
       const cursorHour = cursorTime.getHours() + cursorTime.getMinutes() / 60;
 
       if (!lunchInserted && !skipLunch && lunch?.restaurant && cursorHour >= 11.5 && cursorHour < 14.5) {
-        scheduler.addItem({
+        const result = scheduler.addItem({
           id: `meal-${balancedDay.dayNumber}-lunch`,
           title: `Déjeuner — ${lunch.restaurant.name}`,
           type: 'restaurant',
@@ -209,15 +225,15 @@ export async function assembleTripSchedule(
           maxEndTime: parseTime(dayDate, '14:30'),
           data: lunch.restaurant,
         });
-        lunchInserted = true;
+        if (result) lunchInserted = true;
       }
 
-      // Check if it's time for dinner (cursor between 19:00 and 21:00)
+      // Check if it's time for dinner (cursor between 18:30 and 21:00)
       const cursorTime2 = scheduler.getCurrentTime();
       const cursorHour2 = cursorTime2.getHours() + cursorTime2.getMinutes() / 60;
 
       if (!dinnerInserted && !skipDinner && dinner?.restaurant && cursorHour2 >= 18.5 && cursorHour2 < 21) {
-        scheduler.addItem({
+        const result = scheduler.addItem({
           id: `meal-${balancedDay.dayNumber}-dinner`,
           title: `Dîner — ${dinner.restaurant.name}`,
           type: 'restaurant',
@@ -226,7 +242,7 @@ export async function assembleTripSchedule(
           maxEndTime: parseTime(dayDate, '22:00'),
           data: dinner.restaurant,
         });
-        dinnerInserted = true;
+        if (result) dinnerInserted = true;
       }
 
       // Day-trip activities get extended duration (whole-day excursion)
@@ -246,18 +262,16 @@ export async function assembleTripSchedule(
 
     // 7. Insert any remaining meals after all activities
     if (!lunchInserted && !skipLunch && lunch?.restaurant) {
-      const cursorHour = scheduler.getCurrentTime().getHours();
-      if (cursorHour < 15) {
-        scheduler.addItem({
-          id: `meal-${balancedDay.dayNumber}-lunch`,
-          title: `Déjeuner — ${lunch.restaurant.name}`,
-          type: 'restaurant',
-          duration: 60,
-          minStartTime: parseTime(dayDate, '12:00'),
-          maxEndTime: parseTime(dayDate, '15:00'),
-          data: lunch.restaurant,
-        });
-      }
+      // Always try to insert lunch — the scheduler will handle time constraints
+      scheduler.addItem({
+        id: `meal-${balancedDay.dayNumber}-lunch`,
+        title: `Déjeuner — ${lunch.restaurant.name}`,
+        type: 'restaurant',
+        duration: 60,
+        minStartTime: parseTime(dayDate, '12:00'),
+        maxEndTime: parseTime(dayDate, '15:00'),
+        data: lunch.restaurant,
+      });
     }
 
     if (!dinnerInserted && !skipDinner && dinner?.restaurant) {
@@ -279,6 +293,13 @@ export async function assembleTripSchedule(
     const scheduleItems = scheduler.getItems();
     const tripItems: TripItem[] = scheduleItems.map((item, idx) => {
       const itemData = item.data || {};
+      // Generate Google Maps "search by name" URL (more reliable than GPS coordinates)
+      const placeName = itemData.name || item.title;
+      const placeCity = preferences.destination || '';
+      const googleMapsPlaceUrl = placeName
+        ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(placeName + ', ' + placeCity)}`
+        : undefined;
+
       return {
         id: item.id || uuidv4(),
         dayNumber: balancedDay.dayNumber,
@@ -296,6 +317,7 @@ export async function assembleTripSchedule(
         rating: itemData.rating,
         bookingUrl: itemData.bookingUrl || itemData.reservationUrl,
         viatorUrl: itemData.viatorUrl,
+        googleMapsPlaceUrl,
         restaurant: item.type === 'restaurant' ? itemData : undefined,
         accommodation: (item.type === 'checkin' || item.type === 'checkout') ? itemData : undefined,
         flight: item.type === 'flight' ? itemData : undefined,

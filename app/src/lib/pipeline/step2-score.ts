@@ -52,9 +52,14 @@ export function scoreAndSelectActivities(
   // 7. Select the right count (4 per day + 2 extra buffer)
   const targetCount = Math.max(preferences.durationDays * 4 + 2, 6);
 
-  // 8. Fix durations and costs using existing utilities
-  return scored
-    .slice(0, targetCount)
+  // 8. Ensure all must-see activities are included (they have score 100+)
+  const mustSees = scored.filter(a => a.mustSee);
+  const nonMustSees = scored.filter(a => !a.mustSee);
+  const remainingSlots = Math.max(0, targetCount - mustSees.length);
+  const selected = [...mustSees, ...nonMustSees.slice(0, remainingSlots)];
+
+  // 9. Fix durations and costs using existing utilities
+  return selected
     .map(a => fixAttractionCost(fixAttractionDuration(a)) as ScoredActivity);
 }
 
@@ -98,8 +103,17 @@ function computeScore(
     return activityType.includes(pref);
   }) ? 3 : 0;
 
-  // Viator bonus (bookable = more actionable)
-  const viatorBonus = activity.source === 'viator' ? 0.5 : 0;
+  // Viator bonus: experiences (cruises, food tours, guided tours) add variety
+  // Higher bonus for experiential activities that aren't just monument visits
+  let viatorBonus = 0;
+  if (activity.source === 'viator') {
+    viatorBonus = 2; // Base bonus for bookable experiences
+    const expName = (activity.name || '').toLowerCase();
+    const isExperiential = ['cruise', 'croisière', 'tour', 'visite guidée',
+      'food', 'cooking', 'tasting', 'dégustation', 'bike', 'vélo',
+      'boat', 'bateau', 'canal', 'workshop', 'atelier'].some(k => expName.includes(k));
+    if (isExperiential) viatorBonus = 4; // Strong bonus for unique experiences
+  }
 
   // Data quality bonus (verified > estimated > generated)
   const reliabilityBonus = activity.dataReliability === 'verified' ? 1 : 0;
