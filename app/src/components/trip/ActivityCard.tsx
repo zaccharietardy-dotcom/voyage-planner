@@ -137,7 +137,7 @@ export function ActivityCard({
     >
       {/* Hero image — fixed height, clean without overlay text */}
       {showImage && (
-        <div className="relative h-40 w-full overflow-hidden bg-muted/30">
+        <div className="relative h-28 w-full overflow-hidden bg-muted/30">
           <img
             src={item.imageUrl}
             alt={item.title}
@@ -197,7 +197,7 @@ export function ActivityCard({
         )}
 
         {/* Content */}
-        <div className="flex-1 p-3.5 min-w-0">
+        <div className={cn("flex-1 min-w-0", showImage ? "p-2.5" : "p-3.5")}>
           <div className="flex items-start gap-3">
             <div className="flex-1 min-w-0">
               {/* Time row */}
@@ -218,7 +218,7 @@ export function ActivityCard({
               </div>
 
               {/* Title */}
-              <h4 className="font-semibold text-[13px] leading-snug mb-0.5 line-clamp-2">
+              <h4 className="font-semibold text-[13px] leading-snug mb-0 line-clamp-2">
                 {item.title}
               </h4>
 
