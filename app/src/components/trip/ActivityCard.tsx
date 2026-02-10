@@ -28,9 +28,10 @@ import {
   ChevronUp,
   ChevronDown,
   ChevronRight,
-  Search,
-  ArrowRight,
   Coffee,
+  Ticket,
+  Globe,
+  ImageIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TripItemType } from '@/lib/types';
@@ -50,7 +51,7 @@ interface ActivityCardProps {
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
   dragHandleProps?: React.HTMLAttributes<HTMLDivElement>;
-  swapButton?: React.ReactNode; // Bouton swap avec alternatives du pool
+  swapButton?: React.ReactNode;
 }
 
 const TYPE_ICONS: Record<TripItemType, React.ComponentType<{ className?: string; style?: React.CSSProperties }>> = {
@@ -75,11 +76,10 @@ const TYPE_LABELS: Record<TripItemType, string> = {
   parking: 'Parking',
   checkin: 'Check-in',
   checkout: 'Check-out',
-  luggage: 'Consigne bagages',
+  luggage: 'Consigne',
   free_time: 'Temps libre',
 };
 
-// Icônes pour les modes de transport
 const TRANSIT_MODE_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   bus: Bus,
   metro: TrainFront,
@@ -88,7 +88,6 @@ const TRANSIT_MODE_ICONS: Record<string, React.ComponentType<{ className?: strin
   ferry: Ship,
 };
 
-// Couleurs par défaut si non fournies
 const TRANSIT_MODE_COLORS: Record<string, string> = {
   bus: '#0074D9',
   metro: '#FF4136',
@@ -96,6 +95,9 @@ const TRANSIT_MODE_COLORS: Record<string, string> = {
   tram: '#FF851B',
   ferry: '#39CCCC',
 };
+
+/** Types that can display a hero image */
+const IMAGE_TYPES: TripItemType[] = ['activity', 'restaurant', 'hotel', 'checkin', 'checkout'];
 
 export function ActivityCard({
   item,
@@ -116,155 +118,185 @@ export function ActivityCard({
 }: ActivityCardProps) {
   const Icon = TYPE_ICONS[item.type];
   const color = TRIP_ITEM_COLORS[item.type];
+  const hasImage = item.imageUrl && IMAGE_TYPES.includes(item.type);
+  const [imgError, setImgError] = useState(false);
+  const showImage = hasImage && !imgError;
 
   return (
     <Card
       className={cn(
-        'relative group transition-all cursor-pointer',
-        'hover:shadow-md hover:border-primary/50',
-        isSelected && 'ring-2 ring-primary border-primary',
-        isDragging && 'shadow-lg rotate-1 scale-105',
-        item.type === 'free_time' && 'bg-green-50/50 border-green-200/60 dark:bg-green-950/20 dark:border-green-800/40'
+        'relative group transition-all duration-200 cursor-pointer overflow-hidden',
+        'border-border/60 hover:border-primary/40 hover:shadow-lg',
+        isSelected && 'ring-2 ring-primary/80 border-primary shadow-lg',
+        isDragging && 'shadow-xl rotate-1 scale-[1.03]',
+        item.type === 'free_time' && 'bg-emerald-50/40 border-emerald-200/50 dark:bg-emerald-950/15 dark:border-emerald-800/30',
       )}
       onClick={onSelect}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
+      {/* Hero image — full-width top */}
+      {showImage && (
+        <div className="relative h-32 w-full overflow-hidden bg-muted/30">
+          <img
+            src={item.imageUrl}
+            alt={item.title}
+            className="w-full h-full object-cover"
+            loading="lazy"
+            onError={() => setImgError(true)}
+          />
+          {/* Gradient overlay for readability */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+          {/* Order number on image */}
+          {orderNumber !== undefined && (
+            <div className="absolute top-2.5 left-2.5">
+              <span
+                className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-md"
+                style={{ backgroundColor: color }}
+              >
+                {orderNumber}
+              </span>
+            </div>
+          )}
+          {/* Type badge on image */}
+          <div className="absolute top-2.5 right-2.5">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold text-white/90 bg-black/30 backdrop-blur-sm">
+              <Icon className="h-3 w-3" />
+              {TYPE_LABELS[item.type]}
+            </span>
+          </div>
+          {/* Title overlay on image */}
+          <div className="absolute bottom-0 left-0 right-0 px-3.5 pb-2.5">
+            <h4 className="font-semibold text-sm text-white leading-tight drop-shadow-md line-clamp-2">
+              {item.title}
+            </h4>
+          </div>
+        </div>
+      )}
+
       <div className="flex">
         {/* Drag handle */}
         {dragHandleProps && (
           <div
             {...dragHandleProps}
-            className="flex items-center justify-center w-8 bg-muted/50 cursor-grab active:cursor-grabbing hover:bg-muted"
+            className="flex items-center justify-center w-7 bg-muted/30 cursor-grab active:cursor-grabbing hover:bg-muted/60 transition-colors"
           >
-            <GripVertical className="h-4 w-4 text-muted-foreground" />
+            <GripVertical className="h-3.5 w-3.5 text-muted-foreground/60" />
           </div>
         )}
 
-        {/* Order number indicator */}
-        {orderNumber !== undefined ? (
-          <div
-            className="w-8 self-stretch flex items-center justify-center shrink-0"
-            style={{ backgroundColor: `${color}15` }}
-          >
-            <span
-              className="w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold text-white"
-              style={{ backgroundColor: color }}
+        {/* Color accent stripe + order number (when no image) */}
+        {!showImage && (
+          orderNumber !== undefined ? (
+            <div
+              className="w-9 self-stretch flex items-center justify-center shrink-0"
+              style={{ backgroundColor: `${color}10` }}
             >
-              {orderNumber}
-            </span>
-          </div>
-        ) : (
-          <div className="w-1 self-stretch" style={{ backgroundColor: color }} />
-        )}
-
-        {/* Activity / restaurant / hotel image */}
-        {item.imageUrl && ['activity', 'restaurant', 'hotel', 'checkin', 'checkout'].includes(item.type) && (
-          <div className="w-20 self-stretch shrink-0 overflow-hidden">
-            <img
-              src={item.imageUrl}
-              alt={item.title}
-              className="w-full h-full object-cover"
-              loading="lazy"
-              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-            />
-          </div>
+              <span
+                className="w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold text-white shadow-sm"
+                style={{ backgroundColor: color }}
+              >
+                {orderNumber}
+              </span>
+            </div>
+          ) : (
+            <div className="w-1 self-stretch rounded-l-md" style={{ backgroundColor: color }} />
+          )
         )}
 
         {/* Content */}
-        <div className="flex-1 p-3">
-          <div className="flex items-start justify-between gap-3">
+        <div className="flex-1 p-3.5 min-w-0">
+          <div className="flex items-start gap-3">
             <div className="flex-1 min-w-0">
-              {/* Time + type */}
-              <div className="flex items-center gap-2 text-xs text-muted-foreground mb-0.5">
-                <Clock className="h-3 w-3" />
-                <span>
-                  {item.startTime} - {item.endTime}
+              {/* Time row */}
+              <div className="flex items-center gap-2 mb-1">
+                <span className="inline-flex items-center gap-1 text-xs text-muted-foreground font-medium">
+                  <Clock className="h-3 w-3" />
+                  {item.startTime} – {item.endTime}
                 </span>
-                <span
-                  className="px-1.5 py-0 rounded-full text-[10px] font-medium"
-                  style={{ backgroundColor: `${color}20`, color }}
-                >
-                  {TYPE_LABELS[item.type]}
-                </span>
+                {/* Type badge (only when no image, since image has its own) */}
+                {!showImage && (
+                  <span
+                    className="px-1.5 py-0.5 rounded text-[10px] font-semibold leading-none"
+                    style={{ backgroundColor: `${color}12`, color }}
+                  >
+                    {TYPE_LABELS[item.type]}
+                  </span>
+                )}
               </div>
 
-              {/* Title */}
-              <h4 className="font-semibold text-sm mb-0.5 truncate">{item.title}</h4>
+              {/* Title (only when no image) */}
+              {!showImage && (
+                <h4 className="font-semibold text-[13px] leading-snug mb-0.5 line-clamp-2">
+                  {item.title}
+                </h4>
+              )}
 
               {/* Description */}
-              <p className="text-sm text-muted-foreground line-clamp-2">
-                {item.description}
-              </p>
+              {item.description && (
+                <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2 mb-1.5">
+                  {item.description}
+                </p>
+              )}
               {item.type === 'flight' && (
-                <p className="text-[10px] text-muted-foreground/60 mt-0.5 italic">
+                <p className="text-[10px] text-muted-foreground/50 italic mb-1">
                   Prix indicatif — cliquez pour voir les tarifs actuels
                 </p>
               )}
 
-              {/* Location */}
-              {item.locationName && (
-                <div className="flex items-center gap-1.5 mt-2 text-xs text-muted-foreground">
-                  <MapPin className="h-3 w-3" />
-                  <span className="truncate">{item.locationName}</span>
-                </div>
-              )}
-
-              {/* Additional info row */}
-              <div className="flex items-center gap-3 mt-2 flex-wrap">
-                {/* Rating */}
-                {item.rating && (
-                  <div className="flex items-center gap-1 text-xs">
-                    <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                    <span className="font-medium">{item.rating.toFixed(1)}</span>
-                  </div>
+              {/* Meta row: location, rating, cost */}
+              <div className="flex items-center gap-2.5 flex-wrap text-xs text-muted-foreground">
+                {item.locationName && (
+                  <span className="inline-flex items-center gap-1 truncate max-w-[180px]">
+                    <MapPin className="h-3 w-3 shrink-0" />
+                    <span className="truncate">{item.locationName}</span>
+                  </span>
                 )}
-
-                {/* Distance from previous */}
+                {item.rating && item.rating > 0 && (
+                  <span className="inline-flex items-center gap-0.5 font-medium">
+                    <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                    {item.rating.toFixed(1)}
+                  </span>
+                )}
                 {item.timeFromPrevious && item.timeFromPrevious > 0 && (
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <span className="inline-flex items-center gap-1">
                     <Navigation className="h-3 w-3" />
-                    <span>{item.timeFromPrevious} min</span>
+                    {item.timeFromPrevious} min
                     {item.distanceFromPrevious && item.distanceFromPrevious > 0.1 && (
-                      <span>({item.distanceFromPrevious.toFixed(1)} km)</span>
+                      <span className="text-muted-foreground/60">({item.distanceFromPrevious.toFixed(1)} km)</span>
                     )}
-                  </div>
+                  </span>
                 )}
-
-                {/* Cost (masqué pour transport car affiché dans TransportCard) */}
+                {/* Cost */}
                 {item.type !== 'transport' && (
                   <>
                     {item.estimatedCost != null && item.estimatedCost > 0 ? (
-                      <div className="text-xs">
-                        <span className="font-medium text-primary">
-                          ~{item.estimatedCost}€
-                        </span>
+                      <span className="font-semibold text-primary">
+                        ~{item.estimatedCost}€
                         {item.type !== 'flight' && item.type !== 'parking' && (
-                          <span className="text-muted-foreground"> / pers.</span>
+                          <span className="font-normal text-muted-foreground"> / pers.</span>
                         )}
-                      </div>
-                    ) : item.type === 'activity' ? (
-                      <span className="text-xs font-medium text-green-600 bg-green-50 px-1.5 py-0.5 rounded">
-                        Gratuit
                       </span>
+                    ) : item.type === 'activity' ? (
+                      <span className="font-medium text-emerald-600 dark:text-emerald-400">Gratuit</span>
                     ) : null}
                   </>
                 )}
               </div>
 
-              {/* Transit lines (masqué pour transport avec bookingUrl car affiché dans TransportCard) */}
+              {/* Transit lines */}
               {item.transitInfo?.lines && item.transitInfo.lines.length > 0 && !(item.type === 'transport' && item.bookingUrl) && (
-                <div className="flex items-center gap-2 mt-2 flex-wrap">
+                <div className="flex items-center gap-1.5 mt-2 flex-wrap">
                   {item.transitInfo.lines.map((line, idx) => {
                     const ModeIcon = TRANSIT_MODE_ICONS[line.mode] || Bus;
                     const bgColor = line.color || TRANSIT_MODE_COLORS[line.mode] || '#666';
                     return (
                       <span
                         key={`${line.mode}-${line.number}-${idx}`}
-                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium text-white"
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold text-white"
                         style={{ backgroundColor: bgColor }}
                       >
-                        <ModeIcon className="h-3 w-3" />
+                        <ModeIcon className="h-2.5 w-2.5" />
                         {line.number}
                       </span>
                     );
@@ -272,7 +304,7 @@ export function ActivityCard({
                 </div>
               )}
 
-              {/* Transport card - mini-widget Omio */}
+              {/* Transport card */}
               {item.type === 'transport' && item.bookingUrl && (
                 <TransportCard item={item} />
               )}
@@ -284,19 +316,19 @@ export function ActivityCard({
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={(e) => e.stopPropagation()}
-                  className="flex items-center gap-2.5 mt-2 p-2 rounded-lg border bg-muted/30 hover:bg-muted/60 transition-colors"
+                  className="flex items-center gap-2.5 mt-2.5 p-2 rounded-lg border border-border/60 bg-muted/20 hover:bg-muted/40 transition-colors"
                 >
                   <img
                     src={item.viatorImageUrl}
                     alt={item.viatorTitle || item.title}
-                    className="w-14 h-14 rounded-md object-cover shrink-0"
+                    className="w-12 h-12 rounded-md object-cover shrink-0"
                   />
                   <div className="min-w-0 flex-1">
-                    <p className="text-xs font-medium line-clamp-2">{item.viatorTitle || item.title}</p>
+                    <p className="text-xs font-medium line-clamp-2 leading-snug">{item.viatorTitle || item.title}</p>
                     <div className="flex items-center gap-2 mt-0.5">
                       {item.viatorRating && (
                         <span className="flex items-center gap-0.5 text-[10px]">
-                          <Star className="h-2.5 w-2.5 fill-yellow-400 text-yellow-400" />
+                          <Star className="h-2.5 w-2.5 fill-amber-400 text-amber-400" />
                           {item.viatorRating.toFixed(1)}
                           {item.viatorReviewCount && <span className="text-muted-foreground">({item.viatorReviewCount})</span>}
                         </span>
@@ -308,102 +340,90 @@ export function ActivityCard({
                         </span>
                       )}
                       {(item.viatorPrice || item.estimatedCost) && (item.viatorPrice || item.estimatedCost)! > 0 && (
-                        <span className="text-[10px] font-medium text-green-600">dès {item.viatorPrice || item.estimatedCost}€</span>
+                        <span className="text-[10px] font-semibold text-primary">dès {item.viatorPrice || item.estimatedCost}€</span>
                       )}
                     </div>
                   </div>
                 </a>
               )}
 
-              {/* Booking buttons row - Gros boutons colorés visibles */}
-              <div className="flex items-center gap-2 mt-2 flex-wrap">
+              {/* Booking buttons — clean pill style */}
+              <div className="flex items-center gap-1.5 mt-2.5 flex-wrap">
                 <BookingButtons item={item} />
               </div>
             </div>
 
-            {/* Icon */}
-            <div
-              className="p-2 rounded-lg shrink-0"
-              style={{ backgroundColor: `${color}15` }}
-            >
-              <Icon className="h-5 w-5" style={{ color }} />
-            </div>
+            {/* Type icon (no image mode only) */}
+            {!showImage && (
+              <div
+                className="p-2 rounded-lg shrink-0"
+                style={{ backgroundColor: `${color}10` }}
+              >
+                <Icon className="h-4 w-4" style={{ color }} />
+              </div>
+            )}
           </div>
 
-          {/* Flight alternatives - scrollable horizontal */}
+          {/* Flight alternatives */}
           {item.type === 'flight' && item.flightAlternatives && item.flightAlternatives.length > 0 && (
             <FlightAlternatives alternatives={item.flightAlternatives} />
           )}
-
-          {/* Bouton monter - centré en haut */}
-          {onMoveUp && (
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-              <Button
-                size="icon"
-                variant="secondary"
-                className="h-8 w-8 rounded-full shadow-md"
-                disabled={!canMoveUp}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onMoveUp();
-                }}
-                title="Déplacer vers le haut"
-              >
-                <ChevronUp className="h-5 w-5" />
-              </Button>
-            </div>
-          )}
-
-          {/* Bouton descendre - centré en bas */}
-          {onMoveDown && (
-            <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-              <Button
-                size="icon"
-                variant="secondary"
-                className="h-8 w-8 rounded-full shadow-md"
-                disabled={!canMoveDown}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onMoveDown();
-                }}
-                title="Déplacer vers le bas"
-              >
-                <ChevronDown className="h-5 w-5" />
-              </Button>
-            </div>
-          )}
-
-          {/* Action buttons (swap/edit/delete) */}
-          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-            {swapButton && (item.type === 'activity' || item.type === 'free_time') && swapButton}
-            {onEdit && (
-              <Button
-                size="icon"
-                variant="ghost"
-                className="h-7 w-7"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onEdit();
-                }}
-              >
-                <Pencil className="h-3.5 w-3.5" />
-              </Button>
-            )}
-            {onDelete && (
-              <Button
-                size="icon"
-                variant="ghost"
-                className="h-7 w-7 text-destructive hover:text-destructive"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete();
-                }}
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-              </Button>
-            )}
-          </div>
         </div>
+      </div>
+
+      {/* Move buttons */}
+      {onMoveUp && (
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+          <Button
+            size="icon"
+            variant="secondary"
+            className="h-7 w-7 rounded-full shadow-md"
+            disabled={!canMoveUp}
+            onClick={(e) => { e.stopPropagation(); onMoveUp(); }}
+            title="Déplacer vers le haut"
+          >
+            <ChevronUp className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
+      {onMoveDown && (
+        <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+          <Button
+            size="icon"
+            variant="secondary"
+            className="h-7 w-7 rounded-full shadow-md"
+            disabled={!canMoveDown}
+            onClick={(e) => { e.stopPropagation(); onMoveDown(); }}
+            title="Déplacer vers le bas"
+          >
+            <ChevronDown className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
+
+      {/* Action buttons (swap/edit/delete) */}
+      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-0.5 z-10">
+        {swapButton && (item.type === 'activity' || item.type === 'free_time') && swapButton}
+        {onEdit && (
+          <Button
+            size="icon"
+            variant="ghost"
+            className="h-7 w-7 bg-background/80 backdrop-blur-sm hover:bg-background"
+            onClick={(e) => { e.stopPropagation(); onEdit(); }}
+          >
+            <Pencil className="h-3 w-3" />
+          </Button>
+        )}
+        {onDelete && (
+          <Button
+            size="icon"
+            variant="ghost"
+            className="h-7 w-7 bg-background/80 backdrop-blur-sm hover:bg-background text-destructive hover:text-destructive"
+            onClick={(e) => { e.stopPropagation(); onDelete(); }}
+          >
+            <Trash2 className="h-3 w-3" />
+          </Button>
+        )}
       </div>
     </Card>
   );
@@ -416,153 +436,62 @@ function formatDuration(minutes: number): string {
 }
 
 /**
- * Composant BookingButtons - Affiche des boutons de réservation colorés
- * Détecte automatiquement le provider depuis l'URL
+ * Booking buttons — Clean, subtle style with branded accents
  */
 function BookingButtons({ item }: { item: TripItem }) {
-  const buttons: { label: string; url: string; bgColor: string; icon: React.ReactNode }[] = [];
-
-  // Détecter le provider depuis l'URL du bookingUrl principal
+  const buttons: { label: string; url: string; variant: 'primary' | 'secondary' | 'ghost'; icon: React.ReactNode }[] = [];
   const bookingUrl = item.bookingUrl || '';
 
-  // Vol - Aviasales
+  // Flight
   if (item.type === 'flight' && bookingUrl) {
-    if (bookingUrl.includes('aviasales.com')) {
-      buttons.push({
-        label: 'Aviasales',
-        url: bookingUrl,
-        bgColor: 'bg-orange-500 hover:bg-orange-600',
-        icon: <Plane className="h-3.5 w-3.5" />,
-      });
-    } else {
-      buttons.push({
-        label: 'Réserver vol',
-        url: bookingUrl,
-        bgColor: 'bg-blue-500 hover:bg-blue-600',
-        icon: <Plane className="h-3.5 w-3.5" />,
-      });
-    }
-    // Ajouter aussi Aviasales si disponible séparément
+    buttons.push({
+      label: bookingUrl.includes('aviasales.com') ? 'Aviasales' : 'Réserver vol',
+      url: bookingUrl,
+      variant: 'primary',
+      icon: <Plane className="h-3 w-3" />,
+    });
     if (item.aviasalesUrl && item.aviasalesUrl !== bookingUrl) {
-      buttons.push({
-        label: 'Aviasales',
-        url: item.aviasalesUrl,
-        bgColor: 'bg-orange-500 hover:bg-orange-600',
-        icon: <Plane className="h-3.5 w-3.5" />,
-      });
+      buttons.push({ label: 'Aviasales', url: item.aviasalesUrl, variant: 'secondary', icon: <Plane className="h-3 w-3" /> });
     }
-    // Ajouter Omio comme 2e comparateur de vols
     if (item.omioFlightUrl) {
-      buttons.push({
-        label: 'Omio',
-        url: item.omioFlightUrl,
-        bgColor: 'bg-blue-500 hover:bg-blue-600',
-        icon: <Plane className="h-3.5 w-3.5" />,
-      });
+      buttons.push({ label: 'Omio', url: item.omioFlightUrl, variant: 'secondary', icon: <Plane className="h-3 w-3" /> });
     }
   }
 
-  // Hôtel - Booking.com ou Airbnb
+  // Hotel
   if ((item.type === 'hotel' || item.type === 'checkout') && bookingUrl) {
-    if (bookingUrl.includes('booking.com')) {
-      buttons.push({
-        label: 'Booking',
-        url: bookingUrl,
-        bgColor: 'bg-blue-600 hover:bg-blue-700',
-        icon: <Bed className="h-3.5 w-3.5" />,
-      });
-    } else if (bookingUrl.includes('airbnb.com')) {
-      buttons.push({
-        label: 'Airbnb',
-        url: bookingUrl,
-        bgColor: 'bg-pink-500 hover:bg-pink-600',
-        icon: <Bed className="h-3.5 w-3.5" />,
-      });
-    } else {
-      buttons.push({
-        label: 'Réserver',
-        url: bookingUrl,
-        bgColor: 'bg-blue-600 hover:bg-blue-700',
-        icon: <Bed className="h-3.5 w-3.5" />,
-      });
-    }
+    const label = bookingUrl.includes('airbnb.com') ? 'Airbnb' : bookingUrl.includes('booking.com') ? 'Booking' : 'Réserver';
+    buttons.push({ label, url: bookingUrl, variant: 'primary', icon: <Bed className="h-3 w-3" /> });
   }
 
-  // Transport - Omio, Trainline, FlixBus
+  // Transport
   if (item.type === 'transport' && bookingUrl) {
-    if (bookingUrl.includes('omio.fr') || bookingUrl.includes('omio.com') || bookingUrl.includes('omio.sjv.io')) {
-      buttons.push({
-        label: 'Omio',
-        url: bookingUrl,
-        bgColor: 'bg-blue-500 hover:bg-blue-600',
-        icon: <TrainFront className="h-3.5 w-3.5" />,
-      });
-    } else if (bookingUrl.includes('trainline')) {
-      buttons.push({
-        label: 'Trainline',
-        url: bookingUrl,
-        bgColor: 'bg-blue-500 hover:bg-blue-600',
-        icon: <TrainFront className="h-3.5 w-3.5" />,
-      });
-    } else if (bookingUrl.includes('flixbus')) {
-      buttons.push({
-        label: 'FlixBus',
-        url: bookingUrl,
-        bgColor: 'bg-green-500 hover:bg-green-600',
-        icon: <Bus className="h-3.5 w-3.5" />,
-      });
-    } else {
-      buttons.push({
-        label: 'Réserver transport',
-        url: bookingUrl,
-        bgColor: 'bg-blue-500 hover:bg-blue-600',
-        icon: <TrainFront className="h-3.5 w-3.5" />,
-      });
-    }
+    const label = bookingUrl.includes('omio') || bookingUrl.includes('sjv.io') ? 'Omio'
+      : bookingUrl.includes('trainline') ? 'Trainline'
+      : bookingUrl.includes('flixbus') ? 'FlixBus'
+      : 'Réserver';
+    buttons.push({ label, url: bookingUrl, variant: 'primary', icon: <TrainFront className="h-3 w-3" /> });
   }
 
-  // Activité - Site officiel ou Viator
+  // Activity
   if (item.type === 'activity' && bookingUrl) {
     if (bookingUrl.includes('viator.com')) {
-      buttons.push({
-        label: 'Viator',
-        url: bookingUrl,
-        bgColor: 'bg-green-600 hover:bg-green-700',
-        icon: <ExternalLink className="h-3.5 w-3.5" />,
-      });
+      buttons.push({ label: 'Viator', url: bookingUrl, variant: 'primary', icon: <Ticket className="h-3 w-3" /> });
     } else {
-      // URL officielle (rijksmuseum.nl, annefrank.org, etc.)
-      buttons.push({
-        label: 'Site officiel',
-        url: bookingUrl,
-        bgColor: 'bg-indigo-600 hover:bg-indigo-700',
-        icon: <ExternalLink className="h-3.5 w-3.5" />,
-      });
+      buttons.push({ label: 'Site officiel', url: bookingUrl, variant: 'primary', icon: <Globe className="h-3 w-3" /> });
     }
   }
 
-  // Viator alternatif (quand bookingUrl est un site officiel)
+  // Viator alt
   if (item.viatorUrl && !bookingUrl.includes('viator.com') && !item.viatorImageUrl) {
-    buttons.push({
-      label: 'Viator',
-      url: item.viatorUrl,
-      bgColor: 'bg-green-600 hover:bg-green-700',
-      icon: <ExternalLink className="h-3.5 w-3.5" />,
-    });
+    buttons.push({ label: 'Viator', url: item.viatorUrl, variant: 'secondary', icon: <Ticket className="h-3 w-3" /> });
   }
 
-  // Google Maps - toujours en dernier
-  const mapsUrl = item.googleMapsPlaceUrl ||
-    item.googleMapsUrl ||
+  // Google Maps
+  const mapsUrl = item.googleMapsPlaceUrl || item.googleMapsUrl ||
     (item.latitude && item.longitude ? `https://www.google.com/maps/search/?api=1&query=${item.latitude},${item.longitude}` : null);
-
   if (mapsUrl) {
-    buttons.push({
-      label: 'Maps',
-      url: mapsUrl,
-      bgColor: 'bg-gray-500 hover:bg-gray-600',
-      icon: <Map className="h-3.5 w-3.5" />,
-    });
+    buttons.push({ label: 'Maps', url: mapsUrl, variant: 'ghost', icon: <Map className="h-3 w-3" /> });
   }
 
   if (buttons.length === 0) return null;
@@ -577,8 +506,10 @@ function BookingButtons({ item }: { item: TripItem }) {
           rel="noopener noreferrer"
           onClick={(e) => e.stopPropagation()}
           className={cn(
-            btn.bgColor,
-            'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-white transition-colors shadow-sm'
+            'inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors',
+            btn.variant === 'primary' && 'bg-primary text-primary-foreground hover:opacity-90 shadow-sm',
+            btn.variant === 'secondary' && 'bg-secondary text-secondary-foreground hover:bg-secondary/80 border border-border/50',
+            btn.variant === 'ghost' && 'text-muted-foreground hover:text-foreground hover:bg-muted/60 border border-transparent hover:border-border/40',
           )}
         >
           {btn.icon}
@@ -594,31 +525,17 @@ function TransportCard({ item }: { item: TripItem }) {
 
   const bookingUrl = item.bookingUrl;
   const isOmio = bookingUrl.includes('omio') || bookingUrl.includes('sjv.io');
-
-  // Extraire origin/destination du title
-  const parts = item.title?.match(/(.+?)\s*[→>–\-]\s*(.+)/);
-  const origin = parts?.[1]?.replace(/^(Train|Bus|Vol|Ferry)\s+/i, '').trim() || '';
-  const destination = parts?.[2]?.trim() || '';
-
-  // Mode de transport
-  const isBus = item.title?.toLowerCase().includes('bus');
-  const ModeIcon = isBus ? Bus : TrainFront;
-
-  // Données DB HAFAS réelles
   const legs = item.transitLegs;
   const hasRealData = legs && legs.length > 0;
   const isRealTime = item.transitDataSource === 'api';
 
-  // Formatter un horaire ISO en HH:mm
   const formatTime = (iso: string) => {
     try {
-      const d = new Date(iso);
-      return d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+      return new Date(iso).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
     } catch { return ''; }
   };
 
-  // Formatter la durée
-  const formatDuration = (min: number) => {
+  const fmtDur = (min: number) => {
     if (min >= 60) {
       const h = Math.floor(min / 60);
       const m = min % 60;
@@ -627,60 +544,49 @@ function TransportCard({ item }: { item: TripItem }) {
     return `${min}min`;
   };
 
-  // Nettoyer un nom de ligne GTFS
   const cleanLineName = (leg: { line?: string; operator?: string }) => {
     const raw = leg.line || leg.operator || 'Train';
-    if (raw.includes('->') || /^[A-Z]{3,}[0-9]*$/.test(raw)) {
-      return leg.operator || 'Train';
-    }
+    if (raw.includes('->') || /^[A-Z]{3,}[0-9]*$/.test(raw)) return leg.operator || 'Train';
     return raw;
   };
 
   return (
-    <div className="mt-2.5 space-y-2" onClick={(e) => e.stopPropagation()}>
-      {/* Horaires réels + legs */}
+    <div className="mt-2.5 space-y-2 p-2.5 rounded-lg bg-muted/20 border border-border/40" onClick={(e) => e.stopPropagation()}>
       {hasRealData ? (
         <div className="space-y-1.5">
           {legs.map((leg, idx) => (
-            <div key={idx} className="flex items-center gap-2.5 text-sm">
-              <span className="font-mono text-xs text-primary font-semibold min-w-[100px]">
+            <div key={idx} className="flex items-center gap-2 text-xs">
+              <span className="font-mono text-primary font-semibold min-w-[90px]">
                 {formatTime(leg.departure)} → {formatTime(leg.arrival)}
               </span>
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs border border-primary/30 bg-primary/5 text-foreground font-medium">
-                {leg.mode === 'bus' ? <Bus className="h-3 w-3 text-primary" /> : <TrainFront className="h-3 w-3 text-primary" />}
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] border border-primary/20 bg-primary/5 font-medium">
+                {leg.mode === 'bus' ? <Bus className="h-2.5 w-2.5 text-primary" /> : <TrainFront className="h-2.5 w-2.5 text-primary" />}
                 {cleanLineName(leg)}
               </span>
-              <span className="text-xs text-muted-foreground">
-                {formatDuration(leg.duration)}
-              </span>
+              <span className="text-muted-foreground">{fmtDur(leg.duration)}</span>
               {idx < legs.length - 1 && (
-                <span className="text-[10px] text-primary/60 ml-auto">
-                  ↓ correspondance
-                </span>
+                <span className="text-[10px] text-primary/50 ml-auto">↓ corresp.</span>
               )}
             </div>
           ))}
           {legs.length > 1 && (
-            <div className="text-[11px] text-muted-foreground">
-              {legs.length - 1} correspondance{legs.length > 2 ? 's' : ''} · ~{item.duration ? formatDuration(item.duration) : ''}
+            <div className="text-[10px] text-muted-foreground">
+              {legs.length - 1} correspondance{legs.length > 2 ? 's' : ''} · ~{item.duration ? fmtDur(item.duration) : ''}
             </div>
           )}
         </div>
       ) : (
-        <div className="flex items-center gap-3 text-sm text-muted-foreground">
+        <div className="flex items-center gap-3 text-xs text-muted-foreground">
           {item.startTime && item.endTime && (
             <span className="flex items-center gap-1">
-              <Clock className="h-3.5 w-3.5" />
+              <Clock className="h-3 w-3" />
               {item.startTime} → {item.endTime}
             </span>
           )}
-          {item.duration && item.duration > 0 && (
-            <span className="text-xs">~{formatDuration(item.duration)}</span>
-          )}
+          {item.duration && item.duration > 0 && <span>~{fmtDur(item.duration)}</span>}
         </div>
       )}
 
-      {/* Transit lines badges si pas de legs réels */}
       {!hasRealData && item.transitInfo?.lines && item.transitInfo.lines.length > 0 && (
         <div className="flex items-center gap-1.5 flex-wrap">
           {item.transitInfo.lines.map((line, idx) => {
@@ -688,9 +594,9 @@ function TransportCard({ item }: { item: TripItem }) {
             return (
               <span
                 key={`${line.mode}-${line.number}-${idx}`}
-                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs border border-primary/30 bg-primary/5 text-muted-foreground"
+                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] border border-primary/20 bg-primary/5 text-muted-foreground"
               >
-                <LineIcon className="h-3 w-3" />
+                <LineIcon className="h-2.5 w-2.5" />
                 {line.number}
               </span>
             );
@@ -698,18 +604,17 @@ function TransportCard({ item }: { item: TripItem }) {
         </div>
       )}
 
-      {/* Prix + CTA sur une ligne */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between pt-1">
         <div>
           {item.priceRange ? (
-            <span className="text-sm">
+            <span className="text-xs">
               <span className="font-semibold text-primary">{item.priceRange[0]}€ – {item.priceRange[1]}€</span>
-              <span className="text-[10px] text-muted-foreground ml-1">/ pers.</span>
+              <span className="text-muted-foreground ml-1">/ pers.</span>
             </span>
           ) : item.estimatedCost != null && item.estimatedCost > 0 ? (
-            <span className="text-sm">
+            <span className="text-xs">
               <span className="font-semibold text-primary">~{item.estimatedCost}€</span>
-              <span className="text-[10px] text-muted-foreground ml-1">(estimé)</span>
+              <span className="text-muted-foreground ml-1">(estimé)</span>
             </span>
           ) : null}
         </div>
@@ -717,7 +622,7 @@ function TransportCard({ item }: { item: TripItem }) {
           href={bookingUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-primary text-primary-foreground text-xs font-medium hover:opacity-90 transition-opacity"
+          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-primary text-primary-foreground text-[11px] font-medium hover:opacity-90 transition-opacity"
         >
           <ExternalLink className="h-3 w-3" />
           {isRealTime ? 'Réserver' : `Voir sur ${isOmio ? 'Omio' : 'le site'}`}
@@ -729,11 +634,10 @@ function TransportCard({ item }: { item: TripItem }) {
 
 function FlightAlternatives({ alternatives }: { alternatives: Flight[] }) {
   const [expanded, setExpanded] = useState(false);
-
   if (alternatives.length === 0) return null;
 
   return (
-    <div className="mt-2 border-t pt-2" onClick={(e) => e.stopPropagation()}>
+    <div className="mt-3 border-t border-border/40 pt-2.5" onClick={(e) => e.stopPropagation()}>
       <button
         className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
         onClick={() => setExpanded(!expanded)}
@@ -749,16 +653,16 @@ function FlightAlternatives({ alternatives }: { alternatives: Flight[] }) {
               href={alt.bookingUrl || '#'}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-shrink-0 border rounded-lg p-2 text-xs hover:border-primary/50 hover:bg-muted/50 transition-colors min-w-[140px]"
+              className="flex-shrink-0 border border-border/50 rounded-lg p-2.5 text-xs hover:border-primary/40 hover:shadow-sm transition-all min-w-[140px] bg-card"
             >
               <div className="font-medium">{alt.airline}</div>
-              <div className="text-muted-foreground">{alt.flightNumber}</div>
-              <div className="mt-1">
+              <div className="text-muted-foreground text-[10px]">{alt.flightNumber}</div>
+              <div className="mt-1.5 font-mono text-[11px]">
                 {alt.departureTimeDisplay || alt.departureTime?.split('T')[1]?.slice(0, 5)} → {alt.arrivalTimeDisplay || alt.arrivalTime?.split('T')[1]?.slice(0, 5)}
               </div>
-              <div className="flex items-center justify-between mt-1">
+              <div className="flex items-center justify-between mt-1.5">
                 <span className="font-semibold text-primary">{alt.pricePerPerson || alt.price}€</span>
-                <span className="text-muted-foreground">
+                <span className="text-muted-foreground text-[10px]">
                   {formatDuration(alt.duration)} · {alt.stops === 0 ? 'Direct' : `${alt.stops} esc.`}
                 </span>
               </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { Navigation, Clock, MapPin } from 'lucide-react';
+import { Navigation, Clock, MapPin, Footprints, Car, TrainFront } from 'lucide-react';
 
 interface ItineraryConnectorProps {
   from: {
@@ -13,15 +13,11 @@ interface ItineraryConnectorProps {
     latitude: number;
     longitude: number;
   };
-  duration?: number; // minutes estimées
-  distance?: number; // km
+  duration?: number;
+  distance?: number;
   mode?: 'walk' | 'transit' | 'driving' | 'car' | 'public' | 'taxi';
 }
 
-/**
- * Composant compact pour afficher un lien d'itinéraire cliquable
- * entre deux activités dans la timeline
- */
 export function ItineraryConnector({
   from,
   to,
@@ -29,36 +25,18 @@ export function ItineraryConnector({
   distance,
   mode = 'walk',
 }: ItineraryConnectorProps) {
-  // Mapper les modes vers les travelmode Google Maps
   const googleMapsMode = mode === 'walk' ? 'walking'
     : mode === 'transit' || mode === 'public' ? 'transit'
     : 'driving';
 
-  // Générer l'URL Google Maps avec itinéraire
-  // Préférer les noms de lieux (plus lisible pour l'utilisateur), coordonnées en fallback
   const origin = from.name ? encodeURIComponent(from.name) : `${from.latitude},${from.longitude}`;
   const destination = to.name ? encodeURIComponent(to.name) : `${to.latitude},${to.longitude}`;
   const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&travelmode=${googleMapsMode}`;
 
-  // Icône selon le mode de transport
-  const getModeIcon = () => {
-    switch (mode) {
-      case 'walk':
-        return '🚶';
-      case 'transit':
-      case 'public':
-        return '🚇';
-      case 'car':
-      case 'driving':
-        return '🚗';
-      case 'taxi':
-        return '🚕';
-      default:
-        return '🚶';
-    }
-  };
+  const ModeIcon = mode === 'walk' ? Footprints
+    : mode === 'transit' || mode === 'public' ? TrainFront
+    : Car;
 
-  // Formater la durée
   const formatDuration = (mins: number) => {
     if (mins < 60) return `${mins} min`;
     const hours = Math.floor(mins / 60);
@@ -66,7 +44,6 @@ export function ItineraryConnector({
     return remainingMins > 0 ? `${hours}h${remainingMins}` : `${hours}h`;
   };
 
-  // Formater la distance
   const formatDistance = (km: number) => {
     if (km < 1) return `${Math.round(km * 1000)} m`;
     return `${km.toFixed(1)} km`;
@@ -77,36 +54,29 @@ export function ItineraryConnector({
       href={googleMapsUrl}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-center gap-2 py-2 px-3 my-2 ml-1 bg-blue-50 dark:bg-blue-950/30 hover:bg-blue-100 dark:hover:bg-blue-900/40 rounded-lg border border-blue-200 dark:border-blue-800 transition-colors cursor-pointer group"
+      className="flex items-center gap-2 py-1.5 px-3 my-1 ml-2 rounded-md text-xs text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-colors cursor-pointer group"
     >
-      <Navigation className="h-4 w-4 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform" />
+      <ModeIcon className="h-3.5 w-3.5 shrink-0 opacity-50 group-hover:opacity-80 transition-opacity" />
 
-      <div className="flex-1 min-w-0">
-        <span className="text-sm text-blue-800 dark:text-blue-200 truncate block">
-          {getModeIcon()} Itinéraire vers <span className="font-medium">{to.name}</span>
-        </span>
-
-        {(duration || distance) && (
-          <div className="flex items-center gap-3 text-xs text-blue-600 dark:text-blue-400 mt-0.5">
-            {duration && (
-              <span className="flex items-center gap-1">
-                <Clock className="h-3 w-3" />
-                {formatDuration(duration)}
-              </span>
-            )}
-            {distance && (
-              <span className="flex items-center gap-1">
-                <MapPin className="h-3 w-3" />
-                {formatDistance(distance)}
-              </span>
-            )}
-          </div>
-        )}
-      </div>
-
-      <span className="text-blue-400 dark:text-blue-500 text-xs opacity-0 group-hover:opacity-100 transition-opacity">
-        Ouvrir →
+      <span className="truncate">
+        → {to.name}
       </span>
+
+      {(duration || distance) && (
+        <span className="flex items-center gap-2 shrink-0 ml-auto opacity-60 group-hover:opacity-100 transition-opacity">
+          {duration && (
+            <span className="flex items-center gap-0.5">
+              <Clock className="h-2.5 w-2.5" />
+              {formatDuration(duration)}
+            </span>
+          )}
+          {distance && distance > 0.1 && (
+            <span>{formatDistance(distance)}</span>
+          )}
+        </span>
+      )}
+
+      <Navigation className="h-3 w-3 shrink-0 opacity-0 group-hover:opacity-60 transition-opacity" />
     </a>
   );
 }
