@@ -319,7 +319,39 @@ export async function assembleTripSchedule(
     // the schedule ran out of time after scheduling 4 non-must-see activities.
     const mustSeeActivities = orderedActivities.filter(a => a.mustSee);
     const nonMustSeeActivities = orderedActivities.filter(a => !a.mustSee);
-    orderedActivities = [...mustSeeActivities, ...nonMustSeeActivities];
+
+    // Optimize geographic order within each group using nearest-neighbor heuristic.
+    // This reduces intra-day travel time (e.g. Vatican → Basilique St Pierre vs Vatican → far restaurant → back).
+    // Start from the accommodation or previous position.
+    const geoOptimize = (activities: ScoredActivity[], startLat: number, startLng: number) => {
+      if (activities.length <= 2) return activities;
+      const ordered: ScoredActivity[] = [];
+      const remaining = [...activities];
+      let curLat = startLat, curLng = startLng;
+      while (remaining.length > 0) {
+        let nearestIdx = 0;
+        let nearestDist = Infinity;
+        for (let i = 0; i < remaining.length; i++) {
+          const d = calculateDistance(curLat, curLng, remaining[i].latitude, remaining[i].longitude);
+          if (d < nearestDist) { nearestDist = d; nearestIdx = i; }
+        }
+        const next = remaining.splice(nearestIdx, 1)[0];
+        ordered.push(next);
+        curLat = next.latitude;
+        curLng = next.longitude;
+      }
+      return ordered;
+    };
+
+    const startLat = hotel?.latitude || data.destCoords.lat;
+    const startLng = hotel?.longitude || data.destCoords.lng;
+    const optimizedMustSees = geoOptimize(mustSeeActivities, startLat, startLng);
+    const lastMustSee = optimizedMustSees.length > 0 ? optimizedMustSees[optimizedMustSees.length - 1] : null;
+    const optimizedNonMustSees = geoOptimize(nonMustSeeActivities,
+      lastMustSee?.latitude || startLat,
+      lastMustSee?.longitude || startLng
+    );
+    orderedActivities = [...optimizedMustSees, ...optimizedNonMustSees];
 
     console.log(`[Pipeline V2] Day ${balancedDay.dayNumber}: ${orderedActivities.length} activities to schedule (${mustSeeActivities.length} must-sees), dayStart=${dayStartHour}:00, dayEnd=${dayEndHour}:00, window=${dayEndHour - dayStartHour}h, cursor=${formatTimeHHMM(scheduler.getCurrentTime())}`);
     for (const a of orderedActivities) {

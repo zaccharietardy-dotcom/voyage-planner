@@ -132,6 +132,43 @@ export function scoreAndSelectActivities(
   // 3. Deduplicate by proximity (100m)
   const deduped = deduplicateByProximity(withGPS, 0.1);
 
+  // 3b. FALLBACK must-see name matching
+  // If the SerpAPI must-see search failed for an item, or the dedup lost the flag,
+  // check all activities against the user's mustSee text and apply the flag.
+  // This catches cases like "Fontaine de Trevi" where the API search returned
+  // a different result or the GPS was too far from the Google Places entry.
+  if (preferences.mustSee?.trim()) {
+    const mustSeeItems = preferences.mustSee
+      .split(',')
+      .map(s => s.trim().toLowerCase())
+      .filter(Boolean)
+      .flatMap(item => {
+        // Also expand "et" / "&"
+        if (/\s+et\s+/i.test(item) || /\s*&\s*/.test(item)) {
+          return item.split(/\s+et\s+|\s*&\s*/i).map(p => p.trim()).filter(Boolean);
+        }
+        return [item];
+      });
+
+    // Normalize for accent-insensitive matching
+    const normalizeAccents = (s: string) =>
+      s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+    for (const activity of deduped) {
+      if (activity.mustSee) continue; // Already flagged
+      const actNameNorm = normalizeAccents(activity.name || '');
+      for (const mustSeeItem of mustSeeItems) {
+        const mustSeeNorm = normalizeAccents(mustSeeItem);
+        // Check if activity name contains the must-see item or vice versa
+        if (actNameNorm.includes(mustSeeNorm) || mustSeeNorm.includes(actNameNorm)) {
+          console.log(`[Pipeline V2] Fallback must-see: "${activity.name}" matched "${mustSeeItem}" from user preferences`);
+          activity.mustSee = true;
+          break;
+        }
+      }
+    }
+  }
+
   // 4. Filter irrelevant types
   const filtered = deduped.filter(a => !isIrrelevantAttraction(a));
 

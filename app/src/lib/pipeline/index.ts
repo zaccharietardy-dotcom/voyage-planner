@@ -695,6 +695,56 @@ function rebalanceClustersForFlights(
     }
   }
 
+  // Phase 6: Fatigue balancing
+  // Limit heavy activities (≥90min) to max 2 per day. This prevents exhausting
+  // days like "Vatican 3h + Palais Valentini 2h + Château St-Ange 70min".
+  // Move lowest-scored heavy non-must-see to the day with fewest heavy activities.
+  const MAX_HEAVY_PER_DAY = 2;
+  const HEAVY_THRESHOLD_MIN = 90;
+
+  for (let ci = 0; ci < clusters.length; ci++) {
+    if (isDayTrip[ci]) continue;
+    const cluster = clusters[ci];
+    const heavyActivities = cluster.activities.filter(a => (a.duration || 60) >= HEAVY_THRESHOLD_MIN);
+
+    if (heavyActivities.length <= MAX_HEAVY_PER_DAY) continue;
+
+    // Too many heavy activities — move the lowest-scored non-must-see heavy ones
+    const moveCandidates = heavyActivities
+      .filter(a => !a.mustSee)
+      .sort((a, b) => a.score - b.score);
+
+    let toMove = heavyActivities.length - MAX_HEAVY_PER_DAY;
+    for (const candidate of moveCandidates) {
+      if (toMove <= 0) break;
+
+      // Find the day with the fewest heavy activities that has capacity
+      let bestTarget = -1;
+      let fewestHeavy = Infinity;
+      for (let ti = 0; ti < clusters.length; ti++) {
+        if (ti === ci || isDayTrip[ti]) continue;
+        const targetHeavy = clusters[ti].activities.filter(a => (a.duration || 60) >= HEAVY_THRESHOLD_MIN).length;
+        const tAvail = hoursPerDay[ti] * 60;
+        const tUsed = clusters[ti].activities.reduce((s, a) => s + (a.duration || 60) + 20, 0) + 180;
+        const remaining = tAvail - tUsed;
+        if (targetHeavy < fewestHeavy && remaining >= (candidate.duration || 60) + 20) {
+          fewestHeavy = targetHeavy;
+          bestTarget = ti;
+        }
+      }
+
+      if (bestTarget !== -1 && fewestHeavy < MAX_HEAVY_PER_DAY) {
+        const idx = cluster.activities.findIndex(a => a.id === candidate.id);
+        if (idx !== -1) {
+          const [moved] = cluster.activities.splice(idx, 1);
+          clusters[bestTarget].activities.push(moved);
+          toMove--;
+          console.log(`[Pipeline V2] Phase 6: moved heavy activity "${moved.name}" (${moved.duration}min) from Day ${cluster.dayNumber} → Day ${clusters[bestTarget].dayNumber} (fatigue balancing)`);
+        }
+      }
+    }
+  }
+
   // Log rebalancing result with must-see details
   console.log(`[Pipeline V2] Rebalanced clusters: ${clusters.map((c, i) =>
     `Day ${c.dayNumber}: ${c.activities.length} activities [${c.activities.filter(a => a.mustSee).length} must-sees] (${hoursPerDay[i].toFixed(1)}h avail, max ${maxPerDay[i]})`
