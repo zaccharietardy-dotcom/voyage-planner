@@ -146,12 +146,27 @@ export class DayScheduler {
     // Bug #6: Arrondir à l'heure la plus proche pour éviter 19h12, 20h42
     // Sauf pour les vols et transports qui ont des horaires fixes
     if (type !== 'flight' && type !== 'transport' && type !== 'checkin') {
+      const preRoundStart = startTime.getTime();
       startTime = roundToNearestHour(startTime);
-      // S'assurer qu'on n'a pas reculé avant le curseur après arrondi
-      if (startTime.getTime() < cursorTime) {
+      // S'assurer qu'on n'a pas reculé avant le curseur + travel time après arrondi.
+      // The rounding must NEVER eat the travel gap — otherwise consecutive items
+      // appear to teleport (e.g. checkout at 11:00, activity at 11:00 despite 3km distance).
+      const minStartWithTravel = cursorTime + travelTime * 60 * 1000;
+      if (startTime.getTime() < minStartWithTravel) {
+        // Rounding went too far back — round UP instead
         startTime = new Date(cursorTime);
         startTime.setMinutes(0, 0, 0);
         startTime.setHours(startTime.getHours() + 1);
+        // If still before cursor + travel, push to next 30min or full hour
+        if (startTime.getTime() < minStartWithTravel) {
+          startTime = new Date(minStartWithTravel);
+          startTime = roundToNearestHour(startTime);
+          // Final safety: if rounding went back, just use the raw time
+          if (startTime.getTime() < minStartWithTravel) {
+            startTime = new Date(minStartWithTravel);
+            startTime.setSeconds(0, 0);
+          }
+        }
       }
     }
 

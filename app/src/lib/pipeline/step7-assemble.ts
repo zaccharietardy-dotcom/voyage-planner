@@ -144,19 +144,24 @@ export async function assembleTripSchedule(
       });
     }
 
+    // IMPORTANT: Return flight/transport is inserted AFTER activities (see section 9 below)
+    // This prevents the cursor from jumping past dayEnd, blocking activity insertion.
+    // We prepare the data here but insert it later.
+    let returnTransportData: {
+      id: string; title: string; type: string;
+      startTime: Date; endTime: Date; data: any;
+    } | null = null;
+
     if (isLastDay && flights.return) {
-      const depTime = new Date(flights.return.departureTime);
-      const arrTime = new Date(flights.return.arrivalTime);
-      scheduler.insertFixedItem({
+      returnTransportData = {
         id: `flight-ret-${balancedDay.dayNumber}`,
         title: `Vol ${flights.return.airline} ${flights.return.flightNumber}`,
         type: 'flight',
-        startTime: depTime,
-        endTime: arrTime,
+        startTime: new Date(flights.return.departureTime),
+        endTime: new Date(flights.return.arrivalTime),
         data: flights.return,
-      });
+      };
     } else if (hasReturnTransport && transport) {
-      // Ground transport return
       const { start: tStart, end: tEnd } = getGroundTransportTimes(transport, dayDate, 'return');
       const modeLabels: Record<string, string> = { train: '🚄 Train', bus: '🚌 Bus', car: '🚗 Voiture', combined: '🔄 Transport', ferry: '⛴️ Ferry' };
 
@@ -164,15 +169,10 @@ export async function assembleTripSchedule(
       let returnTransitLegs: typeof transport.transitLegs = undefined;
       if (transport.transitLegs?.length) {
         returnTransitLegs = transport.transitLegs.slice().reverse().map((leg) => {
-          // Swap from/to for return direction
-          // Fix dates: shift to the return day (dayDate)
           const returnDep = new Date(dayDate);
           returnDep.setHours(tStart.getHours(), tStart.getMinutes(), 0, 0);
-
           const returnArr = new Date(dayDate);
           returnArr.setHours(tEnd.getHours(), tEnd.getMinutes(), 0, 0);
-
-          // For multi-leg journeys, distribute times proportionally
           return {
             mode: leg.mode,
             from: leg.to,
@@ -186,7 +186,7 @@ export async function assembleTripSchedule(
         });
       }
 
-      scheduler.insertFixedItem({
+      returnTransportData = {
         id: `transport-ret-${balancedDay.dayNumber}`,
         title: `${modeLabels[transport.mode] || '🚊 Transport'} → ${preferences.origin}`,
         type: 'transport',
@@ -202,7 +202,7 @@ export async function assembleTripSchedule(
           estimatedCost: transport.totalPrice,
           bookingUrl: transport.bookingUrl,
         },
-      });
+      };
     }
 
     // 2. Prepare meal data early (needed for scheduling order decisions)
@@ -294,9 +294,18 @@ export async function assembleTripSchedule(
       });
     }
 
-    // 4. Get activities in Claude-specified order
+    // 4. Get activities in Claude-specified order, but ensure must-sees come first
     const cluster = clusters.find(c => c.dayNumber === balancedDay.dayNumber);
-    const orderedActivities = reorderByPlan(cluster, balancedDay.activityOrder);
+    let orderedActivities = reorderByPlan(cluster, balancedDay.activityOrder);
+
+    // Prioritize must-sees: move them to the front of the list so they're scheduled first.
+    // This prevents the scenario where a must-see at position 5 gets dropped because
+    // the schedule ran out of time after scheduling 4 non-must-see activities.
+    const mustSeeActivities = orderedActivities.filter(a => a.mustSee);
+    const nonMustSeeActivities = orderedActivities.filter(a => !a.mustSee);
+    orderedActivities = [...mustSeeActivities, ...nonMustSeeActivities];
+
+    console.log(`[Pipeline V2] Day ${balancedDay.dayNumber}: ${orderedActivities.length} activities to schedule (${mustSeeActivities.length} must-sees), dayStart=${dayStartHour}, dayEnd=${dayEndHour}, cursor=${formatTimeHHMM(scheduler.getCurrentTime())}`);
 
     // 5. Insert breakfast for non-last days (last day already handled above)
     if (!isLastDay && breakfast?.restaurant && !skipBreakfast && dayStartHour <= 10) {
@@ -392,7 +401,7 @@ export async function assembleTripSchedule(
       // These typically close at sunset — cap at 19:30 (generous for summer)
       const activityMaxEndTime = getActivityMaxEndTime(activity, dayDate);
 
-      scheduler.addItem({
+      const actResult = scheduler.addItem({
         id: activity.id,
         title: activity.name,
         type: 'activity',
@@ -401,6 +410,9 @@ export async function assembleTripSchedule(
         maxEndTime: activityMaxEndTime,
         data: activity,
       });
+      if (!actResult) {
+        console.warn(`[Pipeline V2] Day ${balancedDay.dayNumber}: REJECTED activity "${activity.name}" (duration=${activityDuration}min, travel=${travelTime}min, cursor=${formatTimeHHMM(scheduler.getCurrentTime())}, dayEnd=${dayEndHour}:00)`);
+      }
 
       // After day-trip activity, add explicit return travel to hotel
       // This prevents dinner from showing 7h travel time from the day-trip location
@@ -458,7 +470,13 @@ export async function assembleTripSchedule(
       });
     }
 
-    // 9. Remove scheduling conflicts (keep higher-priority items)
+    // 9. Insert return transport LAST (after activities and meals)
+    // This prevents the cursor from advancing past dayEnd before activities are placed.
+    if (returnTransportData) {
+      scheduler.insertFixedItem(returnTransportData);
+    }
+
+    // 10. Remove scheduling conflicts (keep higher-priority items)
     scheduler.removeConflicts();
 
     // 10. Convert to TripItems
@@ -718,7 +736,17 @@ async function enrichWithDirections(days: TripDay[]): Promise<void> {
 
       const dist = calculateDistance(prev.latitude, prev.longitude, curr.latitude, curr.longitude);
       curr.distanceFromPrevious = Math.round(dist * 100) / 100;
-      curr.timeFromPrevious = estimateTravel(prev, curr);
+      let travelTime = estimateTravel(prev, curr);
+
+      // Fix fakeGPS restaurants: when restaurant GPS is a city-center fallback,
+      // distance to activities is meaningless (often 0km → 0min travel).
+      // Enforce a minimum travel time for any restaurant transition.
+      const isRestaurantTransition = prev.type === 'restaurant' || curr.type === 'restaurant';
+      if (isRestaurantTransition && travelTime < 10) {
+        travelTime = 10; // Minimum 10min to/from a restaurant
+      }
+
+      curr.timeFromPrevious = travelTime;
       curr.transportToPrevious = dist < 1 ? 'walk' : 'public';
     }
   }

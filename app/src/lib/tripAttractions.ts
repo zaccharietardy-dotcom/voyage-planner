@@ -9,12 +9,11 @@ import { applyDurationRules } from './services/claudeItinerary';
  * Sinon → déléguer à applyDurationRules() (caps/floors partagés)
  */
 export function fixAttractionDuration(attraction: Attraction): Attraction {
-  // Données vérifiées (Viator API, viatorKnownProducts) → ne pas toucher
-  if (attraction.dataReliability === 'verified') {
-    return attraction;
-  }
-
-  // Déléguer à applyDurationRules (DURATION_CAPS, DURATION_FLOORS, MINIMUM_DURATION_OVERRIDES)
+  // Apply duration rules to ALL attractions — even "verified" ones.
+  // "Verified" means the source data (name, GPS, rating) is reliable,
+  // but durations are often wildly wrong (e.g. Square Louise Michel = 180min).
+  // Duration CAPS (square → 30min, bridge → 45min) are about realistic visit times,
+  // not data source quality. FLOORS (Louvre ≥ 150min) are also always applicable.
   const fixedDuration = applyDurationRules(attraction.name, attraction.duration);
   if (fixedDuration !== attraction.duration) {
     return { ...attraction, duration: fixedDuration };

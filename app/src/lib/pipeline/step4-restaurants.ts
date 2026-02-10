@@ -73,7 +73,7 @@ export function assignRestaurants(
       } else {
         // Fake GPS mode: all restaurants are at the same point,
         // distance is meaningless → score by quality only
-        best = findBestByQuality(pool, usedIds);
+        best = findBestByQuality(pool, usedIds, mealType);
       }
 
       if (best) {
@@ -208,19 +208,35 @@ function findBestRestaurant(
 /**
  * Pick the highest-rated unused restaurant (ignoring distance).
  * Used when GPS coordinates are unreliable (fake city-center fallback).
+ * Still applies meal type filtering (e.g. no steakhouse for breakfast).
  */
 function findBestByQuality(
   pool: Restaurant[],
-  usedIds: Set<string>
+  usedIds: Set<string>,
+  mealType: 'breakfast' | 'lunch' | 'dinner' = 'lunch'
 ): Restaurant | null {
   let best: Restaurant | null = null;
   let bestScore = -Infinity;
 
   for (const r of pool) {
     if (usedIds.has(r.id)) continue;
+
+    // Filter by cuisine appropriateness for the meal type
+    if (!isAppropriateForMeal(r, mealType)) continue;
+
     const rating = r.rating || 3;
     const reviews = Math.max(r.reviewCount || 1, 1);
-    const score = rating * Math.log10(reviews);
+    let score = rating * Math.log10(reviews);
+
+    // For breakfast: boost café/bakery types
+    if (mealType === 'breakfast') {
+      const nameAndCuisine = `${(r.name || '').toLowerCase()} ${((r as any).cuisineType || '').toLowerCase()}`;
+      const isBreakfastFriendly = ['café', 'cafe', 'bakery', 'boulangerie', 'pâtisserie', 'patisserie',
+        'brunch', 'breakfast', 'petit-déjeuner', 'coffeeshop', 'coffee', 'tea', 'thé',
+        'croissant', 'pancake', 'deli'].some(k => nameAndCuisine.includes(k));
+      if (isBreakfastFriendly) score += 3;
+    }
+
     if (score > bestScore) {
       bestScore = score;
       best = r;

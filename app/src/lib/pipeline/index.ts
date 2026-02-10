@@ -170,8 +170,20 @@ function rebalanceClustersForFlights(
 
   const hoursPerDay = clusters.map((c, ci) => getAvailableHours(c, ci));
 
-  // Max activities per day (~1.5h per activity)
-  const maxPerDay = hoursPerDay.map(h => Math.max(0, Math.floor(h / 1.5)));
+  // Max activities per day: account for actual activity durations when available
+  // Subtract meal overhead (~3h for 3 meals) from available hours
+  const maxPerDay = hoursPerDay.map((h, ci) => {
+    const mealHours = 3; // breakfast 45min + lunch 60min + dinner 75min
+    const effectiveHours = Math.max(0, h - mealHours);
+    // Use actual durations if cluster is already assigned
+    const cluster = clusters[ci];
+    if (cluster && cluster.activities.length > 0) {
+      const avgDuration = cluster.activities.reduce((s, a) => s + (a.duration || 60), 0) / cluster.activities.length;
+      const avgPerActivity = avgDuration / 60 + 0.33; // activity duration + ~20min travel/buffer
+      return Math.max(0, Math.floor(effectiveHours / avgPerActivity));
+    }
+    return Math.max(0, Math.floor(effectiveHours / 1.5));
+  });
 
   // Phase 1: Empty days — merge activities into nearest non-day-trip day with capacity
   // BUT: ensure the day keeps at least its must-sees if it has ANY usable time
@@ -200,43 +212,70 @@ function rebalanceClustersForFlights(
     }
   }
 
-  // Phase 2: Overfull days — trim to max capacity
-  // IMPORTANT: Never move must-see activities — they must stay in the schedule
+  // Phase 2: Duration-aware rebalancing
+  // Move activities (including must-sees) from overcrowded days to days with capacity.
+  // Uses actual activity durations + meal/travel overhead for realistic capacity estimation.
   for (let ci = 0; ci < clusters.length; ci++) {
     if (isDayTrip[ci]) continue;
-
     const cluster = clusters[ci];
-    const maxCount = maxPerDay[ci];
-    if (maxCount === 0) continue; // Already emptied
+    const availMinutes = hoursPerDay[ci] * 60;
+    const mealOverhead = 180; // ~3h for 3 meals
 
-    while (cluster.activities.length > maxCount) {
-      // Find the last NON-must-see activity to move
+    // Keep moving activities until the day fits
+    let iterations = 0;
+    while (iterations++ < 20) {
+      const totalDuration = cluster.activities.reduce((sum, a) => sum + (a.duration || 60), 0);
+      const travelOverhead = cluster.activities.length * 20;
+      if (totalDuration + travelOverhead + mealOverhead <= availMinutes) break;
+
+      // Try to move a non-must-see first
       let moveIdx = -1;
-      for (let ai = cluster.activities.length - 1; ai >= 0; ai--) {
-        if (!cluster.activities[ai].mustSee) {
+      let worstScore = Infinity;
+      for (let ai = 0; ai < cluster.activities.length; ai++) {
+        if (!cluster.activities[ai].mustSee && cluster.activities[ai].score < worstScore) {
+          worstScore = cluster.activities[ai].score;
           moveIdx = ai;
-          break;
         }
       }
-      // If all remaining are must-sees, stop — keep them all even if over capacity
+
+      // If no non-must-sees left, move the longest must-see to a day with more capacity
+      if (moveIdx === -1) {
+        let longestIdx = -1;
+        let longestDur = 0;
+        for (let ai = 0; ai < cluster.activities.length; ai++) {
+          if ((cluster.activities[ai].duration || 60) > longestDur) {
+            longestDur = cluster.activities[ai].duration || 60;
+            longestIdx = ai;
+          }
+        }
+        moveIdx = longestIdx;
+      }
+
       if (moveIdx === -1) break;
 
-      // Find a receiver with remaining capacity
+      const toMove = cluster.activities[moveIdx];
+
+      // Find the day with the most remaining capacity (in minutes) that can fit this activity
       let bestTarget = -1;
-      let bestCapacity = -Infinity;
+      let bestRemainingMin = -Infinity;
       for (let ti = 0; ti < clusters.length; ti++) {
         if (ti === ci || isDayTrip[ti]) continue;
-        const capacity = maxPerDay[ti] - clusters[ti].activities.length;
-        if (capacity > bestCapacity) {
-          bestCapacity = capacity;
+        const targetAvail = hoursPerDay[ti] * 60;
+        const targetUsed = clusters[ti].activities.reduce((s, a) => s + (a.duration || 60), 0) + clusters[ti].activities.length * 20 + mealOverhead;
+        const remaining = targetAvail - targetUsed;
+        if (remaining > bestRemainingMin && remaining >= (toMove.duration || 60) + 20) {
+          bestRemainingMin = remaining;
           bestTarget = ti;
         }
       }
-      if (bestTarget === -1 || bestCapacity <= 0) break;
 
-      // Move the non-must-see activity
+      if (bestTarget === -1) break; // No day can fit this activity
+
       const [moved] = cluster.activities.splice(moveIdx, 1);
       clusters[bestTarget].activities.push(moved);
+      if (moved.mustSee) {
+        console.log(`[Pipeline V2] Moved must-see "${moved.name}" (${moved.duration}min) from Day ${cluster.dayNumber} → Day ${clusters[bestTarget].dayNumber} (${Math.round(bestRemainingMin)}min remaining)`);
+      }
     }
   }
 
