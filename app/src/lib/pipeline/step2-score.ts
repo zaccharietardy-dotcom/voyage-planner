@@ -145,6 +145,13 @@ export function scoreAndSelectActivities(
   // 6. Sort by score descending
   scored.sort((a, b) => b.score - a.score);
 
+  // Log full ranking for debugging
+  console.log(`[Pipeline V2] Activity ranking (top 20):`);
+  scored.slice(0, 20).forEach((a, i) => {
+    const tags = Array.from(inferActivityTags(a)).join(',');
+    console.log(`[Pipeline V2]   #${i + 1} [${a.score.toFixed(1)}] ${a.mustSee ? '⭐' : '  '} "${a.name}" (src=${a.source}, reviews=${a.reviewCount}, rating=${a.rating || '?'}, tags=${tags || 'none'})`);
+  });
+
   // 7. Separate must-sees from regular activities
   const mustSees = scored.filter(a => a.mustSee);
   const nonMustSees = scored.filter(a => !a.mustSee);

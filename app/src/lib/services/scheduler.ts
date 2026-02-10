@@ -374,9 +374,10 @@ export class DayScheduler {
 
   /**
    * PRIORITÉ des types d'items (plus haut = plus important, ne pas supprimer)
+   * Must-see activities get a higher priority than regular activities and restaurants.
    */
-  private getTypePriority(type: string): number {
-    const priorities: Record<string, number> = {
+  private getItemPriority(item: ScheduleItem): number {
+    const typePriorities: Record<string, number> = {
       flight: 100,      // Ne jamais supprimer un vol
       transport: 90,    // Ne jamais supprimer un transport
       checkin: 80,      // Check-in aéroport important
@@ -386,11 +387,19 @@ export class DayScheduler {
       restaurant: 20,   // Peut être supprimé si conflit
       activity: 10,     // Peut être supprimé si conflit
     };
-    return priorities[type] ?? 0;
+    let priority = typePriorities[item.type] ?? 0;
+
+    // CRITICAL: Must-see activities get elevated priority (above restaurants, below transport)
+    if (item.type === 'activity' && (item.data as any)?.mustSee) {
+      priority = 50; // Higher than restaurant (20) but below hotel/transport
+    }
+
+    return priority;
   }
 
   /**
    * Supprime les items en conflit en gardant les plus prioritaires
+   * IMPORTANT: Must-see activities are protected (priority 50 > restaurant 20)
    * Retourne le nombre d'items supprimés
    */
   removeConflicts(): number {
@@ -408,11 +417,12 @@ export class DayScheduler {
 
         if (this.overlaps(itemA.slot, itemB.slot)) {
           // Déterminer lequel supprimer (celui avec la priorité la plus basse)
-          const priorityA = this.getTypePriority(itemA.type);
-          const priorityB = this.getTypePriority(itemB.type);
+          const priorityA = this.getItemPriority(itemA);
+          const priorityB = this.getItemPriority(itemB);
 
           const toRemove = priorityA <= priorityB ? itemA : itemB;
-          const toKeep = priorityA <= priorityB ? itemB : itemA;
+
+          console.log(`[Scheduler] Conflict: "${itemA.title}" (priority=${priorityA}) vs "${itemB.title}" (priority=${priorityB}) → removing "${toRemove.title}"`);
 
           // Supprimer l'item
           const index = this.items.findIndex(item => item.id === toRemove.id);
@@ -455,20 +465,20 @@ export class DayScheduler {
   }
 
   /**
-   * Remove a specific item by ID and recalculate cursor position.
+   * Remove a specific item by ID.
+   * CRITICAL: Resets cursor to the START of the removed item's slot,
+   * so the freed gap can be used immediately for a replacement item.
    * Returns the removed item or null if not found.
    */
   removeItemById(id: string): ScheduleItem | null {
     const index = this.items.findIndex(item => item.id === id);
     if (index === -1) return null;
     const [removed] = this.items.splice(index, 1);
-    // Recalculate cursor: advance to end of last item (or dayStart if empty)
-    if (this.items.length > 0) {
-      const sorted = [...this.items].sort((a, b) => a.slot.end.getTime() - b.slot.end.getTime());
-      this.currentTime = sorted[sorted.length - 1].slot.end;
-    } else {
-      this.currentTime = new Date(this.dayStart);
-    }
+    // Reset cursor to the START of the removed item — this allows inserting
+    // a replacement in the exact same time slot (the freed gap).
+    // If the removed item was the last one, cursor goes to its start.
+    // If there are items after it, the next addItem call will handle conflicts.
+    this.currentTime = new Date(removed.slot.start);
     return removed;
   }
 

@@ -321,7 +321,10 @@ export async function assembleTripSchedule(
     const nonMustSeeActivities = orderedActivities.filter(a => !a.mustSee);
     orderedActivities = [...mustSeeActivities, ...nonMustSeeActivities];
 
-    console.log(`[Pipeline V2] Day ${balancedDay.dayNumber}: ${orderedActivities.length} activities to schedule (${mustSeeActivities.length} must-sees), dayStart=${dayStartHour}, dayEnd=${dayEndHour}, cursor=${formatTimeHHMM(scheduler.getCurrentTime())}`);
+    console.log(`[Pipeline V2] Day ${balancedDay.dayNumber}: ${orderedActivities.length} activities to schedule (${mustSeeActivities.length} must-sees), dayStart=${dayStartHour}:00, dayEnd=${dayEndHour}:00, window=${dayEndHour - dayStartHour}h, cursor=${formatTimeHHMM(scheduler.getCurrentTime())}`);
+    for (const a of orderedActivities) {
+      console.log(`[Pipeline V2]   → "${a.name}" (${a.duration || 60}min, score=${a.score.toFixed(1)}, mustSee=${!!a.mustSee})`);
+    }
 
     // 5. Insert breakfast for non-last days (last day already handled above)
     if (!isLastDay && breakfast?.restaurant && !skipBreakfast && dayStartHour <= 10) {
@@ -447,7 +450,8 @@ export async function assembleTripSchedule(
       }
 
       // MUST-SEE EVICTION: If must-see still rejected, evict lowest-value non-must-see
-      // activity from this day to make room, then retry with original duration.
+      // activity from this day to make room, then retry.
+      // Strategy: evict the item that frees the most time, starting from lowest-scored.
       if (!actResult && activity.mustSee) {
         const scheduledItems = scheduler.getItems();
         // Find non-must-see activities currently scheduled (not meals, transport, checkin, checkout)
@@ -464,9 +468,9 @@ export async function assembleTripSchedule(
           const removed = scheduler.removeItemById(candidate.id);
           if (!removed) continue;
 
-          console.log(`[Pipeline V2] Day ${balancedDay.dayNumber}: Evicted "${candidate.title}" (score=${(candidate.data as any)?.score || '?'}) to make room for must-see "${activity.name}"`);
+          console.log(`[Pipeline V2] Day ${balancedDay.dayNumber}: Evicted "${candidate.title}" (score=${(candidate.data as any)?.score || '?'}, slot=${formatTimeHHMM(removed.slot.start)}-${formatTimeHHMM(removed.slot.end)}) to make room for must-see "${activity.name}"`);
 
-          // Retry the must-see with original duration
+          // Retry the must-see — cursor is now at the evicted item's start time
           actResult = scheduler.addItem({
             id: activity.id,
             title: activity.name,
@@ -476,6 +480,20 @@ export async function assembleTripSchedule(
             maxEndTime: activityMaxEndTime,
             data: activity,
           });
+
+          // Also try with reduced duration if full doesn't fit
+          if (!actResult) {
+            const shortDuration = Math.max(30, Math.floor(activityDuration * 0.5));
+            actResult = scheduler.addItem({
+              id: activity.id,
+              title: activity.name,
+              type: 'activity',
+              duration: shortDuration,
+              travelTime: Math.min(travelTime, 5),
+              maxEndTime: activityMaxEndTime,
+              data: activity,
+            });
+          }
 
           if (actResult) break; // Success!
           // If still doesn't fit, keep the eviction and try next candidate
