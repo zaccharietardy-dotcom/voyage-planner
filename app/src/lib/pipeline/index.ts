@@ -328,6 +328,76 @@ function rebalanceClustersForFlights(
     }
   }
 
+  // Phase 2c: Outdoor must-see scheduling check
+  // Outdoor activities (parks, gardens) have an implicit closing time (~19:30).
+  // If a must-see outdoor is on a day that starts late (arrival day),
+  // move it to a full day where it can be visited before closing.
+  const OUTDOOR_HINTS = ['park', 'parc', 'garden', 'jardin', 'tuin', 'plage', 'beach',
+    'viewpoint', 'mirador', 'promenade', 'square', 'place', 'piazza'];
+
+  // Estimate the earliest start hour for each day
+  const startHourPerDay = clusters.map((c, ci) => {
+    const isFirst = c.dayNumber === 1;
+    const isLast = c.dayNumber === numDays;
+    if (isFirst && outboundFlight) {
+      const arrHour = outboundFlight.arrivalTimeDisplay
+        ? parseInt(outboundFlight.arrivalTimeDisplay.split(':')[0], 10)
+        : new Date(outboundFlight.arrivalTime).getHours();
+      return arrHour + 1; // +1h transfer
+    }
+    if (isFirst && isGroundTransport) {
+      let arrHour = 8 + Math.ceil((transport!.totalDuration || 120) / 60);
+      if (transport!.transitLegs?.length) {
+        const lastLeg = transport!.transitLegs[transport!.transitLegs.length - 1];
+        arrHour = new Date(lastLeg.arrival).getHours();
+      }
+      return arrHour + 1;
+    }
+    return 9; // Full day starts at 9:00
+  });
+
+  for (let ci = 0; ci < clusters.length; ci++) {
+    if (isDayTrip[ci]) continue;
+    const cluster = clusters[ci];
+    const dayStart = startHourPerDay[ci];
+
+    // Skip days that start early enough (before 14:00) — outdoor activities fit fine
+    if (dayStart <= 14) continue;
+
+    // Check for outdoor must-sees on this late-starting day
+    for (let ai = cluster.activities.length - 1; ai >= 0; ai--) {
+      const a = cluster.activities[ai];
+      if (!a.mustSee) continue;
+
+      const nameLC = (a.name || '').toLowerCase();
+      const typeLC = (a.type || '').toLowerCase();
+      const isOutdoor = OUTDOOR_HINTS.some(k => nameLC.includes(k) || typeLC.includes(k));
+      if (!isOutdoor) continue;
+
+      // This outdoor must-see is on a late day — move to the earliest-starting day with capacity
+      let bestTarget = -1;
+      let bestStartHour = 24;
+      for (let ti = 0; ti < clusters.length; ti++) {
+        if (ti === ci || isDayTrip[ti]) continue;
+        if (startHourPerDay[ti] >= dayStart) continue; // Not better
+        const targetAvail = hoursPerDay[ti] * 60;
+        const targetUsed = clusters[ti].activities.reduce((s, act) => s + (act.duration || 60), 0)
+          + clusters[ti].activities.length * 20 + 180;
+        const remaining = targetAvail - targetUsed;
+        if (remaining >= (a.duration || 60) + 20 && startHourPerDay[ti] < bestStartHour) {
+          bestStartHour = startHourPerDay[ti];
+          bestTarget = ti;
+        }
+      }
+
+      if (bestTarget !== -1) {
+        const [moved] = cluster.activities.splice(ai, 1);
+        clusters[bestTarget].activities.push(moved);
+        console.log(`[Pipeline V2] Phase 2c: moved outdoor must-see "${moved.name}" from Day ${cluster.dayNumber} (starts ${dayStart}h) → Day ${clusters[bestTarget].dayNumber} (starts ${startHourPerDay[bestTarget]}h)`);
+      }
+    }
+  }
+
   // Phase 3: Ensure no cluster has 0 activities unless it's truly impossible
   // Days with available time but 0 activities should steal from overfull neighbours
   // Uses 3 passes with decreasing constraints to maximize success

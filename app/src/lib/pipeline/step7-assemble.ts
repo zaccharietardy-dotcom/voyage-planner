@@ -426,8 +426,9 @@ export async function assembleTripSchedule(
         data: activity,
       });
 
-      // MUST-SEE RETRY: If a must-see was rejected, retry with shorter duration (min 30min)
-      // and relaxed closing time. A short visit is better than missing a must-see entirely.
+      // MUST-SEE RETRY: If a must-see was rejected, retry with shorter duration (min 30min).
+      // Keep the same maxEndTime — we don't relax closing hours (a museum that closes at 17:00
+      // still closes at 17:00). But a 30min visit might fit where a 2h visit didn't.
       if (!actResult && activity.mustSee) {
         const shortDuration = Math.max(30, Math.floor(activityDuration * 0.5));
         console.log(`[Pipeline V2] Day ${balancedDay.dayNumber}: Must-see "${activity.name}" rejected at ${activityDuration}min, retrying with ${shortDuration}min`);
@@ -437,9 +438,7 @@ export async function assembleTripSchedule(
           type: 'activity',
           duration: shortDuration,
           travelTime: Math.min(travelTime, 10), // Reduce travel estimate too
-          maxEndTime: activityMaxEndTime
-            ? new Date(Math.max(activityMaxEndTime.getTime(), parseTime(dayDate, '21:00').getTime()))
-            : undefined,
+          maxEndTime: activityMaxEndTime, // Same closing time — no cheating
           data: activity,
         });
       }
