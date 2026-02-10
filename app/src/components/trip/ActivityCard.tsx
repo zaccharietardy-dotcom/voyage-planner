@@ -184,32 +184,32 @@ export function ActivityCard({
         )}
 
         {/* Content */}
-        <div className="flex-1 p-3.5 min-w-0">
+        <div className={cn("flex-1 min-w-0", showImage ? "p-4" : "p-3.5")}>
           <div className="flex items-start gap-3">
             <div className="flex-1 min-w-0">
               {/* Time row */}
-              <div className="flex items-center gap-2 mb-1">
+              <div className={cn("flex items-center gap-2", showImage ? "mb-2" : "mb-1")}>
                 {/* Order number badge (inline when image) */}
                 {showImage && orderNumber !== undefined && (
                   <span
-                    className="w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold text-white shadow-sm shrink-0"
+                    className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-md shrink-0"
                     style={{ backgroundColor: color }}
                   >
                     {orderNumber}
                   </span>
                 )}
                 <span className={cn(
-                  "inline-flex items-center gap-1 text-xs font-medium",
-                  showImage ? "text-white/80" : "text-muted-foreground"
+                  "inline-flex items-center gap-1 font-medium",
+                  showImage ? "text-sm text-white/90" : "text-xs text-muted-foreground"
                 )}>
-                  <Clock className="h-3 w-3" />
+                  <Clock className={cn(showImage ? "h-3.5 w-3.5" : "h-3 w-3")} />
                   {item.startTime} – {item.endTime}
                 </span>
                 {/* Type badge */}
                 <span
                   className={cn(
-                    "px-1.5 py-0.5 rounded text-[10px] font-semibold leading-none",
-                    showImage ? "bg-white/20 text-white/90" : ""
+                    "font-semibold leading-none rounded",
+                    showImage ? "px-2 py-1 text-xs bg-white/20 text-white/90" : "px-1.5 py-0.5 text-[10px]"
                   )}
                   style={!showImage ? { backgroundColor: `${color}12`, color } : undefined}
                 >
@@ -219,8 +219,8 @@ export function ActivityCard({
 
               {/* Title */}
               <h4 className={cn(
-                "font-semibold text-[13px] leading-snug mb-0 line-clamp-2",
-                showImage && "text-white drop-shadow-sm"
+                "font-semibold leading-snug mb-0 line-clamp-2",
+                showImage ? "text-base text-white drop-shadow-md" : "text-[13px]"
               )}>
                 {item.title}
               </h4>
@@ -228,26 +228,26 @@ export function ActivityCard({
               {/* Description */}
               {item.description && (
                 <p className={cn(
-                  "text-xs leading-relaxed line-clamp-2 mb-1.5",
-                  showImage ? "text-white/70" : "text-muted-foreground"
+                  "leading-relaxed line-clamp-2 mb-1.5",
+                  showImage ? "text-sm text-white/70" : "text-xs text-muted-foreground"
                 )}>
                   {item.description}
                 </p>
               )}
               {/* Meta row: rating, cost */}
               <div className={cn(
-                "flex items-center gap-2.5 flex-wrap text-xs",
-                showImage ? "text-white/70" : "text-muted-foreground"
+                "flex items-center gap-2.5 flex-wrap",
+                showImage ? "text-sm text-white/80 mt-1" : "text-xs text-muted-foreground"
               )}>
                 {item.rating && item.rating > 0 && (
                   <span className="inline-flex items-center gap-0.5 font-medium">
-                    <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                    <Star className={cn(showImage ? "h-3.5 w-3.5" : "h-3 w-3", "fill-amber-400 text-amber-400")} />
                     {item.rating.toFixed(1)}
                   </span>
                 )}
                 {item.timeFromPrevious && item.timeFromPrevious > 0 && (
                   <span className="inline-flex items-center gap-1">
-                    <Navigation className="h-3 w-3" />
+                    <Navigation className={cn(showImage ? "h-3.5 w-3.5" : "h-3 w-3")} />
                     {item.timeFromPrevious} min
                     {item.distanceFromPrevious && item.distanceFromPrevious > 0.1 && (
                       <span className={showImage ? "text-white/50" : "text-muted-foreground/60"}>({item.distanceFromPrevious.toFixed(1)} km)</span>
