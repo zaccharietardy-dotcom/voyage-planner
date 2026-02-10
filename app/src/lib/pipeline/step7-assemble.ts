@@ -1015,7 +1015,7 @@ function getActivityMinStartTime(activity: ScoredActivity, dayDate: Date): Date 
 /**
  * Enrich trip items that have no image using Google Places + Wikipedia fallback.
  * Uses GPS coordinates for location-biased search (more accurate results).
- * Processes in parallel batches of 5.
+ * Has a hard 15s timeout — images are non-critical enrichment.
  */
 async function enrichWithPlaceImages(days: TripDay[]): Promise<void> {
   const itemsNeedingImages: TripItem[] = [];
@@ -1031,24 +1031,33 @@ async function enrichWithPlaceImages(days: TripDay[]): Promise<void> {
 
   if (itemsNeedingImages.length === 0) return;
 
-  console.log(`[Pipeline V2] Fetching images for ${itemsNeedingImages.length} items without photos (Google Places + Wikipedia)...`);
+  console.log(`[Pipeline V2] Fetching images for ${itemsNeedingImages.length} items without photos...`);
 
-  // Process in parallel batches of 5
-  for (let i = 0; i < itemsNeedingImages.length; i += 5) {
-    const batch = itemsNeedingImages.slice(i, i + 5);
+  // Hard timeout: 15s max for the entire image enrichment phase
+  const enrichmentWork = async () => {
+    // All items in one parallel burst (each has its own 3s timeout internally)
     await Promise.allSettled(
-      batch.map(async (item) => {
+      itemsNeedingImages.map(async (item) => {
         const imageUrl = await fetchPlaceImage(
           item.title,
-          item.latitude || undefined,
-          item.longitude || undefined
+          item.latitude !== 0 ? item.latitude : undefined,
+          item.longitude !== 0 ? item.longitude : undefined
         );
         if (imageUrl) {
           item.imageUrl = imageUrl;
         }
       })
     );
-  }
+  };
+
+  const timeout = new Promise<void>((resolve) => {
+    setTimeout(() => {
+      console.warn('[Pipeline V2] ⚠️ Image enrichment timeout (15s) — continuing with partial results');
+      resolve();
+    }, 15_000);
+  });
+
+  await Promise.race([enrichmentWork(), timeout]);
 
   const enriched = itemsNeedingImages.filter(i => i.imageUrl).length;
   console.log(`[Pipeline V2] ✅ Place images: ${enriched}/${itemsNeedingImages.length} enriched`);

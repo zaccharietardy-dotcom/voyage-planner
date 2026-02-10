@@ -74,7 +74,7 @@ async function fetchGooglePlacesImage(
       url.searchParams.set('locationbias', `circle:5000@${latitude},${longitude}`);
     }
 
-    const res = await fetch(url.toString(), { signal: AbortSignal.timeout(5000) });
+    const res = await fetch(url.toString(), { signal: AbortSignal.timeout(3000) });
     if (!res.ok) return null;
 
     const data = await res.json();
@@ -111,7 +111,7 @@ async function tryWikipediaImage(name: string, apiBase: string): Promise<string 
     searchUrl.searchParams.set('format', 'json');
     searchUrl.searchParams.set('origin', '*');
 
-    const searchRes = await fetch(searchUrl.toString(), { signal: AbortSignal.timeout(5000) });
+    const searchRes = await fetch(searchUrl.toString(), { signal: AbortSignal.timeout(3000) });
     if (!searchRes.ok) return null;
 
     const searchData = await searchRes.json();
@@ -124,11 +124,11 @@ async function tryWikipediaImage(name: string, apiBase: string): Promise<string 
     imageUrl.searchParams.set('titles', pageTitle);
     imageUrl.searchParams.set('prop', 'pageimages');
     imageUrl.searchParams.set('piprop', 'thumbnail');
-    imageUrl.searchParams.set('pithumbsize', '600');
+    imageUrl.searchParams.set('pithumbsize', '400');
     imageUrl.searchParams.set('format', 'json');
     imageUrl.searchParams.set('origin', '*');
 
-    const imageRes = await fetch(imageUrl.toString(), { signal: AbortSignal.timeout(5000) });
+    const imageRes = await fetch(imageUrl.toString(), { signal: AbortSignal.timeout(3000) });
     if (!imageRes.ok) return null;
 
     const imageData = await imageRes.json();
