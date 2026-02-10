@@ -1268,6 +1268,7 @@ function convertToAttraction(
     tips: place.description,
     dataReliability: 'verified' as const,
     googleMapsUrl: place.website || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.title + ', ' + destination)}`,
+    imageUrl: place.thumbnail,
   };
 }
 

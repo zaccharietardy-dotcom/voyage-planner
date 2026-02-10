@@ -71,6 +71,11 @@ export async function searchGooglePlacesAttractions(
 
     const attractions: Attraction[] = allResults.map((r, idx) => {
       const loc = r.geometry?.location || {};
+      // Extract photo URL from Google Places photo_reference
+      const photoRef = r.photos?.[0]?.photo_reference;
+      const imageUrl = photoRef && apiKey
+        ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=600&photoreference=${photoRef}&key=${apiKey}`
+        : undefined;
       return {
         id: `gp-${r.place_id || idx}`,
         name: r.name || 'Unknown',
@@ -86,6 +91,7 @@ export async function searchGooglePlacesAttractions(
         mustSee: false,
         bookingRequired: false,
         dataReliability: 'verified' as const,
+        imageUrl,
       };
     });
 
