@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { Trip, TripItem, TripDay, Accommodation } from '@/lib/types';
+import { Trip, TripItem, TripDay, Accommodation, GROUP_TYPE_LABELS, ACTIVITY_LABELS } from '@/lib/types';
 import { DayTimeline, CarbonFootprint, TransportOptions, BookingChecklist } from '@/components/trip';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -817,6 +817,18 @@ export default function TripPage() {
                 <p className="text-xs text-muted-foreground">
                   {format(new Date(trip.preferences.startDate), 'd MMM yyyy', { locale: fr })} · {trip.days.length} jour{trip.days.length > 1 ? 's' : ''} · {getAllItems().length} activités · {useCollaborativeMode ? members.length : (trip.preferences.groupSize || 1)} {useCollaborativeMode ? 'collaborateurs' : 'voyageurs'}
                 </p>
+                <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                  {trip.preferences.groupType && (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+                      {GROUP_TYPE_LABELS[trip.preferences.groupType]}
+                    </span>
+                  )}
+                  {trip.preferences.activities?.map((act) => (
+                    <span key={act} className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300">
+                      {ACTIVITY_LABELS[act]}
+                    </span>
+                  ))}
+                </div>
               </div>
             </div>
             <div className="flex items-center gap-1.5">
@@ -951,7 +963,7 @@ export default function TripPage() {
               <TabsTrigger value="carte" className="text-xs flex-1">Carte</TabsTrigger>
               {user && <TabsTrigger value="photos" className="text-xs flex-1">Photos</TabsTrigger>}
               {user && <TabsTrigger value="depenses" className="text-xs flex-1">Dépenses</TabsTrigger>}
-              {canEdit && <TabsTrigger value="infos" className="text-xs flex-1">Infos</TabsTrigger>}
+              <TabsTrigger value="infos" className="text-xs flex-1">Infos</TabsTrigger>
             </TabsList>
 
             <TabsContent value="planning">
@@ -1058,8 +1070,8 @@ export default function TripPage() {
                 <TabsTrigger value="planning" className="text-sm">Planning</TabsTrigger>
                 <TabsTrigger value="reserver" className="text-sm">Reserver</TabsTrigger>
                 {user && <TabsTrigger value="photos" className="text-sm">Photos</TabsTrigger>}
-                {user && <TabsTrigger value="depenses" className="text-sm">Dépenses</TabsTrigger>}
-                {canEdit && <TabsTrigger value="infos" className="text-sm">Infos</TabsTrigger>}
+                {user && <TabsTrigger value="depenses" className="text-sm">Dépenses partagées</TabsTrigger>}
+                <TabsTrigger value="infos" className="text-sm">Infos</TabsTrigger>
               </TabsList>
 
               <TabsContent value="planning">
