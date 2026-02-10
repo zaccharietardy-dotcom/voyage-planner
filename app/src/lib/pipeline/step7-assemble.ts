@@ -296,7 +296,7 @@ export async function assembleTripSchedule(
         duration: 30,
         minStartTime: parseTime(dayDate, `${String(Math.max(7, dayStartHour)).padStart(2, '0')}:00`),
         maxEndTime: parseTime(dayDate, '10:00'),
-        data: { name: 'Petit-déjeuner libre', description: 'Café, boulangerie, ou supermarché', estimatedCost: 0 },
+        data: { name: '', description: '', estimatedCost: 0 },
       });
     }
 
@@ -393,7 +393,7 @@ export async function assembleTripSchedule(
         duration: 30,
         minStartTime: parseTime(dayDate, `${String(Math.max(7, dayStartHour)).padStart(2, '0')}:00`),
         maxEndTime: parseTime(dayDate, '10:00'),
-        data: { name: 'Petit-déjeuner libre', description: 'Café, boulangerie, ou supermarché', estimatedCost: 0 },
+        data: { name: '', description: '', estimatedCost: 0 },
       });
     }
 
@@ -626,8 +626,8 @@ export async function assembleTripSchedule(
     if (!lunchInserted && !skipLunch) {
       const lunchDuration = lunch?.restaurant ? 60 : 45;
       const lunchData = lunch?.restaurant || {
-        name: 'Déjeuner libre',
-        description: 'Explorez les restaurants du quartier',
+        name: '',
+        description: '',
         estimatedCost: 0,
       };
       const lunchTitle = lunch?.restaurant
@@ -657,8 +657,8 @@ export async function assembleTripSchedule(
     if (!dinnerInserted && !skipDinner) {
       const dinnerDuration = dinner?.restaurant ? 75 : 60;
       const dinnerData = dinner?.restaurant || {
-        name: 'Dîner libre',
-        description: 'Explorez les restaurants du quartier',
+        name: '',
+        description: '',
         estimatedCost: 0,
       };
       const dinnerTitle = dinner?.restaurant
@@ -727,7 +727,7 @@ export async function assembleTripSchedule(
         type: item.type as TripItem['type'],
         title: item.title,
         description: itemData.description || '',
-        locationName: itemData.locationName || itemData.address || itemData.name || item.title,
+        locationName: itemData.locationName || itemData.address || itemData.name || '',
         latitude: itemData.latitude
           || (item.type === 'transport' && itemData.segments?.[0]?.toCoords?.lat)
           || 0,

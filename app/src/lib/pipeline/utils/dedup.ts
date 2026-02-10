@@ -91,14 +91,11 @@ export function deduplicateByProximity(
 
     if (isDuplicate && duplicateIdx >= 0) {
       const existing = result[duplicateIdx];
-      // Keep the one with more reviews (better data)
+      // Keep the one with more reviews, but preserve best image + mustSee
       if ((activity.reviewCount || 0) > (existing.reviewCount || 0)) {
-        // Preserve mustSee flag from either version
-        if (existing.mustSee) activity.mustSee = true;
-        result[duplicateIdx] = activity;
+        mergeActivities(result, duplicateIdx, activity, existing);
       } else {
-        // Preserve mustSee flag on the kept item
-        if (activity.mustSee) existing.mustSee = true;
+        mergeActivities(result, duplicateIdx, existing, activity);
       }
     } else {
       result.push(activity);
@@ -141,10 +138,9 @@ export function deduplicateByBookingUrl(
       const idx = seenUrls.get(key)!;
       const existing = result[idx];
       if ((a.reviewCount || 0) > (existing.reviewCount || 0)) {
-        if (existing.mustSee) a.mustSee = true;
-        result[idx] = a;
+        mergeActivities(result, idx, a, existing);
       } else {
-        if (a.mustSee) existing.mustSee = true;
+        mergeActivities(result, idx, existing, a);
       }
       console.log(`[Pipeline V2] Booking URL dedup: "${a.name}" merged with "${existing.name}"`);
     } else if (key) {
@@ -200,13 +196,11 @@ function deduplicateViatorSameLocation(activities: ScoredActivity[]): ScoredActi
 
     if (isDuplicate && dupIdx >= 0) {
       const existing = result[dupIdx];
-      // Keep the one with more reviews
+      // Keep the one with more reviews, but preserve best image + mustSee
       if ((a.reviewCount || 0) > (existing.reviewCount || 0)) {
-        if (existing.mustSee) a.mustSee = true;
-        // Preserve the bookingUrl and imageUrl from the better entry
-        result[dupIdx] = a;
+        mergeActivities(result, dupIdx, a, existing);
       } else {
-        if (a.mustSee) existing.mustSee = true;
+        mergeActivities(result, dupIdx, existing, a);
       }
       console.log(`[Pipeline V2] Viator location dedup: "${a.name}" merged with "${existing.name}"`);
     } else {
@@ -330,4 +324,36 @@ function normalizeName(name: string): string {
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-z0-9]/g, '')
     .trim();
+}
+
+/**
+ * Score an image URL by source reliability.
+ * Higher = more likely to be an accurate photo of the attraction.
+ * Google Places photos are tied to a place_id → highest reliability.
+ * SerpAPI thumbnails are scraped from web search → lowest reliability.
+ */
+function getImageReliabilityScore(url: string | undefined): number {
+  if (!url) return 0;
+  if (url.includes('maps.googleapis.com/maps/api/place/photo')) return 4;
+  if (url.includes('viator.com') || url.includes('staticcdn.viator.com')) return 3;
+  if (url.includes('upload.wikimedia.org')) return 2;
+  return 1; // SerpAPI thumbnails, other sources
+}
+
+/**
+ * Merge two duplicate activities: keep the winner (higher reviewCount),
+ * but preserve mustSee flag and the more reliable image from the loser.
+ */
+function mergeActivities(
+  result: ScoredActivity[],
+  idx: number,
+  winner: ScoredActivity,
+  loser: ScoredActivity
+): void {
+  if (loser.mustSee) winner.mustSee = true;
+  // Preserve the more reliable image from either entry
+  if (getImageReliabilityScore(loser.imageUrl) > getImageReliabilityScore(winner.imageUrl) && loser.imageUrl) {
+    winner.imageUrl = loser.imageUrl;
+  }
+  result[idx] = winner;
 }

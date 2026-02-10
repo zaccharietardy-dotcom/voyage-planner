@@ -244,14 +244,8 @@ export function ActivityCard({
                 </p>
               )}
 
-              {/* Meta row: location, rating, cost */}
+              {/* Meta row: rating, cost */}
               <div className="flex items-center gap-2.5 flex-wrap text-xs text-muted-foreground">
-                {item.locationName && (
-                  <span className="inline-flex items-center gap-1 truncate max-w-[180px]">
-                    <MapPin className="h-3 w-3 shrink-0" />
-                    <span className="truncate">{item.locationName}</span>
-                  </span>
-                )}
                 {item.rating && item.rating > 0 && (
                   <span className="inline-flex items-center gap-0.5 font-medium">
                     <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
