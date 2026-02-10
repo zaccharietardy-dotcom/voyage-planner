@@ -307,7 +307,7 @@ export interface TripSegment {
 
 // Types pour l'itinéraire généré
 
-export type TripItemType = 'activity' | 'restaurant' | 'hotel' | 'transport' | 'flight' | 'parking' | 'checkin' | 'checkout' | 'luggage';
+export type TripItemType = 'activity' | 'restaurant' | 'hotel' | 'transport' | 'flight' | 'parking' | 'checkin' | 'checkout' | 'luggage' | 'free_time';
 
 export interface TripItem {
   id: string;
@@ -455,6 +455,8 @@ export interface Trip {
   parking?: ParkingOption;
   // Pool d'activités rankées (pour swap et insert day intelligent)
   attractionPool?: Attraction[];
+  // Activités alternatives (scorées mais non programmées, top 20 par score)
+  alternativeActivities?: Attraction[];
   // Coûts
   totalEstimatedCost?: number;
   costBreakdown?: {
@@ -598,6 +600,7 @@ export const TRIP_ITEM_COLORS: Record<TripItemType, string> = {
   checkin: '#8B5CF6', // purple (same as hotel)
   checkout: '#8B5CF6', // purple (same as hotel)
   luggage: '#F59E0B', // amber - consigne bagages
+  free_time: '#22C55E', // green - temps libre
 };
 
 // ============================================

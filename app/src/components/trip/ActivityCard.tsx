@@ -30,6 +30,7 @@ import {
   ChevronRight,
   Search,
   ArrowRight,
+  Coffee,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TripItemType } from '@/lib/types';
@@ -62,6 +63,7 @@ const TYPE_ICONS: Record<TripItemType, React.ComponentType<{ className?: string;
   checkin: LogIn,
   checkout: LogOut,
   luggage: Briefcase,
+  free_time: Coffee,
 };
 
 const TYPE_LABELS: Record<TripItemType, string> = {
@@ -74,6 +76,7 @@ const TYPE_LABELS: Record<TripItemType, string> = {
   checkin: 'Check-in',
   checkout: 'Check-out',
   luggage: 'Consigne bagages',
+  free_time: 'Temps libre',
 };
 
 // Icônes pour les modes de transport
@@ -120,7 +123,8 @@ export function ActivityCard({
         'relative group transition-all cursor-pointer',
         'hover:shadow-md hover:border-primary/50',
         isSelected && 'ring-2 ring-primary border-primary',
-        isDragging && 'shadow-lg rotate-1 scale-105'
+        isDragging && 'shadow-lg rotate-1 scale-105',
+        item.type === 'free_time' && 'bg-green-50/50 border-green-200/60 dark:bg-green-950/20 dark:border-green-800/40'
       )}
       onClick={onSelect}
       onMouseEnter={onMouseEnter}
@@ -370,7 +374,7 @@ export function ActivityCard({
 
           {/* Action buttons (swap/edit/delete) */}
           <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-            {swapButton && item.type === 'activity' && swapButton}
+            {swapButton && (item.type === 'activity' || item.type === 'free_time') && swapButton}
             {onEdit && (
               <Button
                 size="icon"

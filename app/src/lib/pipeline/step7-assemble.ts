@@ -579,6 +579,34 @@ export async function assembleTripSchedule(
       }
     }
 
+    // 7b. Insert free time slot if the day is busy (restBreak=true or 4+ activities scheduled)
+    const scheduledActivityCount = scheduler.getItems().filter(i => i.type === 'activity').length;
+    if ((balancedDay.restBreak || scheduledActivityCount >= 4) && !isLastDay) {
+      const currentHour = scheduler.getCurrentTime().getHours();
+      // Only insert if cursor is in the 13h-17h window (afternoon)
+      if (currentHour >= 13 && currentHour < 17) {
+        const freeTimeResult = scheduler.addItem({
+          id: `free-time-${balancedDay.dayNumber}`,
+          title: 'Temps libre',
+          type: 'free_time',
+          duration: 60,
+          minStartTime: parseTime(dayDate, '13:00'),
+          maxEndTime: parseTime(dayDate, '17:00'),
+          data: {
+            name: 'Temps libre',
+            description: 'Pause détente — explorez à votre rythme',
+            isFreeTime: true,
+            estimatedCost: 0,
+            latitude: hotel?.latitude || data.destCoords.lat,
+            longitude: hotel?.longitude || data.destCoords.lng,
+          },
+        });
+        if (freeTimeResult) {
+          console.log(`[Pipeline V2] Day ${balancedDay.dayNumber}: Inserted free time slot (${scheduledActivityCount} activities, restBreak=${balancedDay.restBreak})`);
+        }
+      }
+    }
+
     // 8. Insert any remaining meals after all activities
     // Use wider time windows for fallback (the scheduler handles conflicts)
     if (!lunchInserted && !skipLunch && lunch?.restaurant) {
@@ -704,6 +732,18 @@ export async function assembleTripSchedule(
     budgetStrategy: data.budgetStrategy,
     attractionPool: clusters.flatMap(c => c.activities),
   };
+
+  // 15. Compute alternative activities (scored but not scheduled, top 20 by score)
+  const scheduledIds = new Set(
+    days.flatMap(d => d.items.filter(i => i.type === 'activity').map(i => i.id))
+  );
+  const allPoolActivities = clusters.flatMap(c => c.activities);
+  trip.alternativeActivities = allPoolActivities
+    .filter(a => !scheduledIds.has(a.id))
+    .sort((a, b) => (b.score || 0) - (a.score || 0))
+    .slice(0, 20);
+
+  console.log(`[Pipeline V2] Step 7: ${trip.alternativeActivities.length} alternative activities available for swap`);
 
   return trip;
 }
