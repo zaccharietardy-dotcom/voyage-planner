@@ -19,6 +19,11 @@ function uuidv4(): string {
   });
 }
 
+const MODE_LABELS: Record<string, string> = {
+  train: '🚄 Train', bus: '🚌 Bus', car: '🚗 Voiture',
+  combined: '🔄 Transport', ferry: '⛴️ Ferry',
+};
+
 /**
  * Assemble the final Trip object from all pipeline outputs.
  */
@@ -124,10 +129,9 @@ export async function assembleTripSchedule(
     } else if (hasOutboundTransport && transport) {
       // Ground transport outbound (train, bus, car)
       const { start: tStart, end: tEnd } = getGroundTransportTimes(transport, dayDate, 'outbound');
-      const modeLabels: Record<string, string> = { train: '🚄 Train', bus: '🚌 Bus', car: '🚗 Voiture', combined: '🔄 Transport', ferry: '⛴️ Ferry' };
       scheduler.insertFixedItem({
         id: `transport-out-${balancedDay.dayNumber}`,
-        title: `${modeLabels[transport.mode] || '🚊 Transport'} → ${preferences.destination}`,
+        title: `${MODE_LABELS[transport.mode] || '🚊 Transport'} → ${preferences.destination}`,
         type: 'transport',
         startTime: tStart,
         endTime: tEnd,
@@ -163,7 +167,6 @@ export async function assembleTripSchedule(
       };
     } else if (hasReturnTransport && transport) {
       const { start: tStart, end: tEnd } = getGroundTransportTimes(transport, dayDate, 'return');
-      const modeLabels: Record<string, string> = { train: '🚄 Train', bus: '🚌 Bus', car: '🚗 Voiture', combined: '🔄 Transport', ferry: '⛴️ Ferry' };
 
       // Build return transit legs with CORRECT dates (not outbound dates)
       let returnTransitLegs: typeof transport.transitLegs = undefined;
@@ -188,7 +191,7 @@ export async function assembleTripSchedule(
 
       returnTransportData = {
         id: `transport-ret-${balancedDay.dayNumber}`,
-        title: `${modeLabels[transport.mode] || '🚊 Transport'} → ${preferences.origin}`,
+        title: `${MODE_LABELS[transport.mode] || '🚊 Transport'} → ${preferences.origin}`,
         type: 'transport',
         startTime: tStart,
         endTime: tEnd,
@@ -259,7 +262,7 @@ export async function assembleTripSchedule(
       if (!checkinResult) {
         console.warn(`[Pipeline V2] Check-in insertFixedItem failed at ${formatTime(checkinTime)}, using addItem fallback`);
         scheduler.addItem({
-          id: `checkin-${balancedDay.dayNumber}`,
+          id: `checkin-fallback-${balancedDay.dayNumber}`,
           title: `Check-in ${hotel.name}`,
           type: 'checkin',
           duration: 30,
@@ -512,7 +515,7 @@ export async function assembleTripSchedule(
     // 10. Remove scheduling conflicts (keep higher-priority items)
     scheduler.removeConflicts();
 
-    // 10. Convert to TripItems
+    // 11. Convert to TripItems
     const scheduleItems = scheduler.getItems();
     const tripItems: TripItem[] = scheduleItems.map((item, idx) => {
       const itemData = item.data || {};
@@ -571,15 +574,15 @@ export async function assembleTripSchedule(
     });
   }
 
-  // 11. Batch fetch directions (non-blocking enrichment)
+  // 12. Batch fetch directions (non-blocking enrichment)
   await enrichWithDirections(days).catch(e =>
     console.warn('[Pipeline V2] Directions enrichment failed:', e)
   );
 
-  // 12. Build cost breakdown
+  // 13. Build cost breakdown
   const costBreakdown = computeCostBreakdown(days, flights, hotel, preferences, transport);
 
-  // 13. Assemble final Trip
+  // 14. Assemble final Trip
   const trip: Trip = {
     id: uuidv4(),
     createdAt: new Date(),
@@ -702,35 +705,8 @@ function estimateTravel(from: any, to: any): number {
 /**
  * Check if an activity is a day-trip (far from city center).
  */
-function isDayTripActivity(activity: any, cityCenter: { lat: number; lng: number }): boolean {
-  if (!activity?.latitude || !activity?.longitude) return false;
-  return calculateDistance(activity.latitude, activity.longitude, cityCenter.lat, cityCenter.lng) > 25;
-}
-
-/**
- * Keywords identifying outdoor activities that close at sunset/evening.
- */
-const OUTDOOR_ACTIVITY_KEYWORDS = [
-  'park', 'parc', 'garden', 'jardin', 'botanical', 'botanique',
-  'viewpoint', 'belvedere', 'belvédère', 'mirador',
-  'cemetery', 'cimetière', 'zoo', 'beach', 'plage',
-  'trail', 'randonnée', 'sentier', 'promenade',
-  'square', 'place', 'plaza',
-];
-
-/**
- * Keywords identifying indoor activities that stay open late.
- */
-const INDOOR_ACTIVITY_KEYWORDS = [
-  'museum', 'musée', 'gallery', 'galerie', 'theatre', 'théâtre',
-  'cinema', 'cinéma', 'restaurant', 'bar', 'club', 'pub',
-  'show', 'spectacle', 'concert', 'opera', 'opéra',
-  'mall', 'centre commercial', 'shopping',
-  'spa', 'hammam', 'wellness',
-  'casino', 'bowling',
-  'church', 'église', 'cathedral', 'cathédrale', 'basilica', 'basilique',
-  'mosque', 'mosquée', 'synagogue', 'temple',
-];
+// Import shared keyword lists (single source of truth)
+import { OUTDOOR_ACTIVITY_KEYWORDS, INDOOR_ACTIVITY_KEYWORDS } from './utils/constants';
 
 /**
  * Get maximum end time for an activity based on its type.
@@ -858,7 +834,9 @@ function computeCostBreakdown(
     transportCost = (groundTransport.totalPrice || 0) * 2;
   }
 
-  const accommodationCost = (hotel?.pricePerNight || 0) * preferences.durationDays;
+  // Use totalPrice from API if available (exact for the stay), otherwise compute nights = days - 1
+  const nights = Math.max(1, preferences.durationDays - 1);
+  const accommodationCost = hotel?.totalPrice || (hotel?.pricePerNight || 0) * nights;
 
   let foodCost = 0;
   let activitiesCost = 0;

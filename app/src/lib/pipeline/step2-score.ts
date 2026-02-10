@@ -69,8 +69,9 @@ export function scoreAndSelectActivities(
   const selected: ScoredActivity[] = [...mustSees, ...nonMustSees.slice(0, remainingSlots)];
 
   // 8b. Guarantee at least 1 Viator experiential activity (cruise, food tour, bike tour…)
-  const EXPERIENTIAL_KW = ['cruise', 'croisière', 'tour guidé', 'visite guidée',
-    'food tour', 'dégustation', 'cooking', 'bike', 'vélo', 'boat', 'bateau',
+  // Aligned with scoring keywords in computeScore() — same breadth
+  const EXPERIENTIAL_KW = ['cruise', 'croisière', 'tour', 'visite guidée',
+    'food', 'dégustation', 'tasting', 'cooking', 'bike', 'vélo', 'boat', 'bateau',
     'canal', 'workshop', 'atelier'];
   const isExperientialActivity = (a: ScoredActivity): boolean =>
     a.source === 'viator' && EXPERIENTIAL_KW.some(k => (a.name || '').toLowerCase().includes(k));

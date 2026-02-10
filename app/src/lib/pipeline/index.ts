@@ -16,6 +16,8 @@ import { assignRestaurants } from './step4-restaurants';
 import { selectHotelByBarycenter } from './step5-hotel';
 import { balanceDaysWithClaude } from './step6-balance';
 import { assembleTripSchedule } from './step7-assemble';
+import { calculateDistance } from '../services/geocoding';
+import { OUTDOOR_ACTIVITY_KEYWORDS } from './utils/constants';
 
 /**
  * Generate a trip using Pipeline V2.
@@ -126,8 +128,21 @@ function rebalanceClustersForFlights(
 
   const isGroundTransport = transport && transport.mode !== 'plane';
 
-  // Detect day-trip clusters (single-activity clusters with far-off locations)
-  const isDayTrip = clusters.map(c => c.activities.length === 1);
+  // Detect day-trip clusters: single-activity cluster whose activity is far (>20km)
+  // from the average centroid of all other clusters. A single-activity cluster near
+  // the city center is NOT a day trip — it's just an underpopulated day.
+  const avgCentroid = clusters.length > 1
+    ? {
+        lat: clusters.reduce((s, c) => s + c.centroid.lat, 0) / clusters.length,
+        lng: clusters.reduce((s, c) => s + c.centroid.lng, 0) / clusters.length,
+      }
+    : clusters[0].centroid;
+  const isDayTrip = clusters.map(c => {
+    if (c.activities.length !== 1) return false;
+    const a = c.activities[0];
+    const dist = calculateDistance(a.latitude, a.longitude, avgCentroid.lat, avgCentroid.lng);
+    return dist > 20; // >20km from city = genuine day trip
+  });
 
   // Estimate available hours per day
   const getAvailableHours = (c: ActivityCluster, ci: number): number => {
@@ -141,7 +156,7 @@ function rebalanceClustersForFlights(
       const arrHour = outboundFlight.arrivalTimeDisplay
         ? parseInt(outboundFlight.arrivalTimeDisplay.split(':')[0], 10)
         : new Date(outboundFlight.arrivalTime).getHours();
-      available = Math.max(0, 22 - (arrHour + 1.5));
+      available = Math.max(0, 22 - (arrHour + 1)); // 1h transfer (consistent with step7-assemble)
     } else if (isFirst && isGroundTransport) {
       // Ground transport: estimate arrival hour
       let arrHour = 8 + Math.ceil((transport!.totalDuration || 120) / 60);
@@ -332,8 +347,7 @@ function rebalanceClustersForFlights(
   // Outdoor activities (parks, gardens) have an implicit closing time (~19:30).
   // If a must-see outdoor is on a day that starts late (arrival day),
   // move it to a full day where it can be visited before closing.
-  const OUTDOOR_HINTS = ['park', 'parc', 'garden', 'jardin', 'tuin', 'plage', 'beach',
-    'viewpoint', 'mirador', 'promenade', 'square', 'place', 'piazza'];
+  // Use the shared outdoor keyword list (single source of truth)
 
   // Estimate the earliest start hour for each day
   const startHourPerDay = clusters.map((c, ci) => {
@@ -371,7 +385,7 @@ function rebalanceClustersForFlights(
 
       const nameLC = (a.name || '').toLowerCase();
       const typeLC = (a.type || '').toLowerCase();
-      const isOutdoor = OUTDOOR_HINTS.some(k => nameLC.includes(k) || typeLC.includes(k));
+      const isOutdoor = OUTDOOR_ACTIVITY_KEYWORDS.some(k => nameLC.includes(k) || typeLC.includes(k));
       if (!isOutdoor) continue;
 
       // This outdoor must-see is on a late day — move to the earliest-starting day with capacity
