@@ -5,13 +5,103 @@
  * Merges multi-source activities, deduplicates, scores by popularity, selects the right count.
  */
 
-import type { TripPreferences } from '../types';
+import type { TripPreferences, GroupType, ActivityType } from '../types';
 import type { Attraction } from '../services/attractions';
 import type { FetchedData, ScoredActivity } from './types';
 import { deduplicateByProximity, isIrrelevantAttraction } from './utils/dedup';
 import { fixAttractionDuration, fixAttractionCost } from '../tripAttractions';
 import { findKnownViatorProduct } from '../services/viatorKnownProducts';
 import { calculateDistance } from '../services/geocoding';
+
+// ─── Contextual scoring dictionaries ────────────────────────────────────────
+
+/** Tags inferred from activity name + description to characterize the experience */
+type ProfileTag = 'kid_friendly' | 'romantic' | 'party' | 'adult_only' | 'instagram'
+  | 'deep_culture' | 'active' | 'relaxing' | 'foodie';
+
+/** Keywords that indicate each profile tag */
+const PROFILE_KEYWORDS: Record<ProfileTag, string[]> = {
+  kid_friendly: [
+    'kids', 'children', 'family', 'playground', 'interactive', 'fun',
+    'aquarium', 'zoo', 'theme park', 'amusement', 'legoland', 'trampoline',
+    'nemo', 'science center', 'artis',
+  ],
+  romantic: [
+    'cruise', 'croisière', 'sunset', 'candlelight', 'wine', 'rooftop',
+    'spa', 'hammam', 'gondola', 'romantic',
+  ],
+  party: [
+    'pub crawl', 'bar crawl', 'nightlife', 'club', 'party', 'karaoke',
+    'cocktail', 'beer', 'brewery', 'bar hop',
+  ],
+  adult_only: [
+    'red light', 'coffee shop', 'coffeeshop', 'cannabis', 'sex museum',
+    'erotic', 'strip',
+  ],
+  instagram: [
+    'selfie', 'instagram', 'instagrammable', 'immersive', 'experience museum',
+    'upside down', 'illusions', 'wondr', 'pop-up',
+  ],
+  deep_culture: [
+    'museum', 'musée', 'gallery', 'galerie', 'archaeological', 'heritage',
+    'historical', 'monument', 'cathedral', 'basilica', 'palace', 'palais',
+    'castle', 'château',
+  ],
+  active: [
+    'bike', 'vélo', 'cycling', 'hike', 'randonnée', 'kayak', 'climbing',
+    'surfing', 'diving', 'segway', 'zip line',
+  ],
+  relaxing: [
+    'spa', 'hammam', 'wellness', 'massage', 'yoga', 'garden', 'jardin',
+    'botanical', 'park', 'beach', 'plage',
+  ],
+  foodie: [
+    'food tour', 'cooking class', 'tasting', 'dégustation', 'gastro',
+    'culinary', 'street food', 'market tour',
+  ],
+};
+
+/** Scoring matrix: groupType × profileTag → bonus/penalty */
+const CONTEXT_FIT_MATRIX: Record<GroupType, Record<ProfileTag, number>> = {
+  family_with_kids: {
+    kid_friendly: +3, romantic: -2, party: -3, adult_only: -4,
+    instagram: +1, deep_culture: -1, active: +1, relaxing: +1, foodie: 0,
+  },
+  couple: {
+    kid_friendly: -1, romantic: +3, party: 0, adult_only: 0,
+    instagram: -1, deep_culture: +1, active: +1, relaxing: +2, foodie: +2,
+  },
+  friends: {
+    kid_friendly: -2, romantic: -1, party: +3, adult_only: +1,
+    instagram: +1, deep_culture: 0, active: +2, relaxing: 0, foodie: +2,
+  },
+  solo: {
+    kid_friendly: -1, romantic: -2, party: 0, adult_only: 0,
+    instagram: 0, deep_culture: +2, active: +1, relaxing: +1, foodie: +1,
+  },
+  family_without_kids: {
+    kid_friendly: 0, romantic: +1, party: -1, adult_only: -3,
+    instagram: 0, deep_culture: +2, active: +1, relaxing: +1, foodie: +2,
+  },
+};
+
+/** Affinities: preference → tags that reinforce it (+1.5 each) */
+const PREFERENCE_AFFINITIES: Partial<Record<ActivityType, ProfileTag[]>> = {
+  culture: ['deep_culture'],
+  nature: ['relaxing', 'active'],
+  nightlife: ['party'],
+  gastronomy: ['foodie'],
+  wellness: ['relaxing'],
+  adventure: ['active'],
+};
+
+/** Conflicts: preference → tags that contradict it (-1.5 each) */
+const PREFERENCE_CONFLICTS: Partial<Record<ActivityType, ProfileTag[]>> = {
+  culture: ['instagram', 'party'],
+  nature: ['instagram', 'party'],
+  adventure: ['relaxing', 'instagram'],
+  nightlife: ['kid_friendly'],
+};
 
 export function scoreAndSelectActivities(
   data: FetchedData,
@@ -183,5 +273,86 @@ function computeScore(
     }
   }
 
-  return mustSeeBonus + popularityScore + ratingScore + typeMatchBonus + viatorBonus + reliabilityBonus + distancePenalty;
+  // Factor 8: Context fit — score activity based on group type (family, couple, friends…)
+  const tags = inferActivityTags(activity);
+  const contextFitBonus = computeContextFit(tags, preferences.groupType);
+
+  // Factor 9: Preference depth — reward tags that reinforce selected preferences, penalize contradictions
+  const preferenceDepthBonus = computePreferenceDepth(tags, preferences.activities || []);
+
+  return mustSeeBonus + popularityScore + ratingScore + typeMatchBonus + viatorBonus
+    + reliabilityBonus + distancePenalty + contextFitBonus + preferenceDepthBonus;
+}
+
+// ─── Contextual scoring helpers ─────────────────────────────────────────────
+
+/**
+ * Infer profile tags from activity name, description, and type.
+ * Returns the set of tags that matched at least one keyword.
+ */
+function inferActivityTags(activity: ScoredActivity): Set<ProfileTag> {
+  const text = [
+    activity.name || '',
+    (activity as any).description || '',
+    activity.type || '',
+    (activity as any).cuisineType || '',
+  ].join(' ').toLowerCase();
+
+  const matched = new Set<ProfileTag>();
+  for (const [tag, keywords] of Object.entries(PROFILE_KEYWORDS) as [ProfileTag, string[]][]) {
+    if (keywords.some(kw => text.includes(kw))) {
+      matched.add(tag);
+    }
+  }
+
+  // Disambiguate: if something is both deep_culture and instagram, keep both — the matrix handles it.
+  // Exception: real museums (Rijksmuseum, Van Gogh) should NOT get instagram tag just because "museum" is in both
+  // deep_culture keywords and the name. Only add instagram if it has explicit instagram keywords.
+  // (This is already handled by the keyword lists — "museum" is in deep_culture, not instagram.)
+
+  return matched;
+}
+
+/**
+ * Factor 8: Context fit bonus.
+ * Sum the matrix scores for each matched tag, clamped to [-4, +4].
+ */
+function computeContextFit(tags: Set<ProfileTag>, groupType: GroupType): number {
+  const matrix = CONTEXT_FIT_MATRIX[groupType];
+  if (!matrix) return 0;
+
+  let score = 0;
+  for (const tag of tags) {
+    score += matrix[tag] || 0;
+  }
+  return Math.max(-4, Math.min(4, score));
+}
+
+/**
+ * Factor 9: Preference depth bonus.
+ * For each user preference, check if activity tags reinforce (+1.5) or contradict (-1.5) it.
+ * Clamped to [-2, +3].
+ */
+function computePreferenceDepth(tags: Set<ProfileTag>, preferences: ActivityType[]): number {
+  let score = 0;
+
+  for (const pref of preferences) {
+    // Affinities: tags that reinforce this preference
+    const affinities = PREFERENCE_AFFINITIES[pref];
+    if (affinities) {
+      for (const affTag of affinities) {
+        if (tags.has(affTag)) score += 1.5;
+      }
+    }
+
+    // Conflicts: tags that contradict this preference
+    const conflicts = PREFERENCE_CONFLICTS[pref];
+    if (conflicts) {
+      for (const confTag of conflicts) {
+        if (tags.has(confTag)) score -= 1.5;
+      }
+    }
+  }
+
+  return Math.max(-2, Math.min(3, score));
 }
