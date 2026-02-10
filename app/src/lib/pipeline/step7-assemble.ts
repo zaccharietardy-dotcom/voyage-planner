@@ -247,7 +247,7 @@ export async function assembleTripSchedule(
           checkinTime = earliestCheckin;
         }
       }
-      scheduler.insertFixedItem({
+      const checkinResult = scheduler.insertFixedItem({
         id: `checkin-${balancedDay.dayNumber}`,
         title: `Check-in ${hotel.name}`,
         type: 'checkin',
@@ -255,6 +255,19 @@ export async function assembleTripSchedule(
         endTime: new Date(checkinTime.getTime() + 30 * 60 * 1000),
         data: hotel,
       });
+      // FALLBACK: If insertFixedItem failed (overlap), use addItem to find a free slot
+      if (!checkinResult) {
+        console.warn(`[Pipeline V2] Check-in insertFixedItem failed at ${formatTime(checkinTime)}, using addItem fallback`);
+        scheduler.addItem({
+          id: `checkin-${balancedDay.dayNumber}`,
+          title: `Check-in ${hotel.name}`,
+          type: 'checkin',
+          duration: 30,
+          minStartTime: checkinTime,
+          maxEndTime: parseTime(dayDate, '22:00'),
+          data: hotel,
+        });
+      }
     }
 
     // Last day: insert breakfast BEFORE checkout so cursor is still early
@@ -403,7 +416,7 @@ export async function assembleTripSchedule(
       // These typically close at sunset — cap at 19:30 (generous for summer)
       const activityMaxEndTime = getActivityMaxEndTime(activity, dayDate);
 
-      const actResult = scheduler.addItem({
+      let actResult = scheduler.addItem({
         id: activity.id,
         title: activity.name,
         type: 'activity',
@@ -412,8 +425,27 @@ export async function assembleTripSchedule(
         maxEndTime: activityMaxEndTime,
         data: activity,
       });
+
+      // MUST-SEE RETRY: If a must-see was rejected, retry with shorter duration (min 30min)
+      // and relaxed closing time. A short visit is better than missing a must-see entirely.
+      if (!actResult && activity.mustSee) {
+        const shortDuration = Math.max(30, Math.floor(activityDuration * 0.5));
+        console.log(`[Pipeline V2] Day ${balancedDay.dayNumber}: Must-see "${activity.name}" rejected at ${activityDuration}min, retrying with ${shortDuration}min`);
+        actResult = scheduler.addItem({
+          id: activity.id,
+          title: activity.name,
+          type: 'activity',
+          duration: shortDuration,
+          travelTime: Math.min(travelTime, 10), // Reduce travel estimate too
+          maxEndTime: activityMaxEndTime
+            ? new Date(Math.max(activityMaxEndTime.getTime(), parseTime(dayDate, '21:00').getTime()))
+            : undefined,
+          data: activity,
+        });
+      }
+
       if (!actResult) {
-        console.warn(`[Pipeline V2] Day ${balancedDay.dayNumber}: REJECTED activity "${activity.name}" (duration=${activityDuration}min, travel=${travelTime}min, cursor=${formatTimeHHMM(scheduler.getCurrentTime())}, dayEnd=${dayEndHour}:00)`);
+        console.warn(`[Pipeline V2] Day ${balancedDay.dayNumber}: REJECTED activity "${activity.name}" (duration=${activityDuration}min, travel=${travelTime}min, cursor=${formatTimeHHMM(scheduler.getCurrentTime())}, dayEnd=${dayEndHour}:00)${activity.mustSee ? ' ⚠️ MUST-SEE LOST' : ''}`);
       }
 
       // After day-trip activity, add explicit return travel to hotel
@@ -501,8 +533,12 @@ export async function assembleTripSchedule(
         title: item.title,
         description: itemData.description || '',
         locationName: itemData.locationName || itemData.address || itemData.name || item.title,
-        latitude: itemData.latitude || 0,
-        longitude: itemData.longitude || 0,
+        latitude: itemData.latitude
+          || (item.type === 'transport' && itemData.segments?.[0]?.toCoords?.lat)
+          || 0,
+        longitude: itemData.longitude
+          || (item.type === 'transport' && itemData.segments?.[0]?.toCoords?.lng)
+          || 0,
         orderIndex: idx,
         estimatedCost: itemData.estimatedCost || (itemData.priceLevel ? (itemData.priceLevel || 1) * 15 : 0),
         duration: item.duration,
@@ -703,13 +739,18 @@ const INDOOR_ACTIVITY_KEYWORDS = [
  * Indoor activities have no special cap.
  */
 function getActivityMaxEndTime(activity: ScoredActivity, dayDate: Date): Date | undefined {
+  // PRIORITY 1: Use real opening hours if available (from viatorKnownProducts or API)
+  if (activity.openingHours?.close && activity.openingHours.close !== '23:59') {
+    return parseTime(dayDate, activity.openingHours.close);
+  }
+
   const name = (activity.name || '').toLowerCase();
   const type = (activity.type || '').toLowerCase();
   const allText = `${name} ${type}`;
 
   // Check if indoor first (takes priority)
   const isIndoor = INDOOR_ACTIVITY_KEYWORDS.some(k => allText.includes(k));
-  if (isIndoor) return undefined; // No cap for indoor
+  if (isIndoor) return undefined; // No cap for indoor (hours unknown)
 
   // Check if outdoor
   const isOutdoor = OUTDOOR_ACTIVITY_KEYWORDS.some(k => allText.includes(k));
