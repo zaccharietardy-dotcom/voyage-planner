@@ -227,15 +227,23 @@ export function ActivityCard({
                 )}
 
                 {/* Cost (masqué pour transport car affiché dans TransportCard) */}
-                {item.estimatedCost && item.estimatedCost > 0 && item.type !== 'transport' && (
-                  <div className="text-xs">
-                    <span className="font-medium text-primary">
-                      ~{item.estimatedCost}€
-                    </span>
-                    {item.type !== 'flight' && item.type !== 'parking' && (
-                      <span className="text-muted-foreground"> / pers.</span>
-                    )}
-                  </div>
+                {item.type !== 'transport' && (
+                  <>
+                    {item.estimatedCost != null && item.estimatedCost > 0 ? (
+                      <div className="text-xs">
+                        <span className="font-medium text-primary">
+                          ~{item.estimatedCost}€
+                        </span>
+                        {item.type !== 'flight' && item.type !== 'parking' && (
+                          <span className="text-muted-foreground"> / pers.</span>
+                        )}
+                      </div>
+                    ) : item.type === 'activity' ? (
+                      <span className="text-xs font-medium text-green-600 bg-green-50 px-1.5 py-0.5 rounded">
+                        Gratuit
+                      </span>
+                    ) : null}
+                  </>
                 )}
               </div>
 

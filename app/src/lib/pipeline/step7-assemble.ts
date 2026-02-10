@@ -450,9 +450,9 @@ export async function assembleTripSchedule(
         ? Math.max(activity.duration || 120, 180) // At least 3h for day-trip activities
         : (activity.duration || 60);
 
-      // Enforce closing hours for outdoor activities (parks, gardens, viewpoints)
-      // These typically close at sunset — cap at 19:30 (generous for summer)
+      // Enforce opening/closing hours
       const activityMaxEndTime = getActivityMaxEndTime(activity, dayDate);
+      const activityMinStartTime = getActivityMinStartTime(activity, dayDate);
 
       let actResult = scheduler.addItem({
         id: activity.id,
@@ -460,6 +460,7 @@ export async function assembleTripSchedule(
         type: 'activity',
         duration: activityDuration,
         travelTime,
+        minStartTime: activityMinStartTime,
         maxEndTime: activityMaxEndTime,
         data: activity,
       });
@@ -476,6 +477,7 @@ export async function assembleTripSchedule(
           type: 'activity',
           duration: shortDuration,
           travelTime: Math.min(travelTime, 10), // Reduce travel estimate too
+          minStartTime: activityMinStartTime,
           maxEndTime: activityMaxEndTime, // Same closing time — no cheating
           data: activity,
         });
@@ -509,6 +511,7 @@ export async function assembleTripSchedule(
             type: 'activity',
             duration: activityDuration,
             travelTime: Math.min(travelTime, 10),
+            minStartTime: activityMinStartTime,
             maxEndTime: activityMaxEndTime,
             data: activity,
           });
@@ -522,6 +525,7 @@ export async function assembleTripSchedule(
               type: 'activity',
               duration: shortDuration,
               travelTime: Math.min(travelTime, 5),
+              minStartTime: activityMinStartTime,
               maxEndTime: activityMaxEndTime,
               data: activity,
             });
@@ -824,6 +828,17 @@ function getActivityMaxEndTime(activity: ScoredActivity, dayDate: Date): Date | 
   }
 
   // Unknown type — no cap (err on the side of flexibility)
+  return undefined;
+}
+
+/**
+ * Get minimum start time for an activity based on its opening hours.
+ * Prevents scheduling a museum visit at 07:00 when it opens at 10:00.
+ */
+function getActivityMinStartTime(activity: ScoredActivity, dayDate: Date): Date | undefined {
+  if (activity.openingHours?.open && activity.openingHours.open !== '00:00') {
+    return parseTime(dayDate, activity.openingHours.open);
+  }
   return undefined;
 }
 

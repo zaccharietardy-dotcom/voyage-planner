@@ -20,6 +20,8 @@ import { resolveBudget, generateBudgetStrategy } from '../services/budgetResolve
 import { findBestFlights, selectFlightByBudget } from '../tripFlights';
 import { searchGooglePlacesAttractions } from './services/googlePlacesAttractions';
 import { getMustSeeAttractions, type Attraction } from '../services/attractions';
+import { resolveCoordinates } from '../services/coordsResolver';
+import Anthropic from '@anthropic-ai/sdk';
 
 /**
  * Retry wrapper: retries a promise factory once with a delay on rejection.
@@ -170,6 +172,22 @@ export async function fetchAllData(preferences: TripPreferences): Promise<Fetche
     }
   }
 
+  // ── AI fallback: generate must-sees for uncovered destinations ──────────
+  // When the local database has no curated must-sees AND the user didn't specify any,
+  // use Claude Haiku for NAMES + resolveCoordinates for verified GPS.
+  if (curatedMustSees.length === 0 && mustSeeAttractions.length === 0) {
+    console.log(`[Pipeline V2] No curated must-sees for "${destination}" — generating via AI...`);
+    try {
+      const aiMustSees = await generateMustSeesWithAI(destination, destCoords);
+      if (aiMustSees.length > 0) {
+        mustSeeAttractions.push(...aiMustSees);
+        console.log(`[Pipeline V2] AI generated ${aiMustSees.length} must-sees: ${aiMustSees.map(a => a.name).join(', ')}`);
+      }
+    } catch (e) {
+      console.warn(`[Pipeline V2] AI must-see generation failed:`, e instanceof Error ? e.message : e);
+    }
+  }
+
   // Phase 2: Flights (depends on transport selection)
   // Wrapped with a 20s timeout to prevent slow flight APIs from blocking the pipeline
   let outboundFlight = null;
@@ -231,4 +249,103 @@ export async function fetchAllData(preferences: TripPreferences): Promise<Fetche
     budgetStrategy,
     resolvedBudget,
   };
+}
+
+/**
+ * Generate must-see attractions via Claude Haiku (names only) + resolveCoordinates (verified GPS).
+ * Used for destinations not in the hardcoded attractions database.
+ *
+ * Phase 1: Haiku generates attraction names + metadata (reliable for well-known landmarks)
+ * Phase 2: resolveCoordinates() verifies GPS via Travel Places → Nominatim → Gemini → SerpAPI
+ *          If GPS resolution fails for an item, it's dropped (never use hallucinated coords)
+ */
+async function generateMustSeesWithAI(
+  destination: string,
+  destCoords: { lat: number; lng: number }
+): Promise<Attraction[]> {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) return [];
+
+  const client = new Anthropic({ apiKey });
+
+  // Phase 1: Get attraction names + metadata from Haiku (fast, cheap)
+  const response = await Promise.race([
+    client.messages.create({
+      model: 'claude-3-5-haiku-20241022',
+      max_tokens: 1500,
+      messages: [{
+        role: 'user',
+        content: `Liste les 5-8 attractions absolument incontournables de ${destination}.
+
+Retourne UNIQUEMENT un JSON array. Chaque item :
+{
+  "name": "Nom officiel du lieu",
+  "type": "culture|nature|gastronomy|shopping|nightlife|adventure|wellness|beach",
+  "description": "1 phrase descriptive",
+  "duration": nombre de minutes (60-180),
+  "estimatedCost": euros par personne (0 si gratuit),
+  "rating": note sur 5
+}
+
+Règles : UNIQUEMENT des lieux réels, célèbres et vérifiables. Inclure les landmarks les plus iconiques que tout touriste doit visiter.`,
+      }],
+    }),
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('AI must-see timeout (10s)')), 10000)
+    ),
+  ]);
+
+  const text = response.content
+    .filter((b: any) => b.type === 'text')
+    .map((b: any) => b.text)
+    .join('');
+
+  // Parse JSON from response
+  let jsonStr = text.trim();
+  const jsonMatch = jsonStr.match(/\[[\s\S]*\]/);
+  if (!jsonMatch) {
+    console.warn('[Pipeline V2] AI must-see: no JSON array found in response');
+    return [];
+  }
+
+  const parsed = JSON.parse(jsonMatch[0]);
+  const items = Array.isArray(parsed) ? parsed : [];
+
+  // Phase 2: Resolve GPS coordinates via verified APIs (never trust Haiku GPS)
+  const attractions: Attraction[] = [];
+  const resolvePromises = items.map(async (a: any, i: number) => {
+    const name = a.name?.trim();
+    if (!name) return null;
+
+    const coords = await resolveCoordinates(name, destination, destCoords, 'attraction');
+    if (!coords) {
+      console.warn(`[Pipeline V2] AI must-see: GPS resolution failed for "${name}", skipping`);
+      return null;
+    }
+
+    return {
+      id: `ai-mustsee-${destination.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${i}`,
+      name,
+      type: a.type || 'culture',
+      description: a.description || '',
+      duration: Math.max(30, Math.min(240, a.duration || 90)),
+      estimatedCost: Math.max(0, a.estimatedCost || 0),
+      latitude: coords.lat,
+      longitude: coords.lng,
+      rating: Math.max(1, Math.min(5, a.rating || 4.5)),
+      mustSee: true,
+      bookingRequired: false,
+      openingHours: { open: '09:00', close: '18:00' },
+      dataReliability: 'generated' as const,
+    } as Attraction;
+  });
+
+  const results = await Promise.allSettled(resolvePromises);
+  for (const r of results) {
+    if (r.status === 'fulfilled' && r.value) {
+      attractions.push(r.value);
+    }
+  }
+
+  return attractions;
 }
