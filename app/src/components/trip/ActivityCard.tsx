@@ -135,9 +135,9 @@ export function ActivityCard({
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
-      {/* Hero image — 16:9 ratio, clean without overlay text */}
+      {/* Hero image — fixed height, clean without overlay text */}
       {showImage && (
-        <div className="relative aspect-video w-full overflow-hidden bg-muted/30">
+        <div className="relative h-32 w-full overflow-hidden bg-muted/30">
           <img
             src={item.imageUrl}
             alt={item.title}
