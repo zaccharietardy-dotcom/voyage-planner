@@ -621,61 +621,65 @@ export async function assembleTripSchedule(
     }
 
     // 8. Insert any remaining meals after all activities
-    // Use wider time windows for fallback (the scheduler handles conflicts)
-    if (!lunchInserted && !skipLunch && lunch?.restaurant) {
-      // Try with an extended window — better to have lunch a bit late than not at all
-      const lunchMinStart = parseTime(dayDate, `${String(Math.max(11, dayStartHour)).padStart(2, '0')}:30`);
-      const lunchMaxEnd = parseTime(dayDate, '15:30');
-      const result = scheduler.addItem({
-        id: `meal-${balancedDay.dayNumber}-lunch`,
-        title: `Déjeuner — ${lunch.restaurant.name}`,
-        type: 'restaurant',
-        duration: 60,
-        minStartTime: lunchMinStart,
-        maxEndTime: lunchMaxEnd,
-        data: lunch.restaurant,
-      });
-      if (result) lunchInserted = true;
+    // Uses insertFixedItem to bypass the cursor (which is now past the lunch window).
+    // findBestMealSlot() scans gaps between existing items to find the best time.
+    if (!lunchInserted && !skipLunch) {
+      const lunchDuration = lunch?.restaurant ? 60 : 45;
+      const lunchData = lunch?.restaurant || {
+        name: 'Déjeuner libre',
+        description: 'Explorez les restaurants du quartier',
+        estimatedCost: 0,
+      };
+      const lunchTitle = lunch?.restaurant
+        ? `Déjeuner — ${lunch.restaurant.name}`
+        : 'Déjeuner';
+      const lunchId = lunch?.restaurant
+        ? `meal-${balancedDay.dayNumber}-lunch`
+        : `self-lunch-${balancedDay.dayNumber}`;
+
+      const slot = findBestMealSlot(scheduler, dayDate, '12:00', '15:00', lunchDuration, '13:00');
+      if (slot) {
+        const result = scheduler.insertFixedItem({
+          id: lunchId,
+          title: lunchTitle,
+          type: 'restaurant',
+          startTime: slot.start,
+          endTime: slot.end,
+          data: lunchData,
+        });
+        if (result) {
+          lunchInserted = true;
+          console.log(`[Pipeline V2] Day ${balancedDay.dayNumber}: Lunch inserted via findBestMealSlot at ${formatTimeHHMM(slot.start)}-${formatTimeHHMM(slot.end)}`);
+        }
+      }
     }
 
-    // Self-catered lunch placeholder
-    if (!lunchInserted && !skipLunch && !lunch?.restaurant) {
-      const result = scheduler.addItem({
-        id: `self-lunch-${balancedDay.dayNumber}`,
-        title: 'Déjeuner',
-        type: 'restaurant',
-        duration: 45,
-        minStartTime: parseTime(dayDate, '12:00'),
-        maxEndTime: parseTime(dayDate, '14:30'),
-        data: { name: 'Déjeuner libre', description: 'Trattoria, pizza al taglio, ou panini', estimatedCost: 0 },
-      });
-      if (result) lunchInserted = true;
-    }
+    if (!dinnerInserted && !skipDinner) {
+      const dinnerDuration = dinner?.restaurant ? 75 : 60;
+      const dinnerData = dinner?.restaurant || {
+        name: 'Dîner libre',
+        description: 'Explorez les restaurants du quartier',
+        estimatedCost: 0,
+      };
+      const dinnerTitle = dinner?.restaurant
+        ? `Dîner — ${dinner.restaurant.name}`
+        : 'Dîner';
+      const dinnerId = dinner?.restaurant
+        ? `meal-${balancedDay.dayNumber}-dinner`
+        : `self-dinner-${balancedDay.dayNumber}`;
 
-    if (!dinnerInserted && !skipDinner && dinner?.restaurant) {
-      const dinnerResult = scheduler.addItem({
-        id: `meal-${balancedDay.dayNumber}-dinner`,
-        title: `Dîner — ${dinner.restaurant.name}`,
-        type: 'restaurant',
-        duration: 75,
-        minStartTime: parseTime(dayDate, '19:00'),
-        maxEndTime: parseTime(dayDate, '22:00'),
-        data: dinner.restaurant,
-      });
-      if (dinnerResult) dinnerInserted = true;
-    }
-
-    // Self-catered dinner placeholder
-    if (!dinnerInserted && !skipDinner && !dinner?.restaurant) {
-      scheduler.addItem({
-        id: `self-dinner-${balancedDay.dayNumber}`,
-        title: 'Dîner',
-        type: 'restaurant',
-        duration: 60,
-        minStartTime: parseTime(dayDate, '19:00'),
-        maxEndTime: parseTime(dayDate, '22:00'),
-        data: { name: 'Dîner libre', description: 'Explorez les restaurants du quartier', estimatedCost: 0 },
-      });
+      const slot = findBestMealSlot(scheduler, dayDate, '19:00', '22:00', dinnerDuration, '20:00');
+      if (slot) {
+        const result = scheduler.insertFixedItem({
+          id: dinnerId,
+          title: dinnerTitle,
+          type: 'restaurant',
+          startTime: slot.start,
+          endTime: slot.end,
+          data: dinnerData,
+        });
+        if (result) dinnerInserted = true;
+      }
     }
 
     // 9. Insert return transport LAST (after activities and meals)
@@ -770,6 +774,43 @@ export async function assembleTripSchedule(
 
   // 13. Build cost breakdown
   const costBreakdown = computeCostBreakdown(days, flights, hotel, preferences, transport);
+
+  // 13b. Enrich hotel booking URLs with actual dates and guest count
+  const checkinDate = startDate.toISOString().split('T')[0];
+  const checkoutDate = new Date(startDate);
+  checkoutDate.setDate(checkoutDate.getDate() + preferences.durationDays - 1);
+  const checkoutDateStr = checkoutDate.toISOString().split('T')[0];
+  const guests = preferences.groupSize || 2;
+
+  const enrichBookingUrl = (url: string | undefined, hotelName: string): string => {
+    if (!url) {
+      // No URL at all — build a Booking.com search URL
+      return `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(hotelName + ' ' + preferences.destination)}&checkin=${checkinDate}&checkout=${checkoutDateStr}&group_adults=${guests}&no_rooms=1&lang=fr`;
+    }
+    // If already a booking.com URL, inject/replace date params
+    if (url.includes('booking.com')) {
+      const base = url.split('?')[0];
+      const existingParams = new URLSearchParams(url.includes('?') ? url.split('?')[1] : '');
+      existingParams.set('checkin', checkinDate);
+      existingParams.set('checkout', checkoutDateStr);
+      existingParams.set('group_adults', String(guests));
+      existingParams.set('no_rooms', '1');
+      if (!existingParams.has('lang')) existingParams.set('lang', 'fr');
+      return `${base}?${existingParams.toString()}`;
+    }
+    // Non-booking URL — return as-is
+    return url;
+  };
+
+  if (hotel) {
+    hotel.bookingUrl = enrichBookingUrl(hotel.bookingUrl, hotel.name);
+  }
+  // Also enrich alternative hotel options
+  if (data.bookingHotels) {
+    for (const h of data.bookingHotels) {
+      (h as any).bookingUrl = enrichBookingUrl((h as any).bookingUrl, (h as any).name || '');
+    }
+  }
 
   // 14. Assemble final Trip
   const trip: Trip = {
@@ -1026,6 +1067,69 @@ async function enrichWithDirections(days: TripDay[]): Promise<void> {
       }
     }
   }
+}
+
+/**
+ * Find the best gap in the schedule to insert a meal.
+ * Scans all items in the given time window, finds gaps between them,
+ * and returns the gap closest to the ideal meal time.
+ *
+ * Uses insertFixedItem semantics (ignores cursor), so this works
+ * even when the cursor has advanced past the meal window.
+ */
+function findBestMealSlot(
+  scheduler: DayScheduler,
+  dayDate: Date,
+  windowStartStr: string,
+  windowEndStr: string,
+  duration: number,
+  idealTimeStr: string
+): { start: Date; end: Date } | null {
+  const windowStart = parseTime(dayDate, windowStartStr);
+  const windowEnd = parseTime(dayDate, windowEndStr);
+
+  // Get all items that overlap with the meal window
+  const items = scheduler.getItems()
+    .filter(i => i.slot.end > windowStart && i.slot.start < windowEnd)
+    .sort((a, b) => a.slot.start.getTime() - b.slot.start.getTime());
+
+  // Find gaps between items within the window
+  const gaps: { start: Date; end: Date; size: number }[] = [];
+  let gapStart = windowStart;
+
+  for (const item of items) {
+    if (item.slot.start > gapStart) {
+      const gapSize = (item.slot.start.getTime() - gapStart.getTime()) / 60000;
+      if (gapSize >= duration) {
+        gaps.push({ start: new Date(gapStart), end: new Date(item.slot.start), size: gapSize });
+      }
+    }
+    gapStart = new Date(Math.max(gapStart.getTime(), item.slot.end.getTime()));
+  }
+
+  // Check gap after the last item in the window
+  if (gapStart < windowEnd) {
+    const gapSize = (windowEnd.getTime() - gapStart.getTime()) / 60000;
+    if (gapSize >= duration) {
+      gaps.push({ start: new Date(gapStart), end: new Date(windowEnd), size: gapSize });
+    }
+  }
+
+  if (gaps.length === 0) return null;
+
+  // Pick the gap closest to the ideal meal time
+  const idealTime = parseTime(dayDate, idealTimeStr);
+  gaps.sort((a, b) => {
+    const distA = Math.abs(a.start.getTime() - idealTime.getTime());
+    const distB = Math.abs(b.start.getTime() - idealTime.getTime());
+    return distA - distB;
+  });
+
+  const bestGap = gaps[0];
+  const mealStart = bestGap.start;
+  const mealEnd = new Date(mealStart.getTime() + duration * 60000);
+
+  return { start: mealStart, end: mealEnd };
 }
 
 function formatTimeHHMM(date: Date): string {
