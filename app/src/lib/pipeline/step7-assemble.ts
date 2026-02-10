@@ -285,6 +285,17 @@ export async function assembleTripSchedule(
         maxEndTime: parseTime(dayDate, '10:30'),
         data: breakfast.restaurant,
       });
+    } else if (isLastDay && !breakfast?.restaurant && !skipBreakfast && hotel?.breakfastIncluded && dayStartHour <= 10) {
+      // Hotel breakfast fallback
+      scheduler.addItem({
+        id: `hotel-breakfast-${balancedDay.dayNumber}`,
+        title: `Petit-déjeuner à l'hôtel`,
+        type: 'restaurant',
+        duration: 30,
+        minStartTime: parseTime(dayDate, `${String(Math.max(7, dayStartHour)).padStart(2, '0')}:00`),
+        maxEndTime: parseTime(dayDate, '10:00'),
+        data: { name: hotel?.name || 'Hôtel', description: 'Petit-déjeuner inclus', latitude: hotel?.latitude, longitude: hotel?.longitude, estimatedCost: 0 },
+      });
     }
 
     if (isLastDay && hotel) {
@@ -316,13 +327,9 @@ export async function assembleTripSchedule(
 
     // Prioritize must-sees: move them to the front of the list so they're scheduled first.
     // This prevents the scenario where a must-see at position 5 gets dropped because
-    // the schedule ran out of time after scheduling 4 non-must-see activities.
-    const mustSeeActivities = orderedActivities.filter(a => a.mustSee);
-    const nonMustSeeActivities = orderedActivities.filter(a => !a.mustSee);
-
-    // Optimize geographic order within each group using nearest-neighbor heuristic.
+    // Optimize geographic order for ALL activities together using nearest-neighbor heuristic.
     // This reduces intra-day travel time (e.g. Vatican → Basilique St Pierre vs Vatican → far restaurant → back).
-    // Start from the accommodation or previous position.
+    // Unified approach: must-sees and non-must-sees are interleaved for optimal routing.
     const geoOptimize = (activities: ScoredActivity[], startLat: number, startLng: number) => {
       if (activities.length <= 2) return activities;
       const ordered: ScoredActivity[] = [];
@@ -345,15 +352,10 @@ export async function assembleTripSchedule(
 
     const startLat = hotel?.latitude || data.destCoords.lat;
     const startLng = hotel?.longitude || data.destCoords.lng;
-    const optimizedMustSees = geoOptimize(mustSeeActivities, startLat, startLng);
-    const lastMustSee = optimizedMustSees.length > 0 ? optimizedMustSees[optimizedMustSees.length - 1] : null;
-    const optimizedNonMustSees = geoOptimize(nonMustSeeActivities,
-      lastMustSee?.latitude || startLat,
-      lastMustSee?.longitude || startLng
-    );
-    orderedActivities = [...optimizedMustSees, ...optimizedNonMustSees];
+    orderedActivities = geoOptimize(orderedActivities, startLat, startLng);
 
-    console.log(`[Pipeline V2] Day ${balancedDay.dayNumber}: ${orderedActivities.length} activities to schedule (${mustSeeActivities.length} must-sees), dayStart=${dayStartHour}:00, dayEnd=${dayEndHour}:00, window=${dayEndHour - dayStartHour}h, cursor=${formatTimeHHMM(scheduler.getCurrentTime())}`);
+    const mustSeeCount = orderedActivities.filter(a => a.mustSee).length;
+    console.log(`[Pipeline V2] Day ${balancedDay.dayNumber}: ${orderedActivities.length} activities to schedule (${mustSeeCount} must-sees), dayStart=${dayStartHour}:00, dayEnd=${dayEndHour}:00, window=${dayEndHour - dayStartHour}h, cursor=${formatTimeHHMM(scheduler.getCurrentTime())}`);
     for (const a of orderedActivities) {
       console.log(`[Pipeline V2]   → "${a.name}" (${a.duration || 60}min, score=${a.score.toFixed(1)}, mustSee=${!!a.mustSee})`);
     }
@@ -368,6 +370,17 @@ export async function assembleTripSchedule(
         minStartTime: parseTime(dayDate, `${String(Math.max(7, dayStartHour)).padStart(2, '0')}:00`),
         maxEndTime: parseTime(dayDate, '10:30'),
         data: breakfast.restaurant,
+      });
+    } else if (!isLastDay && !breakfast?.restaurant && !skipBreakfast && hotel?.breakfastIncluded && dayStartHour <= 10) {
+      // Hotel breakfast fallback
+      scheduler.addItem({
+        id: `hotel-breakfast-${balancedDay.dayNumber}`,
+        title: `Petit-déjeuner à l'hôtel`,
+        type: 'restaurant',
+        duration: 30,
+        minStartTime: parseTime(dayDate, `${String(Math.max(7, dayStartHour)).padStart(2, '0')}:00`),
+        maxEndTime: parseTime(dayDate, '10:00'),
+        data: { name: hotel?.name || 'Hôtel', description: 'Petit-déjeuner inclus', latitude: hotel?.latitude, longitude: hotel?.longitude, estimatedCost: 0 },
       });
     }
 

@@ -8,6 +8,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import type { TripPreferences, TransportOptionSummary, Accommodation } from '../types';
 import type { ActivityCluster, MealAssignment, BalancedPlan, BalancedDay } from './types';
+import { calculateDistance } from '../services/geocoding';
 
 /**
  * Call Claude to balance and humanize the day plan.
@@ -19,10 +20,18 @@ export async function balanceDaysWithClaude(
   transport: TransportOptionSummary | null,
   preferences: TripPreferences
 ): Promise<BalancedPlan> {
+  // Compute city center as average of all cluster centroids (used for day-trip detection)
+  const cityCenter = clusters.length > 0
+    ? {
+        lat: clusters.reduce((s, c) => s + c.centroid.lat, 0) / clusters.length,
+        lng: clusters.reduce((s, c) => s + c.centroid.lng, 0) / clusters.length,
+      }
+    : { lat: 0, lng: 0 };
+
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     console.warn('[Pipeline V2] No ANTHROPIC_API_KEY, using deterministic fallback');
-    return buildDeterministicPlan(clusters);
+    return buildDeterministicPlan(clusters, cityCenter);
   }
 
   try {
@@ -45,10 +54,10 @@ export async function balanceDaysWithClaude(
       .map((b: any) => b.text)
       .join('');
 
-    return parsePlan(text, clusters);
+    return parsePlan(text, clusters, cityCenter);
   } catch (error) {
     console.warn('[Pipeline V2] Claude balancing failed, using fallback:', error instanceof Error ? error.message : error);
-    return buildDeterministicPlan(clusters);
+    return buildDeterministicPlan(clusters, cityCenter);
   }
 }
 
@@ -66,7 +75,7 @@ function buildPrompt(
   const clusterDesc = clusters
     .map(c => {
       const activitiesList = c.activities
-        .map(a => `    - [${a.id}] ${a.name} (${a.type}, ${a.duration || 60}min, ${a.rating || '?'}★, ${a.reviewCount || 0} avis)`)
+        .map(a => `    - [${a.id}] ${a.name} (${a.type}, ${a.duration || 60}min, ${a.rating || '?'}★, ${a.reviewCount || 0} avis, GPS: ${a.latitude?.toFixed(4) || '?'},${a.longitude?.toFixed(4) || '?'})`)
         .join('\n');
       return `  Cluster ${c.dayNumber} (centroïde: ${c.centroid.lat.toFixed(4)}, ${c.centroid.lng.toFixed(4)}):\n${activitiesList}`;
     })
@@ -101,6 +110,7 @@ RÈGLES STRICTES:
 5. Musées/monuments le matin, quartiers/marchés l'après-midi
 6. Alterner jours intenses et détendus si possible
 7. Pas 2 musées longs le même jour
+8. Optimise l'ordre géographique : utilise les coordonnées GPS pour minimiser les déplacements intra-journée
 
 RÉPONDS EN JSON STRICT (pas de texte avant/après):
 {
@@ -119,7 +129,7 @@ RÉPONDS EN JSON STRICT (pas de texte avant/après):
 }`;
 }
 
-function parsePlan(text: string, clusters: ActivityCluster[]): BalancedPlan {
+function parsePlan(text: string, clusters: ActivityCluster[], cityCenter?: { lat: number; lng: number }): BalancedPlan {
   try {
     // Extract JSON from response (may have markdown code fences)
     const jsonMatch = text.match(/\{[\s\S]*\}/);
@@ -148,18 +158,38 @@ function parsePlan(text: string, clusters: ActivityCluster[]): BalancedPlan {
     };
   } catch (error) {
     console.warn('[Pipeline V2] Failed to parse Claude response, using fallback:', error);
-    return buildDeterministicPlan(clusters);
+    return buildDeterministicPlan(clusters, cityCenter);
   }
 }
 
 /**
  * Deterministic fallback when Claude is unavailable.
+ * Detects day-trips by checking if a cluster's centroid is >30km from city center.
  */
-function buildDeterministicPlan(clusters: ActivityCluster[]): BalancedPlan {
+function buildDeterministicPlan(
+  clusters: ActivityCluster[],
+  cityCenter?: { lat: number; lng: number }
+): BalancedPlan {
   const totalDays = clusters.length;
   const days: BalancedDay[] = clusters.map((cluster) => {
     const isFirstDay = cluster.dayNumber === 1;
     const isLastDay = cluster.dayNumber === totalDays;
+
+    // Detect day-trip: cluster centroid >30km from city center
+    let isDayTrip = false;
+    let dayTripDestination: string | undefined;
+    if (cityCenter && cityCenter.lat !== 0 && cityCenter.lng !== 0) {
+      const distFromCenter = calculateDistance(
+        cityCenter.lat, cityCenter.lng,
+        cluster.centroid.lat, cluster.centroid.lng
+      );
+      if (distFromCenter > 30) {
+        isDayTrip = true;
+        // Use the first activity's name as a hint for the day-trip destination
+        dayTripDestination = cluster.activities[0]?.name || undefined;
+        console.log(`[Pipeline V2] Deterministic fallback: Day ${cluster.dayNumber} detected as day-trip (${distFromCenter.toFixed(1)}km from center)`);
+      }
+    }
 
     return {
       dayNumber: cluster.dayNumber,
@@ -168,11 +198,14 @@ function buildDeterministicPlan(clusters: ActivityCluster[]): BalancedPlan {
         ? `Arrivée et premières découvertes — ${cluster.activities.length} activités prévues.`
         : isLastDay
           ? `Dernières visites avant le départ — ${cluster.activities.length} activités prévues.`
-          : `Journée de découverte — ${cluster.activities.length} activités prévues.`,
+          : isDayTrip
+            ? `Excursion à la journée — ${cluster.activities.length} activités prévues.`
+            : `Journée de découverte — ${cluster.activities.length} activités prévues.`,
       activityOrder: cluster.activities.map(a => a.id),
-      suggestedStartTime: isFirstDay ? '10:00' : '09:00',
+      suggestedStartTime: isFirstDay ? '10:00' : isDayTrip ? '08:00' : '09:00',
       restBreak: cluster.activities.length > 4,
-      isDayTrip: false,
+      isDayTrip,
+      dayTripDestination,
     };
   });
 

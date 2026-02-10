@@ -19,7 +19,8 @@ export function assignRestaurants(
   serpApiRestaurants: Restaurant[],
   preferences: TripPreferences,
   budgetStrategy: BudgetStrategy | null,
-  accommodationCoords: { lat: number; lng: number }
+  accommodationCoords: { lat: number; lng: number },
+  hotel?: { breakfastIncluded?: boolean } | null
 ): MealAssignment[] {
   // 1. Merge restaurant sources
   const allRestaurants = mergeRestaurantSources(
@@ -53,6 +54,17 @@ export function assignRestaurants(
           dayNumber: cluster.dayNumber,
           mealType,
           restaurant: null,
+          referenceCoords: accommodationCoords,
+        });
+        continue;
+      }
+
+      // Skip breakfast restaurant if hotel includes breakfast
+      if (mealType === 'breakfast' && hotel?.breakfastIncluded) {
+        assignments.push({
+          dayNumber: cluster.dayNumber,
+          mealType,
+          restaurant: null, // Will be handled as hotel breakfast in step7
           referenceCoords: accommodationCoords,
         });
         continue;

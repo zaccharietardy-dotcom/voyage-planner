@@ -88,7 +88,8 @@ export async function generateTripV2(preferences: TripPreferences): Promise<Trip
     data.serpApiRestaurants,
     preferences,
     data.budgetStrategy,
-    accommodationCoords
+    accommodationCoords,
+    hotel
   );
   const assignedCount = meals.filter(m => m.restaurant).length;
   console.log(`[Pipeline V2] Step 4: ${assignedCount}/${meals.length} meals assigned restaurants`);
@@ -740,6 +741,81 @@ function rebalanceClustersForFlights(
           clusters[bestTarget].activities.push(moved);
           toMove--;
           console.log(`[Pipeline V2] Phase 6: moved heavy activity "${moved.name}" (${moved.duration}min) from Day ${cluster.dayNumber} → Day ${clusters[bestTarget].dayNumber} (fatigue balancing)`);
+        }
+      }
+    }
+  }
+
+  // Phase 7: Type diversity balancing
+  // Prevent days with >2 activities of the same broad category (4 museums = exhausting).
+  // Swap lowest-scored excess same-type non-must-see with another day.
+  const DIVERSITY_CATEGORIES: Record<string, string[]> = {
+    culture: ['museum', 'musée', 'museo', 'gallery', 'galerie', 'galleria', 'palace', 'palais', 'palazzo',
+              'cathedral', 'cathédrale', 'church', 'église', 'chiesa', 'basilica', 'basilique',
+              'castle', 'château', 'monument', 'temple', 'mosque', 'synagogue', 'historic'],
+    nature: ['park', 'parc', 'garden', 'jardin', 'botanical', 'botanique', 'beach', 'plage',
+             'viewpoint', 'belvédère', 'trail', 'randonnée', 'zoo', 'promenade'],
+    nightlife: ['bar', 'pub', 'club', 'nightlife', 'cocktail', 'brewery', 'karaoke'],
+  };
+
+  function getActivityCategory(a: ScoredActivity): string {
+    const text = `${(a.name || '').toLowerCase()} ${(a.type || '').toLowerCase()}`;
+    for (const [cat, keywords] of Object.entries(DIVERSITY_CATEGORIES)) {
+      if (keywords.some(k => text.includes(k))) return cat;
+    }
+    return 'other';
+  }
+
+  const MAX_SAME_CATEGORY_PER_DAY = 2;
+
+  for (let ci = 0; ci < clusters.length; ci++) {
+    if (isDayTrip[ci]) continue;
+    const cluster = clusters[ci];
+
+    // Count activities per category
+    const catCounts = new Map<string, ScoredActivity[]>();
+    for (const a of cluster.activities) {
+      const cat = getActivityCategory(a);
+      if (!catCounts.has(cat)) catCounts.set(cat, []);
+      catCounts.get(cat)!.push(a);
+    }
+
+    for (const [cat, catActivities] of catCounts) {
+      if (cat === 'other') continue;
+      if (catActivities.length <= MAX_SAME_CATEGORY_PER_DAY) continue;
+
+      // Too many of this category — move lowest-scored non-must-see
+      const swapCandidates = catActivities
+        .filter(a => !a.mustSee)
+        .sort((a, b) => a.score - b.score);
+
+      let toMove = catActivities.length - MAX_SAME_CATEGORY_PER_DAY;
+      for (const candidate of swapCandidates) {
+        if (toMove <= 0) break;
+
+        // Find target day with fewest of this category AND capacity
+        let bestTarget = -1;
+        let fewestCat = Infinity;
+        for (let ti = 0; ti < clusters.length; ti++) {
+          if (ti === ci || isDayTrip[ti]) continue;
+          const targetCatCount = clusters[ti].activities.filter(a => getActivityCategory(a) === cat).length;
+          const tAvail = hoursPerDay[ti] * 60;
+          const tUsed = clusters[ti].activities.reduce((s, a) => s + (a.duration || 60) + 20, 0) + 180;
+          const remaining = tAvail - tUsed;
+          if (targetCatCount < fewestCat && remaining >= (candidate.duration || 60) + 20) {
+            fewestCat = targetCatCount;
+            bestTarget = ti;
+          }
+        }
+
+        if (bestTarget !== -1 && fewestCat < MAX_SAME_CATEGORY_PER_DAY) {
+          const idx = cluster.activities.findIndex(a => a.id === candidate.id);
+          if (idx !== -1) {
+            const [moved] = cluster.activities.splice(idx, 1);
+            clusters[bestTarget].activities.push(moved);
+            toMove--;
+            console.log(`[Pipeline V2] Phase 7: moved "${moved.name}" (${cat}) from Day ${cluster.dayNumber} → Day ${clusters[bestTarget].dayNumber} (type diversity)`);
+          }
         }
       }
     }
