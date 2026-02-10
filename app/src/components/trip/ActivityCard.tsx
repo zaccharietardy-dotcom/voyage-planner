@@ -238,12 +238,6 @@ export function ActivityCard({
                   {item.description}
                 </p>
               )}
-              {item.type === 'flight' && (
-                <p className="text-[10px] text-muted-foreground/50 italic mb-1">
-                  Prix indicatif — cliquez pour voir les tarifs actuels
-                </p>
-              )}
-
               {/* Meta row: rating, cost */}
               <div className="flex items-center gap-2.5 flex-wrap text-xs text-muted-foreground">
                 {item.rating && item.rating > 0 && (
@@ -267,7 +261,7 @@ export function ActivityCard({
                     {item.estimatedCost != null && item.estimatedCost > 0 ? (
                       <span className="font-semibold text-primary">
                         ~{item.estimatedCost}€
-                        {item.type !== 'flight' && item.type !== 'parking' && (
+                        {item.type !== 'parking' && (
                           <span className="font-normal text-muted-foreground"> / pers.</span>
                         )}
                       </span>

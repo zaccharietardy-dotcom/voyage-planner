@@ -735,7 +735,9 @@ export async function assembleTripSchedule(
           || (item.type === 'transport' && itemData.segments?.[0]?.toCoords?.lng)
           || 0,
         orderIndex: idx,
-        estimatedCost: itemData.estimatedCost || (itemData.priceLevel ? (itemData.priceLevel || 1) * 15 : 0),
+        estimatedCost: itemData.estimatedCost
+          || (item.type === 'flight' ? (itemData.pricePerPerson || itemData.price || 0) : 0)
+          || (itemData.priceLevel ? (itemData.priceLevel || 1) * 15 : 0),
         duration: item.duration,
         rating: itemData.rating,
         bookingUrl: itemData.bookingUrl || itemData.reservationUrl
