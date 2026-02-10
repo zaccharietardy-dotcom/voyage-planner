@@ -135,9 +135,9 @@ export function ActivityCard({
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
-      {/* Hero image — fixed height, compact but readable */}
+      {/* Hero image — 16:9 ratio, clean without overlay text */}
       {showImage && (
-        <div className="relative h-36 w-full overflow-hidden bg-muted/30">
+        <div className="relative aspect-video w-full overflow-hidden bg-muted/30">
           <img
             src={item.imageUrl}
             alt={item.title}
@@ -145,8 +145,6 @@ export function ActivityCard({
             loading="lazy"
             onError={() => setImgError(true)}
           />
-          {/* Gradient overlay for readability */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
           {/* Order number on image */}
           {orderNumber !== undefined && (
             <div className="absolute top-2.5 left-2.5">
@@ -164,12 +162,6 @@ export function ActivityCard({
               <Icon className="h-3 w-3" />
               {TYPE_LABELS[item.type]}
             </span>
-          </div>
-          {/* Title overlay on image */}
-          <div className="absolute bottom-0 left-0 right-0 px-3.5 pb-2.5">
-            <h4 className="font-semibold text-sm text-white leading-tight drop-shadow-md line-clamp-2">
-              {item.title}
-            </h4>
           </div>
         </div>
       )}
@@ -214,7 +206,7 @@ export function ActivityCard({
                   <Clock className="h-3 w-3" />
                   {item.startTime} – {item.endTime}
                 </span>
-                {/* Type badge (only when no image, since image has its own) */}
+                {/* Type badge */}
                 {!showImage && (
                   <span
                     className="px-1.5 py-0.5 rounded text-[10px] font-semibold leading-none"
@@ -225,12 +217,10 @@ export function ActivityCard({
                 )}
               </div>
 
-              {/* Title (only when no image) */}
-              {!showImage && (
-                <h4 className="font-semibold text-[13px] leading-snug mb-0.5 line-clamp-2">
-                  {item.title}
-                </h4>
-              )}
+              {/* Title */}
+              <h4 className="font-semibold text-[13px] leading-snug mb-0.5 line-clamp-2">
+                {item.title}
+              </h4>
 
               {/* Description */}
               {item.description && (
