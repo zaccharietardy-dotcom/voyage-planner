@@ -19,6 +19,7 @@ import { generateTravelTips } from '../services/travelTips';
 import { resolveBudget, generateBudgetStrategy } from '../services/budgetResolver';
 import { findBestFlights, selectFlightByBudget } from '../tripFlights';
 import { searchGooglePlacesAttractions } from './services/googlePlacesAttractions';
+import { getMustSeeAttractions, type Attraction } from '../services/attractions';
 
 /**
  * Fetch all external data in parallel.
@@ -121,13 +122,34 @@ export async function fetchAllData(preferences: TripPreferences): Promise<Fetche
   const serpApiAttractions = extract(1, []);
   const overpassAttractions = extract(2, []);
   const viatorActivities = extract(3, []);
-  const mustSeeAttractions = extract(4, []);
+  let mustSeeAttractions: Attraction[] = extract(4, [] as Attraction[]);
   const tripAdvisorRestaurants = extract(5, []);
   const serpApiRestaurants = extract(6, []);
   const bookingHotels = extract(7, []);
   const transportOptions = extract(8, []);
   const travelTips = extract(9, null);
   const budgetStrategy = extract(10, null as any);
+
+  // ── Inject curated must-sees from hardcoded database ──────────────────────
+  // When the user hasn't specified explicit must-see attractions, use our curated
+  // database (attractions.ts) to inject iconic landmarks (Colisée, Vatican, etc.)
+  // Even when the user HAS specified some, merge in curated ones they didn't mention.
+  const curatedMustSees = getMustSeeAttractions(destination);
+  if (curatedMustSees.length > 0) {
+    const existingNames = new Set(mustSeeAttractions.map((a: any) => a.name.toLowerCase()));
+    let injectedCount = 0;
+    for (const curated of curatedMustSees) {
+      if (!existingNames.has(curated.name.toLowerCase())) {
+        mustSeeAttractions.push(curated);
+        existingNames.add(curated.name.toLowerCase());
+        injectedCount++;
+      }
+    }
+    if (injectedCount > 0) {
+      console.log(`[Pipeline V2] Injected ${injectedCount} curated must-see attractions for "${destination}" from local database`);
+      console.log(`[Pipeline V2]   → ${curatedMustSees.map(a => a.name).join(', ')}`);
+    }
+  }
 
   // Phase 2: Flights (depends on transport selection)
   // Wrapped with a 20s timeout to prevent slow flight APIs from blocking the pipeline
