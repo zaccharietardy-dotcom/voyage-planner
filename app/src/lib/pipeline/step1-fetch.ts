@@ -22,6 +22,25 @@ import { searchGooglePlacesAttractions } from './services/googlePlacesAttraction
 import { getMustSeeAttractions, type Attraction } from '../services/attractions';
 
 /**
+ * Retry wrapper: retries a promise factory once with a delay on rejection.
+ * Used for critical API calls (Google Places, SerpAPI) that occasionally timeout.
+ */
+async function withRetry<T>(
+  promiseFactory: () => Promise<T>,
+  retries: number = 1,
+  delayMs: number = 3000
+): Promise<T> {
+  try {
+    return await promiseFactory();
+  } catch (error) {
+    if (retries <= 0) throw error;
+    console.warn(`[Pipeline V2] Retrying after ${delayMs}ms...`, error instanceof Error ? error.message : error);
+    await new Promise(resolve => setTimeout(resolve, delayMs));
+    return withRetry(promiseFactory, retries - 1, delayMs);
+  }
+}
+
+/**
  * Fetch all external data in parallel.
  * Two phases: coords first (needed by other calls), then everything else.
  */
@@ -49,13 +68,13 @@ export async function fetchAllData(preferences: TripPreferences): Promise<Fetche
 
   // Phase 1: Everything in parallel
   const results = await Promise.allSettled([
-    // 0: Google Places Text Search — attractions with popularity
-    searchGooglePlacesAttractions(destination, destCoords),
-    // 1: SerpAPI — attractions with GPS + rating
-    searchAttractionsMultiQuery(destination, destCoords, {
+    // 0: Google Places Text Search — attractions with popularity (with retry)
+    withRetry(() => searchGooglePlacesAttractions(destination, destCoords)),
+    // 1: SerpAPI — attractions with GPS + rating (with retry)
+    withRetry(() => searchAttractionsMultiQuery(destination, destCoords, {
       types: activityTypes,
       limit: 40,
-    }),
+    })),
     // 2: Overpass — free OSM POIs
     searchAttractionsOverpass(destination, destCoords),
     // 3: Viator — bookable experiences

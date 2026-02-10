@@ -6,8 +6,26 @@ import { calculateDistance } from '../../services/geocoding';
 import type { ScoredActivity } from '../types';
 
 /**
- * Deduplicate activities by GPS proximity.
- * When two activities are within `thresholdKm`, keep the one with more reviews.
+ * Check if two names refer to the same attraction (different data sources).
+ * Uses accent-insensitive, normalized substring matching.
+ */
+function areNamesSimilar(name1: string, name2: string): boolean {
+  const n1 = normalizeName(name1);
+  const n2 = normalizeName(name2);
+  if (!n1 || !n2 || n1.length < 3 || n2.length < 3) return false;
+  if (n1 === n2) return true;
+  // One contains the other (e.g. "pantheon" vs "pantheonroma")
+  if (n1.includes(n2) || n2.includes(n1)) return true;
+  return false;
+}
+
+/**
+ * Deduplicate activities by GPS proximity + name similarity.
+ *
+ * Three cases:
+ * - <100m AND similar names → definite duplicate (same attraction, different sources)
+ * - <300m AND similar names → still a duplicate (GPS imprecision between sources)
+ * - <100m but DIFFERENT names → keep both (Panthéon ≠ nearby café)
  */
 export function deduplicateByProximity(
   activities: ScoredActivity[],
@@ -18,28 +36,40 @@ export function deduplicateByProximity(
   for (const activity of activities) {
     if (!activity.latitude || !activity.longitude) continue;
 
-    const duplicate = result.find(
-      (existing) =>
-        existing.latitude &&
-        existing.longitude &&
-        calculateDistance(
-          activity.latitude,
-          activity.longitude,
-          existing.latitude,
-          existing.longitude
-        ) < thresholdKm
-    );
+    let isDuplicate = false;
+    let duplicateIdx = -1;
 
-    if (duplicate) {
+    for (let i = 0; i < result.length; i++) {
+      const existing = result[i];
+      if (!existing.latitude || !existing.longitude) continue;
+
+      const dist = calculateDistance(
+        activity.latitude, activity.longitude,
+        existing.latitude, existing.longitude
+      );
+
+      const namesSimilar = areNamesSimilar(activity.name || '', existing.name || '');
+
+      // CASE 1: Close (<100m) AND similar names → definite duplicate
+      // CASE 2: Same name but farther apart (up to 300m) → still duplicate (GPS variance)
+      // CASE 3: Close (<100m) but DIFFERENT names → NOT a duplicate
+      if ((dist < thresholdKm && namesSimilar) || (dist < 0.3 && namesSimilar)) {
+        isDuplicate = true;
+        duplicateIdx = i;
+        break;
+      }
+    }
+
+    if (isDuplicate && duplicateIdx >= 0) {
+      const existing = result[duplicateIdx];
       // Keep the one with more reviews (better data)
-      if ((activity.reviewCount || 0) > (duplicate.reviewCount || 0)) {
-        const idx = result.indexOf(duplicate);
+      if ((activity.reviewCount || 0) > (existing.reviewCount || 0)) {
         // Preserve mustSee flag from either version
-        if (duplicate.mustSee) activity.mustSee = true;
-        result[idx] = activity;
+        if (existing.mustSee) activity.mustSee = true;
+        result[duplicateIdx] = activity;
       } else {
         // Preserve mustSee flag on the kept item
-        if (activity.mustSee) duplicate.mustSee = true;
+        if (activity.mustSee) existing.mustSee = true;
       }
     } else {
       result.push(activity);

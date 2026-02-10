@@ -777,15 +777,18 @@ function estimateTravel(from: any, to: any): number {
 
   const distKm = calculateDistance(fromLat, fromLng, toLat, toLng);
 
+  // Road correction: real road distances are ~40% longer than Haversine (straight line)
+  const ROAD_CORRECTION = 1.4;
+
   // Walking: ~5km/h → 12min/km
   // Mixed walking+transit: ~8min/km
   // Urban transit: ~15km/h → 4min/km
   // Car/intercity: ~50km/h → 1.2min/km
-  if (distKm < 1) return Math.max(5, Math.round(distKm * 12));
-  if (distKm < 3) return Math.round(distKm * 8);
-  if (distKm < 15) return Math.round(distKm * 4);
+  if (distKm < 1) return Math.max(5, Math.round(distKm * ROAD_CORRECTION * 12));
+  if (distKm < 3) return Math.round(distKm * ROAD_CORRECTION * 8);
+  if (distKm < 15) return Math.round(distKm * ROAD_CORRECTION * 4);
   // Long distance: car/bus speed (day-trip returns, inter-city)
-  return Math.round((distKm / 50) * 60);
+  return Math.round((distKm * ROAD_CORRECTION / 50) * 60);
 }
 
 /**
