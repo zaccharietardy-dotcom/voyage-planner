@@ -8,7 +8,7 @@
 import type { TripPreferences, GroupType, ActivityType } from '../types';
 import type { Attraction } from '../services/attractions';
 import type { FetchedData, ScoredActivity } from './types';
-import { deduplicateByProximity, isIrrelevantAttraction } from './utils/dedup';
+import { deduplicateByProximity, deduplicateByBookingUrl, isIrrelevantAttraction } from './utils/dedup';
 import { fixAttractionDuration, fixAttractionCost } from '../tripAttractions';
 import { findKnownViatorProduct } from '../services/viatorKnownProducts';
 import { calculateDistance } from '../services/geocoding';
@@ -130,7 +130,10 @@ export function scoreAndSelectActivities(
   );
 
   // 3. Deduplicate by proximity (100m)
-  const deduped = deduplicateByProximity(withGPS, 0.1);
+  const gpsDeduped = deduplicateByProximity(withGPS, 0.1);
+
+  // 3a. Deduplicate by shared booking URL (e.g. Vatican Museums + Sistine Chapel = same visit)
+  const deduped = deduplicateByBookingUrl(gpsDeduped);
 
   // 3b. FALLBACK must-see name matching
   // If the SerpAPI must-see search failed for an item, or the dedup lost the flag,

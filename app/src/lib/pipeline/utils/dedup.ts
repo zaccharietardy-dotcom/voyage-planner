@@ -80,6 +80,51 @@ export function deduplicateByProximity(
 }
 
 /**
+ * Deduplicate activities that share the same Viator booking search URL.
+ * e.g. "Chapelle Sixtine" and "Musées du Vatican" both link to
+ * "Vatican Museums Sistine Chapel Skip the Line" — same visit, keep the best.
+ */
+export function deduplicateByBookingUrl(
+  activities: ScoredActivity[]
+): ScoredActivity[] {
+  const result: ScoredActivity[] = [];
+  const seenUrls = new Map<string, number>(); // normalized key → index in result
+
+  for (const a of activities) {
+    const url = a.bookingUrl;
+    if (!url) { result.push(a); continue; }
+
+    // Normalize: for Viator search URLs, extract the search term as dedup key
+    let key: string;
+    if (url.includes('searchResults/all?text=')) {
+      const match = url.match(/text=([^&]+)/);
+      key = match ? decodeURIComponent(match[1]).toLowerCase() : url.toLowerCase();
+    } else {
+      // Don't dedup non-search URLs (direct product links are unique)
+      result.push(a);
+      continue;
+    }
+
+    if (seenUrls.has(key)) {
+      const idx = seenUrls.get(key)!;
+      const existing = result[idx];
+      // Keep the one with more reviews (better data quality), propagate mustSee
+      if ((a.reviewCount || 0) > (existing.reviewCount || 0)) {
+        if (existing.mustSee) a.mustSee = true;
+        result[idx] = a;
+      } else {
+        if (a.mustSee) existing.mustSee = true;
+      }
+      console.log(`[Pipeline V2] Booking URL dedup: "${a.name}" merged with "${existing.name}"`);
+    } else {
+      seenUrls.set(key, result.length);
+      result.push(a);
+    }
+  }
+  return result;
+}
+
+/**
  * Filter out irrelevant attraction types (restaurants, cinemas, gyms, etc.)
  */
 export function isIrrelevantAttraction(activity: ScoredActivity): boolean {
