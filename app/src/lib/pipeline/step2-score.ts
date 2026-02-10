@@ -11,6 +11,7 @@ import type { FetchedData, ScoredActivity } from './types';
 import { deduplicateByProximity, isIrrelevantAttraction } from './utils/dedup';
 import { fixAttractionDuration, fixAttractionCost } from '../tripAttractions';
 import { findKnownViatorProduct } from '../services/viatorKnownProducts';
+import { calculateDistance } from '../services/geocoding';
 
 export function scoreAndSelectActivities(
   data: FetchedData,
@@ -42,9 +43,10 @@ export function scoreAndSelectActivities(
   const filtered = deduped.filter(a => !isIrrelevantAttraction(a));
 
   // 5. Score each activity
+  const cityCenter = data.destCoords;
   const scored = filtered.map(a => ({
     ...a,
-    score: computeScore(a, preferences),
+    score: computeScore(a, preferences, cityCenter),
   }));
 
   // 6. Sort by score descending
@@ -111,7 +113,8 @@ function tagActivity(
 
 function computeScore(
   activity: ScoredActivity,
-  preferences: TripPreferences
+  preferences: TripPreferences,
+  cityCenter: { lat: number; lng: number }
 ): number {
   // Must-see = always first
   const mustSeeBonus = activity.mustSee ? 100 : 0;
@@ -152,5 +155,17 @@ function computeScore(
   // Data quality bonus (verified > estimated > generated)
   const reliabilityBonus = activity.dataReliability === 'verified' ? 1 : 0;
 
-  return mustSeeBonus + popularityScore + ratingScore + typeMatchBonus + viatorBonus + reliabilityBonus;
+  // Distance penalty: activities far from city center are penalized on short trips
+  // >30km costs 2h+ of round-trip travel — not worth it for ≤3 day trips
+  let distancePenalty = 0;
+  if (activity.latitude && activity.longitude) {
+    const distKm = calculateDistance(activity.latitude, activity.longitude, cityCenter.lat, cityCenter.lng);
+    if (distKm > 30 && preferences.durationDays <= 3) {
+      distancePenalty = -15; // Heavy penalty: makes it lose to any city attraction
+    } else if (distKm > 30) {
+      distancePenalty = -5; // Moderate penalty for longer trips
+    }
+  }
+
+  return mustSeeBonus + popularityScore + ratingScore + typeMatchBonus + viatorBonus + reliabilityBonus + distancePenalty;
 }

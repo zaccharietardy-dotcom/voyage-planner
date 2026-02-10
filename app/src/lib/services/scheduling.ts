@@ -40,18 +40,28 @@ export function isValidScheduleHour(hour: number): boolean {
  * @returns Nouvelle date avec minutes et secondes à 0
  */
 export function roundToNearestHour(date: Date): Date {
+  return roundToNearest5Min(date);
+}
+
+/**
+ * Arrondit une date aux 5 minutes supérieures les plus proches.
+ * Ex: 11:13 → 11:15, 14:41 → 14:45, 10:00 → 10:00
+ * Arrondit toujours VERS LE HAUT (ceil) pour éviter de reculer avant le curseur.
+ */
+export function roundToNearest5Min(date: Date): Date {
   const rounded = new Date(date);
   const minutes = rounded.getMinutes();
 
   rounded.setSeconds(0);
   rounded.setMilliseconds(0);
 
-  // Arrondir à l'heure la plus proche
-  if (minutes < 30) {
-    rounded.setMinutes(0);
-  } else {
+  // Arrondir aux 5 min supérieures
+  const roundedMinutes = Math.ceil(minutes / 5) * 5;
+  if (roundedMinutes === 60) {
     rounded.setMinutes(0);
     rounded.setHours(rounded.getHours() + 1);
+  } else {
+    rounded.setMinutes(roundedMinutes);
   }
 
   return rounded;

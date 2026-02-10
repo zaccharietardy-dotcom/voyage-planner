@@ -24,12 +24,16 @@ export function clusterActivities(
   }
 
   // Separate day-trip activities (>30km from center)
+  // But for SHORT trips (≤3 days), don't allocate a day-trip day — it would steal the only full day.
+  // Instead, far activities compete on score and likely get dropped.
   const dayTripActivities: ScoredActivity[] = [];
   const cityActivities: ScoredActivity[] = [];
 
+  const allowDayTrips = numDays > 3; // Only dedicate a day-trip day for 4+ day trips
+
   for (const a of activities) {
     const dist = calculateDistance(a.latitude, a.longitude, cityCenter.lat, cityCenter.lng);
-    if (dist > 30) {
+    if (dist > 30 && allowDayTrips) {
       dayTripActivities.push(a);
     } else {
       cityActivities.push(a);

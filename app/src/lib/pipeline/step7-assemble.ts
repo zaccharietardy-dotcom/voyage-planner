@@ -347,6 +347,8 @@ export async function assembleTripSchedule(
       const activity = orderedActivities[i];
       const prev = i === 0 ? hotel : orderedActivities[i - 1];
       let travelTime = prev ? estimateTravel(prev, activity) : 10;
+      // Round travel time to nearest 5 minutes for clean schedule times
+      travelTime = Math.round(travelTime / 5) * 5;
 
       // Day-trip activities: long travel from hotel (by car/bus, not transit)
       if (balancedDay.isDayTrip && i === 0 && hotel) {
@@ -355,7 +357,7 @@ export async function assembleTripSchedule(
           activity.latitude, activity.longitude
         );
         // Day trips use car/bus speed (~50km/h average), NOT transit
-        travelTime = Math.round((distKm / 50) * 60);
+        travelTime = Math.round((distKm / 50) * 60 / 5) * 5; // Rounded to 5 min
       }
 
       // Check if it's time for lunch (cursor between 11:30 and 14:30)
