@@ -19,6 +19,9 @@ interface KnownViatorEntry {
   price?: number;
   duration?: number; // Durée de visite en minutes (source: Viator / données terrain)
   searchTerms: string; // What to search on Viator
+  lat?: number; // Coordonnées GPS réelles (pas city-center)
+  lng?: number;
+  openingHours?: { open: string; close: string }; // Horaires d'ouverture réels
 }
 
 export const KNOWN_VIATOR_PRODUCTS: Record<string, KnownViatorEntry> = {
@@ -404,42 +407,56 @@ export const KNOWN_VIATOR_PRODUCTS: Record<string, KnownViatorEntry> = {
     price: 16, // Prix officiel adulte
     duration: 75,
     searchTerms: 'Anne Frank Walking Tour Amsterdam',
+    lat: 52.3752182, lng: 4.8839765, // Westermarkt 20
+    openingHours: { open: '09:00', close: '22:00' }, // Ouvert tard en soirée
   },
   'maison anne frank': {
     city: 'Amsterdam',
     price: 16,
     duration: 75,
     searchTerms: 'Anne Frank Walking Tour Amsterdam',
+    lat: 52.3752182, lng: 4.8839765,
+    openingHours: { open: '09:00', close: '22:00' },
   },
   'rijksmuseum': {
     city: 'Amsterdam',
     price: 22, // Prix officiel adulte (correct)
     duration: 150,
     searchTerms: 'Rijksmuseum Amsterdam Guided Tour',
+    lat: 52.3599976, lng: 4.8852188, // Museumstraat 1
+    openingHours: { open: '09:00', close: '17:00' },
   },
   'van gogh museum': {
     city: 'Amsterdam',
     price: 20, // Prix officiel adulte
     duration: 90,
     searchTerms: 'Amsterdam Van Gogh Museum Tour',
+    lat: 52.3580757, lng: 4.8812053, // Museumplein 6
+    openingHours: { open: '09:00', close: '17:00' },
   },
   'musée van gogh': {
     city: 'Amsterdam',
     price: 20,
     duration: 90,
     searchTerms: 'Amsterdam Van Gogh Museum Tour',
+    lat: 52.3580757, lng: 4.8812053,
+    openingHours: { open: '09:00', close: '17:00' },
   },
   'canal cruise amsterdam': {
     city: 'Amsterdam',
     price: 16, // Prix standard croisière (correct)
     duration: 60,
     searchTerms: 'Amsterdam Canal Cruise',
+    lat: 52.3775, lng: 4.8997, // Damrak embarcadère principal
+    openingHours: { open: '09:00', close: '21:00' }, // Croisières jusque 21h
   },
   'keukenhof': {
     city: 'Amsterdam',
     price: 20, // Prix officiel entrée (sans transport)
     duration: 240,
     searchTerms: 'Keukenhof Gardens Tulip Fields Tour',
+    lat: 52.2697, lng: 4.5462, // Lisse
+    openingHours: { open: '08:00', close: '19:30' },
   },
 
   // ===== VENICE =====
@@ -537,7 +554,15 @@ export const KNOWN_VIATOR_PRODUCTS: Record<string, KnownViatorEntry> = {
  */
 export function findKnownViatorProduct(
   activityName: string
-): { url: string; price: number; title: string; duration?: number } | null {
+): {
+  url: string;
+  price: number;
+  title: string;
+  duration?: number;
+  lat?: number;
+  lng?: number;
+  openingHours?: { open: string; close: string };
+} | null {
   const searchName = activityName.toLowerCase().trim();
 
   for (const [keyword, data] of Object.entries(KNOWN_VIATOR_PRODUCTS)) {
@@ -548,6 +573,9 @@ export function findKnownViatorProduct(
         price: data.price || 0,
         title: activityName,
         duration: data.duration,
+        lat: data.lat,
+        lng: data.lng,
+        openingHours: data.openingHours,
       };
     }
   }

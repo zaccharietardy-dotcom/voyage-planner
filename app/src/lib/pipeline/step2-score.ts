@@ -85,16 +85,31 @@ export function scoreAndSelectActivities(
     }
   }
 
-  // 9. Fix durations, costs, and enrich booking URLs
+  // 9. Fix durations, costs, and enrich with Viator known product data
   return selected.map(a => {
     let fixed = fixAttractionCost(fixAttractionDuration(a)) as ScoredActivity;
-    // Enrich with Viator booking URL if none present (sync dictionary lookup)
-    if (!fixed.bookingUrl) {
-      const viatorData = findKnownViatorProduct(fixed.name);
-      if (viatorData?.url) {
+
+    // Enrich with known Viator product data (sync dictionary lookup)
+    const viatorData = findKnownViatorProduct(fixed.name);
+    if (viatorData) {
+      // Booking URL
+      if (!fixed.bookingUrl && viatorData.url) {
         fixed = { ...fixed, bookingUrl: viatorData.url };
       }
+      // Duration: use known duration if available (more accurate than API/estimate)
+      if (viatorData.duration && viatorData.duration !== fixed.duration) {
+        fixed = { ...fixed, duration: viatorData.duration };
+      }
+      // Coords: replace city-center coords with real GPS for Viator activities
+      if (viatorData.lat && viatorData.lng && fixed.dataReliability === 'estimated') {
+        fixed = { ...fixed, latitude: viatorData.lat, longitude: viatorData.lng, dataReliability: 'verified' };
+      }
+      // Opening hours: use real hours instead of generic 09:00-18:00
+      if (viatorData.openingHours) {
+        fixed = { ...fixed, openingHours: viatorData.openingHours };
+      }
     }
+
     return fixed;
   });
 }
