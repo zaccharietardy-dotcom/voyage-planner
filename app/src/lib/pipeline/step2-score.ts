@@ -10,6 +10,7 @@ import type { Attraction } from '../services/attractions';
 import type { FetchedData, ScoredActivity } from './types';
 import { deduplicateByProximity, isIrrelevantAttraction } from './utils/dedup';
 import { fixAttractionDuration, fixAttractionCost } from '../tripAttractions';
+import { findKnownViatorProduct } from '../services/viatorKnownProducts';
 
 export function scoreAndSelectActivities(
   data: FetchedData,
@@ -63,11 +64,37 @@ export function scoreAndSelectActivities(
     6 // absolute minimum
   );
   const remainingSlots = Math.max(0, targetCount - mustSees.length);
-  const selected = [...mustSees, ...nonMustSees.slice(0, remainingSlots)];
+  const selected: ScoredActivity[] = [...mustSees, ...nonMustSees.slice(0, remainingSlots)];
 
-  // 9. Fix durations and costs using existing utilities
-  return selected
-    .map(a => fixAttractionCost(fixAttractionDuration(a)) as ScoredActivity);
+  // 8b. Guarantee at least 1 Viator experiential activity (cruise, food tour, bike tour…)
+  const EXPERIENTIAL_KW = ['cruise', 'croisière', 'tour guidé', 'visite guidée',
+    'food tour', 'dégustation', 'cooking', 'bike', 'vélo', 'boat', 'bateau',
+    'canal', 'workshop', 'atelier'];
+  const isExperientialActivity = (a: ScoredActivity): boolean =>
+    a.source === 'viator' && EXPERIENTIAL_KW.some(k => (a.name || '').toLowerCase().includes(k));
+
+  if (!selected.some(isExperientialActivity)) {
+    const bestExperiential = nonMustSees.find(a =>
+      isExperientialActivity(a) && !selected.some(s => s.id === a.id)
+    );
+    if (bestExperiential) {
+      selected.push(bestExperiential);
+      console.log(`[Pipeline V2] Added guaranteed experiential: "${bestExperiential.name}"`);
+    }
+  }
+
+  // 9. Fix durations, costs, and enrich booking URLs
+  return selected.map(a => {
+    let fixed = fixAttractionCost(fixAttractionDuration(a)) as ScoredActivity;
+    // Enrich with Viator booking URL if none present (sync dictionary lookup)
+    if (!fixed.bookingUrl) {
+      const viatorData = findKnownViatorProduct(fixed.name);
+      if (viatorData?.url) {
+        fixed = { ...fixed, bookingUrl: viatorData.url };
+      }
+    }
+    return fixed;
+  });
 }
 
 function tagActivity(

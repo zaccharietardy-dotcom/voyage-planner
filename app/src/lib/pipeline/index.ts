@@ -279,41 +279,137 @@ function rebalanceClustersForFlights(
     }
   }
 
+  // Phase 2b: Must-see audit — ensure no day is overloaded with must-sees
+  // If a day has more must-see duration than available time, move excess to days with capacity
+  for (let ci = 0; ci < clusters.length; ci++) {
+    if (isDayTrip[ci]) continue;
+    const cluster = clusters[ci];
+    const mustSeesInCluster = cluster.activities.filter(a => a.mustSee);
+    if (mustSeesInCluster.length <= 1) continue; // Single must-see always fits
+
+    const availMinutes = hoursPerDay[ci] * 60;
+    const mealOverhead = 180;
+    const mustSeeDuration = mustSeesInCluster.reduce((sum, a) => sum + (a.duration || 60), 0);
+    const travelOverhead = mustSeesInCluster.length * 20;
+
+    if (mustSeeDuration + travelOverhead + mealOverhead <= availMinutes) continue; // Fits fine
+
+    // Too many must-sees for this day — move lowest-scored excess to day with most capacity
+    const sortedMustSees = [...mustSeesInCluster].sort((a, b) => a.score - b.score);
+    let minutesToFree = mustSeeDuration + travelOverhead + mealOverhead - availMinutes;
+
+    for (const mustSee of sortedMustSees) {
+      if (minutesToFree <= 0) break;
+
+      // Find day with most remaining capacity that can fit this must-see
+      let bestTarget = -1;
+      let bestRemaining = -Infinity;
+      for (let ti = 0; ti < clusters.length; ti++) {
+        if (ti === ci || isDayTrip[ti]) continue;
+        const targetAvail = hoursPerDay[ti] * 60;
+        const targetUsed = clusters[ti].activities.reduce((s, a) => s + (a.duration || 60), 0)
+          + clusters[ti].activities.length * 20 + mealOverhead;
+        const remaining = targetAvail - targetUsed;
+        if (remaining > bestRemaining && remaining >= (mustSee.duration || 60) + 20) {
+          bestRemaining = remaining;
+          bestTarget = ti;
+        }
+      }
+
+      if (bestTarget === -1) continue; // No day can fit this must-see
+
+      const idx = cluster.activities.findIndex(a => a.id === mustSee.id);
+      if (idx !== -1) {
+        const [moved] = cluster.activities.splice(idx, 1);
+        clusters[bestTarget].activities.push(moved);
+        minutesToFree -= (mustSee.duration || 60) + 20;
+        console.log(`[Pipeline V2] Must-see audit: moved "${mustSee.name}" (${mustSee.duration}min) from Day ${cluster.dayNumber} → Day ${clusters[bestTarget].dayNumber}`);
+      }
+    }
+  }
+
   // Phase 3: Ensure no cluster has 0 activities unless it's truly impossible
   // Days with available time but 0 activities should steal from overfull neighbours
+  // Uses 3 passes with decreasing constraints to maximize success
   for (let ci = 0; ci < clusters.length; ci++) {
     if (isDayTrip[ci]) continue;
     if (clusters[ci].activities.length > 0) continue;
     if (maxPerDay[ci] === 0) continue; // No time available, skip
 
-    // This day has available hours but no activities — steal from the fullest cluster
-    const slotsToFill = Math.min(maxPerDay[ci], 2); // Fill at least 1-2 activities
+    // Prefer short activities for short days (arrival/departure)
+    const availMinutes = hoursPerDay[ci] * 60;
+    const slotsToFill = Math.min(maxPerDay[ci], 2);
+
     for (let s = 0; s < slotsToFill; s++) {
       let bestSource = -1;
-      let bestCount = 0;
-      for (let ti = 0; ti < clusters.length; ti++) {
-        if (ti === ci || isDayTrip[ti]) continue;
-        // Only steal from clusters that have more than their minimum (don't empty them)
-        const nonMustSees = clusters[ti].activities.filter(a => !a.mustSee).length;
-        if (nonMustSees > 1 && clusters[ti].activities.length > bestCount) {
-          bestCount = clusters[ti].activities.length;
-          bestSource = ti;
+      let bestIdx = -1;
+
+      // PASS 1: Steal non-must-see from clusters with >1 non-must-see
+      {
+        let bestCount = 0;
+        for (let ti = 0; ti < clusters.length; ti++) {
+          if (ti === ci || isDayTrip[ti]) continue;
+          const nonMustSees = clusters[ti].activities.filter(a => !a.mustSee).length;
+          if (nonMustSees > 1 && clusters[ti].activities.length > bestCount) {
+            bestCount = clusters[ti].activities.length;
+            bestSource = ti;
+          }
         }
       }
+
+      // PASS 2: If PASS 1 failed and target still has 0 activities,
+      // steal from clusters with >=1 non-must-see AND >=2 total activities
+      if (bestSource === -1 && clusters[ci].activities.length === 0) {
+        for (let ti = 0; ti < clusters.length; ti++) {
+          if (ti === ci || isDayTrip[ti]) continue;
+          const nonMustSees = clusters[ti].activities.filter(a => !a.mustSee).length;
+          if (nonMustSees >= 1 && clusters[ti].activities.length >= 2) {
+            bestSource = ti;
+            break;
+          }
+        }
+      }
+
+      // PASS 3: Last resort — steal a must-see from a cluster with >=3 activities
+      if (bestSource === -1 && clusters[ci].activities.length === 0) {
+        let worstMustSeeScore = Infinity;
+        for (let ti = 0; ti < clusters.length; ti++) {
+          if (ti === ci || isDayTrip[ti]) continue;
+          if (clusters[ti].activities.length < 3) continue;
+          for (let ai = 0; ai < clusters[ti].activities.length; ai++) {
+            const a = clusters[ti].activities[ai];
+            // Prefer short activities that fit the available time
+            if ((a.duration || 60) + 20 > availMinutes) continue;
+            if (a.score < worstMustSeeScore) {
+              worstMustSeeScore = a.score;
+              bestSource = ti;
+              bestIdx = ai;
+            }
+          }
+        }
+        if (bestSource !== -1 && bestIdx !== -1) {
+          const [moved] = clusters[bestSource].activities.splice(bestIdx, 1);
+          clusters[ci].activities.push(moved);
+          console.log(`[Pipeline V2] Phase 3 PASS 3: moved "${moved.name}" from Day ${clusters[bestSource].dayNumber} → empty Day ${clusters[ci].dayNumber}`);
+          continue; // Next slot
+        }
+      }
+
       if (bestSource === -1) break;
 
-      // Move the lowest-scored non-must-see from the source
+      // For PASS 1 & 2: pick the best-fitting non-must-see (shortest for short days)
       const source = clusters[bestSource];
-      const moveIdx = source.activities.findIndex(a => !a.mustSee);
-      if (moveIdx === -1) break;
-
-      // Pick lowest score among non-must-sees
       let worstIdx = -1;
-      let worstScore = Infinity;
+      let bestFitScore = Infinity;
       for (let ai = 0; ai < source.activities.length; ai++) {
         if (source.activities[ai].mustSee) continue;
-        if (source.activities[ai].score < worstScore) {
-          worstScore = source.activities[ai].score;
+        const dur = source.activities[ai].duration || 60;
+        // For short days (<4h), prefer shorter activities; otherwise pick lowest score
+        const fitScore = availMinutes < 240
+          ? dur // prefer shortest
+          : source.activities[ai].score; // prefer lowest-scored
+        if (fitScore < bestFitScore) {
+          bestFitScore = fitScore;
           worstIdx = ai;
         }
       }

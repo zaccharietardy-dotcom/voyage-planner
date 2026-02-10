@@ -28,13 +28,21 @@ export function fixAttractionDuration(attraction: Attraction): Attraction {
  * Sinon → appliquer les règles de prix (gratuit/prix plancher/cap)
  */
 export function fixAttractionCost(attraction: Attraction): Attraction {
-  // Données vérifiées (Viator API, viatorKnownProducts) → ne pas toucher
+  const name = attraction.name.toLowerCase();
+  const cost = attraction.estimatedCost;
+
+  // Prix plancher depuis viatorKnownProducts — AVANT le check verified
+  // Les musées majeurs (Rijksmuseum, Van Gogh, etc.) arrivent parfois avec cost=0
+  // même en 'verified' (Google Places ne fournit pas toujours le prix d'entrée)
+  const viatorData = findKnownViatorProduct(attraction.name);
+  if (viatorData && viatorData.price > 0 && (cost === 0 || cost < viatorData.price * 0.5)) {
+    return { ...attraction, estimatedCost: viatorData.price };
+  }
+
+  // Données vérifiées (Viator API, viatorKnownProducts) → ne pas toucher davantage
   if (attraction.dataReliability === 'verified') {
     return attraction;
   }
-
-  const name = attraction.name.toLowerCase();
-  const cost = attraction.estimatedCost;
 
   // Supermarchés / grocery: coût 0 (filet de sécurité)
   if (/\b(supermarket|supermarché|supermercato|conad|carrefour|lidl|aldi|esselunga|grocery|épicerie)\b/i.test(name)) {
@@ -65,12 +73,6 @@ export function fixAttractionCost(attraction: Attraction): Attraction {
     if (cost > 0 && !/\b(observatory|deck|tower|tour|ticket)\b/i.test(name)) {
       return { ...attraction, estimatedCost: 0 };
     }
-  }
-
-  // Prix plancher depuis viatorKnownProducts (musées majeurs dont le prix est sous-estimé)
-  const viatorData = findKnownViatorProduct(attraction.name);
-  if (viatorData && viatorData.price > 0 && cost < viatorData.price * 0.5) {
-    return { ...attraction, estimatedCost: viatorData.price };
   }
 
   // Street food / marchés → cap à 15€/pers

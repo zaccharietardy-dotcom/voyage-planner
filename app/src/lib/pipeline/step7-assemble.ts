@@ -505,7 +505,10 @@ export async function assembleTripSchedule(
         estimatedCost: itemData.estimatedCost || (itemData.priceLevel ? (itemData.priceLevel || 1) * 15 : 0),
         duration: item.duration,
         rating: itemData.rating,
-        bookingUrl: itemData.bookingUrl || itemData.reservationUrl,
+        bookingUrl: itemData.bookingUrl || itemData.reservationUrl
+          || (item.type === 'restaurant' && (itemData.name || item.title)
+            ? `https://www.thefork.com/search?queryPlace=${encodeURIComponent((itemData.name || item.title) + ', ' + preferences.destination)}`
+            : undefined),
         viatorUrl: itemData.viatorUrl,
         googleMapsPlaceUrl,
         restaurant: item.type === 'restaurant' ? itemData : undefined,
