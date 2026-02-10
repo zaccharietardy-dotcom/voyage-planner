@@ -752,7 +752,7 @@ export async function assembleTripSchedule(
         transitDataSource: itemData.transitDataSource,
         priceRange: itemData.priceRange,
         dataReliability: itemData.dataReliability || 'verified',
-        imageUrl: itemData.photos?.[0] || itemData.imageUrl,
+        imageUrl: itemData.photos?.[0] || itemData.imageUrl || itemData.photoUrl,
       };
     });
 

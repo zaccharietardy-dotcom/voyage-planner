@@ -158,14 +158,15 @@ export function ActivityCard({
           <div className="w-1 self-stretch" style={{ backgroundColor: color }} />
         )}
 
-        {/* Activity image */}
-        {item.imageUrl && item.type === 'activity' && (
+        {/* Activity / restaurant / hotel image */}
+        {item.imageUrl && ['activity', 'restaurant', 'hotel', 'checkin', 'checkout'].includes(item.type) && (
           <div className="w-20 self-stretch shrink-0 overflow-hidden">
             <img
               src={item.imageUrl}
               alt={item.title}
               className="w-full h-full object-cover"
               loading="lazy"
+              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
             />
           </div>
         )}
