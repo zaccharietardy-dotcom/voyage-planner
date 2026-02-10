@@ -181,12 +181,20 @@ export async function fetchAllData(preferences: TripPreferences): Promise<Fetche
   // Even when the user HAS specified some, merge in curated ones they didn't mention.
   const curatedMustSees = getMustSeeAttractions(destination);
   if (curatedMustSees.length > 0) {
-    const existingNames = new Set(mustSeeAttractions.map((a: any) => a.name.toLowerCase()));
+    // Normalize for accent-insensitive, fuzzy matching (not just exact name)
+    // This prevents "Maison Anne Frank" (curated) duplicating "Maison d'Anne Frank" (fetched)
+    const normalizeFuzzy = (name: string) => name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
+    const existingNormalized = mustSeeAttractions.map((a: any) => normalizeFuzzy(a.name));
     let injectedCount = 0;
     for (const curated of curatedMustSees) {
-      if (!existingNames.has(curated.name.toLowerCase())) {
+      const curatedNorm = normalizeFuzzy(curated.name);
+      // Check exact normalized match OR substring match (one contains the other)
+      const isDuplicate = existingNormalized.some(existingNorm =>
+        existingNorm === curatedNorm || existingNorm.includes(curatedNorm) || curatedNorm.includes(existingNorm)
+      );
+      if (!isDuplicate) {
         mustSeeAttractions.push(curated);
-        existingNames.add(curated.name.toLowerCase());
+        existingNormalized.push(curatedNorm);
         injectedCount++;
       }
     }

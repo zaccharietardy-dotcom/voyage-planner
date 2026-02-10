@@ -8,6 +8,7 @@ import type { ScoredActivity } from '../types';
 /**
  * Check if two names refer to the same attraction (different data sources).
  * Uses accent-insensitive, normalized substring matching.
+ * Also checks for shared significant words (e.g. "rijksmuseum" in both names).
  */
 function areNamesSimilar(name1: string, name2: string): boolean {
   const n1 = normalizeName(name1);
@@ -16,7 +17,35 @@ function areNamesSimilar(name1: string, name2: string): boolean {
   if (n1 === n2) return true;
   // One contains the other (e.g. "pantheon" vs "pantheonroma")
   if (n1.includes(n2) || n2.includes(n1)) return true;
+
+  // Check for shared significant words (6+ chars to avoid false positives).
+  // This catches "Visite guidée du Rijksmuseum" vs "Rijksmuseum Amsterdam"
+  // because both contain "rijksmuseum".
+  const words1 = extractSignificantWords(name1);
+  const words2 = extractSignificantWords(name2);
+  for (const w of words1) {
+    if (words2.has(w)) return true;
+  }
+
   return false;
+}
+
+/** Extract significant words (6+ chars, normalized, no stop words) from a name */
+function extractSignificantWords(name: string): Set<string> {
+  const stopWords = new Set([
+    'museum', 'musee', 'visite', 'guided', 'guidee', 'private', 'privee',
+    'amsterdam', 'paris', 'london', 'rome', 'barcelona', 'berlin', 'madrid',
+    'ticket', 'tickets', 'access', 'acces', 'priority', 'prioritaire',
+    'walking', 'balade', 'promenade',
+  ]);
+  const normalized = name
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .split(/\s+/)
+    .filter(w => w.length >= 6 && !stopWords.has(w));
+  return new Set(normalized);
 }
 
 /**
@@ -80,7 +109,8 @@ export function deduplicateByProximity(
 }
 
 /**
- * Deduplicate activities that share the same Viator booking search URL.
+ * Deduplicate activities that share the same Viator booking search URL
+ * OR are Viator products for the same location (same GPS, same attraction).
  * e.g. "Chapelle Sixtine" and "Musées du Vatican" both link to
  * "Vatican Museums Sistine Chapel Skip the Line" — same visit, keep the best.
  */
@@ -95,20 +125,21 @@ export function deduplicateByBookingUrl(
     if (!url) { result.push(a); continue; }
 
     // Normalize: for Viator search URLs, extract the search term as dedup key
-    let key: string;
+    let key: string | null = null;
     if (url.includes('searchResults/all?text=')) {
       const match = url.match(/text=([^&]+)/);
-      key = match ? decodeURIComponent(match[1]).toLowerCase() : url.toLowerCase();
-    } else {
-      // Don't dedup non-search URLs (direct product links are unique)
-      result.push(a);
-      continue;
+      key = match ? `viator-search:${decodeURIComponent(match[1]).toLowerCase()}` : null;
+    } else if (url.includes('viator.com') && url.includes('/tours/')) {
+      // Direct Viator product URL — extract the attraction slug from the path
+      // e.g. /tours/Amsterdam/Rijksmuseum-Highlights-Tour/d525-460280P3 → "rijksmuseum"
+      // We look for significant words shared with existing activities
+      // Fall through to GPS dedup below
+      key = null;
     }
 
-    if (seenUrls.has(key)) {
+    if (key && seenUrls.has(key)) {
       const idx = seenUrls.get(key)!;
       const existing = result[idx];
-      // Keep the one with more reviews (better data quality), propagate mustSee
       if ((a.reviewCount || 0) > (existing.reviewCount || 0)) {
         if (existing.mustSee) a.mustSee = true;
         result[idx] = a;
@@ -116,11 +147,73 @@ export function deduplicateByBookingUrl(
         if (a.mustSee) existing.mustSee = true;
       }
       console.log(`[Pipeline V2] Booking URL dedup: "${a.name}" merged with "${existing.name}"`);
-    } else {
+    } else if (key) {
       seenUrls.set(key, result.length);
+      result.push(a);
+    } else {
       result.push(a);
     }
   }
+
+  // Second pass: deduplicate Viator products that are at the same location
+  // but have different direct product URLs. This catches two different Viator
+  // tours of the same museum (e.g. "Rijksmuseum Private Tour" vs "Rijksmuseum Guided Tour").
+  return deduplicateViatorSameLocation(result);
+}
+
+/**
+ * Among Viator activities with direct product URLs, deduplicate those
+ * that are at the same GPS location (<200m) and share significant words.
+ * Keep the one with the most reviews.
+ */
+function deduplicateViatorSameLocation(activities: ScoredActivity[]): ScoredActivity[] {
+  const result: ScoredActivity[] = [];
+
+  for (const a of activities) {
+    const isViatorProduct = a.source === 'viator'
+      && a.bookingUrl?.includes('viator.com')
+      && a.bookingUrl?.includes('/tours/');
+
+    if (!isViatorProduct || !a.latitude || !a.longitude) {
+      result.push(a);
+      continue;
+    }
+
+    // Check if there's already a Viator product at the same location in result
+    let isDuplicate = false;
+    let dupIdx = -1;
+    for (let i = 0; i < result.length; i++) {
+      const existing = result[i];
+      if (!existing.latitude || !existing.longitude) continue;
+
+      const dist = calculateDistance(a.latitude, a.longitude, existing.latitude, existing.longitude);
+      if (dist < 0.2) {
+        // Same GPS location — check if names share significant words
+        const namesSimilar = areNamesSimilar(a.name || '', existing.name || '');
+        if (namesSimilar) {
+          isDuplicate = true;
+          dupIdx = i;
+          break;
+        }
+      }
+    }
+
+    if (isDuplicate && dupIdx >= 0) {
+      const existing = result[dupIdx];
+      // Keep the one with more reviews
+      if ((a.reviewCount || 0) > (existing.reviewCount || 0)) {
+        if (existing.mustSee) a.mustSee = true;
+        // Preserve the bookingUrl and imageUrl from the better entry
+        result[dupIdx] = a;
+      } else {
+        if (a.mustSee) existing.mustSee = true;
+      }
+      console.log(`[Pipeline V2] Viator location dedup: "${a.name}" merged with "${existing.name}"`);
+    } else {
+      result.push(a);
+    }
+  }
+
   return result;
 }
 
