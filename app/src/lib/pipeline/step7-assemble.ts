@@ -767,7 +767,7 @@ export async function assembleTripSchedule(
         dataReliability: itemData.dataReliability || 'verified',
         imageUrl: itemData.photos?.[0] || itemData.imageUrl || itemData.photoUrl
           || (item.type === 'flight' ? TRANSPORT_IMAGES.flight : undefined)
-          || (item.type === 'transport' ? (TRANSPORT_IMAGES[itemData.mode] || TRANSPORT_IMAGES.train) : undefined),
+          || (item.type === 'transport' ? (TRANSPORT_IMAGES[itemData.mode || ''] || TRANSPORT_IMAGES.train) : undefined),
       };
     });
 
@@ -783,9 +783,12 @@ export async function assembleTripSchedule(
   }
 
   // 12. Enrich items missing images (Google Places photo lookup + Wikipedia fallback)
-  await enrichWithPlaceImages(days).catch(e =>
-    console.warn('[Pipeline V2] Image enrichment failed:', e)
-  );
+  // Non-critical: wrapped in try/catch so pipeline never fails because of images
+  try {
+    await enrichWithPlaceImages(days);
+  } catch (e) {
+    console.warn('[Pipeline V2] Image enrichment failed (non-critical):', e);
+  }
 
   // 13. Batch fetch directions (non-blocking enrichment)
   await enrichWithDirections(days).catch(e =>
@@ -1018,49 +1021,56 @@ function getActivityMinStartTime(activity: ScoredActivity, dayDate: Date): Date 
  * Has a hard 15s timeout — images are non-critical enrichment.
  */
 async function enrichWithPlaceImages(days: TripDay[]): Promise<void> {
-  const itemsNeedingImages: TripItem[] = [];
-  const imageTypes = ['activity', 'restaurant', 'hotel', 'checkin', 'checkout'];
+  try {
+    const itemsNeedingImages: TripItem[] = [];
+    const imageTypes = ['activity', 'restaurant', 'hotel', 'checkin', 'checkout'];
 
-  for (const day of days) {
-    for (const item of day.items) {
-      if (!item.imageUrl && imageTypes.includes(item.type)) {
-        itemsNeedingImages.push(item);
+    for (const day of days) {
+      for (const item of day.items) {
+        if (!item.imageUrl && imageTypes.includes(item.type)) {
+          itemsNeedingImages.push(item);
+        }
       }
     }
+
+    if (itemsNeedingImages.length === 0) return;
+
+    console.log(`[Pipeline V2] Fetching images for ${itemsNeedingImages.length} items without photos...`);
+
+    // Hard timeout: 10s max for the entire image enrichment phase
+    const enrichmentWork = async () => {
+      await Promise.allSettled(
+        itemsNeedingImages.map(async (item) => {
+          try {
+            const imageUrl = await fetchPlaceImage(
+              item.title,
+              item.latitude !== 0 ? item.latitude : undefined,
+              item.longitude !== 0 ? item.longitude : undefined
+            );
+            if (imageUrl) {
+              item.imageUrl = imageUrl;
+            }
+          } catch {
+            // Individual item failure — skip silently
+          }
+        })
+      );
+    };
+
+    const timeout = new Promise<void>((resolve) => {
+      setTimeout(() => {
+        console.warn('[Pipeline V2] ⚠️ Image enrichment timeout (10s) — continuing');
+        resolve();
+      }, 10_000);
+    });
+
+    await Promise.race([enrichmentWork(), timeout]);
+
+    const enriched = itemsNeedingImages.filter(i => i.imageUrl).length;
+    console.log(`[Pipeline V2] ✅ Place images: ${enriched}/${itemsNeedingImages.length} enriched`);
+  } catch (e) {
+    console.warn('[Pipeline V2] Image enrichment error:', e);
   }
-
-  if (itemsNeedingImages.length === 0) return;
-
-  console.log(`[Pipeline V2] Fetching images for ${itemsNeedingImages.length} items without photos...`);
-
-  // Hard timeout: 15s max for the entire image enrichment phase
-  const enrichmentWork = async () => {
-    // All items in one parallel burst (each has its own 3s timeout internally)
-    await Promise.allSettled(
-      itemsNeedingImages.map(async (item) => {
-        const imageUrl = await fetchPlaceImage(
-          item.title,
-          item.latitude !== 0 ? item.latitude : undefined,
-          item.longitude !== 0 ? item.longitude : undefined
-        );
-        if (imageUrl) {
-          item.imageUrl = imageUrl;
-        }
-      })
-    );
-  };
-
-  const timeout = new Promise<void>((resolve) => {
-    setTimeout(() => {
-      console.warn('[Pipeline V2] ⚠️ Image enrichment timeout (15s) — continuing with partial results');
-      resolve();
-    }, 15_000);
-  });
-
-  await Promise.race([enrichmentWork(), timeout]);
-
-  const enriched = itemsNeedingImages.filter(i => i.imageUrl).length;
-  console.log(`[Pipeline V2] ✅ Place images: ${enriched}/${itemsNeedingImages.length} enriched`);
 }
 
 /**
