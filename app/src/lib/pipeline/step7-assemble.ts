@@ -1081,8 +1081,8 @@ async function enrichWithDirections(days: TripDay[]): Promise<void> {
  * Detect if a string looks like a postal address rather than a description.
  * Filters out "00120 Vatican City, État de la Cité du Vatican" etc.
  */
-function looksLikeAddress(text: string): boolean {
-  if (!text || text.length < 5) return false;
+function looksLikeAddress(text: any): boolean {
+  if (!text || typeof text !== 'string' || text.length < 5) return false;
   // Postal codes (4-5 digits) combined with commas → likely an address
   if (/\b\d{4,5}\b/.test(text) && /,/.test(text)) return true;
   // Typical address words (international)
@@ -1103,8 +1103,9 @@ function looksLikeAddress(text: string): boolean {
  * Priority: real description > cuisineTypes/specialties > tips > empty.
  */
 function buildDescription(itemData: any, itemType: string): string {
+  if (!itemData) return '';
   // 1. If a real description exists and is NOT an address → use it
-  if (itemData.description && !looksLikeAddress(itemData.description)) {
+  if (itemData.description && typeof itemData.description === 'string' && !looksLikeAddress(itemData.description)) {
     return itemData.description;
   }
 
@@ -1118,7 +1119,7 @@ function buildDescription(itemData: any, itemType: string): string {
   }
 
   // 3. Fallback to tips (often populated by Viator, attractions.ts curated data)
-  if (itemData.tips && !looksLikeAddress(itemData.tips)) {
+  if (itemData.tips && typeof itemData.tips === 'string' && !looksLikeAddress(itemData.tips)) {
     return itemData.tips;
   }
 
