@@ -99,6 +99,15 @@ const TRANSIT_MODE_COLORS: Record<string, string> = {
 /** Types that can display a hero image */
 const IMAGE_TYPES: TripItemType[] = ['activity', 'restaurant', 'hotel', 'checkin', 'checkout'];
 
+/** Gradient backgrounds per type (used when no image available) */
+const TYPE_GRADIENTS: Record<string, string> = {
+  activity: 'from-blue-600/90 to-blue-800/95',
+  restaurant: 'from-orange-500/90 to-orange-700/95',
+  hotel: 'from-violet-500/90 to-violet-700/95',
+  checkin: 'from-violet-500/90 to-violet-700/95',
+  checkout: 'from-violet-500/90 to-violet-700/95',
+};
+
 export function ActivityCard({
   item,
   orderNumber,
@@ -121,6 +130,9 @@ export function ActivityCard({
   const hasImage = item.imageUrl && IMAGE_TYPES.includes(item.type);
   const [imgError, setImgError] = useState(false);
   const showImage = hasImage && !imgError;
+  const isHeroType = IMAGE_TYPES.includes(item.type);
+  // Hero cards always use the "image" style (white text, overlay) — either with a real image or a gradient fallback
+  const useHeroStyle = isHeroType;
 
   return (
     <Card
@@ -135,37 +147,47 @@ export function ActivityCard({
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
-      {/* Background image (covers entire card) */}
-      {showImage && (
+      {/* Background: real image with overlay, or colored gradient fallback */}
+      {isHeroType && (
         <>
-          <img
-            src={item.imageUrl}
-            alt={item.title}
-            className="absolute inset-0 w-full h-full object-cover"
-            loading="lazy"
-            onError={() => setImgError(true)}
-          />
-          {/* Dark gradient overlay for text readability */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/30" />
+          {showImage ? (
+            <>
+              <img
+                src={item.imageUrl}
+                alt={item.title}
+                className="absolute inset-0 w-full h-full object-cover"
+                loading="lazy"
+                onError={() => setImgError(true)}
+              />
+              {/* Dark gradient overlay for text readability */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/30" />
+            </>
+          ) : (
+            <>
+              {/* Colored gradient fallback + large watermark icon */}
+              <div className={cn("absolute inset-0 bg-gradient-to-br", TYPE_GRADIENTS[item.type] || 'from-gray-600/90 to-gray-800/95')} />
+              <Icon className="absolute right-3 bottom-3 h-16 w-16 text-white/10" />
+            </>
+          )}
         </>
       )}
 
-      <div className={cn("flex", showImage ? "relative z-10" : "")}>
+      <div className={cn("flex", useHeroStyle ? "relative z-10" : "")}>
         {/* Drag handle */}
         {dragHandleProps && (
           <div
             {...dragHandleProps}
             className={cn(
               "flex items-center justify-center w-7 cursor-grab active:cursor-grabbing transition-colors",
-              showImage ? "hover:bg-white/10" : "bg-muted/30 hover:bg-muted/60"
+              useHeroStyle ? "hover:bg-white/10" : "bg-muted/30 hover:bg-muted/60"
             )}
           >
-            <GripVertical className={cn("h-3.5 w-3.5", showImage ? "text-white/60" : "text-muted-foreground/60")} />
+            <GripVertical className={cn("h-3.5 w-3.5", useHeroStyle ? "text-white/60" : "text-muted-foreground/60")} />
           </div>
         )}
 
-        {/* Color accent stripe + order number (when no image) */}
-        {!showImage && (
+        {/* Color accent stripe + order number (non-hero types only: transport, flight, etc.) */}
+        {!isHeroType && (
           orderNumber !== undefined ? (
             <div
               className="w-9 self-stretch flex items-center justify-center shrink-0"
@@ -184,34 +206,33 @@ export function ActivityCard({
         )}
 
         {/* Content */}
-        <div className={cn("flex-1 min-w-0", showImage ? "p-4" : "p-3.5")}>
+        <div className={cn("flex-1 min-w-0", useHeroStyle ? "p-4" : "p-3.5")}>
           <div className="flex items-start gap-3">
             <div className="flex-1 min-w-0">
               {/* Time row */}
-              <div className={cn("flex items-center gap-2", showImage ? "mb-2" : "mb-1")}>
-                {/* Order number badge (inline when image) */}
-                {showImage && orderNumber !== undefined && (
+              <div className={cn("flex items-center gap-2", useHeroStyle ? "mb-2" : "mb-1")}>
+                {/* Order number badge (inline on hero cards) */}
+                {useHeroStyle && orderNumber !== undefined && (
                   <span
-                    className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-md shrink-0"
-                    style={{ backgroundColor: color }}
+                    className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-md shrink-0 bg-white/20"
                   >
                     {orderNumber}
                   </span>
                 )}
                 <span className={cn(
                   "inline-flex items-center gap-1 font-medium",
-                  showImage ? "text-sm text-white/90" : "text-xs text-muted-foreground"
+                  useHeroStyle ? "text-sm text-white/90" : "text-xs text-muted-foreground"
                 )}>
-                  <Clock className={cn(showImage ? "h-3.5 w-3.5" : "h-3 w-3")} />
+                  <Clock className={cn(useHeroStyle ? "h-3.5 w-3.5" : "h-3 w-3")} />
                   {item.startTime} – {item.endTime}
                 </span>
                 {/* Type badge */}
                 <span
                   className={cn(
                     "font-semibold leading-none rounded",
-                    showImage ? "px-2 py-1 text-xs bg-white/20 text-white/90" : "px-1.5 py-0.5 text-[10px]"
+                    useHeroStyle ? "px-2 py-1 text-xs bg-white/20 text-white/90" : "px-1.5 py-0.5 text-[10px]"
                   )}
-                  style={!showImage ? { backgroundColor: `${color}12`, color } : undefined}
+                  style={!useHeroStyle ? { backgroundColor: `${color}12`, color } : undefined}
                 >
                   {TYPE_LABELS[item.type]}
                 </span>
@@ -220,7 +241,7 @@ export function ActivityCard({
               {/* Title */}
               <h4 className={cn(
                 "font-semibold leading-snug mb-0 line-clamp-2",
-                showImage ? "text-base text-white drop-shadow-md" : "text-[13px]"
+                useHeroStyle ? "text-base text-white drop-shadow-md" : "text-[13px]"
               )}>
                 {item.title}
               </h4>
@@ -229,7 +250,7 @@ export function ActivityCard({
               {item.description && (
                 <p className={cn(
                   "leading-relaxed line-clamp-2 mb-1.5",
-                  showImage ? "text-sm text-white/70" : "text-xs text-muted-foreground"
+                  useHeroStyle ? "text-sm text-white/70" : "text-xs text-muted-foreground"
                 )}>
                   {item.description}
                 </p>
@@ -237,20 +258,20 @@ export function ActivityCard({
               {/* Meta row: rating, cost */}
               <div className={cn(
                 "flex items-center gap-2.5 flex-wrap",
-                showImage ? "text-sm text-white/80 mt-1" : "text-xs text-muted-foreground"
+                useHeroStyle ? "text-sm text-white/80 mt-1" : "text-xs text-muted-foreground"
               )}>
                 {item.rating && item.rating > 0 && (
                   <span className="inline-flex items-center gap-0.5 font-medium">
-                    <Star className={cn(showImage ? "h-3.5 w-3.5" : "h-3 w-3", "fill-amber-400 text-amber-400")} />
+                    <Star className={cn(useHeroStyle ? "h-3.5 w-3.5" : "h-3 w-3", "fill-amber-400 text-amber-400")} />
                     {item.rating.toFixed(1)}
                   </span>
                 )}
                 {item.timeFromPrevious && item.timeFromPrevious > 0 && (
                   <span className="inline-flex items-center gap-1">
-                    <Navigation className={cn(showImage ? "h-3.5 w-3.5" : "h-3 w-3")} />
+                    <Navigation className={cn(useHeroStyle ? "h-3.5 w-3.5" : "h-3 w-3")} />
                     {item.timeFromPrevious} min
                     {item.distanceFromPrevious && item.distanceFromPrevious > 0.1 && (
-                      <span className={showImage ? "text-white/50" : "text-muted-foreground/60"}>({item.distanceFromPrevious.toFixed(1)} km)</span>
+                      <span className={useHeroStyle ? "text-white/50" : "text-muted-foreground/60"}>({item.distanceFromPrevious.toFixed(1)} km)</span>
                     )}
                   </span>
                 )}
@@ -258,14 +279,14 @@ export function ActivityCard({
                 {item.type !== 'transport' && (
                   <>
                     {item.estimatedCost != null && item.estimatedCost > 0 ? (
-                      <span className={cn("font-semibold", showImage ? "text-white" : "text-primary")}>
+                      <span className={cn("font-semibold", useHeroStyle ? "text-white" : "text-primary")}>
                         ~{item.estimatedCost}€
                         {item.type !== 'parking' && (
-                          <span className={cn("font-normal", showImage ? "text-white/60" : "text-muted-foreground")}> / pers.</span>
+                          <span className={cn("font-normal", useHeroStyle ? "text-white/60" : "text-muted-foreground")}> / pers.</span>
                         )}
                       </span>
                     ) : item.type === 'activity' ? (
-                      <span className={cn("font-medium", showImage ? "text-emerald-300" : "text-emerald-600 dark:text-emerald-400")}>Gratuit</span>
+                      <span className={cn("font-medium", useHeroStyle ? "text-emerald-300" : "text-emerald-600 dark:text-emerald-400")}>Gratuit</span>
                     ) : null}
                   </>
                 )}
@@ -340,8 +361,8 @@ export function ActivityCard({
               </div>
             </div>
 
-            {/* Type icon (no image mode only) */}
-            {!showImage && (
+            {/* Type icon (non-hero types only) */}
+            {!isHeroType && (
               <div
                 className="p-2 rounded-lg shrink-0"
                 style={{ backgroundColor: `${color}10` }}
