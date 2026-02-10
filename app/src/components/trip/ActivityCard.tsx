@@ -97,7 +97,7 @@ const TRANSIT_MODE_COLORS: Record<string, string> = {
 };
 
 /** Types that can display a hero image */
-const IMAGE_TYPES: TripItemType[] = ['activity', 'restaurant', 'hotel', 'checkin', 'checkout'];
+const IMAGE_TYPES: TripItemType[] = ['activity', 'restaurant', 'hotel', 'checkin', 'checkout', 'flight', 'transport'];
 
 /** Gradient backgrounds per type (used when no image available) */
 const TYPE_GRADIENTS: Record<string, string> = {
@@ -106,6 +106,8 @@ const TYPE_GRADIENTS: Record<string, string> = {
   hotel: 'from-violet-500/90 to-violet-700/95',
   checkin: 'from-violet-500/90 to-violet-700/95',
   checkout: 'from-violet-500/90 to-violet-700/95',
+  flight: 'from-pink-500/90 to-pink-700/95',
+  transport: 'from-emerald-500/90 to-emerald-700/95',
 };
 
 export function ActivityCard({

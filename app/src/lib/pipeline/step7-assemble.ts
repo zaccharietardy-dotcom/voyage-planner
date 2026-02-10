@@ -10,6 +10,7 @@ import type { FetchedData, ActivityCluster, MealAssignment, BalancedPlan, Scored
 import { DayScheduler, parseTime, formatTime } from '../services/scheduler';
 import { calculateDistance, estimateTravelTime } from '../services/geocoding';
 import { getDirections } from '../services/directions';
+import { fetchWikipediaImage } from './services/wikimediaImages';
 // Simple UUID generator (avoids external dependency)
 function uuidv4(): string {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
@@ -22,6 +23,16 @@ function uuidv4(): string {
 const MODE_LABELS: Record<string, string> = {
   train: '🚄 Train', bus: '🚌 Bus', car: '🚗 Voiture',
   combined: '🔄 Transport', ferry: '⛴️ Ferry',
+};
+
+/** Static images for transport types (Unsplash free-to-use) */
+const TRANSPORT_IMAGES: Record<string, string> = {
+  flight: 'https://images.unsplash.com/photo-1436491865332-7a61a109db05?w=600&h=400&fit=crop',
+  train: 'https://images.unsplash.com/photo-1474487548417-781cb71495f3?w=600&h=400&fit=crop',
+  bus: 'https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=600&h=400&fit=crop',
+  ferry: 'https://images.unsplash.com/photo-1534008897995-27a23e859048?w=600&h=400&fit=crop',
+  car: 'https://images.unsplash.com/photo-1449965408869-ebd13bc9e5a8?w=600&h=400&fit=crop',
+  combined: 'https://images.unsplash.com/photo-1474487548417-781cb71495f3?w=600&h=400&fit=crop',
 };
 
 /**
@@ -754,7 +765,9 @@ export async function assembleTripSchedule(
         transitDataSource: itemData.transitDataSource,
         priceRange: itemData.priceRange,
         dataReliability: itemData.dataReliability || 'verified',
-        imageUrl: itemData.photos?.[0] || itemData.imageUrl || itemData.photoUrl,
+        imageUrl: itemData.photos?.[0] || itemData.imageUrl || itemData.photoUrl
+          || (item.type === 'flight' ? TRANSPORT_IMAGES.flight : undefined)
+          || (item.type === 'transport' ? (TRANSPORT_IMAGES[itemData.mode] || TRANSPORT_IMAGES.train) : undefined),
       };
     });
 
@@ -769,7 +782,12 @@ export async function assembleTripSchedule(
     });
   }
 
-  // 12. Batch fetch directions (non-blocking enrichment)
+  // 12. Enrich activities with Wikipedia images (for items missing images)
+  await enrichWithWikipediaImages(days).catch(e =>
+    console.warn('[Pipeline V2] Wikipedia image enrichment failed:', e)
+  );
+
+  // 13. Batch fetch directions (non-blocking enrichment)
   await enrichWithDirections(days).catch(e =>
     console.warn('[Pipeline V2] Directions enrichment failed:', e)
   );
@@ -992,6 +1010,44 @@ function getActivityMinStartTime(activity: ScoredActivity, dayDate: Date): Date 
     return parseTime(dayDate, activity.openingHours.open);
   }
   return undefined;
+}
+
+/**
+ * Enrich trip items that have no image with Wikipedia images.
+ * Only targets activities, restaurants, and hotels.
+ * Processes in parallel batches of 5 to avoid overwhelming the API.
+ */
+async function enrichWithWikipediaImages(days: TripDay[]): Promise<void> {
+  const itemsNeedingImages: TripItem[] = [];
+  const imageTypes = ['activity', 'restaurant', 'hotel', 'checkin', 'checkout'];
+
+  for (const day of days) {
+    for (const item of day.items) {
+      if (!item.imageUrl && imageTypes.includes(item.type)) {
+        itemsNeedingImages.push(item);
+      }
+    }
+  }
+
+  if (itemsNeedingImages.length === 0) return;
+
+  console.log(`[Pipeline V2] Fetching Wikipedia images for ${itemsNeedingImages.length} items without photos...`);
+
+  // Process in parallel batches of 5
+  for (let i = 0; i < itemsNeedingImages.length; i += 5) {
+    const batch = itemsNeedingImages.slice(i, i + 5);
+    const results = await Promise.allSettled(
+      batch.map(async (item) => {
+        const imageUrl = await fetchWikipediaImage(item.title);
+        if (imageUrl) {
+          item.imageUrl = imageUrl;
+        }
+      })
+    );
+  }
+
+  const enriched = itemsNeedingImages.filter(i => i.imageUrl).length;
+  console.log(`[Pipeline V2] ✅ Wikipedia images: ${enriched}/${itemsNeedingImages.length} enriched`);
 }
 
 /**
