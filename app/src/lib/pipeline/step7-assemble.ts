@@ -726,7 +726,7 @@ export async function assembleTripSchedule(
         endTime: formatTimeHHMM(item.slot.end),
         type: item.type as TripItem['type'],
         title: item.title,
-        description: itemData.description || '',
+        description: buildDescription(itemData, item.type),
         locationName: itemData.locationName || itemData.address || itemData.name || '',
         latitude: itemData.latitude
           || (item.type === 'transport' && itemData.segments?.[0]?.toCoords?.lat)
@@ -1075,6 +1075,55 @@ async function enrichWithDirections(days: TripDay[]): Promise<void> {
  * Uses insertFixedItem semantics (ignores cursor), so this works
  * even when the cursor has advanced past the meal window.
  */
+/**
+ * Detect if a string looks like a postal address rather than a description.
+ * Filters out "00120 Vatican City, État de la Cité du Vatican" etc.
+ */
+function looksLikeAddress(text: string): boolean {
+  if (!text || text.length < 5) return false;
+  // Postal codes (4-5 digits) combined with commas → likely an address
+  if (/\b\d{4,5}\b/.test(text) && /,/.test(text)) return true;
+  // Typical address words (international)
+  const addressWords = [
+    'street', 'avenue', 'road', 'blvd', 'boulevard',
+    'via ', 'viale ', 'corso ',  // Italian
+    'rue ', 'place ', 'allée ',  // French
+    'piazza', 'plaza', 'platz',  // Italian/Spanish/German
+    'calle ', 'carrer ',         // Spanish/Catalan
+    'straat', 'weg ',            // Dutch/German
+  ];
+  const lower = text.toLowerCase();
+  return addressWords.some(w => lower.includes(w));
+}
+
+/**
+ * Build a meaningful description for a TripItem, filtering out addresses.
+ * Priority: real description > cuisineTypes/specialties > tips > empty.
+ */
+function buildDescription(itemData: any, itemType: string): string {
+  // 1. If a real description exists and is NOT an address → use it
+  if (itemData.description && !looksLikeAddress(itemData.description)) {
+    return itemData.description;
+  }
+
+  // 2. For restaurants: build from cuisineTypes / specialties
+  if (itemType === 'restaurant' && itemData.cuisineTypes?.length > 0) {
+    const cuisine = itemData.cuisineTypes.slice(0, 3).join(', ');
+    if (itemData.specialties?.length > 0) {
+      return `${cuisine} · ${itemData.specialties[0]}`;
+    }
+    return cuisine;
+  }
+
+  // 3. Fallback to tips (often populated by Viator, attractions.ts curated data)
+  if (itemData.tips && !looksLikeAddress(itemData.tips)) {
+    return itemData.tips;
+  }
+
+  // 4. Empty is better than an address
+  return '';
+}
+
 function findBestMealSlot(
   scheduler: DayScheduler,
   dayDate: Date,

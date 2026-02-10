@@ -80,7 +80,7 @@ export async function searchGooglePlacesAttractions(
         id: `gp-${r.place_id || idx}`,
         name: r.name || 'Unknown',
         type: mapGoogleType(r.types || []) as ActivityType,
-        description: r.formatted_address || '',
+        description: '',  // Don't use formatted_address — addresses are filtered in buildDescription()
         latitude: loc.lat || 0,
         longitude: loc.lng || 0,
         rating: r.rating || 0,
