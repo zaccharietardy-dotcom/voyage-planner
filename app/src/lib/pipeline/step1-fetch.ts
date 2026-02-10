@@ -151,6 +151,30 @@ export async function fetchAllData(preferences: TripPreferences): Promise<Fetche
   const travelTips = extract(9, null);
   const budgetStrategy = extract(10, null as any);
 
+  // ── Resolve GPS for Viator activities (they default to city-center coords) ──
+  const viatorEstimated = viatorActivities.filter(
+    (a: Attraction) => a.dataReliability === 'estimated'
+  );
+  if (viatorEstimated.length > 0) {
+    console.log(`[Pipeline V2] Resolving GPS for ${viatorEstimated.length} Viator activities...`);
+    await Promise.allSettled(
+      viatorEstimated.map(async (activity: Attraction) => {
+        try {
+          const coords = await resolveCoordinates(
+            activity.name, destination, destCoords, 'attraction'
+          );
+          if (coords) {
+            activity.latitude = coords.lat;
+            activity.longitude = coords.lng;
+            activity.dataReliability = 'verified';
+          }
+        } catch { /* keep city-center as fallback */ }
+      })
+    );
+    const resolved = viatorEstimated.filter((a: Attraction) => a.dataReliability === 'verified').length;
+    console.log(`[Pipeline V2] Resolved GPS for ${resolved}/${viatorEstimated.length} Viator activities`);
+  }
+
   // ── Inject curated must-sees from hardcoded database ──────────────────────
   // When the user hasn't specified explicit must-see attractions, use our curated
   // database (attractions.ts) to inject iconic landmarks (Colisée, Vatican, etc.)
