@@ -135,9 +135,9 @@ export function ActivityCard({
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
-      {/* Hero image — full-width top */}
+      {/* Hero image — 16:10 ratio for readable proportions */}
       {showImage && (
-        <div className="relative h-32 w-full overflow-hidden bg-muted/30">
+        <div className="relative aspect-[16/10] w-full overflow-hidden bg-muted/30">
           <img
             src={item.imageUrl}
             alt={item.title}
