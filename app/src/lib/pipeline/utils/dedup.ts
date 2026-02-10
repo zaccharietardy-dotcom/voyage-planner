@@ -70,12 +70,15 @@ export function isIrrelevantAttraction(activity: ScoredActivity): boolean {
 
   if (irrelevantTypes.some(t => type.includes(t))) return true;
 
-  // 2. Low-value tourist traps and chains
+  // 2. Low-value tourist traps, "experience museums", and chains
   const irrelevantNames = [
     'madame tussaud', 'selfie museum', 'escape room',
     'hard rock cafe', 'starbucks', 'mcdonalds', 'mcdonald',
     'burger king', 'kfc', 'subway',
     'red light secrets', 'ripley', 'body worlds',
+    'wondr experience', 'wondr museum', 'museum of illusions',
+    'upside down', 'banksy museum', 'ice bar', 'icebar',
+    'dungeon', 'the amsterdam dungeon', 'house of bols',
   ];
 
   if (irrelevantNames.some(n => name.includes(n))) return true;
@@ -129,9 +132,13 @@ export function mergeRestaurantSources(
   // Enrich TripAdvisor entries with GPS from SerpAPI if missing
   for (const ta of merged) {
     if (!ta.latitude || !ta.longitude || (ta.latitude === 0 && ta.longitude === 0)) {
-      const match = serpApi.find(
-        sr => normalizeName(sr.name) === normalizeName(ta.name) && sr.latitude && sr.longitude
-      );
+      // Try exact match first, then fuzzy (one name contains the other)
+      const taNorm = normalizeName(ta.name);
+      const match = serpApi.find(sr => {
+        if (!sr.latitude || !sr.longitude) return false;
+        const srNorm = normalizeName(sr.name);
+        return srNorm === taNorm || srNorm.includes(taNorm) || taNorm.includes(srNorm);
+      });
       if (match) {
         ta.latitude = match.latitude;
         ta.longitude = match.longitude;

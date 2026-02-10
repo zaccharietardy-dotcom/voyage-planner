@@ -163,8 +163,10 @@ export async function searchTripAdvisorRestaurants(
       .filter(r => r.name && r.averageRating > 0)
       .slice(0, limit)
       .map((r, i) => {
-        const lat = parseFloat(r.latitude || '') || location.latitude;
-        const lng = parseFloat(r.longitude || '') || location.longitude;
+        // Don't fallback to city-center coords — keep 0 so downstream code knows GPS is missing.
+        // City-center fallback pollutes distance calculations and fake-GPS detection.
+        const lat = parseFloat(r.latitude || '') || 0;
+        const lng = parseFloat(r.longitude || '') || 0;
         const address = r.address || formatAddress(r.addressObj) || '';
 
         const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(

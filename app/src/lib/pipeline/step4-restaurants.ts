@@ -71,9 +71,25 @@ export function assignRestaurants(
         // Normal mode: score by quality/distance ratio
         best = findBestRestaurant(pool, refCoords, usedIds, mealType);
       } else {
-        // Fake GPS mode: all restaurants are at the same point,
-        // distance is meaningless → score by quality only
-        best = findBestByQuality(pool, usedIds, mealType);
+        // Fake GPS mode: most TripAdvisor restaurants have city-center fallback coords.
+        // Strategy: try SerpAPI restaurants first (they have real GPS from Google),
+        // then fall back to quality-only scoring for the rest.
+        const realGPSPool = pool.filter(r => {
+          // SerpAPI restaurants have real GPS — identify by source or coords uniqueness
+          if (r.id.startsWith('serp-')) return true;
+          // Also include any restaurant with non-default coords (not the fake center)
+          const coordKey = `${(r.latitude || 0).toFixed(2)},${(r.longitude || 0).toFixed(2)}`;
+          const isFakeCenter = coordKey === `${(refCoords.lat || 0).toFixed(2)},${(refCoords.lng || 0).toFixed(2)}`;
+          return !isFakeCenter && r.latitude && r.longitude;
+        });
+
+        if (realGPSPool.length > 0) {
+          best = findBestRestaurant(realGPSPool, refCoords, usedIds, mealType);
+        }
+        // Fallback: quality-only from full pool
+        if (!best) {
+          best = findBestByQuality(pool, usedIds, mealType);
+        }
       }
 
       if (best) {
@@ -163,7 +179,7 @@ function findBestRestaurant(
   let bestRestaurant: Restaurant | null = null;
   let bestScore = -Infinity;
 
-  const maxDistance = mealType === 'breakfast' ? 1.5 : 2.0; // km
+  const maxDistance = mealType === 'breakfast' ? 2.0 : 3.0; // km (generous — city-scale walking/transit)
 
   for (const r of pool) {
     if (usedIds.has(r.id)) continue;
