@@ -61,31 +61,34 @@ const PROFILE_KEYWORDS: Record<ProfileTag, string[]> = {
   ],
 };
 
-/** Scoring matrix: groupType × profileTag → bonus/penalty */
+/** Scoring matrix: groupType × profileTag → bonus/penalty
+ *  Values are intentionally strong (up to ±6) so the contextual signal
+ *  can overcome a high base score (popularity + rating ≈ 15-22).
+ */
 const CONTEXT_FIT_MATRIX: Record<GroupType, Record<ProfileTag, number>> = {
   family_with_kids: {
-    kid_friendly: +3, romantic: -2, party: -3, adult_only: -4,
-    instagram: +1, deep_culture: -1, active: +1, relaxing: +1, foodie: 0,
+    kid_friendly: +5, romantic: -3, party: -5, adult_only: -6,
+    instagram: +2, deep_culture: -1, active: +2, relaxing: +2, foodie: 0,
   },
   couple: {
-    kid_friendly: -1, romantic: +3, party: 0, adult_only: 0,
-    instagram: -1, deep_culture: +1, active: +1, relaxing: +2, foodie: +2,
+    kid_friendly: -2, romantic: +5, party: 0, adult_only: 0,
+    instagram: -2, deep_culture: +2, active: +2, relaxing: +3, foodie: +3,
   },
   friends: {
-    kid_friendly: -2, romantic: -1, party: +3, adult_only: +1,
-    instagram: +1, deep_culture: 0, active: +2, relaxing: 0, foodie: +2,
+    kid_friendly: -3, romantic: -2, party: +5, adult_only: +2,
+    instagram: +2, deep_culture: 0, active: +3, relaxing: 0, foodie: +3,
   },
   solo: {
-    kid_friendly: -1, romantic: -2, party: 0, adult_only: 0,
-    instagram: 0, deep_culture: +2, active: +1, relaxing: +1, foodie: +1,
+    kid_friendly: -2, romantic: -3, party: 0, adult_only: 0,
+    instagram: 0, deep_culture: +3, active: +2, relaxing: +2, foodie: +2,
   },
   family_without_kids: {
-    kid_friendly: 0, romantic: +1, party: -1, adult_only: -3,
-    instagram: 0, deep_culture: +2, active: +1, relaxing: +1, foodie: +2,
+    kid_friendly: 0, romantic: +2, party: -2, adult_only: -5,
+    instagram: 0, deep_culture: +3, active: +2, relaxing: +2, foodie: +3,
   },
 };
 
-/** Affinities: preference → tags that reinforce it (+1.5 each) */
+/** Affinities: preference → tags that reinforce it (+2 each) */
 const PREFERENCE_AFFINITIES: Partial<Record<ActivityType, ProfileTag[]>> = {
   culture: ['deep_culture'],
   nature: ['relaxing', 'active'],
@@ -95,7 +98,7 @@ const PREFERENCE_AFFINITIES: Partial<Record<ActivityType, ProfileTag[]>> = {
   adventure: ['active'],
 };
 
-/** Conflicts: preference → tags that contradict it (-1.5 each) */
+/** Conflicts: preference → tags that contradict it (-2 each) */
 const PREFERENCE_CONFLICTS: Partial<Record<ActivityType, ProfileTag[]>> = {
   culture: ['instagram', 'party'],
   nature: ['instagram', 'party'],
@@ -315,7 +318,7 @@ function inferActivityTags(activity: ScoredActivity): Set<ProfileTag> {
 
 /**
  * Factor 8: Context fit bonus.
- * Sum the matrix scores for each matched tag, clamped to [-4, +4].
+ * Sum the matrix scores for each matched tag, clamped to [-6, +6].
  */
 function computeContextFit(tags: Set<ProfileTag>, groupType: GroupType): number {
   const matrix = CONTEXT_FIT_MATRIX[groupType];
@@ -325,13 +328,13 @@ function computeContextFit(tags: Set<ProfileTag>, groupType: GroupType): number 
   for (const tag of tags) {
     score += matrix[tag] || 0;
   }
-  return Math.max(-4, Math.min(4, score));
+  return Math.max(-6, Math.min(6, score));
 }
 
 /**
  * Factor 9: Preference depth bonus.
- * For each user preference, check if activity tags reinforce (+1.5) or contradict (-1.5) it.
- * Clamped to [-2, +3].
+ * For each user preference, check if activity tags reinforce (+2) or contradict (-2) it.
+ * Clamped to [-4, +4].
  */
 function computePreferenceDepth(tags: Set<ProfileTag>, preferences: ActivityType[]): number {
   let score = 0;
@@ -341,7 +344,7 @@ function computePreferenceDepth(tags: Set<ProfileTag>, preferences: ActivityType
     const affinities = PREFERENCE_AFFINITIES[pref];
     if (affinities) {
       for (const affTag of affinities) {
-        if (tags.has(affTag)) score += 1.5;
+        if (tags.has(affTag)) score += 2;
       }
     }
 
@@ -349,10 +352,10 @@ function computePreferenceDepth(tags: Set<ProfileTag>, preferences: ActivityType
     const conflicts = PREFERENCE_CONFLICTS[pref];
     if (conflicts) {
       for (const confTag of conflicts) {
-        if (tags.has(confTag)) score -= 1.5;
+        if (tags.has(confTag)) score -= 2;
       }
     }
   }
 
-  return Math.max(-2, Math.min(3, score));
+  return Math.max(-4, Math.min(4, score));
 }
