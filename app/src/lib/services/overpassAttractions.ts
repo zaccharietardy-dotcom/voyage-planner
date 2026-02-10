@@ -15,7 +15,8 @@ import { Attraction } from './attractions';
 
 const OVERPASS_API_URL = 'https://overpass-api.de/api/interpreter';
 const WIKIDATA_API_URL = 'https://www.wikidata.org/w/api.php';
-const CACHE_DIR = path.join(process.cwd(), '.cache', 'overpass-attractions');
+const CACHE_BASE = process.env.VERCEL ? '/tmp' : process.cwd();
+const CACHE_DIR = path.join(CACHE_BASE, '.cache', 'overpass-attractions');
 const CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 jours
 
 // Types OSM à exclure (pollution des résultats identifiée lors des tests)

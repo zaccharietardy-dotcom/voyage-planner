@@ -20,7 +20,8 @@ const IMPACT_AUTH_TOKEN = process.env.IMPACT_AUTH_TOKEN?.trim();
 const IMPACT_OMIO_PROGRAM_ID = process.env.IMPACT_OMIO_PROGRAM_ID?.trim();
 
 // Cache fichier 30 jours (même trajet/date = même lien tracké)
-const CACHE_DIR = path.join(process.cwd(), '.cache', 'impact');
+const CACHE_BASE = process.env.VERCEL ? '/tmp' : process.cwd();
+const CACHE_DIR = path.join(CACHE_BASE, '.cache', 'impact');
 const CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 jours
 
 /**

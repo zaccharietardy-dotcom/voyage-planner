@@ -24,7 +24,8 @@ const SERPAPI_BASE_URL = 'https://serpapi.com/search.json';
 // Cache attractions (7 jours TTL)
 // ============================================
 
-const ATTRACTIONS_CACHE_DIR = path.join(process.cwd(), '.cache', 'attractions');
+const CACHE_BASE = process.env.VERCEL ? '/tmp' : process.cwd();
+const ATTRACTIONS_CACHE_DIR = path.join(CACHE_BASE, '.cache', 'attractions');
 const ATTRACTIONS_CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 jours
 
 function getAttractionsCacheKey(destination: string, cityCenter: { lat: number; lng: number }): string {

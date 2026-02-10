@@ -13,7 +13,8 @@ import { Restaurant, DietaryType, Accommodation } from '../types';
 
 const RAPIDAPI_HOST = 'tripadvisor16.p.rapidapi.com';
 const BASE_URL = `https://${RAPIDAPI_HOST}/api/v1`;
-const CACHE_DIR = path.join(process.cwd(), '.cache', 'tripadvisor');
+const CACHE_BASE = process.env.VERCEL ? '/tmp' : process.cwd();
+const CACHE_DIR = path.join(CACHE_BASE, '.cache', 'tripadvisor');
 const CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 jours
 
 // ============================================

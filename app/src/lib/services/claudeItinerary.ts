@@ -189,7 +189,8 @@ export interface ClaudeItineraryResponse {
 // Cache
 // ============================================
 
-const CACHE_DIR = path.join(process.cwd(), '.cache', 'itineraries');
+const CACHE_BASE = process.env.VERCEL ? '/tmp' : process.cwd();
+const CACHE_DIR = path.join(CACHE_BASE, '.cache', 'itineraries');
 const CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 jours
 
 function getCacheKey(req: ClaudeItineraryRequest): string {
