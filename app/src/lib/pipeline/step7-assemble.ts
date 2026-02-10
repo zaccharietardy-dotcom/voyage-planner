@@ -287,6 +287,17 @@ export async function assembleTripSchedule(
         maxEndTime: parseTime(dayDate, '10:00'),
         data: { name: hotel?.name || 'Hôtel', description: 'Petit-déjeuner inclus', latitude: hotel?.latitude, longitude: hotel?.longitude, estimatedCost: 0 },
       });
+    } else if (isLastDay && !breakfast?.restaurant && !skipBreakfast && !hotel?.breakfastIncluded && dayStartHour <= 10) {
+      // Self-catered breakfast placeholder
+      scheduler.addItem({
+        id: `self-breakfast-${balancedDay.dayNumber}`,
+        title: 'Petit-déjeuner',
+        type: 'restaurant',
+        duration: 30,
+        minStartTime: parseTime(dayDate, `${String(Math.max(7, dayStartHour)).padStart(2, '0')}:00`),
+        maxEndTime: parseTime(dayDate, '10:00'),
+        data: { name: 'Petit-déjeuner libre', description: 'Café, boulangerie, ou supermarché', estimatedCost: 0 },
+      });
     }
 
     if (isLastDay && hotel) {
@@ -372,6 +383,17 @@ export async function assembleTripSchedule(
         minStartTime: parseTime(dayDate, `${String(Math.max(7, dayStartHour)).padStart(2, '0')}:00`),
         maxEndTime: parseTime(dayDate, '10:00'),
         data: { name: hotel?.name || 'Hôtel', description: 'Petit-déjeuner inclus', latitude: hotel?.latitude, longitude: hotel?.longitude, estimatedCost: 0 },
+      });
+    } else if (!isLastDay && !breakfast?.restaurant && !skipBreakfast && !hotel?.breakfastIncluded && dayStartHour <= 10) {
+      // Self-catered breakfast placeholder
+      scheduler.addItem({
+        id: `self-breakfast-${balancedDay.dayNumber}`,
+        title: 'Petit-déjeuner',
+        type: 'restaurant',
+        duration: 30,
+        minStartTime: parseTime(dayDate, `${String(Math.max(7, dayStartHour)).padStart(2, '0')}:00`),
+        maxEndTime: parseTime(dayDate, '10:00'),
+        data: { name: 'Petit-déjeuner libre', description: 'Café, boulangerie, ou supermarché', estimatedCost: 0 },
       });
     }
 
@@ -616,8 +638,22 @@ export async function assembleTripSchedule(
       if (result) lunchInserted = true;
     }
 
+    // Self-catered lunch placeholder
+    if (!lunchInserted && !skipLunch && !lunch?.restaurant) {
+      const result = scheduler.addItem({
+        id: `self-lunch-${balancedDay.dayNumber}`,
+        title: 'Déjeuner',
+        type: 'restaurant',
+        duration: 45,
+        minStartTime: parseTime(dayDate, '12:00'),
+        maxEndTime: parseTime(dayDate, '14:30'),
+        data: { name: 'Déjeuner libre', description: 'Trattoria, pizza al taglio, ou panini', estimatedCost: 0 },
+      });
+      if (result) lunchInserted = true;
+    }
+
     if (!dinnerInserted && !skipDinner && dinner?.restaurant) {
-      scheduler.addItem({
+      const dinnerResult = scheduler.addItem({
         id: `meal-${balancedDay.dayNumber}-dinner`,
         title: `Dîner — ${dinner.restaurant.name}`,
         type: 'restaurant',
@@ -625,6 +661,20 @@ export async function assembleTripSchedule(
         minStartTime: parseTime(dayDate, '19:00'),
         maxEndTime: parseTime(dayDate, '22:00'),
         data: dinner.restaurant,
+      });
+      if (dinnerResult) dinnerInserted = true;
+    }
+
+    // Self-catered dinner placeholder
+    if (!dinnerInserted && !skipDinner && !dinner?.restaurant) {
+      scheduler.addItem({
+        id: `self-dinner-${balancedDay.dayNumber}`,
+        title: 'Dîner',
+        type: 'restaurant',
+        duration: 60,
+        minStartTime: parseTime(dayDate, '19:00'),
+        maxEndTime: parseTime(dayDate, '22:00'),
+        data: { name: 'Dîner libre', description: 'Explorez les restaurants du quartier', estimatedCost: 0 },
       });
     }
 
