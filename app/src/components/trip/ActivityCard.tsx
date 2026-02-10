@@ -137,7 +137,7 @@ export function ActivityCard({
     >
       {/* Hero image — fixed height, clean without overlay text */}
       {showImage && (
-        <div className="relative h-32 w-full overflow-hidden bg-muted/30">
+        <div className="relative h-40 w-full overflow-hidden bg-muted/30">
           <img
             src={item.imageUrl}
             alt={item.title}
