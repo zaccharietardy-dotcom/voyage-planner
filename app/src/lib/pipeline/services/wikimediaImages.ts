@@ -83,7 +83,7 @@ async function fetchGooglePlacesImage(
 
     if (!photoRef) return null;
 
-    return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=600&photoreference=${photoRef}&key=${apiKey}`;
+    return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${photoRef}&key=${apiKey}`;
   } catch {
     return null;
   }

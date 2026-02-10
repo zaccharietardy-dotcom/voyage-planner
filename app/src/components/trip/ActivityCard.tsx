@@ -131,6 +131,7 @@ export function ActivityCard({
   const color = TRIP_ITEM_COLORS[item.type];
   const hasImage = item.imageUrl && IMAGE_TYPES.includes(item.type);
   const [imgError, setImgError] = useState(false);
+  const [imgLoaded, setImgLoaded] = useState(false);
   const showImage = hasImage && !imgError;
   const isHeroType = IMAGE_TYPES.includes(item.type);
   // Hero cards always use the "image" style (white text, overlay) — either with a real image or a gradient fallback
@@ -149,26 +150,29 @@ export function ActivityCard({
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
-      {/* Background: real image with overlay, or colored gradient fallback */}
+      {/* Background: gradient base (always visible) + image on top with fade-in */}
       {isHeroType && (
         <>
-          {showImage ? (
+          {/* Gradient is always rendered as the base layer / loading placeholder */}
+          <div className={cn("absolute inset-0 bg-gradient-to-br", TYPE_GRADIENTS[item.type] || 'from-gray-600/90 to-gray-800/95')} />
+          {!showImage && <Icon className="absolute right-3 bottom-3 h-16 w-16 text-white/10" />}
+
+          {/* Image fades in over the gradient once loaded */}
+          {showImage && (
             <>
               <img
                 src={item.imageUrl}
                 alt={item.title}
-                className="absolute inset-0 w-full h-full object-cover"
+                className={cn(
+                  "absolute inset-0 w-full h-full object-cover transition-opacity duration-500",
+                  imgLoaded ? "opacity-100" : "opacity-0"
+                )}
                 loading="lazy"
+                onLoad={() => setImgLoaded(true)}
                 onError={() => setImgError(true)}
               />
               {/* Dark gradient overlay for text readability */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/30" />
-            </>
-          ) : (
-            <>
-              {/* Colored gradient fallback + large watermark icon */}
-              <div className={cn("absolute inset-0 bg-gradient-to-br", TYPE_GRADIENTS[item.type] || 'from-gray-600/90 to-gray-800/95')} />
-              <Icon className="absolute right-3 bottom-3 h-16 w-16 text-white/10" />
             </>
           )}
         </>

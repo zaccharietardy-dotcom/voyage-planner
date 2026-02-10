@@ -74,7 +74,7 @@ export async function searchGooglePlacesAttractions(
       // Extract photo URL from Google Places photo_reference
       const photoRef = r.photos?.[0]?.photo_reference;
       const imageUrl = photoRef && apiKey
-        ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=600&photoreference=${photoRef}&key=${apiKey}`
+        ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${photoRef}&key=${apiKey}`
         : undefined;
       return {
         id: `gp-${r.place_id || idx}`,
