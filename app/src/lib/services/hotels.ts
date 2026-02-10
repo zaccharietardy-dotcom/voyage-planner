@@ -437,6 +437,8 @@ async function fetchHotelsFromClaude(
     budgetLevel: 'economic' | 'moderate' | 'comfort' | 'luxury';
     cityCenter: { lat: number; lng: number };
     guests: number;
+    checkInDate?: Date;
+    checkOutDate?: Date;
   }
 ): Promise<Accommodation[]> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -538,8 +540,8 @@ Réponds UNIQUEMENT avec un tableau JSON valide.`;
     amenities: h.amenities || ['WiFi gratuit'],
     checkInTime: validateCheckInTime(h.checkInTime),
     checkOutTime: validateCheckOutTime(h.checkOutTime),
-    // Fallback: lien de recherche Booking.com avec le nom de l'hôtel
-    bookingUrl: `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(`${h.name} ${destination}`)}&lang=fr`,
+    // Fallback: lien de recherche Booking.com avec le nom de l'hôtel + dates
+    bookingUrl: `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(`${h.name} ${destination}`)}${options.checkInDate ? `&checkin=${options.checkInDate.toISOString().split('T')[0]}` : ''}${options.checkOutDate ? `&checkout=${options.checkOutDate.toISOString().split('T')[0]}` : ''}&group_adults=${options.guests}&no_rooms=1&lang=fr`,
     distanceToCenter: h.distanceToCenter || 1,
     description: h.description,
     dataReliability: (h.latitude && h.longitude) ? 'verified' as const : 'estimated' as const,
@@ -604,7 +606,7 @@ function generateFallbackHotels(
     amenities: ['WiFi gratuit', 'Climatisation'],
     checkInTime: '15:00',
     checkOutTime: '11:00',
-    bookingUrl: `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(`${template.name} ${destination}`)}&checkin=${options.checkInDate.toISOString().split('T')[0]}&checkout=${options.checkOutDate.toISOString().split('T')[0]}&lang=fr`,
+    bookingUrl: `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(`${template.name} ${destination}`)}&checkin=${options.checkInDate.toISOString().split('T')[0]}&checkout=${options.checkOutDate.toISOString().split('T')[0]}&group_adults=2&no_rooms=1&lang=fr`,
     distanceToCenter: 0.5 + Math.random() * 1,
   }));
 }

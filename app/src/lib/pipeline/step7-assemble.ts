@@ -787,16 +787,14 @@ export async function assembleTripSchedule(
       // No URL at all — build a Booking.com search URL
       return `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(hotelName + ' ' + preferences.destination)}&checkin=${checkinDate}&checkout=${checkoutDateStr}&group_adults=${guests}&no_rooms=1&lang=fr`;
     }
-    // If already a booking.com URL, inject/replace date params
+    // If already a booking.com URL with dates, keep it intact (from RapidAPI)
+    if (url.includes('booking.com') && url.includes('checkin=') && url.includes('checkout=')) {
+      return url;
+    }
+    // If booking.com URL but missing dates, inject them
     if (url.includes('booking.com')) {
-      const base = url.split('?')[0];
-      const existingParams = new URLSearchParams(url.includes('?') ? url.split('?')[1] : '');
-      existingParams.set('checkin', checkinDate);
-      existingParams.set('checkout', checkoutDateStr);
-      existingParams.set('group_adults', String(guests));
-      existingParams.set('no_rooms', '1');
-      if (!existingParams.has('lang')) existingParams.set('lang', 'fr');
-      return `${base}?${existingParams.toString()}`;
+      const separator = url.includes('?') ? '&' : '?';
+      return `${url}${separator}checkin=${checkinDate}&checkout=${checkoutDateStr}&group_adults=${guests}&no_rooms=1&lang=fr`;
     }
     // Non-booking URL — return as-is
     return url;
