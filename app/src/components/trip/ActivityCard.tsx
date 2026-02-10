@@ -135,9 +135,9 @@ export function ActivityCard({
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
-      {/* Hero image — fixed height, clean without overlay text */}
+      {/* Background image (covers entire card) */}
       {showImage && (
-        <div className="relative h-28 w-full overflow-hidden bg-muted/30">
+        <>
           <img
             src={item.imageUrl}
             alt={item.title}
@@ -145,35 +145,22 @@ export function ActivityCard({
             loading="lazy"
             onError={() => setImgError(true)}
           />
-          {/* Order number on image */}
-          {orderNumber !== undefined && (
-            <div className="absolute top-2.5 left-2.5">
-              <span
-                className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-md"
-                style={{ backgroundColor: color }}
-              >
-                {orderNumber}
-              </span>
-            </div>
-          )}
-          {/* Type badge on image */}
-          <div className="absolute top-2.5 right-2.5">
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold text-white/90 bg-black/30 backdrop-blur-sm">
-              <Icon className="h-3 w-3" />
-              {TYPE_LABELS[item.type]}
-            </span>
-          </div>
-        </div>
+          {/* Dark gradient overlay for text readability */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/30" />
+        </>
       )}
 
-      <div className="flex">
+      <div className={cn("flex", showImage ? "relative z-10" : "")}>
         {/* Drag handle */}
         {dragHandleProps && (
           <div
             {...dragHandleProps}
-            className="flex items-center justify-center w-7 bg-muted/30 cursor-grab active:cursor-grabbing hover:bg-muted/60 transition-colors"
+            className={cn(
+              "flex items-center justify-center w-7 cursor-grab active:cursor-grabbing transition-colors",
+              showImage ? "hover:bg-white/10" : "bg-muted/30 hover:bg-muted/60"
+            )}
           >
-            <GripVertical className="h-3.5 w-3.5 text-muted-foreground/60" />
+            <GripVertical className={cn("h-3.5 w-3.5", showImage ? "text-white/60" : "text-muted-foreground/60")} />
           </div>
         )}
 
@@ -197,39 +184,61 @@ export function ActivityCard({
         )}
 
         {/* Content */}
-        <div className={cn("flex-1 min-w-0", showImage ? "p-2.5" : "p-3.5")}>
+        <div className="flex-1 p-3.5 min-w-0">
           <div className="flex items-start gap-3">
             <div className="flex-1 min-w-0">
               {/* Time row */}
               <div className="flex items-center gap-2 mb-1">
-                <span className="inline-flex items-center gap-1 text-xs text-muted-foreground font-medium">
+                {/* Order number badge (inline when image) */}
+                {showImage && orderNumber !== undefined && (
+                  <span
+                    className="w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold text-white shadow-sm shrink-0"
+                    style={{ backgroundColor: color }}
+                  >
+                    {orderNumber}
+                  </span>
+                )}
+                <span className={cn(
+                  "inline-flex items-center gap-1 text-xs font-medium",
+                  showImage ? "text-white/80" : "text-muted-foreground"
+                )}>
                   <Clock className="h-3 w-3" />
                   {item.startTime} – {item.endTime}
                 </span>
                 {/* Type badge */}
-                {!showImage && (
-                  <span
-                    className="px-1.5 py-0.5 rounded text-[10px] font-semibold leading-none"
-                    style={{ backgroundColor: `${color}12`, color }}
-                  >
-                    {TYPE_LABELS[item.type]}
-                  </span>
-                )}
+                <span
+                  className={cn(
+                    "px-1.5 py-0.5 rounded text-[10px] font-semibold leading-none",
+                    showImage ? "bg-white/20 text-white/90" : ""
+                  )}
+                  style={!showImage ? { backgroundColor: `${color}12`, color } : undefined}
+                >
+                  {TYPE_LABELS[item.type]}
+                </span>
               </div>
 
               {/* Title */}
-              <h4 className="font-semibold text-[13px] leading-snug mb-0 line-clamp-2">
+              <h4 className={cn(
+                "font-semibold text-[13px] leading-snug mb-0 line-clamp-2",
+                showImage && "text-white drop-shadow-sm"
+              )}>
                 {item.title}
               </h4>
 
               {/* Description */}
               {item.description && (
-                <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2 mb-1.5">
+                <p className={cn(
+                  "text-xs leading-relaxed line-clamp-2 mb-1.5",
+                  showImage ? "text-white/70" : "text-muted-foreground"
+                )}>
                   {item.description}
                 </p>
               )}
               {/* Meta row: rating, cost */}
-              <div className="flex items-center gap-2.5 flex-wrap text-xs text-muted-foreground">
+              <div className={cn(
+                "flex items-center gap-2.5 flex-wrap text-xs",
+                showImage ? "text-white/70" : "text-muted-foreground"
+              )}>
                 {item.rating && item.rating > 0 && (
                   <span className="inline-flex items-center gap-0.5 font-medium">
                     <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
@@ -241,7 +250,7 @@ export function ActivityCard({
                     <Navigation className="h-3 w-3" />
                     {item.timeFromPrevious} min
                     {item.distanceFromPrevious && item.distanceFromPrevious > 0.1 && (
-                      <span className="text-muted-foreground/60">({item.distanceFromPrevious.toFixed(1)} km)</span>
+                      <span className={showImage ? "text-white/50" : "text-muted-foreground/60"}>({item.distanceFromPrevious.toFixed(1)} km)</span>
                     )}
                   </span>
                 )}
@@ -249,14 +258,14 @@ export function ActivityCard({
                 {item.type !== 'transport' && (
                   <>
                     {item.estimatedCost != null && item.estimatedCost > 0 ? (
-                      <span className="font-semibold text-primary">
+                      <span className={cn("font-semibold", showImage ? "text-white" : "text-primary")}>
                         ~{item.estimatedCost}€
                         {item.type !== 'parking' && (
-                          <span className="font-normal text-muted-foreground"> / pers.</span>
+                          <span className={cn("font-normal", showImage ? "text-white/60" : "text-muted-foreground")}> / pers.</span>
                         )}
                       </span>
                     ) : item.type === 'activity' ? (
-                      <span className="font-medium text-emerald-600 dark:text-emerald-400">Gratuit</span>
+                      <span className={cn("font-medium", showImage ? "text-emerald-300" : "text-emerald-600 dark:text-emerald-400")}>Gratuit</span>
                     ) : null}
                   </>
                 )}
