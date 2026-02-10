@@ -1,6 +1,6 @@
 'use client';
 
-import { Footprints, Car, TrainFront } from 'lucide-react';
+import { Navigation, Clock, MapPin, Footprints, Car, TrainFront } from 'lucide-react';
 
 interface ItineraryConnectorProps {
   from: {
@@ -45,33 +45,38 @@ export function ItineraryConnector({
   };
 
   const formatDistance = (km: number) => {
-    if (km < 1) return `${Math.round(km * 1000)}m`;
-    return `${km.toFixed(1)}km`;
+    if (km < 1) return `${Math.round(km * 1000)} m`;
+    return `${km.toFixed(1)} km`;
   };
-
-  if (!duration && !distance) return null;
 
   return (
     <a
       href={googleMapsUrl}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-center gap-1.5 py-1 px-2 my-0.5 ml-1 rounded-md text-[10px] text-muted-foreground/50 hover:text-muted-foreground/80 hover:bg-muted/20 transition-all cursor-pointer group"
+      className="flex items-center gap-2 py-1.5 px-3 my-1 ml-2 rounded-md text-xs text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-colors cursor-pointer group"
     >
-      <ModeIcon className="h-3 w-3 shrink-0" />
+      <ModeIcon className="h-3.5 w-3.5 shrink-0 opacity-50 group-hover:opacity-80 transition-opacity" />
 
-      <span className="flex items-center gap-1.5">
-        {duration && (
-          <span className="tabular-nums">{formatDuration(duration)}</span>
-        )}
-        {distance && distance > 0.1 && (
-          <span className="opacity-60">{formatDistance(distance)}</span>
-        )}
+      <span className="truncate">
+        → {to.name}
       </span>
 
-      <span className="opacity-0 group-hover:opacity-100 transition-opacity text-primary/60 ml-auto text-[9px]">
-        Itineraire
-      </span>
+      {(duration || distance) && (
+        <span className="flex items-center gap-2 shrink-0 ml-auto opacity-60 group-hover:opacity-100 transition-opacity">
+          {duration && (
+            <span className="flex items-center gap-0.5">
+              <Clock className="h-2.5 w-2.5" />
+              {formatDuration(duration)}
+            </span>
+          )}
+          {distance && distance > 0.1 && (
+            <span>{formatDistance(distance)}</span>
+          )}
+        </span>
+      )}
+
+      <Navigation className="h-3 w-3 shrink-0 opacity-0 group-hover:opacity-60 transition-opacity" />
     </a>
   );
 }

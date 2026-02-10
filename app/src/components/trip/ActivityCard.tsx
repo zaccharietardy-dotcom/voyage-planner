@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
   MapPin,
+  Clock,
   Utensils,
   Bed,
   Bus,
@@ -18,6 +19,7 @@ import {
   LogOut,
   ExternalLink,
   Star,
+  Navigation,
   Map,
   TrainFront,
   TramFront,
@@ -29,6 +31,7 @@ import {
   Coffee,
   Ticket,
   Globe,
+  ImageIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TripItemType } from '@/lib/types';
@@ -65,9 +68,9 @@ const TYPE_ICONS: Record<TripItemType, React.ComponentType<{ className?: string;
 };
 
 const TYPE_LABELS: Record<TripItemType, string> = {
-  activity: 'Activite',
+  activity: 'Activité',
   restaurant: 'Restaurant',
-  hotel: 'Hotel',
+  hotel: 'Hébergement',
   transport: 'Transport',
   flight: 'Vol',
   parking: 'Parking',
@@ -93,7 +96,7 @@ const TRANSIT_MODE_COLORS: Record<string, string> = {
   ferry: '#39CCCC',
 };
 
-/** Types that can display a thumbnail */
+/** Types that can display a hero image */
 const IMAGE_TYPES: TripItemType[] = ['activity', 'restaurant', 'hotel', 'checkin', 'checkout'];
 
 export function ActivityCard({
@@ -122,241 +125,303 @@ export function ActivityCard({
   return (
     <Card
       className={cn(
-        'relative group transition-all duration-200 cursor-pointer overflow-hidden !p-0 !gap-0 rounded-xl',
-        'border-transparent bg-card shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.08)]',
-        'dark:bg-card dark:shadow-[0_1px_4px_rgba(0,0,0,0.3)] dark:hover:shadow-[0_6px_20px_rgba(0,0,0,0.4)]',
-        isSelected && 'ring-2 ring-primary/70 shadow-[0_4px_16px_rgba(212,168,83,0.12)]',
-        isDragging && 'shadow-2xl scale-[1.02] rotate-[0.5deg]',
-        item.type === 'free_time' && 'bg-emerald-50/20 dark:bg-emerald-950/10',
+        'relative group transition-all duration-200 cursor-pointer overflow-hidden',
+        'border-border/60 hover:border-primary/40 hover:shadow-lg',
+        isSelected && 'ring-2 ring-primary/80 border-primary shadow-lg',
+        isDragging && 'shadow-xl rotate-1 scale-[1.03]',
+        item.type === 'free_time' && 'bg-emerald-50/40 border-emerald-200/50 dark:bg-emerald-950/15 dark:border-emerald-800/30',
       )}
       onClick={onSelect}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
+      {/* Hero image — full-width top */}
+      {showImage && (
+        <div className="relative h-32 w-full overflow-hidden bg-muted/30">
+          <img
+            src={item.imageUrl}
+            alt={item.title}
+            className="w-full h-full object-cover"
+            loading="lazy"
+            onError={() => setImgError(true)}
+          />
+          {/* Gradient overlay for readability */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+          {/* Order number on image */}
+          {orderNumber !== undefined && (
+            <div className="absolute top-2.5 left-2.5">
+              <span
+                className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-md"
+                style={{ backgroundColor: color }}
+              >
+                {orderNumber}
+              </span>
+            </div>
+          )}
+          {/* Type badge on image */}
+          <div className="absolute top-2.5 right-2.5">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold text-white/90 bg-black/30 backdrop-blur-sm">
+              <Icon className="h-3 w-3" />
+              {TYPE_LABELS[item.type]}
+            </span>
+          </div>
+          {/* Title overlay on image */}
+          <div className="absolute bottom-0 left-0 right-0 px-3.5 pb-2.5">
+            <h4 className="font-semibold text-sm text-white leading-tight drop-shadow-md line-clamp-2">
+              {item.title}
+            </h4>
+          </div>
+        </div>
+      )}
+
       <div className="flex">
         {/* Drag handle */}
         {dragHandleProps && (
           <div
             {...dragHandleProps}
-            className="flex items-center justify-center w-6 bg-muted/20 cursor-grab active:cursor-grabbing hover:bg-muted/40 transition-colors"
+            className="flex items-center justify-center w-7 bg-muted/30 cursor-grab active:cursor-grabbing hover:bg-muted/60 transition-colors"
           >
-            <GripVertical className="h-3.5 w-3.5 text-muted-foreground/40" />
+            <GripVertical className="h-3.5 w-3.5 text-muted-foreground/60" />
           </div>
         )}
 
-        {/* Color accent strip */}
-        <div className="w-[3px] self-stretch shrink-0 rounded-l-[inherit]" style={{ backgroundColor: color }} />
-
-        {/* Thumbnail */}
-        {showImage && (
-          <div className="w-16 self-stretch shrink-0 overflow-hidden bg-muted/10">
-            <img
-              src={item.imageUrl}
-              alt=""
-              className="w-full h-full object-cover"
-              loading="lazy"
-              onError={() => setImgError(true)}
-            />
-          </div>
-        )}
-
-        {/* Main content */}
-        <div className="flex-1 py-2.5 px-3 min-w-0">
-          {/* Row 1: Time + Title */}
-          <div className="flex items-center gap-2 mb-0.5">
-            <span className="text-[11px] tabular-nums text-muted-foreground/70 font-medium shrink-0">
-              {item.startTime}
-            </span>
-            <h4 className="font-semibold text-[13px] leading-tight truncate">
-              {item.title}
-            </h4>
-          </div>
-
-          {/* Row 2: Description (1 line max) */}
-          {item.description && (
-            <p className="text-[11px] text-muted-foreground/70 leading-snug line-clamp-1 mb-1">
-              {item.description}
-            </p>
-          )}
-          {item.type === 'flight' && (
-            <p className="text-[10px] text-muted-foreground/40 italic mb-1">
-              Prix indicatif
-            </p>
-          )}
-
-          {/* Row 3: Pills — location, rating, cost */}
-          <div className="flex items-center gap-1.5 flex-wrap">
-            {/* Type pill */}
-            <span
-              className="inline-flex items-center gap-1 px-1.5 py-[1px] rounded-full text-[10px] font-medium"
-              style={{ backgroundColor: `${color}10`, color }}
+        {/* Color accent stripe + order number (when no image) */}
+        {!showImage && (
+          orderNumber !== undefined ? (
+            <div
+              className="w-9 self-stretch flex items-center justify-center shrink-0"
+              style={{ backgroundColor: `${color}10` }}
             >
-              <Icon className="h-2.5 w-2.5" />
-              {TYPE_LABELS[item.type]}
-            </span>
+              <span
+                className="w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold text-white shadow-sm"
+                style={{ backgroundColor: color }}
+              >
+                {orderNumber}
+              </span>
+            </div>
+          ) : (
+            <div className="w-1 self-stretch rounded-l-md" style={{ backgroundColor: color }} />
+          )
+        )}
 
-            {item.locationName && (
-              <span className="inline-flex items-center gap-0.5 text-[10px] text-muted-foreground/60 truncate max-w-[140px]">
-                <MapPin className="h-2.5 w-2.5 shrink-0" />
-                <span className="truncate">{item.locationName}</span>
-              </span>
-            )}
-            {item.rating && item.rating > 0 && (
-              <span className="inline-flex items-center gap-0.5 text-[10px] font-medium text-amber-500">
-                <Star className="h-2.5 w-2.5 fill-current" />
-                {item.rating.toFixed(1)}
-              </span>
-            )}
-            {/* Duration */}
-            {item.duration && item.duration > 0 && item.type !== 'transport' && (
-              <span className="text-[10px] text-muted-foreground/50">
-                {formatDuration(item.duration)}
-              </span>
-            )}
-            {/* Cost */}
-            {item.type !== 'transport' && (
-              <>
-                {item.estimatedCost != null && item.estimatedCost > 0 ? (
-                  <span className="text-[10px] font-semibold text-primary">
-                    {item.estimatedCost}€
-                    {item.type !== 'flight' && item.type !== 'parking' && (
-                      <span className="font-normal text-muted-foreground/50">/p.</span>
+        {/* Content */}
+        <div className="flex-1 p-3.5 min-w-0">
+          <div className="flex items-start gap-3">
+            <div className="flex-1 min-w-0">
+              {/* Time row */}
+              <div className="flex items-center gap-2 mb-1">
+                <span className="inline-flex items-center gap-1 text-xs text-muted-foreground font-medium">
+                  <Clock className="h-3 w-3" />
+                  {item.startTime} – {item.endTime}
+                </span>
+                {/* Type badge (only when no image, since image has its own) */}
+                {!showImage && (
+                  <span
+                    className="px-1.5 py-0.5 rounded text-[10px] font-semibold leading-none"
+                    style={{ backgroundColor: `${color}12`, color }}
+                  >
+                    {TYPE_LABELS[item.type]}
+                  </span>
+                )}
+              </div>
+
+              {/* Title (only when no image) */}
+              {!showImage && (
+                <h4 className="font-semibold text-[13px] leading-snug mb-0.5 line-clamp-2">
+                  {item.title}
+                </h4>
+              )}
+
+              {/* Description */}
+              {item.description && (
+                <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2 mb-1.5">
+                  {item.description}
+                </p>
+              )}
+              {item.type === 'flight' && (
+                <p className="text-[10px] text-muted-foreground/50 italic mb-1">
+                  Prix indicatif — cliquez pour voir les tarifs actuels
+                </p>
+              )}
+
+              {/* Meta row: location, rating, cost */}
+              <div className="flex items-center gap-2.5 flex-wrap text-xs text-muted-foreground">
+                {item.locationName && (
+                  <span className="inline-flex items-center gap-1 truncate max-w-[180px]">
+                    <MapPin className="h-3 w-3 shrink-0" />
+                    <span className="truncate">{item.locationName}</span>
+                  </span>
+                )}
+                {item.rating && item.rating > 0 && (
+                  <span className="inline-flex items-center gap-0.5 font-medium">
+                    <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                    {item.rating.toFixed(1)}
+                  </span>
+                )}
+                {item.timeFromPrevious && item.timeFromPrevious > 0 && (
+                  <span className="inline-flex items-center gap-1">
+                    <Navigation className="h-3 w-3" />
+                    {item.timeFromPrevious} min
+                    {item.distanceFromPrevious && item.distanceFromPrevious > 0.1 && (
+                      <span className="text-muted-foreground/60">({item.distanceFromPrevious.toFixed(1)} km)</span>
                     )}
                   </span>
-                ) : item.type === 'activity' ? (
-                  <span className="text-[10px] font-medium text-emerald-500">Gratuit</span>
-                ) : null}
-              </>
+                )}
+                {/* Cost */}
+                {item.type !== 'transport' && (
+                  <>
+                    {item.estimatedCost != null && item.estimatedCost > 0 ? (
+                      <span className="font-semibold text-primary">
+                        ~{item.estimatedCost}€
+                        {item.type !== 'flight' && item.type !== 'parking' && (
+                          <span className="font-normal text-muted-foreground"> / pers.</span>
+                        )}
+                      </span>
+                    ) : item.type === 'activity' ? (
+                      <span className="font-medium text-emerald-600 dark:text-emerald-400">Gratuit</span>
+                    ) : null}
+                  </>
+                )}
+              </div>
+
+              {/* Transit lines */}
+              {item.transitInfo?.lines && item.transitInfo.lines.length > 0 && !(item.type === 'transport' && item.bookingUrl) && (
+                <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+                  {item.transitInfo.lines.map((line, idx) => {
+                    const ModeIcon = TRANSIT_MODE_ICONS[line.mode] || Bus;
+                    const bgColor = line.color || TRANSIT_MODE_COLORS[line.mode] || '#666';
+                    return (
+                      <span
+                        key={`${line.mode}-${line.number}-${idx}`}
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold text-white"
+                        style={{ backgroundColor: bgColor }}
+                      >
+                        <ModeIcon className="h-2.5 w-2.5" />
+                        {line.number}
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Transport card */}
+              {item.type === 'transport' && item.bookingUrl && (
+                <TransportCard item={item} />
+              )}
+
+              {/* Viator product card */}
+              {item.viatorImageUrl && (item.bookingUrl?.includes('viator.com') || item.viatorUrl) && (
+                <a
+                  href={item.viatorUrl || item.bookingUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  className="flex items-center gap-2.5 mt-2.5 p-2 rounded-lg border border-border/60 bg-muted/20 hover:bg-muted/40 transition-colors"
+                >
+                  <img
+                    src={item.viatorImageUrl}
+                    alt={item.viatorTitle || item.title}
+                    className="w-12 h-12 rounded-md object-cover shrink-0"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-medium line-clamp-2 leading-snug">{item.viatorTitle || item.title}</p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      {item.viatorRating && (
+                        <span className="flex items-center gap-0.5 text-[10px]">
+                          <Star className="h-2.5 w-2.5 fill-amber-400 text-amber-400" />
+                          {item.viatorRating.toFixed(1)}
+                          {item.viatorReviewCount && <span className="text-muted-foreground">({item.viatorReviewCount})</span>}
+                        </span>
+                      )}
+                      {item.viatorDuration && item.viatorDuration > 0 && (
+                        <span className="flex items-center gap-0.5 text-[10px] text-muted-foreground">
+                          <Clock className="h-2.5 w-2.5" />
+                          {formatDuration(item.viatorDuration)}
+                        </span>
+                      )}
+                      {(item.viatorPrice || item.estimatedCost) && (item.viatorPrice || item.estimatedCost)! > 0 && (
+                        <span className="text-[10px] font-semibold text-primary">dès {item.viatorPrice || item.estimatedCost}€</span>
+                      )}
+                    </div>
+                  </div>
+                </a>
+              )}
+
+              {/* Booking buttons — clean pill style */}
+              <div className="flex items-center gap-1.5 mt-2.5 flex-wrap">
+                <BookingButtons item={item} />
+              </div>
+            </div>
+
+            {/* Type icon (no image mode only) */}
+            {!showImage && (
+              <div
+                className="p-2 rounded-lg shrink-0"
+                style={{ backgroundColor: `${color}10` }}
+              >
+                <Icon className="h-4 w-4" style={{ color }} />
+              </div>
             )}
           </div>
 
-          {/* Transit lines */}
-          {item.transitInfo?.lines && item.transitInfo.lines.length > 0 && !(item.type === 'transport' && item.bookingUrl) && (
-            <div className="flex items-center gap-1 mt-1.5 flex-wrap">
-              {item.transitInfo.lines.map((line, idx) => {
-                const ModeIcon = TRANSIT_MODE_ICONS[line.mode] || Bus;
-                const bgColor = line.color || TRANSIT_MODE_COLORS[line.mode] || '#666';
-                return (
-                  <span
-                    key={`${line.mode}-${line.number}-${idx}`}
-                    className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-semibold text-white"
-                    style={{ backgroundColor: bgColor }}
-                  >
-                    <ModeIcon className="h-2 w-2" />
-                    {line.number}
-                  </span>
-                );
-              })}
-            </div>
+          {/* Flight alternatives */}
+          {item.type === 'flight' && item.flightAlternatives && item.flightAlternatives.length > 0 && (
+            <FlightAlternatives alternatives={item.flightAlternatives} />
           )}
-
-          {/* Transport card */}
-          {item.type === 'transport' && item.bookingUrl && (
-            <TransportCard item={item} />
-          )}
-
-          {/* Viator product card */}
-          {item.viatorImageUrl && (item.bookingUrl?.includes('viator.com') || item.viatorUrl) && (
-            <a
-              href={item.viatorUrl || item.bookingUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
-              className="flex items-center gap-2 mt-2 p-1.5 rounded-lg bg-muted/20 hover:bg-muted/40 transition-colors"
-            >
-              <img
-                src={item.viatorImageUrl}
-                alt=""
-                className="w-10 h-10 rounded-md object-cover shrink-0"
-              />
-              <div className="min-w-0 flex-1">
-                <p className="text-[11px] font-medium line-clamp-1">{item.viatorTitle || item.title}</p>
-                <div className="flex items-center gap-1.5 mt-0.5">
-                  {item.viatorRating && (
-                    <span className="flex items-center gap-0.5 text-[9px]">
-                      <Star className="h-2 w-2 fill-amber-400 text-amber-400" />
-                      {item.viatorRating.toFixed(1)}
-                    </span>
-                  )}
-                  {(item.viatorPrice || item.estimatedCost) && (item.viatorPrice || item.estimatedCost)! > 0 && (
-                    <span className="text-[9px] font-semibold text-primary">des {item.viatorPrice || item.estimatedCost}€</span>
-                  )}
-                </div>
-              </div>
-            </a>
-          )}
-
-          {/* Booking links — inline minimal */}
-          <BookingButtons item={item} />
         </div>
-
-        {/* Order number badge — right side */}
-        {orderNumber !== undefined && (
-          <div className="flex items-start pt-2.5 pr-2.5 shrink-0">
-            <span
-              className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white"
-              style={{ backgroundColor: color }}
-            >
-              {orderNumber}
-            </span>
-          </div>
-        )}
       </div>
 
-      {/* Flight alternatives */}
-      {item.type === 'flight' && item.flightAlternatives && item.flightAlternatives.length > 0 && (
-        <FlightAlternatives alternatives={item.flightAlternatives} />
-      )}
-
-      {/* Move buttons — appear on hover */}
+      {/* Move buttons */}
       {onMoveUp && (
-        <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
           <Button
             size="icon"
             variant="secondary"
-            className="h-5 w-5 rounded-full shadow-md"
+            className="h-7 w-7 rounded-full shadow-md"
             disabled={!canMoveUp}
             onClick={(e) => { e.stopPropagation(); onMoveUp(); }}
+            title="Déplacer vers le haut"
           >
-            <ChevronUp className="h-3 w-3" />
+            <ChevronUp className="h-4 w-4" />
           </Button>
         </div>
       )}
       {onMoveDown && (
-        <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+        <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
           <Button
             size="icon"
             variant="secondary"
-            className="h-5 w-5 rounded-full shadow-md"
+            className="h-7 w-7 rounded-full shadow-md"
             disabled={!canMoveDown}
             onClick={(e) => { e.stopPropagation(); onMoveDown(); }}
+            title="Déplacer vers le bas"
           >
-            <ChevronDown className="h-3 w-3" />
+            <ChevronDown className="h-4 w-4" />
           </Button>
         </div>
       )}
 
-      {/* Action buttons — top right hover */}
-      <div className="absolute top-1.5 right-1.5 opacity-0 group-hover:opacity-100 transition-opacity flex gap-0.5 z-10">
+      {/* Action buttons (swap/edit/delete) */}
+      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-0.5 z-10">
         {swapButton && (item.type === 'activity' || item.type === 'free_time') && swapButton}
         {onEdit && (
           <Button
             size="icon"
             variant="ghost"
-            className="h-6 w-6 rounded-full bg-background/90 backdrop-blur-sm shadow-sm hover:bg-background"
+            className="h-7 w-7 bg-background/80 backdrop-blur-sm hover:bg-background"
             onClick={(e) => { e.stopPropagation(); onEdit(); }}
           >
-            <Pencil className="h-2.5 w-2.5" />
+            <Pencil className="h-3 w-3" />
           </Button>
         )}
         {onDelete && (
           <Button
             size="icon"
             variant="ghost"
-            className="h-6 w-6 rounded-full bg-background/90 backdrop-blur-sm shadow-sm hover:bg-background text-destructive hover:text-destructive"
+            className="h-7 w-7 bg-background/80 backdrop-blur-sm hover:bg-background text-destructive hover:text-destructive"
             onClick={(e) => { e.stopPropagation(); onDelete(); }}
           >
-            <Trash2 className="h-2.5 w-2.5" />
+            <Trash2 className="h-3 w-3" />
           </Button>
         )}
       </div>
@@ -367,37 +432,36 @@ export function ActivityCard({
 function formatDuration(minutes: number): string {
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
-  if (h === 0) return `${m}min`;
   return m > 0 ? `${h}h${String(m).padStart(2, '0')}` : `${h}h`;
 }
 
 /**
- * Booking buttons — minimal inline links
+ * Booking buttons — Clean, subtle style with branded accents
  */
 function BookingButtons({ item }: { item: TripItem }) {
-  const links: { label: string; url: string; icon: React.ReactNode; primary?: boolean }[] = [];
+  const buttons: { label: string; url: string; variant: 'primary' | 'secondary' | 'ghost'; icon: React.ReactNode }[] = [];
   const bookingUrl = item.bookingUrl || '';
 
   // Flight
   if (item.type === 'flight' && bookingUrl) {
-    links.push({
-      label: bookingUrl.includes('aviasales.com') ? 'Aviasales' : 'Reserver',
+    buttons.push({
+      label: bookingUrl.includes('aviasales.com') ? 'Aviasales' : 'Réserver vol',
       url: bookingUrl,
-      primary: true,
+      variant: 'primary',
       icon: <Plane className="h-3 w-3" />,
     });
     if (item.aviasalesUrl && item.aviasalesUrl !== bookingUrl) {
-      links.push({ label: 'Aviasales', url: item.aviasalesUrl, icon: <Plane className="h-3 w-3" /> });
+      buttons.push({ label: 'Aviasales', url: item.aviasalesUrl, variant: 'secondary', icon: <Plane className="h-3 w-3" /> });
     }
     if (item.omioFlightUrl) {
-      links.push({ label: 'Omio', url: item.omioFlightUrl, icon: <Plane className="h-3 w-3" /> });
+      buttons.push({ label: 'Omio', url: item.omioFlightUrl, variant: 'secondary', icon: <Plane className="h-3 w-3" /> });
     }
   }
 
   // Hotel
   if ((item.type === 'hotel' || item.type === 'checkout') && bookingUrl) {
-    const label = bookingUrl.includes('airbnb.com') ? 'Airbnb' : bookingUrl.includes('booking.com') ? 'Booking' : 'Reserver';
-    links.push({ label, url: bookingUrl, primary: true, icon: <Bed className="h-3 w-3" /> });
+    const label = bookingUrl.includes('airbnb.com') ? 'Airbnb' : bookingUrl.includes('booking.com') ? 'Booking' : 'Réserver';
+    buttons.push({ label, url: bookingUrl, variant: 'primary', icon: <Bed className="h-3 w-3" /> });
   }
 
   // Transport
@@ -405,54 +469,54 @@ function BookingButtons({ item }: { item: TripItem }) {
     const label = bookingUrl.includes('omio') || bookingUrl.includes('sjv.io') ? 'Omio'
       : bookingUrl.includes('trainline') ? 'Trainline'
       : bookingUrl.includes('flixbus') ? 'FlixBus'
-      : 'Reserver';
-    links.push({ label, url: bookingUrl, primary: true, icon: <TrainFront className="h-3 w-3" /> });
+      : 'Réserver';
+    buttons.push({ label, url: bookingUrl, variant: 'primary', icon: <TrainFront className="h-3 w-3" /> });
   }
 
   // Activity
   if (item.type === 'activity' && bookingUrl) {
     if (bookingUrl.includes('viator.com')) {
-      links.push({ label: 'Viator', url: bookingUrl, primary: true, icon: <Ticket className="h-3 w-3" /> });
+      buttons.push({ label: 'Viator', url: bookingUrl, variant: 'primary', icon: <Ticket className="h-3 w-3" /> });
     } else {
-      links.push({ label: 'Site officiel', url: bookingUrl, primary: true, icon: <Globe className="h-3 w-3" /> });
+      buttons.push({ label: 'Site officiel', url: bookingUrl, variant: 'primary', icon: <Globe className="h-3 w-3" /> });
     }
   }
 
   // Viator alt
   if (item.viatorUrl && !bookingUrl.includes('viator.com') && !item.viatorImageUrl) {
-    links.push({ label: 'Viator', url: item.viatorUrl, icon: <Ticket className="h-3 w-3" /> });
+    buttons.push({ label: 'Viator', url: item.viatorUrl, variant: 'secondary', icon: <Ticket className="h-3 w-3" /> });
   }
 
   // Google Maps
   const mapsUrl = item.googleMapsPlaceUrl || item.googleMapsUrl ||
     (item.latitude && item.longitude ? `https://www.google.com/maps/search/?api=1&query=${item.latitude},${item.longitude}` : null);
   if (mapsUrl) {
-    links.push({ label: 'Maps', url: mapsUrl, icon: <Map className="h-3 w-3" /> });
+    buttons.push({ label: 'Maps', url: mapsUrl, variant: 'ghost', icon: <Map className="h-3 w-3" /> });
   }
 
-  if (links.length === 0) return null;
+  if (buttons.length === 0) return null;
 
   return (
-    <div className="flex items-center gap-1 mt-2 flex-wrap">
-      {links.map((link, i) => (
+    <>
+      {buttons.map((btn, i) => (
         <a
-          key={`${link.label}-${i}`}
-          href={link.url}
+          key={`${btn.label}-${i}`}
+          href={btn.url}
           target="_blank"
           rel="noopener noreferrer"
           onClick={(e) => e.stopPropagation()}
           className={cn(
-            'inline-flex items-center gap-1 px-2 py-[3px] rounded-full text-[10px] font-medium transition-colors',
-            link.primary
-              ? 'bg-primary/10 text-primary hover:bg-primary/20'
-              : 'text-muted-foreground/60 hover:text-muted-foreground hover:bg-muted/40',
+            'inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors',
+            btn.variant === 'primary' && 'bg-primary text-primary-foreground hover:opacity-90 shadow-sm',
+            btn.variant === 'secondary' && 'bg-secondary text-secondary-foreground hover:bg-secondary/80 border border-border/50',
+            btn.variant === 'ghost' && 'text-muted-foreground hover:text-foreground hover:bg-muted/60 border border-transparent hover:border-border/40',
           )}
         >
-          {link.icon}
-          {link.label}
+          {btn.icon}
+          {btn.label}
         </a>
       ))}
-    </div>
+    </>
   );
 }
 
@@ -487,46 +551,52 @@ function TransportCard({ item }: { item: TripItem }) {
   };
 
   return (
-    <div className="mt-2 space-y-1.5 p-2 rounded-lg bg-muted/10" onClick={(e) => e.stopPropagation()}>
+    <div className="mt-2.5 space-y-2 p-2.5 rounded-lg bg-muted/20 border border-border/40" onClick={(e) => e.stopPropagation()}>
       {hasRealData ? (
-        <div className="space-y-1">
+        <div className="space-y-1.5">
           {legs.map((leg, idx) => (
-            <div key={idx} className="flex items-center gap-1.5 text-[11px]">
-              <span className="font-mono text-foreground/80 font-medium min-w-[78px]">
+            <div key={idx} className="flex items-center gap-2 text-xs">
+              <span className="font-mono text-primary font-semibold min-w-[90px]">
                 {formatTime(leg.departure)} → {formatTime(leg.arrival)}
               </span>
-              <span className="inline-flex items-center gap-0.5 px-1.5 py-[1px] rounded-full text-[9px] font-semibold bg-primary/8 text-primary">
-                {leg.mode === 'bus' ? <Bus className="h-2.5 w-2.5" /> : <TrainFront className="h-2.5 w-2.5" />}
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] border border-primary/20 bg-primary/5 font-medium">
+                {leg.mode === 'bus' ? <Bus className="h-2.5 w-2.5 text-primary" /> : <TrainFront className="h-2.5 w-2.5 text-primary" />}
                 {cleanLineName(leg)}
               </span>
-              <span className="text-muted-foreground/50 text-[10px]">{fmtDur(leg.duration)}</span>
+              <span className="text-muted-foreground">{fmtDur(leg.duration)}</span>
+              {idx < legs.length - 1 && (
+                <span className="text-[10px] text-primary/50 ml-auto">↓ corresp.</span>
+              )}
             </div>
           ))}
           {legs.length > 1 && (
-            <div className="text-[9px] text-muted-foreground/50">
-              {legs.length - 1} corresp. · {item.duration ? fmtDur(item.duration) : ''}
+            <div className="text-[10px] text-muted-foreground">
+              {legs.length - 1} correspondance{legs.length > 2 ? 's' : ''} · ~{item.duration ? fmtDur(item.duration) : ''}
             </div>
           )}
         </div>
       ) : (
-        <div className="flex items-center gap-2 text-[11px] text-muted-foreground/60">
+        <div className="flex items-center gap-3 text-xs text-muted-foreground">
           {item.startTime && item.endTime && (
-            <span>{item.startTime} → {item.endTime}</span>
+            <span className="flex items-center gap-1">
+              <Clock className="h-3 w-3" />
+              {item.startTime} → {item.endTime}
+            </span>
           )}
-          {item.duration && item.duration > 0 && <span>{fmtDur(item.duration)}</span>}
+          {item.duration && item.duration > 0 && <span>~{fmtDur(item.duration)}</span>}
         </div>
       )}
 
       {!hasRealData && item.transitInfo?.lines && item.transitInfo.lines.length > 0 && (
-        <div className="flex items-center gap-1 flex-wrap">
+        <div className="flex items-center gap-1.5 flex-wrap">
           {item.transitInfo.lines.map((line, idx) => {
             const LineIcon = TRANSIT_MODE_ICONS[line.mode] || Bus;
             return (
               <span
                 key={`${line.mode}-${line.number}-${idx}`}
-                className="inline-flex items-center gap-0.5 px-1.5 py-[1px] rounded-full text-[9px] font-medium bg-primary/8 text-muted-foreground"
+                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] border border-primary/20 bg-primary/5 text-muted-foreground"
               >
-                <LineIcon className="h-2 w-2" />
+                <LineIcon className="h-2.5 w-2.5" />
                 {line.number}
               </span>
             );
@@ -534,16 +604,17 @@ function TransportCard({ item }: { item: TripItem }) {
         </div>
       )}
 
-      <div className="flex items-center justify-between pt-0.5">
+      <div className="flex items-center justify-between pt-1">
         <div>
           {item.priceRange ? (
-            <span className="text-[11px]">
+            <span className="text-xs">
               <span className="font-semibold text-primary">{item.priceRange[0]}€ – {item.priceRange[1]}€</span>
-              <span className="text-muted-foreground/50 ml-0.5">/p.</span>
+              <span className="text-muted-foreground ml-1">/ pers.</span>
             </span>
           ) : item.estimatedCost != null && item.estimatedCost > 0 ? (
-            <span className="text-[11px]">
+            <span className="text-xs">
               <span className="font-semibold text-primary">~{item.estimatedCost}€</span>
+              <span className="text-muted-foreground ml-1">(estimé)</span>
             </span>
           ) : null}
         </div>
@@ -551,10 +622,10 @@ function TransportCard({ item }: { item: TripItem }) {
           href={bookingUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 px-2 py-[3px] rounded-full bg-primary/10 text-primary text-[10px] font-medium hover:bg-primary/20 transition-colors"
+          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-primary text-primary-foreground text-[11px] font-medium hover:opacity-90 transition-opacity"
         >
-          <ExternalLink className="h-2.5 w-2.5" />
-          {isRealTime ? 'Reserver' : `${isOmio ? 'Omio' : 'Voir'}`}
+          <ExternalLink className="h-3 w-3" />
+          {isRealTime ? 'Réserver' : `Voir sur ${isOmio ? 'Omio' : 'le site'}`}
         </a>
       </div>
     </div>
@@ -566,32 +637,32 @@ function FlightAlternatives({ alternatives }: { alternatives: Flight[] }) {
   if (alternatives.length === 0) return null;
 
   return (
-    <div className="mx-3 mb-2 border-t border-border/30 pt-2" onClick={(e) => e.stopPropagation()}>
+    <div className="mt-3 border-t border-border/40 pt-2.5" onClick={(e) => e.stopPropagation()}>
       <button
-        className="flex items-center gap-1 text-[11px] text-muted-foreground/60 hover:text-muted-foreground transition-colors"
+        className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
         onClick={() => setExpanded(!expanded)}
       >
         <ChevronRight className={cn('h-3 w-3 transition-transform', expanded && 'rotate-90')} />
         {alternatives.length} autre{alternatives.length > 1 ? 's' : ''} vol{alternatives.length > 1 ? 's' : ''}
       </button>
       {expanded && (
-        <div className="flex gap-1.5 mt-1.5 overflow-x-auto pb-1.5 -mx-0.5 px-0.5">
+        <div className="flex gap-2 mt-2 overflow-x-auto pb-2 -mx-1 px-1">
           {alternatives.map((alt) => (
             <a
               key={alt.id}
               href={alt.bookingUrl || '#'}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-shrink-0 rounded-lg p-2 text-[11px] hover:bg-muted/40 transition-all min-w-[120px] bg-muted/15"
+              className="flex-shrink-0 border border-border/50 rounded-lg p-2.5 text-xs hover:border-primary/40 hover:shadow-sm transition-all min-w-[140px] bg-card"
             >
-              <div className="font-medium text-foreground/80">{alt.airline}</div>
-              <div className="text-muted-foreground/50 text-[9px]">{alt.flightNumber}</div>
-              <div className="mt-1 font-mono text-[10px] text-foreground/70">
+              <div className="font-medium">{alt.airline}</div>
+              <div className="text-muted-foreground text-[10px]">{alt.flightNumber}</div>
+              <div className="mt-1.5 font-mono text-[11px]">
                 {alt.departureTimeDisplay || alt.departureTime?.split('T')[1]?.slice(0, 5)} → {alt.arrivalTimeDisplay || alt.arrivalTime?.split('T')[1]?.slice(0, 5)}
               </div>
-              <div className="flex items-center justify-between mt-1">
-                <span className="font-semibold text-primary text-[10px]">{alt.pricePerPerson || alt.price}€</span>
-                <span className="text-muted-foreground/40 text-[9px]">
+              <div className="flex items-center justify-between mt-1.5">
+                <span className="font-semibold text-primary">{alt.pricePerPerson || alt.price}€</span>
+                <span className="text-muted-foreground text-[10px]">
                   {formatDuration(alt.duration)} · {alt.stops === 0 ? 'Direct' : `${alt.stops} esc.`}
                 </span>
               </div>

@@ -5,7 +5,7 @@ import { ActivityCard } from './ActivityCard';
 import { HotelCarouselSelector } from './HotelCarouselSelector';
 import { ItineraryConnector } from './ItineraryConnector';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Plus, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { shouldShowItinerary } from '@/lib/services/itineraryValidator';
@@ -39,12 +39,17 @@ interface DayTimelineProps {
 }
 
 /**
- * Convertit une heure HH:MM en minutes depuis minuit, avec gestion des horaires apres minuit.
+ * Convertit une heure HH:MM en minutes depuis minuit, avec gestion des horaires après minuit.
+ * Les heures entre 00:00 et 05:59 sont considérées comme "après minuit" (lendemain)
+ * UNIQUEMENT si le jour contient aussi des items tardifs (après 22h = nightlife).
+ * Sinon, ce sont des matins tôt (ex: trajet aéroport à 04:45) → tri normal.
  */
 function timeToSortableMinutes(time: string, treatEarlyAsAfterMidnight: boolean = true): number {
   const [hours, minutes] = time.split(':').map(Number);
   const totalMinutes = hours * 60 + minutes;
 
+  // Seulement si le jour a des items après 22h (nightlife), traiter 00:00-05:59 comme "après minuit"
+  // Sinon, les items tôt le matin (vol à 4h45, trajet aéroport à 5h) restent en début de journée
   if (treatEarlyAsAfterMidnight && hours < 6) {
     return totalMinutes + 1440;
   }
@@ -67,6 +72,10 @@ export function DayTimeline({
   renderSwapButton,
   hotelSelectorData,
 }: DayTimelineProps) {
+  // Sort by startTime with smart handling for early morning vs after-midnight times
+  // Déterminer si ce jour a des items de fin de soirée (après 22h = nightlife)
+  // Si oui → les items 00:00-05:59 sont "après minuit" (triés après 22h)
+  // Si non → les items 00:00-05:59 sont des matins tôt (ex: trajet aéroport à 4h45)
   const hasLateNightItems = day.items.some(item => {
     const [h] = item.startTime.split(':').map(Number);
     return h >= 22;
@@ -74,44 +83,51 @@ export function DayTimeline({
   const sortedItems = [...day.items]
     .sort((a, b) => timeToSortableMinutes(a.startTime, hasLateNightItems) - timeToSortableMinutes(b.startTime, hasLateNightItems));
 
-  const formattedDate = format(new Date(day.date), 'EEEE d MMMM', { locale: fr });
-  // Capitalize first letter
-  const displayDate = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
-
   return (
-    <div className="space-y-3">
-      {/* Day header — minimal, Apple-style */}
+    <div className="space-y-4">
+      {/* Day header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-baseline gap-3">
-          <span className="text-2xl font-bold tracking-tight text-foreground">
-            J{day.dayNumber}
-          </span>
-          <span className="text-sm text-muted-foreground/60 font-medium">
-            {displayDate}
-          </span>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold">
+            {day.dayNumber}
+          </div>
+          <div>
+            <h3 className="font-semibold">Jour {day.dayNumber}</h3>
+            <p className="text-sm text-muted-foreground flex items-center gap-1">
+              <Calendar className="h-3.5 w-3.5" />
+              {format(new Date(day.date), 'EEEE d MMMM', { locale: fr })}
+            </p>
+          </div>
         </div>
         {onAddItem && (
           <Button
-            variant="ghost"
+            variant="outline"
             size="sm"
-            className="gap-1 text-muted-foreground/50 hover:text-foreground h-7 px-2 rounded-full"
+            className="gap-1"
             onClick={() => onAddItem(day.dayNumber)}
           >
-            <Plus className="h-3.5 w-3.5" />
-            <span className="text-xs">Ajouter</span>
+            <Plus className="h-4 w-4" />
+            Ajouter
           </Button>
         )}
       </div>
 
-      {/* Activities list — clean, no heavy timeline line */}
-      <div className="space-y-1.5">
+      {/* Timeline */}
+      <div className="relative pl-6 space-y-3">
+        {/* Vertical line */}
+        <div className="absolute left-[11px] top-0 bottom-0 w-0.5 bg-border" />
+
         {sortedItems.map((item, index) => {
           const nextItem = index < sortedItems.length - 1 ? sortedItems[index + 1] : null;
+
           const isFirst = index === 0;
           const isLast = index === sortedItems.length - 1;
 
           return (
-            <div key={item.id}>
+            <div key={item.id} className="relative group/item">
+              {/* Timeline dot */}
+              <div className="absolute -left-6 top-5 w-3 h-3 rounded-full bg-background border-2 border-primary" />
+
               <ActivityCard
                 item={item}
                 orderNumber={mapNumbers?.get(item.id) ?? (globalIndexOffset + index + 1)}
@@ -128,9 +144,9 @@ export function DayTimeline({
                 swapButton={renderSwapButton?.(item)}
               />
 
-              {/* Hotel selector after check-in */}
+              {/* Sélecteur d'hôtel inline après le check-in */}
               {item.type === 'hotel' && hotelSelectorData && hotelSelectorData.hotels.length > 0 && (
-                <div className="mt-2 mb-1">
+                <div className="mt-3 mb-1">
                   <HotelCarouselSelector
                     hotels={hotelSelectorData.hotels}
                     selectedId={hotelSelectorData.selectedId}
@@ -141,7 +157,8 @@ export function DayTimeline({
                 </div>
               )}
 
-              {/* Itinerary connector */}
+              {/* Connecteur d'itinéraire vers l'activité suivante */}
+              {/* FILTRE: N'afficher que les itinéraires pratiques (pas check-in→vol, vol, etc.) */}
               {nextItem && shouldShowItinerary(item, nextItem) && (
                 <ItineraryConnector
                   from={{
@@ -164,15 +181,15 @@ export function DayTimeline({
         })}
 
         {sortedItems.length === 0 && (
-          <div className="text-center py-10 text-muted-foreground/40">
-            <p className="text-sm">Aucune activite pour ce jour</p>
+          <div className="text-center py-8 text-muted-foreground">
+            <p>Aucune activité pour ce jour</p>
             {onAddItem && (
               <Button
                 variant="link"
-                className="mt-1 text-primary/60 hover:text-primary"
+                className="mt-2"
                 onClick={() => onAddItem(day.dayNumber)}
               >
-                Ajouter une activite
+                Ajouter une activité
               </Button>
             )}
           </div>
