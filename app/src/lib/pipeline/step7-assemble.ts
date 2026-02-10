@@ -10,7 +10,7 @@ import type { FetchedData, ActivityCluster, MealAssignment, BalancedPlan, Scored
 import { DayScheduler, parseTime, formatTime } from '../services/scheduler';
 import { calculateDistance, estimateTravelTime } from '../services/geocoding';
 import { getDirections } from '../services/directions';
-import { fetchWikipediaImage } from './services/wikimediaImages';
+import { fetchPlaceImage } from './services/wikimediaImages';
 // Simple UUID generator (avoids external dependency)
 function uuidv4(): string {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
@@ -782,9 +782,9 @@ export async function assembleTripSchedule(
     });
   }
 
-  // 12. Enrich activities with Wikipedia images (for items missing images)
-  await enrichWithWikipediaImages(days).catch(e =>
-    console.warn('[Pipeline V2] Wikipedia image enrichment failed:', e)
+  // 12. Enrich items missing images (Google Places photo lookup + Wikipedia fallback)
+  await enrichWithPlaceImages(days).catch(e =>
+    console.warn('[Pipeline V2] Image enrichment failed:', e)
   );
 
   // 13. Batch fetch directions (non-blocking enrichment)
@@ -1013,11 +1013,11 @@ function getActivityMinStartTime(activity: ScoredActivity, dayDate: Date): Date 
 }
 
 /**
- * Enrich trip items that have no image with Wikipedia images.
- * Only targets activities, restaurants, and hotels.
- * Processes in parallel batches of 5 to avoid overwhelming the API.
+ * Enrich trip items that have no image using Google Places + Wikipedia fallback.
+ * Uses GPS coordinates for location-biased search (more accurate results).
+ * Processes in parallel batches of 5.
  */
-async function enrichWithWikipediaImages(days: TripDay[]): Promise<void> {
+async function enrichWithPlaceImages(days: TripDay[]): Promise<void> {
   const itemsNeedingImages: TripItem[] = [];
   const imageTypes = ['activity', 'restaurant', 'hotel', 'checkin', 'checkout'];
 
@@ -1031,14 +1031,18 @@ async function enrichWithWikipediaImages(days: TripDay[]): Promise<void> {
 
   if (itemsNeedingImages.length === 0) return;
 
-  console.log(`[Pipeline V2] Fetching Wikipedia images for ${itemsNeedingImages.length} items without photos...`);
+  console.log(`[Pipeline V2] Fetching images for ${itemsNeedingImages.length} items without photos (Google Places + Wikipedia)...`);
 
   // Process in parallel batches of 5
   for (let i = 0; i < itemsNeedingImages.length; i += 5) {
     const batch = itemsNeedingImages.slice(i, i + 5);
-    const results = await Promise.allSettled(
+    await Promise.allSettled(
       batch.map(async (item) => {
-        const imageUrl = await fetchWikipediaImage(item.title);
+        const imageUrl = await fetchPlaceImage(
+          item.title,
+          item.latitude || undefined,
+          item.longitude || undefined
+        );
         if (imageUrl) {
           item.imageUrl = imageUrl;
         }
@@ -1047,7 +1051,7 @@ async function enrichWithWikipediaImages(days: TripDay[]): Promise<void> {
   }
 
   const enriched = itemsNeedingImages.filter(i => i.imageUrl).length;
-  console.log(`[Pipeline V2] ✅ Wikipedia images: ${enriched}/${itemsNeedingImages.length} enriched`);
+  console.log(`[Pipeline V2] ✅ Place images: ${enriched}/${itemsNeedingImages.length} enriched`);
 }
 
 /**

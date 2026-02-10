@@ -1,45 +1,108 @@
 /**
- * Wikimedia Commons / Wikipedia — Image lookup
- *
- * Uses the Wikipedia REST API to find the main image for a landmark/place.
- * Completely free, no API key required, no rate limit for reasonable usage.
+ * Image lookup service — Google Places + Wikipedia fallback
  *
  * Strategy:
- * 1. Search Wikipedia for the place name
- * 2. Get the page's main image (thumbnail) at 600px width
+ * 1. Google Places "Find Place" API → exact match by name + location bias
+ *    Returns the place's official photo_reference → reliable image
+ * 2. Fallback: Wikipedia API → main article thumbnail (free, no key)
  *
- * This is used as a fallback when Google Places / Viator / SerpAPI
- * don't provide an image for an activity.
+ * Google Places Find Place = 1 request per lookup ($0.017 each)
+ * Photo URL = free (just constructs URL, browser fetches it directly)
  */
 
-const WIKI_API = 'https://en.wikipedia.org/w/api.php';
+const GOOGLE_FIND_PLACE_URL = 'https://maps.googleapis.com/maps/api/place/findplacefromtext/json';
 const WIKI_API_FR = 'https://fr.wikipedia.org/w/api.php';
+const WIKI_API_EN = 'https://en.wikipedia.org/w/api.php';
 
-// Simple in-memory cache to avoid re-fetching during a single pipeline run
+// In-memory cache for a single pipeline run
 const imageCache = new Map<string, string | null>();
 
+function getApiKey(): string {
+  return process.env.GOOGLE_PLACES_API_KEY || process.env.GOOGLE_MAPS_API_KEY || '';
+}
+
 /**
- * Fetch the main Wikipedia image for a given place/landmark name.
- * Tries French Wikipedia first (better for European cities), then English.
- * Returns the image URL or null if not found.
+ * Find an image for a place by name.
+ * Uses Google Places (most reliable) then Wikipedia as fallback.
+ */
+export async function fetchPlaceImage(
+  name: string,
+  latitude?: number,
+  longitude?: number
+): Promise<string | null> {
+  if (!name || name.length < 3) return null;
+
+  const cacheKey = `${name.toLowerCase().trim()}|${latitude}|${longitude}`;
+  if (imageCache.has(cacheKey)) return imageCache.get(cacheKey) || null;
+
+  // Try Google Places first (most reliable — photo tied to place_id)
+  const apiKey = getApiKey();
+  if (apiKey) {
+    const googleImage = await fetchGooglePlacesImage(name, apiKey, latitude, longitude);
+    if (googleImage) {
+      imageCache.set(cacheKey, googleImage);
+      return googleImage;
+    }
+  }
+
+  // Fallback: Wikipedia
+  const wikiImage = await fetchWikipediaImage(name);
+  imageCache.set(cacheKey, wikiImage);
+  return wikiImage;
+}
+
+/**
+ * Google Places Find Place → extract photo_reference → build photo URL.
+ * One API call per lookup. Returns null if no photo found.
+ */
+async function fetchGooglePlacesImage(
+  name: string,
+  apiKey: string,
+  latitude?: number,
+  longitude?: number
+): Promise<string | null> {
+  try {
+    const url = new URL(GOOGLE_FIND_PLACE_URL);
+    url.searchParams.set('input', name);
+    url.searchParams.set('inputtype', 'textquery');
+    url.searchParams.set('fields', 'photos,name');
+    url.searchParams.set('language', 'fr');
+    url.searchParams.set('key', apiKey);
+
+    // Location bias: prefer results near the activity's GPS coordinates
+    if (latitude && longitude) {
+      url.searchParams.set('locationbias', `circle:5000@${latitude},${longitude}`);
+    }
+
+    const res = await fetch(url.toString(), { signal: AbortSignal.timeout(5000) });
+    if (!res.ok) return null;
+
+    const data = await res.json();
+    const candidate = data?.candidates?.[0];
+    const photoRef = candidate?.photos?.[0]?.photo_reference;
+
+    if (!photoRef) return null;
+
+    return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=600&photoreference=${photoRef}&key=${apiKey}`;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Wikipedia fallback: search for page → get main thumbnail.
+ * Free, no API key. Tries French then English Wikipedia.
  */
 export async function fetchWikipediaImage(name: string): Promise<string | null> {
   if (!name || name.length < 3) return null;
 
-  const cacheKey = name.toLowerCase().trim();
-  if (imageCache.has(cacheKey)) return imageCache.get(cacheKey) || null;
-
-  // Try French first (trip destinations are often European), then English
-  const result = await tryWikipediaImage(name, WIKI_API_FR)
-    || await tryWikipediaImage(name, WIKI_API);
-
-  imageCache.set(cacheKey, result);
-  return result;
+  return await tryWikipediaImage(name, WIKI_API_FR)
+    || await tryWikipediaImage(name, WIKI_API_EN);
 }
 
 async function tryWikipediaImage(name: string, apiBase: string): Promise<string | null> {
   try {
-    // Step 1: Search for the page
+    // Search for the page
     const searchUrl = new URL(apiBase);
     searchUrl.searchParams.set('action', 'query');
     searchUrl.searchParams.set('list', 'search');
@@ -48,16 +111,14 @@ async function tryWikipediaImage(name: string, apiBase: string): Promise<string 
     searchUrl.searchParams.set('format', 'json');
     searchUrl.searchParams.set('origin', '*');
 
-    const searchRes = await fetch(searchUrl.toString(), {
-      signal: AbortSignal.timeout(5000),
-    });
+    const searchRes = await fetch(searchUrl.toString(), { signal: AbortSignal.timeout(5000) });
     if (!searchRes.ok) return null;
 
     const searchData = await searchRes.json();
     const pageTitle = searchData?.query?.search?.[0]?.title;
     if (!pageTitle) return null;
 
-    // Step 2: Get the page's main image (pageimages prop)
+    // Get the page's main image
     const imageUrl = new URL(apiBase);
     imageUrl.searchParams.set('action', 'query');
     imageUrl.searchParams.set('titles', pageTitle);
@@ -67,9 +128,7 @@ async function tryWikipediaImage(name: string, apiBase: string): Promise<string 
     imageUrl.searchParams.set('format', 'json');
     imageUrl.searchParams.set('origin', '*');
 
-    const imageRes = await fetch(imageUrl.toString(), {
-      signal: AbortSignal.timeout(5000),
-    });
+    const imageRes = await fetch(imageUrl.toString(), { signal: AbortSignal.timeout(5000) });
     if (!imageRes.ok) return null;
 
     const imageData = await imageRes.json();
@@ -79,37 +138,8 @@ async function tryWikipediaImage(name: string, apiBase: string): Promise<string 
     const page = Object.values(pages)[0] as any;
     const thumbnail = page?.thumbnail?.source;
 
-    if (thumbnail && typeof thumbnail === 'string') {
-      return thumbnail;
-    }
-
-    return null;
-  } catch (error) {
-    // Silently fail — this is a best-effort fallback
+    return (thumbnail && typeof thumbnail === 'string') ? thumbnail : null;
+  } catch {
     return null;
   }
-}
-
-/**
- * Batch fetch Wikipedia images for multiple activities.
- * Processes in parallel with concurrency limit to avoid overwhelming the API.
- */
-export async function fetchWikipediaImagesBatch(
-  names: string[],
-  concurrency: number = 5
-): Promise<Map<string, string>> {
-  const results = new Map<string, string>();
-  const uniqueNames = [...new Set(names.filter(n => n && n.length >= 3))];
-
-  // Process in batches
-  for (let i = 0; i < uniqueNames.length; i += concurrency) {
-    const batch = uniqueNames.slice(i, i + concurrency);
-    const promises = batch.map(async (name) => {
-      const url = await fetchWikipediaImage(name);
-      if (url) results.set(name, url);
-    });
-    await Promise.all(promises);
-  }
-
-  return results;
 }
