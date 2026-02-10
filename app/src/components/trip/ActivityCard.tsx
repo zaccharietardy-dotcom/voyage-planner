@@ -141,7 +141,7 @@ export function ActivityCard({
           <img
             src={item.imageUrl}
             alt={item.title}
-            className="w-full h-full object-cover"
+            className="absolute inset-0 w-full h-full object-cover"
             loading="lazy"
             onError={() => setImgError(true)}
           />
