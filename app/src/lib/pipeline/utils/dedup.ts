@@ -120,11 +120,17 @@ export function mergeRestaurantSources(
   serpApi: { id: string; name: string; latitude: number; longitude: number; rating: number; reviewCount: number; [key: string]: any }[]
 ): any[] {
   const merged = [...tripAdvisor];
-  const taNames = new Set(tripAdvisor.map(r => normalizeName(r.name)));
+  const taNormNames = tripAdvisor.map(r => normalizeName(r.name));
 
   // Add SerpAPI restaurants that don't exist in TripAdvisor
+  // Use fuzzy matching: if the shorter name is a substring of the longer one, it's a match
+  // e.g. "bhattipasal" is contained in "bhattipasalvoetboogauthenticnepalessefood"
   for (const sr of serpApi) {
-    if (!taNames.has(normalizeName(sr.name))) {
+    const srNorm = normalizeName(sr.name);
+    const isDuplicate = taNormNames.some(taNorm =>
+      srNorm === taNorm || srNorm.includes(taNorm) || taNorm.includes(srNorm)
+    );
+    if (!isDuplicate) {
       merged.push(sr);
     }
   }

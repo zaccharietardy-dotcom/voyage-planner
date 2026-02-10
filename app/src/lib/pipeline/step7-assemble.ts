@@ -446,6 +446,42 @@ export async function assembleTripSchedule(
         });
       }
 
+      // MUST-SEE EVICTION: If must-see still rejected, evict lowest-value non-must-see
+      // activity from this day to make room, then retry with original duration.
+      if (!actResult && activity.mustSee) {
+        const scheduledItems = scheduler.getItems();
+        // Find non-must-see activities currently scheduled (not meals, transport, checkin, checkout)
+        const evictCandidates = scheduledItems
+          .filter(item => item.type === 'activity' && !(item.data as any)?.mustSee)
+          .sort((a, b) => {
+            // Evict the one with lowest score first
+            const scoreA = (a.data as any)?.score || 0;
+            const scoreB = (b.data as any)?.score || 0;
+            return scoreA - scoreB;
+          });
+
+        for (const candidate of evictCandidates) {
+          const removed = scheduler.removeItemById(candidate.id);
+          if (!removed) continue;
+
+          console.log(`[Pipeline V2] Day ${balancedDay.dayNumber}: Evicted "${candidate.title}" (score=${(candidate.data as any)?.score || '?'}) to make room for must-see "${activity.name}"`);
+
+          // Retry the must-see with original duration
+          actResult = scheduler.addItem({
+            id: activity.id,
+            title: activity.name,
+            type: 'activity',
+            duration: activityDuration,
+            travelTime: Math.min(travelTime, 10),
+            maxEndTime: activityMaxEndTime,
+            data: activity,
+          });
+
+          if (actResult) break; // Success!
+          // If still doesn't fit, keep the eviction and try next candidate
+        }
+      }
+
       if (!actResult) {
         console.warn(`[Pipeline V2] Day ${balancedDay.dayNumber}: REJECTED activity "${activity.name}" (duration=${activityDuration}min, travel=${travelTime}min, cursor=${formatTimeHHMM(scheduler.getCurrentTime())}, dayEnd=${dayEndHour}:00)${activity.mustSee ? ' ⚠️ MUST-SEE LOST' : ''}`);
       }

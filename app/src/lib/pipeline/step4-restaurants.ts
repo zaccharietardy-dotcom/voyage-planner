@@ -142,6 +142,11 @@ const BREAKFAST_EXCLUDED_CUISINES = [
   'pub', 'bar', 'cocktail', 'wine bar',
   'nightclub', 'disco',
   'fast food', 'burger', 'pizza', 'kebab', 'shawarma',
+  // Asian cuisine subtypes not covered above
+  'nepali', 'nepalese', 'népalais', 'asian', 'asiatique',
+  'vietnamese', 'vietnamien', 'japanese', 'japonais',
+  'indonesian', 'indonésien', 'malaysian', 'malaisien',
+  'tibetan', 'tibétain', 'sri lankan',
 ];
 
 /**
@@ -151,9 +156,14 @@ function isAppropriateForMeal(restaurant: Restaurant, mealType: 'breakfast' | 'l
   if (mealType !== 'breakfast') return true; // No filtering for lunch/dinner
 
   const name = (restaurant.name || '').toLowerCase();
-  const cuisine = ((restaurant as any).cuisineType || (restaurant as any).cuisine || '').toLowerCase();
+  // Read both singular field and plural array (different API sources use different formats)
+  const cuisineTypesArr = (restaurant as any).cuisineTypes || [];
+  const cuisineStr = Array.isArray(cuisineTypesArr)
+    ? cuisineTypesArr.join(' ').toLowerCase()
+    : String(cuisineTypesArr).toLowerCase();
+  const cuisineSingular = ((restaurant as any).cuisineType || (restaurant as any).cuisine || '').toLowerCase();
   const type = ((restaurant as any).type || '').toLowerCase();
-  const allText = `${name} ${cuisine} ${type}`;
+  const allText = `${name} ${cuisineStr} ${cuisineSingular} ${type}`;
 
   // Exclude inappropriate cuisine types for breakfast
   for (const excluded of BREAKFAST_EXCLUDED_CUISINES) {

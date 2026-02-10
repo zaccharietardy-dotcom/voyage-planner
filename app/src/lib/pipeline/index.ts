@@ -504,6 +504,98 @@ function rebalanceClustersForFlights(
     }
   }
 
+  // Phase 4: Must-see distribution check
+  // Verify must-sees are spread across days. If a short day (arrival/departure) holds a
+  // must-see that won't fit timewise, move it to a full day, evicting if needed.
+  const allMustSees = clusters.flatMap(c => c.activities.filter(a => a.mustSee));
+  const mustSeeIds = new Set(allMustSees.map(a => a.id));
+
+  for (let ci = 0; ci < clusters.length; ci++) {
+    if (isDayTrip[ci]) continue;
+    const cluster = clusters[ci];
+    const availMin = hoursPerDay[ci] * 60;
+    const totalDuration = cluster.activities.reduce((s, a) => s + (a.duration || 60) + 20, 0) + 180;
+
+    // If this day is overloaded and has must-sees, ensure must-sees survive by moving non-must-sees out
+    if (totalDuration > availMin) {
+      const overflowMin = totalDuration - availMin;
+      const nonMustSees = cluster.activities
+        .filter(a => !a.mustSee)
+        .sort((a, b) => a.score - b.score); // lowest score first
+
+      let freedMin = 0;
+      for (const nm of nonMustSees) {
+        if (freedMin >= overflowMin) break;
+
+        // Find a day that can absorb this activity
+        let bestTarget = -1;
+        let bestRemaining = -Infinity;
+        for (let ti = 0; ti < clusters.length; ti++) {
+          if (ti === ci || isDayTrip[ti]) continue;
+          const tAvail = hoursPerDay[ti] * 60;
+          const tUsed = clusters[ti].activities.reduce((s, a) => s + (a.duration || 60) + 20, 0) + 180;
+          const remaining = tAvail - tUsed;
+          if (remaining > bestRemaining && remaining >= (nm.duration || 60) + 20) {
+            bestRemaining = remaining;
+            bestTarget = ti;
+          }
+        }
+
+        if (bestTarget !== -1) {
+          const idx = cluster.activities.findIndex(a => a.id === nm.id);
+          if (idx !== -1) {
+            const [moved] = cluster.activities.splice(idx, 1);
+            clusters[bestTarget].activities.push(moved);
+            freedMin += (moved.duration || 60) + 20;
+            console.log(`[Pipeline V2] Phase 4: moved non-must-see "${moved.name}" from overloaded Day ${cluster.dayNumber} → Day ${clusters[bestTarget].dayNumber} to protect must-sees`);
+          }
+        }
+      }
+    }
+  }
+
+  // Also check: if any must-see is orphaned (not in any cluster), inject it
+  const allClusterActivityIds = new Set(clusters.flatMap(c => c.activities.map(a => a.id)));
+  const missingMustSees = allMustSees.filter(a => !allClusterActivityIds.has(a.id));
+
+  for (const mustSee of missingMustSees) {
+    // Find the day with the most remaining capacity
+    let bestDay = -1;
+    let bestRemaining = -Infinity;
+    for (let ci = 0; ci < clusters.length; ci++) {
+      if (isDayTrip[ci]) continue;
+      const availMin = hoursPerDay[ci] * 60;
+      const usedMin = clusters[ci].activities.reduce((s, a) => s + (a.duration || 60), 0)
+        + clusters[ci].activities.length * 20 + 180;
+      const remaining = availMin - usedMin;
+      if (remaining > bestRemaining) {
+        bestRemaining = remaining;
+        bestDay = ci;
+      }
+    }
+
+    if (bestDay === -1) continue;
+
+    // If there's enough room, just add
+    if (bestRemaining >= (mustSee.duration || 60) + 20) {
+      clusters[bestDay].activities.push(mustSee);
+      console.log(`[Pipeline V2] Phase 4: injected missing must-see "${mustSee.name}" into Day ${clusters[bestDay].dayNumber} (${Math.round(bestRemaining)}min remaining)`);
+    } else {
+      // Not enough room — evict the lowest-scored non-must-see from this day
+      const nonMustSees = clusters[bestDay].activities
+        .filter(a => !a.mustSee)
+        .sort((a, b) => a.score - b.score);
+      if (nonMustSees.length > 0) {
+        const evictIdx = clusters[bestDay].activities.findIndex(a => a.id === nonMustSees[0].id);
+        if (evictIdx !== -1) {
+          const [evicted] = clusters[bestDay].activities.splice(evictIdx, 1);
+          clusters[bestDay].activities.push(mustSee);
+          console.log(`[Pipeline V2] Phase 4: evicted "${evicted.name}" (score=${evicted.score.toFixed(1)}) to inject must-see "${mustSee.name}" into Day ${clusters[bestDay].dayNumber}`);
+        }
+      }
+    }
+  }
+
   // Log rebalancing result
   console.log(`[Pipeline V2] Rebalanced clusters: ${clusters.map((c, i) =>
     `Day ${c.dayNumber}: ${c.activities.length} activities (${hoursPerDay[i].toFixed(1)}h avail, max ${maxPerDay[i]})`

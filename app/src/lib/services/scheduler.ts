@@ -455,6 +455,24 @@ export class DayScheduler {
   }
 
   /**
+   * Remove a specific item by ID and recalculate cursor position.
+   * Returns the removed item or null if not found.
+   */
+  removeItemById(id: string): ScheduleItem | null {
+    const index = this.items.findIndex(item => item.id === id);
+    if (index === -1) return null;
+    const [removed] = this.items.splice(index, 1);
+    // Recalculate cursor: advance to end of last item (or dayStart if empty)
+    if (this.items.length > 0) {
+      const sorted = [...this.items].sort((a, b) => a.slot.end.getTime() - b.slot.end.getTime());
+      this.currentTime = sorted[sorted.length - 1].slot.end;
+    } else {
+      this.currentTime = new Date(this.dayStart);
+    }
+    return removed;
+  }
+
+  /**
    * Debug: affiche l'emploi du temps
    */
   debug(): void {
