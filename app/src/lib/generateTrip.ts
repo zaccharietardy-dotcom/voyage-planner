@@ -4,6 +4,11 @@ import { Trip, TripPreferences } from './types';
  * Appelle /api/generate en streaming SSE.
  * Le serveur envoie des keepalive pings puis le résultat final.
  * Ceci évite les timeouts 504 sur Vercel (le stream maintient la connexion).
+ *
+ * Le message final ("done") peut être très gros (100KB+ de JSON pour un trip
+ * complet) et arriver en plusieurs chunks réseau. On accumule donc le buffer
+ * complet et on ne tente le parse qu'après un `\n\n` terminateur ou quand le
+ * stream se ferme.
  */
 export async function generateTripStream(
   preferences: Partial<TripPreferences>,
@@ -41,59 +46,113 @@ export async function generateTripStream(
 
     buffer += decoder.decode(value, { stream: true });
 
-    // Parser les événements SSE (format: "data: {...}\n\n")
-    const lines = buffer.split('\n\n');
-    buffer = lines.pop() || ''; // garder le reste non terminé
-
-    for (const line of lines) {
-      const dataMatch = line.match(/^data:\s*(.+)$/m);
-      if (!dataMatch) continue;
-
-      try {
-        const msg = JSON.parse(dataMatch[1]);
-
-        if (msg.status === 'generating') {
-          onProgress?.(msg.status);
-          continue;
-        }
-
-        if (msg.status === 'done' && msg.trip) {
-          return msg.trip as Trip;
-        }
-
-        if (msg.status === 'error') {
-          throw new Error(msg.error || 'Erreur de génération');
-        }
-      } catch (e) {
-        if (e instanceof SyntaxError) {
-          // JSON partiel, on continue à lire
-          continue;
-        }
-        throw e;
-      }
-    }
+    // Essayer de traiter les événements SSE complets (terminés par \n\n)
+    const result = processSSEBuffer(buffer, onProgress);
+    if (result.trip) return result.trip;
+    if (result.error) throw new Error(result.error);
+    buffer = result.remaining;
   }
 
-  // Vérifier le buffer restant avant de throw (message final peut être incomplet)
+  // Stream terminé — traiter tout ce qui reste dans le buffer
+  // (le serveur peut fermer le stream juste après le message final sans \n\n)
   if (buffer.trim()) {
-    // Le buffer peut contenir "data: {...}" sans le \n\n final
-    const dataMatch = buffer.match(/^data:\s*(.+)$/m);
-    if (dataMatch) {
-      try {
-        const msg = JSON.parse(dataMatch[1]);
-        if (msg.status === 'done' && msg.trip) {
-          return msg.trip as Trip;
-        }
-        if (msg.status === 'error') {
-          throw new Error(msg.error || 'Erreur de génération');
-        }
-      } catch (e) {
-        if (!(e instanceof SyntaxError)) throw e;
-        // Log pour debug si JSON invalide
-        console.error('Buffer SSE non parseable:', buffer.substring(0, 200));
-      }
-    }
+    const result = processSSEBuffer(buffer + '\n\n', onProgress);
+    if (result.trip) return result.trip;
+    if (result.error) throw new Error(result.error);
+
+    // Dernière tentative : chercher le JSON brut du trip dans le buffer
+    const tripJson = extractTripJson(buffer);
+    if (tripJson) return tripJson;
+
+    console.error('[SSE] Buffer restant non parseable:', buffer.substring(0, 500));
   }
 
   throw new Error('Stream terminé sans résultat');
+}
+
+/**
+ * Traite les événements SSE complets dans le buffer.
+ * Retourne le trip si trouvé, l'erreur si trouvée, ou le buffer restant.
+ */
+function processSSEBuffer(
+  buffer: string,
+  onProgress?: (status: string) => void,
+): { trip?: Trip; error?: string; remaining: string } {
+  // Séparer les événements SSE par \n\n (double newline = fin d'événement)
+  const parts = buffer.split('\n\n');
+  const remaining = parts.pop() || ''; // dernier élément = fragment non terminé
+
+  for (const part of parts) {
+    if (!part.trim()) continue;
+
+    // Extraire le contenu après "data: " — peut être multi-ligne
+    // (SSE spec: lignes multiples "data: xxx\ndata: yyy" → concaténées)
+    const dataLines: string[] = [];
+    for (const line of part.split('\n')) {
+      const m = line.match(/^data:\s?(.*)/);
+      if (m) dataLines.push(m[1]);
+    }
+    if (dataLines.length === 0) continue;
+
+    const jsonStr = dataLines.join('');
+
+    try {
+      const msg = JSON.parse(jsonStr);
+
+      if (msg.status === 'generating') {
+        onProgress?.(msg.status);
+        continue;
+      }
+
+      if (msg.status === 'done' && msg.trip) {
+        return { trip: msg.trip as Trip, remaining: '' };
+      }
+
+      if (msg.status === 'error') {
+        return { error: msg.error || 'Erreur de génération', remaining: '' };
+      }
+    } catch (e) {
+      if (e instanceof SyntaxError) {
+        // JSON partiel ou corrompu — log et continue
+        console.warn('[SSE] JSON parse failed for event, length:', jsonStr.length, 'preview:', jsonStr.substring(0, 200));
+        continue;
+      }
+      throw e;
+    }
+  }
+
+  return { remaining };
+}
+
+/**
+ * Dernier recours : extraire le JSON du trip directement du buffer brut.
+ * Utile si le wrapping SSE est cassé mais le JSON est présent.
+ */
+function extractTripJson(buffer: string): Trip | null {
+  // Chercher le pattern {"status":"done","trip":{...}}
+  const idx = buffer.indexOf('"trip"');
+  if (idx === -1) return null;
+
+  // Trouver le début du wrapper JSON
+  const wrapStart = buffer.lastIndexOf('{', idx);
+  if (wrapStart === -1) return null;
+
+  try {
+    const msg = JSON.parse(buffer.substring(wrapStart));
+    if (msg.status === 'done' && msg.trip) {
+      return msg.trip as Trip;
+    }
+  } catch {
+    // Essayer de trouver juste le trip object
+    const tripStart = buffer.indexOf('{', idx);
+    if (tripStart === -1) return null;
+
+    try {
+      return JSON.parse(buffer.substring(tripStart)) as Trip;
+    } catch {
+      return null;
+    }
+  }
+
+  return null;
 }

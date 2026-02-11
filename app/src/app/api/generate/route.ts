@@ -98,8 +98,21 @@ export async function POST(request: NextRequest) {
           ]);
 
           clearInterval(keepAlive);
+
+          // Sérialiser le trip — peut être gros (100KB+), log la taille
+          let tripJson: string;
+          try {
+            tripJson = JSON.stringify(trip);
+            console.log(`[Generate] ✅ Trip generated, JSON size: ${(tripJson.length / 1024).toFixed(1)}KB`);
+          } catch (serializeErr) {
+            console.error('[Generate] ❌ JSON.stringify(trip) failed:', serializeErr);
+            controller.enqueue(encoder.encode(`data: {"status":"error","error":"Erreur de sérialisation du voyage"}\n\n`));
+            controller.close();
+            return;
+          }
+
           // Envoyer le résultat final
-          const finalMessage = `data: {"status":"done","trip":${JSON.stringify(trip)}}\n\n`;
+          const finalMessage = `data: {"status":"done","trip":${tripJson}}\n\n`;
           controller.enqueue(encoder.encode(finalMessage));
           // Petit délai pour s'assurer que le message est bien flush avant de fermer
           await new Promise(resolve => setTimeout(resolve, 100));
@@ -108,15 +121,19 @@ export async function POST(request: NextRequest) {
           clearInterval(keepAlive);
           const message = error instanceof Error ? error.message : String(error);
           const stack = error instanceof Error ? error.stack : '';
-          console.error('Erreur de génération:', message);
-          console.error('Stack trace:', stack);
+          console.error('[Generate] ❌ Erreur de génération:', message);
+          console.error('[Generate] Stack trace:', stack);
 
           // S'assurer que le message d'erreur est bien envoyé
           try {
-            const safeMessage = message.replace(/"/g, '\\"').replace(/\n/g, ' ');
+            // Nettoyer le message pour le JSON — tronquer si trop long
+            const safeMessage = message
+              .replace(/"/g, '\\"')
+              .replace(/\n/g, ' ')
+              .substring(0, 500);
             controller.enqueue(encoder.encode(`data: {"status":"error","error":"${safeMessage}"}\n\n`));
           } catch (e) {
-            console.error('Erreur envoi message erreur:', e);
+            console.error('[Generate] ❌ Erreur envoi message erreur:', e);
           }
           controller.close();
         }

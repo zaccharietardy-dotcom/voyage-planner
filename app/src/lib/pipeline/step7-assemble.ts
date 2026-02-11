@@ -790,10 +790,21 @@ export async function assembleTripSchedule(
     console.warn('[Pipeline V2] Image enrichment failed (non-critical):', e);
   }
 
-  // 13. Batch fetch directions (non-blocking enrichment)
-  await enrichWithDirections(days).catch(e =>
-    console.warn('[Pipeline V2] Directions enrichment failed:', e)
-  );
+  // 13. Batch fetch directions (non-blocking enrichment, 20s max)
+  try {
+    const directionsTimeout = new Promise<void>((resolve) => {
+      setTimeout(() => {
+        console.warn('[Pipeline V2] ⚠️ Directions enrichment timeout (20s) — continuing');
+        resolve();
+      }, 20_000);
+    });
+    await Promise.race([
+      enrichWithDirections(days),
+      directionsTimeout,
+    ]);
+  } catch (e) {
+    console.warn('[Pipeline V2] Directions enrichment failed:', e);
+  }
 
   // 13. Build cost breakdown
   const costBreakdown = computeCostBreakdown(days, flights, hotel, preferences, transport);
@@ -850,20 +861,25 @@ export async function assembleTripSchedule(
     costBreakdown: costBreakdown.breakdown,
     travelTips: data.travelTips,
     budgetStrategy: data.budgetStrategy,
-    attractionPool: clusters.flatMap(c => c.activities),
+    attractionPool: [], // populated below (trimmed to reduce payload)
   };
 
   // 15. Compute alternative activities (scored but not scheduled, top 20 by score)
+  // Also build a trimmed attractionPool (top 40 by score) to keep the JSON payload small.
   const scheduledIds = new Set(
     days.flatMap(d => d.items.filter(i => i.type === 'activity').map(i => i.id))
   );
   const allPoolActivities = clusters.flatMap(c => c.activities);
-  trip.alternativeActivities = allPoolActivities
+  const sortedPool = allPoolActivities.sort((a, b) => (b.score || 0) - (a.score || 0));
+
+  // attractionPool: top 40 pour le swap/insert (au lieu de tout le pool qui peut être 100+)
+  trip.attractionPool = sortedPool.slice(0, 40);
+
+  trip.alternativeActivities = sortedPool
     .filter(a => !scheduledIds.has(a.id))
-    .sort((a, b) => (b.score || 0) - (a.score || 0))
     .slice(0, 20);
 
-  console.log(`[Pipeline V2] Step 7: ${trip.alternativeActivities.length} alternative activities available for swap`);
+  console.log(`[Pipeline V2] Step 7: ${trip.alternativeActivities.length} alternatives, pool trimmed to ${trip.attractionPool.length}/${allPoolActivities.length}`);
 
   return trip;
 }
