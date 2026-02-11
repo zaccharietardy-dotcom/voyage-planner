@@ -239,9 +239,8 @@ export async function assembleTripSchedule(
     // 3. Hotel check-in (first day) / check-out (last day)
     // IMPORTANT: On the last day, insert breakfast BEFORE checkout.
     // Otherwise checkout advances the cursor past breakfast's maxEndTime (10:00).
-    // IMPORTANT: On the first day, DEFER check-in insertion until after activities.
-    // This prevents the check-in block from creating a gap before it (e.g. 10:00-15:00 empty).
-    let deferredCheckinData: { id: string; title: string; type: string; startTime: Date; endTime: Date; data: any } | null = null;
+    // On the first day we prioritize check-in near arrival time, so it is not pushed
+    // after dinner by late conflict resolution.
     if (isFirstDay && hotel) {
       let checkinTime = parseTime(dayDate, hotel.checkInTime || '15:00');
       // If there's a flight, check-in must be AFTER arrival + transfer
@@ -273,8 +272,7 @@ export async function assembleTripSchedule(
       if (checkinTime >= midnight) {
         checkinTime = parseTime(dayDate, '23:59');
       }
-      // Store check-in data — will be inserted AFTER activities to avoid blocking pre-check-in slots
-      deferredCheckinData = {
+      const checkinData = {
         id: `checkin-${balancedDay.dayNumber}`,
         title: `Check-in ${hotel.name}`,
         type: 'checkin',
@@ -282,6 +280,21 @@ export async function assembleTripSchedule(
         endTime: new Date(checkinTime.getTime() + 30 * 60 * 1000),
         data: hotel,
       };
+
+      // Insert immediately so check-in stays anchored near arrival.
+      // If fixed insert conflicts, fallback to addItem from that minimum start.
+      const checkinResult = scheduler.insertFixedItem(checkinData);
+      if (!checkinResult) {
+        scheduler.addItem({
+          id: `checkin-fallback-${balancedDay.dayNumber}`,
+          title: checkinData.title,
+          type: 'checkin',
+          duration: 30,
+          minStartTime: checkinData.startTime,
+          maxEndTime: parseTime(dayDate, '22:30'),
+          data: checkinData.data,
+        });
+      }
     }
 
     // Last day: insert breakfast BEFORE checkout so cursor is still early
@@ -709,23 +722,6 @@ export async function assembleTripSchedule(
     // This prevents the cursor from advancing past dayEnd before activities are placed.
     if (returnTransportData) {
       scheduler.insertFixedItem(returnTransportData);
-    }
-
-    // 9b. Insert deferred Day 1 check-in (after activities, so pre-check-in activities aren't blocked)
-    if (deferredCheckinData) {
-      const checkinResult = scheduler.insertFixedItem(deferredCheckinData);
-      if (!checkinResult) {
-        console.warn(`[Pipeline V2] Deferred check-in insertFixedItem failed, using addItem fallback`);
-        scheduler.addItem({
-          id: `checkin-fallback-${balancedDay.dayNumber}`,
-          title: deferredCheckinData.title,
-          type: 'checkin',
-          duration: 30,
-          minStartTime: deferredCheckinData.startTime,
-          maxEndTime: parseTime(dayDate, '22:00'),
-          data: deferredCheckinData.data,
-        });
-      }
     }
 
     // 10. Remove scheduling conflicts (keep higher-priority items)

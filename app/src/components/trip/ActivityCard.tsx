@@ -478,7 +478,7 @@ function BookingButtons({ item }: { item: TripItem }) {
   }
 
   // Hotel
-  if ((item.type === 'hotel' || item.type === 'checkout') && bookingUrl) {
+  if ((item.type === 'hotel' || item.type === 'checkin' || item.type === 'checkout') && bookingUrl) {
     const label = bookingUrl.includes('airbnb.com') ? 'Airbnb' : bookingUrl.includes('booking.com') ? 'Booking' : 'Réserver';
     buttons.push({ label, url: bookingUrl, variant: 'primary', icon: <Bed className="h-3 w-3" /> });
   }
