@@ -12,7 +12,7 @@ import { getCityCenterCoordsAsync, findNearbyAirportsAsync } from '../services/g
 import { compareTransportOptions } from '../services/transport';
 import { searchAttractionsMultiQuery, searchMustSeeAttractions, searchRestaurantsWithSerpApi } from '../services/serpApiPlaces';
 import { searchAttractionsOverpass } from '../services/overpassAttractions';
-import { searchViatorActivities } from '../services/viator';
+import { searchViatorActivities, getViatorProductCoordinates } from '../services/viator';
 import { searchTripAdvisorRestaurants } from '../services/tripadvisor';
 import { searchHotels } from '../services/hotels';
 import { generateTravelTips } from '../services/travelTips';
@@ -40,6 +40,32 @@ async function withRetry<T>(
     await new Promise(resolve => setTimeout(resolve, delayMs));
     return withRetry(promiseFactory, retries - 1, delayMs);
   }
+}
+
+function extractViatorProductCode(activity: Attraction): string | null {
+  if (activity.id?.startsWith('viator-')) return activity.id.replace(/^viator-/, '').trim() || null;
+  const booking = activity.bookingUrl || '';
+  const match = booking.match(/\/d\d+-([A-Za-z0-9]+)/);
+  return match?.[1] || null;
+}
+
+function buildViatorLocationCandidates(activityName: string, destination: string): string[] {
+  const clean = activityName
+    .replace(/\s+/g, ' ')
+    .replace(/[|•]/g, ' ')
+    .replace(/\b(private|privée?|guided|visite guidée|skip[-\s]?the[-\s]?line|with artist|life style)\b/gi, '')
+    .trim();
+
+  const candidates = new Set<string>();
+  candidates.add(`${clean}, ${destination}`);
+
+  // Try to extract landmark after common French connectors.
+  const landmarkMatch = clean.match(/\b(?:à|au|aux|du|de la|de l'|des)\s+(.+)$/i);
+  if (landmarkMatch?.[1]) {
+    candidates.add(`${landmarkMatch[1].trim()}, ${destination}`);
+  }
+
+  return Array.from(candidates).filter(Boolean);
 }
 
 /**
@@ -160,13 +186,27 @@ export async function fetchAllData(preferences: TripPreferences): Promise<Fetche
     await Promise.allSettled(
       viatorEstimated.map(async (activity: Attraction) => {
         try {
-          const coords = await resolveCoordinates(
-            activity.name, destination, destCoords, 'attraction'
-          );
-          if (coords) {
+          // 1) Try Viator product details first (true source coordinates when available).
+          const productCode = extractViatorProductCode(activity);
+          if (productCode) {
+            const viatorCoords = await getViatorProductCoordinates(productCode, destCoords);
+            if (viatorCoords) {
+              activity.latitude = viatorCoords.lat;
+              activity.longitude = viatorCoords.lng;
+              activity.dataReliability = 'verified';
+              return;
+            }
+          }
+
+          // 2) Fallback: resolve from cleaned candidate queries.
+          const candidates = buildViatorLocationCandidates(activity.name, destination);
+          for (const candidate of candidates) {
+            const coords = await resolveCoordinates(candidate, destination, destCoords, 'attraction');
+            if (!coords) continue;
             activity.latitude = coords.lat;
             activity.longitude = coords.lng;
             activity.dataReliability = 'verified';
+            return;
           }
         } catch { /* keep city-center as fallback */ }
       })

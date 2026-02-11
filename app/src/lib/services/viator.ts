@@ -15,6 +15,7 @@ import * as path from 'path';
 import { Attraction } from './attractions';
 import { ActivityType } from '../types';
 import { findKnownViatorProduct } from './viatorKnownProducts';
+import { calculateDistance } from './geocoding';
 
 function getViatorApiKey() { return process.env.VIATOR_API_KEY?.trim(); }
 const VIATOR_BASE_URL = 'https://api.viator.com/partner';
@@ -26,6 +27,104 @@ const CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 jours
 
 export function isViatorConfigured(): boolean {
   return !!getViatorApiKey();
+}
+
+export interface ViatorProductCoordinates {
+  lat: number;
+  lng: number;
+  source: 'viator_product';
+}
+
+function findFirstCoordinatePair(value: unknown): { lat: number; lng: number } | null {
+  if (!value || typeof value !== 'object') return null;
+  const queue: unknown[] = [value];
+
+  while (queue.length > 0) {
+    const current = queue.shift();
+    if (!current || typeof current !== 'object') continue;
+    const record = current as Record<string, unknown>;
+
+    const latRaw = record.latitude;
+    const lngRaw = record.longitude;
+    const lat = typeof latRaw === 'number' ? latRaw : Number(latRaw);
+    const lng = typeof lngRaw === 'number' ? lngRaw : Number(lngRaw);
+    if (Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180) {
+      return { lat, lng };
+    }
+
+    for (const child of Object.values(record)) {
+      if (child && typeof child === 'object') queue.push(child);
+    }
+  }
+
+  return null;
+}
+
+function isCoordinateNearDestination(
+  coords: { lat: number; lng: number },
+  destinationCenter: { lat: number; lng: number },
+  maxDistanceKm: number = 40
+): boolean {
+  const distance = calculateDistance(coords.lat, coords.lng, destinationCenter.lat, destinationCenter.lng);
+  return distance <= maxDistanceKm;
+}
+
+/**
+ * Try to get precise coordinates from Viator product APIs using productCode.
+ * Some products expose meeting-point/location coordinates in product details.
+ */
+export async function getViatorProductCoordinates(
+  productCode: string,
+  destinationCenter: { lat: number; lng: number }
+): Promise<ViatorProductCoordinates | null> {
+  if (!getViatorApiKey() || !productCode?.trim()) return null;
+
+  const headers = {
+    'exp-api-key': getViatorApiKey() || '',
+    'Accept-Language': 'fr-FR',
+    'Content-Type': 'application/json',
+    'Accept': 'application/json;version=2.0',
+  };
+
+  const calls: Array<{ url: string; method: 'GET' | 'POST'; body?: Record<string, unknown> }> = [
+    { url: `${VIATOR_BASE_URL}/products/${encodeURIComponent(productCode)}`, method: 'GET' },
+    {
+      url: `${VIATOR_BASE_URL}/products/bulk`,
+      method: 'POST',
+      body: { productCodes: [productCode], currency: 'EUR' },
+    },
+    {
+      url: `${VIATOR_BASE_URL}/products/search`,
+      method: 'POST',
+      body: {
+        currency: 'EUR',
+        pagination: { start: 1, count: 3 },
+        filtering: { productCodes: [productCode] },
+      },
+    },
+  ];
+
+  for (const call of calls) {
+    try {
+      const response = await fetch(call.url, {
+        method: call.method,
+        headers,
+        body: call.body ? JSON.stringify(call.body) : undefined,
+      });
+      if (!response.ok) continue;
+
+      const data = await response.json();
+      const coords = findFirstCoordinatePair(data);
+      if (!coords) continue;
+      if (!isCoordinateNearDestination(coords, destinationCenter)) continue;
+
+      return { lat: coords.lat, lng: coords.lng, source: 'viator_product' };
+    } catch {
+      // Try next endpoint silently
+    }
+  }
+
+  return null;
 }
 
 /**
