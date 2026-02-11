@@ -60,7 +60,14 @@ export async function generateTripV2(preferences: TripPreferences): Promise<Trip
   const clusters = clusterActivities(selectedActivities, preferences.durationDays, data.destCoords);
 
   // Rebalance: first/last day get fewer activities based on flight/transport times
-  rebalanceClustersForFlights(clusters, data.outboundFlight, data.returnFlight, preferences.durationDays, bestTransport);
+  rebalanceClustersForFlights(
+    clusters,
+    data.outboundFlight,
+    data.returnFlight,
+    preferences.durationDays,
+    bestTransport,
+    data.destCoords
+  );
 
   console.log(`[Pipeline V2] Step 3: ${clusters.length} clusters created`);
   for (const c of clusters) {
@@ -141,7 +148,8 @@ function rebalanceClustersForFlights(
   outboundFlight: Flight | null,
   returnFlight: Flight | null,
   numDays: number,
-  transport?: TransportOptionSummary | null
+  transport?: TransportOptionSummary | null,
+  destCoords?: { lat: number; lng: number }
 ): void {
   if (clusters.length < 2) return;
 
@@ -842,6 +850,155 @@ function rebalanceClustersForFlights(
     }
   }
 
+  // Phase 7b: Strict must-see zone consolidation
+  // Group nearby must-sees (same neighborhood) onto a single day whenever possible.
+  // This avoids splitting key zones (e.g. Vatican) across multiple days.
+  // Keep this radius tight to form true "same neighborhood" groups,
+  // not broad city-center chains.
+  const MUST_SEE_GROUP_KM = clusters.length >= 4 ? 1.4 : 1.8;
+
+  const findActivityDay = (activityId: string): number =>
+    clusters.findIndex(c => c.activities.some(a => a.id === activityId));
+
+  const ensureCapacityOnDay = (targetIdx: number, neededMin: number, protectedIds: Set<string>): boolean => {
+    let remaining = dayRemainingMinutes(targetIdx);
+    if (remaining >= neededMin) return true;
+
+    let deficit = neededMin - remaining;
+    const evictables = [...clusters[targetIdx].activities]
+      .filter(a => !a.mustSee && !protectedIds.has(a.id))
+      .sort((a, b) => a.score - b.score);
+
+    for (const evict of evictables) {
+      const evictMin = (evict.duration || 60) + 20;
+      let bestReceiver = -1;
+      let bestReceiverRemaining = -Infinity;
+
+      for (let ti = 0; ti < clusters.length; ti++) {
+        if (ti === targetIdx || isDayTrip[ti]) continue;
+        const receiverRemaining = dayRemainingMinutes(ti);
+        if (receiverRemaining < evictMin) continue;
+        if (receiverRemaining > bestReceiverRemaining) {
+          bestReceiverRemaining = receiverRemaining;
+          bestReceiver = ti;
+        }
+      }
+
+      if (bestReceiver === -1) continue;
+
+      const evictIdx = clusters[targetIdx].activities.findIndex(a => a.id === evict.id);
+      if (evictIdx === -1) continue;
+
+      const [movedEvict] = clusters[targetIdx].activities.splice(evictIdx, 1);
+      clusters[bestReceiver].activities.push(movedEvict);
+      computeClusterGeo(clusters[targetIdx]);
+      computeClusterGeo(clusters[bestReceiver]);
+
+      deficit -= evictMin;
+      if (deficit <= 0) return true;
+    }
+
+    remaining = dayRemainingMinutes(targetIdx);
+    return remaining >= neededMin;
+  };
+
+  const mustSeeNodes = clusters.flatMap((cluster) =>
+    cluster.activities
+      .filter(a => a.mustSee)
+      .map(a => ({ activity: a }))
+  );
+
+  if (mustSeeNodes.length >= 2) {
+    const adjacency = new Map<string, Set<string>>();
+    for (const node of mustSeeNodes) adjacency.set(node.activity.id, new Set());
+
+    for (let i = 0; i < mustSeeNodes.length; i++) {
+      for (let j = i + 1; j < mustSeeNodes.length; j++) {
+        const a = mustSeeNodes[i].activity;
+        const b = mustSeeNodes[j].activity;
+        const dist = calculateDistance(a.latitude, a.longitude, b.latitude, b.longitude);
+        if (dist <= MUST_SEE_GROUP_KM) {
+          adjacency.get(a.id)?.add(b.id);
+          adjacency.get(b.id)?.add(a.id);
+        }
+      }
+    }
+
+    const visited = new Set<string>();
+    const groups: string[][] = [];
+
+    for (const node of mustSeeNodes) {
+      const startId = node.activity.id;
+      if (visited.has(startId)) continue;
+
+      const queue = [startId];
+      visited.add(startId);
+      const component: string[] = [];
+
+      while (queue.length > 0) {
+        const current = queue.shift()!;
+        component.push(current);
+        for (const next of adjacency.get(current) || []) {
+          if (visited.has(next)) continue;
+          visited.add(next);
+          queue.push(next);
+        }
+      }
+
+      if (component.length >= 2) groups.push(component);
+    }
+
+    groups.sort((a, b) => b.length - a.length);
+
+    for (const groupIdsArr of groups) {
+      const groupIds = new Set(groupIdsArr);
+      const involvedDays = Array.from(
+        new Set(groupIdsArr.map(id => findActivityDay(id)).filter(idx => idx >= 0))
+      ).filter(idx => !isDayTrip[idx] && hoursPerDay[idx] > 0);
+
+      if (involvedDays.length <= 1) continue;
+
+      let targetIdx = involvedDays[0];
+      let targetScore = -Infinity;
+      for (const di of involvedDays) {
+        const alreadyThere = clusters[di].activities.filter(a => groupIds.has(a.id)).length;
+        const shortDayPenalty = hoursPerDay[di] < 7 ? 400 : 0;
+        const score = alreadyThere * 1000 + dayRemainingMinutes(di) - shortDayPenalty;
+        if (score > targetScore) {
+          targetScore = score;
+          targetIdx = di;
+        }
+      }
+
+      for (const activityId of groupIdsArr) {
+        const sourceIdx = findActivityDay(activityId);
+        if (sourceIdx === -1 || sourceIdx === targetIdx) continue;
+        if (isDayTrip[sourceIdx]) continue;
+        if (clusters[sourceIdx].activities.length <= 1 && hoursPerDay[sourceIdx] >= 6) continue;
+
+        const activity = clusters[sourceIdx].activities.find(a => a.id === activityId);
+        if (!activity) continue;
+
+        const neededMin = (activity.duration || 60) + 20;
+        const canFit = ensureCapacityOnDay(targetIdx, neededMin, groupIds);
+        if (!canFit) continue;
+
+        const moveIdx = clusters[sourceIdx].activities.findIndex(a => a.id === activityId);
+        if (moveIdx === -1) continue;
+
+        const [moved] = clusters[sourceIdx].activities.splice(moveIdx, 1);
+        clusters[targetIdx].activities.push(moved);
+        computeClusterGeo(clusters[sourceIdx]);
+        computeClusterGeo(clusters[targetIdx]);
+
+        console.log(
+          `[Pipeline V2] Phase 7b: consolidated must-see "${moved.name}" Day ${clusters[sourceIdx].dayNumber} → Day ${clusters[targetIdx].dayNumber} ` +
+          `(zone<=${MUST_SEE_GROUP_KM}km)`
+        );
+      }
+    }
+  }
+
   // Phase 8: Geographic KNN smoothing
   // Reassign obvious geographic outliers to the nearest day cluster (if capacity allows).
   // This prevents "aller-retour" patterns where a day contains activities that are
@@ -911,9 +1068,96 @@ function rebalanceClustersForFlights(
     if (!movedAny) break;
   }
 
-  // Phase 9: Reorder middle days by proximity (keep first/last fixed for transport constraints)
+  // Phase 8b: Enforce per-day geographic cohesion ("city zones per day")
+  // Goal: avoid days that zigzag across distant neighborhoods.
+  // We move far outliers from a day to the geographically closest day that has capacity.
+  for (const c of clusters) computeClusterGeo(c);
+
+  const cohesionMaxRadiusKm = clusters.length >= 4 ? 3.8 : 4.5;
+  for (let iter = 0; iter < 5; iter++) {
+    let movedAny = false;
+
+    for (let ci = 0; ci < clusters.length; ci++) {
+      if (isDayTrip[ci]) continue;
+      const source = clusters[ci];
+      if (source.activities.length <= 2) continue;
+
+      const sourceCandidates = [...source.activities]
+        .filter(a => !a.mustSee)
+        .map(a => ({
+          activity: a,
+          dist: calculateDistance(a.latitude, a.longitude, source.centroid.lat, source.centroid.lng),
+        }))
+        .filter(x => x.dist > cohesionMaxRadiusKm)
+        .sort((a, b) => b.dist - a.dist); // farthest first
+
+      for (const candidate of sourceCandidates) {
+        const activity = candidate.activity;
+        const srcDist = candidate.dist;
+        const requiredMin = (activity.duration || 60) + 20;
+
+        let bestTarget = -1;
+        let bestTargetDist = Infinity;
+        for (let ti = 0; ti < clusters.length; ti++) {
+          if (ti === ci || isDayTrip[ti]) continue;
+          if (dayRemainingMinutes(ti) < requiredMin) continue;
+
+          const targetDist = calculateDistance(
+            activity.latitude,
+            activity.longitude,
+            clusters[ti].centroid.lat,
+            clusters[ti].centroid.lng
+          );
+          if (targetDist < bestTargetDist) {
+            bestTargetDist = targetDist;
+            bestTarget = ti;
+          }
+        }
+
+        if (bestTarget === -1) continue;
+        // Require a clear gain to avoid noisy shuffling.
+        if (bestTargetDist + 0.8 >= srcDist) continue;
+
+        const idx = source.activities.findIndex(a => a.id === activity.id);
+        if (idx === -1) continue;
+
+        const [moved] = source.activities.splice(idx, 1);
+        clusters[bestTarget].activities.push(moved);
+        computeClusterGeo(source);
+        computeClusterGeo(clusters[bestTarget]);
+        movedAny = true;
+
+        console.log(
+          `[Pipeline V2] Phase 8b: moved "${moved.name}" Day ${source.dayNumber} → Day ${clusters[bestTarget].dayNumber} ` +
+          `(cohesion ${srcDist.toFixed(1)}→${bestTargetDist.toFixed(1)}km, max=${cohesionMaxRadiusKm}km)`
+        );
+        break; // Re-evaluate this source day after each move
+      }
+    }
+
+    if (!movedAny) break;
+  }
+
+  // Optional lightweight zone ordering around city center (if known): keep day sequence coherent by geography.
+  // This keeps "day neighborhoods" flowing around the city instead of jumping back and forth.
+  if (destCoords && clusters.length >= 4) {
+    const first = clusters[0];
+    const last = clusters[clusters.length - 1];
+    const middle = clusters.slice(1, -1);
+    const withAngle = middle.map(c => ({
+      cluster: c,
+      angle: Math.atan2(c.centroid.lat - destCoords.lat, c.centroid.lng - destCoords.lng),
+    }));
+    withAngle.sort((a, b) => a.angle - b.angle);
+    const reordered = [first, ...withAngle.map(x => x.cluster), last];
+    for (let i = 0; i < reordered.length; i++) reordered[i].dayNumber = i + 1;
+    clusters.splice(0, clusters.length, ...reordered);
+    console.log('[Pipeline V2] Phase 8c: reordered middle days by city-zone angle');
+  }
+
+  // Phase 9: Reorder middle days by proximity (fallback when no city-center anchor is available).
   // For trips with 4+ days this reduces A→B→A day patterns.
-  if (clusters.length >= 4) {
+  if (clusters.length >= 4 && !destCoords) {
     const first = clusters[0];
     const middle = clusters.slice(1, -1);
     const last = clusters[clusters.length - 1];

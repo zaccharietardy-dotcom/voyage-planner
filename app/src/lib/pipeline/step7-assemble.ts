@@ -360,29 +360,83 @@ export async function assembleTripSchedule(
     const cluster = clusters.find(c => c.dayNumber === balancedDay.dayNumber);
     let orderedActivities = reorderByPlan(cluster, balancedDay.activityOrder);
 
-    // Prioritize must-sees: move them to the front of the list so they're scheduled first.
-    // This prevents the scenario where a must-see at position 5 gets dropped because
-    // Optimize geographic order for ALL activities together using nearest-neighbor heuristic.
-    // This reduces intra-day travel time (e.g. Vatican → Basilique St Pierre vs Vatican → far restaurant → back).
-    // Unified approach: must-sees and non-must-sees are interleaved for optimal routing.
+    // Optimize geographic order for all activities in the day.
+    // Strategy: multi-start nearest-neighbor + light 2-opt improvement.
+    // This is more stable than a single greedy pass and reduces long zigzags.
     const geoOptimize = (activities: ScoredActivity[], startLat: number, startLng: number) => {
       if (activities.length <= 2) return activities;
-      const ordered: ScoredActivity[] = [];
-      const remaining = [...activities];
-      let curLat = startLat, curLng = startLng;
-      while (remaining.length > 0) {
-        let nearestIdx = 0;
-        let nearestDist = Infinity;
-        for (let i = 0; i < remaining.length; i++) {
-          const d = calculateDistance(curLat, curLng, remaining[i].latitude, remaining[i].longitude);
-          if (d < nearestDist) { nearestDist = d; nearestIdx = i; }
+
+      const routeDistance = (route: ScoredActivity[]): number => {
+        if (route.length === 0) return 0;
+        let total = calculateDistance(startLat, startLng, route[0].latitude, route[0].longitude);
+        for (let i = 1; i < route.length; i++) {
+          total += calculateDistance(route[i - 1].latitude, route[i - 1].longitude, route[i].latitude, route[i].longitude);
         }
-        const next = remaining.splice(nearestIdx, 1)[0];
-        ordered.push(next);
-        curLat = next.latitude;
-        curLng = next.longitude;
+        return total;
+      };
+
+      const buildGreedyFromFirst = (firstIndex: number): ScoredActivity[] => {
+        const ordered: ScoredActivity[] = [];
+        const remaining = [...activities];
+        const first = remaining.splice(firstIndex, 1)[0];
+        ordered.push(first);
+
+        let curLat = first.latitude;
+        let curLng = first.longitude;
+        while (remaining.length > 0) {
+          let nearestIdx = 0;
+          let nearestDist = Infinity;
+          for (let i = 0; i < remaining.length; i++) {
+            const d = calculateDistance(curLat, curLng, remaining[i].latitude, remaining[i].longitude);
+            if (d < nearestDist) {
+              nearestDist = d;
+              nearestIdx = i;
+            }
+          }
+          const next = remaining.splice(nearestIdx, 1)[0];
+          ordered.push(next);
+          curLat = next.latitude;
+          curLng = next.longitude;
+        }
+        return ordered;
+      };
+
+      // Multi-start: try each activity as first stop, keep shortest route from hotel/start.
+      let bestRoute: ScoredActivity[] = [];
+      let bestDistance = Infinity;
+      for (let i = 0; i < activities.length; i++) {
+        const candidate = buildGreedyFromFirst(i);
+        const candidateDistance = routeDistance(candidate);
+        if (candidateDistance < bestDistance) {
+          bestDistance = candidateDistance;
+          bestRoute = candidate;
+        }
       }
-      return ordered;
+
+      // 2-opt local improvement.
+      // Keep this light since day activity count is small (typically <= 8).
+      let improved = true;
+      let route = [...bestRoute];
+      while (improved) {
+        improved = false;
+        for (let i = 0; i < route.length - 2; i++) {
+          for (let k = i + 1; k < route.length - 1; k++) {
+            const nextRoute = [
+              ...route.slice(0, i + 1),
+              ...route.slice(i + 1, k + 1).reverse(),
+              ...route.slice(k + 1),
+            ];
+            const nextDistance = routeDistance(nextRoute);
+            if (nextDistance + 0.01 < bestDistance) {
+              route = nextRoute;
+              bestDistance = nextDistance;
+              improved = true;
+            }
+          }
+        }
+      }
+
+      return route;
     };
 
     const startLat = hotel?.latitude || data.destCoords.lat;

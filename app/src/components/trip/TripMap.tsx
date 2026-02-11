@@ -45,7 +45,27 @@ const TYPE_LABELS: Record<string, string> = {
   luggage: 'Bagages',
 };
 
+const ROUTE_COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4'];
+
 // ─── Helpers ────────────────────────────────────────────────
+
+function parseSortableTime(time?: string): number {
+  if (!time) return Number.MAX_SAFE_INTEGER;
+  const [h, m] = time.split(':').map(Number);
+  if (Number.isNaN(h) || Number.isNaN(m)) return Number.MAX_SAFE_INTEGER;
+  return h * 60 + m;
+}
+
+function compareItemsForRoute(a: TripItem, b: TripItem): number {
+  const dayDiff = (a.dayNumber || 0) - (b.dayNumber || 0);
+  if (dayDiff !== 0) return dayDiff;
+
+  const aOrder = typeof a.orderIndex === 'number' ? a.orderIndex : Number.MAX_SAFE_INTEGER;
+  const bOrder = typeof b.orderIndex === 'number' ? b.orderIndex : Number.MAX_SAFE_INTEGER;
+  if (aOrder !== bOrder) return aOrder - bOrder;
+
+  return parseSortableTime(a.startTime) - parseSortableTime(b.startTime);
+}
 
 function createNumberedIcon(L: any, num: number, type: string, isHighlighted: boolean) {
   const colors = MARKER_COLORS[type] || { bg: '#666', border: '#444' };
@@ -406,28 +426,35 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
       }
     }
 
-    // Draw route polyline between non-flight items in chronological order
-    const routeCoords = displayItems
+    // Draw route polylines PER DAY (prevents cross-day zigzags)
+    const routeCandidates = displayItems
       .filter((item) => item.latitude && item.longitude && item.type !== 'flight')
-      .sort((a, b) => {
-        const dayDiff = (a.dayNumber || 0) - (b.dayNumber || 0);
-        if (dayDiff !== 0) return dayDiff;
-        return (a.startTime || '00:00').localeCompare(b.startTime || '00:00');
-      })
-      .map((item) => [item.latitude, item.longitude] as [number, number]);
+      .sort(compareItemsForRoute);
 
-    if (routeCoords.length > 1) {
+    const byDay = new Map<number, TripItem[]>();
+    routeCandidates.forEach((item) => {
+      const day = item.dayNumber || 0;
+      const list = byDay.get(day);
+      if (list) list.push(item);
+      else byDay.set(day, [item]);
+    });
+
+    const dayEntries = Array.from(byDay.entries()).sort((a, b) => a[0] - b[0]);
+    dayEntries.forEach(([_, dayItems], idx) => {
+      const routeCoords = dayItems.map((item) => [item.latitude, item.longitude] as [number, number]);
+      if (routeCoords.length < 2) return;
+
+      const color = filterDay === null ? ROUTE_COLORS[idx % ROUTE_COLORS.length] : '#3B82F6';
       const polyline = L.polyline(routeCoords, {
-        color: '#3B82F6',
+        color,
         weight: 3,
         opacity: 0.5,
         smoothFactor: 1.5,
         lineJoin: 'round',
       });
       routeLayer.addLayer(polyline);
-
-      addDirectionArrows(L, map, routeCoords, '#3B82F6', routeLayer);
-    }
+      addDirectionArrows(L, map, routeCoords, color, routeLayer);
+    });
 
     // Flight arc
     if (flightInfo?.departureCoords) {
