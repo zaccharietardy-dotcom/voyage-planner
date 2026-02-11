@@ -15,6 +15,31 @@ import type { ActivityType } from '../../types';
 
 const GOOGLE_PLACES_TEXT_SEARCH_URL = 'https://maps.googleapis.com/maps/api/place/textsearch/json';
 
+/** Google Places types that are NOT tourist attractions (cities, agencies, etc.) */
+const EXCLUDED_GOOGLE_TYPES = [
+  'locality', 'political', 'administrative_area_level_1',
+  'administrative_area_level_2', 'administrative_area_level_3',
+  'administrative_area_level_4', 'administrative_area_level_5',
+  'country', 'colloquial_area', 'sublocality',
+  'travel_agency', 'real_estate_agency', 'insurance_agency',
+];
+
+/** Google Places types that indicate a genuine tourist attraction */
+const ATTRACTION_GOOGLE_TYPES = [
+  'tourist_attraction', 'museum', 'park', 'art_gallery',
+  'church', 'place_of_worship', 'zoo', 'aquarium',
+  'amusement_park', 'stadium', 'shopping_mall',
+];
+
+/**
+ * Check if a Google Places result should be excluded (city, agency, etc.).
+ * A result is excluded if it has an excluded type AND no genuine attraction type.
+ */
+function isExcludedPlaceType(types: string[]): boolean {
+  if (ATTRACTION_GOOGLE_TYPES.some(t => types.includes(t))) return false;
+  return EXCLUDED_GOOGLE_TYPES.some(t => types.includes(t));
+}
+
 function getApiKey(): string {
   return process.env.GOOGLE_PLACES_API_KEY || process.env.GOOGLE_MAPS_API_KEY || '';
 }
@@ -63,6 +88,11 @@ export async function searchGooglePlacesAttractions(
 
       for (const result of data.results || []) {
         if (!seenPlaceIds.has(result.place_id)) {
+          // Skip cities, administrative areas, and agencies
+          if (isExcludedPlaceType(result.types || [])) {
+            console.log(`[Google Places] Filtered "${result.name}" (types: ${(result.types || []).join(', ')})`);
+            continue;
+          }
           seenPlaceIds.add(result.place_id);
           allResults.push(result);
         }

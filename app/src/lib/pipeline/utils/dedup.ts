@@ -106,6 +106,70 @@ export function deduplicateByProximity(
 }
 
 /**
+ * Deduplicate activities that share the same GPS location (<200m)
+ * AND the same activity type. These represent the same experience
+ * offered by different operators (e.g., two kayak tours at the same beach).
+ * Name similarity is NOT required — same place + same type = duplicate.
+ */
+const SAME_LOCATION_DEDUP_TYPES = new Set([
+  'museum', 'religious', 'park', 'gallery', 'zoo', 'amusement_park',
+  'stadium', 'market', 'beach', 'nature', 'adventure', 'wellness',
+]);
+
+export function deduplicateSameLocationSameType(
+  activities: ScoredActivity[]
+): ScoredActivity[] {
+  const result: ScoredActivity[] = [];
+
+  for (const activity of activities) {
+    if (!activity.latitude || !activity.longitude) {
+      result.push(activity);
+      continue;
+    }
+
+    let isDuplicate = false;
+    let duplicateIdx = -1;
+
+    for (let i = 0; i < result.length; i++) {
+      const existing = result[i];
+      if (!existing.latitude || !existing.longitude) continue;
+
+      const dist = calculateDistance(
+        activity.latitude, activity.longitude,
+        existing.latitude, existing.longitude
+      );
+
+      // Same location (<200m) AND same mapped type → duplicate
+      if (dist < 0.2
+        && activity.type && existing.type
+        && activity.type === existing.type
+        && SAME_LOCATION_DEDUP_TYPES.has(activity.type)) {
+        isDuplicate = true;
+        duplicateIdx = i;
+        break;
+      }
+    }
+
+    if (isDuplicate && duplicateIdx >= 0) {
+      const existing = result[duplicateIdx];
+      // Keep higher-scored, fall back to more reviews
+      const actScore = (activity as any).score || 0;
+      const exScore = (existing as any).score || 0;
+      if (actScore > exScore || (actScore === exScore && (activity.reviewCount || 0) > (existing.reviewCount || 0))) {
+        mergeActivities(result, duplicateIdx, activity, existing);
+      } else {
+        mergeActivities(result, duplicateIdx, existing, activity);
+      }
+      console.log(`[Pipeline V2] Same-location-type dedup: "${activity.name}" merged with "${existing.name}" (type=${activity.type})`);
+    } else {
+      result.push(activity);
+    }
+  }
+
+  return result;
+}
+
+/**
  * Deduplicate activities that share the same Viator booking search URL
  * OR are Viator products for the same location (same GPS, same attraction).
  * e.g. "Chapelle Sixtine" and "Musées du Vatican" both link to
@@ -244,6 +308,25 @@ export function isIrrelevantAttraction(activity: ScoredActivity): boolean {
   ];
 
   if (irrelevantNames.some(n => name.includes(n))) return true;
+
+  // 2b. Tour operators, travel agencies, tourist offices
+  // These slip through when Google Places types aren't available (e.g. from SerpAPI/Overpass)
+  const tourOperatorPatterns = [
+    /\btour(?:s)?\s+(?:operator|agency|company|oficina)\b/i,
+    /\bagenc[ey]\s+(?:de\s+)?(?:voyage|viaje|viaggio|reisen)\b/i,
+    /\boficina\s+de\s+turism[eo]\b/i,
+    /\boffice\s+(?:de\s+)?tourisme\b/i,
+    /\btourist\s+(?:info(?:rmation)?|office|center|centre)\b/i,
+  ];
+  // Exception: Viator activities that ARE tours (food tours, bike tours) should NOT be filtered
+  const isTourExperience = activity.source === 'viator' ||
+    /\b(food\s+tour|bike\s+tour|walking\s+tour|boat\s+tour|cruise|kayak|cooking\s+class|wine\s+tasting|guided\s+visit|visite\s+guid[eé]e|excursion|snorkel|plong[eé]e|segway|e-?bike)\b/i.test(name);
+  if (!isTourExperience && tourOperatorPatterns.some(p => p.test(name))) return true;
+  // Also catch names like "In Out Barcelona Tours" — an agency, not a tour experience
+  if (!isTourExperience && /\btours?\b/i.test(name) && !/\b(tour\s+of|tour\s+du|tour\s+de|tour\s+del|city\s+tour|free\s+tour|hop[\s-]on)\b/i.test(name)) {
+    // If the name ends with "Tours" and has no experiential verb, it's likely an agency
+    if (/\btours?\s*$/i.test(name)) return true;
+  }
 
   // 3. Generic places/streets/squares that are NOT real activities
   // (walking through a street is not a 1h activity)

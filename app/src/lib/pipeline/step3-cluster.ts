@@ -1,7 +1,9 @@
 /**
  * Pipeline V2 — Step 3: Geographic Clustering
  *
- * Groups nearby activities into day-sized clusters using K-means.
+ * Groups nearby activities into day-sized clusters using agglomerative
+ * hierarchical clustering (average-linkage). Guarantees that nearby
+ * activities end up in the same cluster.
  * Pure function, zero API calls.
  */
 
@@ -10,7 +12,7 @@ import { calculateDistance } from '../services/geocoding';
 
 /**
  * Cluster activities into `numDays` groups by geographic proximity.
- * Uses K-means with K-means++ initialization.
+ * Uses agglomerative hierarchical clustering with average-linkage distance.
  */
 export function clusterActivities(
   activities: ScoredActivity[],
@@ -44,8 +46,8 @@ export function clusterActivities(
   const dayTripDays = dayTripActivities.length > 0 ? 1 : 0;
   const cityDays = Math.max(1, numDays - dayTripDays);
 
-  // K-means on city activities
-  const clusters = kMeansClustering(cityActivities, cityDays, cityCenter);
+  // Hierarchical clustering on city activities
+  const clusters = hierarchicalClustering(cityActivities, cityDays);
 
   // Add day-trip cluster if needed
   if (dayTripActivities.length > 0) {
@@ -56,119 +58,191 @@ export function clusterActivities(
   const dayTripClusterIdx = dayTripActivities.length > 0 ? clusters.length - 1 : -1;
   balanceClusterSizes(clusters, Math.ceil(activities.length / numDays) + 1, dayTripClusterIdx);
 
-  // Optimize visit order within each cluster (nearest-neighbor)
+  // Optimize visit order within each cluster (nearest-neighbor + 2-opt)
   for (const cluster of clusters) {
     cluster.activities = optimizeVisitOrder(cluster.activities);
   }
 
-  // Renumber days: put day-trip cluster in the middle (not first or last day)
-  if (dayTripClusterIdx >= 0 && clusters.length >= 3) {
-    const dayTripCluster = clusters.splice(dayTripClusterIdx, 1)[0];
-    const middleIdx = Math.floor(clusters.length / 2);
-    clusters.splice(middleIdx, 0, dayTripCluster);
-  }
+  // Reorder clusters by geographic proximity (nearest-neighbor from city center)
+  // Also handles day-trip cluster placement (middle of the trip)
+  reorderClustersByProximity(clusters, cityCenter, dayTripClusterIdx);
+
+  // Renumber days after reordering
   clusters.forEach((c, i) => { c.dayNumber = i + 1; });
 
   return clusters;
 }
 
 /**
- * K-means clustering with K-means++ initialization.
+ * Agglomerative hierarchical clustering with average-linkage distance.
+ *
+ * Algorithm:
+ * 1. Start: each activity is its own cluster (N clusters)
+ * 2. Precompute pairwise distance matrix
+ * 3. Merge the two closest clusters (average-linkage: mean distance between all member pairs)
+ * 4. Repeat until K clusters remain
+ *
+ * Average-linkage chosen because:
+ * - Single-linkage → long chains (La Rambla 2km → everything merges)
+ * - Complete-linkage → too compact (splits natural walking routes)
+ * - Average → balanced, produces walkable day-clusters
+ *
+ * Performance: O(N^3) for N=15-30 → < 1ms
  */
-function kMeansClustering(
+function hierarchicalClustering(
   activities: ScoredActivity[],
-  K: number,
-  cityCenter: { lat: number; lng: number }
+  K: number
 ): ActivityCluster[] {
   if (activities.length === 0) return [];
   if (K <= 1) return [buildCluster(1, activities)];
+  if (activities.length <= K) {
+    // Fewer activities than clusters — one per cluster
+    return activities.map((a, i) => buildCluster(i + 1, [a]));
+  }
 
-  // K-means++ initialization
-  let centroids = initCentroidsKMeansPP(activities, K);
+  // 1. Precompute pairwise distance matrix
+  const N = activities.length;
+  const distMatrix: number[][] = [];
+  for (let i = 0; i < N; i++) {
+    distMatrix[i] = [];
+    for (let j = 0; j < N; j++) {
+      if (i === j) {
+        distMatrix[i][j] = 0;
+      } else if (j < i) {
+        distMatrix[i][j] = distMatrix[j][i]; // Symmetric
+      } else {
+        distMatrix[i][j] = calculateDistance(
+          activities[i].latitude, activities[i].longitude,
+          activities[j].latitude, activities[j].longitude
+        );
+      }
+    }
+  }
 
-  let assignments: number[] = new Array(activities.length).fill(0);
-  const MAX_ITERATIONS = 20;
+  // 2. Initialize: each activity is its own cluster (as indices)
+  let clusterMembers: number[][] = activities.map((_, i) => [i]);
 
-  for (let iter = 0; iter < MAX_ITERATIONS; iter++) {
-    // Assignment step: each activity to nearest centroid
-    let changed = false;
-    for (let i = 0; i < activities.length; i++) {
-      const a = activities[i];
-      let bestK = 0;
-      let bestDist = Infinity;
-      for (let k = 0; k < centroids.length; k++) {
-        const d = calculateDistance(a.latitude, a.longitude, centroids[k].lat, centroids[k].lng);
+  // 3. Agglomerate until K clusters
+  while (clusterMembers.length > K) {
+    // Find the two closest clusters (average-linkage)
+    let bestI = 0, bestJ = 1;
+    let bestDist = Infinity;
+
+    for (let i = 0; i < clusterMembers.length; i++) {
+      for (let j = i + 1; j < clusterMembers.length; j++) {
+        const d = averageLinkageDistance(clusterMembers[i], clusterMembers[j], distMatrix);
         if (d < bestDist) {
           bestDist = d;
-          bestK = k;
+          bestI = i;
+          bestJ = j;
         }
-      }
-      if (assignments[i] !== bestK) {
-        assignments[i] = bestK;
-        changed = true;
       }
     }
 
-    if (!changed) break;
-
-    // Update step: recompute centroids
-    centroids = centroids.map((c, k) => {
-      const members = activities.filter((_, i) => assignments[i] === k);
-      if (members.length === 0) return c; // Keep old centroid if empty
-      return {
-        lat: members.reduce((s, a) => s + a.latitude, 0) / members.length,
-        lng: members.reduce((s, a) => s + a.longitude, 0) / members.length,
-      };
-    });
+    // Merge cluster[bestJ] into cluster[bestI]
+    clusterMembers[bestI] = [...clusterMembers[bestI], ...clusterMembers[bestJ]];
+    clusterMembers.splice(bestJ, 1);
   }
 
-  // Build clusters from assignments
-  const clusterMap = new Map<number, ScoredActivity[]>();
-  for (let i = 0; i < activities.length; i++) {
-    const k = assignments[i];
-    if (!clusterMap.has(k)) clusterMap.set(k, []);
-    clusterMap.get(k)!.push(activities[i]);
-  }
-
-  return Array.from(clusterMap.entries())
-    .sort(([a], [b]) => a - b)
-    .map(([k, members], idx) => buildCluster(idx + 1, members));
+  // 4. Build ActivityCluster[] from result
+  return clusterMembers.map((memberIndices, idx) => {
+    const members = memberIndices.map(i => activities[i]);
+    return buildCluster(idx + 1, members);
+  });
 }
 
 /**
- * K-means++ centroid initialization: spread out initial centroids.
+ * Average-linkage distance: mean of all pairwise distances between two clusters.
  */
-function initCentroidsKMeansPP(
-  activities: ScoredActivity[],
-  K: number
-): { lat: number; lng: number }[] {
-  const centroids: { lat: number; lng: number }[] = [];
+function averageLinkageDistance(
+  clusterA: number[],
+  clusterB: number[],
+  distMatrix: number[][]
+): number {
+  let total = 0;
+  for (const a of clusterA) {
+    for (const b of clusterB) {
+      total += distMatrix[a][b];
+    }
+  }
+  return total / (clusterA.length * clusterB.length);
+}
 
-  // Pick first centroid: the activity with highest score
-  const first = activities[0]; // Already sorted by score
-  centroids.push({ lat: first.latitude, lng: first.longitude });
+/**
+ * Reorder city clusters using nearest-neighbor heuristic from startCoords.
+ * Ensures Day 1's cluster is closest to the arrival point, and subsequent days
+ * flow geographically (e.g., north → east → south instead of north → south → north).
+ * Preserves day-trip cluster position (middle of the trip).
+ */
+function reorderClustersByProximity(
+  clusters: ActivityCluster[],
+  startCoords: { lat: number; lng: number },
+  dayTripClusterIdx: number
+): void {
+  if (clusters.length <= 2) return;
 
-  for (let k = 1; k < K; k++) {
-    // For each activity, compute distance to nearest existing centroid
-    let maxDist = -Infinity;
-    let farthest = activities[0];
+  // Separate day-trip cluster (if any) — it gets placed in the middle later
+  const dayTripCluster = dayTripClusterIdx >= 0 ? clusters[dayTripClusterIdx] : null;
+  const cityClusterIndices = clusters
+    .map((_, i) => i)
+    .filter(i => i !== dayTripClusterIdx);
 
-    for (const a of activities) {
-      let minDist = Infinity;
-      for (const c of centroids) {
-        const d = calculateDistance(a.latitude, a.longitude, c.lat, c.lng);
-        if (d < minDist) minDist = d;
-      }
-      if (minDist > maxDist) {
-        maxDist = minDist;
-        farthest = a;
+  if (cityClusterIndices.length <= 2) {
+    // Not enough city clusters to reorder, but still handle day-trip placement
+    if (dayTripCluster && clusters.length >= 3) {
+      const dtIdx = clusters.indexOf(dayTripCluster);
+      clusters.splice(dtIdx, 1);
+      const middleIdx = Math.floor(clusters.length / 2);
+      clusters.splice(middleIdx, 0, dayTripCluster);
+    }
+    return;
+  }
+
+  // Nearest-neighbor from startCoords
+  const remaining = new Set(cityClusterIndices);
+  const order: number[] = [];
+  let curLat = startCoords.lat;
+  let curLng = startCoords.lng;
+
+  while (remaining.size > 0) {
+    let nearestIdx = -1;
+    let nearestDist = Infinity;
+
+    for (const idx of remaining) {
+      const c = clusters[idx];
+      const d = calculateDistance(curLat, curLng, c.centroid.lat, c.centroid.lng);
+      if (d < nearestDist) {
+        nearestDist = d;
+        nearestIdx = idx;
       }
     }
 
-    centroids.push({ lat: farthest.latitude, lng: farthest.longitude });
+    if (nearestIdx === -1) break;
+
+    order.push(nearestIdx);
+    remaining.delete(nearestIdx);
+    curLat = clusters[nearestIdx].centroid.lat;
+    curLng = clusters[nearestIdx].centroid.lng;
   }
 
-  return centroids;
+  // Rebuild clusters array in the new order
+  const reordered: ActivityCluster[] = order.map(i => clusters[i]);
+
+  // Re-insert day-trip cluster in the middle
+  if (dayTripCluster) {
+    const middleIdx = Math.floor(reordered.length / 2);
+    reordered.splice(middleIdx, 0, dayTripCluster);
+  }
+
+  // Replace clusters array contents in-place
+  clusters.length = 0;
+  for (const c of reordered) {
+    clusters.push(c);
+  }
+
+  console.log(`[Pipeline V2] Clusters reordered by proximity: ${clusters.map((c, i) =>
+    `Day ${i + 1}: centroid (${c.centroid.lat.toFixed(4)}, ${c.centroid.lng.toFixed(4)})`
+  ).join(', ')}`);
 }
 
 /**

@@ -8,7 +8,7 @@
 import type { TripPreferences, GroupType, ActivityType } from '../types';
 import type { Attraction } from '../services/attractions';
 import type { FetchedData, ScoredActivity } from './types';
-import { deduplicateByProximity, deduplicateByBookingUrl, isIrrelevantAttraction } from './utils/dedup';
+import { deduplicateByProximity, deduplicateByBookingUrl, deduplicateSameLocationSameType, isIrrelevantAttraction } from './utils/dedup';
 import { fixAttractionDuration, fixAttractionCost } from '../tripAttractions';
 import { findKnownViatorProduct } from '../services/viatorKnownProducts';
 import { calculateDistance } from '../services/geocoding';
@@ -132,10 +132,13 @@ export function scoreAndSelectActivities(
   // 3. Deduplicate by proximity (100m)
   const gpsDeduped = deduplicateByProximity(withGPS, 0.1);
 
-  // 3a. Deduplicate by shared booking URL (e.g. Vatican Museums + Sistine Chapel = same visit)
-  const deduped = deduplicateByBookingUrl(gpsDeduped);
+  // 3a. Deduplicate same GPS location + same activity type (e.g., two kayak tours at same beach)
+  const locationTypeDeduped = deduplicateSameLocationSameType(gpsDeduped);
 
-  // 3b. FALLBACK must-see name matching
+  // 3b. Deduplicate by shared booking URL (e.g. Vatican Museums + Sistine Chapel = same visit)
+  const deduped = deduplicateByBookingUrl(locationTypeDeduped);
+
+  // 3c. FALLBACK must-see name matching
   // If the SerpAPI must-see search failed for an item, or the dedup lost the flag,
   // check all activities against the user's mustSee text and apply the flag.
   // This catches cases like "Fontaine de Trevi" where the API search returned

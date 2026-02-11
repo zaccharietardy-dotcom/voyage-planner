@@ -106,9 +106,10 @@ export class DayScheduler {
     travelTime?: number; // temps de trajet depuis le lieu précédent
     minStartTime?: Date; // heure minimum de début (ex: ouverture)
     maxEndTime?: Date; // heure maximum de fin (ex: fermeture)
+    minDuration?: number; // durée minimum acceptable (type-dependent, default 30)
     data?: any;
   }): ScheduleItem | null {
-    const { id, title, type, duration, travelTime = 0, minStartTime, maxEndTime, data } = params;
+    const { id, title, type, duration, travelTime = 0, minStartTime, maxEndTime, minDuration = 30, data } = params;
 
     // Buffer time entre activités (sauf pour transport/flight/checkin/checkout)
     const BUFFER_MINUTES = 5;
@@ -193,7 +194,7 @@ export class DayScheduler {
     let effectiveDuration = duration;
     if (maxEndTime && endTime > maxEndTime && maxEndTime > startTime) {
       const clampedDuration = Math.round((maxEndTime.getTime() - startTime.getTime()) / (60 * 1000));
-      if (clampedDuration < 30) {
+      if (clampedDuration < minDuration) {
         return null;
       }
       endTime = new Date(maxEndTime);

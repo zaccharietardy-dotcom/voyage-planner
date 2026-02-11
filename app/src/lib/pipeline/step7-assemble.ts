@@ -491,6 +491,9 @@ export async function assembleTripSchedule(
       const activityMaxEndTime = getActivityMaxEndTime(activity, dayDate);
       const activityMinStartTime = getActivityMinStartTime(activity, dayDate);
 
+      // Minimum meaningful duration for this activity type (e.g., 60min for museums)
+      const actMinDuration = getMinDuration(activity.name || '', activity.type || '');
+
       let actResult = scheduler.addItem({
         id: activity.id,
         title: activity.name,
@@ -499,15 +502,16 @@ export async function assembleTripSchedule(
         travelTime,
         minStartTime: activityMinStartTime,
         maxEndTime: activityMaxEndTime,
+        minDuration: actMinDuration,
         data: activity,
       });
 
-      // MUST-SEE RETRY: If a must-see was rejected, retry with shorter duration (min 30min).
+      // MUST-SEE RETRY: If a must-see was rejected, retry with shorter duration.
       // Keep the same maxEndTime — we don't relax closing hours (a museum that closes at 17:00
-      // still closes at 17:00). But a 30min visit might fit where a 2h visit didn't.
+      // still closes at 17:00). Uses type-based minimum (e.g., 60min for cathedral, not 30).
       if (!actResult && activity.mustSee) {
-        const shortDuration = Math.max(30, Math.floor(activityDuration * 0.5));
-        console.log(`[Pipeline V2] Day ${balancedDay.dayNumber}: Must-see "${activity.name}" rejected at ${activityDuration}min, retrying with ${shortDuration}min`);
+        const shortDuration = Math.max(actMinDuration, Math.floor(activityDuration * 0.5));
+        console.log(`[Pipeline V2] Day ${balancedDay.dayNumber}: Must-see "${activity.name}" rejected at ${activityDuration}min, retrying with ${shortDuration}min (min=${actMinDuration}min)`);
         actResult = scheduler.addItem({
           id: activity.id,
           title: activity.name,
@@ -516,6 +520,7 @@ export async function assembleTripSchedule(
           travelTime: Math.min(travelTime, 10), // Reduce travel estimate too
           minStartTime: activityMinStartTime,
           maxEndTime: activityMaxEndTime, // Same closing time — no cheating
+          minDuration: actMinDuration,
           data: activity,
         });
       }
@@ -550,12 +555,13 @@ export async function assembleTripSchedule(
             travelTime: Math.min(travelTime, 10),
             minStartTime: activityMinStartTime,
             maxEndTime: activityMaxEndTime,
+            minDuration: actMinDuration,
             data: activity,
           });
 
           // Also try with reduced duration if full doesn't fit
           if (!actResult) {
-            const shortDuration = Math.max(30, Math.floor(activityDuration * 0.5));
+            const shortDuration = Math.max(actMinDuration, Math.floor(activityDuration * 0.5));
             actResult = scheduler.addItem({
               id: activity.id,
               title: activity.name,
@@ -564,6 +570,7 @@ export async function assembleTripSchedule(
               travelTime: Math.min(travelTime, 5),
               minStartTime: activityMinStartTime,
               maxEndTime: activityMaxEndTime,
+              minDuration: actMinDuration,
               data: activity,
             });
           }
@@ -988,7 +995,7 @@ function estimateTravel(from: any, to: any): number {
  * Check if an activity is a day-trip (far from city center).
  */
 // Import shared keyword lists (single source of truth)
-import { OUTDOOR_ACTIVITY_KEYWORDS, INDOOR_ACTIVITY_KEYWORDS } from './utils/constants';
+import { OUTDOOR_ACTIVITY_KEYWORDS, INDOOR_ACTIVITY_KEYWORDS, getMinDuration } from './utils/constants';
 
 /**
  * Get maximum end time for an activity based on its type.
