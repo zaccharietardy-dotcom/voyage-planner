@@ -82,6 +82,7 @@ export interface MealAssignment {
   dayNumber: number;
   mealType: 'breakfast' | 'lunch' | 'dinner';
   restaurant: Restaurant | null; // null = self-catered
+  restaurantAlternatives: Restaurant[]; // 2e et 3e choix (classés par qualité/distance)
   referenceCoords: { lat: number; lng: number };
 }
 

@@ -336,6 +336,7 @@ export interface TripItem {
   originalOmioUrl?: string; // URL Omio directe avant wrapping Impact tracking
   parking?: ParkingOption;
   restaurant?: Restaurant;
+  restaurantAlternatives?: Restaurant[]; // Top 2-3 restaurants alternatifs classés par qualité/distance
   accommodation?: Accommodation;
   localTransport?: LocalTransport;
   // Distance/temps par rapport à l'item précédent

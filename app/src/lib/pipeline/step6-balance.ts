@@ -54,10 +54,10 @@ export async function balanceDaysWithClaude(
       .map((b: any) => b.text)
       .join('');
 
-    return parsePlan(text, clusters, cityCenter);
+    return validateAndFixThemes(parsePlan(text, clusters, cityCenter), clusters);
   } catch (error) {
     console.warn('[Pipeline V2] Claude balancing failed, using fallback:', error instanceof Error ? error.message : error);
-    return buildDeterministicPlan(clusters, cityCenter);
+    return validateAndFixThemes(buildDeterministicPlan(clusters, cityCenter), clusters);
   }
 }
 
@@ -225,4 +225,44 @@ function generateTheme(cluster: ActivityCluster): string {
   if (types.some(t => t.includes('religious') || t.includes('mosque') || t.includes('church'))) return 'Spiritualité & Architecture';
 
   return 'Exploration & Découverte';
+}
+
+/**
+ * Post-validation: ensure each day's theme/narrative actually matches its activities.
+ * Claude sometimes hallucinates themes that describe activities from other days.
+ * If a theme doesn't reference any of the day's actual activities, regenerate it.
+ */
+function validateAndFixThemes(plan: BalancedPlan, clusters: ActivityCluster[]): BalancedPlan {
+  for (const day of plan.days) {
+    const cluster = clusters.find(c => c.dayNumber === day.dayNumber);
+    if (!cluster || cluster.activities.length === 0) continue;
+
+    // Extract keywords from activity names (words longer than 3 chars)
+    const activityKeywords = cluster.activities
+      .map(a => (a.name || '').toLowerCase())
+      .filter(Boolean);
+
+    // Check if the theme mentions at least one activity keyword
+    const themeLower = (day.theme || '').toLowerCase();
+    const themeMatchesContent = activityKeywords.some(kw =>
+      kw.split(/\s+/).some(word => word.length > 3 && themeLower.includes(word))
+    );
+
+    if (!themeMatchesContent && activityKeywords.length > 0) {
+      const mainNames = cluster.activities
+        .slice(0, 3)
+        .map(a => a.name)
+        .filter(Boolean);
+
+      const oldTheme = day.theme;
+      day.theme = mainNames.length > 1
+        ? `${mainNames[0]} et ${mainNames[1]}`
+        : mainNames[0] || 'Exploration & Découverte';
+
+      day.dayNarrative = `Journée consacrée à ${mainNames.join(', ')}. ${cluster.activities.length} activités prévues.`;
+
+      console.log(`[Pipeline V2] Theme mismatch fixed for day ${day.dayNumber}: "${oldTheme}" → "${day.theme}"`);
+    }
+  }
+  return plan;
 }

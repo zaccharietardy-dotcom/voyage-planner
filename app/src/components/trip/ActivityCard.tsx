@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { TripItem, Flight, TRIP_ITEM_COLORS } from '@/lib/types';
+import { TripItem, Flight, Restaurant, TRIP_ITEM_COLORS } from '@/lib/types';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -382,6 +382,11 @@ export function ActivityCard({
           {item.type === 'flight' && item.flightAlternatives && item.flightAlternatives.length > 0 && (
             <FlightAlternatives alternatives={item.flightAlternatives} />
           )}
+
+          {/* Restaurant alternatives */}
+          {item.type === 'restaurant' && item.restaurantAlternatives && item.restaurantAlternatives.length > 0 && (
+            <RestaurantAlternatives alternatives={item.restaurantAlternatives} />
+          )}
         </div>
       </div>
 
@@ -679,6 +684,47 @@ function FlightAlternatives({ alternatives }: { alternatives: Flight[] }) {
                 <span className="text-muted-foreground text-[10px]">
                   {formatDuration(alt.duration)} · {alt.stops === 0 ? 'Direct' : `${alt.stops} esc.`}
                 </span>
+              </div>
+            </a>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function RestaurantAlternatives({ alternatives }: { alternatives: Restaurant[] }) {
+  const [expanded, setExpanded] = useState(false);
+  if (alternatives.length === 0) return null;
+
+  return (
+    <div className="mt-3 border-t border-border/40 pt-2.5" onClick={(e) => e.stopPropagation()}>
+      <button
+        className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+        onClick={() => setExpanded(!expanded)}
+      >
+        <ChevronRight className={cn('h-3 w-3 transition-transform', expanded && 'rotate-90')} />
+        {alternatives.length} autre{alternatives.length > 1 ? 's' : ''} restaurant{alternatives.length > 1 ? 's' : ''}
+      </button>
+      {expanded && (
+        <div className="flex gap-2 mt-2 overflow-x-auto pb-2 -mx-1 px-1">
+          {alternatives.map((alt) => (
+            <a
+              key={alt.id}
+              href={alt.reservationUrl || alt.googleMapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(alt.name)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-shrink-0 border border-border/50 rounded-lg p-2.5 text-xs hover:border-primary/40 hover:shadow-sm transition-all min-w-[140px] bg-card"
+            >
+              <div className="font-medium truncate">{alt.name}</div>
+              <div className="text-muted-foreground text-[10px] truncate">{alt.cuisineTypes?.join(', ')}</div>
+              <div className="flex items-center justify-between mt-1.5">
+                {alt.rating > 0 && <span className="font-semibold text-primary">⭐ {alt.rating.toFixed(1)}</span>}
+                {alt.distance != null && (
+                  <span className="text-muted-foreground text-[10px]">
+                    {alt.distance < 1 ? `${Math.round(alt.distance * 1000)}m` : `${alt.distance.toFixed(1)}km`}
+                  </span>
+                )}
               </div>
             </a>
           ))}

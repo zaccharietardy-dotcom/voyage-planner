@@ -34,6 +34,9 @@ Thumbs.db
 # Cache
 .cache/
 *.tsbuildinfo
+data/luggage-cache/
+app/data/luggage-cache/
+app/test-results/
 
 # Debug exports
 voyage à debugger/

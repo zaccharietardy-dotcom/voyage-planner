@@ -54,6 +54,7 @@ export function assignRestaurants(
           dayNumber: cluster.dayNumber,
           mealType,
           restaurant: null,
+          restaurantAlternatives: [],
           referenceCoords: accommodationCoords,
         });
         continue;
@@ -65,6 +66,7 @@ export function assignRestaurants(
           dayNumber: cluster.dayNumber,
           mealType,
           restaurant: null, // Will be handled as hotel breakfast in step7
+          restaurantAlternatives: [],
           referenceCoords: accommodationCoords,
         });
         continue;
@@ -77,11 +79,11 @@ export function assignRestaurants(
         accommodationCoords
       );
 
-      let best: Restaurant | null = null;
+      let topRestaurants: Restaurant[] = [];
 
       if (hasRealGPS) {
-        // Normal mode: score by quality/distance ratio
-        best = findBestRestaurant(pool, refCoords, usedIds, mealType);
+        // Normal mode: score by quality/distance ratio — get top 3
+        topRestaurants = findTopRestaurants(pool, refCoords, usedIds, mealType, 3);
       } else {
         // Fake GPS mode: most TripAdvisor restaurants have city-center fallback coords.
         // Strategy: try SerpAPI restaurants first (they have real GPS from Google),
@@ -96,13 +98,52 @@ export function assignRestaurants(
         });
 
         if (realGPSPool.length > 0) {
-          best = findBestRestaurant(realGPSPool, refCoords, usedIds, mealType);
+          topRestaurants = findTopRestaurants(realGPSPool, refCoords, usedIds, mealType, 3);
         }
         // Fallback: quality-only from full pool
-        if (!best) {
-          best = findBestByQuality(pool, usedIds, mealType);
+        if (topRestaurants.length === 0) {
+          topRestaurants = findTopByQuality(pool, usedIds, mealType, 3);
         }
       }
+
+      // Fallback robuste : ne jamais laisser restaurant: null
+      if (topRestaurants.length === 0) {
+        // Retry 1: distance étendue (5km) sans filtre cuisine
+        const extendedResults = findTopRestaurants(pool, refCoords, new Set(), 'lunch', 3); // 'lunch' = pas de filtre cuisine strict, 3km
+        if (extendedResults.length > 0) {
+          topRestaurants = extendedResults;
+        }
+      }
+
+      if (topRestaurants.length === 0) {
+        // Retry 2: qualité seule sans filtre usedIds
+        const qualityResults = findTopByQuality(pool, new Set(), mealType, 3);
+        if (qualityResults.length > 0) {
+          topRestaurants = qualityResults;
+        }
+      }
+
+      if (topRestaurants.length === 0) {
+        // Fallback générique — restaurant fictif
+        const fallbackName = mealType === 'breakfast' ? 'Café local' : 'Restaurant local';
+        topRestaurants = [{
+          id: `fallback-${cluster.dayNumber}-${mealType}`,
+          name: fallbackName,
+          address: '',
+          latitude: refCoords.lat,
+          longitude: refCoords.lng,
+          rating: 0,
+          reviewCount: 0,
+          priceLevel: 2 as const,
+          cuisineTypes: ['locale'],
+          dietaryOptions: [],
+          openingHours: {},
+          dataReliability: 'generated' as const,
+        }];
+      }
+
+      const best = topRestaurants[0];
+      const alternatives = topRestaurants.slice(1);
 
       if (best) {
         usedIds.add(best.id);
@@ -112,6 +153,7 @@ export function assignRestaurants(
         dayNumber: cluster.dayNumber,
         mealType,
         restaurant: best,
+        restaurantAlternatives: alternatives,
         referenceCoords: refCoords,
       });
     }
@@ -188,18 +230,19 @@ function isAppropriateForMeal(restaurant: Restaurant, mealType: 'breakfast' | 'l
 }
 
 /**
- * Find the best restaurant for a meal slot.
- * Score = (rating × log10(reviewCount)) / distance
+ * Find the top N restaurants for a meal slot, ranked by quality/distance.
+ * Score = (rating × log10(reviewCount) + mealTypeBonus) / distance
  * For breakfast: filters out inappropriate cuisines (steakhouse, BBQ, etc.)
+ * Returns restaurants enriched with `distance` field.
  */
-function findBestRestaurant(
+function findTopRestaurants(
   pool: Restaurant[],
   refCoords: { lat: number; lng: number },
   usedIds: Set<string>,
-  mealType: 'breakfast' | 'lunch' | 'dinner'
-): Restaurant | null {
-  let bestRestaurant: Restaurant | null = null;
-  let bestScore = -Infinity;
+  mealType: 'breakfast' | 'lunch' | 'dinner',
+  count: number = 3
+): Restaurant[] {
+  const scored: { restaurant: Restaurant; score: number; distance: number }[] = [];
 
   const maxDistance = mealType === 'breakfast' ? 2.0 : 3.0; // km (generous — city-scale walking/transit)
 
@@ -233,28 +276,30 @@ function findBestRestaurant(
     }
 
     const score = (qualityScore + mealTypeBonus) / distancePenalty;
-
-    if (score > bestScore) {
-      bestScore = score;
-      bestRestaurant = r;
-    }
+    scored.push({ restaurant: r, score, distance: dist });
   }
 
-  return bestRestaurant;
+  scored.sort((a, b) => b.score - a.score);
+
+  // Enrichir chaque restaurant avec le champ `distance`
+  return scored.slice(0, count).map(s => ({
+    ...s.restaurant,
+    distance: s.distance,
+  }));
 }
 
 /**
- * Pick the highest-rated unused restaurant (ignoring distance).
+ * Pick the top N highest-rated unused restaurants (ignoring distance).
  * Used when GPS coordinates are unreliable (fake city-center fallback).
  * Still applies meal type filtering (e.g. no steakhouse for breakfast).
  */
-function findBestByQuality(
+function findTopByQuality(
   pool: Restaurant[],
   usedIds: Set<string>,
-  mealType: 'breakfast' | 'lunch' | 'dinner' = 'lunch'
-): Restaurant | null {
-  let best: Restaurant | null = null;
-  let bestScore = -Infinity;
+  mealType: 'breakfast' | 'lunch' | 'dinner' = 'lunch',
+  count: number = 3
+): Restaurant[] {
+  const scored: { restaurant: Restaurant; score: number }[] = [];
 
   for (const r of pool) {
     if (usedIds.has(r.id)) continue;
@@ -275,13 +320,11 @@ function findBestByQuality(
       if (isBreakfastFriendly) score += 3;
     }
 
-    if (score > bestScore) {
-      bestScore = score;
-      best = r;
-    }
+    scored.push({ restaurant: r, score });
   }
 
-  return best;
+  scored.sort((a, b) => b.score - a.score);
+  return scored.slice(0, count).map(s => s.restaurant);
 }
 
 /**

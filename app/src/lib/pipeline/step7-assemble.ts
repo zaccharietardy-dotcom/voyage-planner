@@ -131,7 +131,7 @@ export async function assembleTripSchedule(
       const arrTime = new Date(flights.outbound.arrivalTime);
       scheduler.insertFixedItem({
         id: `flight-out-${balancedDay.dayNumber}`,
-        title: `Vol ${flights.outbound.airline} ${flights.outbound.flightNumber}`,
+        title: `Vol ${flights.outbound.flightNumber}`,
         type: 'flight',
         startTime: depTime,
         endTime: arrTime,
@@ -170,7 +170,7 @@ export async function assembleTripSchedule(
     if (isLastDay && flights.return) {
       returnTransportData = {
         id: `flight-ret-${balancedDay.dayNumber}`,
-        title: `Vol ${flights.return.airline} ${flights.return.flightNumber}`,
+        title: `Vol ${flights.return.flightNumber}`,
         type: 'flight',
         startTime: new Date(flights.return.departureTime),
         endTime: new Date(flights.return.arrivalTime),
@@ -230,7 +230,8 @@ export async function assembleTripSchedule(
     // Skip breakfast only if we physically can't have it (arriving after 10am)
     const skipBreakfast = isFirstDay && dayStartHour >= 10;
     // Skip lunch only if the day ends before lunch time (e.g. very early departure)
-    const skipLunch = isLastDay && hasReturnTravel && dayEndHour <= 12;
+    const skipLunch = (isLastDay && hasReturnTravel && dayEndHour <= 12) ||
+                       (isFirstDay && dayStartHour >= 14);
     // Skip dinner only if the day ends before dinner time
     const skipDinner = (isLastDay && hasReturnTravel && dayEndHour < 19) ||
                        (isFirstDay && dayStartHour >= 20);
@@ -264,6 +265,14 @@ export async function assembleTripSchedule(
           checkinTime = earliestCheckin;
         }
       }
+      // If check-in falls past midnight (e.g. flight arrives 23:30 + 1h transfer = 00:30),
+      // cap it at 23:59 so it displays correctly within the day boundary
+      const midnight = new Date(dayDate);
+      midnight.setDate(midnight.getDate() + 1);
+      midnight.setHours(0, 0, 0, 0);
+      if (checkinTime >= midnight) {
+        checkinTime = parseTime(dayDate, '23:59');
+      }
       // Store check-in data — will be inserted AFTER activities to avoid blocking pre-check-in slots
       deferredCheckinData = {
         id: `checkin-${balancedDay.dayNumber}`,
@@ -285,7 +294,7 @@ export async function assembleTripSchedule(
         duration: 45,
         minStartTime: parseTime(dayDate, `${String(Math.max(7, dayStartHour)).padStart(2, '0')}:00`),
         maxEndTime: parseTime(dayDate, '10:30'),
-        data: breakfast.restaurant,
+        data: { ...breakfast.restaurant, _alternatives: breakfast.restaurantAlternatives || [] },
       });
     } else if (isLastDay && !breakfast?.restaurant && !skipBreakfast && hotel?.breakfastIncluded && dayStartHour <= 10) {
       // Hotel breakfast fallback
@@ -382,7 +391,7 @@ export async function assembleTripSchedule(
         duration: 45,
         minStartTime: parseTime(dayDate, `${String(Math.max(7, dayStartHour)).padStart(2, '0')}:00`),
         maxEndTime: parseTime(dayDate, '10:30'),
-        data: breakfast.restaurant,
+        data: { ...breakfast.restaurant, _alternatives: breakfast.restaurantAlternatives || [] },
       });
     } else if (!isLastDay && !breakfast?.restaurant && !skipBreakfast && hotel?.breakfastIncluded && dayStartHour <= 10) {
       // Hotel breakfast fallback
@@ -425,7 +434,7 @@ export async function assembleTripSchedule(
         duration: 60,
         minStartTime: parseTime(dayDate, '12:00'),
         maxEndTime: parseTime(dayDate, '14:30'),
-        data: lunch.restaurant,
+        data: { ...lunch.restaurant, _alternatives: lunch.restaurantAlternatives || [] },
       });
       if (result) lunchInserted = true;
     }
@@ -460,7 +469,7 @@ export async function assembleTripSchedule(
           duration: 60,
           minStartTime: parseTime(dayDate, '12:00'),
           maxEndTime: parseTime(dayDate, '14:30'),
-          data: lunch.restaurant,
+          data: { ...lunch.restaurant, _alternatives: lunch.restaurantAlternatives || [] },
         });
         if (result) lunchInserted = true;
       }
@@ -477,7 +486,7 @@ export async function assembleTripSchedule(
           duration: 75,
           minStartTime: parseTime(dayDate, '19:00'),
           maxEndTime: parseTime(dayDate, '22:00'),
-          data: dinner.restaurant,
+          data: { ...dinner.restaurant, _alternatives: dinner.restaurantAlternatives || [] },
         });
         if (result) dinnerInserted = true;
       }
@@ -643,11 +652,9 @@ export async function assembleTripSchedule(
     // findBestMealSlot() scans gaps between existing items to find the best time.
     if (!lunchInserted && !skipLunch) {
       const lunchDuration = lunch?.restaurant ? 60 : 45;
-      const lunchData = lunch?.restaurant || {
-        name: '',
-        description: '',
-        estimatedCost: 0,
-      };
+      const lunchData = lunch?.restaurant
+        ? { ...lunch.restaurant, _alternatives: lunch.restaurantAlternatives || [] }
+        : { name: '', description: '', estimatedCost: 0 };
       const lunchTitle = lunch?.restaurant
         ? `Déjeuner — ${lunch.restaurant.name}`
         : 'Déjeuner';
@@ -674,11 +681,9 @@ export async function assembleTripSchedule(
 
     if (!dinnerInserted && !skipDinner) {
       const dinnerDuration = dinner?.restaurant ? 75 : 60;
-      const dinnerData = dinner?.restaurant || {
-        name: '',
-        description: '',
-        estimatedCost: 0,
-      };
+      const dinnerData = dinner?.restaurant
+        ? { ...dinner.restaurant, _alternatives: dinner.restaurantAlternatives || [] }
+        : { name: '', description: '', estimatedCost: 0 };
       const dinnerTitle = dinner?.restaurant
         ? `Dîner — ${dinner.restaurant.name}`
         : 'Dîner';
@@ -765,6 +770,9 @@ export async function assembleTripSchedule(
         viatorUrl: itemData.viatorUrl,
         googleMapsPlaceUrl,
         restaurant: item.type === 'restaurant' ? itemData : undefined,
+        restaurantAlternatives: item.type === 'restaurant' && itemData._alternatives?.length > 0
+          ? itemData._alternatives
+          : undefined,
         accommodation: (item.type === 'checkin' || item.type === 'checkout') ? itemData : undefined,
         flight: item.type === 'flight' ? itemData : undefined,
         // Transport-specific fields (train/bus legs, price range)

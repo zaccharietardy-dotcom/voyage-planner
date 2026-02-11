@@ -44,3 +44,5 @@ next-env.d.ts
 # debug pipeline results (generated trip JSONs)
 scripts/debug-pipeline/results/*.json
 !scripts/debug-pipeline/results/.gitkeep
+test-results/
+data/luggage-cache/
