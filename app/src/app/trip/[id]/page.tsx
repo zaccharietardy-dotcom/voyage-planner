@@ -464,6 +464,36 @@ export default function TripPage() {
     toast.success(`Restaurant mis à jour: ${selectedRestaurant.name}`);
   }, [trip, saveTrip]);
 
+  const handleSelectSelfMeal = useCallback((item: TripItem) => {
+    if (!trip || item.type !== 'restaurant') return;
+
+    const titlePrefix = item.title.includes('—')
+      ? item.title.split('—')[0].trim()
+      : 'Repas';
+
+    const updatedDays = trip.days.map((day) => ({
+      ...day,
+      items: day.items.map((currentItem) => {
+        if (currentItem.id !== item.id) return currentItem;
+        return {
+          ...currentItem,
+          title: `${titlePrefix} — Repas libre`,
+          description: 'Pique-nique / courses / repas maison',
+          locationName: 'Repas libre',
+          estimatedCost: 0,
+          bookingUrl: undefined,
+          googleMapsPlaceUrl: undefined,
+          restaurant: undefined,
+          restaurantAlternatives: undefined,
+        };
+      }),
+    }));
+
+    const updatedTrip = { ...trip, days: updatedDays, updatedAt: new Date() };
+    saveTrip(updatedTrip);
+    toast.success('Repas passé en mode libre');
+  }, [trip, saveTrip]);
+
   // Render swap button pour les ActivityCards (si pool disponible)
   const renderSwapButton = useCallback((item: TripItem) => {
     if (!trip?.attractionPool || trip.attractionPool.length === 0 || !canEdit) return null;
@@ -1052,7 +1082,7 @@ export default function TripPage() {
                     </TabsList>
                     {trip.days.map((day, idx) => (
                       <TabsContent key={day.dayNumber} value={day.dayNumber.toString()} className="mt-0">
-                        <DayTimeline day={day} selectedItemId={selectedItemId} globalIndexOffset={getDayIndexOffset(day.dayNumber)} mapNumbers={itemMapNumbers} onSelectItem={handleSelectItem} onEditItem={handleEditItem} onDeleteItem={handleDeleteItem} onMoveItem={handleMoveItem} onHoverItem={setHoveredItemId} showMoveButtons={true} renderSwapButton={renderSwapButton} hotelSelectorData={hotelSelectorData} onSelectRestaurantAlternative={handleSelectRestaurantAlternative} />
+                        <DayTimeline day={day} selectedItemId={selectedItemId} globalIndexOffset={getDayIndexOffset(day.dayNumber)} mapNumbers={itemMapNumbers} onSelectItem={handleSelectItem} onEditItem={handleEditItem} onDeleteItem={handleDeleteItem} onMoveItem={handleMoveItem} onHoverItem={setHoveredItemId} showMoveButtons={true} renderSwapButton={renderSwapButton} hotelSelectorData={hotelSelectorData} onSelectRestaurantAlternative={handleSelectRestaurantAlternative} onSelectSelfMeal={handleSelectSelfMeal} />
                         {/* Bouton "Ajouter un jour après" (mobile) */}
                         {canEdit && idx > 0 && idx < trip.days.length - 1 && (
                           <div className="flex items-center justify-center py-3 mt-3">
@@ -1172,6 +1202,7 @@ export default function TripPage() {
                           renderSwapButton={renderSwapButton}
                           hotelSelectorData={hotelSelectorData}
                           onSelectRestaurantAlternative={handleSelectRestaurantAlternative}
+                          onSelectSelfMeal={handleSelectSelfMeal}
                         />
                         {/* Bouton "Ajouter un jour" entre les jours (sauf après le dernier) */}
                         {canEdit && idx < trip.days.length - 1 && idx > 0 && (

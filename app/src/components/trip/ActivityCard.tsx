@@ -53,6 +53,7 @@ interface ActivityCardProps {
   dragHandleProps?: React.HTMLAttributes<HTMLDivElement>;
   swapButton?: React.ReactNode;
   onSelectRestaurantAlternative?: (item: TripItem, restaurant: Restaurant) => void;
+  onSelectSelfMeal?: (item: TripItem) => void;
 }
 
 const TYPE_ICONS: Record<TripItemType, React.ComponentType<{ className?: string; style?: React.CSSProperties }>> = {
@@ -128,6 +129,7 @@ export function ActivityCard({
   dragHandleProps,
   swapButton,
   onSelectRestaurantAlternative,
+  onSelectSelfMeal,
 }: ActivityCardProps) {
   const Icon = TYPE_ICONS[item.type];
   const color = TRIP_ITEM_COLORS[item.type];
@@ -390,6 +392,7 @@ export function ActivityCard({
             <RestaurantSuggestions
               item={item}
               onSelectRestaurantAlternative={onSelectRestaurantAlternative}
+              onSelectSelfMeal={onSelectSelfMeal}
             />
           )}
         </div>
@@ -701,9 +704,11 @@ function FlightAlternatives({ alternatives }: { alternatives: Flight[] }) {
 function RestaurantSuggestions({
   item,
   onSelectRestaurantAlternative,
+  onSelectSelfMeal,
 }: {
   item: TripItem;
   onSelectRestaurantAlternative?: (item: TripItem, restaurant: Restaurant) => void;
+  onSelectSelfMeal?: (item: TripItem) => void;
 }) {
   const current = item.restaurant;
   if (!current) return null;
@@ -712,38 +717,74 @@ function RestaurantSuggestions({
   [current, ...(item.restaurantAlternatives || [])].forEach((r) => {
     if (r?.id) uniqueById.set(r.id, r);
   });
-  const suggestions = Array.from(uniqueById.values()).slice(0, 3);
+  const rankRestaurant = (r: Restaurant): number => {
+    const ratingScore = (r.rating || 0) * 22;
+    const reviewScore = Math.min(Math.log10((r.reviewCount || 0) + 1) * 10, 25);
+    const distancePenalty = Math.min((r.distance || 0) * 12, 28);
+    const fallbackPenalty = r.latitude === 0 || r.longitude === 0 ? 6 : 0;
+    return ratingScore + reviewScore - distancePenalty - fallbackPenalty;
+  };
+
+  const suggestions = Array.from(uniqueById.values())
+    .sort((a, b) => rankRestaurant(b) - rankRestaurant(a))
+    .slice(0, 3);
   if (suggestions.length <= 1) return null;
+
+  const getCuisineLabel = (r: Restaurant): string => {
+    const raw = r.cuisineTypes?.[0] || 'Cuisine locale';
+    return raw
+      .replace(/^restaurant\s*/i, '')
+      .replace(/\s+/g, ' ')
+      .trim() || 'Cuisine locale';
+  };
+
+  const getRestaurantImage = (r: Restaurant): string => {
+    const candidate = r.photos?.[0];
+    if (candidate && /^https?:\/\//i.test(candidate)) return candidate;
+    return `https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&h=500&fit=crop&q=80&auto=format`;
+  };
 
   return (
     <div className="mt-3 border-t border-border/40 pt-2.5" onClick={(e) => e.stopPropagation()}>
       <div className="text-xs font-medium text-muted-foreground mb-2">Top 3 restaurants suggérés</div>
-      <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
         {suggestions.map((option) => {
           const isSelected = option.id === current.id;
           const bookingUrl = option.reservationUrl || option.googleMapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(option.name)}`;
+          const imageUrl = getRestaurantImage(option);
 
           return (
             <div
               key={option.id}
               className={cn(
-                "flex-shrink-0 min-w-[180px] max-w-[220px] rounded-lg border p-2.5 bg-card",
+                "relative overflow-hidden rounded-xl border p-2.5 min-h-[170px]",
                 isSelected ? "border-primary/60 shadow-sm" : "border-border/50"
               )}
             >
-              <div className="font-medium text-xs truncate">{option.name}</div>
-              <div className="text-muted-foreground text-[10px] truncate">{option.cuisineTypes?.join(', ') || 'Restaurant'}</div>
-              <div className="flex items-center justify-between mt-1.5 text-[10px]">
+              <img
+                src={imageUrl}
+                alt={option.name}
+                className="absolute inset-0 h-full w-full object-cover"
+                loading="lazy"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/55 to-black/25" />
+              <div className="relative z-10 text-white">
+                <div className="inline-flex items-center rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-medium backdrop-blur-sm">
+                  {getCuisineLabel(option)}
+                </div>
+                <div className="font-semibold text-sm mt-1.5 line-clamp-2">{option.name}</div>
+              </div>
+              <div className="relative z-10 flex items-center justify-between mt-2 text-[10px] text-white/90">
                 {option.rating > 0 ? <span className="font-semibold text-primary">⭐ {option.rating.toFixed(1)}</span> : <span />}
                 {option.distance != null && (
-                  <span className="text-muted-foreground">
+                  <span>
                     {option.distance < 1 ? `${Math.round(option.distance * 1000)}m` : `${option.distance.toFixed(1)}km`}
                   </span>
                 )}
               </div>
-              <div className="flex items-center gap-1.5 mt-2">
+              <div className="relative z-10 flex items-center gap-1.5 mt-2">
                 {isSelected ? (
-                  <span className="inline-flex items-center px-2 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-medium">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded bg-emerald-500/25 text-emerald-200 text-[10px] font-medium">
                     Sélectionné
                   </span>
                 ) : (
@@ -761,7 +802,7 @@ function RestaurantSuggestions({
                   href={bookingUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center px-2 py-0.5 rounded border border-border/60 text-[10px] text-muted-foreground hover:text-foreground"
+                  className="inline-flex items-center px-2 py-0.5 rounded border border-white/40 text-[10px] text-white/90 hover:text-white"
                   onClick={(e) => e.stopPropagation()}
                 >
                   Voir
@@ -770,6 +811,17 @@ function RestaurantSuggestions({
             </div>
           );
         })}
+      </div>
+      <div className="mt-2 flex justify-end">
+        <button
+          className="text-[11px] text-muted-foreground hover:text-foreground underline-offset-2 hover:underline"
+          onClick={(e) => {
+            e.stopPropagation();
+            onSelectSelfMeal?.(item);
+          }}
+        >
+          Manger par ses moyens (pique-nique / maison / libre)
+        </button>
       </div>
     </div>
   );

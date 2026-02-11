@@ -731,6 +731,7 @@ export async function assembleTripSchedule(
     const scheduleItems = scheduler.getItems();
     const tripItems: TripItem[] = scheduleItems.map((item, idx) => {
       const itemData = item.data || {};
+      const normalizedCoords = normalizeItemCoordinates(item.title, itemData, item.type, preferences.destination);
       // Generate Google Maps "search by name" URL (more reliable than GPS coordinates)
       const placeName = itemData.name || item.title;
       const placeCity = preferences.destination || '';
@@ -747,10 +748,10 @@ export async function assembleTripSchedule(
         title: item.title,
         description: buildDescription(itemData, item.type),
         locationName: itemData.locationName || itemData.address || itemData.name || '',
-        latitude: itemData.latitude
+        latitude: normalizedCoords.latitude
           || (item.type === 'transport' && itemData.segments?.[0]?.toCoords?.lat)
           || 0,
-        longitude: itemData.longitude
+        longitude: normalizedCoords.longitude
           || (item.type === 'transport' && itemData.segments?.[0]?.toCoords?.lng)
           || 0,
         orderIndex: idx,
@@ -1204,29 +1205,93 @@ function looksLikeAddress(text: any): boolean {
   return addressWords.some(w => lower.includes(w));
 }
 
+const LANDMARK_COORD_FIXES: Array<{
+  keywords: string[];
+  latitude: number;
+  longitude: number;
+  maxDistanceKm: number;
+}> = [
+  { keywords: ['tour eiffel', 'eiffel tower', 'trocadero'], latitude: 48.85837, longitude: 2.294481, maxDistanceKm: 4 },
+  { keywords: ['louvre'], latitude: 48.860611, longitude: 2.337644, maxDistanceKm: 4 },
+  { keywords: ['sacre-coeur', 'sacre coeur', 'montmartre'], latitude: 48.886705, longitude: 2.343104, maxDistanceKm: 4 },
+  { keywords: ['notre-dame'], latitude: 48.852968, longitude: 2.349902, maxDistanceKm: 4 },
+  { keywords: ['arc de triomphe'], latitude: 48.873792, longitude: 2.295028, maxDistanceKm: 4 },
+  { keywords: ['versailles'], latitude: 48.804865, longitude: 2.120355, maxDistanceKm: 10 },
+];
+
+function normalizeItemCoordinates(
+  title: string,
+  itemData: any,
+  itemType: string,
+  destination: string
+): { latitude: number; longitude: number } {
+  const currentLat = itemData?.latitude || 0;
+  const currentLng = itemData?.longitude || 0;
+  if (itemType !== 'activity') {
+    return { latitude: currentLat, longitude: currentLng };
+  }
+
+  const haystack = `${(title || '').toLowerCase()} ${(itemData?.name || '').toLowerCase()}`;
+  const destinationLower = (destination || '').toLowerCase();
+  const match = LANDMARK_COORD_FIXES.find((candidate) =>
+    candidate.keywords.some((keyword) => haystack.includes(keyword))
+  );
+
+  if (!match) {
+    return { latitude: currentLat, longitude: currentLng };
+  }
+
+  // Keep this conservative outside Paris to avoid false positives in other cities.
+  if (!destinationLower.includes('paris') && !match.keywords.includes('versailles')) {
+    return { latitude: currentLat, longitude: currentLng };
+  }
+
+  if (!currentLat || !currentLng) {
+    return { latitude: match.latitude, longitude: match.longitude };
+  }
+
+  const distanceKm = calculateDistance(currentLat, currentLng, match.latitude, match.longitude);
+  if (distanceKm > match.maxDistanceKm) {
+    return { latitude: match.latitude, longitude: match.longitude };
+  }
+
+  return { latitude: currentLat, longitude: currentLng };
+}
+
+function sanitizeDescription(value: string): string {
+  return value.replace(/\s+/g, ' ').trim();
+}
+
 /**
  * Build a meaningful description for a TripItem, filtering out addresses.
  * Priority: real description > cuisineTypes/specialties > tips > empty.
  */
 function buildDescription(itemData: any, itemType: string): string {
+  const MAX_DESCRIPTION_LENGTH = 170;
+  const cut = (value: string): string => {
+    const compact = sanitizeDescription(value);
+    if (compact.length <= MAX_DESCRIPTION_LENGTH) return compact;
+    return `${compact.slice(0, MAX_DESCRIPTION_LENGTH - 3).trim()}...`;
+  };
+
   if (!itemData) return '';
   // 1. If a real description exists and is NOT an address → use it
   if (itemData.description && typeof itemData.description === 'string' && !looksLikeAddress(itemData.description)) {
-    return itemData.description;
+    return cut(itemData.description);
   }
 
   // 2. For restaurants: build from cuisineTypes / specialties
   if (itemType === 'restaurant' && itemData.cuisineTypes?.length > 0) {
     const cuisine = itemData.cuisineTypes.slice(0, 3).join(', ');
     if (itemData.specialties?.length > 0) {
-      return `${cuisine} · ${itemData.specialties[0]}`;
+      return cut(`${cuisine} · ${itemData.specialties[0]}`);
     }
-    return cuisine;
+    return cut(cuisine);
   }
 
   // 3. Fallback to tips (often populated by Viator, attractions.ts curated data)
   if (itemData.tips && typeof itemData.tips === 'string' && !looksLikeAddress(itemData.tips)) {
-    return itemData.tips;
+    return cut(itemData.tips);
   }
 
   // 4. Empty is better than an address
