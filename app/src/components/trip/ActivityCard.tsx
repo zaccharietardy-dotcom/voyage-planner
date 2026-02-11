@@ -20,7 +20,7 @@ import {
   ExternalLink,
   Star,
   Navigation,
-  Map,
+  Map as MapIcon,
   TrainFront,
   TramFront,
   Ship,
@@ -515,7 +515,7 @@ function BookingButtons({ item }: { item: TripItem }) {
   const mapsUrl = item.googleMapsPlaceUrl || item.googleMapsUrl ||
     (item.latitude && item.longitude ? `https://www.google.com/maps/search/?api=1&query=${item.latitude},${item.longitude}` : null);
   if (mapsUrl) {
-    buttons.push({ label: 'Maps', url: mapsUrl, variant: 'ghost', icon: <Map className="h-3 w-3" /> });
+    buttons.push({ label: 'Maps', url: mapsUrl, variant: 'ghost', icon: <MapIcon className="h-3 w-3" /> });
   }
 
   if (buttons.length === 0) return null;
