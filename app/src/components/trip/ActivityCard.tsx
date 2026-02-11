@@ -52,6 +52,7 @@ interface ActivityCardProps {
   onMouseLeave?: () => void;
   dragHandleProps?: React.HTMLAttributes<HTMLDivElement>;
   swapButton?: React.ReactNode;
+  onSelectRestaurantAlternative?: (item: TripItem, restaurant: Restaurant) => void;
 }
 
 const TYPE_ICONS: Record<TripItemType, React.ComponentType<{ className?: string; style?: React.CSSProperties }>> = {
@@ -126,6 +127,7 @@ export function ActivityCard({
   onMouseLeave,
   dragHandleProps,
   swapButton,
+  onSelectRestaurantAlternative,
 }: ActivityCardProps) {
   const Icon = TYPE_ICONS[item.type];
   const color = TRIP_ITEM_COLORS[item.type];
@@ -383,9 +385,12 @@ export function ActivityCard({
             <FlightAlternatives alternatives={item.flightAlternatives} />
           )}
 
-          {/* Restaurant alternatives */}
-          {item.type === 'restaurant' && item.restaurantAlternatives && item.restaurantAlternatives.length > 0 && (
-            <RestaurantAlternatives alternatives={item.restaurantAlternatives} />
+          {/* Restaurant top-3 suggestions */}
+          {item.type === 'restaurant' && item.restaurant && item.restaurantAlternatives && item.restaurantAlternatives.length > 0 && (
+            <RestaurantSuggestions
+              item={item}
+              onSelectRestaurantAlternative={onSelectRestaurantAlternative}
+            />
           )}
         </div>
       </div>
@@ -693,43 +698,79 @@ function FlightAlternatives({ alternatives }: { alternatives: Flight[] }) {
   );
 }
 
-function RestaurantAlternatives({ alternatives }: { alternatives: Restaurant[] }) {
-  const [expanded, setExpanded] = useState(false);
-  if (alternatives.length === 0) return null;
+function RestaurantSuggestions({
+  item,
+  onSelectRestaurantAlternative,
+}: {
+  item: TripItem;
+  onSelectRestaurantAlternative?: (item: TripItem, restaurant: Restaurant) => void;
+}) {
+  const current = item.restaurant;
+  if (!current) return null;
+
+  const uniqueById = new Map<string, Restaurant>();
+  [current, ...(item.restaurantAlternatives || [])].forEach((r) => {
+    if (r?.id) uniqueById.set(r.id, r);
+  });
+  const suggestions = Array.from(uniqueById.values()).slice(0, 3);
+  if (suggestions.length <= 1) return null;
 
   return (
     <div className="mt-3 border-t border-border/40 pt-2.5" onClick={(e) => e.stopPropagation()}>
-      <button
-        className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
-        onClick={() => setExpanded(!expanded)}
-      >
-        <ChevronRight className={cn('h-3 w-3 transition-transform', expanded && 'rotate-90')} />
-        {alternatives.length} autre{alternatives.length > 1 ? 's' : ''} restaurant{alternatives.length > 1 ? 's' : ''}
-      </button>
-      {expanded && (
-        <div className="flex gap-2 mt-2 overflow-x-auto pb-2 -mx-1 px-1">
-          {alternatives.map((alt) => (
-            <a
-              key={alt.id}
-              href={alt.reservationUrl || alt.googleMapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(alt.name)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex-shrink-0 border border-border/50 rounded-lg p-2.5 text-xs hover:border-primary/40 hover:shadow-sm transition-all min-w-[140px] bg-card"
+      <div className="text-xs font-medium text-muted-foreground mb-2">Top 3 restaurants suggérés</div>
+      <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+        {suggestions.map((option) => {
+          const isSelected = option.id === current.id;
+          const bookingUrl = option.reservationUrl || option.googleMapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(option.name)}`;
+
+          return (
+            <div
+              key={option.id}
+              className={cn(
+                "flex-shrink-0 min-w-[180px] max-w-[220px] rounded-lg border p-2.5 bg-card",
+                isSelected ? "border-primary/60 shadow-sm" : "border-border/50"
+              )}
             >
-              <div className="font-medium truncate">{alt.name}</div>
-              <div className="text-muted-foreground text-[10px] truncate">{alt.cuisineTypes?.join(', ')}</div>
-              <div className="flex items-center justify-between mt-1.5">
-                {alt.rating > 0 && <span className="font-semibold text-primary">⭐ {alt.rating.toFixed(1)}</span>}
-                {alt.distance != null && (
-                  <span className="text-muted-foreground text-[10px]">
-                    {alt.distance < 1 ? `${Math.round(alt.distance * 1000)}m` : `${alt.distance.toFixed(1)}km`}
+              <div className="font-medium text-xs truncate">{option.name}</div>
+              <div className="text-muted-foreground text-[10px] truncate">{option.cuisineTypes?.join(', ') || 'Restaurant'}</div>
+              <div className="flex items-center justify-between mt-1.5 text-[10px]">
+                {option.rating > 0 ? <span className="font-semibold text-primary">⭐ {option.rating.toFixed(1)}</span> : <span />}
+                {option.distance != null && (
+                  <span className="text-muted-foreground">
+                    {option.distance < 1 ? `${Math.round(option.distance * 1000)}m` : `${option.distance.toFixed(1)}km`}
                   </span>
                 )}
               </div>
-            </a>
-          ))}
-        </div>
-      )}
+              <div className="flex items-center gap-1.5 mt-2">
+                {isSelected ? (
+                  <span className="inline-flex items-center px-2 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-medium">
+                    Sélectionné
+                  </span>
+                ) : (
+                  <button
+                    className="inline-flex items-center px-2 py-0.5 rounded bg-primary text-primary-foreground text-[10px] font-medium hover:opacity-90"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSelectRestaurantAlternative?.(item, option);
+                    }}
+                  >
+                    Choisir
+                  </button>
+                )}
+                <a
+                  href={bookingUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center px-2 py-0.5 rounded border border-border/60 text-[10px] text-muted-foreground hover:text-foreground"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  Voir
+                </a>
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

@@ -36,6 +36,7 @@ interface DayTimelineProps {
   showMoveButtons?: boolean;
   renderSwapButton?: (item: TripItem) => React.ReactNode;
   hotelSelectorData?: HotelSelectorData;
+  onSelectRestaurantAlternative?: (item: TripItem, restaurant: NonNullable<TripItem['restaurant']>) => void;
 }
 
 /**
@@ -71,6 +72,7 @@ export function DayTimeline({
   showMoveButtons = false,
   renderSwapButton,
   hotelSelectorData,
+  onSelectRestaurantAlternative,
 }: DayTimelineProps) {
   // Sort by startTime with smart handling for early morning vs after-midnight times
   // Déterminer si ce jour a des items de fin de soirée (après 22h = nightlife)
@@ -142,6 +144,7 @@ export function DayTimeline({
                 onMouseEnter={() => onHoverItem?.(item.id)}
                 onMouseLeave={() => onHoverItem?.(null)}
                 swapButton={renderSwapButton?.(item)}
+                onSelectRestaurantAlternative={onSelectRestaurantAlternative}
               />
 
               {/* Sélecteur d'hôtel inline après le check-in */}

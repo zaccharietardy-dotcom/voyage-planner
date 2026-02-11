@@ -133,6 +133,13 @@ function updateTripWithNewHotel(trip: Trip, newHotel: Accommodation): Trip {
   };
 }
 
+function buildRestaurantDescription(restaurant: NonNullable<TripItem['restaurant']>): string {
+  if (restaurant.description?.trim()) return restaurant.description;
+  if (restaurant.specialties?.length) return restaurant.specialties[0];
+  if (restaurant.cuisineTypes?.length) return restaurant.cuisineTypes.slice(0, 2).join(', ');
+  return '';
+}
+
 const TripMap = dynamic(
   () => import('@/components/trip/TripMap').then((mod) => mod.TripMap),
   {
@@ -406,6 +413,55 @@ export default function TripPage() {
     const updatedTrip: Trip = { ...trip, days: updatedDays, updatedAt: new Date() };
     saveTrip(updatedTrip);
     toast.success(`"${oldItem.title}" remplacé par "${newAttraction.name}"`);
+  }, [trip, saveTrip]);
+
+  const handleSelectRestaurantAlternative = useCallback((
+    item: TripItem,
+    selectedRestaurant: NonNullable<TripItem['restaurant']>
+  ) => {
+    if (!trip || item.type !== 'restaurant') return;
+
+    const titlePrefix = item.title.includes('—')
+      ? item.title.split('—')[0].trim()
+      : 'Restaurant';
+
+    const candidates = [item.restaurant, ...(item.restaurantAlternatives || [])]
+      .filter((r): r is NonNullable<TripItem['restaurant']> => !!r);
+
+    const dedup = new Map<string, NonNullable<TripItem['restaurant']>>();
+    candidates.forEach((r) => dedup.set(r.id, r));
+    dedup.set(selectedRestaurant.id, selectedRestaurant);
+
+    const alternatives = Array.from(dedup.values())
+      .filter((r) => r.id !== selectedRestaurant.id)
+      .slice(0, 2);
+
+    const updatedDays = trip.days.map((day) => ({
+      ...day,
+      items: day.items.map((currentItem) => {
+        if (currentItem.id !== item.id) return currentItem;
+
+        const mapsSearchUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${selectedRestaurant.name}, ${trip.preferences.destination}`)}`;
+
+        return {
+          ...currentItem,
+          title: `${titlePrefix} — ${selectedRestaurant.name}`,
+          description: buildRestaurantDescription(selectedRestaurant),
+          locationName: selectedRestaurant.address || selectedRestaurant.name,
+          latitude: selectedRestaurant.latitude,
+          longitude: selectedRestaurant.longitude,
+          rating: selectedRestaurant.rating,
+          bookingUrl: selectedRestaurant.reservationUrl || selectedRestaurant.googleMapsUrl || mapsSearchUrl,
+          googleMapsPlaceUrl: mapsSearchUrl,
+          restaurant: selectedRestaurant,
+          restaurantAlternatives: alternatives,
+        };
+      }),
+    }));
+
+    const updatedTrip = { ...trip, days: updatedDays, updatedAt: new Date() };
+    saveTrip(updatedTrip);
+    toast.success(`Restaurant mis à jour: ${selectedRestaurant.name}`);
   }, [trip, saveTrip]);
 
   // Render swap button pour les ActivityCards (si pool disponible)
@@ -996,7 +1052,7 @@ export default function TripPage() {
                     </TabsList>
                     {trip.days.map((day, idx) => (
                       <TabsContent key={day.dayNumber} value={day.dayNumber.toString()} className="mt-0">
-                        <DayTimeline day={day} selectedItemId={selectedItemId} globalIndexOffset={getDayIndexOffset(day.dayNumber)} mapNumbers={itemMapNumbers} onSelectItem={handleSelectItem} onEditItem={handleEditItem} onDeleteItem={handleDeleteItem} onMoveItem={handleMoveItem} onHoverItem={setHoveredItemId} showMoveButtons={true} renderSwapButton={renderSwapButton} hotelSelectorData={hotelSelectorData} />
+                        <DayTimeline day={day} selectedItemId={selectedItemId} globalIndexOffset={getDayIndexOffset(day.dayNumber)} mapNumbers={itemMapNumbers} onSelectItem={handleSelectItem} onEditItem={handleEditItem} onDeleteItem={handleDeleteItem} onMoveItem={handleMoveItem} onHoverItem={setHoveredItemId} showMoveButtons={true} renderSwapButton={renderSwapButton} hotelSelectorData={hotelSelectorData} onSelectRestaurantAlternative={handleSelectRestaurantAlternative} />
                         {/* Bouton "Ajouter un jour après" (mobile) */}
                         {canEdit && idx > 0 && idx < trip.days.length - 1 && (
                           <div className="flex items-center justify-center py-3 mt-3">
@@ -1115,6 +1171,7 @@ export default function TripPage() {
                           showMoveButtons={true}
                           renderSwapButton={renderSwapButton}
                           hotelSelectorData={hotelSelectorData}
+                          onSelectRestaurantAlternative={handleSelectRestaurantAlternative}
                         />
                         {/* Bouton "Ajouter un jour" entre les jours (sauf après le dernier) */}
                         {canEdit && idx < trip.days.length - 1 && idx > 0 && (
