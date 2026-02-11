@@ -219,6 +219,27 @@ function rebalanceClustersForFlights(
     return Math.max(0, Math.floor(effectiveHours / 1.5));
   });
 
+  const computeClusterGeo = (cluster: ActivityCluster): void => {
+    if (cluster.activities.length === 0) return;
+    const lat = cluster.activities.reduce((s, a) => s + a.latitude, 0) / cluster.activities.length;
+    const lng = cluster.activities.reduce((s, a) => s + a.longitude, 0) / cluster.activities.length;
+    cluster.centroid = { lat, lng };
+
+    let intra = 0;
+    for (let i = 0; i < cluster.activities.length - 1; i++) {
+      const a = cluster.activities[i];
+      const b = cluster.activities[i + 1];
+      intra += calculateDistance(a.latitude, a.longitude, b.latitude, b.longitude);
+    }
+    cluster.totalIntraDistance = intra;
+  };
+
+  const dayUsedMinutes = (idx: number): number =>
+    clusters[idx].activities.reduce((s, a) => s + (a.duration || 60) + 20, 0) + 180;
+
+  const dayRemainingMinutes = (idx: number): number =>
+    hoursPerDay[idx] * 60 - dayUsedMinutes(idx);
+
   // Phase 1: Empty days — merge activities into nearest non-day-trip day with capacity
   // BUT: ensure the day keeps at least its must-sees if it has ANY usable time
   for (let ci = 0; ci < clusters.length; ci++) {
@@ -819,6 +840,109 @@ function rebalanceClustersForFlights(
         }
       }
     }
+  }
+
+  // Phase 8: Geographic KNN smoothing
+  // Reassign obvious geographic outliers to the nearest day cluster (if capacity allows).
+  // This prevents "aller-retour" patterns where a day contains activities that are
+  // significantly closer to another day's centroid.
+  for (const c of clusters) computeClusterGeo(c);
+
+  for (let iter = 0; iter < 3; iter++) {
+    let movedAny = false;
+
+    for (let ci = 0; ci < clusters.length; ci++) {
+      if (isDayTrip[ci]) continue;
+      if (clusters[ci].activities.length <= 1) continue;
+
+      const source = clusters[ci];
+      const candidates = [...source.activities]
+        .filter(a => !a.mustSee)
+        .sort((a, b) => {
+          const da = calculateDistance(a.latitude, a.longitude, source.centroid.lat, source.centroid.lng);
+          const db = calculateDistance(b.latitude, b.longitude, source.centroid.lat, source.centroid.lng);
+          return db - da; // largest outlier first
+        });
+
+      for (const activity of candidates) {
+        const srcDist = calculateDistance(activity.latitude, activity.longitude, source.centroid.lat, source.centroid.lng);
+        const requiredMin = (activity.duration || 60) + 20;
+
+        let bestTarget = -1;
+        let bestTargetDist = Infinity;
+        for (let ti = 0; ti < clusters.length; ti++) {
+          if (ti === ci || isDayTrip[ti]) continue;
+          if (dayRemainingMinutes(ti) < requiredMin) continue;
+
+          const targetDist = calculateDistance(
+            activity.latitude,
+            activity.longitude,
+            clusters[ti].centroid.lat,
+            clusters[ti].centroid.lng
+          );
+          if (targetDist < bestTargetDist) {
+            bestTargetDist = targetDist;
+            bestTarget = ti;
+          }
+        }
+
+        if (bestTarget === -1) continue;
+
+        // Move only if there is a clear geographic win.
+        const improvementKm = srcDist - bestTargetDist;
+        if (improvementKm < 3) continue;
+
+        const idx = source.activities.findIndex(a => a.id === activity.id);
+        if (idx === -1) continue;
+        const [moved] = source.activities.splice(idx, 1);
+        clusters[bestTarget].activities.push(moved);
+        computeClusterGeo(source);
+        computeClusterGeo(clusters[bestTarget]);
+        movedAny = true;
+
+        console.log(
+          `[Pipeline V2] Phase 8: moved outlier "${moved.name}" Day ${source.dayNumber} → Day ${clusters[bestTarget].dayNumber} ` +
+          `(improvement ${improvementKm.toFixed(1)}km, ${srcDist.toFixed(1)}→${bestTargetDist.toFixed(1)}km)`
+        );
+        break; // Re-evaluate source cluster after each move
+      }
+    }
+
+    if (!movedAny) break;
+  }
+
+  // Phase 9: Reorder middle days by proximity (keep first/last fixed for transport constraints)
+  // For trips with 4+ days this reduces A→B→A day patterns.
+  if (clusters.length >= 4) {
+    const first = clusters[0];
+    const middle = clusters.slice(1, -1);
+    const last = clusters[clusters.length - 1];
+
+    const orderedMiddle: ActivityCluster[] = [];
+    const remaining = [...middle];
+    let curLat = first.centroid.lat;
+    let curLng = first.centroid.lng;
+
+    while (remaining.length > 0) {
+      let nearestIdx = 0;
+      let nearestDist = Infinity;
+      for (let i = 0; i < remaining.length; i++) {
+        const d = calculateDistance(curLat, curLng, remaining[i].centroid.lat, remaining[i].centroid.lng);
+        if (d < nearestDist) {
+          nearestDist = d;
+          nearestIdx = i;
+        }
+      }
+      const next = remaining.splice(nearestIdx, 1)[0];
+      orderedMiddle.push(next);
+      curLat = next.centroid.lat;
+      curLng = next.centroid.lng;
+    }
+
+    const reordered = [first, ...orderedMiddle, last];
+    for (let i = 0; i < reordered.length; i++) reordered[i].dayNumber = i + 1;
+    clusters.splice(0, clusters.length, ...reordered);
+    console.log('[Pipeline V2] Phase 9: reordered middle days by nearest-neighbor centroids');
   }
 
   // Log rebalancing result with must-see details
