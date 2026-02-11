@@ -366,13 +366,35 @@ export async function assembleTripSchedule(
     const geoOptimize = (activities: ScoredActivity[], startLat: number, startLng: number) => {
       if (activities.length <= 2) return activities;
 
-      const routeDistance = (route: ScoredActivity[]): number => {
+      const routeCost = (route: ScoredActivity[]): number => {
         if (route.length === 0) return 0;
-        let total = calculateDistance(startLat, startLng, route[0].latitude, route[0].longitude);
-        for (let i = 1; i < route.length; i++) {
-          total += calculateDistance(route[i - 1].latitude, route[i - 1].longitude, route[i].latitude, route[i].longitude);
+
+        let total = 0;
+        let maxLeg = 0;
+        let longLegPenalty = 0;
+
+        const firstLeg = calculateDistance(startLat, startLng, route[0].latitude, route[0].longitude);
+        total += firstLeg;
+        maxLeg = Math.max(maxLeg, firstLeg);
+        if (firstLeg > 3) {
+          longLegPenalty += (firstLeg - 3) * 1.4;
         }
-        return total;
+
+        for (let i = 1; i < route.length; i++) {
+          const leg = calculateDistance(
+            route[i - 1].latitude, route[i - 1].longitude,
+            route[i].latitude, route[i].longitude
+          );
+          total += leg;
+          maxLeg = Math.max(maxLeg, leg);
+          if (leg > 3) {
+            longLegPenalty += (leg - 3) * 1.4;
+          }
+        }
+
+        // Penalize "one giant jump" routes even if total distance is similar.
+        const maxLegPenalty = Math.max(0, maxLeg - 4) * 2.5;
+        return total + longLegPenalty + maxLegPenalty;
       };
 
       const buildGreedyFromFirst = (firstIndex: number): ScoredActivity[] => {
@@ -403,12 +425,12 @@ export async function assembleTripSchedule(
 
       // Multi-start: try each activity as first stop, keep shortest route from hotel/start.
       let bestRoute: ScoredActivity[] = [];
-      let bestDistance = Infinity;
+      let bestCost = Infinity;
       for (let i = 0; i < activities.length; i++) {
         const candidate = buildGreedyFromFirst(i);
-        const candidateDistance = routeDistance(candidate);
-        if (candidateDistance < bestDistance) {
-          bestDistance = candidateDistance;
+        const candidateCost = routeCost(candidate);
+        if (candidateCost < bestCost) {
+          bestCost = candidateCost;
           bestRoute = candidate;
         }
       }
@@ -426,10 +448,10 @@ export async function assembleTripSchedule(
               ...route.slice(i + 1, k + 1).reverse(),
               ...route.slice(k + 1),
             ];
-            const nextDistance = routeDistance(nextRoute);
-            if (nextDistance + 0.01 < bestDistance) {
+            const nextCost = routeCost(nextRoute);
+            if (nextCost + 0.01 < bestCost) {
               route = nextRoute;
-              bestDistance = nextDistance;
+              bestCost = nextCost;
               improved = true;
             }
           }

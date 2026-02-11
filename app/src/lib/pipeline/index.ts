@@ -7,8 +7,8 @@
  * Target: 20-40s per trip generation.
  */
 
-import type { Trip, TripPreferences, Flight, TransportOptionSummary } from '../types';
-import type { ActivityCluster, ScoredActivity } from './types';
+import type { Trip, TripPreferences, Flight, TransportOptionSummary, Restaurant } from '../types';
+import type { ActivityCluster, MealAssignment, ScoredActivity } from './types';
 import { fetchAllData } from './step1-fetch';
 import { scoreAndSelectActivities } from './step2-score';
 import { clusterActivities } from './step3-cluster';
@@ -17,6 +17,7 @@ import { selectHotelByBarycenter } from './step5-hotel';
 import { balanceDaysWithClaude } from './step6-balance';
 import { assembleTripSchedule } from './step7-assemble';
 import { calculateDistance } from '../services/geocoding';
+import { searchRestaurantsWithSerpApi } from '../services/serpApiPlaces';
 import { OUTDOOR_ACTIVITY_KEYWORDS } from './utils/constants';
 
 /**
@@ -89,15 +90,57 @@ export async function generateTripV2(preferences: TripPreferences): Promise<Trip
 
   // Step 4: Restaurant assignment (~0ms)
   console.log('[Pipeline V2] === Step 4: Assigning restaurants... ===');
-  const meals = assignRestaurants(
+  const supplementalRestaurants = await fetchSupplementalRestaurantsForSparseAreas(
+    preferences.destination,
+    clusters,
+    accommodationCoords,
+    [...data.tripAdvisorRestaurants, ...data.serpApiRestaurants]
+  );
+  let serpRestaurantsForAssignment = deduplicateRestaurantsByNameAndCoords([
+    ...data.serpApiRestaurants,
+    ...supplementalRestaurants,
+  ]);
+  if (supplementalRestaurants.length > 0) {
+    console.log(
+      `[Pipeline V2] Step 4: supplemental API restaurants fetched=${supplementalRestaurants.length}, total SerpAPI pool=${serpRestaurantsForAssignment.length}`
+    );
+  }
+
+  let meals = assignRestaurants(
     clusters,
     data.tripAdvisorRestaurants,
-    data.serpApiRestaurants,
+    serpRestaurantsForAssignment,
     preferences,
     data.budgetStrategy,
     accommodationCoords,
     hotel
   );
+  const missingMeals = meals.filter(m => !m.restaurant);
+  if (missingMeals.length > 0) {
+    const targetedRestaurants = await fetchTargetedRestaurantsForMissingMeals(
+      preferences.destination,
+      missingMeals
+    );
+    if (targetedRestaurants.length > 0) {
+      serpRestaurantsForAssignment = deduplicateRestaurantsByNameAndCoords([
+        ...serpRestaurantsForAssignment,
+        ...targetedRestaurants,
+      ]);
+      meals = assignRestaurants(
+        clusters,
+        data.tripAdvisorRestaurants,
+        serpRestaurantsForAssignment,
+        preferences,
+        data.budgetStrategy,
+        accommodationCoords,
+        hotel
+      );
+      const remainingMissing = meals.filter(m => !m.restaurant).length;
+      console.log(
+        `[Pipeline V2] Step 4 retry: targeted API fetched=${targetedRestaurants.length}, missing meals ${missingMeals.length} -> ${remainingMissing}`
+      );
+    }
+  }
   const assignedCount = meals.filter(m => m.restaurant).length;
   console.log(`[Pipeline V2] Step 4: ${assignedCount}/${meals.length} meals assigned restaurants`);
 
@@ -136,6 +179,186 @@ export async function generateTripV2(preferences: TripPreferences): Promise<Trip
   }
 
   return trip;
+}
+
+/**
+ * Build geographically meaningful anchors where meals are likely to happen.
+ * We query around these anchors when the initial restaurant pool is sparse.
+ */
+function buildRestaurantAnchors(
+  clusters: ActivityCluster[],
+  accommodationCoords: { lat: number; lng: number }
+): { lat: number; lng: number; label: string }[] {
+  const raw: { lat: number; lng: number; label: string }[] = [];
+
+  raw.push({ lat: accommodationCoords.lat, lng: accommodationCoords.lng, label: 'hotel' });
+
+  for (const cluster of clusters) {
+    raw.push({ lat: cluster.centroid.lat, lng: cluster.centroid.lng, label: `day-${cluster.dayNumber}-centroid` });
+    const first = cluster.activities[0];
+    const last = cluster.activities[cluster.activities.length - 1];
+    if (first) raw.push({ lat: first.latitude, lng: first.longitude, label: `day-${cluster.dayNumber}-first` });
+    if (last) raw.push({ lat: last.latitude, lng: last.longitude, label: `day-${cluster.dayNumber}-last` });
+  }
+
+  const seen = new Set<string>();
+  const deduped: { lat: number; lng: number; label: string }[] = [];
+  for (const a of raw) {
+    if (!Number.isFinite(a.lat) || !Number.isFinite(a.lng)) continue;
+    const key = `${a.lat.toFixed(2)},${a.lng.toFixed(2)}`; // ~1km dedup
+    if (seen.has(key)) continue;
+    seen.add(key);
+    deduped.push(a);
+  }
+
+  // Keep request volume bounded.
+  return deduped.slice(0, 8);
+}
+
+function hasRestaurantCoords(r: Restaurant): boolean {
+  return Boolean(r.latitude && r.longitude && r.latitude !== 0 && r.longitude !== 0);
+}
+
+function countRestaurantsNear(
+  restaurants: Restaurant[],
+  anchor: { lat: number; lng: number },
+  radiusKm: number
+): number {
+  let count = 0;
+  for (const r of restaurants) {
+    if (!hasRestaurantCoords(r)) continue;
+    const d = calculateDistance(anchor.lat, anchor.lng, r.latitude, r.longitude);
+    if (d <= radiusKm) count++;
+  }
+  return count;
+}
+
+function deduplicateRestaurantsByNameAndCoords(restaurants: Restaurant[]): Restaurant[] {
+  const normalizeName = (s: string) =>
+    (s || '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]/g, '');
+
+  const map = new Map<string, Restaurant>();
+  for (const r of restaurants) {
+    const coordsKey = hasRestaurantCoords(r)
+      ? `${r.latitude.toFixed(4)},${r.longitude.toFixed(4)}`
+      : 'no-coords';
+    const key = `${normalizeName(r.name)}|${coordsKey}`;
+    const existing = map.get(key);
+    if (!existing) {
+      map.set(key, r);
+      continue;
+    }
+
+    const existingScore = (existing.reviewCount || 0) * (existing.rating || 0);
+    const currentScore = (r.reviewCount || 0) * (r.rating || 0);
+    if (currentScore > existingScore) {
+      map.set(key, r);
+    }
+  }
+
+  return Array.from(map.values());
+}
+
+function buildMissingMealTargets(
+  missingMeals: MealAssignment[]
+): Array<{ lat: number; lng: number; mealType: 'breakfast' | 'lunch' | 'dinner' }> {
+  const dedup = new Map<string, { lat: number; lng: number; mealType: 'breakfast' | 'lunch' | 'dinner' }>();
+  for (const meal of missingMeals) {
+    const { referenceCoords } = meal;
+    if (!Number.isFinite(referenceCoords.lat) || !Number.isFinite(referenceCoords.lng)) continue;
+    const key = `${meal.mealType}|${referenceCoords.lat.toFixed(3)},${referenceCoords.lng.toFixed(3)}`;
+    if (!dedup.has(key)) {
+      dedup.set(key, {
+        lat: referenceCoords.lat,
+        lng: referenceCoords.lng,
+        mealType: meal.mealType,
+      });
+    }
+  }
+
+  // Keep latency and quota predictable.
+  return Array.from(dedup.values()).slice(0, 6);
+}
+
+async function fetchTargetedRestaurantsForMissingMeals(
+  destination: string,
+  missingMeals: MealAssignment[]
+): Promise<Restaurant[]> {
+  const targets = buildMissingMealTargets(missingMeals);
+  if (targets.length === 0) return [];
+
+  console.log(
+    `[Pipeline V2] Step 4 retry prefetch: missing meals=${missingMeals.length}, targets=${targets.length}`
+  );
+
+  const results = await Promise.allSettled(
+    targets.map(target =>
+      searchRestaurantsWithSerpApi(destination, {
+        latitude: target.lat,
+        longitude: target.lng,
+        mealType: target.mealType,
+        limit: 25,
+      })
+    )
+  );
+
+  const supplemental: Restaurant[] = [];
+  for (const r of results) {
+    if (r.status === 'fulfilled' && Array.isArray(r.value)) {
+      supplemental.push(...r.value);
+    }
+  }
+
+  return deduplicateRestaurantsByNameAndCoords(supplemental);
+}
+
+/**
+ * Patch API coverage gaps: if some anchors have too few nearby restaurants in the current pool,
+ * fetch additional SerpAPI results around those anchors.
+ */
+async function fetchSupplementalRestaurantsForSparseAreas(
+  destination: string,
+  clusters: ActivityCluster[],
+  accommodationCoords: { lat: number; lng: number },
+  existingRestaurants: Restaurant[]
+): Promise<Restaurant[]> {
+  const anchors = buildRestaurantAnchors(clusters, accommodationCoords);
+  const existingWithCoords = existingRestaurants.filter(hasRestaurantCoords);
+
+  // Sparse if fewer than 3 restaurants in a ~3.2km radius.
+  const sparseAnchors = anchors.filter(a => countRestaurantsNear(existingWithCoords, a, 3.2) < 3);
+  if (sparseAnchors.length === 0) {
+    return [];
+  }
+
+  // Keep API usage controlled.
+  const targets = sparseAnchors.slice(0, 4);
+  console.log(
+    `[Pipeline V2] Step 4 prefetch: sparse anchors=${targets.length}/${anchors.length} (${targets.map(t => t.label).join(', ')})`
+  );
+
+  const responses = await Promise.allSettled(
+    targets.map(anchor =>
+      searchRestaurantsWithSerpApi(destination, {
+        latitude: anchor.lat,
+        longitude: anchor.lng,
+        limit: 25,
+      })
+    )
+  );
+
+  const supplemental: Restaurant[] = [];
+  for (const res of responses) {
+    if (res.status === 'fulfilled' && Array.isArray(res.value)) {
+      supplemental.push(...res.value);
+    }
+  }
+
+  return deduplicateRestaurantsByNameAndCoords(supplemental);
 }
 
 /**
@@ -1073,7 +1296,8 @@ function rebalanceClustersForFlights(
   // We move far outliers from a day to the geographically closest day that has capacity.
   for (const c of clusters) computeClusterGeo(c);
 
-  const cohesionMaxRadiusKm = clusters.length >= 4 ? 3.8 : 4.5;
+  const cohesionMaxRadiusKm = clusters.length <= 3 ? 3.2 : clusters.length === 4 ? 3.6 : 3.8;
+  const minCohesionGainKm = clusters.length <= 3 ? 0.5 : 0.8;
   for (let iter = 0; iter < 5; iter++) {
     let movedAny = false;
 
@@ -1116,7 +1340,7 @@ function rebalanceClustersForFlights(
 
         if (bestTarget === -1) continue;
         // Require a clear gain to avoid noisy shuffling.
-        if (bestTargetDist + 0.8 >= srcDist) continue;
+        if (bestTargetDist + minCohesionGainKm >= srcDist) continue;
 
         const idx = source.activities.findIndex(a => a.id === activity.id);
         if (idx === -1) continue;

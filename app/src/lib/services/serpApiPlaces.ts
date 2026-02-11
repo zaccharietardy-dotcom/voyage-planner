@@ -1412,34 +1412,68 @@ export function parseSimpleOpeningHours(hours: Record<string, string>): { open: 
 
 function getCountryCode(destination: string): string {
   const dest = destination.toLowerCase();
+  const destNorm = dest.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const normalized = `${dest} ${destNorm}`;
 
-  if (['barcelona', 'madrid', 'sevilla', 'valencia', 'malaga'].some(c => dest.includes(c))) return 'es';
-  if (['paris', 'lyon', 'marseille', 'nice', 'bordeaux', 'angers', 'nantes', 'toulouse'].some(c => dest.includes(c))) return 'fr';
-  if (['rome', 'florence', 'venice', 'milan', 'naples', 'roma', 'firenze', 'venezia', 'milano', 'napoli'].some(c => dest.includes(c))) return 'it';
-  if (['lisbon', 'porto', 'lisbonne'].some(c => dest.includes(c))) return 'pt';
-  if (['london', 'manchester', 'edinburgh', 'londres'].some(c => dest.includes(c))) return 'uk';
-  if (['berlin', 'munich', 'frankfurt'].some(c => dest.includes(c))) return 'de';
-  if (['amsterdam', 'rotterdam'].some(c => dest.includes(c))) return 'nl';
-  if (['brussels', 'bruges', 'bruxelles'].some(c => dest.includes(c))) return 'be';
-  if (['athens', 'santorini', 'athenes'].some(c => dest.includes(c))) return 'gr';
-  if (['tokyo', 'kyoto', 'osaka'].some(c => dest.includes(c))) return 'jp';
+  // If the user already provided an ISO-like country suffix, honor it.
+  const isoMatch = normalized.match(/(?:,\s*|\s+)([a-z]{2})\s*$/i);
+  if (isoMatch) {
+    const code = isoMatch[1].toLowerCase();
+    if (code.length === 2) return code;
+  }
+
+  if (['barcelona', 'madrid', 'sevilla', 'valencia', 'malaga'].some(c => normalized.includes(c))) return 'es';
+  if (['paris', 'lyon', 'marseille', 'nice', 'bordeaux', 'angers', 'nantes', 'toulouse'].some(c => normalized.includes(c))) return 'fr';
+  if (['rome', 'florence', 'venice', 'milan', 'naples', 'roma', 'firenze', 'venezia', 'milano', 'napoli'].some(c => normalized.includes(c))) return 'it';
+  if (['lisbon', 'porto', 'lisbonne'].some(c => normalized.includes(c))) return 'pt';
+  if (['london', 'manchester', 'edinburgh', 'londres'].some(c => normalized.includes(c))) return 'uk';
+  if (['berlin', 'munich', 'frankfurt'].some(c => normalized.includes(c))) return 'de';
+  if (['amsterdam', 'rotterdam'].some(c => normalized.includes(c))) return 'nl';
+  if (['brussels', 'bruges', 'bruxelles'].some(c => normalized.includes(c))) return 'be';
+  if (['athens', 'santorini', 'athenes'].some(c => normalized.includes(c))) return 'gr';
+  if (['tokyo', 'kyoto', 'osaka'].some(c => normalized.includes(c))) return 'jp';
   // Chine - IMPORTANT: Pekin/Beijing
-  if (['beijing', 'pekin', 'pékin', 'shanghai', 'hong kong', 'guangzhou', 'shenzhen', 'xian', "xi'an", 'chengdu'].some(c => dest.includes(c))) return 'cn';
+  if (['beijing', 'pekin', 'shanghai', 'hong kong', 'guangzhou', 'shenzhen', 'xian', "xi'an", 'chengdu'].some(c => normalized.includes(c))) return 'cn';
   // Autres pays asiatiques
-  if (['bangkok', 'phuket', 'chiang mai'].some(c => dest.includes(c))) return 'th';
-  if (['singapore', 'singapour'].some(c => dest.includes(c))) return 'sg';
-  if (['bali', 'jakarta'].some(c => dest.includes(c))) return 'id';
-  if (['hanoi', 'ho chi minh', 'saigon'].some(c => dest.includes(c))) return 'vn';
-  if (['seoul'].some(c => dest.includes(c))) return 'kr';
+  if (['bangkok', 'phuket', 'chiang mai'].some(c => normalized.includes(c))) return 'th';
+  if (['singapore', 'singapour'].some(c => normalized.includes(c))) return 'sg';
+  if (['bali', 'jakarta'].some(c => normalized.includes(c))) return 'id';
+  if (['hanoi', 'ho chi minh', 'saigon'].some(c => normalized.includes(c))) return 'vn';
+  if (['seoul'].some(c => normalized.includes(c))) return 'kr';
   // Amerique
-  if (['new york', 'los angeles', 'san francisco', 'miami', 'las vegas', 'chicago'].some(c => dest.includes(c))) return 'us';
+  if (['new york', 'los angeles', 'san francisco', 'miami', 'las vegas', 'chicago'].some(c => normalized.includes(c))) return 'us';
+  if (['toronto', 'montreal', 'vancouver', 'ottawa'].some(c => normalized.includes(c))) return 'ca';
+  if (['mexico city', 'ciudad de mexico', 'cancun'].some(c => normalized.includes(c))) return 'mx';
+  if (['rio de janeiro', 'sao paulo', 'são paulo'].some(c => normalized.includes(c))) return 'br';
+  if (['buenos aires'].some(c => normalized.includes(c))) return 'ar';
   // Moyen-Orient
-  if (['dubai', 'abu dhabi'].some(c => dest.includes(c))) return 'ae';
-  if (['marrakech', 'casablanca', 'fes', 'rabat'].some(c => dest.includes(c))) return 'ma';
+  if (['dubai', 'abu dhabi'].some(c => normalized.includes(c))) return 'ae';
+  if (['marrakech', 'casablanca', 'fes', 'rabat'].some(c => normalized.includes(c))) return 'ma';
+  if (['istanbul', 'ankara'].some(c => normalized.includes(c))) return 'tr';
+  if (['tel aviv', 'jerusalem'].some(c => normalized.includes(c))) return 'il';
   // Oceanie
-  if (['sydney', 'melbourne', 'brisbane'].some(c => dest.includes(c))) return 'au';
+  if (['sydney', 'melbourne', 'brisbane'].some(c => normalized.includes(c))) return 'au';
+  if (['auckland', 'wellington'].some(c => normalized.includes(c))) return 'nz';
 
-  return 'fr'; // Defaut France (plus pertinent pour une app francaise)
+  // Explicit country names in destination string.
+  const countryHints: Array<{ code: string; tokens: string[] }> = [
+    { code: 'fr', tokens: ['france'] },
+    { code: 'es', tokens: ['spain', 'espagne'] },
+    { code: 'it', tokens: ['italy', 'italie'] },
+    { code: 'de', tokens: ['germany', 'allemagne'] },
+    { code: 'uk', tokens: ['united kingdom', 'royaume-uni', 'great britain', 'england'] },
+    { code: 'us', tokens: ['united states', 'usa', 'etats-unis', 'états-unis'] },
+    { code: 'ca', tokens: ['canada'] },
+    { code: 'jp', tokens: ['japan', 'japon'] },
+    { code: 'cn', tokens: ['china', 'chine'] },
+    { code: 'au', tokens: ['australia', 'australie'] },
+  ];
+  for (const hint of countryHints) {
+    if (hint.tokens.some(t => normalized.includes(t))) return hint.code;
+  }
+
+  // Neutral fallback for unknown destinations (instead of forcing France).
+  return 'us';
 }
 
 // Convertit le code pays en nom de pays pour les queries
