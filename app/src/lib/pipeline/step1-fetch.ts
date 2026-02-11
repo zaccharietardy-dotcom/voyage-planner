@@ -205,14 +205,17 @@ export async function fetchAllData(preferences: TripPreferences): Promise<Fetche
             if (!coords) continue;
             activity.latitude = coords.lat;
             activity.longitude = coords.lng;
-            activity.dataReliability = 'verified';
+            // Fallback geocoding improves map placement but is less reliable than Viator product coordinates.
+            if (activity.dataReliability !== 'verified') {
+              activity.dataReliability = 'estimated';
+            }
             return;
           }
         } catch { /* keep city-center as fallback */ }
       })
     );
-    const resolved = viatorEstimated.filter((a: Attraction) => a.dataReliability === 'verified').length;
-    console.log(`[Pipeline V2] Resolved GPS for ${resolved}/${viatorEstimated.length} Viator activities`);
+    const verified = viatorEstimated.filter((a: Attraction) => a.dataReliability === 'verified').length;
+    console.log(`[Pipeline V2] Resolved precise Viator GPS for ${verified}/${viatorEstimated.length} activities`);
   }
 
   // ── Inject curated must-sees from hardcoded database ──────────────────────

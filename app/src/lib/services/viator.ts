@@ -35,29 +35,74 @@ export interface ViatorProductCoordinates {
   source: 'viator_product';
 }
 
-function findFirstCoordinatePair(value: unknown): { lat: number; lng: number } | null {
-  if (!value || typeof value !== 'object') return null;
-  const queue: unknown[] = [value];
+interface CoordinateCandidate {
+  lat: number;
+  lng: number;
+  score: number;
+  path: string;
+}
 
-  while (queue.length > 0) {
-    const current = queue.shift();
-    if (!current || typeof current !== 'object') continue;
-    const record = current as Record<string, unknown>;
+function toCoord(raw: unknown): number | null {
+  const n = typeof raw === 'number' ? raw : Number(raw);
+  if (!Number.isFinite(n)) return null;
+  return n;
+}
 
-    const latRaw = record.latitude;
-    const lngRaw = record.longitude;
-    const lat = typeof latRaw === 'number' ? latRaw : Number(latRaw);
-    const lng = typeof lngRaw === 'number' ? lngRaw : Number(lngRaw);
-    if (Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180) {
-      return { lat, lng };
-    }
+function isValidCoordinatePair(lat: number, lng: number): boolean {
+  return Math.abs(lat) <= 90 && Math.abs(lng) <= 180;
+}
 
-    for (const child of Object.values(record)) {
-      if (child && typeof child === 'object') queue.push(child);
-    }
+function scoreCoordinatePath(path: string): number {
+  const p = path.toLowerCase();
+  let score = 0;
+
+  const strongPositive = ['meeting', 'meet', 'pickup', 'pick_up', 'pick-up', 'start', 'departure'];
+  const mediumPositive = ['itinerary', 'stop', 'waypoint', 'location', 'address', 'venue', 'point'];
+  const strongNegative = ['bounds', 'viewport', 'north', 'south', 'east', 'west', 'min', 'max'];
+  const mediumNegative = ['destination', 'city', 'region', 'country', 'center', 'centre', 'mapcenter'];
+
+  if (strongPositive.some(k => p.includes(k))) score += 6;
+  if (mediumPositive.some(k => p.includes(k))) score += 3;
+  if (strongNegative.some(k => p.includes(k))) score -= 8;
+  if (mediumNegative.some(k => p.includes(k))) score -= 5;
+
+  return score;
+}
+
+function collectCoordinateCandidates(
+  value: unknown,
+  path: string,
+  out: CoordinateCandidate[]
+): void {
+  if (!value || typeof value !== 'object') return;
+  const record = value as Record<string, unknown>;
+
+  const pairs: Array<{ latKey: string; lngKey: string }> = [
+    { latKey: 'latitude', lngKey: 'longitude' },
+    { latKey: 'lat', lngKey: 'lng' },
+    { latKey: 'lat', lngKey: 'lon' },
+  ];
+
+  for (const pair of pairs) {
+    if (!(pair.latKey in record) || !(pair.lngKey in record)) continue;
+    const lat = toCoord(record[pair.latKey]);
+    const lng = toCoord(record[pair.lngKey]);
+    if (lat === null || lng === null) continue;
+    if (!isValidCoordinatePair(lat, lng)) continue;
+    const candidatePath = `${path}.${pair.latKey}/${pair.lngKey}`;
+    out.push({ lat, lng, score: scoreCoordinatePath(candidatePath), path: candidatePath });
   }
 
-  return null;
+  for (const [key, child] of Object.entries(record)) {
+    if (!child || typeof child !== 'object') continue;
+    collectCoordinateCandidates(child, `${path}.${key}`, out);
+  }
+}
+
+function extractCoordinateCandidates(value: unknown): CoordinateCandidate[] {
+  const candidates: CoordinateCandidate[] = [];
+  collectCoordinateCandidates(value, 'root', candidates);
+  return candidates;
 }
 
 function isCoordinateNearDestination(
@@ -114,11 +159,23 @@ export async function getViatorProductCoordinates(
       if (!response.ok) continue;
 
       const data = await response.json();
-      const coords = findFirstCoordinatePair(data);
-      if (!coords) continue;
-      if (!isCoordinateNearDestination(coords, destinationCenter)) continue;
+      const candidates = extractCoordinateCandidates(data)
+        .filter(c => isCoordinateNearDestination({ lat: c.lat, lng: c.lng }, destinationCenter))
+        .sort((a, b) => {
+          if (b.score !== a.score) return b.score - a.score;
+          const dA = calculateDistance(a.lat, a.lng, destinationCenter.lat, destinationCenter.lng);
+          const dB = calculateDistance(b.lat, b.lng, destinationCenter.lat, destinationCenter.lng);
+          return dA - dB;
+        });
 
-      return { lat: coords.lat, lng: coords.lng, source: 'viator_product' };
+      if (candidates.length === 0) continue;
+      const best = candidates[0];
+
+      // Avoid "verified" on generic coordinates when payload contains many ambiguous pairs.
+      if (best.score < 0) continue;
+      if (best.score === 0 && candidates.length > 1) continue;
+
+      return { lat: best.lat, lng: best.lng, source: 'viator_product' };
     } catch {
       // Try next endpoint silently
     }
@@ -576,6 +633,20 @@ const VIATOR_EXCLUDED_KEYWORDS = [
   'ferrari', 'lamborghini', 'supercar', 'sports car',
 ];
 
+function inferViatorOpeningHours(title: string, description?: string): { open: string; close: string } {
+  const text = `${title} ${description || ''}`.toLowerCase();
+
+  const eveningKeywords = [
+    'evening', 'night', 'sunset', 'aperitivo', 'dinner', 'pub crawl', 'after dark',
+    'soir', 'soirée', 'nuit', 'coucher de soleil', 'apéritif', 'dîner', 'bar',
+  ];
+  const morningKeywords = ['morning', 'sunrise', 'breakfast', 'matin', 'lever du soleil', 'petit-déjeuner'];
+
+  if (eveningKeywords.some(k => text.includes(k))) return { open: '17:00', close: '23:30' };
+  if (morningKeywords.some(k => text.includes(k))) return { open: '07:00', close: '12:30' };
+  return { open: '09:00', close: '18:00' };
+}
+
 function processViatorResults(
   data: ViatorSearchResponse,
   destination: string,
@@ -628,11 +699,18 @@ function processViatorResults(
       // Utiliser productUrl de l'API si disponible, sinon construire depuis productCode, sinon recherche
       const affiliateUrl = normalizeViatorUrl(p.productUrl, p.title, destination, p.productCode);
 
+      const cleanDescription = (p.description || p.title || '')
+        .replace(/\s+/g, ' ')
+        .trim();
+      const shortDescription = cleanDescription.length > 180
+        ? `${cleanDescription.slice(0, 177)}...`
+        : cleanDescription;
+
       return {
         id: `viator-${p.productCode}`,
         name: p.title,
         type: guessActivityType(p.title, p.tags),
-        description: p.description?.substring(0, 200) || p.title,
+        description: shortDescription || p.title,
         duration: durationMinutes,
         estimatedCost: Math.round(price),
         latitude: cityCenter.lat, // Viator doesn't return exact coords — resolved later via coordsResolver
@@ -641,7 +719,7 @@ function processViatorResults(
         mustSee: (reviewCount > 500 && rating >= 4.5),
         bookingRequired: true,
         bookingUrl: affiliateUrl,
-        openingHours: { open: '09:00', close: '18:00' },
+        openingHours: inferViatorOpeningHours(p.title, p.description),
         dataReliability: 'estimated', // coords are city center, not exact — will be resolved
         imageUrl,
         providerName: 'Viator',
