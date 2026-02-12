@@ -162,12 +162,23 @@ export function scoreAndSelectActivities(
 
     for (const activity of deduped) {
       if (activity.mustSee) continue; // Already flagged
+      // Skip Viator activities for fallback matching — their marketing names
+      // often include landmark names ("Séance photo à la Tour Eiffel") which
+      // causes false must-see matches. Viator activities should only be must-see
+      // if explicitly matched via ID/slug in the primary matching pass.
+      if ((activity as any).source === 'viator') continue;
       const actNameNorm = normalizeAccents(activity.name || '');
       for (const mustSeeItem of mustSeeItems) {
         const mustSeeNorm = normalizeAccents(mustSeeItem);
+        // Guard: require the must-see term to be a significant portion of the
+        // activity name. This prevents "Tour Eiffel" (11 chars) matching inside
+        // "Séance photo privée parisienne Life Style à la Tour Eiffel" (55 chars)
+        // because 11/55 = 0.20 < 0.3.
+        const nameRatio = mustSeeNorm.length / actNameNorm.length;
+        if (nameRatio < 0.3 || nameRatio > 3.0) continue;
         // Check if activity name contains the must-see item or vice versa
         if (actNameNorm.includes(mustSeeNorm) || mustSeeNorm.includes(actNameNorm)) {
-          console.log(`[Pipeline V2] Fallback must-see: "${activity.name}" matched "${mustSeeItem}" from user preferences`);
+          console.log(`[Pipeline V2] Fallback must-see: "${activity.name}" matched "${mustSeeItem}" from user preferences (ratio=${nameRatio.toFixed(2)})`);
           activity.mustSee = true;
           break;
         }

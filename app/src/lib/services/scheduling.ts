@@ -40,7 +40,17 @@ export function isValidScheduleHour(hour: number): boolean {
  * @returns Nouvelle date avec minutes et secondes à 0
  */
 export function roundToNearestHour(date: Date): Date {
-  return roundToNearest5Min(date);
+  const rounded = new Date(date);
+  const minutes = rounded.getMinutes();
+  rounded.setSeconds(0);
+  rounded.setMilliseconds(0);
+  if (minutes >= 30) {
+    rounded.setMinutes(0);
+    rounded.setHours(rounded.getHours() + 1);
+  } else {
+    rounded.setMinutes(0);
+  }
+  return rounded;
 }
 
 /**

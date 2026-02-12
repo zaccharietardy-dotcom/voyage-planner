@@ -265,7 +265,36 @@ function selectTopNearbyRestaurants(
 }
 
 /**
+ * Find the activity closest to the cluster centroid.
+ * This is the "real heart" of the cluster — an actual place the traveler
+ * will be, unlike the geometric centroid which can fall in the middle of a river.
+ */
+function getNearestActivityToCentroid(
+  cluster: ActivityCluster
+): { lat: number; lng: number } {
+  if (!cluster.activities.length) return cluster.centroid;
+
+  let bestLat = cluster.centroid.lat;
+  let bestLng = cluster.centroid.lng;
+  let bestDist = Infinity;
+
+  for (const a of cluster.activities) {
+    if (!a.latitude || !a.longitude) continue;
+    const d = calculateDistance(a.latitude, a.longitude, cluster.centroid.lat, cluster.centroid.lng);
+    if (d < bestDist) {
+      bestDist = d;
+      bestLat = a.latitude;
+      bestLng = a.longitude;
+    }
+  }
+
+  return { lat: bestLat, lng: bestLng };
+}
+
+/**
  * Determine where the traveler will be for each meal type.
+ * Uses the nearest-to-centroid activity instead of the raw centroid,
+ * so restaurants are placed near an actual destination, not a geometric average.
  */
 function getMealReferenceCoords(
   mealType: MealType,
@@ -276,16 +305,17 @@ function getMealReferenceCoords(
     return accommodationCoords;
   }
 
+  // Use the activity closest to the centroid as the anchor point
+  const coreActivity = getNearestActivityToCentroid(cluster);
+
   if (mealType === 'lunch') {
-    // Stable anchor independent from internal activity ordering.
-    return cluster.centroid;
+    return coreActivity;
   }
 
-  // Dinner: bias toward cluster center with a pull toward the hotel.
-  // This avoids picking dinner near outlier activities that may be reordered later.
+  // Dinner: bias toward the core activity with a pull toward the hotel.
   return {
-    lat: cluster.centroid.lat * 0.7 + accommodationCoords.lat * 0.3,
-    lng: cluster.centroid.lng * 0.7 + accommodationCoords.lng * 0.3,
+    lat: coreActivity.lat * 0.7 + accommodationCoords.lat * 0.3,
+    lng: coreActivity.lng * 0.7 + accommodationCoords.lng * 0.3,
   };
 }
 

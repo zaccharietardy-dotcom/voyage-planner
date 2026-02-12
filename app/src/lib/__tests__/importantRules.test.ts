@@ -716,6 +716,8 @@ describe('Validation globale des regles importantes', () => {
         flights: 80,
         accommodation: 10,
         localTransport: 10,
+        food: 0,
+        activities: 0,
         rating: 'B',
         equivalents: { treesNeeded: 4, carKmEquivalent: 476 },
         tips: [],

@@ -438,10 +438,23 @@ function rebalanceClustersForFlights(
 
   const hoursPerDay = clusters.map((c, ci) => getAvailableHours(c, ci));
 
+  // Dynamic meal overhead: arrival/departure days have fewer meals
+  const computeMealOverheadMin = (ci: number): number => {
+    const cluster = clusters[ci];
+    const isFirst = cluster.dayNumber === 1;
+    const isLast = cluster.dayNumber === numDays;
+    const h = hoursPerDay[ci];
+    // Short day (arrival or departure) → fewer meals
+    if (isFirst && h < 8) return 75;   // dinner only (~75min)
+    if (isLast && h < 8) return 60;    // lunch only (~60min)
+    // Full day: breakfast 30min + lunch 60min + dinner 75min = 165min
+    return 165;
+  };
+
   // Max activities per day: account for actual activity durations when available
-  // Subtract meal overhead (~3h for 3 meals) from available hours
+  // Subtract meal overhead from available hours (dynamic per day type)
   const maxPerDay = hoursPerDay.map((h, ci) => {
-    const mealHours = 3; // breakfast 45min + lunch 60min + dinner 75min
+    const mealHours = computeMealOverheadMin(ci) / 60;
     const effectiveHours = Math.max(0, h - mealHours);
     // Use actual durations if cluster is already assigned
     const cluster = clusters[ci];
@@ -469,7 +482,7 @@ function rebalanceClustersForFlights(
   };
 
   const dayUsedMinutes = (idx: number): number =>
-    clusters[idx].activities.reduce((s, a) => s + (a.duration || 60) + 20, 0) + 180;
+    clusters[idx].activities.reduce((s, a) => s + (a.duration || 60) + 20, 0) + computeMealOverheadMin(idx);
 
   const dayRemainingMinutes = (idx: number): number =>
     hoursPerDay[idx] * 60 - dayUsedMinutes(idx);
@@ -508,7 +521,7 @@ function rebalanceClustersForFlights(
     if (isDayTrip[ci]) continue;
     const cluster = clusters[ci];
     const availMinutes = hoursPerDay[ci] * 60;
-    const mealOverhead = 180; // ~3h for 3 meals
+    const mealOverhead = computeMealOverheadMin(ci);
 
     // Keep moving activities until the day fits
     let iterations = 0;

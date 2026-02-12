@@ -471,6 +471,49 @@ export async function assembleTripSchedule(
       console.log(`[Pipeline V2]   → "${a.name}" (${a.duration || 60}min, score=${a.score.toFixed(1)}, mustSee=${!!a.mustSee})`);
     }
 
+    // 4b. Restaurant re-optimization after geoOptimize
+    // After activity reordering, a restaurant assigned near the old cluster centroid
+    // may now be far from the nearest activity. Check lunch/dinner and swap to a closer
+    // alternative if available.
+    const reoptMeal = (meal: typeof lunch, neighborActivity: ScoredActivity | undefined) => {
+      if (!meal?.restaurant || !neighborActivity) return;
+      const rLat = meal.restaurant.latitude;
+      const rLng = meal.restaurant.longitude;
+      if (!rLat || !rLng || !neighborActivity.latitude || !neighborActivity.longitude) return;
+
+      const currentDist = calculateDistance(
+        neighborActivity.latitude, neighborActivity.longitude,
+        rLat, rLng
+      );
+      if (currentDist <= 2.0) return; // Already close enough
+
+      // Check alternatives for a closer option
+      const alternatives = meal.restaurantAlternatives || [];
+      for (const alt of alternatives) {
+        if (!alt.latitude || !alt.longitude) continue;
+        const altDist = calculateDistance(
+          neighborActivity.latitude, neighborActivity.longitude,
+          alt.latitude, alt.longitude
+        );
+        if (altDist < currentDist && altDist <= 2.0) {
+          console.log(`[Pipeline V2] Restaurant re-opt day ${balancedDay.dayNumber} ${meal.mealType}: "${meal.restaurant.name}" (${currentDist.toFixed(1)}km) → "${alt.name}" (${altDist.toFixed(1)}km)`);
+          // Swap: current restaurant becomes an alternative, alt becomes primary
+          const oldRestaurant = meal.restaurant;
+          meal.restaurant = alt;
+          meal.restaurantAlternatives = [oldRestaurant, ...alternatives.filter(a => a.id !== alt.id)];
+          return;
+        }
+      }
+    };
+
+    if (orderedActivities.length > 0) {
+      // Lunch neighbor: the activity nearest to the middle of the day's schedule
+      const midIdx = Math.floor(orderedActivities.length / 2);
+      reoptMeal(lunch, orderedActivities[midIdx]);
+      // Dinner neighbor: the last activity of the day
+      reoptMeal(dinner, orderedActivities[orderedActivities.length - 1]);
+    }
+
     // 5. Insert breakfast for non-last days (last day already handled above)
     if (!isLastDay && breakfast?.restaurant && !skipBreakfast && dayStartHour <= 10) {
       scheduler.addItem({

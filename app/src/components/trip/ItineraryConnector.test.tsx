@@ -7,6 +7,9 @@ jest.mock('lucide-react', () => ({
   Navigation: () => <span data-testid="navigation-icon" />,
   Clock: () => <span data-testid="clock-icon" />,
   MapPin: () => <span data-testid="mappin-icon" />,
+  Footprints: () => <span data-testid="footprints-icon" />,
+  Car: () => <span data-testid="car-icon" />,
+  TrainFront: () => <span data-testid="train-front-icon" />,
 }));
 
 describe('ItineraryConnector', () => {
@@ -86,10 +89,10 @@ describe('ItineraryConnector', () => {
       expect(screen.getByText(/Parc Güell/)).toBeInTheDocument();
     });
 
-    it('shows "Itinéraire vers" text', () => {
+    it('shows arrow and destination name', () => {
       render(<ItineraryConnector from={mockFrom} to={mockTo} />);
 
-      expect(screen.getByText(/Itinéraire vers/)).toBeInTheDocument();
+      expect(screen.getByText(/→.*Parc Güell/)).toBeInTheDocument();
     });
   });
 
@@ -131,7 +134,6 @@ describe('ItineraryConnector', () => {
       render(<ItineraryConnector from={mockFrom} to={mockTo} distance={1.2} />);
 
       expect(screen.getByText('1.2 km')).toBeInTheDocument();
-      expect(screen.getByTestId('mappin-icon')).toBeInTheDocument();
     });
 
     it('displays distance in meters when < 1 km', () => {
@@ -148,28 +150,28 @@ describe('ItineraryConnector', () => {
   });
 
   describe('mode icons', () => {
-    it('shows walking emoji for walk mode', () => {
+    it('shows Footprints icon for walk mode', () => {
       render(<ItineraryConnector from={mockFrom} to={mockTo} mode="walk" />);
 
-      expect(screen.getByText(/🚶/)).toBeInTheDocument();
+      expect(screen.getByTestId('footprints-icon')).toBeInTheDocument();
     });
 
-    it('shows transit emoji for transit mode', () => {
+    it('shows TrainFront icon for transit mode', () => {
       render(<ItineraryConnector from={mockFrom} to={mockTo} mode="transit" />);
 
-      expect(screen.getByText(/🚇/)).toBeInTheDocument();
+      expect(screen.getByTestId('train-front-icon')).toBeInTheDocument();
     });
 
-    it('shows car emoji for car mode', () => {
+    it('shows Car icon for car mode', () => {
       render(<ItineraryConnector from={mockFrom} to={mockTo} mode="car" />);
 
-      expect(screen.getByText(/🚗/)).toBeInTheDocument();
+      expect(screen.getByTestId('car-icon')).toBeInTheDocument();
     });
 
-    it('shows taxi emoji for taxi mode', () => {
+    it('shows Car icon for taxi mode (maps to driving)', () => {
       render(<ItineraryConnector from={mockFrom} to={mockTo} mode="taxi" />);
 
-      expect(screen.getByText(/🚕/)).toBeInTheDocument();
+      expect(screen.getByTestId('car-icon')).toBeInTheDocument();
     });
   });
 
@@ -187,7 +189,6 @@ describe('ItineraryConnector', () => {
       expect(screen.getByText('15 min')).toBeInTheDocument();
       expect(screen.getByText('1.2 km')).toBeInTheDocument();
       expect(screen.getByTestId('clock-icon')).toBeInTheDocument();
-      expect(screen.getByTestId('mappin-icon')).toBeInTheDocument();
     });
   });
 });
