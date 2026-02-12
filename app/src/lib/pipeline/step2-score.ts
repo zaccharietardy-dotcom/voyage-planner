@@ -124,6 +124,20 @@ export function scoreAndSelectActivities(
     ...data.viatorActivities.map(a => tagActivity(a, 'viator')),
   ];
 
+  // 1b. Validate OSM mustSee flags: only keep if the item looks like a visitable place.
+  // Overpass sets mustSee based on Wikidata sitelinks count, which can flag abstract
+  // concepts (e.g. "metre" = unit of measurement with 180 sitelinks → mustSee=true).
+  const VISITABLE_KEYWORDS = /\b(museum|musée|musee|monument|palace|palais|castle|château|chateau|cathedral|cathédrale|basilica|basilique|church|église|eglise|tower|tour|park|parc|garden|jardin|bridge|pont|market|marché|marche|gallery|galerie|opera|opéra|library|bibliothèque|fort|fortress|temple|mosque|synagogue|zoo|aquarium|theatre|théâtre|viewpoint|belvedere|belvédère|citadel|citadelle|arena|arène|amphitheatre|amphithéâtre|stadium|stade|lighthouse|phare|waterfall|cascade|lake|lac|cave|grotte|abbey|abbaye|priory|prieuré|cloister|cloître)\b/i;
+  for (const a of allActivities) {
+    if (a.source === 'overpass' && a.mustSee) {
+      const text = `${a.name || ''} ${(a as any).description || ''}`;
+      if (!VISITABLE_KEYWORDS.test(text)) {
+        console.log(`[Pipeline V2] Stripped mustSee from OSM item "${a.name}" — no visitable-place keyword`);
+        a.mustSee = false;
+      }
+    }
+  }
+
   // 2. Filter activities without valid GPS
   const withGPS = allActivities.filter(
     a => a.latitude && a.longitude && a.latitude !== 0 && a.longitude !== 0
@@ -183,6 +197,20 @@ export function scoreAndSelectActivities(
           break;
         }
       }
+    }
+  }
+
+  // 3d. Cap OSM-only mustSees to prevent pool flooding.
+  // User-specified mustSees (from 'mustsee' source or fallback matching) are untouched.
+  // Only auto-detected OSM mustSees (from Wikidata sitelinks) are capped.
+  const MAX_OSM_MUST_SEES = 3;
+  const osmMustSees = deduped.filter(a => a.mustSee && a.source === 'overpass');
+  if (osmMustSees.length > MAX_OSM_MUST_SEES) {
+    // Keep only the top N by rating, strip mustSee from the rest
+    osmMustSees.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    for (let i = MAX_OSM_MUST_SEES; i < osmMustSees.length; i++) {
+      osmMustSees[i].mustSee = false;
+      console.log(`[Pipeline V2] Capped OSM mustSee: "${osmMustSees[i].name}" (${i + 1}/${osmMustSees.length})`);
     }
   }
 
@@ -297,8 +325,11 @@ function computeScore(
   cityCenter: { lat: number; lng: number },
   activityCentroid: { lat: number; lng: number }
 ): number {
-  // Must-see = always first
-  const mustSeeBonus = activity.mustSee ? 100 : 0;
+  // Must-see bonus: user-specified get full +100, OSM auto-detected get +50
+  // This ensures user must-sees always rank above OSM auto-detected ones
+  const mustSeeBonus = activity.mustSee
+    ? (activity.source === 'overpass' ? 50 : 100)
+    : 0;
 
   // Popularity: log10 of review count (0-10 scale)
   const reviews = Math.max(activity.reviewCount || 1, 1);

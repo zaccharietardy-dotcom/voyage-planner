@@ -331,14 +331,17 @@ export function isIrrelevantAttraction(activity: ScoredActivity): boolean {
   // 3. Generic places/streets/squares that are NOT real activities
   // (walking through a street is not a 1h activity)
   const genericPlacePatterns = [
-    /^(the )?\d+ streets$/,           // "The 9 Streets"
-    /\bsquare$/,                       // "Dam Square"
-    /\bplein$/,                        // "Museumplein"
-    /\bstraat$/,                       // street names
-    /\bgracht$/,                       // canal names like "Prinsengracht"
-    /\bstreet$/,                       // "Oxford Street"
-    /\bavenue$/,                       // "Champs Élysées" (as place only)
-    /^(rue|boulevard|place|piazza|plaza|platz|calle) /,  // French/Italian/Spanish/German streets
+    /^(the )?\d+ streets$/i,           // "The 9 Streets"
+    /\bsquare$/i,                       // "Dam Square"
+    /\bplein$/i,                        // "Museumplein"
+    /\bstraat$/i,                       // street names
+    /\bgracht$/i,                       // canal names like "Prinsengracht"
+    /\bstreet$/i,                       // "Oxford Street"
+    /\bavenue\b/i,                      // "avenue des Champs-Élysées" (was: /\bavenue$/)
+    /^(rue|boulevard|place|piazza|plaza|platz|calle|avenida|viale|corso|strasse|straße)\b/i,  // International street types
+    /\b(rue|boulevard|rambla) /i,       // Mid-name: "La Rambla", "Le Boulevard..."
+    // Neighbourhoods/quarters (SerpAPI pollution: "Latin Quarter", "Marais district")
+    /\b(quarter|quartier|neighbourhood|neighborhood|barrio|viertel|wijk)\b/i,
   ];
 
   // Don't filter if the name contains keywords suggesting it's a real attraction
@@ -349,6 +352,10 @@ export function isIrrelevantAttraction(activity: ScoredActivity): boolean {
     'bridge', 'pont', 'park', 'parc', 'basilica', 'basilique', 'fort',
     'library', 'bibliothèque', 'opera', 'opéra', 'theatre', 'théâtre'];
   const hasAttractionKeyword = attractionKeywords.some(k => name.includes(k));
+
+  // Don't filter high-popularity items from verified APIs (Google Places)
+  // They were explicitly returned as tourist attractions
+  if ((activity as any).source === 'google_places' && (activity.reviewCount || 0) > 500) return false;
 
   if (!hasAttractionKeyword && genericPlacePatterns.some(p => p.test(name))) return true;
 

@@ -86,7 +86,7 @@ describe('Restaurant proximity assignment', () => {
       makeRestaurant('r-far', 'Far Top Rated', 48.871889, 2.366516, 4.95),
     ];
 
-    const meals = assignRestaurants(
+    const { meals } = assignRestaurants(
       [cluster],
       [],
       restaurants,
@@ -120,7 +120,7 @@ describe('Restaurant proximity assignment', () => {
       makeRestaurant('r2', 'Near Two', 48.8599, 2.3487, 4.3),
     ];
 
-    const meals = assignRestaurants(
+    const { meals } = assignRestaurants(
       [cluster],
       [],
       restaurants,
@@ -152,7 +152,7 @@ describe('Restaurant proximity assignment', () => {
       makeRestaurant('r-far-1', 'Very Far Restaurant', 48.95, 2.45, 4.9),
     ];
 
-    const meals = assignRestaurants(
+    const { meals } = assignRestaurants(
       [cluster],
       [],
       farRestaurants,

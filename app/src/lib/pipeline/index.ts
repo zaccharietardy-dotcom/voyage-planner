@@ -108,7 +108,7 @@ export async function generateTripV2(preferences: TripPreferences): Promise<Trip
     );
   }
 
-  let meals = assignRestaurants(
+  let restaurantResult = assignRestaurants(
     clusters,
     data.tripAdvisorRestaurants,
     serpRestaurantsForAssignment,
@@ -117,6 +117,8 @@ export async function generateTripV2(preferences: TripPreferences): Promise<Trip
     accommodationCoords,
     hotel
   );
+  let meals = restaurantResult.meals;
+  let restaurantGeoPool = restaurantResult.restaurantGeoPool;
   const missingMeals = meals.filter(m => !m.restaurant);
   if (missingMeals.length > 0) {
     const targetedRestaurants = await fetchTargetedRestaurantsForMissingMeals(
@@ -128,7 +130,7 @@ export async function generateTripV2(preferences: TripPreferences): Promise<Trip
         ...serpRestaurantsForAssignment,
         ...targetedRestaurants,
       ]);
-      meals = assignRestaurants(
+      const retryResult = assignRestaurants(
         clusters,
         data.tripAdvisorRestaurants,
         serpRestaurantsForAssignment,
@@ -137,6 +139,8 @@ export async function generateTripV2(preferences: TripPreferences): Promise<Trip
         accommodationCoords,
         hotel
       );
+      meals = retryResult.meals;
+      restaurantGeoPool = retryResult.restaurantGeoPool;
       const remainingMissing = meals.filter(m => !m.restaurant).length;
       console.log(
         `[Pipeline V2] Step 4 retry: targeted API fetched=${targetedRestaurants.length}, missing meals ${missingMeals.length} -> ${remainingMissing}`
@@ -144,7 +148,7 @@ export async function generateTripV2(preferences: TripPreferences): Promise<Trip
     }
   }
   const assignedCount = meals.filter(m => m.restaurant).length;
-  console.log(`[Pipeline V2] Step 4: ${assignedCount}/${meals.length} meals assigned restaurants`);
+  console.log(`[Pipeline V2] Step 4: ${assignedCount}/${meals.length} meals assigned restaurants (pool=${restaurantGeoPool.length})`);
 
   // Step 6: Claude day balancing (~10-15s)
   console.log('[Pipeline V2] === Step 6: Claude balancing... ===');
@@ -157,7 +161,8 @@ export async function generateTripV2(preferences: TripPreferences): Promise<Trip
   const trip = await assembleTripSchedule(
     plan, clusters, meals, hotel,
     { outbound: data.outboundFlight, return: data.returnFlight },
-    bestTransport, preferences, data
+    bestTransport, preferences, data,
+    restaurantGeoPool
   );
 
   const totalTime = Date.now() - T0;

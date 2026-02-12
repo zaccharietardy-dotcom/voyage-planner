@@ -5,7 +5,7 @@
  * Uses the existing DayScheduler for time slot management.
  */
 
-import type { Trip, TripDay, TripItem, TripPreferences, Flight, Accommodation, TransportOptionSummary } from '../types';
+import type { Trip, TripDay, TripItem, TripPreferences, Flight, Accommodation, TransportOptionSummary, Restaurant } from '../types';
 import type { FetchedData, ActivityCluster, MealAssignment, BalancedPlan, ScoredActivity } from './types';
 import { DayScheduler, parseTime, formatTime } from '../services/scheduler';
 import { calculateDistance, estimateTravelTime } from '../services/geocoding';
@@ -46,7 +46,8 @@ export async function assembleTripSchedule(
   flights: { outbound: Flight | null; return: Flight | null },
   transport: TransportOptionSummary | null,
   preferences: TripPreferences,
-  data: FetchedData
+  data: FetchedData,
+  restaurantGeoPool?: Restaurant[]
 ): Promise<Trip> {
   const startDate = new Date(preferences.startDate);
   const days: TripDay[] = [];
@@ -473,21 +474,41 @@ export async function assembleTripSchedule(
 
     // 4b. Restaurant re-optimization after geoOptimize
     // After activity reordering, a restaurant assigned near the old cluster centroid
-    // may now be far from the nearest activity. Check lunch/dinner and swap to a closer
-    // alternative if available.
-    const reoptMeal = (meal: typeof lunch, neighborActivity: ScoredActivity | undefined) => {
+    // may now be far from the nearest activity. Search the FULL restaurant pool
+    // for a better option near the actual neighbor activity.
+    const MEAL_REOPT_LIMITS: Record<string, number> = {
+      breakfast: 1.5,
+      lunch: 2.0,
+      dinner: 2.5,
+    };
+
+    const usedRestaurantIds = new Set<string>();
+    // Track all already-assigned restaurants on this day
+    const dayMealsAll = meals.filter(m => m.dayNumber === balancedDay.dayNumber);
+    for (const m of dayMealsAll) {
+      if (m.restaurant) usedRestaurantIds.add(m.restaurant.id);
+    }
+
+    const reoptMealFromPool = (
+      meal: typeof lunch,
+      neighborActivity: ScoredActivity | undefined,
+      mealType: 'breakfast' | 'lunch' | 'dinner',
+    ) => {
       if (!meal?.restaurant || !neighborActivity) return;
+      if (!neighborActivity.latitude || !neighborActivity.longitude) return;
       const rLat = meal.restaurant.latitude;
       const rLng = meal.restaurant.longitude;
-      if (!rLat || !rLng || !neighborActivity.latitude || !neighborActivity.longitude) return;
+      if (!rLat || !rLng) return;
 
       const currentDist = calculateDistance(
         neighborActivity.latitude, neighborActivity.longitude,
         rLat, rLng
       );
-      if (currentDist <= 2.0) return; // Already close enough
+      if (currentDist <= 1.0) return; // Already close enough (tight threshold)
 
-      // Check alternatives for a closer option
+      const maxDist = MEAL_REOPT_LIMITS[mealType] || 2.0;
+
+      // First check existing alternatives (fast path)
       const alternatives = meal.restaurantAlternatives || [];
       for (const alt of alternatives) {
         if (!alt.latitude || !alt.longitude) continue;
@@ -495,23 +516,60 @@ export async function assembleTripSchedule(
           neighborActivity.latitude, neighborActivity.longitude,
           alt.latitude, alt.longitude
         );
-        if (altDist < currentDist && altDist <= 2.0) {
-          console.log(`[Pipeline V2] Restaurant re-opt day ${balancedDay.dayNumber} ${meal.mealType}: "${meal.restaurant.name}" (${currentDist.toFixed(1)}km) → "${alt.name}" (${altDist.toFixed(1)}km)`);
-          // Swap: current restaurant becomes an alternative, alt becomes primary
+        if (altDist < currentDist && altDist <= maxDist) {
+          console.log(`[Pipeline V2] Restaurant re-opt (alt) day ${balancedDay.dayNumber} ${mealType}: "${meal.restaurant.name}" (${currentDist.toFixed(1)}km) → "${alt.name}" (${altDist.toFixed(1)}km)`);
           const oldRestaurant = meal.restaurant;
           meal.restaurant = alt;
           meal.restaurantAlternatives = [oldRestaurant, ...alternatives.filter(a => a.id !== alt.id)];
+          usedRestaurantIds.add(alt.id);
           return;
         }
+      }
+
+      // Full pool search if alternatives weren't good enough
+      if (!restaurantGeoPool || restaurantGeoPool.length === 0) return;
+
+      let bestCandidate: Restaurant | null = null;
+      let bestScore = -Infinity;
+
+      for (const r of restaurantGeoPool) {
+        if (usedRestaurantIds.has(r.id)) continue;
+        if (!r.latitude || !r.longitude) continue;
+
+        const dist = calculateDistance(
+          neighborActivity.latitude, neighborActivity.longitude,
+          r.latitude, r.longitude
+        );
+        if (dist > maxDist || dist >= currentDist) continue;
+
+        // Score: quality - distance penalty
+        const quality = (r.rating || 3) * 2 + Math.log10(Math.max(r.reviewCount || 1, 1)) * 1.5;
+        const score = quality - dist * 2;
+
+        if (score > bestScore) {
+          bestScore = score;
+          bestCandidate = r;
+        }
+      }
+
+      if (bestCandidate) {
+        const newDist = calculateDistance(
+          neighborActivity.latitude, neighborActivity.longitude,
+          bestCandidate.latitude, bestCandidate.longitude
+        );
+        console.log(`[Pipeline V2] Restaurant re-opt (pool) day ${balancedDay.dayNumber} ${mealType}: "${meal.restaurant.name}" (${currentDist.toFixed(1)}km) → "${bestCandidate.name}" (${newDist.toFixed(1)}km)`);
+        meal.restaurantAlternatives = [meal.restaurant, ...(meal.restaurantAlternatives || []).slice(0, 1)];
+        meal.restaurant = bestCandidate;
+        usedRestaurantIds.add(bestCandidate.id);
       }
     };
 
     if (orderedActivities.length > 0) {
       // Lunch neighbor: the activity nearest to the middle of the day's schedule
       const midIdx = Math.floor(orderedActivities.length / 2);
-      reoptMeal(lunch, orderedActivities[midIdx]);
+      reoptMealFromPool(lunch, orderedActivities[midIdx], 'lunch');
       // Dinner neighbor: the last activity of the day
-      reoptMeal(dinner, orderedActivities[orderedActivities.length - 1]);
+      reoptMealFromPool(dinner, orderedActivities[orderedActivities.length - 1], 'dinner');
     }
 
     // 5. Insert breakfast for non-last days (last day already handled above)

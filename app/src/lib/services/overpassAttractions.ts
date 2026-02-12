@@ -44,6 +44,34 @@ const EXCLUDED_NAME_PATTERNS = [
   /\bossuary\b/i, /\bossuaire\b/i,
 ];
 
+// Wikidata descriptions indicating non-visitable / abstract entities
+// Applied AFTER Wikidata enrichment to catch items with high sitelinks
+// but that are not actual tourist attractions (e.g. "metre" = unit of measurement)
+const WIKIDATA_DESCRIPTION_EXCLUDES = [
+  // Abstract concepts, units, measurements
+  /\b(unit of|measurement|concept|quantity|physical quantity|standard of|SI unit|metric system|mathematical|formula|notation)\b/i,
+  // Destroyed, demolished, no longer existing
+  /\b(destroyed|demolished|torn down|razed|no longer exist|dismantled|disappeared|defunct)\b/i,
+  // Streets, avenues, roads, thoroughfares
+  /\b(street in|avenue in|boulevard in|road in|thoroughfare|highway|motorway|expressway|freeway)\b/i,
+  /\b(rue de|rue du|rue des|voie|allée|passage in|impasse|chemin de|autoroute|nationale)\b/i,
+  // Administrative/political entities
+  /\b(administrative|arrondissement|district of|municipality|commune of|canton of|department of|region of|province|prefecture)\b/i,
+  // Historical events (battles, treaties, revolutions)
+  /\b(battle of|siege of|treaty of|congress of|uprising|revolt)\b/i,
+  // People (biographies)
+  /\b(born in|died in|politician|composer|painter|artist|writer|architect|philosopher|scientist)\b/i,
+  /\b(king of|queen of|emperor|empress|president of|prime minister)\b/i,
+  // Languages, scripts, alphabets
+  /\b(language$|dialect|writing system|alphabet|script|phoneme)\b/i,
+  // Species, taxonomy (but not zoos/aquariums)
+  /\b(species of|genus of|family of|order of|mammal|bird species|insect|plant species)\b/i,
+  // Media, publications, organizations
+  /\b(newspaper|magazine|television|radio station|political party|company|corporation|brand)\b/i,
+  // Fictional entities
+  /\b(fictional|character in|novel by|film by|song by|album by)\b/i,
+];
+
 // Mapping OSM tourism/historic types → ActivityType
 function mapOsmTypeToActivityType(osmTags: Record<string, string>): ActivityType {
   const tourism = osmTags.tourism || '';
@@ -245,6 +273,11 @@ function shouldExclude(name: string, tags: Record<string, string>): boolean {
   // Exclude by OSM type
   if (EXCLUDED_OSM_TYPES.has(tourism) || EXCLUDED_OSM_TYPES.has(historic)) return true;
 
+  // Exclude roads, administrative boundaries, transport routes
+  if (tags.highway) return true;
+  if (tags.boundary) return true;
+  if (tags.route) return true;
+
   // Exclude memorials of specific persons (they have "memorial" type and usually a person's name)
   if (historic === 'memorial' || historic === 'artwork') {
     // Keep if it's a well-known memorial site (9/11, war memorials with specific names)
@@ -258,6 +291,39 @@ function shouldExclude(name: string, tags: Record<string, string>): boolean {
   }
 
   return false;
+}
+
+/**
+ * Post-Wikidata semantic filter: reject items whose Wikidata description
+ * reveals they are not visitable tourist attractions (abstract concepts,
+ * destroyed buildings, streets, people, etc.)
+ */
+function shouldExcludeByWikidata(description: string): boolean {
+  if (!description) return false;
+  for (const pattern of WIKIDATA_DESCRIPTION_EXCLUDES) {
+    if (pattern.test(description)) return true;
+  }
+  return false;
+}
+
+/**
+ * Check if OSM tags suggest a physically visitable place.
+ * Used to gate mustSee: only physical places should be must-sees,
+ * not abstract entities that happen to have many Wikipedia articles.
+ */
+function isVisitablePlace(tags: Record<string, string>): boolean {
+  return !!(
+    tags.tourism ||
+    tags.leisure ||
+    tags.amenity ||
+    tags.building ||
+    tags.historic === 'castle' ||
+    tags.historic === 'monument' ||
+    tags.historic === 'palace' ||
+    tags.historic === 'archaeological_site' ||
+    tags.historic === 'fort' ||
+    tags.historic === 'city_gate'
+  );
 }
 
 // ============================================
@@ -334,13 +400,20 @@ export async function searchAttractionsOverpass(
     // Filter low-popularity items
     if (popularity < minPopularity) continue;
 
+    // Post-Wikidata semantic filter: reject abstract concepts, destroyed sites, streets, etc.
+    const wdDescription = wd?.description || '';
+    if (shouldExcludeByWikidata(wdDescription)) {
+      console.log(`[Overpass] Excluded "${wd?.name || poi.name}" by Wikidata description: "${wdDescription}"`);
+      continue;
+    }
+
     // Use Wikidata coords if OSM coords are missing
     const lat = poi.lat || wd?.latitude || 0;
     const lng = poi.lng || wd?.longitude || 0;
     if (!lat || !lng) continue;
 
     const name = wd?.name || poi.name;
-    const description = wd?.description || `Découvrez ${name}`;
+    const description = wdDescription || `Découvrez ${name}`;
 
     // Generate image URL from Wikidata
     let imageUrl: string | undefined;
@@ -361,8 +434,11 @@ export async function searchAttractionsOverpass(
       estimatedCost: 0, // Will be estimated later by Claude or duration estimator
       latitude: lat,
       longitude: lng,
-      rating: Math.min(5, 3 + (popularity / 50)), // Convert popularity to 3-5 rating
-      mustSee: popularity >= 80, // Major landmarks (80+ Wikipedia pages)
+      // Diminishing returns rating: sqrt(popularity)/7 instead of popularity/50
+      // 40 sitelinks → 3.9, 80 → 4.3, 120 → 4.6, 200 → 5.0
+      rating: Math.min(5, 3 + Math.sqrt(popularity) / 7),
+      // mustSee requires 120+ sitelinks AND physically visitable OSM tags
+      mustSee: popularity >= 120 && isVisitablePlace(poi.tags),
       bookingRequired: false,
       bookingUrl: wd?.officialWebsite,
       openingHours: { open: '09:00', close: '18:00' },

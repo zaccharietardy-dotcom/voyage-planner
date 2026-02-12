@@ -102,6 +102,13 @@ export interface MealAssignment {
   referenceCoords: { lat: number; lng: number };
 }
 
+/** Return type of assignRestaurants() — includes the full geo-filtered restaurant pool
+ *  for post-geoOptimize re-optimization in step 7 */
+export interface RestaurantAssignmentResult {
+  meals: MealAssignment[];
+  restaurantGeoPool: Restaurant[]; // Full pool with valid coords for step7 re-optimization
+}
+
 // ============================================
 // Step 6: Claude Balanced Plan
 // ============================================

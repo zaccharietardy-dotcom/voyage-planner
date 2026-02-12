@@ -9,7 +9,7 @@
  */
 
 import type { Restaurant, BudgetStrategy, TripPreferences } from '../types';
-import type { ActivityCluster, MealAssignment } from './types';
+import type { ActivityCluster, MealAssignment, RestaurantAssignmentResult } from './types';
 import { calculateDistance } from '../services/geocoding';
 import { mergeRestaurantSources } from './utils/dedup';
 
@@ -59,7 +59,7 @@ export function assignRestaurants(
   budgetStrategy: BudgetStrategy | null,
   accommodationCoords: { lat: number; lng: number },
   hotel?: { breakfastIncluded?: boolean } | null
-): MealAssignment[] {
+): RestaurantAssignmentResult {
   // 1. Merge real API sources only.
   const allRestaurants = mergeRestaurantSources(
     tripAdvisorRestaurants as any,
@@ -148,7 +148,10 @@ export function assignRestaurants(
     }
   }
 
-  return assignments;
+  return {
+    meals: assignments,
+    restaurantGeoPool: geoPool,
+  };
 }
 
 function hasValidCoordinates(restaurant: Restaurant): boolean {
