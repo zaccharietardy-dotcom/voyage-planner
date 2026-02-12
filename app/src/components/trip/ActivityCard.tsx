@@ -746,9 +746,10 @@ function RestaurantSuggestions({
 
   return (
     <div className="mt-3 border-t border-border/40 pt-2.5" onClick={(e) => e.stopPropagation()}>
-      <div className="text-xs font-medium text-muted-foreground mb-2">Top 3 restaurants suggérés</div>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-        {suggestions.map((option) => {
+      <div className="text-xs font-medium text-muted-foreground mb-2">Top {suggestions.length} restaurants suggérés</div>
+      {/* Side-by-side cards: flex row on sm+, column on mobile */}
+      <div className="flex flex-col sm:flex-row gap-2">
+        {suggestions.map((option, idx) => {
           const isSelected = option.id === current.id;
           const bookingUrl = option.reservationUrl || option.googleMapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(option.name)}`;
           const imageUrl = getRestaurantImage(option);
@@ -757,56 +758,102 @@ function RestaurantSuggestions({
             <div
               key={option.id}
               className={cn(
-                "relative overflow-hidden rounded-xl border p-2.5 min-h-[170px]",
-                isSelected ? "border-primary/60 shadow-sm" : "border-border/50"
+                "relative overflow-hidden rounded-xl border-2 transition-all duration-200",
+                "aspect-video sm:aspect-video",
+                isSelected
+                  ? "border-primary shadow-lg shadow-primary/20 ring-1 ring-primary/30"
+                  : "border-transparent hover:border-white/20 hover:shadow-md"
               )}
+              style={{
+                flex: isSelected ? '1.3 1 0%' : '1 1 0%',
+                minHeight: '140px',
+              }}
             >
+              {/* Background photo */}
               <img
                 src={imageUrl}
                 alt={option.name}
                 className="absolute inset-0 h-full w-full object-cover"
                 loading="lazy"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/55 to-black/25" />
-              <div className="relative z-10 text-white">
-                <div className="inline-flex items-center rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-medium backdrop-blur-sm">
-                  {getCuisineLabel(option)}
+              {/* Dark gradient overlay — heavier at bottom for text readability */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/15" />
+
+              {/* Selected indicator — top-left accent */}
+              {isSelected && (
+                <div className="absolute top-0 left-0 right-0 h-0.5 bg-primary" />
+              )}
+
+              {/* Card content — positioned at bottom via flex */}
+              <div className="relative z-10 h-full flex flex-col justify-between p-2.5">
+                {/* Top section: cuisine badge */}
+                <div className="flex items-start justify-between gap-1">
+                  <span className="inline-flex items-center rounded-full bg-black/40 backdrop-blur-sm px-2 py-0.5 text-[10px] font-medium text-white/90">
+                    {getCuisineLabel(option)}
+                  </span>
+                  {isSelected && (
+                    <span className="inline-flex items-center rounded-full bg-primary/90 px-2 py-0.5 text-[10px] font-bold text-primary-foreground backdrop-blur-sm shrink-0">
+                      Choisi
+                    </span>
+                  )}
                 </div>
-                <div className="font-semibold text-sm mt-1.5 line-clamp-2">{option.name}</div>
-              </div>
-              <div className="relative z-10 flex items-center justify-between mt-2 text-[10px] text-white/90">
-                {option.rating > 0 ? <span className="font-semibold text-primary">⭐ {option.rating.toFixed(1)}</span> : <span />}
-                {option.distance != null && (
-                  <span>
-                    {option.distance < 1 ? `${Math.round(option.distance * 1000)}m` : `${option.distance.toFixed(1)}km`}
-                  </span>
-                )}
-              </div>
-              <div className="relative z-10 flex items-center gap-1.5 mt-2">
-                {isSelected ? (
-                  <span className="inline-flex items-center px-2 py-0.5 rounded bg-emerald-500/25 text-emerald-200 text-[10px] font-medium">
-                    Sélectionné
-                  </span>
-                ) : (
-                  <button
-                    className="inline-flex items-center px-2 py-0.5 rounded bg-primary text-primary-foreground text-[10px] font-medium hover:opacity-90"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onSelectRestaurantAlternative?.(item, option);
-                    }}
-                  >
-                    Choisir
-                  </button>
-                )}
-                <a
-                  href={bookingUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center px-2 py-0.5 rounded border border-white/40 text-[10px] text-white/90 hover:text-white"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  Voir
-                </a>
+
+                {/* Bottom section: name, meta, actions */}
+                <div>
+                  {/* Restaurant name */}
+                  <h5 className="font-bold text-sm text-white leading-tight line-clamp-2 drop-shadow-md">
+                    {option.name}
+                  </h5>
+
+                  {/* Meta row: rating + distance */}
+                  <div className="flex items-center gap-2.5 mt-1 text-[11px] text-white/85">
+                    {option.rating > 0 && (
+                      <span className="inline-flex items-center gap-0.5 font-semibold">
+                        <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                        {option.rating.toFixed(1)}
+                        {option.reviewCount > 0 && (
+                          <span className="text-white/50 font-normal">({option.reviewCount})</span>
+                        )}
+                      </span>
+                    )}
+                    {option.distance != null && (
+                      <span className="inline-flex items-center gap-0.5">
+                        <Navigation className="h-2.5 w-2.5" />
+                        {option.distance < 1 ? `${Math.round(option.distance * 1000)}m` : `${option.distance.toFixed(1)}km`}
+                      </span>
+                    )}
+                    {option.priceLevel && (
+                      <span className="text-white/60">
+                        {'€'.repeat(option.priceLevel)}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Action buttons */}
+                  <div className="flex items-center gap-1.5 mt-1.5">
+                    {!isSelected && (
+                      <button
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-primary text-primary-foreground text-[10px] font-semibold hover:opacity-90 transition-opacity shadow-sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onSelectRestaurantAlternative?.(item, option);
+                        }}
+                      >
+                        Choisir
+                      </button>
+                    )}
+                    <a
+                      href={bookingUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-white/15 backdrop-blur-sm border border-white/25 text-[10px] text-white/90 hover:bg-white/25 hover:text-white transition-colors"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <ExternalLink className="h-2.5 w-2.5" />
+                      Voir
+                    </a>
+                  </div>
+                </div>
               </div>
             </div>
           );
@@ -814,7 +861,7 @@ function RestaurantSuggestions({
       </div>
       <div className="mt-2 flex justify-end">
         <button
-          className="text-[11px] text-muted-foreground hover:text-foreground underline-offset-2 hover:underline"
+          className="text-[11px] text-muted-foreground hover:text-foreground underline-offset-2 hover:underline transition-colors"
           onClick={(e) => {
             e.stopPropagation();
             onSelectSelfMeal?.(item);

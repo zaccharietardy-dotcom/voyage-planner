@@ -8,10 +8,10 @@
  */
 
 import type { Trip, TripPreferences, Flight, TransportOptionSummary, Restaurant } from '../types';
-import type { ActivityCluster, MealAssignment, ScoredActivity } from './types';
+import type { ActivityCluster, CityDensityProfile, MealAssignment, ScoredActivity } from './types';
 import { fetchAllData } from './step1-fetch';
 import { scoreAndSelectActivities } from './step2-score';
-import { clusterActivities } from './step3-cluster';
+import { clusterActivities, computeCityDensityProfile } from './step3-cluster';
 import { assignRestaurants } from './step4-restaurants';
 import { selectHotelByBarycenter } from './step5-hotel';
 import { balanceDaysWithClaude } from './step6-balance';
@@ -58,7 +58,8 @@ export async function generateTripV2(preferences: TripPreferences): Promise<Trip
 
   // Step 3: Geographic clustering (~0ms)
   console.log('[Pipeline V2] === Step 3: Clustering... ===');
-  const clusters = clusterActivities(selectedActivities, preferences.durationDays, data.destCoords);
+  const densityProfile = computeCityDensityProfile(selectedActivities, preferences.durationDays);
+  const clusters = clusterActivities(selectedActivities, preferences.durationDays, data.destCoords, densityProfile);
 
   // Rebalance: first/last day get fewer activities based on flight/transport times
   rebalanceClustersForFlights(
@@ -67,7 +68,8 @@ export async function generateTripV2(preferences: TripPreferences): Promise<Trip
     data.returnFlight,
     preferences.durationDays,
     bestTransport,
-    data.destCoords
+    data.destCoords,
+    densityProfile
   );
 
   console.log(`[Pipeline V2] Step 3: ${clusters.length} clusters created`);
@@ -372,7 +374,8 @@ function rebalanceClustersForFlights(
   returnFlight: Flight | null,
   numDays: number,
   transport?: TransportOptionSummary | null,
-  destCoords?: { lat: number; lng: number }
+  destCoords?: { lat: number; lng: number },
+  densityProfile?: CityDensityProfile
 ): void {
   if (clusters.length < 2) return;
 
@@ -1296,8 +1299,11 @@ function rebalanceClustersForFlights(
   // We move far outliers from a day to the geographically closest day that has capacity.
   for (const c of clusters) computeClusterGeo(c);
 
-  const cohesionMaxRadiusKm = clusters.length <= 3 ? 3.2 : clusters.length === 4 ? 3.6 : 3.8;
-  const minCohesionGainKm = clusters.length <= 3 ? 0.5 : 0.8;
+  // Use density profile for adaptive cohesion radius (1.5x cluster radius as post-processing tolerance)
+  const cohesionMaxRadiusKm = densityProfile
+    ? densityProfile.maxClusterRadius * 1.5
+    : (clusters.length <= 3 ? 3.2 : clusters.length === 4 ? 3.6 : 3.8);
+  const minCohesionGainKm = densityProfile?.densityCategory === 'dense' ? 0.3 : 0.5;
   for (let iter = 0; iter < 5; iter++) {
     let movedAny = false;
 

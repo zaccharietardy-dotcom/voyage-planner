@@ -72,6 +72,22 @@ export interface ActivityCluster {
   activities: ScoredActivity[];
   centroid: { lat: number; lng: number };
   totalIntraDistance: number; // km, within cluster
+  maxRadius?: number; // km, max distance from centroid to any member
+}
+
+// ============================================
+// Step 3b: City Density Profile
+// ============================================
+
+export interface CityDensityProfile {
+  /** 75th percentile of all pairwise activity distances (km) */
+  p75PairwiseDistance: number;
+  /** Median of all pairwise activity distances (km) */
+  medianPairwiseDistance: number;
+  /** Derived maximum cluster radius for a single day (km) */
+  maxClusterRadius: number;
+  /** Density category for logging */
+  densityCategory: 'dense' | 'medium' | 'spread';
 }
 
 // ============================================

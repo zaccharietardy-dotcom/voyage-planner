@@ -180,9 +180,19 @@ export function scoreAndSelectActivities(
 
   // 5. Score each activity
   const cityCenter = data.destCoords;
+
+  // Compute activity centroid for proximity penalty (favors geographically grouped activities)
+  const gpsValid = filtered.filter(a => a.latitude && a.longitude);
+  const activityCentroid = gpsValid.length >= 3
+    ? {
+        lat: gpsValid.reduce((s, a) => s + a.latitude, 0) / gpsValid.length,
+        lng: gpsValid.reduce((s, a) => s + a.longitude, 0) / gpsValid.length,
+      }
+    : cityCenter;
+
   const scored = filtered.map(a => ({
     ...a,
-    score: computeScore(a, preferences, cityCenter),
+    score: computeScore(a, preferences, cityCenter, activityCentroid),
   }));
 
   // 6. Sort by score descending
@@ -273,7 +283,8 @@ function tagActivity(
 function computeScore(
   activity: ScoredActivity,
   preferences: TripPreferences,
-  cityCenter: { lat: number; lng: number }
+  cityCenter: { lat: number; lng: number },
+  activityCentroid: { lat: number; lng: number }
 ): number {
   // Must-see = always first
   const mustSeeBonus = activity.mustSee ? 100 : 0;
@@ -333,8 +344,20 @@ function computeScore(
   // Factor 9: Preference depth — reward tags that reinforce selected preferences, penalize contradictions
   const preferenceDepthBonus = computePreferenceDepth(tags, preferences.activities || []);
 
+  // Factor 10: Proximity penalty — soft penalty for activities far from the activity centroid
+  // Favors selecting geographically grouped activities, reducing cross-city zigzag
+  let proximityPenalty = 0;
+  if (activity.latitude && activity.longitude && !activity.mustSee) {
+    const distFromCenter = calculateDistance(
+      activity.latitude, activity.longitude,
+      activityCentroid.lat, activityCentroid.lng
+    );
+    if (distFromCenter > 5) proximityPenalty = -3;
+    else if (distFromCenter > 3) proximityPenalty = -1;
+  }
+
   return mustSeeBonus + popularityScore + ratingScore + typeMatchBonus + viatorBonus
-    + reliabilityBonus + distancePenalty + contextFitBonus + preferenceDepthBonus;
+    + reliabilityBonus + distancePenalty + contextFitBonus + preferenceDepthBonus + proximityPenalty;
 }
 
 // ─── Contextual scoring helpers ─────────────────────────────────────────────
