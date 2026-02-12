@@ -393,6 +393,11 @@ export async function assembleTripSchedule(
           }
         }
 
+        // Add return-to-hotel cost (penalize last activity far from hotel)
+        const lastActivity = route[route.length - 1];
+        const returnLeg = calculateDistance(lastActivity.latitude, lastActivity.longitude, startLat, startLng);
+        total += returnLeg * 0.5; // Weight at 0.5 (less important than inter-activity but matters)
+
         // Penalize "one giant jump" routes even if total distance is similar.
         const maxLegPenalty = Math.max(0, maxLeg - 4) * 2.5;
         return total + longLegPenalty + maxLegPenalty;
@@ -565,9 +570,10 @@ export async function assembleTripSchedule(
     };
 
     if (orderedActivities.length > 0) {
-      // Lunch neighbor: the activity nearest to the middle of the day's schedule
+      // Lunch neighbor: the activity before the mid-point (likely scheduled just before lunch break)
       const midIdx = Math.floor(orderedActivities.length / 2);
-      reoptMealFromPool(lunch, orderedActivities[midIdx], 'lunch');
+      const lunchNeighborIdx = Math.max(0, midIdx - 1);
+      reoptMealFromPool(lunch, orderedActivities[lunchNeighborIdx], 'lunch');
       // Dinner neighbor: the last activity of the day
       reoptMealFromPool(dinner, orderedActivities[orderedActivities.length - 1], 'dinner');
     }
@@ -708,9 +714,11 @@ export async function assembleTripSchedule(
       // MUST-SEE RETRY: If a must-see was rejected, retry with shorter duration.
       // Keep the same maxEndTime — we don't relax closing hours (a museum that closes at 17:00
       // still closes at 17:00). Uses type-based minimum (e.g., 60min for cathedral, not 30).
+      // For large museums (duration >= 120), use 0.7 factor instead of 0.5 to preserve more visit time.
       if (!actResult && activity.mustSee) {
-        const shortDuration = Math.max(actMinDuration, Math.floor(activityDuration * 0.5));
-        console.log(`[Pipeline V2] Day ${balancedDay.dayNumber}: Must-see "${activity.name}" rejected at ${activityDuration}min, retrying with ${shortDuration}min (min=${actMinDuration}min)`);
+        const reductionFactor = activityDuration >= 120 ? 0.7 : 0.5;
+        const shortDuration = Math.max(actMinDuration, Math.floor(activityDuration * reductionFactor));
+        console.log(`[Pipeline V2] Day ${balancedDay.dayNumber}: Must-see "${activity.name}" rejected at ${activityDuration}min, retrying with ${shortDuration}min (min=${actMinDuration}min, factor=${reductionFactor})`);
         actResult = scheduler.addItem({
           id: activity.id,
           title: activity.name,
@@ -760,7 +768,8 @@ export async function assembleTripSchedule(
 
           // Also try with reduced duration if full doesn't fit
           if (!actResult) {
-            const shortDuration = Math.max(actMinDuration, Math.floor(activityDuration * 0.5));
+            const reductionFactor = activityDuration >= 120 ? 0.7 : 0.5;
+            const shortDuration = Math.max(actMinDuration, Math.floor(activityDuration * reductionFactor));
             actResult = scheduler.addItem({
               id: activity.id,
               title: activity.name,
@@ -776,6 +785,42 @@ export async function assembleTripSchedule(
 
           if (actResult) break; // Success!
           // If still doesn't fit, keep the eviction and try next candidate
+        }
+      }
+
+      // MUST-SEE RETRY 3: If still rejected after eviction, extend day end by up to 1 hour
+      if (!actResult && activity.mustSee) {
+        const extendedDayEndHour = Math.min(23, dayEndHour + 1);
+        const extendedDayEnd = parseTime(dayDate, `${String(extendedDayEndHour).padStart(2, '0')}:00`);
+
+        // Temporarily extend the scheduler's day end
+        const originalDayEnd = scheduler['dayEnd']; // Access private field
+        (scheduler as any).dayEnd = extendedDayEnd;
+
+        const reductionFactor = activityDuration >= 120 ? 0.7 : 0.5;
+        const shortDuration = Math.max(actMinDuration, Math.floor(activityDuration * reductionFactor));
+
+        console.log(`[Pipeline V2] Day ${balancedDay.dayNumber}: Must-see "${activity.name}" RETRY 3 — extending day end to ${extendedDayEndHour}:00 (was ${dayEndHour}:00)`);
+
+        actResult = scheduler.addItem({
+          id: activity.id,
+          title: activity.name,
+          type: 'activity',
+          duration: shortDuration,
+          travelTime: Math.min(travelTime, 5),
+          minStartTime: activityMinStartTime,
+          maxEndTime: activityMaxEndTime,
+          minDuration: actMinDuration,
+          data: activity,
+        });
+
+        if (actResult) {
+          console.log(`[Pipeline V2] Day ${balancedDay.dayNumber}: ✅ Must-see "${activity.name}" scheduled after day extension to ${extendedDayEndHour}:00`);
+          // Keep the extended day end for subsequent activities
+          dayEndHour = extendedDayEndHour;
+        } else {
+          // Restore original day end if retry failed
+          (scheduler as any).dayEnd = originalDayEnd;
         }
       }
 
