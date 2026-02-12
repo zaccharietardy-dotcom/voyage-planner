@@ -481,10 +481,11 @@ export async function assembleTripSchedule(
     // After activity reordering, a restaurant assigned near the old cluster centroid
     // may now be far from the nearest activity. Search the FULL restaurant pool
     // for a better option near the actual neighbor activity.
+    // Hard max: restaurant must be within 500m of the neighbor activity.
     const MEAL_REOPT_LIMITS: Record<string, number> = {
-      breakfast: 1.5,
-      lunch: 2.0,
-      dinner: 2.5,
+      breakfast: 0.5,
+      lunch: 0.5,
+      dinner: 0.5,
     };
 
     const usedRestaurantIds = new Set<string>();
@@ -509,7 +510,7 @@ export async function assembleTripSchedule(
         neighborActivity.latitude, neighborActivity.longitude,
         rLat, rLng
       );
-      if (currentDist <= 1.0) return; // Already close enough (tight threshold)
+      if (currentDist <= 0.3) return; // Already within 300m — no need to re-opt
 
       const maxDist = MEAL_REOPT_LIMITS[mealType] || 2.0;
 
@@ -531,38 +532,37 @@ export async function assembleTripSchedule(
         }
       }
 
-      // Full pool search if alternatives weren't good enough
+      // Full pool search: progressive radius 500m → 800m → 1.2km
+      // Always prefer the closest restaurant; only widen if nothing at all exists.
       if (!restaurantGeoPool || restaurantGeoPool.length === 0) return;
 
+      const SEARCH_RADII = [0.5, 0.8, 1.2];
       let bestCandidate: Restaurant | null = null;
-      let bestScore = -Infinity;
+      let bestDist = Infinity;
 
-      for (const r of restaurantGeoPool) {
-        if (usedRestaurantIds.has(r.id)) continue;
-        if (!r.latitude || !r.longitude) continue;
+      for (const radius of SEARCH_RADII) {
+        for (const r of restaurantGeoPool) {
+          if (usedRestaurantIds.has(r.id)) continue;
+          if (!r.latitude || !r.longitude) continue;
 
-        const dist = calculateDistance(
-          neighborActivity.latitude, neighborActivity.longitude,
-          r.latitude, r.longitude
-        );
-        if (dist > maxDist || dist >= currentDist) continue;
+          const dist = calculateDistance(
+            neighborActivity.latitude, neighborActivity.longitude,
+            r.latitude, r.longitude
+          );
+          if (dist > radius || dist >= currentDist) continue;
 
-        // Score: quality - distance penalty
-        const quality = (r.rating || 3) * 2 + Math.log10(Math.max(r.reviewCount || 1, 1)) * 1.5;
-        const score = quality - dist * 2;
-
-        if (score > bestScore) {
-          bestScore = score;
-          bestCandidate = r;
+          // Within this radius, prefer closest restaurant. Break ties by quality.
+          if (dist < bestDist || (dist === bestDist && (r.rating || 3) > ((bestCandidate as any)?.rating || 3))) {
+            bestDist = dist;
+            bestCandidate = r;
+          }
         }
+        // Found something in this radius — don't widen further.
+        if (bestCandidate) break;
       }
 
       if (bestCandidate) {
-        const newDist = calculateDistance(
-          neighborActivity.latitude, neighborActivity.longitude,
-          bestCandidate.latitude, bestCandidate.longitude
-        );
-        console.log(`[Pipeline V2] Restaurant re-opt (pool) day ${balancedDay.dayNumber} ${mealType}: "${meal.restaurant.name}" (${currentDist.toFixed(1)}km) → "${bestCandidate.name}" (${newDist.toFixed(1)}km)`);
+        console.log(`[Pipeline V2] Restaurant re-opt (pool) day ${balancedDay.dayNumber} ${mealType}: "${meal.restaurant.name}" (${currentDist.toFixed(1)}km) → "${bestCandidate.name}" (${bestDist.toFixed(1)}km)`);
         meal.restaurantAlternatives = [meal.restaurant, ...(meal.restaurantAlternatives || []).slice(0, 1)];
         meal.restaurant = bestCandidate;
         usedRestaurantIds.add(bestCandidate.id);

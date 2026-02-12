@@ -17,11 +17,11 @@ type MealType = 'breakfast' | 'lunch' | 'dinner';
 
 const MEAL_DISTANCE_LIMITS: Record<MealType, { idealKm: number; hardKm: number; absoluteKm: number }> = {
   // Breakfast should stay very close to the hotel.
-  breakfast: { idealKm: 0.9, hardKm: 1.4, absoluteKm: 2.0 },
-  // Lunch stays around the day cluster center.
-  lunch: { idealKm: 1.3, hardKm: 2.0, absoluteKm: 2.8 },
-  // Dinner can be wider than lunch, but still avoid cross-city jumps.
-  dinner: { idealKm: 1.6, hardKm: 2.3, absoluteKm: 3.0 },
+  breakfast: { idealKm: 0.4, hardKm: 0.8, absoluteKm: 1.2 },
+  // Lunch stays around the nearest activity — 500m target, 1km hard max.
+  lunch: { idealKm: 0.5, hardKm: 0.8, absoluteKm: 1.2 },
+  // Dinner: same tight constraint — walk from last activity.
+  dinner: { idealKm: 0.5, hardKm: 0.8, absoluteKm: 1.2 },
 };
 
 /**
@@ -199,11 +199,11 @@ function scoreCandidate(restaurant: Restaurant, mealType: MealType, distanceKm: 
   const quality = rating * 2 + Math.log10(reviews + 1) * 1.5;
 
   const limits = MEAL_DISTANCE_LIMITS[mealType];
-  const distanceWeight = mealType === 'breakfast' ? 3.0 : mealType === 'lunch' ? 2.5 : 2.2;
+  const distanceWeight = mealType === 'breakfast' ? 4.0 : 3.5;
   let score = quality - distanceKm * distanceWeight;
 
   if (distanceKm > limits.idealKm) {
-    score -= (distanceKm - limits.idealKm) * 1.8;
+    score -= (distanceKm - limits.idealKm) * 3.0;
   }
 
   if (mealType === 'breakfast' && isBreakfastFriendly(restaurant)) {
