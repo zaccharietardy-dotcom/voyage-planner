@@ -72,6 +72,45 @@ export async function generateTripV2(preferences: TripPreferences): Promise<Trip
     densityProfile
   );
 
+  // Post-rebalance must-see guarantee: ensure no must-see was lost during rebalancing
+  const clusterActivityIds = new Set(clusters.flatMap(c => c.activities.map(a => a.id)));
+  const lostMustSees = selectedActivities.filter(a => a.mustSee && !clusterActivityIds.has(a.id));
+  for (const mustSee of lostMustSees) {
+    // Find cluster with most remaining capacity
+    let bestTarget = -1;
+    let bestRemaining = -Infinity;
+    for (let ci = 0; ci < clusters.length; ci++) {
+      const used = clusters[ci].activities.reduce((s, a) => s + (a.duration || 60), 0) + clusters[ci].activities.length * 20 + 180;
+      // Estimate hours per day: ~8h for full days, less for first/last
+      const isFirst = clusters[ci].dayNumber === 1;
+      const isLast = clusters[ci].dayNumber === preferences.durationDays;
+      const estHours = (isFirst || isLast) ? 5 : 8;
+      const remaining = estHours * 60 - used;
+      if (remaining > bestRemaining) {
+        bestRemaining = remaining;
+        bestTarget = ci;
+      }
+    }
+
+    if (bestTarget !== -1) {
+      // If no room, evict the lowest-scored non-must-see
+      if (bestRemaining < (mustSee.duration || 60) + 20) {
+        const candidates = clusters[bestTarget].activities
+          .filter(a => !a.mustSee)
+          .sort((a, b) => a.score - b.score);
+        if (candidates.length > 0) {
+          const evictIdx = clusters[bestTarget].activities.findIndex(a => a.id === candidates[0].id);
+          if (evictIdx !== -1) {
+            const evicted = clusters[bestTarget].activities.splice(evictIdx, 1)[0];
+            console.log(`[Pipeline V2] Must-see guarantee: evicted "${evicted.name}" to make room for "${mustSee.name}"`);
+          }
+        }
+      }
+      clusters[bestTarget].activities.push(mustSee);
+      console.log(`[Pipeline V2] Must-see guarantee: injected "${mustSee.name}" into Day ${clusters[bestTarget].dayNumber}`);
+    }
+  }
+
   console.log(`[Pipeline V2] Step 3: ${clusters.length} clusters created`);
   for (const c of clusters) {
     console.log(`[Pipeline V2]   Day ${c.dayNumber}: ${c.activities.map(a => a.name).join(', ')} (${c.totalIntraDistance.toFixed(1)}km intra)`);
@@ -130,6 +169,14 @@ export async function generateTripV2(preferences: TripPreferences): Promise<Trip
         ...serpRestaurantsForAssignment,
         ...targetedRestaurants,
       ]);
+      // Collect all restaurant IDs from first pass
+      const firstPassUsedIds = new Set<string>();
+      for (const m of meals) {
+        if (m.restaurant?.id) firstPassUsedIds.add(m.restaurant.id);
+        for (const alt of (m.restaurantAlternatives || [])) {
+          if (alt.id) firstPassUsedIds.add(alt.id);
+        }
+      }
       const retryResult = assignRestaurants(
         clusters,
         data.tripAdvisorRestaurants,
@@ -137,7 +184,8 @@ export async function generateTripV2(preferences: TripPreferences): Promise<Trip
         preferences,
         data.budgetStrategy,
         accommodationCoords,
-        hotel
+        hotel,
+        firstPassUsedIds
       );
       meals = retryResult.meals;
       restaurantGeoPool = retryResult.restaurantGeoPool;

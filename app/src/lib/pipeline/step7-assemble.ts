@@ -11,6 +11,7 @@ import { DayScheduler, parseTime, formatTime } from '../services/scheduler';
 import { calculateDistance, estimateTravelTime } from '../services/geocoding';
 import { getDirections } from '../services/directions';
 import { fetchPlaceImage } from './services/wikimediaImages';
+import { isAppropriateForMeal } from './step4-restaurants';
 // Simple UUID generator (avoids external dependency)
 function uuidv4(): string {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
@@ -323,14 +324,23 @@ export async function assembleTripSchedule(
       });
     } else if (isLastDay && !breakfast?.restaurant && !skipBreakfast && !hotel?.breakfastIncluded && dayStartHour <= 10) {
       // Self-catered breakfast placeholder
+      let bkfTitle: string;
+      let bkfData: any;
+      if (hotel) {
+        bkfTitle = 'Petit-déjeuner à l\'hôtel';
+        bkfData = { name: hotel.name || 'Hôtel', description: 'Petit-déjeuner', latitude: hotel.latitude, longitude: hotel.longitude, estimatedCost: 0 };
+      } else {
+        bkfTitle = 'Petit-déjeuner — Café/Boulangerie à proximité';
+        bkfData = { name: 'Café/Boulangerie', description: 'Petit-déjeuner à proximité de l\'hôtel', latitude: data.destCoords.lat, longitude: data.destCoords.lng, estimatedCost: 8 };
+      }
       scheduler.addItem({
         id: `self-breakfast-${balancedDay.dayNumber}`,
-        title: 'Petit-déjeuner',
+        title: bkfTitle,
         type: 'restaurant',
         duration: 30,
         minStartTime: parseTime(dayDate, `${String(Math.max(7, dayStartHour)).padStart(2, '0')}:00`),
         maxEndTime: parseTime(dayDate, '10:00'),
-        data: { name: '', description: '', estimatedCost: 0 },
+        data: bkfData,
       });
     }
 
@@ -518,6 +528,7 @@ export async function assembleTripSchedule(
       const alternatives = meal.restaurantAlternatives || [];
       for (const alt of alternatives) {
         if (!alt.latitude || !alt.longitude) continue;
+        if (!isAppropriateForMeal(alt, mealType)) continue;
         const altDist = calculateDistance(
           neighborActivity.latitude, neighborActivity.longitude,
           alt.latitude, alt.longitude
@@ -544,6 +555,7 @@ export async function assembleTripSchedule(
         for (const r of restaurantGeoPool) {
           if (usedRestaurantIds.has(r.id)) continue;
           if (!r.latitude || !r.longitude) continue;
+          if (!isAppropriateForMeal(r, mealType)) continue;
 
           const dist = calculateDistance(
             neighborActivity.latitude, neighborActivity.longitude,
@@ -602,14 +614,23 @@ export async function assembleTripSchedule(
       });
     } else if (!isLastDay && !breakfast?.restaurant && !skipBreakfast && !hotel?.breakfastIncluded && dayStartHour <= 10) {
       // Self-catered breakfast placeholder
+      let bkfTitle: string;
+      let bkfData: any;
+      if (hotel) {
+        bkfTitle = 'Petit-déjeuner à l\'hôtel';
+        bkfData = { name: hotel.name || 'Hôtel', description: 'Petit-déjeuner', latitude: hotel.latitude, longitude: hotel.longitude, estimatedCost: 0 };
+      } else {
+        bkfTitle = 'Petit-déjeuner — Café/Boulangerie à proximité';
+        bkfData = { name: 'Café/Boulangerie', description: 'Petit-déjeuner à proximité de l\'hôtel', latitude: data.destCoords.lat, longitude: data.destCoords.lng, estimatedCost: 8 };
+      }
       scheduler.addItem({
         id: `self-breakfast-${balancedDay.dayNumber}`,
-        title: 'Petit-déjeuner',
+        title: bkfTitle,
         type: 'restaurant',
         duration: 30,
         minStartTime: parseTime(dayDate, `${String(Math.max(7, dayStartHour)).padStart(2, '0')}:00`),
         maxEndTime: parseTime(dayDate, '10:00'),
-        data: { name: '', description: '', estimatedCost: 0 },
+        data: bkfData,
       });
     }
 
@@ -788,9 +809,9 @@ export async function assembleTripSchedule(
         }
       }
 
-      // MUST-SEE RETRY 3: If still rejected after eviction, extend day end by up to 1 hour
+      // MUST-SEE RETRY 3: If still rejected after eviction, extend day end by up to 1.5 hours
       if (!actResult && activity.mustSee) {
-        const extendedDayEndHour = Math.min(23, dayEndHour + 1);
+        const extendedDayEndHour = Math.min(23, dayEndHour + 2);
         const extendedDayEnd = parseTime(dayDate, `${String(extendedDayEndHour).padStart(2, '0')}:00`);
 
         // Temporarily extend the scheduler's day end
@@ -889,10 +910,10 @@ export async function assembleTripSchedule(
       const lunchDuration = lunch?.restaurant ? 60 : 45;
       const lunchData = lunch?.restaurant
         ? { ...lunch.restaurant, _alternatives: lunch.restaurantAlternatives || [] }
-        : { name: '', description: '', estimatedCost: 0 };
+        : { name: 'Restaurant à proximité', description: 'Déjeuner', latitude: hotel?.latitude || data.destCoords.lat, longitude: hotel?.longitude || data.destCoords.lng, estimatedCost: 15 };
       const lunchTitle = lunch?.restaurant
         ? `Déjeuner — ${lunch.restaurant.name}`
-        : 'Déjeuner';
+        : 'Déjeuner — Restaurant à proximité';
       const lunchId = lunch?.restaurant
         ? `meal-${balancedDay.dayNumber}-lunch`
         : `self-lunch-${balancedDay.dayNumber}`;
@@ -918,10 +939,10 @@ export async function assembleTripSchedule(
       const dinnerDuration = dinner?.restaurant ? 75 : 60;
       const dinnerData = dinner?.restaurant
         ? { ...dinner.restaurant, _alternatives: dinner.restaurantAlternatives || [] }
-        : { name: '', description: '', estimatedCost: 0 };
+        : { name: 'Restaurant à proximité', description: 'Dîner', latitude: hotel?.latitude || data.destCoords.lat, longitude: hotel?.longitude || data.destCoords.lng, estimatedCost: 20 };
       const dinnerTitle = dinner?.restaurant
         ? `Dîner — ${dinner.restaurant.name}`
-        : 'Dîner';
+        : 'Dîner — Restaurant à proximité';
       const dinnerId = dinner?.restaurant
         ? `meal-${balancedDay.dayNumber}-dinner`
         : `self-dinner-${balancedDay.dayNumber}`;
