@@ -119,6 +119,23 @@ const TRANSIT_MODE_COLORS: Record<string, string> = {
   ferry: '#39CCCC',
 };
 
+const GOOGLE_PLACE_PHOTO_PATTERN = /(^\/api\/place-photo\?)|(maps\.googleapis\.com\/maps\/api\/place\/photo)/i;
+
+function toGooglePlacePhotoUrl(url?: string): string | undefined {
+  if (!url) return undefined;
+  const normalized = url.trim();
+  return GOOGLE_PLACE_PHOTO_PATTERN.test(normalized) ? normalized : undefined;
+}
+
+function getRestaurantGooglePhoto(restaurant?: Partial<Restaurant>): string | undefined {
+  const photos = Array.isArray(restaurant?.photos) ? restaurant.photos : [];
+  for (const photo of photos) {
+    const valid = toGooglePlacePhotoUrl(photo);
+    if (valid) return valid;
+  }
+  return undefined;
+}
+
 function normalizeTransportModeForUi(mode?: string): TripItem['transportMode'] | undefined {
   if (!mode) return undefined;
   const normalized = mode.toLowerCase();
@@ -237,7 +254,10 @@ export function ActivityCard({
   const transportMode = item.type === 'transport' ? getTransportModeForItem(item) : undefined;
   const transportIconTestId = transportMode ? `transport-icon-${transportMode}` : undefined;
   const color = TRIP_ITEM_COLORS[item.type];
-  const hasImage = item.imageUrl && IMAGE_TYPES.includes(item.type);
+  const imageUrl = item.type === 'restaurant'
+    ? (getRestaurantGooglePhoto(item.restaurant) || toGooglePlacePhotoUrl(item.imageUrl))
+    : item.imageUrl;
+  const hasImage = imageUrl && IMAGE_TYPES.includes(item.type);
   const [imgError, setImgError] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
   const showImage = hasImage && !imgError;
@@ -277,7 +297,7 @@ export function ActivityCard({
           {showImage && (
             <>
               <img
-                src={item.imageUrl}
+                src={imageUrl}
                 alt={item.title}
                 className={cn(
                   "absolute inset-0 w-full h-full object-cover transition-opacity duration-500",
@@ -1024,22 +1044,8 @@ function RestaurantSuggestionsFlat({
     return 'Restaurant';
   };
 
-  const getRestaurantImage = (r: Restaurant): string => {
-    const candidate = r.photos?.[0];
-    if (candidate && /^https?:\/\//i.test(candidate)) return candidate;
-    const FALLBACK_IMAGES = [
-      'photo-1414235077428-338989a2e8c0',
-      'photo-1517248135467-4c7edcad34c4',
-      'photo-1555396273-367ea4eb4db5',
-      'photo-1424847651672-bf20a4b0982b',
-      'photo-1565299624946-b28f40a0ae38',
-      'photo-1540189549336-e6e99c3679fe',
-      'photo-1504674900247-0877df9cc836',
-      'photo-1559339352-11d035aa65de',
-    ];
-    const hash = r.name.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
-    const img = FALLBACK_IMAGES[hash % FALLBACK_IMAGES.length];
-    return `https://images.unsplash.com/${img}?w=800&h=500&fit=crop&q=80&auto=format`;
+  const getRestaurantImage = (r: Restaurant): string | undefined => {
+    return getRestaurantGooglePhoto(r);
   };
 
   return (
@@ -1064,12 +1070,16 @@ function RestaurantSuggestionsFlat({
               style={{ minHeight: '160px' }}
             >
               {/* Background photo */}
-              <img
-                src={imageUrl}
-                alt={option.name}
-                className="absolute inset-0 h-full w-full object-cover"
-                loading="lazy"
-              />
+              {imageUrl ? (
+                <img
+                  src={imageUrl}
+                  alt={option.name}
+                  className="absolute inset-0 h-full w-full object-cover"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="absolute inset-0 bg-gradient-to-br from-stone-700 to-stone-900" />
+              )}
               {/* Dark gradient overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/15" />
 
@@ -1299,22 +1309,8 @@ function RestaurantSuggestions({
     return 'Restaurant';
   };
 
-  const getRestaurantImage = (r: Restaurant): string => {
-    const candidate = r.photos?.[0];
-    if (candidate && /^https?:\/\//i.test(candidate)) return candidate;
-    const FALLBACK_IMAGES = [
-      'photo-1414235077428-338989a2e8c0',
-      'photo-1517248135467-4c7edcad34c4',
-      'photo-1555396273-367ea4eb4db5',
-      'photo-1424847651672-bf20a4b0982b',
-      'photo-1565299624946-b28f40a0ae38',
-      'photo-1540189549336-e6e99c3679fe',
-      'photo-1504674900247-0877df9cc836',
-      'photo-1559339352-11d035aa65de',
-    ];
-    const hash = r.name.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
-    const img = FALLBACK_IMAGES[hash % FALLBACK_IMAGES.length];
-    return `https://images.unsplash.com/${img}?w=800&h=500&fit=crop&q=80&auto=format`;
+  const getRestaurantImage = (r: Restaurant): string | undefined => {
+    return getRestaurantGooglePhoto(r);
   };
 
   return (
@@ -1343,12 +1339,16 @@ function RestaurantSuggestions({
               }}
             >
               {/* Background photo */}
-              <img
-                src={imageUrl}
-                alt={option.name}
-                className="absolute inset-0 h-full w-full object-cover"
-                loading="lazy"
-              />
+              {imageUrl ? (
+                <img
+                  src={imageUrl}
+                  alt={option.name}
+                  className="absolute inset-0 h-full w-full object-cover"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="absolute inset-0 bg-gradient-to-br from-stone-700 to-stone-900" />
+              )}
               {/* Dark gradient overlay — heavier at bottom for text readability */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/15" />
 

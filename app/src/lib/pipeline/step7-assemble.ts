@@ -1184,11 +1184,6 @@ export async function assembleTripSchedule(
         if (result) dinnerInserted = true;
       }
 
-      // Day-trip activities get extended duration (whole-day excursion)
-      const activityDuration = balancedDay.isDayTrip
-        ? Math.max(activity.duration || 120, 180) // At least 3h for day-trip activities
-        : (activity.duration || 60);
-
       // Skip activities that are closed on this day (per-day opening hours)
       if (!isActivityOpenOnDay(activity, dayDate)) {
         console.log(`[Pipeline V2] Day ${balancedDay.dayNumber}: Skipping "${activity.name}" — closed on ${DAY_NAMES_EN[dayDate.getDay()]}`);
@@ -1201,6 +1196,12 @@ export async function assembleTripSchedule(
 
       // Minimum meaningful duration for this activity type (e.g., 60min for museums)
       const actMinDuration = getMinDuration(activity.name || '', activity.type || '');
+      // Day-trip activities get extended duration (whole-day excursion)
+      const baseActivityDuration = balancedDay.isDayTrip
+        ? Math.max(activity.duration || 120, 180) // At least 3h for day-trip activities
+        : (activity.duration || 60);
+      // Hard floor on final scheduling input to avoid absurdly short iconic visits (e.g. Louvre 60min)
+      const activityDuration = Math.max(baseActivityDuration, actMinDuration);
 
       let actResult = scheduler.addItem({
         id: activity.id,

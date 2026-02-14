@@ -43,6 +43,11 @@ export const INDOOR_ACTIVITY_KEYWORDS = [
  * First match wins — order from most specific to least specific.
  */
 const MIN_DURATION_RULES: [RegExp, number][] = [
+  // Major museums and landmark complexes: realistic minimum visit windows
+  [/\b(vatican|vaticano|mus[eé]es? du vatican|vatican museum|chapelle sixtine|sistine)\b/i, 180],
+  [/\b(louvre|mus[eé]e du louvre)\b/i, 150],
+  [/\b(british museum|uffizi|offices|galerie des offices|prado|museo del prado|rijksmuseum|hermitage|ermitage|met museum|metropolitan)\b/i, 120],
+  [/\b(mus[eé]e d'orsay|orsay|colosseum|colosseo|colis[eé]e|coliseum)\b/i, 90],
   // Major museums, cathedrals, basilicas: at least 60 min
   [/\b(museum|mus[eé][eo]|gallery|galerie|galleria|cathedral|cath[eé]drale|basilica|basilique)\b/i, 60],
   // Palaces, castles, forts: at least 45 min
