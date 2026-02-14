@@ -64,21 +64,7 @@ export function Footer() {
           {/* Brand */}
           <div className="lg:col-span-2">
             <Link href="/" className="inline-flex items-center gap-2 mb-4">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#1e3a5f] to-[#0f2744] flex items-center justify-center">
-                <svg className="w-6 h-6" viewBox="0 0 32 32">
-                  <defs>
-                    <linearGradient id="wing-footer" x1="0%" y1="100%" x2="100%" y2="0%">
-                      <stop offset="0%" style={{ stopColor: '#c9a227' }} />
-                      <stop offset="50%" style={{ stopColor: '#f4d03f' }} />
-                      <stop offset="100%" style={{ stopColor: '#fff8dc' }} />
-                    </linearGradient>
-                  </defs>
-                  <path
-                    d="M8 24 C10 20, 14 12, 24 6 C20 10, 18 14, 18 18 C18 14, 16 12, 12 14 C14 16, 14 20, 10 24 Z"
-                    fill="url(#wing-footer)"
-                  />
-                </svg>
-              </div>
+              <img src="/logo-narae.png" alt="Narae Voyage" className="w-10 h-10 rounded-lg object-cover" />
               <span className="font-bold text-xl">Narae Voyage</span>
             </Link>
             <p className="text-sm text-muted-foreground mb-6 max-w-xs">

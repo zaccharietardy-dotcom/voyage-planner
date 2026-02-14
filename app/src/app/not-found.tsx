@@ -14,21 +14,7 @@ export default function NotFound() {
             404
           </div>
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#1e3a5f] to-[#0f2744] flex items-center justify-center animate-bounce">
-              <svg className="w-14 h-14" viewBox="0 0 32 32">
-                <defs>
-                  <linearGradient id="wing-404" x1="0%" y1="100%" x2="100%" y2="0%">
-                    <stop offset="0%" style={{ stopColor: '#c9a227' }} />
-                    <stop offset="50%" style={{ stopColor: '#f4d03f' }} />
-                    <stop offset="100%" style={{ stopColor: '#fff8dc' }} />
-                  </linearGradient>
-                </defs>
-                <path
-                  d="M8 24 C10 20, 14 12, 24 6 C20 10, 18 14, 18 18 C18 14, 16 12, 12 14 C14 16, 14 20, 10 24 Z"
-                  fill="url(#wing-404)"
-                />
-              </svg>
-            </div>
+            <img src="/logo-narae.png" alt="Narae Voyage" className="w-24 h-24 rounded-lg object-cover animate-bounce" />
           </div>
         </div>
 

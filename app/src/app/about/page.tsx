@@ -49,21 +49,7 @@ export default function AboutPage() {
 
         {/* Hero */}
         <div className="text-center mb-16">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-[#1e3a5f] to-[#0f2744] mb-6">
-            <svg className="w-10 h-10" viewBox="0 0 32 32">
-              <defs>
-                <linearGradient id="wing-about" x1="0%" y1="100%" x2="100%" y2="0%">
-                  <stop offset="0%" style={{ stopColor: '#c9a227' }} />
-                  <stop offset="50%" style={{ stopColor: '#f4d03f' }} />
-                  <stop offset="100%" style={{ stopColor: '#fff8dc' }} />
-                </linearGradient>
-              </defs>
-              <path
-                d="M8 24 C10 20, 14 12, 24 6 C20 10, 18 14, 18 18 C18 14, 16 12, 12 14 C14 16, 14 20, 10 24 Z"
-                fill="url(#wing-about)"
-              />
-            </svg>
-          </div>
+          <img src="/logo-narae.png" alt="Narae Voyage" className="w-16 h-16 rounded-lg object-cover mb-6 inline-block" />
           <h1 className="text-4xl md:text-5xl font-bold mb-4">À propos de Narae Voyage</h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             Narae signifie &quot;aile&quot; en coréen. Notre mission : vous donner des ailes

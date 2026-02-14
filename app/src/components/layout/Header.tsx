@@ -64,21 +64,11 @@ export function Header() {
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2 z-50">
-              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#1e3a5f] to-[#0f2744] flex items-center justify-center">
-                <svg className="w-5 h-5" viewBox="0 0 32 32">
-                  <defs>
-                    <linearGradient id="wing-header" x1="0%" y1="100%" x2="100%" y2="0%">
-                      <stop offset="0%" style={{ stopColor: '#c9a227' }} />
-                      <stop offset="50%" style={{ stopColor: '#f4d03f' }} />
-                      <stop offset="100%" style={{ stopColor: '#fff8dc' }} />
-                    </linearGradient>
-                  </defs>
-                  <path
-                    d="M8 24 C10 20, 14 12, 24 6 C20 10, 18 14, 18 18 C18 14, 16 12, 12 14 C14 16, 14 20, 10 24 Z"
-                    fill="url(#wing-header)"
-                  />
-                </svg>
-              </div>
+              <img
+                src="/logo-narae.png"
+                alt="Narae Voyage"
+                className="w-9 h-9 rounded-lg object-cover"
+              />
               <span className="font-bold text-lg hidden sm:inline">Narae Voyage</span>
             </Link>
 

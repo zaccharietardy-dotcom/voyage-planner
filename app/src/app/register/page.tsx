@@ -173,21 +173,7 @@ export default function RegisterPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <Link href="/" className="inline-block mb-4">
-            <div className="w-12 h-12 mx-auto rounded-full bg-gradient-to-br from-[#1e3a5f] to-[#0f2744] flex items-center justify-center">
-              <svg className="w-7 h-7" viewBox="0 0 32 32">
-                <defs>
-                  <linearGradient id="wing-register" x1="0%" y1="100%" x2="100%" y2="0%">
-                    <stop offset="0%" style={{ stopColor: '#c9a227' }} />
-                    <stop offset="50%" style={{ stopColor: '#f4d03f' }} />
-                    <stop offset="100%" style={{ stopColor: '#fff8dc' }} />
-                  </linearGradient>
-                </defs>
-                <path
-                  d="M8 24 C10 20, 14 12, 24 6 C20 10, 18 14, 18 18 C18 14, 16 12, 12 14 C14 16, 14 20, 10 24 Z"
-                  fill="url(#wing-register)"
-                />
-              </svg>
-            </div>
+            <img src="/logo-narae.png" alt="Narae Voyage" className="w-12 h-12 mx-auto rounded-lg object-cover" />
           </Link>
           <CardTitle className="text-2xl">Créer un compte</CardTitle>
           <CardDescription>
