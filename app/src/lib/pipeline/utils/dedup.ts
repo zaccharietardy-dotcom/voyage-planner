@@ -305,6 +305,7 @@ export function isIrrelevantAttraction(activity: ScoredActivity): boolean {
     'hard rock cafe', 'starbucks', 'mcdonalds', 'mcdonald',
     'burger king', 'kfc', 'subway',
     'ripley', 'body worlds',
+    'photoshoot', 'photo shoot',
   ];
 
   if (irrelevantNames.some(n => name.includes(n))) return true;
@@ -358,6 +359,17 @@ export function isIrrelevantAttraction(activity: ScoredActivity): boolean {
   if ((activity as any).source === 'google_places' && (activity.reviewCount || 0) > 500) return false;
 
   if (!hasAttractionKeyword && genericPlacePatterns.some(p => p.test(name))) return true;
+
+  // 4. City gates, doors, minor architectural elements — usually just walk-by
+  // things that don't justify a dedicated activity slot (e.g., "Porte du Simplon", "Porta Garibaldi")
+  const minorMonumentPatterns = [
+    /^(porta|porte|puerta|gate|tor)\b/i,     // City gates
+    /\b(city gate|city wall|porta)\b/i,       // City walls and gates
+  ];
+  // Exception: famous gates (Brandenburg, etc.) or if high reviews
+  const isFamousGate = (activity.reviewCount || 0) > 1000 ||
+    /\b(brandenburg|triomphe|alcalá|india gate|golden gate)\b/i.test(name);
+  if (!isFamousGate && minorMonumentPatterns.some(p => p.test(name))) return true;
 
   return false;
 }

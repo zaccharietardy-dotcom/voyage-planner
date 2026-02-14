@@ -622,6 +622,10 @@ const VIATOR_EXCLUDED_KEYWORDS = [
   'bimhuis', 'muziekgebouw', 'carré',
   // Generic photo spots
   'photo spot', 'instagram spot', 'selfie',
+  // Photography/photoshoot marketing activities
+  'photoshoot', 'photo shoot', 'photo tour', 'photo session',
+  'photography tour', 'photography experience', 'photo experience',
+  'professional photographer', 'professional photo',
   // Tourist traps
   'madame tussauds', 'tussaud', 'wax museum', 'trick eye',
   'selfie museum', "ripley's",

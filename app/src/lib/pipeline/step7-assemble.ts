@@ -273,6 +273,28 @@ export async function assembleTripSchedule(
   }
 
   // ---------------------------------------------------------------------------
+  // Cross-day activity dedup: prevent the same activity from appearing on multiple days.
+  // This can happen when rebalancing/must-see injection puts an activity into a cluster
+  // while another copy remained from a different source.
+  // ---------------------------------------------------------------------------
+  const crossDayUsedActivityIds = new Set<string>();
+  const crossDayUsedActivityNames = new Set<string>();
+  for (const [dayNum, activities] of prepassActivities) {
+    const deduped: ScoredActivity[] = [];
+    for (const act of activities) {
+      const normName = (act.name || '').toLowerCase().trim();
+      if (crossDayUsedActivityIds.has(act.id) || crossDayUsedActivityNames.has(normName)) {
+        console.log(`[Pipeline V2] Cross-day dedup: removing "${act.name}" from Day ${dayNum} (already scheduled)`);
+        continue;
+      }
+      crossDayUsedActivityIds.add(act.id);
+      if (normName) crossDayUsedActivityNames.add(normName);
+      deduped.push(act);
+    }
+    prepassActivities.set(dayNum, deduped);
+  }
+
+  // ---------------------------------------------------------------------------
   // MAIN LOOP: schedule each day using pre-computed activities + directions cache
   // ---------------------------------------------------------------------------
   for (const balancedDay of plan.days) {
