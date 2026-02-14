@@ -32,23 +32,8 @@ export async function POST(
       return NextResponse.json({ error: 'Voyage non trouvé' }, { status: 404 });
     }
 
-    // Vérifier que l'utilisateur est propriétaire ou éditeur
-    const isOwner = trip.owner_id === user.id;
-    let hasAccess = isOwner;
-
-    if (!isOwner) {
-      const { data: member } = await supabase
-        .from('trip_members')
-        .select('role')
-        .eq('trip_id', tripId)
-        .eq('user_id', user.id)
-        .single();
-
-      hasAccess = !!member && ['owner', 'editor'].includes(member.role);
-    }
-
-    if (!hasAccess) {
-      return NextResponse.json({ error: 'Accès refusé' }, { status: 403 });
+    if (trip.owner_id !== user.id) {
+      return NextResponse.json({ error: 'Seul le propriétaire peut appliquer ces modifications' }, { status: 403 });
     }
 
     // Parser le body
@@ -186,22 +171,8 @@ export async function DELETE(
       return NextResponse.json({ error: 'Voyage non trouvé' }, { status: 404 });
     }
 
-    const isOwner = trip.owner_id === user.id;
-    let hasAccess = isOwner;
-
-    if (!isOwner) {
-      const { data: member } = await supabase
-        .from('trip_members')
-        .select('role')
-        .eq('trip_id', tripId)
-        .eq('user_id', user.id)
-        .single();
-
-      hasAccess = !!member && ['owner', 'editor'].includes(member.role);
-    }
-
-    if (!hasAccess) {
-      return NextResponse.json({ error: 'Accès refusé' }, { status: 403 });
+    if (trip.owner_id !== user.id) {
+      return NextResponse.json({ error: 'Seul le propriétaire peut annuler ces modifications' }, { status: 403 });
     }
 
     // Restaurer les données (y compris durationDays)

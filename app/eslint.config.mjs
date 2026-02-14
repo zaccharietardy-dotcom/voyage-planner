@@ -30,6 +30,22 @@ const eslintConfig = defineConfig([
       "react-hooks/immutability": "warn",
     },
   },
+  {
+    files: [
+      "src/hooks/useRealtimeTrip.ts",
+      "src/app/api/trips/[id]/proposals/route.ts",
+      "src/app/api/proposals/[id]/vote/route.ts",
+      "src/app/api/trips/[id]/route.ts",
+      "src/components/trip/SharePanel.tsx",
+      "src/app/trip/[id]/page.tsx",
+    ],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "error",
+      "react-hooks/set-state-in-effect": "error",
+      "react-hooks/refs": "error",
+      "react-hooks/immutability": "error",
+    },
+  },
 ]);
 
 export default eslintConfig;

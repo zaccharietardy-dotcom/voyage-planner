@@ -52,6 +52,13 @@ export async function POST(
           .from('trip_members')
           .update({ role })
           .eq('id', existing.id);
+
+        await supabase.from('activity_log').insert({
+          trip_id: id,
+          user_id: user.id,
+          action: 'member_role_changed',
+          details: { targetUserId: user_id, newRole: role },
+        });
       }
       return NextResponse.json({ message: 'Membre mis à jour', role });
     }

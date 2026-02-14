@@ -15,6 +15,8 @@ import {
   CheckCircle,
   XCircle,
   GitMerge,
+  Crown,
+  Loader2,
 } from 'lucide-react';
 import { Proposal, ChangeType } from '@/lib/types/collaboration';
 import { formatDistanceToNow } from 'date-fns';
@@ -23,18 +25,42 @@ import { fr } from 'date-fns/locale';
 interface ProposalCardProps {
   proposal: Proposal;
   onVote: (proposalId: string, vote: boolean) => Promise<void>;
+  onDecision?: (proposalId: string, decision: 'merge' | 'reject') => Promise<void>;
   currentUserId?: string;
+  canVote?: boolean;
+  canOwnerDecide?: boolean;
 }
 
-export function ProposalCard({ proposal, onVote, currentUserId }: ProposalCardProps) {
+export function ProposalCard({
+  proposal,
+  onVote,
+  onDecision,
+  currentUserId,
+  canVote = false,
+  canOwnerDecide = false,
+}: ProposalCardProps) {
   const [isVoting, setIsVoting] = useState(false);
+  const [isDeciding, setIsDeciding] = useState(false);
 
-  const handleVote = async (vote: boolean) => {
+  const handleVote = async (voteValue: boolean) => {
     setIsVoting(true);
     try {
-      await onVote(proposal.id, vote);
+      await onVote(proposal.id, voteValue);
     } finally {
       setIsVoting(false);
+    }
+  };
+
+  const handleDecision = async (decision: 'merge' | 'reject') => {
+    if (!onDecision) {
+      return;
+    }
+
+    setIsDeciding(true);
+    try {
+      await onDecision(proposal.id, decision);
+    } finally {
+      setIsDeciding(false);
     }
   };
 
@@ -44,14 +70,14 @@ export function ProposalCard({ proposal, onVote, currentUserId }: ProposalCardPr
         return (
           <Badge variant="outline" className="gap-1">
             <Clock className="h-3 w-3" />
-            En attente
+            En vote
           </Badge>
         );
       case 'approved':
         return (
-          <Badge className="gap-1 bg-green-500">
-            <CheckCircle className="h-3 w-3" />
-            Approuvée
+          <Badge className="gap-1 bg-amber-500">
+            <Crown className="h-3 w-3" />
+            Décision propriétaire
           </Badge>
         );
       case 'rejected':
@@ -88,7 +114,8 @@ export function ProposalCard({ proposal, onVote, currentUserId }: ProposalCardPr
   };
 
   const isAuthor = proposal.authorId === currentUserId;
-  const canVote = !isAuthor && proposal.status === 'pending';
+  const canVoteOnProposal = canVote && !isAuthor && proposal.status === 'pending';
+  const canDecideProposal = canOwnerDecide && proposal.status === 'approved';
 
   return (
     <Card className="overflow-hidden">
@@ -133,11 +160,10 @@ export function ProposalCard({ proposal, onVote, currentUserId }: ProposalCardPr
           )}
         </div>
 
-        {/* Liste des changements */}
         <div className="space-y-1">
-          {proposal.changes.map((change, i) => (
+          {proposal.changes.map((change) => (
             <div
-              key={i}
+              key={change.id}
               className="flex items-center gap-2 text-xs px-2 py-1.5 bg-muted rounded"
             >
               {getChangeIcon(change.type)}
@@ -145,23 +171,33 @@ export function ProposalCard({ proposal, onVote, currentUserId }: ProposalCardPr
             </div>
           ))}
         </div>
+
+        {proposal.status === 'approved' && !canOwnerDecide && (
+          <div className="rounded-md border border-amber-200 bg-amber-50 px-2.5 py-2 text-xs text-amber-900">
+            Proposition approuvée par les votes. En attente de la décision du propriétaire.
+          </div>
+        )}
       </CardContent>
 
-      {/* Footer avec votes */}
       <CardFooter className="border-t pt-3">
-        <div className="flex items-center justify-between w-full">
-          <div className="flex items-center gap-4 text-sm">
-            <span className="flex items-center gap-1 text-green-600">
-              <ThumbsUp className="h-4 w-4" />
-              {proposal.votesFor}
-            </span>
-            <span className="flex items-center gap-1 text-red-600">
-              <ThumbsDown className="h-4 w-4" />
-              {proposal.votesAgainst}
+        <div className="flex flex-col gap-2 w-full">
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center gap-4 text-sm">
+              <span className="flex items-center gap-1 text-green-600">
+                <ThumbsUp className="h-4 w-4" />
+                {proposal.votesFor}
+              </span>
+              <span className="flex items-center gap-1 text-red-600">
+                <ThumbsDown className="h-4 w-4" />
+                {proposal.votesAgainst}
+              </span>
+            </div>
+            <span className="text-xs text-muted-foreground">
+              Majorité: {proposal.requiredVotes}/{proposal.eligibleVoters}
             </span>
           </div>
 
-          {canVote && (
+          {canVoteOnProposal && (
             <div className="flex gap-2">
               <Button
                 size="sm"
@@ -186,9 +222,33 @@ export function ProposalCard({ proposal, onVote, currentUserId }: ProposalCardPr
             </div>
           )}
 
+          {canDecideProposal && (
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                onClick={() => handleDecision('merge')}
+                disabled={isDeciding}
+                className="gap-1"
+              >
+                {isDeciding ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4" />}
+                Appliquer
+              </Button>
+              <Button
+                size="sm"
+                variant="destructive"
+                onClick={() => handleDecision('reject')}
+                disabled={isDeciding}
+                className="gap-1"
+              >
+                <XCircle className="h-4 w-4" />
+                Rejeter
+              </Button>
+            </div>
+          )}
+
           {isAuthor && proposal.status === 'pending' && (
             <p className="text-xs text-muted-foreground">
-              En attente des votes...
+              En attente des votes des éditeurs...
             </p>
           )}
         </div>

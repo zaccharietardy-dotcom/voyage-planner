@@ -53,6 +53,9 @@ export interface Proposal {
   userVote?: boolean; // true = pour, false = contre, undefined = pas voté
   createdAt: string;
   resolvedAt?: string;
+  eligibleVoters: number;
+  requiredVotes: number;
+  ownerDecisionRequired: boolean;
 }
 
 // Rôle d'un membre dans un voyage
@@ -88,8 +91,10 @@ export type ActivityAction =
   | 'member_joined'
   | 'member_left'
   | 'member_role_changed'
+  | 'member_invited'
   | 'proposal_created'
   | 'proposal_voted'
+  | 'proposal_approved'
   | 'proposal_merged'
   | 'proposal_rejected';
 
@@ -105,6 +110,27 @@ export interface ActivityLogEntry {
   action: ActivityAction;
   details?: Record<string, any>;
   createdAt: string;
+}
+
+export interface ProposalVoteResponse {
+  proposalId: string;
+  status: ProposalStatus;
+  votesFor: number;
+  votesAgainst: number;
+  userVote: boolean;
+  eligibleVoters: number;
+  requiredVotes: number;
+  ownerDecisionRequired: boolean;
+}
+
+export interface ProposalDecisionResponse {
+  proposalId: string;
+  status: Extract<ProposalStatus, 'merged' | 'rejected'>;
+  ownerDecisionRequired: false;
+}
+
+export interface MemberRoleUpdateRequest {
+  role: Extract<MemberRole, 'editor' | 'viewer'>;
 }
 
 // Voyage avec toutes les données relationnelles

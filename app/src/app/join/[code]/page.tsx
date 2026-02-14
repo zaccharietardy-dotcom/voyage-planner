@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/components/auth';
-import { getSupabaseClient } from '@/lib/supabase';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2, MapPin, Users, CheckCircle, XCircle } from 'lucide-react';
@@ -26,70 +25,32 @@ export default function JoinTripPage() {
     }
 
     setStatus('checking');
-    const supabase = getSupabaseClient();
-    const joinRole = 'viewer';
 
     try {
-      // Trouver le voyage par code de partage
-      const { data: trip, error: tripError } = await supabase
-        .from('trips')
-        .select('id, title, destination')
-        .eq('share_code', code)
-        .single();
-
-      if (tripError || !trip) {
-        setStatus('error');
-        setError('Ce lien de partage est invalide ou a expiré.');
-        return;
-      }
-
-      setTripInfo(trip);
-
-      // Vérifier si l'utilisateur est déjà membre
-      const { data: existingMember } = await supabase
-        .from('trip_members')
-        .select('id')
-        .eq('trip_id', trip.id)
-        .eq('user_id', user.id)
-        .single();
-
-      if (existingMember) {
-        setStatus('already_member');
-        return;
-      }
-
-      // Ajouter comme membre (contrainte UNIQUE sur trip_id+user_id gère la race condition)
-      setStatus('joining');
-      const { error: joinError } = await supabase.from('trip_members').insert({
-        trip_id: trip.id,
-        user_id: user.id,
-        role: joinRole,
+      const response = await fetch('/api/trips/join', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code }),
       });
 
-      if (joinError) {
-        // Si conflit de contrainte unique, l'utilisateur est déjà membre (race condition)
-        if (joinError.code === '23505') {
-          setStatus('already_member');
-          return;
-        }
+      const payload = await response.json() as {
+        error?: string;
+        status?: 'joined' | 'already_member';
+        trip?: { id: string; title: string; destination: string };
+      };
+
+      if (!response.ok || !payload.trip || !payload.status) {
         setStatus('error');
-        setError('Impossible de rejoindre ce voyage. Veuillez réessayer.');
+        setError(payload.error || 'Ce lien de partage est invalide ou a expiré.');
         return;
       }
 
-      // Log d'activité
-      await supabase.from('activity_log').insert({
-        trip_id: trip.id,
-        user_id: user.id,
-        action: 'member_joined',
-        details: { joinMethod: 'share_link' },
-      });
-
-      setStatus('success');
+      setTripInfo(payload.trip);
+      setStatus(payload.status === 'already_member' ? 'already_member' : 'success');
 
       // Rediriger après 2 secondes
       setTimeout(() => {
-        router.push(`/trip/${trip.id}`);
+        router.push(`/trip/${payload.trip!.id}`);
       }, 2000);
     } catch (err) {
       console.error('Error joining trip:', err);

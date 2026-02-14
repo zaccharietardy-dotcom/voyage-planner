@@ -3,7 +3,14 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { getSupabaseClient } from '@/lib/supabase';
 import { Trip, TripDay } from '@/lib/types';
-import { Proposal, TripMember, MemberRole } from '@/lib/types/collaboration';
+import {
+  Proposal,
+  TripMember,
+  MemberRole,
+  ProposedChange,
+  ProposalVoteResponse,
+  ProposalDecisionResponse,
+} from '@/lib/types/collaboration';
 
 interface TripWithCollaboration {
   id: string;
@@ -19,18 +26,58 @@ interface TripWithCollaboration {
   userRole?: MemberRole;
 }
 
+interface TripApiResponse {
+  id: string;
+  title: string;
+  destination: string;
+  start_date: string;
+  duration_days: number;
+  share_code: string;
+  visibility?: 'public' | 'friends' | 'private';
+  data: Trip;
+  members?: TripMember[];
+  proposals?: Proposal[];
+  userRole?: MemberRole;
+}
+
 interface UseRealtimeTripResult {
   trip: TripWithCollaboration | null;
   isLoading: boolean;
   error: string | null;
   updateTrip: (updates: Partial<Trip>) => Promise<void>;
   updateDays: (days: TripDay[]) => Promise<void>;
-  createProposal: (title: string, description: string, changes: any[]) => Promise<void>;
+  createProposal: (title: string, description: string, changes: ProposedChange[]) => Promise<void>;
   vote: (proposalId: string, vote: boolean) => Promise<void>;
+  decideProposal: (proposalId: string, decision: 'merge' | 'reject') => Promise<void>;
   refetch: () => Promise<void>;
 }
 
-export function useRealtimeTrip(tripId: string, userId?: string): UseRealtimeTripResult {
+function deserializeTrip(tripData: Trip): Trip {
+  const clonedTrip = structuredClone(tripData);
+
+  if (clonedTrip.days) {
+    clonedTrip.days = clonedTrip.days.map((day) => ({
+      ...day,
+      date: day.date ? new Date(day.date) : new Date(),
+    }));
+  }
+
+  if (clonedTrip.preferences?.startDate) {
+    clonedTrip.preferences.startDate = new Date(clonedTrip.preferences.startDate);
+  }
+
+  if (clonedTrip.createdAt) {
+    clonedTrip.createdAt = new Date(clonedTrip.createdAt);
+  }
+
+  if (clonedTrip.updatedAt) {
+    clonedTrip.updatedAt = new Date(clonedTrip.updatedAt);
+  }
+
+  return clonedTrip;
+}
+
+export function useRealtimeTrip(tripId: string): UseRealtimeTripResult {
   const [trip, setTrip] = useState<TripWithCollaboration | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -38,8 +85,6 @@ export function useRealtimeTrip(tripId: string, userId?: string): UseRealtimeTri
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
   const retryCountRef = useRef(0);
-
-  // Charger les données du voyage
   const isRetryingRef = useRef(false);
 
   const fetchTrip = useCallback(async () => {
@@ -50,31 +95,26 @@ export function useRealtimeTrip(tripId: string, userId?: string): UseRealtimeTri
       const response = await fetch(`/api/trips/${tripId}`);
       if (!response.ok) {
         if ((response.status === 401 || response.status === 403) && retryCountRef.current < 3) {
-          // Auth not ready yet — retry after delay, keep loading state
-          retryCountRef.current++;
+          retryCountRef.current += 1;
           isRetryingRef.current = true;
-          setTimeout(() => fetchTrip(), retryCountRef.current * 800);
+          setTimeout(() => {
+            void fetchTrip();
+          }, retryCountRef.current * 800);
           return;
         }
-        throw new Error(response.status === 401 ? 'Non authentifié' : response.status === 403 ? 'Accès refusé' : 'Voyage non trouvé');
+
+        throw new Error(
+          response.status === 401
+            ? 'Non authentifié'
+            : response.status === 403
+              ? 'Accès refusé'
+              : 'Voyage non trouvé'
+        );
       }
+
       retryCountRef.current = 0;
-
-      const data = await response.json();
-
-      // Deserialize dates from JSON
-      const tripData = data.data as Trip;
-      if (tripData.days) {
-        tripData.days = tripData.days.map((day: any) => ({
-          ...day,
-          date: day.date ? new Date(day.date) : new Date(),
-        }));
-      }
-      if (tripData.preferences?.startDate) {
-        tripData.preferences.startDate = new Date(tripData.preferences.startDate);
-      }
-      if (tripData.createdAt) tripData.createdAt = new Date(tripData.createdAt);
-      if (tripData.updatedAt) tripData.updatedAt = new Date(tripData.updatedAt);
+      const data = await response.json() as TripApiResponse;
+      const tripData = deserializeTrip(data.data);
 
       setTrip({
         id: data.id,
@@ -98,15 +138,12 @@ export function useRealtimeTrip(tripId: string, userId?: string): UseRealtimeTri
     }
   }, [tripId]);
 
-  // Configurer les subscriptions temps réel
   useEffect(() => {
     retryCountRef.current = 0;
-    fetchTrip();
+    void fetchTrip();
 
-    // Créer le channel pour ce voyage
     const channel = supabase
       .channel(`trip-${tripId}`)
-      // Écouter les mises à jour du voyage
       .on(
         'postgres_changes',
         {
@@ -115,33 +152,23 @@ export function useRealtimeTrip(tripId: string, userId?: string): UseRealtimeTri
           table: 'trips',
           filter: `id=eq.${tripId}`,
         },
-        (payload) => {
-          const tripData = payload.new.data as Trip;
-          // Deserialize dates from raw Postgres JSON
-          if (tripData.days) {
-            tripData.days = tripData.days.map((day: any) => ({
-              ...day,
-              date: day.date ? new Date(day.date) : new Date(),
-            }));
-          }
-          if (tripData.preferences?.startDate) {
-            tripData.preferences.startDate = new Date(tripData.preferences.startDate);
-          }
-          if (tripData.createdAt) tripData.createdAt = new Date(tripData.createdAt);
-          if (tripData.updatedAt) tripData.updatedAt = new Date(tripData.updatedAt);
+        (payload: { new: { data: Trip; title: string; destination: string } }) => {
+          const realtimeTripData = deserializeTrip(payload.new.data);
 
-          setTrip((prev) => {
-            if (!prev) return prev;
+          setTrip((previousTrip) => {
+            if (!previousTrip) {
+              return previousTrip;
+            }
+
             return {
-              ...prev,
-              data: tripData,
+              ...previousTrip,
+              data: realtimeTripData,
               title: payload.new.title,
               destination: payload.new.destination,
             };
           });
         }
       )
-      // Écouter les nouvelles propositions
       .on(
         'postgres_changes',
         {
@@ -150,19 +177,22 @@ export function useRealtimeTrip(tripId: string, userId?: string): UseRealtimeTri
           table: 'proposals',
           filter: `trip_id=eq.${tripId}`,
         },
-        async (payload) => {
-          // Recharger les propositions avec les détails de l'auteur
+        async () => {
           const response = await fetch(`/api/trips/${tripId}/proposals`);
-          if (response.ok) {
-            const proposals = await response.json();
-            setTrip((prev) => {
-              if (!prev) return prev;
-              return { ...prev, proposals };
-            });
+          if (!response.ok) {
+            return;
           }
+
+          const proposals = await response.json() as Proposal[];
+          setTrip((previousTrip) => {
+            if (!previousTrip) {
+              return previousTrip;
+            }
+
+            return { ...previousTrip, proposals };
+          });
         }
       )
-      // Écouter les mises à jour des propositions (votes)
       .on(
         'postgres_changes',
         {
@@ -171,24 +201,24 @@ export function useRealtimeTrip(tripId: string, userId?: string): UseRealtimeTri
           table: 'proposals',
           filter: `trip_id=eq.${tripId}`,
         },
-        async (payload) => {
-          // Recharger les propositions
+        async (payload: { new: { status: Proposal['status'] } }) => {
           const response = await fetch(`/api/trips/${tripId}/proposals`);
           if (response.ok) {
-            const proposals = await response.json();
-            setTrip((prev) => {
-              if (!prev) return prev;
-              return { ...prev, proposals };
+            const proposals = await response.json() as Proposal[];
+            setTrip((previousTrip) => {
+              if (!previousTrip) {
+                return previousTrip;
+              }
+
+              return { ...previousTrip, proposals };
             });
           }
 
-          // Si une proposition a été mergée, recharger le voyage
           if (payload.new.status === 'merged') {
-            fetchTrip();
+            await fetchTrip();
           }
         }
       )
-      // Écouter les nouveaux membres
       .on(
         'postgres_changes',
         {
@@ -198,8 +228,31 @@ export function useRealtimeTrip(tripId: string, userId?: string): UseRealtimeTri
           filter: `trip_id=eq.${tripId}`,
         },
         () => {
-          // Recharger le voyage complet pour avoir les détails des membres
-          fetchTrip();
+          void fetchTrip();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'trip_members',
+          filter: `trip_id=eq.${tripId}`,
+        },
+        () => {
+          void fetchTrip();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'trip_members',
+          filter: `trip_id=eq.${tripId}`,
+        },
+        () => {
+          void fetchTrip();
         }
       )
       .subscribe();
@@ -208,15 +261,16 @@ export function useRealtimeTrip(tripId: string, userId?: string): UseRealtimeTri
 
     return () => {
       if (channelRef.current) {
-        supabase.removeChannel(channelRef.current);
+        void supabase.removeChannel(channelRef.current);
       }
     };
   }, [tripId, fetchTrip, supabase]);
 
-  // Mettre à jour le voyage
   const updateTrip = useCallback(
     async (updates: Partial<Trip>) => {
-      if (!trip) return;
+      if (!trip) {
+        return;
+      }
 
       const response = await fetch(`/api/trips/${tripId}`, {
         method: 'PATCH',
@@ -229,22 +283,25 @@ export function useRealtimeTrip(tripId: string, userId?: string): UseRealtimeTri
         return;
       }
 
-      // Mise à jour optimiste
-      setTrip((prev) => {
-        if (!prev) return prev;
+      setTrip((previousTrip) => {
+        if (!previousTrip) {
+          return previousTrip;
+        }
+
         return {
-          ...prev,
-          data: { ...prev.data, ...updates },
+          ...previousTrip,
+          data: { ...previousTrip.data, ...updates },
         };
       });
     },
     [trip, tripId]
   );
 
-  // Mettre à jour les jours spécifiquement
   const updateDays = useCallback(
     async (days: TripDay[]) => {
-      if (!trip) return;
+      if (!trip) {
+        return;
+      }
 
       const response = await fetch(`/api/trips/${tripId}`, {
         method: 'PATCH',
@@ -257,21 +314,22 @@ export function useRealtimeTrip(tripId: string, userId?: string): UseRealtimeTri
         return;
       }
 
-      // Mise à jour optimiste
-      setTrip((prev) => {
-        if (!prev) return prev;
+      setTrip((previousTrip) => {
+        if (!previousTrip) {
+          return previousTrip;
+        }
+
         return {
-          ...prev,
-          data: { ...prev.data, days },
+          ...previousTrip,
+          data: { ...previousTrip.data, days },
         };
       });
     },
     [trip, tripId]
   );
 
-  // Créer une proposition
   const createProposal = useCallback(
-    async (title: string, description: string, changes: any[]) => {
+    async (title: string, description: string, changes: ProposedChange[]) => {
       const response = await fetch(`/api/trips/${tripId}/proposals`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -282,21 +340,22 @@ export function useRealtimeTrip(tripId: string, userId?: string): UseRealtimeTri
         throw new Error('Erreur de création de proposition');
       }
 
-      const proposal = await response.json();
+      const proposal = await response.json() as Proposal;
 
-      // Ajouter la proposition localement
-      setTrip((prev) => {
-        if (!prev) return prev;
+      setTrip((previousTrip) => {
+        if (!previousTrip) {
+          return previousTrip;
+        }
+
         return {
-          ...prev,
-          proposals: [proposal, ...prev.proposals],
+          ...previousTrip,
+          proposals: [proposal, ...previousTrip.proposals],
         };
       });
     },
     [tripId]
   );
 
-  // Voter sur une proposition
   const vote = useCallback(
     async (proposalId: string, voteValue: boolean) => {
       const response = await fetch(`/api/proposals/${proposalId}/vote`, {
@@ -309,30 +368,74 @@ export function useRealtimeTrip(tripId: string, userId?: string): UseRealtimeTri
         throw new Error('Erreur de vote');
       }
 
-      const result = await response.json();
+      const result = await response.json() as ProposalVoteResponse;
 
-      // Mettre à jour la proposition localement
-      setTrip((prev) => {
-        if (!prev) return prev;
+      setTrip((previousTrip) => {
+        if (!previousTrip) {
+          return previousTrip;
+        }
+
         return {
-          ...prev,
-          proposals: prev.proposals.map((p) =>
-            p.id === proposalId
+          ...previousTrip,
+          proposals: previousTrip.proposals.map((proposal) =>
+            proposal.id === proposalId
               ? {
-                  ...p,
+                  ...proposal,
                   votesFor: result.votesFor,
                   votesAgainst: result.votesAgainst,
                   status: result.status,
                   userVote: result.userVote,
+                  eligibleVoters: result.eligibleVoters,
+                  requiredVotes: result.requiredVotes,
+                  ownerDecisionRequired: result.ownerDecisionRequired,
                 }
-              : p
+              : proposal
+          ),
+        };
+      });
+    },
+    []
+  );
+
+  const decideProposal = useCallback(
+    async (proposalId: string, decision: 'merge' | 'reject') => {
+      const response = await fetch(`/api/proposals/${proposalId}/decision`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ decision }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Erreur lors de la décision propriétaire');
+      }
+
+      const result = await response.json() as ProposalDecisionResponse;
+
+      setTrip((previousTrip) => {
+        if (!previousTrip) {
+          return previousTrip;
+        }
+
+        return {
+          ...previousTrip,
+          proposals: previousTrip.proposals.map((proposal) =>
+            proposal.id === proposalId
+              ? {
+                  ...proposal,
+                  status: result.status,
+                  ownerDecisionRequired: false,
+                  resolvedAt: new Date().toISOString(),
+                }
+              : proposal
           ),
         };
       });
 
-      // Si mergé, le voyage sera mis à jour via realtime
+      if (result.status === 'merged') {
+        await fetchTrip();
+      }
     },
-    []
+    [fetchTrip]
   );
 
   return {
@@ -343,6 +446,7 @@ export function useRealtimeTrip(tripId: string, userId?: string): UseRealtimeTri
     updateDays,
     createProposal,
     vote,
+    decideProposal,
     refetch: fetchTrip,
   };
 }

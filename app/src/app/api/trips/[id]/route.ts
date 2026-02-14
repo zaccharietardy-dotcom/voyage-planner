@@ -1,10 +1,37 @@
 import { createRouteHandlerClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 import { isAcceptedCloseFriend } from '@/lib/server/closeFriends';
+import type { Json } from '@/lib/supabase/types';
+import type { MemberRole } from '@/lib/types/collaboration';
+import {
+  formatProposalForApi,
+  getEditorUserIds,
+  type ProposalSelectRow,
+} from '@/lib/server/collaboration';
+
+interface ProfileRow {
+  id?: string;
+  display_name: string | null;
+  avatar_url: string | null;
+  email: string | null;
+}
+
+interface TripMemberWithProfile {
+  id: string;
+  role: MemberRole;
+  joined_at: string;
+  user_id: string;
+  profiles: ProfileRow | ProfileRow[] | null;
+}
+
+interface VoteRow {
+  proposal_id: string;
+  vote: boolean;
+}
 
 // GET /api/trips/[id] - Récupérer un voyage avec ses membres et propositions
 export async function GET(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -12,7 +39,6 @@ export async function GET(
     const supabase = await createRouteHandlerClient();
     const { data: { user } } = await supabase.auth.getUser();
 
-    // Récupérer le voyage
     const { data: trip, error: tripError } = await supabase
       .from('trips')
       .select('*')
@@ -24,22 +50,21 @@ export async function GET(
     }
 
     // Check access: owner, trip_member, or visibility-based
-    let userRole: string | null = null;
+    let userRole: MemberRole | null = null;
 
     if (user) {
       const isOwner = trip.owner_id === user.id;
       userRole = isOwner ? 'owner' : null;
 
       if (!isOwner) {
-        // Check trip_members
         const { data: member } = await supabase
           .from('trip_members')
           .select('role')
           .eq('trip_id', id)
           .eq('user_id', user.id)
-          .single();
+          .maybeSingle();
 
-        if (member) {
+        if (member && (member.role === 'owner' || member.role === 'editor' || member.role === 'viewer')) {
           userRole = member.role;
         } else if (trip.visibility === 'public') {
           userRole = 'viewer';
@@ -50,11 +75,9 @@ export async function GET(
           }
         }
       }
-    } else {
+    } else if (trip.visibility === 'public') {
       // Unauthenticated: only allow public trips
-      if (trip.visibility === 'public') {
-        userRole = 'viewer';
-      }
+      userRole = 'viewer';
     }
 
     if (!userRole) {
@@ -64,8 +87,7 @@ export async function GET(
       );
     }
 
-    // Récupérer les membres avec leurs profils
-    const { data: members } = await supabase
+    const { data: memberRows } = await supabase
       .from('trip_members')
       .select(`
         id,
@@ -81,8 +103,7 @@ export async function GET(
       `)
       .eq('trip_id', id);
 
-    // Récupérer les propositions en attente
-    const { data: proposals } = await supabase
+    const { data: proposalRows } = await supabase
       .from('proposals')
       .select(`
         *,
@@ -94,58 +115,40 @@ export async function GET(
       .eq('trip_id', id)
       .order('created_at', { ascending: false });
 
-    // Récupérer les votes de l'utilisateur sur les propositions
-    let userVotes: Record<string, boolean> = {};
-    if (user && proposals) {
-      const proposalIds = proposals.map((p) => p.id);
+    const userVotes: Record<string, boolean> = {};
+    if (user && proposalRows && proposalRows.length > 0) {
+      const proposalIds = proposalRows.map((proposal) => proposal.id);
       const { data: votes } = await supabase
         .from('votes')
         .select('proposal_id, vote')
         .eq('user_id', user.id)
         .in('proposal_id', proposalIds);
 
-      userVotes = (votes || []).reduce((acc, v) => {
-        acc[v.proposal_id] = v.vote;
-        return acc;
-      }, {} as Record<string, boolean>);
+      for (const vote of (votes || []) as VoteRow[]) {
+        userVotes[vote.proposal_id] = vote.vote;
+      }
     }
 
-    // Formater les propositions avec le vote de l'utilisateur
-    const formattedProposals = proposals?.map((p) => {
-      const author = p.author as { display_name?: string | null; avatar_url?: string | null } | null;
-      return {
-        id: p.id,
-        tripId: p.trip_id,
-        authorId: p.author_id,
-        author: {
-          displayName: author?.display_name || 'Utilisateur',
-          avatarUrl: author?.avatar_url,
-        },
-        title: p.title,
-        description: p.description,
-        changes: p.changes,
-        status: p.status,
-        votesFor: p.votes_for,
-        votesAgainst: p.votes_against,
-        userVote: userVotes[p.id],
-        createdAt: p.created_at,
-        resolvedAt: p.resolved_at,
-      };
-    });
+    const editorUserIds = await getEditorUserIds(supabase, id);
 
-    // Formater les membres
-    const formattedMembers = members?.map((m) => {
-      const profile = m.profiles as {
-        display_name?: string | null;
-        avatar_url?: string | null;
-        email?: string | null;
-      } | null;
+    const formattedProposals = (proposalRows || []).map((proposal) =>
+      formatProposalForApi(
+        proposal as ProposalSelectRow,
+        userVotes[proposal.id],
+        editorUserIds
+      )
+    );
+
+    const typedMemberRows = (memberRows || []) as TripMemberWithProfile[];
+    const formattedMembers = typedMemberRows.map((member) => {
+      const profile = Array.isArray(member.profiles) ? member.profiles[0] : member.profiles;
+
       return {
-        id: m.id,
+        id: member.id,
         tripId: id,
-        userId: m.user_id,
-        role: m.role,
-        joinedAt: m.joined_at,
+        userId: member.user_id,
+        role: member.role,
+        joinedAt: member.joined_at,
         profile: {
           displayName: profile?.display_name || 'Utilisateur',
           avatarUrl: profile?.avatar_url,
@@ -156,8 +159,8 @@ export async function GET(
 
     return NextResponse.json({
       ...trip,
-      members: formattedMembers || [],
-      proposals: formattedProposals || [],
+      members: formattedMembers,
+      proposals: formattedProposals,
       userRole,
     });
   } catch (error) {
@@ -180,46 +183,48 @@ export async function PATCH(
       return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
     }
 
-    // Vérifier que l'utilisateur est owner ou editor
-    // First check if user is trip owner
-    const { data: trip } = await supabase
+    // Proposals First: seules les modifications owner passent en PATCH direct
+    const { data: trip, error: tripError } = await supabase
       .from('trips')
       .select('owner_id')
       .eq('id', id)
-      .single();
+      .maybeSingle();
 
-    const isOwner = trip?.owner_id === user.id;
-
-    if (!isOwner) {
-      // Fallback: check trip_members
-      const { data: member } = await supabase
-        .from('trip_members')
-        .select('role')
-        .eq('trip_id', id)
-        .eq('user_id', user.id)
-        .single();
-
-      if (!member || member.role === 'viewer') {
-        return NextResponse.json({ error: 'Permission refusée' }, { status: 403 });
-      }
+    if (tripError || !trip) {
+      return NextResponse.json({ error: 'Voyage non trouvé' }, { status: 404 });
     }
 
-    const updates = await request.json();
-
-    // Only owner can change visibility
-    if (updates.visibility !== undefined && !isOwner) {
-      return NextResponse.json({ error: 'Seul le propri\u00e9taire peut changer la visibilit\u00e9' }, { status: 403 });
+    if (trip.owner_id !== user.id) {
+      return NextResponse.json({ error: 'Seul le propriétaire peut modifier directement le voyage' }, { status: 403 });
     }
 
-    // Build update object
-    const updateObj: Record<string, unknown> = {
+    const updates = await request.json() as {
+      data?: Json;
+      visibility?: 'public' | 'friends' | 'private';
+      title?: string;
+    };
+
+    const updateObj: {
+      updated_at: string;
+      data?: Json;
+      visibility?: 'public' | 'friends' | 'private';
+      title?: string;
+    } = {
       updated_at: new Date().toISOString(),
     };
-    if (updates.data !== undefined) updateObj.data = updates.data;
-    if (updates.visibility !== undefined) updateObj.visibility = updates.visibility;
-    if (updates.title !== undefined) updateObj.title = updates.title;
 
-    // Mettre à jour le voyage
+    if (updates.data !== undefined) {
+      updateObj.data = updates.data;
+    }
+
+    if (updates.visibility !== undefined) {
+      updateObj.visibility = updates.visibility;
+    }
+
+    if (updates.title !== undefined) {
+      updateObj.title = updates.title;
+    }
+
     const { data: updatedTrip, error } = await supabase
       .from('trips')
       .update(updateObj)
@@ -231,7 +236,6 @@ export async function PATCH(
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    // Log d'activité
     await supabase.from('activity_log').insert({
       trip_id: id,
       user_id: user.id,
@@ -248,7 +252,7 @@ export async function PATCH(
 
 // DELETE /api/trips/[id] - Supprimer un voyage
 export async function DELETE(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -260,19 +264,20 @@ export async function DELETE(
       return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
     }
 
-    // Vérifier que l'utilisateur est owner
-    const { data: member } = await supabase
-      .from('trip_members')
-      .select('role')
-      .eq('trip_id', id)
-      .eq('user_id', user.id)
-      .single();
+    const { data: trip, error: tripError } = await supabase
+      .from('trips')
+      .select('owner_id')
+      .eq('id', id)
+      .maybeSingle();
 
-    if (!member || member.role !== 'owner') {
+    if (tripError || !trip) {
+      return NextResponse.json({ error: 'Voyage non trouvé' }, { status: 404 });
+    }
+
+    if (trip.owner_id !== user.id) {
       return NextResponse.json({ error: 'Seul le propriétaire peut supprimer le voyage' }, { status: 403 });
     }
 
-    // Supprimer le voyage (les cascades supprimeront membres, propositions, votes)
     const { error } = await supabase
       .from('trips')
       .delete()

@@ -12,16 +12,12 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import {
   ArrowLeft,
   Share2,
-  Users,
-  Calendar,
-  MapPin,
   Wallet,
   Loader2,
   RefreshCw,
   Bug,
   GitPullRequest,
   GripVertical,
-  Receipt,
   Copy,
   CalendarPlus,
   Download,
@@ -44,8 +40,8 @@ import { TravelTips } from '@/components/trip/TravelTips';
 import { PhotoGallery } from '@/components/photos/PhotoGallery';
 import { PhotoUploader } from '@/components/photos/PhotoUploader';
 import { PastTripView } from '@/components/trip/PastTripView';
-import { ProposedChange, createMoveActivityChange } from '@/lib/types/collaboration';
-import { recalculateTimes, insertDay, getUnusedAttractions } from '@/lib/services/itineraryCalculator';
+import { ProposedChange } from '@/lib/types/collaboration';
+import { recalculateTimes, insertDay } from '@/lib/services/itineraryCalculator';
 import { Attraction } from '@/lib/services/attractions';
 import { ActivitySwapButton } from '@/components/trip/ActivitySwapButton';
 import { AddActivityModal } from '@/components/trip/AddActivityModal';
@@ -53,7 +49,6 @@ import { CalendarView } from '@/components/trip/CalendarView';
 import { CommentsSection } from '@/components/trip/CommentsSection';
 import { ChatPanel, ChatButton } from '@/components/trip/ChatPanel';
 import { TripOnboarding } from '@/components/trip/TripOnboarding';
-import { cn } from '@/lib/utils';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -154,6 +149,16 @@ const TripMap = dynamic(
   }
 );
 
+type TripPreferencesWithType = Trip['preferences'] & { tripType?: string };
+
+interface TripApiRecord {
+  id: string;
+  owner_id?: string;
+  preferences?: TripPreferencesWithType;
+  data?: Trip;
+  [key: string]: unknown;
+}
+
 export default function TripPage() {
   const params = useParams();
   const router = useRouter();
@@ -163,7 +168,7 @@ export default function TripPage() {
   const [useCollaborativeMode, setUseCollaborativeMode] = useState(false);
   const [localTrip, setLocalTrip] = useState<Trip | null>(null);
   const [localLoading, setLocalLoading] = useState(true);
-  const [dbTrip, setDbTrip] = useState<any>(null);
+  const [dbTrip, setDbTrip] = useState<TripApiRecord | null>(null);
 
   const {
     trip: collaborativeTrip,
@@ -172,8 +177,9 @@ export default function TripPage() {
     updateDays,
     createProposal,
     vote,
+    decideProposal,
     refetch,
-  } = useRealtimeTrip(tripId, user?.id);
+  } = useRealtimeTrip(tripId);
 
   const [regenerating, setRegenerating] = useState(false);
   const [transportChanged, setTransportChanged] = useState(false);
@@ -186,7 +192,6 @@ export default function TripPage() {
   const [pendingChanges, setPendingChanges] = useState<ProposedChange[]>([]);
   const [showProposalDialog, setShowProposalDialog] = useState(false);
   const [showCollabPanel, setShowCollabPanel] = useState(false);
-  const [showExpensesPanel, setShowExpensesPanel] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [mainTab, setMainTab] = useState('planning');
   const [editingItem, setEditingItem] = useState<TripItem | null>(null);
@@ -211,12 +216,18 @@ export default function TripPage() {
   const trip = useCollaborativeMode ? collaborativeTrip?.data : localTrip;
   const loading = useCollaborativeMode ? collaborativeLoading : localLoading;
 
-  const members = collaborativeTrip?.members || [];
-  const proposals = collaborativeTrip?.proposals || [];
+  const members = useMemo(() => collaborativeTrip?.members || [], [collaborativeTrip?.members]);
+  const proposals = useMemo(() => collaborativeTrip?.proposals || [], [collaborativeTrip?.proposals]);
+  const openProposalCount = proposals.filter(
+    (proposal) => proposal.status === 'pending' || proposal.status === 'approved'
+  ).length;
   const userRole = collaborativeTrip?.userRole;
   const shareCode = collaborativeTrip?.shareCode || '';
   const isOwner = useCollaborativeMode ? userRole === 'owner' : true;
-  const canEdit = useCollaborativeMode ? (userRole === 'owner' || userRole === 'editor') : true;
+  const canOwnerEdit = useCollaborativeMode ? userRole === 'owner' : true;
+  const canPropose = useCollaborativeMode ? (userRole === 'owner' || userRole === 'editor') : true;
+  const canVoteOnProposals = useCollaborativeMode ? userRole === 'editor' : false;
+  const canOwnerDecide = useCollaborativeMode ? userRole === 'owner' : false;
 
   useEffect(() => {
     const stored = localStorage.getItem('currentTrip');
@@ -259,7 +270,7 @@ export default function TripPage() {
       }
     };
 
-    const handleApiData = (data: any) => {
+    const handleApiData = (data: TripApiRecord) => {
       if (data) {
         setDbTrip(data);
         if (data.data && Object.keys(data.data).length > 0) {
@@ -290,13 +301,18 @@ export default function TripPage() {
   }, [user, collaborativeTrip, collaborativeError]);
 
   const saveTrip = useCallback((updatedTrip: Trip) => {
+    if (useCollaborativeMode && !canOwnerEdit) {
+      toast.error('Mode collaboration: seules les actions propriétaire appliquent directement le voyage');
+      return;
+    }
+
     if (useCollaborativeMode) {
       updateDays(updatedTrip.days);
     } else {
       setLocalTrip(updatedTrip);
       localStorage.setItem('currentTrip', JSON.stringify(updatedTrip));
     }
-  }, [useCollaborativeMode, updateDays]);
+  }, [useCollaborativeMode, canOwnerEdit, updateDays]);
 
   const handleDirectUpdate = useCallback((updatedDays: TripDay[]) => {
     if (!trip) return;
@@ -310,17 +326,23 @@ export default function TripPage() {
   }, []);
 
   const handleCreateProposal = useCallback(async (title: string, description: string, changes: ProposedChange[]) => {
-    if (useCollaborativeMode) {
+    if (useCollaborativeMode && canPropose) {
       await createProposal(title, description, changes);
     }
     setPendingChanges([]);
-  }, [useCollaborativeMode, createProposal]);
+  }, [useCollaborativeMode, canPropose, createProposal]);
 
   const handleVote = useCallback(async (proposalId: string, voteValue: boolean) => {
-    if (useCollaborativeMode) {
+    if (useCollaborativeMode && canVoteOnProposals) {
       await vote(proposalId, voteValue);
     }
-  }, [useCollaborativeMode, vote]);
+  }, [useCollaborativeMode, canVoteOnProposals, vote]);
+
+  const handleProposalDecision = useCallback(async (proposalId: string, decision: 'merge' | 'reject') => {
+    if (useCollaborativeMode && canOwnerDecide) {
+      await decideProposal(proposalId, decision);
+    }
+  }, [useCollaborativeMode, canOwnerDecide, decideProposal]);
 
   const handleRegenerateTrip = async () => {
     if (!trip) return;
@@ -498,7 +520,7 @@ export default function TripPage() {
 
   // Render swap button pour les ActivityCards (si pool disponible)
   const renderSwapButton = useCallback((item: TripItem) => {
-    if (!trip?.attractionPool || trip.attractionPool.length === 0 || !canEdit) return null;
+    if (!trip?.attractionPool || trip.attractionPool.length === 0 || !canOwnerEdit) return null;
     if (item.type !== 'activity') return null;
     return (
       <ActivitySwapButton
@@ -508,7 +530,7 @@ export default function TripPage() {
         onSwap={handleSwapActivity}
       />
     );
-  }, [trip?.attractionPool, trip?.days, canEdit, handleSwapActivity]);
+  }, [trip?.attractionPool, trip?.days, canOwnerEdit, handleSwapActivity]);
 
   const handleInsertDay = (afterDayNumber: number) => {
     if (!trip) return;
@@ -757,7 +779,6 @@ export default function TripPage() {
 
   // Keep backward-compat function signatures for non-map callers
   const getAllItems = (): TripItem[] => allItems;
-  const getActiveDayItems = (): TripItem[] => activeDayItems;
 
   const handleExportDebug = () => {
     if (!trip) return;
@@ -846,7 +867,8 @@ export default function TripPage() {
     );
   }
 
-  const isPastTrip = dbTrip?.preferences?.tripType === 'past' || (collaborativeTrip?.data?.preferences as any)?.tripType === 'past';
+  const collaborativeTripType = (collaborativeTrip?.data?.preferences as TripPreferencesWithType | undefined)?.tripType;
+  const isPastTrip = dbTrip?.preferences?.tripType === 'past' || collaborativeTripType === 'past';
   if (isPastTrip && dbTrip) {
     return <PastTripView trip={dbTrip} isOwner={isOwner || dbTrip.owner_id === user?.id} />;
   }
@@ -860,18 +882,14 @@ export default function TripPage() {
     );
   }
 
-  // Inline stats text
-  const statsText = [
-    `${trip.days.length} jour${trip.days.length > 1 ? 's' : ''}`,
-    `${getAllItems().length} activités`,
-    `${useCollaborativeMode ? members.length : (trip.preferences.groupSize || 1)} ${useCollaborativeMode ? 'collaborateurs' : 'voyageurs'}`,
-    `~${trip.totalEstimatedCost}€ (~${Math.round((trip.totalEstimatedCost || 0) / (trip.preferences.groupSize || 1))}€/pers.)`,
-  ].join(' · ');
-
   const hotelSelectorData = trip.accommodationOptions && trip.accommodationOptions.length > 0 ? {
     hotels: trip.accommodationOptions,
     selectedId: selectedHotelId || trip.accommodation?.id || trip.accommodationOptions[0]?.id || '',
     onSelect: (hotelId: string) => {
+      if (!canOwnerEdit) {
+        toast.error('Seul le propriétaire peut modifier l’hébergement');
+        return;
+      }
       setSelectedHotelId(hotelId);
       const newHotel = trip.accommodationOptions?.find(h => h.id === hotelId);
       if (newHotel) saveTrip(updateTripWithNewHotel(trip, newHotel));
@@ -884,6 +902,18 @@ export default function TripPage() {
     ),
     nights: trip.preferences.durationDays - 1,
   } : undefined;
+
+  const expenseMembers = useCollaborativeMode
+    ? members.map((member) => ({
+        userId: member.userId,
+        profile: {
+          displayName: member.profile.displayName,
+          avatarUrl: member.profile.avatarUrl,
+        },
+      }))
+    : user
+      ? [{ userId: user.id, profile: { displayName: 'Moi', avatarUrl: null } }]
+      : [];
 
   return (
     <div className="min-h-screen bg-background">
@@ -932,7 +962,7 @@ export default function TripPage() {
             </div>
             <div className="flex items-center gap-1.5">
               {/* Transport selector - compact popover */}
-              {trip.transportOptions && trip.transportOptions.length > 0 && (
+              {canOwnerEdit && trip.transportOptions && trip.transportOptions.length > 0 && (
                 <TransportOptions
                   options={trip.transportOptions}
                   selectedId={trip.selectedTransport?.id}
@@ -954,7 +984,7 @@ export default function TripPage() {
                 <VisibilityBadge visibility={collaborativeTrip.visibility || 'private'} />
               )}
 
-              {canEdit && (
+              {canOwnerEdit && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="sm" className="gap-1.5 h-8" disabled={regenerating}>
@@ -976,13 +1006,13 @@ export default function TripPage() {
                 </DropdownMenu>
               )}
 
-              {canEdit && !editMode && (
+              {canPropose && !editMode && (
                 <Button variant="outline" size="sm" className="gap-1.5 h-8" onClick={() => setEditMode(true)} data-tour="edit-mode">
                   <GripVertical className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline text-xs">Éditer</span>
+                  <span className="hidden sm:inline text-xs">{canOwnerEdit ? 'Éditer' : 'Proposer'}</span>
                 </Button>
               )}
-              {canEdit && editMode && (
+              {canPropose && editMode && (
                 <Button variant="default" size="sm" className="gap-1.5 h-8" onClick={() => setEditMode(false)}>
                   <ArrowLeft className="h-3.5 w-3.5" />
                   <span className="text-xs">Terminer</span>
@@ -994,9 +1024,9 @@ export default function TripPage() {
                   <SheetTrigger asChild>
                     <Button variant="outline" size="sm" className="gap-1.5 h-8 relative">
                       <GitPullRequest className="h-3.5 w-3.5" />
-                      {proposals.filter(p => p.status === 'pending').length > 0 && (
+                      {openProposalCount > 0 && (
                         <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary text-primary-foreground text-[10px] rounded-full flex items-center justify-center">
-                          {proposals.filter(p => p.status === 'pending').length}
+                          {openProposalCount}
                         </span>
                       )}
                     </Button>
@@ -1005,13 +1035,20 @@ export default function TripPage() {
                     <SheetHeader><SheetTitle>Collaboration</SheetTitle></SheetHeader>
                     <div className="mt-6 space-y-6">
                       <SharePanel tripId={tripId} shareCode={shareCode} members={members} currentUserId={user?.id} userRole={userRole} />
-                      <ProposalsList proposals={proposals} onVote={handleVote} currentUserId={user?.id} />
+                      <ProposalsList
+                        proposals={proposals}
+                        onVote={handleVote}
+                        onDecision={handleProposalDecision}
+                        currentUserId={user?.id}
+                        canVote={canVoteOnProposals}
+                        canOwnerDecide={canOwnerDecide}
+                      />
                     </div>
                   </SheetContent>
                 </Sheet>
               )}
 
-              {!canEdit && useCollaborativeMode && (
+              {!canOwnerEdit && useCollaborativeMode && (
                 <Button variant="outline" size="sm" className="gap-1.5 h-8" onClick={() => setShowCloneModal(true)}>
                   <Copy className="h-3.5 w-3.5" />
                 </Button>
@@ -1028,14 +1065,14 @@ export default function TripPage() {
                 <span className="hidden sm:inline text-xs">PDF</span>
               </Button>
 
-              {canEdit && (
+              {canOwnerEdit && (
                 <Button variant="outline" size="sm" className="gap-1.5 h-8" onClick={handleExportDebug}>
                   <Bug className="h-3.5 w-3.5" />
                 </Button>
               )}
 
               {/* Chat Assistant Button */}
-              {canEdit && (
+              {canOwnerEdit && (
                 <div data-tour="chat-button">
                   <ChatButton onClick={() => setShowChatPanel(true)} />
                 </div>
@@ -1044,7 +1081,7 @@ export default function TripPage() {
           </div>
 
           {/* Transport changed warning */}
-          {transportChanged && (
+          {transportChanged && canOwnerEdit && (
             <div className="flex items-center justify-between gap-3 mt-2 p-2 bg-amber-50 border border-amber-200 rounded-lg text-sm dark:bg-amber-900/20 dark:border-amber-700">
               <p className="text-amber-800 dark:text-amber-300 text-xs">Transport modifié — régénérez pour mettre à jour les horaires</p>
               <Button size="sm" className="h-7 text-xs bg-amber-600 hover:bg-amber-700" onClick={handleRegenerateTrip} disabled={regenerating}>
@@ -1085,10 +1122,32 @@ export default function TripPage() {
 
                 {planningView === 'calendar' ? (
                   <div className="h-[70vh]">
-                    <CalendarView days={trip.days} isEditable={canEdit} onUpdateItem={handleCalendarUpdateItem} onClickItem={handleEditItem} onClickSlot={canEdit ? handleCalendarSlotClick : undefined} onCreateSlotRange={canEdit ? handleCalendarSlotRange : undefined} onMoveItemCrossDay={canEdit ? handleCalendarMoveItemCrossDay : undefined} />
+                    <CalendarView
+                      days={trip.days}
+                      isEditable={canOwnerEdit}
+                      onUpdateItem={handleCalendarUpdateItem}
+                      onClickItem={canOwnerEdit ? handleEditItem : undefined}
+                      onClickSlot={canOwnerEdit ? handleCalendarSlotClick : undefined}
+                      onCreateSlotRange={canOwnerEdit ? handleCalendarSlotRange : undefined}
+                      onMoveItemCrossDay={canOwnerEdit ? handleCalendarMoveItemCrossDay : undefined}
+                    />
                   </div>
                 ) : editMode && !isDesktop ? (
-                  <DraggableTimeline days={trip.days} isEditable={canEdit} isOwner={isOwner} onDirectUpdate={isOwner ? handleDirectUpdate : undefined} onProposalCreate={!isOwner && canEdit ? handleProposalFromDrag : undefined} onEditItem={handleEditItem} onAddItem={(dayNumber) => { setAddActivityDay(dayNumber); setAddActivityDefaultTime(undefined); setAddActivityDefaultEndTime(undefined); setShowAddActivityModal(true); }} hotelSelectorData={hotelSelectorData} />
+                  <DraggableTimeline
+                    days={trip.days}
+                    isEditable={canPropose}
+                    isOwner={isOwner}
+                    onDirectUpdate={canOwnerEdit ? handleDirectUpdate : undefined}
+                    onProposalCreate={!canOwnerEdit && canPropose ? handleProposalFromDrag : undefined}
+                    onEditItem={canOwnerEdit ? handleEditItem : undefined}
+                    onAddItem={canOwnerEdit ? (dayNumber) => {
+                      setAddActivityDay(dayNumber);
+                      setAddActivityDefaultTime(undefined);
+                      setAddActivityDefaultEndTime(undefined);
+                      setShowAddActivityModal(true);
+                    } : undefined}
+                    hotelSelectorData={hotelSelectorData}
+                  />
                 ) : !editMode ? (
                   <Tabs value={activeDay} onValueChange={setActiveDay}>
                     <TabsList className="w-full flex-wrap h-auto gap-1 bg-transparent p-0 mb-3">
@@ -1100,9 +1159,24 @@ export default function TripPage() {
                     </TabsList>
                     {trip.days.map((day, idx) => (
                       <TabsContent key={day.dayNumber} value={day.dayNumber.toString()} className="mt-0">
-                        <DayTimeline day={day} selectedItemId={selectedItemId} globalIndexOffset={getDayIndexOffset(day.dayNumber)} mapNumbers={itemMapNumbers} onSelectItem={handleSelectItem} onEditItem={handleEditItem} onDeleteItem={handleDeleteItem} onMoveItem={handleMoveItem} onHoverItem={setHoveredItemId} showMoveButtons={true} renderSwapButton={renderSwapButton} hotelSelectorData={hotelSelectorData} onSelectRestaurantAlternative={handleSelectRestaurantAlternative} onSelectSelfMeal={handleSelectSelfMeal} />
+                        <DayTimeline
+                          day={day}
+                          selectedItemId={selectedItemId}
+                          globalIndexOffset={getDayIndexOffset(day.dayNumber)}
+                          mapNumbers={itemMapNumbers}
+                          onSelectItem={handleSelectItem}
+                          onEditItem={canOwnerEdit ? handleEditItem : undefined}
+                          onDeleteItem={canOwnerEdit ? handleDeleteItem : undefined}
+                          onMoveItem={canOwnerEdit ? handleMoveItem : undefined}
+                          onHoverItem={setHoveredItemId}
+                          showMoveButtons={canOwnerEdit}
+                          renderSwapButton={renderSwapButton}
+                          hotelSelectorData={hotelSelectorData}
+                          onSelectRestaurantAlternative={canOwnerEdit ? handleSelectRestaurantAlternative : undefined}
+                          onSelectSelfMeal={canOwnerEdit ? handleSelectSelfMeal : undefined}
+                        />
                         {/* Bouton "Ajouter un jour après" (mobile) */}
-                        {canEdit && idx > 0 && idx < trip.days.length - 1 && (
+                        {canOwnerEdit && idx > 0 && idx < trip.days.length - 1 && (
                           <div className="flex items-center justify-center py-3 mt-3">
                             <Button
                               variant="outline"
@@ -1148,7 +1222,7 @@ export default function TripPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ExpensesPanel tripId={tripId} members={useCollaborativeMode ? members.map((m: any) => ({ userId: m.userId, profile: { displayName: m.profile.displayName, avatarUrl: m.profile.avatarUrl } })) : user ? [{ userId: user.id, profile: { displayName: 'Moi', avatarUrl: null } }] : []} currentUserId={user?.id || ''} />
+                  <ExpensesPanel tripId={tripId} members={expenseMembers} currentUserId={user?.id || ''} />
                 </CardContent>
               </Card>
             </TabsContent>
@@ -1157,7 +1231,7 @@ export default function TripPage() {
               <Card>
                 <CardHeader><CardTitle className="text-lg">Photos</CardTitle></CardHeader>
                 <CardContent className="space-y-4">
-                  {(isOwner || canEdit) && <PhotoUploader tripId={tripId} />}
+                  {canOwnerEdit && <PhotoUploader tripId={tripId} />}
                   <PhotoGallery tripId={tripId} isOwner={isOwner} />
                 </CardContent>
               </Card>
@@ -1197,10 +1271,32 @@ export default function TripPage() {
 
                 {planningView === 'calendar' ? (
                   <div className="h-[75vh]">
-                    <CalendarView days={trip.days} isEditable={canEdit} onUpdateItem={handleCalendarUpdateItem} onClickItem={handleEditItem} onClickSlot={canEdit ? handleCalendarSlotClick : undefined} onCreateSlotRange={canEdit ? handleCalendarSlotRange : undefined} onMoveItemCrossDay={canEdit ? handleCalendarMoveItemCrossDay : undefined} />
+                    <CalendarView
+                      days={trip.days}
+                      isEditable={canOwnerEdit}
+                      onUpdateItem={handleCalendarUpdateItem}
+                      onClickItem={canOwnerEdit ? handleEditItem : undefined}
+                      onClickSlot={canOwnerEdit ? handleCalendarSlotClick : undefined}
+                      onCreateSlotRange={canOwnerEdit ? handleCalendarSlotRange : undefined}
+                      onMoveItemCrossDay={canOwnerEdit ? handleCalendarMoveItemCrossDay : undefined}
+                    />
                   </div>
                 ) : editMode && isDesktop ? (
-                  <DraggableTimeline days={trip.days} isEditable={canEdit} isOwner={isOwner} onDirectUpdate={isOwner ? handleDirectUpdate : undefined} onProposalCreate={!isOwner && canEdit ? handleProposalFromDrag : undefined} onEditItem={handleEditItem} onAddItem={(dayNumber) => { setAddActivityDay(dayNumber); setAddActivityDefaultTime(undefined); setAddActivityDefaultEndTime(undefined); setShowAddActivityModal(true); }} hotelSelectorData={hotelSelectorData} />
+                  <DraggableTimeline
+                    days={trip.days}
+                    isEditable={canPropose}
+                    isOwner={isOwner}
+                    onDirectUpdate={canOwnerEdit ? handleDirectUpdate : undefined}
+                    onProposalCreate={!canOwnerEdit && canPropose ? handleProposalFromDrag : undefined}
+                    onEditItem={canOwnerEdit ? handleEditItem : undefined}
+                    onAddItem={canOwnerEdit ? (dayNumber) => {
+                      setAddActivityDay(dayNumber);
+                      setAddActivityDefaultTime(undefined);
+                      setAddActivityDefaultEndTime(undefined);
+                      setShowAddActivityModal(true);
+                    } : undefined}
+                    hotelSelectorData={hotelSelectorData}
+                  />
                 ) : !editMode ? (
                   <div className="space-y-6">
                     {trip.days.map((day, idx) => (
@@ -1211,19 +1307,19 @@ export default function TripPage() {
                           globalIndexOffset={getDayIndexOffset(day.dayNumber)}
                           mapNumbers={itemMapNumbers}
                           onSelectItem={handleSelectItem}
-                          onEditItem={handleEditItem}
-                          onDeleteItem={handleDeleteItem}
-                          onMoveItem={handleMoveItem}
+                          onEditItem={canOwnerEdit ? handleEditItem : undefined}
+                          onDeleteItem={canOwnerEdit ? handleDeleteItem : undefined}
+                          onMoveItem={canOwnerEdit ? handleMoveItem : undefined}
                           onHoverItem={setHoveredItemId}
-                          onAddItem={(dayNumber) => { setAddActivityDay(dayNumber); setAddActivityDefaultTime(undefined); setAddActivityDefaultEndTime(undefined); setShowAddActivityModal(true); }}
-                          showMoveButtons={true}
+                          onAddItem={canOwnerEdit ? (dayNumber) => { setAddActivityDay(dayNumber); setAddActivityDefaultTime(undefined); setAddActivityDefaultEndTime(undefined); setShowAddActivityModal(true); } : undefined}
+                          showMoveButtons={canOwnerEdit}
                           renderSwapButton={renderSwapButton}
                           hotelSelectorData={hotelSelectorData}
-                          onSelectRestaurantAlternative={handleSelectRestaurantAlternative}
-                          onSelectSelfMeal={handleSelectSelfMeal}
+                          onSelectRestaurantAlternative={canOwnerEdit ? handleSelectRestaurantAlternative : undefined}
+                          onSelectSelfMeal={canOwnerEdit ? handleSelectSelfMeal : undefined}
                         />
                         {/* Bouton "Ajouter un jour" entre les jours (sauf après le dernier) */}
-                        {canEdit && idx < trip.days.length - 1 && idx > 0 && (
+                        {canOwnerEdit && idx < trip.days.length - 1 && idx > 0 && (
                           <div className="flex items-center justify-center py-2 group">
                             <div className="flex-1 h-px bg-border group-hover:bg-primary/30 transition-colors" />
                             <Button
@@ -1264,19 +1360,19 @@ export default function TripPage() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <ExpensesPanel tripId={tripId} members={useCollaborativeMode ? members.map((m: any) => ({ userId: m.userId, profile: { displayName: m.profile.displayName, avatarUrl: m.profile.avatarUrl } })) : user ? [{ userId: user.id, profile: { displayName: 'Moi', avatarUrl: null } }] : []} currentUserId={user?.id || ''} />
+                    <ExpensesPanel tripId={tripId} members={expenseMembers} currentUserId={user?.id || ''} />
                   </CardContent>
                 </Card>
               </TabsContent>
 
               <TabsContent value="photos">
                 <Card>
-                  <CardHeader><CardTitle className="text-lg">Photos</CardTitle></CardHeader>
-                  <CardContent className="space-y-4">
-                    {(isOwner || canEdit) && <PhotoUploader tripId={tripId} />}
+                <CardHeader><CardTitle className="text-lg">Photos</CardTitle></CardHeader>
+                <CardContent className="space-y-4">
+                    {canOwnerEdit && <PhotoUploader tripId={tripId} />}
                     <PhotoGallery tripId={tripId} isOwner={isOwner} />
-                  </CardContent>
-                </Card>
+                </CardContent>
+              </Card>
               </TabsContent>
             </Tabs>
           </div>
@@ -1324,7 +1420,7 @@ export default function TripPage() {
           onOpenChange={(open) => { setShowShareDialog(open); if (!open) { refetch(); setUseCollaborativeMode(true); } }}
           trip={trip}
           tripId={tripId}
-          onTripSaved={(savedId, code) => { window.history.replaceState(null, '', `/trip/${savedId}`); }}
+          onTripSaved={(savedId) => { window.history.replaceState(null, '', `/trip/${savedId}`); }}
         />
       )}
 
@@ -1339,7 +1435,7 @@ export default function TripPage() {
       )}
 
       {/* Chat Panel for AI-powered itinerary modifications */}
-      {trip && canEdit && (
+      {trip && canOwnerEdit && (
         <ChatPanel
           tripId={tripId}
           trip={{
