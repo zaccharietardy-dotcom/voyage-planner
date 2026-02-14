@@ -241,7 +241,8 @@ export async function searchRestaurantsWithSerpApi(
         phoneNumber: r.phone,
         website: r.website,
         googleMapsUrl, // URL Google Maps fiable avec nom + adresse complète
-        reservationUrl: `https://www.thefork.fr/search?q=${encodeURIComponent(`${r.title} ${destination}`)}`,
+        // Pas de reservationUrl TheFork (liens de recherche générique peu fiables)
+        // Google Maps est utilisé via googleMapsUrl ci-dessus
         photos: r.thumbnail ? [r.thumbnail] : undefined,
         openingHours: parseOpeningHours(r.operating_hours) || {},
         distance: 0, // Sera calculé plus tard

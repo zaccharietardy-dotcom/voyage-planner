@@ -825,41 +825,33 @@ function RestaurantSuggestionsFlat({
 
   const getCuisineLabel = (r: Restaurant): string => {
     const text = `${r.name || ''} ${(r.cuisineTypes || []).join(' ')}`.toLowerCase();
+    // Nationalit\u00e9s uniquement — pas de types d'\u00e9tablissement
     const CUISINE_LABELS: [string[], string][] = [
-      [['sushi', 'ramen', 'japonais', 'japanese', 'izakaya', 'yakitori'], 'Japonais'],
-      [['italien', 'italian', 'pizza', 'pizzeria', 'trattoria', 'osteria', 'ristorante'], 'Italien'],
-      [['chinois', 'chinese', 'dim sum', 'cantonais', 'wok'], 'Chinois'],
-      [['indien', 'indian', 'curry', 'tandoori'], 'Indien'],
-      [['thai', 'tha\u00ef', 'tha\u00eflandais'], 'Tha\u00eflandais'],
-      [['vietnamien', 'vietnamese', 'pho', 'banh mi'], 'Vietnamien'],
-      [['cor\u00e9en', 'korean', 'bibimbap'], 'Cor\u00e9en'],
-      [['mexicain', 'mexican', 'tacos', 'taqueria'], 'Mexicain'],
-      [['libanais', 'lebanese', 'mezze', 'falafel'], 'Libanais'],
-      [['marocain', 'moroccan', 'tagine', 'couscous'], 'Marocain'],
-      [['grec', 'greek', 'taverna', 'gyros'], 'Grec'],
+      [['sushi', 'ramen', 'japonais', 'japanese', 'izakaya', 'yakitori', 'udon', 'tempura'], 'Japonais'],
+      [['italien', 'italian', 'pizza', 'pizzeria', 'trattoria', 'osteria', 'ristorante', 'pasta'], 'Italien'],
+      [['chinois', 'chinese', 'dim sum', 'cantonais', 'wok', 'szechuan'], 'Chinois'],
+      [['indien', 'indian', 'curry', 'tandoori', 'masala', 'naan'], 'Indien'],
+      [['thai', 'tha\u00ef', 'tha\u00eflandais', 'pad thai'], 'Tha\u00eflandais'],
+      [['vietnamien', 'vietnamese', 'pho', 'banh mi', 'bo bun'], 'Vietnamien'],
+      [['cor\u00e9en', 'korean', 'bibimbap', 'kimchi'], 'Cor\u00e9en'],
+      [['mexicain', 'mexican', 'tacos', 'taqueria', 'burrito'], 'Mexicain'],
+      [['libanais', 'lebanese', 'mezze', 'falafel', 'shawarma'], 'Libanais'],
+      [['marocain', 'moroccan', 'tagine', 'couscous', 'marocaine'], 'Marocain'],
+      [['grec', 'greek', 'taverna', 'gyros', 'souvlaki'], 'Grec'],
       [['turc', 'turkish', 'kebab', 'd\u00f6ner'], 'Turc'],
-      [['espagnol', 'spanish', 'tapas', 'paella'], 'Espagnol'],
+      [['espagnol', 'spanish', 'tapas', 'paella', 'catalan'], 'Espagnol'],
       [['p\u00e9ruvien', 'peruvian', 'ceviche'], 'P\u00e9ruvien'],
-      [['burger', 'american', 'am\u00e9ricain', 'bbq', 'barbecue'], 'Am\u00e9ricain'],
-      [['fruits de mer', 'seafood', 'poisson', 'fish'], 'Fruits de mer'],
-      [['steakhouse', 'steak', 'grill', 'viande', 'beef'], 'Grill & Viandes'],
-      [['brasserie'], 'Brasserie'],
-      [['bistro', 'bistrot'], 'Bistrot'],
-      [['gastronomique', 'gastro', 'michelin'], 'Gastronomique'],
-      [['boulangerie', 'bakery'], 'Boulangerie'],
-      [['p\u00e2tisserie', 'patisserie'], 'P\u00e2tisserie'],
-      [['brunch', 'breakfast'], 'Brunch & Caf\u00e9'],
-      [['caf\u00e9', 'cafe', 'coffee', 'caff\u00e8'], 'Caf\u00e9'],
-      [['fran\u00e7ais', 'french', 'proven\u00e7al', 'lyonnais'], 'Fran\u00e7ais'],
+      [['burger', 'american', 'am\u00e9ricain', 'bbq', 'barbecue', 'diner'], 'Am\u00e9ricain'],
       [['portugais', 'portuguese'], 'Portugais'],
       [['rome', 'romano', 'roman', 'r\u00e9gion de rome'], 'Romain'],
-      [['m\u00e9diterran\u00e9en', 'mediterranean'], 'M\u00e9diterran\u00e9en'],
-      [['sandwicherie', 'sandwich'], 'Sandwicherie'],
+      [['m\u00e9diterran\u00e9en', 'mediterranean', 'mediterran\u00e9en'], 'M\u00e9diterran\u00e9en'],
+      [['fran\u00e7ais', 'french', 'proven\u00e7al', 'lyonnais', 'brasserie', 'bistro', 'bistrot', 'gastronomique', 'gastro', 'boulangerie', 'p\u00e2tisserie', 'patisserie', 'breton', 'alsacien', 'normand', 'savoyard', 'fruits de mer', 'seafood', 'steakhouse', 'grill'], 'Fran\u00e7ais'],
+      [['caf\u00e9', 'cafe', 'coffee', 'caff\u00e8', 'brunch', 'breakfast'], 'Caf\u00e9'],
     ];
     for (const [keywords, label] of CUISINE_LABELS) {
       if (keywords.some(kw => text.includes(kw))) return label;
     }
-    return 'Cuisine locale';
+    return 'Restaurant';
   };
 
   const getRestaurantImage = (r: Restaurant): string => {
@@ -886,7 +878,7 @@ function RestaurantSuggestionsFlat({
       <div className="flex flex-col sm:flex-row gap-2">
         {suggestions.map((option) => {
           const isSelected = option.id === current.id;
-          const bookingUrl = option.reservationUrl || option.googleMapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(option.name)}`;
+          const bookingUrl = option.googleMapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(option.name)}`;
           const imageUrl = getRestaurantImage(option);
 
           return (
@@ -1063,41 +1055,33 @@ function RestaurantSuggestions({
 
   const getCuisineLabel = (r: Restaurant): string => {
     const text = `${r.name || ''} ${(r.cuisineTypes || []).join(' ')}`.toLowerCase();
+    // Nationalit\u00e9s uniquement — pas de types d'\u00e9tablissement
     const CUISINE_LABELS: [string[], string][] = [
-      [['sushi', 'ramen', 'japonais', 'japanese', 'izakaya', 'yakitori'], 'Japonais'],
-      [['italien', 'italian', 'pizza', 'pizzeria', 'trattoria', 'osteria', 'ristorante'], 'Italien'],
-      [['chinois', 'chinese', 'dim sum', 'cantonais', 'wok'], 'Chinois'],
-      [['indien', 'indian', 'curry', 'tandoori'], 'Indien'],
-      [['thai', 'tha\u00ef', 'tha\u00eflandais'], 'Tha\u00eflandais'],
-      [['vietnamien', 'vietnamese', 'pho', 'banh mi'], 'Vietnamien'],
-      [['cor\u00e9en', 'korean', 'bibimbap'], 'Cor\u00e9en'],
-      [['mexicain', 'mexican', 'tacos', 'taqueria'], 'Mexicain'],
-      [['libanais', 'lebanese', 'mezze', 'falafel'], 'Libanais'],
-      [['marocain', 'moroccan', 'tagine', 'couscous'], 'Marocain'],
-      [['grec', 'greek', 'taverna', 'gyros'], 'Grec'],
+      [['sushi', 'ramen', 'japonais', 'japanese', 'izakaya', 'yakitori', 'udon', 'tempura'], 'Japonais'],
+      [['italien', 'italian', 'pizza', 'pizzeria', 'trattoria', 'osteria', 'ristorante', 'pasta'], 'Italien'],
+      [['chinois', 'chinese', 'dim sum', 'cantonais', 'wok', 'szechuan'], 'Chinois'],
+      [['indien', 'indian', 'curry', 'tandoori', 'masala', 'naan'], 'Indien'],
+      [['thai', 'tha\u00ef', 'tha\u00eflandais', 'pad thai'], 'Tha\u00eflandais'],
+      [['vietnamien', 'vietnamese', 'pho', 'banh mi', 'bo bun'], 'Vietnamien'],
+      [['cor\u00e9en', 'korean', 'bibimbap', 'kimchi'], 'Cor\u00e9en'],
+      [['mexicain', 'mexican', 'tacos', 'taqueria', 'burrito'], 'Mexicain'],
+      [['libanais', 'lebanese', 'mezze', 'falafel', 'shawarma'], 'Libanais'],
+      [['marocain', 'moroccan', 'tagine', 'couscous', 'marocaine'], 'Marocain'],
+      [['grec', 'greek', 'taverna', 'gyros', 'souvlaki'], 'Grec'],
       [['turc', 'turkish', 'kebab', 'd\u00f6ner'], 'Turc'],
-      [['espagnol', 'spanish', 'tapas', 'paella'], 'Espagnol'],
+      [['espagnol', 'spanish', 'tapas', 'paella', 'catalan'], 'Espagnol'],
       [['p\u00e9ruvien', 'peruvian', 'ceviche'], 'P\u00e9ruvien'],
-      [['burger', 'american', 'am\u00e9ricain', 'bbq', 'barbecue'], 'Am\u00e9ricain'],
-      [['fruits de mer', 'seafood', 'poisson', 'fish'], 'Fruits de mer'],
-      [['steakhouse', 'steak', 'grill', 'viande', 'beef'], 'Grill & Viandes'],
-      [['brasserie'], 'Brasserie'],
-      [['bistro', 'bistrot'], 'Bistrot'],
-      [['gastronomique', 'gastro', 'michelin'], 'Gastronomique'],
-      [['boulangerie', 'bakery'], 'Boulangerie'],
-      [['p\u00e2tisserie', 'patisserie'], 'P\u00e2tisserie'],
-      [['brunch', 'breakfast'], 'Brunch & Caf\u00e9'],
-      [['caf\u00e9', 'cafe', 'coffee', 'caff\u00e8'], 'Caf\u00e9'],
-      [['fran\u00e7ais', 'french', 'proven\u00e7al', 'lyonnais'], 'Fran\u00e7ais'],
+      [['burger', 'american', 'am\u00e9ricain', 'bbq', 'barbecue', 'diner'], 'Am\u00e9ricain'],
       [['portugais', 'portuguese'], 'Portugais'],
       [['rome', 'romano', 'roman', 'r\u00e9gion de rome'], 'Romain'],
-      [['m\u00e9diterran\u00e9en', 'mediterranean'], 'M\u00e9diterran\u00e9en'],
-      [['sandwicherie', 'sandwich'], 'Sandwicherie'],
+      [['m\u00e9diterran\u00e9en', 'mediterranean', 'mediterran\u00e9en'], 'M\u00e9diterran\u00e9en'],
+      [['fran\u00e7ais', 'french', 'proven\u00e7al', 'lyonnais', 'brasserie', 'bistro', 'bistrot', 'gastronomique', 'gastro', 'boulangerie', 'p\u00e2tisserie', 'patisserie', 'breton', 'alsacien', 'normand', 'savoyard', 'fruits de mer', 'seafood', 'steakhouse', 'grill'], 'Fran\u00e7ais'],
+      [['caf\u00e9', 'cafe', 'coffee', 'caff\u00e8', 'brunch', 'breakfast'], 'Caf\u00e9'],
     ];
     for (const [keywords, label] of CUISINE_LABELS) {
       if (keywords.some(kw => text.includes(kw))) return label;
     }
-    return 'Cuisine locale';
+    return 'Restaurant';
   };
 
   const getRestaurantImage = (r: Restaurant): string => {
@@ -1125,7 +1109,7 @@ function RestaurantSuggestions({
       <div className="flex flex-col sm:flex-row gap-2">
         {suggestions.map((option, idx) => {
           const isSelected = option.id === current.id;
-          const bookingUrl = option.reservationUrl || option.googleMapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(option.name)}`;
+          const bookingUrl = option.googleMapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(option.name)}`;
           const imageUrl = getRestaurantImage(option);
 
           return (

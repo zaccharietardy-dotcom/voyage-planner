@@ -1279,9 +1279,9 @@ export async function assembleTripSchedule(
           || (itemData.priceLevel ? (itemData.priceLevel || 1) * 15 : 0),
         duration: item.duration,
         rating: itemData.rating,
-        bookingUrl: itemData.bookingUrl || itemData.reservationUrl
+        bookingUrl: itemData.bookingUrl || itemData.googleMapsUrl
           || (item.type === 'restaurant' && (itemData.name || item.title)
-            ? `https://www.thefork.com/search?queryPlace=${encodeURIComponent((itemData.name || item.title) + ', ' + preferences.destination)}`
+            ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((itemData.name || item.title) + ', ' + preferences.destination)}`
             : undefined),
         viatorUrl: itemData.viatorUrl,
         googleMapsPlaceUrl,
@@ -1449,7 +1449,7 @@ export async function assembleTripSchedule(
           item.locationName = bestR.name;
           item.rating = bestR.rating;
           item.estimatedCost = bestR.priceLevel ? (bestR.priceLevel || 1) * 15 : item.estimatedCost;
-          item.bookingUrl = bestR.reservationUrl || bestR.website;
+          item.bookingUrl = bestR.googleMapsUrl || bestR.website;
           item.restaurant = bestR;
           item.restaurantAlternatives = []; // Clear stale alts — section 13b will refill
           item.distanceFromPrevious = bestDist;
@@ -1506,7 +1506,7 @@ export async function assembleTripSchedule(
           item.locationName = bestR.name;
           item.rating = bestR.rating;
           item.estimatedCost = bestR.priceLevel ? (bestR.priceLevel || 1) * 15 : item.estimatedCost;
-          item.bookingUrl = bestR.reservationUrl || bestR.website;
+          item.bookingUrl = bestR.googleMapsUrl || bestR.website;
           item.restaurant = bestR;
           item.restaurantAlternatives = []; // Clear stale alts — section 13b will refill
           item.distanceFromPrevious = bestDist;
@@ -2145,7 +2145,9 @@ function getActivityMinStartTime(activity: ScoredActivity, dayDate: Date): Date 
 async function enrichWithPlaceImages(days: TripDay[]): Promise<void> {
   try {
     const itemsNeedingImages: TripItem[] = [];
-    const imageTypes = ['activity', 'restaurant', 'hotel', 'checkin', 'checkout'];
+    // Restaurants exclus : ils utilisent SerpAPI thumbnail / TripAdvisor heroImgUrl
+    // fetchPlaceImage() peut renvoyer la photo d'un autre restaurant du même nom
+    const imageTypes = ['activity', 'hotel', 'checkin', 'checkout'];
 
     for (const day of days) {
       for (const item of day.items) {
@@ -2155,30 +2157,14 @@ async function enrichWithPlaceImages(days: TripDay[]): Promise<void> {
       }
     }
 
-    // Also collect restaurant alternatives without photos (max 10 to limit API calls)
-    const altsNeedingImages: Restaurant[] = [];
-    for (const day of days) {
-      for (const item of day.items) {
-        if (item.type === 'restaurant' && item.restaurantAlternatives) {
-          for (const alt of item.restaurantAlternatives) {
-            if ((!alt.photos || alt.photos.length === 0) && altsNeedingImages.length < 10) {
-              altsNeedingImages.push(alt);
-            }
-          }
-        }
-      }
-    }
+    if (itemsNeedingImages.length === 0) return;
 
-    const totalWork = itemsNeedingImages.length + altsNeedingImages.length;
-    if (totalWork === 0) return;
-
-    console.log(`[Pipeline V2] Fetching images for ${itemsNeedingImages.length} items + ${altsNeedingImages.length} restaurant alts without photos...`);
+    console.log(`[Pipeline V2] Fetching images for ${itemsNeedingImages.length} items without photos...`);
 
     // Hard timeout: 10s max for the entire image enrichment phase
     const enrichmentWork = async () => {
-      await Promise.allSettled([
-        // Enrich main TripItems
-        ...itemsNeedingImages.map(async (item) => {
+      await Promise.allSettled(
+        itemsNeedingImages.map(async (item) => {
           try {
             const imageUrl = await fetchPlaceImage(
               item.title,
@@ -2192,22 +2178,7 @@ async function enrichWithPlaceImages(days: TripDay[]): Promise<void> {
             // Individual item failure — skip silently
           }
         }),
-        // Enrich restaurant alternatives
-        ...altsNeedingImages.map(async (alt) => {
-          try {
-            const imageUrl = await fetchPlaceImage(
-              alt.name,
-              alt.latitude || undefined,
-              alt.longitude || undefined
-            );
-            if (imageUrl) {
-              alt.photos = [imageUrl];
-            }
-          } catch {
-            // Individual alt failure — skip silently
-          }
-        }),
-      ]);
+      );
     };
 
     const timeout = new Promise<void>((resolve) => {
@@ -2220,8 +2191,7 @@ async function enrichWithPlaceImages(days: TripDay[]): Promise<void> {
     await Promise.race([enrichmentWork(), timeout]);
 
     const enriched = itemsNeedingImages.filter(i => i.imageUrl).length;
-    const altsEnriched = altsNeedingImages.filter(a => a.photos && a.photos.length > 0).length;
-    console.log(`[Pipeline V2] ✅ Place images: ${enriched}/${itemsNeedingImages.length} enriched, ${altsEnriched}/${altsNeedingImages.length} alt photos`);
+    console.log(`[Pipeline V2] ✅ Place images: ${enriched}/${itemsNeedingImages.length} enriched (restaurants excluded — use SerpAPI/TripAdvisor photos)`);
   } catch (e) {
     console.warn('[Pipeline V2] Image enrichment error:', e);
   }
