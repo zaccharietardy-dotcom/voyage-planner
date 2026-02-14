@@ -14,6 +14,14 @@ import { findKnownViatorProduct } from '../services/viatorKnownProducts';
 import { calculateDistance } from '../services/geocoding';
 import { classifyOutdoorIndoor } from './utils/constants';
 
+/** Keywords that indicate an activity includes a meal (cooking class, food tour, etc.) */
+const MEAL_INCLUSIVE_KEYWORDS = [
+  'cooking class', 'cours de cuisine', 'atelier cuisine', 'atelier culinaire',
+  'food tour', 'food tasting', 'wine tasting', 'dégustation', 'degustation',
+  'includes lunch', 'includes dinner', 'déjeuner inclus', 'dîner inclus',
+  'repas inclus', 'meal included', 'menu dégustation',
+];
+
 // ─── Contextual scoring dictionaries ────────────────────────────────────────
 
 /** Tags inferred from activity name + description to characterize the experience */
@@ -326,9 +334,13 @@ function tagActivity(
 ): ScoredActivity {
   // Classify outdoor/indoor if not already set
   const isOutdoor = a.isOutdoor ?? classifyOutdoorIndoor(a.name || '', a.description, a.type);
+  // Detect meal-inclusive activities (cooking class, food tour, etc.)
+  const nameAndDesc = `${(a.name || '').toLowerCase()} ${(a.description || '').toLowerCase()}`;
+  const includesMeal = a.includesMeal || MEAL_INCLUSIVE_KEYWORDS.some(k => nameAndDesc.includes(k));
   return {
     ...a,
     isOutdoor,
+    includesMeal: includesMeal || undefined, // Only set if true
     score: 0,
     source,
     reviewCount: (a as any).reviewCount || (a as any).reviews || 0,

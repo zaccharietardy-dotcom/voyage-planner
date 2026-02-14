@@ -37,6 +37,7 @@ export interface Attraction {
   freeCancellation?: boolean;
   instantConfirmation?: boolean;
   isOutdoor?: boolean; // true = outdoor, false = indoor, undefined = unknown
+  includesMeal?: boolean; // Activity includes a meal (cooking class, food tour, etc.)
 }
 
 // Base de données des attractions par destination

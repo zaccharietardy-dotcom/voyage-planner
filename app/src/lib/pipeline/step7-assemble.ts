@@ -41,11 +41,11 @@ const MODE_LABELS: Record<string, string> = {
 /** Static images for transport types (Unsplash free-to-use) */
 const TRANSPORT_IMAGES: Record<string, string> = {
   flight: 'https://images.unsplash.com/photo-1436491865332-7a61a109db05?w=600&h=400&fit=crop',
-  train: 'https://images.unsplash.com/photo-1474487548417-781cb71495f3?w=600&h=400&fit=crop',
+  train: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&h=400&fit=crop',
   bus: 'https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=600&h=400&fit=crop',
   ferry: 'https://images.unsplash.com/photo-1534008897995-27a23e859048?w=600&h=400&fit=crop',
   car: 'https://images.unsplash.com/photo-1449965408869-ebd13bc9e5a8?w=600&h=400&fit=crop',
-  combined: 'https://images.unsplash.com/photo-1474487548417-781cb71495f3?w=600&h=400&fit=crop',
+  combined: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&h=400&fit=crop',
 };
 
 /**
@@ -406,17 +406,21 @@ export async function assembleTripSchedule(
       // Build return transit legs with CORRECT dates (not outbound dates)
       let returnTransitLegs: typeof transport.transitLegs = undefined;
       if (transport.transitLegs?.length) {
-        returnTransitLegs = transport.transitLegs.slice().reverse().map((leg) => {
-          const returnDep = new Date(dayDate);
-          returnDep.setHours(tStart.getHours(), tStart.getMinutes(), 0, 0);
-          const returnArr = new Date(dayDate);
-          returnArr.setHours(tEnd.getHours(), tEnd.getMinutes(), 0, 0);
+        const reversedLegs = transport.transitLegs.slice().reverse();
+        let cumulativeMs = tStart.getTime();
+
+        returnTransitLegs = reversedLegs.map((leg) => {
+          const legDep = new Date(cumulativeMs);
+          const legDurMs = (leg.duration || 30) * 60 * 1000;
+          const legArr = new Date(cumulativeMs + legDurMs);
+          cumulativeMs = legArr.getTime();
+
           return {
             mode: leg.mode,
             from: leg.to,
             to: leg.from,
-            departure: returnDep.toISOString(),
-            arrival: returnArr.toISOString(),
+            departure: legDep.toISOString(),
+            arrival: legArr.toISOString(),
             duration: leg.duration,
             operator: leg.operator,
             line: leg.line,
@@ -906,6 +910,15 @@ export async function assembleTripSchedule(
       });
     }
 
+    // 5b. Check if any activity on this day includes a meal (cooking class, food tour, etc.)
+    // If so, skip the adjacent restaurant assignment to avoid double-meal
+    const hasMealInclusiveActivity = orderedActivities.some(
+      act => (act as any).includesMeal === true
+    );
+    if (hasMealInclusiveActivity) {
+      console.log(`[Pipeline V2] Day ${balancedDay.dayNumber}: meal-inclusive activity found — skipping separate lunch/dinner`);
+    }
+
     // 6. Pre-insert lunch if the day starts late (after 14:30 — arrival day)
     // In this case, the interleave loop will never hit the 11:30-14:30 window
     let lunchInserted = false;
@@ -915,7 +928,7 @@ export async function assembleTripSchedule(
     const initialHour = initialCursor.getHours() + initialCursor.getMinutes() / 60;
 
     // If cursor starts between 11:30 and 14:30, insert lunch NOW before activities
-    if (!skipLunch && lunch?.restaurant && initialHour >= 11.5 && initialHour < 14.5 && orderedActivities.length > 0) {
+    if (!skipLunch && !hasMealInclusiveActivity && lunch?.restaurant && initialHour >= 11.5 && initialHour < 14.5 && orderedActivities.length > 0) {
       const result = scheduler.addItem({
         id: `meal-${balancedDay.dayNumber}-lunch`,
         title: `Déjeuner — ${lunch.restaurant.name}`,
@@ -950,7 +963,7 @@ export async function assembleTripSchedule(
       const cursorTime = scheduler.getCurrentTime();
       const cursorHour = cursorTime.getHours() + cursorTime.getMinutes() / 60;
 
-      if (!lunchInserted && !skipLunch && lunch?.restaurant && cursorHour >= 11.5 && cursorHour < 14.5) {
+      if (!lunchInserted && !skipLunch && !hasMealInclusiveActivity && lunch?.restaurant && cursorHour >= 11.5 && cursorHour < 14.5) {
         const result = scheduler.addItem({
           id: `meal-${balancedDay.dayNumber}-lunch`,
           title: `Déjeuner — ${lunch.restaurant.name}`,
@@ -967,7 +980,7 @@ export async function assembleTripSchedule(
       const cursorTime2 = scheduler.getCurrentTime();
       const cursorHour2 = cursorTime2.getHours() + cursorTime2.getMinutes() / 60;
 
-      if (!dinnerInserted && !skipDinner && dinner?.restaurant && cursorHour2 >= 18.5 && cursorHour2 < 21) {
+      if (!dinnerInserted && !skipDinner && !hasMealInclusiveActivity && dinner?.restaurant && cursorHour2 >= 18.5 && cursorHour2 < 21) {
         const result = scheduler.addItem({
           id: `meal-${balancedDay.dayNumber}-dinner`,
           title: `Dîner — ${dinner.restaurant.name}`,
@@ -1184,7 +1197,7 @@ export async function assembleTripSchedule(
     // 8. Insert any remaining meals after all activities
     // Uses insertFixedItem to bypass the cursor (which is now past the lunch window).
     // findBestMealSlot() scans gaps between existing items to find the best time.
-    if (!lunchInserted && !skipLunch) {
+    if (!lunchInserted && !skipLunch && !hasMealInclusiveActivity) {
       const lunchDuration = lunch?.restaurant ? 60 : 45;
       const lunchData = lunch?.restaurant
         ? { ...lunch.restaurant, _alternatives: lunch.restaurantAlternatives || [] }
@@ -1213,7 +1226,7 @@ export async function assembleTripSchedule(
       }
     }
 
-    if (!dinnerInserted && !skipDinner) {
+    if (!dinnerInserted && !skipDinner && !hasMealInclusiveActivity) {
       const dinnerDuration = dinner?.restaurant ? 75 : 60;
       const dinnerData = dinner?.restaurant
         ? { ...dinner.restaurant, _alternatives: dinner.restaurantAlternatives || [] }
@@ -1504,6 +1517,7 @@ export async function assembleTripSchedule(
         for (const r of candidates) {
           if (!r.latitude || !r.longitude) continue;
           if (usedIds.has(r.id) || usedNames.has(r.name)) continue;
+          if (!isAppropriateForMeal(r, c.mealType)) continue; // Prevent pizza/heavy meals for breakfast
           const rDist = calculateDistance(c.refLat, c.refLng, r.latitude, r.longitude);
           if (rDist < bestDist && rDist < 2.0) {
             bestDist = rDist;

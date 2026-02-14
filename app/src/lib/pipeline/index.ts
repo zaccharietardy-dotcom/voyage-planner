@@ -1229,6 +1229,9 @@ function rebalanceClustersForFlights(
     nature: ['park', 'parc', 'garden', 'jardin', 'botanical', 'botanique', 'beach', 'plage',
              'viewpoint', 'belvédère', 'trail', 'randonnée', 'zoo', 'promenade'],
     nightlife: ['bar', 'pub', 'club', 'nightlife', 'cocktail', 'brewery', 'karaoke'],
+    experiential: ['cooking class', 'cours de cuisine', 'food tour', 'wine tasting',
+                   'dégustation', 'degustation', 'tasting', 'atelier cuisine',
+                   'atelier culinaire', 'wine tour', 'beer tasting'],
   };
 
   function getActivityCategory(a: ScoredActivity): string {
@@ -1240,6 +1243,7 @@ function rebalanceClustersForFlights(
   }
 
   const MAX_SAME_CATEGORY_PER_DAY = 2;
+  const MAX_EXPERIENTIAL_PER_DAY = 1;
 
   for (let ci = 0; ci < clusters.length; ci++) {
     if (isDayTrip[ci]) continue;
@@ -1255,14 +1259,15 @@ function rebalanceClustersForFlights(
 
     for (const [cat, catActivities] of catCounts) {
       if (cat === 'other') continue;
-      if (catActivities.length <= MAX_SAME_CATEGORY_PER_DAY) continue;
+      const maxForCat = cat === 'experiential' ? MAX_EXPERIENTIAL_PER_DAY : MAX_SAME_CATEGORY_PER_DAY;
+      if (catActivities.length <= maxForCat) continue;
 
       // Too many of this category — move lowest-scored non-must-see
       const swapCandidates = catActivities
         .filter(a => !a.mustSee)
         .sort((a, b) => a.score - b.score);
 
-      let toMove = catActivities.length - MAX_SAME_CATEGORY_PER_DAY;
+      let toMove = catActivities.length - maxForCat;
       for (const candidate of swapCandidates) {
         if (toMove <= 0) break;
 
@@ -1281,7 +1286,7 @@ function rebalanceClustersForFlights(
           }
         }
 
-        if (bestTarget !== -1 && fewestCat < MAX_SAME_CATEGORY_PER_DAY) {
+        if (bestTarget !== -1 && fewestCat < maxForCat) {
           const idx = cluster.activities.findIndex(a => a.id === candidate.id);
           if (idx !== -1) {
             const [moved] = cluster.activities.splice(idx, 1);
