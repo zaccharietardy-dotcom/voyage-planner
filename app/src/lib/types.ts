@@ -208,6 +208,7 @@ export interface Restaurant {
   tips?: string; // conseils (réservation, plats signature, etc.)
   badges?: string[]; // TripAdvisor badges (Michelin, Travelers' Choice, etc.)
   dataReliability?: 'verified' | 'estimated' | 'generated'; // Fiabilité des coordonnées GPS
+  googlePlaceId?: string; // Google Places place_id pour récupérer la vraie photo
 }
 
 // ============================================

@@ -10,7 +10,7 @@ import type { FetchedData, ActivityCluster, MealAssignment, BalancedPlan, Scored
 import { DayScheduler, parseTime, formatTime } from '../services/scheduler';
 import { calculateDistance, estimateTravelTime } from '../services/geocoding';
 import { getDirections } from '../services/directions';
-import { fetchPlaceImage } from './services/wikimediaImages';
+import { fetchPlaceImage, fetchRestaurantPhotoByPlaceId } from './services/wikimediaImages';
 import { isAppropriateForMeal, getCuisineFamily } from './step4-restaurants';
 import { searchRestaurantsNearby } from '../services/serpApiPlaces';
 import { batchFetchWikipediaSummaries, getWikiLanguageForDestination } from '../services/wikipedia';
@@ -1338,6 +1338,13 @@ export async function assembleTripSchedule(
     console.warn('[Pipeline V2] Image enrichment failed (non-critical):', e);
   }
 
+  // 12b. Enrich restaurant photos using Google Places Details API (real photos from place_id)
+  try {
+    await enrichRestaurantsWithPhotos(days);
+  } catch (e) {
+    console.warn('[Pipeline V2] Restaurant photo enrichment failed (non-critical):', e);
+  }
+
   // 13. Batch fetch directions (non-blocking enrichment, 20s max)
   try {
     const directionsTimeout = new Promise<void>((resolve) => {
@@ -2383,6 +2390,124 @@ async function enrichWithPlaceImages(days: TripDay[]): Promise<void> {
     console.log(`[Pipeline V2] ✅ Place images: ${enriched}/${itemsNeedingImages.length} enriched (restaurants excluded — use SerpAPI/TripAdvisor photos)`);
   } catch (e) {
     console.warn('[Pipeline V2] Image enrichment error:', e);
+  }
+}
+
+/**
+ * Determine if a restaurant needs a better photo (no photo, or only a low-quality SerpAPI thumbnail).
+ */
+function needsBetterPhoto(restaurant: Restaurant): boolean {
+  // No photos at all
+  if (!restaurant.photos || restaurant.photos.length === 0) return true;
+
+  // Only has SerpAPI thumbnails (low quality, typically from lh5.googleusercontent.com at small size)
+  const firstPhoto = restaurant.photos[0];
+  if (!firstPhoto) return true;
+
+  // Already has a Google Places photo URL (maxwidth=800) → good quality
+  if (firstPhoto.includes('maps.googleapis.com/maps/api/place/photo')) return false;
+
+  // SerpAPI thumbnails are typically from lh5.googleusercontent.com with small dimensions
+  // or from other low-quality sources. If it's not a Google Places photo, try to upgrade.
+  return true;
+}
+
+/**
+ * Enrich restaurant photos using Google Places Details API.
+ * Uses the googlePlaceId from SerpAPI to fetch the real first photo from Google Maps.
+ * Much more reliable than searching by name (avoids homonym issues).
+ * Cost: $0.005 per call (Place Details Basic).
+ * Hard timeout: 10s max.
+ */
+async function enrichRestaurantsWithPhotos(days: TripDay[]): Promise<void> {
+  try {
+    // Collect all restaurants (main + alternatives) that need better photos
+    const restaurantsToEnrich: Restaurant[] = [];
+
+    for (const day of days) {
+      for (const item of day.items) {
+        if (item.type === 'restaurant' && item.restaurant) {
+          if (needsBetterPhoto(item.restaurant)) {
+            restaurantsToEnrich.push(item.restaurant);
+          }
+          // Also check alternatives
+          if (item.restaurantAlternatives) {
+            for (const alt of item.restaurantAlternatives) {
+              if (needsBetterPhoto(alt)) {
+                restaurantsToEnrich.push(alt);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    if (restaurantsToEnrich.length === 0) {
+      console.log('[Pipeline V2] All restaurants already have good photos — skipping');
+      return;
+    }
+
+    console.log(`[Pipeline V2] 📸 Enriching ${restaurantsToEnrich.length} restaurants with Google Places photos...`);
+
+    const enrichmentWork = async () => {
+      // Process in batches of 5 for concurrency control
+      const BATCH_SIZE = 5;
+      for (let i = 0; i < restaurantsToEnrich.length; i += BATCH_SIZE) {
+        const batch = restaurantsToEnrich.slice(i, i + BATCH_SIZE);
+        await Promise.allSettled(
+          batch.map(async (restaurant) => {
+            try {
+              let photoUrl: string | null = null;
+
+              // Path A: Use googlePlaceId (reliable, $0.005)
+              if (restaurant.googlePlaceId) {
+                photoUrl = await fetchRestaurantPhotoByPlaceId(restaurant.googlePlaceId);
+              }
+
+              // Path B: Fallback to name-based search (less reliable, $0.017)
+              if (!photoUrl && restaurant.name) {
+                photoUrl = await fetchPlaceImage(
+                  restaurant.name,
+                  restaurant.latitude,
+                  restaurant.longitude
+                );
+              }
+
+              if (photoUrl) {
+                // Prepend the Google Places photo to the photos array
+                if (!restaurant.photos) restaurant.photos = [];
+                restaurant.photos.unshift(photoUrl);
+              }
+            } catch {
+              // Individual restaurant failure — skip silently
+            }
+          })
+        );
+      }
+    };
+
+    const timeout = new Promise<void>((resolve) => {
+      setTimeout(() => {
+        console.warn('[Pipeline V2] ⚠️ Restaurant photo enrichment timeout (10s) — continuing');
+        resolve();
+      }, 10_000);
+    });
+
+    await Promise.race([enrichmentWork(), timeout]);
+
+    // Sync imageUrl on restaurant TripItems (so the card displays the new photo)
+    for (const day of days) {
+      for (const item of day.items) {
+        if (item.type === 'restaurant' && item.restaurant?.photos?.[0]) {
+          item.imageUrl = item.restaurant.photos[0];
+        }
+      }
+    }
+
+    const enriched = restaurantsToEnrich.filter(r => r.photos && r.photos.length > 0 && !needsBetterPhoto(r)).length;
+    console.log(`[Pipeline V2] ✅ Restaurant photos: ${enriched}/${restaurantsToEnrich.length} enriched with Google Places photos`);
+  } catch (e) {
+    console.warn('[Pipeline V2] Restaurant photo enrichment error:', e);
   }
 }
 

@@ -244,6 +244,7 @@ export async function searchRestaurantsWithSerpApi(
         // Pas de reservationUrl TheFork (liens de recherche générique peu fiables)
         // Google Maps est utilisé via googleMapsUrl ci-dessus
         photos: r.thumbnail ? [r.thumbnail] : undefined,
+        googlePlaceId: r.place_id || undefined,
         openingHours: parseOpeningHours(r.operating_hours) || {},
         distance: 0, // Sera calculé plus tard
         walkingTime: 0,
@@ -1018,6 +1019,7 @@ export async function searchRestaurantsNearby(
         website: place.website,
         googleMapsUrl,
         photos: place.thumbnail ? [place.thumbnail] : undefined,
+        googlePlaceId: place.place_id || undefined,
         openingHours: parseOpeningHours(place.operating_hours) || {},
         distance: distanceKm,
         walkingTime: Math.round(distanceMeters / 80), // ~80m/min de marche

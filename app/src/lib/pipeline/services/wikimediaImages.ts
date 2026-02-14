@@ -90,6 +90,45 @@ async function fetchGooglePlacesImage(
 }
 
 /**
+ * Fetch a restaurant photo by Google Place ID.
+ * Uses Place Details API ($0.005/call) — much cheaper than Find Place ($0.017).
+ * Returns the first photo URL at maxwidth=800 for high quality.
+ */
+export async function fetchRestaurantPhotoByPlaceId(
+  placeId: string,
+  apiKey?: string
+): Promise<string | null> {
+  const key = apiKey || getApiKey();
+  if (!key || !placeId) return null;
+
+  const cacheKey = `place_id:${placeId}`;
+  if (imageCache.has(cacheKey)) return imageCache.get(cacheKey) || null;
+
+  try {
+    const url = new URL('https://maps.googleapis.com/maps/api/place/details/json');
+    url.searchParams.set('place_id', placeId);
+    url.searchParams.set('fields', 'photos');
+    url.searchParams.set('key', key);
+
+    const res = await fetch(url.toString(), { signal: AbortSignal.timeout(3000) });
+    if (!res.ok) { imageCache.set(cacheKey, null); return null; }
+
+    const data = await res.json();
+    if (data.status !== 'OK') { imageCache.set(cacheKey, null); return null; }
+
+    const photoRef = data.result?.photos?.[0]?.photo_reference;
+    if (!photoRef) { imageCache.set(cacheKey, null); return null; }
+
+    const photoUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photoreference=${photoRef}&key=${key}`;
+    imageCache.set(cacheKey, photoUrl);
+    return photoUrl;
+  } catch {
+    imageCache.set(cacheKey, null);
+    return null;
+  }
+}
+
+/**
  * Wikipedia fallback: search for page → get main thumbnail.
  * Free, no API key. Tries French then English Wikipedia.
  */
