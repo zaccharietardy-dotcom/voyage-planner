@@ -88,6 +88,10 @@ function buildPrompt(
 
   const clusterDesc = clusters
     .map(c => {
+      const totalActivityMin = c.activities.reduce((sum, a) => sum + (a.duration || 60), 0);
+      const heavyActivities = c.activities.filter((a) => (a.duration || 60) >= 90).length;
+      const estimatedTravelMin = Math.round((c.totalIntraDistance || 0) * 12);
+      const budgetHint = `    [BUDGET JOUR: activités=${totalActivityMin}min, déplacements≈${estimatedTravelMin}min, heavy=${heavyActivities}]`;
       const activitiesList = c.activities
         .map(a => {
           const durationStr = `${a.duration || 60}min`;
@@ -115,7 +119,7 @@ function buildPrompt(
           return `    - [${a.id}] ${a.name} (${a.type}, ${durationStr}, ${ratingStr}, ${reviewStr}, ${gpsStr}${hoursInfo}${viatorFlag})`;
         })
         .join('\n');
-      return `  Cluster ${c.dayNumber} (centroïde: ${c.centroid.lat.toFixed(4)}, ${c.centroid.lng.toFixed(4)}):\n${activitiesList}`;
+      return `  Cluster ${c.dayNumber} (centroïde: ${c.centroid.lat.toFixed(4)}, ${c.centroid.lng.toFixed(4)}, intra=${(c.totalIntraDistance || 0).toFixed(1)}km):\n${budgetHint}\n${activitiesList}`;
     })
     .join('\n\n');
 
@@ -165,6 +169,8 @@ RÈGLES STRICTES:
 9. RESPECTE les horaires d'ouverture : évite de programmer des lieux fermés (marqués [FERMÉ ce jour])
 10. ADAPTE selon la météo : privilégie les activités intérieures (musées, monuments couverts) les jours de pluie, et les activités extérieures (parcs, jardins, marchés) les jours ensoleillés
 11. JAMAIS 2 activités expérientielles similaires (cours de cuisine, dégustation, food tour) le même jour — les répartir sur des jours différents
+12. Respecte les budgets journaliers: charge globale équilibrée (durées + déplacements + activités lourdes)
+13. Jours arrivée/départ: alléger fortement (moins d'activités et moins de déplacements)
 
 RÉPONDS EN JSON STRICT (pas de texte avant/après):
 {

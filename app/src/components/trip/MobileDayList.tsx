@@ -7,6 +7,11 @@ import {
   Utensils,
   Hotel,
   Car,
+  Bus,
+  TrainFront,
+  TramFront,
+  Ship,
+  Footprints,
   Plane,
   ParkingCircle,
   LogIn,
@@ -20,13 +25,59 @@ const TYPE_ICONS: Record<string, React.ElementType> = {
   activity: MapPin,
   restaurant: Utensils,
   hotel: Hotel,
-  transport: Car,
+  transport: TramFront,
   flight: Plane,
   parking: ParkingCircle,
   checkin: LogIn,
   checkout: LogOut,
   luggage: Luggage,
 };
+
+const TRANSPORT_UI_V2_ENABLED = !['0', 'false', 'off'].includes(
+  String(process.env.NEXT_PUBLIC_PIPELINE_TRANSPORT_UI_V2 || 'true').toLowerCase()
+);
+
+const TRANSPORT_MODE_ICONS: Record<NonNullable<TripItem['transportMode']>, React.ElementType> = {
+  train: TrainFront,
+  bus: Bus,
+  car: Car,
+  ferry: Ship,
+  walking: Footprints,
+  transit: TramFront,
+};
+
+function normalizeTransportModeForUi(mode?: string): TripItem['transportMode'] | undefined {
+  if (!mode) return undefined;
+  const normalized = mode.toLowerCase();
+  if (normalized === 'train' || normalized === 'bus' || normalized === 'car' || normalized === 'ferry') return normalized;
+  if (normalized === 'walk' || normalized === 'walking') return 'walking';
+  if (normalized === 'public' || normalized === 'metro' || normalized === 'tram' || normalized === 'subway' || normalized === 'transit' || normalized === 'combined') return 'transit';
+  return undefined;
+}
+
+function getTransportModeForItem(item: TripItem): TripItem['transportMode'] {
+  const explicit = normalizeTransportModeForUi(item.transportMode);
+  if (explicit) return explicit;
+
+  if (item.transitLegs && item.transitLegs.length > 0) {
+    const weighted = new Map<string, number>();
+    for (const leg of item.transitLegs) {
+      const mode = normalizeTransportModeForUi(leg.mode);
+      if (!mode) continue;
+      weighted.set(mode, (weighted.get(mode) || 0) + Math.max(1, leg.duration || 1));
+    }
+    if (weighted.size > 0) {
+      return [...weighted.entries()].sort((a, b) => b[1] - a[1])[0][0] as TripItem['transportMode'];
+    }
+  }
+
+  const title = (item.title || '').toLowerCase();
+  if (title.includes('train')) return 'train';
+  if (title.includes('bus')) return 'bus';
+  if (title.includes('ferry')) return 'ferry';
+  if (title.includes('walk') || title.includes('à pied')) return 'walking';
+  return 'transit';
+}
 
 const TYPE_LABELS: Record<string, string> = {
   activity: 'Activité',
@@ -72,9 +123,15 @@ export function MobileDayList({ day, onClickItem }: MobileDayListProps) {
           <span className="truncate">{day.weatherForecast.condition}</span>
         </div>
       )}
-      {sortedItems.map((item, idx) => {
+      {sortedItems.map((item) => {
         const color = TRIP_ITEM_COLORS[item.type] || '#6B7280';
-        const Icon = TYPE_ICONS[item.type] || MapPin;
+        const transportMode = item.type === 'transport' && TRANSPORT_UI_V2_ENABLED
+          ? getTransportModeForItem(item)
+          : undefined;
+        const transportIconTestId = transportMode ? `transport-icon-${transportMode}` : undefined;
+        const Icon = item.type === 'transport' && TRANSPORT_UI_V2_ENABLED
+          ? (TRANSPORT_MODE_ICONS[transportMode || 'transit'] || TYPE_ICONS.transport)
+          : (TYPE_ICONS[item.type] || MapPin);
         const durationMin = computeDuration(item.startTime, item.endTime);
 
         return (
@@ -102,7 +159,11 @@ export function MobileDayList({ day, onClickItem }: MobileDayListProps) {
               className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
               style={{ backgroundColor: `${color}20` }}
             >
-              <Icon className="h-4 w-4" style={{ color }} />
+              <Icon
+                className="h-4 w-4"
+                style={{ color }}
+                data-testid={transportIconTestId}
+              />
             </div>
 
             {/* Content */}

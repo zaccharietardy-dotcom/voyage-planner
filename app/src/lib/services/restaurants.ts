@@ -22,6 +22,7 @@ import { searchRestaurantsWithSerpApi, searchRestaurantsNearby, isSerpApiPlacesC
 import { searchPlacesFromDB, savePlacesToDB, isDataFresh, type PlaceData } from './placeDatabase';
 import { searchTripAdvisorRestaurants, isTripAdvisorConfigured } from './tripadvisor';
 import { searchRestaurantsWithGemini } from './geminiSearch';
+import { buildPlacePhotoProxyUrl } from './googlePlacePhoto';
 
 // Configuration optionnelle Google Places
 function getGooglePlacesKey() { return process.env.GOOGLE_PLACES_API_KEY; }
@@ -741,7 +742,7 @@ async function searchWithGooglePlaces(params: RestaurantSearchParams): Promise<R
       googleMapsUrl, // URL directe vers la fiche Google Maps
       reservationUrl: `https://www.thefork.fr/search?q=${encodeURIComponent(`${place.name} ${params.destination || ''}`)}`,
       photos: place.photos?.map((p: any) =>
-        `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${p.photo_reference}&key=${getGooglePlacesKey()}`
+        buildPlacePhotoProxyUrl(p.photo_reference, 400)
       ),
       distance: calculateDistance(latitude, longitude, place.geometry.location.lat, place.geometry.location.lng),
       walkingTime: estimateTravelTime(

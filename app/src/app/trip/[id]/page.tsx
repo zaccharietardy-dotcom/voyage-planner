@@ -785,10 +785,14 @@ export default function TripPage() {
   // Keep backward-compat function signatures for non-map callers
   const getAllItems = (): TripItem[] => allItems;
 
-  const handleExportDebug = () => {
+  const handleExportDebug = (compact: boolean = true) => {
     if (!trip) return;
     const debugExport = {
-      _meta: { exportedAt: new Date().toISOString(), purpose: 'Debug export' },
+      _meta: {
+        exportedAt: new Date().toISOString(),
+        purpose: 'Debug export',
+        compact,
+      },
       summary: {
         destination: trip.preferences.destination,
         origin: trip.preferences.origin,
@@ -798,7 +802,7 @@ export default function TripPage() {
         totalEstimatedCost: trip.totalEstimatedCost,
       },
       days: trip.days,
-      _rawTrip: trip,
+      ...(compact ? {} : { _rawTrip: trip }),
     };
     const blob = new Blob([JSON.stringify(debugExport, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -1072,7 +1076,13 @@ export default function TripPage() {
               </Button>
 
               {canOwnerEdit && (
-                <Button variant="outline" size="sm" className="gap-1.5 h-8" onClick={handleExportDebug}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5 h-8"
+                  onClick={(event) => handleExportDebug(!event.shiftKey)}
+                  title="Export debug compact (Shift+clic pour inclure _rawTrip)"
+                >
                   <Bug className="h-3.5 w-3.5" />
                 </Button>
               )}

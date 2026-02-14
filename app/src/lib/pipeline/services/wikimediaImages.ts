@@ -10,6 +10,7 @@
  * Photo URL = free (just constructs URL, browser fetches it directly)
  */
 
+import { buildPlacePhotoProxyUrl } from '../../services/googlePlacePhoto';
 const GOOGLE_FIND_PLACE_URL = 'https://maps.googleapis.com/maps/api/place/findplacefromtext/json';
 const WIKI_API_FR = 'https://fr.wikipedia.org/w/api.php';
 const WIKI_API_EN = 'https://en.wikipedia.org/w/api.php';
@@ -224,7 +225,7 @@ async function fetchGooglePlacesImage(
     const photoRef = best.candidate.photos?.[0]?.photo_reference;
     if (!photoRef) return null;
 
-    return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photoreference=${photoRef}&key=${apiKey}`;
+    return buildPlacePhotoProxyUrl(photoRef, 800);
   } catch {
     return null;
   }
@@ -260,7 +261,7 @@ export async function fetchRestaurantPhotoByPlaceId(
     const photoRef = data.result?.photos?.[0]?.photo_reference;
     if (!photoRef) { imageCache.set(cacheKey, null); return null; }
 
-    const photoUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photoreference=${photoRef}&key=${key}`;
+    const photoUrl = buildPlacePhotoProxyUrl(photoRef, 800);
     imageCache.set(cacheKey, photoUrl);
     return photoUrl;
   } catch {

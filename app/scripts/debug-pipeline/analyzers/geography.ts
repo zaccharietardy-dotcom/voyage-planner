@@ -5,6 +5,21 @@
 import { Trip, TripItem } from '../../../src/lib/types';
 import { AnalysisIssue } from './schedule';
 
+const URBAN_LONG_LEG_TARGET_KM = 2.5;
+const URBAN_LONG_LEG_HARD_KM = 4;
+const OUTLIER_MIN_THRESHOLD_KM = 3;
+const LOGISTICS_TYPES = ['flight', 'transport', 'checkin', 'checkout', 'parking', 'luggage'];
+
+function isHotelMeal(item: TripItem): boolean {
+  if (item.type !== 'restaurant') return false;
+  const normalizedTitle = (item.title || '')
+    .toLowerCase()
+    .replace(/’/g, "'")
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+  return normalizedTitle.includes("a l'hotel") || normalizedTitle.includes('at hotel');
+}
+
 function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const R = 6371; // km
   const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -19,6 +34,34 @@ function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
 function parseTime(time: string): number {
   const [h, m] = time.split(':').map(Number);
   return (h || 0) * 60 + (m || 0);
+}
+
+function percentile(values: number[], p: number): number {
+  if (values.length === 0) return 0;
+  const sorted = [...values].sort((a, b) => a - b);
+  const idx = Math.max(0, Math.min(sorted.length - 1, Math.ceil(p * sorted.length) - 1));
+  return sorted[idx];
+}
+
+function activityDistanceFromCentroid(items: TripItem[]): Map<string, number> {
+  const points = items.filter((item) => item.latitude !== 0 && item.longitude !== 0);
+  if (points.length < 3) return new Map();
+
+  const centroid = points.reduce(
+    (acc, point) => ({ lat: acc.lat + point.latitude, lng: acc.lng + point.longitude }),
+    { lat: 0, lng: 0 }
+  );
+  centroid.lat /= points.length;
+  centroid.lng /= points.length;
+
+  const distances = new Map<string, number>();
+  for (const point of points) {
+    distances.set(
+      point.id,
+      haversineDistance(centroid.lat, centroid.lng, point.latitude, point.longitude)
+    );
+  }
+  return distances;
 }
 
 export function analyzeGeography(trip: Trip): AnalysisIssue[] {
@@ -57,6 +100,8 @@ export function analyzeGeography(trip: Trip): AnalysisIssue[] {
     const items = [...day.items].sort((a, b) => parseTime(a.startTime) - parseTime(b.startTime));
 
     for (const item of items) {
+      if (item.type === 'flight') continue;
+
       // Coordonnées nulles ou (0,0)
       if (item.latitude === 0 && item.longitude === 0) {
         issues.push({
@@ -97,7 +142,7 @@ export function analyzeGeography(trip: Trip): AnalysisIssue[] {
       }
 
       // Restaurant trop loin du centre (>15km)
-      if (centerCount > 0 && item.type === 'restaurant') {
+      if (centerCount > 0 && item.type === 'restaurant' && !isHotelMeal(item)) {
         const dist = haversineDistance(centerLat, centerLng, item.latitude, item.longitude);
         if (dist > 15) {
           issues.push({
@@ -113,7 +158,9 @@ export function analyzeGeography(trip: Trip): AnalysisIssue[] {
     }
 
     // Distance entre activités consécutives
-    const nonLogistics = items.filter(i => !['flight', 'transport', 'checkin', 'checkout', 'parking', 'luggage'].includes(i.type));
+    const nonLogistics = items.filter(i => !LOGISTICS_TYPES.includes(i.type) && !isHotelMeal(i));
+    const dayLegDistancesKm: number[] = [];
+
     for (let i = 0; i < nonLogistics.length - 1; i++) {
       const current = nonLogistics[i];
       const next = nonLogistics[i + 1];
@@ -122,6 +169,7 @@ export function analyzeGeography(trip: Trip): AnalysisIssue[] {
 
       const dist = haversineDistance(current.latitude, current.longitude, next.latitude, next.longitude);
       const gapMinutes = parseTime(next.startTime) - parseTime(current.endTime);
+      dayLegDistancesKm.push(dist);
 
       // Plus de 20km entre deux items consécutifs
       if (dist > 20 && !day.isDayTrip) {
@@ -131,6 +179,9 @@ export function analyzeGeography(trip: Trip): AnalysisIssue[] {
           message: `Jour ${day.dayNumber}: ${dist.toFixed(1)}km entre "${current.title}" et "${next.title}" — trajet long`,
           dayNumber: day.dayNumber,
           details: { distanceKm: Math.round(dist), gapMinutes },
+          code: 'GEO_VERY_LONG_DAY_LEG',
+          component: 'pipeline/geography',
+          frequencyWeight: 1.2,
         });
       }
 
@@ -142,6 +193,67 @@ export function analyzeGeography(trip: Trip): AnalysisIssue[] {
           message: `Jour ${day.dayNumber}: ${dist.toFixed(1)}km entre "${current.title}" et "${next.title}" avec seulement ${gapMinutes}min de battement`,
           dayNumber: day.dayNumber,
           details: { distanceKm: dist.toFixed(1), gapMinutes },
+          code: 'GEO_IMPOSSIBLE_TRANSITION',
+          component: 'pipeline/step8-validate',
+          frequencyWeight: 2,
+          autofixCandidate: true,
+        });
+      }
+
+      // Règle urbaine non day-trip: 0 legs >4km
+      if (!day.isDayTrip && dist > URBAN_LONG_LEG_HARD_KM) {
+        issues.push({
+          severity: 'critical',
+          category: 'geography',
+          message: `Jour ${day.dayNumber}: segment urbain dur ${dist.toFixed(1)}km entre "${current.title}" et "${next.title}" (> ${URBAN_LONG_LEG_HARD_KM}km)`,
+          dayNumber: day.dayNumber,
+          details: { distanceKm: Number(dist.toFixed(2)), thresholdKm: URBAN_LONG_LEG_HARD_KM },
+          code: 'GEO_URBAN_HARD_LONG_LEG',
+          component: 'pipeline/step8-validate',
+          frequencyWeight: 2.2,
+          autofixCandidate: true,
+        });
+      }
+    }
+
+    // Règle urbaine non day-trip: max 1 leg >2.5km
+    if (!day.isDayTrip) {
+      const longLegCount = dayLegDistancesKm.filter((d) => d > URBAN_LONG_LEG_TARGET_KM).length;
+      if (longLegCount > 1) {
+        issues.push({
+          severity: 'warning',
+          category: 'geography',
+          message: `Jour ${day.dayNumber}: ${longLegCount} segments > ${URBAN_LONG_LEG_TARGET_KM}km (max cible: 1)`,
+          dayNumber: day.dayNumber,
+          details: { longLegCount, thresholdKm: URBAN_LONG_LEG_TARGET_KM, maxAllowed: 1 },
+          code: 'GEO_URBAN_TOO_MANY_LONG_LEGS',
+          component: 'pipeline/step8-validate',
+          frequencyWeight: 1.6,
+          autofixCandidate: true,
+        });
+      }
+    }
+
+    // Outliers intra-journée par percentile
+    const distByItemId = activityDistanceFromCentroid(nonLogistics);
+    if (distByItemId.size >= 3) {
+      const values = [...distByItemId.values()];
+      const p90 = percentile(values, 0.9);
+      const threshold = Math.max(OUTLIER_MIN_THRESHOLD_KM, p90);
+      for (const item of nonLogistics) {
+        const dist = distByItemId.get(item.id);
+        if (!dist || dist <= threshold) continue;
+        issues.push({
+          severity: 'warning',
+          category: 'geography',
+          message: `Jour ${day.dayNumber}: "${item.title}" est un outlier géographique (${dist.toFixed(1)}km du centroïde journalier)`,
+          dayNumber: day.dayNumber,
+          itemTitle: item.title,
+          details: { distanceKm: Number(dist.toFixed(2)), p90Km: Number(p90.toFixed(2)), thresholdKm: Number(threshold.toFixed(2)) },
+          code: 'GEO_DAY_OUTLIER',
+          component: 'pipeline/step7-assemble',
+          frequencyWeight: 1.4,
+          autofixCandidate: true,
         });
       }
     }
@@ -185,6 +297,9 @@ export function analyzeGeography(trip: Trip): AnalysisIssue[] {
       category: 'geography',
       message: `Majorité des coordonnées générées (${generated} generated vs ${verified} verified + ${estimated} estimated) — qualité GPS faible`,
       details: { verified, estimated, generated, noReliability },
+      code: 'GEO_DATA_RELIABILITY_LOW',
+      component: 'pipeline/geocoding',
+      frequencyWeight: 1.1,
     });
   }
 

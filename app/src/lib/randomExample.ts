@@ -17,33 +17,39 @@ const GROUP_TYPES: TripPreferences['groupType'][] = ['solo', 'couple', 'friends'
 const BUDGET_LEVELS: TripPreferences['budgetLevel'][] = ['economic', 'moderate', 'comfort', 'luxury'];
 const ACTIVITIES: TripPreferences['activities'][number][] = ['beach', 'nature', 'culture', 'gastronomy', 'nightlife', 'shopping', 'adventure', 'wellness'];
 
-function pick<T>(arr: T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)];
+interface RandomExampleOptions {
+  randomFn?: () => number;
 }
 
-function pickN<T>(arr: T[], min: number, max: number): T[] {
-  const n = min + Math.floor(Math.random() * (max - min + 1));
-  const shuffled = [...arr].sort(() => Math.random() - 0.5);
-  return shuffled.slice(0, n);
+function pickWithRandom<T>(arr: T[], randomFn: () => number): T {
+  return arr[Math.floor(randomFn() * arr.length)];
 }
 
-export function generateRandomPreferences(): Partial<TripPreferences> {
-  const origin = pick(ORIGINS);
-  let destination = pick(DESTINATIONS);
+function pickNWithRandom<T>(arr: T[], min: number, max: number, randomFn: () => number): T[] {
+  const n = min + Math.floor(randomFn() * (max - min + 1));
+  const keyed = arr.map((value) => ({ value, key: randomFn() }));
+  keyed.sort((a, b) => a.key - b.key);
+  return keyed.slice(0, n).map((entry) => entry.value);
+}
+
+export function generateRandomPreferences(options: RandomExampleOptions = {}): Partial<TripPreferences> {
+  const randomFn = options.randomFn ?? Math.random;
+  const origin = pickWithRandom(ORIGINS, randomFn);
+  let destination = pickWithRandom(DESTINATIONS, randomFn);
   // Ensure different from origin
   while (destination === origin) {
-    destination = pick(DESTINATIONS);
+    destination = pickWithRandom(DESTINATIONS, randomFn);
   }
 
   const startDate = new Date();
-  startDate.setDate(startDate.getDate() + 7 + Math.floor(Math.random() * 80));
+  startDate.setDate(startDate.getDate() + 7 + Math.floor(randomFn() * 80));
 
-  const groupType = pick(GROUP_TYPES);
+  const groupType = pickWithRandom(GROUP_TYPES, randomFn);
   const groupSize = groupType === 'solo' ? 1
     : groupType === 'couple' ? 2
-    : 1 + Math.floor(Math.random() * 6);
+    : 1 + Math.floor(randomFn() * 6);
 
-  const durationDays = 3 + Math.floor(Math.random() * 12);
+  const durationDays = 3 + Math.floor(randomFn() * 12);
 
   return {
     origin,
@@ -51,11 +57,11 @@ export function generateRandomPreferences(): Partial<TripPreferences> {
     startDate,
     durationDays,
     transport: 'optimal',
-    carRental: Math.random() > 0.7,
+    carRental: randomFn() > 0.7,
     groupSize,
     groupType,
-    budgetLevel: pick(BUDGET_LEVELS),
-    activities: pickN(ACTIVITIES, 2, 4),
+    budgetLevel: pickWithRandom(BUDGET_LEVELS, randomFn),
+    activities: pickNWithRandom(ACTIVITIES, 2, 4, randomFn),
     dietary: ['none'],
     tripMode: 'precise' as const,
     cityPlan: [{ city: destination, days: durationDays }],

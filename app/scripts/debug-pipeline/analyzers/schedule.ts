@@ -11,6 +11,10 @@ export interface AnalysisIssue {
   dayNumber?: number;
   itemTitle?: string;
   details?: Record<string, unknown>;
+  code?: string;
+  component?: string;
+  frequencyWeight?: number;
+  autofixCandidate?: boolean;
 }
 
 function parseTime(time: string): number {

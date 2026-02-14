@@ -33,8 +33,13 @@ export function analyzeRelevance(trip: Trip): AnalysisIssue[] {
     }
 
     if (missing.length > 0) {
+      const missingRatio = mustSeeItems.length > 0 ? missing.length / mustSeeItems.length : 1;
+      const severity: AnalysisIssue['severity'] =
+        trip.preferences.durationDays <= 2 || missingRatio <= 0.5
+          ? 'warning'
+          : 'critical';
       issues.push({
-        severity: 'critical',
+        severity,
         category: 'relevance',
         message: `Must-see manquants (${found}/${mustSeeItems.length}): ${missing.join(', ')}`,
         details: { found, total: mustSeeItems.length, missing },

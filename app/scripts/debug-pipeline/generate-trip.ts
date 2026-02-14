@@ -15,9 +15,10 @@
 import * as path from 'path';
 import * as fs from 'fs';
 
-// Charger .env.local nativement (Node 20.12+)
-const envPath = path.join(__dirname, '..', '..', '.env.local');
-if (fs.existsSync(envPath)) {
+export function loadEnvLocal(explicitPath?: string): void {
+  const envPath = explicitPath || path.join(__dirname, '..', '..', '.env.local');
+  if (!fs.existsSync(envPath)) return;
+
   const envContent = fs.readFileSync(envPath, 'utf-8');
   for (const line of envContent.split('\n')) {
     const trimmed = line.trim();
@@ -29,6 +30,9 @@ if (fs.existsSync(envPath)) {
     process.env[key] = val;
   }
 }
+
+// Chargement eager par défaut pour la CLI
+loadEnvLocal();
 
 // Imports après dotenv
 import { generateTripV2 } from '../../src/lib/pipeline';
@@ -79,7 +83,16 @@ function captureConsole(): CapturedLogs & { restore: () => void } {
 // Trip generation
 // ============================================
 
-interface GenerationResult {
+export interface CampaignRunMetadata {
+  campaignId: string;
+  runId: string;
+  runKind: 'scenario' | 'random';
+  seed: number;
+  startedAt: string;
+  durationMs: number;
+}
+
+export interface GenerationResult {
   scenarioId: string;
   preferences: TripPreferences;
   trip: unknown;
@@ -90,9 +103,10 @@ interface GenerationResult {
   generatedAt: string;
   success: boolean;
   errorMessage?: string;
+  _campaign?: CampaignRunMetadata;
 }
 
-async function generateTrip(scenarioId: string, preferences: TripPreferences): Promise<GenerationResult> {
+export async function generateTripRun(scenarioId: string, preferences: TripPreferences): Promise<GenerationResult> {
   const captured = captureConsole();
   const startTime = Date.now();
   const generatedAt = new Date().toISOString();
@@ -156,18 +170,24 @@ async function generateTrip(scenarioId: string, preferences: TripPreferences): P
 // File saving
 // ============================================
 
-function saveResult(result: GenerationResult): string {
-  const resultsDir = path.join(__dirname, 'results');
+export interface SaveResultOptions {
+  outDir?: string;
+  filename?: string;
+}
+
+export function saveResult(result: GenerationResult, options: SaveResultOptions = {}): string {
+  const resultsDir = options.outDir || path.join(__dirname, 'results');
   if (!fs.existsSync(resultsDir)) {
     fs.mkdirSync(resultsDir, { recursive: true });
   }
 
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-  const filename = `${result.scenarioId}-${timestamp}.json`;
+  const filename = options.filename || `${result.scenarioId}-${timestamp}.json`;
   const filepath = path.join(resultsDir, filename);
 
   fs.writeFileSync(filepath, JSON.stringify(result, null, 2), 'utf-8');
-  console.log(`💾 Sauvegardé: results/${filename}`);
+  const relativePath = path.relative(process.cwd(), filepath);
+  console.log(`💾 Sauvegardé: ${relativePath || filepath}`);
   return filepath;
 }
 
@@ -193,8 +213,12 @@ Scénarios disponibles:`);
   }
 }
 
-function completeRandomPreferences(): TripPreferences {
-  const partial = generateRandomPreferences();
+export interface CompleteRandomPreferencesOptions {
+  randomFn?: () => number;
+}
+
+export function completeRandomPreferences(options: CompleteRandomPreferencesOptions = {}): TripPreferences {
+  const partial = generateRandomPreferences({ randomFn: options.randomFn });
   return {
     origin: partial.origin ?? 'Paris',
     destination: partial.destination ?? 'Rome',
@@ -213,24 +237,35 @@ function completeRandomPreferences(): TripPreferences {
   };
 }
 
-async function main() {
-  const args = process.argv.slice(2);
-
-  // Check env
-  const requiredEnvs = ['ANTHROPIC_API_KEY'];
-  const missingEnvs = requiredEnvs.filter(k => !process.env[k]);
-  if (missingEnvs.length > 0) {
-    console.error(`❌ Variables d'environnement manquantes: ${missingEnvs.join(', ')}`);
-    console.error('   Vérifiez votre fichier .env.local');
-    process.exit(1);
-  }
-
-  console.log('🔑 ENV check:', {
+export function getEnvHealth(): Record<'ANTHROPIC' | 'SERPAPI' | 'RAPIDAPI' | 'VIATOR', '✅' | '❌'> {
+  return {
     ANTHROPIC: process.env.ANTHROPIC_API_KEY ? '✅' : '❌',
     SERPAPI: process.env.SERPAPI_KEY ? '✅' : '❌',
     RAPIDAPI: process.env.RAPIDAPI_KEY ? '✅' : '❌',
     VIATOR: process.env.VIATOR_API_KEY ? '✅' : '❌',
-  });
+  };
+}
+
+export function assertRequiredEnv(requiredEnvs: string[] = ['ANTHROPIC_API_KEY']): void {
+  const missingEnvs = requiredEnvs.filter((k) => !process.env[k]);
+  if (missingEnvs.length > 0) {
+    throw new Error(`Variables d'environnement manquantes: ${missingEnvs.join(', ')}`);
+  }
+}
+
+async function main() {
+  const args = process.argv.slice(2);
+
+  // Check env
+  try {
+    assertRequiredEnv(['ANTHROPIC_API_KEY']);
+  } catch (err) {
+    console.error(`❌ ${err instanceof Error ? err.message : String(err)}`);
+    console.error('   Vérifiez votre fichier .env.local');
+    process.exit(1);
+  }
+
+  console.log('🔑 ENV check:', getEnvHealth());
 
   if (args.includes('--list') || args.length === 0) {
     printUsage();
@@ -239,7 +274,7 @@ async function main() {
 
   if (args.includes('--random')) {
     const prefs = completeRandomPreferences();
-    const result = await generateTrip('random', prefs);
+    const result = await generateTripRun('random', prefs);
     saveResult(result);
     return;
   }
@@ -258,7 +293,7 @@ async function main() {
       printUsage();
       process.exit(1);
     }
-    const result = await generateTrip(scenario.id, scenario.preferences);
+    const result = await generateTripRun(scenario.id, scenario.preferences);
     saveResult(result);
     return;
   }
@@ -272,7 +307,7 @@ async function main() {
 
     for (const id of ids) {
       const scenario = SCENARIOS[id];
-      const result = await generateTrip(scenario.id, scenario.preferences);
+      const result = await generateTripRun(scenario.id, scenario.preferences);
       const filepath = saveResult(result);
       results.push(result);
 
@@ -309,7 +344,10 @@ async function main() {
   process.exit(1);
 }
 
-main().catch((err) => {
-  console.error('💥 Erreur fatale:', err);
-  process.exit(1);
-});
+const isDirectRun = process.argv[1]?.includes('generate-trip');
+if (isDirectRun) {
+  main().catch((err) => {
+    console.error('💥 Erreur fatale:', err);
+    process.exit(1);
+  });
+}

@@ -578,6 +578,9 @@ function rebalanceClustersForFlights(
   densityProfile?: CityDensityProfile
 ): void {
   if (clusters.length < 2) return;
+  const PIPELINE_GEO_STRICT = !['0', 'false', 'off'].includes(
+    String(process.env.PIPELINE_GEO_STRICT || 'true').toLowerCase()
+  );
 
   const isGroundTransport = transport && transport.mode !== 'plane';
 
@@ -673,6 +676,7 @@ function rebalanceClustersForFlights(
     }
     return Math.max(0, Math.floor(effectiveHours / 1.5));
   });
+  const dayGeoSpreadCapKm = hoursPerDay.map((h) => (h <= 6 ? 6.5 : h <= 8 ? 8.5 : 11));
 
   const computeClusterGeo = (cluster: ActivityCluster): void => {
     if (cluster.activities.length === 0) return;
@@ -694,6 +698,49 @@ function rebalanceClustersForFlights(
 
   const dayRemainingMinutes = (idx: number): number =>
     hoursPerDay[idx] * 60 - dayUsedMinutes(idx);
+
+  const routeCostKm = (activities: ScoredActivity[]): number => {
+    if (activities.length <= 1) return 0;
+    let total = 0;
+    for (let i = 0; i < activities.length - 1; i++) {
+      total += calculateDistance(
+        activities[i].latitude,
+        activities[i].longitude,
+        activities[i + 1].latitude,
+        activities[i + 1].longitude
+      );
+    }
+    return total;
+  };
+
+  const maxRadiusKm = (activities: ScoredActivity[]): number => {
+    if (activities.length <= 1) return 0;
+    const centroid = {
+      lat: activities.reduce((sum, act) => sum + act.latitude, 0) / activities.length,
+      lng: activities.reduce((sum, act) => sum + act.longitude, 0) / activities.length,
+    };
+    return activities.reduce((max, act) => {
+      const dist = calculateDistance(act.latitude, act.longitude, centroid.lat, centroid.lng);
+      return Math.max(max, dist);
+    }, 0);
+  };
+
+  const moveDegradesRouteCost = (sourceIdx: number, targetIdx: number, activity: ScoredActivity): boolean => {
+    const sourceBefore = clusters[sourceIdx].activities;
+    const targetBefore = clusters[targetIdx].activities;
+    const sourceAfter = sourceBefore.filter((a) => a.id !== activity.id);
+    const targetAfter = [...targetBefore, activity];
+
+    const beforeCost = routeCostKm(sourceBefore) + routeCostKm(targetBefore);
+    const afterCost = routeCostKm(sourceAfter) + routeCostKm(targetAfter);
+
+    return afterCost > beforeCost + 0.25;
+  };
+
+  const moveExceedsGeoCap = (targetIdx: number, activity: ScoredActivity): boolean => {
+    const projected = [...clusters[targetIdx].activities, activity];
+    return maxRadiusKm(projected) > dayGeoSpreadCapKm[targetIdx];
+  };
 
   // Phase 1: Empty days — merge activities into nearest non-day-trip day with capacity
   // BUT: ensure the day keeps at least its must-sees if it has ANY usable time
@@ -1219,6 +1266,62 @@ function rebalanceClustersForFlights(
     }
   }
 
+  // Phase 6b: Composite day-load balancing (time + travel + fatigue)
+  // Smooths over-dense days by moving low-impact activities to lighter days.
+  const dayLoadScore = (idx: number): number => {
+    const activities = clusters[idx].activities;
+    const totalDurationMin = activities.reduce((sum, a) => sum + (a.duration || 60), 0);
+    const travelMin = Math.round(routeCostKm(activities) * 12);
+    const heavyCount = activities.filter((a) => (a.duration || 60) >= 90).length;
+    return totalDurationMin + travelMin + heavyCount * 35;
+  };
+
+  for (let iter = 0; iter < 12; iter++) {
+    let sourceIdx = -1;
+    let targetIdx = -1;
+    let maxLoad = -Infinity;
+    let minLoad = Infinity;
+
+    for (let ci = 0; ci < clusters.length; ci++) {
+      if (isDayTrip[ci]) continue;
+      const load = dayLoadScore(ci);
+      if (load > maxLoad) {
+        maxLoad = load;
+        sourceIdx = ci;
+      }
+      if (load < minLoad) {
+        minLoad = load;
+        targetIdx = ci;
+      }
+    }
+
+    if (sourceIdx === -1 || targetIdx === -1 || sourceIdx === targetIdx) break;
+    if (maxLoad - minLoad < 120) break;
+
+    const source = clusters[sourceIdx];
+    const moveCandidate = source.activities
+      .filter((a) => !a.mustSee)
+      .sort((a, b) => (a.score - b.score) || ((a.duration || 60) - (b.duration || 60)))[0];
+
+    if (!moveCandidate) break;
+    if (dayRemainingMinutes(targetIdx) < (moveCandidate.duration || 60) + 20) break;
+    if (moveExceedsGeoCap(targetIdx, moveCandidate)) break;
+    if (PIPELINE_GEO_STRICT && moveDegradesRouteCost(sourceIdx, targetIdx, moveCandidate)) break;
+
+    const moveIdx = source.activities.findIndex((a) => a.id === moveCandidate.id);
+    if (moveIdx === -1) break;
+
+    const [moved] = source.activities.splice(moveIdx, 1);
+    clusters[targetIdx].activities.push(moved);
+    computeClusterGeo(source);
+    computeClusterGeo(clusters[targetIdx]);
+
+    console.log(
+      `[Pipeline V2] Phase 6b: moved \"${moved.name}\" Day ${clusters[sourceIdx].dayNumber} → Day ${clusters[targetIdx].dayNumber} `
+      + `(load ${Math.round(maxLoad)}→${Math.round(dayLoadScore(sourceIdx))}, ${Math.round(minLoad)}→${Math.round(dayLoadScore(targetIdx))})`
+    );
+  }
+
   // Phase 7: Type diversity balancing
   // Prevent days with >2 activities of the same broad category (4 museums = exhausting).
   // Swap lowest-scored excess same-type non-must-see with another day.
@@ -1497,6 +1600,9 @@ function rebalanceClustersForFlights(
         // Move only if there is a clear geographic win.
         const improvementKm = srcDist - bestTargetDist;
         if (improvementKm < 3) continue;
+        if (PIPELINE_GEO_STRICT && (moveDegradesRouteCost(ci, bestTarget, activity) || moveExceedsGeoCap(bestTarget, activity))) {
+          continue;
+        }
 
         const idx = source.activities.findIndex(a => a.id === activity.id);
         if (idx === -1) continue;
@@ -1570,6 +1676,9 @@ function rebalanceClustersForFlights(
         if (bestTarget === -1) continue;
         // Require a clear gain to avoid noisy shuffling.
         if (bestTargetDist + minCohesionGainKm >= srcDist) continue;
+        if (PIPELINE_GEO_STRICT && (moveDegradesRouteCost(ci, bestTarget, activity) || moveExceedsGeoCap(bestTarget, activity))) {
+          continue;
+        }
 
         const idx = source.activities.findIndex(a => a.id === activity.id);
         if (idx === -1) continue;

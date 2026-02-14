@@ -12,6 +12,7 @@
 
 import type { Attraction } from '../../services/attractions';
 import type { ActivityType } from '../../types';
+import { buildPlacePhotoProxyUrl } from '../../services/googlePlacePhoto';
 
 const GOOGLE_PLACES_TEXT_SEARCH_URL = 'https://maps.googleapis.com/maps/api/place/textsearch/json';
 
@@ -103,8 +104,8 @@ export async function searchGooglePlacesAttractions(
       const loc = r.geometry?.location || {};
       // Extract photo URL from Google Places photo_reference
       const photoRef = r.photos?.[0]?.photo_reference;
-      const imageUrl = photoRef && apiKey
-        ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${photoRef}&key=${apiKey}`
+      const imageUrl = photoRef
+        ? buildPlacePhotoProxyUrl(photoRef, 400)
         : undefined;
       return {
         id: `gp-${r.place_id || idx}`,

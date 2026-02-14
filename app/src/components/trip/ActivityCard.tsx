@@ -10,6 +10,7 @@ import {
   Utensils,
   Bed,
   Bus,
+  Car,
   Pencil,
   Trash2,
   GripVertical,
@@ -24,6 +25,7 @@ import {
   TrainFront,
   TramFront,
   Ship,
+  Footprints,
   Briefcase,
   ChevronUp,
   ChevronDown,
@@ -39,6 +41,8 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TripItemType } from '@/lib/types';
+
+type SvgIconComponent = React.ComponentType<React.SVGProps<SVGSVGElement>>;
 
 interface ActivityCardProps {
   item: TripItem;
@@ -60,7 +64,7 @@ interface ActivityCardProps {
   onSelectSelfMeal?: (item: TripItem) => void;
 }
 
-const TYPE_ICONS: Record<TripItemType, React.ComponentType<{ className?: string; style?: React.CSSProperties }>> = {
+const TYPE_ICONS: Record<TripItemType, SvgIconComponent> = {
   activity: MapPin,
   restaurant: Utensils,
   hotel: Bed,
@@ -72,6 +76,19 @@ const TYPE_ICONS: Record<TripItemType, React.ComponentType<{ className?: string;
   luggage: Briefcase,
   free_time: Coffee,
 };
+
+const TRANSPORT_MODE_ICONS: Record<NonNullable<TripItem['transportMode']>, SvgIconComponent> = {
+  train: TrainFront,
+  bus: Bus,
+  car: Car,
+  ferry: Ship,
+  walking: Footprints,
+  transit: TramFront,
+};
+
+const TRANSPORT_UI_V2_ENABLED = !['0', 'false', 'off'].includes(
+  String(process.env.NEXT_PUBLIC_PIPELINE_TRANSPORT_UI_V2 || 'true').toLowerCase()
+);
 
 const TYPE_LABELS: Record<TripItemType, string> = {
   activity: 'Activité',
@@ -86,7 +103,7 @@ const TYPE_LABELS: Record<TripItemType, string> = {
   free_time: 'Temps libre',
 };
 
-const TRANSIT_MODE_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+const TRANSIT_MODE_ICONS: Record<string, SvgIconComponent> = {
   bus: Bus,
   metro: TrainFront,
   train: TrainFront,
@@ -101,6 +118,88 @@ const TRANSIT_MODE_COLORS: Record<string, string> = {
   tram: '#FF851B',
   ferry: '#39CCCC',
 };
+
+function normalizeTransportModeForUi(mode?: string): TripItem['transportMode'] | undefined {
+  if (!mode) return undefined;
+  const normalized = mode.toLowerCase();
+  if (normalized === 'train' || normalized === 'bus' || normalized === 'car' || normalized === 'ferry') return normalized;
+  if (normalized === 'walk' || normalized === 'walking') return 'walking';
+  if (normalized === 'public' || normalized === 'metro' || normalized === 'tram' || normalized === 'subway' || normalized === 'transit' || normalized === 'combined') return 'transit';
+  return undefined;
+}
+
+function getTransportModeForItem(item: TripItem): TripItem['transportMode'] | undefined {
+  const explicit = normalizeTransportModeForUi(item.transportMode);
+  if (explicit) return explicit;
+
+  if (item.transitLegs && item.transitLegs.length > 0) {
+    const weighted = new Map<string, number>();
+    for (const leg of item.transitLegs) {
+      const mode = normalizeTransportModeForUi(leg.mode);
+      if (!mode) continue;
+      weighted.set(mode, (weighted.get(mode) || 0) + Math.max(1, leg.duration || 1));
+    }
+    if (weighted.size > 0) {
+      return [...weighted.entries()].sort((a, b) => b[1] - a[1])[0][0] as TripItem['transportMode'];
+    }
+  }
+
+  const title = (item.title || '').toLowerCase();
+  if (title.includes('train')) return 'train';
+  if (title.includes('bus')) return 'bus';
+  if (title.includes('ferry')) return 'ferry';
+  if (title.includes('walk') || title.includes('à pied')) return 'walking';
+  return 'transit';
+}
+
+function ItemTypeIcon({
+  item,
+  className,
+  style,
+  testId,
+}: {
+  item: TripItem;
+  className?: string;
+  style?: React.CSSProperties;
+  testId?: string;
+}) {
+  const iconProps = { className, style, 'data-testid': testId } as React.SVGProps<SVGSVGElement>;
+
+  if (TRANSPORT_UI_V2_ENABLED && item.type === 'transport') {
+    const mode = getTransportModeForItem(item);
+    if (mode === 'train') return <TrainFront {...iconProps} />;
+    if (mode === 'bus') return <Bus {...iconProps} />;
+    if (mode === 'car') return <Car {...iconProps} />;
+    if (mode === 'ferry') return <Ship {...iconProps} />;
+    if (mode === 'walking') return <Footprints {...iconProps} />;
+    return <TramFront {...iconProps} />;
+  }
+
+  switch (item.type) {
+    case 'activity':
+      return <MapPin {...iconProps} />;
+    case 'restaurant':
+      return <Utensils {...iconProps} />;
+    case 'hotel':
+      return <Bed {...iconProps} />;
+    case 'flight':
+      return <Plane {...iconProps} />;
+    case 'parking':
+      return <ParkingCircle {...iconProps} />;
+    case 'checkin':
+      return <LogIn {...iconProps} />;
+    case 'checkout':
+      return <LogOut {...iconProps} />;
+    case 'luggage':
+      return <Briefcase {...iconProps} />;
+    case 'free_time':
+      return <Coffee {...iconProps} />;
+    case 'transport':
+      return <Bus {...iconProps} />;
+    default:
+      return <MapPin {...iconProps} />;
+  }
+}
 
 /** Types that can display a hero image */
 const IMAGE_TYPES: TripItemType[] = ['activity', 'restaurant', 'hotel', 'checkin', 'checkout', 'flight', 'transport'];
@@ -135,7 +234,8 @@ export function ActivityCard({
   onSelectRestaurantAlternative,
   onSelectSelfMeal,
 }: ActivityCardProps) {
-  const Icon = TYPE_ICONS[item.type];
+  const transportMode = item.type === 'transport' ? getTransportModeForItem(item) : undefined;
+  const transportIconTestId = transportMode ? `transport-icon-${transportMode}` : undefined;
   const color = TRIP_ITEM_COLORS[item.type];
   const hasImage = item.imageUrl && IMAGE_TYPES.includes(item.type);
   const [imgError, setImgError] = useState(false);
@@ -165,7 +265,13 @@ export function ActivityCard({
         <>
           {/* Gradient is always rendered as the base layer / loading placeholder */}
           <div className={cn("absolute inset-0 bg-gradient-to-br", TYPE_GRADIENTS[item.type] || 'from-gray-600/90 to-gray-800/95')} />
-          {!showImage && <Icon className="absolute right-3 bottom-3 h-16 w-16 text-white/10" />}
+          {!showImage && (
+            <ItemTypeIcon
+              item={item}
+              className="absolute right-3 bottom-3 h-16 w-16 text-white/10"
+              testId={transportIconTestId}
+            />
+          )}
 
           {/* Image fades in over the gradient once loaded */}
           {showImage && (
@@ -457,7 +563,12 @@ export function ActivityCard({
                 className="p-2 rounded-lg shrink-0"
                 style={{ backgroundColor: `${color}10` }}
               >
-                <Icon className="h-4 w-4" style={{ color }} />
+                <ItemTypeIcon
+                  item={item}
+                  className="h-4 w-4"
+                  style={{ color }}
+                  testId={transportIconTestId}
+                />
               </div>
             )}
           </div>
@@ -581,11 +692,13 @@ function BookingButtons({ item }: { item: TripItem }) {
 
   // Transport
   if (item.type === 'transport' && bookingUrl) {
+    const transportMode = getTransportModeForItem(item) || 'transit';
+    const TransportIcon = TRANSPORT_MODE_ICONS[transportMode] || TrainFront;
     const label = bookingUrl.includes('omio') || bookingUrl.includes('sjv.io') ? 'Omio'
       : bookingUrl.includes('trainline') ? 'Trainline'
       : bookingUrl.includes('flixbus') ? 'FlixBus'
       : 'Réserver';
-    buttons.push({ label, url: bookingUrl, variant: 'primary', icon: <TrainFront className="h-3 w-3" /> });
+    buttons.push({ label, url: bookingUrl, variant: 'primary', icon: <TransportIcon className="h-3 w-3" /> });
   }
 
   // Activity
@@ -669,21 +782,25 @@ function TransportCard({ item }: { item: TripItem }) {
     <div className="mt-2.5 space-y-2 p-2.5 rounded-lg bg-muted/20 border border-border/40" onClick={(e) => e.stopPropagation()}>
       {hasRealData ? (
         <div className="space-y-1.5">
-          {legs.map((leg, idx) => (
-            <div key={idx} className="flex items-center gap-2 text-xs">
-              <span className="font-mono text-primary font-semibold min-w-[90px]">
-                {formatTime(leg.departure)} → {formatTime(leg.arrival)}
-              </span>
-              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] border border-primary/20 bg-primary/5 font-medium">
-                {leg.mode === 'bus' ? <Bus className="h-2.5 w-2.5 text-primary" /> : <TrainFront className="h-2.5 w-2.5 text-primary" />}
-                {cleanLineName(leg)}
-              </span>
-              <span className="text-muted-foreground">{fmtDur(leg.duration)}</span>
-              {idx < legs.length - 1 && (
-                <span className="text-[10px] text-primary/50 ml-auto">↓ corresp.</span>
-              )}
-            </div>
-          ))}
+          {legs.map((leg, idx) => {
+            const legMode = normalizeTransportModeForUi(leg.mode) || 'transit';
+            const LegIcon = TRANSPORT_MODE_ICONS[legMode] || TrainFront;
+            return (
+              <div key={idx} className="flex items-center gap-2 text-xs">
+                <span className="font-mono text-primary font-semibold min-w-[90px]">
+                  {formatTime(leg.departure)} → {formatTime(leg.arrival)}
+                </span>
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] border border-primary/20 bg-primary/5 font-medium">
+                  <LegIcon className="h-2.5 w-2.5 text-primary" />
+                  {cleanLineName(leg)}
+                </span>
+                <span className="text-muted-foreground">{fmtDur(leg.duration)}</span>
+                {idx < legs.length - 1 && (
+                  <span className="text-[10px] text-primary/50 ml-auto">↓ corresp.</span>
+                )}
+              </div>
+            );
+          })}
           {legs.length > 1 && (
             <div className="text-[10px] text-muted-foreground">
               {legs.length - 1} correspondance{legs.length > 2 ? 's' : ''} · ~{item.duration ? fmtDur(item.duration) : ''}

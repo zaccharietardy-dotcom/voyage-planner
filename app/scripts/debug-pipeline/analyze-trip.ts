@@ -34,6 +34,14 @@ interface GenerationResult {
   durationMs?: number;
   generatedAt?: string;
   success?: boolean;
+  _campaign?: {
+    campaignId: string;
+    runId: string;
+    runKind: 'scenario' | 'random';
+    seed: number;
+    startedAt: string;
+    durationMs: number;
+  };
 }
 
 function loadTripFromFile(filepath: string): { trip: Trip; scenarioId: string } {
@@ -62,21 +70,30 @@ function analyzeTrip(trip: Trip, scenarioId: string): AnalysisReport {
   return buildReport(trip, scenarioId, sections);
 }
 
+interface AnalyzeFromFileOptions {
+  silent?: boolean;
+  reportPath?: string;
+}
+
 /**
  * Analyse un fichier trip JSON et affiche le rapport.
  * Exporté pour être utilisé par generate-trip.ts en mode --all-and-analyze.
  */
-export async function analyzeFromFile(filepath: string): Promise<AnalysisReport> {
+export async function analyzeFromFile(filepath: string, options: AnalyzeFromFileOptions = {}): Promise<AnalysisReport> {
   const { trip, scenarioId } = loadTripFromFile(filepath);
   const report = analyzeTrip(trip, scenarioId);
 
   // Afficher le rapport texte
-  console.log(formatReportText(report));
+  if (!options.silent) {
+    console.log(formatReportText(report));
+  }
 
   // Sauvegarder le rapport JSON
-  const reportPath = filepath.replace('.json', '-report.json');
+  const reportPath = options.reportPath || filepath.replace('.json', '-report.json');
   fs.writeFileSync(reportPath, JSON.stringify(report, null, 2), 'utf-8');
-  console.log(`💾 Rapport sauvegardé: ${path.basename(reportPath)}`);
+  if (!options.silent) {
+    console.log(`💾 Rapport sauvegardé: ${path.basename(reportPath)}`);
+  }
 
   return report;
 }

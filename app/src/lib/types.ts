@@ -345,6 +345,9 @@ export interface TripItem {
   distanceFromPrevious?: number; // en km
   timeFromPrevious?: number; // en minutes
   transportToPrevious?: 'walk' | 'car' | 'public' | 'taxi';
+  // Normalized transport metadata for rendering/analytics
+  transportMode?: 'train' | 'bus' | 'car' | 'ferry' | 'walking' | 'transit';
+  transportRole?: 'longhaul' | 'hotel_depart' | 'hotel_return' | 'inter_item';
   // Informations de transport détaillées
   transitInfo?: {
     lines: { number: string; mode: 'bus' | 'metro' | 'tram' | 'train' | 'ferry'; color?: string }[];
@@ -386,6 +389,11 @@ export interface TripDay {
   dayNumber: number;
   date: Date;
   items: TripItem[];
+  geoDiagnostics?: {
+    maxLegKm: number;
+    p95LegKm: number;
+    totalTravelMin: number;
+  };
   // Résumé du jour
   totalDistance?: number;
   totalCost?: number;

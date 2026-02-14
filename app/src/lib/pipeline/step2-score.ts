@@ -422,8 +422,15 @@ function computeScore(
       activity.latitude, activity.longitude,
       activityCentroid.lat, activityCentroid.lng
     );
-    if (distFromCenter > 5) proximityPenalty = -3;
-    else if (distFromCenter > 3) proximityPenalty = -1;
+    if (distFromCenter > 7) proximityPenalty = -8;
+    else if (distFromCenter > 5) proximityPenalty = -5;
+    else if (distFromCenter > 3.5) proximityPenalty = -3;
+    else if (distFromCenter > 2.5) proximityPenalty = -1.5;
+
+    // Short urban trips must stay tighter to avoid long intra-day transitions.
+    if (preferences.durationDays <= 5 && distFromCenter > 4) {
+      proximityPenalty -= 2;
+    }
   }
 
   return mustSeeBonus + popularityScore + ratingScore + typeMatchBonus + viatorBonus

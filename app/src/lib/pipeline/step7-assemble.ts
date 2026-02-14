@@ -16,6 +16,7 @@ import { isAppropriateForMeal, getCuisineFamily, isBreakfastSpecialized } from '
 import { searchRestaurantsNearby } from '../services/serpApiPlaces';
 import { batchFetchWikipediaSummaries, getWikiLanguageForDestination } from '../services/wikipedia';
 import { normalizeHotelBookingUrl } from '../services/bookingLinks';
+import { sanitizeApiKeyLeaksInString, sanitizeGoogleMapsUrl } from '../services/googlePlacePhoto';
 import { dedupeActivitiesBySimilarity, isDuplicateActivityCandidate } from './utils/activityDedup';
 // ---------------------------------------------------------------------------
 // Directions cache — used to store pre-fetched real travel times
@@ -43,12 +44,112 @@ const MODE_LABELS: Record<string, string> = {
 /** Static images for transport types (Unsplash free-to-use) */
 const TRANSPORT_IMAGES: Record<string, string> = {
   flight: 'https://images.unsplash.com/photo-1436491865332-7a61a109db05?w=600&h=400&fit=crop',
-  train: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&h=400&fit=crop',
+  train: 'https://images.unsplash.com/photo-1452421822248-d4c2b47f0c81?w=600&h=400&fit=crop',
   bus: 'https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=600&h=400&fit=crop',
   ferry: 'https://images.unsplash.com/photo-1534008897995-27a23e859048?w=600&h=400&fit=crop',
   car: 'https://images.unsplash.com/photo-1449965408869-ebd13bc9e5a8?w=600&h=400&fit=crop',
-  combined: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&h=400&fit=crop',
+  combined: 'https://images.unsplash.com/photo-1452421822248-d4c2b47f0c81?w=600&h=400&fit=crop',
+  walking: 'https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?w=600&h=400&fit=crop',
+  transit: 'https://images.unsplash.com/photo-1452421822248-d4c2b47f0c81?w=600&h=400&fit=crop',
 };
+
+const PIPELINE_MEDIA_PROXY = !['0', 'false', 'off'].includes(
+  String(process.env.PIPELINE_MEDIA_PROXY || 'true').toLowerCase()
+);
+
+function normalizeTransportMode(rawMode?: string): TripItem['transportMode'] | undefined {
+  if (!rawMode) return undefined;
+  const mode = rawMode.toLowerCase();
+  if (mode === 'train' || mode === 'bus' || mode === 'car' || mode === 'ferry') return mode;
+  if (mode === 'walk' || mode === 'walking') return 'walking';
+  if (mode === 'taxi' || mode === 'driving') return 'car';
+  if (mode === 'public' || mode === 'metro' || mode === 'tram' || mode === 'subway' || mode === 'combined' || mode === 'transit') return 'transit';
+  return undefined;
+}
+
+function dominantTransitLegMode(transitLegs?: TripItem['transitLegs']): TripItem['transportMode'] | undefined {
+  if (!transitLegs || transitLegs.length === 0) return undefined;
+  const weightedDurations = new Map<string, number>();
+  for (const leg of transitLegs) {
+    const mode = normalizeTransportMode(leg.mode);
+    if (!mode) continue;
+    const duration = Number.isFinite(leg.duration) ? leg.duration : 1;
+    weightedDurations.set(mode, (weightedDurations.get(mode) || 0) + Math.max(1, duration));
+  }
+  if (weightedDurations.size === 0) return undefined;
+  return [...weightedDurations.entries()].sort((a, b) => b[1] - a[1])[0][0] as TripItem['transportMode'];
+}
+
+export function getTransportModeFromItemData(itemData: any): TripItem['transportMode'] | undefined {
+  const explicit = normalizeTransportMode(itemData?.transportMode) || normalizeTransportMode(itemData?.mode);
+  if (explicit) return explicit;
+  const fromLegs = dominantTransitLegMode(itemData?.transitLegs);
+  if (fromLegs) return fromLegs;
+
+  const title = String(itemData?.title || '').toLowerCase();
+  if (title.includes('train')) return 'train';
+  if (title.includes('bus')) return 'bus';
+  if (title.includes('ferry')) return 'ferry';
+  if (title.includes('car') || title.includes('voiture')) return 'car';
+  return undefined;
+}
+
+function getTransportImage(itemData: any): string {
+  const mode = getTransportModeFromItemData(itemData);
+  if (mode && TRANSPORT_IMAGES[mode]) return TRANSPORT_IMAGES[mode];
+  return TRANSPORT_IMAGES.train;
+}
+
+export function normalizeReturnTransportBookingUrl(rawUrl: string | undefined, returnDate: Date): string | undefined {
+  if (!rawUrl) return rawUrl;
+  try {
+    const url = new URL(rawUrl);
+    const returnDateStr = returnDate.toISOString().split('T')[0];
+    if (url.searchParams.has('departure_date')) {
+      url.searchParams.set('departure_date', returnDateStr);
+    }
+    return url.toString();
+  } catch {
+    return rawUrl;
+  }
+}
+
+function inferInterItemTransportMode(distanceKm: number, travelMinutes: number): TripItem['transportToPrevious'] {
+  if (distanceKm <= 1.2) return 'walk';
+  if (distanceKm >= 6) return 'car';
+  if (distanceKm >= 3.5 && travelMinutes <= 20) return 'car';
+  return 'public';
+}
+
+function sanitizeTripMediaAndSecrets(trip: Trip): void {
+  const seen = new WeakSet<object>();
+
+  const visit = (value: unknown): unknown => {
+    if (typeof value === 'string') {
+      const sanitizedUrl = PIPELINE_MEDIA_PROXY ? sanitizeGoogleMapsUrl(value) : value;
+      return sanitizeApiKeyLeaksInString(sanitizedUrl);
+    }
+
+    if (!value || typeof value !== 'object') return value;
+    if (seen.has(value as object)) return value;
+    seen.add(value as object);
+
+    if (Array.isArray(value)) {
+      for (let i = 0; i < value.length; i++) {
+        value[i] = visit(value[i]);
+      }
+      return value;
+    }
+
+    const record = value as Record<string, unknown>;
+    for (const key of Object.keys(record)) {
+      record[key] = visit(record[key]);
+    }
+    return record;
+  };
+
+  visit(trip);
+}
 
 /**
  * Assemble the final Trip object from all pipeline outputs.
@@ -405,6 +506,8 @@ export async function assembleTripSchedule(
           priceRange: transport.priceRange,
           estimatedCost: transport.totalPrice,
           bookingUrl: transport.bookingUrl,
+          transportMode: normalizeTransportMode(transport.mode),
+          transportRole: 'longhaul',
         },
       });
     }
@@ -468,7 +571,9 @@ export async function assembleTripSchedule(
           transitDataSource: transport.dataSource,
           priceRange: transport.priceRange,
           estimatedCost: transport.totalPrice,
-          bookingUrl: transport.bookingUrl,
+          bookingUrl: normalizeReturnTransportBookingUrl(transport.bookingUrl, tStart),
+          transportMode: normalizeTransportMode(transport.mode),
+          transportRole: 'longhaul',
         },
       };
     }
@@ -1317,6 +1422,9 @@ export async function assembleTripSchedule(
     const scheduleItems = scheduler.getItems();
     let tripItems: TripItem[] = scheduleItems.map((item, idx) => {
       const itemData = item.data || {};
+      const resolvedTransportMode = item.type === 'transport'
+        ? (getTransportModeFromItemData(itemData) || 'transit')
+        : undefined;
       const normalizedCoords = normalizeItemCoordinates(item.title, itemData, item.type, preferences.destination);
       // Generate Google Maps "search by name" URL (more reliable than GPS coordinates)
       const placeName = itemData.name || item.title;
@@ -1362,10 +1470,12 @@ export async function assembleTripSchedule(
         transitLegs: itemData.transitLegs,
         transitDataSource: itemData.transitDataSource,
         priceRange: itemData.priceRange,
+        transportMode: resolvedTransportMode,
+        transportRole: itemData.transportRole || (item.type === 'transport' ? 'inter_item' : undefined),
         dataReliability: itemData.dataReliability || 'verified',
         imageUrl: itemData.photos?.[0] || itemData.imageUrl || itemData.photoUrl
           || (item.type === 'flight' ? TRANSPORT_IMAGES.flight : undefined)
-          || (item.type === 'transport' ? (TRANSPORT_IMAGES[itemData.mode || ''] || TRANSPORT_IMAGES.train) : undefined),
+          || (item.type === 'transport' ? getTransportImage({ ...itemData, transportMode: resolvedTransportMode }) : undefined),
         // Viator flags (activities only)
         freeCancellation: item.type === 'activity' ? itemData.freeCancellation : undefined,
         instantConfirmation: item.type === 'activity' ? itemData.instantConfirmation : undefined,
@@ -1480,11 +1590,32 @@ export async function assembleTripSchedule(
         if (item.type !== 'restaurant') continue;
         if (!item.latitude || !item.longitude || item.latitude === 0) continue;
 
-        // Find both prev and next activity/checkin/checkout neighbors
-        const prev = i > 0 ? day.items[i - 1] : null;
-        const next = i < day.items.length - 1 ? day.items[i + 1] : null;
-        const validPrev = (prev && ['activity', 'checkin', 'checkout'].includes(prev.type) && prev.latitude && prev.latitude !== 0) ? prev : null;
-        const validNext = (next && ['activity', 'checkin', 'checkout'].includes(next.type) && next.latitude && next.latitude !== 0) ? next : null;
+        // Find nearest activity neighbors (scan across transport/checkin/checkouts).
+        // If none exist on one side, fallback to nearest checkin/checkout on that side.
+        const findPrev = (predicate: (candidate: TripItem) => boolean): TripItem | null => {
+          for (let idx = i - 1; idx >= 0; idx--) {
+            const candidate = day.items[idx];
+            if (!candidate.latitude || !candidate.longitude || candidate.latitude === 0 || candidate.longitude === 0) continue;
+            if (predicate(candidate)) return candidate;
+          }
+          return null;
+        };
+        const findNext = (predicate: (candidate: TripItem) => boolean): TripItem | null => {
+          for (let idx = i + 1; idx < day.items.length; idx++) {
+            const candidate = day.items[idx];
+            if (!candidate.latitude || !candidate.longitude || candidate.latitude === 0 || candidate.longitude === 0) continue;
+            if (predicate(candidate)) return candidate;
+          }
+          return null;
+        };
+
+        const prevActivity = findPrev((candidate) => candidate.type === 'activity');
+        const nextActivity = findNext((candidate) => candidate.type === 'activity');
+        const prevLogistic = findPrev((candidate) => candidate.type === 'checkin' || candidate.type === 'checkout');
+        const nextLogistic = findNext((candidate) => candidate.type === 'checkin' || candidate.type === 'checkout');
+
+        const validPrev = prevActivity || (!nextActivity ? prevLogistic : null);
+        const validNext = nextActivity || (!prevActivity ? nextLogistic : null);
 
         if (!validPrev && !validNext) continue;
 
@@ -1551,6 +1682,7 @@ export async function assembleTripSchedule(
           item.restaurantAlternatives = []; // Clear stale alts — section 13b will refill
           item.distanceFromPrevious = bestDist;
           item.timeFromPrevious = Math.max(5, Math.round(bestDist * 12));
+          item.transportToPrevious = inferInterItemTransportMode(item.distanceFromPrevious, item.timeFromPrevious);
         } else {
           // Phase 2: No pool match — queue for SerpAPI fallback
           swapCandidates.push({ day, itemIdx: i, refLat, refLng, currentDist: minDist, mealType });
@@ -1610,6 +1742,7 @@ export async function assembleTripSchedule(
           item.restaurantAlternatives = []; // Clear stale alts — section 13b will refill
           item.distanceFromPrevious = bestDist;
           item.timeFromPrevious = Math.max(5, Math.round(bestDist * 12));
+          item.transportToPrevious = inferInterItemTransportMode(item.distanceFromPrevious, item.timeFromPrevious);
           // Also add to pool for future reference
           fullPool.push(bestR);
         }
@@ -1898,6 +2031,21 @@ export async function assembleTripSchedule(
     }
   }
 
+  // 13e. Activity outlier correction (cross-day swap, adjacent days only)
+  // Reduces large intra-day jumps without breaking existing time slots.
+  try {
+    const swapCount = rebalanceActivityOutliersAcrossAdjacentDays(days);
+    if (swapCount > 0) {
+      refreshRouteMetadataAfterMutations(days, directionsCache);
+      console.log(`[Pipeline V2] Section 13e: ${swapCount} activity outlier swap(s) applied`);
+    }
+  } catch (error) {
+    console.warn('[Pipeline V2] Section 13e failed (non-critical):', error);
+  }
+
+  // 13f. Final route metadata coherence pass after all swaps/re-orders.
+  refreshRouteMetadataAfterMutations(days, directionsCache);
+
   // 13. Build cost breakdown
   const costBreakdown = computeCostBreakdown(days, flights, hotel, preferences, transport);
 
@@ -1961,6 +2109,8 @@ export async function assembleTripSchedule(
   trip.alternativeActivities = sortedPool
     .filter(a => !scheduledIds.has(a.id))
     .slice(0, 20);
+
+  sanitizeTripMediaAndSecrets(trip);
 
   console.log(`[Pipeline V2] Step 7: ${trip.alternativeActivities.length} alternatives, pool trimmed to ${trip.attractionPool.length}/${allPoolActivities.length}`);
 
@@ -2491,7 +2641,7 @@ function needsBetterPhoto(restaurant: Restaurant): boolean {
   if (!firstPhoto) return true;
 
   // Already has a Google Places photo URL (maxwidth=800) → good quality
-  if (firstPhoto.includes('maps.googleapis.com/maps/api/place/photo')) return false;
+  if (firstPhoto.includes('maps.googleapis.com/maps/api/place/photo') || firstPhoto.includes('/api/place-photo')) return false;
 
   // SerpAPI thumbnails are typically from lh5.googleusercontent.com with small dimensions
   // or from other low-quality sources. If it's not a Google Places photo, try to upgrade.
@@ -2605,15 +2755,16 @@ async function enrichWithDirections(days: TripDay[], cache?: DirectionsCache): P
   for (const day of days) {
     // Compute hotel→first activity/restaurant distance (not covered by the i=1 loop)
     const hotelItem = day.items.find(i => i.type === 'checkin' || i.type === 'checkout');
-    const firstMovableItem = day.items.find(i => ['activity', 'restaurant'].includes(i.type));
+    const firstMovableItem = day.items.find(i => ['activity', 'restaurant', 'free_time'].includes(i.type));
     if (hotelItem && firstMovableItem && hotelItem.latitude && hotelItem.longitude
         && firstMovableItem.latitude && firstMovableItem.longitude
         && hotelItem.latitude !== 0 && firstMovableItem.latitude !== 0
         && !firstMovableItem.distanceFromPrevious) {
       const dist = calculateDistance(hotelItem.latitude, hotelItem.longitude, firstMovableItem.latitude, firstMovableItem.longitude);
       firstMovableItem.distanceFromPrevious = Math.round(dist * 100) / 100;
-      firstMovableItem.timeFromPrevious = estimateTravel(hotelItem, firstMovableItem, cache);
-      firstMovableItem.transportToPrevious = dist < 1 ? 'walk' : 'public';
+      const travelTime = estimateTravel(hotelItem, firstMovableItem, cache);
+      firstMovableItem.timeFromPrevious = travelTime;
+      firstMovableItem.transportToPrevious = inferInterItemTransportMode(dist, travelTime);
     }
 
     for (let i = 1; i < day.items.length; i++) {
@@ -2622,6 +2773,12 @@ async function enrichWithDirections(days: TripDay[], cache?: DirectionsCache): P
 
       if (!prev.latitude || !prev.longitude || !curr.latitude || !curr.longitude) continue;
       if (prev.latitude === 0 || curr.latitude === 0) continue;
+      if (
+        curr.type === 'transport'
+        && (curr.transportRole === 'hotel_depart' || curr.transportRole === 'hotel_return')
+      ) {
+        continue;
+      }
 
       // Only fetch directions for activity/restaurant transitions
       if (!['activity', 'restaurant'].includes(prev.type) && !['activity', 'restaurant'].includes(curr.type)) continue;
@@ -2639,7 +2796,7 @@ async function enrichWithDirections(days: TripDay[], cache?: DirectionsCache): P
       }
 
       curr.timeFromPrevious = travelTime;
-      curr.transportToPrevious = dist < 1 ? 'walk' : 'public';
+      curr.transportToPrevious = inferInterItemTransportMode(dist, travelTime);
     }
   }
 
@@ -2650,6 +2807,12 @@ async function enrichWithDirections(days: TripDay[], cache?: DirectionsCache): P
     for (let i = 1; i < day.items.length; i++) {
       const from = day.items[i - 1];
       const to = day.items[i];
+      if (
+        to.type === 'transport'
+        && (to.transportRole === 'hotel_depart' || to.transportRole === 'hotel_return')
+      ) {
+        continue;
+      }
       if ((to.distanceFromPrevious || 0) > 1 && from.latitude && to.latitude) {
         // Skip if already resolved from the prefetch cache
         if (cache) {
@@ -2681,6 +2844,9 @@ async function enrichWithDirections(days: TripDay[], cache?: DirectionsCache): P
         if (dir) {
           item.timeFromPrevious = dir.duration || item.timeFromPrevious;
           item.distanceFromPrevious = dir.distance || item.distanceFromPrevious;
+          if (item.distanceFromPrevious != null && item.timeFromPrevious != null) {
+            item.transportToPrevious = inferInterItemTransportMode(item.distanceFromPrevious, item.timeFromPrevious);
+          }
           if (dir.transitInfo) item.transitInfo = dir.transitInfo;
           if (dir.googleMapsUrl) item.googleMapsUrl = dir.googleMapsUrl;
         }
@@ -2949,7 +3115,7 @@ function dedupeScheduledActivityItems(items: TripItem[], dayNumber: number): Tri
   return result.map((item, idx) => ({ ...item, orderIndex: idx }));
 }
 
-function addHotelBoundaryTransportItems(params: {
+export function addHotelBoundaryTransportItems(params: {
   items: TripItem[];
   dayNumber: number;
   hotel: Accommodation | null;
@@ -2980,6 +3146,12 @@ function addHotelBoundaryTransportItems(params: {
   const lastOutside = outside[outside.length - 1];
 
   if (firstOutside && !hasHotelDeparture) {
+    const directDistanceKm = calculateDistance(
+      hotel.latitude,
+      hotel.longitude,
+      firstOutside.latitude || hotel.latitude,
+      firstOutside.longitude || hotel.longitude
+    );
     const estimatedDuration = roundToNearestFive(
       estimateTravel(
         { latitude: hotel.latitude, longitude: hotel.longitude },
@@ -2987,29 +3159,59 @@ function addHotelBoundaryTransportItems(params: {
         directionsCache
       )
     );
+    const inferredMode = inferInterItemTransportMode(directDistanceKm, estimatedDuration);
+    const inferredTransportMode: TripItem['transportMode'] =
+      inferredMode === 'walk' ? 'walking' : inferredMode === 'car' ? 'car' : 'transit';
     const endMinutes = parseHHMMToMinutes(firstOutside.startTime);
-    const startMinutes = Math.max(6 * 60, endMinutes - estimatedDuration);
-    const duration = Math.max(5, endMinutes - startMinutes);
+    const baseStartMinutes = Math.max(6 * 60, endMinutes - estimatedDuration);
+    const overlapEndMinutes = result.reduce((latest, item) => {
+      if (item.id === firstOutside.id) return latest;
+      const itemStart = parseHHMMToMinutes(item.startTime);
+      const itemEnd = parseHHMMToMinutes(item.endTime);
+      if (itemStart < endMinutes && itemEnd > baseStartMinutes) {
+        return Math.max(latest, itemEnd);
+      }
+      return latest;
+    }, baseStartMinutes);
+    const startMinutes = Math.max(baseStartMinutes, overlapEndMinutes);
+    const duration = Math.max(0, endMinutes - startMinutes);
 
-    result.push({
-      id: `hotel-depart-${dayNumber}-${firstOutside.id}`,
-      dayNumber,
-      startTime: formatMinutesToHHMM(startMinutes),
-      endTime: formatMinutesToHHMM(endMinutes),
-      type: 'transport',
-      title: "Départ de l'hôtel",
-      description: `Trajet vers ${firstOutside.locationName || firstOutside.title}`,
-      locationName: firstOutside.locationName || firstOutside.title,
-      latitude: firstOutside.latitude,
-      longitude: firstOutside.longitude,
-      orderIndex: -1,
-      estimatedCost: 0,
-      duration,
-      dataReliability: 'estimated',
-    });
+    if (duration < 5) {
+      console.log(
+        `[Pipeline V2] Day ${dayNumber}: skipping hotel_depart boundary due to schedule overlap before "${firstOutside.title}"`
+      );
+    } else {
+      result.push({
+        id: `hotel-depart-${dayNumber}-${firstOutside.id}`,
+        dayNumber,
+        startTime: formatMinutesToHHMM(startMinutes),
+        endTime: formatMinutesToHHMM(endMinutes),
+        type: 'transport',
+        title: "Départ de l'hôtel",
+        description: `Trajet vers ${firstOutside.locationName || firstOutside.title}`,
+        locationName: firstOutside.locationName || firstOutside.title,
+        latitude: hotel.latitude,
+        longitude: hotel.longitude,
+        orderIndex: -1,
+        estimatedCost: 0,
+        duration,
+        distanceFromPrevious: Math.round(directDistanceKm * 100) / 100,
+        timeFromPrevious: estimatedDuration,
+        transportToPrevious: inferredMode,
+        transportMode: inferredTransportMode,
+        transportRole: 'hotel_depart',
+        dataReliability: 'estimated',
+      });
+    }
   }
 
   if (lastOutside && !hasHotelReturn && !hasManualDayTripReturn) {
+    const directDistanceKm = calculateDistance(
+      lastOutside.latitude || hotel.latitude,
+      lastOutside.longitude || hotel.longitude,
+      hotel.latitude,
+      hotel.longitude
+    );
     const estimatedDuration = roundToNearestFive(
       estimateTravel(
         { latitude: lastOutside.latitude, longitude: lastOutside.longitude },
@@ -3017,30 +3219,244 @@ function addHotelBoundaryTransportItems(params: {
         directionsCache
       )
     );
+    const inferredMode = inferInterItemTransportMode(directDistanceKm, estimatedDuration);
+    const inferredTransportMode: TripItem['transportMode'] =
+      inferredMode === 'walk' ? 'walking' : inferredMode === 'car' ? 'car' : 'transit';
     const startMinutes = parseHHMMToMinutes(lastOutside.endTime);
-    const endMinutes = Math.min(23 * 60 + 59, startMinutes + estimatedDuration);
-    const duration = Math.max(5, endMinutes - startMinutes);
+    const baseEndMinutes = Math.min(23 * 60 + 59, startMinutes + estimatedDuration);
+    const overlapStartMinutes = result.reduce((earliest, item) => {
+      if (item.id === lastOutside.id) return earliest;
+      const itemStart = parseHHMMToMinutes(item.startTime);
+      const itemEnd = parseHHMMToMinutes(item.endTime);
+      if (itemStart < baseEndMinutes && itemEnd > startMinutes) {
+        return Math.min(earliest, itemStart);
+      }
+      return earliest;
+    }, baseEndMinutes);
+    const endMinutes = Math.min(baseEndMinutes, overlapStartMinutes);
+    const duration = Math.max(0, endMinutes - startMinutes);
 
-    result.push({
-      id: `hotel-return-${dayNumber}-${lastOutside.id}`,
-      dayNumber,
-      startTime: formatMinutesToHHMM(startMinutes),
-      endTime: formatMinutesToHHMM(endMinutes),
-      type: 'transport',
-      title: "Retour à l'hôtel",
-      description: `Retour vers ${hotel.name}`,
-      locationName: hotel.name,
-      latitude: hotel.latitude,
-      longitude: hotel.longitude,
-      orderIndex: -1,
-      estimatedCost: 0,
-      duration,
-      dataReliability: 'estimated',
-    });
+    if (duration < 5) {
+      console.log(
+        `[Pipeline V2] Day ${dayNumber}: skipping hotel_return boundary due to schedule overlap after "${lastOutside.title}"`
+      );
+    } else {
+      result.push({
+        id: `hotel-return-${dayNumber}-${lastOutside.id}`,
+        dayNumber,
+        startTime: formatMinutesToHHMM(startMinutes),
+        endTime: formatMinutesToHHMM(endMinutes),
+        type: 'transport',
+        title: "Retour à l'hôtel",
+        description: `Retour vers ${hotel.name}`,
+        locationName: hotel.name,
+        latitude: hotel.latitude,
+        longitude: hotel.longitude,
+        orderIndex: -1,
+        estimatedCost: 0,
+        duration,
+        distanceFromPrevious: Math.round(directDistanceKm * 100) / 100,
+        timeFromPrevious: estimatedDuration,
+        transportToPrevious: inferredMode,
+        transportMode: inferredTransportMode,
+        transportRole: 'hotel_return',
+        dataReliability: 'estimated',
+      });
+    }
   }
 
   result = sortItemsByTime(result).map((item, idx) => ({ ...item, orderIndex: idx }));
   return result;
+}
+
+function swapTripItemPayload(source: TripItem, target: TripItem): void {
+  const sourceSchedule = {
+    dayNumber: source.dayNumber,
+    startTime: source.startTime,
+    endTime: source.endTime,
+    orderIndex: source.orderIndex,
+  };
+  const targetSchedule = {
+    dayNumber: target.dayNumber,
+    startTime: target.startTime,
+    endTime: target.endTime,
+    orderIndex: target.orderIndex,
+  };
+
+  const mutableKeys: (keyof TripItem)[] = [
+    'id', 'type', 'title', 'description', 'locationName',
+    'latitude', 'longitude', 'estimatedCost', 'duration', 'rating',
+    'bookingUrl', 'viatorUrl', 'viatorTitle', 'viatorImageUrl', 'viatorRating',
+    'viatorReviewCount', 'viatorDuration', 'viatorPrice', 'aviasalesUrl',
+    'omioFlightUrl', 'googleMapsUrl', 'googleMapsPlaceUrl', 'restaurant',
+    'restaurantAlternatives', 'accommodation', 'flight', 'flightAlternatives',
+    'transitInfo', 'transitLegs', 'transitDataSource', 'priceRange',
+    'transportMode', 'transportRole', 'dataReliability', 'imageUrl',
+    'freeCancellation', 'instantConfirmation', 'distanceFromPrevious',
+    'timeFromPrevious', 'transportToPrevious',
+  ];
+
+  const sourceSnapshot: Partial<TripItem> = {};
+  for (const key of mutableKeys) {
+    (sourceSnapshot as any)[key] = source[key];
+    (source as any)[key] = target[key];
+  }
+
+  for (const key of mutableKeys) {
+    (target as any)[key] = (sourceSnapshot as any)[key];
+  }
+
+  source.dayNumber = sourceSchedule.dayNumber;
+  source.startTime = sourceSchedule.startTime;
+  source.endTime = sourceSchedule.endTime;
+  source.orderIndex = sourceSchedule.orderIndex;
+
+  target.dayNumber = targetSchedule.dayNumber;
+  target.startTime = targetSchedule.startTime;
+  target.endTime = targetSchedule.endTime;
+  target.orderIndex = targetSchedule.orderIndex;
+}
+
+function computeDayActivityCentroid(day: TripDay): { lat: number; lng: number } | null {
+  const activities = day.items.filter((item) =>
+    item.type === 'activity'
+    && !!item.latitude
+    && !!item.longitude
+    && item.latitude !== 0
+    && item.longitude !== 0
+  );
+  if (activities.length === 0) return null;
+  return {
+    lat: activities.reduce((sum, item) => sum + item.latitude, 0) / activities.length,
+    lng: activities.reduce((sum, item) => sum + item.longitude, 0) / activities.length,
+  };
+}
+
+function rebalanceActivityOutliersAcrossAdjacentDays(days: TripDay[]): number {
+  let swaps = 0;
+
+  for (let di = 0; di < days.length; di++) {
+    const sourceDay = days[di];
+    if (sourceDay.isDayTrip) continue;
+
+    const sourceCentroid = computeDayActivityCentroid(sourceDay);
+    if (!sourceCentroid) continue;
+
+    const sourceActivities = sourceDay.items.filter((item) =>
+      item.type === 'activity'
+      && !!item.latitude
+      && !!item.longitude
+      && item.latitude !== 0
+      && item.longitude !== 0
+      && !(item.bookingUrl || '').includes('viator.com')
+    );
+
+    for (const sourceItem of sourceActivities) {
+      const sourceOutlierDistance = calculateDistance(
+        sourceItem.latitude,
+        sourceItem.longitude,
+        sourceCentroid.lat,
+        sourceCentroid.lng
+      );
+      if (sourceOutlierDistance < 4) continue;
+
+      const adjacentIndices = [di - 1, di + 1].filter((idx) => idx >= 0 && idx < days.length);
+      let bestSwap: { target: TripItem; improvement: number; targetDay: TripDay } | null = null;
+
+      for (const targetDayIndex of adjacentIndices) {
+        const targetDay = days[targetDayIndex];
+        if (targetDay.isDayTrip) continue;
+        const targetCentroid = computeDayActivityCentroid(targetDay);
+        if (!targetCentroid) continue;
+
+        const sourceToTargetCentroid = calculateDistance(
+          sourceItem.latitude,
+          sourceItem.longitude,
+          targetCentroid.lat,
+          targetCentroid.lng
+        );
+        if (sourceToTargetCentroid >= sourceOutlierDistance - 0.6) continue;
+
+        const targetActivities = targetDay.items.filter((item) =>
+          item.type === 'activity'
+          && !!item.latitude
+          && !!item.longitude
+          && item.latitude !== 0
+          && item.longitude !== 0
+          && !(item.bookingUrl || '').includes('viator.com')
+        );
+
+        for (const targetItem of targetActivities) {
+          const targetOutlierDistance = calculateDistance(
+            targetItem.latitude,
+            targetItem.longitude,
+            targetCentroid.lat,
+            targetCentroid.lng
+          );
+          const targetToSourceCentroid = calculateDistance(
+            targetItem.latitude,
+            targetItem.longitude,
+            sourceCentroid.lat,
+            sourceCentroid.lng
+          );
+
+          const improvement =
+            (sourceOutlierDistance - sourceToTargetCentroid)
+            + (targetOutlierDistance - targetToSourceCentroid);
+
+          if (improvement <= 1.5) continue;
+          if (!bestSwap || improvement > bestSwap.improvement) {
+            bestSwap = { target: targetItem, improvement, targetDay };
+          }
+        }
+      }
+
+      if (bestSwap) {
+        const sourceLabel = sourceItem.title;
+        const targetLabel = bestSwap.target.title;
+        swapTripItemPayload(sourceItem, bestSwap.target);
+        swaps++;
+        console.log(
+          `[Pipeline V2] Activity outlier swap: "${sourceLabel}" (day ${sourceDay.dayNumber}) `
+          + `<-> "${targetLabel}" (day ${bestSwap.targetDay.dayNumber}), gain=${bestSwap.improvement.toFixed(1)}km`
+        );
+      }
+    }
+  }
+
+  return swaps;
+}
+
+function refreshRouteMetadataAfterMutations(days: TripDay[], cache?: DirectionsCache): void {
+  for (const day of days) {
+    const sorted = sortItemsByTime(day.items);
+
+    for (let i = 1; i < sorted.length; i++) {
+      const from = sorted[i - 1];
+      const to = sorted[i];
+
+      if (!from.latitude || !from.longitude || !to.latitude || !to.longitude) continue;
+      if (from.latitude === 0 || from.longitude === 0 || to.latitude === 0 || to.longitude === 0) continue;
+      if (
+        (to.type === 'transport' && (to.transportRole === 'longhaul' || to.transportRole === 'hotel_depart' || to.transportRole === 'hotel_return'))
+        || (from.type === 'transport' && from.transportRole === 'longhaul')
+      ) {
+        continue;
+      }
+
+      const distance = Math.round(calculateDistance(from.latitude, from.longitude, to.latitude, to.longitude) * 100) / 100;
+      let duration = estimateTravel(from, to, cache);
+
+      const restaurantTransition = from.type === 'restaurant' || to.type === 'restaurant';
+      if (restaurantTransition && duration < 10) duration = 10;
+
+      to.distanceFromPrevious = distance;
+      to.timeFromPrevious = duration;
+      to.transportToPrevious = inferInterItemTransportMode(distance, duration);
+    }
+
+    day.items = sorted.map((item, index) => ({ ...item, orderIndex: index }));
+  }
 }
 
 /**
