@@ -933,12 +933,25 @@ export async function assembleTripSchedule(
     }
 
     // 5b. Check if any activity on this day includes a meal (cooking class, food tour, etc.)
-    // If so, skip the adjacent restaurant assignment to avoid double-meal
-    const hasMealInclusiveActivity = orderedActivities.some(
-      act => (act as any).includesMeal === true
-    );
-    if (hasMealInclusiveActivity) {
-      console.log(`[Pipeline V2] Day ${balancedDay.dayNumber}: meal-inclusive activity found — skipping separate lunch/dinner`);
+    // Determine WHICH meal it replaces based on position in the day:
+    // - Activities in the first half of the day → replace lunch
+    // - Activities in the second half → replace dinner
+    // - If only 1-2 activities total, a meal-inclusive one replaces the nearest meal
+    let skipLunchForMealActivity = false;
+    let skipDinnerForMealActivity = false;
+    const mealInclusiveActivities = orderedActivities.filter(act => (act as any).includesMeal === true);
+    if (mealInclusiveActivities.length > 0) {
+      const totalActs = orderedActivities.length;
+      for (const mia of mealInclusiveActivities) {
+        const idx = orderedActivities.indexOf(mia);
+        // If in the first half of the day → replaces lunch; second half → replaces dinner
+        if (idx < totalActs / 2) {
+          skipLunchForMealActivity = true;
+        } else {
+          skipDinnerForMealActivity = true;
+        }
+      }
+      console.log(`[Pipeline V2] Day ${balancedDay.dayNumber}: meal-inclusive activity found — skipLunch=${skipLunchForMealActivity}, skipDinner=${skipDinnerForMealActivity}`);
     }
 
     // 6. Pre-insert lunch if the day starts late (after 14:30 — arrival day)
@@ -950,7 +963,7 @@ export async function assembleTripSchedule(
     const initialHour = initialCursor.getHours() + initialCursor.getMinutes() / 60;
 
     // If cursor starts between 11:30 and 14:30, insert lunch NOW before activities
-    if (!skipLunch && !hasMealInclusiveActivity && lunch?.restaurant && initialHour >= 11.5 && initialHour < 14.5 && orderedActivities.length > 0) {
+    if (!skipLunch && !skipLunchForMealActivity && lunch?.restaurant && initialHour >= 11.5 && initialHour < 14.5 && orderedActivities.length > 0) {
       const result = scheduler.addItem({
         id: `meal-${balancedDay.dayNumber}-lunch`,
         title: `Déjeuner — ${lunch.restaurant.name}`,
@@ -985,7 +998,7 @@ export async function assembleTripSchedule(
       const cursorTime = scheduler.getCurrentTime();
       const cursorHour = cursorTime.getHours() + cursorTime.getMinutes() / 60;
 
-      if (!lunchInserted && !skipLunch && !hasMealInclusiveActivity && lunch?.restaurant && cursorHour >= 11.5 && cursorHour < 14.5) {
+      if (!lunchInserted && !skipLunch && !skipLunchForMealActivity && lunch?.restaurant && cursorHour >= 11.5 && cursorHour < 14.5) {
         const result = scheduler.addItem({
           id: `meal-${balancedDay.dayNumber}-lunch`,
           title: `Déjeuner — ${lunch.restaurant.name}`,
@@ -1002,7 +1015,7 @@ export async function assembleTripSchedule(
       const cursorTime2 = scheduler.getCurrentTime();
       const cursorHour2 = cursorTime2.getHours() + cursorTime2.getMinutes() / 60;
 
-      if (!dinnerInserted && !skipDinner && !hasMealInclusiveActivity && dinner?.restaurant && cursorHour2 >= 18.5 && cursorHour2 < 21) {
+      if (!dinnerInserted && !skipDinner && !skipDinnerForMealActivity && dinner?.restaurant && cursorHour2 >= 18.5 && cursorHour2 < 21) {
         const result = scheduler.addItem({
           id: `meal-${balancedDay.dayNumber}-dinner`,
           title: `Dîner — ${dinner.restaurant.name}`,
@@ -1219,7 +1232,7 @@ export async function assembleTripSchedule(
     // 8. Insert any remaining meals after all activities
     // Uses insertFixedItem to bypass the cursor (which is now past the lunch window).
     // findBestMealSlot() scans gaps between existing items to find the best time.
-    if (!lunchInserted && !skipLunch && !hasMealInclusiveActivity) {
+    if (!lunchInserted && !skipLunch && !skipLunchForMealActivity) {
       const lunchDuration = lunch?.restaurant ? 60 : 45;
       const lunchData = lunch?.restaurant
         ? { ...lunch.restaurant, _alternatives: lunch.restaurantAlternatives || [] }
@@ -1248,7 +1261,7 @@ export async function assembleTripSchedule(
       }
     }
 
-    if (!dinnerInserted && !skipDinner && !hasMealInclusiveActivity) {
+    if (!dinnerInserted && !skipDinner && !skipDinnerForMealActivity) {
       const dinnerDuration = dinner?.restaurant ? 75 : 60;
       const dinnerData = dinner?.restaurant
         ? { ...dinner.restaurant, _alternatives: dinner.restaurantAlternatives || [] }

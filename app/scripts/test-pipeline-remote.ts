@@ -16,6 +16,12 @@ import * as path from 'path';
 
 const BASE_URL = process.env.TEST_API_URL || 'https://naraevoyage.com';
 
+function daysFromNow(n: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() + n);
+  return d.toISOString().split('T')[0];
+}
+
 // ============================================
 // Test Scenarios
 // ============================================
@@ -134,6 +140,114 @@ const TEST_SCENARIOS: TestScenario[] = [
       mustSee: '',
     },
   },
+  // 6. Milan 5j — le cas original du bug (cross-day dedup, photoshoot, minor gates)
+  {
+    name: 'Paris → Milan, 5j, train, solo, culture+gastro',
+    body: {
+      origin: 'Paris',
+      destination: 'Milan',
+      startDate: daysFromNow(4),
+      durationDays: 5,
+      transport: 'train',
+      carRental: false,
+      groupSize: 1,
+      groupType: 'solo',
+      budgetLevel: 'moderate',
+      activities: ['culture', 'gastronomy', 'shopping'],
+      dietary: ['none'],
+      mustSee: 'Duomo, La Cène',
+    },
+  },
+  // 7. Londres — Eurostar, ville anglophone
+  {
+    name: 'Paris → London, 3j, train, amis, culture+shopping',
+    body: {
+      origin: 'Paris',
+      destination: 'London',
+      startDate: daysFromNow(5),
+      durationDays: 3,
+      transport: 'train',
+      carRental: false,
+      groupSize: 3,
+      groupType: 'friends',
+      budgetLevel: 'comfort',
+      activities: ['culture', 'shopping'],
+      dietary: ['none'],
+      mustSee: 'Tower of London, British Museum',
+    },
+  },
+  // 8. Lisbonne — long séjour, avion, destination lointaine
+  {
+    name: 'Lyon → Lisbonne, 7j, avion, couple, beach+culture',
+    body: {
+      origin: 'Lyon',
+      destination: 'Lisbon',
+      startDate: daysFromNow(7),
+      durationDays: 7,
+      transport: 'plane',
+      carRental: false,
+      groupSize: 2,
+      groupType: 'couple',
+      budgetLevel: 'moderate',
+      activities: ['beach', 'culture'],
+      dietary: ['none'],
+      mustSee: 'Torre de Belém, Monastère des Hiéronymites',
+    },
+  },
+  // 9. Tokyo — très long, hors Europe
+  {
+    name: 'Paris → Tokyo, 10j, avion, amis, culture+gastro',
+    body: {
+      origin: 'Paris',
+      destination: 'Tokyo',
+      startDate: daysFromNow(14),
+      durationDays: 10,
+      transport: 'plane',
+      carRental: false,
+      groupSize: 3,
+      groupType: 'friends',
+      budgetLevel: 'comfort',
+      activities: ['culture', 'gastronomy'],
+      dietary: ['none'],
+      mustSee: 'Senso-ji, Meiji Shrine, Shibuya Crossing',
+    },
+  },
+  // 10. Nice — week-end court, côte d'azur
+  {
+    name: 'Bruxelles → Nice, 2j, train, couple, beach+gastro',
+    body: {
+      origin: 'Brussels',
+      destination: 'Nice',
+      startDate: daysFromNow(3),
+      durationDays: 2,
+      transport: 'train',
+      carRental: false,
+      groupSize: 2,
+      groupType: 'couple',
+      budgetLevel: 'comfort',
+      activities: ['beach', 'gastronomy'],
+      dietary: ['none'],
+      mustSee: 'Promenade des Anglais',
+    },
+  },
+  // 11. Prague — bus, Europe de l'Est
+  {
+    name: 'Paris → Prague, 4j, bus, solo, culture+nightlife',
+    body: {
+      origin: 'Paris',
+      destination: 'Prague',
+      startDate: daysFromNow(6),
+      durationDays: 4,
+      transport: 'bus',
+      carRental: false,
+      groupSize: 1,
+      groupType: 'solo',
+      budgetLevel: 'economic',
+      activities: ['culture', 'nightlife'],
+      dietary: ['none'],
+      mustSee: 'Pont Charles, Horloge astronomique',
+    },
+  },
 ];
 
 // ============================================
@@ -209,10 +323,11 @@ function analyzeTrip(trip: Trip, body: Record<string, any>): QualityIssue[] {
     const restaurants = items.filter(i => i.type === 'restaurant');
     const transports = items.filter(i => i.type === 'transport' || i.type === 'flight');
 
-    // Empty day
+    // Empty day — but last day with return transport is normal (checkout + train/flight)
     if (activities.length === 0 && !day.isDayTrip) {
-      const hasTransportOnly = transports.length > 0;
-      if (!isFirst || !hasTransportOnly) {
+      const hasTransport = transports.length > 0;
+      const isTransitDay = (isFirst || isLast) && hasTransport;
+      if (!isTransitDay) {
         issues.push({
           severity: 'critical', category: 'empty-day', dayNumber: dayNum,
           message: `J${dayNum}: 0 activités (items: ${items.map(i => `${i.type}[${i.title.slice(0, 30)}]`).join(', ')})`,
@@ -233,7 +348,10 @@ function analyzeTrip(trip: Trip, body: Record<string, any>): QualityIssue[] {
     }
 
     if (!hasLunch && activities.length >= 2) {
-      issues.push({ severity: 'major', category: 'meals', dayNumber: dayNum, message: `J${dayNum}: pas de déjeuner (${activities.length} activités)` });
+      // On transit days (first/last with transport), missing lunch is less critical
+      const hasTransport = transports.length > 0;
+      const sev = (isFirst || isLast) && hasTransport ? 'minor' : 'major';
+      issues.push({ severity: sev, category: 'meals', dayNumber: dayNum, message: `J${dayNum}: pas de déjeuner (${activities.length} activités)` } as QualityIssue);
     }
 
     if (!hasDinner && !isLast && activities.length >= 1) {
@@ -270,8 +388,9 @@ function analyzeTrip(trip: Trip, body: Record<string, any>): QualityIssue[] {
         }
       }
 
-      // Travel time feasibility
-      if (i > 0) {
+      // Travel time feasibility (skip "Temps libre" / free time slots)
+      const isFreeTime = item.title.toLowerCase().includes('temps libre') || (items[i - 1] && items[i - 1].title.toLowerCase().includes('temps libre'));
+      if (i > 0 && !isFreeTime) {
         const prev = items[i - 1];
         if (prev.latitude && prev.longitude && item.latitude && item.longitude &&
             prev.latitude !== 0 && item.latitude !== 0) {
@@ -299,17 +418,26 @@ function analyzeTrip(trip: Trip, body: Record<string, any>): QualityIssue[] {
     }
 
     // Transport items on first/last day
+    // Note: for planes, the flight may be in any day (flexible allocation)
+    // Only flag as minor when no transport AND no flight across any day
     if (isFirst && transports.length === 0 && body.transport !== 'car') {
-      issues.push({
-        severity: 'minor', category: 'transport', dayNumber: dayNum,
-        message: `J1: pas de transport aller`,
-      });
+      // Check if any flight exists in any day (planes often get allocated differently)
+      const anyFlightInTrip = trip.days.some(d => d.items.some(i => i.type === 'flight'));
+      if (!anyFlightInTrip) {
+        issues.push({
+          severity: 'minor', category: 'transport', dayNumber: dayNum,
+          message: `J1: pas de transport aller`,
+        });
+      }
     }
     if (isLast && transports.length === 0 && body.transport !== 'car') {
-      issues.push({
-        severity: 'minor', category: 'transport', dayNumber: dayNum,
-        message: `J${dayNum} (dernier): pas de transport retour`,
-      });
+      const anyFlightInTrip = trip.days.some(d => d.items.some(i => i.type === 'flight'));
+      if (!anyFlightInTrip) {
+        issues.push({
+          severity: 'minor', category: 'transport', dayNumber: dayNum,
+          message: `J${dayNum} (dernier): pas de transport retour`,
+        });
+      }
     }
 
     // Transit return date check
@@ -341,6 +469,85 @@ function analyzeTrip(trip: Trip, body: Record<string, any>): QualityIssue[] {
   // Cost
   if (trip.totalEstimatedCost === 0) {
     issues.push({ severity: 'minor', category: 'cost', message: 'Coût total = 0€' });
+  }
+
+  // ─── NEW CHECKS (post-fix validation) ───
+
+  // Cross-day activity duplicates
+  const activityNamesByDay = new Map<string, number>();
+  for (const day of trip.days) {
+    for (const item of day.items) {
+      if (item.type !== 'activity') continue;
+      const normName = item.title.toLowerCase().trim();
+      if (activityNamesByDay.has(normName)) {
+        const prevDay = activityNamesByDay.get(normName)!;
+        issues.push({
+          severity: 'critical', category: 'cross-day-duplicate',
+          dayNumber: day.dayNumber,
+          message: `"${item.title}" apparaît J${prevDay} ET J${day.dayNumber}`,
+        });
+      } else {
+        activityNamesByDay.set(normName, day.dayNumber);
+      }
+    }
+  }
+
+  // Photoshoot / marketing activities
+  const marketingKeywords = ['photoshoot', 'photo shoot', 'photo tour', 'photo session',
+    'photography tour', 'photography experience', 'professional photo'];
+  for (const day of trip.days) {
+    for (const item of day.items) {
+      if (item.type !== 'activity') continue;
+      const name = item.title.toLowerCase();
+      const matchedKw = marketingKeywords.find(k => name.includes(k));
+      if (matchedKw) {
+        issues.push({
+          severity: 'critical', category: 'marketing-activity',
+          dayNumber: day.dayNumber,
+          message: `J${day.dayNumber}: "${item.title}" (keyword: ${matchedKw})`,
+        });
+      }
+    }
+  }
+
+  // Experiential dedup: max 1 cooking class / food tour per day
+  const experientialKeywords = ['cooking class', 'cours de cuisine', 'food tour',
+    'wine tasting', 'dégustation', 'degustation', 'atelier cuisine', 'atelier culinaire'];
+  for (const day of trip.days) {
+    const experiential = day.items.filter(item => {
+      if (item.type !== 'activity') return false;
+      const name = item.title.toLowerCase();
+      return experientialKeywords.some(k => name.includes(k));
+    });
+    if (experiential.length > 1) {
+      issues.push({
+        severity: 'major', category: 'experiential-overload',
+        dayNumber: day.dayNumber,
+        message: `J${day.dayNumber}: ${experiential.length} activités expérientielles (${experiential.map(e => `"${e.title.slice(0, 30)}"`).join(', ')})`,
+      });
+    }
+  }
+
+  // Meal-inclusive check: cooking class/food tour + separate restaurant same slot
+  for (const day of trip.days) {
+    const hasMealInclusive = day.items.some(item => {
+      if (item.type !== 'activity') return false;
+      const name = item.title.toLowerCase();
+      return ['cooking class', 'cours de cuisine', 'food tour', 'food tasting',
+        'wine tasting', 'dégustation'].some(k => name.includes(k));
+    });
+    if (hasMealInclusive) {
+      const meals = day.items.filter(i => i.type === 'restaurant');
+      const hasLunch = meals.some(m => m.title.toLowerCase().includes('déjeuner') && !m.title.toLowerCase().includes('petit'));
+      const hasDinner = meals.some(m => m.title.toLowerCase().includes('dîner'));
+      if (hasLunch || hasDinner) {
+        issues.push({
+          severity: 'minor', category: 'meal-inclusive-overlap',
+          dayNumber: day.dayNumber,
+          message: `J${day.dayNumber}: activité avec repas inclus + restaurant séparé (${hasLunch ? 'déjeuner' : ''}${hasLunch && hasDinner ? '+' : ''}${hasDinner ? 'dîner' : ''})`,
+        });
+      }
+    }
   }
 
   return issues;
