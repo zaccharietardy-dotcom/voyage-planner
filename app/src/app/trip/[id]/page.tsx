@@ -24,6 +24,7 @@ import {
   Receipt,
   Copy,
   CalendarPlus,
+  Download,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -61,6 +62,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
+import { exportTripPdf } from '@/lib/exportPdf';
 
 function updateTripWithNewHotel(trip: Trip, newHotel: Accommodation): Trip {
   const oldHotelName = trip.accommodation?.name || '';
@@ -783,6 +785,17 @@ export default function TripPage() {
     URL.revokeObjectURL(url);
   };
 
+  const handleExportPdf = () => {
+    if (!trip) return;
+    try {
+      exportTripPdf(trip);
+      toast.success('PDF téléchargé avec succès');
+    } catch (error) {
+      console.error('Erreur lors de l\'export PDF:', error);
+      toast.error('Erreur lors de l\'export PDF');
+    }
+  };
+
   // Unified map numbers: same numbering for both map markers and planning view
   // Only items with valid coords and non-flight type get a number (matching TripMap logic)
   const itemMapNumbers = useMemo(() => {
@@ -1009,6 +1022,11 @@ export default function TripPage() {
                   <Share2 className="h-3.5 w-3.5" />
                 </Button>
               )}
+
+              <Button variant="outline" size="sm" className="gap-1.5 h-8" onClick={handleExportPdf} title="Exporter en PDF">
+                <Download className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline text-xs">PDF</span>
+              </Button>
 
               {canEdit && (
                 <Button variant="outline" size="sm" className="gap-1.5 h-8" onClick={handleExportDebug}>

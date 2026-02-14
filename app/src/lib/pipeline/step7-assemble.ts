@@ -1657,6 +1657,146 @@ export async function assembleTripSchedule(
     }
   }
 
+  // ---------------------------------------------------------------------------
+  // 13d. Opening hours validation — check activities are open at scheduled time
+  // ---------------------------------------------------------------------------
+  // Build a lookup from activity ID to ScoredActivity (for opening hours data)
+  {
+    const activityLookup = new Map<string, ScoredActivity>();
+    for (const cluster of clusters) {
+      for (const act of cluster.activities) {
+        activityLookup.set(act.id, act);
+      }
+    }
+
+    let validatedCount = 0;
+    let conflictCount = 0;
+    let swapCount = 0;
+    let warnCount = 0;
+
+    for (let dayIdx = 0; dayIdx < days.length; dayIdx++) {
+      const day = days[dayIdx];
+      const dayDate = day.date instanceof Date ? day.date : new Date(day.date);
+
+      for (let itemIdx = 0; itemIdx < day.items.length; itemIdx++) {
+        const item = day.items[itemIdx];
+        if (item.type !== 'activity') continue;
+
+        const activity = activityLookup.get(item.id);
+        if (!activity) continue;
+
+        // Skip if no opening hours data at all (nothing to validate)
+        if (!activity.openingHoursByDay && !activity.openingHours) continue;
+
+        validatedCount++;
+
+        if (isOpenAtTime(activity, dayDate, item.startTime, item.endTime)) continue;
+
+        // This activity has a conflict — it's closed or outside hours
+        conflictCount++;
+        const dayName = DAY_NAMES_EN[dayDate.getDay()];
+        const closedOnDay = !isActivityOpenOnDay(activity, dayDate);
+        const reason = closedOnDay
+          ? `closed on ${dayName}`
+          : `outside hours (scheduled ${item.startTime}-${item.endTime})`;
+
+        console.warn(`[Pipeline V2] Opening hours conflict: "${item.title}" on day ${day.dayNumber} (${dayName}) — ${reason}`);
+
+        // Only attempt swap if the venue is CLOSED that day (not just outside hours —
+        // time-of-day mismatches are harder to fix without rescheduling the full day)
+        if (!closedOnDay) {
+          warnCount++;
+          continue;
+        }
+
+        // Try to SWAP with a same-type activity from another day where this one IS open
+        let swapped = false;
+        for (let otherDayIdx = 0; otherDayIdx < days.length; otherDayIdx++) {
+          if (otherDayIdx === dayIdx) continue;
+          const otherDay = days[otherDayIdx];
+          const otherDayDate = otherDay.date instanceof Date ? otherDay.date : new Date(otherDay.date);
+
+          // Check if the conflicting activity would be open on the other day
+          if (!isActivityOpenOnDay(activity, otherDayDate)) continue;
+
+          // Find a swap candidate in the other day: an activity that is open on the current day
+          for (let otherItemIdx = 0; otherItemIdx < otherDay.items.length; otherItemIdx++) {
+            const otherItem = otherDay.items[otherItemIdx];
+            if (otherItem.type !== 'activity') continue;
+
+            const otherActivity = activityLookup.get(otherItem.id);
+            if (!otherActivity) continue;
+
+            // The other activity must be open on the current day (where we'd move it)
+            if (!isActivityOpenOnDay(otherActivity, dayDate)) continue;
+
+            // Also check time-slot compatibility (the other activity at the current slot)
+            if (!isOpenAtTime(otherActivity, dayDate, item.startTime, item.endTime)) continue;
+            // And the conflicting activity at the other slot
+            if (!isOpenAtTime(activity, otherDayDate, otherItem.startTime, otherItem.endTime)) continue;
+
+            // Swap the two items: exchange their positions in the days arrays
+            // Preserve time slots (startTime, endTime, orderIndex) but swap content
+            const savedStartTime = item.startTime;
+            const savedEndTime = item.endTime;
+            const savedOrderIndex = item.orderIndex;
+            const savedDayNumber = item.dayNumber;
+
+            // Move item properties (keep schedule position, swap content)
+            const itemKeys: (keyof TripItem)[] = [
+              'id', 'title', 'description', 'locationName',
+              'latitude', 'longitude', 'estimatedCost', 'duration',
+              'imageUrl', 'bookingUrl', 'viatorUrl', 'rating',
+              'googleMapsPlaceUrl', 'freeCancellation', 'instantConfirmation',
+              'dataReliability',
+            ];
+
+            const tempValues: Partial<TripItem> = {};
+            for (const key of itemKeys) {
+              (tempValues as any)[key] = item[key];
+            }
+
+            for (const key of itemKeys) {
+              (item as any)[key] = otherItem[key];
+            }
+            item.startTime = savedStartTime;
+            item.endTime = savedEndTime;
+            item.orderIndex = savedOrderIndex;
+            item.dayNumber = savedDayNumber;
+
+            const otherSavedStartTime = otherItem.startTime;
+            const otherSavedEndTime = otherItem.endTime;
+            const otherSavedOrderIndex = otherItem.orderIndex;
+            const otherSavedDayNumber = otherItem.dayNumber;
+
+            for (const key of itemKeys) {
+              (otherItem as any)[key] = (tempValues as any)[key];
+            }
+            otherItem.startTime = otherSavedStartTime;
+            otherItem.endTime = otherSavedEndTime;
+            otherItem.orderIndex = otherSavedOrderIndex;
+            otherItem.dayNumber = otherSavedDayNumber;
+
+            swapped = true;
+            swapCount++;
+            console.log(`[Pipeline V2] Opening hours swap: "${tempValues.title}" (day ${day.dayNumber}) <-> "${item.title}" (day ${otherDay.dayNumber})`);
+            break;
+          }
+          if (swapped) break;
+        }
+
+        if (!swapped) {
+          warnCount++;
+          console.warn(`[Pipeline V2] Could not reschedule "${item.title}" (day ${day.dayNumber}, ${dayName}) — no valid swap found`);
+        }
+      }
+    }
+
+    if (validatedCount > 0) {
+      console.log(`[Pipeline V2] Section 13d: Opening hours validated ${validatedCount} activities — ${conflictCount} conflicts, ${swapCount} swaps, ${warnCount} unresolved`);
+    }
+  }
+
   // 13. Build cost breakdown
   const costBreakdown = computeCostBreakdown(days, flights, hotel, preferences, transport);
 
@@ -2117,6 +2257,55 @@ function isActivityOpenOnDay(activity: ScoredActivity, dayDate: Date): boolean {
   const dayName = DAY_NAMES_EN[dayDate.getDay()];
   if (!(dayName in activity.openingHoursByDay)) return true; // Day not in data — assume open
   return activity.openingHoursByDay[dayName] !== null; // null = closed
+}
+
+/**
+ * Check if an activity is open during a specific scheduled time slot.
+ * Returns true if no opening hours data is available (don't block scheduling).
+ * Returns false if the venue is explicitly closed that day (null) or if the
+ * scheduled time slot falls outside the venue's opening hours.
+ *
+ * @param activity - The scored activity with potential openingHours / openingHoursByDay data
+ * @param dayDate - The calendar date of the scheduled day
+ * @param startTime - Scheduled start time in "HH:MM" format
+ * @param endTime - Scheduled end time in "HH:MM" format
+ */
+function isOpenAtTime(
+  activity: ScoredActivity,
+  dayDate: Date,
+  startTime: string,
+  endTime: string
+): boolean {
+  // Step 1: Get the hours for this specific day
+  const dayHours = getActivityHoursForDay(activity, dayDate);
+
+  // If getActivityHoursForDay returns null, it could mean:
+  // (a) venue is CLOSED that day (openingHoursByDay[day] === null), or
+  // (b) no hours data at all — assume open
+  if (dayHours === null) {
+    // Distinguish (a) vs (b) using isActivityOpenOnDay
+    return isActivityOpenOnDay(activity, dayDate);
+  }
+
+  // Step 2: We have hours — check if the scheduled slot overlaps
+  // Parse venue open/close times and scheduled start/end times
+  const venueOpen = parseTime(dayDate, dayHours.open);
+  const venueClose = parseTime(dayDate, dayHours.close);
+  const slotStart = parseTime(dayDate, startTime);
+  const slotEnd = parseTime(dayDate, endTime);
+
+  // Handle venues open 24h (00:00-23:59)
+  if (dayHours.open === '00:00' && (dayHours.close === '23:59' || dayHours.close === '00:00')) {
+    return true;
+  }
+
+  // The activity must start at or after venue opens, and end at or before venue closes
+  // Allow 15 min tolerance: venue might let you in slightly before opening
+  const TOLERANCE_MS = 15 * 60 * 1000;
+  const opensEarlyEnough = slotStart.getTime() >= venueOpen.getTime() - TOLERANCE_MS;
+  const closesLateEnough = slotEnd.getTime() <= venueClose.getTime() + TOLERANCE_MS;
+
+  return opensEarlyEnough && closesLateEnough;
 }
 
 /**
