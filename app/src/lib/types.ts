@@ -206,6 +206,7 @@ export interface Restaurant {
   specialties?: string[]; // spécialités du restaurant
   description?: string; // description courte
   tips?: string; // conseils (réservation, plats signature, etc.)
+  badges?: string[]; // TripAdvisor badges (Michelin, Travelers' Choice, etc.)
   dataReliability?: 'verified' | 'estimated' | 'generated'; // Fiabilité des coordonnées GPS
 }
 
@@ -375,6 +376,9 @@ export interface TripItem {
   viatorReviewCount?: number;
   viatorPrice?: number; // Prix du produit Viator (peut différer de estimatedCost qui est le prix d'entrée officiel)
   viatorDuration?: number; // Durée réelle du produit Viator en minutes
+  // Viator flags
+  freeCancellation?: boolean;
+  instantConfirmation?: boolean;
 }
 
 export interface TripDay {
@@ -389,6 +393,13 @@ export interface TripDay {
     tempMin: number;
     tempMax: number;
     icon: string;
+  };
+  // Budget détaillé par jour (€ par personne)
+  dailyBudget?: {
+    activities: number;
+    food: number;
+    transport: number;
+    total: number;
   };
   // Itinéraire intelligent (Claude curation)
   theme?: string;

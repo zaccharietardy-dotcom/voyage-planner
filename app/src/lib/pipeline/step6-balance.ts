@@ -7,8 +7,20 @@
 
 import Anthropic from '@anthropic-ai/sdk';
 import type { TripPreferences, TransportOptionSummary, Accommodation } from '../types';
-import type { ActivityCluster, MealAssignment, BalancedPlan, BalancedDay } from './types';
+import type { ActivityCluster, MealAssignment, BalancedPlan, BalancedDay, FetchedData } from './types';
 import { calculateDistance } from '../services/geocoding';
+
+/**
+ * Helper: Get day of week name for a given day number.
+ * Returns key matching openingHoursByDay format (e.g., 'monday', 'tuesday', etc.)
+ */
+function getDayOfWeek(startDate: Date, dayNumber: number): string {
+  const date = new Date(startDate);
+  date.setDate(startDate.getDate() + dayNumber - 1);
+  const dayIndex = date.getDay(); // 0 = Sunday, 1 = Monday, etc.
+  const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+  return dayNames[dayIndex];
+}
 
 /**
  * Call Claude to balance and humanize the day plan.
@@ -18,7 +30,8 @@ export async function balanceDaysWithClaude(
   meals: MealAssignment[],
   hotel: Accommodation | null,
   transport: TransportOptionSummary | null,
-  preferences: TripPreferences
+  preferences: TripPreferences,
+  data: FetchedData
 ): Promise<BalancedPlan> {
   // Compute city center as average of all cluster centroids (used for day-trip detection)
   const cityCenter = clusters.length > 0
@@ -36,7 +49,7 @@ export async function balanceDaysWithClaude(
 
   try {
     const client = new Anthropic({ apiKey });
-    const prompt = buildPrompt(clusters, meals, hotel, transport, preferences);
+    const prompt = buildPrompt(clusters, meals, hotel, transport, preferences, data);
 
     const response = await Promise.race([
       client.messages.create({
@@ -66,7 +79,8 @@ function buildPrompt(
   meals: MealAssignment[],
   hotel: Accommodation | null,
   transport: TransportOptionSummary | null,
-  preferences: TripPreferences
+  preferences: TripPreferences,
+  data: FetchedData
 ): string {
   const startDate = new Date(preferences.startDate);
   const endDate = new Date(startDate);
@@ -75,7 +89,31 @@ function buildPrompt(
   const clusterDesc = clusters
     .map(c => {
       const activitiesList = c.activities
-        .map(a => `    - [${a.id}] ${a.name} (${a.type}, ${a.duration || 60}min, ${a.rating || '?'}★, ${a.reviewCount || 0} avis, GPS: ${a.latitude?.toFixed(4) || '?'},${a.longitude?.toFixed(4) || '?'})`)
+        .map(a => {
+          const durationStr = `${a.duration || 60}min`;
+          const ratingStr = `${a.rating || '?'}★`;
+          const reviewStr = `${a.reviewCount || 0} avis`;
+          const gpsStr = `GPS: ${a.latitude?.toFixed(4) || '?'},${a.longitude?.toFixed(4) || '?'}`;
+
+          // Opening hours info (if available from Google Places Details)
+          let hoursInfo = '';
+          if (a.openingHoursByDay) {
+            const dayOfWeek = getDayOfWeek(startDate, c.dayNumber);
+            const hours = a.openingHoursByDay[dayOfWeek];
+            if (hours === null) {
+              hoursInfo = ' [FERMÉ ce jour]';
+            } else if (hours) {
+              hoursInfo = ` [Horaires: ${hours.open}-${hours.close}]`;
+            }
+          } else if (a.openingHours) {
+            hoursInfo = ` [Horaires: ${a.openingHours.open}-${a.openingHours.close}]`;
+          }
+
+          // Viator bookable flag
+          const viatorFlag = a.providerName === 'Viator' ? ' [Viator]' : '';
+
+          return `    - [${a.id}] ${a.name} (${a.type}, ${durationStr}, ${ratingStr}, ${reviewStr}, ${gpsStr}${hoursInfo}${viatorFlag})`;
+        })
         .join('\n');
       return `  Cluster ${c.dayNumber} (centroïde: ${c.centroid.lat.toFixed(4)}, ${c.centroid.lng.toFixed(4)}):\n${activitiesList}`;
     })
@@ -85,6 +123,19 @@ function buildPrompt(
     .filter(m => m.restaurant)
     .map(m => `  Jour ${m.dayNumber} ${m.mealType}: ${m.restaurant!.name} (${m.restaurant!.rating || '?'}★)`)
     .join('\n');
+
+  // Weather forecast per day (if available)
+  let weatherDesc = '';
+  if (data.weatherForecasts && data.weatherForecasts.length > 0) {
+    weatherDesc = '\nMÉTÉO PRÉVUE:\n' + data.weatherForecasts
+      .slice(0, preferences.durationDays)
+      .map((w, idx) => {
+        const dayNum = idx + 1;
+        const temp = `${w.tempMin}°-${w.tempMax}°C`;
+        return `  Jour ${dayNum} (${w.date}): ${w.condition} (${temp})`;
+      })
+      .join('\n');
+  }
 
   return `Tu es un planificateur de voyage expert. Tu reçois un itinéraire pré-construit algorithmiquement avec des clusters géographiques d'activités. Ton rôle est UNIQUEMENT d'ajuster l'ordre et le rythme.
 
@@ -100,7 +151,7 @@ CLUSTERS D'ACTIVITÉS:
 ${clusterDesc}
 
 RESTAURANTS ASSIGNÉS:
-${mealDesc || '  (aucun)'}
+${mealDesc || '  (aucun)'}${weatherDesc}
 
 RÈGLES STRICTES:
 1. Tu NE PEUX PAS ajouter, supprimer ou inventer de nouvelles activités
@@ -111,6 +162,8 @@ RÈGLES STRICTES:
 6. Alterner jours intenses et détendus si possible
 7. Pas 2 musées longs le même jour
 8. Optimise l'ordre géographique : utilise les coordonnées GPS pour minimiser les déplacements intra-journée
+9. RESPECTE les horaires d'ouverture : évite de programmer des lieux fermés (marqués [FERMÉ ce jour])
+10. ADAPTE selon la météo : privilégie les activités intérieures (musées, monuments couverts) les jours de pluie, et les activités extérieures (parcs, jardins, marchés) les jours ensoleillés
 
 RÉPONDS EN JSON STRICT (pas de texte avant/après):
 {

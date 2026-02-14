@@ -32,6 +32,10 @@ import {
   Ticket,
   Globe,
   ImageIcon,
+  Phone,
+  ShieldCheck,
+  Zap,
+  Award,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TripItemType } from '@/lib/types';
@@ -137,7 +141,9 @@ export function ActivityCard({
   const [imgError, setImgError] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
   const showImage = hasImage && !imgError;
-  const isHeroType = IMAGE_TYPES.includes(item.type);
+  // Restaurant with alternatives: render as flat card with 3 equal suggestion cards
+  const hasRestaurantAlternatives = item.type === 'restaurant' && item.restaurant && item.restaurantAlternatives && item.restaurantAlternatives.length > 0;
+  const isHeroType = IMAGE_TYPES.includes(item.type) && !hasRestaurantAlternatives;
   // Hero cards always use the "image" style (white text, overlay) — either with a real image or a gradient fallback
   const useHeroStyle = isHeroType;
 
@@ -248,16 +254,18 @@ export function ActivityCard({
                 </span>
               </div>
 
-              {/* Title */}
-              <h4 className={cn(
-                "font-semibold leading-snug mb-0 line-clamp-2",
-                useHeroStyle ? "text-base text-white drop-shadow-md" : "text-[13px]"
-              )}>
-                {item.title}
-              </h4>
+              {/* Title — hidden for restaurant flat layout (shown in cards) */}
+              {!hasRestaurantAlternatives && (
+                <h4 className={cn(
+                  "font-semibold leading-snug mb-0 line-clamp-2",
+                  useHeroStyle ? "text-base text-white drop-shadow-md" : "text-[13px]"
+                )}>
+                  {item.title}
+                </h4>
+              )}
 
-              {/* Description */}
-              {item.description && (
+              {/* Description — hidden for restaurant flat layout */}
+              {!hasRestaurantAlternatives && item.description && (
                 <p className={cn(
                   "leading-relaxed line-clamp-2 mb-1.5",
                   useHeroStyle ? "text-sm text-white/70" : "text-xs text-muted-foreground"
@@ -265,7 +273,45 @@ export function ActivityCard({
                   {item.description}
                 </p>
               )}
-              {/* Meta row: rating, cost */}
+
+              {/* Viator flags + Restaurant badges */}
+              {!hasRestaurantAlternatives && (
+                <div className="flex items-center gap-1.5 flex-wrap mt-1">
+                  {/* Viator: Free cancellation */}
+                  {item.freeCancellation && (
+                    <span className={cn(
+                      "inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-medium",
+                      useHeroStyle ? "bg-emerald-500/20 text-emerald-300" : "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400"
+                    )}>
+                      <ShieldCheck className="h-2.5 w-2.5" />
+                      Annulation gratuite
+                    </span>
+                  )}
+                  {/* Viator: Instant confirmation */}
+                  {item.instantConfirmation && (
+                    <span className={cn(
+                      "inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-medium",
+                      useHeroStyle ? "bg-blue-500/20 text-blue-300" : "bg-blue-50 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400"
+                    )}>
+                      <Zap className="h-2.5 w-2.5" />
+                      Confirmation instantanée
+                    </span>
+                  )}
+                  {/* Restaurant badges (Michelin, etc.) */}
+                  {item.type === 'restaurant' && item.restaurant?.badges?.map((badge, i) => (
+                    <span key={i} className={cn(
+                      "inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-medium",
+                      useHeroStyle ? "bg-amber-500/20 text-amber-300" : "bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400"
+                    )}>
+                      <Award className="h-2.5 w-2.5" />
+                      {badge}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* Meta row: rating, cost — hidden for restaurant flat layout */}
+              {!hasRestaurantAlternatives && (
               <div className={cn(
                 "flex items-center gap-2.5 flex-wrap",
                 useHeroStyle ? "text-sm text-white/80 mt-1" : "text-xs text-muted-foreground"
@@ -301,6 +347,38 @@ export function ActivityCard({
                   </>
                 )}
               </div>
+              )}
+
+              {/* Restaurant phone & website (non-flat layout) */}
+              {!hasRestaurantAlternatives && item.type === 'restaurant' && item.restaurant && (item.restaurant.phoneNumber || item.restaurant.website) && (
+                <div className={cn(
+                  "flex items-center gap-3 mt-1",
+                  useHeroStyle ? "text-xs text-white/70" : "text-xs text-muted-foreground"
+                )}>
+                  {item.restaurant.phoneNumber && (
+                    <a
+                      href={`tel:${item.restaurant.phoneNumber}`}
+                      className={cn("inline-flex items-center gap-1 hover:underline", useHeroStyle ? "hover:text-white" : "hover:text-foreground")}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Phone className="h-3 w-3" />
+                      {item.restaurant.phoneNumber}
+                    </a>
+                  )}
+                  {item.restaurant.website && (
+                    <a
+                      href={item.restaurant.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={cn("inline-flex items-center gap-1 hover:underline", useHeroStyle ? "hover:text-white" : "hover:text-foreground")}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Globe className="h-3 w-3" />
+                      Site web
+                    </a>
+                  )}
+                </div>
+              )}
 
               {/* Transit lines */}
               {item.transitInfo?.lines && item.transitInfo.lines.length > 0 && !(item.type === 'transport' && item.bookingUrl) && (
@@ -365,10 +443,12 @@ export function ActivityCard({
                 </a>
               )}
 
-              {/* Booking buttons — clean pill style */}
-              <div className="flex items-center gap-1.5 mt-2.5 flex-wrap">
-                <BookingButtons item={item} />
-              </div>
+              {/* Booking buttons — clean pill style (hidden for restaurant flat layout) */}
+              {!hasRestaurantAlternatives && (
+                <div className="flex items-center gap-1.5 mt-2.5 flex-wrap">
+                  <BookingButtons item={item} />
+                </div>
+              )}
             </div>
 
             {/* Type icon (non-hero types only) */}
@@ -387,8 +467,8 @@ export function ActivityCard({
             <FlightAlternatives alternatives={item.flightAlternatives} />
           )}
 
-          {/* Restaurant top-3 suggestions */}
-          {item.type === 'restaurant' && item.restaurant && item.restaurantAlternatives && item.restaurantAlternatives.length > 0 && (
+          {/* Restaurant top-3 suggestions — old nested style (only for restaurants without the flat layout) */}
+          {item.type === 'restaurant' && item.restaurant && item.restaurantAlternatives && item.restaurantAlternatives.length > 0 && !hasRestaurantAlternatives && (
             <RestaurantSuggestions
               item={item}
               onSelectRestaurantAlternative={onSelectRestaurantAlternative}
@@ -397,6 +477,15 @@ export function ActivityCard({
           )}
         </div>
       </div>
+
+      {/* Restaurant flat layout: 3 equal cards side by side as the main content */}
+      {hasRestaurantAlternatives && (
+        <RestaurantSuggestionsFlat
+          item={item}
+          onSelectRestaurantAlternative={onSelectRestaurantAlternative}
+          onSelectSelfMeal={onSelectSelfMeal}
+        />
+      )}
 
       {/* Move buttons */}
       {onMoveUp && (
@@ -701,6 +790,205 @@ function FlightAlternatives({ alternatives }: { alternatives: Flight[] }) {
   );
 }
 
+/**
+ * Flat restaurant layout: 3 equal cards side-by-side.
+ * This replaces the old "big hero card + nested suggestions" layout.
+ */
+function RestaurantSuggestionsFlat({
+  item,
+  onSelectRestaurantAlternative,
+  onSelectSelfMeal,
+}: {
+  item: TripItem;
+  onSelectRestaurantAlternative?: (item: TripItem, restaurant: Restaurant) => void;
+  onSelectSelfMeal?: (item: TripItem) => void;
+}) {
+  const current = item.restaurant;
+  if (!current) return null;
+
+  const uniqueById = new Map<string, Restaurant>();
+  [current, ...(item.restaurantAlternatives || [])].forEach((r) => {
+    if (r?.id) uniqueById.set(r.id, r);
+  });
+  const rankRestaurant = (r: Restaurant): number => {
+    const ratingScore = (r.rating || 0) * 22;
+    const reviewScore = Math.min(Math.log10((r.reviewCount || 0) + 1) * 10, 25);
+    const distancePenalty = Math.min((r.distance || 0) * 12, 28);
+    const fallbackPenalty = r.latitude === 0 || r.longitude === 0 ? 6 : 0;
+    return ratingScore + reviewScore - distancePenalty - fallbackPenalty;
+  };
+
+  const suggestions = Array.from(uniqueById.values())
+    .sort((a, b) => rankRestaurant(b) - rankRestaurant(a))
+    .slice(0, 3);
+  if (suggestions.length === 0) return null;
+
+  const getCuisineLabel = (r: Restaurant): string => {
+    const raw = r.cuisineTypes?.[0] || 'Cuisine locale';
+    return raw
+      .replace(/^restaurant\s*/i, '')
+      .replace(/\s+/g, ' ')
+      .trim() || 'Cuisine locale';
+  };
+
+  const getRestaurantImage = (r: Restaurant): string => {
+    const candidate = r.photos?.[0];
+    if (candidate && /^https?:\/\//i.test(candidate)) return candidate;
+    return `https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&h=500&fit=crop&q=80&auto=format`;
+  };
+
+  return (
+    <div className="px-3.5 pb-3" onClick={(e) => e.stopPropagation()}>
+      {/* 3 equal cards side by side */}
+      <div className="flex flex-col sm:flex-row gap-2">
+        {suggestions.map((option) => {
+          const isSelected = option.id === current.id;
+          const bookingUrl = option.reservationUrl || option.googleMapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(option.name)}`;
+          const imageUrl = getRestaurantImage(option);
+
+          return (
+            <div
+              key={option.id}
+              className={cn(
+                "relative overflow-hidden rounded-xl border-2 transition-all duration-200 flex-1",
+                "aspect-[4/3] sm:aspect-[4/3]",
+                isSelected
+                  ? "border-primary shadow-lg shadow-primary/20 ring-1 ring-primary/30"
+                  : "border-transparent hover:border-white/20 hover:shadow-md"
+              )}
+              style={{ minHeight: '160px' }}
+            >
+              {/* Background photo */}
+              <img
+                src={imageUrl}
+                alt={option.name}
+                className="absolute inset-0 h-full w-full object-cover"
+                loading="lazy"
+              />
+              {/* Dark gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/15" />
+
+              {/* Card content */}
+              <div className="relative z-10 h-full flex flex-col justify-between p-2.5">
+                {/* Top section: cuisine badge + restaurant badges + selected indicator */}
+                <div className="flex items-start justify-between gap-1">
+                  <div className="flex items-center gap-1 flex-wrap">
+                    <span className="inline-flex items-center rounded-full bg-black/40 backdrop-blur-sm px-2 py-0.5 text-[10px] font-medium text-white/90">
+                      {getCuisineLabel(option)}
+                    </span>
+                    {/* Restaurant badges */}
+                    {option.badges?.map((badge, i) => (
+                      <span key={i} className="inline-flex items-center gap-0.5 rounded-full bg-amber-500/30 backdrop-blur-sm px-2 py-0.5 text-[10px] font-medium text-amber-200">
+                        <Award className="h-2.5 w-2.5" />
+                        {badge}
+                      </span>
+                    ))}
+                  </div>
+                  {isSelected && (
+                    <span className="inline-flex items-center rounded-full bg-primary/90 px-2 py-0.5 text-[10px] font-bold text-primary-foreground backdrop-blur-sm shrink-0">
+                      Choisi
+                    </span>
+                  )}
+                </div>
+
+                {/* Bottom section: name, meta, actions */}
+                <div>
+                  <h5 className="font-bold text-sm text-white leading-tight line-clamp-2 drop-shadow-md">
+                    {option.name}
+                  </h5>
+                  <div className="flex items-center gap-2.5 mt-1 text-[11px] text-white/85">
+                    {option.rating > 0 && (
+                      <span className="inline-flex items-center gap-0.5 font-semibold">
+                        <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                        {option.rating.toFixed(1)}
+                        {option.reviewCount > 0 && (
+                          <span className="text-white/50 font-normal">({option.reviewCount})</span>
+                        )}
+                      </span>
+                    )}
+                    {option.distance != null && (
+                      <span className="inline-flex items-center gap-0.5">
+                        <Navigation className="h-2.5 w-2.5" />
+                        {option.distance < 1 ? `${Math.round(option.distance * 1000)}m` : `${option.distance.toFixed(1)}km`}
+                      </span>
+                    )}
+                    {option.priceLevel && (
+                      <span className="text-white/60">
+                        {'€'.repeat(option.priceLevel)}
+                      </span>
+                    )}
+                  </div>
+                  {/* Phone & Website */}
+                  {(option.phoneNumber || option.website) && (
+                    <div className="flex items-center gap-2 mt-1 text-[10px]">
+                      {option.phoneNumber && (
+                        <a
+                          href={`tel:${option.phoneNumber}`}
+                          className="inline-flex items-center gap-0.5 text-white/70 hover:text-white transition-colors"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Phone className="h-2.5 w-2.5" />
+                          {option.phoneNumber}
+                        </a>
+                      )}
+                      {option.website && (
+                        <a
+                          href={option.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-0.5 text-white/70 hover:text-white transition-colors"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Globe className="h-2.5 w-2.5" />
+                          Site web
+                        </a>
+                      )}
+                    </div>
+                  )}
+                  <div className="flex items-center gap-1.5 mt-1.5">
+                    {!isSelected && (
+                      <button
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-primary text-primary-foreground text-[10px] font-semibold hover:opacity-90 transition-opacity shadow-sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onSelectRestaurantAlternative?.(item, option);
+                        }}
+                      >
+                        Choisir
+                      </button>
+                    )}
+                    <a
+                      href={bookingUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-white/15 backdrop-blur-sm border border-white/25 text-[10px] text-white/90 hover:bg-white/25 hover:text-white transition-colors"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <ExternalLink className="h-2.5 w-2.5" />
+                      Voir
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <div className="mt-2 flex justify-end">
+        <button
+          className="text-[11px] text-muted-foreground hover:text-foreground underline-offset-2 hover:underline transition-colors"
+          onClick={(e) => {
+            e.stopPropagation();
+            onSelectSelfMeal?.(item);
+          }}
+        >
+          Manger par ses moyens (pique-nique / maison / libre)
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function RestaurantSuggestions({
   item,
   onSelectRestaurantAlternative,
@@ -786,11 +1074,20 @@ function RestaurantSuggestions({
 
               {/* Card content — positioned at bottom via flex */}
               <div className="relative z-10 h-full flex flex-col justify-between p-2.5">
-                {/* Top section: cuisine badge */}
+                {/* Top section: cuisine badge + restaurant badges */}
                 <div className="flex items-start justify-between gap-1">
-                  <span className="inline-flex items-center rounded-full bg-black/40 backdrop-blur-sm px-2 py-0.5 text-[10px] font-medium text-white/90">
-                    {getCuisineLabel(option)}
-                  </span>
+                  <div className="flex items-center gap-1 flex-wrap">
+                    <span className="inline-flex items-center rounded-full bg-black/40 backdrop-blur-sm px-2 py-0.5 text-[10px] font-medium text-white/90">
+                      {getCuisineLabel(option)}
+                    </span>
+                    {/* Restaurant badges */}
+                    {option.badges?.map((badge, i) => (
+                      <span key={i} className="inline-flex items-center gap-0.5 rounded-full bg-amber-500/30 backdrop-blur-sm px-2 py-0.5 text-[10px] font-medium text-amber-200">
+                        <Award className="h-2.5 w-2.5" />
+                        {badge}
+                      </span>
+                    ))}
+                  </div>
                   {isSelected && (
                     <span className="inline-flex items-center rounded-full bg-primary/90 px-2 py-0.5 text-[10px] font-bold text-primary-foreground backdrop-blur-sm shrink-0">
                       Choisi
@@ -828,6 +1125,34 @@ function RestaurantSuggestions({
                       </span>
                     )}
                   </div>
+
+                  {/* Phone & Website */}
+                  {(option.phoneNumber || option.website) && (
+                    <div className="flex items-center gap-2 mt-1 text-[10px]">
+                      {option.phoneNumber && (
+                        <a
+                          href={`tel:${option.phoneNumber}`}
+                          className="inline-flex items-center gap-0.5 text-white/70 hover:text-white transition-colors"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Phone className="h-2.5 w-2.5" />
+                          {option.phoneNumber}
+                        </a>
+                      )}
+                      {option.website && (
+                        <a
+                          href={option.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-0.5 text-white/70 hover:text-white transition-colors"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Globe className="h-2.5 w-2.5" />
+                          Site web
+                        </a>
+                      )}
+                    </div>
+                  )}
 
                   {/* Action buttons */}
                   <div className="flex items-center gap-1.5 mt-1.5">

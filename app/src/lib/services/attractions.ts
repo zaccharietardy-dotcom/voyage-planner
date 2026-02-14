@@ -22,13 +22,20 @@ export interface Attraction {
   mustSee: boolean; // Incontournable
   bookingRequired: boolean;
   bookingUrl?: string;
-  openingHours: { open: string; close: string }; // Format "HH:MM"
+  openingHours: { open: string; close: string }; // Format "HH:MM" — simple format (daily default)
+  openingHoursByDay?: Record<string, { open: string; close: string } | null>; // Per-day hours (null = closed)
+  businessStatus?: 'OPERATIONAL' | 'CLOSED_TEMPORARILY' | 'CLOSED_PERMANENTLY';
+  phone?: string; // Phone from Google Places Details
+  website?: string; // Website from Google Places Details
+  googlePlaceId?: string; // Google Places place_id for Details lookup
   tips?: string;
   dataReliability?: 'verified' | 'estimated' | 'generated'; // Source des données
   googleMapsUrl?: string; // Lien direct vers Google Maps
   imageUrl?: string; // Photo de l'activité (Viator, etc.)
   providerName?: string; // Source: 'Viator', 'Foursquare', etc.
   reviewCount?: number; // Nombre d'avis
+  freeCancellation?: boolean;
+  instantConfirmation?: boolean;
 }
 
 // Base de données des attractions par destination

@@ -397,8 +397,10 @@ export async function searchRestaurantsWithGemini(
   const prompt = `Recherche sur Google les meilleurs restaurants pour ${mealLabels[mealType]} à ${destination}.
 
 IMPORTANT: Je veux UNIQUEMENT des restaurants qui EXISTENT VRAIMENT. Vérifie sur Google Maps.
-- Privilégie la cuisine LOCALE de ${destination} (pas de chaînes, pas de fast-food)
-- Donne ${effectiveLimit} restaurants avec des données VÉRIFIÉES
+- DIVERSITÉ DE CUISINES OBLIGATOIRE: propose un MIX de cuisines différentes (par ex. pour Paris: 1 brasserie parisienne, 1 italien, 1 japonais/sushi, 1 libanais, etc.)
+- Ne donne PAS uniquement des restaurants de cuisine locale — je veux de la variété !
+- Pas de chaînes, pas de fast-food
+- Donne ${effectiveLimit} restaurants avec des données VÉRIFIÉES et des CUISINES DIFFÉRENTES
 
 Réponds UNIQUEMENT en JSON valide (pas de markdown, pas de commentaires):
 [{
@@ -409,10 +411,11 @@ Réponds UNIQUEMENT en JSON valide (pas de markdown, pas de commentaires):
   "rating": 4.5,
   "reviewCount": 850,
   "priceLevel": 2,
-  "cuisineTypes": ["locale", "traditionnelle"],
+  "cuisineTypes": ["italien"],
   "googleMapsUrl": "https://www.google.com/maps/place/..."
 }]
 
+cuisineTypes: utilise le TYPE PRÉCIS de cuisine (ex: "brasserie", "italien", "japonais", "sushi", "libanais", "indien", "thaï", etc.), PAS "locale" ou "traditionnelle".
 priceLevel: 1 (€) à 4 (€€€€). IMPORTANT: Pas de champ description, tips ou specialties.`;
 
   try {

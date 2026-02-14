@@ -51,15 +51,36 @@ export function selectHotelByBarycenter(
 
   if (candidates.length === 0) return hotels[0] || null;
 
+  // 2b. Distance filter: prefer hotels within 5km of barycenter
+  // If none within 5km, relax to 8km. If still none, keep all candidates.
+  const MAX_HOTEL_DIST_KM = 5;
+  const RELAXED_HOTEL_DIST_KM = 8;
+
+  const nearCandidates = candidates.filter(h =>
+    calculateDistance(barycenter.lat, barycenter.lng, h.latitude, h.longitude) <= MAX_HOTEL_DIST_KM
+  );
+  if (nearCandidates.length >= 2) {
+    candidates = nearCandidates;
+  } else {
+    const relaxedCandidates = candidates.filter(h =>
+      calculateDistance(barycenter.lat, barycenter.lng, h.latitude, h.longitude) <= RELAXED_HOTEL_DIST_KM
+    );
+    if (relaxedCandidates.length >= 2) {
+      candidates = relaxedCandidates;
+    }
+    // else: keep all candidates (no nearby hotels available)
+  }
+
   // 3. Score: lower distance + higher rating = better
+  // Use dist^1.5 to penalize far hotels more aggressively
   const scored = candidates.map(h => {
     const dist = calculateDistance(
       barycenter.lat, barycenter.lng,
       h.latitude, h.longitude
     );
     const ratingNorm = normalizeHotelRating(h) / 10; // 0-1 scale
-    // Lower score = better
-    return { hotel: h, score: dist / Math.max(ratingNorm, 0.1) };
+    // Lower score = better. dist^1.5 penalizes far hotels more than linear.
+    return { hotel: h, score: Math.pow(dist, 1.5) / Math.max(ratingNorm, 0.1) };
   });
 
   scored.sort((a, b) => a.score - b.score);

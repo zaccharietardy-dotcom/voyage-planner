@@ -18,9 +18,10 @@ import { searchHotels } from '../services/hotels';
 import { generateTravelTips } from '../services/travelTips';
 import { resolveBudget, generateBudgetStrategy } from '../services/budgetResolver';
 import { findBestFlights, selectFlightByBudget } from '../tripFlights';
-import { searchGooglePlacesAttractions } from './services/googlePlacesAttractions';
+import { searchGooglePlacesAttractions, enrichAttractionsWithPlaceDetails } from './services/googlePlacesAttractions';
 import { getMustSeeAttractions, type Attraction } from '../services/attractions';
 import { resolveCoordinates } from '../services/coordsResolver';
+import { fetchWeatherForecast } from '../services/weather';
 import Anthropic from '@anthropic-ai/sdk';
 
 /**
@@ -155,6 +156,8 @@ export async function fetchAllData(preferences: TripPreferences): Promise<Fetche
       activityTypes,
       preferences.mealPreference,
     ),
+    // 11: Weather forecast (Open-Meteo, free, no key)
+    fetchWeatherForecast(destCoords, startDate, preferences.durationDays),
   ]);
 
   // Extract results safely (fulfilled or empty array)
@@ -176,6 +179,18 @@ export async function fetchAllData(preferences: TripPreferences): Promise<Fetche
   const transportOptions = extract(8, []);
   const travelTips = extract(9, null);
   const budgetStrategy = extract(10, null as any);
+  const weatherForecasts = extract(11, []);
+
+  // ── Enrich Google Places attractions with real opening hours (Place Details API) ──
+  // Non-blocking: wrapped in try/catch + timeout so pipeline never stalls
+  try {
+    await Promise.race([
+      enrichAttractionsWithPlaceDetails(googlePlacesAttractions, 20),
+      new Promise<void>((resolve) => setTimeout(resolve, 10000)), // 10s timeout
+    ]);
+  } catch (e) {
+    console.warn('[Pipeline V2] Place Details enrichment failed (non-critical):', e);
+  }
 
   // ── Resolve GPS for Viator activities (they default to city-center coords) ──
   const viatorEstimated = viatorActivities.filter(
@@ -320,6 +335,7 @@ export async function fetchAllData(preferences: TripPreferences): Promise<Fetche
     outboundFlight,
     returnFlight,
     flightAlternatives,
+    weatherForecasts,
     travelTips,
     budgetStrategy,
     resolvedBudget,

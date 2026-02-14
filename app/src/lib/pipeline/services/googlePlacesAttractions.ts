@@ -122,6 +122,7 @@ export async function searchGooglePlacesAttractions(
         bookingRequired: false,
         dataReliability: 'verified' as const,
         imageUrl,
+        googlePlaceId: r.place_id || undefined,
       };
     });
 
@@ -154,4 +155,166 @@ function estimateDuration(types: string[]): number {
   if (types.includes('zoo') || types.includes('aquarium')) return 180;
   if (types.includes('amusement_park')) return 240;
   return 60; // Default: 1 hour
+}
+
+// ============================================
+// Google Places Details — Opening Hours Enrichment
+// ============================================
+
+const GOOGLE_PLACES_DETAILS_URL = 'https://maps.googleapis.com/maps/api/place/details/json';
+
+const DAY_NAMES = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+
+/**
+ * Batch-enrich attractions with real opening hours from Google Places Details API.
+ * Only fetches for attractions that have a googlePlaceId.
+ *
+ * Cost: ~$0.005 per request (Place Details: Basic + Contact fields)
+ * For 20 attractions: ~$0.10 per trip generation.
+ *
+ * @param attractions - Attractions to enrich (mutates in place)
+ * @param limit - Max number of Details API calls (default: 20)
+ */
+export async function enrichAttractionsWithPlaceDetails(
+  attractions: Attraction[],
+  limit: number = 20
+): Promise<void> {
+  const apiKey = getApiKey();
+  if (!apiKey) return;
+
+  const toEnrich = attractions
+    .filter(a => a.googlePlaceId)
+    .slice(0, limit);
+
+  if (toEnrich.length === 0) return;
+
+  const T0 = Date.now();
+  let enriched = 0;
+  const CONCURRENCY = 5;
+
+  for (let i = 0; i < toEnrich.length; i += CONCURRENCY) {
+    const batch = toEnrich.slice(i, i + CONCURRENCY);
+    const results = await Promise.allSettled(
+      batch.map(attraction => fetchPlaceDetails(attraction.googlePlaceId!, apiKey))
+    );
+
+    batch.forEach((attraction, idx) => {
+      const result = results[idx];
+      if (result.status !== 'fulfilled' || !result.value) return;
+
+      const details = result.value;
+
+      // Update opening hours
+      if (details.openingHours) {
+        attraction.openingHours = details.openingHours.default;
+        attraction.openingHoursByDay = details.openingHours.byDay;
+      }
+
+      // Update business status
+      if (details.businessStatus) {
+        attraction.businessStatus = details.businessStatus;
+      }
+
+      // Add phone and website (if not already set)
+      if (details.phone && !attraction.phone) {
+        attraction.phone = details.phone;
+      }
+      if (details.website && !attraction.website) {
+        attraction.website = details.website;
+      }
+
+      enriched++;
+    });
+  }
+
+  console.log(`[Google Places Details] ✅ ${enriched}/${toEnrich.length} attractions enriched with real hours (${Date.now() - T0}ms)`);
+}
+
+interface PlaceDetailsResult {
+  openingHours?: {
+    default: { open: string; close: string };
+    byDay: Record<string, { open: string; close: string } | null>;
+  };
+  businessStatus?: 'OPERATIONAL' | 'CLOSED_TEMPORARILY' | 'CLOSED_PERMANENTLY';
+  phone?: string;
+  website?: string;
+}
+
+async function fetchPlaceDetails(
+  placeId: string,
+  apiKey: string
+): Promise<PlaceDetailsResult | null> {
+  try {
+    const url = new URL(GOOGLE_PLACES_DETAILS_URL);
+    url.searchParams.set('place_id', placeId);
+    url.searchParams.set('fields', 'opening_hours,business_status,formatted_phone_number,website');
+    url.searchParams.set('language', 'fr');
+    url.searchParams.set('key', apiKey);
+
+    const response = await fetch(url.toString(), {
+      signal: AbortSignal.timeout(5000),
+    });
+
+    if (!response.ok) return null;
+
+    const data = await response.json();
+    if (data.status !== 'OK') return null;
+
+    const result = data.result;
+    if (!result) return null;
+
+    // Parse opening hours periods
+    let openingHours: PlaceDetailsResult['openingHours'] = undefined;
+    if (result.opening_hours?.periods) {
+      const periods: any[] = result.opening_hours.periods;
+      const byDay: Record<string, { open: string; close: string } | null> = {};
+
+      // Initialize all days as null (closed)
+      for (const day of DAY_NAMES) {
+        byDay[day] = null;
+      }
+
+      // Fill in open days
+      for (const period of periods) {
+        if (!period.open) continue;
+
+        const dayIdx = period.open.day;
+        const dayName = DAY_NAMES[dayIdx];
+        if (!dayName) continue;
+
+        const openTime = formatPeriodTime(period.open.time);
+        const closeTime = period.close ? formatPeriodTime(period.close.time) : '23:59';
+
+        byDay[dayName] = { open: openTime, close: closeTime };
+      }
+
+      // Compute default open/close (most common hours across open days)
+      const openDays = Object.values(byDay).filter(v => v !== null) as { open: string; close: string }[];
+      if (openDays.length > 0) {
+        // Use earliest open and latest close as defaults
+        const defaultOpen = openDays.reduce((min, d) => d.open < min ? d.open : min, '23:59');
+        const defaultClose = openDays.reduce((max, d) => d.close > max ? d.close : max, '00:00');
+
+        openingHours = {
+          default: { open: defaultOpen, close: defaultClose },
+          byDay,
+        };
+      }
+    }
+
+    return {
+      openingHours,
+      businessStatus: result.business_status || undefined,
+      phone: result.formatted_phone_number || undefined,
+      website: result.website || undefined,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function formatPeriodTime(time: string): string {
+  // Google returns "0930" format, we need "09:30"
+  if (!time || time.length < 4) return '09:00';
+  return `${time.slice(0, 2)}:${time.slice(2, 4)}`;
 }

@@ -18,10 +18,10 @@ type MealType = 'breakfast' | 'lunch' | 'dinner';
 const MEAL_DISTANCE_LIMITS: Record<MealType, { idealKm: number; hardKm: number; absoluteKm: number }> = {
   // Breakfast should stay very close to the hotel.
   breakfast: { idealKm: 0.4, hardKm: 0.8, absoluteKm: 1.2 },
-  // Lunch stays around the nearest activity — 500m target, 1km hard max.
-  lunch: { idealKm: 0.5, hardKm: 0.8, absoluteKm: 1.2 },
-  // Dinner: same tight constraint — walk from last activity.
-  dinner: { idealKm: 0.5, hardKm: 0.8, absoluteKm: 1.2 },
+  // Lunch/dinner: allow up to 2km in step4 (cluster centroids can differ from final activity positions).
+  // Step7 re-optimization will tighten to <500m after activity reordering.
+  lunch: { idealKm: 0.5, hardKm: 1.0, absoluteKm: 2.0 },
+  dinner: { idealKm: 0.5, hardKm: 1.0, absoluteKm: 2.0 },
 };
 
 /**
@@ -255,14 +255,55 @@ function detectDestinationCountry(destination: string): string {
   return 'france'; // default
 }
 
-function getCuisineFamily(restaurant: Restaurant): string {
+/**
+ * Fine-grained cuisine family detection.
+ * Returns a specific cuisine tag (e.g. "italian", "japanese", "brasserie")
+ * instead of just a country code, so the diversity algorithm can distinguish
+ * between e.g. a brasserie and a boulangerie (both "france").
+ */
+export function getCuisineFamily(restaurant: Restaurant): string {
   const text = `${restaurant.name || ''} ${(restaurant.cuisineTypes || []).join(' ')}`.toLowerCase();
+
+  // Check fine-grained categories first (more specific = earlier match)
+  const FINE_CUISINE_MAP: Record<string, string[]> = {
+    'japanese': ['sushi', 'ramen', 'izakaya', 'japonais', 'japanese', 'yakitori', 'tempura', 'udon', 'sashimi', 'maki'],
+    'italian': ['italien', 'italian', 'pizza', 'pizzeria', 'trattoria', 'osteria', 'ristorante', 'pasta', 'risotto'],
+    'chinese': ['chinois', 'chinese', 'dim sum', 'cantonais', 'szechuan', 'wok'],
+    'indian': ['indien', 'indian', 'curry', 'tandoori', 'naan', 'masala'],
+    'thai': ['thaï', 'thai', 'thaïlandais', 'pad thai'],
+    'vietnamese': ['vietnamien', 'vietnamese', 'pho', 'banh mi', 'bo bun'],
+    'korean': ['coréen', 'korean', 'bibimbap', 'kimchi'],
+    'mexican': ['mexicain', 'mexican', 'tacos', 'taqueria', 'burrito', 'guacamole'],
+    'lebanese': ['libanais', 'lebanese', 'mezze', 'falafel', 'shawarma'],
+    'moroccan': ['marocain', 'moroccan', 'tagine', 'couscous'],
+    'greek': ['grec', 'greek', 'taverna', 'gyros', 'souvlaki'],
+    'turkish': ['turc', 'turkish', 'kebab', 'döner'],
+    'spanish': ['espagnol', 'spanish', 'tapas', 'paella'],
+    'peruvian': ['péruvien', 'peruvian', 'ceviche'],
+    'american': ['american', 'américain', 'burger', 'diner', 'bbq', 'barbecue'],
+    'brasserie': ['brasserie'],
+    'bistro': ['bistro', 'bistrot'],
+    'french-gastro': ['gastronomique', 'étoilé', 'michelin', 'gastro'],
+    'bakery': ['boulangerie', 'bakery', 'pain', 'bread'],
+    'patisserie': ['pâtisserie', 'patisserie'],
+    'seafood': ['fruits de mer', 'seafood', 'poisson', 'fish', 'crustacé', 'huître', 'oyster'],
+    'steakhouse': ['steakhouse', 'steak', 'grill', 'viande', 'boucherie'],
+    'french': ['français', 'francais', 'french', 'provençal', 'lyonnais', 'normand', 'breton', 'alsacien', 'savoyard'],
+  };
+
+  for (const [family, keywords] of Object.entries(FINE_CUISINE_MAP)) {
+    for (const kw of keywords) {
+      if (text.includes(kw)) return family;
+    }
+  }
+
+  // Fallback to country-level detection
   for (const [country, keywords] of Object.entries(LOCAL_CUISINE_KEYWORDS)) {
     for (const kw of keywords) {
       if (text.includes(kw)) return country;
     }
   }
-  return 'unknown';
+  return 'generic';
 }
 
 function isLocalCuisine(restaurant: Restaurant, country: string): boolean {
@@ -344,43 +385,54 @@ function selectTopNearbyRestaurants(
     return a.distanceKm - b.distanceKm;
   });
 
-  // Diversity selection: 1 local + 2 international when possible
+  // Diversity selection: maximize cuisine variety across the 3 picks.
+  // Goal: brasserie + italian + sushi (for Paris), not 3x "restaurant français".
   if (count >= 3 && shortlist.length >= 3 && destination) {
     const country = detectDestinationCountry(destination);
+    const localFamilies = new Set<string>(Object.keys(LOCAL_CUISINE_KEYWORDS[country] ? { [country]: true } : {}));
+    // Also mark fine-grained local sub-families as "local"
+    const LOCAL_SUB_FAMILIES: Record<string, string[]> = {
+      france: ['french', 'brasserie', 'bistro', 'french-gastro', 'bakery', 'patisserie'],
+      italy: ['italian'],
+      spain: ['spanish'],
+      japan: ['japanese'],
+      germany: [],
+      greece: ['greek'],
+      morocco: ['moroccan'],
+      usa: ['american'],
+      uk: [],
+    };
+    const localSubs = new Set<string>(LOCAL_SUB_FAMILIES[country] || []);
+    localSubs.add(country);
+
     const result: typeof shortlist = [];
     const usedFamilies = new Set<string>();
 
-    // Pick 1: best local cuisine
-    const bestLocal = shortlist.find(s => isLocalCuisine(s.restaurant, country));
+    // Pick 1: best local/destination cuisine
+    const bestLocal = shortlist.find(s => {
+      const fam = getCuisineFamily(s.restaurant);
+      return localSubs.has(fam) || isLocalCuisine(s.restaurant, country);
+    });
     if (bestLocal) {
       result.push(bestLocal);
-      usedFamilies.add(country);
+      const fam = getCuisineFamily(bestLocal.restaurant);
+      usedFamilies.add(fam);
+      // Also block all local sub-families to avoid picking brasserie + bistro
+      for (const sub of localSubs) usedFamilies.add(sub);
     }
 
-    // Pick 2: best international (different family)
-    for (const s of shortlist) {
-      if (result.some(r => r.restaurant.id === s.restaurant.id)) continue;
-      const family = getCuisineFamily(s.restaurant);
-      if (family !== country && family !== 'unknown' && !usedFamilies.has(family)) {
-        result.push(s);
-        usedFamilies.add(family);
-        break;
-      }
-    }
-
-    // Pick 3: another different international, or best remaining
+    // Pick 2 & 3: maximize diversity — pick restaurants with different cuisine families
     for (const s of shortlist) {
       if (result.length >= count) break;
       if (result.some(r => r.restaurant.id === s.restaurant.id)) continue;
       const family = getCuisineFamily(s.restaurant);
-      if (!usedFamilies.has(family) && family !== 'unknown') {
+      if (!usedFamilies.has(family)) {
         result.push(s);
         usedFamilies.add(family);
-        break;
       }
     }
 
-    // Fill remaining slots with best available
+    // If we still need more, accept "generic" restaurants too
     for (const s of shortlist) {
       if (result.length >= count) break;
       if (result.some(r => r.restaurant.id === s.restaurant.id)) continue;

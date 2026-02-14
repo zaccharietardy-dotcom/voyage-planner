@@ -11,7 +11,18 @@ import { DayScheduler, parseTime, formatTime } from '../services/scheduler';
 import { calculateDistance, estimateTravelTime } from '../services/geocoding';
 import { getDirections } from '../services/directions';
 import { fetchPlaceImage } from './services/wikimediaImages';
-import { isAppropriateForMeal } from './step4-restaurants';
+import { isAppropriateForMeal, getCuisineFamily } from './step4-restaurants';
+import { searchRestaurantsNearby } from '../services/serpApiPlaces';
+import { batchFetchWikipediaSummaries, getWikiLanguageForDestination } from '../services/wikipedia';
+// ---------------------------------------------------------------------------
+// Directions cache — used to store pre-fetched real travel times
+// ---------------------------------------------------------------------------
+type DirectionsCache = Map<string, { duration: number; distance: number }>;
+
+function directionsCacheKey(fromLat: number, fromLng: number, toLat: number, toLng: number): string {
+  return `${fromLat.toFixed(5)},${fromLng.toFixed(5)}→${toLat.toFixed(5)},${toLng.toFixed(5)}`;
+}
+
 // Simple UUID generator (avoids external dependency)
 function uuidv4(): string {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
@@ -53,6 +64,215 @@ export async function assembleTripSchedule(
   const startDate = new Date(preferences.startDate);
   const days: TripDay[] = [];
 
+  // Pre-fetch Wikipedia summaries for top activities (non-blocking enrichment)
+  let wikiDescriptions = new Map<string, string>();
+  try {
+    const allActivities = clusters.flatMap(c => c.activities);
+    const activityNames = [...new Set(allActivities.map(a => a.name))].slice(0, 25);
+    const wikiLang = getWikiLanguageForDestination(preferences.destination);
+    const wikiResults = await Promise.race([
+      batchFetchWikipediaSummaries(activityNames, wikiLang),
+      new Promise<Map<string, null>>((resolve) => setTimeout(() => resolve(new Map()), 8000)),
+    ]);
+    for (const [name, summary] of wikiResults.entries()) {
+      if (summary?.extract) {
+        wikiDescriptions.set(name, summary.extract);
+      }
+    }
+    if (wikiDescriptions.size > 0) {
+      console.log(`[Pipeline V2] Wikipedia: ${wikiDescriptions.size}/${activityNames.length} descriptions enriched`);
+    }
+  } catch (e) {
+    console.warn('[Pipeline V2] Wikipedia enrichment failed (non-critical):', e);
+  }
+
+  // ---------------------------------------------------------------------------
+  // PRE-PASS: geo-optimize all days, prefetch real directions, re-optimize
+  // ---------------------------------------------------------------------------
+  const prepassStartLat = hotel?.latitude || data.destCoords.lat;
+  const prepassStartLng = hotel?.longitude || data.destCoords.lng;
+
+  // Shared geoOptimize function (extracted so it can be called in the pre-pass)
+  const geoOptimizeFn = (activities: ScoredActivity[], sLat: number, sLng: number) => {
+    if (activities.length <= 2) return activities;
+
+    const routeCost = (route: ScoredActivity[]): number => {
+      if (route.length === 0) return 0;
+      let total = 0;
+      let maxLeg = 0;
+      let longLegPenalty = 0;
+
+      const firstLeg = calculateDistance(sLat, sLng, route[0].latitude, route[0].longitude);
+      total += firstLeg;
+      maxLeg = Math.max(maxLeg, firstLeg);
+      if (firstLeg > 3) longLegPenalty += (firstLeg - 3) * 1.4;
+
+      for (let i = 1; i < route.length; i++) {
+        const leg = calculateDistance(
+          route[i - 1].latitude, route[i - 1].longitude,
+          route[i].latitude, route[i].longitude
+        );
+        total += leg;
+        maxLeg = Math.max(maxLeg, leg);
+        if (leg > 3) longLegPenalty += (leg - 3) * 1.4;
+      }
+
+      const lastActivity = route[route.length - 1];
+      const returnLeg = calculateDistance(lastActivity.latitude, lastActivity.longitude, sLat, sLng);
+      total += returnLeg * 0.5;
+
+      const maxLegPenalty = Math.max(0, maxLeg - 4) * 2.5;
+      return total + longLegPenalty + maxLegPenalty;
+    };
+
+    const buildGreedyFromFirst = (firstIndex: number): ScoredActivity[] => {
+      const ordered: ScoredActivity[] = [];
+      const remaining = [...activities];
+      const first = remaining.splice(firstIndex, 1)[0];
+      ordered.push(first);
+
+      let curLat = first.latitude;
+      let curLng = first.longitude;
+      while (remaining.length > 0) {
+        let nearestIdx = 0;
+        let nearestDist = Infinity;
+        for (let i = 0; i < remaining.length; i++) {
+          const d = calculateDistance(curLat, curLng, remaining[i].latitude, remaining[i].longitude);
+          if (d < nearestDist) {
+            nearestDist = d;
+            nearestIdx = i;
+          }
+        }
+        const next = remaining.splice(nearestIdx, 1)[0];
+        ordered.push(next);
+        curLat = next.latitude;
+        curLng = next.longitude;
+      }
+      return ordered;
+    };
+
+    let bestRoute: ScoredActivity[] = [];
+    let bestCost = Infinity;
+    for (let i = 0; i < activities.length; i++) {
+      const candidate = buildGreedyFromFirst(i);
+      const candidateCost = routeCost(candidate);
+      if (candidateCost < bestCost) {
+        bestCost = candidateCost;
+        bestRoute = candidate;
+      }
+    }
+
+    let improved = true;
+    let route = [...bestRoute];
+    while (improved) {
+      improved = false;
+      for (let i = 0; i < route.length - 2; i++) {
+        for (let k = i + 1; k < route.length - 1; k++) {
+          const nextRoute = [
+            ...route.slice(0, i + 1),
+            ...route.slice(i + 1, k + 1).reverse(),
+            ...route.slice(k + 1),
+          ];
+          const nextCost = routeCost(nextRoute);
+          if (nextCost + 0.01 < bestCost) {
+            route = nextRoute;
+            bestCost = nextCost;
+            improved = true;
+          }
+        }
+      }
+    }
+
+    return route;
+  };
+
+  // Step 1: Run geoOptimize for all days and collect ordered activities
+  const prepassActivities = new Map<number, ScoredActivity[]>();
+  for (const balancedDay of plan.days) {
+    const cluster = clusters.find(c => c.dayNumber === balancedDay.dayNumber);
+    const rawOrdered = reorderByPlan(cluster, balancedDay.activityOrder);
+    const optimized = geoOptimizeFn(rawOrdered, prepassStartLat, prepassStartLng);
+    prepassActivities.set(balancedDay.dayNumber, optimized);
+  }
+
+  // Step 2: Prefetch real directions for all consecutive pairs
+  let directionsCache: DirectionsCache = new Map();
+  try {
+    directionsCache = await prefetchDirectionsForDays(prepassActivities, prepassStartLat, prepassStartLng);
+  } catch (e) {
+    console.warn('[Pipeline V2] Directions prefetch failed — falling back to Haversine:', e);
+  }
+
+  // Step 3: Re-run 2-opt per day with real times (if cache has entries)
+  if (directionsCache.size > 0) {
+    let reoptCount = 0;
+    for (const [dayNum, activities] of prepassActivities) {
+      const before = activities.map(a => a.name).join(' → ');
+      const reoptimized = reoptimizeWithRealTimes(activities, prepassStartLat, prepassStartLng, directionsCache);
+      prepassActivities.set(dayNum, reoptimized);
+      const after = reoptimized.map(a => a.name).join(' → ');
+      if (before !== after) {
+        reoptCount++;
+        console.log(`[Pipeline V2] Day ${dayNum} re-optimized with real times: ${after}`);
+
+        // Prefetch any new pairs introduced by the re-ordering
+        const newPairs = collectDirectionPairs(
+          new Map([[dayNum, reoptimized]]),
+          prepassStartLat,
+          prepassStartLng
+        ).filter(p => !directionsCache.has(directionsCacheKey(p.fromLat, p.fromLng, p.toLat, p.toLng)));
+
+        if (newPairs.length > 0) {
+          try {
+            const results = await Promise.allSettled(
+              newPairs.map(({ fromLat, fromLng, toLat, toLng }) =>
+                getDirections({
+                  from: { lat: fromLat, lng: fromLng },
+                  to: { lat: toLat, lng: toLng },
+                  mode: 'transit',
+                })
+              )
+            );
+            for (let i = 0; i < results.length; i++) {
+              if (results[i].status === 'fulfilled') {
+                const dir = (results[i] as PromiseFulfilledResult<any>).value;
+                if (dir && typeof dir.duration === 'number') {
+                  const p = newPairs[i];
+                  directionsCache.set(
+                    directionsCacheKey(p.fromLat, p.fromLng, p.toLat, p.toLng),
+                    { duration: dir.duration, distance: dir.distance }
+                  );
+                }
+              }
+            }
+          } catch {
+            // Non-critical — cache will just miss those new pairs
+          }
+        }
+      }
+    }
+    if (reoptCount > 0) {
+      console.log(`[Pipeline V2] 2-opt re-optimization: ${reoptCount}/${prepassActivities.size} days changed with real times`);
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Cross-day restaurant dedup: track restaurant names used across ALL days
+  // to prevent the same restaurant appearing on multiple days
+  // ---------------------------------------------------------------------------
+  const crossDayUsedRestaurantNames = new Set<string>();
+  const crossDayUsedRestaurantIds = new Set<string>();
+  // Pre-populate from meals already assigned by step4
+  for (const m of meals) {
+    if (m.restaurant) {
+      crossDayUsedRestaurantIds.add(m.restaurant.id);
+      crossDayUsedRestaurantNames.add(m.restaurant.name);
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // MAIN LOOP: schedule each day using pre-computed activities + directions cache
+  // ---------------------------------------------------------------------------
   for (const balancedDay of plan.days) {
     const dayDate = new Date(startDate);
     dayDate.setDate(startDate.getDate() + balancedDay.dayNumber - 1);
@@ -299,50 +519,9 @@ export async function assembleTripSchedule(
       }
     }
 
-    // Last day: insert breakfast BEFORE checkout so cursor is still early
-    // Use maxEndTime of 10:30 to give a bit more room
-    if (isLastDay && breakfast?.restaurant && !skipBreakfast && dayStartHour <= 10) {
-      scheduler.addItem({
-        id: `meal-${balancedDay.dayNumber}-breakfast`,
-        title: `Petit-déjeuner — ${breakfast.restaurant.name}`,
-        type: 'restaurant',
-        duration: 45,
-        minStartTime: parseTime(dayDate, `${String(Math.max(7, dayStartHour)).padStart(2, '0')}:00`),
-        maxEndTime: parseTime(dayDate, '10:30'),
-        data: { ...breakfast.restaurant, _alternatives: breakfast.restaurantAlternatives || [] },
-      });
-    } else if (isLastDay && !breakfast?.restaurant && !skipBreakfast && hotel?.breakfastIncluded && dayStartHour <= 10) {
-      // Hotel breakfast fallback
-      scheduler.addItem({
-        id: `hotel-breakfast-${balancedDay.dayNumber}`,
-        title: `Petit-déjeuner à l'hôtel`,
-        type: 'restaurant',
-        duration: 30,
-        minStartTime: parseTime(dayDate, `${String(Math.max(7, dayStartHour)).padStart(2, '0')}:00`),
-        maxEndTime: parseTime(dayDate, '10:00'),
-        data: { name: hotel?.name || 'Hôtel', description: 'Petit-déjeuner inclus', latitude: hotel?.latitude, longitude: hotel?.longitude, estimatedCost: 0 },
-      });
-    } else if (isLastDay && !breakfast?.restaurant && !skipBreakfast && !hotel?.breakfastIncluded && dayStartHour <= 10) {
-      // Self-catered breakfast placeholder
-      let bkfTitle: string;
-      let bkfData: any;
-      if (hotel) {
-        bkfTitle = 'Petit-déjeuner à l\'hôtel';
-        bkfData = { name: hotel.name || 'Hôtel', description: 'Petit-déjeuner', latitude: hotel.latitude, longitude: hotel.longitude, estimatedCost: 0 };
-      } else {
-        bkfTitle = 'Petit-déjeuner — Café/Boulangerie à proximité';
-        bkfData = { name: 'Café/Boulangerie', description: 'Petit-déjeuner à proximité de l\'hôtel', latitude: data.destCoords.lat, longitude: data.destCoords.lng, estimatedCost: 8 };
-      }
-      scheduler.addItem({
-        id: `self-breakfast-${balancedDay.dayNumber}`,
-        title: bkfTitle,
-        type: 'restaurant',
-        duration: 30,
-        minStartTime: parseTime(dayDate, `${String(Math.max(7, dayStartHour)).padStart(2, '0')}:00`),
-        maxEndTime: parseTime(dayDate, '10:00'),
-        data: bkfData,
-      });
-    }
+    // Last day breakfast: DEFERRED to after reoptMealFromPool runs (see section 4c below).
+    // This allows the rescue logic to find a real restaurant before we insert the scheduler item.
+    // We still insert checkout here since it's a fixed-time item.
 
     if (isLastDay && hotel) {
       let checkoutTime = parseTime(dayDate, hotel.checkOutTime || '11:00');
@@ -367,119 +546,8 @@ export async function assembleTripSchedule(
       });
     }
 
-    // 4. Get activities in Claude-specified order, but ensure must-sees come first
-    const cluster = clusters.find(c => c.dayNumber === balancedDay.dayNumber);
-    let orderedActivities = reorderByPlan(cluster, balancedDay.activityOrder);
-
-    // Optimize geographic order for all activities in the day.
-    // Strategy: multi-start nearest-neighbor + light 2-opt improvement.
-    // This is more stable than a single greedy pass and reduces long zigzags.
-    const geoOptimize = (activities: ScoredActivity[], startLat: number, startLng: number) => {
-      if (activities.length <= 2) return activities;
-
-      const routeCost = (route: ScoredActivity[]): number => {
-        if (route.length === 0) return 0;
-
-        let total = 0;
-        let maxLeg = 0;
-        let longLegPenalty = 0;
-
-        const firstLeg = calculateDistance(startLat, startLng, route[0].latitude, route[0].longitude);
-        total += firstLeg;
-        maxLeg = Math.max(maxLeg, firstLeg);
-        if (firstLeg > 3) {
-          longLegPenalty += (firstLeg - 3) * 1.4;
-        }
-
-        for (let i = 1; i < route.length; i++) {
-          const leg = calculateDistance(
-            route[i - 1].latitude, route[i - 1].longitude,
-            route[i].latitude, route[i].longitude
-          );
-          total += leg;
-          maxLeg = Math.max(maxLeg, leg);
-          if (leg > 3) {
-            longLegPenalty += (leg - 3) * 1.4;
-          }
-        }
-
-        // Add return-to-hotel cost (penalize last activity far from hotel)
-        const lastActivity = route[route.length - 1];
-        const returnLeg = calculateDistance(lastActivity.latitude, lastActivity.longitude, startLat, startLng);
-        total += returnLeg * 0.5; // Weight at 0.5 (less important than inter-activity but matters)
-
-        // Penalize "one giant jump" routes even if total distance is similar.
-        const maxLegPenalty = Math.max(0, maxLeg - 4) * 2.5;
-        return total + longLegPenalty + maxLegPenalty;
-      };
-
-      const buildGreedyFromFirst = (firstIndex: number): ScoredActivity[] => {
-        const ordered: ScoredActivity[] = [];
-        const remaining = [...activities];
-        const first = remaining.splice(firstIndex, 1)[0];
-        ordered.push(first);
-
-        let curLat = first.latitude;
-        let curLng = first.longitude;
-        while (remaining.length > 0) {
-          let nearestIdx = 0;
-          let nearestDist = Infinity;
-          for (let i = 0; i < remaining.length; i++) {
-            const d = calculateDistance(curLat, curLng, remaining[i].latitude, remaining[i].longitude);
-            if (d < nearestDist) {
-              nearestDist = d;
-              nearestIdx = i;
-            }
-          }
-          const next = remaining.splice(nearestIdx, 1)[0];
-          ordered.push(next);
-          curLat = next.latitude;
-          curLng = next.longitude;
-        }
-        return ordered;
-      };
-
-      // Multi-start: try each activity as first stop, keep shortest route from hotel/start.
-      let bestRoute: ScoredActivity[] = [];
-      let bestCost = Infinity;
-      for (let i = 0; i < activities.length; i++) {
-        const candidate = buildGreedyFromFirst(i);
-        const candidateCost = routeCost(candidate);
-        if (candidateCost < bestCost) {
-          bestCost = candidateCost;
-          bestRoute = candidate;
-        }
-      }
-
-      // 2-opt local improvement.
-      // Keep this light since day activity count is small (typically <= 8).
-      let improved = true;
-      let route = [...bestRoute];
-      while (improved) {
-        improved = false;
-        for (let i = 0; i < route.length - 2; i++) {
-          for (let k = i + 1; k < route.length - 1; k++) {
-            const nextRoute = [
-              ...route.slice(0, i + 1),
-              ...route.slice(i + 1, k + 1).reverse(),
-              ...route.slice(k + 1),
-            ];
-            const nextCost = routeCost(nextRoute);
-            if (nextCost + 0.01 < bestCost) {
-              route = nextRoute;
-              bestCost = nextCost;
-              improved = true;
-            }
-          }
-        }
-      }
-
-      return route;
-    };
-
-    const startLat = hotel?.latitude || data.destCoords.lat;
-    const startLng = hotel?.longitude || data.destCoords.lng;
-    orderedActivities = geoOptimize(orderedActivities, startLat, startLng);
+    // 4. Get activities from pre-pass (already geo-optimized + re-optimized with real times)
+    let orderedActivities = prepassActivities.get(balancedDay.dayNumber) || [];
 
     const mustSeeCount = orderedActivities.filter(a => a.mustSee).length;
     console.log(`[Pipeline V2] Day ${balancedDay.dayNumber}: ${orderedActivities.length} activities to schedule (${mustSeeCount} must-sees), dayStart=${dayStartHour}:00, dayEnd=${dayEndHour}:00, window=${dayEndHour - dayStartHour}h, cursor=${formatTimeHHMM(scheduler.getCurrentTime())}`);
@@ -498,20 +566,144 @@ export async function assembleTripSchedule(
       dinner: 0.5,
     };
 
-    const usedRestaurantIds = new Set<string>();
+    const usedRestaurantIds = new Set<string>(crossDayUsedRestaurantIds);
+    const usedRestaurantNames = new Set<string>(crossDayUsedRestaurantNames);
     // Track all already-assigned restaurants on this day
     const dayMealsAll = meals.filter(m => m.dayNumber === balancedDay.dayNumber);
     for (const m of dayMealsAll) {
-      if (m.restaurant) usedRestaurantIds.add(m.restaurant.id);
+      if (m.restaurant) {
+        usedRestaurantIds.add(m.restaurant.id);
+        usedRestaurantNames.add(m.restaurant.name);
+      }
     }
 
-    const reoptMealFromPool = (
+    const reoptMealFromPool = async (
       meal: typeof lunch,
       neighborActivity: ScoredActivity | undefined,
       mealType: 'breakfast' | 'lunch' | 'dinner',
     ) => {
-      if (!meal?.restaurant || !neighborActivity) return;
+      if (!meal || !neighborActivity) return;
       if (!neighborActivity.latitude || !neighborActivity.longitude) return;
+
+      const maxDist = MEAL_REOPT_LIMITS[mealType] || 2.0;
+
+      // Helper: search pool for best restaurant near neighborActivity
+      const findBestInPool = (pool: Restaurant[], maxCurrentDist?: number): { best: Restaurant | null; dist: number } => {
+        const SEARCH_RADII = [0.5, 0.8, 1.2];
+        let bestCandidate: Restaurant | null = null;
+        let bestDist = Infinity;
+
+        for (const radius of SEARCH_RADII) {
+          for (const r of pool) {
+            if (usedRestaurantIds.has(r.id) || usedRestaurantNames.has(r.name)) continue;
+            if (!r.latitude || !r.longitude) continue;
+            if (!isAppropriateForMeal(r, mealType)) continue;
+
+            const dist = calculateDistance(
+              neighborActivity.latitude!, neighborActivity.longitude!,
+              r.latitude, r.longitude
+            );
+            if (dist > radius) continue;
+            // If we have a current restaurant, only accept closer options
+            if (maxCurrentDist !== undefined && dist >= maxCurrentDist) continue;
+
+            if (dist < bestDist || (dist === bestDist && (r.rating || 3) > ((bestCandidate as any)?.rating || 3))) {
+              bestDist = dist;
+              bestCandidate = r;
+            }
+          }
+          if (bestCandidate) break;
+        }
+        return { best: bestCandidate, dist: bestDist };
+      };
+
+      // Helper: fetch restaurants from API near neighborActivity
+      const fetchNearbyFromAPI = async (): Promise<Restaurant[]> => {
+        try {
+          const nearbyResults = await searchRestaurantsNearby(
+            { lat: neighborActivity.latitude!, lng: neighborActivity.longitude! },
+            preferences.destination,
+            { mealType, maxDistance: 800, limit: 5 }
+          );
+          if (nearbyResults.length > 0 && restaurantGeoPool) {
+            restaurantGeoPool.push(...nearbyResults);
+          }
+          return nearbyResults;
+        } catch (err) {
+          console.warn(`[Pipeline V2] Restaurant re-opt API fetch failed:`, err);
+          return [];
+        }
+      };
+
+      // CASE A: meal has no restaurant at all (step4 failed to assign)
+      if (!meal.restaurant) {
+        console.log(`[Pipeline V2] Restaurant re-opt: no restaurant assigned for day ${balancedDay.dayNumber} ${mealType}, searching pool + API near "${neighborActivity.name || 'activity'}"...`);
+
+        // Try pool first
+        let { best: bestCandidate, dist: bestDist } = restaurantGeoPool?.length
+          ? findBestInPool(restaurantGeoPool)
+          : { best: null, dist: Infinity };
+
+        // If pool has nothing close, fetch from API
+        if (!bestCandidate) {
+          const nearbyResults = await fetchNearbyFromAPI();
+          if (nearbyResults.length > 0) {
+            const freshResult = findBestInPool(nearbyResults);
+            if (freshResult.best) {
+              bestCandidate = freshResult.best;
+              bestDist = freshResult.dist;
+            }
+          }
+        }
+
+        if (bestCandidate) {
+          console.log(`[Pipeline V2] Restaurant re-opt (rescue) day ${balancedDay.dayNumber} ${mealType}: found "${bestCandidate.name}" (${bestDist.toFixed(2)}km from ${neighborActivity.name})`);
+          meal.restaurant = bestCandidate;
+          meal.restaurantAlternatives = [];
+          usedRestaurantIds.add(bestCandidate.id);
+          usedRestaurantNames.add(bestCandidate.name);
+          crossDayUsedRestaurantIds.add(bestCandidate.id);
+          crossDayUsedRestaurantNames.add(bestCandidate.name);
+        }
+        // Fill alternatives from pool with cuisine diversity
+        if (meal.restaurant && restaurantGeoPool && restaurantGeoPool.length > 0) {
+          const nearbyAlts: { r: Restaurant; dist: number; family: string }[] = [];
+          for (const r of restaurantGeoPool) {
+            if (r.id === meal.restaurant.id) continue;
+            if (usedRestaurantIds.has(r.id) || usedRestaurantNames.has(r.name)) continue;
+            if (!r.latitude || !r.longitude) continue;
+            if (!isAppropriateForMeal(r, mealType)) continue;
+            const dist = calculateDistance(
+              neighborActivity.latitude!, neighborActivity.longitude!,
+              r.latitude, r.longitude
+            );
+            if (dist <= 1.5) nearbyAlts.push({ r, dist, family: getCuisineFamily(r) });
+          }
+          nearbyAlts.sort((a, b) => a.dist - b.dist);
+          // Pass 1: pick alts with different cuisine families
+          const primaryFamily = getCuisineFamily(meal.restaurant);
+          const usedFamilies = new Set([primaryFamily]);
+          const diverseAlts: Restaurant[] = [];
+          for (const alt of nearbyAlts) {
+            if (diverseAlts.length >= 2) break;
+            if (!usedFamilies.has(alt.family)) {
+              diverseAlts.push(alt.r);
+              usedFamilies.add(alt.family);
+            }
+          }
+          // Pass 2: fill remaining slots with closest
+          for (const alt of nearbyAlts) {
+            if (diverseAlts.length >= 2) break;
+            if (!diverseAlts.some(d => d.id === alt.r.id)) {
+              diverseAlts.push(alt.r);
+            }
+          }
+          meal.restaurantAlternatives = diverseAlts;
+        }
+        return;
+      }
+
+      // CASE B: meal has a restaurant — check if it needs re-optimization
       const rLat = meal.restaurant.latitude;
       const rLng = meal.restaurant.longitude;
       if (!rLat || !rLng) return;
@@ -521,8 +713,6 @@ export async function assembleTripSchedule(
         rLat, rLng
       );
       if (currentDist <= 0.3) return; // Already within 300m — no need to re-opt
-
-      const maxDist = MEAL_REOPT_LIMITS[mealType] || 2.0;
 
       // First check existing alternatives (fast path)
       const alternatives = meal.restaurantAlternatives || [];
@@ -539,58 +729,138 @@ export async function assembleTripSchedule(
           meal.restaurant = alt;
           meal.restaurantAlternatives = [oldRestaurant, ...alternatives.filter(a => a.id !== alt.id)];
           usedRestaurantIds.add(alt.id);
+          usedRestaurantNames.add(alt.name);
+          crossDayUsedRestaurantIds.add(alt.id);
+          crossDayUsedRestaurantNames.add(alt.name);
           return;
         }
       }
 
-      // Full pool search: progressive radius 500m → 800m → 1.2km
-      // Always prefer the closest restaurant; only widen if nothing at all exists.
-      if (!restaurantGeoPool || restaurantGeoPool.length === 0) return;
+      // Try existing pool first
+      let { best: bestCandidate, dist: bestDist } = restaurantGeoPool?.length
+        ? findBestInPool(restaurantGeoPool, currentDist)
+        : { best: null, dist: Infinity };
 
-      const SEARCH_RADII = [0.5, 0.8, 1.2];
-      let bestCandidate: Restaurant | null = null;
-      let bestDist = Infinity;
-
-      for (const radius of SEARCH_RADII) {
-        for (const r of restaurantGeoPool) {
-          if (usedRestaurantIds.has(r.id)) continue;
-          if (!r.latitude || !r.longitude) continue;
-          if (!isAppropriateForMeal(r, mealType)) continue;
-
-          const dist = calculateDistance(
-            neighborActivity.latitude, neighborActivity.longitude,
-            r.latitude, r.longitude
-          );
-          if (dist > radius || dist >= currentDist) continue;
-
-          // Within this radius, prefer closest restaurant. Break ties by quality.
-          if (dist < bestDist || (dist === bestDist && (r.rating || 3) > ((bestCandidate as any)?.rating || 3))) {
-            bestDist = dist;
-            bestCandidate = r;
+      // If pool has nothing close AND current restaurant is too far, fetch from API
+      if (!bestCandidate && currentDist > maxDist) {
+        console.log(`[Pipeline V2] Restaurant re-opt: pool has nothing near ${neighborActivity.name || 'activity'} (day ${balancedDay.dayNumber} ${mealType}), fetching nearby restaurants via API...`);
+        const nearbyResults = await fetchNearbyFromAPI();
+        if (nearbyResults.length > 0) {
+          const freshResult = findBestInPool(nearbyResults, currentDist);
+          if (freshResult.best) {
+            bestCandidate = freshResult.best;
+            bestDist = freshResult.dist;
           }
         }
-        // Found something in this radius — don't widen further.
-        if (bestCandidate) break;
       }
 
       if (bestCandidate) {
         console.log(`[Pipeline V2] Restaurant re-opt (pool) day ${balancedDay.dayNumber} ${mealType}: "${meal.restaurant.name}" (${currentDist.toFixed(1)}km) → "${bestCandidate.name}" (${bestDist.toFixed(1)}km)`);
-        meal.restaurantAlternatives = [meal.restaurant, ...(meal.restaurantAlternatives || []).slice(0, 1)];
+        meal.restaurantAlternatives = [meal.restaurant, ...(meal.restaurantAlternatives || []).slice(0, 2)].slice(0, 2);
         meal.restaurant = bestCandidate;
         usedRestaurantIds.add(bestCandidate.id);
+        usedRestaurantNames.add(bestCandidate.name);
+        crossDayUsedRestaurantIds.add(bestCandidate.id);
+        crossDayUsedRestaurantNames.add(bestCandidate.name);
+      }
+
+      // Re-filter alternatives: only keep alternatives within reasonable distance of the neighbor
+      if (meal.restaurant && meal.restaurantAlternatives && neighborActivity.latitude && neighborActivity.longitude) {
+        const MAX_ALT_DIST = 1.2; // km
+        meal.restaurantAlternatives = meal.restaurantAlternatives.filter(alt => {
+          if (!alt.latitude || !alt.longitude) return false;
+          const altDist = calculateDistance(
+            neighborActivity.latitude!, neighborActivity.longitude!,
+            alt.latitude, alt.longitude
+          );
+          return altDist <= MAX_ALT_DIST;
+        });
+        // If we lost all alternatives, find new ones from pool near the neighbor
+        if (meal.restaurantAlternatives.length === 0 && restaurantGeoPool && restaurantGeoPool.length > 0) {
+          const nearbyAlts: { r: Restaurant; dist: number }[] = [];
+          for (const r of restaurantGeoPool) {
+            if (r.id === meal.restaurant.id) continue;
+            if (usedRestaurantIds.has(r.id) || usedRestaurantNames.has(r.name)) continue;
+            if (!r.latitude || !r.longitude) continue;
+            if (!isAppropriateForMeal(r, mealType)) continue;
+            const dist = calculateDistance(
+              neighborActivity.latitude!, neighborActivity.longitude!,
+              r.latitude, r.longitude
+            );
+            if (dist <= MAX_ALT_DIST) {
+              nearbyAlts.push({ r, dist });
+            }
+          }
+          nearbyAlts.sort((a, b) => a.dist - b.dist);
+          meal.restaurantAlternatives = nearbyAlts.slice(0, 2).map(({ r }) => r);
+        }
       }
     };
+
+    // Breakfast rescue: runs even when day has no activities (e.g., departure day)
+    if (breakfast && !breakfast.restaurant && hotel && !hotel.breakfastIncluded && !skipBreakfast) {
+      const hotelAsNeighbor = { latitude: hotel.latitude, longitude: hotel.longitude, name: hotel.name } as ScoredActivity;
+      await reoptMealFromPool(breakfast, hotelAsNeighbor, 'breakfast');
+    }
 
     if (orderedActivities.length > 0) {
       // Lunch neighbor: the activity before the mid-point (likely scheduled just before lunch break)
       const midIdx = Math.floor(orderedActivities.length / 2);
       const lunchNeighborIdx = Math.max(0, midIdx - 1);
-      reoptMealFromPool(lunch, orderedActivities[lunchNeighborIdx], 'lunch');
-      // Dinner neighbor: the last activity of the day
-      reoptMealFromPool(dinner, orderedActivities[orderedActivities.length - 1], 'dinner');
+      await reoptMealFromPool(lunch, orderedActivities[lunchNeighborIdx], 'lunch');
+      // Dinner neighbor: blend last activity (60%) + hotel (40%) to favor restaurants
+      // on the path back toward the hotel (avoids long late-night returns)
+      const lastAct = orderedActivities[orderedActivities.length - 1];
+      const dinnerNeighbor = hotel && lastAct
+        ? {
+            ...lastAct,
+            latitude: lastAct.latitude * 0.6 + hotel.latitude * 0.4,
+            longitude: lastAct.longitude * 0.6 + hotel.longitude * 0.4,
+          }
+        : lastAct;
+      await reoptMealFromPool(dinner, dinnerNeighbor, 'dinner');
     }
 
-    // 5. Insert breakfast for non-last days (last day already handled above)
+    // 4c. Last-day breakfast (deferred from section 3 so reoptMealFromPool could rescue it)
+    // Uses insertFixedItem to bypass cursor (which is past checkout by now)
+    if (isLastDay && !skipBreakfast && dayStartHour <= 10) {
+      const bkfStart = parseTime(dayDate, `${String(Math.max(7, dayStartHour)).padStart(2, '0')}:00`);
+      if (breakfast?.restaurant) {
+        scheduler.insertFixedItem({
+          id: `meal-${balancedDay.dayNumber}-breakfast`,
+          title: `Petit-déjeuner — ${breakfast.restaurant.name}`,
+          type: 'restaurant',
+          startTime: bkfStart,
+          endTime: new Date(bkfStart.getTime() + 45 * 60 * 1000),
+          data: { ...breakfast.restaurant, _alternatives: breakfast.restaurantAlternatives || [] },
+        });
+      } else if (hotel?.breakfastIncluded) {
+        scheduler.insertFixedItem({
+          id: `hotel-breakfast-${balancedDay.dayNumber}`,
+          title: `Petit-déjeuner à l'hôtel`,
+          type: 'restaurant',
+          startTime: bkfStart,
+          endTime: new Date(bkfStart.getTime() + 30 * 60 * 1000),
+          data: { name: hotel.name || 'Hôtel', description: 'Petit-déjeuner inclus', latitude: hotel.latitude, longitude: hotel.longitude, estimatedCost: 0 },
+        });
+      } else {
+        // Self-catered breakfast placeholder
+        const bkfTitle = hotel ? 'Petit-déjeuner à l\'hôtel' : 'Petit-déjeuner — Café/Boulangerie à proximité';
+        const bkfData = hotel
+          ? { name: hotel.name || 'Hôtel', description: 'Petit-déjeuner', latitude: hotel.latitude, longitude: hotel.longitude, estimatedCost: 0 }
+          : { name: 'Café/Boulangerie', description: 'Petit-déjeuner à proximité de l\'hôtel', latitude: data.destCoords.lat, longitude: data.destCoords.lng, estimatedCost: 8 };
+        scheduler.insertFixedItem({
+          id: `self-breakfast-${balancedDay.dayNumber}`,
+          title: bkfTitle,
+          type: 'restaurant',
+          startTime: bkfStart,
+          endTime: new Date(bkfStart.getTime() + 30 * 60 * 1000),
+          data: bkfData,
+        });
+      }
+    }
+
+    // 5. Insert breakfast for non-last days
     if (!isLastDay && breakfast?.restaurant && !skipBreakfast && dayStartHour <= 10) {
       scheduler.addItem({
         id: `meal-${balancedDay.dayNumber}-breakfast`,
@@ -660,7 +930,7 @@ export async function assembleTripSchedule(
     for (let i = 0; i < orderedActivities.length; i++) {
       const activity = orderedActivities[i];
       const prev = i === 0 ? hotel : orderedActivities[i - 1];
-      let travelTime = prev ? estimateTravel(prev, activity) : 10;
+      let travelTime = prev ? estimateTravel(prev, activity, directionsCache) : 10;
       // Round travel time to nearest 5 minutes for clean schedule times
       travelTime = Math.round(travelTime / 5) * 5;
 
@@ -712,6 +982,12 @@ export async function assembleTripSchedule(
       const activityDuration = balancedDay.isDayTrip
         ? Math.max(activity.duration || 120, 180) // At least 3h for day-trip activities
         : (activity.duration || 60);
+
+      // Skip activities that are closed on this day (per-day opening hours)
+      if (!isActivityOpenOnDay(activity, dayDate)) {
+        console.log(`[Pipeline V2] Day ${balancedDay.dayNumber}: Skipping "${activity.name}" — closed on ${DAY_NAMES_EN[dayDate.getDay()]}`);
+        continue;
+      }
 
       // Enforce opening/closing hours
       const activityMaxEndTime = getActivityMaxEndTime(activity, dayDate);
@@ -989,7 +1265,7 @@ export async function assembleTripSchedule(
         endTime: formatTimeHHMM(item.slot.end),
         type: item.type as TripItem['type'],
         title: item.title,
-        description: buildDescription(itemData, item.type),
+        description: buildDescription(itemData, item.type, wikiDescriptions),
         locationName: itemData.locationName || itemData.address || itemData.name || '',
         latitude: normalizedCoords.latitude
           || (item.type === 'transport' && itemData.segments?.[0]?.toCoords?.lat)
@@ -1023,8 +1299,18 @@ export async function assembleTripSchedule(
         imageUrl: itemData.photos?.[0] || itemData.imageUrl || itemData.photoUrl
           || (item.type === 'flight' ? TRANSPORT_IMAGES.flight : undefined)
           || (item.type === 'transport' ? (TRANSPORT_IMAGES[itemData.mode || ''] || TRANSPORT_IMAGES.train) : undefined),
+        // Viator flags (activities only)
+        freeCancellation: item.type === 'activity' ? itemData.freeCancellation : undefined,
+        instantConfirmation: item.type === 'activity' ? itemData.instantConfirmation : undefined,
       };
     });
+
+    // Match weather forecast to this day's date
+    const dayDateStr = dayDate.toISOString().split('T')[0];
+    const dayWeather = data.weatherForecasts?.find(w => w.date === dayDateStr);
+
+    // Compute daily budget breakdown (€ per person)
+    const dailyBudget = computeDailyBudget(tripItems);
 
     days.push({
       dayNumber: balancedDay.dayNumber,
@@ -1034,6 +1320,13 @@ export async function assembleTripSchedule(
       dayNarrative: balancedDay.dayNarrative,
       isDayTrip: balancedDay.isDayTrip,
       dayTripDestination: balancedDay.dayTripDestination,
+      weatherForecast: dayWeather ? {
+        condition: dayWeather.condition,
+        tempMin: dayWeather.tempMin,
+        tempMax: dayWeather.tempMax,
+        icon: dayWeather.icon,
+      } : undefined,
+      dailyBudget,
     });
   }
 
@@ -1054,11 +1347,314 @@ export async function assembleTripSchedule(
       }, 20_000);
     });
     await Promise.race([
-      enrichWithDirections(days),
+      enrichWithDirections(days, directionsCache),
       directionsTimeout,
     ]);
   } catch (e) {
     console.warn('[Pipeline V2] Directions enrichment failed:', e);
+  }
+
+  // 13a. Post-schedule restaurant distance re-check
+  // After scheduling + directions enrichment, some restaurants may be far from their
+  // actual schedule neighbors (because the re-opt was computed before activities were
+  // rejected/reordered by the scheduler). Swap them from the pool if possible.
+  // Strategy: consider BOTH prev and next neighbors, use midpoint for transition meals,
+  // widen search radius, and fallback to SerpAPI if pool has nothing.
+  {
+    const fullPool = restaurantGeoPool || [];
+    // Track used restaurant names across all days to avoid cross-day duplicates
+    const usedNames = new Set<string>();
+    const usedIds = new Set<string>();
+    for (const d of days) {
+      for (const item of d.items) {
+        if (item.type === 'restaurant') {
+          usedIds.add(item.id);
+          if (item.restaurant?.name) usedNames.add(item.restaurant.name);
+          else if (item.locationName) usedNames.add(item.locationName);
+        }
+      }
+    }
+
+    // Collect problematic restaurants first (before async operations)
+    const swapCandidates: { day: typeof days[0]; itemIdx: number; refLat: number; refLng: number; currentDist: number; mealType: 'breakfast' | 'lunch' | 'dinner' }[] = [];
+
+    for (const day of days) {
+      for (let i = 0; i < day.items.length; i++) {
+        const item = day.items[i];
+        if (item.type !== 'restaurant') continue;
+        if (!item.latitude || !item.longitude || item.latitude === 0) continue;
+
+        // Find both prev and next activity/checkin/checkout neighbors
+        const prev = i > 0 ? day.items[i - 1] : null;
+        const next = i < day.items.length - 1 ? day.items[i + 1] : null;
+        const validPrev = (prev && ['activity', 'checkin', 'checkout'].includes(prev.type) && prev.latitude && prev.latitude !== 0) ? prev : null;
+        const validNext = (next && ['activity', 'checkin', 'checkout'].includes(next.type) && next.latitude && next.latitude !== 0) ? next : null;
+
+        if (!validPrev && !validNext) continue;
+
+        // Compute distance to the closest neighbor
+        const distPrev = validPrev ? calculateDistance(validPrev.latitude, validPrev.longitude, item.latitude, item.longitude) : Infinity;
+        const distNext = validNext ? calculateDistance(validNext.latitude, validNext.longitude, item.latitude, item.longitude) : Infinity;
+        const minDist = Math.min(distPrev, distNext);
+
+        if (minDist <= 1.5) continue; // Within 1.5km — acceptable
+
+        // Determine the reference point for searching:
+        // - If both neighbors exist and are far apart (>3km), use midpoint (lunch between clusters)
+        // - Otherwise use the closer neighbor
+        let refLat: number, refLng: number;
+        if (validPrev && validNext) {
+          const interNeighborDist = calculateDistance(validPrev.latitude, validPrev.longitude, validNext.latitude, validNext.longitude);
+          if (interNeighborDist > 3) {
+            // Transition meal between distant clusters — search near midpoint
+            refLat = (validPrev.latitude + validNext.latitude) / 2;
+            refLng = (validPrev.longitude + validNext.longitude) / 2;
+          } else {
+            // Both nearby — use the closer neighbor
+            const closer = distPrev <= distNext ? validPrev : validNext;
+            refLat = closer.latitude;
+            refLng = closer.longitude;
+          }
+        } else {
+          const only = validPrev || validNext!;
+          refLat = only.latitude;
+          refLng = only.longitude;
+        }
+
+        const mealType = item.title.includes('Petit-déjeuner') ? 'breakfast' as const : item.title.includes('Déjeuner') ? 'lunch' as const : 'dinner' as const;
+
+        // Phase 1: Search pool with wider radius (1.5km instead of 1.0km)
+        let bestR: Restaurant | null = null;
+        let bestDist = minDist;
+        for (const r of fullPool) {
+          if (!r.latitude || !r.longitude) continue;
+          if (usedIds.has(r.id) || usedNames.has(r.name)) continue;
+          if (!isAppropriateForMeal(r, mealType)) continue;
+          const rDist = calculateDistance(refLat, refLng, r.latitude, r.longitude);
+          if (rDist < bestDist && rDist < 1.5) {
+            bestDist = rDist;
+            bestR = r;
+          }
+        }
+
+        if (bestR) {
+          console.log(`[Pipeline V2] Post-schedule re-opt: Day ${day.dayNumber} "${item.title}" (${minDist.toFixed(1)}km from neighbor) → "${bestR.name}" (${bestDist.toFixed(1)}km from ref)`);
+          const oldName = item.restaurant?.name || item.locationName;
+          if (oldName) usedNames.delete(oldName);
+          usedNames.add(bestR.name);
+          usedIds.add(bestR.id);
+          item.title = item.title.replace(/—\s+.+$/, `— ${bestR.name}`);
+          item.latitude = bestR.latitude!;
+          item.longitude = bestR.longitude!;
+          item.locationName = bestR.name;
+          item.rating = bestR.rating;
+          item.estimatedCost = bestR.priceLevel ? (bestR.priceLevel || 1) * 15 : item.estimatedCost;
+          item.bookingUrl = bestR.reservationUrl || bestR.website;
+          item.restaurant = bestR;
+          item.restaurantAlternatives = []; // Clear stale alts — section 13b will refill
+          item.distanceFromPrevious = bestDist;
+          item.timeFromPrevious = Math.max(5, Math.round(bestDist * 12));
+        } else {
+          // Phase 2: No pool match — queue for SerpAPI fallback
+          swapCandidates.push({ day, itemIdx: i, refLat, refLng, currentDist: minDist, mealType });
+        }
+      }
+    }
+
+    // Phase 2: SerpAPI fallback for restaurants that couldn't be swapped from pool
+    if (swapCandidates.length > 0) {
+      console.log(`[Pipeline V2] Post-schedule: ${swapCandidates.length} restaurant(s) still far — trying SerpAPI nearby search`);
+      const apiResults = await Promise.allSettled(
+        swapCandidates.map(c =>
+          searchRestaurantsNearby(
+            { lat: c.refLat, lng: c.refLng },
+            preferences.destination,
+            { mealType: c.mealType, maxDistance: 1500, limit: 5 }
+          ).catch(() => [] as Restaurant[])
+        )
+      );
+
+      for (let ci = 0; ci < swapCandidates.length; ci++) {
+        const c = swapCandidates[ci];
+        const result = apiResults[ci];
+        const candidates = result.status === 'fulfilled' ? result.value : [];
+        if (!candidates || candidates.length === 0) continue;
+
+        // Pick the closest candidate that's not already used
+        let bestR: Restaurant | null = null;
+        let bestDist = c.currentDist;
+        for (const r of candidates) {
+          if (!r.latitude || !r.longitude) continue;
+          if (usedIds.has(r.id) || usedNames.has(r.name)) continue;
+          const rDist = calculateDistance(c.refLat, c.refLng, r.latitude, r.longitude);
+          if (rDist < bestDist && rDist < 2.0) {
+            bestDist = rDist;
+            bestR = r;
+          }
+        }
+
+        if (bestR) {
+          const item = c.day.items[c.itemIdx];
+          console.log(`[Pipeline V2] Post-schedule SerpAPI re-opt: Day ${c.day.dayNumber} "${item.title}" (${c.currentDist.toFixed(1)}km) → "${bestR.name}" (${bestDist.toFixed(1)}km from ref)`);
+          const oldName = item.restaurant?.name || item.locationName;
+          if (oldName) usedNames.delete(oldName);
+          usedNames.add(bestR.name);
+          usedIds.add(bestR.id);
+          item.title = item.title.replace(/—\s+.+$/, `— ${bestR.name}`);
+          item.latitude = bestR.latitude!;
+          item.longitude = bestR.longitude!;
+          item.locationName = bestR.name;
+          item.rating = bestR.rating;
+          item.estimatedCost = bestR.priceLevel ? (bestR.priceLevel || 1) * 15 : item.estimatedCost;
+          item.bookingUrl = bestR.reservationUrl || bestR.website;
+          item.restaurant = bestR;
+          item.restaurantAlternatives = []; // Clear stale alts — section 13b will refill
+          item.distanceFromPrevious = bestDist;
+          item.timeFromPrevious = Math.max(5, Math.round(bestDist * 12));
+          // Also add to pool for future reference
+          fullPool.push(bestR);
+        }
+      }
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  // 13c. Restaurant alternatives refill pass
+  // After all swaps (section 13a), ensure every restaurant TripItem has 2
+  // cuisine-diverse alternatives. In European cities this is mandatory;
+  // in isolated destinations (< 2 pool candidates within 3km), skip.
+  // -------------------------------------------------------------------------
+  {
+    const altPool = restaurantGeoPool || [];
+    const ALT_SEARCH_RADIUS_KM = 1.5;
+    const ISOLATED_THRESHOLD_KM = 3.0;
+    const TARGET_ALTS = 2;
+
+    // Build global used set from ALL restaurant items across ALL days
+    const globalUsedIds = new Set<string>();
+    const globalUsedNames = new Set<string>();
+    for (const day of days) {
+      for (const item of day.items) {
+        if (item.type === 'restaurant' && item.restaurant) {
+          globalUsedIds.add(item.restaurant.id || item.id);
+          if (item.restaurant.name) globalUsedNames.add(item.restaurant.name);
+        }
+      }
+    }
+
+    let refillCount = 0;
+    let apiCallCount = 0;
+
+    for (const day of days) {
+      for (const item of day.items) {
+        if (item.type !== 'restaurant') continue;
+        if (!item.restaurant) continue;
+        if (!item.latitude || !item.longitude || item.latitude === 0) continue;
+
+        const currentAlts = item.restaurantAlternatives || [];
+        if (currentAlts.length >= TARGET_ALTS) continue; // Already has enough
+
+        const mealType: 'breakfast' | 'lunch' | 'dinner' =
+          item.title.includes('Petit-déjeuner') ? 'breakfast' :
+          item.title.includes('Déjeuner') ? 'lunch' : 'dinner';
+
+        const refLat = item.latitude;
+        const refLng = item.longitude;
+
+        // Check if isolated location (< 2 pool candidates within 3km)
+        let nearbyPoolCount = 0;
+        for (const r of altPool) {
+          if (!r.latitude || !r.longitude) continue;
+          if (calculateDistance(refLat, refLng, r.latitude, r.longitude) <= ISOLATED_THRESHOLD_KM) {
+            nearbyPoolCount++;
+            if (nearbyPoolCount >= 2) break; // No need to count further
+          }
+        }
+        if (nearbyPoolCount < 2) continue; // Isolated — don't force alternatives
+
+        // Collect candidates from pool
+        const primaryFamily = getCuisineFamily(item.restaurant);
+        const currentAltIds = new Set(currentAlts.map((a: Restaurant) => a.id));
+        const currentAltFamilies = new Set(currentAlts.map((a: Restaurant) => getCuisineFamily(a)));
+        currentAltFamilies.add(primaryFamily);
+
+        const candidates: { r: Restaurant; dist: number; family: string }[] = [];
+        for (const r of altPool) {
+          if (r.id === (item.restaurant.id || item.id)) continue;
+          if (currentAltIds.has(r.id)) continue;
+          if (globalUsedIds.has(r.id) || globalUsedNames.has(r.name)) continue;
+          if (!r.latitude || !r.longitude) continue;
+          if (!isAppropriateForMeal(r, mealType)) continue;
+          const dist = calculateDistance(refLat, refLng, r.latitude, r.longitude);
+          if (dist <= ALT_SEARCH_RADIUS_KM) {
+            candidates.push({ r, dist, family: getCuisineFamily(r) });
+          }
+        }
+        candidates.sort((a, b) => a.dist - b.dist);
+
+        const newAlts: Restaurant[] = [...currentAlts];
+        const usedFamilies = new Set(currentAltFamilies);
+
+        // Pass 1: pick diverse cuisines first
+        for (const c of candidates) {
+          if (newAlts.length >= TARGET_ALTS) break;
+          if (!usedFamilies.has(c.family)) {
+            newAlts.push(c.r);
+            usedFamilies.add(c.family);
+          }
+        }
+        // Pass 2: fill remaining with closest
+        for (const c of candidates) {
+          if (newAlts.length >= TARGET_ALTS) break;
+          if (!newAlts.some((a: Restaurant) => a.id === c.r.id)) {
+            newAlts.push(c.r);
+          }
+        }
+
+        // If pool didn't have enough, try SerpAPI (max 2 API calls total)
+        if (newAlts.length < TARGET_ALTS && apiCallCount < 2) {
+          try {
+            apiCallCount++;
+            const apiResults = await searchRestaurantsNearby(
+              { lat: refLat, lng: refLng },
+              preferences.destination,
+              { mealType, maxDistance: 1500, limit: 5 }
+            );
+            if (apiResults.length > 0) altPool.push(...apiResults);
+
+            for (const r of apiResults) {
+              if (newAlts.length >= TARGET_ALTS) break;
+              if (r.id === (item.restaurant.id || item.id)) continue;
+              if (newAlts.some((a: Restaurant) => a.id === r.id)) continue;
+              if (globalUsedNames.has(r.name)) continue;
+              if (!r.latitude || !r.longitude) continue;
+              if (!isAppropriateForMeal(r, mealType)) continue;
+              const dist = calculateDistance(refLat, refLng, r.latitude, r.longitude);
+              if (dist <= ALT_SEARCH_RADIUS_KM) {
+                const family = getCuisineFamily(r);
+                if (!usedFamilies.has(family)) {
+                  newAlts.push(r);
+                  usedFamilies.add(family);
+                } else if (newAlts.length < TARGET_ALTS) {
+                  newAlts.push(r);
+                }
+              }
+            }
+          } catch (err) {
+            console.warn(`[Pipeline V2] Alternatives refill API failed:`, err);
+          }
+        }
+
+        if (newAlts.length > currentAlts.length) {
+          item.restaurantAlternatives = newAlts.slice(0, TARGET_ALTS);
+          refillCount++;
+        }
+      }
+    }
+
+    if (refillCount > 0) {
+      console.log(`[Pipeline V2] Section 13c: Refilled alternatives for ${refillCount} restaurant(s) (${apiCallCount} API calls)`);
+    }
   }
 
   // 13. Build cost breakdown
@@ -1211,17 +1807,223 @@ function getGroundTransportTimes(
   }
 }
 
+// ---------------------------------------------------------------------------
+// Prefetch real Google Directions for all consecutive activity pairs
+// ---------------------------------------------------------------------------
+
+/**
+ * Collect all consecutive coordinate pairs for a set of days.
+ * For each day: hotel→act[0], act[0]→act[1], ..., act[n]→hotel (return leg).
+ */
+function collectDirectionPairs(
+  dayActivities: Map<number, ScoredActivity[]>,
+  hotelLat: number,
+  hotelLng: number
+): Array<{ fromLat: number; fromLng: number; toLat: number; toLng: number }> {
+  const pairs: Array<{ fromLat: number; fromLng: number; toLat: number; toLng: number }> = [];
+  const seen = new Set<string>();
+
+  const addPair = (fLat: number, fLng: number, tLat: number, tLng: number) => {
+    if (!fLat || !fLng || !tLat || !tLng) return;
+    const key = directionsCacheKey(fLat, fLng, tLat, tLng);
+    if (seen.has(key)) return;
+    seen.add(key);
+    pairs.push({ fromLat: fLat, fromLng: fLng, toLat: tLat, toLng: tLng });
+  };
+
+  for (const [, activities] of dayActivities) {
+    if (activities.length === 0) continue;
+
+    // hotel → first activity
+    addPair(hotelLat, hotelLng, activities[0].latitude, activities[0].longitude);
+
+    // consecutive activity pairs
+    for (let i = 0; i < activities.length - 1; i++) {
+      addPair(
+        activities[i].latitude, activities[i].longitude,
+        activities[i + 1].latitude, activities[i + 1].longitude
+      );
+    }
+
+    // last activity → hotel (for 2-opt return cost)
+    const last = activities[activities.length - 1];
+    addPair(last.latitude, last.longitude, hotelLat, hotelLng);
+  }
+
+  return pairs;
+}
+
+/**
+ * Batch-fetch Google Directions for all collected pairs.
+ * Concurrency: 5 parallel requests.
+ * Global timeout: 15s for the whole batch.
+ */
+async function prefetchDirectionsForDays(
+  dayActivities: Map<number, ScoredActivity[]>,
+  hotelLat: number,
+  hotelLng: number
+): Promise<DirectionsCache> {
+  const cache: DirectionsCache = new Map();
+  const pairs = collectDirectionPairs(dayActivities, hotelLat, hotelLng);
+
+  if (pairs.length === 0) return cache;
+
+  console.log(`[Pipeline V2] Prefetching directions for ${pairs.length} pairs...`);
+
+  const fetchWork = async () => {
+    // Process in batches of 5 (concurrency limit)
+    for (let batch = 0; batch < pairs.length; batch += 5) {
+      const batchPairs = pairs.slice(batch, batch + 5);
+      const results = await Promise.allSettled(
+        batchPairs.map(({ fromLat, fromLng, toLat, toLng }) =>
+          getDirections({
+            from: { lat: fromLat, lng: fromLng },
+            to: { lat: toLat, lng: toLng },
+            mode: 'transit',
+          })
+        )
+      );
+
+      for (let i = 0; i < results.length; i++) {
+        if (results[i].status === 'fulfilled') {
+          const dir = (results[i] as PromiseFulfilledResult<any>).value;
+          if (dir && typeof dir.duration === 'number') {
+            const p = batchPairs[i];
+            const key = directionsCacheKey(p.fromLat, p.fromLng, p.toLat, p.toLng);
+            cache.set(key, { duration: dir.duration, distance: dir.distance });
+          }
+        }
+      }
+    }
+  };
+
+  try {
+    const timeout = new Promise<void>((resolve) => {
+      setTimeout(() => {
+        console.warn('[Pipeline V2] Directions prefetch timeout (15s) — using partial cache');
+        resolve();
+      }, 15_000);
+    });
+    await Promise.race([fetchWork(), timeout]);
+  } catch (e) {
+    console.warn('[Pipeline V2] Directions prefetch failed (non-critical):', e);
+  }
+
+  console.log(`[Pipeline V2] Directions cache: ${cache.size}/${pairs.length} pairs fetched`);
+  return cache;
+}
+
+// ---------------------------------------------------------------------------
+// 2-opt re-optimization with real travel times from cache
+// ---------------------------------------------------------------------------
+
+/**
+ * Re-run 2-opt on already-ordered activities using cached real travel times.
+ * Falls back to Haversine for pairs not in the cache.
+ * Does NOT re-run the full multi-start greedy — only the 2-opt improvement.
+ */
+function reoptimizeWithRealTimes(
+  activities: ScoredActivity[],
+  startLat: number,
+  startLng: number,
+  cache: DirectionsCache
+): ScoredActivity[] {
+  if (activities.length <= 2 || cache.size === 0) return activities;
+
+  // Cost function using cached real times, falling back to Haversine distance
+  const realCost = (route: ScoredActivity[]): number => {
+    if (route.length === 0) return 0;
+
+    let total = 0;
+    let maxLeg = 0;
+    let longLegPenalty = 0;
+
+    // Helper: get travel time in minutes for a pair, using cache or Haversine fallback
+    const travelMinutes = (fLat: number, fLng: number, tLat: number, tLng: number): number => {
+      const key = directionsCacheKey(fLat, fLng, tLat, tLng);
+      const cached = cache.get(key);
+      if (cached) return cached.duration;
+      // Fallback to Haversine-based estimate (same logic as estimateTravel)
+      const distKm = calculateDistance(fLat, fLng, tLat, tLng);
+      const ROAD_CORRECTION = 1.4;
+      if (distKm < 1) return Math.max(5, Math.round(distKm * ROAD_CORRECTION * 12));
+      if (distKm < 3) return Math.round(distKm * ROAD_CORRECTION * 8);
+      if (distKm < 15) return Math.round(distKm * ROAD_CORRECTION * 4);
+      return Math.round((distKm * ROAD_CORRECTION / 50) * 60);
+    };
+
+    // hotel → first
+    const firstLeg = travelMinutes(startLat, startLng, route[0].latitude, route[0].longitude);
+    total += firstLeg;
+    maxLeg = Math.max(maxLeg, firstLeg);
+    if (firstLeg > 20) longLegPenalty += (firstLeg - 20) * 1.4;
+
+    // inter-activity legs
+    for (let i = 1; i < route.length; i++) {
+      const leg = travelMinutes(
+        route[i - 1].latitude, route[i - 1].longitude,
+        route[i].latitude, route[i].longitude
+      );
+      total += leg;
+      maxLeg = Math.max(maxLeg, leg);
+      if (leg > 20) longLegPenalty += (leg - 20) * 1.4;
+    }
+
+    // last activity → hotel (return leg, weighted 0.5)
+    const lastAct = route[route.length - 1];
+    const returnLeg = travelMinutes(lastAct.latitude, lastAct.longitude, startLat, startLng);
+    total += returnLeg * 0.5;
+
+    const maxLegPenalty = Math.max(0, maxLeg - 25) * 2.5;
+    return total + longLegPenalty + maxLegPenalty;
+  };
+
+  // 2-opt improvement loop
+  let route = [...activities];
+  let bestCost = realCost(route);
+  let improved = true;
+
+  while (improved) {
+    improved = false;
+    for (let i = 0; i < route.length - 2; i++) {
+      for (let k = i + 1; k < route.length - 1; k++) {
+        const nextRoute = [
+          ...route.slice(0, i + 1),
+          ...route.slice(i + 1, k + 1).reverse(),
+          ...route.slice(k + 1),
+        ];
+        const nextCost = realCost(nextRoute);
+        if (nextCost + 0.5 < bestCost) { // 0.5min threshold to avoid noise swaps
+          route = nextRoute;
+          bestCost = nextCost;
+          improved = true;
+        }
+      }
+    }
+  }
+
+  return route;
+}
+
 /**
  * Estimate travel time between two locations using Haversine.
  * For long distances (>15km, e.g. day-trip return), uses car/bus speed.
+ * If a directions cache is provided, uses cached real times when available.
  */
-function estimateTravel(from: any, to: any): number {
+function estimateTravel(from: any, to: any, directionsCache?: DirectionsCache): number {
   const fromLat = from?.latitude || from?.lat;
   const fromLng = from?.longitude || from?.lng;
   const toLat = to?.latitude || to?.lat;
   const toLng = to?.longitude || to?.lng;
 
   if (!fromLat || !fromLng || !toLat || !toLng) return 10;
+
+  // Check directions cache first
+  if (directionsCache) {
+    const key = directionsCacheKey(fromLat, fromLng, toLat, toLng);
+    const cached = directionsCache.get(key);
+    if (cached) return cached.duration;
+  }
 
   const distKm = calculateDistance(fromLat, fromLng, toLat, toLng);
 
@@ -1250,9 +2052,39 @@ import { OUTDOOR_ACTIVITY_KEYWORDS, INDOOR_ACTIVITY_KEYWORDS, getMinDuration } f
  * Outdoor activities (parks, gardens) get a 19:30 cap.
  * Indoor activities have no special cap.
  */
+const DAY_NAMES_EN = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+
+/**
+ * Get the opening hours for an activity on a specific day.
+ * Priority: per-day hours (openingHoursByDay) > default hours (openingHours).
+ * Returns null if the activity is CLOSED that day.
+ */
+function getActivityHoursForDay(activity: ScoredActivity, dayDate: Date): { open: string; close: string } | null {
+  const dayName = DAY_NAMES_EN[dayDate.getDay()];
+
+  // PRIORITY 1: Per-day hours from Google Places Details
+  if (activity.openingHoursByDay && dayName in activity.openingHoursByDay) {
+    const dayHours = activity.openingHoursByDay[dayName];
+    return dayHours; // null means closed that day
+  }
+
+  // PRIORITY 2: Default hours
+  if (activity.openingHours?.open && activity.openingHours?.close) {
+    return activity.openingHours;
+  }
+
+  return null; // Unknown — no constraint
+}
+
 function getActivityMaxEndTime(activity: ScoredActivity, dayDate: Date): Date | undefined {
-  // PRIORITY 1: Use real opening hours if available (from viatorKnownProducts or API)
-  if (activity.openingHours?.close && activity.openingHours.close !== '23:59') {
+  // PRIORITY 1: Per-day real opening hours (Google Places Details API)
+  const dayHours = getActivityHoursForDay(activity, dayDate);
+  if (dayHours?.close && dayHours.close !== '23:59') {
+    return parseTime(dayDate, dayHours.close);
+  }
+
+  // PRIORITY 2: Simple opening hours (if set and not default)
+  if (!dayHours && activity.openingHours?.close && activity.openingHours.close !== '23:59' && activity.openingHours.close !== '18:00') {
     return parseTime(dayDate, activity.openingHours.close);
   }
 
@@ -1276,10 +2108,29 @@ function getActivityMaxEndTime(activity: ScoredActivity, dayDate: Date): Date | 
 }
 
 /**
+ * Check if an activity is open on a specific day.
+ * Returns false only if we have per-day data and the day is explicitly null (closed).
+ * Returns true for unknown hours (default — err on side of scheduling).
+ */
+function isActivityOpenOnDay(activity: ScoredActivity, dayDate: Date): boolean {
+  if (!activity.openingHoursByDay) return true; // No per-day data — assume open
+  const dayName = DAY_NAMES_EN[dayDate.getDay()];
+  if (!(dayName in activity.openingHoursByDay)) return true; // Day not in data — assume open
+  return activity.openingHoursByDay[dayName] !== null; // null = closed
+}
+
+/**
  * Get minimum start time for an activity based on its opening hours.
  * Prevents scheduling a museum visit at 07:00 when it opens at 10:00.
  */
 function getActivityMinStartTime(activity: ScoredActivity, dayDate: Date): Date | undefined {
+  // PRIORITY 1: Per-day hours
+  const dayHours = getActivityHoursForDay(activity, dayDate);
+  if (dayHours?.open && dayHours.open !== '00:00') {
+    return parseTime(dayDate, dayHours.open);
+  }
+
+  // PRIORITY 2: Simple opening hours
   if (activity.openingHours?.open && activity.openingHours.open !== '00:00') {
     return parseTime(dayDate, activity.openingHours.open);
   }
@@ -1347,10 +2198,21 @@ async function enrichWithPlaceImages(days: TripDay[]): Promise<void> {
 /**
  * Batch enrich items with directions between consecutive items.
  */
-async function enrichWithDirections(days: TripDay[]): Promise<void> {
-  const directionPromises: Promise<void>[] = [];
-
+async function enrichWithDirections(days: TripDay[], cache?: DirectionsCache): Promise<void> {
   for (const day of days) {
+    // Compute hotel→first activity/restaurant distance (not covered by the i=1 loop)
+    const hotelItem = day.items.find(i => i.type === 'checkin' || i.type === 'checkout');
+    const firstMovableItem = day.items.find(i => ['activity', 'restaurant'].includes(i.type));
+    if (hotelItem && firstMovableItem && hotelItem.latitude && hotelItem.longitude
+        && firstMovableItem.latitude && firstMovableItem.longitude
+        && hotelItem.latitude !== 0 && firstMovableItem.latitude !== 0
+        && !firstMovableItem.distanceFromPrevious) {
+      const dist = calculateDistance(hotelItem.latitude, hotelItem.longitude, firstMovableItem.latitude, firstMovableItem.longitude);
+      firstMovableItem.distanceFromPrevious = Math.round(dist * 100) / 100;
+      firstMovableItem.timeFromPrevious = estimateTravel(hotelItem, firstMovableItem, cache);
+      firstMovableItem.transportToPrevious = dist < 1 ? 'walk' : 'public';
+    }
+
     for (let i = 1; i < day.items.length; i++) {
       const prev = day.items[i - 1];
       const curr = day.items[i];
@@ -1363,7 +2225,7 @@ async function enrichWithDirections(days: TripDay[]): Promise<void> {
 
       const dist = calculateDistance(prev.latitude, prev.longitude, curr.latitude, curr.longitude);
       curr.distanceFromPrevious = Math.round(dist * 100) / 100;
-      let travelTime = estimateTravel(prev, curr);
+      let travelTime = estimateTravel(prev, curr, cache);
 
       // Fix fakeGPS restaurants: when restaurant GPS is a city-center fallback,
       // distance to activities is meaningless (often 0km → 0min travel).
@@ -1378,7 +2240,7 @@ async function enrichWithDirections(days: TripDay[]): Promise<void> {
     }
   }
 
-  // Batch Google Directions for longer distances (>1km)
+  // Batch Google Directions for longer distances (>1km) — skip pairs already in cache
   const longDistancePairs: { day: TripDay; idx: number; from: TripItem; to: TripItem }[] = [];
 
   for (const day of days) {
@@ -1386,6 +2248,11 @@ async function enrichWithDirections(days: TripDay[]): Promise<void> {
       const from = day.items[i - 1];
       const to = day.items[i];
       if ((to.distanceFromPrevious || 0) > 1 && from.latitude && to.latitude) {
+        // Skip if already resolved from the prefetch cache
+        if (cache) {
+          const key = directionsCacheKey(from.latitude, from.longitude, to.latitude, to.longitude);
+          if (cache.has(key)) continue;
+        }
         longDistancePairs.push({ day, idx: i, from, to });
       }
     }
@@ -1509,8 +2376,8 @@ function sanitizeDescription(value: string): string {
  * Build a meaningful description for a TripItem, filtering out addresses.
  * Priority: real description > cuisineTypes/specialties > tips > empty.
  */
-function buildDescription(itemData: any, itemType: string): string {
-  const MAX_DESCRIPTION_LENGTH = 170;
+function buildDescription(itemData: any, itemType: string, wikiDescriptions?: Map<string, string>): string {
+  const MAX_DESCRIPTION_LENGTH = 250;
   const cut = (value: string): string => {
     const compact = sanitizeDescription(value);
     if (compact.length <= MAX_DESCRIPTION_LENGTH) return compact;
@@ -1518,12 +2385,21 @@ function buildDescription(itemData: any, itemType: string): string {
   };
 
   if (!itemData) return '';
-  // 1. If a real description exists and is NOT an address → use it
+
+  // 1. Wikipedia extract (most informative, available for well-known attractions)
+  if (wikiDescriptions && itemData.name && wikiDescriptions.has(itemData.name)) {
+    const wiki = wikiDescriptions.get(itemData.name)!;
+    if (wiki.length >= 30 && !looksLikeAddress(wiki)) {
+      return cut(wiki);
+    }
+  }
+
+  // 2. If a real description exists and is NOT an address → use it
   if (itemData.description && typeof itemData.description === 'string' && !looksLikeAddress(itemData.description)) {
     return cut(itemData.description);
   }
 
-  // 2. For restaurants: build from cuisineTypes / specialties
+  // 3. For restaurants: build from cuisineTypes / specialties
   if (itemType === 'restaurant' && itemData.cuisineTypes?.length > 0) {
     const cuisine = itemData.cuisineTypes.slice(0, 3).join(', ');
     if (itemData.specialties?.length > 0) {
@@ -1532,12 +2408,12 @@ function buildDescription(itemData: any, itemType: string): string {
     return cut(cuisine);
   }
 
-  // 3. Fallback to tips (often populated by Viator, attractions.ts curated data)
+  // 4. Fallback to tips (often populated by Viator, attractions.ts curated data)
   if (itemData.tips && typeof itemData.tips === 'string' && !looksLikeAddress(itemData.tips)) {
     return cut(itemData.tips);
   }
 
-  // 4. Empty is better than an address
+  // 5. Empty is better than an address
   return '';
 }
 
@@ -1598,6 +2474,40 @@ function findBestMealSlot(
 
 function formatTimeHHMM(date: Date): string {
   return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+}
+
+/**
+ * Compute daily budget breakdown from trip items (€ per person).
+ */
+function computeDailyBudget(items: TripItem[]): { activities: number; food: number; transport: number; total: number } {
+  let activities = 0;
+  let food = 0;
+  let transport = 0;
+
+  for (const item of items) {
+    const cost = item.estimatedCost || 0;
+    if (cost <= 0) continue;
+
+    switch (item.type) {
+      case 'activity':
+        activities += cost;
+        break;
+      case 'restaurant':
+        food += cost;
+        break;
+      case 'transport':
+        transport += cost;
+        break;
+      // flights, hotel: not counted in daily budget (they're trip-level costs)
+    }
+  }
+
+  return {
+    activities: Math.round(activities),
+    food: Math.round(food),
+    transport: Math.round(transport),
+    total: Math.round(activities + food + transport),
+  };
 }
 
 function computeCostBreakdown(

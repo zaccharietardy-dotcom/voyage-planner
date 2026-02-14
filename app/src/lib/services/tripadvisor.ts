@@ -194,6 +194,7 @@ export async function searchTripAdvisorRestaurants(
           photos: r.heroImgUrl ? [r.heroImgUrl] : undefined,
           distance: 0,
           walkingTime: 0,
+          badges: extractRestaurantBadges(r),
         };
       });
 
@@ -352,6 +353,22 @@ export async function searchTripAdvisorHotels(
 // Helpers
 // ============================================
 
+function extractRestaurantBadges(r: TripAdvisorRestaurant): string[] | undefined {
+  const badges: string[] = [];
+  // Check establishment tags for potential award indicators
+  const tags = r.establishmentTypeAndCuisineTags || [];
+  for (const tag of tags) {
+    const lower = tag.toLowerCase();
+    if (lower.includes('michelin') || lower.includes('étoilé') || lower.includes('starred')) {
+      badges.push(tag);
+    }
+    if (lower.includes('travelers') || lower.includes('travellers') || lower.includes('choice')) {
+      badges.push(tag);
+    }
+  }
+  return badges.length > 0 ? badges : undefined;
+}
+
 function formatAddress(obj?: { street1?: string; city?: string; country?: string }): string {
   if (!obj) return '';
   return [obj.street1, obj.city, obj.country].filter(Boolean).join(', ');
@@ -368,8 +385,10 @@ function parseTAPriceLevel(priceTag?: string): 1 | 2 | 3 | 4 {
   return 1;
 }
 
-function parsePrice(priceStr: string): number {
+function parsePrice(priceStr: string | number | undefined | null): number {
   if (!priceStr) return 0;
+  if (typeof priceStr === 'number') return Math.round(priceStr);
+  if (typeof priceStr !== 'string') return 0;
   // Extract number from strings like "$245", "€189", "245 €"
   const match = priceStr.replace(/[,\s]/g, '').match(/[\d.]+/);
   return match ? Math.round(parseFloat(match[0])) : 0;

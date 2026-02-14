@@ -143,8 +143,20 @@ export function scoreAndSelectActivities(
     a => a.latitude && a.longitude && a.latitude !== 0 && a.longitude !== 0
   );
 
+  // 2b. Reject GPS outliers: activities >50km from destination center
+  // Catches cross-city contamination (e.g., "Palais de Tokyo" in Paris appearing in a Tokyo trip)
+  const MAX_ACTIVITY_DIST_KM = 50;
+  const gpsFiltered = withGPS.filter(a => {
+    const dist = calculateDistance(a.latitude, a.longitude, data.destCoords.lat, data.destCoords.lng);
+    if (dist > MAX_ACTIVITY_DIST_KM) {
+      console.log(`[Pipeline V2] ❌ GPS outlier rejected: "${a.name}" (${dist.toFixed(0)}km from destination, max ${MAX_ACTIVITY_DIST_KM}km)`);
+      return false;
+    }
+    return true;
+  });
+
   // 3. Deduplicate by proximity (100m)
-  const gpsDeduped = deduplicateByProximity(withGPS, 0.1);
+  const gpsDeduped = deduplicateByProximity(gpsFiltered, 0.1);
 
   // 3a. Deduplicate same GPS location + same activity type (e.g., two kayak tours at same beach)
   const locationTypeDeduped = deduplicateSameLocationSameType(gpsDeduped);

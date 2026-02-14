@@ -702,15 +702,12 @@ function processViatorResults(
       const cleanDescription = (p.description || p.title || '')
         .replace(/\s+/g, ' ')
         .trim();
-      const shortDescription = cleanDescription.length > 180
-        ? `${cleanDescription.slice(0, 177)}...`
-        : cleanDescription;
 
       return {
         id: `viator-${p.productCode}`,
         name: p.title,
         type: guessActivityType(p.title, p.tags),
-        description: shortDescription || p.title,
+        description: cleanDescription || p.title,
         duration: durationMinutes,
         estimatedCost: Math.round(price),
         latitude: cityCenter.lat, // Viator doesn't return exact coords — resolved later via coordsResolver
@@ -724,6 +721,8 @@ function processViatorResults(
         imageUrl,
         providerName: 'Viator',
         reviewCount,
+        freeCancellation: (p.flags || []).some(f => /free.?cancel/i.test(f) || /annulation.?gratuite/i.test(f)),
+        instantConfirmation: (p.flags || []).some(f => /instant.?confirm/i.test(f) || /confirmation.?instantan/i.test(f)),
       };
     });
 

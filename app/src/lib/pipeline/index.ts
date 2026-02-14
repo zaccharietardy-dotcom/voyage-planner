@@ -16,6 +16,7 @@ import { assignRestaurants } from './step4-restaurants';
 import { selectHotelByBarycenter } from './step5-hotel';
 import { balanceDaysWithClaude } from './step6-balance';
 import { assembleTripSchedule } from './step7-assemble';
+import { validateAndFixTrip } from './step8-validate';
 import { calculateDistance } from '../services/geocoding';
 import { searchRestaurantsWithSerpApi } from '../services/serpApiPlaces';
 import { OUTDOOR_ACTIVITY_KEYWORDS } from './utils/constants';
@@ -201,7 +202,7 @@ export async function generateTripV2(preferences: TripPreferences): Promise<Trip
   // Step 6: Claude day balancing (~10-15s)
   console.log('[Pipeline V2] === Step 6: Claude balancing... ===');
   const T6 = Date.now();
-  const plan = await balanceDaysWithClaude(clusters, meals, hotel, bestTransport, preferences);
+  const plan = await balanceDaysWithClaude(clusters, meals, hotel, bestTransport, preferences, data);
   console.log(`[Pipeline V2] Step 6 done in ${Date.now() - T6}ms — "${plan.dayOrderReason}"`);
 
   // Step 7: Schedule assembly (~2-5s)
@@ -212,6 +213,11 @@ export async function generateTripV2(preferences: TripPreferences): Promise<Trip
     bestTransport, preferences, data,
     restaurantGeoPool
   );
+
+  // Step 8: Post-generation validation (~0ms)
+  console.log('[Pipeline V2] === Step 8: Quality validation... ===');
+  const validationResult = validateAndFixTrip(trip);
+  console.log(`[Pipeline V2] Step 8: Quality score ${validationResult.score}/100 (${validationResult.warnings.length} warnings, ${validationResult.autoFixes.length} auto-fixes)`);
 
   const totalTime = Date.now() - T0;
   console.log(`[Pipeline V2] ✅ Trip generated in ${totalTime}ms (${(totalTime / 1000).toFixed(1)}s)`);
@@ -462,7 +468,15 @@ function rebalanceClustersForFlights(
       const arrHour = outboundFlight.arrivalTimeDisplay
         ? parseInt(outboundFlight.arrivalTimeDisplay.split(':')[0], 10)
         : new Date(outboundFlight.arrivalTime).getHours();
-      available = Math.max(0, 22 - (arrHour + 1)); // 1h transfer (consistent with step7-assemble)
+      const arrMin = outboundFlight.arrivalTimeDisplay
+        ? parseInt(outboundFlight.arrivalTimeDisplay.split(':')[1] || '0', 10) / 60
+        : new Date(outboundFlight.arrivalTime).getMinutes() / 60;
+      // Realistic start: arrHour + 1h transfer, but also respect hotel check-in at ~14:00
+      // If flight arrives early morning (before noon), tourists must wait for check-in (14:00-14:30)
+      // So effective start = max(arrHour + 1.5, 14.5) for early flights
+      const transferEnd = arrHour + arrMin + 1.5; // 1.5h for airport transfer + settling
+      const effectiveStart = transferEnd < 14 ? 14.5 : transferEnd; // check-in floor at 14:30
+      available = Math.max(0, 22 - effectiveStart);
     } else if (isFirst && isGroundTransport) {
       // Ground transport: estimate arrival hour
       let arrHour = 8 + Math.ceil((transport!.totalDuration || 120) / 60);

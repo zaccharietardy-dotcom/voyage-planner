@@ -144,7 +144,7 @@ export async function searchRestaurantsWithSerpApi(
   } else if (cuisineType) {
     query = `${cuisineType} restaurant`;
   } else {
-    query = 'restaurant local cuisine'; // Privilégier la cuisine locale
+    query = 'meilleur restaurant'; // Generic query to get diverse results
   }
 
   const serpParams: Record<string, string> = {
@@ -787,12 +787,14 @@ export async function searchAttractionsMultiQuery(
 
   const limited = diversified.slice(0, limit);
 
-  // Marquer les 3 premiers comme mustSee
-  const finalAttractions = limited.map((attr, index) => {
+  // Don't auto-tag SerpAPI results as mustSee — this causes false positives
+  // (e.g., "Barcelona Segwayday" blocking real must-sees like Sagrada Família).
+  // Must-see tagging should only come from: user preferences, curated database, or Overpass/Wikidata.
+  const finalAttractions = limited.map((attr) => {
     const { priority, ...attraction } = attr;
     return {
       ...attraction,
-      mustSee: index < 3,
+      mustSee: false,
     };
   });
 
@@ -1263,7 +1265,7 @@ function convertToAttraction(
     latitude: place.gps_coordinates.latitude,
     longitude: place.gps_coordinates.longitude,
     rating: place.rating || 4.0,
-    mustSee: priority === 1,
+    mustSee: false, // Don't auto-tag SerpAPI results — must-see from user prefs only
     bookingRequired: false,
     openingHours: place.operating_hours ? parseSimpleOpeningHours(place.operating_hours) || { open: '09:00', close: '18:00' } : { open: '09:00', close: '18:00' },
     tips: place.description,
