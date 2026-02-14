@@ -8,7 +8,7 @@
  */
 
 import type { Trip, TripPreferences, Flight, TransportOptionSummary, Restaurant } from '../types';
-import type { ActivityCluster, CityDensityProfile, MealAssignment, ScoredActivity, OnPipelineEvent } from './types';
+import type { ActivityCluster, CityDensityProfile, MealAssignment, ScoredActivity, OnPipelineEvent, FetchedData } from './types';
 export type { PipelineEvent, OnPipelineEvent } from './types';
 import { fetchAllData } from './step1-fetch';
 import { scoreAndSelectActivities } from './step2-score';
@@ -20,7 +20,6 @@ import { assembleTripSchedule } from './step7-assemble';
 import { validateAndFixTrip } from './step8-validate';
 import { calculateDistance } from '../services/geocoding';
 import { searchRestaurantsWithSerpApi } from '../services/serpApiPlaces';
-import { OUTDOOR_ACTIVITY_KEYWORDS } from './utils/constants';
 
 // ---------------------------------------------------------------------------
 // Pipeline Event System — emit helper
@@ -234,6 +233,10 @@ export async function generateTripV2(
   emit(onEvent, { type: 'api_done', step: 6, label: 'Claude AI', durationMs: step6Ms });
   emit(onEvent, { type: 'step_done', step: 6, stepName: 'Claude AI balancing', durationMs: step6Ms, detail: plan.dayOrderReason });
 
+  // Step 6b: Weather-aware day permutation (~0ms)
+  // Swap outdoor-heavy days with indoor-heavy days when rain is forecast
+  weatherPermuteClusters(clusters, data.weatherForecasts, preferences.durationDays, onEvent);
+
   // Step 7: Schedule assembly (~2-5s)
   console.log('[Pipeline V2] === Step 7: Assembling schedule... ===');
   emit(onEvent, { type: 'step_start', step: 7, stepName: 'Schedule assembly' });
@@ -277,6 +280,107 @@ export async function generateTripV2(
   }
 
   return trip;
+}
+
+// ---------------------------------------------------------------------------
+// Weather-aware day permutation
+// ---------------------------------------------------------------------------
+// WMO weather codes ≥ 51 = rain/drizzle/snow/storms (bad for outdoor)
+const RAINY_WMO_THRESHOLD = 51;
+
+/**
+ * Swap outdoor-heavy clusters to dry days and indoor-heavy clusters to rainy days.
+ * Only swaps "full" days (not first/last which have transport constraints).
+ * Mutates `clusters` in place by swapping their `dayNumber` assignments.
+ */
+function weatherPermuteClusters(
+  clusters: ActivityCluster[],
+  weatherForecasts: FetchedData['weatherForecasts'],
+  durationDays: number,
+  onEvent?: OnPipelineEvent
+): void {
+  if (!weatherForecasts || weatherForecasts.length === 0 || clusters.length < 3) {
+    return; // Need weather data and at least 3 days to have swappable middle days
+  }
+
+  // Build weather map: dayNumber → weatherCode
+  // weatherForecasts[0] = day 1, etc.
+  const weatherByDay = new Map<number, number>();
+  for (let i = 0; i < weatherForecasts.length; i++) {
+    const wf = weatherForecasts[i];
+    const code = wf.weatherCode ?? 0;
+    weatherByDay.set(i + 1, code);
+  }
+
+  // Compute outdoor ratio per cluster
+  type DayInfo = {
+    cluster: ActivityCluster;
+    outdoorRatio: number;
+    isRainy: boolean;
+    dayNumber: number;
+    isSwappable: boolean; // false for first/last day
+  };
+
+  const dayInfos: DayInfo[] = clusters.map(c => {
+    const total = c.activities.length;
+    if (total === 0) return { cluster: c, outdoorRatio: 0.5, isRainy: false, dayNumber: c.dayNumber, isSwappable: false };
+    const outdoorCount = c.activities.filter(a => a.isOutdoor === true).length;
+    const outdoorRatio = outdoorCount / total;
+    const wCode = weatherByDay.get(c.dayNumber) ?? 0;
+    const isRainy = wCode >= RAINY_WMO_THRESHOLD;
+    const isSwappable = c.dayNumber > 1 && c.dayNumber < durationDays; // Skip first/last
+    return { cluster: c, outdoorRatio, isRainy, dayNumber: c.dayNumber, isSwappable };
+  });
+
+  // Find problematic pairs: rainy+outdoor day ↔ dry+indoor day
+  let swapCount = 0;
+  const swapped = new Set<number>(); // dayNumbers already swapped
+
+  for (const rainyDay of dayInfos) {
+    if (!rainyDay.isRainy || !rainyDay.isSwappable || swapped.has(rainyDay.dayNumber)) continue;
+    if (rainyDay.outdoorRatio < 0.5) continue; // Already mostly indoor, no need to swap
+
+    // Find a dry day with more indoor activities to swap with
+    let bestSwap: DayInfo | null = null;
+    let bestScore = 0;
+
+    for (const dryDay of dayInfos) {
+      if (dryDay.isRainy || !dryDay.isSwappable || swapped.has(dryDay.dayNumber)) continue;
+      if (dryDay.dayNumber === rainyDay.dayNumber) continue;
+      if (dryDay.outdoorRatio >= rainyDay.outdoorRatio) continue; // Not helpful
+
+      // Score = how much improvement we get: rainyDay.outdoor - dryDay.outdoor
+      const improvement = rainyDay.outdoorRatio - dryDay.outdoorRatio;
+      if (improvement > bestScore) {
+        bestScore = improvement;
+        bestSwap = dryDay;
+      }
+    }
+
+    if (bestSwap && bestScore >= 0.2) {
+      // Swap dayNumbers between clusters
+      const tempDay = rainyDay.cluster.dayNumber;
+      rainyDay.cluster.dayNumber = bestSwap.cluster.dayNumber;
+      bestSwap.cluster.dayNumber = tempDay;
+
+      swapped.add(rainyDay.dayNumber);
+      swapped.add(bestSwap.dayNumber);
+      swapCount++;
+
+      console.log(
+        `[Pipeline V2] Weather swap: Day ${tempDay} (${(rainyDay.outdoorRatio * 100).toFixed(0)}% outdoor, rainy) ↔ Day ${bestSwap.dayNumber} (${(bestSwap.outdoorRatio * 100).toFixed(0)}% outdoor, dry)`
+      );
+    }
+  }
+
+  if (swapCount > 0) {
+    emit(onEvent, {
+      type: 'info',
+      detail: `Weather permutation: ${swapCount} day swap(s) — outdoor activities moved to dry days`,
+    });
+  } else {
+    console.log('[Pipeline V2] Weather permutation: no swaps needed');
+  }
 }
 
 /**
@@ -774,10 +878,7 @@ function rebalanceClustersForFlights(
       const a = cluster.activities[ai];
       if (!a.mustSee) continue;
 
-      const nameLC = (a.name || '').toLowerCase();
-      const typeLC = (a.type || '').toLowerCase();
-      const isOutdoor = OUTDOOR_ACTIVITY_KEYWORDS.some(k => nameLC.includes(k) || typeLC.includes(k));
-      if (!isOutdoor) continue;
+      if (!a.isOutdoor) continue;
 
       // This outdoor must-see is on a late day — move to the earliest-starting day with capacity
       let bestTarget = -1;

@@ -275,6 +275,11 @@ export function CalendarView({
             </Button>
             <span className="text-sm font-medium min-w-[80px] text-center">
               Jour {currentDay?.dayNumber || 1}
+              {currentDay?.weatherForecast && (
+                <span className="ml-1.5 text-muted-foreground font-normal" title={currentDay.weatherForecast.condition}>
+                  {currentDay.weatherForecast.icon} {currentDay.weatherForecast.tempMin}°/{currentDay.weatherForecast.tempMax}°
+                </span>
+              )}
             </span>
             <Button
               variant="outline"

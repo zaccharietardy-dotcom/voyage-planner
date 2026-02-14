@@ -62,6 +62,16 @@ export function MobileDayList({ day, onClickItem }: MobileDayListProps) {
 
   return (
     <div className="space-y-2">
+      {/* Weather banner */}
+      {day.weatherForecast && (
+        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/50 text-sm text-muted-foreground">
+          <span className="text-lg">{day.weatherForecast.icon}</span>
+          <span className="font-medium text-foreground">
+            {day.weatherForecast.tempMin}° / {day.weatherForecast.tempMax}°
+          </span>
+          <span className="truncate">{day.weatherForecast.condition}</span>
+        </div>
+      )}
       {sortedItems.map((item, idx) => {
         const color = TRIP_ITEM_COLORS[item.type] || '#6B7280';
         const Icon = TYPE_ICONS[item.type] || MapPin;

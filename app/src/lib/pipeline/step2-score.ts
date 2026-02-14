@@ -12,6 +12,7 @@ import { deduplicateByProximity, deduplicateByBookingUrl, deduplicateSameLocatio
 import { fixAttractionDuration, fixAttractionCost } from '../tripAttractions';
 import { findKnownViatorProduct } from '../services/viatorKnownProducts';
 import { calculateDistance } from '../services/geocoding';
+import { classifyOutdoorIndoor } from './utils/constants';
 
 // ─── Contextual scoring dictionaries ────────────────────────────────────────
 
@@ -323,8 +324,11 @@ function tagActivity(
   a: Attraction,
   source: ScoredActivity['source']
 ): ScoredActivity {
+  // Classify outdoor/indoor if not already set
+  const isOutdoor = a.isOutdoor ?? classifyOutdoorIndoor(a.name || '', a.description, a.type);
   return {
     ...a,
+    isOutdoor,
     score: 0,
     source,
     reviewCount: (a as any).reviewCount || (a as any).reviews || 0,

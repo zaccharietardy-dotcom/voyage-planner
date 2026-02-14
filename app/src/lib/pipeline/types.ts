@@ -63,7 +63,7 @@ export interface FetchedData {
   flightAlternatives: { outbound: Flight[]; return: Flight[] };
 
   // Weather
-  weatherForecasts: { date: string; tempMin: number; tempMax: number; condition: string; icon: string }[];
+  weatherForecasts: { date: string; tempMin: number; tempMax: number; condition: string; icon: string; weatherCode?: number }[];
 
   // Ancillary
   travelTips: any;

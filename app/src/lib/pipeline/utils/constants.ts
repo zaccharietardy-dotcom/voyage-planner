@@ -63,3 +63,32 @@ export function getMinDuration(name: string, type: string): number {
   }
   return 30; // Default minimum
 }
+
+/**
+ * Classify an activity as outdoor, indoor, or unknown based on name/description keywords.
+ * Also uses ActivityType as a secondary signal (nature/beach → outdoor, culture → indoor).
+ */
+export function classifyOutdoorIndoor(name: string, description?: string, activityType?: string): boolean | undefined {
+  const text = `${name} ${description || ''} ${activityType || ''}`.toLowerCase();
+
+  const isOutdoor = OUTDOOR_ACTIVITY_KEYWORDS.some(kw => text.includes(kw));
+  const isIndoor = INDOOR_ACTIVITY_KEYWORDS.some(kw => text.includes(kw));
+
+  // Both or neither → use activity type as tiebreaker
+  if (isOutdoor && !isIndoor) return true;
+  if (isIndoor && !isOutdoor) return false;
+  if (isOutdoor && isIndoor) {
+    // Conflict: "Jardin du musée" → prefer outdoor (it's partly outside)
+    return true;
+  }
+
+  // Neither keyword matched → use broad ActivityType
+  if (activityType) {
+    const outdoorTypes = ['nature', 'beach', 'adventure'];
+    const indoorTypes = ['culture', 'shopping', 'wellness', 'nightlife'];
+    if (outdoorTypes.includes(activityType)) return true;
+    if (indoorTypes.includes(activityType)) return false;
+  }
+
+  return undefined; // truly unknown
+}

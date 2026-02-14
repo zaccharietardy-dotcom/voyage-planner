@@ -36,6 +36,7 @@ export interface Attraction {
   reviewCount?: number; // Nombre d'avis
   freeCancellation?: boolean;
   instantConfirmation?: boolean;
+  isOutdoor?: boolean; // true = outdoor, false = indoor, undefined = unknown
 }
 
 // Base de données des attractions par destination
