@@ -202,6 +202,85 @@ function normalizeHotelsBookingUrls(
   }));
 }
 
+function normalizeHotelNameForAvailability(name: string): string {
+  return name
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/&/g, ' and ')
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\b(hotel|hostel|resort|suite|suites|apartment|apartments|residence|residenza|inn|spa|the|by)\b/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function areLikelySameHotelName(left: string, right: string): boolean {
+  const a = normalizeHotelNameForAvailability(left);
+  const b = normalizeHotelNameForAvailability(right);
+  if (!a || !b) return false;
+  if (a === b) return true;
+
+  const minLen = Math.min(a.length, b.length);
+  if (minLen >= 8 && (a.includes(b) || b.includes(a))) return true;
+
+  const tokensA = new Set(a.split(' ').filter((token) => token.length >= 4));
+  const tokensB = new Set(b.split(' ').filter((token) => token.length >= 4));
+  if (tokensA.size === 0 || tokensB.size === 0) return false;
+
+  let overlap = 0;
+  for (const token of tokensA) {
+    if (tokensB.has(token)) overlap++;
+  }
+  if (overlap >= 2) return true;
+  if (Math.min(tokensA.size, tokensB.size) <= 2 && overlap >= 1) return true;
+  return false;
+}
+
+function appendAvailabilityBadge(description: string | undefined): string {
+  if (!description) return 'Disponibilité confirmée';
+  if (/disponibilit[ée]\s+confirm[ée]e/i.test(description)) return description;
+  return `${description} • Disponibilité confirmée`;
+}
+
+async function filterHotelsWithLiveAvailability(
+  hotels: Accommodation[],
+  destination: string,
+  checkIn: string,
+  checkOut: string,
+  guests: number
+): Promise<Accommodation[]> {
+  if (hotels.length === 0 || !isSerpApiPlacesConfigured()) return hotels;
+
+  try {
+    const availableNames = await getAvailableHotelNames(destination, checkIn, checkOut, guests);
+    if (!availableNames || availableNames.size === 0) {
+      return hotels;
+    }
+
+    const availableList = Array.from(availableNames);
+    const matchedHotels = hotels.filter((hotel) =>
+      availableList.some((name) => areLikelySameHotelName(hotel.name, name))
+    );
+
+    if (matchedHotels.length === 0) {
+      console.warn(`[Hotels] Aucun match de disponibilité trouvé pour "${destination}" (${checkIn} → ${checkOut}) — conservation de la liste initiale`);
+      return hotels;
+    }
+
+    if (matchedHotels.length < hotels.length) {
+      console.log(`[Hotels] Disponibilité live: ${matchedHotels.length}/${hotels.length} hôtels confirmés`);
+    }
+
+    return matchedHotels.map((hotel) => ({
+      ...hotel,
+      description: appendAvailabilityBadge(hotel.description),
+    }));
+  } catch (error) {
+    console.warn('[Hotels] Vérification disponibilité live impossible, fallback sur liste initiale:', error);
+    return hotels;
+  }
+}
+
 /**
  * Recherche des hôtels - PRIORITÉ: Booking.com pour la disponibilité temps réel
  */
@@ -223,6 +302,18 @@ export async function searchHotels(
   const checkInStr = options.checkInDate.toISOString().split('T')[0];
   const checkOutStr = options.checkOutDate.toISOString().split('T')[0];
   const priceRange = getPriceRange(options.budgetLevel);
+
+  const finalizeHotels = async (hotels: Accommodation[]): Promise<Accommodation[]> => {
+    const normalized = normalizeHotelsBookingUrls(hotels, destination, checkInStr, checkOutStr, options.guests);
+    const available = await filterHotelsWithLiveAvailability(
+      normalized,
+      destination,
+      checkInStr,
+      checkOutStr,
+      options.guests
+    );
+    return adjustHotelPrices(available, options);
+  };
 
   // Si un maxPricePerNight est fourni par la stratégie budget, l'utiliser comme plafond
   if (options.maxPricePerNight) {
@@ -273,10 +364,7 @@ export async function searchHotels(
           };
         });
 
-        return adjustHotelPrices(
-          normalizeHotelsBookingUrls(hotels, destination, checkInStr, checkOutStr, options.guests),
-          options
-        );
+        return finalizeHotels(hotels);
       }
     } catch (error) {
       console.warn('[Hotels] Booking.com API error, trying TripAdvisor/SerpAPI:', error);
@@ -347,10 +435,7 @@ export async function searchHotels(
                 }
 
                 if (validated.length > 0) {
-                  return adjustHotelPrices(
-                    normalizeHotelsBookingUrls(validated, destination, checkInStr, checkOutStr, options.guests),
-                    options
-                  );
+                  return finalizeHotels(validated);
                 }
 
                 const serpAccommodations: Accommodation[] = serpHotels.slice(0, 10).map((h, index: number) => {
@@ -387,20 +472,14 @@ export async function searchHotels(
                 const enrichedSerpAccommodations = await Promise.all(
                   serpAccommodations.map(h => enrichHotelWithGooglePlaces(h as unknown as BookingHotel, destination) as unknown as Promise<Accommodation>)
                 );
-                return adjustHotelPrices(
-                  normalizeHotelsBookingUrls(enrichedSerpAccommodations, destination, checkInStr, checkOutStr, options.guests),
-                  options
-                );
+                return finalizeHotels(enrichedSerpAccommodations);
               }
             } catch (serpError) {
               console.warn('[Hotels] SerpAPI validation error:', serpError);
             }
           }
 
-          return adjustHotelPrices(
-            normalizeHotelsBookingUrls(filtered, destination, checkInStr, checkOutStr, options.guests),
-            options
-          );
+          return finalizeHotels(filtered);
         }
       }
     } catch (error) {
@@ -462,10 +541,7 @@ export async function searchHotels(
         const enrichedHotels = await Promise.all(
           hotels.map(h => enrichHotelWithGooglePlaces(h as unknown as BookingHotel, destination) as unknown as Promise<Accommodation>)
         );
-        return adjustHotelPrices(
-          normalizeHotelsBookingUrls(enrichedHotels, destination, checkInStr, checkOutStr, options.guests),
-          options
-        );
+        return finalizeHotels(enrichedHotels);
       }
     } catch (error) {
       console.warn('[Hotels] SerpAPI error, trying Claude:', error);
@@ -480,17 +556,14 @@ export async function searchHotels(
       const enrichedHotels = await Promise.all(
         hotels.map(h => enrichHotelWithGooglePlaces(h as unknown as BookingHotel, destination) as unknown as Promise<Accommodation>)
       );
-      return adjustHotelPrices(
-        normalizeHotelsBookingUrls(enrichedHotels, destination, checkInStr, checkOutStr, options.guests),
-        options
-      );
+      return finalizeHotels(enrichedHotels);
     } catch (error) {
       console.error('[Hotels] Claude AI error:', error);
     }
   }
 
   // 6. Dernier fallback: hôtels génériques
-  return generateFallbackHotels(destination, options);
+  return finalizeHotels(generateFallbackHotels(destination, options));
 }
 
 /**

@@ -1719,6 +1719,8 @@ export async function assembleTripSchedule(
           item.bookingUrl = bestR.googleMapsUrl || bestR.website;
           item.restaurant = bestR;
           item.restaurantAlternatives = []; // Clear stale alts — section 13b will refill
+          // Restaurant changed: clear previous image so we don't keep a stale photo.
+          item.imageUrl = undefined;
           item.distanceFromPrevious = bestDist;
           item.timeFromPrevious = Math.max(5, Math.round(bestDist * 12));
           item.transportToPrevious = inferInterItemTransportMode(item.distanceFromPrevious, item.timeFromPrevious);
@@ -1779,6 +1781,8 @@ export async function assembleTripSchedule(
           item.bookingUrl = bestR.googleMapsUrl || bestR.website;
           item.restaurant = bestR;
           item.restaurantAlternatives = []; // Clear stale alts — section 13b will refill
+          // Restaurant changed: clear previous image so we don't keep a stale photo.
+          item.imageUrl = undefined;
           item.distanceFromPrevious = bestDist;
           item.timeFromPrevious = Math.max(5, Math.round(bestDist * 12));
           item.transportToPrevious = inferInterItemTransportMode(item.distanceFromPrevious, item.timeFromPrevious);
@@ -1929,6 +1933,23 @@ export async function assembleTripSchedule(
       console.log(`[Pipeline V2] Section 13c: Refilled alternatives for ${refillCount} restaurant(s) (${apiCallCount} API calls)`);
     }
   }
+
+  // 13c-bis. Some restaurants are replaced after the first photo enrichment pass.
+  // Re-run restaurant image enrichment to avoid stale or non-Google photos.
+  onEvent?.({ type: 'api_call', step: 7, label: 'Restaurant Photos (post-swap)', timestamp: Date.now() });
+  const tRestoPostSwap = Date.now();
+  try {
+    await enrichRestaurantsWithPhotos(days, preferences.destination);
+  } catch (e) {
+    console.warn('[Pipeline V2] Post-swap restaurant photo enrichment failed (non-critical):', e);
+  }
+  onEvent?.({
+    type: 'api_done',
+    step: 7,
+    label: 'Restaurant Photos (post-swap)',
+    durationMs: Date.now() - tRestoPostSwap,
+    timestamp: Date.now(),
+  });
 
   // ---------------------------------------------------------------------------
   // 13d. Opening hours validation — check activities are open at scheduled time
