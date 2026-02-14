@@ -825,32 +825,87 @@ function RestaurantSuggestionsFlat({
 
   const getCuisineLabel = (r: Restaurant): string => {
     const text = `${r.name || ''} ${(r.cuisineTypes || []).join(' ')}`.toLowerCase();
-    // Nationalit\u00e9s uniquement — pas de types d'\u00e9tablissement
-    const CUISINE_LABELS: [string[], string][] = [
-      [['sushi', 'ramen', 'japonais', 'japanese', 'izakaya', 'yakitori', 'udon', 'tempura'], 'Japonais'],
-      [['italien', 'italian', 'pizza', 'pizzeria', 'trattoria', 'osteria', 'ristorante', 'pasta'], 'Italien'],
-      [['chinois', 'chinese', 'dim sum', 'cantonais', 'wok', 'szechuan'], 'Chinois'],
-      [['indien', 'indian', 'curry', 'tandoori', 'masala', 'naan'], 'Indien'],
-      [['thai', 'tha\u00ef', 'tha\u00eflandais', 'pad thai'], 'Tha\u00eflandais'],
-      [['vietnamien', 'vietnamese', 'pho', 'banh mi', 'bo bun'], 'Vietnamien'],
-      [['cor\u00e9en', 'korean', 'bibimbap', 'kimchi'], 'Cor\u00e9en'],
-      [['mexicain', 'mexican', 'tacos', 'taqueria', 'burrito'], 'Mexicain'],
-      [['libanais', 'lebanese', 'mezze', 'falafel', 'shawarma'], 'Libanais'],
-      [['marocain', 'moroccan', 'tagine', 'couscous', 'marocaine'], 'Marocain'],
-      [['grec', 'greek', 'taverna', 'gyros', 'souvlaki'], 'Grec'],
-      [['turc', 'turkish', 'kebab', 'd\u00f6ner'], 'Turc'],
-      [['espagnol', 'spanish', 'tapas', 'paella', 'catalan'], 'Espagnol'],
-      [['p\u00e9ruvien', 'peruvian', 'ceviche'], 'P\u00e9ruvien'],
-      [['burger', 'american', 'am\u00e9ricain', 'bbq', 'barbecue', 'diner'], 'Am\u00e9ricain'],
-      [['portugais', 'portuguese'], 'Portugais'],
-      [['rome', 'romano', 'roman', 'r\u00e9gion de rome'], 'Romain'],
-      [['m\u00e9diterran\u00e9en', 'mediterranean', 'mediterran\u00e9en'], 'M\u00e9diterran\u00e9en'],
-      [['fran\u00e7ais', 'french', 'proven\u00e7al', 'lyonnais', 'brasserie', 'bistro', 'bistrot', 'gastronomique', 'gastro', 'boulangerie', 'p\u00e2tisserie', 'patisserie', 'breton', 'alsacien', 'normand', 'savoyard', 'fruits de mer', 'seafood', 'steakhouse', 'grill'], 'Fran\u00e7ais'],
-      [['caf\u00e9', 'cafe', 'coffee', 'caff\u00e8', 'brunch', 'breakfast'], 'Caf\u00e9'],
+
+    // 1) D\u00e9tecter la nationalit\u00e9 / origine
+    const NATIONALITIES: [string[], string][] = [
+      [['sushi', 'ramen', 'japonais', 'japanese', 'izakaya', 'yakitori', 'udon', 'tempura'], 'japonais'],
+      [['italien', 'italian', 'pizza', 'pizzeria', 'trattoria', 'osteria', 'ristorante', 'pasta'], 'italien'],
+      [['chinois', 'chinese', 'dim sum', 'cantonais', 'wok', 'szechuan'], 'chinois'],
+      [['indien', 'indian', 'curry', 'tandoori', 'masala', 'naan'], 'indien'],
+      [['thai', 'tha\u00ef', 'tha\u00eflandais', 'pad thai'], 'tha\u00eflandais'],
+      [['vietnamien', 'vietnamese', 'pho', 'banh mi', 'bo bun'], 'vietnamien'],
+      [['cor\u00e9en', 'korean', 'bibimbap', 'kimchi'], 'cor\u00e9en'],
+      [['mexicain', 'mexican', 'tacos', 'taqueria', 'burrito'], 'mexicain'],
+      [['libanais', 'lebanese', 'mezze', 'falafel', 'shawarma'], 'libanais'],
+      [['marocain', 'moroccan', 'tagine', 'couscous', 'marocaine'], 'marocain'],
+      [['grec', 'greek', 'taverna', 'gyros', 'souvlaki'], 'grec'],
+      [['turc', 'turkish', 'kebab', 'd\u00f6ner'], 'turc'],
+      [['espagnol', 'spanish', 'tapas', 'paella', 'catalan'], 'espagnol'],
+      [['p\u00e9ruvien', 'peruvian', 'ceviche'], 'p\u00e9ruvien'],
+      [['burger', 'american', 'am\u00e9ricain', 'bbq', 'barbecue', 'diner'], 'am\u00e9ricain'],
+      [['portugais', 'portuguese'], 'portugais'],
+      [['rome', 'romano', 'roman'], 'romain'],
+      [['m\u00e9diterran\u00e9en', 'mediterranean', 'mediterran\u00e9en'], 'm\u00e9diterran\u00e9en'],
+      [['proven\u00e7al', 'provencal'], 'proven\u00e7al'],
+      [['lyonnais'], 'lyonnais'],
+      [['breton'], 'breton'],
+      [['alsacien'], 'alsacien'],
+      [['normand'], 'normand'],
+      [['savoyard'], 'savoyard'],
+      [['fran\u00e7ais', 'french', 'brasserie', 'bistro', 'bistrot', 'boulangerie', 'p\u00e2tisserie', 'patisserie'], 'fran\u00e7ais'],
     ];
-    for (const [keywords, label] of CUISINE_LABELS) {
-      if (keywords.some(kw => text.includes(kw))) return label;
+    let nationality = '';
+    for (const [keywords, nat] of NATIONALITIES) {
+      if (keywords.some(kw => text.includes(kw))) { nationality = nat; break; }
     }
+
+    // 2) D\u00e9tecter le type d'\u00e9tablissement (optionnel, enrichit le label)
+    const TYPES: [string[], string][] = [
+      [['brasserie'], 'Brasserie'],
+      [['bistro', 'bistrot'], 'Bistrot'],
+      [['trattoria'], 'Trattoria'],
+      [['osteria'], 'Osteria'],
+      [['ristorante'], 'Ristorante'],
+      [['izakaya'], 'Izakaya'],
+      [['taverna', 'taverne'], 'Taverne'],
+      [['gastronomique', 'gastro'], 'Gastronomique'],
+      [['boulangerie'], 'Boulangerie'],
+      [['p\u00e2tisserie', 'patisserie'], 'P\u00e2tisserie'],
+      [['fruits de mer', 'seafood'], 'Fruits de mer'],
+      [['steakhouse', 'grill'], 'Grill'],
+      [['pizzeria'], 'Pizzeria'],
+      [['taqueria'], 'Taqueria'],
+      [['caf\u00e9', 'cafe', 'coffee', 'caff\u00e8'], 'Caf\u00e9'],
+      [['brunch', 'breakfast'], 'Brunch'],
+    ];
+    let placeType = '';
+    for (const [keywords, t] of TYPES) {
+      if (keywords.some(kw => text.includes(kw))) { placeType = t; break; }
+    }
+
+    // 3) Combiner : "Type + nationalit\u00e9" ou juste nationalit\u00e9 capitalis\u00e9e
+    const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+    if (placeType && nationality) {
+      // Ex: "Brasserie fran\u00e7aise", "Trattoria italienne", "Izakaya japonais"
+      const fem = ['fran\u00e7ais', 'italien', 'espagnol', 'am\u00e9ricain', 'proven\u00e7al', 'cor\u00e9en', 'tha\u00eflandais', 'portugais', 'mexicain', 'marocain', 'libanais', 'grec', 'turc', 'p\u00e9ruvien', 'romain', 'indien', 'chinois', 'vietnamien', 'm\u00e9diterran\u00e9en', 'breton', 'alsacien', 'normand', 'savoyard', 'lyonnais'];
+      const femForms: Record<string, string> = {
+        'fran\u00e7ais': 'fran\u00e7aise', 'italien': 'italienne', 'espagnol': 'espagnole',
+        'am\u00e9ricain': 'am\u00e9ricaine', 'proven\u00e7al': 'proven\u00e7ale', 'cor\u00e9en': 'cor\u00e9enne',
+        'tha\u00eflandais': 'tha\u00eflandaise', 'portugais': 'portugaise', 'mexicain': 'mexicaine',
+        'marocain': 'marocaine', 'libanais': 'libanaise', 'grec': 'grecque',
+        'turc': 'turque', 'p\u00e9ruvien': 'p\u00e9ruvienne', 'romain': 'romaine',
+        'indien': 'indienne', 'chinois': 'chinoise', 'vietnamien': 'vietnamienne',
+        'm\u00e9diterran\u00e9en': 'm\u00e9diterran\u00e9enne', 'breton': 'bretonne', 'alsacien': 'alsacienne',
+        'normand': 'normande', 'savoyard': 'savoyarde', 'lyonnais': 'lyonnaise',
+      };
+      // Types f\u00e9minins en fran\u00e7ais
+      const femTypes = ['Brasserie', 'Trattoria', 'Osteria', 'Taverne', 'Boulangerie', 'P\u00e2tisserie', 'Pizzeria', 'Taqueria'];
+      const isFem = femTypes.includes(placeType);
+      const adj = isFem ? (femForms[nationality] || nationality) : nationality;
+      return `${placeType} ${adj}`;
+    }
+    if (placeType) return placeType; // "Caf\u00e9", "Brunch" etc. sans nationalit\u00e9
+    if (nationality) return cap(nationality); // "Fran\u00e7ais", "Italien", etc.
     return 'Restaurant';
   };
 
@@ -1055,32 +1110,87 @@ function RestaurantSuggestions({
 
   const getCuisineLabel = (r: Restaurant): string => {
     const text = `${r.name || ''} ${(r.cuisineTypes || []).join(' ')}`.toLowerCase();
-    // Nationalit\u00e9s uniquement — pas de types d'\u00e9tablissement
-    const CUISINE_LABELS: [string[], string][] = [
-      [['sushi', 'ramen', 'japonais', 'japanese', 'izakaya', 'yakitori', 'udon', 'tempura'], 'Japonais'],
-      [['italien', 'italian', 'pizza', 'pizzeria', 'trattoria', 'osteria', 'ristorante', 'pasta'], 'Italien'],
-      [['chinois', 'chinese', 'dim sum', 'cantonais', 'wok', 'szechuan'], 'Chinois'],
-      [['indien', 'indian', 'curry', 'tandoori', 'masala', 'naan'], 'Indien'],
-      [['thai', 'tha\u00ef', 'tha\u00eflandais', 'pad thai'], 'Tha\u00eflandais'],
-      [['vietnamien', 'vietnamese', 'pho', 'banh mi', 'bo bun'], 'Vietnamien'],
-      [['cor\u00e9en', 'korean', 'bibimbap', 'kimchi'], 'Cor\u00e9en'],
-      [['mexicain', 'mexican', 'tacos', 'taqueria', 'burrito'], 'Mexicain'],
-      [['libanais', 'lebanese', 'mezze', 'falafel', 'shawarma'], 'Libanais'],
-      [['marocain', 'moroccan', 'tagine', 'couscous', 'marocaine'], 'Marocain'],
-      [['grec', 'greek', 'taverna', 'gyros', 'souvlaki'], 'Grec'],
-      [['turc', 'turkish', 'kebab', 'd\u00f6ner'], 'Turc'],
-      [['espagnol', 'spanish', 'tapas', 'paella', 'catalan'], 'Espagnol'],
-      [['p\u00e9ruvien', 'peruvian', 'ceviche'], 'P\u00e9ruvien'],
-      [['burger', 'american', 'am\u00e9ricain', 'bbq', 'barbecue', 'diner'], 'Am\u00e9ricain'],
-      [['portugais', 'portuguese'], 'Portugais'],
-      [['rome', 'romano', 'roman', 'r\u00e9gion de rome'], 'Romain'],
-      [['m\u00e9diterran\u00e9en', 'mediterranean', 'mediterran\u00e9en'], 'M\u00e9diterran\u00e9en'],
-      [['fran\u00e7ais', 'french', 'proven\u00e7al', 'lyonnais', 'brasserie', 'bistro', 'bistrot', 'gastronomique', 'gastro', 'boulangerie', 'p\u00e2tisserie', 'patisserie', 'breton', 'alsacien', 'normand', 'savoyard', 'fruits de mer', 'seafood', 'steakhouse', 'grill'], 'Fran\u00e7ais'],
-      [['caf\u00e9', 'cafe', 'coffee', 'caff\u00e8', 'brunch', 'breakfast'], 'Caf\u00e9'],
+
+    // 1) D\u00e9tecter la nationalit\u00e9 / origine
+    const NATIONALITIES: [string[], string][] = [
+      [['sushi', 'ramen', 'japonais', 'japanese', 'izakaya', 'yakitori', 'udon', 'tempura'], 'japonais'],
+      [['italien', 'italian', 'pizza', 'pizzeria', 'trattoria', 'osteria', 'ristorante', 'pasta'], 'italien'],
+      [['chinois', 'chinese', 'dim sum', 'cantonais', 'wok', 'szechuan'], 'chinois'],
+      [['indien', 'indian', 'curry', 'tandoori', 'masala', 'naan'], 'indien'],
+      [['thai', 'tha\u00ef', 'tha\u00eflandais', 'pad thai'], 'tha\u00eflandais'],
+      [['vietnamien', 'vietnamese', 'pho', 'banh mi', 'bo bun'], 'vietnamien'],
+      [['cor\u00e9en', 'korean', 'bibimbap', 'kimchi'], 'cor\u00e9en'],
+      [['mexicain', 'mexican', 'tacos', 'taqueria', 'burrito'], 'mexicain'],
+      [['libanais', 'lebanese', 'mezze', 'falafel', 'shawarma'], 'libanais'],
+      [['marocain', 'moroccan', 'tagine', 'couscous', 'marocaine'], 'marocain'],
+      [['grec', 'greek', 'taverna', 'gyros', 'souvlaki'], 'grec'],
+      [['turc', 'turkish', 'kebab', 'd\u00f6ner'], 'turc'],
+      [['espagnol', 'spanish', 'tapas', 'paella', 'catalan'], 'espagnol'],
+      [['p\u00e9ruvien', 'peruvian', 'ceviche'], 'p\u00e9ruvien'],
+      [['burger', 'american', 'am\u00e9ricain', 'bbq', 'barbecue', 'diner'], 'am\u00e9ricain'],
+      [['portugais', 'portuguese'], 'portugais'],
+      [['rome', 'romano', 'roman'], 'romain'],
+      [['m\u00e9diterran\u00e9en', 'mediterranean', 'mediterran\u00e9en'], 'm\u00e9diterran\u00e9en'],
+      [['proven\u00e7al', 'provencal'], 'proven\u00e7al'],
+      [['lyonnais'], 'lyonnais'],
+      [['breton'], 'breton'],
+      [['alsacien'], 'alsacien'],
+      [['normand'], 'normand'],
+      [['savoyard'], 'savoyard'],
+      [['fran\u00e7ais', 'french', 'brasserie', 'bistro', 'bistrot', 'boulangerie', 'p\u00e2tisserie', 'patisserie'], 'fran\u00e7ais'],
     ];
-    for (const [keywords, label] of CUISINE_LABELS) {
-      if (keywords.some(kw => text.includes(kw))) return label;
+    let nationality = '';
+    for (const [keywords, nat] of NATIONALITIES) {
+      if (keywords.some(kw => text.includes(kw))) { nationality = nat; break; }
     }
+
+    // 2) D\u00e9tecter le type d'\u00e9tablissement (optionnel, enrichit le label)
+    const TYPES: [string[], string][] = [
+      [['brasserie'], 'Brasserie'],
+      [['bistro', 'bistrot'], 'Bistrot'],
+      [['trattoria'], 'Trattoria'],
+      [['osteria'], 'Osteria'],
+      [['ristorante'], 'Ristorante'],
+      [['izakaya'], 'Izakaya'],
+      [['taverna', 'taverne'], 'Taverne'],
+      [['gastronomique', 'gastro'], 'Gastronomique'],
+      [['boulangerie'], 'Boulangerie'],
+      [['p\u00e2tisserie', 'patisserie'], 'P\u00e2tisserie'],
+      [['fruits de mer', 'seafood'], 'Fruits de mer'],
+      [['steakhouse', 'grill'], 'Grill'],
+      [['pizzeria'], 'Pizzeria'],
+      [['taqueria'], 'Taqueria'],
+      [['caf\u00e9', 'cafe', 'coffee', 'caff\u00e8'], 'Caf\u00e9'],
+      [['brunch', 'breakfast'], 'Brunch'],
+    ];
+    let placeType = '';
+    for (const [keywords, t] of TYPES) {
+      if (keywords.some(kw => text.includes(kw))) { placeType = t; break; }
+    }
+
+    // 3) Combiner : "Type + nationalit\u00e9" ou juste nationalit\u00e9 capitalis\u00e9e
+    const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+    if (placeType && nationality) {
+      // Ex: "Brasserie fran\u00e7aise", "Trattoria italienne", "Izakaya japonais"
+      const fem = ['fran\u00e7ais', 'italien', 'espagnol', 'am\u00e9ricain', 'proven\u00e7al', 'cor\u00e9en', 'tha\u00eflandais', 'portugais', 'mexicain', 'marocain', 'libanais', 'grec', 'turc', 'p\u00e9ruvien', 'romain', 'indien', 'chinois', 'vietnamien', 'm\u00e9diterran\u00e9en', 'breton', 'alsacien', 'normand', 'savoyard', 'lyonnais'];
+      const femForms: Record<string, string> = {
+        'fran\u00e7ais': 'fran\u00e7aise', 'italien': 'italienne', 'espagnol': 'espagnole',
+        'am\u00e9ricain': 'am\u00e9ricaine', 'proven\u00e7al': 'proven\u00e7ale', 'cor\u00e9en': 'cor\u00e9enne',
+        'tha\u00eflandais': 'tha\u00eflandaise', 'portugais': 'portugaise', 'mexicain': 'mexicaine',
+        'marocain': 'marocaine', 'libanais': 'libanaise', 'grec': 'grecque',
+        'turc': 'turque', 'p\u00e9ruvien': 'p\u00e9ruvienne', 'romain': 'romaine',
+        'indien': 'indienne', 'chinois': 'chinoise', 'vietnamien': 'vietnamienne',
+        'm\u00e9diterran\u00e9en': 'm\u00e9diterran\u00e9enne', 'breton': 'bretonne', 'alsacien': 'alsacienne',
+        'normand': 'normande', 'savoyard': 'savoyarde', 'lyonnais': 'lyonnaise',
+      };
+      // Types f\u00e9minins en fran\u00e7ais
+      const femTypes = ['Brasserie', 'Trattoria', 'Osteria', 'Taverne', 'Boulangerie', 'P\u00e2tisserie', 'Pizzeria', 'Taqueria'];
+      const isFem = femTypes.includes(placeType);
+      const adj = isFem ? (femForms[nationality] || nationality) : nationality;
+      return `${placeType} ${adj}`;
+    }
+    if (placeType) return placeType; // "Caf\u00e9", "Brunch" etc. sans nationalit\u00e9
+    if (nationality) return cap(nationality); // "Fran\u00e7ais", "Italien", etc.
     return 'Restaurant';
   };
 
