@@ -1,3 +1,15 @@
+export interface GlobeWaypoint {
+  id: string;
+  lat: number;
+  lng: number;
+  name: string;
+  type: string;
+  dayNumber?: number;
+  order?: number;
+  imageUrl?: string;
+  tripPhotoId?: string;
+}
+
 export interface Traveler {
   id: string;
   name: string;
@@ -11,6 +23,9 @@ export interface Traveler {
   tripDates: string;
   rating: number;
   itinerary: string[];
+  routePoints?: GlobeWaypoint[];
+  destination?: string;
+  ownerName?: string;
   isOnline?: boolean;
   imageUrl?: string;
 }
@@ -22,4 +37,6 @@ export interface TripArc {
   to: { lat: number; lng: number; name: string };
   color?: string;
   animated?: boolean;
+  distanceKm?: number;
+  isLongHaul?: boolean;
 }

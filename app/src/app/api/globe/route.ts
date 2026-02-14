@@ -2,6 +2,7 @@ import { createRouteHandlerClient } from '@/lib/supabase/server';
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 import { getAcceptedCloseFriendIds } from '@/lib/server/closeFriends';
+import { calculateDistance } from '@/lib/services/geocoding';
 
 function getServiceClient() {
   return createClient(
@@ -38,10 +39,40 @@ interface GlobePhotoRow {
 }
 
 interface TripGeoPoint {
+  id: string;
   lat: number;
   lng: number;
   name: string;
   type: string;
+  dayNumber?: number;
+  order?: number;
+  imageUrl?: string;
+  tripPhotoId?: string;
+}
+
+interface TripPhotoPoint {
+  id: string;
+  lat: number;
+  lng: number;
+  name: string;
+  imageUrl?: string;
+}
+
+const ROUTE_DEDUP_THRESHOLD_KM = 0.2;
+const PHOTO_MATCH_THRESHOLD_KM = 0.35;
+const PHOTO_STANDALONE_MIN_KM = 0.6;
+
+function isValidCoord(lat: number | undefined, lng: number | undefined): boolean {
+  return typeof lat === 'number'
+    && typeof lng === 'number'
+    && Number.isFinite(lat)
+    && Number.isFinite(lng)
+    && Math.abs(lat) <= 90
+    && Math.abs(lng) <= 180;
+}
+
+function normalizePointName(name: string): string {
+  return name.trim().toLowerCase().replace(/\s+/g, ' ');
 }
 
 // GET /api/globe - Get trips from followed users for globe visualization
@@ -105,19 +136,36 @@ export async function GET() {
       .select('id, trip_id, storage_path, thumbnail_path, latitude, longitude, location_name')
       .in('trip_id', tripIds);
 
-    // Build cover URL map (first photo per trip)
+    // Build cover map and per-trip photo geo points
     const coverMap: Record<string, string> = {};
+    const photoPointsByTrip: Record<string, TripPhotoPoint[]> = {};
     const typedPhotos: GlobePhotoRow[] = photos || [];
     if (typedPhotos.length > 0) {
       const seen = new Set<string>();
       for (const p of typedPhotos) {
+        const path = p.thumbnail_path || p.storage_path;
+        let imageUrl: string | undefined;
+        if (path) {
+          const { data: urlData } = sc.storage.from('trip-photos').getPublicUrl(path);
+          imageUrl = urlData?.publicUrl || undefined;
+        }
+
         if (!seen.has(p.trip_id)) {
           seen.add(p.trip_id);
-          const path = p.thumbnail_path || p.storage_path;
-          if (path) {
-            const { data: urlData } = sc.storage.from('trip-photos').getPublicUrl(path);
-            coverMap[p.trip_id] = urlData?.publicUrl || '';
+          if (imageUrl) {
+            coverMap[p.trip_id] = imageUrl;
           }
+        }
+
+        if (isValidCoord(p.latitude ?? undefined, p.longitude ?? undefined)) {
+          photoPointsByTrip[p.trip_id] ??= [];
+          photoPointsByTrip[p.trip_id].push({
+            id: p.id,
+            lat: p.latitude as number,
+            lng: p.longitude as number,
+            name: p.location_name || 'Photo',
+            imageUrl,
+          });
         }
       }
     }
@@ -126,43 +174,129 @@ export async function GET() {
     const extractGeoFromTrip = (trip: GlobeTripRow): TripGeoPoint[] => {
       const data = (trip.data || {}) as {
         preferences?: { destinationCoords?: { lat?: number; lng?: number } };
-        days?: Array<{ items?: Array<{ latitude?: number; longitude?: number; locationName?: string; title?: string; type?: string }> }>;
+        days?: Array<{
+          dayNumber?: number;
+          items?: Array<{
+            id?: string;
+            latitude?: number;
+            longitude?: number;
+            locationName?: string;
+            title?: string;
+            type?: string;
+          }>;
+        }>;
       };
       const prefs = (trip.preferences || data.preferences || {}) as {
         destinationCoords?: { lat?: number; lng?: number };
       };
-      const points: TripGeoPoint[] = [];
+      const rawPoints: TripGeoPoint[] = [];
+      let pointOrder = 0;
 
       // Destination coords from preferences
       if (
-        prefs.destinationCoords &&
-        typeof prefs.destinationCoords.lat === 'number' &&
-        typeof prefs.destinationCoords.lng === 'number'
+        prefs.destinationCoords
+        && isValidCoord(prefs.destinationCoords.lat, prefs.destinationCoords.lng)
       ) {
-        points.push({
-          lat: prefs.destinationCoords.lat,
-          lng: prefs.destinationCoords.lng,
+        const destLat = prefs.destinationCoords.lat as number;
+        const destLng = prefs.destinationCoords.lng as number;
+        rawPoints.push({
+          id: `${trip.id}-destination`,
+          lat: destLat,
+          lng: destLng,
           name: trip.destination || trip.title || 'Destination',
           type: 'destination',
+          order: pointOrder++,
         });
       }
 
       // Extract coords from day items
       const days = data.days || [];
-      for (const day of days) {
+      for (let dayIndex = 0; dayIndex < days.length; dayIndex += 1) {
+        const day = days[dayIndex];
         for (const item of (day.items || [])) {
-          if (typeof item.latitude === 'number' && typeof item.longitude === 'number') {
-            points.push({
-              lat: item.latitude,
-              lng: item.longitude,
+          if (isValidCoord(item.latitude, item.longitude)) {
+            rawPoints.push({
+              id: item.id || `${trip.id}-point-${pointOrder}`,
+              lat: item.latitude as number,
+              lng: item.longitude as number,
               name: item.locationName || item.title || 'Point',
               type: item.type || 'activity',
+              dayNumber: day.dayNumber || dayIndex + 1,
+              order: pointOrder++,
             });
           }
         }
       }
 
-      return points;
+      // Remove near-duplicates while preserving route order.
+      const deduped: TripGeoPoint[] = [];
+      for (const point of rawPoints) {
+        const prev = deduped[deduped.length - 1];
+        if (!prev) {
+          deduped.push(point);
+          continue;
+        }
+
+        const nearPrev = calculateDistance(prev.lat, prev.lng, point.lat, point.lng) <= ROUTE_DEDUP_THRESHOLD_KM;
+        const sameName = normalizePointName(prev.name) === normalizePointName(point.name);
+        const sameType = prev.type === point.type;
+
+        if (nearPrev && (sameName || sameType)) {
+          continue;
+        }
+        deduped.push(point);
+      }
+
+      // Attach photo thumbnails to nearest points.
+      const tripPhotoPoints = [...(photoPointsByTrip[trip.id] || [])];
+      const remainingPhotoPoints: TripPhotoPoint[] = [];
+
+      for (const photo of tripPhotoPoints) {
+        let nearestPointIndex = -1;
+        let nearestDistance = Infinity;
+
+        for (let i = 0; i < deduped.length; i += 1) {
+          const point = deduped[i];
+          const distanceKm = calculateDistance(point.lat, point.lng, photo.lat, photo.lng);
+          if (distanceKm < nearestDistance) {
+            nearestDistance = distanceKm;
+            nearestPointIndex = i;
+          }
+        }
+
+        if (nearestPointIndex >= 0 && nearestDistance <= PHOTO_MATCH_THRESHOLD_KM) {
+          const matched = deduped[nearestPointIndex];
+          if (!matched.imageUrl && photo.imageUrl) {
+            matched.imageUrl = photo.imageUrl;
+            matched.tripPhotoId = photo.id;
+          }
+        } else {
+          remainingPhotoPoints.push(photo);
+        }
+      }
+
+      // Add standalone photo spots only when not close to route points.
+      for (const photo of remainingPhotoPoints) {
+        const tooCloseToExisting = deduped.some((point) =>
+          calculateDistance(point.lat, point.lng, photo.lat, photo.lng) <= PHOTO_STANDALONE_MIN_KM
+        );
+
+        if (!tooCloseToExisting) {
+          deduped.push({
+            id: `${trip.id}-photo-${photo.id}`,
+            lat: photo.lat,
+            lng: photo.lng,
+            name: photo.name || 'Spot photo',
+            type: 'photo',
+            order: pointOrder++,
+            imageUrl: photo.imageUrl,
+            tripPhotoId: photo.id,
+          });
+        }
+      }
+
+      deduped.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+      return deduped.slice(0, 60);
     };
 
     const globeTrips = visibleTrips.map((trip) => ({
