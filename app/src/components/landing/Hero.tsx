@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 
 const trustPoints = [
   { icon: Clock3, label: 'Plan en 2 min' },
-  { icon: Users2, label: 'Mode collaboratif' },
+  { icon: Users2, label: 'Réseau social intégré' },
   { icon: ShieldCheck, label: 'Liens fiables' },
 ];
 
@@ -69,7 +69,7 @@ export function Hero() {
 
             <p className="mt-6 max-w-xl text-lg text-muted-foreground md:text-xl">
               Narae compose un itinéraire précis, élégant et collaboratif:
-              horaires réalistes, adresses de qualité, et réservations prêtes à ouvrir.
+              horaires réalistes, adresses de qualité, réseau social voyageur et réservations prêtes à ouvrir.
             </p>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">

@@ -9,7 +9,7 @@ import { TripPreferences } from '@/lib/types';
 import { toast } from 'sonner';
 import { useAuth } from '@/components/auth';
 import { generateTripStream } from '@/lib/generateTrip';
-import { Hero, HowItWorks, Features, PopularDestinations, Testimonials, CTASection } from '@/components/landing';
+import { Hero, HowItWorks, Features, SocialNetworkSection, PopularDestinations, Testimonials, CTASection } from '@/components/landing';
 import { Footer } from '@/components/layout';
 
 // Date helpers
@@ -431,6 +431,7 @@ export default function Home() {
       <PresetTripsSection />
       <HowItWorks />
       <Features />
+      <SocialNetworkSection />
       <PopularDestinations />
       <Testimonials />
       <CTASection />

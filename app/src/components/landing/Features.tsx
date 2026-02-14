@@ -38,7 +38,7 @@ const features = [
   {
     icon: Globe,
     title: 'Partage Social',
-    description: 'Partagez vos aventures, découvrez les voyages des autres et inspirez-vous.',
+    description: 'Suivez des profils, commentez les itinéraires et transformez l’inspiration en plans concrets.',
     color: 'from-[#257e9f]/15 to-[#257e9f]/5 text-[#257e9f] dark:text-[#8bcde6]',
   },
 ];
