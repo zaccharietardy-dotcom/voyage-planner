@@ -26,7 +26,7 @@ describe('bookingLinks', () => {
     expect(url).toContain('aid=304142');
   });
 
-  it('converts booking search URL to direct hotel URL', () => {
+  it('keeps booking search URL and injects dates/adults', () => {
     const url = normalizeHotelBookingUrl({
       url: 'https://www.booking.com/searchresults.html?ss=Hotel+V+Nesplein+Amsterdam',
       hotelName: 'Hotel V Nesplein Amsterdam',
@@ -36,16 +36,17 @@ describe('bookingLinks', () => {
       adults: 2,
     });
 
-    expect(isBookingSearchUrl(url)).toBe(false);
-    expect(isBookingHotelPath(url)).toBe(true);
-    expect(url).toContain('/hotel/nl/');
+    expect(isBookingSearchUrl(url)).toBe(true);
+    expect(isBookingHotelPath(url)).toBe(false);
+    expect(url).toContain('searchresults.html');
+    expect(url).toContain('ss=Hotel+V+Nesplein+Amsterdam');
     expect(url).toContain('checkin=2026-05-02');
     expect(url).toContain('checkout=2026-05-05');
+    expect(url).toContain('group_adults=2');
     expect(url).toContain('group_children=0');
-    expect(url).not.toContain('searchresults.html');
   });
 
-  it('builds direct hotel URL when missing url', () => {
+  it('builds booking search URL when missing url', () => {
     const url = normalizeHotelBookingUrl({
       hotelName: 'The Dylan Amsterdam',
       destinationHint: 'Amsterdam',
@@ -54,10 +55,11 @@ describe('bookingLinks', () => {
       adults: 2,
     });
 
-    expect(url).toContain('booking.com/hotel/nl/');
-    expect(url).toContain('/the-dylan-amsterdam.html');
+    expect(url).toContain('booking.com/searchresults.html');
+    expect(url).toContain('ss=The+Dylan+Amsterdam+Amsterdam');
     expect(url).toContain('checkin=2026-06-01');
     expect(url).toContain('checkout=2026-06-03');
+    expect(url).toContain('group_adults=2');
     expect(url).toContain('group_children=0');
   });
 

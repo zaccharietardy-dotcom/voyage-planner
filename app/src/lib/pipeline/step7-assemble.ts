@@ -44,13 +44,13 @@ const MODE_LABELS: Record<string, string> = {
 /** Static images for transport types (Unsplash free-to-use) */
 const TRANSPORT_IMAGES: Record<string, string> = {
   flight: 'https://images.unsplash.com/photo-1436491865332-7a61a109db05?w=600&h=400&fit=crop',
-  train: 'https://images.unsplash.com/photo-1452421822248-d4c2b47f0c81?w=600&h=400&fit=crop',
+  train: '/images/transport/train-sncf-duplex.jpg',
   bus: 'https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=600&h=400&fit=crop',
   ferry: 'https://images.unsplash.com/photo-1534008897995-27a23e859048?w=600&h=400&fit=crop',
   car: 'https://images.unsplash.com/photo-1449965408869-ebd13bc9e5a8?w=600&h=400&fit=crop',
-  combined: 'https://images.unsplash.com/photo-1452421822248-d4c2b47f0c81?w=600&h=400&fit=crop',
+  combined: '/images/transport/train-sncf-duplex.jpg',
   walking: 'https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?w=600&h=400&fit=crop',
-  transit: 'https://images.unsplash.com/photo-1452421822248-d4c2b47f0c81?w=600&h=400&fit=crop',
+  transit: '/images/transport/train-sncf-duplex.jpg',
 };
 
 const PIPELINE_MEDIA_PROXY = !['0', 'false', 'off'].includes(
@@ -98,6 +98,40 @@ function getTransportImage(itemData: any): string {
   const mode = getTransportModeFromItemData(itemData);
   if (mode && TRANSPORT_IMAGES[mode]) return TRANSPORT_IMAGES[mode];
   return TRANSPORT_IMAGES.train;
+}
+
+function normalizeRestaurantGooglePhotoUrl(raw?: string): string | undefined {
+  if (!raw) return undefined;
+  const sanitized = sanitizeApiKeyLeaksInString(sanitizeGoogleMapsUrl(raw));
+  if (sanitized.startsWith('/api/place-photo?')) return sanitized;
+  if (sanitized.includes('maps.googleapis.com/maps/api/place/photo')) {
+    return sanitizeGoogleMapsUrl(sanitized);
+  }
+  return undefined;
+}
+
+function extractGoogleRestaurantPhotos(restaurant?: Partial<Restaurant>): string[] {
+  const photos = Array.isArray(restaurant?.photos) ? restaurant.photos : [];
+  const normalized = photos
+    .map((photo) => normalizeRestaurantGooglePhotoUrl(photo))
+    .filter((photo): photo is string => Boolean(photo));
+  return [...new Set(normalized)];
+}
+
+function enforceGoogleRestaurantPhotoPolicy(restaurant?: Restaurant): void {
+  if (!restaurant) return;
+  const googlePhotos = extractGoogleRestaurantPhotos(restaurant);
+  if (googlePhotos.length > 0) {
+    restaurant.photos = googlePhotos;
+  } else {
+    delete restaurant.photos;
+  }
+}
+
+function getRestaurantPrimaryGooglePhoto(itemData: any): string | undefined {
+  const fromPhotos = extractGoogleRestaurantPhotos(itemData as Partial<Restaurant>)[0];
+  if (fromPhotos) return fromPhotos;
+  return normalizeRestaurantGooglePhotoUrl(itemData?.imageUrl) || normalizeRestaurantGooglePhotoUrl(itemData?.photoUrl);
 }
 
 export function normalizeReturnTransportBookingUrl(rawUrl: string | undefined, returnDate: Date): string | undefined {
@@ -1433,6 +1467,10 @@ export async function assembleTripSchedule(
         ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(placeName + ', ' + placeCity)}`
         : undefined;
 
+      const restaurantImageUrl = item.type === 'restaurant'
+        ? getRestaurantPrimaryGooglePhoto(itemData)
+        : undefined;
+
       return {
         id: item.id || uuidv4(),
         dayNumber: balancedDay.dayNumber,
@@ -1473,7 +1511,8 @@ export async function assembleTripSchedule(
         transportMode: resolvedTransportMode,
         transportRole: itemData.transportRole || (item.type === 'transport' ? 'inter_item' : undefined),
         dataReliability: itemData.dataReliability || 'verified',
-        imageUrl: itemData.photos?.[0] || itemData.imageUrl || itemData.photoUrl
+        imageUrl: restaurantImageUrl
+          || (item.type !== 'restaurant' ? (itemData.photos?.[0] || itemData.imageUrl || itemData.photoUrl) : undefined)
           || (item.type === 'flight' ? TRANSPORT_IMAGES.flight : undefined)
           || (item.type === 'transport' ? getTransportImage({ ...itemData, transportMode: resolvedTransportMode }) : undefined),
         // Viator flags (activities only)
@@ -2576,8 +2615,7 @@ function getActivityMinStartTime(activity: ScoredActivity, dayDate: Date): Date 
 async function enrichWithPlaceImages(days: TripDay[], destinationHint?: string): Promise<void> {
   try {
     const itemsNeedingImages: TripItem[] = [];
-    // Restaurants exclus : ils utilisent SerpAPI thumbnail / TripAdvisor heroImgUrl
-    // fetchPlaceImage() peut renvoyer la photo d'un autre restaurant du même nom
+    // Restaurants exclus: enrichis séparément via Google Places (photos Google Maps only).
     const imageTypes = ['activity', 'hotel', 'checkin', 'checkout'];
 
     for (const day of days) {
@@ -2623,7 +2661,7 @@ async function enrichWithPlaceImages(days: TripDay[], destinationHint?: string):
     await Promise.race([enrichmentWork(), timeout]);
 
     const enriched = itemsNeedingImages.filter(i => i.imageUrl).length;
-    console.log(`[Pipeline V2] ✅ Place images: ${enriched}/${itemsNeedingImages.length} enriched (restaurants excluded — use SerpAPI/TripAdvisor photos)`);
+    console.log(`[Pipeline V2] ✅ Place images: ${enriched}/${itemsNeedingImages.length} enriched (restaurants handled in dedicated Google photo pass)`);
   } catch (e) {
     console.warn('[Pipeline V2] Image enrichment error:', e);
   }
@@ -2633,19 +2671,7 @@ async function enrichWithPlaceImages(days: TripDay[], destinationHint?: string):
  * Determine if a restaurant needs a better photo (no photo, or only a low-quality SerpAPI thumbnail).
  */
 function needsBetterPhoto(restaurant: Restaurant): boolean {
-  // No photos at all
-  if (!restaurant.photos || restaurant.photos.length === 0) return true;
-
-  // Only has SerpAPI thumbnails (low quality, typically from lh5.googleusercontent.com at small size)
-  const firstPhoto = restaurant.photos[0];
-  if (!firstPhoto) return true;
-
-  // Already has a Google Places photo URL (maxwidth=800) → good quality
-  if (firstPhoto.includes('maps.googleapis.com/maps/api/place/photo') || firstPhoto.includes('/api/place-photo')) return false;
-
-  // SerpAPI thumbnails are typically from lh5.googleusercontent.com with small dimensions
-  // or from other low-quality sources. If it's not a Google Places photo, try to upgrade.
-  return true;
+  return extractGoogleRestaurantPhotos(restaurant).length === 0;
 }
 
 /**
@@ -2657,18 +2683,21 @@ function needsBetterPhoto(restaurant: Restaurant): boolean {
  */
 async function enrichRestaurantsWithPhotos(days: TripDay[], destinationHint?: string): Promise<void> {
   try {
-    // Collect all restaurants (main + alternatives) that need better photos
+    // Collect all restaurants (main + alternatives) that need better photos.
+    // Keep only Google photo sources; drop all non-Google thumbnails/heroes.
     const restaurantsToEnrich: Restaurant[] = [];
 
     for (const day of days) {
       for (const item of day.items) {
         if (item.type === 'restaurant' && item.restaurant) {
+          enforceGoogleRestaurantPhotoPolicy(item.restaurant);
           if (needsBetterPhoto(item.restaurant)) {
             restaurantsToEnrich.push(item.restaurant);
           }
           // Also check alternatives
           if (item.restaurantAlternatives) {
             for (const alt of item.restaurantAlternatives) {
+              enforceGoogleRestaurantPhotoPolicy(alt);
               if (needsBetterPhoto(alt)) {
                 restaurantsToEnrich.push(alt);
               }
@@ -2702,19 +2731,20 @@ async function enrichRestaurantsWithPhotos(days: TripDay[], destinationHint?: st
 
               // Path B: Fallback to name-based search (less reliable, $0.017)
               if (!photoUrl && restaurant.name) {
-                photoUrl = await fetchPlaceImage(
+                const fallback = await fetchPlaceImage(
                   restaurant.name,
                   restaurant.latitude,
                   restaurant.longitude,
                   destinationHint
                 );
+                photoUrl = normalizeRestaurantGooglePhotoUrl(fallback || undefined) || null;
               }
 
-              if (photoUrl) {
-                // Prepend the Google Places photo to the photos array
-                if (!restaurant.photos) restaurant.photos = [];
-                restaurant.photos.unshift(photoUrl);
+              const normalizedPhoto = normalizeRestaurantGooglePhotoUrl(photoUrl || undefined);
+              if (normalizedPhoto) {
+                restaurant.photos = [normalizedPhoto];
               }
+              enforceGoogleRestaurantPhotoPolicy(restaurant);
             } catch {
               // Individual restaurant failure — skip silently
             }
@@ -2735,9 +2765,16 @@ async function enrichRestaurantsWithPhotos(days: TripDay[], destinationHint?: st
     // Sync imageUrl on restaurant TripItems (so the card displays the new photo)
     for (const day of days) {
       for (const item of day.items) {
-        if (item.type === 'restaurant' && item.restaurant?.photos?.[0]) {
-          item.imageUrl = item.restaurant.photos[0];
+        if (item.type !== 'restaurant') continue;
+        if (item.restaurant) {
+          enforceGoogleRestaurantPhotoPolicy(item.restaurant);
         }
+        if (item.restaurantAlternatives) {
+          for (const alt of item.restaurantAlternatives) {
+            enforceGoogleRestaurantPhotoPolicy(alt);
+          }
+        }
+        item.imageUrl = item.restaurant?.photos?.[0];
       }
     }
 

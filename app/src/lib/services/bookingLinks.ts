@@ -114,6 +114,15 @@ type BuildDirectBookingHotelUrlParams = {
   existingUrl?: string;
 };
 
+type BuildBookingSearchUrlParams = {
+  hotelName: string;
+  destinationHint?: string;
+  checkIn?: string;
+  checkOut?: string;
+  adults?: number;
+  existingUrl?: string;
+};
+
 type NormalizeHotelBookingUrlParams = {
   url?: string | null;
   hotelName: string;
@@ -280,6 +289,39 @@ export function buildDirectBookingHotelUrl({
   return `${basePath}?${params.toString()}`;
 }
 
+export function buildBookingSearchUrl({
+  hotelName,
+  destinationHint,
+  checkIn,
+  checkOut,
+  adults,
+  existingUrl,
+}: BuildBookingSearchUrlParams): string {
+  const parsedExisting = existingUrl && isBookingSearchUrl(existingUrl)
+    ? toBookingUrl(existingUrl)
+    : null;
+
+  const params = parsedExisting
+    ? new URLSearchParams(parsedExisting.searchParams.toString())
+    : new URLSearchParams();
+
+  const normalizedCheckIn = sanitizeDate(checkIn);
+  const normalizedCheckOut = sanitizeDate(checkOut);
+  const normalizedAdults = adults && adults > 0 ? adults : 2;
+  const searchLabel = [hotelName, destinationHint].filter(Boolean).join(' ').trim();
+
+  if (searchLabel) {
+    params.set('ss', searchLabel);
+  }
+  if (normalizedCheckIn) params.set('checkin', normalizedCheckIn);
+  if (normalizedCheckOut) params.set('checkout', normalizedCheckOut);
+  params.set('group_adults', String(normalizedAdults));
+  params.set('group_children', '0');
+  params.set('no_rooms', '1');
+
+  return `${BOOKING_BASE_ORIGIN}/searchresults.html?${params.toString()}`;
+}
+
 export function normalizeHotelBookingUrl({
   url,
   hotelName,
@@ -295,7 +337,7 @@ export function normalizeHotelBookingUrl({
   }
 
   if (!raw) {
-    return buildDirectBookingHotelUrl({
+    return buildBookingSearchUrl({
       hotelName,
       destinationHint,
       checkIn,
@@ -315,8 +357,19 @@ export function normalizeHotelBookingUrl({
     });
   }
 
-  if (isBookingSearchUrl(raw) || isBookingDomain(raw)) {
-    return buildDirectBookingHotelUrl({
+  if (isBookingSearchUrl(raw)) {
+    return buildBookingSearchUrl({
+      hotelName,
+      destinationHint,
+      checkIn,
+      checkOut,
+      adults,
+      existingUrl: raw,
+    });
+  }
+
+  if (isBookingDomain(raw)) {
+    return buildBookingSearchUrl({
       hotelName,
       destinationHint,
       checkIn,

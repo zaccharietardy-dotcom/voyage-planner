@@ -28,7 +28,7 @@ describe('rapidApiBooking', () => {
     jest.restoreAllMocks();
   });
 
-  it('falls back to direct booking slug when getHotelDetails fails', async () => {
+  it('falls back to booking search URL when getHotelDetails fails', async () => {
     process.env.RAPIDAPI_KEY = 'test-key';
 
     const fetchMock = jest.fn()
@@ -75,9 +75,10 @@ describe('rapidApiBooking', () => {
     );
 
     expect(hotels).toHaveLength(1);
-    expect(hotels[0].bookingUrl).toContain('booking.com/hotel/nl/');
+    expect(hotels[0].bookingUrl).toContain('booking.com/searchresults.html');
+    expect(hotels[0].bookingUrl).toContain('ss=Hotel+V+Nesplein+Amsterdam+Amsterdam');
     expect(hotels[0].bookingUrl).toContain('checkin=2026-08-10');
     expect(hotels[0].bookingUrl).toContain('checkout=2026-08-12');
-    expect(hotels[0].bookingUrl).not.toContain('searchresults.html');
+    expect(hotels[0].bookingUrl).toContain('group_adults=2');
   });
 });
