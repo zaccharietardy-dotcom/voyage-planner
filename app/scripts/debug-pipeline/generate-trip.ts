@@ -2,7 +2,7 @@
 /**
  * Générateur CLI de voyages pour le debug pipeline
  *
- * Appelle generateTripWithAI() directement, sans passer par l'UI ni Supabase.
+ * Appelle generateTripV2() directement, sans passer par l'UI ni Supabase.
  *
  * Usage:
  *   npx tsx scripts/debug-pipeline/generate-trip.ts --scenario paris-rome-4d
@@ -31,10 +31,10 @@ if (fs.existsSync(envPath)) {
 }
 
 // Imports après dotenv
-import { generateTripWithAI } from '../../src/lib/ai';
+import { generateTripV2 } from '../../src/lib/pipeline';
 import { generateRandomPreferences } from '../../src/lib/randomExample';
 import { TripPreferences } from '../../src/lib/types';
-import { SCENARIOS, getScenario, getAllScenarioIds, Scenario } from './scenarios';
+import { SCENARIOS, getScenario, getAllScenarioIds } from './scenarios';
 
 // ============================================
 // Console capture
@@ -104,7 +104,7 @@ async function generateTrip(scenarioId: string, preferences: TripPreferences): P
   console.log(`${'='.repeat(70)}\n`);
 
   try {
-    const trip = await generateTripWithAI(preferences);
+    const trip = await generateTripV2(preferences);
     const durationMs = Date.now() - startTime;
     captured.restore();
 

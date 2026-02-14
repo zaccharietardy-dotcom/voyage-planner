@@ -6,7 +6,7 @@
 
 | Catégorie | API | Type de Lien | Fichier Principal |
 |-----------|-----|--------------|-------------------|
-| **Hôtels** | RapidAPI Booking.com | Direct `/hotel/xx/name.html` | `rapidApiBooking.ts` |
+| **Hôtels** | RapidAPI Booking.com | Direct `/hotel/xx/name.html` + normalisation | `rapidApiBooking.ts` + `bookingLinks.ts` |
 | **Activités** | Viator Partner API | Direct ou Recherche | `viator.ts` |
 | **Attractions** | SerpAPI | Google Maps | `serpApiPlaces.ts` |
 | **Restaurants** | SerpAPI | Google Maps | `serpApiPlaces.ts` |
@@ -49,6 +49,14 @@ https://www.booking.com/hotel/nl/hotel-name.html?checkin=2026-02-10&checkout=202
 
 ### Fichier
 `src/lib/services/rapidApiBooking.ts`
+
+### Normalisation des URLs hôtels (V2)
+- Fichier central: `src/lib/services/bookingLinks.ts`
+- Règles:
+  - conserve les URLs directes `/hotel/`
+  - convertit `searchresults` vers `/hotel/{country}/{slug}.html`
+  - génère une URL directe si absente
+  - conserve Airbnb tel quel
 
 ---
 

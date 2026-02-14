@@ -12,6 +12,12 @@
  * 3. getHotelDetails → URL Booking.com directe
  */
 
+import {
+  getBookingCountryCode,
+  isBookingDomain,
+  normalizeHotelBookingUrl,
+} from './bookingLinks';
+
 function getRapidApiKey() { return process.env.RAPIDAPI_KEY?.trim(); }
 const RAPIDAPI_HOST = 'booking-com15.p.rapidapi.com';
 const RAPIDAPI_BASE_URL = `https://${RAPIDAPI_HOST}/api/v1/hotels`;
@@ -37,6 +43,57 @@ export interface BookingHotel {
   photoUrl: string;
   bookingUrl: string;
   available: boolean;
+}
+
+interface RawBookingProperty {
+  id?: string | number;
+  name?: string;
+  countryCode?: string;
+  latitude?: number;
+  longitude?: number;
+  reviewScore?: number;
+  reviewCount?: number;
+  propertyClass?: number;
+  accuratePropertyClass?: number;
+  checkin?: { fromTime?: string };
+  checkout?: { untilTime?: string };
+  hasBreakfast?: boolean;
+  address?: string;
+  city?: string;
+  distanceFromCenter?: string | number;
+  url?: string;
+  photoUrls?: string[];
+  mainPhotoUrl?: string;
+  priceBreakdown?: { grossPrice?: { value?: number } };
+}
+
+interface RawBookingHotelItem {
+  soldout?: boolean | number;
+  hotel_id?: string | number;
+  id?: string | number;
+  property?: RawBookingProperty;
+  price_breakdown?: { gross_price?: number };
+  min_total_price?: number;
+  composite_price_breakdown?: { gross_amount_per_night?: { value?: number } };
+  hotel_name?: string;
+  hotel_name_trans?: string;
+  country_trans?: string;
+  cc1?: string;
+  latitude?: number;
+  longitude?: number;
+  review_score?: number;
+  review_nr?: number;
+  class?: number;
+  checkin?: { from?: string };
+  checkout?: { until?: string };
+  hotel_include_breakfast?: number;
+  address?: string;
+  address_trans?: string;
+  city?: string;
+  distance_to_cc?: string | number;
+  distance?: string | number;
+  url?: string;
+  main_photo_url?: string;
 }
 
 /**
@@ -85,7 +142,7 @@ async function getDestinationId(city: string): Promise<{ destId: string; destTyp
 
     // Chercher la ville (dest_type "city")
     const cityResult = Array.isArray(results)
-      ? results.find((item: any) => item.dest_type === 'city' || item.search_type === 'city')
+      ? results.find((item: { dest_type?: string; search_type?: string }) => item.dest_type === 'city' || item.search_type === 'city')
       : null;
 
     const result = cityResult || (Array.isArray(results) && results.length > 0 ? results[0] : null);
@@ -107,73 +164,6 @@ async function getDestinationId(city: string): Promise<{ destId: string; destTyp
 }
 
 /**
- * Génère un slug Booking.com à partir du nom de l'hôtel
- * Ex: "Hotel ClinkMama Amsterdam" → "clinkmama"
- */
-function generateHotelSlug(hotelName: string): string {
-  return hotelName
-    .toLowerCase()
-    .replace(/\b(hotel|hostel|b&b|bed and breakfast|apartments?|residence|inn)\b/gi, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .replace(/-+/g, '-');
-}
-
-/**
- * Détecte le code pays Booking.com à partir de la destination
- */
-function getCountryCodeFromDestination(destination: string): string {
-  const dest = destination.toLowerCase();
-
-  // Map des villes/pays vers codes Booking.com
-  const countryMap: Record<string, string> = {
-    // Pays-Bas
-    'amsterdam': 'nl', 'rotterdam': 'nl', 'hague': 'nl', 'utrecht': 'nl', 'netherlands': 'nl',
-    // Espagne
-    'barcelona': 'es', 'madrid': 'es', 'valencia': 'es', 'seville': 'es', 'sevilla': 'es',
-    'malaga': 'es', 'bilbao': 'es', 'spain': 'es', 'espagne': 'es',
-    // France
-    'paris': 'fr', 'lyon': 'fr', 'marseille': 'fr', 'nice': 'fr', 'bordeaux': 'fr',
-    'toulouse': 'fr', 'nantes': 'fr', 'strasbourg': 'fr', 'france': 'fr',
-    // Italie
-    'rome': 'it', 'roma': 'it', 'milan': 'it', 'milano': 'it', 'florence': 'it',
-    'firenze': 'it', 'venice': 'it', 'venezia': 'it', 'naples': 'it', 'napoli': 'it', 'italy': 'it', 'italie': 'it',
-    // Allemagne
-    'berlin': 'de', 'munich': 'de', 'frankfurt': 'de', 'hamburg': 'de', 'cologne': 'de',
-    'germany': 'de', 'allemagne': 'de',
-    // UK
-    'london': 'gb', 'manchester': 'gb', 'edinburgh': 'gb', 'birmingham': 'gb', 'uk': 'gb',
-    'england': 'gb', 'scotland': 'gb',
-    // Portugal
-    'lisbon': 'pt', 'porto': 'pt', 'portugal': 'pt',
-    // Belgique
-    'brussels': 'be', 'bruxelles': 'be', 'bruges': 'be', 'antwerp': 'be', 'belgium': 'be', 'belgique': 'be',
-    // Autres
-    'vienna': 'at', 'wien': 'at', 'austria': 'at', 'autriche': 'at',
-    'prague': 'cz', 'czech': 'cz',
-    'budapest': 'hu', 'hungary': 'hu',
-    'copenhagen': 'dk', 'denmark': 'dk',
-    'stockholm': 'se', 'sweden': 'se',
-    'oslo': 'no', 'norway': 'no',
-    'helsinki': 'fi', 'finland': 'fi',
-    'dublin': 'ie', 'ireland': 'ie',
-    'athens': 'gr', 'greece': 'gr',
-    'istanbul': 'tr', 'turkey': 'tr',
-    'morocco': 'ma', 'marrakech': 'ma', 'maroc': 'ma',
-    'new york': 'us', 'los angeles': 'us', 'usa': 'us', 'united states': 'us',
-    'tokyo': 'jp', 'japan': 'jp', 'japon': 'jp',
-  };
-
-  for (const [key, code] of Object.entries(countryMap)) {
-    if (dest.includes(key)) {
-      return code;
-    }
-  }
-
-  return 'nl'; // Default
-}
-
-/**
  * Récupère l'URL Booking.com directe pour un hôtel
  */
 async function getHotelBookingUrl(
@@ -186,6 +176,17 @@ async function getHotelBookingUrl(
 ): Promise<string | null> {
   if (!getRapidApiKey()) return null;
 
+  const fallbackToDirect = () => {
+    if (!hotelName) return null;
+    return normalizeHotelBookingUrl({
+      hotelName,
+      destinationHint: countryCode,
+      checkIn,
+      checkOut,
+      adults,
+    });
+  };
+
   try {
     const url = `${RAPIDAPI_BASE_URL}/getHotelDetails?hotel_id=${encodeURIComponent(hotelId)}&arrival_date=${checkIn}&departure_date=${checkOut}&adults=${adults}&currency_code=EUR`;
 
@@ -196,14 +197,7 @@ async function getHotelBookingUrl(
       },
     });
 
-    if (!response.ok) {
-      // Si l'API échoue mais qu'on a le nom de l'hôtel, utiliser une URL de recherche
-      if (hotelName) {
-        const searchUrl = `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(hotelName)}&checkin=${checkIn}&checkout=${checkOut}&group_adults=${adults}&no_rooms=1&lang=fr`;
-        return searchUrl;
-      }
-      return null;
-    }
+    if (!response.ok) return fallbackToDirect();
 
     const data = await response.json();
     const hotelData = data.data || data;
@@ -230,27 +224,22 @@ async function getHotelBookingUrl(
         const baseUrl = slugStr.startsWith('http') ? slugStr : `https://www.booking.com${slugStr.startsWith('/') ? '' : '/'}${slugStr}`;
         // Double-check: l'URL résolue doit être sur booking.com
         if (baseUrl.includes('booking.com') && !baseUrl.includes('facebook') && !baseUrl.includes('blogspot')) {
-          const separator = baseUrl.includes('?') ? '&' : '?';
-          return `${baseUrl}${separator}checkin=${checkIn}&checkout=${checkOut}&group_adults=${adults}&no_rooms=1`;
+          return normalizeHotelBookingUrl({
+            url: baseUrl,
+            hotelName: hotelName || 'Hotel',
+            destinationHint: countryCode || hotelData.country_code,
+            checkIn,
+            checkOut,
+            adults,
+          });
         }
       }
     }
 
-    // Fallback: URL de recherche Booking.com avec le nom de l'hôtel (plus fiable que slug généré)
-    if (hotelName) {
-      const cc = countryCode || (hotelData.country_code?.toLowerCase()) || 'nl';
-      const searchUrl = `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(hotelName)}&dest_type=city&checkin=${checkIn}&checkout=${checkOut}&group_adults=${adults}&no_rooms=1&lang=fr`;
-      return searchUrl;
-    }
-
-    return null;
+    return fallbackToDirect();
   } catch (error) {
     console.error(`[RapidAPI Booking] Erreur getHotelDetails ${hotelId}:`, error);
-    // Fallback en cas d'erreur: URL de recherche (plus fiable que slug généré)
-    if (hotelName) {
-      return `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(hotelName)}&checkin=${checkIn}&checkout=${checkOut}&group_adults=${adults}&no_rooms=1&lang=fr`;
-    }
-    return null;
+    return fallbackToDirect();
   }
 }
 
@@ -345,9 +334,9 @@ export async function searchHotelsWithBookingApi(
     const nights = Math.ceil((checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24));
 
     // 3. Transformer les résultats et récupérer les URLs directes
-    const rawHotels = Array.isArray(properties) ? properties : [];
+    const rawHotels: RawBookingHotelItem[] = Array.isArray(properties) ? (properties as RawBookingHotelItem[]) : [];
     const availableHotels = rawHotels
-      .filter((p: any) => {
+      .filter((p) => {
         // Exclure les hôtels sold out
         if (p.soldout === 1 || p.soldout === true) return false;
         // Garder seulement ceux avec un prix
@@ -361,10 +350,10 @@ export async function searchHotelsWithBookingApi(
       .slice(0, limit);
 
     // Récupérer les URLs Booking directes pour les 5 premiers (limite API calls)
-    // Utiliser getCountryCodeFromDestination comme fallback si l'API ne retourne pas le code pays
-    const destinationCountryCode = getCountryCodeFromDestination(destination);
+    // Utiliser getBookingCountryCode comme fallback si l'API ne retourne pas le code pays
+    const destinationCountryCode = getBookingCountryCode(destination);
 
-    const hotelUrlPromises = availableHotels.slice(0, 5).map(async (p: any) => {
+    const hotelUrlPromises = availableHotels.slice(0, 5).map(async (p) => {
       const hotelId = p.hotel_id || p.property?.id || p.id;
       const hotelName = p.property?.name || p.hotel_name || p.hotel_name_trans;
       const countryCode = p.property?.countryCode || p.country_trans || p.cc1 || destinationCountryCode;
@@ -375,7 +364,7 @@ export async function searchHotelsWithBookingApi(
     });
     const hotelUrls = await Promise.all(hotelUrlPromises);
 
-    const hotels: BookingHotel[] = availableHotels.map((p: any, index: number) => {
+    const hotels: BookingHotel[] = availableHotels.map((p, index: number) => {
       // Extraire le prix (plusieurs formats possibles selon la version de l'API)
       const grossPrice = p.property?.priceBreakdown?.grossPrice?.value
         || p.price_breakdown?.gross_price
@@ -411,26 +400,34 @@ export async function searchHotelsWithBookingApi(
       // IMPORTANT: Valider que l'URL est bien sur booking.com (pas Facebook, blogs, etc.)
       const directUrl = index < 5 ? hotelUrls[index] : null;
       const hotelName = p.property?.name || p.hotel_name || p.hotel_name_trans || 'Hotel';
-      const fallbackUrl = `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(`${hotelName} ${destination}`)}&checkin=${checkIn}&checkout=${checkOut}&group_adults=${guests}&no_rooms=1&lang=fr`;
 
       // Valider que l'URL candidate est bien une URL Booking.com
       const isValidBookingUrl = (url: string | null | undefined): boolean => {
         if (!url) return false;
         const urlLower = url.toLowerCase();
-        if (!urlLower.includes('booking.com')) return false;
+        if (!isBookingDomain(url)) return false;
         const badDomains = ['facebook', 'blogspot', 'instagram', 'twitter', 'tripadvisor', 'airbnb'];
         return !badDomains.some(domain => urlLower.includes(domain));
       };
 
-      // Priorité: URL directe > URL API > fallback (toujours valide)
-      let bookingUrl = fallbackUrl; // Fallback garanti sur Booking.com
+      // Priorité: URL directe > URL API > URL normalisée
+      let bookingUrlCandidate: string | null | undefined = directUrl;
       if (isValidBookingUrl(directUrl)) {
-        bookingUrl = directUrl!;
+        bookingUrlCandidate = directUrl!;
       } else if (isValidBookingUrl(p.property?.url)) {
-        bookingUrl = p.property.url;
+        bookingUrlCandidate = p.property.url;
       } else if (isValidBookingUrl(p.url)) {
-        bookingUrl = p.url;
+        bookingUrlCandidate = p.url;
       }
+
+      const bookingUrl = normalizeHotelBookingUrl({
+        url: bookingUrlCandidate,
+        hotelName,
+        destinationHint: destination,
+        checkIn,
+        checkOut,
+        adults: guests,
+      });
 
       // Photo
       const photoUrl = p.property?.photoUrls?.[0]
@@ -456,7 +453,7 @@ export async function searchHotelsWithBookingApi(
         checkOut: checkOutTime,
         distanceToCenter: parseFloat(p.property?.distanceFromCenter || p.distance_to_cc || p.distance || '0'),
         photoUrl,
-        bookingUrl: bookingUrl.startsWith('http') ? bookingUrl : `https://www.booking.com${bookingUrl}`,
+        bookingUrl,
         available: true,
       };
     });

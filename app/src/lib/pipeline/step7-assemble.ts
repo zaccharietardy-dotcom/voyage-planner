@@ -15,6 +15,7 @@ import type { OnPipelineEvent } from './types';
 import { isAppropriateForMeal, getCuisineFamily } from './step4-restaurants';
 import { searchRestaurantsNearby } from '../services/serpApiPlaces';
 import { batchFetchWikipediaSummaries, getWikiLanguageForDestination } from '../services/wikipedia';
+import { normalizeHotelBookingUrl } from '../services/bookingLinks';
 // ---------------------------------------------------------------------------
 // Directions cache — used to store pre-fetched real travel times
 // ---------------------------------------------------------------------------
@@ -1874,31 +1875,22 @@ export async function assembleTripSchedule(
   const checkoutDateStr = checkoutDate.toISOString().split('T')[0];
   const guests = preferences.groupSize || 2;
 
-  const enrichBookingUrl = (url: string | undefined, hotelName: string): string => {
-    if (!url) {
-      // No URL at all — build a Booking.com search URL
-      return `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(hotelName + ' ' + preferences.destination)}&checkin=${checkinDate}&checkout=${checkoutDateStr}&group_adults=${guests}&no_rooms=1&lang=fr`;
-    }
-    // If already a booking.com URL with dates, keep it intact (from RapidAPI)
-    if (url.includes('booking.com') && url.includes('checkin=') && url.includes('checkout=')) {
-      return url;
-    }
-    // If booking.com URL but missing dates, inject them
-    if (url.includes('booking.com')) {
-      const separator = url.includes('?') ? '&' : '?';
-      return `${url}${separator}checkin=${checkinDate}&checkout=${checkoutDateStr}&group_adults=${guests}&no_rooms=1&lang=fr`;
-    }
-    // Non-booking URL — return as-is
-    return url;
-  };
+  const enrichBookingUrl = (url: string | undefined, hotelName: string): string => normalizeHotelBookingUrl({
+    url,
+    hotelName,
+    destinationHint: preferences.destination,
+    checkIn: checkinDate,
+    checkOut: checkoutDateStr,
+    adults: guests,
+  });
 
   if (hotel) {
     hotel.bookingUrl = enrichBookingUrl(hotel.bookingUrl, hotel.name);
   }
   // Also enrich alternative hotel options
   if (data.bookingHotels) {
-    for (const h of data.bookingHotels) {
-      (h as any).bookingUrl = enrichBookingUrl((h as any).bookingUrl, (h as any).name || '');
+    for (const hotelOption of data.bookingHotels) {
+      hotelOption.bookingUrl = enrichBookingUrl(hotelOption.bookingUrl, hotelOption.name || '');
     }
   }
 

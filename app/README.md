@@ -6,8 +6,8 @@ Planificateur de voyage intelligent avec IA, génération automatique d'itinéra
 
 ## Fonctionnalités
 
-- **Génération IA** : Itinéraire jour par jour généré par Claude
-- **Liens directs** : Booking.com, Viator, Omio, Google Flights
+- **Génération Pipeline V2** : Itinéraire jour par jour généré via pipeline multi-étapes + Claude
+- **Liens directs** : Booking.com (priorité direct `/hotel/...`), Viator, Omio, Google Flights
 - **Carte interactive** : Leaflet avec tous les points d'intérêt
 - **Calendrier** : Vue calendrier drag & drop
 - **Collaboration** : Partage et édition en temps réel (Supabase)
@@ -103,7 +103,7 @@ src/
 │   └── ui/                   # shadcn/ui
 ├── lib/
 │   ├── services/             # Logique métier
-│   ├── ai.ts                 # Orchestration génération
+│   ├── pipeline/             # Pipeline V2 (génération active)
 │   └── types.ts              # Types TypeScript
 └── hooks/                    # Custom hooks
 ```
@@ -113,14 +113,22 @@ src/
 ## Flow de Génération
 
 ```
-Formulaire → API /generate → Recherche parallèle (Hôtels + Activités + Restaurants)
-                                    ↓
-                           Claude génère l'itinéraire
-                                    ↓
-                           Post-processing (liens)
-                                    ↓
-                           Sauvegarde + Affichage
+Formulaire → API /generate (V2 only) → Step 1: fetch parallel (hôtels/activités/restaurants/transport)
+                                               ↓
+                                       Step 2-5: scoring + clustering + repas + hôtel
+                                               ↓
+                                       Step 6: équilibrage Claude
+                                               ↓
+                                       Step 7-8: assemblage + validation qualité
+                                               ↓
+                                       Sauvegarde + Affichage
 ```
+
+### Politique Liens Hôtels
+
+- Les nouveaux voyages utilisent des liens Booking.com directs (`/hotel/{country}/{slug}.html`).
+- Si l'API ne renvoie pas de lien direct exploitable, fallback vers slug direct (pas `searchresults.html` pour le lien principal).
+- Les liens de recherche (`Recherche Booking`, `Recherche Airbnb`) restent disponibles en UI comme actions explicites.
 
 ---
 

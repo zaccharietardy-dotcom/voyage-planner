@@ -20,6 +20,18 @@ npx tsx test-pipeline.ts rome   # Test pipeline on a city (rome/barcelona/tokyo/
 - **Leaflet** (2D map) + **Cesium/Resium** (3D globe)
 - **Claude API** (`@anthropic-ai/sdk`) for day balancing (step 6) and chatbot modifications
 
+## Runtime Policy
+
+- `/api/generate` runs **Pipeline V2 only**.
+- `src/lib/ai.ts` is retained temporarily for legacy/debug reference but is not used for new trip generation.
+
+## Booking URL Policy (Hotels)
+
+- Primary hotel links must be direct Booking paths: `https://www.booking.com/hotel/{country}/{slug}.html`.
+- Date/guest params are always normalized (`checkin`, `checkout`, `group_adults`, `no_rooms`).
+- For hotel main booking links, fallback is direct slug generation, not `searchresults.html`.
+- Search links are allowed only as explicit UI actions (`Recherche Booking`, `Recherche Airbnb`).
+
 ## Pipeline V2 - Trip Generation (20-40s target)
 
 The trip generation uses a **7-step pipeline** in `src/lib/pipeline/`. This is the ONLY active generation path. The old `src/lib/ai.ts` is legacy and NOT used for new trips.

@@ -97,13 +97,12 @@ describe('Link Generator (Bug #10)', () => {
 
       const link = generateHotelLink(hotel, context);
 
-      expect(link).toContain('booking.com');
+      expect(link).toMatch(/booking\.com\/hotel\/[a-z]{2}\//);
       expect(link).toContain('checkin=2026-01-28');
       expect(link).toContain('checkout=2026-01-31');
-      expect(link).toContain('Barcelona');
     });
 
-    it('includes hotel name in search query', () => {
+    it('includes hotel slug in direct booking URL', () => {
       const hotel = {
         name: 'W Barcelona',
         city: 'Barcelona',
@@ -116,8 +115,7 @@ describe('Link Generator (Bug #10)', () => {
 
       const link = generateHotelLink(hotel, context);
 
-      // URLSearchParams encodes spaces as '+' which is valid
-      expect(link).toMatch(/W[+%20]Barcelona/);
+      expect(link).toContain('/w-barcelona.html');
     });
 
     it('handles missing dates gracefully', () => {
@@ -128,8 +126,7 @@ describe('Link Generator (Bug #10)', () => {
 
       const link = generateHotelLink(hotel, {});
 
-      expect(link).toContain('booking.com');
-      expect(link).toContain('Barcelona');
+      expect(link).toMatch(/booking\.com\/hotel\/[a-z]{2}\//);
       // Should not crash without dates
     });
   });

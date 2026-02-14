@@ -15,6 +15,7 @@ import { searchHotelsWithSerpApi, isSerpApiPlacesConfigured, getAvailableHotelNa
 import { searchHotelsWithBookingApi, isRapidApiBookingConfigured, enrichHotelWithGooglePlaces, type BookingHotel } from './rapidApiBooking';
 import { searchTripAdvisorHotels, isTripAdvisorConfigured } from './tripadvisor';
 import { searchPlacesFromDB, savePlacesToDB, type PlaceData } from './placeDatabase';
+import { normalizeHotelBookingUrl } from './bookingLinks';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -29,6 +30,42 @@ interface HotelsCache {
     version: number;
   };
 }
+
+type SerpHotelCandidate = {
+  id?: string;
+  name?: string;
+  amenities?: string[];
+  stars?: number | string;
+  address?: string;
+  latitude?: number;
+  longitude?: number;
+  rating?: number;
+  reviewCount?: number;
+  pricePerNight?: number;
+  totalPrice?: number;
+  checkIn?: string;
+  checkOut?: string;
+  bookingUrl?: string;
+};
+
+type ClaudeHotelCandidate = {
+  id?: string;
+  name?: string;
+  type?: string;
+  address?: string;
+  latitude?: number;
+  longitude?: number;
+  rating?: number;
+  reviewCount?: number;
+  stars?: number;
+  pricePerNight?: number;
+  currency?: string;
+  amenities?: string[];
+  checkInTime?: string;
+  checkOutTime?: string;
+  distanceToCenter?: number;
+  description?: string;
+};
 
 function loadCache(): HotelsCache {
   try {
@@ -145,6 +182,26 @@ function getPriceRange(budgetLevel: 'economic' | 'moderate' | 'comfort' | 'luxur
   }
 }
 
+function normalizeHotelsBookingUrls(
+  hotels: Accommodation[],
+  destination: string,
+  checkIn: string,
+  checkOut: string,
+  guests: number
+): Accommodation[] {
+  return hotels.map((hotel) => ({
+    ...hotel,
+    bookingUrl: normalizeHotelBookingUrl({
+      url: hotel.bookingUrl,
+      hotelName: hotel.name,
+      destinationHint: destination,
+      checkIn,
+      checkOut,
+      adults: guests,
+    }),
+  }));
+}
+
 /**
  * Recherche des hôtels - PRIORITÉ: Booking.com pour la disponibilité temps réel
  */
@@ -216,7 +273,10 @@ export async function searchHotels(
           };
         });
 
-        return adjustHotelPrices(hotels, options);
+        return adjustHotelPrices(
+          normalizeHotelsBookingUrls(hotels, destination, checkInStr, checkOutStr, options.guests),
+          options
+        );
       }
     } catch (error) {
       console.warn('[Hotels] Booking.com API error, trying TripAdvisor/SerpAPI:', error);
@@ -236,7 +296,7 @@ export async function searchHotels(
       });
 
       if (taHotels.length > 0) {
-        let filtered = taHotels.filter(h =>
+        const filtered = taHotels.filter(h =>
           h.pricePerNight === 0 ||
           (h.pricePerNight >= priceRange.min * 0.7 && h.pricePerNight <= priceRange.hardMax)
         );
@@ -245,22 +305,22 @@ export async function searchHotels(
 
           if (isSerpApiPlacesConfigured()) {
             try {
-              const serpHotels = await searchHotelsWithSerpApi(destination, checkInStr, checkOutStr, {
+              const serpHotels = (await searchHotelsWithSerpApi(destination, checkInStr, checkOutStr, {
                 adults: options.guests,
                 minPrice: priceRange.min,
                 maxPrice: Math.round(priceRange.hardMax),
                 hotelClass: targetStars,
                 sort: options.budgetLevel === 'economic' ? 'lowest_price' : 'highest_rating',
                 limit: 30,
-              });
+              })) as SerpHotelCandidate[];
 
               if (serpHotels.length > 0) {
-                const serpMap = new Map(serpHotels.map((h: any) => [h.name?.toLowerCase().trim(), h]));
+                const serpMap = new Map(serpHotels.map((h) => [h.name?.toLowerCase().trim(), h]));
 
                 const validated: Accommodation[] = [];
                 for (const taHotel of filtered) {
                   const taNameLower = taHotel.name.toLowerCase().trim();
-                  let serpMatch: any = serpMap.get(taNameLower);
+                  let serpMatch: SerpHotelCandidate | undefined = serpMap.get(taNameLower);
                   if (!serpMatch) {
                     for (const [serpName, serpData] of serpMap) {
                       if (serpName.includes(taNameLower) || taNameLower.includes(serpName) ||
@@ -283,10 +343,13 @@ export async function searchHotels(
                 }
 
                 if (validated.length > 0) {
-                  return adjustHotelPrices(validated, options);
+                  return adjustHotelPrices(
+                    normalizeHotelsBookingUrls(validated, destination, checkInStr, checkOutStr, options.guests),
+                    options
+                  );
                 }
 
-                const serpAccommodations: Accommodation[] = serpHotels.slice(0, 10).map((h: any) => {
+                const serpAccommodations: Accommodation[] = serpHotels.slice(0, 10).map((h) => {
                   const amenities = h.amenities || [];
                   const breakfastIncluded = checkBreakfastIncluded(amenities);
                   let stars = 3;
@@ -320,14 +383,20 @@ export async function searchHotels(
                 const enrichedSerpAccommodations = await Promise.all(
                   serpAccommodations.map(h => enrichHotelWithGooglePlaces(h as unknown as BookingHotel, destination) as unknown as Promise<Accommodation>)
                 );
-                return adjustHotelPrices(enrichedSerpAccommodations, options);
+                return adjustHotelPrices(
+                  normalizeHotelsBookingUrls(enrichedSerpAccommodations, destination, checkInStr, checkOutStr, options.guests),
+                  options
+                );
               }
             } catch (serpError) {
               console.warn('[Hotels] SerpAPI validation error:', serpError);
             }
           }
 
-          return adjustHotelPrices(filtered, options);
+          return adjustHotelPrices(
+            normalizeHotelsBookingUrls(filtered, destination, checkInStr, checkOutStr, options.guests),
+            options
+          );
         }
       }
     } catch (error) {
@@ -339,17 +408,17 @@ export async function searchHotels(
   if (isSerpApiPlacesConfigured()) {
     try {
 
-      const serpHotels = await searchHotelsWithSerpApi(destination, checkInStr, checkOutStr, {
+      const serpHotels = (await searchHotelsWithSerpApi(destination, checkInStr, checkOutStr, {
         adults: options.guests,
         minPrice: priceRange.min,
         maxPrice: priceRange.max,
         hotelClass: targetStars,
         sort: options.budgetLevel === 'economic' ? 'lowest_price' : 'highest_rating',
         limit: 15,
-      });
+      })) as SerpHotelCandidate[];
 
       if (serpHotels.length > 0) {
-        const hotels: Accommodation[] = serpHotels.map((h: any) => {
+        const hotels: Accommodation[] = serpHotels.map((h) => {
           const amenities = h.amenities || [];
           const breakfastIncluded = checkBreakfastIncluded(amenities);
           let stars = 3;
@@ -389,7 +458,10 @@ export async function searchHotels(
         const enrichedHotels = await Promise.all(
           hotels.map(h => enrichHotelWithGooglePlaces(h as unknown as BookingHotel, destination) as unknown as Promise<Accommodation>)
         );
-        return adjustHotelPrices(enrichedHotels, options);
+        return adjustHotelPrices(
+          normalizeHotelsBookingUrls(enrichedHotels, destination, checkInStr, checkOutStr, options.guests),
+          options
+        );
       }
     } catch (error) {
       console.warn('[Hotels] SerpAPI error, trying Claude:', error);
@@ -404,7 +476,10 @@ export async function searchHotels(
       const enrichedHotels = await Promise.all(
         hotels.map(h => enrichHotelWithGooglePlaces(h as unknown as BookingHotel, destination) as unknown as Promise<Accommodation>)
       );
-      return adjustHotelPrices(enrichedHotels, options);
+      return adjustHotelPrices(
+        normalizeHotelsBookingUrls(enrichedHotels, destination, checkInStr, checkOutStr, options.guests),
+        options
+      );
     } catch (error) {
       console.error('[Hotels] Claude AI error:', error);
     }
@@ -523,9 +598,11 @@ Réponds UNIQUEMENT avec un tableau JSON valide.`;
     jsonStr = jsonStr.replace(/```json?\n?/g, '').replace(/```$/g, '').trim();
   }
 
-  const rawHotels = JSON.parse(jsonStr);
+  const rawHotels = JSON.parse(jsonStr) as ClaudeHotelCandidate[];
+  const checkIn = options.checkInDate ? options.checkInDate.toISOString().split('T')[0] : undefined;
+  const checkOut = options.checkOutDate ? options.checkOutDate.toISOString().split('T')[0] : undefined;
 
-  return rawHotels.map((h: any, index: number) => ({
+  return rawHotels.map((h, index: number) => ({
     id: h.id || `${destination.toLowerCase()}-hotel-${index}`,
     name: h.name,
     type: h.type || 'hotel',
@@ -540,8 +617,13 @@ Réponds UNIQUEMENT avec un tableau JSON valide.`;
     amenities: h.amenities || ['WiFi gratuit'],
     checkInTime: validateCheckInTime(h.checkInTime),
     checkOutTime: validateCheckOutTime(h.checkOutTime),
-    // Fallback: lien de recherche Booking.com avec le nom de l'hôtel + dates
-    bookingUrl: `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(`${h.name} ${destination}`)}${options.checkInDate ? `&checkin=${options.checkInDate.toISOString().split('T')[0]}` : ''}${options.checkOutDate ? `&checkout=${options.checkOutDate.toISOString().split('T')[0]}` : ''}&group_adults=${options.guests}&no_rooms=1&lang=fr`,
+    bookingUrl: normalizeHotelBookingUrl({
+      hotelName: h.name || `Hotel ${index + 1}`,
+      destinationHint: destination,
+      checkIn,
+      checkOut,
+      adults: options.guests,
+    }),
     distanceToCenter: h.distanceToCenter || 1,
     description: h.description,
     dataReliability: (h.latitude && h.longitude) ? 'verified' as const : 'estimated' as const,
@@ -606,7 +688,13 @@ function generateFallbackHotels(
     amenities: ['WiFi gratuit', 'Climatisation'],
     checkInTime: '15:00',
     checkOutTime: '11:00',
-    bookingUrl: `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(`${template.name} ${destination}`)}&checkin=${options.checkInDate.toISOString().split('T')[0]}&checkout=${options.checkOutDate.toISOString().split('T')[0]}&group_adults=2&no_rooms=1&lang=fr`,
+    bookingUrl: normalizeHotelBookingUrl({
+      hotelName: `${template.name} ${destination}`,
+      destinationHint: destination,
+      checkIn: options.checkInDate.toISOString().split('T')[0],
+      checkOut: options.checkOutDate.toISOString().split('T')[0],
+      adults: 2,
+    }),
     distanceToCenter: 0.5 + Math.random() * 1,
   }));
 }
@@ -782,7 +870,7 @@ function placeToAccommodation(
 /**
  * Convertit un hôtel SerpAPI en PlaceData pour sauvegarde en base
  */
-function hotelToPlace(hotel: any, city: string): PlaceData {
+function hotelToPlace(hotel: Accommodation, city: string): PlaceData {
   return {
     externalId: hotel.id,
     type: 'hotel',

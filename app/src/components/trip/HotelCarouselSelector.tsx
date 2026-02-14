@@ -67,6 +67,13 @@ export function HotelCarouselSelector({
     );
   };
 
+  const getProviderLabel = (bookingUrl?: string): string => {
+    const lower = bookingUrl?.toLowerCase() || '';
+    if (lower.includes('airbnb.com')) return 'Airbnb';
+    if (lower.includes('booking.com')) return 'Booking';
+    return 'Réserver';
+  };
+
   return (
     <div className="space-y-4">
       {/* Header avec titre et navigation */}
@@ -84,7 +91,7 @@ export function HotelCarouselSelector({
               rel="noopener noreferrer"
               className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1"
             >
-              Booking <ExternalLink className="h-3 w-3" />
+              Recherche Booking <ExternalLink className="h-3 w-3" />
             </a>
           )}
           {searchLinks?.airbnb && (
@@ -94,7 +101,7 @@ export function HotelCarouselSelector({
               rel="noopener noreferrer"
               className="text-xs text-rose-500 hover:text-rose-700 flex items-center gap-1"
             >
-              Airbnb <ExternalLink className="h-3 w-3" />
+              Recherche Airbnb <ExternalLink className="h-3 w-3" />
             </a>
           )}
           {/* Boutons de navigation */}
@@ -231,7 +238,7 @@ export function HotelCarouselSelector({
                   onClick={(e) => e.stopPropagation()}
                   className="mt-3 block w-full text-center bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-medium py-2 px-4 rounded-lg transition-colors"
                 >
-                  Voir sur Booking
+                  {getProviderLabel(hotel.bookingUrl)}
                 </a>
               )}
             </div>

@@ -9,6 +9,8 @@
  * - Attraction: Site officiel, Viator (affilié 8%), ou Google Maps
  */
 
+import { buildDirectBookingHotelUrl } from './bookingLinks';
+
 /**
  * Types d'éléments pour la génération de liens
  */
@@ -120,23 +122,15 @@ export function generateHotelLink(
   context: ReservationContext
 ): string {
   const { name, city } = hotel;
-  const { checkIn, checkOut } = context;
+  const { checkIn, checkOut, passengers } = context;
 
-  const searchQuery = `${name} ${city}`;
-  const baseUrl = 'https://www.booking.com/searchresults.html';
-
-  const params = new URLSearchParams();
-  params.set('ss', searchQuery);
-
-  if (checkIn) {
-    params.set('checkin', formatDateForBooking(checkIn));
-  }
-
-  if (checkOut) {
-    params.set('checkout', formatDateForBooking(checkOut));
-  }
-
-  return `${baseUrl}?${params.toString()}`;
+  return buildDirectBookingHotelUrl({
+    hotelName: name,
+    destinationHint: city,
+    checkIn: checkIn ? formatDateForBooking(checkIn) : undefined,
+    checkOut: checkOut ? formatDateForBooking(checkOut) : undefined,
+    adults: passengers,
+  });
 }
 
 /**

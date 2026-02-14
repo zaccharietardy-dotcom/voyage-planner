@@ -31,6 +31,34 @@ interface AirbnbSearchOptions {
   cityCenter?: { lat: number; lng: number };
 }
 
+function asRecord(value: unknown): Record<string, unknown> {
+  if (typeof value === 'object' && value !== null) {
+    return value as Record<string, unknown>;
+  }
+  return {};
+}
+
+export function isValidAirbnbRoomUrl(url?: string | null, listingId?: string): boolean {
+  if (!url) return false;
+
+  try {
+    const parsed = new URL(url);
+    const host = parsed.hostname.toLowerCase();
+    if (!host.includes('airbnb.com')) return false;
+
+    const match = parsed.pathname.match(/^\/rooms\/([A-Za-z0-9_-]+)(?:\/|$)/);
+    if (!match?.[1]) return false;
+
+    if (listingId && match[1] !== listingId) {
+      return false;
+    }
+
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Étape 1: Résoudre la destination en Place ID Google via searchDestination
  */
@@ -67,16 +95,21 @@ async function resolveDestinationId(destination: string): Promise<{ id: string; 
  *   title: "Flat in Barcelona"
  * }
  */
-async function fetchWithRetry(url: string, headers: Record<string, string>, maxRetries = 3): Promise<any> {
+async function fetchWithRetry(
+  url: string,
+  headers: Record<string, string>,
+  maxRetries = 3
+): Promise<Record<string, unknown> | null> {
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     const response = await fetch(url, { headers });
     if (!response.ok) {
       console.error(`[Airbnb] HTTP ${response.status}`);
       return null;
     }
-    const data = await response.json();
+    const data = asRecord(await response.json());
     // Rate limit → wait and retry
-    if (data.message && data.message.includes('rate limit')) {
+    const message = typeof data.message === 'string' ? data.message : '';
+    if (message.includes('rate limit')) {
       const delay = (attempt + 1) * 2000; // 2s, 4s, 6s
       console.warn(`[Airbnb] Rate limited, retry ${attempt + 1}/${maxRetries} dans ${delay}ms...`);
       await new Promise(r => setTimeout(r, delay));
@@ -92,7 +125,7 @@ async function searchByPlaceId(
   checkIn: string,
   checkOut: string,
   options: AirbnbSearchOptions,
-): Promise<any[]> {
+): Promise<Array<Record<string, unknown>>> {
   const params = new URLSearchParams({
     placeId,
     adults: (options.guests || 2).toString(),
@@ -110,12 +143,16 @@ async function searchByPlaceId(
     { 'x-rapidapi-key': getRapidApiKey(), 'x-rapidapi-host': getAirbnbHost() },
   );
 
-  if (!data || !data.status || !data.data) {
-    console.warn(`[Airbnb] API error: ${data?.message || 'no data'}`);
+  const isOk = !!data && data.status === true;
+  const dataPayload = data ? asRecord(data.data) : {};
+  const message = data && typeof data.message === 'string' ? data.message : 'no data';
+  if (!isOk || Object.keys(dataPayload).length === 0) {
+    console.warn(`[Airbnb] API error: ${message}`);
     return [];
   }
 
-  return data.data.list || [];
+  const list = dataPayload.list;
+  return Array.isArray(list) ? (list as Array<Record<string, unknown>>) : [];
 }
 
 /**
@@ -153,49 +190,77 @@ export async function searchAirbnbListings(
       (new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (1000 * 60 * 60 * 24)
     ));
 
-    const accommodations: Accommodation[] = listings
-      .slice(0, options.limit || 10)
-      .map((item: any) => {
-        const listing = item.listing || {};
-        const coords = listing.legacyCoordinate || {};
-        const pricePerNight = extractPricePerNight(item, nights);
-        const { rating, reviewCount } = extractRating(item);
-        const photos = extractPhotos(item);
-        const listingId = listing.id || '';
+    const sampledListings = listings.slice(0, options.limit || 10);
+    let rejectedMissingId = 0;
+    let rejectedInvalidUrl = 0;
+    let rejectedPrice = 0;
 
-        // Le title contient souvent le type : "Flat in Barcelona", "Loft in Barcelona"
-        const title = item.title || listing.title || '';
-        const isEntireHome = title.toLowerCase().includes('flat') ||
-          title.toLowerCase().includes('apartment') ||
-          title.toLowerCase().includes('loft') ||
-          title.toLowerCase().includes('home') ||
-          title.toLowerCase().includes('condo') ||
-          title.toLowerCase().includes('house') ||
-          listing.legacyPDPType === 'MARKETPLACE';
+    const accommodations: Accommodation[] = [];
+    for (const item of sampledListings) {
+      const listing = asRecord(item.listing);
+      const listingId = String(listing.id || '').trim();
+      if (!listingId) {
+        rejectedMissingId++;
+        continue;
+      }
 
-        return {
-          id: `airbnb-${listingId}`,
-          name: listing.legacyName || title || `Airbnb à ${destination}`,
-          type: isEntireHome ? 'apartment' as const : 'bnb' as const,
-          address: listing.legacyCity || destination,
-          latitude: coords.latitude || 0,
-          longitude: coords.longitude || 0,
-          rating,
-          reviewCount,
-          pricePerNight,
-          totalPrice: pricePerNight * nights,
-          currency: 'EUR',
-          amenities: isEntireHome ? ['Logement entier', 'WiFi'] : ['WiFi'],
-          photos,
-          checkInTime: '15:00',
-          checkOutTime: '11:00',
-          bookingUrl: `https://www.airbnb.com/rooms/${listingId}?check_in=${checkIn}&check_out=${checkOut}&adults=${options.guests || 2}`,
-          distanceToCenter: undefined,
-          breakfastIncluded: false,
-          description: listing.legacyName || title || undefined,
-        };
-      })
-      .filter((a: Accommodation) => a.pricePerNight > 0);
+      const coords = asRecord(listing.legacyCoordinate);
+      const pricePerNight = extractPricePerNight(item, nights);
+      if (pricePerNight <= 0) {
+        rejectedPrice++;
+        continue;
+      }
+
+      const bookingUrl = `https://www.airbnb.com/rooms/${listingId}?check_in=${checkIn}&check_out=${checkOut}&adults=${options.guests || 2}`;
+      if (!isValidAirbnbRoomUrl(bookingUrl, listingId)) {
+        rejectedInvalidUrl++;
+        continue;
+      }
+
+      const { rating, reviewCount } = extractRating(item);
+      const photos = extractPhotos(item);
+
+      // Le title contient souvent le type : "Flat in Barcelona", "Loft in Barcelona"
+      const title = String(item.title || listing.title || '');
+      const isEntireHome = title.toLowerCase().includes('flat') ||
+        title.toLowerCase().includes('apartment') ||
+        title.toLowerCase().includes('loft') ||
+        title.toLowerCase().includes('home') ||
+        title.toLowerCase().includes('condo') ||
+        title.toLowerCase().includes('house') ||
+        listing.legacyPDPType === 'MARKETPLACE';
+
+      const legacyName = typeof listing.legacyName === 'string' ? listing.legacyName : '';
+      const legacyCity = typeof listing.legacyCity === 'string' ? listing.legacyCity : '';
+      const latitude = typeof coords.latitude === 'number' ? coords.latitude : 0;
+      const longitude = typeof coords.longitude === 'number' ? coords.longitude : 0;
+
+      accommodations.push({
+        id: `airbnb-${listingId}`,
+        name: legacyName || title || `Airbnb à ${destination}`,
+        type: isEntireHome ? 'apartment' as const : 'bnb' as const,
+        address: legacyCity || destination,
+        latitude,
+        longitude,
+        rating,
+        reviewCount,
+        pricePerNight,
+        totalPrice: pricePerNight * nights,
+        currency: 'EUR',
+        amenities: isEntireHome ? ['Logement entier', 'WiFi'] : ['WiFi'],
+        photos,
+        checkInTime: '15:00',
+        checkOutTime: '11:00',
+        bookingUrl,
+        distanceToCenter: undefined,
+        breakfastIncluded: false,
+        description: legacyName || title || undefined,
+      });
+    }
+
+    console.log(
+      `[Airbnb] Audit destination=${destination} raw=${listings.length} sampled=${sampledListings.length} kept=${accommodations.length} rejectedMissingId=${rejectedMissingId} rejectedInvalidUrl=${rejectedInvalidUrl} rejectedPrice=${rejectedPrice}`
+    );
 
     // Si cuisine requise, ne garder que les logements entiers
     let filtered = accommodations;
@@ -234,15 +299,19 @@ export async function searchAirbnbListings(
  * 2. primaryLine.accessibilityLabel → "€ 1,133 for 4 nights" (divisé par nuits)
  * 3. primaryLine.price → "€ 1,133" (divisé par nuits)
  */
-function extractPricePerNight(item: any, nights: number): number {
-  const sp = item.structuredDisplayPrice || {};
-  const expl = sp.explanationData || {};
+function extractPricePerNight(item: Record<string, unknown>, nights: number): number {
+  const sp = asRecord(item.structuredDisplayPrice);
+  const expl = asRecord(sp.explanationData);
 
   // 1. Chercher dans priceDetails le prix par nuit ("4 nights x € 283.23")
-  if (expl.priceDetails) {
-    for (const group of expl.priceDetails) {
-      for (const detail of group.items || []) {
-        const desc = detail.description || '';
+  const priceDetails = Array.isArray(expl.priceDetails) ? expl.priceDetails : [];
+  if (priceDetails.length > 0) {
+    for (const group of priceDetails) {
+      const groupRecord = asRecord(group);
+      const items = Array.isArray(groupRecord.items) ? groupRecord.items : [];
+      for (const detail of items) {
+        const detailRecord = asRecord(detail);
+        const desc = typeof detailRecord.description === 'string' ? detailRecord.description : '';
         const match = desc.match(/(\d+)\s*nights?\s*x\s*[€$£]\s*([\d,.]+)/i);
         if (match) {
           return parseFloat(match[2].replace(',', ''));
@@ -252,14 +321,15 @@ function extractPricePerNight(item: any, nights: number): number {
   }
 
   // 2. Extraire du accessibilityLabel ("€ 1,133 for 4 nights")
-  const label = sp.primaryLine?.accessibilityLabel || '';
+  const primaryLine = asRecord(sp.primaryLine);
+  const label = typeof primaryLine.accessibilityLabel === 'string' ? primaryLine.accessibilityLabel : '';
   const totalMatch = label.match(/[€$£]\s*([\d,.]+)/);
   if (totalMatch && nights > 0) {
     return Math.round(parseFloat(totalMatch[1].replace(',', '')) / nights);
   }
 
   // 3. Extraire du price ("€ 1,133")
-  const priceStr = sp.primaryLine?.price || '';
+  const priceStr = typeof primaryLine.price === 'string' ? primaryLine.price : '';
   const priceMatch = priceStr.match(/[\d,.]+/);
   if (priceMatch && nights > 0) {
     return Math.round(parseFloat(priceMatch[0].replace(',', '')) / nights);
@@ -272,8 +342,8 @@ function extractPricePerNight(item: any, nights: number): number {
  * Extrait le rating et le nombre de reviews depuis avgRatingLocalized
  * Format: "4.93 (97)" ou "4.93"
  */
-function extractRating(item: any): { rating: number; reviewCount: number } {
-  const ratingStr = item.avgRatingLocalized || '';
+function extractRating(item: Record<string, unknown>): { rating: number; reviewCount: number } {
+  const ratingStr = typeof item.avgRatingLocalized === 'string' ? item.avgRatingLocalized : '';
   const match = ratingStr.match(/([\d.]+)\s*\((\d+)\)/);
 
   if (match) {
@@ -295,9 +365,15 @@ function extractRating(item: any): { rating: number; reviewCount: number } {
 /**
  * Extrait les URLs des photos depuis contextualPictures
  */
-function extractPhotos(item: any): string[] {
-  const pics = item.contextualPictures || [];
-  return pics.slice(0, 5).map((p: any) => p.picture || '').filter(Boolean);
+function extractPhotos(item: Record<string, unknown>): string[] {
+  const pics = Array.isArray(item.contextualPictures) ? item.contextualPictures : [];
+  return pics
+    .slice(0, 5)
+    .map((pic) => {
+      const rec = asRecord(pic);
+      return typeof rec.picture === 'string' ? rec.picture : '';
+    })
+    .filter(Boolean);
 }
 
 /**

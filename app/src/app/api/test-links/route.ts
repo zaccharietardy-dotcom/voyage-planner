@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { searchAirbnbListings, isAirbnbApiConfigured } from '@/lib/services/airbnb';
+import { searchAirbnbListings, isAirbnbApiConfigured, isValidAirbnbRoomUrl } from '@/lib/services/airbnb';
 import { searchViatorActivities, isViatorConfigured } from '@/lib/services/viator';
 
 export async function POST(request: NextRequest) {
@@ -15,6 +15,10 @@ export async function POST(request: NextRequest) {
         configured: false,
         fallbackUrl: searchUrl,
         message: 'API Airbnb non configuree (RAPIDAPI_KEY manquante). Lien de recherche genere.',
+        diagnostics: {
+          source: 'fallback-search-url',
+          providerHost: process.env.RAPIDAPI_AIRBNB_HOST || 'airbnb19.p.rapidapi.com',
+        },
       });
     }
 
@@ -29,6 +33,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         configured: true,
         count: results.length,
+        diagnostics: {
+          source: 'rapidapi-airbnb19',
+          providerHost: process.env.RAPIDAPI_AIRBNB_HOST || 'airbnb19.p.rapidapi.com',
+          returned: results.length,
+          validRoomUrls: results.filter(r => isValidAirbnbRoomUrl(r.bookingUrl)).length,
+          invalidRoomUrls: results.filter(r => !isValidAirbnbRoomUrl(r.bookingUrl)).length,
+        },
         listings: results.map(r => ({
           name: r.name,
           pricePerNight: r.pricePerNight,
@@ -38,8 +49,9 @@ export async function POST(request: NextRequest) {
           rating: r.rating,
         })),
       });
-    } catch (error: any) {
-      return NextResponse.json({ configured: true, error: error.message }, { status: 500 });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      return NextResponse.json({ configured: true, error: message }, { status: 500 });
     }
   }
 
@@ -69,12 +81,17 @@ export async function POST(request: NextRequest) {
           estimatedCost: a.estimatedCost,
           bookingUrl: a.bookingUrl,
           rating: a.rating,
-          reviewCount: (a as any).reviewCount,
-          imageUrl: (a as any).imageUrl,
+          reviewCount: typeof (a as { reviewCount?: unknown }).reviewCount === 'number'
+            ? ((a as { reviewCount: number }).reviewCount)
+            : 0,
+          imageUrl: typeof (a as { imageUrl?: unknown }).imageUrl === 'string'
+            ? ((a as { imageUrl: string }).imageUrl)
+            : undefined,
         })),
       });
-    } catch (error: any) {
-      return NextResponse.json({ configured: true, error: error.message }, { status: 500 });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      return NextResponse.json({ configured: true, error: message }, { status: 500 });
     }
   }
 

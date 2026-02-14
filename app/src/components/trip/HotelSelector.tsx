@@ -40,6 +40,12 @@ export function HotelSelector({
 }: HotelSelectorProps) {
   const [open, setOpen] = useState(false);
   const selectedHotel = hotels.find(h => h.id === selectedId) || hotels[0];
+  const selectedProviderLabel = (() => {
+    const bookingUrl = selectedHotel?.bookingUrl?.toLowerCase() || '';
+    if (bookingUrl.includes('airbnb.com')) return 'Airbnb';
+    if (bookingUrl.includes('booking.com')) return 'Booking';
+    return 'Réserver';
+  })();
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -140,14 +146,14 @@ export function HotelSelector({
           <Button variant="outline" size="sm" className="gap-1 text-xs flex-1" asChild>
             <a href={searchLinks.booking} target="_blank" rel="noopener noreferrer">
               <ExternalLink className="h-3 w-3" />
-              Booking.com
+              Recherche Booking
             </a>
           </Button>
           {selectedHotel?.bookingUrl && (
             <Button size="sm" className="gap-1 text-xs flex-1" asChild>
               <a href={selectedHotel.bookingUrl} target="_blank" rel="noopener noreferrer">
                 <ExternalLink className="h-3 w-3" />
-                Réserver
+                {selectedProviderLabel}
               </a>
             </Button>
           )}

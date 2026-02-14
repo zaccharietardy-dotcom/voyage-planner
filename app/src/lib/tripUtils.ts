@@ -1,5 +1,6 @@
 import { BudgetLevel, Accommodation } from './types';
 import { generateHotelLink, formatDateForUrl } from './services/linkGenerator';
+import { normalizeHotelBookingUrl } from './services/bookingLinks';
 
 /**
  * Génère l'URL de réservation pour un hébergement.
@@ -14,21 +15,30 @@ export function getAccommodationBookingUrl(
 ): string | undefined {
   if (!accom?.name) return undefined;
 
+  const normalizedCheckIn = formatDateForUrl(checkIn);
+  const normalizedCheckOut = formatDateForUrl(checkOut);
+
   // PRIORITÉ 1: Utiliser le bookingUrl direct si c'est un vrai lien Booking.com (/hotel/)
   // Cela inclut les liens générés par rapidApiBooking.ts comme /hotel/nl/clinkmama.html
-  if (accom.bookingUrl?.includes('/hotel/')) {
+  if (accom.bookingUrl?.includes('airbnb.com')) {
     return accom.bookingUrl;
   }
 
-  // PRIORITÉ 2: Garder le lien Airbnb si c'est un appartement
-  if (accom.type === 'apartment' && accom.bookingUrl?.includes('airbnb.com')) {
-    return accom.bookingUrl;
+  // PRIORITÉ 2: Normaliser toute URL Booking
+  if (accom.bookingUrl) {
+    return normalizeHotelBookingUrl({
+      url: accom.bookingUrl,
+      hotelName: accom.name,
+      destinationHint: destination,
+      checkIn: normalizedCheckIn,
+      checkOut: normalizedCheckOut,
+    });
   }
 
-  // PRIORITÉ 3: Pour tout le reste → générer lien Booking.com recherche
+  // PRIORITÉ 3: Générer un lien Booking direct si aucune URL n'est fournie
   return generateHotelLink(
     { name: accom.name, city: destination },
-    { checkIn: formatDateForUrl(checkIn), checkOut: formatDateForUrl(checkOut) },
+    { checkIn: normalizedCheckIn, checkOut: normalizedCheckOut },
   );
 }
 
@@ -176,4 +186,3 @@ export function getBudgetPriceLevel(budgetLevel?: BudgetLevel): 1 | 2 | 3 | 4 {
     default: return 2;
   }
 }
-
