@@ -8,6 +8,7 @@
 import type { Trip, TripDay, TripItem, TripPreferences, Flight, Accommodation, TransportOptionSummary, Restaurant } from '../types';
 import type { FetchedData, ActivityCluster, MealAssignment, BalancedPlan, ScoredActivity } from './types';
 import { DayScheduler, parseTime } from '../services/scheduler';
+import type { ScheduleItem } from '../services/scheduler';
 import { calculateDistance } from '../services/geocoding';
 import { getDirections } from '../services/directions';
 import { fetchPlaceImage, fetchRestaurantPhotoByPlaceId } from './services/wikimediaImages';
@@ -153,6 +154,66 @@ function inferInterItemTransportMode(distanceKm: number, travelMinutes: number):
   if (distanceKm >= 6) return 'car';
   if (distanceKm >= 3.5 && travelMinutes <= 20) return 'car';
   return 'public';
+}
+
+type GeoPoint = { latitude: number; longitude: number };
+
+function asGeoPoint(value: unknown): GeoPoint | null {
+  if (!value || typeof value !== 'object') return null;
+  const obj = value as Record<string, any>;
+
+  const directLat = Number(obj.latitude ?? obj.lat);
+  const directLng = Number(obj.longitude ?? obj.lng);
+  if (Number.isFinite(directLat) && Number.isFinite(directLng)) {
+    return { latitude: directLat, longitude: directLng };
+  }
+
+  if (obj.location && typeof obj.location === 'object') {
+    const locLat = Number(obj.location.latitude ?? obj.location.lat);
+    const locLng = Number(obj.location.longitude ?? obj.location.lng);
+    if (Number.isFinite(locLat) && Number.isFinite(locLng)) {
+      return { latitude: locLat, longitude: locLng };
+    }
+  }
+
+  if (obj.toCoords && typeof obj.toCoords === 'object') {
+    const toLat = Number(obj.toCoords.lat ?? obj.toCoords.latitude);
+    const toLng = Number(obj.toCoords.lng ?? obj.toCoords.longitude);
+    if (Number.isFinite(toLat) && Number.isFinite(toLng)) {
+      return { latitude: toLat, longitude: toLng };
+    }
+  }
+
+  return null;
+}
+
+function getLatestScheduledGeoPoint(scheduler: DayScheduler): GeoPoint | null {
+  const scheduled = scheduler.getItems();
+  for (let i = scheduled.length - 1; i >= 0; i--) {
+    const point = asGeoPoint((scheduled[i] as ScheduleItem).data);
+    if (point) return point;
+  }
+  return null;
+}
+
+export function normalizeSuggestedDayStartHour(
+  suggestedHour: number,
+  opts: { isFirstDay: boolean; isLastDay: boolean; isDayTrip: boolean }
+): number {
+  let hour = Number.isFinite(suggestedHour) ? suggestedHour : 9;
+  hour = Math.max(6, Math.min(11, hour));
+
+  // Full exploration days should not start too late; late starts create large idle gaps.
+  if (!opts.isFirstDay && !opts.isLastDay) {
+    hour = Math.min(hour, opts.isDayTrip ? 8 : 8);
+  }
+
+  // Keep departure days reasonably early by default to preserve a usable morning block.
+  if (opts.isLastDay) {
+    hour = Math.min(hour, 9);
+  }
+
+  return hour;
 }
 
 function sanitizeTripMediaAndSecrets(trip: Trip): void {
@@ -444,7 +505,10 @@ export async function assembleTripSchedule(
     const isLastDay = balancedDay.dayNumber === preferences.durationDays;
 
     // Compute day bounds
-    let dayStartHour = parseInt(balancedDay.suggestedStartTime?.split(':')[0] || '9', 10);
+    let dayStartHour = normalizeSuggestedDayStartHour(
+      parseInt(balancedDay.suggestedStartTime?.split(':')[0] || '9', 10),
+      { isFirstDay, isLastDay, isDayTrip: !!balancedDay.isDayTrip }
+    );
     let dayEndHour = 22;
 
     // Detect ground transport (train/bus/car) — used when no flights
@@ -490,6 +554,9 @@ export async function assembleTripSchedule(
       const departureHour = flights.return.departureTimeDisplay
         ? parseInt(flights.return.departureTimeDisplay.split(':')[0], 10)
         : new Date(flights.return.departureTime).getHours();
+      if (departureHour >= 14) {
+        dayStartHour = Math.min(dayStartHour, 8);
+      }
       // Need to be at airport 2h before departure, plus 1h transfer = 3h before
       // But ensure at least a 3h window for the last day (activities + checkout)
       dayEndHour = Math.max(dayStartHour + 3, departureHour - 3);
@@ -498,6 +565,9 @@ export async function assembleTripSchedule(
         dayStartHour = Math.min(dayStartHour, 7);
       }
     } else if (hasReturnTransport && groundDepartureHour !== null) {
+      if (groundDepartureHour >= 14) {
+        dayStartHour = Math.min(dayStartHour, 8);
+      }
       // Ground transport: need to be at station ~30min before
       dayEndHour = Math.max(dayStartHour + 3, groundDepartureHour - 1);
       if (groundDepartureHour <= 12) {
@@ -1135,7 +1205,7 @@ export async function assembleTripSchedule(
     // 7. Interleave activities with lunch and dinner at appropriate positions
     for (let i = 0; i < orderedActivities.length; i++) {
       const activity = orderedActivities[i];
-      const prev = i === 0 ? hotel : orderedActivities[i - 1];
+      const prev = getLatestScheduledGeoPoint(scheduler) || (i === 0 ? hotel : orderedActivities[i - 1]);
       let travelTime = prev ? estimateTravel(prev, activity, directionsCache) : 10;
       // Round travel time to nearest 5 minutes for clean schedule times
       travelTime = Math.round(travelTime / 5) * 5;
@@ -3264,7 +3334,17 @@ export function addHotelBoundaryTransportItems(params: {
     }
   }
 
-  if (lastOutside && !hasHotelReturn && !hasManualDayTripReturn) {
+  const lastOutsideEndMinutes = parseHHMMToMinutes(lastOutside?.endTime || '00:00');
+  const hasUpcomingReturnLonghaul = result.some((item) => {
+    const itemStart = parseHHMMToMinutes(item.startTime);
+    const isReturnLeg =
+      item.id.startsWith(`transport-ret-${dayNumber}`) ||
+      item.id.startsWith(`flight-ret-${dayNumber}`) ||
+      ((item.type === 'transport' || item.type === 'flight') && item.transportRole === 'longhaul');
+    return isReturnLeg && itemStart >= lastOutsideEndMinutes;
+  });
+
+  if (lastOutside && !hasHotelReturn && !hasManualDayTripReturn && !hasUpcomingReturnLonghaul) {
     const directDistanceKm = calculateDistance(
       lastOutside.latitude || hotel.latitude,
       lastOutside.longitude || hotel.longitude,
