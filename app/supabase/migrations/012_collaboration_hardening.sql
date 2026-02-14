@@ -11,6 +11,63 @@ ALTER TABLE public.proposals ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.votes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.activity_log ENABLE ROW LEVEL SECURITY;
 
+-- 2a) Backward-compat: ensure proposals.author_id exists on legacy schemas.
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'proposals'
+      AND column_name = 'author_id'
+  ) THEN
+    ALTER TABLE public.proposals ADD COLUMN author_id UUID;
+  END IF;
+END $$;
+
+-- Backfill author_id from known legacy columns when available.
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'proposals'
+      AND column_name = 'user_id'
+  ) THEN
+    EXECUTE 'UPDATE public.proposals SET author_id = user_id WHERE author_id IS NULL';
+  ELSIF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'proposals'
+      AND column_name = 'created_by'
+  ) THEN
+    EXECUTE 'UPDATE public.proposals SET author_id = created_by WHERE author_id IS NULL';
+  END IF;
+END $$;
+
+-- Final fallback for historical rows: use trip owner.
+UPDATE public.proposals p
+SET author_id = t.owner_id
+FROM public.trips t
+WHERE p.trip_id = t.id
+  AND p.author_id IS NULL;
+
+-- Add FK if absent (keeps migration idempotent).
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_constraint
+    WHERE conname = 'proposals_author_id_fkey'
+  ) THEN
+    ALTER TABLE public.proposals
+      ADD CONSTRAINT proposals_author_id_fkey
+      FOREIGN KEY (author_id) REFERENCES public.profiles(id);
+  END IF;
+END $$;
+
 -- 2b) Tighten trip member policies for invite/role flow.
 DROP POLICY IF EXISTS "Trip members can view members" ON public.trip_members;
 DROP POLICY IF EXISTS "Authenticated users can join trips" ON public.trip_members;
