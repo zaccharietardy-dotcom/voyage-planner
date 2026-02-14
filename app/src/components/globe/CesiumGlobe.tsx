@@ -1,9 +1,11 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Traveler, TripArc } from '@/lib/globe/types';
+import { Compass, Minus, Plus } from 'lucide-react';
+import { GlobeWaypoint, Traveler, TripArc } from '@/lib/globe/types';
 
 const colors = { arcColor: '#d4a853' };
+const INITIAL_CAMERA = { lng: 2.3522, lat: 48.8566, height: 20000000 };
 
 // Create a simple dot marker (fallback when no image)
 function createMarkerCanvas(Cesium: any, isSelected: boolean, isOnline: boolean): HTMLCanvasElement {
@@ -166,7 +168,10 @@ export interface CesiumGlobeProps {
   travelers: Traveler[];
   arcs: TripArc[];
   onTravelerSelect?: (traveler: Traveler | null) => void;
+  onWaypointSelect?: (waypoint: GlobeWaypoint | null) => void;
   selectedTraveler?: Traveler | null;
+  selectedTripPoints?: GlobeWaypoint[];
+  selectedWaypointId?: string | null;
   className?: string;
 }
 
@@ -174,7 +179,10 @@ export function CesiumGlobe({
   travelers,
   arcs,
   onTravelerSelect,
+  onWaypointSelect,
   selectedTraveler = null,
+  selectedTripPoints = [],
+  selectedWaypointId = null,
   className = '',
 }: CesiumGlobeProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -183,6 +191,7 @@ export function CesiumGlobe({
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const markersRef = useRef<Map<string, any>>(new Map());
+  const waypointRef = useRef<Map<string, any>>(new Map());
 
   // Initialize Cesium
   useEffect(() => {
@@ -267,9 +276,13 @@ export function CesiumGlobe({
           }
         });
 
-        // Set initial camera position (view of Earth from Paris)
+        // Set initial camera position (wide Earth framing)
         viewer.camera.setView({
-          destination: Cesium.Cartesian3.fromDegrees(2.3522, 48.8566, 20000000),
+          destination: Cesium.Cartesian3.fromDegrees(
+            INITIAL_CAMERA.lng,
+            INITIAL_CAMERA.lat,
+            INITIAL_CAMERA.height
+          ),
         });
 
         // Spin animation when zoomed out
@@ -410,18 +423,85 @@ export function CesiumGlobe({
     const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
     handler.setInputAction((click: any) => {
       const pickedObject = viewer.scene.pick(click.position);
+      if (Cesium.defined(pickedObject) && pickedObject.id?.properties?.waypoint) {
+        const waypoint = pickedObject.id.properties.waypoint.getValue();
+        onWaypointSelect?.(waypoint);
+        return;
+      }
+
       if (Cesium.defined(pickedObject) && pickedObject.id?.properties?.traveler) {
         const traveler = pickedObject.id.properties.traveler.getValue();
         onTravelerSelect?.(traveler);
+        onWaypointSelect?.(null);
       } else {
         onTravelerSelect?.(null);
+        onWaypointSelect?.(null);
       }
     }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 
     return () => {
       handler.destroy();
     };
-  }, [isLoaded, travelers, selectedTraveler, onTravelerSelect]);
+  }, [isLoaded, travelers, selectedTraveler, onTravelerSelect, onWaypointSelect]);
+
+  // Add selected trip waypoints (clickable points of interest)
+  useEffect(() => {
+    const Cesium = cesiumRef.current;
+    if (!isLoaded || !viewerRef.current || !Cesium) return;
+
+    const viewer = viewerRef.current;
+
+    waypointRef.current.forEach((entity) => {
+      viewer.entities.remove(entity);
+    });
+    waypointRef.current.clear();
+
+    if (!selectedTripPoints.length) return;
+
+    const visiblePoints = selectedTripPoints
+      .filter((point) => (
+        Number.isFinite(point.lat)
+        && Number.isFinite(point.lng)
+        && Math.abs(point.lat) <= 90
+        && Math.abs(point.lng) <= 180
+      ))
+      .slice(0, 40);
+
+    visiblePoints.forEach((point, index) => {
+      const isSelected = selectedWaypointId === point.id;
+      const entity = viewer.entities.add({
+        id: `waypoint-${point.id}`,
+        position: Cesium.Cartesian3.fromDegrees(point.lng, point.lat, 120),
+        point: {
+          pixelSize: isSelected ? 14 : 10,
+          color: isSelected
+            ? Cesium.Color.fromCssColorString('#f59e0b')
+            : Cesium.Color.fromCssColorString('#38bdf8'),
+          outlineColor: Cesium.Color.WHITE,
+          outlineWidth: 2,
+          disableDepthTestDistance: Number.POSITIVE_INFINITY,
+          heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND,
+        },
+        label: {
+          text: `${index + 1}`,
+          font: '700 10px -apple-system, BlinkMacSystemFont, sans-serif',
+          fillColor: Cesium.Color.WHITE,
+          outlineColor: Cesium.Color.BLACK.withAlpha(0.9),
+          outlineWidth: 2,
+          style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+          verticalOrigin: Cesium.VerticalOrigin.CENTER,
+          horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
+          distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0, 2200000),
+          disableDepthTestDistance: Number.POSITIVE_INFINITY,
+        },
+        properties: {
+          waypoint: point,
+        },
+      });
+
+      waypointRef.current.set(point.id, entity);
+    });
+  }, [isLoaded, selectedTripPoints, selectedWaypointId]);
 
   // Add trip arcs
   useEffect(() => {
@@ -436,6 +516,11 @@ export function CesiumGlobe({
 
     // Add arcs
     arcs.forEach((arc) => {
+      const focusedTravelerId = selectedTraveler?.id || null;
+      const isFocused = focusedTravelerId ? arc.travelerId === focusedTravelerId : true;
+      const isDimmed = focusedTravelerId ? arc.travelerId !== focusedTravelerId : false;
+      const hasLongDistance = (arc.distanceKm || 0) > 1200 || arc.isLongHaul;
+
       const positions = Cesium.Cartesian3.fromDegreesArrayHeights([
         arc.from.lng, arc.from.lat, 100000,
         (arc.from.lng + arc.to.lng) / 2, (arc.from.lat + arc.to.lat) / 2, 500000,
@@ -446,16 +531,20 @@ export function CesiumGlobe({
         id: `arc-${arc.id}`,
         polyline: {
           positions: positions,
-          width: 2,
+          width: isFocused ? 3.2 : 1.4,
           material: new Cesium.PolylineGlowMaterialProperty({
-            glowPower: 0.2,
-            color: Cesium.Color.fromCssColorString(arc.color || colors.arcColor),
+            glowPower: isFocused ? 0.28 : 0.1,
+            color: Cesium.Color.fromCssColorString(
+              hasLongDistance
+                ? '#fb923c'
+                : (arc.color || colors.arcColor)
+            ).withAlpha(isDimmed ? 0.2 : 0.92),
           }),
           arcType: Cesium.ArcType.NONE,
         },
       });
     });
-  }, [isLoaded, arcs]);
+  }, [isLoaded, arcs, selectedTraveler]);
 
   // Fly to selected traveler
   useEffect(() => {
@@ -472,6 +561,49 @@ export function CesiumGlobe({
       duration: 2,
     });
   }, [isLoaded, selectedTraveler]);
+
+  // Fly to selected waypoint (photo/monument hotspot)
+  useEffect(() => {
+    const Cesium = cesiumRef.current;
+    if (!isLoaded || !viewerRef.current || !selectedWaypointId || !Cesium) return;
+
+    const point = selectedTripPoints.find((item) => item.id === selectedWaypointId);
+    if (!point) return;
+
+    viewerRef.current.camera.flyTo({
+      destination: Cesium.Cartesian3.fromDegrees(point.lng, point.lat, 350000),
+      duration: 1.4,
+    });
+  }, [isLoaded, selectedWaypointId, selectedTripPoints]);
+
+  const handleZoomIn = () => {
+    const viewer = viewerRef.current;
+    if (!viewer) return;
+    const cameraHeight = viewer.camera.positionCartographic.height;
+    viewer.camera.zoomIn(cameraHeight * 0.28);
+  };
+
+  const handleZoomOut = () => {
+    const viewer = viewerRef.current;
+    if (!viewer) return;
+    const cameraHeight = viewer.camera.positionCartographic.height;
+    viewer.camera.zoomOut(cameraHeight * 0.32);
+  };
+
+  const handleResetView = () => {
+    const Cesium = cesiumRef.current;
+    const viewer = viewerRef.current;
+    if (!Cesium || !viewer) return;
+
+    viewer.camera.flyTo({
+      destination: Cesium.Cartesian3.fromDegrees(
+        INITIAL_CAMERA.lng,
+        INITIAL_CAMERA.lat,
+        INITIAL_CAMERA.height
+      ),
+      duration: 1.6,
+    });
+  };
 
   return (
     <div className={`relative w-full h-full ${className}`}>
@@ -500,6 +632,36 @@ export function CesiumGlobe({
         className="w-full h-full"
         style={{ background: '#0a0a0f' }}
       />
+
+      {/* Navigation controls */}
+      {isLoaded && !error && (
+        <div className="absolute right-4 top-4 z-20 flex flex-col gap-2">
+          <button
+            type="button"
+            onClick={handleZoomIn}
+            className="h-10 w-10 rounded-lg border border-white/20 bg-black/45 text-white shadow-md backdrop-blur hover:bg-black/70"
+            aria-label="Zoom avant"
+          >
+            <Plus className="mx-auto h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={handleZoomOut}
+            className="h-10 w-10 rounded-lg border border-white/20 bg-black/45 text-white shadow-md backdrop-blur hover:bg-black/70"
+            aria-label="Zoom arrière"
+          >
+            <Minus className="mx-auto h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={handleResetView}
+            className="h-10 w-10 rounded-lg border border-white/20 bg-black/45 text-white shadow-md backdrop-blur hover:bg-black/70"
+            aria-label="Recentrer le globe"
+          >
+            <Compass className="mx-auto h-4 w-4" />
+          </button>
+        </div>
+      )}
 
       {/* Custom styles to hide Cesium branding and match dark theme */}
       <style jsx global>{`
