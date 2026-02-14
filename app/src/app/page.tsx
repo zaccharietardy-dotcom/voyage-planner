@@ -9,7 +9,7 @@ import { TripPreferences } from '@/lib/types';
 import { toast } from 'sonner';
 import { useAuth } from '@/components/auth';
 import { generateTripStream } from '@/lib/generateTrip';
-import { Hero, HowItWorks, Features, PopularDestinations, CTASection } from '@/components/landing';
+import { Hero, HowItWorks, Features, PopularDestinations, Testimonials, CTASection } from '@/components/landing';
 import { Footer } from '@/components/layout';
 
 // Date helpers
@@ -296,7 +296,7 @@ const PRESET_TRIPS: PresetTrip[] = [
 const BUDGET_COLORS: Record<string, string> = {
   economic: 'bg-green-100 text-green-700',
   moderate: 'bg-blue-100 text-blue-700',
-  comfort: 'bg-purple-100 text-purple-700',
+  comfort: 'bg-sky-100 text-sky-700',
   luxury: 'bg-amber-100 text-amber-700',
 };
 
@@ -341,15 +341,16 @@ function PresetTripsSection() {
   };
 
   return (
-    <section className="container max-w-4xl mx-auto px-4 py-12">
+    <section className="container mx-auto max-w-5xl px-4 py-12 md:py-16">
       <div className="mb-8 text-center">
-        <h2 className="text-2xl font-bold mb-2">Voyages de test</h2>
+        <p className="mb-2 text-xs uppercase tracking-[0.2em] text-[#b8923d]">Démarrage instantané</p>
+        <h2 className="font-display mb-2 text-3xl font-semibold md:text-4xl">Voyages de test</h2>
         <p className="text-muted-foreground">
-          Cliquez sur un voyage pour lancer la generation.
+          Cliquez sur un voyage pour lancer la génération.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {PRESET_TRIPS.map((preset, i) => {
           const isGenerating = generatingId === i;
           const anyGenerating = generatingId !== null;
@@ -358,7 +359,7 @@ function PresetTripsSection() {
           return (
             <Card
               key={i}
-              className={`transition-all hover:shadow-lg ${anyGenerating && !isGenerating ? 'opacity-50' : ''}`}
+              className={`premium-surface transition-all hover:-translate-y-0.5 hover:shadow-lg ${anyGenerating && !isGenerating ? 'opacity-50' : ''}`}
             >
               <CardContent className="p-5">
                 <div className="flex items-start justify-between mb-3">
@@ -398,7 +399,7 @@ function PresetTripsSection() {
                 </div>
 
                 <Button
-                  className="w-full gap-2"
+                  className="w-full gap-2 bg-[#102a45] text-white hover:bg-[#173a5f] dark:bg-[#d4a853] dark:text-[#102a45] dark:hover:bg-[#e8c068]"
                   disabled={anyGenerating}
                   onClick={() => handleGenerate(preset, i)}
                 >
@@ -431,6 +432,7 @@ export default function Home() {
       <HowItWorks />
       <Features />
       <PopularDestinations />
+      <Testimonials />
       <CTASection />
       <Footer />
     </div>

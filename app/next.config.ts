@@ -6,11 +6,22 @@ const withBundleAnalyzer = bundleAnalyzer({
 });
 
 const nextConfig: NextConfig = {
-  // Supprime les console.log en production (garde console.error et console.warn)
   compiler: {
     removeConsole: process.env.NODE_ENV === "production"
       ? { exclude: ["error", "warn"] }
       : false,
+  },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
+      {
+        protocol: "https",
+        hostname: "i.pravatar.cc",
+      },
+    ],
   },
 };
 

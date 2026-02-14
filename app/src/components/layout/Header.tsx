@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -26,63 +27,58 @@ export function Header() {
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
+      setIsScrolled(window.scrollY > 8);
     };
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Close mobile menu when route changes
   useEffect(() => {
-    setIsMobileMenuOpen(false);
-  }, [pathname]);
-
-  // Prevent body scroll when mobile menu is open
-  useEffect(() => {
-    if (isMobileMenuOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
+    document.body.style.overflow = isMobileMenuOpen ? 'hidden' : '';
     return () => {
       document.body.style.overflow = '';
     };
   }, [isMobileMenuOpen]);
 
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false);
+  };
+
   return (
     <>
       <header
         className={cn(
-          'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
+          'fixed left-0 right-0 top-0 z-50 transition-all duration-300',
           isScrolled
-            ? 'bg-background/80 backdrop-blur-lg border-b shadow-sm'
+            ? 'border-b border-[#1e3a5f]/12 bg-background/85 shadow-[0_8px_30px_rgba(10,22,40,0.08)] backdrop-blur-xl'
             : 'bg-transparent'
         )}
       >
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
-            {/* Logo */}
-            <Link href="/" className="flex items-center gap-2 z-50">
-              <img
+          <div className="flex h-16 items-center justify-between">
+            <Link href="/" className="z-50 inline-flex items-center gap-2" onClick={closeMobileMenu}>
+              <Image
                 src="/logo-narae.png"
                 alt="Narae Voyage"
-                className="w-9 h-9 rounded-lg object-cover"
+                width={36}
+                height={36}
+                className="h-9 w-9 rounded-lg object-cover shadow-sm"
+                priority
               />
-              <span className="font-bold text-lg hidden sm:inline">Narae Voyage</span>
+              <span className="font-display hidden text-xl font-semibold tracking-tight sm:inline">Narae Voyage</span>
             </Link>
 
-            {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center gap-1">
+            <nav className="hidden items-center gap-1 rounded-full border border-[#1e3a5f]/10 bg-background/70 p-1 backdrop-blur-md md:flex">
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
                   className={cn(
-                    'px-4 py-2 rounded-lg text-sm font-medium transition-colors',
+                    'rounded-full px-4 py-2 text-sm font-medium transition-all',
                     pathname === link.href
-                      ? 'bg-primary/10 text-primary'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                      ? 'bg-[#102a45] text-white shadow-sm dark:bg-[#d4a853] dark:text-[#102a45]'
+                      : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                   )}
                 >
                   {link.label}
@@ -90,7 +86,6 @@ export function Header() {
               ))}
             </nav>
 
-            {/* Right side */}
             <div className="flex items-center gap-2">
               <NotificationBell />
               <div className="hidden md:block">
@@ -98,7 +93,6 @@ export function Header() {
               </div>
               <ThemeToggle />
 
-              {/* Mobile menu button */}
               <Button
                 variant="ghost"
                 size="icon"
@@ -106,59 +100,49 @@ export function Header() {
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 aria-label={isMobileMenuOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
               >
-                {isMobileMenuOpen ? (
-                  <X className="h-5 w-5" />
-                ) : (
-                  <Menu className="h-5 w-5" />
-                )}
+                {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
               </Button>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 md:hidden"
-          onClick={() => setIsMobileMenuOpen(false)}
+          className="fixed inset-0 z-40 bg-black/45 md:hidden"
+          onClick={closeMobileMenu}
         />
       )}
 
-      {/* Mobile Menu Panel */}
       <div
         className={cn(
-          'fixed top-0 right-0 bottom-0 w-72 bg-background border-l z-40 transform transition-transform duration-300 md:hidden',
+          'fixed bottom-0 right-0 top-0 z-40 w-72 border-l border-[#1e3a5f]/15 bg-background/95 px-4 pb-6 pt-20 backdrop-blur-xl transition-transform duration-300 md:hidden',
           isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
         )}
       >
-        <div className="flex flex-col h-full pt-20 pb-6 px-4">
-          {/* Mobile Navigation Links */}
-          <nav className="flex flex-col gap-1">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={cn(
-                  'flex items-center gap-3 px-4 py-3 rounded-lg text-base font-medium transition-colors',
-                  pathname === link.href
-                    ? 'bg-primary/10 text-primary'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-                )}
-              >
-                <link.icon className="h-5 w-5" />
-                {link.label}
-              </Link>
-            ))}
-          </nav>
+        <nav className="flex flex-col gap-1">
+          {navLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              onClick={closeMobileMenu}
+              className={cn(
+                'flex items-center gap-3 rounded-xl px-4 py-3 text-base font-medium transition-colors',
+                pathname === link.href
+                  ? 'bg-[#102a45]/10 text-[#102a45] dark:bg-[#d4a853]/20 dark:text-[#f4d03f]'
+                  : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+              )}
+            >
+              <link.icon className="h-5 w-5" />
+              {link.label}
+            </Link>
+          ))}
+        </nav>
 
-          {/* Spacer */}
-          <div className="flex-1" />
+        <div className="flex-1" />
 
-          {/* Mobile User Menu */}
-          <div className="border-t pt-4">
-            <UserMenu />
-          </div>
+        <div className="mt-6 border-t border-border pt-4">
+          <UserMenu />
         </div>
       </div>
     </>
