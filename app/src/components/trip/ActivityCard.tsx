@@ -930,8 +930,8 @@ function RestaurantSuggestionsFlat({
 
   return (
     <div className="px-3.5 pb-3" onClick={(e) => e.stopPropagation()}>
-      {/* 3 equal cards side by side */}
-      <div className="flex flex-col sm:flex-row gap-2">
+      {/* Carousel horizontal mobile, grille 3 colonnes desktop */}
+      <div className="flex gap-2 overflow-x-auto snap-x snap-mandatory sm:overflow-visible sm:grid sm:grid-cols-3 scrollbar-hide pb-1 -mx-1 px-1">
         {suggestions.map((option) => {
           const isSelected = option.id === current.id;
           const bookingUrl = option.googleMapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(option.name)}`;
@@ -941,8 +941,8 @@ function RestaurantSuggestionsFlat({
             <div
               key={option.id}
               className={cn(
-                "relative overflow-hidden rounded-xl border-2 transition-all duration-200 flex-1",
-                "aspect-[4/3] sm:aspect-[4/3]",
+                "relative overflow-hidden rounded-xl border-2 transition-all duration-200 snap-center",
+                "min-w-[75vw] sm:min-w-0 aspect-[4/3]",
                 isSelected
                   ? "border-primary shadow-lg shadow-primary/20 ring-1 ring-primary/30"
                   : "border-transparent hover:border-white/20 hover:shadow-md"

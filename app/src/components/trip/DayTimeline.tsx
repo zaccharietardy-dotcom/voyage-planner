@@ -9,6 +9,7 @@ import { Plus, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { shouldShowItinerary } from '@/lib/services/itineraryValidator';
+import { motion } from 'framer-motion';
 
 export interface HotelSelectorData {
   hotels: Accommodation[];
@@ -90,16 +91,33 @@ export function DayTimeline({
   return (
     <div className="space-y-4">
       {/* Day header */}
-      <div className="flex items-center justify-between">
+      <motion.div
+        className="flex items-center justify-between"
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, ease: 'easeOut' }}
+      >
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold">
             {day.dayNumber}
           </div>
           <div>
-            <h3 className="font-semibold">Jour {day.dayNumber}</h3>
+            <h3 className="font-semibold flex items-center gap-2">
+              Jour {day.dayNumber}
+              {day.weatherForecast && (
+                <span className="text-sm font-normal text-muted-foreground" title={day.weatherForecast.condition}>
+                  {day.weatherForecast.icon} {day.weatherForecast.tempMin}°/{day.weatherForecast.tempMax}°
+                </span>
+              )}
+            </h3>
             <p className="text-sm text-muted-foreground flex items-center gap-1">
               <Calendar className="h-3.5 w-3.5" />
               {format(new Date(day.date), 'EEEE d MMMM', { locale: fr })}
+              {day.weatherForecast && (
+                <span className="ml-1 opacity-70">
+                  — {day.weatherForecast.condition}
+                </span>
+              )}
             </p>
           </div>
         </div>
@@ -114,10 +132,21 @@ export function DayTimeline({
             Ajouter
           </Button>
         )}
-      </div>
+      </motion.div>
 
       {/* Timeline */}
-      <div className="relative pl-6 space-y-3">
+      <motion.div
+        className="relative pl-6 space-y-3"
+        initial="hidden"
+        animate="visible"
+        variants={{
+          visible: {
+            transition: {
+              staggerChildren: 0.08,
+            },
+          },
+        }}
+      >
         {/* Vertical line */}
         <div className="absolute left-[11px] top-0 bottom-0 w-0.5 bg-border" />
 
@@ -128,7 +157,21 @@ export function DayTimeline({
           const isLast = index === sortedItems.length - 1;
 
           return (
-            <div key={item.id} className="relative group/item">
+            <motion.div
+              key={item.id}
+              className="relative group/item"
+              variants={{
+                hidden: { opacity: 0, y: 20 },
+                visible: {
+                  opacity: 1,
+                  y: 0,
+                  transition: {
+                    duration: 0.4,
+                    ease: 'easeOut',
+                  },
+                },
+              }}
+            >
               {/* Timeline dot */}
               <div className="absolute -left-6 top-5 w-3 h-3 rounded-full bg-background border-2 border-primary" />
 
@@ -182,12 +225,17 @@ export function DayTimeline({
                   mode={nextItem.transportToPrevious}
                 />
               )}
-            </div>
+            </motion.div>
           );
         })}
 
         {sortedItems.length === 0 && (
-          <div className="text-center py-8 text-muted-foreground">
+          <motion.div
+            className="text-center py-8 text-muted-foreground"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3, delay: 0.1 }}
+          >
             <p>Aucune activité pour ce jour</p>
             {onAddItem && (
               <Button
@@ -198,9 +246,9 @@ export function DayTimeline({
                 Ajouter une activité
               </Button>
             )}
-          </div>
+          </motion.div>
         )}
-      </div>
+      </motion.div>
     </div>
   );
 }
