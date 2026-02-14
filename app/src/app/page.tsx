@@ -29,6 +29,68 @@ interface PresetTrip {
 }
 
 const PRESET_TRIPS: PresetTrip[] = [
+  // ── Voyages imminents (2-4 jours) — météo forecast temps réel ──
+  {
+    label: 'Nice ce week-end',
+    emoji: '🌊',
+    description: 'Couple, 2 jours, plage & gastro',
+    tags: ['couple', '2j', 'moderate'],
+    preferences: {
+      origin: 'Paris',
+      destination: 'Nice',
+      startDate: daysFromNow(2),
+      durationDays: 2,
+      groupSize: 2,
+      groupType: 'couple',
+      transport: 'train',
+      carRental: false,
+      budgetLevel: 'moderate',
+      activities: ['beach', 'gastronomy'],
+      dietary: ['none'],
+      mustSee: 'Promenade des Anglais, Vieux-Nice',
+    },
+  },
+  {
+    label: 'Bruxelles express',
+    emoji: '🍫',
+    description: 'Amis x2, 2 jours, gastro & culture',
+    tags: ['amis', '2j', 'economic'],
+    preferences: {
+      origin: 'Paris',
+      destination: 'Brussels',
+      startDate: daysFromNow(3),
+      durationDays: 2,
+      groupSize: 2,
+      groupType: 'friends',
+      transport: 'train',
+      carRental: false,
+      budgetLevel: 'economic',
+      activities: ['gastronomy', 'culture'],
+      dietary: ['none'],
+      mustSee: 'Grand-Place, Atomium, Manneken Pis',
+    },
+  },
+  {
+    label: 'Milan 5 jours',
+    emoji: '🍕',
+    description: 'Solo, 5 jours, culture & shopping',
+    tags: ['solo', '5j', 'moderate'],
+    preferences: {
+      origin: 'Lyon',
+      destination: 'Milan',
+      startDate: daysFromNow(4),
+      durationDays: 5,
+      groupSize: 1,
+      groupType: 'solo',
+      transport: 'train',
+      carRental: false,
+      budgetLevel: 'moderate',
+      activities: ['culture', 'shopping', 'gastronomy'],
+      dietary: ['none'],
+      mustSee: 'Duomo, La Scala, Navigli',
+    },
+  },
+  // ── Voyages classiques ──
   {
     label: 'Week-end Paris romantique',
     emoji: '🗼',
