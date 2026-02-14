@@ -847,7 +847,7 @@ function RestaurantSuggestionsFlat({
       [['rome', 'romano', 'roman'], 'romain'],
       [['m\u00e9diterran\u00e9en', 'mediterranean', 'mediterran\u00e9en'], 'm\u00e9diterran\u00e9en'],
       [['proven\u00e7al', 'provencal'], 'proven\u00e7al'],
-      [['lyonnais'], 'lyonnais'],
+      [['lyonnais', 'bouchon'], 'lyonnais'],
       [['breton'], 'breton'],
       [['alsacien'], 'alsacien'],
       [['normand'], 'normand'],
@@ -861,6 +861,7 @@ function RestaurantSuggestionsFlat({
 
     // 2) D\u00e9tecter le type d'\u00e9tablissement (optionnel, enrichit le label)
     const TYPES: [string[], string][] = [
+      [['bouchon'], 'Bouchon'],
       [['brasserie'], 'Brasserie'],
       [['bistro', 'bistrot'], 'Bistrot'],
       [['trattoria'], 'Trattoria'],
@@ -1132,7 +1133,7 @@ function RestaurantSuggestions({
       [['rome', 'romano', 'roman'], 'romain'],
       [['m\u00e9diterran\u00e9en', 'mediterranean', 'mediterran\u00e9en'], 'm\u00e9diterran\u00e9en'],
       [['proven\u00e7al', 'provencal'], 'proven\u00e7al'],
-      [['lyonnais'], 'lyonnais'],
+      [['lyonnais', 'bouchon'], 'lyonnais'],
       [['breton'], 'breton'],
       [['alsacien'], 'alsacien'],
       [['normand'], 'normand'],
@@ -1146,6 +1147,7 @@ function RestaurantSuggestions({
 
     // 2) D\u00e9tecter le type d'\u00e9tablissement (optionnel, enrichit le label)
     const TYPES: [string[], string][] = [
+      [['bouchon'], 'Bouchon'],
       [['brasserie'], 'Brasserie'],
       [['bistro', 'bistrot'], 'Bistrot'],
       [['trattoria'], 'Trattoria'],
