@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/components/auth';
 import { getSupabaseClient } from '@/lib/supabase';
@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Loader2, MapPin, Users, CheckCircle, XCircle } from 'lucide-react';
 import Link from 'next/link';
 
-type JoinStatus = 'loading' | 'checking' | 'joining' | 'success' | 'error' | 'already_member' | 'not_authenticated';
+type JoinStatus = 'loading' | 'checking' | 'joining' | 'success' | 'error' | 'already_member';
 
 export default function JoinTripPage() {
   const router = useRouter();
@@ -20,23 +20,14 @@ export default function JoinTripPage() {
   const [error, setError] = useState<string>('');
   const [tripInfo, setTripInfo] = useState<{ id: string; title: string; destination: string } | null>(null);
 
-  useEffect(() => {
-    if (authLoading) return;
-
+  const joinTrip = useCallback(async () => {
     if (!user) {
-      setStatus('not_authenticated');
       return;
     }
 
-    joinTrip();
-  }, [user, authLoading, code]);
-
-  async function joinTrip() {
     setStatus('checking');
     const supabase = getSupabaseClient();
-    // Read role synchronously from URL to avoid race condition with useState
-    const urlParams = new URLSearchParams(window.location.search);
-    const joinRole = urlParams.get('role') === 'editor' ? 'editor' : 'viewer';
+    const joinRole = 'viewer';
 
     try {
       // Trouver le voyage par code de partage
@@ -59,7 +50,7 @@ export default function JoinTripPage() {
         .from('trip_members')
         .select('id')
         .eq('trip_id', trip.id)
-        .eq('user_id', user!.id)
+        .eq('user_id', user.id)
         .single();
 
       if (existingMember) {
@@ -71,7 +62,7 @@ export default function JoinTripPage() {
       setStatus('joining');
       const { error: joinError } = await supabase.from('trip_members').insert({
         trip_id: trip.id,
-        user_id: user!.id,
+        user_id: user.id,
         role: joinRole,
       });
 
@@ -89,7 +80,7 @@ export default function JoinTripPage() {
       // Log d'activité
       await supabase.from('activity_log').insert({
         trip_id: trip.id,
-        user_id: user!.id,
+        user_id: user.id,
         action: 'member_joined',
         details: { joinMethod: 'share_link' },
       });
@@ -105,10 +96,17 @@ export default function JoinTripPage() {
       setStatus('error');
       setError('Une erreur est survenue. Veuillez réessayer.');
     }
-  }
+  }, [code, router, user]);
+
+  useEffect(() => {
+    if (authLoading) return;
+    if (!user) return;
+
+    joinTrip();
+  }, [user, authLoading, joinTrip]);
 
   // Non authentifié
-  if (status === 'not_authenticated') {
+  if (!authLoading && !user) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
@@ -228,7 +226,7 @@ export default function JoinTripPage() {
         </CardHeader>
         <CardContent className="text-center">
           <Button asChild variant="outline" className="w-full">
-            <Link href="/">Retour à l'accueil</Link>
+            <Link href="/">Retour à l&apos;accueil</Link>
           </Button>
         </CardContent>
       </Card>

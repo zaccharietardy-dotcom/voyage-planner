@@ -183,7 +183,7 @@ function hierarchicalClustering(
   }
 
   // 2. Initialize: each activity is its own cluster (as indices)
-  let clusterMembers: number[][] = activities.map((_, i) => [i]);
+  const clusterMembers: number[][] = activities.map((_, i) => [i]);
 
   // 3. Agglomerate until K clusters (with radius constraint)
   while (clusterMembers.length > K) {

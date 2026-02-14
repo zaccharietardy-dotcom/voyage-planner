@@ -16,7 +16,7 @@
 
 import { Restaurant, DietaryType } from '../types';
 import { calculateDistance, estimateTravelTime } from './geocoding';
-import { validateRestaurantCuisine, filterRestaurantsByCuisine } from './cuisineValidator';
+import { validateRestaurantCuisine, filterRestaurantsByCuisine, getCountryFromDestination } from './cuisineValidator';
 import { searchRestaurants as searchFoursquareRestaurants, foursquareToRestaurant, isFoursquareConfigured } from './foursquare';
 import { searchRestaurantsWithSerpApi, searchRestaurantsNearby, isSerpApiPlacesConfigured, QUALITY_THRESHOLDS } from './serpApiPlaces';
 import { searchPlacesFromDB, savePlacesToDB, isDataFresh, type PlaceData } from './placeDatabase';
@@ -411,8 +411,6 @@ export function filterByRating(restaurants: Restaurant[]): Restaurant[] {
  * Utile quand OSM n'a pas de cuisineTypes mais le nom révèle la cuisine
  */
 function filterByForbiddenNames(restaurants: Restaurant[], destination: string): Restaurant[] {
-  const { getCountryFromDestination } = require('./cuisineValidator');
-
   // Mots-clés interdits par pays (dans le nom du restaurant)
   // IMPORTANT: Liste exhaustive incluant toutes les variantes possibles
   const FORBIDDEN_KEYWORDS: Record<string, string[]> = {

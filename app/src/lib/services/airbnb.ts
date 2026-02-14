@@ -70,10 +70,24 @@ async function resolveDestinationId(destination: string): Promise<{ id: string; 
       { 'x-rapidapi-key': getRapidApiKey(), 'x-rapidapi-host': getAirbnbHost() },
     );
 
-    if (!data || !data.status || !data.data || data.data.length === 0) return null;
+    if (!data || !data.status) return null;
 
-    const first = data.data[0];
-    return { id: first.id, name: first.display_name || first.location_name || destination };
+    const destinations = Array.isArray(data.data)
+      ? data.data.map((item) => asRecord(item))
+      : [];
+    if (destinations.length === 0) return null;
+
+    const first = destinations[0];
+    const rawId = first.id;
+    if (typeof rawId !== 'string' && typeof rawId !== 'number') return null;
+
+    const displayName = typeof first.display_name === 'string'
+      ? first.display_name
+      : typeof first.location_name === 'string'
+        ? first.location_name
+        : destination;
+
+    return { id: String(rawId), name: displayName };
   } catch (error) {
     console.error('[Airbnb] Erreur résolution destination:', error);
     return null;

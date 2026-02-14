@@ -119,7 +119,8 @@ export async function searchFlightsWithSerpApi(
       // Ces vols obligent à dormir à l'aéroport, ce qui est impraticable
       const hasOvernightLayover = flightOffer.layovers?.some(l => l.overnight === true);
       if (hasOvernightLayover) {
-        const layoverInfo = flightOffer.layovers?.find(l => l.overnight)!;
+        const layoverInfo = flightOffer.layovers?.find(l => l.overnight);
+        if (!layoverInfo) continue;
         console.warn(`[SerpAPI] ⚠️ Vol ignoré: escale de nuit à ${layoverInfo.name} (${Math.round(layoverInfo.duration / 60)}h)`);
         continue;
       }
@@ -127,7 +128,8 @@ export async function searchFlightsWithSerpApi(
       // VALIDATION: Rejeter les vols avec escales trop longues (> 4h)
       const hasLongLayover = flightOffer.layovers?.some(l => l.duration > 240);
       if (hasLongLayover) {
-        const layoverInfo = flightOffer.layovers?.find(l => l.duration > 240)!;
+        const layoverInfo = flightOffer.layovers?.find(l => l.duration > 240);
+        if (!layoverInfo) continue;
         console.warn(`[SerpAPI] ⚠️ Vol ignoré: escale trop longue à ${layoverInfo.name} (${Math.round(layoverInfo.duration / 60)}h)`);
         continue;
       }

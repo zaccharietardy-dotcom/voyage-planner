@@ -1,16 +1,38 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { searchAirbnbListings, isAirbnbApiConfigured, isValidAirbnbRoomUrl } from '@/lib/services/airbnb';
 import { searchViatorActivities, isViatorConfigured } from '@/lib/services/viator';
+import { requireAdmin } from '@/lib/server/adminAuth';
+
+interface TestLinksBody {
+  type?: string;
+  destination?: string;
+  checkIn?: string;
+  checkOut?: string;
+  guests?: number;
+  cityCenter?: { lat: number; lng: number };
+}
 
 export async function POST(request: NextRequest) {
-  const body = await request.json();
+  const auth = await requireAdmin();
+  if (!auth.ok) return auth.response;
+
+  const body = (await request.json()) as TestLinksBody;
   const { type, destination, checkIn, checkOut, guests, cityCenter } = body;
+
+  if (!destination || typeof destination !== 'string') {
+    return NextResponse.json({ error: 'destination requis' }, { status: 400 });
+  }
+  const normalizedDestination = destination.trim();
+  const defaultCheckIn = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const defaultCheckOut = new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const normalizedCheckIn = checkIn || defaultCheckIn;
+  const normalizedCheckOut = checkOut || defaultCheckOut;
 
   if (type === 'airbnb') {
     const configured = isAirbnbApiConfigured();
     if (!configured) {
       // Generate fallback search link
-      const searchUrl = `https://www.airbnb.com/s/${encodeURIComponent(destination)}/homes?checkin=${checkIn}&checkout=${checkOut}&adults=${guests || 2}&price_max=100&room_types%5B%5D=Entire%20home%2Fapt`;
+      const searchUrl = `https://www.airbnb.com/s/${encodeURIComponent(normalizedDestination)}/homes?checkin=${normalizedCheckIn}&checkout=${normalizedCheckOut}&adults=${guests || 2}&price_max=100&room_types%5B%5D=Entire%20home%2Fapt`;
       return NextResponse.json({
         configured: false,
         fallbackUrl: searchUrl,
@@ -23,7 +45,7 @@ export async function POST(request: NextRequest) {
     }
 
     try {
-      const results = await searchAirbnbListings(destination, checkIn, checkOut, {
+      const results = await searchAirbnbListings(normalizedDestination, normalizedCheckIn, normalizedCheckOut, {
         guests: guests || 2,
         maxPricePerNight: 100,
         limit: 5,
@@ -66,7 +88,7 @@ export async function POST(request: NextRequest) {
 
     try {
       const results = await searchViatorActivities(
-        destination,
+        normalizedDestination,
         cityCenter || { lat: 13.7563, lng: 100.5018 }, // Bangkok default
         { limit: 10 },
       );

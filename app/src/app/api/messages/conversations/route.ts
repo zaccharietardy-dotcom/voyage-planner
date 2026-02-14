@@ -38,7 +38,7 @@ export async function GET() {
       .neq('user_id', user.id);
 
     const otherUserIds = [...new Set(allParticipants?.map(p => p.user_id) || [])];
-    let profileMap: Record<string, any> = {};
+    const profileMap: Record<string, any> = {};
     if (otherUserIds.length > 0) {
       const { data: profiles } = await sc
         .from('profiles')

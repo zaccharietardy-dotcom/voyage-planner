@@ -257,7 +257,7 @@ function shiftTimes(
       const oldEnd = item.endTime;
 
       // Calcule les nouveaux horaires
-      let newStartMinutes = itemStart + shiftMinutes;
+      const newStartMinutes = itemStart + shiftMinutes;
       let newEndMinutes = itemEnd + shiftMinutes;
 
       // Vérifie les limites basses

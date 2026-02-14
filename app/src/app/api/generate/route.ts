@@ -24,32 +24,37 @@ export async function POST(request: NextRequest) {
     const supabase = await createRouteHandlerClient();
     const { data: { user } } = await supabase.auth.getUser();
 
-    if (user) {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('subscription_status, extra_trips')
-        .eq('id', user.id)
-        .single();
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Non authentifié' },
+        { status: 401 }
+      );
+    }
 
-      if (!profile?.subscription_status || profile.subscription_status !== 'pro') {
-        const startOfMonth = new Date();
-        startOfMonth.setDate(1);
-        startOfMonth.setHours(0, 0, 0, 0);
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('subscription_status, extra_trips')
+      .eq('id', user.id)
+      .single();
 
-        const { count } = await supabase
-          .from('trips')
-          .select('*', { count: 'exact', head: true })
-          .eq('owner_id', user.id)
-          .gte('created_at', startOfMonth.toISOString());
+    if (!profile?.subscription_status || profile.subscription_status !== 'pro') {
+      const startOfMonth = new Date();
+      startOfMonth.setDate(1);
+      startOfMonth.setHours(0, 0, 0, 0);
 
-        const totalAllowed = FREE_MONTHLY_LIMIT + (profile?.extra_trips || 0);
+      const { count } = await supabase
+        .from('trips')
+        .select('*', { count: 'exact', head: true })
+        .eq('owner_id', user.id)
+        .gte('created_at', startOfMonth.toISOString());
 
-        if (count !== null && count >= totalAllowed) {
-          return NextResponse.json(
-            { error: 'Limite de voyages gratuits atteinte. Passez à Pro pour des voyages illimités.', code: 'QUOTA_EXCEEDED' },
-            { status: 403 }
-          );
-        }
+      const totalAllowed = FREE_MONTHLY_LIMIT + (profile?.extra_trips || 0);
+
+      if (count !== null && count >= totalAllowed) {
+        return NextResponse.json(
+          { error: 'Limite de voyages gratuits atteinte. Passez à Pro pour des voyages illimités.', code: 'QUOTA_EXCEEDED' },
+          { status: 403 }
+        );
       }
     }
 

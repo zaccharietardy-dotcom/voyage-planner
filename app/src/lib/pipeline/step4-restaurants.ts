@@ -144,7 +144,7 @@ export function assignRestaurants(
 
       const refCoords = getMealReferenceCoords(mealType, cluster, accommodationCoords);
 
-      let topRestaurants = selectTopNearbyRestaurants(
+      const topRestaurants = selectTopNearbyRestaurants(
         geoPool,
         refCoords,
         usedIds,

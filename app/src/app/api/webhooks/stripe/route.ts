@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
 import { createClient } from '@supabase/supabase-js';
+import Stripe from 'stripe';
 
 // Use service role client to bypass RLS (webhook has no user session)
 function getAdminClient() {
@@ -18,7 +19,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Missing signature' }, { status: 400 });
   }
 
-  let event;
+  let event: Stripe.Event;
   try {
     event = stripe.webhooks.constructEvent(
       body,
@@ -36,7 +37,7 @@ export async function POST(request: NextRequest) {
 
     switch (event.type) {
       case 'checkout.session.completed': {
-        const session = event.data.object;
+        const session = event.data.object as Stripe.Checkout.Session;
         const customerId = session.customer as string;
 
         if (session.mode === 'subscription') {
@@ -62,6 +63,15 @@ export async function POST(request: NextRequest) {
           }
 
         } else if (session.mode === 'payment') {
+          const customer = await stripe.customers.retrieve(customerId);
+          const customerMetadata = (!('deleted' in customer) ? customer.metadata : {}) || {};
+          const alreadyCredited = customerMetadata.last_one_time_session_id === session.id;
+
+          if (alreadyCredited) {
+            console.log(`[Stripe] Session ${session.id} déjà créditée, skip`);
+            break;
+          }
+
           const metadata = session.metadata as Record<string, string> | null;
           if (metadata?.type === 'one_time_trip') {
             const { data: profileData } = await supabase
@@ -82,6 +92,12 @@ export async function POST(request: NextRequest) {
               return NextResponse.json({ error: `DB error: ${updateError.message}` }, { status: 500 });
             }
 
+            await stripe.customers.update(customerId, {
+              metadata: {
+                ...customerMetadata,
+                last_one_time_session_id: session.id,
+              },
+            });
           }
         }
         break;

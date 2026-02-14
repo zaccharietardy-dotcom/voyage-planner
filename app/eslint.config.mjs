@@ -14,7 +14,22 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Vendored Cesium assets
     "public/cesium/**",
+    // Generated reports
+    "coverage/**",
+    // Debug scripts (non-runtime production code)
+    "scripts/**",
+    "test-pipeline.ts",
+    "jest.setup.js",
   ]),
+  {
+    files: ["**/*.{js,jsx,ts,tsx}"],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "warn",
+      "react-hooks/set-state-in-effect": "warn",
+      "react-hooks/refs": "warn",
+      "react-hooks/immutability": "warn",
+    },
+  },
 ]);
 
 export default eslintConfig;

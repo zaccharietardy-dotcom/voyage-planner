@@ -15,6 +15,7 @@ import { isSerpApiPlacesConfigured } from '@/lib/services/serpApiPlaces';
 import { isFoursquareConfigured } from '@/lib/services/foursquare';
 import { isViatorConfigured } from '@/lib/services/viator';
 import { isOverpassConfigured } from '@/lib/services/overpassAttractions';
+import { requireAdmin } from '@/lib/server/adminAuth';
 
 // ============================================
 // Types
@@ -30,6 +31,12 @@ interface ApiStatus {
   latencyMs?: number;
   details?: string;
 }
+
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
+type TestProbeResult = Pick<ApiStatus, 'status' | 'error' | 'latencyMs' | 'details'>;
 
 // ============================================
 // Lightweight API tests (minimal calls)
@@ -62,8 +69,8 @@ async function testGemini(): Promise<Pick<ApiStatus, 'status' | 'error' | 'laten
     const data = await response.json();
     const modelCount = data.models?.length || 0;
     return { status: 'ok', latencyMs, details: `${modelCount} models available` };
-  } catch (error: any) {
-    return { status: 'error', latencyMs: Date.now() - start, error: error.message };
+  } catch (error: unknown) {
+    return { status: 'error', latencyMs: Date.now() - start, error: getErrorMessage(error) };
   }
 }
 
@@ -102,8 +109,8 @@ async function testRapidApi(): Promise<Pick<ApiStatus, 'status' | 'error' | 'lat
       return { status: 'error', latencyMs, error: data.error.message || 'Unknown error' };
     }
     return { status: 'ok', latencyMs, details: `${data.data?.length || 0} results` };
-  } catch (error: any) {
-    return { status: 'error', latencyMs: Date.now() - start, error: error.message };
+  } catch (error: unknown) {
+    return { status: 'error', latencyMs: Date.now() - start, error: getErrorMessage(error) };
   }
 }
 
@@ -140,8 +147,8 @@ async function testSerpApi(): Promise<Pick<ApiStatus, 'status' | 'error' | 'late
         ? `${remaining} recherches restantes (plan: ${plan})`
         : `plan: ${plan}`,
     };
-  } catch (error: any) {
-    return { status: 'error', latencyMs: Date.now() - start, error: error.message };
+  } catch (error: unknown) {
+    return { status: 'error', latencyMs: Date.now() - start, error: getErrorMessage(error) };
   }
 }
 
@@ -170,8 +177,8 @@ async function testGooglePlaces(): Promise<Pick<ApiStatus, 'status' | 'error' | 
       return { status: 'ok', latencyMs };
     }
     return { status: 'error', latencyMs, error: `Status: ${data.status}` };
-  } catch (error: any) {
-    return { status: 'error', latencyMs: Date.now() - start, error: error.message };
+  } catch (error: unknown) {
+    return { status: 'error', latencyMs: Date.now() - start, error: getErrorMessage(error) };
   }
 }
 
@@ -199,8 +206,8 @@ async function testOverpass(): Promise<Pick<ApiStatus, 'status' | 'error' | 'lat
     const data = await response.json();
     const count = data.elements?.[0]?.tags?.total || data.elements?.length || 0;
     return { status: 'ok', latencyMs, details: `${count} restaurants trouvés (test)` };
-  } catch (error: any) {
-    return { status: 'error', latencyMs: Date.now() - start, error: error.message };
+  } catch (error: unknown) {
+    return { status: 'error', latencyMs: Date.now() - start, error: getErrorMessage(error) };
   }
 }
 
@@ -242,8 +249,8 @@ async function testViator(): Promise<Pick<ApiStatus, 'status' | 'error' | 'laten
     const data = await response.json();
     const destCount = data?.destinations?.results?.length || 0;
     return { status: 'ok', latencyMs, details: `${destCount} destinations trouvées (test)` };
-  } catch (error: any) {
-    return { status: 'error', latencyMs: Date.now() - start, error: error.message };
+  } catch (error: unknown) {
+    return { status: 'error', latencyMs: Date.now() - start, error: getErrorMessage(error) };
   }
 }
 
@@ -287,8 +294,8 @@ async function testAnthropic(): Promise<Pick<ApiStatus, 'status' | 'error' | 'la
     }
 
     return { status: 'ok', latencyMs };
-  } catch (error: any) {
-    return { status: 'error', latencyMs: Date.now() - start, error: error.message };
+  } catch (error: unknown) {
+    return { status: 'error', latencyMs: Date.now() - start, error: getErrorMessage(error) };
   }
 }
 
@@ -297,6 +304,9 @@ async function testAnthropic(): Promise<Pick<ApiStatus, 'status' | 'error' | 'la
 // ============================================
 
 export async function GET(request: NextRequest) {
+  const auth = await requireAdmin();
+  if (!auth.ok) return auth.response;
+
   const doTest = request.nextUrl.searchParams.get('test') === 'true';
 
   // Re-read env vars at request time (not import time)
@@ -370,7 +380,7 @@ export async function GET(request: NextRequest) {
 
   // If test mode, run actual API calls in parallel
   if (doTest) {
-    const tests = await Promise.allSettled([
+    const tests: PromiseSettledResult<TestProbeResult>[] = await Promise.allSettled([
       testAnthropic(),
       testGemini(),
       testRapidApi(),
@@ -384,9 +394,11 @@ export async function GET(request: NextRequest) {
     for (let i = 0; i < tests.length; i++) {
       const api = apis.find(a => a.name === testNames[i]);
       if (!api) continue;
+      const test = tests[i];
+      if (!test) continue;
 
-      if (tests[i].status === 'fulfilled') {
-        const result = (tests[i] as PromiseFulfilledResult<any>).value;
+      if (test.status === 'fulfilled') {
+        const result = test.value;
         // Don't override not_configured
         if (api.configured) {
           api.status = result.status;
@@ -397,7 +409,7 @@ export async function GET(request: NextRequest) {
       } else {
         if (api.configured) {
           api.status = 'error';
-          api.error = (tests[i] as PromiseRejectedResult).reason?.message || 'Unknown error';
+          api.error = getErrorMessage(test.reason);
         }
       }
     }

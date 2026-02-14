@@ -163,7 +163,7 @@ export default function MesVoyagesPage() {
               <Plane className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
               <h3 className="text-lg font-semibold mb-2">Aucun voyage</h3>
               <p className="text-muted-foreground mb-4">
-                Vous n'avez pas encore planifié de voyage.
+                Vous n&apos;avez pas encore planifié de voyage.
               </p>
               <Button asChild>
                 <Link href="/plan">

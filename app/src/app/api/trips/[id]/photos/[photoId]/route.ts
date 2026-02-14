@@ -13,7 +13,7 @@ export async function PATCH(
     if (!user) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
 
     const body = await request.json();
-    const updates: Record<string, any> = { updated_at: new Date().toISOString() };
+    const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };
     if (body.caption !== undefined) updates.caption = body.caption;
     if (body.visibility !== undefined) updates.visibility = body.visibility;
     if (body.location_name !== undefined) updates.location_name = body.location_name;
@@ -23,6 +23,7 @@ export async function PATCH(
     const { data, error } = await supabase
       .from('trip_photos')
       .update(updates)
+      .eq('trip_id', id)
       .eq('id', photoId)
       .eq('user_id', user.id)
       .select()
@@ -39,7 +40,7 @@ export async function PATCH(
 
 // DELETE /api/trips/[id]/photos/[photoId] - Delete photo
 export async function DELETE(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ id: string; photoId: string }> }
 ) {
   try {
@@ -52,6 +53,7 @@ export async function DELETE(
     const { data: photo } = await supabase
       .from('trip_photos')
       .select('storage_path, thumbnail_path')
+      .eq('trip_id', id)
       .eq('id', photoId)
       .eq('user_id', user.id)
       .single();
@@ -68,6 +70,7 @@ export async function DELETE(
     const { error } = await supabase
       .from('trip_photos')
       .delete()
+      .eq('trip_id', id)
       .eq('id', photoId)
       .eq('user_id', user.id);
 

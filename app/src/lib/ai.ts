@@ -464,7 +464,7 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
     const totalNonViator = attractionPool.filter(a => a.providerName !== 'Viator').length;
   }
 
-  let selectedAttractions = attractionPool;
+  const selectedAttractions = attractionPool;
 
   // Protection finale: s'assurer que groupSize est valide pour eviter NaN
   if (!preferences.groupSize || preferences.groupSize < 1) {

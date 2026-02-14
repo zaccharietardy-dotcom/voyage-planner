@@ -192,7 +192,7 @@ export async function fetchAllData(preferences: TripPreferences, onEvent?: OnPip
   const serpApiAttractions = extract(1, []);
   const overpassAttractions = extract(2, []);
   const viatorActivities = extract(3, []);
-  let mustSeeAttractions: Attraction[] = extract(4, [] as Attraction[]);
+  const mustSeeAttractions: Attraction[] = extract(4, [] as Attraction[]);
   const tripAdvisorRestaurants = extract(5, []);
   const serpApiRestaurants = extract(6, []);
   const bookingHotels = extract(7, []);
@@ -412,7 +412,7 @@ Règles : UNIQUEMENT des lieux réels, célèbres et vérifiables. Inclure les l
     .join('');
 
   // Parse JSON from response
-  let jsonStr = text.trim();
+  const jsonStr = text.trim();
   const jsonMatch = jsonStr.match(/\[[\s\S]*\]/);
   if (!jsonMatch) {
     console.warn('[Pipeline V2] AI must-see: no JSON array found in response');

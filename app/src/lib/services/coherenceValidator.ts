@@ -946,7 +946,7 @@ function fixLogisticsOrder(trip: Trip, error: CoherenceError): void {
   // (ex: trajet Caen → Paris qui débute à 22:38 la veille mais s'affiche le jour même)
   // On utilise 08:00 comme heure minimale de départ pour la logistique
   const MIN_LOGISTICS_START = 5 * 60; // 05:00 en minutes
-  let rawStart = parseTimeToMinutes(logistics[0]?.startTime || '08:00');
+  const rawStart = parseTimeToMinutes(logistics[0]?.startTime || '08:00');
   // Si l'heure de départ est avant 05:00 (ex: 00:30, 03:00), c'est suspect
   // Cela peut arriver si un trajet traverse minuit et que l'heure est mal calculée
   let cursor = rawStart < MIN_LOGISTICS_START ? parseTimeToMinutes('08:00') : rawStart;

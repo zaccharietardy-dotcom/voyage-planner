@@ -412,10 +412,11 @@ export async function searchHotelsWithBookingApi(
 
       // Priorité: URL directe > URL API > URL normalisée
       let bookingUrlCandidate: string | null | undefined = directUrl;
+      const propertyUrl = p.property?.url;
       if (isValidBookingUrl(directUrl)) {
         bookingUrlCandidate = directUrl!;
-      } else if (isValidBookingUrl(p.property?.url)) {
-        bookingUrlCandidate = p.property.url;
+      } else if (isValidBookingUrl(propertyUrl)) {
+        bookingUrlCandidate = propertyUrl;
       } else if (isValidBookingUrl(p.url)) {
         bookingUrlCandidate = p.url;
       }
@@ -435,6 +436,11 @@ export async function searchHotelsWithBookingApi(
         || p.property?.mainPhotoUrl
         || '';
 
+      const distanceRaw = p.property?.distanceFromCenter || p.distance_to_cc || p.distance || '0';
+      const distanceToCenter = typeof distanceRaw === 'number'
+        ? distanceRaw
+        : parseFloat(distanceRaw);
+
       return {
         id: `booking-${p.hotel_id || p.property?.id || p.id || index}`,
         name: hotelName,
@@ -451,7 +457,7 @@ export async function searchHotelsWithBookingApi(
         breakfastIncluded,
         checkIn: checkInTime,
         checkOut: checkOutTime,
-        distanceToCenter: parseFloat(p.property?.distanceFromCenter || p.distance_to_cc || p.distance || '0'),
+        distanceToCenter: Number.isFinite(distanceToCenter) ? distanceToCenter : 0,
         photoUrl,
         bookingUrl,
         available: true,

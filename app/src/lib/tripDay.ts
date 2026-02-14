@@ -2553,7 +2553,7 @@ export async function generateDayWithScheduler(params: {
         const isTrainOrBus = groundTransport.mode === 'train' || groundTransport.mode === 'bus' || groundTransport.mode === 'combined';
         if (isTrainOrBus) {
           // Déterminer les coordonnées et le nom de la gare
-          let stationCoords = cityCenter;
+          const stationCoords = cityCenter;
           let stationName = 'la gare';
           if (groundTransport.transitLegs?.length) {
             // Pour le retour, la gare de départ est la destination d'arrivée de l'aller (dernière leg)

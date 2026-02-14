@@ -26,6 +26,8 @@ export default function AdminPage() {
   const [origin, setOrigin] = useState('Paris');
   const [duration, setDuration] = useState(4);
   const [totalTime, setTotalTime] = useState<number | null>(null);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [runStartTime, setRunStartTime] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const eventIdRef = useRef(0);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -52,13 +54,26 @@ export default function AdminPage() {
     }
   }, [events]);
 
+  useEffect(() => {
+    if (!isGenerating) return;
+
+    const timer = setInterval(() => {
+      setElapsedSeconds(Math.floor((Date.now() - startTimeRef.current) / 1000));
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [isGenerating]);
+
   const handleGenerate = useCallback(async () => {
     setEvents([]);
     setIsGenerating(true);
     setTotalTime(null);
     setError(null);
     eventIdRef.current = 0;
-    startTimeRef.current = Date.now();
+    const now = Date.now();
+    startTimeRef.current = now;
+    setRunStartTime(now);
+    setElapsedSeconds(0);
 
     try {
       const res = await fetch('/api/generate', {
@@ -203,7 +218,7 @@ export default function AdminPage() {
           <StatCard label="Erreurs" value={apiErrors.length} color="red" />
           <StatCard
             label="Duree totale"
-            value={totalTime ? `${(totalTime / 1000).toFixed(1)}s` : isGenerating ? `${((Date.now() - startTimeRef.current) / 1000).toFixed(0)}s...` : '--'}
+            value={totalTime ? `${(totalTime / 1000).toFixed(1)}s` : isGenerating ? `${elapsedSeconds}s...` : '--'}
             color="purple"
           />
         </div>
@@ -240,7 +255,7 @@ export default function AdminPage() {
               </div>
             )}
             {events.map(event => (
-              <EventRow key={event.id} event={event} t0={startTimeRef.current} />
+              <EventRow key={event.id} event={event} t0={runStartTime} />
             ))}
             {isGenerating && (
               <div className="flex items-center gap-2 py-1 px-2 text-blue-400">

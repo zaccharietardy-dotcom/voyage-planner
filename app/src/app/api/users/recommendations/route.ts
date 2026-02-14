@@ -36,7 +36,7 @@ export async function GET(request: Request) {
     const myDestinations = myTrips?.map(t => t.destination?.toLowerCase()).filter(Boolean) || [];
 
     // Strategy 1: Users with same destinations (most relevant)
-    let candidateScores: Record<string, number> = {};
+    const candidateScores: Record<string, number> = {};
 
     if (myDestinations.length > 0) {
       const { data: similarTrips } = await sc

@@ -315,7 +315,11 @@ export async function searchHotels(
               })) as SerpHotelCandidate[];
 
               if (serpHotels.length > 0) {
-                const serpMap = new Map(serpHotels.map((h) => [h.name?.toLowerCase().trim(), h]));
+                const serpMap = new Map<string, SerpHotelCandidate>(
+                  serpHotels
+                    .filter((h): h is SerpHotelCandidate & { name: string } => typeof h.name === 'string' && h.name.trim().length > 0)
+                    .map((h) => [h.name.toLowerCase().trim(), h])
+                );
 
                 const validated: Accommodation[] = [];
                 for (const taHotel of filtered) {
@@ -349,7 +353,7 @@ export async function searchHotels(
                   );
                 }
 
-                const serpAccommodations: Accommodation[] = serpHotels.slice(0, 10).map((h) => {
+                const serpAccommodations: Accommodation[] = serpHotels.slice(0, 10).map((h, index: number) => {
                   const amenities = h.amenities || [];
                   const breakfastIncluded = checkBreakfastIncluded(amenities);
                   let stars = 3;
@@ -357,8 +361,8 @@ export async function searchHotels(
                     stars = typeof h.stars === 'number' ? h.stars : parseInt(String(h.stars).match(/(\d)/)?.[1] || '3');
                   }
                   return {
-                    id: h.id,
-                    name: h.name,
+                    id: h.id || `${destination.toLowerCase()}-serp-${index}`,
+                    name: h.name || `Hôtel ${index + 1}`,
                     type: 'hotel' as const,
                     address: h.address || 'Adresse non disponible',
                     latitude: h.latitude || options.cityCenter.lat,
@@ -418,7 +422,7 @@ export async function searchHotels(
       })) as SerpHotelCandidate[];
 
       if (serpHotels.length > 0) {
-        const hotels: Accommodation[] = serpHotels.map((h) => {
+                const hotels: Accommodation[] = serpHotels.map((h, index: number) => {
           const amenities = h.amenities || [];
           const breakfastIncluded = checkBreakfastIncluded(amenities);
           let stars = 3;
@@ -430,11 +434,11 @@ export async function searchHotels(
             }
           }
 
-          return {
-            id: h.id,
-            name: h.name,
-            type: 'hotel' as const,
-            address: h.address || 'Adresse non disponible',
+                  return {
+                    id: h.id || `${destination.toLowerCase()}-serp-fallback-${index}`,
+                    name: h.name || `Hôtel ${index + 1}`,
+                    type: 'hotel' as const,
+                    address: h.address || 'Adresse non disponible',
             latitude: h.latitude || options.cityCenter.lat,
             longitude: h.longitude || options.cityCenter.lng,
             rating: Math.round((h.rating ? (h.rating <= 5 ? h.rating * 2 : h.rating) : 8) * 10) / 10,
@@ -604,8 +608,8 @@ Réponds UNIQUEMENT avec un tableau JSON valide.`;
 
   return rawHotels.map((h, index: number) => ({
     id: h.id || `${destination.toLowerCase()}-hotel-${index}`,
-    name: h.name,
-    type: h.type || 'hotel',
+    name: h.name || `Hotel ${index + 1}`,
+    type: 'hotel' as const,
     address: h.address || 'Adresse non disponible',
     latitude: h.latitude || options.cityCenter.lat + (Math.random() - 0.5) * 0.02,
     longitude: h.longitude || options.cityCenter.lng + (Math.random() - 0.5) * 0.02,

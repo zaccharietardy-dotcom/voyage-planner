@@ -44,7 +44,7 @@ export async function GET(
 
     // Get profiles
     const senderIds = [...new Set(messages?.map(m => m.sender_id) || [])];
-    let profileMap: Record<string, any> = {};
+    const profileMap: Record<string, any> = {};
     if (senderIds.length > 0) {
       const { data: profiles } = await sc
         .from('profiles')

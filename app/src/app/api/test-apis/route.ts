@@ -12,6 +12,7 @@ import { searchHotels } from '@/lib/services/hotels';
 import { searchViatorActivities } from '@/lib/services/viator';
 import { compareTransportOptions } from '@/lib/services/transport';
 import { getDirections } from '@/lib/services/directions';
+import { requireAdmin } from '@/lib/server/adminAuth';
 
 // Test destination: Paris → Barcelona (popular, lots of data)
 const TEST_CONFIG = {
@@ -51,8 +52,12 @@ interface TestResult {
   status: 'ok' | 'error' | 'not_configured';
   latencyMs: number;
   count?: number;
-  items?: any[];
+  items?: unknown[];
   error?: string;
+}
+
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
 }
 
 async function testFlights(): Promise<TestResult> {
@@ -73,7 +78,7 @@ async function testFlights(): Promise<TestResult> {
       status: allFlights.length > 0 ? 'ok' : 'error',
       latencyMs,
       count: allFlights.length,
-      items: allFlights.slice(0, 3).map(f => ({
+      items: allFlights.slice(0, 3).map((f) => ({
         type: 'flight',
         title: `${f.airline} ${f.flightNumber}`,
         subtitle: `${f.departureAirportCode} ${f.departureTimeDisplay} → ${f.arrivalAirportCode} ${f.arrivalTimeDisplay}`,
@@ -85,8 +90,14 @@ async function testFlights(): Promise<TestResult> {
       })),
       error: result.error,
     };
-  } catch (err: any) {
-    return { category: 'transport', name: 'Vols (SerpAPI/Gemini)', status: 'error', latencyMs: Date.now() - start, error: err.message };
+  } catch (error: unknown) {
+    return {
+      category: 'transport',
+      name: 'Vols (SerpAPI/Gemini)',
+      status: 'error',
+      latencyMs: Date.now() - start,
+      error: getErrorMessage(error),
+    };
   }
 }
 
@@ -108,17 +119,17 @@ async function testTrains(): Promise<TestResult> {
       status: options.length > 0 ? 'ok' : 'error',
       latencyMs,
       count: options.length,
-      items: options.slice(0, 4).map(o => ({
+      items: options.slice(0, 4).map((o) => ({
         type: 'transport',
         title: `${o.mode === 'train' ? 'Train' : o.mode === 'bus' ? 'Bus' : o.mode === 'car' ? 'Voiture' : o.mode === 'plane' ? 'Avion' : o.mode === 'combined' ? 'Combiné' : o.mode}`,
-        subtitle: o.segments.map(s => `${s.from} → ${s.to}`).join(' | '),
+        subtitle: o.segments.map((s) => `${s.from} → ${s.to}`).join(' | '),
         price: `${o.totalPrice}€`,
         duration: `${Math.floor(o.totalDuration / 60)}h${String(o.totalDuration % 60).padStart(2, '0')}`,
         co2: `${o.totalCO2.toFixed(1)} kg CO2`,
         recommended: o.recommended,
         link: o.bookingUrl || null,
         linkLabel: o.mode === 'train' ? 'Réserver (Omio/SNCF)' : o.mode === 'bus' ? 'Réserver (FlixBus)' : 'Voir',
-        transitLegs: o.transitLegs?.slice(0, 3).map(l => ({
+        transitLegs: o.transitLegs?.slice(0, 3).map((l) => ({
           line: l.line || l.operator || l.mode,
           from: l.from,
           to: l.to,
@@ -127,8 +138,14 @@ async function testTrains(): Promise<TestResult> {
         })),
       })),
     };
-  } catch (err: any) {
-    return { category: 'transport', name: 'Trains / Bus / Voiture', status: 'error', latencyMs: Date.now() - start, error: err.message };
+  } catch (error: unknown) {
+    return {
+      category: 'transport',
+      name: 'Trains / Bus / Voiture',
+      status: 'error',
+      latencyMs: Date.now() - start,
+      error: getErrorMessage(error),
+    };
   }
 }
 
@@ -149,7 +166,7 @@ async function testHotels(): Promise<TestResult> {
       status: hotels.length > 0 ? 'ok' : 'error',
       latencyMs,
       count: hotels.length,
-      items: hotels.slice(0, 3).map(h => ({
+      items: hotels.slice(0, 3).map((h) => ({
         type: 'hotel',
         title: h.name,
         subtitle: `${'★'.repeat(h.stars || 0)} · ${h.type} · ${h.address}`,
@@ -160,8 +177,14 @@ async function testHotels(): Promise<TestResult> {
         linkLabel: 'Voir sur Booking.com',
       })),
     };
-  } catch (err: any) {
-    return { category: 'hebergement', name: 'Hotels (Booking.com/SerpAPI)', status: 'error', latencyMs: Date.now() - start, error: err.message };
+  } catch (error: unknown) {
+    return {
+      category: 'hebergement',
+      name: 'Hotels (Booking.com/SerpAPI)',
+      status: 'error',
+      latencyMs: Date.now() - start,
+      error: getErrorMessage(error),
+    };
   }
 }
 
@@ -183,10 +206,10 @@ async function testRestaurants(): Promise<TestResult> {
       status: restaurants.length > 0 ? 'ok' : 'error',
       latencyMs,
       count: restaurants.length,
-      items: restaurants.slice(0, 4).map(r => ({
+      items: restaurants.slice(0, 4).map((r) => ({
         type: 'restaurant',
         title: r.name,
-        subtitle: (r.cuisineTypes?.filter(c => c !== 'none' && c !== 'unknown')?.join(', ')) || 'Restaurant',
+        subtitle: (r.cuisineTypes?.filter((c) => c !== 'none' && c !== 'unknown')?.join(', ')) || 'Restaurant',
         price: priceLevels[r.priceLevel] || '€€',
         rating: r.rating ? `${parseFloat(r.rating.toFixed(1))}/5 (${r.reviewCount || 0} avis)` : null,
         address: r.address,
@@ -195,8 +218,14 @@ async function testRestaurants(): Promise<TestResult> {
         reservationLink: r.reservationUrl || null,
       })),
     };
-  } catch (err: any) {
-    return { category: 'restaurants', name: 'Restaurants (Gemini/SerpAPI)', status: 'error', latencyMs: Date.now() - start, error: err.message };
+  } catch (error: unknown) {
+    return {
+      category: 'restaurants',
+      name: 'Restaurants (Gemini/SerpAPI)',
+      status: 'error',
+      latencyMs: Date.now() - start,
+      error: getErrorMessage(error),
+    };
   }
 }
 
@@ -215,7 +244,7 @@ async function testActivities(): Promise<TestResult> {
       status: activities.length > 0 ? 'ok' : 'error',
       latencyMs,
       count: activities.length,
-      items: activities.slice(0, 4).map(a => ({
+      items: activities.slice(0, 4).map((a) => ({
         type: 'activity',
         title: a.name,
         subtitle: a.type || 'Activité',
@@ -226,8 +255,14 @@ async function testActivities(): Promise<TestResult> {
         linkLabel: 'Réserver sur Viator',
       })),
     };
-  } catch (err: any) {
-    return { category: 'activites', name: 'Activités (Viator)', status: 'error', latencyMs: Date.now() - start, error: err.message };
+  } catch (error: unknown) {
+    return {
+      category: 'activites',
+      name: 'Activités (Viator)',
+      status: 'error',
+      latencyMs: Date.now() - start,
+      error: getErrorMessage(error),
+    };
   }
 }
 
@@ -249,19 +284,28 @@ async function testDirections(): Promise<TestResult> {
       count: result.steps.length,
       items: [{
         type: 'direction',
-        title: `Centre → Sagrada Familia`,
+        title: 'Centre → Sagrada Familia',
         subtitle: `${result.distance.toFixed(1)} km · ${result.duration} min (${result.source})`,
         link: result.googleMapsUrl,
         linkLabel: 'Voir sur Google Maps',
-        transitLines: result.transitLines.map(t => `${t.mode} ${t.number}`).join(', ') || 'À pied',
+        transitLines: result.transitLines.map((t) => `${t.mode} ${t.number}`).join(', ') || 'À pied',
       }],
     };
-  } catch (err: any) {
-    return { category: 'maps', name: 'Directions (Google Maps)', status: 'error', latencyMs: Date.now() - start, error: err.message };
+  } catch (error: unknown) {
+    return {
+      category: 'maps',
+      name: 'Directions (Google Maps)',
+      status: 'error',
+      latencyMs: Date.now() - start,
+      error: getErrorMessage(error),
+    };
   }
 }
 
 export async function GET() {
+  const auth = await requireAdmin();
+  if (!auth.ok) return auth.response;
+
   const startTotal = Date.now();
 
   // Lancer tous les tests en parallèle
@@ -276,12 +320,14 @@ export async function GET() {
 
   const testResults = results.map((r, i) => {
     if (r.status === 'fulfilled') return r.value;
+
+    const reason = r.reason as { message?: string } | undefined;
     return {
       category: ['transport', 'transport', 'hebergement', 'restaurants', 'activites', 'maps'][i],
       name: ['Vols', 'Trains', 'Hotels', 'Restaurants', 'Activités', 'Directions'][i],
       status: 'error' as const,
       latencyMs: 0,
-      error: r.reason?.message || 'Unknown error',
+      error: reason?.message || 'Unknown error',
     };
   });
 

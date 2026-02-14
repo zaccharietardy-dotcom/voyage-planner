@@ -178,7 +178,7 @@ export function StepActivities({ data, onChange }: StepActivitiesProps) {
     <div className="space-y-8">
       <div className="text-center mb-8">
         <h2 className="text-2xl font-bold mb-2">Que voulez-vous faire ?</h2>
-        <p className="text-muted-foreground">Selectionnez vos types d'activites preferes</p>
+        <p className="text-muted-foreground">Selectionnez vos types d&apos;activites preferes</p>
       </div>
 
       {/* Types d'activites */}

@@ -10,6 +10,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import { createHash } from 'crypto';
 import { ActivityType } from '../types';
 import { Attraction } from './attractions';
 
@@ -257,7 +258,7 @@ async function enrichWithWikidata(qids: string[]): Promise<Map<string, WikidataE
 function getWikimediaImageUrl(filename: string): string {
   // Convert Wikidata filename to Wikimedia Commons URL
   const encoded = encodeURIComponent(filename.replace(/ /g, '_'));
-  const md5 = require('crypto').createHash('md5').update(filename.replace(/ /g, '_')).digest('hex');
+  const md5 = createHash('md5').update(filename.replace(/ /g, '_')).digest('hex');
   return `https://upload.wikimedia.org/wikipedia/commons/thumb/${md5[0]}/${md5[0]}${md5[1]}/${encoded}/400px-${encoded}`;
 }
 

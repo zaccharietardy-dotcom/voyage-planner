@@ -68,7 +68,7 @@ export async function assembleTripSchedule(
   const days: TripDay[] = [];
 
   // Pre-fetch Wikipedia summaries for top activities (non-blocking enrichment)
-  let wikiDescriptions = new Map<string, string>();
+  const wikiDescriptions = new Map<string, string>();
   try {
     const allActivities = clusters.flatMap(c => c.activities);
     const activityNames = [...new Set(allActivities.map(a => a.name))].slice(0, 25);
@@ -576,7 +576,7 @@ export async function assembleTripSchedule(
     }
 
     // 4. Get activities from pre-pass (already geo-optimized + re-optimized with real times)
-    let orderedActivities = prepassActivities.get(balancedDay.dayNumber) || [];
+    const orderedActivities = prepassActivities.get(balancedDay.dayNumber) || [];
 
     const mustSeeCount = orderedActivities.filter(a => a.mustSee).length;
     console.log(`[Pipeline V2] Day ${balancedDay.dayNumber}: ${orderedActivities.length} activities to schedule (${mustSeeCount} must-sees), dayStart=${dayStartHour}:00, dayEnd=${dayEndHour}:00, window=${dayEndHour - dayStartHour}h, cursor=${formatTimeHHMM(scheduler.getCurrentTime())}`);

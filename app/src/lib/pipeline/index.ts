@@ -170,7 +170,7 @@ export async function generateTripV2(
     );
   }
 
-  let restaurantResult = assignRestaurants(
+  const restaurantResult = assignRestaurants(
     clusters,
     data.tripAdvisorRestaurants,
     serpRestaurantsForAssignment,

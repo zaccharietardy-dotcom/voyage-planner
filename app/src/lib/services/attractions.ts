@@ -3963,7 +3963,7 @@ export function selectAttractions(
     maxPerDay?: number;
   }
 ): Attraction[] {
-  let attractions = getAttractions(destination);
+  const attractions = getAttractions(destination);
 
   if (attractions.length === 0) {
     return [];

@@ -97,7 +97,7 @@ async function testDestination(dest: TestDestination) {
   console.table(poolTable);
 
   // 2. MustSee spécifiques
-  let fullPool = [...pool];
+  const fullPool = [...pool];
   if (dest.mustSee) {
     console.log('\n--- ÉTAPE 1b: MustSee spécifiques ---\n');
     const mustSeeResults = await searchMustSeeAttractions(dest.mustSee, dest.name, dest.cityCenter);

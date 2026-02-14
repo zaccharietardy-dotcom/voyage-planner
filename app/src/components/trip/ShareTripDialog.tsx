@@ -55,7 +55,7 @@ export function ShareTripDialog({
   const [savedTripId, setSavedTripId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [copied, setCopied] = useState<'viewer' | 'editor' | false>(false);
+  const [copied, setCopied] = useState(false);
   const [showQR, setShowQR] = useState(false);
   const [friends, setFriends] = useState<any[]>([]);
   const [friendsLoading, setFriendsLoading] = useState(false);
@@ -64,7 +64,6 @@ export function ShareTripDialog({
 
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
   const shareUrl = shareCode ? `${baseUrl}/join/${shareCode}` : '';
-  const editorShareUrl = shareCode ? `${baseUrl}/join/${shareCode}?role=editor` : '';
 
   // Vérifier si le voyage est déjà sauvegardé quand le dialog s'ouvre
   useEffect(() => {
@@ -192,11 +191,10 @@ export function ShareTripDialog({
   };
 
   // Copier le lien
-  const handleCopy = async (type: 'viewer' | 'editor') => {
-    const url = type === 'editor' ? editorShareUrl : shareUrl;
-    if (!url) return;
-    await navigator.clipboard.writeText(url);
-    setCopied(type);
+  const handleCopy = async () => {
+    if (!shareUrl) return;
+    await navigator.clipboard.writeText(shareUrl);
+    setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -359,8 +357,8 @@ export function ShareTripDialog({
                   className="text-sm bg-muted"
                   onClick={(e) => e.currentTarget.select()}
                 />
-                <Button onClick={() => handleCopy('viewer')} variant="outline" size="icon">
-                  {copied === 'viewer' ? (
+                <Button onClick={handleCopy} variant="outline" size="icon">
+                  {copied ? (
                     <Check className="h-4 w-4 text-green-500" />
                   ) : (
                     <Copy className="h-4 w-4" />
@@ -368,37 +366,9 @@ export function ShareTripDialog({
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground">
-                Les personnes qui rejoignent via ce lien pourront voir le voyage.
+                Les personnes qui rejoignent via ce lien auront un accès lecture seule.
               </p>
             </div>
-
-            {/* Lien éditeur */}
-            {isOwner && (
-              <div className="space-y-2">
-                <label className="text-sm font-medium flex items-center gap-2">
-                  <Users className="h-4 w-4" />
-                  Lien éditeur
-                </label>
-                <div className="flex gap-2">
-                  <Input
-                    value={editorShareUrl}
-                    readOnly
-                    className="text-sm bg-muted"
-                    onClick={(e) => e.currentTarget.select()}
-                  />
-                  <Button onClick={() => handleCopy('editor')} variant="outline" size="icon">
-                    {copied === 'editor' ? (
-                      <Check className="h-4 w-4 text-green-500" />
-                    ) : (
-                      <Copy className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Les personnes qui rejoignent via ce lien pourront modifier le voyage.
-                </p>
-              </div>
-            )}
 
             {/* QR Code */}
             <div className="space-y-2">

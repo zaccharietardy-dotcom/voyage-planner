@@ -1,5 +1,6 @@
 import { createRouteHandlerClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
+import { isAcceptedCloseFriend } from '@/lib/server/closeFriends';
 
 // GET /api/trips/[id] - Récupérer un voyage avec ses membres et propositions
 export async function GET(
@@ -43,14 +44,8 @@ export async function GET(
         } else if (trip.visibility === 'public') {
           userRole = 'viewer';
         } else if (trip.visibility === 'friends') {
-          // Check if user follows the owner
-          const { data: follow } = await supabase
-            .from('follows')
-            .select('id')
-            .eq('follower_id', user.id)
-            .eq('following_id', trip.owner_id)
-            .single();
-          if (follow) {
+          const isCloseFriend = await isAcceptedCloseFriend(supabase, user.id, trip.owner_id);
+          if (isCloseFriend) {
             userRole = 'viewer';
           }
         }
@@ -116,38 +111,48 @@ export async function GET(
     }
 
     // Formater les propositions avec le vote de l'utilisateur
-    const formattedProposals = proposals?.map((p) => ({
-      id: p.id,
-      tripId: p.trip_id,
-      authorId: p.author_id,
-      author: {
-        displayName: (p.author as any)?.display_name || 'Utilisateur',
-        avatarUrl: (p.author as any)?.avatar_url,
-      },
-      title: p.title,
-      description: p.description,
-      changes: p.changes,
-      status: p.status,
-      votesFor: p.votes_for,
-      votesAgainst: p.votes_against,
-      userVote: userVotes[p.id],
-      createdAt: p.created_at,
-      resolvedAt: p.resolved_at,
-    }));
+    const formattedProposals = proposals?.map((p) => {
+      const author = p.author as { display_name?: string | null; avatar_url?: string | null } | null;
+      return {
+        id: p.id,
+        tripId: p.trip_id,
+        authorId: p.author_id,
+        author: {
+          displayName: author?.display_name || 'Utilisateur',
+          avatarUrl: author?.avatar_url,
+        },
+        title: p.title,
+        description: p.description,
+        changes: p.changes,
+        status: p.status,
+        votesFor: p.votes_for,
+        votesAgainst: p.votes_against,
+        userVote: userVotes[p.id],
+        createdAt: p.created_at,
+        resolvedAt: p.resolved_at,
+      };
+    });
 
     // Formater les membres
-    const formattedMembers = members?.map((m) => ({
-      id: m.id,
-      tripId: id,
-      userId: m.user_id,
-      role: m.role,
-      joinedAt: m.joined_at,
-      profile: {
-        displayName: (m.profiles as any)?.display_name || 'Utilisateur',
-        avatarUrl: (m.profiles as any)?.avatar_url,
-        email: (m.profiles as any)?.email || '',
-      },
-    }));
+    const formattedMembers = members?.map((m) => {
+      const profile = m.profiles as {
+        display_name?: string | null;
+        avatar_url?: string | null;
+        email?: string | null;
+      } | null;
+      return {
+        id: m.id,
+        tripId: id,
+        userId: m.user_id,
+        role: m.role,
+        joinedAt: m.joined_at,
+        profile: {
+          displayName: profile?.display_name || 'Utilisateur',
+          avatarUrl: profile?.avatar_url,
+          email: profile?.email || '',
+        },
+      };
+    });
 
     return NextResponse.json({
       ...trip,
@@ -207,7 +212,7 @@ export async function PATCH(
     }
 
     // Build update object
-    const updateObj: Record<string, any> = {
+    const updateObj: Record<string, unknown> = {
       updated_at: new Date().toISOString(),
     };
     if (updates.data !== undefined) updateObj.data = updates.data;
