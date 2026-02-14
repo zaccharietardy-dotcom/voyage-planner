@@ -8,7 +8,8 @@
  */
 
 import type { Trip, TripPreferences, Flight, TransportOptionSummary, Restaurant } from '../types';
-import type { ActivityCluster, CityDensityProfile, MealAssignment, ScoredActivity } from './types';
+import type { ActivityCluster, CityDensityProfile, MealAssignment, ScoredActivity, OnPipelineEvent } from './types';
+export type { PipelineEvent, OnPipelineEvent } from './types';
 import { fetchAllData } from './step1-fetch';
 import { scoreAndSelectActivities } from './step2-score';
 import { clusterActivities, computeCityDensityProfile } from './step3-cluster';
@@ -21,25 +22,40 @@ import { calculateDistance } from '../services/geocoding';
 import { searchRestaurantsWithSerpApi } from '../services/serpApiPlaces';
 import { OUTDOOR_ACTIVITY_KEYWORDS } from './utils/constants';
 
+// ---------------------------------------------------------------------------
+// Pipeline Event System — emit helper
+// ---------------------------------------------------------------------------
+function emit(onEvent: OnPipelineEvent | undefined, partial: Omit<import('./types').PipelineEvent, 'timestamp'>) {
+  onEvent?.({ ...partial, timestamp: Date.now() });
+}
+
 /**
  * Generate a trip using Pipeline V2.
  */
-export async function generateTripV2(preferences: TripPreferences): Promise<Trip> {
+export async function generateTripV2(
+  preferences: TripPreferences,
+  onEvent?: OnPipelineEvent
+): Promise<Trip> {
   const T0 = Date.now();
 
   // Step 1: Fetch all data in parallel (~5-10s)
   console.log('[Pipeline V2] === Step 1: Fetching data... ===');
-  const data = await fetchAllData(preferences);
-  console.log(`[Pipeline V2] Step 1 done in ${Date.now() - T0}ms`);
+  emit(onEvent, { type: 'step_start', step: 1, stepName: 'Fetching data' });
+  const data = await fetchAllData(preferences, onEvent);
+  const step1Ms = Date.now() - T0;
+  console.log(`[Pipeline V2] Step 1 done in ${step1Ms}ms`);
+  emit(onEvent, { type: 'step_done', step: 1, stepName: 'Fetching data', durationMs: step1Ms });
 
   // Step 2: Score & select activities (~0ms)
   console.log('[Pipeline V2] === Step 2: Scoring activities... ===');
+  emit(onEvent, { type: 'step_start', step: 2, stepName: 'Scoring activities' });
+  const T2 = Date.now();
   const selectedActivities = scoreAndSelectActivities(data, preferences);
   const mustSeeCount = selectedActivities.filter(a => a.mustSee).length;
-  console.log(`[Pipeline V2] Step 2: ${selectedActivities.length} activities selected (${mustSeeCount} must-sees) from ${
-    data.googlePlacesAttractions.length + data.serpApiAttractions.length + data.overpassAttractions.length + data.viatorActivities.length
-  } total`);
+  const totalRaw = data.googlePlacesAttractions.length + data.serpApiAttractions.length + data.overpassAttractions.length + data.viatorActivities.length;
+  console.log(`[Pipeline V2] Step 2: ${selectedActivities.length} activities selected (${mustSeeCount} must-sees) from ${totalRaw} total`);
   console.log(`[Pipeline V2] Must-sees: ${selectedActivities.filter(a => a.mustSee).map(a => `"${a.name}" (${a.score.toFixed(1)})`).join(', ')}`);
+  emit(onEvent, { type: 'step_done', step: 2, stepName: 'Scoring activities', durationMs: Date.now() - T2, detail: `${selectedActivities.length} selected (${mustSeeCount} must-sees) from ${totalRaw}` });
 
   // Resolve best transport early (needed for clustering rebalancing and scheduling)
   // IMPORTANT: Respect user's transport preference (train, bus, car, plane)
@@ -59,6 +75,8 @@ export async function generateTripV2(preferences: TripPreferences): Promise<Trip
 
   // Step 3: Geographic clustering (~0ms)
   console.log('[Pipeline V2] === Step 3: Clustering... ===');
+  emit(onEvent, { type: 'step_start', step: 3, stepName: 'Geographic clustering' });
+  const T3 = Date.now();
   const densityProfile = computeCityDensityProfile(selectedActivities, preferences.durationDays);
   const clusters = clusterActivities(selectedActivities, preferences.durationDays, data.destCoords, densityProfile);
 
@@ -116,9 +134,11 @@ export async function generateTripV2(preferences: TripPreferences): Promise<Trip
   for (const c of clusters) {
     console.log(`[Pipeline V2]   Day ${c.dayNumber}: ${c.activities.map(a => a.name).join(', ')} (${c.totalIntraDistance.toFixed(1)}km intra)`);
   }
+  emit(onEvent, { type: 'step_done', step: 3, stepName: 'Geographic clustering', durationMs: Date.now() - T3, detail: `${clusters.length} clusters` });
 
   // Step 5: Hotel selection (~0ms) — before restaurants, need hotel coords
   console.log('[Pipeline V2] === Step 5: Selecting hotel... ===');
+  emit(onEvent, { type: 'step_start', step: 5, stepName: 'Hotel selection' });
   const hotel = selectHotelByBarycenter(
     clusters,
     data.bookingHotels,
@@ -129,9 +149,12 @@ export async function generateTripV2(preferences: TripPreferences): Promise<Trip
   const accommodationCoords = hotel
     ? { lat: hotel.latitude, lng: hotel.longitude }
     : data.destCoords;
+  emit(onEvent, { type: 'step_done', step: 5, stepName: 'Hotel selection', durationMs: 0, detail: hotel ? `${hotel.name}` : 'No hotel found' });
 
   // Step 4: Restaurant assignment (~0ms)
   console.log('[Pipeline V2] === Step 4: Assigning restaurants... ===');
+  emit(onEvent, { type: 'step_start', step: 4, stepName: 'Restaurant assignment' });
+  const T4 = Date.now();
   const supplementalRestaurants = await fetchSupplementalRestaurantsForSparseAreas(
     preferences.destination,
     clusters,
@@ -198,30 +221,44 @@ export async function generateTripV2(preferences: TripPreferences): Promise<Trip
   }
   const assignedCount = meals.filter(m => m.restaurant).length;
   console.log(`[Pipeline V2] Step 4: ${assignedCount}/${meals.length} meals assigned restaurants (pool=${restaurantGeoPool.length})`);
+  emit(onEvent, { type: 'step_done', step: 4, stepName: 'Restaurant assignment', durationMs: Date.now() - T4, detail: `${assignedCount}/${meals.length} meals assigned` });
 
   // Step 6: Claude day balancing (~10-15s)
   console.log('[Pipeline V2] === Step 6: Claude balancing... ===');
+  emit(onEvent, { type: 'step_start', step: 6, stepName: 'Claude AI balancing' });
+  emit(onEvent, { type: 'api_call', step: 6, label: 'Claude AI' });
   const T6 = Date.now();
   const plan = await balanceDaysWithClaude(clusters, meals, hotel, bestTransport, preferences, data);
-  console.log(`[Pipeline V2] Step 6 done in ${Date.now() - T6}ms — "${plan.dayOrderReason}"`);
+  const step6Ms = Date.now() - T6;
+  console.log(`[Pipeline V2] Step 6 done in ${step6Ms}ms — "${plan.dayOrderReason}"`);
+  emit(onEvent, { type: 'api_done', step: 6, label: 'Claude AI', durationMs: step6Ms });
+  emit(onEvent, { type: 'step_done', step: 6, stepName: 'Claude AI balancing', durationMs: step6Ms, detail: plan.dayOrderReason });
 
   // Step 7: Schedule assembly (~2-5s)
   console.log('[Pipeline V2] === Step 7: Assembling schedule... ===');
+  emit(onEvent, { type: 'step_start', step: 7, stepName: 'Schedule assembly' });
+  const T7 = Date.now();
   const trip = await assembleTripSchedule(
     plan, clusters, meals, hotel,
     { outbound: data.outboundFlight, return: data.returnFlight },
     bestTransport, preferences, data,
-    restaurantGeoPool
+    restaurantGeoPool,
+    onEvent
   );
+  const step7Ms = Date.now() - T7;
+  emit(onEvent, { type: 'step_done', step: 7, stepName: 'Schedule assembly', durationMs: step7Ms });
 
   // Step 8: Post-generation validation (~0ms)
   console.log('[Pipeline V2] === Step 8: Quality validation... ===');
+  emit(onEvent, { type: 'step_start', step: 8, stepName: 'Quality validation' });
   const validationResult = validateAndFixTrip(trip);
   console.log(`[Pipeline V2] Step 8: Quality score ${validationResult.score}/100 (${validationResult.warnings.length} warnings, ${validationResult.autoFixes.length} auto-fixes)`);
+  emit(onEvent, { type: 'step_done', step: 8, stepName: 'Quality validation', durationMs: 0, detail: `Score ${validationResult.score}/100 (${validationResult.warnings.length} warnings)` });
 
   const totalTime = Date.now() - T0;
   console.log(`[Pipeline V2] ✅ Trip generated in ${totalTime}ms (${(totalTime / 1000).toFixed(1)}s)`);
   console.log(`[Pipeline V2]   ${trip.days.length} days, ${trip.days.reduce((s, d) => s + d.items.length, 0)} items total`);
+  emit(onEvent, { type: 'info', detail: `Trip generated in ${(totalTime / 1000).toFixed(1)}s — ${trip.days.length} days, ${trip.days.reduce((s, d) => s + d.items.length, 0)} items` });
 
   // Final must-see audit: check which must-sees made it into the schedule
   const poolMustSees = (trip.attractionPool || []).filter(a => a.mustSee);

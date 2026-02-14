@@ -15,6 +15,21 @@ import type {
 } from '../types';
 
 // ============================================
+// Pipeline Event System — real-time monitoring
+// ============================================
+export type PipelineEvent = {
+  type: 'step_start' | 'step_done' | 'api_call' | 'api_done' | 'info' | 'warning' | 'error';
+  step?: number;
+  stepName?: string;
+  label?: string;
+  durationMs?: number;
+  detail?: string;
+  timestamp: number;
+};
+
+export type OnPipelineEvent = (event: PipelineEvent) => void;
+
+// ============================================
 // Step 1: Fetched Data
 // ============================================
 

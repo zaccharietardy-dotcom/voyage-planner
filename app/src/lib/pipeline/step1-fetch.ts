@@ -73,11 +73,30 @@ function buildViatorLocationCandidates(activityName: string, destination: string
  * Fetch all external data in parallel.
  * Two phases: coords first (needed by other calls), then everything else.
  */
-export async function fetchAllData(preferences: TripPreferences): Promise<FetchedData> {
+import type { OnPipelineEvent } from './types';
+
+export async function fetchAllData(preferences: TripPreferences, onEvent?: OnPipelineEvent): Promise<FetchedData> {
   const T0 = Date.now();
   const { origin, destination } = preferences;
 
+  /** Wrapper to emit api_call/api_done events around a promise */
+  function tracked<T>(label: string, promise: Promise<T>): Promise<T> {
+    const t0 = Date.now();
+    onEvent?.({ type: 'api_call', step: 1, label, timestamp: t0 });
+    return promise.then(
+      (result) => {
+        onEvent?.({ type: 'api_done', step: 1, label, durationMs: Date.now() - t0, timestamp: Date.now() });
+        return result;
+      },
+      (err) => {
+        onEvent?.({ type: 'api_done', step: 1, label, durationMs: Date.now() - t0, detail: `ERROR: ${err?.message || err}`, timestamp: Date.now() });
+        throw err;
+      }
+    );
+  }
+
   // Phase 0: Geocoding (needed by subsequent calls)
+  onEvent?.({ type: 'api_call', step: 1, label: 'Geocoding', timestamp: Date.now() });
   const [originCoords, destCoords, originAirports, destAirports] = await Promise.all([
     getCityCenterCoordsAsync(origin).then(c => c || { lat: 48.8566, lng: 2.3522 }),
     getCityCenterCoordsAsync(destination).then(c => c || { lat: 48.8566, lng: 2.3522 }),
@@ -86,6 +105,7 @@ export async function fetchAllData(preferences: TripPreferences): Promise<Fetche
   ]);
 
   console.log(`[Pipeline V2] Phase 0: Coords resolved in ${Date.now() - T0}ms`);
+  onEvent?.({ type: 'api_done', step: 1, label: 'Geocoding', durationMs: Date.now() - T0, timestamp: Date.now() });
 
   // Pre-compute dates
   const resolvedBudget = resolveBudget(preferences);
@@ -95,44 +115,44 @@ export async function fetchAllData(preferences: TripPreferences): Promise<Fetche
 
   const activityTypes = preferences.activities || [];
 
-  // Phase 1: Everything in parallel
+  // Phase 1: Everything in parallel (tracked for monitoring)
   const results = await Promise.allSettled([
     // 0: Google Places Text Search — attractions with popularity (with retry)
-    withRetry(() => searchGooglePlacesAttractions(destination, destCoords)),
+    tracked('Google Places', withRetry(() => searchGooglePlacesAttractions(destination, destCoords))),
     // 1: SerpAPI — attractions with GPS + rating (with retry)
-    withRetry(() => searchAttractionsMultiQuery(destination, destCoords, {
+    tracked('SerpAPI attractions', withRetry(() => searchAttractionsMultiQuery(destination, destCoords, {
       types: activityTypes,
       limit: 40,
-    })),
+    }))),
     // 2: Overpass — free OSM POIs
-    searchAttractionsOverpass(destination, destCoords),
+    tracked('OpenStreetMap', searchAttractionsOverpass(destination, destCoords)),
     // 3: Viator — bookable experiences
-    searchViatorActivities(destination, destCoords, {
+    tracked('Viator', searchViatorActivities(destination, destCoords, {
       types: activityTypes,
       limit: 20,
-    }),
+    })),
     // 4: Must-see attractions (user-specified)
-    preferences.mustSee?.trim()
+    tracked('Must-sees', preferences.mustSee?.trim()
       ? searchMustSeeAttractions(preferences.mustSee, destination, destCoords)
-      : Promise.resolve([]),
+      : Promise.resolve([])),
     // 5: TripAdvisor restaurants
-    searchTripAdvisorRestaurants(destination, { limit: 30 }),
+    tracked('TripAdvisor', searchTripAdvisorRestaurants(destination, { limit: 30 })),
     // 6: SerpAPI restaurants (for GPS)
-    searchRestaurantsWithSerpApi(destination, {
+    tracked('SerpAPI restaurants', searchRestaurantsWithSerpApi(destination, {
       latitude: destCoords.lat,
       longitude: destCoords.lng,
       limit: 20,
-    }),
+    })),
     // 7: Booking.com hotels
-    searchHotels(destination, {
+    tracked('Booking.com', searchHotels(destination, {
       budgetLevel: preferences.budgetLevel,
       cityCenter: destCoords,
       checkInDate: startDate,
       checkOutDate: endDate,
       guests: preferences.groupSize || 2,
-    }),
+    })),
     // 8: Transport comparison
-    compareTransportOptions({
+    tracked('Transport routes', compareTransportOptions({
       origin,
       destination,
       originCoords,
@@ -144,20 +164,20 @@ export async function fetchAllData(preferences: TripPreferences): Promise<Fetche
         prioritize: 'balanced',
         forceIncludeMode: preferences.transport as any,
       },
-    }),
+    })),
     // 9: Travel tips
-    generateTravelTips(origin, destination, startDate, preferences.durationDays),
+    tracked('Travel tips', generateTravelTips(origin, destination, startDate, preferences.durationDays)),
     // 10: Budget strategy
-    generateBudgetStrategy(
+    tracked('Budget strategy', generateBudgetStrategy(
       resolvedBudget,
       destination,
       preferences.durationDays,
       preferences.groupSize || 1,
       activityTypes,
       preferences.mealPreference,
-    ),
+    )),
     // 11: Weather forecast (Open-Meteo, free, no key)
-    fetchWeatherForecast(destCoords, startDate, preferences.durationDays),
+    tracked('Weather forecast', fetchWeatherForecast(destCoords, startDate, preferences.durationDays)),
   ]);
 
   // Extract results safely (fulfilled or empty array)

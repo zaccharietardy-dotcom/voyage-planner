@@ -11,6 +11,7 @@ import { DayScheduler, parseTime, formatTime } from '../services/scheduler';
 import { calculateDistance, estimateTravelTime } from '../services/geocoding';
 import { getDirections } from '../services/directions';
 import { fetchPlaceImage, fetchRestaurantPhotoByPlaceId } from './services/wikimediaImages';
+import type { OnPipelineEvent } from './types';
 import { isAppropriateForMeal, getCuisineFamily } from './step4-restaurants';
 import { searchRestaurantsNearby } from '../services/serpApiPlaces';
 import { batchFetchWikipediaSummaries, getWikiLanguageForDestination } from '../services/wikipedia';
@@ -59,7 +60,8 @@ export async function assembleTripSchedule(
   transport: TransportOptionSummary | null,
   preferences: TripPreferences,
   data: FetchedData,
-  restaurantGeoPool?: Restaurant[]
+  restaurantGeoPool?: Restaurant[],
+  onEvent?: OnPipelineEvent
 ): Promise<Trip> {
   const startDate = new Date(preferences.startDate);
   const days: TripDay[] = [];
@@ -1332,20 +1334,28 @@ export async function assembleTripSchedule(
 
   // 12. Enrich items missing images (Google Places photo lookup + Wikipedia fallback)
   // Non-critical: wrapped in try/catch so pipeline never fails because of images
+  onEvent?.({ type: 'api_call', step: 7, label: 'Google Places Photos', timestamp: Date.now() });
+  const tImg = Date.now();
   try {
     await enrichWithPlaceImages(days);
   } catch (e) {
     console.warn('[Pipeline V2] Image enrichment failed (non-critical):', e);
   }
+  onEvent?.({ type: 'api_done', step: 7, label: 'Google Places Photos', durationMs: Date.now() - tImg, timestamp: Date.now() });
 
   // 12b. Enrich restaurant photos using Google Places Details API (real photos from place_id)
+  onEvent?.({ type: 'api_call', step: 7, label: 'Restaurant Photos', timestamp: Date.now() });
+  const tResto = Date.now();
   try {
     await enrichRestaurantsWithPhotos(days);
   } catch (e) {
     console.warn('[Pipeline V2] Restaurant photo enrichment failed (non-critical):', e);
   }
+  onEvent?.({ type: 'api_done', step: 7, label: 'Restaurant Photos', durationMs: Date.now() - tResto, timestamp: Date.now() });
 
   // 13. Batch fetch directions (non-blocking enrichment, 20s max)
+  onEvent?.({ type: 'api_call', step: 7, label: 'Google Directions', timestamp: Date.now() });
+  const tDir = Date.now();
   try {
     const directionsTimeout = new Promise<void>((resolve) => {
       setTimeout(() => {
@@ -1360,6 +1370,7 @@ export async function assembleTripSchedule(
   } catch (e) {
     console.warn('[Pipeline V2] Directions enrichment failed:', e);
   }
+  onEvent?.({ type: 'api_done', step: 7, label: 'Google Directions', durationMs: Date.now() - tDir, timestamp: Date.now() });
 
   // 13a. Post-schedule restaurant distance re-check
   // After scheduling + directions enrichment, some restaurants may be far from their

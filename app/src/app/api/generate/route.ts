@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateTripWithAI } from '@/lib/ai';
-import { generateTripV2 } from '@/lib/pipeline';
+import { generateTripV2, type PipelineEvent } from '@/lib/pipeline';
 import { TripPreferences } from '@/lib/types';
 import { normalizeCity } from '@/lib/services/cityNormalization';
 import { createRouteHandlerClient } from '@/lib/supabase/server';
@@ -89,11 +89,21 @@ export async function POST(request: NextRequest) {
             setTimeout(() => reject(new Error('Timeout: génération trop longue (> 4min45)')), 285_000);
           });
 
-          const generateFn = USE_PIPELINE_V2 ? generateTripV2 : generateTripWithAI;
           console.log(`[Generate] Using pipeline ${USE_PIPELINE_V2 ? 'V2' : 'V1'}`);
 
+          // Stream pipeline events to the client for real-time monitoring
+          const onEvent = (event: PipelineEvent) => {
+            try {
+              controller.enqueue(
+                encoder.encode(`data: ${JSON.stringify({ status: 'progress', event })}\n\n`)
+              );
+            } catch { /* stream closed */ }
+          };
+
           const trip = await Promise.race([
-            generateFn(preferences),
+            USE_PIPELINE_V2
+              ? generateTripV2(preferences, onEvent)
+              : generateTripWithAI(preferences),
             timeoutPromise
           ]);
 
