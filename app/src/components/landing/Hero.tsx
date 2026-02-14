@@ -11,10 +11,22 @@ const trustPoints = [
   { icon: ShieldCheck, label: 'Liens fiables' },
 ];
 
-const stats = [
-  { value: '120k+', label: 'itinéraires créés' },
-  { value: '4.8/5', label: 'note moyenne' },
-  { value: '78%', label: 'temps gagné' },
+const experienceHighlights = [
+  {
+    icon: Clock3,
+    title: 'Timeline claire',
+    detail: 'Horaires réalistes et enchaînement logique de la journée.',
+  },
+  {
+    icon: Users2,
+    title: 'Collaboration cadrée',
+    detail: 'Propositions, votes et décision propriétaire côté serveur.',
+  },
+  {
+    icon: ShieldCheck,
+    title: 'Réservation prête',
+    detail: 'Liens de booking normalisés et actions directes en un clic.',
+  },
 ];
 
 export function Hero() {
@@ -109,19 +121,26 @@ export function Hero() {
               </div>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-3">
-              {stats.map((stat, index) => (
+            <div className="space-y-3">
+              {experienceHighlights.map((highlight, index) => (
                 <motion.div
-                  key={stat.label}
+                  key={highlight.title}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.35, delay: 0.2 + index * 0.08 }}
-                  className="rounded-2xl border border-white/40 bg-background/70 p-4 text-center dark:border-white/10"
+                  className="rounded-2xl border border-white/40 bg-background/70 p-4 dark:border-white/10"
                 >
-                  <p className="font-display text-3xl font-semibold text-[#102a45] dark:text-[#f4d03f]">
-                    {stat.value}
-                  </p>
-                  <p className="mt-1 text-xs text-muted-foreground">{stat.label}</p>
+                  <div className="flex items-start gap-3">
+                    <span className="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#102a45] text-white dark:bg-[#d4a853] dark:text-[#102a45]">
+                      <highlight.icon className="h-4 w-4" />
+                    </span>
+                    <div className="text-left">
+                      <p className="text-sm font-semibold text-[#102a45] dark:text-[#f4d03f]">
+                        {highlight.title}
+                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground">{highlight.detail}</p>
+                    </div>
+                  </div>
                 </motion.div>
               ))}
             </div>

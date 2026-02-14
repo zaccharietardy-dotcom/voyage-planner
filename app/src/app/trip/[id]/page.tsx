@@ -159,6 +159,11 @@ interface TripApiRecord {
   [key: string]: unknown;
 }
 
+function isHotelBoundaryTransportItem(item: TripItem): boolean {
+  return item.type === 'transport' &&
+    (item.id.startsWith('hotel-depart-') || item.id.startsWith('hotel-return-'));
+}
+
 export default function TripPage() {
   const params = useParams();
   const router = useRouter();
@@ -767,14 +772,14 @@ export default function TripPage() {
 
   const allItems = useMemo(() => {
     if (!trip) return [];
-    return trip.days.flatMap((day) => day.items);
+    return trip.days.flatMap((day) => day.items).filter((item) => !isHotelBoundaryTransportItem(item));
   }, [trip]);
 
   const activeDayItems = useMemo(() => {
     if (!trip) return [];
     const dayNumber = parseInt(activeDay);
     const day = trip.days.find((d) => d.dayNumber === dayNumber);
-    return day?.items || [];
+    return (day?.items || []).filter((item) => !isHotelBoundaryTransportItem(item));
   }, [trip, activeDay]);
 
   // Keep backward-compat function signatures for non-map callers
@@ -916,12 +921,13 @@ export default function TripPage() {
       : [];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-b from-background via-background to-[#1e3a5f]/5">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b">
+      <header className="sticky top-0 z-50 border-b border-[#1e3a5f]/10 bg-background/85 shadow-sm backdrop-blur-xl">
         <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+          <div className="rounded-2xl border border-[#1e3a5f]/10 bg-background/75 px-3 py-2 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
               <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => router.push('/')}>
                 <ArrowLeft className="h-4 w-4" />
               </Button>
@@ -960,7 +966,7 @@ export default function TripPage() {
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5">
               {/* Transport selector - compact popover */}
               {canOwnerEdit && trip.transportOptions && trip.transportOptions.length > 0 && (
                 <TransportOptions
@@ -1077,28 +1083,29 @@ export default function TripPage() {
                   <ChatButton onClick={() => setShowChatPanel(true)} />
                 </div>
               )}
+              </div>
             </div>
-          </div>
 
-          {/* Transport changed warning */}
-          {transportChanged && canOwnerEdit && (
-            <div className="flex items-center justify-between gap-3 mt-2 p-2 bg-amber-50 border border-amber-200 rounded-lg text-sm dark:bg-amber-900/20 dark:border-amber-700">
-              <p className="text-amber-800 dark:text-amber-300 text-xs">Transport modifié — régénérez pour mettre à jour les horaires</p>
-              <Button size="sm" className="h-7 text-xs bg-amber-600 hover:bg-amber-700" onClick={handleRegenerateTrip} disabled={regenerating}>
-                {regenerating ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <RefreshCw className="h-3 w-3 mr-1" />}
-                Régénérer
-              </Button>
-            </div>
-          )}
+            {/* Transport changed warning */}
+            {transportChanged && canOwnerEdit && (
+              <div className="mt-2 flex items-center justify-between gap-3 rounded-lg border border-amber-200 bg-amber-50 p-2 text-sm dark:border-amber-700 dark:bg-amber-900/20">
+                <p className="text-xs text-amber-800 dark:text-amber-300">Transport modifié — régénérez pour mettre à jour les horaires</p>
+                <Button size="sm" className="h-7 bg-amber-600 text-xs hover:bg-amber-700" onClick={handleRegenerateTrip} disabled={regenerating}>
+                  {regenerating ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <RefreshCw className="mr-1 h-3 w-3" />}
+                  Régénérer
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
       </header>
 
       {/* Main content */}
-      <div className="container mx-auto px-4 py-4">
+      <div className="container mx-auto px-4 py-6">
         {/* Mobile layout */}
         <div className="lg:hidden">
           <Tabs value={mainTab} onValueChange={setMainTab}>
-            <TabsList className="w-full flex mb-4 overflow-x-auto" data-tour="tabs">
+            <TabsList className="mb-4 flex w-full overflow-x-auto rounded-xl border border-[#1e3a5f]/12 bg-background/70 p-1" data-tour="tabs">
               <TabsTrigger value="planning" className="text-xs flex-1">Planning</TabsTrigger>
               <TabsTrigger value="reserver" className="text-xs flex-1">Reserver</TabsTrigger>
               <TabsTrigger value="carte" className="text-xs flex-1">Carte</TabsTrigger>
@@ -1108,7 +1115,7 @@ export default function TripPage() {
             </TabsList>
 
             <TabsContent value="planning">
-              <div className="space-y-0">
+              <div className="space-y-0 rounded-2xl border border-[#1e3a5f]/10 bg-background/65 p-3 shadow-sm">
                 {/* Hotel selector moved to check-in in timeline */}
 
                 {/* Planning view toggle */}
@@ -1244,7 +1251,7 @@ export default function TripPage() {
           {/* Left: Planning */}
           <div className="flex-[3] min-w-0">
             <Tabs value={mainTab} onValueChange={setMainTab}>
-              <TabsList className="mb-3" data-tour="tabs">
+              <TabsList className="mb-3 rounded-xl border border-[#1e3a5f]/12 bg-background/70 p-1" data-tour="tabs">
                 <TabsTrigger value="planning" className="text-sm">Planning</TabsTrigger>
                 <TabsTrigger value="reserver" className="text-sm">Reserver</TabsTrigger>
                 {user && <TabsTrigger value="photos" className="text-sm">Photos</TabsTrigger>}
@@ -1256,7 +1263,7 @@ export default function TripPage() {
                 {/* Hotel selector moved to check-in in timeline */}
 
                 {/* Planning view toggle */}
-                <div className="flex items-center justify-between mb-3">
+                <div className="mb-3 flex items-center justify-between rounded-xl border border-[#1e3a5f]/10 bg-background/65 px-3 py-2">
                   <h2 className="font-semibold">Itinéraire</h2>
                   <div className="flex items-center gap-2">
                     {editMode && planningView === 'timeline' && (

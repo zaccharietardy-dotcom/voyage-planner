@@ -5,7 +5,7 @@ import { ActivityCard } from './ActivityCard';
 import { HotelCarouselSelector } from './HotelCarouselSelector';
 import { ItineraryConnector } from './ItineraryConnector';
 import { Button } from '@/components/ui/button';
-import { Plus, Calendar } from 'lucide-react';
+import { Plus, Calendar, Bed, Clock, Navigation } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { shouldShowItinerary } from '@/lib/services/itineraryValidator';
@@ -60,6 +60,61 @@ function timeToSortableMinutes(time: string, treatEarlyAsAfterMidnight: boolean 
   return totalMinutes;
 }
 
+function isHotelBoundaryTransport(item: TripItem): boolean {
+  return item.type === 'transport' &&
+    (item.id.startsWith('hotel-depart-') || item.id.startsWith('hotel-return-'));
+}
+
+function formatBoundaryDistance(distanceKm?: number): string | null {
+  if (!distanceKm || distanceKm <= 0.05) return null;
+  if (distanceKm < 1) return `${Math.round(distanceKm * 1000)} m`;
+  return `${distanceKm.toFixed(1)} km`;
+}
+
+function HotelBoundaryMiniConnector({
+  type,
+  fromLabel,
+  toLabel,
+  duration,
+  distance,
+}: {
+  type: 'depart' | 'return';
+  fromLabel: string;
+  toLabel: string;
+  duration?: number;
+  distance?: number;
+}) {
+  const distanceLabel = formatBoundaryDistance(distance);
+
+  return (
+    <div className="my-1 ml-2 flex items-center gap-2 rounded-xl border border-[#1e3a5f]/15 bg-gradient-to-r from-[#1e3a5f]/5 to-[#d4a853]/5 px-3 py-1.5 text-xs text-muted-foreground">
+      <Bed className="h-3.5 w-3.5 shrink-0 text-[#b8923d]" />
+      <span className="rounded-full bg-[#102a45]/10 px-1.5 py-0.5 text-[10px] font-medium text-[#102a45] dark:text-[#f4d03f]">
+        {type === 'depart' ? 'Aller' : 'Retour'}
+      </span>
+      <span className="truncate">
+        {fromLabel} → {toLabel}
+      </span>
+      {(duration || distanceLabel) && (
+        <span className="ml-auto inline-flex shrink-0 items-center gap-2 text-[11px] text-muted-foreground/85">
+          {duration ? (
+            <span className="inline-flex items-center gap-0.5">
+              <Clock className="h-2.5 w-2.5" />
+              {duration} min
+            </span>
+          ) : null}
+          {distanceLabel ? (
+            <span className="inline-flex items-center gap-0.5">
+              <Navigation className="h-2.5 w-2.5" />
+              {distanceLabel}
+            </span>
+          ) : null}
+        </span>
+      )}
+    </div>
+  );
+}
+
 export function DayTimeline({
   day,
   selectedItemId,
@@ -88,11 +143,27 @@ export function DayTimeline({
   const sortedItems = [...day.items]
     .sort((a, b) => timeToSortableMinutes(a.startTime, hasLateNightItems) - timeToSortableMinutes(b.startTime, hasLateNightItems));
 
+  const boundaryItems = sortedItems.filter(isHotelBoundaryTransport);
+  const visibleItems = sortedItems.filter((item) => !isHotelBoundaryTransport(item));
+
+  const departurePrefix = `hotel-depart-${day.dayNumber}-`;
+  const returnPrefix = `hotel-return-${day.dayNumber}-`;
+  const departureByTargetId = new Map<string, TripItem>();
+  const returnBySourceId = new Map<string, TripItem>();
+
+  for (const boundary of boundaryItems) {
+    if (boundary.id.startsWith(departurePrefix)) {
+      departureByTargetId.set(boundary.id.slice(departurePrefix.length), boundary);
+    } else if (boundary.id.startsWith(returnPrefix)) {
+      returnBySourceId.set(boundary.id.slice(returnPrefix.length), boundary);
+    }
+  }
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       {/* Day header */}
       <motion.div
-        className="flex items-center justify-between"
+        className="flex items-center justify-between rounded-2xl border border-[#1e3a5f]/12 bg-background/75 p-3 backdrop-blur-sm"
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, ease: 'easeOut' }}
@@ -136,7 +207,7 @@ export function DayTimeline({
 
       {/* Timeline */}
       <motion.div
-        className="relative pl-6 space-y-3"
+        className="relative space-y-3 rounded-2xl border border-[#1e3a5f]/10 bg-background/65 p-3 pl-6 shadow-sm"
         initial="hidden"
         animate="visible"
         variants={{
@@ -148,13 +219,15 @@ export function DayTimeline({
         }}
       >
         {/* Vertical line */}
-        <div className="absolute left-[11px] top-0 bottom-0 w-0.5 bg-border" />
+        <div className="absolute bottom-4 left-[11px] top-4 w-0.5 bg-border/80" />
 
-        {sortedItems.map((item, index) => {
-          const nextItem = index < sortedItems.length - 1 ? sortedItems[index + 1] : null;
+        {visibleItems.map((item, index) => {
+          const nextItem = index < visibleItems.length - 1 ? visibleItems[index + 1] : null;
+          const departureBoundary = departureByTargetId.get(item.id);
+          const returnBoundary = returnBySourceId.get(item.id);
 
           const isFirst = index === 0;
-          const isLast = index === sortedItems.length - 1;
+          const isLast = index === visibleItems.length - 1;
 
           return (
             <motion.div
@@ -174,6 +247,16 @@ export function DayTimeline({
             >
               {/* Timeline dot */}
               <div className="absolute -left-6 top-5 w-3 h-3 rounded-full bg-background border-2 border-primary" />
+
+              {departureBoundary && (
+                <HotelBoundaryMiniConnector
+                  type="depart"
+                  fromLabel="Hôtel"
+                  toLabel={item.locationName || item.title}
+                  duration={departureBoundary.duration}
+                  distance={departureBoundary.distanceFromPrevious}
+                />
+              )}
 
               <ActivityCard
                 item={item}
@@ -225,11 +308,21 @@ export function DayTimeline({
                   mode={nextItem.transportToPrevious}
                 />
               )}
+
+              {returnBoundary && (
+                <HotelBoundaryMiniConnector
+                  type="return"
+                  fromLabel={item.locationName || item.title}
+                  toLabel={returnBoundary.locationName || "Hôtel"}
+                  duration={returnBoundary.duration}
+                  distance={returnBoundary.distanceFromPrevious}
+                />
+              )}
             </motion.div>
           );
         })}
 
-        {sortedItems.length === 0 && (
+        {visibleItems.length === 0 && (
           <motion.div
             className="text-center py-8 text-muted-foreground"
             initial={{ opacity: 0 }}
