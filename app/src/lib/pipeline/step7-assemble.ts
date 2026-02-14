@@ -7,15 +7,16 @@
 
 import type { Trip, TripDay, TripItem, TripPreferences, Flight, Accommodation, TransportOptionSummary, Restaurant } from '../types';
 import type { FetchedData, ActivityCluster, MealAssignment, BalancedPlan, ScoredActivity } from './types';
-import { DayScheduler, parseTime, formatTime } from '../services/scheduler';
-import { calculateDistance, estimateTravelTime } from '../services/geocoding';
+import { DayScheduler, parseTime } from '../services/scheduler';
+import { calculateDistance } from '../services/geocoding';
 import { getDirections } from '../services/directions';
 import { fetchPlaceImage, fetchRestaurantPhotoByPlaceId } from './services/wikimediaImages';
 import type { OnPipelineEvent } from './types';
-import { isAppropriateForMeal, getCuisineFamily } from './step4-restaurants';
+import { isAppropriateForMeal, getCuisineFamily, isBreakfastSpecialized } from './step4-restaurants';
 import { searchRestaurantsNearby } from '../services/serpApiPlaces';
 import { batchFetchWikipediaSummaries, getWikiLanguageForDestination } from '../services/wikipedia';
 import { normalizeHotelBookingUrl } from '../services/bookingLinks';
+import { dedupeActivitiesBySimilarity, isDuplicateActivityCandidate } from './utils/activityDedup';
 // ---------------------------------------------------------------------------
 // Directions cache — used to store pre-fetched real travel times
 // ---------------------------------------------------------------------------
@@ -278,21 +279,23 @@ export async function assembleTripSchedule(
   // This can happen when rebalancing/must-see injection puts an activity into a cluster
   // while another copy remained from a different source.
   // ---------------------------------------------------------------------------
-  const crossDayUsedActivityIds = new Set<string>();
-  const crossDayUsedActivityNames = new Set<string>();
+  let seenActivitiesAcrossDays: Array<{
+    id: string;
+    name: string;
+    latitude: number;
+    longitude: number;
+  }> = [];
   for (const [dayNum, activities] of prepassActivities) {
-    const deduped: ScoredActivity[] = [];
-    for (const act of activities) {
-      const normName = (act.name || '').toLowerCase().trim();
-      if (crossDayUsedActivityIds.has(act.id) || crossDayUsedActivityNames.has(normName)) {
-        console.log(`[Pipeline V2] Cross-day dedup: removing "${act.name}" from Day ${dayNum} (already scheduled)`);
-        continue;
-      }
-      crossDayUsedActivityIds.add(act.id);
-      if (normName) crossDayUsedActivityNames.add(normName);
-      deduped.push(act);
+    const dedupResult = dedupeActivitiesBySimilarity(
+      activities,
+      seenActivitiesAcrossDays,
+      { nearDistanceKm: 0.35, canonicalDistanceKm: 2.5 }
+    );
+    if (dedupResult.dropped > 0) {
+      console.log(`[Pipeline V2] Cross-day dedup: removed ${dedupResult.dropped} duplicate activity(ies) from Day ${dayNum}`);
     }
-    prepassActivities.set(dayNum, deduped);
+    prepassActivities.set(dayNum, dedupResult.deduped);
+    seenActivitiesAcrossDays = dedupResult.seen as typeof seenActivitiesAcrossDays;
   }
 
   // ---------------------------------------------------------------------------
@@ -576,7 +579,16 @@ export async function assembleTripSchedule(
     }
 
     // 4. Get activities from pre-pass (already geo-optimized + re-optimized with real times)
-    const orderedActivities = prepassActivities.get(balancedDay.dayNumber) || [];
+    const orderedActivitiesRaw = prepassActivities.get(balancedDay.dayNumber) || [];
+    const intraDayDedup = dedupeActivitiesBySimilarity(
+      orderedActivitiesRaw,
+      [],
+      { nearDistanceKm: 0.35, canonicalDistanceKm: 2.5 }
+    );
+    const orderedActivities = intraDayDedup.deduped;
+    if (intraDayDedup.dropped > 0) {
+      console.log(`[Pipeline V2] Day ${balancedDay.dayNumber}: removed ${intraDayDedup.dropped} intra-day duplicate activity(ies)`);
+    }
 
     const mustSeeCount = orderedActivities.filter(a => a.mustSee).length;
     console.log(`[Pipeline V2] Day ${balancedDay.dayNumber}: ${orderedActivities.length} activities to schedule (${mustSeeCount} must-sees), dayStart=${dayStartHour}:00, dayEnd=${dayEndHour}:00, window=${dayEndHour - dayStartHour}h, cursor=${formatTimeHHMM(scheduler.getCurrentTime())}`);
@@ -627,6 +639,7 @@ export async function assembleTripSchedule(
             if (usedRestaurantIds.has(r.id) || usedRestaurantNames.has(r.name)) continue;
             if (!r.latitude || !r.longitude) continue;
             if (!isAppropriateForMeal(r, mealType)) continue;
+            if (mealType === 'breakfast' && !isBreakfastSpecialized(r)) continue;
 
             const dist = calculateDistance(
               neighborActivity.latitude!, neighborActivity.longitude!,
@@ -702,6 +715,7 @@ export async function assembleTripSchedule(
             if (usedRestaurantIds.has(r.id) || usedRestaurantNames.has(r.name)) continue;
             if (!r.latitude || !r.longitude) continue;
             if (!isAppropriateForMeal(r, mealType)) continue;
+            if (mealType === 'breakfast' && !isBreakfastSpecialized(r)) continue;
             const dist = calculateDistance(
               neighborActivity.latitude!, neighborActivity.longitude!,
               r.latitude, r.longitude
@@ -748,6 +762,7 @@ export async function assembleTripSchedule(
       for (const alt of alternatives) {
         if (!alt.latitude || !alt.longitude) continue;
         if (!isAppropriateForMeal(alt, mealType)) continue;
+        if (mealType === 'breakfast' && !isBreakfastSpecialized(alt)) continue;
         const altDist = calculateDistance(
           neighborActivity.latitude, neighborActivity.longitude,
           alt.latitude, alt.longitude
@@ -812,6 +827,7 @@ export async function assembleTripSchedule(
             if (usedRestaurantIds.has(r.id) || usedRestaurantNames.has(r.name)) continue;
             if (!r.latitude || !r.longitude) continue;
             if (!isAppropriateForMeal(r, mealType)) continue;
+            if (mealType === 'breakfast' && !isBreakfastSpecialized(r)) continue;
             const dist = calculateDistance(
               neighborActivity.latitude!, neighborActivity.longitude!,
               r.latitude, r.longitude
@@ -1299,7 +1315,7 @@ export async function assembleTripSchedule(
 
     // 11. Convert to TripItems
     const scheduleItems = scheduler.getItems();
-    const tripItems: TripItem[] = scheduleItems.map((item, idx) => {
+    let tripItems: TripItem[] = scheduleItems.map((item, idx) => {
       const itemData = item.data || {};
       const normalizedCoords = normalizeItemCoordinates(item.title, itemData, item.type, preferences.destination);
       // Generate Google Maps "search by name" URL (more reliable than GPS coordinates)
@@ -1356,6 +1372,19 @@ export async function assembleTripSchedule(
       };
     });
 
+    // Intra-day activity dedup (safety net) after scheduler transformations/swaps
+    tripItems = dedupeScheduledActivityItems(tripItems, balancedDay.dayNumber);
+
+    // Add explicit morning departure from hotel + evening return to hotel
+    // so the daily route is visually complete for users.
+    tripItems = addHotelBoundaryTransportItems({
+      items: tripItems,
+      dayNumber: balancedDay.dayNumber,
+      hotel,
+      destination: preferences.destination,
+      directionsCache,
+    });
+
     // Match weather forecast to this day's date
     const dayDateStr = dayDate.toISOString().split('T')[0];
     const dayWeather = data.weatherForecasts?.find(w => w.date === dayDateStr);
@@ -1386,7 +1415,7 @@ export async function assembleTripSchedule(
   onEvent?.({ type: 'api_call', step: 7, label: 'Google Places Photos', timestamp: Date.now() });
   const tImg = Date.now();
   try {
-    await enrichWithPlaceImages(days);
+    await enrichWithPlaceImages(days, preferences.destination);
   } catch (e) {
     console.warn('[Pipeline V2] Image enrichment failed (non-critical):', e);
   }
@@ -1396,7 +1425,7 @@ export async function assembleTripSchedule(
   onEvent?.({ type: 'api_call', step: 7, label: 'Restaurant Photos', timestamp: Date.now() });
   const tResto = Date.now();
   try {
-    await enrichRestaurantsWithPhotos(days);
+    await enrichRestaurantsWithPhotos(days, preferences.destination);
   } catch (e) {
     console.warn('[Pipeline V2] Restaurant photo enrichment failed (non-critical):', e);
   }
@@ -1497,6 +1526,7 @@ export async function assembleTripSchedule(
           if (!r.latitude || !r.longitude) continue;
           if (usedIds.has(r.id) || usedNames.has(r.name)) continue;
           if (!isAppropriateForMeal(r, mealType)) continue;
+          if (mealType === 'breakfast' && !isBreakfastSpecialized(r)) continue;
           const rDist = calculateDistance(refLat, refLng, r.latitude, r.longitude);
           if (rDist < bestDist && rDist < 1.5) {
             bestDist = rDist;
@@ -1554,6 +1584,7 @@ export async function assembleTripSchedule(
           if (!r.latitude || !r.longitude) continue;
           if (usedIds.has(r.id) || usedNames.has(r.name)) continue;
           if (!isAppropriateForMeal(r, c.mealType)) continue; // Prevent pizza/heavy meals for breakfast
+          if (c.mealType === 'breakfast' && !isBreakfastSpecialized(r)) continue;
           const rDist = calculateDistance(c.refLat, c.refLng, r.latitude, r.longitude);
           if (rDist < bestDist && rDist < 2.0) {
             bestDist = rDist;
@@ -1653,6 +1684,7 @@ export async function assembleTripSchedule(
           if (globalUsedIds.has(r.id) || globalUsedNames.has(r.name)) continue;
           if (!r.latitude || !r.longitude) continue;
           if (!isAppropriateForMeal(r, mealType)) continue;
+          if (mealType === 'breakfast' && !isBreakfastSpecialized(r)) continue;
           const dist = calculateDistance(refLat, refLng, r.latitude, r.longitude);
           if (dist <= ALT_SEARCH_RADIUS_KM) {
             candidates.push({ r, dist, family: getCuisineFamily(r) });
@@ -1697,6 +1729,7 @@ export async function assembleTripSchedule(
               if (globalUsedNames.has(r.name)) continue;
               if (!r.latitude || !r.longitude) continue;
               if (!isAppropriateForMeal(r, mealType)) continue;
+              if (mealType === 'breakfast' && !isBreakfastSpecialized(r)) continue;
               const dist = calculateDistance(refLat, refLng, r.latitude, r.longitude);
               if (dist <= ALT_SEARCH_RADIUS_KM) {
                 const family = getCuisineFamily(r);
@@ -2390,7 +2423,7 @@ function getActivityMinStartTime(activity: ScoredActivity, dayDate: Date): Date 
  * Uses GPS coordinates for location-biased search (more accurate results).
  * Has a hard 15s timeout — images are non-critical enrichment.
  */
-async function enrichWithPlaceImages(days: TripDay[]): Promise<void> {
+async function enrichWithPlaceImages(days: TripDay[], destinationHint?: string): Promise<void> {
   try {
     const itemsNeedingImages: TripItem[] = [];
     // Restaurants exclus : ils utilisent SerpAPI thumbnail / TripAdvisor heroImgUrl
@@ -2417,7 +2450,8 @@ async function enrichWithPlaceImages(days: TripDay[]): Promise<void> {
             const imageUrl = await fetchPlaceImage(
               item.title,
               item.latitude !== 0 ? item.latitude : undefined,
-              item.longitude !== 0 ? item.longitude : undefined
+              item.longitude !== 0 ? item.longitude : undefined,
+              destinationHint
             );
             if (imageUrl) {
               item.imageUrl = imageUrl;
@@ -2471,7 +2505,7 @@ function needsBetterPhoto(restaurant: Restaurant): boolean {
  * Cost: $0.005 per call (Place Details Basic).
  * Hard timeout: 10s max.
  */
-async function enrichRestaurantsWithPhotos(days: TripDay[]): Promise<void> {
+async function enrichRestaurantsWithPhotos(days: TripDay[], destinationHint?: string): Promise<void> {
   try {
     // Collect all restaurants (main + alternatives) that need better photos
     const restaurantsToEnrich: Restaurant[] = [];
@@ -2521,7 +2555,8 @@ async function enrichRestaurantsWithPhotos(days: TripDay[]): Promise<void> {
                 photoUrl = await fetchPlaceImage(
                   restaurant.name,
                   restaurant.latitude,
-                  restaurant.longitude
+                  restaurant.longitude,
+                  destinationHint
                 );
               }
 
@@ -2842,6 +2877,170 @@ function findBestMealSlot(
 
 function formatTimeHHMM(date: Date): string {
   return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+}
+
+function parseHHMMToMinutes(time: string): number {
+  const [h, m] = time.split(':').map((v) => Number(v));
+  const hour = Number.isFinite(h) ? h : 0;
+  const minute = Number.isFinite(m) ? m : 0;
+  return hour * 60 + minute;
+}
+
+function formatMinutesToHHMM(totalMinutes: number): string {
+  const minutes = Math.max(0, Math.min(totalMinutes, 23 * 60 + 59));
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+}
+
+function roundToNearestFive(value: number): number {
+  return Math.max(5, Math.round(value / 5) * 5);
+}
+
+function isOutsideHotel(item: TripItem, hotel: Accommodation): boolean {
+  if (!item.latitude || !item.longitude || item.latitude === 0 || item.longitude === 0) return false;
+  if (!hotel.latitude || !hotel.longitude) return false;
+  const dist = calculateDistance(item.latitude, item.longitude, hotel.latitude, hotel.longitude);
+  return dist > 0.15;
+}
+
+function sortItemsByTime(items: TripItem[]): TripItem[] {
+  return [...items].sort((a, b) => {
+    const startDiff = parseHHMMToMinutes(a.startTime) - parseHHMMToMinutes(b.startTime);
+    if (startDiff !== 0) return startDiff;
+    const endDiff = parseHHMMToMinutes(a.endTime) - parseHHMMToMinutes(b.endTime);
+    if (endDiff !== 0) return endDiff;
+    return (a.orderIndex || 0) - (b.orderIndex || 0);
+  });
+}
+
+function dedupeScheduledActivityItems(items: TripItem[], dayNumber: number): TripItem[] {
+  const result: TripItem[] = [];
+  const seenActivities: TripItem[] = [];
+  let dropped = 0;
+
+  for (const item of sortItemsByTime(items)) {
+    if (item.type !== 'activity') {
+      result.push(item);
+      continue;
+    }
+
+    const isDup = seenActivities.some((existing) =>
+      isDuplicateActivityCandidate(
+        { id: item.id, name: item.title, latitude: item.latitude, longitude: item.longitude },
+        { id: existing.id, name: existing.title, latitude: existing.latitude, longitude: existing.longitude },
+        { nearDistanceKm: 0.35, canonicalDistanceKm: 2.5 }
+      )
+    );
+
+    if (isDup) {
+      dropped++;
+      continue;
+    }
+
+    seenActivities.push(item);
+    result.push(item);
+  }
+
+  if (dropped > 0) {
+    console.log(`[Pipeline V2] Day ${dayNumber}: removed ${dropped} duplicated activity item(s) after scheduling`);
+  }
+
+  return result.map((item, idx) => ({ ...item, orderIndex: idx }));
+}
+
+function addHotelBoundaryTransportItems(params: {
+  items: TripItem[];
+  dayNumber: number;
+  hotel: Accommodation | null;
+  destination: string;
+  directionsCache?: DirectionsCache;
+}): TripItem[] {
+  const { items, dayNumber, hotel, destination, directionsCache } = params;
+  if (!hotel || !hotel.latitude || !hotel.longitude) return items;
+
+  let result = sortItemsByTime(items);
+  const hasManualDayTripReturn = result.some(
+    (item) => item.id.startsWith(`daytrip-return-${dayNumber}`) || item.title === `Retour vers ${destination}`
+  );
+  const hasHotelDeparture = result.some((item) => item.id.startsWith(`hotel-depart-${dayNumber}`));
+  const hasHotelReturn = result.some((item) => item.id.startsWith(`hotel-return-${dayNumber}`));
+
+  const candidateTypes: TripItem['type'][] = ['activity', 'restaurant', 'free_time'];
+  const outside = result.filter(
+    (item) =>
+      candidateTypes.includes(item.type) &&
+      !item.id.startsWith('hotel-depart-') &&
+      !item.id.startsWith('hotel-return-') &&
+      isOutsideHotel(item, hotel)
+  );
+  if (outside.length === 0) return result;
+
+  const firstOutside = outside[0];
+  const lastOutside = outside[outside.length - 1];
+
+  if (firstOutside && !hasHotelDeparture) {
+    const estimatedDuration = roundToNearestFive(
+      estimateTravel(
+        { latitude: hotel.latitude, longitude: hotel.longitude },
+        { latitude: firstOutside.latitude, longitude: firstOutside.longitude },
+        directionsCache
+      )
+    );
+    const endMinutes = parseHHMMToMinutes(firstOutside.startTime);
+    const startMinutes = Math.max(6 * 60, endMinutes - estimatedDuration);
+    const duration = Math.max(5, endMinutes - startMinutes);
+
+    result.push({
+      id: `hotel-depart-${dayNumber}-${firstOutside.id}`,
+      dayNumber,
+      startTime: formatMinutesToHHMM(startMinutes),
+      endTime: formatMinutesToHHMM(endMinutes),
+      type: 'transport',
+      title: "Départ de l'hôtel",
+      description: `Trajet vers ${firstOutside.locationName || firstOutside.title}`,
+      locationName: firstOutside.locationName || firstOutside.title,
+      latitude: firstOutside.latitude,
+      longitude: firstOutside.longitude,
+      orderIndex: -1,
+      estimatedCost: 0,
+      duration,
+      dataReliability: 'estimated',
+    });
+  }
+
+  if (lastOutside && !hasHotelReturn && !hasManualDayTripReturn) {
+    const estimatedDuration = roundToNearestFive(
+      estimateTravel(
+        { latitude: lastOutside.latitude, longitude: lastOutside.longitude },
+        { latitude: hotel.latitude, longitude: hotel.longitude },
+        directionsCache
+      )
+    );
+    const startMinutes = parseHHMMToMinutes(lastOutside.endTime);
+    const endMinutes = Math.min(23 * 60 + 59, startMinutes + estimatedDuration);
+    const duration = Math.max(5, endMinutes - startMinutes);
+
+    result.push({
+      id: `hotel-return-${dayNumber}-${lastOutside.id}`,
+      dayNumber,
+      startTime: formatMinutesToHHMM(startMinutes),
+      endTime: formatMinutesToHHMM(endMinutes),
+      type: 'transport',
+      title: "Retour à l'hôtel",
+      description: `Retour vers ${hotel.name}`,
+      locationName: hotel.name,
+      latitude: hotel.latitude,
+      longitude: hotel.longitude,
+      orderIndex: -1,
+      estimatedCost: 0,
+      duration,
+      dataReliability: 'estimated',
+    });
+  }
+
+  result = sortItemsByTime(result).map((item, idx) => ({ ...item, orderIndex: idx }));
+  return result;
 }
 
 /**

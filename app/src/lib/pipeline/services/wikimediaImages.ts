@@ -21,6 +21,118 @@ function getApiKey(): string {
   return process.env.GOOGLE_PLACES_API_KEY || process.env.GOOGLE_MAPS_API_KEY || '';
 }
 
+type GooglePlaceCandidate = {
+  name?: string;
+  formatted_address?: string;
+  geometry?: {
+    location?: {
+      lat?: number;
+      lng?: number;
+    };
+  };
+  photos?: Array<{
+    photo_reference?: string;
+  }>;
+};
+
+function normalizeText(input: string): string {
+  return input
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function tokenSimilarity(a: string, b: string): number {
+  const aTokens = new Set(normalizeText(a).split(' ').filter(Boolean));
+  const bTokens = new Set(normalizeText(b).split(' ').filter(Boolean));
+  if (aTokens.size === 0 || bTokens.size === 0) return 0;
+
+  let intersection = 0;
+  for (const token of aTokens) {
+    if (bTokens.has(token)) intersection++;
+  }
+
+  return intersection / Math.max(aTokens.size, bTokens.size);
+}
+
+function geoDistanceKm(
+  lat1: number,
+  lng1: number,
+  lat2: number,
+  lng2: number
+): number {
+  const dLat = (lat2 - lat1) * (Math.PI / 180);
+  const dLng = (lng2 - lng1) * (Math.PI / 180);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * (Math.PI / 180)) *
+      Math.cos(lat2 * (Math.PI / 180)) *
+      Math.sin(dLng / 2) *
+      Math.sin(dLng / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return 6371 * c;
+}
+
+export function scoreGooglePlaceCandidate(params: {
+  queryName: string;
+  candidate: GooglePlaceCandidate;
+  latitude?: number;
+  longitude?: number;
+  destinationHint?: string;
+}): number {
+  const { queryName, candidate, latitude, longitude, destinationHint } = params;
+  const candidateName = candidate.name || '';
+  const normalizedQuery = normalizeText(queryName);
+  const normalizedCandidate = normalizeText(candidateName);
+  if (!normalizedQuery || !normalizedCandidate) return 0;
+
+  let nameScore = 0;
+  if (normalizedQuery === normalizedCandidate) {
+    nameScore = 1;
+  } else if (
+    normalizedCandidate.includes(normalizedQuery) ||
+    normalizedQuery.includes(normalizedCandidate)
+  ) {
+    nameScore = 0.9;
+  } else {
+    nameScore = tokenSimilarity(normalizedQuery, normalizedCandidate);
+  }
+
+  let geoScore = 0.5;
+  const cLat = candidate.geometry?.location?.lat;
+  const cLng = candidate.geometry?.location?.lng;
+  if (latitude && longitude && typeof cLat === 'number' && typeof cLng === 'number') {
+    const distance = geoDistanceKm(latitude, longitude, cLat, cLng);
+    if (distance <= 0.5) geoScore = 1;
+    else if (distance <= 2) geoScore = 0.85;
+    else if (distance <= 5) geoScore = 0.6;
+    else if (distance <= 10) geoScore = 0.35;
+    else geoScore = 0.1;
+  }
+
+  let destinationScore = 0.5;
+  if (destinationHint) {
+    const normalizedHint = normalizeText(destinationHint);
+    const addressText = normalizeText(candidate.formatted_address || '');
+    destinationScore =
+      addressText.includes(normalizedHint) || normalizedCandidate.includes(normalizedHint)
+        ? 1
+        : 0.2;
+  }
+
+  const hasCoordsInput = Boolean(latitude && longitude);
+  const weighted =
+    hasCoordsInput
+      ? nameScore * 0.65 + geoScore * 0.3 + destinationScore * 0.05
+      : nameScore * 0.85 + destinationScore * 0.15;
+
+  const hasPhoto = Boolean(candidate.photos?.[0]?.photo_reference);
+  return hasPhoto ? weighted : Math.max(0, weighted - 0.4);
+}
+
 /**
  * Find an image for a place by name.
  * Uses Google Places (most reliable) then Wikipedia as fallback.
@@ -28,17 +140,24 @@ function getApiKey(): string {
 export async function fetchPlaceImage(
   name: string,
   latitude?: number,
-  longitude?: number
+  longitude?: number,
+  destinationHint?: string
 ): Promise<string | null> {
   if (!name || name.length < 3) return null;
 
-  const cacheKey = `${name.toLowerCase().trim()}|${latitude}|${longitude}`;
+  const cacheKey = `${name.toLowerCase().trim()}|${latitude}|${longitude}|${normalizeText(destinationHint || '')}`;
   if (imageCache.has(cacheKey)) return imageCache.get(cacheKey) || null;
 
   // Try Google Places first (most reliable — photo tied to place_id)
   const apiKey = getApiKey();
   if (apiKey) {
-    const googleImage = await fetchGooglePlacesImage(name, apiKey, latitude, longitude);
+    const googleImage = await fetchGooglePlacesImage(
+      name,
+      apiKey,
+      latitude,
+      longitude,
+      destinationHint
+    );
     if (googleImage) {
       imageCache.set(cacheKey, googleImage);
       return googleImage;
@@ -46,7 +165,7 @@ export async function fetchPlaceImage(
   }
 
   // Fallback: Wikipedia
-  const wikiImage = await fetchWikipediaImage(name);
+  const wikiImage = await fetchWikipediaImage(name, destinationHint);
   imageCache.set(cacheKey, wikiImage);
   return wikiImage;
 }
@@ -59,13 +178,15 @@ async function fetchGooglePlacesImage(
   name: string,
   apiKey: string,
   latitude?: number,
-  longitude?: number
+  longitude?: number,
+  destinationHint?: string
 ): Promise<string | null> {
   try {
     const url = new URL(GOOGLE_FIND_PLACE_URL);
-    url.searchParams.set('input', name);
+    const query = destinationHint ? `${name} ${destinationHint}` : name;
+    url.searchParams.set('input', query);
     url.searchParams.set('inputtype', 'textquery');
-    url.searchParams.set('fields', 'photos,name');
+    url.searchParams.set('fields', 'photos,name,formatted_address,geometry');
     url.searchParams.set('language', 'fr');
     url.searchParams.set('key', apiKey);
 
@@ -78,12 +199,32 @@ async function fetchGooglePlacesImage(
     if (!res.ok) return null;
 
     const data = await res.json();
-    const candidate = data?.candidates?.[0];
-    const photoRef = candidate?.photos?.[0]?.photo_reference;
+    const candidates = Array.isArray(data?.candidates)
+      ? (data.candidates as GooglePlaceCandidate[])
+      : [];
+    if (candidates.length === 0) return null;
 
+    const scored = candidates
+      .map((candidate) => ({
+        candidate,
+        score: scoreGooglePlaceCandidate({
+          queryName: name,
+          candidate,
+          latitude,
+          longitude,
+          destinationHint,
+        }),
+      }))
+      .sort((a, b) => b.score - a.score);
+
+    const minScore = latitude && longitude ? 0.55 : 0.62;
+    const best = scored[0];
+    if (!best || best.score < minScore) return null;
+
+    const photoRef = best.candidate.photos?.[0]?.photo_reference;
     if (!photoRef) return null;
 
-    return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${photoRef}&key=${apiKey}`;
+    return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photoreference=${photoRef}&key=${apiKey}`;
   } catch {
     return null;
   }
@@ -132,10 +273,13 @@ export async function fetchRestaurantPhotoByPlaceId(
  * Wikipedia fallback: search for page → get main thumbnail.
  * Free, no API key. Tries French then English Wikipedia.
  */
-export async function fetchWikipediaImage(name: string): Promise<string | null> {
+export async function fetchWikipediaImage(name: string, destinationHint?: string): Promise<string | null> {
   if (!name || name.length < 3) return null;
 
-  return await tryWikipediaImage(name, WIKI_API_FR)
+  const contextualName = destinationHint ? `${name} ${destinationHint}` : name;
+  return await tryWikipediaImage(contextualName, WIKI_API_FR)
+    || await tryWikipediaImage(name, WIKI_API_FR)
+    || await tryWikipediaImage(contextualName, WIKI_API_EN)
     || await tryWikipediaImage(name, WIKI_API_EN);
 }
 
@@ -174,7 +318,7 @@ async function tryWikipediaImage(name: string, apiBase: string): Promise<string 
     const pages = imageData?.query?.pages;
     if (!pages) return null;
 
-    const page = Object.values(pages)[0] as any;
+    const page = Object.values(pages)[0] as { thumbnail?: { source?: string } };
     const thumbnail = page?.thumbnail?.source;
 
     return (thumbnail && typeof thumbnail === 'string') ? thumbnail : null;

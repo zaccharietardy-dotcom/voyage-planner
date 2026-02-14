@@ -483,7 +483,6 @@ export function ActivityCard({
         <RestaurantSuggestionsFlat
           item={item}
           onSelectRestaurantAlternative={onSelectRestaurantAlternative}
-          onSelectSelfMeal={onSelectSelfMeal}
         />
       )}
 
@@ -797,11 +796,9 @@ function FlightAlternatives({ alternatives }: { alternatives: Flight[] }) {
 function RestaurantSuggestionsFlat({
   item,
   onSelectRestaurantAlternative,
-  onSelectSelfMeal,
 }: {
   item: TripItem;
   onSelectRestaurantAlternative?: (item: TripItem, restaurant: Restaurant) => void;
-  onSelectSelfMeal?: (item: TripItem) => void;
 }) {
   const current = item.restaurant;
   if (!current) return null;
@@ -1064,17 +1061,6 @@ function RestaurantSuggestionsFlat({
             </div>
           );
         })}
-      </div>
-      <div className="mt-2 flex justify-end">
-        <button
-          className="text-[11px] text-muted-foreground hover:text-foreground underline-offset-2 hover:underline transition-colors"
-          onClick={(e) => {
-            e.stopPropagation();
-            onSelectSelfMeal?.(item);
-          }}
-        >
-          Manger par ses moyens (pique-nique / maison / libre)
-        </button>
       </div>
     </div>
   );

@@ -274,6 +274,7 @@ export function buildDirectBookingHotelUrl({
   if (normalizedCheckIn) params.set('checkin', normalizedCheckIn);
   if (normalizedCheckOut) params.set('checkout', normalizedCheckOut);
   params.set('group_adults', String(normalizedAdults));
+  params.set('group_children', '0');
   params.set('no_rooms', '1');
 
   return `${basePath}?${params.toString()}`;

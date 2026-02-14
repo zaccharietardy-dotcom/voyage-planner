@@ -21,6 +21,7 @@ describe('bookingLinks', () => {
     expect(url).toContain('checkin=2026-04-10');
     expect(url).toContain('checkout=2026-04-12');
     expect(url).toContain('group_adults=3');
+    expect(url).toContain('group_children=0');
     expect(url).toContain('no_rooms=1');
     expect(url).toContain('aid=304142');
   });
@@ -40,6 +41,7 @@ describe('bookingLinks', () => {
     expect(url).toContain('/hotel/nl/');
     expect(url).toContain('checkin=2026-05-02');
     expect(url).toContain('checkout=2026-05-05');
+    expect(url).toContain('group_children=0');
     expect(url).not.toContain('searchresults.html');
   });
 
@@ -56,6 +58,7 @@ describe('bookingLinks', () => {
     expect(url).toContain('/the-dylan-amsterdam.html');
     expect(url).toContain('checkin=2026-06-01');
     expect(url).toContain('checkout=2026-06-03');
+    expect(url).toContain('group_children=0');
   });
 
   it('keeps airbnb url unchanged', () => {
@@ -89,5 +92,6 @@ describe('bookingLinks', () => {
     expect(url).toContain('/hotel/fr/real-hotel.html');
     expect(url).toContain('aid=1234');
     expect(url).toContain('group_adults=2');
+    expect(url).toContain('group_children=0');
   });
 });

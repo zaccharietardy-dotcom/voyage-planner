@@ -42,10 +42,11 @@ const BREAKFAST_EXCLUDED_CUISINES = [
   'tibetan', 'tibétain', 'sri lankan',
 ];
 
-const BREAKFAST_FRIENDLY_KEYWORDS = [
-  'café', 'cafe', 'bakery', 'boulangerie', 'pâtisserie', 'patisserie',
-  'brunch', 'breakfast', 'petit-déjeuner', 'coffee', 'tea', 'thé',
-  'croissant', 'toast', 'viennoiserie',
+const BREAKFAST_SPECIALIZED_KEYWORDS = [
+  'boulangerie', 'bakery', 'pâtisserie', 'patisserie',
+  'café', 'cafe', 'coffee', 'coffee shop', 'caffè', 'cafe bar',
+  'brunch', 'breakfast', 'petit-déjeuner', 'petit dejeuner',
+  'viennoiserie', 'croissant', 'tea room', 'salon de thé', 'salon de the',
 ];
 
 const DINNER_EXCLUDED_KEYWORDS = [
@@ -235,9 +236,27 @@ export function isAppropriateForMeal(restaurant: Restaurant, mealType: MealType)
   return true;
 }
 
-function isBreakfastFriendly(restaurant: Restaurant): boolean {
-  const text = `${restaurant.name || ''} ${restaurant.cuisineTypes?.join(' ') || ''}`.toLowerCase();
-  return BREAKFAST_FRIENDLY_KEYWORDS.some(k => text.includes(k));
+/**
+ * Strict breakfast predicate:
+ * - Excludes heavy/non-breakfast cuisines
+ * - Requires explicit breakfast-oriented signals (bakery/cafe/brunch/etc.)
+ */
+export function isBreakfastSpecialized(restaurant: Restaurant): boolean {
+  if (!restaurant) return false;
+  if (!isAppropriateForMeal(restaurant, 'breakfast')) return false;
+
+  const type = String((restaurant as any).type || '').toLowerCase();
+  const name = String(restaurant.name || '').toLowerCase();
+  const cuisines = Array.isArray(restaurant.cuisineTypes)
+    ? restaurant.cuisineTypes.join(' ').toLowerCase()
+    : '';
+  const description = String((restaurant as any).description || '').toLowerCase();
+  const specialties = Array.isArray((restaurant as any).specialties)
+    ? (restaurant as any).specialties.join(' ').toLowerCase()
+    : '';
+  const allText = `${name} ${cuisines} ${type} ${description} ${specialties}`;
+
+  return BREAKFAST_SPECIALIZED_KEYWORDS.some((keyword) => allText.includes(keyword));
 }
 
 function detectDestinationCountry(destination: string): string {
@@ -329,7 +348,7 @@ function scoreCandidate(restaurant: Restaurant, mealType: MealType, distanceKm: 
     score -= (distanceKm - limits.idealKm) * 3.0;
   }
 
-  if (mealType === 'breakfast' && isBreakfastFriendly(restaurant)) {
+  if (mealType === 'breakfast' && isBreakfastSpecialized(restaurant)) {
     score += 1.5;
   }
 
@@ -356,6 +375,7 @@ function selectTopNearbyRestaurants(
     if (usedIds.has(r.id)) continue;
     if (!hasValidCoordinates(r)) continue;
     if (!isAppropriateForMeal(r, mealType)) continue;
+    if (mealType === 'breakfast' && !isBreakfastSpecialized(r)) continue;
 
     const distanceKm = calculateDistance(
       refCoords.lat, refCoords.lng,
@@ -389,7 +409,6 @@ function selectTopNearbyRestaurants(
   // Goal: brasserie + italian + sushi (for Paris), not 3x "restaurant français".
   if (count >= 3 && shortlist.length >= 3 && destination) {
     const country = detectDestinationCountry(destination);
-    const localFamilies = new Set<string>(Object.keys(LOCAL_CUISINE_KEYWORDS[country] ? { [country]: true } : {}));
     // Also mark fine-grained local sub-families as "local"
     const LOCAL_SUB_FAMILIES: Record<string, string[]> = {
       france: ['french', 'brasserie', 'bistro', 'french-gastro', 'bakery', 'patisserie'],
