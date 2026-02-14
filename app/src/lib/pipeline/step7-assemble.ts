@@ -2155,14 +2155,30 @@ async function enrichWithPlaceImages(days: TripDay[]): Promise<void> {
       }
     }
 
-    if (itemsNeedingImages.length === 0) return;
+    // Also collect restaurant alternatives without photos (max 10 to limit API calls)
+    const altsNeedingImages: Restaurant[] = [];
+    for (const day of days) {
+      for (const item of day.items) {
+        if (item.type === 'restaurant' && item.restaurantAlternatives) {
+          for (const alt of item.restaurantAlternatives) {
+            if ((!alt.photos || alt.photos.length === 0) && altsNeedingImages.length < 10) {
+              altsNeedingImages.push(alt);
+            }
+          }
+        }
+      }
+    }
 
-    console.log(`[Pipeline V2] Fetching images for ${itemsNeedingImages.length} items without photos...`);
+    const totalWork = itemsNeedingImages.length + altsNeedingImages.length;
+    if (totalWork === 0) return;
+
+    console.log(`[Pipeline V2] Fetching images for ${itemsNeedingImages.length} items + ${altsNeedingImages.length} restaurant alts without photos...`);
 
     // Hard timeout: 10s max for the entire image enrichment phase
     const enrichmentWork = async () => {
-      await Promise.allSettled(
-        itemsNeedingImages.map(async (item) => {
+      await Promise.allSettled([
+        // Enrich main TripItems
+        ...itemsNeedingImages.map(async (item) => {
           try {
             const imageUrl = await fetchPlaceImage(
               item.title,
@@ -2175,8 +2191,23 @@ async function enrichWithPlaceImages(days: TripDay[]): Promise<void> {
           } catch {
             // Individual item failure — skip silently
           }
-        })
-      );
+        }),
+        // Enrich restaurant alternatives
+        ...altsNeedingImages.map(async (alt) => {
+          try {
+            const imageUrl = await fetchPlaceImage(
+              alt.name,
+              alt.latitude || undefined,
+              alt.longitude || undefined
+            );
+            if (imageUrl) {
+              alt.photos = [imageUrl];
+            }
+          } catch {
+            // Individual alt failure — skip silently
+          }
+        }),
+      ]);
     };
 
     const timeout = new Promise<void>((resolve) => {
@@ -2189,7 +2220,8 @@ async function enrichWithPlaceImages(days: TripDay[]): Promise<void> {
     await Promise.race([enrichmentWork(), timeout]);
 
     const enriched = itemsNeedingImages.filter(i => i.imageUrl).length;
-    console.log(`[Pipeline V2] ✅ Place images: ${enriched}/${itemsNeedingImages.length} enriched`);
+    const altsEnriched = altsNeedingImages.filter(a => a.photos && a.photos.length > 0).length;
+    console.log(`[Pipeline V2] ✅ Place images: ${enriched}/${itemsNeedingImages.length} enriched, ${altsEnriched}/${altsNeedingImages.length} alt photos`);
   } catch (e) {
     console.warn('[Pipeline V2] Image enrichment error:', e);
   }

@@ -242,6 +242,7 @@ export async function searchRestaurantsWithSerpApi(
         website: r.website,
         googleMapsUrl, // URL Google Maps fiable avec nom + adresse complète
         reservationUrl: `https://www.thefork.fr/search?q=${encodeURIComponent(`${r.title} ${destination}`)}`,
+        photos: r.thumbnail ? [r.thumbnail] : undefined,
         openingHours: parseOpeningHours(r.operating_hours) || {},
         distance: 0, // Sera calculé plus tard
         walkingTime: 0,
@@ -1015,6 +1016,7 @@ export async function searchRestaurantsNearby(
         phoneNumber: place.phone,
         website: place.website,
         googleMapsUrl,
+        photos: place.thumbnail ? [place.thumbnail] : undefined,
         openingHours: parseOpeningHours(place.operating_hours) || {},
         distance: distanceKm,
         walkingTime: Math.round(distanceMeters / 80), // ~80m/min de marche

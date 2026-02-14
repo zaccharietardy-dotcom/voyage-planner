@@ -824,17 +824,60 @@ function RestaurantSuggestionsFlat({
   if (suggestions.length === 0) return null;
 
   const getCuisineLabel = (r: Restaurant): string => {
-    const raw = r.cuisineTypes?.[0] || 'Cuisine locale';
-    return raw
-      .replace(/^restaurant\s*/i, '')
-      .replace(/\s+/g, ' ')
-      .trim() || 'Cuisine locale';
+    const text = `${r.name || ''} ${(r.cuisineTypes || []).join(' ')}`.toLowerCase();
+    const CUISINE_LABELS: [string[], string][] = [
+      [['sushi', 'ramen', 'japonais', 'japanese', 'izakaya', 'yakitori'], 'Japonais'],
+      [['italien', 'italian', 'pizza', 'pizzeria', 'trattoria', 'osteria', 'ristorante'], 'Italien'],
+      [['chinois', 'chinese', 'dim sum', 'cantonais', 'wok'], 'Chinois'],
+      [['indien', 'indian', 'curry', 'tandoori'], 'Indien'],
+      [['thai', 'tha\u00ef', 'tha\u00eflandais'], 'Tha\u00eflandais'],
+      [['vietnamien', 'vietnamese', 'pho', 'banh mi'], 'Vietnamien'],
+      [['cor\u00e9en', 'korean', 'bibimbap'], 'Cor\u00e9en'],
+      [['mexicain', 'mexican', 'tacos', 'taqueria'], 'Mexicain'],
+      [['libanais', 'lebanese', 'mezze', 'falafel'], 'Libanais'],
+      [['marocain', 'moroccan', 'tagine', 'couscous'], 'Marocain'],
+      [['grec', 'greek', 'taverna', 'gyros'], 'Grec'],
+      [['turc', 'turkish', 'kebab', 'd\u00f6ner'], 'Turc'],
+      [['espagnol', 'spanish', 'tapas', 'paella'], 'Espagnol'],
+      [['p\u00e9ruvien', 'peruvian', 'ceviche'], 'P\u00e9ruvien'],
+      [['burger', 'american', 'am\u00e9ricain', 'bbq', 'barbecue'], 'Am\u00e9ricain'],
+      [['fruits de mer', 'seafood', 'poisson', 'fish'], 'Fruits de mer'],
+      [['steakhouse', 'steak', 'grill', 'viande', 'beef'], 'Grill & Viandes'],
+      [['brasserie'], 'Brasserie'],
+      [['bistro', 'bistrot'], 'Bistrot'],
+      [['gastronomique', 'gastro', 'michelin'], 'Gastronomique'],
+      [['boulangerie', 'bakery'], 'Boulangerie'],
+      [['p\u00e2tisserie', 'patisserie'], 'P\u00e2tisserie'],
+      [['brunch', 'breakfast'], 'Brunch & Caf\u00e9'],
+      [['caf\u00e9', 'cafe', 'coffee', 'caff\u00e8'], 'Caf\u00e9'],
+      [['fran\u00e7ais', 'french', 'proven\u00e7al', 'lyonnais'], 'Fran\u00e7ais'],
+      [['portugais', 'portuguese'], 'Portugais'],
+      [['rome', 'romano', 'roman', 'r\u00e9gion de rome'], 'Romain'],
+      [['m\u00e9diterran\u00e9en', 'mediterranean'], 'M\u00e9diterran\u00e9en'],
+      [['sandwicherie', 'sandwich'], 'Sandwicherie'],
+    ];
+    for (const [keywords, label] of CUISINE_LABELS) {
+      if (keywords.some(kw => text.includes(kw))) return label;
+    }
+    return 'Cuisine locale';
   };
 
   const getRestaurantImage = (r: Restaurant): string => {
     const candidate = r.photos?.[0];
     if (candidate && /^https?:\/\//i.test(candidate)) return candidate;
-    return `https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&h=500&fit=crop&q=80&auto=format`;
+    const FALLBACK_IMAGES = [
+      'photo-1414235077428-338989a2e8c0',
+      'photo-1517248135467-4c7edcad34c4',
+      'photo-1555396273-367ea4eb4db5',
+      'photo-1424847651672-bf20a4b0982b',
+      'photo-1565299624946-b28f40a0ae38',
+      'photo-1540189549336-e6e99c3679fe',
+      'photo-1504674900247-0877df9cc836',
+      'photo-1559339352-11d035aa65de',
+    ];
+    const hash = r.name.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+    const img = FALLBACK_IMAGES[hash % FALLBACK_IMAGES.length];
+    return `https://images.unsplash.com/${img}?w=800&h=500&fit=crop&q=80&auto=format`;
   };
 
   return (
@@ -1019,17 +1062,60 @@ function RestaurantSuggestions({
   if (suggestions.length <= 1) return null;
 
   const getCuisineLabel = (r: Restaurant): string => {
-    const raw = r.cuisineTypes?.[0] || 'Cuisine locale';
-    return raw
-      .replace(/^restaurant\s*/i, '')
-      .replace(/\s+/g, ' ')
-      .trim() || 'Cuisine locale';
+    const text = `${r.name || ''} ${(r.cuisineTypes || []).join(' ')}`.toLowerCase();
+    const CUISINE_LABELS: [string[], string][] = [
+      [['sushi', 'ramen', 'japonais', 'japanese', 'izakaya', 'yakitori'], 'Japonais'],
+      [['italien', 'italian', 'pizza', 'pizzeria', 'trattoria', 'osteria', 'ristorante'], 'Italien'],
+      [['chinois', 'chinese', 'dim sum', 'cantonais', 'wok'], 'Chinois'],
+      [['indien', 'indian', 'curry', 'tandoori'], 'Indien'],
+      [['thai', 'tha\u00ef', 'tha\u00eflandais'], 'Tha\u00eflandais'],
+      [['vietnamien', 'vietnamese', 'pho', 'banh mi'], 'Vietnamien'],
+      [['cor\u00e9en', 'korean', 'bibimbap'], 'Cor\u00e9en'],
+      [['mexicain', 'mexican', 'tacos', 'taqueria'], 'Mexicain'],
+      [['libanais', 'lebanese', 'mezze', 'falafel'], 'Libanais'],
+      [['marocain', 'moroccan', 'tagine', 'couscous'], 'Marocain'],
+      [['grec', 'greek', 'taverna', 'gyros'], 'Grec'],
+      [['turc', 'turkish', 'kebab', 'd\u00f6ner'], 'Turc'],
+      [['espagnol', 'spanish', 'tapas', 'paella'], 'Espagnol'],
+      [['p\u00e9ruvien', 'peruvian', 'ceviche'], 'P\u00e9ruvien'],
+      [['burger', 'american', 'am\u00e9ricain', 'bbq', 'barbecue'], 'Am\u00e9ricain'],
+      [['fruits de mer', 'seafood', 'poisson', 'fish'], 'Fruits de mer'],
+      [['steakhouse', 'steak', 'grill', 'viande', 'beef'], 'Grill & Viandes'],
+      [['brasserie'], 'Brasserie'],
+      [['bistro', 'bistrot'], 'Bistrot'],
+      [['gastronomique', 'gastro', 'michelin'], 'Gastronomique'],
+      [['boulangerie', 'bakery'], 'Boulangerie'],
+      [['p\u00e2tisserie', 'patisserie'], 'P\u00e2tisserie'],
+      [['brunch', 'breakfast'], 'Brunch & Caf\u00e9'],
+      [['caf\u00e9', 'cafe', 'coffee', 'caff\u00e8'], 'Caf\u00e9'],
+      [['fran\u00e7ais', 'french', 'proven\u00e7al', 'lyonnais'], 'Fran\u00e7ais'],
+      [['portugais', 'portuguese'], 'Portugais'],
+      [['rome', 'romano', 'roman', 'r\u00e9gion de rome'], 'Romain'],
+      [['m\u00e9diterran\u00e9en', 'mediterranean'], 'M\u00e9diterran\u00e9en'],
+      [['sandwicherie', 'sandwich'], 'Sandwicherie'],
+    ];
+    for (const [keywords, label] of CUISINE_LABELS) {
+      if (keywords.some(kw => text.includes(kw))) return label;
+    }
+    return 'Cuisine locale';
   };
 
   const getRestaurantImage = (r: Restaurant): string => {
     const candidate = r.photos?.[0];
     if (candidate && /^https?:\/\//i.test(candidate)) return candidate;
-    return `https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&h=500&fit=crop&q=80&auto=format`;
+    const FALLBACK_IMAGES = [
+      'photo-1414235077428-338989a2e8c0',
+      'photo-1517248135467-4c7edcad34c4',
+      'photo-1555396273-367ea4eb4db5',
+      'photo-1424847651672-bf20a4b0982b',
+      'photo-1565299624946-b28f40a0ae38',
+      'photo-1540189549336-e6e99c3679fe',
+      'photo-1504674900247-0877df9cc836',
+      'photo-1559339352-11d035aa65de',
+    ];
+    const hash = r.name.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+    const img = FALLBACK_IMAGES[hash % FALLBACK_IMAGES.length];
+    return `https://images.unsplash.com/${img}?w=800&h=500&fit=crop&q=80&auto=format`;
   };
 
   return (
