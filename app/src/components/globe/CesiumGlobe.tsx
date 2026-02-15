@@ -8,7 +8,24 @@ const colors = { arcColor: '#d4a853' };
 const INITIAL_CAMERA = { lng: 2.3522, lat: 48.8566, height: 20000000 };
 const GOOGLE_PHOTOREALISTIC_ION_ASSET_ID = 2275207;
 
-async function applyBest3DQuality(Cesium: any, viewer: any) {
+async function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = window.setTimeout(() => reject(new Error('timeout')), ms);
+    promise
+      .then((value) => {
+        window.clearTimeout(timer);
+        resolve(value);
+      })
+      .catch((error) => {
+        window.clearTimeout(timer);
+        reject(error);
+      });
+  });
+}
+
+async function applyBest3DQuality(Cesium: any, viewer: any, hasIonToken: boolean) {
+  if (!hasIonToken) return;
+
   viewer.resolutionScale = Math.min(window.devicePixelRatio || 1, 2);
   viewer.scene.highDynamicRange = true;
   viewer.scene.globe.enableLighting = true;
@@ -24,10 +41,14 @@ async function applyBest3DQuality(Cesium: any, viewer: any) {
   try {
     let photorealisticTileset: any = null;
     if (typeof Cesium.createGooglePhotorealistic3DTileset === 'function') {
-      photorealisticTileset = await Cesium.createGooglePhotorealistic3DTileset();
+      photorealisticTileset = await withTimeout(
+        Cesium.createGooglePhotorealistic3DTileset(),
+        6000
+      );
     } else if (Cesium.Cesium3DTileset?.fromIonAssetId) {
-      photorealisticTileset = await Cesium.Cesium3DTileset.fromIonAssetId(
-        GOOGLE_PHOTOREALISTIC_ION_ASSET_ID
+      photorealisticTileset = await withTimeout(
+        Cesium.Cesium3DTileset.fromIonAssetId(GOOGLE_PHOTOREALISTIC_ION_ASSET_ID),
+        6000
       );
     }
 
@@ -44,7 +65,7 @@ async function applyBest3DQuality(Cesium: any, viewer: any) {
 
   try {
     if (typeof Cesium.createOsmBuildingsAsync === 'function') {
-      const osmBuildings = await Cesium.createOsmBuildingsAsync();
+      const osmBuildings = await withTimeout(Cesium.createOsmBuildingsAsync(), 4000);
       viewer.scene.primitives.add(osmBuildings);
     }
   } catch (error) {
@@ -265,11 +286,13 @@ export function CesiumGlobe({
         const Cesium = CesiumModule;
 
         // Set access token
-        Cesium.Ion.defaultAccessToken = process.env.NEXT_PUBLIC_CESIUM_ION_TOKEN || '';
+        const ionToken = (process.env.NEXT_PUBLIC_CESIUM_ION_TOKEN || '').trim();
+        const hasIonToken = ionToken.length > 0;
+        Cesium.Ion.defaultAccessToken = ionToken;
 
         // Create viewer with dark theme settings
         const viewer = new Cesium.Viewer(containerRef.current, {
-          terrain: Cesium.Terrain.fromWorldTerrain(),
+          terrain: hasIonToken ? Cesium.Terrain.fromWorldTerrain() : undefined,
           animation: false,
           baseLayerPicker: false,
           fullscreenButton: false,
@@ -301,20 +324,27 @@ export function CesiumGlobe({
           baseLayer.gamma = 0.95;
         }
 
-        await applyBest3DQuality(Cesium, viewer);
+        void applyBest3DQuality(Cesium, viewer, hasIonToken);
 
         // Labels overlay - only show when very close (street level)
         let labelsLayer: any = null;
-        try {
-          const osmLabels = await Cesium.IonImageryProvider.fromAssetId(3);
-          labelsLayer = imageryLayers.addImageryProvider(osmLabels);
-          labelsLayer.alpha = 0.5;
-          labelsLayer.brightness = 0.6;
-          // Make labels only visible at low altitude (under 50km)
-          labelsLayer.minificationFilter = Cesium.TextureMinificationFilter.LINEAR;
-          labelsLayer.magnificationFilter = Cesium.TextureMagnificationFilter.LINEAR;
-        } catch (error) {
-          console.info('[CesiumGlobe] Labels layer unavailable', error);
+        if (hasIonToken) {
+          void (async () => {
+            try {
+              const osmLabels = await withTimeout(
+                Cesium.IonImageryProvider.fromAssetId(3),
+                4000
+              );
+              labelsLayer = imageryLayers.addImageryProvider(osmLabels);
+              labelsLayer.alpha = 0.5;
+              labelsLayer.brightness = 0.6;
+              // Make labels only visible at low altitude (under 50km)
+              labelsLayer.minificationFilter = Cesium.TextureMinificationFilter.LINEAR;
+              labelsLayer.magnificationFilter = Cesium.TextureMagnificationFilter.LINEAR;
+            } catch (error) {
+              console.info('[CesiumGlobe] Labels layer unavailable', error);
+            }
+          })();
         }
 
         // Dark background
