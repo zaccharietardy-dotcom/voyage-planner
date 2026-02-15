@@ -17,11 +17,20 @@ export interface Coordinates {
   lng: number;
 }
 
+export interface TransitPreferences {
+  preferredModes?: ('bus' | 'subway' | 'train' | 'tram' | 'ferry')[];
+  avoidModes?: ('bus' | 'subway' | 'train' | 'tram' | 'ferry')[];
+  maxWalkingDistance?: number; // mètres
+  departureTime?: Date;
+  arrivalTime?: Date;
+}
+
 export interface DirectionsRequest {
   from: Coordinates;
   to: Coordinates;
   mode?: 'transit' | 'walking' | 'driving';
   departureTime?: Date;
+  transitPreferences?: TransitPreferences;
 }
 
 export interface TransitLine {
@@ -32,6 +41,12 @@ export interface TransitLine {
   departureStop?: string;
   arrivalStop?: string;
   numStops?: number;
+  // Enhanced fields
+  vehicleType?: string;
+  frequency?: string; // "toutes les 5 min"
+  fare?: { amount: number; currency: string };
+  accessibility?: boolean;
+  realTimeAvailable?: boolean;
 }
 
 export interface DirectionsStep {
@@ -49,6 +64,23 @@ export interface DirectionsResult {
   transitLines: TransitLine[];
   googleMapsUrl: string;
   source: 'google' | 'openroute' | 'estimated';
+}
+
+export interface RideHailingEstimate {
+  service: 'uber' | 'bolt' | 'generic';
+  priceMin: number;
+  priceMax: number;
+  currency: string;
+  duration: number; // minutes
+  distance: number; // km
+  estimatedWaitTime?: number; // minutes
+}
+
+export interface MultiModalDirections {
+  transit?: DirectionsResult;
+  walking?: DirectionsResult;
+  rideHailing?: RideHailingEstimate;
+  recommendWalking?: boolean; // true si marche < 15min
 }
 
 /**
@@ -335,6 +367,118 @@ function calculateDistance(lat1: number, lng1: number, lat2: number, lng2: numbe
     Math.sin(dLng / 2) * Math.sin(dLng / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
+}
+
+/**
+ * Estime le prix d'une course en VTC (Uber, Bolt, etc.)
+ * Basé sur la distance et la durée avec multiplicateurs par ville
+ */
+export function estimateRideHailing(
+  origin: Coordinates,
+  destination: Coordinates,
+  city?: string
+): RideHailingEstimate {
+  const distance = calculateDistance(origin.lat, origin.lng, destination.lat, destination.lng);
+
+  // Vitesse moyenne en ville (km/h)
+  const avgSpeed = 25;
+  const duration = Math.ceil((distance / avgSpeed) * 60);
+
+  // Prix de base: tarif moyen européen
+  const baseFare = 2.50;
+  const perKm = 1.20;
+  const perMin = 0.30;
+
+  // Importer le multiplicateur depuis les constantes de ville
+  // Pour éviter la dépendance circulaire, on garde les multiplicateurs ici
+  // mais on pourrait importer getRideHailingMultiplier si nécessaire
+  const cityMultipliers: Record<string, number> = {
+    'paris': 1.2,
+    'london': 1.4,
+    'tokyo': 1.5,
+    'new york': 1.3,
+    'barcelona': 0.9,
+    'bangkok': 0.3,
+    'marrakech': 0.4,
+    'rome': 0.95,
+    'berlin': 0.85,
+    'amsterdam': 1.1,
+    'lisbon': 0.8,
+    'dubai': 0.7,
+    'singapore': 1.0,
+    'prague': 0.6,
+    'budapest': 0.5,
+    'istanbul': 0.6,
+  };
+
+  const cityLower = city?.toLowerCase() || '';
+  const multiplier = cityMultipliers[cityLower] || 1.0;
+
+  const basePrice = (baseFare + (distance * perKm) + (duration * perMin)) * multiplier;
+
+  // Fourchette de prix: -15% / +25% (variation selon trafic, demande)
+  const priceMin = Math.round(basePrice * 0.85 * 10) / 10;
+  const priceMax = Math.round(basePrice * 1.25 * 10) / 10;
+
+  return {
+    service: 'generic',
+    priceMin,
+    priceMax,
+    currency: 'EUR',
+    duration,
+    distance,
+    estimatedWaitTime: 5, // 5 min en moyenne
+  };
+}
+
+/**
+ * Obtient les options de transport multi-modales
+ * Retourne transit, marche, et estimation VTC
+ */
+export async function getMultiModalDirections(
+  origin: Coordinates,
+  destination: Coordinates,
+  city?: string,
+  departureTime?: Date
+): Promise<MultiModalDirections> {
+  const result: MultiModalDirections = {};
+
+  // 1. Transit
+  try {
+    result.transit = await getDirections({
+      from: origin,
+      to: destination,
+      mode: 'transit',
+      departureTime,
+    });
+  } catch (error) {
+    console.warn('Failed to get transit directions:', error);
+  }
+
+  // 2. Walking
+  try {
+    result.walking = await getDirections({
+      from: origin,
+      to: destination,
+      mode: 'walking',
+    });
+
+    // Recommander la marche si < 15 min
+    if (result.walking.duration < 15) {
+      result.recommendWalking = true;
+    }
+  } catch (error) {
+    console.warn('Failed to get walking directions:', error);
+  }
+
+  // 3. Ride-hailing estimate
+  try {
+    result.rideHailing = estimateRideHailing(origin, destination, city);
+  } catch (error) {
+    console.warn('Failed to estimate ride-hailing:', error);
+  }
+
+  return result;
 }
 
 /**

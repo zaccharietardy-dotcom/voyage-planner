@@ -109,7 +109,7 @@ ${daySummaries}
 ${historySection}
 TYPES D'INTENTIONS POSSIBLES:
 1. shift_times: Décaler des horaires ("je veux me lever plus tard", "commencer plus tôt", "décaler tout de 1h")
-2. swap_activity: Remplacer une activité ("remplace X par Y", "je préfère Y au lieu de X")
+2. swap_activity: Remplacer une activité ("remplace X par Y", "je préfère Y au lieu de X") - l'utilisateur sait EXACTEMENT ce qu'il veut à la place
 3. add_activity: Ajouter une activité ("ajoute un restaurant japonais", "je voudrais visiter X")
 4. remove_activity: Supprimer une activité ("supprime X", "enlève la visite de Y", "retire")
 5. extend_free_time: Ajouter du temps libre ("plus de temps libre", "moins d'activités", "journée plus relax")
@@ -117,8 +117,9 @@ TYPES D'INTENTIONS POSSIBLES:
 7. change_restaurant: Changer un restaurant ("autre restaurant", "je veux manger italien plutôt")
 8. adjust_duration: Modifier la durée d'une activité ("plus de temps au Louvre", "moins de temps au musée")
 9. add_day: Ajouter un jour au voyage ("ajoute un jour", "insère une journée libre entre le jour 2 et 3", "rajoute un jour")
-10. clarification: La demande n'est pas claire, besoin de plus d'informations
-11. general_question: Question générale qui ne nécessite pas de modification
+10. report_issue: Signaler un problème avec une activité ("le musée est fermé", "il pleut on peut pas faire la rando", "le restaurant a fermé définitivement", "les horaires ont changé", "cette activité n'est plus disponible") - l'utilisateur a BESOIN de suggestions d'alternatives
+11. clarification: La demande n'est pas claire, besoin de plus d'informations
+12. general_question: Question générale qui ne nécessite pas de modification
 
 RÈGLES IMPORTANTES:
 - Si l'utilisateur mentionne "matin", "me lever", "grasse matinée", "dormir plus" → c'est shift_times avec scope "morning_only". Ne PAS décaler toute la journée !
@@ -126,6 +127,10 @@ RÈGLES IMPORTANTES:
 - Par défaut pour shift_times, utilise scope "morning_only" sauf si l'utilisateur dit clairement de tout décaler
 - Si l'utilisateur mentionne un restaurant ou repas spécifique → change_restaurant
 - Si l'utilisateur veut "ajouter un jour", "insérer une journée", "rajouter un jour" → add_day. Identifie insertAfterDay
+- **DISTINCTION CRITIQUE entre swap_activity et report_issue**:
+  * swap_activity = l'utilisateur sait EXACTEMENT ce qu'il veut ("remplace X par Y", "je préfère le Louvre au lieu du musée d'Orsay")
+  * report_issue = l'utilisateur signale un PROBLÈME et a BESOIN de suggestions ("le musée est fermé", "il pleut", "ce restaurant a fermé", "l'activité n'est plus disponible")
+  * Pour report_issue, identifie le issueType: "closed" (fermé définitivement), "weather" (météo défavorable), "unavailable" (indisponible), "schedule_change" (horaires modifiés)
 - Si la demande est vague → clarification avec une question
 - Identifie les jours concernés (tous si non spécifié pour shift_times)
 - Identifie l'activité ciblée si applicable (match par nom)
@@ -155,7 +160,8 @@ Réponds UNIQUEMENT en JSON valide (pas de texte avant ou après):
     "mealType": "breakfast/lunch/dinner ou null",
     "cuisineType": "type de cuisine ou null",
     "duration": null,
-    "insertAfterDay": null
+    "insertAfterDay": null,
+    "issueType": "closed/weather/unavailable/schedule_change ou null"
   },
   "explanation": "Explication courte de ce que l'utilisateur veut"
 }`;
@@ -212,7 +218,7 @@ export async function classifyIntent(
     const validTypes: ModificationIntentType[] = [
       'shift_times', 'swap_activity', 'add_activity', 'remove_activity',
       'extend_free_time', 'reorder_day', 'change_restaurant', 'adjust_duration',
-      'add_day', 'clarification', 'general_question'
+      'add_day', 'report_issue', 'clarification', 'general_question'
     ];
 
     if (!validTypes.includes(parsed.type)) {
@@ -234,6 +240,7 @@ export async function classifyIntent(
         cuisineType: parsed.parameters?.cuisineType || undefined,
         duration: parsed.parameters?.duration || undefined,
         insertAfterDay: parsed.parameters?.insertAfterDay || undefined,
+        issueType: parsed.parameters?.issueType || undefined,
       },
       explanation: parsed.explanation || '',
     };

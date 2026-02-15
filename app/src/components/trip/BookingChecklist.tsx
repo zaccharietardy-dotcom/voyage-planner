@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { Trip, TripItem, Flight, Accommodation } from '@/lib/types';
 import {
   Plane,
@@ -14,9 +15,13 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 
 interface BookingChecklistProps {
   trip: Trip;
+  onUpdate?: (bookedItems: Trip['bookedItems']) => Promise<void>;
 }
 
 interface BookableItem {
@@ -143,8 +148,42 @@ function categoryColor(category: BookableItem['category']): string {
   }
 }
 
-export function BookingChecklist({ trip }: BookingChecklistProps) {
+export function BookingChecklist({ trip, onUpdate }: BookingChecklistProps) {
   const items = extractBookableItems(trip);
+  const [bookedItems, setBookedItems] = useState<Trip['bookedItems']>(trip.bookedItems || {});
+  const [notesEditing, setNotesEditing] = useState<Record<string, string>>({});
+
+  const handleToggleBooked = async (itemId: string) => {
+    const newBookedItems = { ...bookedItems };
+    if (newBookedItems[itemId]?.booked) {
+      delete newBookedItems[itemId];
+    } else {
+      newBookedItems[itemId] = {
+        booked: true,
+        bookedAt: new Date().toISOString(),
+      };
+    }
+    setBookedItems(newBookedItems);
+    if (onUpdate) {
+      await onUpdate(newBookedItems);
+    }
+  };
+
+  const handleUpdateNotes = async (itemId: string, notes: string) => {
+    const currentBooked = bookedItems || {};
+    const newBookedItems = {
+      ...currentBooked,
+      [itemId]: {
+        ...currentBooked[itemId],
+        booked: currentBooked[itemId]?.booked || false,
+        notes,
+      },
+    };
+    setBookedItems(newBookedItems);
+    if (onUpdate) {
+      await onUpdate(newBookedItems);
+    }
+  };
 
   if (items.length === 0) {
     return (
@@ -171,7 +210,7 @@ export function BookingChecklist({ trip }: BookingChecklistProps) {
   }, {});
 
   const totalBookable = items.length;
-  const totalWithLinks = items.filter(i => i.bookingUrl).length;
+  const totalBooked = Object.values(bookedItems || {}).filter(b => b.booked).length;
 
   return (
     <div className="space-y-6">
@@ -180,13 +219,13 @@ export function BookingChecklist({ trip }: BookingChecklistProps) {
         <div className="flex items-center justify-between mb-2">
           <h3 className="font-semibold text-foreground">Checklist de reservation</h3>
           <span className="text-sm text-muted-foreground">
-            {totalWithLinks}/{totalBookable} liens disponibles
+            {totalBooked}/{totalBookable} réservés
           </span>
         </div>
         <div className="w-full bg-muted rounded-full h-2">
           <div
-            className="bg-primary h-2 rounded-full transition-all"
-            style={{ width: `${totalBookable > 0 ? (totalWithLinks / totalBookable) * 100 : 0}%` }}
+            className="bg-green-500 h-2 rounded-full transition-all"
+            style={{ width: `${totalBookable > 0 ? (totalBooked / totalBookable) * 100 : 0}%` }}
           />
         </div>
       </div>
@@ -195,7 +234,13 @@ export function BookingChecklist({ trip }: BookingChecklistProps) {
       {outboundFlight.length > 0 && (
         <Section title="Vol aller" icon={<Plane className="h-4 w-4" />} color="#EC4899">
           {outboundFlight.map(item => (
-            <BookingCard key={item.id} item={item} />
+            <BookingCard
+              key={item.id}
+              item={item}
+              bookedStatus={bookedItems?.[item.id]}
+              onToggleBooked={() => handleToggleBooked(item.id)}
+              onUpdateNotes={(notes) => handleUpdateNotes(item.id, notes)}
+            />
           ))}
         </Section>
       )}
@@ -204,7 +249,13 @@ export function BookingChecklist({ trip }: BookingChecklistProps) {
       {hotel.length > 0 && (
         <Section title="Hebergement" icon={<Bed className="h-4 w-4" />} color="#8B5CF6">
           {hotel.map(item => (
-            <BookingCard key={item.id} item={item} />
+            <BookingCard
+              key={item.id}
+              item={item}
+              bookedStatus={bookedItems?.[item.id]}
+              onToggleBooked={() => handleToggleBooked(item.id)}
+              onUpdateNotes={(notes) => handleUpdateNotes(item.id, notes)}
+            />
           ))}
         </Section>
       )}
@@ -223,7 +274,13 @@ export function BookingChecklist({ trip }: BookingChecklistProps) {
               color="#3B82F6"
             >
               {dayItems.map(item => (
-                <BookingCard key={item.id} item={item} />
+                <BookingCard
+                  key={item.id}
+                  item={item}
+                  bookedStatus={bookedItems?.[item.id]}
+                  onToggleBooked={() => handleToggleBooked(item.id)}
+                  onUpdateNotes={(notes) => handleUpdateNotes(item.id, notes)}
+                />
               ))}
             </Section>
           );
@@ -233,7 +290,13 @@ export function BookingChecklist({ trip }: BookingChecklistProps) {
       {returnFlight.length > 0 && (
         <Section title="Vol retour" icon={<Plane className="h-4 w-4" />} color="#EC4899">
           {returnFlight.map(item => (
-            <BookingCard key={item.id} item={item} />
+            <BookingCard
+              key={item.id}
+              item={item}
+              bookedStatus={bookedItems?.[item.id]}
+              onToggleBooked={() => handleToggleBooked(item.id)}
+              onUpdateNotes={(notes) => handleUpdateNotes(item.id, notes)}
+            />
           ))}
         </Section>
       )}
@@ -265,82 +328,113 @@ function Section({ title, icon, color, children }: {
   );
 }
 
-function BookingCard({ item }: { item: BookableItem }) {
+function BookingCard({
+  item,
+  bookedStatus,
+  onToggleBooked,
+  onUpdateNotes,
+}: {
+  item: BookableItem;
+  bookedStatus?: { booked: boolean; bookedAt?: string; notes?: string };
+  onToggleBooked: () => void;
+  onUpdateNotes: (notes: string) => void;
+}) {
   const color = categoryColor(item.category);
   const provider = item.bookingUrl ? getProviderFromUrl(item.bookingUrl) : null;
+  const [notesValue, setNotesValue] = useState(bookedStatus?.notes || '');
 
   return (
-    <div className="bg-card border border-border rounded-xl p-4 flex items-center gap-4">
-      {/* Status indicator */}
-      <div className="flex-shrink-0">
-        {item.bookingUrl ? (
-          <div className="w-8 h-8 rounded-full bg-green-500/10 flex items-center justify-center">
-            <Check className="h-4 w-4 text-green-500" />
+    <div className="bg-card border border-border rounded-xl p-4 flex flex-col gap-3">
+      <div className="flex items-center gap-4">
+        {/* Checkbox */}
+        <div className="flex-shrink-0">
+          <Checkbox
+            checked={bookedStatus?.booked || false}
+            onCheckedChange={onToggleBooked}
+          />
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-0.5">
+            <span
+              className="text-[10px] font-medium px-1.5 py-0 rounded-full"
+              style={{ backgroundColor: `${color}20`, color }}
+            >
+              <CategoryIcon category={item.category} />
+            </span>
+            <h5 className="font-medium text-foreground text-sm truncate">{item.title}</h5>
+            {bookedStatus?.booked && (
+              <Badge className="bg-green-500 text-white text-[10px] px-1.5 py-0">
+                Réservé
+              </Badge>
+            )}
           </div>
-        ) : (
-          <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
-            <AlertCircle className="h-4 w-4 text-muted-foreground" />
+          {item.subtitle && (
+            <p className="text-xs text-muted-foreground truncate">{item.subtitle}</p>
+          )}
+          <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+            {item.date && (
+              <span className="flex items-center gap-1">
+                <Calendar className="h-3 w-3" />
+                {item.date}
+              </span>
+            )}
+            {item.time && (
+              <span className="flex items-center gap-1">
+                <Clock className="h-3 w-3" />
+                {item.time}
+              </span>
+            )}
+            {bookedStatus?.bookedAt && (
+              <span className="text-green-600 text-[10px]">
+                {format(new Date(bookedStatus.bookedAt), 'd MMM', { locale: fr })}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Price */}
+        {item.price != null && item.price > 0 && (
+          <div className="flex-shrink-0 text-right">
+            <span className="text-sm font-semibold text-foreground">{item.price}€</span>
+            {item.priceLabel && (
+              <span className="text-[10px] text-muted-foreground block">{item.priceLabel}</span>
+            )}
           </div>
         )}
-      </div>
 
-      {/* Content */}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-0.5">
-          <span
-            className="text-[10px] font-medium px-1.5 py-0 rounded-full"
-            style={{ backgroundColor: `${color}20`, color }}
+        {/* Booking button */}
+        {item.bookingUrl && provider && (
+          <a
+            href={item.bookingUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`flex-shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium text-white transition-colors ${provider.color}`}
           >
-            <CategoryIcon category={item.category} />
-          </span>
-          <h5 className="font-medium text-foreground text-sm truncate">{item.title}</h5>
-        </div>
-        {item.subtitle && (
-          <p className="text-xs text-muted-foreground truncate">{item.subtitle}</p>
+            <ExternalLink className="h-3.5 w-3.5" />
+            {provider.name}
+          </a>
         )}
-        <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-          {item.date && (
-            <span className="flex items-center gap-1">
-              <Calendar className="h-3 w-3" />
-              {item.date}
-            </span>
-          )}
-          {item.time && (
-            <span className="flex items-center gap-1">
-              <Clock className="h-3 w-3" />
-              {item.time}
-            </span>
-          )}
-        </div>
+
+        {!item.bookingUrl && (
+          <span className="flex-shrink-0 text-xs text-muted-foreground/60 italic">
+            Pas de lien
+          </span>
+        )}
       </div>
 
-      {/* Price */}
-      {item.price != null && item.price > 0 && (
-        <div className="flex-shrink-0 text-right">
-          <span className="text-sm font-semibold text-foreground">{item.price}€</span>
-          {item.priceLabel && (
-            <span className="text-[10px] text-muted-foreground block">{item.priceLabel}</span>
-          )}
+      {/* Notes field (only when booked) */}
+      {bookedStatus?.booked && (
+        <div className="pl-11">
+          <Input
+            placeholder="Numéro de confirmation, notes..."
+            value={notesValue}
+            onChange={(e) => setNotesValue(e.target.value)}
+            onBlur={() => onUpdateNotes(notesValue)}
+            className="text-xs h-8"
+          />
         </div>
-      )}
-
-      {/* Booking button */}
-      {item.bookingUrl && provider && (
-        <a
-          href={item.bookingUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={`flex-shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium text-white transition-colors ${provider.color}`}
-        >
-          <ExternalLink className="h-3.5 w-3.5" />
-          {provider.name}
-        </a>
-      )}
-
-      {!item.bookingUrl && (
-        <span className="flex-shrink-0 text-xs text-muted-foreground/60 italic">
-          Pas de lien
-        </span>
       )}
     </div>
   );

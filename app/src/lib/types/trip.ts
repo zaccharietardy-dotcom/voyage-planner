@@ -1,4 +1,4 @@
-import type { Attraction } from './services/attractions';
+import type { Attraction } from '../services/attractions';
 
 // Types pour le formulaire de planification
 
@@ -537,33 +537,64 @@ export interface Trip {
     };
     tips: string[];
   };
+  // État des réservations
+  bookedItems?: Record<string, {
+    booked: boolean;
+    bookedAt?: string; // ISO date string
+    notes?: string; // Numéro de confirmation, etc.
+  }>;
+  // Liste de bagages
+  packingList?: {
+    items: Array<{
+      id: string;
+      label: string;
+      category: string;
+      checked: boolean;
+      isCustom?: boolean;
+    }>;
+  };
+  // Documents et billets
+  documents?: {
+    items: Array<{
+      id: string;
+      name: string;
+      type: 'flight_ticket' | 'hotel_booking' | 'activity_ticket' | 'insurance' | 'visa' | 'passport' | 'other';
+      fileUrl?: string; // Supabase Storage URL
+      fileSize?: number;
+      mimeType?: string;
+      uploadedAt: string;
+      uploadedBy?: string;
+      notes?: string;
+      linkedActivityId?: string; // optional link to a specific activity
+    }>;
+  };
+  // Lieux importés depuis Google Maps
+  importedPlaces?: {
+    items: ImportedPlace[];
+    importedAt: string; // ISO date string
+    source: string; // description de la source (filename, etc.)
+  };
 }
 
-// Types pour le Tricount (Phase 3)
-
-export interface Participant {
-  id: string;
+// Types pour les lieux importés
+export interface ImportedPlace {
   name: string;
-  email?: string;
-  avatarUrl?: string;
+  lat: number;
+  lng: number;
+  address?: string;
+  category?: string;
+  notes?: string;
+  sourceUrl?: string;
+  source: 'google_takeout' | 'kml' | 'url' | 'manual' | 'social_media';
 }
 
-export interface Expense {
-  id: string;
-  tripId: string;
-  title: string;
-  amount: number;
-  currency: string;
-  paidBy: string; // Participant ID
-  splitBetween: string[]; // Participant IDs
-  category: 'transport' | 'accommodation' | 'food' | 'activity' | 'other';
-  date: Date;
-  createdAt: Date;
-}
-
-export interface Balance {
-  participantId: string;
-  amount: number; // Positif = on lui doit, Négatif = il doit
+// Types pour l'import depuis les réseaux sociaux
+export interface SocialMediaExtraction {
+  platform: 'instagram' | 'tiktok' | 'youtube' | 'blog' | 'unknown';
+  sourceUrl?: string;
+  places: ImportedPlace[];
+  rawText?: string;
+  confidence: number;
 }
 
 // Labels pour l'UI
@@ -623,141 +654,3 @@ export const TRIP_ITEM_COLORS: Record<TripItemType, string> = {
   luggage: '#F59E0B', // amber - consigne bagages
   free_time: '#22C55E', // green - temps libre
 };
-
-// ============================================
-// Types pour le Chatbot de modification
-// ============================================
-
-export type ModificationIntentType =
-  | 'shift_times'      // Décaler les horaires (me lever plus tard)
-  | 'swap_activity'    // Remplacer une activité par une autre
-  | 'add_activity'     // Ajouter une nouvelle activité
-  | 'remove_activity'  // Supprimer une activité
-  | 'extend_free_time' // Plus de temps libre
-  | 'reorder_day'      // Réorganiser l'ordre des activités
-  | 'change_restaurant'// Changer un restaurant
-  | 'adjust_duration'  // Modifier la durée d'une activité
-  | 'add_day'          // Ajouter un jour au voyage
-  | 'clarification'    // Besoin de clarification
-  | 'general_question';// Question générale (pas de modification)
-
-export interface ModificationIntent {
-  type: ModificationIntentType;
-  confidence: number; // 0-1
-  parameters: {
-    dayNumbers?: number[];      // Jours concernés
-    targetActivity?: string;    // Activité ciblée (nom ou id)
-    targetItemId?: string;      // ID de l'item ciblé
-    newValue?: string;          // Nouvelle valeur/activité
-    timeShift?: number;         // Décalage en minutes
-    direction?: 'later' | 'earlier'; // Direction du décalage
-    scope?: 'morning_only' | 'afternoon_only' | 'full_day'; // Portée du décalage temporel
-    mealType?: 'breakfast' | 'lunch' | 'dinner'; // Type de repas si restaurant
-    cuisineType?: string;       // Type de cuisine demandée
-    duration?: number;          // Durée souhaitée en minutes
-    insertAfterDay?: number;    // Insérer un jour APRÈS ce numéro de jour
-  };
-  explanation: string; // Explication de ce que l'utilisateur veut
-}
-
-export type TripChangeType = 'add' | 'remove' | 'update' | 'move';
-
-export interface TripChange {
-  type: TripChangeType;
-  dayNumber: number;
-  itemId?: string;
-  before?: Partial<TripItem>;
-  after?: Partial<TripItem>;
-  newItem?: TripItem; // Pour les ajouts
-  description: string;
-}
-
-export interface ModificationResult {
-  success: boolean;
-  changes: TripChange[];
-  explanation: string;      // Réponse conversationnelle
-  warnings: string[];       // Avertissements (conflits potentiels)
-  newDays: TripDay[];       // Nouvel état des jours après modification
-  rollbackData: TripDay[];  // État avant modification (pour undo)
-  errorInfo?: ChatErrorInfo; // Info d'erreur structurée (quand success === false)
-}
-
-export interface ChatMessage {
-  id: string;
-  tripId: string;
-  userId?: string;
-  role: 'user' | 'assistant';
-  content: string;
-  intent?: ModificationIntent | null;
-  changesApplied?: TripChange[] | null;
-  errorInfo?: ChatErrorInfo | null;
-  createdAt: Date;
-}
-
-export interface ChatResponse {
-  reply: string;
-  intent: ModificationIntent | null;
-  changes: TripChange[] | null;
-  previewDays: TripDay[] | null;
-  requiresConfirmation: boolean;
-  warnings: string[];
-  suggestions?: ContextualSuggestion[];
-  errorInfo?: ChatErrorInfo;
-}
-
-// ============================================
-// Suggestions contextuelles
-// ============================================
-
-export interface ContextualSuggestion {
-  label: string;    // Texte court affiché sur le chip
-  prompt: string;   // Message complet envoyé au chatbot
-  icon?: string;    // Emoji optionnel pour le chip
-}
-
-// ============================================
-// Mémoire conversationnelle
-// ============================================
-
-export interface ConversationContext {
-  recentExchanges: Array<{
-    userMessage: string;
-    assistantReply: string;
-    intent?: string;
-  }>;
-}
-
-// ============================================
-// Erreurs structurées
-// ============================================
-
-export type ChatErrorType =
-  | 'schedule_conflict'
-  | 'budget_exceeded'
-  | 'immutable_item'
-  | 'item_not_found'
-  | 'no_slot_available'
-  | 'constraint_violation'
-  | 'unknown';
-
-export interface ChatErrorInfo {
-  type: ChatErrorType;
-  message: string;
-  alternativeSuggestion?: ContextualSuggestion;
-}
-
-export interface TripConstraint {
-  itemId: string;
-  type: 'immutable' | 'time_locked' | 'booking_required';
-  reason: string;
-}
-
-export const SUGGESTED_CHAT_PROMPTS = [
-  { label: 'Me lever plus tard', prompt: 'Je veux me lever plus tard le matin' },
-  { label: 'Plus de temps libre', prompt: "J'aimerais plus de temps libre l'après-midi" },
-  { label: 'Changer un restaurant', prompt: 'Change le restaurant du ' },
-  { label: 'Ajouter une activité', prompt: 'Ajoute ' },
-  { label: 'Supprimer une visite', prompt: 'Supprime ' },
-  { label: 'Réorganiser la journée', prompt: 'Réorganise le jour ' },
-  { label: 'Ajouter un jour', prompt: 'Ajoute un jour libre entre le jour ' },
-] as const;

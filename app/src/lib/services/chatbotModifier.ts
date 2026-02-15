@@ -165,6 +165,9 @@ async function generateModifications(
     case 'add_day':
       return addDay(intent, days, rollbackData, tripContext);
 
+    case 'report_issue':
+      return handleIssueReport(intent, days, constraints, rollbackData, tripContext);
+
     default:
       return {
         success: false,
@@ -1151,6 +1154,343 @@ function changeRestaurant(
     newDays,
     rollbackData,
   };
+}
+
+// ============================================
+// Report Issue (Closed, Weather, etc.)
+// ============================================
+
+/**
+ * Gère le signalement d'un problème avec une activité.
+ * Génère des alternatives intelligentes basées sur le type de problème.
+ */
+async function handleIssueReport(
+  intent: ModificationIntent,
+  days: TripDay[],
+  constraints: ReturnType<typeof getConstraints>,
+  rollbackData: TripDay[],
+  tripContext?: TripModificationContext
+): Promise<ModificationResult> {
+  const { targetActivity, issueType = 'unavailable', dayNumbers = [] } = intent.parameters;
+
+  if (!targetActivity) {
+    return {
+      success: false,
+      changes: [],
+      explanation: "Je n'ai pas compris quelle activité pose problème. Pouvez-vous préciser ?",
+      warnings: [],
+      newDays: days,
+      rollbackData,
+      errorInfo: {
+        type: 'item_not_found',
+        message: "Précisez quelle activité pose problème pour que je puisse vous proposer des alternatives.",
+      },
+    };
+  }
+
+  // Trouve l'activité concernée
+  let targetItem: TripItem | null = null;
+  let targetDay: TripDay | null = null;
+
+  for (const day of days) {
+    if (dayNumbers.length > 0 && !dayNumbers.includes(day.dayNumber)) continue;
+
+    const item = day.items.find(i => {
+      const normalizedTarget = normalizeString(targetActivity);
+      const normalizedTitle = normalizeString(i.title);
+      return normalizedTitle.includes(normalizedTarget) || normalizedTarget.includes(normalizedTitle);
+    });
+
+    if (item) {
+      targetItem = item;
+      targetDay = day;
+      break;
+    }
+  }
+
+  if (!targetItem || !targetDay) {
+    return {
+      success: false,
+      changes: [],
+      explanation: `Je n'ai pas trouvé "${targetActivity}" dans votre itinéraire. Vérifiez le nom exact.`,
+      warnings: [],
+      newDays: days,
+      rollbackData,
+      errorInfo: {
+        type: 'item_not_found',
+        message: `Je n'ai pas trouvé "${targetActivity}" dans votre itinéraire. Vérifiez le nom exact ou précisez le jour.`,
+      },
+    };
+  }
+
+  // Vérifie si l'activité est modifiable
+  const constraint = constraints.find(c => c.itemId === targetItem!.id);
+  if (constraint && constraint.type === 'immutable') {
+    return {
+      success: false,
+      changes: [],
+      explanation: constraint.reason,
+      warnings: [],
+      newDays: days,
+      rollbackData,
+      errorInfo: {
+        type: 'immutable_item',
+        message: `« ${targetItem.title} » ne peut pas être modifié(e). ${constraint.reason}`,
+      },
+    };
+  }
+
+  // Génère des suggestions intelligentes via Claude
+  const suggestions = await generateIssueSuggestions(
+    targetItem,
+    targetDay,
+    issueType,
+    days,
+    tripContext
+  );
+
+  if (!suggestions || suggestions.length === 0) {
+    return {
+      success: false,
+      changes: [],
+      explanation: `Je comprends que "${targetActivity}" pose problème. Malheureusement, je n'ai pas pu générer d'alternatives pour le moment. Essayez de préciser ce que vous souhaitez à la place.`,
+      warnings: [],
+      newDays: days,
+      rollbackData,
+      errorInfo: {
+        type: 'no_slot_available',
+        message: `Impossible de générer des alternatives pour "${targetActivity}". Précisez ce que vous souhaitez à la place.`,
+        alternativeSuggestion: {
+          label: 'Supprimer cette activité',
+          prompt: `Supprime "${targetActivity}"`,
+        },
+      },
+    };
+  }
+
+  // Applique automatiquement la première suggestion
+  const bestSuggestion = suggestions[0];
+  const newDays = JSON.parse(JSON.stringify(days)) as TripDay[];
+  const newDay = newDays.find(d => d.dayNumber === targetDay!.dayNumber);
+
+  if (!newDay) {
+    return {
+      success: false,
+      changes: [],
+      explanation: "Erreur lors du remplacement. Veuillez réessayer.",
+      warnings: [],
+      newDays: days,
+      rollbackData,
+    };
+  }
+
+  const itemIndex = newDay.items.findIndex(i => i.id === targetItem!.id);
+  if (itemIndex === -1) {
+    return {
+      success: false,
+      changes: [],
+      explanation: "Erreur lors du remplacement. Veuillez réessayer.",
+      warnings: [],
+      newDays: days,
+      rollbackData,
+    };
+  }
+
+  const item = newDay.items[itemIndex];
+  const oldTitle = item.title;
+
+  // Applique la meilleure suggestion
+  item.title = bestSuggestion.title;
+  item.description = bestSuggestion.description;
+  item.dataReliability = 'estimated';
+
+  // Enrichir avec coordonnées GPS si disponibles
+  if (bestSuggestion.latitude && bestSuggestion.longitude) {
+    item.latitude = bestSuggestion.latitude;
+    item.longitude = bestSuggestion.longitude;
+  } else {
+    try {
+      const { geocodeAddress } = await import('./geocoding');
+      const destination = tripContext?.destination || days[0]?.items?.find((i: any) => i.type === 'checkin')?.locationName || '';
+      const searchQuery = `${bestSuggestion.title}, ${destination}`;
+      const coords = await geocodeAddress(searchQuery);
+      if (coords) {
+        item.latitude = coords.lat;
+        item.longitude = coords.lng;
+      }
+    } catch (err) {
+      console.warn('[IssueReport] Geocoding failed:', err);
+    }
+  }
+
+  item.googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(bestSuggestion.title)}`;
+
+  // Ajuste la durée si nécessaire
+  if (bestSuggestion.estimatedDuration) {
+    const startMinutes = timeToMinutes(item.startTime);
+    item.endTime = minutesToTime(startMinutes + bestSuggestion.estimatedDuration);
+    item.duration = bestSuggestion.estimatedDuration;
+  }
+
+  const change: TripChange = {
+    type: 'update',
+    dayNumber: newDay.dayNumber,
+    itemId: item.id,
+    before: { title: oldTitle },
+    after: { title: bestSuggestion.title },
+    description: `"${oldTitle}" → "${bestSuggestion.title}"`,
+  };
+
+  // Construit le message de réponse avec toutes les suggestions
+  const issueTypeText = {
+    closed: 'fermé(e)',
+    weather: 'incompatible avec la météo',
+    unavailable: 'indisponible',
+    schedule_change: 'avec des horaires modifiés',
+  }[issueType] || 'avec un problème';
+
+  const otherSuggestions = suggestions.slice(1, 3)
+    .map((s, i) => `${i + 2}. **${s.title}** — ${s.description}`)
+    .join('\n');
+
+  const explanation = `Je comprends que "${oldTitle}" soit ${issueTypeText}. Voici ce que je vous propose :
+
+**1. ${bestSuggestion.title}** ✅ (appliqué automatiquement)
+${bestSuggestion.description}
+
+${otherSuggestions ? `Autres alternatives :\n${otherSuggestions}\n\n` : ''}Pour appliquer une autre suggestion, dites-moi simplement "remplace par [nom de l'activité]".`;
+
+  return {
+    success: true,
+    changes: [change],
+    explanation,
+    warnings: constraint?.type === 'booking_required' ? [constraint.reason] : [],
+    newDays,
+    rollbackData,
+  };
+}
+
+/**
+ * Génère des suggestions intelligentes basées sur le type de problème
+ */
+async function generateIssueSuggestions(
+  targetItem: TripItem,
+  targetDay: TripDay,
+  issueType: string,
+  days: TripDay[],
+  tripContext?: TripModificationContext
+): Promise<Array<{
+  title: string;
+  description: string;
+  estimatedDuration?: number;
+  latitude?: number;
+  longitude?: number;
+}> | null> {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    console.warn('[IssueReport] ANTHROPIC_API_KEY non configurée');
+    return null;
+  }
+
+  const destination = tripContext?.destination || days[0]?.items?.find((i: any) => i.type === 'checkin')?.locationName || 'la destination';
+
+  // Récupère les autres activités du jour pour contexte
+  const dayActivities = targetDay.items
+    .filter(i => i.type === 'activity' && i.id !== targetItem.id)
+    .map(i => i.title)
+    .join(', ');
+
+  // Construit le contexte pour Claude
+  const issueContext = {
+    closed: `L'activité est fermée définitivement ou temporairement. Proposer des alternatives similaires dans la même zone.`,
+    weather: `La météo est défavorable (pluie, vent). Proposer des activités INTÉRIEURES (musées, galeries, marchés couverts, shopping, spa, cinéma, cuisine, ateliers).`,
+    unavailable: `L'activité n'est plus disponible ou accessible. Proposer des alternatives similaires ou complémentaires.`,
+    schedule_change: `Les horaires ont changé. Proposer des alternatives similaires ou suggérer un ajustement de timing.`,
+  }[issueType] || `Il y a un problème avec cette activité. Proposer des alternatives pertinentes.`;
+
+  const prompt = `Tu es un assistant de voyage expert. L'utilisateur a un problème avec une activité planifiée.
+
+CONTEXTE:
+- Destination: ${destination}
+- Jour: ${targetDay.dayNumber} (${targetDay.theme || 'pas de thème'})
+- Activité problématique: "${targetItem.title}"
+- Type de problème: ${issueType}
+- ${issueContext}
+- Autres activités du jour: ${dayActivities || 'aucune'}
+- Durée originale: ${targetItem.duration || 90} minutes
+- Horaire: ${targetItem.startTime} - ${targetItem.endTime}
+
+TÂCHE:
+Génère exactement 3 suggestions d'activités alternatives pertinentes qui:
+1. Sont adaptées au type de problème (ex: si météo défavorable, UNIQUEMENT des activités intérieures)
+2. Sont situées dans la même zone géographique ou facilement accessibles
+3. Ont une durée similaire ou adaptable
+4. Sont cohérentes avec le reste du voyage
+5. Sont des attractions/activités RÉELLES et POPULAIRES à ${destination}
+
+${issueType === 'weather' ? '\n⚠️ IMPORTANT: Pour un problème météo, propose UNIQUEMENT des activités INTÉRIEURES (musées, galeries, marchés couverts, shopping centers, spa, cinéma, ateliers créatifs, etc.).\n' : ''}
+
+Réponds UNIQUEMENT en JSON valide:
+[
+  {
+    "title": "Nom exact de l'activité",
+    "description": "Description courte (1-2 phrases) expliquant pourquoi c'est une bonne alternative",
+    "estimatedDuration": 90,
+    "latitude": 48.8566,
+    "longitude": 2.3522
+  },
+  {
+    "title": "...",
+    "description": "...",
+    "estimatedDuration": 60,
+    "latitude": null,
+    "longitude": null
+  },
+  {
+    "title": "...",
+    "description": "...",
+    "estimatedDuration": 120,
+    "latitude": null,
+    "longitude": null
+  }
+]`;
+
+  try {
+    const client = new Anthropic({ apiKey });
+
+    const response = await client.messages.create({
+      model: 'claude-3-5-haiku-20241022',
+      max_tokens: 600,
+      messages: [{ role: 'user', content: prompt }],
+    });
+
+    const text = response.content[0].type === 'text' ? response.content[0].text : '';
+    const jsonMatch = text.match(/\[[\s\S]*\]/);
+
+    if (!jsonMatch) {
+      console.error('[IssueReport] No JSON array found in response');
+      return null;
+    }
+
+    const parsed = JSON.parse(jsonMatch[0]);
+
+    // Valide et nettoie
+    const valid = parsed
+      .filter((s: any) => s.title && s.description)
+      .slice(0, 3)
+      .map((s: any) => ({
+        title: s.title,
+        description: s.description,
+        estimatedDuration: s.estimatedDuration || targetItem.duration || 90,
+        latitude: s.latitude || undefined,
+        longitude: s.longitude || undefined,
+      }));
+
+    return valid.length >= 2 ? valid : null;
+  } catch (error) {
+    console.error('[IssueReport] Error generating suggestions:', error);
+    return null;
+  }
 }
 
 // ============================================

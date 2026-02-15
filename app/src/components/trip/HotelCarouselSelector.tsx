@@ -133,18 +133,18 @@ export function HotelCarouselSelector({
             key={hotel.id}
             className={`
               flex-shrink-0 w-72 snap-start relative
-              rounded-xl border-2 transition-all cursor-pointer
+              rounded-xl border-2 transition-all duration-200 cursor-pointer
               hover:shadow-lg
               ${selectedId === hotel.id
-                ? 'border-primary ring-2 ring-primary/20 bg-primary/5'
-                : 'border-border hover:border-muted-foreground/30 bg-card'}
+                ? 'border-primary ring-2 ring-primary/40 shadow-lg shadow-primary/15'
+                : 'border-border/50 hover:border-primary/30 opacity-95 hover:opacity-100 bg-card'}
             `}
             onClick={() => onSelect(hotel.id)}
           >
             {/* Badge sélectionné */}
             {selectedId === hotel.id && (
-              <div className="absolute -top-2 -right-2 z-10 bg-blue-500 text-white rounded-full p-1.5 shadow-md">
-                <Check className="h-4 w-4" />
+              <div className="absolute top-2 right-2 z-10 bg-emerald-500 rounded-full p-1.5 shadow-lg">
+                <Check className="h-3.5 w-3.5 text-white" strokeWidth={3} />
               </div>
             )}
 

@@ -15,7 +15,9 @@ import {
   Clock,
   Heart,
   Accessibility,
-  Save
+  Save,
+  Wand2,
+  Settings
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -25,6 +27,7 @@ import { useUserPreferences, preferenceOptions, defaultPreferences } from '@/hoo
 import { UserPreferences } from '@/lib/supabase/types';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { TripStyleQuiz } from '@/components/trip/TripStyleQuiz';
 
 type Step = 'travel_style' | 'budget' | 'accommodation' | 'pace' | 'activities' | 'food' | 'accessibility' | 'summary';
 
@@ -42,18 +45,24 @@ const steps: { id: Step; title: string; icon: React.ReactNode; description: stri
 export default function PreferencesPage() {
   const router = useRouter();
   const { user, isLoading: authLoading } = useAuth();
-  const { preferences, isLoading: prefsLoading, savePreferences } = useUserPreferences();
+  const { preferences, isLoading: prefsLoading, savePreferences, refetch } = useUserPreferences();
 
   const [currentStep, setCurrentStep] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState<Partial<UserPreferences>>(defaultPreferences);
+  const [showQuiz, setShowQuiz] = useState(false);
+  const [quizMode, setQuizMode] = useState<'initial' | 'modify'>('initial');
 
   // Load existing preferences
   useEffect(() => {
     if (preferences) {
       setFormData(preferences);
+      setShowQuiz(false);
+    } else if (!prefsLoading && !preferences) {
+      // New user without preferences - show quiz option
+      setQuizMode('initial');
     }
-  }, [preferences]);
+  }, [preferences, prefsLoading]);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -91,6 +100,16 @@ export default function PreferencesPage() {
     }
   };
 
+  const handleQuizComplete = async () => {
+    await refetch();
+    setShowQuiz(false);
+    toast.success('Quiz terminé ! Vos préférences ont été enregistrées.');
+  };
+
+  const handleQuizClose = () => {
+    setShowQuiz(false);
+  };
+
   const updateFormData = (key: keyof UserPreferences, value: unknown) => {
     setFormData(prev => ({ ...prev, [key]: value }));
   };
@@ -117,6 +136,70 @@ export default function PreferencesPage() {
 
   const currentStepData = steps[currentStep];
 
+  // Show quiz if requested
+  if (showQuiz) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 py-8">
+        <div className="container mx-auto px-4">
+          <TripStyleQuiz onComplete={handleQuizComplete} onClose={handleQuizClose} />
+        </div>
+      </div>
+    );
+  }
+
+  // Show initial choice for new users
+  if (quizMode === 'initial' && !preferences && !prefsLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 flex items-center justify-center py-8">
+        <div className="container mx-auto px-4 max-w-2xl">
+          <Card className="border-0 shadow-lg">
+            <CardHeader className="text-center pb-4">
+              <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                <Sparkles className="h-8 w-8 text-primary" />
+              </div>
+              <CardTitle className="text-3xl mb-2">Bienvenue !</CardTitle>
+              <CardDescription className="text-base">
+                Commençons par définir vos préférences de voyage
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Button
+                onClick={() => setShowQuiz(true)}
+                className="w-full h-auto py-6 flex-col gap-2"
+                size="lg"
+              >
+                <Wand2 className="h-6 w-6" />
+                <div className="flex flex-col gap-1">
+                  <span className="font-semibold">Quiz interactif (recommandé)</span>
+                  <span className="text-xs font-normal opacity-90">5 questions rapides - 2 minutes</span>
+                </div>
+              </Button>
+
+              <Button
+                onClick={() => setQuizMode('modify')}
+                variant="outline"
+                className="w-full h-auto py-6 flex-col gap-2"
+                size="lg"
+              >
+                <Settings className="h-6 w-6" />
+                <div className="flex flex-col gap-1">
+                  <span className="font-semibold">Configuration manuelle</span>
+                  <span className="text-xs font-normal opacity-70">Définir chaque préférence en détail</span>
+                </div>
+              </Button>
+
+              <div className="text-center pt-4">
+                <Button variant="ghost" onClick={() => router.push('/plan')}>
+                  Passer pour l&apos;instant
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 py-8">
       <div className="container mx-auto px-4 max-w-3xl">
@@ -127,9 +210,22 @@ export default function PreferencesPage() {
               <ArrowLeft className="h-4 w-4 mr-2" />
               Retour
             </Button>
-            <span className="text-sm text-muted-foreground">
-              Étape {currentStep + 1} sur {steps.length}
-            </span>
+            <div className="flex items-center gap-2">
+              {preferences && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowQuiz(true)}
+                  className="gap-1"
+                >
+                  <Wand2 className="h-3 w-3" />
+                  Refaire le quiz
+                </Button>
+              )}
+              <span className="text-sm text-muted-foreground">
+                Étape {currentStep + 1} sur {steps.length}
+              </span>
+            </div>
           </div>
           <div className="h-2 bg-muted rounded-full overflow-hidden">
             <motion.div

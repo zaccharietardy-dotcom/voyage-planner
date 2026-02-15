@@ -1,9 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { TripItem, Flight, Restaurant, TRIP_ITEM_COLORS } from '@/lib/types';
+import { TripItem, TripItemType, Flight, Restaurant, TRIP_ITEM_COLORS } from '@/lib/types';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { PriceComparisonCard } from './PriceComparisonCard';
 import {
   MapPin,
   Clock,
@@ -38,9 +40,10 @@ import {
   ShieldCheck,
   Zap,
   Award,
+  Check,
+  TrendingDown,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { TripItemType } from '@/lib/types';
 
 type SvgIconComponent = React.ComponentType<React.SVGProps<SVGSVGElement>>;
 
@@ -62,6 +65,7 @@ interface ActivityCardProps {
   swapButton?: React.ReactNode;
   onSelectRestaurantAlternative?: (item: TripItem, restaurant: Restaurant) => void;
   onSelectSelfMeal?: (item: TripItem) => void;
+  showPriceComparison?: boolean;
 }
 
 const TYPE_ICONS: Record<TripItemType, SvgIconComponent> = {
@@ -250,7 +254,9 @@ export function ActivityCard({
   swapButton,
   onSelectRestaurantAlternative,
   onSelectSelfMeal,
+  showPriceComparison = false,
 }: ActivityCardProps) {
+  const [showPriceComparisonDialog, setShowPriceComparisonDialog] = useState(false);
   const transportMode = item.type === 'transport' ? getTransportModeForItem(item) : undefined;
   const transportIconTestId = transportMode ? `transport-icon-${transportMode}` : undefined;
   const color = TRIP_ITEM_COLORS[item.type];
@@ -573,6 +579,23 @@ export function ActivityCard({
               {!hasRestaurantAlternatives && (
                 <div className="flex items-center gap-1.5 mt-2.5 flex-wrap">
                   <BookingButtons item={item} />
+                  {/* Price comparison button for activities */}
+                  {showPriceComparison && item.type === 'activity' && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowPriceComparisonDialog(true);
+                      }}
+                      className={cn(
+                        'inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors',
+                        'text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300',
+                        'hover:bg-emerald-500/10 border border-transparent hover:border-emerald-500/20'
+                      )}
+                    >
+                      <TrendingDown className="h-3 w-3" />
+                      Comparer les prix
+                    </button>
+                  )}
                 </div>
               )}
             </div>
@@ -671,6 +694,25 @@ export function ActivityCard({
           </Button>
         )}
       </div>
+
+      {/* Price comparison dialog */}
+      {item.type === 'activity' && (
+        <Dialog open={showPriceComparisonDialog} onOpenChange={setShowPriceComparisonDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>{item.title} - Comparaison des prix</DialogTitle>
+            </DialogHeader>
+            <PriceComparisonCard
+              type="activity"
+              params={{
+                activityName: item.title,
+                city: item.locationName,
+              }}
+              currentPrice={item.estimatedCost}
+            />
+          </DialogContent>
+        </Dialog>
+      )}
     </Card>
   );
 }
@@ -1064,8 +1106,8 @@ function RestaurantSuggestionsFlat({
                 "relative overflow-hidden rounded-xl border-2 transition-all duration-200 snap-center",
                 "min-w-[75vw] sm:min-w-0 aspect-[4/3]",
                 isSelected
-                  ? "border-primary shadow-lg shadow-primary/20 ring-1 ring-primary/30"
-                  : "border-transparent hover:border-white/20 hover:shadow-md"
+                  ? "border-primary shadow-lg shadow-primary/20 ring-2 ring-primary/40"
+                  : "border-border/50 hover:border-white/20 hover:shadow-md opacity-90 hover:opacity-100"
               )}
               style={{ minHeight: '160px' }}
             >
@@ -1083,9 +1125,16 @@ function RestaurantSuggestionsFlat({
               {/* Dark gradient overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/15" />
 
+              {/* Badge checkmark vert en haut à droite */}
+              {isSelected && (
+                <div className="absolute top-2 right-2 z-20 bg-emerald-500 rounded-full p-1.5 shadow-lg">
+                  <Check className="h-3.5 w-3.5 text-white" strokeWidth={3} />
+                </div>
+              )}
+
               {/* Card content */}
               <div className="relative z-10 h-full flex flex-col justify-between p-2.5">
-                {/* Top section: cuisine badge + restaurant badges + selected indicator */}
+                {/* Top section: cuisine badge + restaurant badges */}
                 <div className="flex items-start justify-between gap-1">
                   <div className="flex items-center gap-1 flex-wrap">
                     <span className="inline-flex items-center rounded-full bg-black/40 backdrop-blur-sm px-2 py-0.5 text-[10px] font-medium text-white/90">
@@ -1099,11 +1148,6 @@ function RestaurantSuggestionsFlat({
                       </span>
                     ))}
                   </div>
-                  {isSelected && (
-                    <span className="inline-flex items-center rounded-full bg-primary/90 px-2 py-0.5 text-[10px] font-bold text-primary-foreground backdrop-blur-sm shrink-0">
-                      Choisi
-                    </span>
-                  )}
                 </div>
 
                 {/* Bottom section: name, meta, actions */}
@@ -1330,8 +1374,8 @@ function RestaurantSuggestions({
                 "relative overflow-hidden rounded-xl border-2 transition-all duration-200",
                 "aspect-video sm:aspect-video",
                 isSelected
-                  ? "border-primary shadow-lg shadow-primary/20 ring-1 ring-primary/30"
-                  : "border-transparent hover:border-white/20 hover:shadow-md"
+                  ? "border-primary shadow-lg shadow-primary/20 ring-2 ring-primary/40"
+                  : "border-border/50 hover:border-white/20 hover:shadow-md opacity-90 hover:opacity-100"
               )}
               style={{
                 flex: isSelected ? '1.3 1 0%' : '1 1 0%',
@@ -1352,9 +1396,11 @@ function RestaurantSuggestions({
               {/* Dark gradient overlay — heavier at bottom for text readability */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/15" />
 
-              {/* Selected indicator — top-left accent */}
+              {/* Badge checkmark vert en haut à droite */}
               {isSelected && (
-                <div className="absolute top-0 left-0 right-0 h-0.5 bg-primary" />
+                <div className="absolute top-2 right-2 z-20 bg-emerald-500 rounded-full p-1.5 shadow-lg">
+                  <Check className="h-3.5 w-3.5 text-white" strokeWidth={3} />
+                </div>
               )}
 
               {/* Card content — positioned at bottom via flex */}
@@ -1373,11 +1419,6 @@ function RestaurantSuggestions({
                       </span>
                     ))}
                   </div>
-                  {isSelected && (
-                    <span className="inline-flex items-center rounded-full bg-primary/90 px-2 py-0.5 text-[10px] font-bold text-primary-foreground backdrop-blur-sm shrink-0">
-                      Choisi
-                    </span>
-                  )}
                 </div>
 
                 {/* Bottom section: name, meta, actions */}

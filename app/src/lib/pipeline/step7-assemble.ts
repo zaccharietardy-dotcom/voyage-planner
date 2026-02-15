@@ -1478,9 +1478,20 @@ export async function assembleTripSchedule(
       }
     }
 
-    // 7b. Insert free time slot if the day is busy (restBreak=true or 4+ activities scheduled)
-    const scheduledActivityCount = scheduler.getItems().filter(i => i.type === 'activity').length;
-    if ((balancedDay.restBreak || scheduledActivityCount >= 4) && !isLastDay) {
+    // 7b. Insert free time slot only on explicitly relaxed dense days.
+    // Avoid adding automatic idle blocks on otherwise healthy schedules.
+    const activityItems = scheduler.getItems().filter((item) => item.type === 'activity');
+    const scheduledActivityCount = activityItems.length;
+    const scheduledActivityMinutes = activityItems.reduce(
+      (sum, item) => sum + Math.max(0, Math.round((item.slot.end.getTime() - item.slot.start.getTime()) / 60000)),
+      0
+    );
+    const shouldInsertFreeTime = Boolean(
+      balancedDay.restBreak
+      && !isLastDay
+      && (scheduledActivityCount >= 5 || scheduledActivityMinutes >= 420)
+    );
+    if (shouldInsertFreeTime) {
       const currentHour = scheduler.getCurrentTime().getHours();
       // Only insert if cursor is in the 13h-17h window (afternoon)
       if (currentHour >= 13 && currentHour < 17) {
@@ -1489,7 +1500,7 @@ export async function assembleTripSchedule(
           id: `free-time-${balancedDay.dayNumber}`,
           title: 'Temps libre',
           type: 'free_time',
-          duration: 60,
+          duration: 45,
           minStartTime: parseTime(dayDate, '13:00'),
           maxEndTime: parseTime(dayDate, '17:00'),
           data: {
@@ -1502,7 +1513,7 @@ export async function assembleTripSchedule(
           },
         });
         if (freeTimeResult) {
-          console.log(`[Pipeline V2] Day ${balancedDay.dayNumber}: Inserted free time slot (${scheduledActivityCount} activities, restBreak=${balancedDay.restBreak})`);
+          console.log(`[Pipeline V2] Day ${balancedDay.dayNumber}: Inserted free time slot (${scheduledActivityCount} activities, ${scheduledActivityMinutes}min, restBreak=${balancedDay.restBreak})`);
         }
       }
     }

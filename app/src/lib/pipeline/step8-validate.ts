@@ -127,6 +127,9 @@ export function validateAndFixTrip(trip: Trip): ValidationResult {
       const currStart = timeToMinutes(curr.startTime);
       const gap = currStart - prevEnd;
       if (gap > 180) { // 3 hours
+        if (isIntentionalGapAnchor(prev) || isIntentionalGapAnchor(curr)) {
+          continue;
+        }
         warnings.push(`Day ${day.dayNumber}: ${gap}min gap between "${prev.title}" and "${curr.title}"`);
         penalties += 2;
       }
@@ -184,7 +187,13 @@ export function validateAndFixTrip(trip: Trip): ValidationResult {
     const mealMinutes = restaurants.reduce((sum, item) => sum + Math.max(30, item.duration || 60), 0);
     const dayLoadMinutes = activityMinutes + mealMinutes + totalTravelMin;
     const maxLoad = isBoundaryDay ? MAX_BOUNDARY_DAY_LOAD_MIN : MAX_FULL_DAY_LOAD_MIN;
-    if (!day.isDayTrip && dayLoadMinutes > maxLoad) {
+    const mustSeeMinutes = activities.reduce((sum, item) => {
+      const isMustSee = Boolean((item as TripItem & { data?: { mustSee?: boolean } }).data?.mustSee);
+      return sum + (isMustSee ? (item.duration || 60) : 0);
+    }, 0);
+    const adaptiveMustSeeAllowance = Math.min(60, Math.max(0, mustSeeMinutes - 180) * 0.2);
+    const fatigueThreshold = maxLoad + adaptiveMustSeeAllowance;
+    if (!day.isDayTrip && dayLoadMinutes > fatigueThreshold) {
       warnings.push(
         `Day ${day.dayNumber}: day load is high (${Math.round(dayLoadMinutes)}min planned incl. travel)`
       );
@@ -346,6 +355,23 @@ function isHotelMeal(item: TripItem): boolean {
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '');
   return normalizedTitle.includes("a l'hotel") || normalizedTitle.includes('at hotel');
+}
+
+function isIntentionalGapAnchor(item: TripItem): boolean {
+  if (item.type === 'free_time' || item.type === 'checkin' || item.type === 'checkout') {
+    return true;
+  }
+  if (item.type === 'flight') {
+    return true;
+  }
+  if (item.type === 'transport' && (
+    item.transportRole === 'longhaul' ||
+    item.transportRole === 'hotel_depart' ||
+    item.transportRole === 'hotel_return'
+  )) {
+    return true;
+  }
+  return false;
 }
 
 function checkBoundaryConsistency(

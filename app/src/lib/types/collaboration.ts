@@ -1,4 +1,4 @@
-import { TripItem, TripDay, Trip } from '../types';
+import { TripItem, TripDay, Trip } from './trip';
 import { Profile } from '../supabase';
 
 // Types de changements possibles dans une proposition

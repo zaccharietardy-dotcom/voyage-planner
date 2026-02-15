@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, MapPin, Loader2, Calendar, MessageCircle } from 'lucide-react';
+import { ArrowLeft, MapPin, Loader2, Calendar, MessageCircle, Trophy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { FollowButton } from '@/components/social/FollowButton';
+import { GamificationSection } from '@/components/gamification/GamificationSection';
 import { useAuth } from '@/components/auth';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -165,34 +166,52 @@ export default function UserProfilePage() {
           </div>
         )}
 
-        {/* Trips */}
+        {/* Content Tabs */}
         <div className="mt-6">
-          <h2 className="font-semibold mb-3">Voyages</h2>
-          {trips.length === 0 ? (
-            <div className="text-center py-10">
-              <MapPin className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-              <p className="text-muted-foreground">Aucun voyage public</p>
-            </div>
-          ) : (
-            <div className="space-y-3 mb-8">
-              {trips.map((trip) => (
-                <Card
-                  key={trip.id}
-                  className="cursor-pointer hover:shadow-md transition-shadow"
-                  onClick={() => router.push(`/trip/${trip.id}`)}
-                >
-                  <CardContent className="p-3">
-                    <h4 className="font-medium">{trip.title}</h4>
-                    <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {trip.destination}</span>
-                      <span>{trip.duration_days}j</span>
-                      <span>{format(new Date(trip.start_date), 'd MMM', { locale: fr })}</span>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
+          <Tabs defaultValue="trips" className="w-full">
+            <TabsList className="w-full grid grid-cols-2">
+              <TabsTrigger value="trips">
+                <MapPin className="w-4 h-4 mr-1" />
+                Voyages
+              </TabsTrigger>
+              <TabsTrigger value="stats">
+                <Trophy className="w-4 h-4 mr-1" />
+                Stats
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="trips" className="mt-4">
+              {trips.length === 0 ? (
+                <div className="text-center py-10">
+                  <MapPin className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+                  <p className="text-muted-foreground">Aucun voyage public</p>
+                </div>
+              ) : (
+                <div className="space-y-3 mb-8">
+                  {trips.map((trip) => (
+                    <Card
+                      key={trip.id}
+                      className="cursor-pointer hover:shadow-md transition-shadow"
+                      onClick={() => router.push(`/trip/${trip.id}`)}
+                    >
+                      <CardContent className="p-3">
+                        <h4 className="font-medium">{trip.title}</h4>
+                        <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                          <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {trip.destination}</span>
+                          <span>{trip.duration_days}j</span>
+                          <span>{format(new Date(trip.start_date), 'd MMM', { locale: fr })}</span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="stats" className="mt-4">
+              <GamificationSection userId={userId} isOwnProfile={false} />
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </div>

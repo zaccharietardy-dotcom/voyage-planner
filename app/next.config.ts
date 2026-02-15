@@ -1,8 +1,15 @@
 import type { NextConfig } from "next";
 import bundleAnalyzer from "@next/bundle-analyzer";
+import withSerwistInit from "@serwist/next";
 
 const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === "true",
+});
+
+const withSerwist = withSerwistInit({
+  swSrc: "src/app/sw.ts",
+  swDest: "public/sw.js",
+  disable: process.env.NODE_ENV !== "production",
 });
 
 const nextConfig: NextConfig = {
@@ -23,6 +30,8 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Note: Serwist requires webpack for production builds.
+  // Use `next dev --webpack` for local dev if needed (see package.json scripts).
 };
 
-export default withBundleAnalyzer(nextConfig);
+export default withSerwist(withBundleAnalyzer(nextConfig));

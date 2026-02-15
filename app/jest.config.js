@@ -10,6 +10,7 @@ module.exports = {
       testMatch: [
         '<rootDir>/src/lib/__tests__/**/*.test.ts',
         '<rootDir>/src/lib/pipeline/__tests__/**/*.test.ts',
+        '<rootDir>/src/lib/services/__tests__/**/*.test.ts',
       ],
       moduleNameMapper: {
         '^@/(.*)$': '<rootDir>/src/$1',

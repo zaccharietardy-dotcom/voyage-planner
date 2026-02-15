@@ -875,6 +875,107 @@ export interface Database {
         };
         Relationships: [];
       };
+      place_reviews: {
+        Row: {
+          id: string;
+          user_id: string;
+          place_id: string;
+          trip_id: string | null;
+          activity_title: string;
+          city: string;
+          rating: number;
+          title: string;
+          content: string;
+          tips: string | null;
+          photos: string[] | null;
+          visit_date: string | null;
+          helpful_count: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          place_id: string;
+          trip_id?: string | null;
+          activity_title: string;
+          city: string;
+          rating: number;
+          title: string;
+          content: string;
+          tips?: string | null;
+          photos?: string[] | null;
+          visit_date?: string | null;
+          helpful_count?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          place_id?: string;
+          trip_id?: string | null;
+          activity_title?: string;
+          city?: string;
+          rating?: number;
+          title?: string;
+          content?: string;
+          tips?: string | null;
+          photos?: string[] | null;
+          visit_date?: string | null;
+          helpful_count?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "place_reviews_user_id_fkey";
+            columns: ["user_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "place_reviews_trip_id_fkey";
+            columns: ["trip_id"];
+            referencedRelation: "trips";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      review_helpful: {
+        Row: {
+          id: string;
+          review_id: string;
+          user_id: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          review_id: string;
+          user_id: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          review_id?: string;
+          user_id?: string;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "review_helpful_review_id_fkey";
+            columns: ["review_id"];
+            referencedRelation: "place_reviews";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "review_helpful_user_id_fkey";
+            columns: ["user_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
     };
     Views: {
       [_ in never]: never;
@@ -904,6 +1005,8 @@ export type TripComment = Database['public']['Tables']['trip_comments']['Row'];
 export type Follow = Database['public']['Tables']['follows']['Row'];
 export type CloseFriend = Database['public']['Tables']['close_friends']['Row'];
 export type TripPhoto = Database['public']['Tables']['trip_photos']['Row'];
+export type PlaceReviewDB = Database['public']['Tables']['place_reviews']['Row'];
+export type ReviewHelpful = Database['public']['Tables']['review_helpful']['Row'];
 
 // Extended types with relations
 export interface TripWithMembers extends Trip {

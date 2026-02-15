@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
-import { TripItem, TRIP_ITEM_COLORS } from '@/lib/types';
+import { TripItem, TRIP_ITEM_COLORS, ImportedPlace } from '@/lib/types';
 
 interface TripMapProps {
   items: TripItem[];
@@ -10,6 +10,7 @@ interface TripMapProps {
   hoveredItemId?: string;
   mapNumbers?: Map<string, number>;
   isVisible?: boolean;
+  importedPlaces?: ImportedPlace[];
   flightInfo?: {
     departureCity?: string;
     departureCoords?: { lat: number; lng: number };
@@ -45,7 +46,7 @@ const TYPE_LABELS: Record<string, string> = {
   luggage: 'Bagages',
 };
 
-const ROUTE_COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4'];
+const ROUTE_COLORS = ['#6366F1', '#06B6D4', '#F59E0B', '#EF4444', '#8B5CF6', '#10B981', '#F97316', '#EC4899'];
 
 // ─── Helpers ────────────────────────────────────────────────
 
@@ -127,69 +128,6 @@ function getPopupContent(item: TripItem, index: number): string {
   `;
 }
 
-function addDirectionArrows(
-  L: any,
-  map: any,
-  routeCoords: [number, number][],
-  color: string,
-  layerGroup: any
-): void {
-  if (routeCoords.length < 2) return;
-
-  // Compute total route distance for even arrow spacing
-  let totalDist = 0;
-  const segDists: number[] = [];
-  for (let i = 0; i < routeCoords.length - 1; i++) {
-    const d = map.distance(routeCoords[i], routeCoords[i + 1]);
-    segDists.push(d);
-    totalDist += d;
-  }
-
-  if (totalDist < 100) return; // too short for arrows
-
-  // Place arrows every ~20% of total distance (max 5 arrows)
-  const arrowInterval = totalDist / 6;
-  let accumulated = 0;
-  let nextArrowAt = arrowInterval;
-
-  for (let i = 0; i < routeCoords.length - 1; i++) {
-    const segLen = segDists[i];
-    accumulated += segLen;
-
-    if (accumulated >= nextArrowAt) {
-      const start = routeCoords[i];
-      const end = routeCoords[i + 1];
-
-      // Use screen-space angle for Mercator-correct direction
-      const p1 = map.latLngToContainerPoint(start);
-      const p2 = map.latLngToContainerPoint(end);
-      const dx = p2.x - p1.x;
-      const dy = p2.y - p1.y;
-      const angleDeg = Math.atan2(dx, -dy) * 180 / Math.PI;
-
-      const midLat = (start[0] + end[0]) / 2;
-      const midLng = (start[1] + end[1]) / 2;
-
-      const arrowIcon = L.divIcon({
-        className: 'direction-arrow',
-        html: `<svg width="14" height="14" viewBox="0 0 14 14" style="transform:rotate(${angleDeg}deg);filter:drop-shadow(0 0 2px white) drop-shadow(0 0 2px white);" fill="none">
-          <path d="M3 10L7 4L11 10" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>`,
-        iconSize: [14, 14],
-        iconAnchor: [7, 7],
-      });
-
-      const arrowMarker = L.marker([midLat, midLng], {
-        icon: arrowIcon,
-        interactive: false,
-        zIndexOffset: -50,
-      });
-      layerGroup.addLayer(arrowMarker);
-
-      nextArrowAt += arrowInterval;
-    }
-  }
-}
 
 // ─── Inline styles for Leaflet overrides ────────────────────
 
@@ -231,11 +169,12 @@ const LEAFLET_STYLE_OVERRIDES = `
 
 // ─── Component ──────────────────────────────────────────────
 
-export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, mapNumbers, isVisible = true, flightInfo }: TripMapProps) {
+export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, mapNumbers, isVisible = true, importedPlaces, flightInfo }: TripMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
   const leafletRef = useRef<any>(null);
+  const polylineDecoratorRef = useRef<any>(null);
 
   // Layer groups for explicit cleanup
   const markerLayerRef = useRef<any>(null);
@@ -287,6 +226,10 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
       try {
         const L = await import('leaflet');
         leafletRef.current = L.default;
+
+        // Load polyline decorator
+        const PolylineDecorator = await import('leaflet-polylinedecorator');
+        polylineDecoratorRef.current = PolylineDecorator.default;
 
         // Inject Leaflet CSS
         if (!document.getElementById('leaflet-css')) {
@@ -445,15 +388,50 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
       if (routeCoords.length < 2) return;
 
       const color = filterDay === null ? ROUTE_COLORS[idx % ROUTE_COLORS.length] : '#3B82F6';
+
+      // Halo (ombre)
+      const halo = L.polyline(routeCoords, {
+        color,
+        weight: 7,
+        opacity: 0.15,
+        smoothFactor: 1.5,
+        lineJoin: 'round',
+        lineCap: 'round',
+      });
+      routeLayer.addLayer(halo);
+
+      // Route principale
       const polyline = L.polyline(routeCoords, {
         color,
         weight: 3,
-        opacity: 0.5,
+        opacity: 0.7,
         smoothFactor: 1.5,
         lineJoin: 'round',
+        lineCap: 'round',
       });
       routeLayer.addLayer(polyline);
-      addDirectionArrows(L, map, routeCoords, color, routeLayer);
+
+      // Decorator avec flèches directionnelles
+      if (polylineDecoratorRef.current) {
+        const decorator = L.polylineDecorator(polyline, {
+          patterns: [{
+            offset: '25%',
+            repeat: 80,
+            symbol: L.Symbol.arrowHead({
+              pixelSize: 9,
+              polygon: false,
+              pathOptions: {
+                stroke: true,
+                color,
+                weight: 2,
+                opacity: 0.8,
+                fillOpacity: 0,
+              },
+            }),
+          }],
+        });
+        routeLayer.addLayer(decorator);
+      }
     });
 
     // Flight arc
@@ -486,7 +464,7 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
         const endLng = firstDestItem.longitude;
 
         const curvePoints: [number, number][] = [];
-        const numPoints = 50;
+        const numPoints = 80;
         for (let i = 0; i <= numPoints; i++) {
           const t = i / numPoints;
           const lat = startLat + t * (endLat - startLat);
@@ -499,7 +477,9 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
           color: '#6366F1',
           weight: 2,
           opacity: 0.6,
-          dashArray: '8, 6',
+          dashArray: '4, 4',
+          lineJoin: 'round',
+          lineCap: 'round',
         });
         routeLayer.addLayer(flightLine);
 
@@ -523,8 +503,60 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
         routeLayer.addLayer(planeMarker);
       }
     }
+
+    // ─── Add imported places markers (distinct style) ─────────
+    if (importedPlaces && importedPlaces.length > 0) {
+      importedPlaces.forEach((place) => {
+        if (!place.lat || !place.lng) return;
+
+        // Star icon marker (wish list style)
+        const importedIcon = L.divIcon({
+          className: 'imported-place-marker',
+          html: `<div style="
+            width:28px;height:28px;border-radius:50%;
+            background:#FBBF24;border:2px solid white;
+            color:white;font-size:14px;
+            display:flex;align-items:center;justify-content:center;
+            box-shadow:0 1px 4px rgba(0,0,0,0.25);
+            transition:transform 0.15s ease;
+          ">⭐</div>`,
+          iconSize: [28, 28],
+          iconAnchor: [14, 14],
+          popupAnchor: [0, -14],
+        });
+
+        const categoryLabel = place.category || 'autre';
+        const popupHtml = `
+          <div style="min-width:160px;padding:4px;">
+            <div style="font-weight:600;font-size:13px;margin-bottom:4px;">${place.name}</div>
+            ${place.address ? `<div style="font-size:11px;color:#666;margin-bottom:4px;">${place.address}</div>` : ''}
+            <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:6px;">
+              <span style="background:#FBBF24;color:white;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:600;">Lieu importé</span>
+              <span style="background:#E5E7EB;color:#374151;padding:2px 6px;border-radius:4px;font-size:10px;">${categoryLabel}</span>
+            </div>
+            ${place.notes ? `<div style="font-size:11px;color:#666;margin-top:6px;font-style:italic;">${place.notes}</div>` : ''}
+            ${place.sourceUrl ? `<a href="${place.sourceUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-block;margin-top:6px;color:#3B82F6;font-size:11px;text-decoration:underline;">Voir sur Maps</a>` : ''}
+          </div>
+        `;
+
+        const marker = L.marker([place.lat, place.lng], { icon: importedIcon })
+          .bindPopup(popupHtml, {
+            maxWidth: typeof window !== 'undefined' ? Math.min(280, window.innerWidth - 60) : 280,
+            className: 'clean-popup',
+          });
+
+        markerLayer.addLayer(marker);
+        bounds.extend([place.lat, place.lng]);
+      });
+
+      // Re-fit bounds to include imported places
+      if (bounds.isValid()) {
+        storedBoundsRef.current = bounds;
+        map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14, animate: true });
+      }
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [itemsKey, isLoaded, flightInfo, mapNumbers, filterDay]);
+  }, [itemsKey, isLoaded, flightInfo, mapNumbers, filterDay, importedPlaces]);
 
   // ─── Hover highlight (O(1) icon swap, no full rebuild) ──
 

@@ -22,6 +22,7 @@ import {
   CalendarPlus,
   Download,
   Globe,
+  Upload,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -50,6 +51,8 @@ import { CalendarView } from '@/components/trip/CalendarView';
 import { CommentsSection } from '@/components/trip/CommentsSection';
 import { ChatPanel, ChatButton } from '@/components/trip/ChatPanel';
 import { TripOnboarding } from '@/components/trip/TripOnboarding';
+import { ImportPlaces } from '@/components/trip/ImportPlaces';
+import { ImportedPlace } from '@/lib/types';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -59,6 +62,9 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
 import { exportTripPdf } from '@/lib/exportPdf';
+import { useLiveTrip } from '@/hooks/useLiveTrip';
+import { LiveTripBanner } from '@/components/trip/LiveTripBanner';
+import { LiveTripDashboard } from '@/components/trip/LiveTripDashboard';
 
 function updateTripWithNewHotel(trip: Trip, newHotel: Accommodation): Trip {
   const oldHotelName = trip.accommodation?.name || '';
@@ -215,6 +221,8 @@ export default function TripPage() {
   const [planningView, setPlanningView] = useState<'timeline' | 'calendar'>('timeline');
   const [showChatPanel, setShowChatPanel] = useState(false);
   const [showFlythrough, setShowFlythrough] = useState(false);
+  const [showImportPlaces, setShowImportPlaces] = useState(false);
+  const [showLiveDashboard, setShowLiveDashboard] = useState(false);
 
   const [isDesktop, setIsDesktop] = useState(false);
   useEffect(() => {
@@ -227,6 +235,9 @@ export default function TripPage() {
 
   const trip = useCollaborativeMode ? collaborativeTrip?.data : localTrip;
   const loading = useCollaborativeMode ? collaborativeLoading : localLoading;
+
+  // Live Trip Mode
+  const liveState = useLiveTrip(trip || null);
 
   const members = useMemo(() => collaborativeTrip?.members || [], [collaborativeTrip?.members]);
   const proposals = useMemo(() => collaborativeTrip?.proposals || [], [collaborativeTrip?.proposals]);
@@ -833,6 +844,37 @@ export default function TripPage() {
     }
   };
 
+  const handleImportPlaces = async (places: ImportedPlace[]) => {
+    if (!trip) return;
+
+    const updatedTrip: Trip = {
+      ...trip,
+      importedPlaces: {
+        items: places,
+        importedAt: new Date().toISOString(),
+        source: places[0]?.source || 'unknown',
+      },
+    };
+
+    setLocalTrip(updatedTrip);
+    localStorage.setItem('currentTrip', JSON.stringify(updatedTrip));
+
+    // Si mode collaboratif, sauvegarder en DB
+    if (useCollaborativeMode && tripId) {
+      try {
+        await fetch(`/api/trips/${tripId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            data: updatedTrip,
+          }),
+        });
+      } catch (error) {
+        console.error('Erreur lors de la sauvegarde des lieux importés:', error);
+      }
+    }
+  };
+
   // Unified map numbers: same numbering for both map markers and planning view
   // Only items with valid coords and non-flight type get a number (matching TripMap logic)
   const itemMapNumbers = useMemo(() => {
@@ -933,6 +975,16 @@ export default function TripPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background via-background to-[#1e3a5f]/5">
+      {/* Live Trip Banner */}
+      {liveState && trip && (
+        <LiveTripBanner
+          liveState={liveState}
+          trip={trip}
+          onShowMap={() => setMainTab('carte')}
+          onReportIssue={() => setShowChatPanel(true)}
+        />
+      )}
+
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-[#1e3a5f]/10 bg-background/85 shadow-sm backdrop-blur-xl">
         <div className="container mx-auto px-4 py-3">
@@ -1092,6 +1144,19 @@ export default function TripPage() {
                   variant="outline"
                   size="sm"
                   className="gap-1.5 h-8"
+                  onClick={() => setShowImportPlaces(true)}
+                  title="Importer des lieux depuis Google Maps"
+                >
+                  <Upload className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline text-xs">Lieux</span>
+                </Button>
+              )}
+
+              {canOwnerEdit && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5 h-8"
                   onClick={(event) => handleExportDebug(!event.shiftKey)}
                   title="Export debug compact (Shift+clic pour inclure _rawTrip)"
                 >
@@ -1128,6 +1193,7 @@ export default function TripPage() {
         <div className="lg:hidden">
           <Tabs value={mainTab} onValueChange={setMainTab}>
             <TabsList className="mb-4 flex w-full overflow-x-auto rounded-xl border border-[#1e3a5f]/12 bg-background/70 p-1" data-tour="tabs">
+              {liveState && <TabsTrigger value="live" className="text-xs flex-1 bg-gradient-to-r from-purple-500 to-blue-500 text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600">🔴 Live</TabsTrigger>}
               <TabsTrigger value="planning" className="text-xs flex-1">Planning</TabsTrigger>
               <TabsTrigger value="reserver" className="text-xs flex-1">Reserver</TabsTrigger>
               <TabsTrigger value="carte" className="text-xs flex-1">Carte</TabsTrigger>
@@ -1135,6 +1201,23 @@ export default function TripPage() {
               {user && <TabsTrigger value="depenses" className="text-xs flex-1">Dépenses</TabsTrigger>}
               <TabsTrigger value="infos" className="text-xs flex-1">Infos</TabsTrigger>
             </TabsList>
+
+            {liveState && (
+              <TabsContent value="live">
+                <LiveTripDashboard
+                  liveState={liveState}
+                  trip={trip}
+                  onNavigateToActivity={(activityId) => {
+                    // Find the activity and open it in the map
+                    const item = trip.days.flatMap(d => d.items).find(i => i.id === activityId);
+                    if (item) {
+                      setSelectedItemId(activityId);
+                      setMainTab('carte');
+                    }
+                  }}
+                />
+              </TabsContent>
+            )}
 
             <TabsContent value="planning">
               <div className="space-y-0 rounded-2xl border border-[#1e3a5f]/10 bg-background/65 p-3 shadow-sm">
@@ -1231,7 +1314,7 @@ export default function TripPage() {
 
             <TabsContent value="carte">
               <div className="h-[70vh] rounded-lg overflow-hidden">
-                <TripMap items={editMode ? allItems : activeDayItems} selectedItemId={selectedItemId} hoveredItemId={hoveredItemId || undefined} onItemClick={handleSelectItem} mapNumbers={itemMapNumbers} isVisible={mainTab === 'carte'} flightInfo={{ departureCity: trip.preferences.origin, departureCoords: trip.preferences.originCoords, arrivalCity: trip.preferences.destination, arrivalCoords: trip.preferences.destinationCoords, stopoverCities: trip.outboundFlight?.stopCities }} />
+                <TripMap items={editMode ? allItems : activeDayItems} selectedItemId={selectedItemId} hoveredItemId={hoveredItemId || undefined} onItemClick={handleSelectItem} mapNumbers={itemMapNumbers} isVisible={mainTab === 'carte'} importedPlaces={trip.importedPlaces?.items} flightInfo={{ departureCity: trip.preferences.origin, departureCoords: trip.preferences.originCoords, arrivalCity: trip.preferences.destination, arrivalCoords: trip.preferences.destinationCoords, stopoverCities: trip.outboundFlight?.stopCities }} />
               </div>
             </TabsContent>
 
@@ -1274,12 +1357,30 @@ export default function TripPage() {
           <div className="flex-[3] min-w-0">
             <Tabs value={mainTab} onValueChange={setMainTab}>
               <TabsList className="mb-3 rounded-xl border border-[#1e3a5f]/12 bg-background/70 p-1" data-tour="tabs">
+                {liveState && <TabsTrigger value="live" className="text-sm bg-gradient-to-r from-purple-500 to-blue-500 text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600">🔴 Live</TabsTrigger>}
                 <TabsTrigger value="planning" className="text-sm">Planning</TabsTrigger>
                 <TabsTrigger value="reserver" className="text-sm">Reserver</TabsTrigger>
                 {user && <TabsTrigger value="photos" className="text-sm">Photos</TabsTrigger>}
                 {user && <TabsTrigger value="depenses" className="text-sm">Dépenses partagées</TabsTrigger>}
                 <TabsTrigger value="infos" className="text-sm">Infos</TabsTrigger>
               </TabsList>
+
+              {liveState && (
+                <TabsContent value="live">
+                  <LiveTripDashboard
+                    liveState={liveState}
+                    trip={trip}
+                    onNavigateToActivity={(activityId) => {
+                      const item = trip.days.flatMap(d => d.items).find(i => i.id === activityId);
+                      if (item) {
+                        setSelectedItemId(activityId);
+                        // The map is already visible on desktop, just highlight the item
+                        setHoveredItemId(activityId);
+                      }
+                    }}
+                  />
+                </TabsContent>
+              )}
 
               <TabsContent value="planning">
                 {/* Hotel selector moved to check-in in timeline */}
@@ -1416,6 +1517,7 @@ export default function TripPage() {
                 onItemClick={handleSelectItem}
                 mapNumbers={itemMapNumbers}
                 isVisible={true}
+                importedPlaces={trip.importedPlaces?.items}
                 flightInfo={{
                   departureCity: trip.preferences.origin,
                   departureCoords: trip.preferences.originCoords,
@@ -1462,6 +1564,13 @@ export default function TripPage() {
       {trip && (
         <AddActivityModal isOpen={showAddActivityModal} onClose={() => setShowAddActivityModal(false)} onAdd={handleAddNewItem} dayNumber={addActivityDay} destination={trip.preferences?.destination || collaborativeTrip?.destination || ''} defaultStartTime={addActivityDefaultTime} defaultEndTime={addActivityDefaultEndTime} />
       )}
+
+      <ImportPlaces
+        open={showImportPlaces}
+        onOpenChange={setShowImportPlaces}
+        onImport={handleImportPlaces}
+        destinationCoords={trip?.preferences.destinationCoords}
+      />
 
       {/* Chat Panel for AI-powered itinerary modifications */}
       {trip && canOwnerEdit && (

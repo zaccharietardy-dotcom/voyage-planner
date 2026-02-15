@@ -1,6 +1,6 @@
 'use client';
 
-import { LogOut, Loader2, ArrowLeft, MapPin, Settings, Users, UserPlus, Calendar, Crown, CreditCard, Sparkles, Check } from 'lucide-react';
+import { LogOut, Loader2, ArrowLeft, MapPin, Settings, Users, UserPlus, Calendar, Crown, CreditCard, Sparkles, Check, Trophy } from 'lucide-react';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -11,6 +11,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { UserProfileCard } from '@/components/social/UserProfileCard';
+import { GamificationSection } from '@/components/gamification/GamificationSection';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -203,11 +204,15 @@ export default function ProfilPage() {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
-          <TabsList className="w-full">
-            <TabsTrigger value="trips" className="flex-1">Voyages</TabsTrigger>
-            <TabsTrigger value="followers" className="flex-1">Abonnés</TabsTrigger>
-            <TabsTrigger value="following" className="flex-1">Abonnements</TabsTrigger>
-            <TabsTrigger value="pro" className="flex-1 gap-1">
+          <TabsList className="w-full grid grid-cols-5 gap-1">
+            <TabsTrigger value="trips" className="text-xs">Voyages</TabsTrigger>
+            <TabsTrigger value="gamification" className="gap-1 text-xs">
+              <Trophy className="w-3.5 h-3.5" />
+              Stats
+            </TabsTrigger>
+            <TabsTrigger value="followers" className="text-xs">Abonnés</TabsTrigger>
+            <TabsTrigger value="following" className="text-xs">Suivis</TabsTrigger>
+            <TabsTrigger value="pro" className="gap-1 text-xs">
               <Crown className="w-3.5 h-3.5" />
               Pro
             </TabsTrigger>
@@ -242,6 +247,10 @@ export default function ProfilPage() {
                 ))}
               </div>
             )}
+          </TabsContent>
+
+          <TabsContent value="gamification" className="mt-4">
+            {user && <GamificationSection userId={user.id} isOwnProfile={true} />}
           </TabsContent>
 
           <TabsContent value="followers" className="mt-4">

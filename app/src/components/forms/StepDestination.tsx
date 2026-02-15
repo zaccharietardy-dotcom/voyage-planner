@@ -15,6 +15,8 @@ import { fr } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { TripPreferences, CityStage, DurationSuggestion, DestinationSuggestion } from '@/lib/types';
 import { useSuggestions } from '@/hooks/useSuggestions';
+import { useUserPreferences } from '@/hooks/useUserPreferences';
+import { StyleMatchBadge } from '@/components/trip/StyleMatchBadge';
 
 interface StepDestinationProps {
   data: Partial<TripPreferences>;
@@ -32,6 +34,7 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
   const stages = data.cityPlan || [{ city: '', days: 7 }];
   const [inspireQuery, setInspireQuery] = useState('');
   const [durationSuggestionForStage, setDurationSuggestionForStage] = useState<number | null>(null);
+  const { preferences } = useUserPreferences();
 
   const {
     loadingDuration,
@@ -241,21 +244,32 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
                   )}
                 </div>
 
-                {/* Duration suggestion link per stage */}
+                {/* Duration suggestion and style match */}
                 {stage.city.length > 2 && (
-                  <button
-                    type="button"
-                    onClick={() => handleDurationSuggestion(index)}
-                    disabled={loadingDuration && durationSuggestionForStage === index}
-                    className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors ml-1"
-                  >
-                    {loadingDuration && durationSuggestionForStage === index ? (
-                      <Loader2 className="h-3 w-3 animate-spin" />
-                    ) : (
-                      <Clock className="h-3 w-3" />
+                  <div className="flex items-center gap-3 ml-1">
+                    <button
+                      type="button"
+                      onClick={() => handleDurationSuggestion(index)}
+                      disabled={loadingDuration && durationSuggestionForStage === index}
+                      className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
+                    >
+                      {loadingDuration && durationSuggestionForStage === index ? (
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                      ) : (
+                        <Clock className="h-3 w-3" />
+                      )}
+                      Combien de jours ?
+                    </button>
+
+                    {/* Show style match if user has preferences */}
+                    {preferences && (
+                      <StyleMatchBadge
+                        destination={stage.city}
+                        preferences={preferences}
+                        showIcon={false}
+                      />
                     )}
-                    Combien de jours ?
-                  </button>
+                  </div>
                 )}
 
                 {/* Duration suggestion display for this stage */}
