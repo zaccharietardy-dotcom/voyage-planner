@@ -193,6 +193,7 @@ export async function PATCH(
   try {
     const { id } = await params;
     const supabase = await createRouteHandlerClient();
+    const serviceClient = getServiceClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
@@ -200,7 +201,7 @@ export async function PATCH(
     }
 
     // Proposals First: seules les modifications owner passent en PATCH direct
-    const { data: trip, error: tripError } = await supabase
+    const { data: trip, error: tripError } = await serviceClient
       .from('trips')
       .select('owner_id')
       .eq('id', id)
@@ -274,13 +275,14 @@ export async function DELETE(
   try {
     const { id } = await params;
     const supabase = await createRouteHandlerClient();
+    const serviceClient = getServiceClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
       return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
     }
 
-    const { data: trip, error: tripError } = await supabase
+    const { data: trip, error: tripError } = await serviceClient
       .from('trips')
       .select('owner_id')
       .eq('id', id)
