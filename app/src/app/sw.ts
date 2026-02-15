@@ -1,6 +1,6 @@
 import { defaultCache } from "@serwist/next/worker";
 import type { PrecacheEntry, SerwistGlobalConfig } from "serwist";
-import { Serwist, StaleWhileRevalidate, CacheFirst } from "serwist";
+import { Serwist, StaleWhileRevalidate, CacheFirst, NetworkFirst } from "serwist";
 import { CacheableResponsePlugin } from "serwist";
 import { ExpirationPlugin } from "serwist";
 
@@ -19,6 +19,19 @@ const serwist = new Serwist({
   clientsClaim: true,
   navigationPreload: true,
   runtimeCaching: [
+    // Cesium assets - network-first to prevent stale workers/widgets
+    {
+      matcher: /\/cesium\/.*/i,
+      handler: new NetworkFirst({
+        cacheName: "cesium-assets",
+        plugins: [
+          new ExpirationPlugin({
+            maxEntries: 200,
+            maxAgeSeconds: 24 * 60 * 60, // 1 day
+          }),
+        ],
+      }),
+    },
     ...defaultCache,
     // Cache trip API responses with stale-while-revalidate
     {

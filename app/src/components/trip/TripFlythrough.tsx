@@ -106,11 +106,16 @@ function applySafeBaseImagery(Cesium: any, viewer: any) {
 function detectWebGLSupport(): { webgl1: boolean; webgl2: boolean } {
   try {
     const canvas = document.createElement('canvas');
-    const webgl2 = !!canvas.getContext('webgl2');
-    const webgl1 =
-      !!canvas.getContext('webgl') || !!canvas.getContext('experimental-webgl');
 
-    return { webgl1, webgl2 };
+    const gl2 = canvas.getContext('webgl2');
+    const hasWebgl2 = !!gl2;
+    if (gl2) gl2.getExtension('WEBGL_lose_context')?.loseContext();
+
+    const gl1 = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    const hasWebgl1 = !!gl1;
+    if (gl1) (gl1 as WebGLRenderingContext).getExtension('WEBGL_lose_context')?.loseContext();
+
+    return { webgl1: hasWebgl1, webgl2: hasWebgl2 };
   } catch {
     return { webgl1: false, webgl2: false };
   }
@@ -237,6 +242,18 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
     document.body.style.overflow = 'hidden';
     return () => {
       document.body.style.overflow = previousOverflow;
+    };
+  }, [isOpen]);
+
+  // Load Cesium widget CSS (required for proper viewer layout)
+  useEffect(() => {
+    if (!isOpen) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = '/cesium/Widgets/widgets.css';
+    document.head.appendChild(link);
+    return () => {
+      document.head.removeChild(link);
     };
   }, [isOpen]);
 
@@ -465,15 +482,19 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
         }
 
         try {
-          void applyBest3DQuality(Cesium, viewer, hasIonToken, compatibilityMode);
+          await applyBest3DQuality(Cesium, viewer, hasIonToken, compatibilityMode);
         } catch (qualityError) {
           console.warn('[TripFlythrough] 3D quality boost failed, continuing.', qualityError);
         }
 
         try {
+          let renderErrorCount = 0;
+          const MAX_RENDER_ERRORS = 3;
           const onRenderError = (_scene: any, renderError: unknown) => {
-            console.error('[TripFlythrough] Render error after init', renderError);
+            renderErrorCount += 1;
+            console.warn(`[TripFlythrough] Render error ${renderErrorCount}/${MAX_RENDER_ERRORS}`, renderError);
             if (!mounted) return;
+            if (renderErrorCount < MAX_RENDER_ERRORS) return;
             const currentViewer = viewerRef.current;
             if (currentViewer && !currentViewer.isDestroyed?.()) {
               currentViewer.destroy();
