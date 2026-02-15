@@ -114,7 +114,8 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
 
   const totalDays = stages.reduce((sum, s) => sum + s.days, 0);
 
-  const handleUseCurrentLocation = () => {
+  const handleUseCurrentLocation = (options?: { forceOriginUpdate?: boolean }) => {
+    const forceOriginUpdate = options?.forceOriginUpdate === true;
     if (typeof navigator === 'undefined' || !navigator.geolocation) {
       setGeoError('La géolocalisation n’est pas disponible sur cet appareil.');
       return;
@@ -149,7 +150,7 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
           onChange({
             homeCoords: { lat, lng },
             homeAddress: displayName || data.homeAddress || '',
-            ...(cityName && !data.origin ? { origin: cityName } : {}),
+            ...(cityName && (forceOriginUpdate || !data.origin) ? { origin: cityName } : {}),
           });
         } catch {
           onChange({ homeCoords: { lat, lng } });
@@ -229,16 +230,45 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
         <Label htmlFor="origin" className="text-base font-medium">
           Ville de départ
         </Label>
-        <div className="relative">
-          <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            id="origin"
-            placeholder="Paris, France"
-            value={data.origin || ''}
-            onChange={(e) => onChange({ origin: e.target.value })}
-            className="pl-10 h-12 text-base"
-          />
+        <div className="flex flex-col sm:flex-row gap-2">
+          <div className="relative flex-1">
+            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              id="origin"
+              placeholder="Paris, France"
+              value={data.origin || ''}
+              onChange={(e) => onChange({ origin: e.target.value })}
+              className="pl-10 h-12 text-base"
+            />
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            className="h-12 w-full sm:w-auto"
+            onClick={() => handleUseCurrentLocation({ forceOriginUpdate: true })}
+            disabled={geoLoading}
+          >
+            {geoLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Localisation...
+              </>
+            ) : (
+              <>
+                <Navigation className="mr-2 h-4 w-4" />
+                Ma position actuelle
+              </>
+            )}
+          </Button>
         </div>
+        {data.homeCoords && (
+          <p className="text-xs text-muted-foreground">
+            Position détectée: {data.homeCoords.lat.toFixed(4)}, {data.homeCoords.lng.toFixed(4)}
+          </p>
+        )}
+        {geoError && (
+          <p className="text-xs text-destructive">{geoError}</p>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -252,35 +282,9 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
           onChange={(e) => onChange({ homeAddress: e.target.value })}
           className="h-12 text-base"
         />
-        <div className="flex items-center gap-3">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={handleUseCurrentLocation}
-            disabled={geoLoading}
-          >
-            {geoLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Localisation...
-              </>
-            ) : (
-              <>
-                <Navigation className="mr-2 h-4 w-4" />
-                Utiliser ma position actuelle
-              </>
-            )}
-          </Button>
-          {data.homeCoords && (
-            <span className="text-xs text-muted-foreground">
-              {data.homeCoords.lat.toFixed(4)}, {data.homeCoords.lng.toFixed(4)}
-            </span>
-          )}
-        </div>
-        {geoError && (
-          <p className="text-xs text-destructive">{geoError}</p>
-        )}
+        <p className="text-xs text-muted-foreground">
+          Astuce: utilisez le bouton <span className="font-medium">Ma position actuelle</span> sur la ville de départ pour pré-remplir automatiquement cette adresse.
+        </p>
       </div>
 
       {/* ============ MODE PRECISE ============ */}
