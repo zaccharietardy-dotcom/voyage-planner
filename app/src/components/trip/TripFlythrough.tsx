@@ -471,6 +471,7 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
         if (!viewer) {
           throw lastViewerError ?? new Error('Unable to initialize Cesium viewer');
         }
+        console.info('[TripFlythrough] CHECKPOINT: viewer created, applying styles...');
 
         try {
           const imageryLayers = viewer.imageryLayers;
@@ -494,11 +495,13 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
           console.warn('[TripFlythrough] Scene styling failed, continuing.', styleError);
         }
 
+        console.info('[TripFlythrough] CHECKPOINT: styles applied, loading quality...');
         try {
           await applyBest3DQuality(Cesium, viewer, hasIonToken, compatibilityMode);
         } catch (qualityError) {
           console.warn('[TripFlythrough] 3D quality boost failed, continuing.', qualityError);
         }
+        console.info('[TripFlythrough] CHECKPOINT: quality done, setting up render error handler...');
 
         try {
           let renderErrorCount = 0;
@@ -528,6 +531,7 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
           console.warn('[TripFlythrough] Render error hook failed, continuing.', renderHookError);
         }
 
+        console.info('[TripFlythrough] CHECKPOINT: render handler set, extracting waypoints...');
         // Extract waypoints
         const waypoints = extractWaypoints();
         waypointsRef.current = waypoints;
@@ -609,6 +613,7 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
           console.info('[TripFlythrough] No activity waypoints found for this trip, showing base 3D globe only.');
         }
 
+        console.info('[TripFlythrough] CHECKPOINT: waypoints done, setting loaded...');
         setIsLoaded(true);
 
         window.addEventListener('resize', resizeViewer);
