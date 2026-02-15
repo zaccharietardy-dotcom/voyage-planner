@@ -40,61 +40,92 @@ async function applyBest3DQuality(
     viewer.shadowMap.enabled = false;
   }
 
-  if (!hasIonToken) {
-    console.info('[TripFlythrough] No Ion token — skipping Google 3D tiles');
-    return;
+  // Try loading Google Photorealistic 3D Tiles using multiple strategies
+  const googleMapsApiKey = (process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '').trim();
+  let photorealisticTileset: any = null;
+
+  // Strategy 1: Direct Google Maps API key (most reliable in Cesium 1.113+)
+  if (googleMapsApiKey && !photorealisticTileset) {
+    try {
+      console.info('[TripFlythrough] Strategy 1: Loading Google 3D Tiles via Maps API key...');
+      // Set Google Maps API key for Cesium
+      if (Cesium.GoogleMaps) {
+        Cesium.GoogleMaps.defaultApiKey = googleMapsApiKey;
+      }
+      if (typeof Cesium.createGooglePhotorealistic3DTileset === 'function') {
+        photorealisticTileset = await withTimeout(
+          Cesium.createGooglePhotorealistic3DTileset(undefined, { key: googleMapsApiKey }),
+          12000
+        );
+        console.info('[TripFlythrough] Strategy 1 SUCCESS: Google 3D tiles loaded via Maps API key');
+      }
+    } catch (error) {
+      console.warn('[TripFlythrough] Strategy 1 FAILED (Maps API key):', error);
+    }
   }
 
-  try {
-    let photorealisticTileset: any = null;
-    console.info('[TripFlythrough] Loading Google Photorealistic 3D Tiles...');
-    if (typeof Cesium.createGooglePhotorealistic3DTileset === 'function') {
-      photorealisticTileset = await withTimeout(
-        Cesium.createGooglePhotorealistic3DTileset(),
-        12000
-      );
-    } else if (Cesium.Cesium3DTileset?.fromIonAssetId) {
+  // Strategy 2: Via Cesium Ion createGooglePhotorealistic3DTileset (Ion proxied)
+  if (!photorealisticTileset && hasIonToken) {
+    try {
+      console.info('[TripFlythrough] Strategy 2: Loading Google 3D Tiles via Ion...');
+      if (typeof Cesium.createGooglePhotorealistic3DTileset === 'function') {
+        photorealisticTileset = await withTimeout(
+          Cesium.createGooglePhotorealistic3DTileset(),
+          12000
+        );
+        console.info('[TripFlythrough] Strategy 2 SUCCESS: Google 3D tiles loaded via Ion');
+      }
+    } catch (error) {
+      console.warn('[TripFlythrough] Strategy 2 FAILED (Ion createGooglePhotorealistic3DTileset):', error);
+    }
+  }
+
+  // Strategy 3: Via Ion asset ID directly
+  if (!photorealisticTileset && hasIonToken && Cesium.Cesium3DTileset?.fromIonAssetId) {
+    try {
+      console.info('[TripFlythrough] Strategy 3: Loading via Ion asset #2275207...');
       photorealisticTileset = await withTimeout(
         Cesium.Cesium3DTileset.fromIonAssetId(GOOGLE_PHOTOREALISTIC_ION_ASSET_ID),
         12000
       );
+      console.info('[TripFlythrough] Strategy 3 SUCCESS: Google 3D tiles loaded via Ion asset ID');
+    } catch (error) {
+      console.warn('[TripFlythrough] Strategy 3 FAILED (Ion asset ID):', error);
     }
-
-    if (photorealisticTileset) {
-      console.info('[TripFlythrough] Google 3D tiles loaded successfully');
-      // Street-level detail: lower MSE = more tiles loaded = sharper buildings
-      photorealisticTileset.maximumScreenSpaceError = compatibilityMode ? 4 : 1.0;
-      photorealisticTileset.dynamicScreenSpaceError = true;
-      photorealisticTileset.preloadFlightDestinations = true;
-      photorealisticTileset.preloadWhenHidden = true;
-      // Reduce detail on screen edges for better perf (focus center)
-      if (photorealisticTileset.foveatedScreenSpaceError !== undefined) {
-        photorealisticTileset.foveatedScreenSpaceError = 2.0;
-      }
-      // Increase tile cache for smoother revisits
-      if (photorealisticTileset.cacheBytes !== undefined) {
-        photorealisticTileset.cacheBytes = 256 * 1024 * 1024; // 256 MB
-        photorealisticTileset.maximumCacheOverflowBytes = 128 * 1024 * 1024; // 128 MB overflow
-      }
-      viewer.scene.primitives.add(photorealisticTileset);
-
-      // Hide the 2D base layer — Google 3D tiles cover the ground completely
-      // This removes ugly 2D map symbols/roads showing through the 3D view
-      try {
-        const baseLayer = viewer.imageryLayers.get(0);
-        if (baseLayer) {
-          baseLayer.alpha = 0.05; // Nearly invisible, kept as fallback for unloaded areas
-        }
-      } catch { /* no-op */ }
-
-      return;
-    }
-  } catch (error) {
-    console.warn('[TripFlythrough] Google 3D tiles FAILED — you may need to add asset #2275207 to your Cesium Ion account at https://ion.cesium.com/assets', error);
   }
 
-  // Fallback: OSM 3D buildings (grey blocks, not photorealistic)
-  console.info('[TripFlythrough] Falling back to OSM 3D buildings (grey blocks)');
+  // Apply settings if any strategy succeeded
+  if (photorealisticTileset) {
+    // Street-level detail: lower MSE = more tiles loaded = sharper buildings
+    photorealisticTileset.maximumScreenSpaceError = compatibilityMode ? 4 : 1.0;
+    photorealisticTileset.dynamicScreenSpaceError = true;
+    photorealisticTileset.preloadFlightDestinations = true;
+    photorealisticTileset.preloadWhenHidden = true;
+    // Reduce detail on screen edges for better perf (focus center)
+    if (photorealisticTileset.foveatedScreenSpaceError !== undefined) {
+      photorealisticTileset.foveatedScreenSpaceError = 2.0;
+    }
+    // Increase tile cache for smoother revisits
+    if (photorealisticTileset.cacheBytes !== undefined) {
+      photorealisticTileset.cacheBytes = 256 * 1024 * 1024; // 256 MB
+      photorealisticTileset.maximumCacheOverflowBytes = 128 * 1024 * 1024; // 128 MB overflow
+    }
+    viewer.scene.primitives.add(photorealisticTileset);
+
+    // Hide the 2D base layer — Google 3D tiles cover the ground completely
+    try {
+      const baseLayer = viewer.imageryLayers.get(0);
+      if (baseLayer) {
+        baseLayer.alpha = 0.05;
+      }
+    } catch { /* no-op */ }
+
+    return;
+  }
+
+  // All strategies failed — fallback to OSM 3D buildings (grey blocks)
+  console.warn('[TripFlythrough] ALL Google 3D tile strategies failed. Falling back to OSM buildings (grey blocks).');
+  console.warn('[TripFlythrough] To fix: ensure NEXT_PUBLIC_GOOGLE_MAPS_API_KEY has Maps Tiles API enabled, or add asset #2275207 to Ion at https://ion.cesium.com/assets');
   try {
     if (typeof Cesium.createOsmBuildingsAsync === 'function') {
       const osmBuildings = await withTimeout(Cesium.createOsmBuildingsAsync(), 4000);
