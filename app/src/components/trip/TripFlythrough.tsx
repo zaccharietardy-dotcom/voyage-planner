@@ -333,14 +333,6 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
         const compatibilityMode = !webglSupport.webgl2;
         Cesium.Ion.defaultAccessToken = ionToken;
 
-        // Synchronous base layer to avoid async Ion race condition (C[0] null crash)
-        const osmBaseLayer = new Cesium.ImageryLayer(
-          new Cesium.OpenStreetMapImageryProvider({
-            url: 'https://tile.openstreetmap.org/',
-            credit: 'OpenStreetMap',
-          })
-        );
-
         const commonViewerOptions: any = {
           animation: false,
           baseLayerPicker: false,
@@ -356,7 +348,10 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
           navigationInstructionsInitiallyVisible: false,
           showRenderLoopErrors: false,
           skyBox: false,
-          baseLayer: osmBaseLayer,
+          // Disable default async Ion imagery to prevent C[0] null crash
+          baseLayer: false,
+          // Pause render loop until we add a synchronous base layer
+          useDefaultRenderLoop: false,
         };
 
         const viewerProfiles: Array<{
@@ -444,20 +439,28 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
             }
 
             viewer = new Cesium.Viewer(containerRef.current, viewerOptions);
-
             viewerRef.current = viewer;
-            console.info(`[TripFlythrough] Cesium initialized with ${profile.name}`);
 
-            // Load terrain async AFTER viewer is created to avoid race condition
+            // Add synchronous OSM base layer BEFORE starting the render loop
+            viewer.imageryLayers.addImageryProvider(
+              new Cesium.OpenStreetMapImageryProvider({
+                url: 'https://tile.openstreetmap.org/',
+                credit: 'OpenStreetMap',
+              })
+            );
+
+            // Load terrain async (safe: globe renders fine without it)
             if (profile.useTerrain && hasIonToken) {
               try {
-                const terrain = Cesium.Terrain.fromWorldTerrain();
-                viewer.scene.setTerrain(terrain);
-                console.info('[TripFlythrough] Terrain loading started');
+                viewer.scene.setTerrain(Cesium.Terrain.fromWorldTerrain());
               } catch (terrainError) {
-                console.warn('[TripFlythrough] Terrain setup failed, continuing without terrain.', terrainError);
+                console.warn('[TripFlythrough] Terrain setup failed, continuing.', terrainError);
               }
             }
+
+            // NOW start the render loop (base layer is ready)
+            viewer.useDefaultRenderLoop = true;
+            console.info(`[TripFlythrough] Cesium initialized with ${profile.name}`);
             break;
           } catch (profileError) {
             lastViewerError = profileError;
@@ -467,12 +470,6 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
 
         if (!viewer) {
           throw lastViewerError ?? new Error('Unable to initialize Cesium viewer');
-        }
-
-        try {
-          applySafeBaseImagery(Cesium, viewer);
-        } catch (imageryError) {
-          console.warn('[TripFlythrough] Base imagery setup failed, continuing.', imageryError);
         }
 
         try {
@@ -635,6 +632,9 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
         viewerRef.current = null;
 
         console.error('Failed to initialize Cesium:', err);
+        if (err instanceof Error && err.stack) {
+          console.error('[TripFlythrough] Stack trace:', err.stack);
+        }
         const rawMessage = err instanceof Error ? err.message : String(err);
         const lowerMessage = rawMessage.toLowerCase();
         if (lowerMessage.includes('cesiumwidget') || lowerMessage.includes('webgl')) {
