@@ -6,6 +6,51 @@ import { GlobeWaypoint, Traveler, TripArc } from '@/lib/globe/types';
 
 const colors = { arcColor: '#d4a853' };
 const INITIAL_CAMERA = { lng: 2.3522, lat: 48.8566, height: 20000000 };
+const GOOGLE_PHOTOREALISTIC_ION_ASSET_ID = 2275207;
+
+async function applyBest3DQuality(Cesium: any, viewer: any) {
+  viewer.resolutionScale = Math.min(window.devicePixelRatio || 1, 2);
+  viewer.scene.highDynamicRange = true;
+  viewer.scene.globe.enableLighting = true;
+  viewer.scene.globe.showGroundAtmosphere = true;
+  viewer.shadows = true;
+
+  if (viewer.shadowMap) {
+    viewer.shadowMap.enabled = true;
+    viewer.shadowMap.softShadows = true;
+    viewer.shadowMap.size = 2048;
+  }
+
+  try {
+    let photorealisticTileset: any = null;
+    if (typeof Cesium.createGooglePhotorealistic3DTileset === 'function') {
+      photorealisticTileset = await Cesium.createGooglePhotorealistic3DTileset();
+    } else if (Cesium.Cesium3DTileset?.fromIonAssetId) {
+      photorealisticTileset = await Cesium.Cesium3DTileset.fromIonAssetId(
+        GOOGLE_PHOTOREALISTIC_ION_ASSET_ID
+      );
+    }
+
+    if (photorealisticTileset) {
+      photorealisticTileset.maximumScreenSpaceError = 1.2;
+      photorealisticTileset.dynamicScreenSpaceError = true;
+      photorealisticTileset.preloadFlightDestinations = true;
+      viewer.scene.primitives.add(photorealisticTileset);
+      return;
+    }
+  } catch (error) {
+    console.info('[CesiumGlobe] Photorealistic tiles unavailable, fallback to OSM 3D buildings', error);
+  }
+
+  try {
+    if (typeof Cesium.createOsmBuildingsAsync === 'function') {
+      const osmBuildings = await Cesium.createOsmBuildingsAsync();
+      viewer.scene.primitives.add(osmBuildings);
+    }
+  } catch (error) {
+    console.info('[CesiumGlobe] OSM buildings unavailable', error);
+  }
+}
 
 // Create a simple dot marker (fallback when no image)
 function createMarkerCanvas(Cesium: any, isSelected: boolean, isOnline: boolean): HTMLCanvasElement {
@@ -256,14 +301,21 @@ export function CesiumGlobe({
           baseLayer.gamma = 0.95;
         }
 
+        await applyBest3DQuality(Cesium, viewer);
+
         // Labels overlay - only show when very close (street level)
-        const osmLabels = await Cesium.IonImageryProvider.fromAssetId(3);
-        const labelsLayer = imageryLayers.addImageryProvider(osmLabels);
-        labelsLayer.alpha = 0.5;
-        labelsLayer.brightness = 0.6;
-        // Make labels only visible at low altitude (under 50km)
-        labelsLayer.minificationFilter = Cesium.TextureMinificationFilter.LINEAR;
-        labelsLayer.magnificationFilter = Cesium.TextureMagnificationFilter.LINEAR;
+        let labelsLayer: any = null;
+        try {
+          const osmLabels = await Cesium.IonImageryProvider.fromAssetId(3);
+          labelsLayer = imageryLayers.addImageryProvider(osmLabels);
+          labelsLayer.alpha = 0.5;
+          labelsLayer.brightness = 0.6;
+          // Make labels only visible at low altitude (under 50km)
+          labelsLayer.minificationFilter = Cesium.TextureMinificationFilter.LINEAR;
+          labelsLayer.magnificationFilter = Cesium.TextureMagnificationFilter.LINEAR;
+        } catch (error) {
+          console.info('[CesiumGlobe] Labels layer unavailable', error);
+        }
 
         // Dark background
         viewer.scene.backgroundColor = Cesium.Color.fromCssColorString('#050508');

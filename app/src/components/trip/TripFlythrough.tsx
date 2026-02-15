@@ -6,6 +6,52 @@ import { X, Play, Pause, SkipForward, Gauge } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { Trip } from '@/lib/types';
 
+const GOOGLE_PHOTOREALISTIC_ION_ASSET_ID = 2275207;
+
+async function applyBest3DQuality(Cesium: any, viewer: any) {
+  viewer.resolutionScale = Math.min(window.devicePixelRatio || 1, 2);
+  viewer.scene.highDynamicRange = true;
+  viewer.scene.globe.enableLighting = true;
+  viewer.scene.globe.showGroundAtmosphere = true;
+  viewer.shadows = true;
+
+  if (viewer.shadowMap) {
+    viewer.shadowMap.enabled = true;
+    viewer.shadowMap.softShadows = true;
+    viewer.shadowMap.size = 2048;
+  }
+
+  try {
+    let photorealisticTileset: any = null;
+    if (typeof Cesium.createGooglePhotorealistic3DTileset === 'function') {
+      photorealisticTileset = await Cesium.createGooglePhotorealistic3DTileset();
+    } else if (Cesium.Cesium3DTileset?.fromIonAssetId) {
+      photorealisticTileset = await Cesium.Cesium3DTileset.fromIonAssetId(
+        GOOGLE_PHOTOREALISTIC_ION_ASSET_ID
+      );
+    }
+
+    if (photorealisticTileset) {
+      photorealisticTileset.maximumScreenSpaceError = 1.2;
+      photorealisticTileset.dynamicScreenSpaceError = true;
+      photorealisticTileset.preloadFlightDestinations = true;
+      viewer.scene.primitives.add(photorealisticTileset);
+      return;
+    }
+  } catch (error) {
+    console.info('[TripFlythrough] Photorealistic tiles unavailable, fallback to OSM 3D buildings', error);
+  }
+
+  try {
+    if (typeof Cesium.createOsmBuildingsAsync === 'function') {
+      const osmBuildings = await Cesium.createOsmBuildingsAsync();
+      viewer.scene.primitives.add(osmBuildings);
+    }
+  } catch (error) {
+    console.info('[TripFlythrough] OSM buildings unavailable', error);
+  }
+}
+
 interface TripFlythroughProps {
   trip: Trip;
   isOpen: boolean;
@@ -135,6 +181,7 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
 
         viewer.scene.backgroundColor = Cesium.Color.fromCssColorString('#0a0a12');
         viewer.scene.globe.baseColor = Cesium.Color.fromCssColorString('#0a0a12');
+        await applyBest3DQuality(Cesium, viewer);
 
         // Extract waypoints
         const waypoints = extractWaypoints();
@@ -197,11 +244,11 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
           destination: Cesium.Cartesian3.fromDegrees(
             firstWaypoint.lng,
             firstWaypoint.lat,
-            2000
+            1100
           ),
           orientation: {
             heading: 0,
-            pitch: Cesium.Math.toRadians(-45),
+            pitch: Cesium.Math.toRadians(-38),
             roll: 0,
           },
           duration: 2,
@@ -287,11 +334,11 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
       destination: Cesium.Cartesian3.fromDegrees(
         waypoint.lng,
         waypoint.lat,
-        2000
+        950
       ),
       orientation: {
         heading: 0,
-        pitch: Cesium.Math.toRadians(-45),
+        pitch: Cesium.Math.toRadians(-35),
         roll: 0,
       },
       duration: 2 / speed,
