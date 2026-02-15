@@ -436,47 +436,63 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
           throw lastViewerError ?? new Error('Unable to initialize Cesium viewer');
         }
 
-        applySafeBaseImagery(Cesium, viewer);
-
-        // Dark theme
-        const imageryLayers = viewer.imageryLayers;
-        const baseLayer = imageryLayers.get(0);
-        if (baseLayer) {
-          baseLayer.brightness = 0.6;
-          baseLayer.contrast = 1.1;
-          baseLayer.saturation = 0.5;
+        try {
+          applySafeBaseImagery(Cesium, viewer);
+        } catch (imageryError) {
+          console.warn('[TripFlythrough] Base imagery setup failed, continuing.', imageryError);
         }
 
-        viewer.scene.backgroundColor = Cesium.Color.fromCssColorString('#0a0a12');
-        viewer.scene.globe.baseColor = Cesium.Color.fromCssColorString('#0a0a12');
-        viewer.scene.globe.depthTestAgainstTerrain = true;
-        viewer.scene.fog.enabled = true;
-        viewer.scene.fog.density = compatibilityMode ? 0.00025 : 0.00035;
-        viewer.scene.fxaa = !compatibilityMode;
-        if (viewer.scene.postProcessStages?.fxaa) {
-          viewer.scene.postProcessStages.fxaa.enabled = !compatibilityMode;
-        }
-        void applyBest3DQuality(Cesium, viewer, hasIonToken, compatibilityMode);
+        try {
+          const imageryLayers = viewer.imageryLayers;
+          const baseLayer = imageryLayers.get(0);
+          if (baseLayer) {
+            baseLayer.brightness = 0.6;
+            baseLayer.contrast = 1.1;
+            baseLayer.saturation = 0.5;
+          }
 
-        const onRenderError = (_scene: any, renderError: unknown) => {
-          console.error('[TripFlythrough] Render error after init', renderError);
-          if (!mounted) return;
-          const currentViewer = viewerRef.current;
-          if (currentViewer && !currentViewer.isDestroyed?.()) {
-            currentViewer.destroy();
+          viewer.scene.backgroundColor = Cesium.Color.fromCssColorString('#0a0a12');
+          viewer.scene.globe.baseColor = Cesium.Color.fromCssColorString('#0a0a12');
+          viewer.scene.globe.depthTestAgainstTerrain = true;
+          viewer.scene.fog.enabled = true;
+          viewer.scene.fog.density = compatibilityMode ? 0.00025 : 0.00035;
+          viewer.scene.fxaa = !compatibilityMode;
+          if (viewer.scene.postProcessStages?.fxaa) {
+            viewer.scene.postProcessStages.fxaa.enabled = !compatibilityMode;
           }
-          viewerRef.current = null;
-          setIsLoaded(false);
-          setError('Le rendu 3D a échoué sur cet appareil. Carte 2D affichée à la place.');
-        };
-        viewer.scene.renderError.addEventListener(onRenderError);
-        removeRenderErrorListener = () => {
-          try {
-            viewer.scene.renderError.removeEventListener(onRenderError);
-          } catch {
-            // no-op
-          }
-        };
+        } catch (styleError) {
+          console.warn('[TripFlythrough] Scene styling failed, continuing.', styleError);
+        }
+
+        try {
+          void applyBest3DQuality(Cesium, viewer, hasIonToken, compatibilityMode);
+        } catch (qualityError) {
+          console.warn('[TripFlythrough] 3D quality boost failed, continuing.', qualityError);
+        }
+
+        try {
+          const onRenderError = (_scene: any, renderError: unknown) => {
+            console.error('[TripFlythrough] Render error after init', renderError);
+            if (!mounted) return;
+            const currentViewer = viewerRef.current;
+            if (currentViewer && !currentViewer.isDestroyed?.()) {
+              currentViewer.destroy();
+            }
+            viewerRef.current = null;
+            setIsLoaded(false);
+            setError('Le rendu 3D a échoué sur cet appareil. Carte 2D affichée à la place.');
+          };
+          viewer.scene.renderError.addEventListener(onRenderError);
+          removeRenderErrorListener = () => {
+            try {
+              viewer.scene.renderError.removeEventListener(onRenderError);
+            } catch {
+              // no-op
+            }
+          };
+        } catch (renderHookError) {
+          console.warn('[TripFlythrough] Render error hook failed, continuing.', renderHookError);
+        }
 
         // Extract waypoints
         const waypoints = extractWaypoints();
@@ -587,7 +603,8 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
         if (lowerMessage.includes('cesiumwidget') || lowerMessage.includes('webgl')) {
           setError('3D indisponible sur cet appareil. Carte 2D affichée à la place.');
         } else {
-          setError('Échec du chargement de la visualisation 3D. Carte 2D affichée à la place.');
+          const shortReason = rawMessage.slice(0, 140);
+          setError(`Échec du chargement de la visualisation 3D (${shortReason}). Carte 2D affichée à la place.`);
         }
       }
     }

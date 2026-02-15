@@ -463,89 +463,113 @@ export function CesiumGlobe({
           throw lastViewerError ?? new Error('Unable to initialize Cesium viewer');
         }
 
-        applySafeBaseImagery(Cesium, viewer);
-
-        // Dark theme - visible but muted
-        const imageryLayers = viewer.imageryLayers;
-        const baseLayer = imageryLayers.get(0);
-        if (baseLayer) {
-          baseLayer.brightness = 0.55; // Slightly brighter
-          baseLayer.contrast = 1.15;
-          baseLayer.saturation = 0.45; // Muted colors
-          baseLayer.gamma = 0.95;
+        let imageryLayers = viewer.imageryLayers;
+        try {
+          applySafeBaseImagery(Cesium, viewer);
+          imageryLayers = viewer.imageryLayers;
+        } catch (imageryError) {
+          console.warn('[CesiumGlobe] Base imagery setup failed, continuing.', imageryError);
         }
 
-        void applyBest3DQuality(Cesium, viewer, hasIonToken, compatibilityMode);
+        try {
+          const baseLayer = imageryLayers.get(0);
+          if (baseLayer) {
+            baseLayer.brightness = 0.55; // Slightly brighter
+            baseLayer.contrast = 1.15;
+            baseLayer.saturation = 0.45; // Muted colors
+            baseLayer.gamma = 0.95;
+          }
+        } catch (styleError) {
+          console.warn('[CesiumGlobe] Base layer styling failed, continuing.', styleError);
+        }
+
+        try {
+          void applyBest3DQuality(Cesium, viewer, hasIonToken, compatibilityMode);
+        } catch (qualityError) {
+          console.warn('[CesiumGlobe] 3D quality boost failed, continuing.', qualityError);
+        }
 
         // Labels overlay - only show when very close (street level)
         let labelsLayer: any = null;
-        if (hasIonToken) {
-          void (async () => {
-            try {
-              const osmLabels = await withTimeout(
-                Cesium.IonImageryProvider.fromAssetId(3),
-                4000
-              );
-              labelsLayer = imageryLayers.addImageryProvider(osmLabels);
-              labelsLayer.alpha = 0.5;
-              labelsLayer.brightness = 0.6;
-              // Make labels only visible at low altitude (under 50km)
-              labelsLayer.minificationFilter = Cesium.TextureMinificationFilter.LINEAR;
-              labelsLayer.magnificationFilter = Cesium.TextureMagnificationFilter.LINEAR;
-            } catch (error) {
-              console.info('[CesiumGlobe] Labels layer unavailable', error);
+        try {
+          if (hasIonToken) {
+            void (async () => {
+              try {
+                const osmLabels = await withTimeout(
+                  Cesium.IonImageryProvider.fromAssetId(3),
+                  4000
+                );
+                labelsLayer = imageryLayers.addImageryProvider(osmLabels);
+                labelsLayer.alpha = 0.5;
+                labelsLayer.brightness = 0.6;
+                // Make labels only visible at low altitude (under 50km)
+                labelsLayer.minificationFilter = Cesium.TextureMinificationFilter.LINEAR;
+                labelsLayer.magnificationFilter = Cesium.TextureMagnificationFilter.LINEAR;
+              } catch (error) {
+                console.info('[CesiumGlobe] Labels layer unavailable', error);
+              }
+            })();
+          }
+        } catch (labelsError) {
+          console.warn('[CesiumGlobe] Labels setup failed, continuing.', labelsError);
+        }
+
+        try {
+          // Dark background
+          viewer.scene.backgroundColor = Cesium.Color.fromCssColorString('#050508');
+          viewer.scene.globe.baseColor = Cesium.Color.fromCssColorString('#0a0a12');
+          viewer.scene.globe.showGroundAtmosphere = true;
+
+          // Subtle atmosphere
+          if (viewer.scene.skyAtmosphere) {
+            viewer.scene.skyAtmosphere.brightnessShift = 0.2;
+            viewer.scene.skyAtmosphere.saturationShift = -0.2;
+          }
+
+          // Dynamic labels visibility based on zoom
+          viewer.camera.changed.addEventListener(() => {
+            const height = viewer.camera.positionCartographic.height;
+            // Only show road labels when under 50km altitude
+            if (labelsLayer) {
+              labelsLayer.alpha = height < 50000 ? 0.7 : height < 200000 ? 0.3 : 0;
             }
-          })();
+          });
+
+          // Set initial camera position (wide Earth framing)
+          viewer.camera.setView({
+            destination: Cesium.Cartesian3.fromDegrees(
+              INITIAL_CAMERA.lng,
+              INITIAL_CAMERA.lat,
+              INITIAL_CAMERA.height
+            ),
+          });
+        } catch (cameraStyleError) {
+          console.warn('[CesiumGlobe] Camera/style setup failed, continuing.', cameraStyleError);
         }
 
-        // Dark background
-        viewer.scene.backgroundColor = Cesium.Color.fromCssColorString('#050508');
-        viewer.scene.globe.baseColor = Cesium.Color.fromCssColorString('#0a0a12');
-        viewer.scene.globe.showGroundAtmosphere = true;
-
-        // Subtle atmosphere
-        if (viewer.scene.skyAtmosphere) {
-          viewer.scene.skyAtmosphere.brightnessShift = 0.2;
-          viewer.scene.skyAtmosphere.saturationShift = -0.2;
+        try {
+          const onRenderError = (_scene: any, renderError: unknown) => {
+            console.error('[CesiumGlobe] Render error after init', renderError);
+            if (!mounted) return;
+            const currentViewer = viewerRef.current;
+            if (currentViewer && !currentViewer.isDestroyed?.()) {
+              currentViewer.destroy();
+            }
+            viewerRef.current = null;
+            setIsLoaded(false);
+            setError('Le rendu 3D du globe a échoué sur cet appareil.');
+          };
+          viewer.scene.renderError.addEventListener(onRenderError);
+          removeRenderErrorListener = () => {
+            try {
+              viewer.scene.renderError.removeEventListener(onRenderError);
+            } catch {
+              // no-op
+            }
+          };
+        } catch (renderHookError) {
+          console.warn('[CesiumGlobe] Render error hook failed, continuing.', renderHookError);
         }
-
-        // Dynamic labels visibility based on zoom
-        viewer.camera.changed.addEventListener(() => {
-          const height = viewer.camera.positionCartographic.height;
-          // Only show road labels when under 50km altitude
-          if (labelsLayer) {
-            labelsLayer.alpha = height < 50000 ? 0.7 : height < 200000 ? 0.3 : 0;
-          }
-        });
-
-        // Set initial camera position (wide Earth framing)
-        viewer.camera.setView({
-          destination: Cesium.Cartesian3.fromDegrees(
-            INITIAL_CAMERA.lng,
-            INITIAL_CAMERA.lat,
-            INITIAL_CAMERA.height
-          ),
-        });
-
-        const onRenderError = (_scene: any, renderError: unknown) => {
-          console.error('[CesiumGlobe] Render error after init', renderError);
-          if (!mounted) return;
-          const currentViewer = viewerRef.current;
-          if (currentViewer && !currentViewer.isDestroyed?.()) {
-            currentViewer.destroy();
-          }
-          viewerRef.current = null;
-          setIsLoaded(false);
-          setError('Le rendu 3D du globe a échoué sur cet appareil.');
-        };
-        viewer.scene.renderError.addEventListener(onRenderError);
-        removeRenderErrorListener = () => {
-          try {
-            viewer.scene.renderError.removeEventListener(onRenderError);
-          } catch {
-            // no-op
-          }
-        };
 
         // Spin animation when zoomed out
         let lastTime = Date.now();
