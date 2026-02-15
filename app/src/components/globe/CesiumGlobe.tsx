@@ -23,20 +23,25 @@ async function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   });
 }
 
-async function applyBest3DQuality(Cesium: any, viewer: any, hasIonToken: boolean) {
-  if (!hasIonToken) return;
-
-  viewer.resolutionScale = Math.min(window.devicePixelRatio || 1, 2);
-  viewer.scene.highDynamicRange = true;
+async function applyBest3DQuality(
+  Cesium: any,
+  viewer: any,
+  hasIonToken: boolean,
+  compatibilityMode: boolean
+) {
+  viewer.resolutionScale = Math.min(window.devicePixelRatio || 1, compatibilityMode ? 1.1 : 1.5);
+  viewer.scene.highDynamicRange = !compatibilityMode;
   viewer.scene.globe.enableLighting = true;
   viewer.scene.globe.showGroundAtmosphere = true;
-  viewer.shadows = true;
+  viewer.shadows = !compatibilityMode;
 
   if (viewer.shadowMap) {
-    viewer.shadowMap.enabled = true;
-    viewer.shadowMap.softShadows = true;
-    viewer.shadowMap.size = 2048;
+    viewer.shadowMap.enabled = !compatibilityMode;
+    viewer.shadowMap.softShadows = !compatibilityMode;
+    viewer.shadowMap.size = compatibilityMode ? 1024 : 2048;
   }
+
+  if (!hasIonToken) return;
 
   try {
     let photorealisticTileset: any = null;
@@ -53,7 +58,7 @@ async function applyBest3DQuality(Cesium: any, viewer: any, hasIonToken: boolean
     }
 
     if (photorealisticTileset) {
-      photorealisticTileset.maximumScreenSpaceError = 1.2;
+      photorealisticTileset.maximumScreenSpaceError = compatibilityMode ? 2.4 : 1.2;
       photorealisticTileset.dynamicScreenSpaceError = true;
       photorealisticTileset.preloadFlightDestinations = true;
       viewer.scene.primitives.add(photorealisticTileset);
@@ -321,6 +326,7 @@ export function CesiumGlobe({
         // Set access token
         const ionToken = (process.env.NEXT_PUBLIC_CESIUM_ION_TOKEN || '').trim();
         const hasIonToken = ionToken.length > 0;
+        const compatibilityMode = !webglSupport.webgl2;
         Cesium.Ion.defaultAccessToken = ionToken;
 
         const commonViewerOptions: any = {
@@ -366,18 +372,22 @@ export function CesiumGlobe({
               contextOptions: {
                 requestWebgl1: profile.requestWebgl1,
                 webgl: {
-                  alpha: true,
+                  alpha: false,
                   depth: true,
-                  stencil: true,
-                  antialias: true,
+                  stencil: false,
+                  antialias: false,
+                  premultipliedAlpha: false,
+                  preserveDrawingBuffer: false,
                   powerPreference: profile.powerPreference,
                   failIfMajorPerformanceCaveat: false,
                 },
               },
+              msaaSamples: profile.requestWebgl1 ? undefined : 1,
               terrain: hasIonToken ? Cesium.Terrain.fromWorldTerrain() : undefined,
               skyAtmosphere: new Cesium.SkyAtmosphere(),
             });
 
+            viewerRef.current = viewer;
             console.info(`[CesiumGlobe] Cesium initialized with ${profile.name}`);
             break;
           } catch (profileError) {
@@ -402,7 +412,7 @@ export function CesiumGlobe({
           baseLayer.gamma = 0.95;
         }
 
-        void applyBest3DQuality(Cesium, viewer, hasIonToken);
+        void applyBest3DQuality(Cesium, viewer, hasIonToken, compatibilityMode);
 
         // Labels overlay - only show when very close (street level)
         let labelsLayer: any = null;
@@ -500,7 +510,6 @@ export function CesiumGlobe({
           });
         });
 
-        viewerRef.current = viewer;
         setIsLoaded(true);
 
         window.addEventListener('resize', resizeViewer);
@@ -517,6 +526,12 @@ export function CesiumGlobe({
         });
 
       } catch (err) {
+        const currentViewer = viewerRef.current;
+        if (currentViewer && !currentViewer.isDestroyed?.()) {
+          currentViewer.destroy();
+        }
+        viewerRef.current = null;
+
         console.error('Failed to initialize Cesium:', err);
         setError('Échec du chargement du globe 3D');
       }
@@ -870,6 +885,9 @@ export function CesiumGlobe({
           display: none !important;
         }
         .cesium-viewer .cesium-widget-credits {
+          display: none !important;
+        }
+        .cesium-widget-errorPanel {
           display: none !important;
         }
       `}</style>
