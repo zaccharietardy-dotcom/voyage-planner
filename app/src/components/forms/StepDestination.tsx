@@ -26,6 +26,7 @@ interface StepDestinationProps {
 type LocationSuggestion = {
   displayName: string;
   label: string;
+  subtitle?: string;
   city?: string;
   country?: string;
   lat: number;
@@ -37,6 +38,10 @@ function looksLikeStreetQuery(value: string): boolean {
   if (!normalized) return false;
   if (/\d/.test(normalized)) return true;
   return /\b(rue|street|avenue|road|boulevard|blvd|via|strasse|straße|calle|rua|quai|impasse|allee|allée|chemin|route|plaza|place)\b/i.test(normalized);
+}
+
+function formatCoordPair(lat: number, lng: number): string {
+  return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
 }
 
 const TYPE_LABELS: Record<DestinationSuggestion['type'], { label: string; icon: typeof Map }> = {
@@ -185,7 +190,7 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
 
         try {
           const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lng)}`
+            `/api/geocode/reverse?lat=${encodeURIComponent(lat)}&lng=${encodeURIComponent(lng)}`
           );
 
           if (!response.ok) {
@@ -193,9 +198,8 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
           }
 
           const payload = await response.json();
-          const displayName = payload?.display_name as string | undefined;
-          const address = payload?.address || {};
-          const cityName = address.city || address.town || address.village || address.municipality;
+          const displayName = typeof payload?.displayName === 'string' ? payload.displayName : undefined;
+          const cityName = typeof payload?.city === 'string' ? payload.city : undefined;
 
           onChange({
             homeCoords: { lat, lng },
@@ -311,6 +315,11 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
     handleUseCurrentLocation({ forceOriginUpdate: true, silentErrors: true });
   };
 
+  const originQueryIsAddress = looksLikeStreetQuery(data.origin || '');
+  const detectedOriginText = (data.homeAddress || '').trim() || (data.homeCoords
+    ? formatCoordPair(data.homeCoords.lat, data.homeCoords.lng)
+    : '');
+
   return (
     <div className="space-y-8">
       <div className="text-center mb-8">
@@ -388,7 +397,7 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
                   {originSuggestionsLoading ? (
                     <div className="px-3 py-2 text-sm text-muted-foreground flex items-center gap-2">
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      Recherche des villes...
+                      {originQueryIsAddress ? 'Recherche des adresses...' : 'Recherche des villes...'}
                     </div>
                   ) : originSuggestions.length > 0 ? (
                     originSuggestions.map((suggestion, index) => (
@@ -399,9 +408,9 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
                         onMouseDown={(e) => e.preventDefault()}
                         onClick={() => applyOriginSuggestion(suggestion)}
                       >
-                        <div className="text-sm font-medium">{suggestion.label || suggestion.displayName}</div>
-                        {suggestion.displayName !== (suggestion.label || suggestion.displayName) && (
-                          <div className="text-xs text-muted-foreground line-clamp-1">{suggestion.displayName}</div>
+                        <div className="text-sm font-medium line-clamp-1">{suggestion.label || suggestion.displayName}</div>
+                        {originQueryIsAddress && suggestion.subtitle && (
+                          <div className="text-xs text-muted-foreground line-clamp-1">{suggestion.subtitle}</div>
                         )}
                       </button>
                     ))
@@ -434,9 +443,9 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
             )}
           </Button>
         </div>
-        {data.homeCoords && (
+        {data.homeCoords && detectedOriginText && (
           <p className="text-xs text-muted-foreground">
-            Position détectée: {data.homeCoords.lat.toFixed(4)}, {data.homeCoords.lng.toFixed(4)}
+            Position détectée: {detectedOriginText}
           </p>
         )}
         {geoError && (
@@ -475,7 +484,10 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
                       onMouseDown={(e) => e.preventDefault()}
                       onClick={() => applyHomeAddressSuggestion(suggestion)}
                     >
-                      {suggestion.displayName}
+                      <div className="font-medium line-clamp-1">{suggestion.label || suggestion.displayName}</div>
+                      {suggestion.subtitle && (
+                        <div className="text-xs text-muted-foreground line-clamp-1">{suggestion.subtitle}</div>
+                      )}
                     </button>
                   ))
                 ) : (

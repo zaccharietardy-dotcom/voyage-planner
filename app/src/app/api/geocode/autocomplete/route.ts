@@ -8,6 +8,11 @@ type NominatimAddress = {
   county?: string;
   state?: string;
   country?: string;
+  house_number?: string;
+  road?: string;
+  suburb?: string;
+  neighbourhood?: string;
+  hamlet?: string;
 };
 
 type NominatimSearchResult = {
@@ -20,6 +25,7 @@ type NominatimSearchResult = {
 type AutocompleteResult = {
   displayName: string;
   label: string;
+  subtitle?: string;
   city?: string;
   country?: string;
   lat: number;
@@ -35,6 +41,60 @@ function normalizeLimit(input: string | null): number {
 function getCityName(address?: NominatimAddress): string | undefined {
   if (!address) return undefined;
   return address.city || address.town || address.village || address.municipality || address.county || address.state;
+}
+
+function splitDisplayName(displayName: string): string[] {
+  return displayName
+    .split(',')
+    .map((part) => part.trim())
+    .filter(Boolean);
+}
+
+function uniqParts(parts: Array<string | undefined>): string[] {
+  const seen = new Set<string>();
+  const result: string[] = [];
+  for (const part of parts) {
+    const normalized = (part || '').trim();
+    if (!normalized) continue;
+    const key = normalized.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    result.push(normalized);
+  }
+  return result;
+}
+
+function buildSubtitle(label: string, parts: Array<string | undefined>): string | undefined {
+  const labelKey = label.trim().toLowerCase();
+  const filtered = uniqParts(parts).filter((part) => part.toLowerCase() !== labelKey);
+  return filtered.length > 0 ? filtered.join(', ') : undefined;
+}
+
+function buildCityPresentation(item: NominatimSearchResult): { label: string; subtitle?: string } {
+  const city = getCityName(item.address);
+  const country = item.address?.country;
+  if (city) {
+    return { label: uniqParts([city, country]).join(', ') || city };
+  }
+
+  const parts = splitDisplayName(item.display_name);
+  const label = parts[0] || item.display_name;
+  const subtitle = buildSubtitle(label, [parts[1], country]);
+  return { label, subtitle };
+}
+
+function buildAddressPresentation(item: NominatimSearchResult): { label: string; subtitle?: string } {
+  const address = item.address;
+  const street = uniqParts([address?.house_number, address?.road]).join(' ').trim();
+  const parts = splitDisplayName(item.display_name);
+  const label = street || parts[0] || item.display_name;
+  const subtitle = buildSubtitle(label, [
+    address?.suburb || address?.neighbourhood || address?.hamlet,
+    getCityName(address),
+    address?.country,
+    ...parts.slice(1, 4),
+  ]);
+  return { label, subtitle };
 }
 
 export async function GET(request: NextRequest) {
@@ -85,11 +145,11 @@ export async function GET(request: NextRequest) {
         if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
         const city = getCityName(item.address);
         const country = item.address?.country;
-        const cityLabel = [city, country].filter(Boolean).join(', ');
-        const label = mode === 'city' ? (cityLabel || item.display_name) : item.display_name;
+        const presentation = mode === 'city' ? buildCityPresentation(item) : buildAddressPresentation(item);
         return {
           displayName: item.display_name,
-          label,
+          label: presentation.label,
+          subtitle: presentation.subtitle,
           city,
           country,
           lat,
@@ -112,4 +172,3 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ results: [] });
   }
 }
-
