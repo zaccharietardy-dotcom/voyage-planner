@@ -58,11 +58,8 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
   const [geoLoading, setGeoLoading] = useState(false);
   const [geoError, setGeoError] = useState<string | null>(null);
   const [originSuggestions, setOriginSuggestions] = useState<LocationSuggestion[]>([]);
-  const [homeAddressSuggestions, setHomeAddressSuggestions] = useState<LocationSuggestion[]>([]);
   const [originSuggestionsLoading, setOriginSuggestionsLoading] = useState(false);
-  const [homeAddressSuggestionsLoading, setHomeAddressSuggestionsLoading] = useState(false);
   const [showOriginSuggestions, setShowOriginSuggestions] = useState(false);
-  const [showHomeAddressSuggestions, setShowHomeAddressSuggestions] = useState(false);
   const geoPromptTriggeredRef = useRef(false);
   const { preferences } = useUserPreferences();
 
@@ -265,32 +262,6 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
     };
   }, [departureInputValue, fetchLocationSuggestions]);
 
-  useEffect(() => {
-    const query = (data.homeAddress || '').trim();
-    if (query.length < 3) {
-      setHomeAddressSuggestions([]);
-      return;
-    }
-
-    const controller = new AbortController();
-    const timeoutId = window.setTimeout(async () => {
-      setHomeAddressSuggestionsLoading(true);
-      try {
-        const suggestions = await fetchLocationSuggestions(query, 'address', controller.signal);
-        setHomeAddressSuggestions(suggestions);
-      } catch {
-        setHomeAddressSuggestions([]);
-      } finally {
-        setHomeAddressSuggestionsLoading(false);
-      }
-    }, 250);
-
-    return () => {
-      window.clearTimeout(timeoutId);
-      controller.abort();
-    };
-  }, [data.homeAddress, fetchLocationSuggestions]);
-
   const applyOriginSuggestion = (suggestion: LocationSuggestion) => {
     const queryIsAddress = looksLikeStreetQuery(departureInputValue);
     const nextAddress = queryIsAddress
@@ -302,15 +273,6 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
       homeCoords: { lat: suggestion.lat, lng: suggestion.lng },
     });
     setShowOriginSuggestions(false);
-  };
-
-  const applyHomeAddressSuggestion = (suggestion: LocationSuggestion) => {
-    onChange({
-      homeAddress: suggestion.displayName,
-      homeCoords: { lat: suggestion.lat, lng: suggestion.lng },
-      ...(suggestion.city ? { origin: suggestion.city } : {}),
-    });
-    setShowHomeAddressSuggestions(false);
   };
 
   const maybeTriggerGeoPrompt = () => {
@@ -462,56 +424,8 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
         {geoError && (
           <p className="text-xs text-destructive">{geoError}</p>
         )}
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="homeAddress" className="text-base font-medium">
-          Affiner l&apos;adresse de départ (optionnel)
-        </Label>
-        <Input
-          id="homeAddress"
-          placeholder="10 rue Exemple, 75011 Paris"
-          value={data.homeAddress || ''}
-          onChange={(e) => onChange({ homeAddress: e.target.value })}
-          onFocus={() => setShowHomeAddressSuggestions(true)}
-          onBlur={() => window.setTimeout(() => setShowHomeAddressSuggestions(false), 120)}
-          className="h-12 text-base"
-        />
-        {showHomeAddressSuggestions && ((data.homeAddress || '').trim().length >= 3) && (
-          <div className="relative">
-            <div className="absolute z-20 mt-1 w-full rounded-md border border-border bg-background shadow-lg overflow-hidden">
-              <div className="max-h-64 overflow-y-auto">
-                {homeAddressSuggestionsLoading ? (
-                  <div className="px-3 py-2 text-sm text-muted-foreground flex items-center gap-2">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Recherche des adresses...
-                  </div>
-                ) : homeAddressSuggestions.length > 0 ? (
-                  homeAddressSuggestions.map((suggestion, index) => (
-                    <button
-                      key={`${suggestion.displayName}-${index}`}
-                      type="button"
-                      className="w-full text-left px-3 py-2 text-sm hover:bg-muted transition-colors"
-                      onMouseDown={(e) => e.preventDefault()}
-                      onClick={() => applyHomeAddressSuggestion(suggestion)}
-                    >
-                      <div className="font-medium line-clamp-1">{suggestion.label || suggestion.displayName}</div>
-                      {suggestion.subtitle && (
-                        <div className="text-xs text-muted-foreground line-clamp-1">{suggestion.subtitle}</div>
-                      )}
-                    </button>
-                  ))
-                ) : (
-                  <div className="px-3 py-2 text-sm text-muted-foreground">
-                    Aucune suggestion.
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
         <p className="text-xs text-muted-foreground">
-          Astuce: utilisez <span className="font-medium">Ma position actuelle</span> pour pré-remplir automatiquement l&apos;adresse exacte.
+          Astuce: vous pouvez saisir une adresse exacte ou utiliser <span className="font-medium">Ma position actuelle</span>.
         </p>
       </div>
 
