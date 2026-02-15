@@ -271,12 +271,24 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
   const waypointsRef = useRef<Waypoint[]>([]);
   const markersRef = useRef<Map<number, any>>(new Map());
   const polylineRef = useRef<any>(null);
+  const isPlayingRef = useRef(false);
+  const speedRef = useRef(1);
+  const renderPumpRef = useRef<NodeJS.Timeout | null>(null);
   const fallbackItems = useMemo(() => trip.days.flatMap((day) => day.items || []), [trip]);
 
   useEffect(() => {
     setHasMounted(true);
     return () => setHasMounted(false);
   }, []);
+
+  // Keep refs in sync with state (avoids stale closures in flyToWaypoint)
+  useEffect(() => {
+    isPlayingRef.current = isPlaying;
+  }, [isPlaying]);
+
+  useEffect(() => {
+    speedRef.current = speed;
+  }, [speed]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -643,6 +655,20 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
               },
               duration: 3.0, // gentle intro flight
               maximumHeight: firstProfile.altitude + 100,
+              // Pump renders after arrival to force tile loading
+              complete: () => {
+                if (viewer && !viewer.isDestroyed?.()) {
+                  viewer.scene.requestRender();
+                  let pumps = 0;
+                  const interval = setInterval(() => {
+                    if (viewer && !viewer.isDestroyed?.()) {
+                      viewer.scene.requestRender();
+                    }
+                    pumps++;
+                    if (pumps >= 6) clearInterval(interval);
+                  }, 500);
+                }
+              },
             };
             if (Cesium.EasingFunction?.CUBIC_IN_OUT) {
               firstFlightOptions.easingFunction = Cesium.EasingFunction.CUBIC_IN_OUT;
@@ -697,8 +723,14 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
 
     return () => {
       mounted = false;
+      isPlayingRef.current = false;
       if (animationRef.current) {
         clearTimeout(animationRef.current);
+        animationRef.current = null;
+      }
+      if (renderPumpRef.current) {
+        clearInterval(renderPumpRef.current);
+        renderPumpRef.current = null;
       }
       if (rafId !== null) {
         window.cancelAnimationFrame(rafId);
@@ -736,21 +768,35 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
   }, []);
 
   // Fly to waypoint — street-level approach: camera offset from monument, looking AT it
+  // Uses refs (isPlayingRef, speedRef) to avoid stale closure issues
   const flyToWaypoint = useCallback((index: number) => {
     const Cesium = cesiumRef.current;
     const viewer = viewerRef.current;
     const waypoints = waypointsRef.current;
 
-    if (!Cesium || !viewer || index >= waypoints.length) {
+    if (!Cesium || !viewer || viewer.isDestroyed?.() || index >= waypoints.length) {
       setIsPlaying(false);
+      isPlayingRef.current = false;
       return;
+    }
+
+    // Clear any pending timeout from previous waypoint
+    if (animationRef.current) {
+      clearTimeout(animationRef.current);
+      animationRef.current = null;
+    }
+    // Clear any render pump from previous waypoint
+    if (renderPumpRef.current) {
+      clearInterval(renderPumpRef.current);
+      renderPumpRef.current = null;
     }
 
     setCurrentIndex(index);
     highlightWaypoint(index);
 
     const profile = getStreetLevelFlightProfile(waypoints, index);
-    const flightDuration = profile.duration / speed;
+    const currentSpeed = speedRef.current;
+    const flightDuration = profile.duration / currentSpeed;
 
     // Fly camera to offset position near the monument, looking AT it
     const flightOptions: any = {
@@ -767,39 +813,90 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
       duration: flightDuration,
       // Keep maximumHeight very close to altitude — NO sky arcs
       maximumHeight: profile.maxHeight,
+      // Called when flight animation completes
+      complete: () => {
+        if (!viewer || viewer.isDestroyed?.()) return;
+
+        // Force tile loading at new camera position
+        viewer.scene.requestRender();
+
+        // Render pump: force tile loading every 500ms during the pause
+        renderPumpRef.current = setInterval(() => {
+          if (viewer && !viewer.isDestroyed?.()) {
+            viewer.scene.requestRender();
+          }
+        }, 500);
+
+        // Check if still playing (read from ref, not stale closure)
+        if (!isPlayingRef.current) {
+          // Not playing — just pump renders for a few seconds then stop
+          setTimeout(() => {
+            if (renderPumpRef.current) {
+              clearInterval(renderPumpRef.current);
+              renderPumpRef.current = null;
+            }
+          }, 3000);
+          return;
+        }
+
+        // Schedule next waypoint after pause
+        const pauseMs = profile.pauseMs / speedRef.current;
+        animationRef.current = setTimeout(() => {
+          // Stop render pump
+          if (renderPumpRef.current) {
+            clearInterval(renderPumpRef.current);
+            renderPumpRef.current = null;
+          }
+
+          // Re-check playing state (user may have paused during the pause)
+          if (!isPlayingRef.current) return;
+
+          const nextIndex = index + 1;
+          if (nextIndex < waypoints.length) {
+            flyToWaypoint(nextIndex);
+          } else {
+            setIsPlaying(false);
+            isPlayingRef.current = false;
+            setCurrentIndex(0);
+          }
+        }, pauseMs);
+      },
+      // Called if flight is cancelled (user interaction or cancelFlight())
+      cancel: () => {
+        // Don't schedule next waypoint — flight was interrupted
+      },
     };
     if (Cesium.EasingFunction?.QUADRATIC_IN_OUT) {
       flightOptions.easingFunction = Cesium.EasingFunction.QUADRATIC_IN_OUT;
     }
     viewer.camera.flyTo(flightOptions);
-
-    // Schedule next waypoint: wait for flight to complete + pause to admire
-    if (isPlaying) {
-      const totalWaitMs = (flightDuration * 1000) + (profile.pauseMs / speed);
-      animationRef.current = setTimeout(() => {
-        const nextIndex = index + 1;
-        if (nextIndex < waypoints.length) {
-          flyToWaypoint(nextIndex);
-        } else {
-          setIsPlaying(false);
-          setCurrentIndex(0);
-        }
-      }, totalWaitMs);
-    }
-  }, [speed, isPlaying, highlightWaypoint]);
+  }, [highlightWaypoint]);
 
   // Play/Pause
   const togglePlay = useCallback(() => {
     if (!isLoaded) return;
 
     if (isPlaying) {
+      // PAUSE: stop everything immediately
       setIsPlaying(false);
+      isPlayingRef.current = false;
       if (animationRef.current) {
         clearTimeout(animationRef.current);
         animationRef.current = null;
       }
+      if (renderPumpRef.current) {
+        clearInterval(renderPumpRef.current);
+        renderPumpRef.current = null;
+      }
+      // Cancel in-progress camera flight
+      const viewer = viewerRef.current;
+      if (viewer && !viewer.isDestroyed?.()) {
+        viewer.camera.cancelFlight();
+      }
     } else {
+      // PLAY: set ref BEFORE calling flyToWaypoint (avoids stale closure race)
       setIsPlaying(true);
+      isPlayingRef.current = true;
       flyToWaypoint(currentIndex);
     }
   }, [isPlaying, isLoaded, currentIndex, flyToWaypoint]);
@@ -808,22 +905,24 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
   const skipNext = useCallback(() => {
     if (!isLoaded) return;
 
+    // Cancel current flight + pending timeout
     if (animationRef.current) {
       clearTimeout(animationRef.current);
       animationRef.current = null;
     }
+    if (renderPumpRef.current) {
+      clearInterval(renderPumpRef.current);
+      renderPumpRef.current = null;
+    }
+    const viewer = viewerRef.current;
+    if (viewer && !viewer.isDestroyed?.()) {
+      viewer.camera.cancelFlight();
+    }
 
     const waypoints = waypointsRef.current;
     const nextIndex = (currentIndex + 1) % waypoints.length;
-
-    if (isPlaying) {
-      flyToWaypoint(nextIndex);
-    } else {
-      setCurrentIndex(nextIndex);
-      highlightWaypoint(nextIndex);
-      flyToWaypoint(nextIndex);
-    }
-  }, [isLoaded, currentIndex, isPlaying, flyToWaypoint, highlightWaypoint]);
+    flyToWaypoint(nextIndex);
+  }, [isLoaded, currentIndex, flyToWaypoint]);
 
   // Change speed
   const cycleSpeed = useCallback(() => {
@@ -831,6 +930,26 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
     const currentIdx = speeds.indexOf(speed);
     const nextSpeed = speeds[(currentIdx + 1) % speeds.length];
     setSpeed(nextSpeed);
+  }, [speed]);
+
+  // Restart flight at new speed when speed changes mid-playback
+  useEffect(() => {
+    if (isPlaying && isLoaded) {
+      if (animationRef.current) {
+        clearTimeout(animationRef.current);
+        animationRef.current = null;
+      }
+      if (renderPumpRef.current) {
+        clearInterval(renderPumpRef.current);
+        renderPumpRef.current = null;
+      }
+      const viewer = viewerRef.current;
+      if (viewer && !viewer.isDestroyed?.()) {
+        viewer.camera.cancelFlight();
+      }
+      flyToWaypoint(currentIndex);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [speed]);
 
   const currentWaypoint = waypointsRef.current[currentIndex];
