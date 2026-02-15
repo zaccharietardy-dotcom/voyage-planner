@@ -57,9 +57,11 @@ async function applyBest3DQuality(
     }
 
     if (photorealisticTileset) {
-      photorealisticTileset.maximumScreenSpaceError = compatibilityMode ? 4 : 2;
+      // Low error = more detail (important at street-level altitude)
+      photorealisticTileset.maximumScreenSpaceError = compatibilityMode ? 4 : 1.5;
       photorealisticTileset.dynamicScreenSpaceError = true;
       photorealisticTileset.preloadFlightDestinations = true;
+      photorealisticTileset.preloadWhenHidden = true;
       viewer.scene.primitives.add(photorealisticTileset);
       return;
     }
@@ -77,29 +79,6 @@ async function applyBest3DQuality(
   }
 }
 
-function applySafeBaseImagery(Cesium: any, viewer: any) {
-  try {
-    const imageryLayers = viewer.imageryLayers;
-    const existingLayers: any[] = [];
-    for (let i = 0; i < imageryLayers.length; i += 1) {
-      existingLayers.push(imageryLayers.get(i));
-    }
-
-    const osmProvider = new Cesium.OpenStreetMapImageryProvider({
-      url: 'https://tile.openstreetmap.org/',
-      credit: 'OpenStreetMap',
-    });
-    const osmLayer = imageryLayers.addImageryProvider(osmProvider, 0);
-
-    existingLayers.forEach((layer) => {
-      if (layer && layer !== osmLayer) {
-        imageryLayers.remove(layer, false);
-      }
-    });
-  } catch (error) {
-    console.info('[TripFlythrough] OSM imagery fallback unavailable', error);
-  }
-}
 
 function detectWebGLSupport(): { webgl1: boolean; webgl2: boolean } {
   try {
@@ -165,38 +144,101 @@ function haversineDistanceKm(
   return earthRadiusKm * c;
 }
 
-function getCinematicFlightProfile(waypoints: Waypoint[], index: number) {
-  const current = waypoints[index];
-  const next = waypoints[Math.min(index + 1, waypoints.length - 1)] || current;
+/**
+ * Compute an offset camera position ~200m from the target, looking TOWARD the monument.
+ * The offset direction comes from the PREVIOUS waypoint (approach direction) or defaults to south.
+ */
+function getOffsetPosition(
+  targetLat: number,
+  targetLng: number,
+  approachFromLat: number | null,
+  approachFromLng: number | null,
+  offsetMeters: number = 200
+): { lat: number; lng: number; headingToTarget: number } {
+  // Determine approach bearing: from previous waypoint or default (south = camera north of target)
+  let approachBearing: number;
+  if (approachFromLat !== null && approachFromLng !== null) {
+    approachBearing = getBearingDegrees(approachFromLat, approachFromLng, targetLat, targetLng);
+  } else {
+    approachBearing = 0; // default: approach from south, camera looks north
+  }
 
-  const segmentDistanceKm = haversineDistanceKm(
-    current.lat,
-    current.lng,
-    next.lat,
-    next.lng
+  // Place camera BEHIND the approach direction (offset opposite to approach)
+  // Camera is positioned offsetMeters away, on the opposite side of approach
+  const offsetBearing = normalizeBearing(approachBearing + 180);
+  const offsetBearingRad = toRadians(offsetBearing);
+  const earthRadius = 6371000; // meters
+
+  const targetLatRad = toRadians(targetLat);
+  const targetLngRad = toRadians(targetLng);
+  const angularDistance = offsetMeters / earthRadius;
+
+  const offsetLatRad = Math.asin(
+    Math.sin(targetLatRad) * Math.cos(angularDistance) +
+    Math.cos(targetLatRad) * Math.sin(angularDistance) * Math.cos(offsetBearingRad)
+  );
+  const offsetLngRad = targetLngRad + Math.atan2(
+    Math.sin(offsetBearingRad) * Math.sin(angularDistance) * Math.cos(targetLatRad),
+    Math.cos(angularDistance) - Math.sin(targetLatRad) * Math.sin(offsetLatRad)
   );
 
-  const headingDeg =
-    waypoints.length > 1
-      ? getBearingDegrees(current.lat, current.lng, next.lat, next.lng)
-      : 0;
+  const offsetLat = (offsetLatRad * 180) / Math.PI;
+  const offsetLng = (offsetLngRad * 180) / Math.PI;
 
-  // Low altitude for close-up views of monuments and points of interest
-  const altitude = Math.min(1500, Math.max(250, segmentDistanceKm * 180));
-  const duration = Math.min(8.0, Math.max(3.5, segmentDistanceKm * 1.2));
-  const maxHeight = Math.max(altitude * 2.5, altitude + 400);
+  // Heading from offset position TOWARD the target monument
+  const headingToTarget = getBearingDegrees(offsetLat, offsetLng, targetLat, targetLng);
 
-  // Gentle pitch angles for bird's eye perspective
-  let pitchDeg = -35;
-  if (segmentDistanceKm > 5) pitchDeg = -20;
-  else if (segmentDistanceKm > 2) pitchDeg = -28;
+  return { lat: offsetLat, lng: offsetLng, headingToTarget };
+}
+
+/**
+ * Street-level flight profile: low altitude, flat transitions, camera looks AT monument.
+ */
+function getStreetLevelFlightProfile(waypoints: Waypoint[], index: number) {
+  const current = waypoints[index];
+  const prev = index > 0 ? waypoints[index - 1] : null;
+  const next = waypoints[Math.min(index + 1, waypoints.length - 1)];
+
+  // Distance from previous waypoint (for flight duration)
+  const segmentDistanceKm = prev
+    ? haversineDistanceKm(prev.lat, prev.lng, current.lat, current.lng)
+    : 0;
+
+  // Low altitude: 80m for close POIs, up to 300m for far ones
+  const altitude = Math.min(300, Math.max(80, segmentDistanceKm * 40 + 80));
+
+  // Camera offset ~200m from monument, approach direction based on previous waypoint
+  const offsetDist = Math.min(250, Math.max(150, altitude * 1.5));
+  const offset = getOffsetPosition(
+    current.lat,
+    current.lng,
+    prev?.lat ?? null,
+    prev?.lng ?? null,
+    offsetDist
+  );
+
+  // Flight duration: proportional to distance, but slow enough for smooth movement
+  // Min 2s for very close, max 10s for far, slower = more cinematic
+  const duration = Math.min(10.0, Math.max(2.0, segmentDistanceKm * 1.5 + 1.5));
+
+  // maximumHeight: barely above altitude to keep camera near ground (no sky arcs!)
+  const maxHeight = altitude + Math.min(100, segmentDistanceKm * 15);
+
+  // Pitch: look slightly down toward the monument (-20° to -30°)
+  const pitchDeg = -25;
+
+  // Pause at this monument (ms) — long enough for tiles to load and user to appreciate
+  const pauseMs = 7000;
 
   return {
-    headingDeg,
+    cameraLat: offset.lat,
+    cameraLng: offset.lng,
+    headingDeg: offset.headingToTarget,
     pitchDeg,
     altitude,
     duration,
     maxHeight,
+    pauseMs,
   };
 }
 
@@ -483,7 +525,7 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
 
           viewer.scene.backgroundColor = Cesium.Color.fromCssColorString('#0a0a12');
           viewer.scene.globe.baseColor = Cesium.Color.fromCssColorString('#0a0a12');
-          viewer.scene.globe.depthTestAgainstTerrain = false;
+          viewer.scene.globe.depthTestAgainstTerrain = true;
           viewer.scene.fog.enabled = !compatibilityMode;
           viewer.scene.fog.density = 0.00015;
           viewer.scene.fxaa = false;
@@ -539,7 +581,7 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
             // Add route polyline
             if (waypoints.length > 1) {
               const positions = waypoints.map((w) =>
-                Cesium.Cartesian3.fromDegrees(w.lng, w.lat, 50)
+                Cesium.Cartesian3.fromDegrees(w.lng, w.lat, 15)
               );
 
               polylineRef.current = viewer.entities.add({
@@ -559,46 +601,48 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
               const isFirst = index === 0;
               const marker = viewer.entities.add({
                 id: `waypoint-${waypoint.id}-${index}`,
-                position: Cesium.Cartesian3.fromDegrees(waypoint.lng, waypoint.lat, 100),
+                position: Cesium.Cartesian3.fromDegrees(waypoint.lng, waypoint.lat, 30),
                 point: {
                   pixelSize: isFirst ? 18 : 12,
                   color: Cesium.Color.fromCssColorString('#60a5fa'),
                   outlineColor: Cesium.Color.WHITE,
                   outlineWidth: 2,
                   heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND,
+                  disableDepthTestDistance: Number.POSITIVE_INFINITY,
                 },
                 label: {
-                  text: `${index + 1}`,
-                  font: '700 13px sans-serif',
+                  text: `${index + 1}. ${waypoint.name}`,
+                  font: '700 14px sans-serif',
                   fillColor: Cesium.Color.WHITE,
                   outlineColor: Cesium.Color.BLACK,
-                  outlineWidth: 2,
+                  outlineWidth: 3,
                   style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-                  verticalOrigin: Cesium.VerticalOrigin.CENTER,
-                  horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
+                  verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+                  horizontalOrigin: Cesium.HorizontalOrigin.LEFT,
+                  pixelOffset: new Cesium.Cartesian2(12, -8),
                   heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND,
+                  disableDepthTestDistance: Number.POSITIVE_INFINITY,
+                  distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0, 5000),
                 },
               });
               markersRef.current.set(index, marker);
             });
 
-            // Fly to first waypoint
-            const firstWaypoint = waypoints[0];
-            const firstFlightProfile = getCinematicFlightProfile(waypoints, 0);
+            // Fly to first waypoint using street-level profile
+            const firstProfile = getStreetLevelFlightProfile(waypoints, 0);
             const firstFlightOptions: any = {
               destination: Cesium.Cartesian3.fromDegrees(
-                firstWaypoint.lng,
-                firstWaypoint.lat,
-                firstFlightProfile.altitude
+                firstProfile.cameraLng,
+                firstProfile.cameraLat,
+                firstProfile.altitude
               ),
               orientation: {
-                heading: Cesium.Math.toRadians(firstFlightProfile.headingDeg),
-                pitch: Cesium.Math.toRadians(firstFlightProfile.pitchDeg),
+                heading: Cesium.Math.toRadians(firstProfile.headingDeg),
+                pitch: Cesium.Math.toRadians(firstProfile.pitchDeg),
                 roll: 0,
               },
-              duration: firstFlightProfile.duration,
-              maximumHeight: firstFlightProfile.maxHeight,
-              pitchAdjustHeight: Math.max(3500, firstFlightProfile.maxHeight * 0.8),
+              duration: 3.0, // gentle intro flight
+              maximumHeight: firstProfile.altitude + 100,
             };
             if (Cesium.EasingFunction?.CUBIC_IN_OUT) {
               firstFlightOptions.easingFunction = Cesium.EasingFunction.CUBIC_IN_OUT;
@@ -691,7 +735,7 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
     });
   }, []);
 
-  // Fly to waypoint
+  // Fly to waypoint — street-level approach: camera offset from monument, looking AT it
   const flyToWaypoint = useCallback((index: number) => {
     const Cesium = cesiumRef.current;
     const viewer = viewerRef.current;
@@ -702,34 +746,36 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
       return;
     }
 
-    const waypoint = waypoints[index];
     setCurrentIndex(index);
     highlightWaypoint(index);
 
-    const flightProfile = getCinematicFlightProfile(waypoints, index);
+    const profile = getStreetLevelFlightProfile(waypoints, index);
+    const flightDuration = profile.duration / speed;
+
+    // Fly camera to offset position near the monument, looking AT it
     const flightOptions: any = {
       destination: Cesium.Cartesian3.fromDegrees(
-        waypoint.lng,
-        waypoint.lat,
-        flightProfile.altitude
+        profile.cameraLng,
+        profile.cameraLat,
+        profile.altitude
       ),
       orientation: {
-        heading: Cesium.Math.toRadians(flightProfile.headingDeg),
-        pitch: Cesium.Math.toRadians(flightProfile.pitchDeg),
+        heading: Cesium.Math.toRadians(profile.headingDeg),
+        pitch: Cesium.Math.toRadians(profile.pitchDeg),
         roll: 0,
       },
-      duration: flightProfile.duration / speed,
-      maximumHeight: flightProfile.maxHeight,
-      pitchAdjustHeight: Math.max(3500, flightProfile.maxHeight * 0.8),
+      duration: flightDuration,
+      // Keep maximumHeight very close to altitude — NO sky arcs
+      maximumHeight: profile.maxHeight,
     };
     if (Cesium.EasingFunction?.QUADRATIC_IN_OUT) {
       flightOptions.easingFunction = Cesium.EasingFunction.QUADRATIC_IN_OUT;
     }
     viewer.camera.flyTo(flightOptions);
 
-    // Schedule next waypoint
+    // Schedule next waypoint: wait for flight to complete + pause to admire
     if (isPlaying) {
-      const pauseDuration = 4000 / speed;
+      const totalWaitMs = (flightDuration * 1000) + (profile.pauseMs / speed);
       animationRef.current = setTimeout(() => {
         const nextIndex = index + 1;
         if (nextIndex < waypoints.length) {
@@ -738,7 +784,7 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
           setIsPlaying(false);
           setCurrentIndex(0);
         }
-      }, pauseDuration);
+      }, totalWaitMs);
     }
   }, [speed, isPlaying, highlightWaypoint]);
 
