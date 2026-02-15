@@ -94,7 +94,7 @@ export function ReviewsList({ placeId, maxReviews }: ReviewsListProps) {
   if (!aggregate || aggregate.totalReviews === 0) {
     return (
       <div className="text-center py-8">
-        <p className="text-muted-foreground mb-2">Aucun avis pour l'instant</p>
+        <p className="text-muted-foreground mb-2">Aucun avis pour l&apos;instant</p>
         <p className="text-sm text-muted-foreground">Soyez le premier à laisser un avis !</p>
       </div>
     );

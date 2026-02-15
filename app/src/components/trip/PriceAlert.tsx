@@ -85,7 +85,7 @@ export function PriceAlert({
                   onClick={(e) => e.stopPropagation()}
                 >
                   <ExternalLink className="h-3 w-3" />
-                  Voir l'offre
+                  Voir l&apos;offre
                 </a>
               )}
 

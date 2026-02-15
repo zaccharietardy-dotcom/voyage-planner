@@ -303,14 +303,14 @@ export function TripBudgetComparator({ trip }: TripBudgetComparatorProps) {
               <Lightbulb className="h-5 w-5 text-blue-600 dark:text-blue-400" />
             </div>
             <div className="flex-1">
-              <h3 className="font-semibold mb-2">Conseils d'économies</h3>
+              <h3 className="font-semibold mb-2">Conseils d&apos;économies</h3>
               <ul className="space-y-1.5 text-sm text-muted-foreground">
                 {summary.accommodation.savings > 0 && (
                   <li className="flex items-start gap-2">
                     <span className="text-blue-600 dark:text-blue-400 mt-0.5">•</span>
                     <span>
-                      Réservez sur Airbnb au lieu de Booking.com pour économiser jusqu'à{' '}
-                      {summary.accommodation.savings}€ sur l'hébergement
+                      Réservez sur Airbnb au lieu de Booking.com pour économiser jusqu&apos;à{' '}
+                      {summary.accommodation.savings}€ sur l&apos;hébergement
                     </span>
                   </li>
                 )}
@@ -327,7 +327,7 @@ export function TripBudgetComparator({ trip }: TripBudgetComparatorProps) {
                   <li className="flex items-start gap-2">
                     <span className="text-blue-600 dark:text-blue-400 mt-0.5">•</span>
                     <span>
-                      Réservez vos activités sur GetYourGuide ou Tiqets pour économiser jusqu'à{' '}
+                      Réservez vos activités sur GetYourGuide ou Tiqets pour économiser jusqu&apos;à{' '}
                       {summary.activities.savings}€
                     </span>
                   </li>

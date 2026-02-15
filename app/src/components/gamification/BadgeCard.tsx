@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { Badge, TIER_COLORS } from '@/lib/constants/badges';
 import { motion } from 'framer-motion';
 import { Lock, Check } from 'lucide-react';
@@ -25,6 +26,18 @@ export function BadgeCard({
   className,
 }: BadgeCardProps) {
   const colors = TIER_COLORS[badge.tier];
+  const [renderedAtMs, setRenderedAtMs] = useState(0);
+
+  useEffect(() => {
+    setRenderedAtMs(Date.now());
+  }, []);
+
+  const showFreshGlow = Boolean(
+    isEarned
+    && earnedAt
+    && renderedAtMs > 0
+    && renderedAtMs - earnedAt.getTime() < 10_000
+  );
 
   return (
     <motion.div
@@ -133,7 +146,7 @@ export function BadgeCard({
       </div>
 
       {/* Glow effect for newly earned badges */}
-      {isEarned && earnedAt && Date.now() - earnedAt.getTime() < 10000 && (
+      {showFreshGlow && (
         <motion.div
           className={cn(
             'absolute inset-0 rounded-xl pointer-events-none',

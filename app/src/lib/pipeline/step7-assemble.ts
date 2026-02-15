@@ -95,6 +95,38 @@ function minutesToHHMM(totalMinutes: number): string {
   return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
 }
 
+function normalizeDayBoundsMinutes(
+  rawStartMinutes: number,
+  rawEndMinutes: number,
+  options: { isFirstDay: boolean; isLastDay: boolean; isDayTrip: boolean }
+): { dayStartMinutes: number; dayEndMinutes: number } {
+  const ABSOLUTE_DAY_END = 23 * 60 + 59;
+  let dayStartMinutes = Math.round(rawStartMinutes);
+  let dayEndMinutes = Math.round(rawEndMinutes);
+
+  // Keep full days reasonably early by default (user expectation: start around 8-9am).
+  if (!options.isFirstDay && !options.isLastDay && !options.isDayTrip) {
+    dayStartMinutes = Math.min(dayStartMinutes, 9 * 60);
+  }
+
+  dayStartMinutes = Math.max(0, Math.min(ABSOLUTE_DAY_END, dayStartMinutes));
+  dayEndMinutes = Math.max(0, Math.min(ABSOLUTE_DAY_END, dayEndMinutes));
+
+  // Ensure a valid usable window, even for very late arrivals.
+  if (dayEndMinutes <= dayStartMinutes) {
+    const preferredWindow = options.isFirstDay || options.isLastDay ? 90 : 180;
+    dayEndMinutes = Math.min(ABSOLUTE_DAY_END, dayStartMinutes + preferredWindow);
+
+    // Edge case: dayStart already at 23:59 (can't extend end anymore).
+    if (dayEndMinutes <= dayStartMinutes) {
+      dayStartMinutes = Math.max(0, dayStartMinutes - 60);
+      dayEndMinutes = Math.min(ABSOLUTE_DAY_END, dayStartMinutes + 60);
+    }
+  }
+
+  return { dayStartMinutes, dayEndMinutes };
+}
+
 function normalizeTransportMode(rawMode?: string): TripItem['transportMode'] | undefined {
   if (!rawMode) return undefined;
   const mode = rawMode.toLowerCase();
@@ -609,6 +641,12 @@ export async function assembleTripSchedule(
       }
     }
 
+    ({ dayStartMinutes, dayEndMinutes } = normalizeDayBoundsMinutes(dayStartMinutes, dayEndMinutes, {
+      isFirstDay,
+      isLastDay,
+      isDayTrip: !!balancedDay.isDayTrip,
+    }));
+
     dayStartHour = Math.floor(dayStartMinutes / 60);
     dayEndHour = Math.floor(dayEndMinutes / 60);
 
@@ -850,20 +888,29 @@ export async function assembleTripSchedule(
       { nearDistanceKm: 0.35, canonicalDistanceKm: 2.5 }
     );
     const orderedActivities = intraDayDedup.deduped;
+    const prioritizedActivities = (() => {
+      const mustSee = orderedActivities.filter((activity) => activity.mustSee);
+      const optional = orderedActivities.filter((activity) => !activity.mustSee);
+      if (mustSee.length === 0 || optional.length === 0) return orderedActivities;
+      return [...mustSee, ...optional];
+    })();
     if (intraDayDedup.dropped > 0) {
       console.log(`[Pipeline V2] Day ${balancedDay.dayNumber}: removed ${intraDayDedup.dropped} intra-day duplicate activity(ies)`);
     }
+    if (prioritizedActivities !== orderedActivities) {
+      console.log(`[Pipeline V2] Day ${balancedDay.dayNumber}: prioritizing must-see activities before optional ones`);
+    }
 
-    const mustSeeCount = orderedActivities.filter(a => a.mustSee).length;
-    console.log(`[Pipeline V2] Day ${balancedDay.dayNumber}: ${orderedActivities.length} activities to schedule (${mustSeeCount} must-sees), dayStart=${minutesToHHMM(dayStartMinutes)}, dayEnd=${minutesToHHMM(dayEndMinutes)}, window=${((dayEndMinutes - dayStartMinutes) / 60).toFixed(1)}h, cursor=${formatTimeHHMM(scheduler.getCurrentTime())}`);
-    for (const a of orderedActivities) {
+    const mustSeeCount = prioritizedActivities.filter(a => a.mustSee).length;
+    console.log(`[Pipeline V2] Day ${balancedDay.dayNumber}: ${prioritizedActivities.length} activities to schedule (${mustSeeCount} must-sees), dayStart=${minutesToHHMM(dayStartMinutes)}, dayEnd=${minutesToHHMM(dayEndMinutes)}, window=${((dayEndMinutes - dayStartMinutes) / 60).toFixed(1)}h, cursor=${formatTimeHHMM(scheduler.getCurrentTime())}`);
+    for (const a of prioritizedActivities) {
       console.log(`[Pipeline V2]   → "${a.name}" (${a.duration || 60}min, score=${a.score.toFixed(1)}, mustSee=${!!a.mustSee})`);
     }
 
     // 4a. Insert deferred check-in (arrival day only)
     if (isFirstDay && (scheduler as any)._deferredCheckin) {
       const deferred = (scheduler as any)._deferredCheckin;
-      if (deferred.hasAfternoonWindow && orderedActivities.length > 0) {
+      if (deferred.hasAfternoonWindow && prioritizedActivities.length > 0) {
         // Defer check-in: insert as a flexible item AFTER the first 1-2 activities
         // This creates the flow: arrival → activity 1 → [activity 2] → check-in → dinner
         scheduler.addItem({
@@ -1239,8 +1286,17 @@ export async function assembleTripSchedule(
       let bkfTitle: string;
       let bkfData: any;
       if (hotel) {
+        const estimatedBreakfastCost = hotel.breakfastIncluded
+          ? 0
+          : Math.max(8, Math.round((preferences.groupSize || 2) * 6));
         bkfTitle = 'Petit-déjeuner à l\'hôtel';
-        bkfData = { name: hotel.name || 'Hôtel', description: 'Petit-déjeuner', latitude: hotel.latitude, longitude: hotel.longitude, estimatedCost: 0 };
+        bkfData = {
+          name: hotel.name || 'Hôtel',
+          description: hotel.breakfastIncluded ? 'Petit-déjeuner inclus' : 'Petit-déjeuner à l\'hôtel',
+          latitude: hotel.latitude,
+          longitude: hotel.longitude,
+          estimatedCost: estimatedBreakfastCost,
+        };
       } else {
         bkfTitle = 'Petit-déjeuner — Café/Boulangerie à proximité';
         bkfData = { name: 'Café/Boulangerie', description: 'Petit-déjeuner à proximité de l\'hôtel', latitude: data.destCoords.lat, longitude: data.destCoords.lng, estimatedCost: 8 };
@@ -1263,11 +1319,11 @@ export async function assembleTripSchedule(
     // - If only 1-2 activities total, a meal-inclusive one replaces the nearest meal
     let skipLunchForMealActivity = false;
     let skipDinnerForMealActivity = false;
-    const mealInclusiveActivities = orderedActivities.filter(act => (act as any).includesMeal === true);
+    const mealInclusiveActivities = prioritizedActivities.filter(act => (act as any).includesMeal === true);
     if (mealInclusiveActivities.length > 0) {
-      const totalActs = orderedActivities.length;
+      const totalActs = prioritizedActivities.length;
       for (const mia of mealInclusiveActivities) {
-        const idx = orderedActivities.indexOf(mia);
+        const idx = prioritizedActivities.indexOf(mia);
         // If in the first half of the day → replaces lunch; second half → replaces dinner
         if (idx < totalActs / 2) {
           skipLunchForMealActivity = true;
@@ -1287,7 +1343,7 @@ export async function assembleTripSchedule(
     const initialHour = initialCursor.getHours() + initialCursor.getMinutes() / 60;
 
     // If cursor starts between 11:30 and 14:30, insert lunch NOW before activities
-    if (!skipLunch && !skipLunchForMealActivity && lunch?.restaurant && initialHour >= 11.5 && initialHour < 14.5 && orderedActivities.length > 0) {
+    if (!skipLunch && !skipLunchForMealActivity && lunch?.restaurant && initialHour >= 11.5 && initialHour < 14.5 && prioritizedActivities.length > 0) {
       const result = scheduler.addItem({
         id: `meal-${balancedDay.dayNumber}-lunch`,
         title: `Déjeuner — ${lunch.restaurant.name}`,
@@ -1301,9 +1357,9 @@ export async function assembleTripSchedule(
     }
 
     // 7. Interleave activities with lunch and dinner at appropriate positions
-    for (let i = 0; i < orderedActivities.length; i++) {
-      const activity = orderedActivities[i];
-      const prev = getLatestScheduledGeoPoint(scheduler) || (i === 0 ? hotel : orderedActivities[i - 1]);
+    for (let i = 0; i < prioritizedActivities.length; i++) {
+      const activity = prioritizedActivities[i];
+      const prev = getLatestScheduledGeoPoint(scheduler) || (i === 0 ? hotel : prioritizedActivities[i - 1]);
       let travelTime = prev ? estimateTravel(prev, activity, directionsCache) : 10;
       // Round travel time to nearest 5 minutes for clean schedule times
       travelTime = Math.round(travelTime / 5) * 5;
@@ -1338,7 +1394,7 @@ export async function assembleTripSchedule(
       // Check if it's time for dinner (cursor between 18:30 and 21:00)
       const cursorTime2 = scheduler.getCurrentTime();
       const cursorHour2 = cursorTime2.getHours() + cursorTime2.getMinutes() / 60;
-      const pendingMustSee = orderedActivities.slice(i).some((candidate) => candidate.mustSee);
+      const pendingMustSee = prioritizedActivities.slice(i).some((candidate) => candidate.mustSee);
 
       if (!dinnerInserted && !skipDinner && !skipDinnerForMealActivity && dinner?.restaurant && cursorHour2 >= 18.5 && cursorHour2 < 21 && !pendingMustSee) {
         const result = scheduler.addItem({
@@ -1503,7 +1559,7 @@ export async function assembleTripSchedule(
 
       // After day-trip activity, add explicit return travel to hotel
       // This prevents dinner from showing 7h travel time from the day-trip location
-      if (balancedDay.isDayTrip && hotel && i === orderedActivities.length - 1) {
+      if (balancedDay.isDayTrip && hotel && i === prioritizedActivities.length - 1) {
         const distKm = calculateDistance(
           activity.latitude, activity.longitude,
           hotel.latitude, hotel.longitude

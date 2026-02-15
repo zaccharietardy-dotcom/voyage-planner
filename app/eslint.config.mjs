@@ -14,6 +14,8 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Vendored Cesium assets
     "public/cesium/**",
+    // Generated service worker bundle
+    "public/sw.js",
     // Generated reports
     "coverage/**",
     // Debug scripts (non-runtime production code)

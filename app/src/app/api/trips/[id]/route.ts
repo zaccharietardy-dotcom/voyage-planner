@@ -67,10 +67,12 @@ export async function GET(
 
     // Check access: owner, trip_member, or visibility-based
     let userRole: MemberRole | null = null;
+    let hasCollaborationAccess = false;
 
     if (user) {
       const isOwner = trip.owner_id === user.id;
       userRole = isOwner ? 'owner' : null;
+      hasCollaborationAccess = isOwner;
 
       if (!isOwner) {
         const { data: member } = await serviceClient
@@ -82,6 +84,7 @@ export async function GET(
 
         if (member && (member.role === 'owner' || member.role === 'editor' || member.role === 'viewer')) {
           userRole = member.role;
+          hasCollaborationAccess = true;
         } else if (trip.visibility === 'public') {
           userRole = 'viewer';
         } else if (trip.visibility === 'friends') {
@@ -103,78 +106,103 @@ export async function GET(
       );
     }
 
-    const { data: memberRows } = await serviceClient
-      .from('trip_members')
-      .select(`
-        id,
-        role,
-        joined_at,
-        user_id,
-        profiles:user_id (
+    let formattedProposals: ReturnType<typeof formatProposalForApi>[] = [];
+    let formattedMembers: Array<{
+      id: string;
+      tripId: string;
+      userId: string;
+      role: MemberRole;
+      joinedAt: string;
+      profile: {
+        displayName: string;
+        avatarUrl: string | null;
+        email: string;
+      };
+    }> = [];
+
+    // Public/friends viewers can read the trip itself, but collaboration details
+    // (members/proposals/votes/share code) are restricted to owner/members.
+    if (hasCollaborationAccess) {
+      const { data: memberRows } = await serviceClient
+        .from('trip_members')
+        .select(`
           id,
-          display_name,
-          avatar_url,
-          email
-        )
-      `)
-      .eq('trip_id', id);
+          role,
+          joined_at,
+          user_id,
+          profiles:user_id (
+            id,
+            display_name,
+            avatar_url,
+            email
+          )
+        `)
+        .eq('trip_id', id);
 
-    const { data: proposalRows } = await serviceClient
-      .from('proposals')
-      .select(`
-        *,
-        author:author_id (
-          display_name,
-          avatar_url
-        )
-      `)
-      .eq('trip_id', id)
-      .order('created_at', { ascending: false });
+      const { data: proposalRows } = await serviceClient
+        .from('proposals')
+        .select(`
+          *,
+          author:author_id (
+            display_name,
+            avatar_url
+          )
+        `)
+        .eq('trip_id', id)
+        .order('created_at', { ascending: false });
 
-    const userVotes: Record<string, boolean> = {};
-    if (user && proposalRows && proposalRows.length > 0) {
-      const proposalIds = proposalRows.map((proposal) => proposal.id);
-      const { data: votes } = await serviceClient
-        .from('votes')
-        .select('proposal_id, vote')
-        .eq('user_id', user.id)
-        .in('proposal_id', proposalIds);
+      const userVotes: Record<string, boolean> = {};
+      if (user && proposalRows && proposalRows.length > 0) {
+        const proposalIds = proposalRows.map((proposal) => proposal.id);
+        const { data: votes } = await serviceClient
+          .from('votes')
+          .select('proposal_id, vote')
+          .eq('user_id', user.id)
+          .in('proposal_id', proposalIds);
 
-      for (const vote of (votes || []) as VoteRow[]) {
-        userVotes[vote.proposal_id] = vote.vote;
+        for (const vote of (votes || []) as VoteRow[]) {
+          userVotes[vote.proposal_id] = vote.vote;
+        }
       }
+
+      const editorUserIds = await getEditorUserIds(serviceClient, id);
+
+      formattedProposals = (proposalRows || []).map((proposal) =>
+        formatProposalForApi(
+          proposal as ProposalSelectRow,
+          userVotes[proposal.id],
+          editorUserIds
+        )
+      );
+
+      const typedMemberRows = (memberRows || []) as TripMemberWithProfile[];
+      formattedMembers = typedMemberRows.map((member) => {
+        const profile = Array.isArray(member.profiles) ? member.profiles[0] : member.profiles;
+
+        return {
+          id: member.id,
+          tripId: id,
+          userId: member.user_id,
+          role: member.role,
+          joinedAt: member.joined_at,
+          profile: {
+            displayName: profile?.display_name || 'Utilisateur',
+            avatarUrl: profile?.avatar_url,
+            email: profile?.email || '',
+          },
+        };
+      });
     }
 
-    const editorUserIds = await getEditorUserIds(serviceClient, id);
-
-    const formattedProposals = (proposalRows || []).map((proposal) =>
-      formatProposalForApi(
-        proposal as ProposalSelectRow,
-        userVotes[proposal.id],
-        editorUserIds
-      )
-    );
-
-    const typedMemberRows = (memberRows || []) as TripMemberWithProfile[];
-    const formattedMembers = typedMemberRows.map((member) => {
-      const profile = Array.isArray(member.profiles) ? member.profiles[0] : member.profiles;
-
-      return {
-        id: member.id,
-        tripId: id,
-        userId: member.user_id,
-        role: member.role,
-        joinedAt: member.joined_at,
-        profile: {
-          displayName: profile?.display_name || 'Utilisateur',
-          avatarUrl: profile?.avatar_url,
-          email: profile?.email || '',
-        },
-      };
-    });
+    const tripPayload = hasCollaborationAccess
+      ? trip
+      : {
+          ...trip,
+          share_code: '',
+        };
 
     return NextResponse.json({
-      ...trip,
+      ...tripPayload,
       members: formattedMembers,
       proposals: formattedProposals,
       userRole,

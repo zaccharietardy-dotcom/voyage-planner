@@ -249,7 +249,7 @@ export function TransportCard({
                     </div>
                     <div>
                       La marche est idéale pour découvrir la ville et profiter
-                      de l'atmosphère locale.
+                      de l&apos;atmosphère locale.
                     </div>
                   </div>
                 </div>
@@ -264,7 +264,7 @@ export function TransportCard({
                 rel="noopener noreferrer"
                 className="text-xs text-primary hover:underline flex items-center gap-1"
               >
-                Voir l'itinéraire
+                Voir l&apos;itinéraire
                 <ExternalLink className="h-3 w-3" />
               </a>
             </div>

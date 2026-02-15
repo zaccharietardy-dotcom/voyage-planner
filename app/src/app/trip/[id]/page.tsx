@@ -246,9 +246,10 @@ export default function TripPage() {
   ).length;
   const userRole = collaborativeTrip?.userRole;
   const shareCode = collaborativeTrip?.shareCode || '';
-  const isOwner = useCollaborativeMode ? userRole === 'owner' : true;
-  const canOwnerEdit = useCollaborativeMode ? userRole === 'owner' : true;
-  const canPropose = useCollaborativeMode ? (userRole === 'owner' || userRole === 'editor') : true;
+  const localIsOwner = Boolean(user && dbTrip?.owner_id && dbTrip.owner_id === user.id);
+  const isOwner = useCollaborativeMode ? userRole === 'owner' : localIsOwner;
+  const canOwnerEdit = isOwner;
+  const canPropose = useCollaborativeMode ? (userRole === 'owner' || userRole === 'editor') : localIsOwner;
   const canVoteOnProposals = useCollaborativeMode ? userRole === 'editor' : false;
   const canOwnerDecide = useCollaborativeMode ? userRole === 'owner' : false;
 

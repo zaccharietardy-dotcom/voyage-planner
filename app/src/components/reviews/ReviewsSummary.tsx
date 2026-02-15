@@ -68,7 +68,7 @@ export function ReviewsSummary({ placeId, activityTitle, onViewReviews }: Review
       {/* Top Review Excerpt (optional, only if space) */}
       {aggregate.topReview && (
         <span className="hidden sm:inline text-[11px] opacity-80 max-w-[200px] truncate">
-          "{aggregate.topReview.title}"
+          &ldquo;{aggregate.topReview.title}&rdquo;
         </span>
       )}
     </div>

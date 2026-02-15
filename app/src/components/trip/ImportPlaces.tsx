@@ -421,7 +421,7 @@ export function ImportPlaces({ open, onOpenChange, onImport, destinationCoords }
                 {socialLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Extraction en cours avec l'IA...
+                    Extraction en cours avec l&apos;IA...
                   </>
                 ) : (
                   <>
@@ -448,9 +448,9 @@ export function ImportPlaces({ open, onOpenChange, onImport, destinationCoords }
               <div className="text-xs text-muted-foreground space-y-1 bg-muted/30 p-3 rounded-lg">
                 <p className="font-medium">Comment ça marche:</p>
                 <ul className="list-disc list-inside space-y-0.5 ml-2">
-                  <li>Collez un lien Instagram, TikTok, YouTube ou d'un blog de voyage</li>
-                  <li>Ou copiez-collez directement le texte d'une légende/description</li>
-                  <li>L'IA extrait automatiquement les noms de restaurants, hôtels et attractions</li>
+                  <li>Collez un lien Instagram, TikTok, YouTube ou d&apos;un blog de voyage</li>
+                  <li>Ou copiez-collez directement le texte d&apos;une légende/description</li>
+                  <li>L&apos;IA extrait automatiquement les noms de restaurants, hôtels et attractions</li>
                   <li>Les coordonnées GPS sont géocodées automatiquement</li>
                 </ul>
               </div>
@@ -577,7 +577,7 @@ export function ImportPlaces({ open, onOpenChange, onImport, destinationCoords }
                   placeholder="Champ de Mars, Paris"
                 />
                 <p className="text-xs text-muted-foreground">
-                  L'adresse sera géocodée automatiquement
+                  L&apos;adresse sera géocodée automatiquement
                 </p>
               </div>
 
