@@ -916,6 +916,40 @@ export async function searchMustSeeAttractions(
  * Recherche des restaurants à proximité d'une activité via Google Maps
  * Utilise le paramètre ll pour recherche GPS précise
  */
+const nearbyRestaurantsCache = new Map<string, { expiresAt: number; results: Restaurant[] }>();
+const nearbyRestaurantsInFlight = new Map<string, Promise<Restaurant[]>>();
+const NEARBY_RESTAURANTS_CACHE_TTL_MS = 12 * 60 * 60 * 1000; // 12h
+
+function buildNearbyRestaurantsCacheKey(
+  destination: string,
+  coords: { lat: number; lng: number },
+  mealType: string,
+  maxDistance: number,
+  minRating: number,
+  minReviews: number
+): string {
+  return [
+    destination.toLowerCase().trim(),
+    mealType,
+    coords.lat.toFixed(4),
+    coords.lng.toFixed(4),
+    maxDistance,
+    minRating.toFixed(1),
+    minReviews,
+  ].join('|');
+}
+
+function cloneRestaurantForCache(r: Restaurant): Restaurant {
+  return {
+    ...r,
+    cuisineTypes: Array.isArray(r.cuisineTypes) ? [...r.cuisineTypes] : [],
+    dietaryOptions: Array.isArray(r.dietaryOptions) ? [...r.dietaryOptions] : ['none'],
+    specialties: Array.isArray(r.specialties) ? [...r.specialties] : undefined,
+    photos: Array.isArray(r.photos) ? [...r.photos] : undefined,
+    openingHours: r.openingHours ? { ...r.openingHours } : {},
+  };
+}
+
 export async function searchRestaurantsNearby(
   activityCoords: { lat: number; lng: number },
   destination: string,
@@ -939,6 +973,26 @@ export async function searchRestaurantsNearby(
     minReviews = QUALITY_THRESHOLDS.restaurants.minReviews,
     limit = 5,
   } = options;
+
+  const cacheKey = buildNearbyRestaurantsCacheKey(
+    destination,
+    activityCoords,
+    mealType,
+    maxDistance,
+    minRating,
+    minReviews
+  );
+
+  const cached = nearbyRestaurantsCache.get(cacheKey);
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.results.slice(0, limit).map(cloneRestaurantForCache);
+  }
+
+  const inFlight = nearbyRestaurantsInFlight.get(cacheKey);
+  if (inFlight) {
+    const sharedResults = await inFlight;
+    return sharedResults.slice(0, limit).map(cloneRestaurantForCache);
+  }
 
   // Construire la requête selon le type de repas + langue locale
   const countryCode = getCountryCode(destination);
@@ -971,81 +1025,95 @@ export async function searchRestaurantsNearby(
     gl: getCountryCode(destination),
   });
 
-  try {
-    const response = await trackedSerpApiFetch(`${SERPAPI_BASE_URL}?${params}`);
+  const fetchPromise = (async (): Promise<Restaurant[]> => {
+    try {
+      const response = await trackedSerpApiFetch(`${SERPAPI_BASE_URL}?${params}`);
 
-    if (!response.ok) {
-      console.error('[SerpAPI Restaurants Nearby] Erreur HTTP:', response.status);
-      return [];
-    }
-
-    const data = await response.json();
-
-    if (data.error) {
-      console.error('[SerpAPI Restaurants Nearby] Erreur:', data.error);
-      return [];
-    }
-
-    const results = data.local_results || [];
-    const restaurants: Restaurant[] = [];
-
-    for (const place of results) {
-      // Vérifier les coordonnées GPS
-      if (!place.gps_coordinates?.latitude || !place.gps_coordinates?.longitude) {
-        continue;
+      if (!response.ok) {
+        console.error('[SerpAPI Restaurants Nearby] Erreur HTTP:', response.status);
+        return [];
       }
 
-      // Calculer la distance en mètres
-      const distanceKm = calculateDistance(
-        activityCoords.lat,
-        activityCoords.lng,
-        place.gps_coordinates.latitude,
-        place.gps_coordinates.longitude
-      );
-      const distanceMeters = Math.round(distanceKm * 1000);
+      const data = await response.json();
 
-      // Filtres de qualité
-      if (distanceMeters > maxDistance) continue;
-      if (place.rating && place.rating < minRating) continue;
-      if (place.reviews && place.reviews < minReviews) continue;
+      if (data.error) {
+        console.error('[SerpAPI Restaurants Nearby] Erreur:', data.error);
+        return [];
+      }
 
-      // Générer URL Google Maps
-      const searchQuery = place.address
-        ? `${place.title}, ${place.address}`
-        : `${place.title}, ${destination}`;
-      const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(searchQuery)}`;
+      const results = data.local_results || [];
+      const restaurants: Restaurant[] = [];
 
-      restaurants.push({
-        id: `serp-nearby-${place.place_id || place.data_cid || restaurants.length}`,
-        name: place.title,
-        address: place.address || 'Adresse non disponible',
-        latitude: place.gps_coordinates.latitude,
-        longitude: place.gps_coordinates.longitude,
-        rating: place.rating || 0,
-        reviewCount: place.reviews || 0,
-        priceLevel: parsePriceLevel(place.price),
-        cuisineTypes: parseCuisineTypes(place.type, place.types),
-        dietaryOptions: ['none'] as DietaryType[],
-        specialties: place.description ? [place.description] : undefined,
-        description: place.description,
-        phoneNumber: place.phone,
-        website: place.website,
-        googleMapsUrl,
-        photos: place.thumbnail ? [place.thumbnail] : undefined,
-        googlePlaceId: place.place_id || undefined,
-        openingHours: parseOpeningHours(place.operating_hours) || {},
-        distance: distanceKm,
-        walkingTime: Math.round(distanceMeters / 80), // ~80m/min de marche
+      for (const place of results) {
+        // Vérifier les coordonnées GPS
+        if (!place.gps_coordinates?.latitude || !place.gps_coordinates?.longitude) {
+          continue;
+        }
+
+        // Calculer la distance en mètres
+        const distanceKm = calculateDistance(
+          activityCoords.lat,
+          activityCoords.lng,
+          place.gps_coordinates.latitude,
+          place.gps_coordinates.longitude
+        );
+        const distanceMeters = Math.round(distanceKm * 1000);
+
+        // Filtres de qualité
+        if (distanceMeters > maxDistance) continue;
+        if (place.rating && place.rating < minRating) continue;
+        if (place.reviews && place.reviews < minReviews) continue;
+
+        // Générer URL Google Maps
+        const searchQuery = place.address
+          ? `${place.title}, ${place.address}`
+          : `${place.title}, ${destination}`;
+        const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(searchQuery)}`;
+
+        restaurants.push({
+          id: `serp-nearby-${place.place_id || place.data_cid || restaurants.length}`,
+          name: place.title,
+          address: place.address || 'Adresse non disponible',
+          latitude: place.gps_coordinates.latitude,
+          longitude: place.gps_coordinates.longitude,
+          rating: place.rating || 0,
+          reviewCount: place.reviews || 0,
+          priceLevel: parsePriceLevel(place.price),
+          cuisineTypes: parseCuisineTypes(place.type, place.types),
+          dietaryOptions: ['none'] as DietaryType[],
+          specialties: place.description ? [place.description] : undefined,
+          description: place.description,
+          phoneNumber: place.phone,
+          website: place.website,
+          googleMapsUrl,
+          photos: place.thumbnail ? [place.thumbnail] : undefined,
+          googlePlaceId: place.place_id || undefined,
+          openingHours: parseOpeningHours(place.operating_hours) || {},
+          distance: distanceKm,
+          walkingTime: Math.round(distanceMeters / 80), // ~80m/min de marche
+        });
+      }
+
+      // Trier par distance
+      restaurants.sort((a, b) => (a.distance || 0) - (b.distance || 0));
+
+      nearbyRestaurantsCache.set(cacheKey, {
+        expiresAt: Date.now() + NEARBY_RESTAURANTS_CACHE_TTL_MS,
+        results: restaurants.map(cloneRestaurantForCache),
       });
+      return restaurants;
+    } catch (error) {
+      console.error('[SerpAPI Restaurants Nearby] Erreur:', error);
+      return [];
     }
+  })();
 
-    // Trier par distance
-    restaurants.sort((a, b) => (a.distance || 0) - (b.distance || 0));
-
-    return restaurants.slice(0, limit);
-  } catch (error) {
-    console.error('[SerpAPI Restaurants Nearby] Erreur:', error);
-    return [];
+  nearbyRestaurantsInFlight.set(cacheKey, fetchPromise);
+  try {
+    const results = await fetchPromise;
+    return results.slice(0, limit).map(cloneRestaurantForCache);
+  } finally {
+    nearbyRestaurantsInFlight.delete(cacheKey);
   }
 }
 

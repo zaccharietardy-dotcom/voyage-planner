@@ -36,14 +36,16 @@ async function applyBest3DQuality(
   hasIonToken: boolean,
   compatibilityMode: boolean
 ) {
-  viewer.resolutionScale = Math.min(window.devicePixelRatio || 1, compatibilityMode ? 1.0 : 1.25);
-  viewer.scene.highDynamicRange = false;
+  viewer.resolutionScale = Math.min(window.devicePixelRatio || 1, compatibilityMode ? 1.1 : 1.5);
+  viewer.scene.highDynamicRange = !compatibilityMode;
   viewer.scene.globe.enableLighting = true;
   viewer.scene.globe.showGroundAtmosphere = true;
-  viewer.shadows = false;
+  viewer.shadows = !compatibilityMode;
 
   if (viewer.shadowMap) {
-    viewer.shadowMap.enabled = false;
+    viewer.shadowMap.enabled = !compatibilityMode;
+    viewer.shadowMap.softShadows = !compatibilityMode;
+    viewer.shadowMap.size = compatibilityMode ? 1024 : 2048;
   }
 
   // Load Google Photorealistic 3D Tiles via Cesium Ion
@@ -59,18 +61,18 @@ async function applyBest3DQuality(
     if (typeof Cesium.createGooglePhotorealistic3DTileset === 'function') {
       photorealisticTileset = await withTimeout(
         Cesium.createGooglePhotorealistic3DTileset(),
-        15000
+        6000
       );
     } else if (Cesium.Cesium3DTileset?.fromIonAssetId) {
       photorealisticTileset = await withTimeout(
         Cesium.Cesium3DTileset.fromIonAssetId(GOOGLE_PHOTOREALISTIC_ION_ASSET_ID),
-        15000
+        6000
       );
     }
 
     if (photorealisticTileset) {
       console.info('[TripFlythrough] Google 3D tiles loaded OK');
-      photorealisticTileset.maximumScreenSpaceError = compatibilityMode ? 4 : 1.5;
+      photorealisticTileset.maximumScreenSpaceError = compatibilityMode ? 2.4 : 1.2;
       photorealisticTileset.dynamicScreenSpaceError = true;
       photorealisticTileset.preloadFlightDestinations = true;
       viewer.scene.primitives.add(photorealisticTileset);
@@ -568,15 +570,16 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
           const imageryLayers = viewer.imageryLayers;
           const baseLayer = imageryLayers.get(0);
           if (baseLayer) {
-            // Satellite imagery — vibrant and realistic like Google Earth
-            baseLayer.brightness = 1.05;
-            baseLayer.contrast = 1.1;
-            baseLayer.saturation = 1.1;
-            baseLayer.gamma = 1.0;
+            // Muted base imagery — photorealistic 3D tiles render on top
+            baseLayer.brightness = 0.55;
+            baseLayer.contrast = 1.15;
+            baseLayer.saturation = 0.45;
+            baseLayer.gamma = 0.95;
           }
 
-          viewer.scene.backgroundColor = Cesium.Color.fromCssColorString('#1a1a2e');
-          viewer.scene.globe.baseColor = Cesium.Color.fromCssColorString('#2c3e50');
+          // Near-black background — invisible when tiles don't load (no "marée")
+          viewer.scene.backgroundColor = Cesium.Color.fromCssColorString('#050508');
+          viewer.scene.globe.baseColor = Cesium.Color.fromCssColorString('#0a0a12');
           viewer.scene.globe.depthTestAgainstTerrain = true;
           // Preload adjacent terrain tiles for smoother transitions
           viewer.scene.globe.preloadSiblings = true;
@@ -844,12 +847,20 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
     if (!Cesium || !viewer || viewer.isDestroyed?.()) return;
 
     const ORBIT_SPEED_DEG_PER_SEC = 8; // degrees per second — slow cinematic rotation
+    const MIN_FRAME_MS = 100; // ~10fps max — give tiles time to load between frames
     let lastTime = performance.now();
 
     const orbitStep = (now: number) => {
       if (!viewer || viewer.isDestroyed?.()) return;
 
-      const dt = (now - lastTime) / 1000; // seconds
+      const elapsed = now - lastTime;
+      if (elapsed < MIN_FRAME_MS) {
+        // Skip this frame — let tiles load instead of thrashing the GPU
+        orbitRef.current = requestAnimationFrame(orbitStep);
+        return;
+      }
+
+      const dt = Math.min(elapsed / 1000, 0.2); // cap dt to avoid jumps
       lastTime = now;
 
       // Rotate heading
