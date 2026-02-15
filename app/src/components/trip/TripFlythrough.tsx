@@ -514,13 +514,12 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
             viewer = new Cesium.Viewer(containerRef.current, viewerOptions);
             viewerRef.current = viewer;
 
-            // Add synchronous dark base layer BEFORE starting the render loop
-            // CartoDB dark_nolabels: minimalist, no text/symbols cluttering the 3D view
+            // Add synchronous satellite base layer BEFORE starting the render loop
+            // ArcGIS World Imagery: realistic satellite photos, no ugly labels/symbols
             viewer.imageryLayers.addImageryProvider(
               new Cesium.UrlTemplateImageryProvider({
-                url: 'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png',
-                credit: 'CartoDB',
-                subdomains: 'abcd',
+                url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+                credit: 'Esri, Maxar, Earthstar Geographics',
                 maximumLevel: 19,
               })
             );
@@ -552,15 +551,15 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
           const imageryLayers = viewer.imageryLayers;
           const baseLayer = imageryLayers.get(0);
           if (baseLayer) {
-            // CartoDB dark is already clean — subtle adjustments only
-            baseLayer.brightness = 1.0;
+            // Satellite imagery — vibrant and realistic like Google Earth
+            baseLayer.brightness = 1.05;
             baseLayer.contrast = 1.1;
-            baseLayer.saturation = 0.5;
-            baseLayer.gamma = 0.95;
+            baseLayer.saturation = 1.1;
+            baseLayer.gamma = 1.0;
           }
 
-          viewer.scene.backgroundColor = Cesium.Color.fromCssColorString('#0a0a12');
-          viewer.scene.globe.baseColor = Cesium.Color.fromCssColorString('#0a0a12');
+          viewer.scene.backgroundColor = Cesium.Color.fromCssColorString('#1a2a3a');
+          viewer.scene.globe.baseColor = Cesium.Color.fromCssColorString('#2a3a2a');
           viewer.scene.globe.depthTestAgainstTerrain = true;
           // Preload adjacent terrain tiles for smoother transitions
           viewer.scene.globe.preloadSiblings = true;
