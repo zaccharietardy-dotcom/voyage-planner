@@ -58,6 +58,32 @@ const PIPELINE_MEDIA_PROXY = !['0', 'false', 'off'].includes(
   String(process.env.PIPELINE_MEDIA_PROXY || 'true').toLowerCase()
 );
 
+export function getAirportPreDepartureLeadMinutes(flight: Flight): number {
+  const airportText = `${flight.departureAirport || ''} ${flight.departureAirportCode || ''}`.toLowerCase();
+  const needsExtraMargin = /international|intl|orly|charles|gaulle|fiumicino|heathrow|gatwick|schiphol|barajas|frankfurt/.test(airportText);
+  // User constraint: include transfer + check-in/security in a 1h30 to 2h window.
+  return needsExtraMargin ? 120 : 90;
+}
+
+function getLocalTimeMinutes(displayTime?: string, isoTime?: string): number {
+  if (displayTime && /^([01]?\d|2[0-3]):([0-5]\d)$/.test(displayTime)) {
+    const [h, m] = displayTime.split(':').map(Number);
+    return h * 60 + m;
+  }
+  if (isoTime) {
+    const d = new Date(isoTime);
+    if (Number.isFinite(d.getTime())) return d.getHours() * 60 + d.getMinutes();
+  }
+  return 0;
+}
+
+function minutesToHHMM(totalMinutes: number): string {
+  const clamped = Math.max(0, Math.min(23 * 60 + 59, Math.round(totalMinutes)));
+  const hours = Math.floor(clamped / 60);
+  const minutes = clamped % 60;
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+}
+
 function normalizeTransportMode(rawMode?: string): TripItem['transportMode'] | undefined {
   if (!rawMode) return undefined;
   const mode = rawMode.toLowerCase();
@@ -508,6 +534,8 @@ export async function assembleTripSchedule(
       { isFirstDay, isLastDay, isDayTrip: !!balancedDay.isDayTrip }
     );
     let dayEndHour = 22;
+    let dayStartMinutes = dayStartHour * 60;
+    let dayEndMinutes = dayEndHour * 60;
 
     // Detect ground transport (train/bus/car) — used when no flights
     const isGroundTransport = transport && transport.mode !== 'plane';
@@ -515,66 +543,66 @@ export async function assembleTripSchedule(
     const hasReturnTransport = isLastDay && isGroundTransport;
 
     // Compute outbound arrival hour for ground transport
-    let groundArrivalHour: number | null = null;
+    let groundArrivalMinutes: number | null = null;
     if (hasOutboundTransport && transport) {
       if (transport.transitLegs?.length) {
         const lastLeg = transport.transitLegs[transport.transitLegs.length - 1];
-        groundArrivalHour = new Date(lastLeg.arrival).getHours();
+        const lastLegArrival = new Date(lastLeg.arrival);
+        groundArrivalMinutes = lastLegArrival.getHours() * 60 + lastLegArrival.getMinutes();
       } else {
         // Estimated: depart 08:00 + total duration
-        groundArrivalHour = 8 + Math.ceil(transport.totalDuration / 60);
+        groundArrivalMinutes = (8 + Math.ceil(transport.totalDuration / 60)) * 60;
       }
     }
 
     // Compute return departure hour for ground transport
     // Transit legs have outbound dates — they almost never match the return day
     // Use estimated afternoon departure (15:00 gives a full morning for activities)
-    let groundDepartureHour: number | null = null;
+    let groundDepartureMinutes: number | null = null;
     if (hasReturnTransport && transport) {
       // Estimate based on total duration: leave at 15:00 by default
       // If the trip is very long (>4h), leave earlier (14:00) to arrive at reasonable time
       const durationHours = (transport.totalDuration || 120) / 60;
-      groundDepartureHour = durationHours > 4 ? 14 : 15;
+      groundDepartureMinutes = (durationHours > 4 ? 14 : 15) * 60;
     }
 
     if (isFirstDay && flights.outbound) {
-      // Use display time (local airport time) if available, otherwise parse ISO
-      const arrivalHour = flights.outbound.arrivalTimeDisplay
-        ? parseInt(flights.outbound.arrivalTimeDisplay.split(':')[0], 10)
-        : new Date(flights.outbound.arrivalTime).getHours();
-      dayStartHour = Math.max(dayStartHour, arrivalHour + 1); // +1h for transfer
-    } else if (hasOutboundTransport && groundArrivalHour !== null) {
+      const arrivalMinutes = getLocalTimeMinutes(flights.outbound.arrivalTimeDisplay, flights.outbound.arrivalTime);
+      dayStartMinutes = Math.max(dayStartMinutes, arrivalMinutes + 60); // +1h transfer
+    } else if (hasOutboundTransport && groundArrivalMinutes !== null) {
       // Ground transport: activities start after arrival
-      dayStartHour = Math.max(dayStartHour, groundArrivalHour + 1);
+      dayStartMinutes = Math.max(dayStartMinutes, groundArrivalMinutes + 60);
     }
 
     if (isLastDay && flights.return) {
-      const departureHour = flights.return.departureTimeDisplay
-        ? parseInt(flights.return.departureTimeDisplay.split(':')[0], 10)
-        : new Date(flights.return.departureTime).getHours();
-      if (departureHour >= 14) {
-        dayStartHour = Math.min(dayStartHour, 8);
+      const departureMinutes = getLocalTimeMinutes(flights.return.departureTimeDisplay, flights.return.departureTime);
+      const airportLeadMinutes = getAirportPreDepartureLeadMinutes(flights.return);
+      if (departureMinutes >= 14 * 60) {
+        dayStartMinutes = Math.min(dayStartMinutes, 8 * 60);
       }
-      // Need to be at airport 2h before departure, plus 1h transfer = 3h before
-      // But ensure at least a 3h window for the last day (activities + checkout)
-      dayEndHour = Math.max(dayStartHour + 3, departureHour - 3);
+      // Keep a realistic airport lead window (1h30 to 2h including transfer).
+      // Still guarantee a minimum usable half-day block.
+      dayEndMinutes = Math.max(dayStartMinutes + 180, departureMinutes - airportLeadMinutes);
       // If flight is very early (before noon), start earlier
-      if (departureHour <= 12) {
-        dayStartHour = Math.min(dayStartHour, 7);
+      if (departureMinutes <= 12 * 60) {
+        dayStartMinutes = Math.min(dayStartMinutes, 7 * 60);
       }
-    } else if (hasReturnTransport && groundDepartureHour !== null) {
-      if (groundDepartureHour >= 14) {
-        dayStartHour = Math.min(dayStartHour, 8);
+    } else if (hasReturnTransport && groundDepartureMinutes !== null) {
+      if (groundDepartureMinutes >= 14 * 60) {
+        dayStartMinutes = Math.min(dayStartMinutes, 8 * 60);
       }
       // Ground transport: need to be at station ~30min before
-      dayEndHour = Math.max(dayStartHour + 3, groundDepartureHour - 1);
-      if (groundDepartureHour <= 12) {
-        dayStartHour = Math.min(dayStartHour, 7);
+      dayEndMinutes = Math.max(dayStartMinutes + 180, groundDepartureMinutes - 60);
+      if (groundDepartureMinutes <= 12 * 60) {
+        dayStartMinutes = Math.min(dayStartMinutes, 7 * 60);
       }
     }
 
-    const dayStart = parseTime(dayDate, `${String(dayStartHour).padStart(2, '0')}:00`);
-    const dayEnd = parseTime(dayDate, `${String(Math.min(dayEndHour, 23)).padStart(2, '0')}:00`);
+    dayStartHour = Math.floor(dayStartMinutes / 60);
+    dayEndHour = Math.floor(dayEndMinutes / 60);
+
+    const dayStart = parseTime(dayDate, minutesToHHMM(dayStartMinutes));
+    const dayEnd = parseTime(dayDate, minutesToHHMM(dayEndMinutes));
 
     const scheduler = new DayScheduler(dayDate, dayStart, dayEnd);
 
@@ -621,13 +649,36 @@ export async function assembleTripSchedule(
       id: string; title: string; type: string;
       startTime: Date; endTime: Date; data: any;
     } | null = null;
+    let returnAirportPrepData: {
+      id: string; title: string; type: string;
+      startTime: Date; endTime: Date; data: any;
+    } | null = null;
 
     if (isLastDay && flights.return) {
+      const flightDeparture = new Date(flights.return.departureTime);
+      const airportLeadMinutes = getAirportPreDepartureLeadMinutes(flights.return);
+      const airportPrepStart = new Date(flightDeparture.getTime() - airportLeadMinutes * 60 * 1000);
+
+      returnAirportPrepData = {
+        id: `airport-prep-${balancedDay.dayNumber}`,
+        title: `Trajet vers ${flights.return.departureAirportCode || "l'aéroport"} + check-in`,
+        type: 'transport',
+        startTime: airportPrepStart,
+        endTime: flightDeparture,
+        data: {
+          locationName: flights.return.departureAirport || flights.return.departureAirportCode || "Aéroport",
+          description: `Trajet + formalités aéroport (${airportLeadMinutes} min)`,
+          estimatedCost: 0,
+          transportMode: 'transit',
+          transportRole: 'longhaul',
+        },
+      };
+
       returnTransportData = {
         id: `flight-ret-${balancedDay.dayNumber}`,
         title: `Vol ${flights.return.flightNumber}`,
         type: 'flight',
-        startTime: new Date(flights.return.departureTime),
+        startTime: flightDeparture,
         endTime: new Date(flights.return.arrivalTime),
         data: flights.return,
       };
@@ -691,11 +742,11 @@ export async function assembleTripSchedule(
     // Skip breakfast only if we physically can't have it (arriving after 10am)
     const skipBreakfast = isFirstDay && dayStartHour >= 10;
     // Skip lunch only if the day ends before lunch time (e.g. very early departure)
-    const skipLunch = (isLastDay && hasReturnTravel && dayEndHour <= 12) ||
-                       (isFirstDay && dayStartHour >= 14);
+    const skipLunch = (isLastDay && hasReturnTravel && dayEndMinutes <= 12 * 60) ||
+                       (isFirstDay && dayStartMinutes >= 14 * 60);
     // Skip dinner only if the day ends before dinner time
-    const skipDinner = (isLastDay && hasReturnTravel && dayEndHour < 19) ||
-                       (isFirstDay && dayStartHour >= 20);
+    const skipDinner = (isLastDay && hasReturnTravel && dayEndMinutes < 19 * 60) ||
+                       (isFirstDay && dayStartMinutes >= 20 * 60);
 
     // 3. Hotel check-in (first day) / check-out (last day)
     // IMPORTANT: On the last day, insert breakfast BEFORE checkout.
@@ -718,9 +769,9 @@ export async function assembleTripSchedule(
         if (earliestCheckinWithTransfer > checkinTime) {
           checkinTime = earliestCheckinWithTransfer;
         }
-      } else if (hasOutboundTransport && groundArrivalHour !== null) {
+      } else if (hasOutboundTransport && groundArrivalMinutes !== null) {
         // Ground transport: check-in after arrival at destination
-        const earliestCheckin = parseTime(dayDate, `${String(groundArrivalHour).padStart(2, '0')}:30`);
+        const earliestCheckin = parseTime(dayDate, minutesToHHMM(groundArrivalMinutes + 30));
         if (earliestCheckin > checkinTime) {
           checkinTime = earliestCheckin;
         }
@@ -766,11 +817,11 @@ export async function assembleTripSchedule(
       let checkoutTime = parseTime(dayDate, hotel.checkOutTime || '11:00');
       // If there's a return flight, check-out must be well before departure
       if (flights.return) {
-        const departureHour = flights.return.departureTimeDisplay
-          ? parseInt(flights.return.departureTimeDisplay.split(':')[0], 10)
-          : new Date(flights.return.departureTime).getHours();
-        // Check-out at least 3h before flight
-        const latestCheckout = parseTime(dayDate, `${String(Math.max(7, departureHour - 3)).padStart(2, '0')}:00`);
+        const departureMinutes = getLocalTimeMinutes(flights.return.departureTimeDisplay, flights.return.departureTime);
+        const airportLeadMinutes = getAirportPreDepartureLeadMinutes(flights.return);
+        // Latest checkout aligns with airport transfer/security buffer.
+        const latestCheckoutMinutes = Math.max(7 * 60, departureMinutes - airportLeadMinutes);
+        const latestCheckout = parseTime(dayDate, minutesToHHMM(latestCheckoutMinutes));
         if (latestCheckout < checkoutTime) {
           checkoutTime = latestCheckout;
         }
@@ -798,7 +849,7 @@ export async function assembleTripSchedule(
     }
 
     const mustSeeCount = orderedActivities.filter(a => a.mustSee).length;
-    console.log(`[Pipeline V2] Day ${balancedDay.dayNumber}: ${orderedActivities.length} activities to schedule (${mustSeeCount} must-sees), dayStart=${dayStartHour}:00, dayEnd=${dayEndHour}:00, window=${dayEndHour - dayStartHour}h, cursor=${formatTimeHHMM(scheduler.getCurrentTime())}`);
+    console.log(`[Pipeline V2] Day ${balancedDay.dayNumber}: ${orderedActivities.length} activities to schedule (${mustSeeCount} must-sees), dayStart=${minutesToHHMM(dayStartMinutes)}, dayEnd=${minutesToHHMM(dayEndMinutes)}, window=${((dayEndMinutes - dayStartMinutes) / 60).toFixed(1)}h, cursor=${formatTimeHHMM(scheduler.getCurrentTime())}`);
     for (const a of orderedActivities) {
       console.log(`[Pipeline V2]   → "${a.name}" (${a.duration || 60}min, score=${a.score.toFixed(1)}, mustSee=${!!a.mustSee})`);
     }
@@ -1530,6 +1581,9 @@ export async function assembleTripSchedule(
 
     // 9. Insert return transport LAST (after activities and meals)
     // This prevents the cursor from advancing past dayEnd before activities are placed.
+    if (returnAirportPrepData) {
+      scheduler.insertFixedItem(returnAirportPrepData);
+    }
     if (returnTransportData) {
       scheduler.insertFixedItem(returnTransportData);
     }

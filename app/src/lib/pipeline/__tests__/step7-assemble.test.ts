@@ -1,10 +1,11 @@
 import {
   addHotelBoundaryTransportItems,
+  getAirportPreDepartureLeadMinutes,
   getTransportModeFromItemData,
   normalizeReturnTransportBookingUrl,
   normalizeSuggestedDayStartHour,
 } from '../step7-assemble';
-import type { Accommodation, TripItem } from '../../types';
+import type { Accommodation, Flight, TripItem } from '../../types';
 
 describe('step7-assemble helpers', () => {
   const hotel: Accommodation = {
@@ -130,5 +131,39 @@ describe('step7-assemble helpers', () => {
     expect(
       normalizeSuggestedDayStartHour(11, { isFirstDay: false, isLastDay: true, isDayTrip: false })
     ).toBe(9);
+  });
+
+  it('uses a realistic airport lead window (90-120 min)', () => {
+    const majorHubFlight: Flight = {
+      id: 'f-1',
+      airline: 'Air France',
+      flightNumber: 'AF123',
+      departureAirport: 'Aéroport international de Rome Fiumicino',
+      departureAirportCode: 'FCO',
+      departureCity: 'Rome',
+      departureTime: '2026-03-20T19:30:00.000Z',
+      departureTimeDisplay: '19:30',
+      arrivalAirport: 'Aéroport de Paris-Orly',
+      arrivalAirportCode: 'ORY',
+      arrivalCity: 'Paris',
+      arrivalTime: '2026-03-20T21:45:00.000Z',
+      arrivalTimeDisplay: '21:45',
+      duration: 135,
+      stops: 0,
+      price: 120,
+      currency: 'EUR',
+      cabinClass: 'economy',
+      baggageIncluded: true,
+    };
+
+    const regionalFlight: Flight = {
+      ...majorHubFlight,
+      id: 'f-2',
+      departureAirport: 'Aéroport de Nîmes',
+      departureAirportCode: 'FNI',
+    };
+
+    expect(getAirportPreDepartureLeadMinutes(majorHubFlight)).toBe(120);
+    expect(getAirportPreDepartureLeadMinutes(regionalFlight)).toBe(90);
   });
 });

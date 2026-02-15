@@ -600,6 +600,24 @@ function rebalanceClustersForFlights(
     return dist > 20; // >20km from city = genuine day trip
   });
 
+  const getAirportPreDepartureLeadMinutes = (flight: Flight): number => {
+    const airportText = `${flight.departureAirport || ''} ${flight.departureAirportCode || ''}`.toLowerCase();
+    const needsExtraMargin = /international|intl|orly|charles|gaulle|fiumicino|heathrow|gatwick|schiphol|barajas|frankfurt/.test(airportText);
+    return needsExtraMargin ? 120 : 90;
+  };
+
+  const getLocalTimeMinutes = (displayTime?: string, isoTime?: string): number => {
+    if (displayTime && /^([01]?\d|2[0-3]):([0-5]\d)$/.test(displayTime)) {
+      const [h, m] = displayTime.split(':').map(Number);
+      return h * 60 + m;
+    }
+    if (isoTime) {
+      const d = new Date(isoTime);
+      if (Number.isFinite(d.getTime())) return d.getHours() * 60 + d.getMinutes();
+    }
+    return 0;
+  };
+
   // Estimate available hours per day
   const getAvailableHours = (c: ActivityCluster, ci: number): number => {
     if (isDayTrip[ci]) return 12;
@@ -632,10 +650,9 @@ function rebalanceClustersForFlights(
     }
 
     if (isLast && returnFlight) {
-      const depHour = returnFlight.departureTimeDisplay
-        ? parseInt(returnFlight.departureTimeDisplay.split(':')[0], 10)
-        : new Date(returnFlight.departureTime).getHours();
-      available = Math.max(0, depHour - 3 - 8);
+      const depMinutes = getLocalTimeMinutes(returnFlight.departureTimeDisplay, returnFlight.departureTime);
+      const airportLeadMinutes = getAirportPreDepartureLeadMinutes(returnFlight);
+      available = Math.max(0, ((depMinutes - airportLeadMinutes) / 60) - 8);
     } else if (isLast && isGroundTransport) {
       // Ground transport return: estimate departure around 14:00-16:00
       // Note: transitLegs have outbound dates, so we use the hour only as a rough guide

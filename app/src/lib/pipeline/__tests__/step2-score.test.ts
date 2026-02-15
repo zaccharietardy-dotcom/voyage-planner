@@ -21,22 +21,23 @@ function createPreferences(): TripPreferences {
 }
 
 function attraction(overrides: Partial<Attraction> & Pick<Attraction, 'id' | 'name'>): Attraction {
+  const { id, name, ...rest } = overrides;
   return {
-    id: overrides.id,
-    name: overrides.name,
+    id,
+    name,
     type: 'culture',
-    description: overrides.description || overrides.name,
-    duration: overrides.duration || 90,
-    estimatedCost: overrides.estimatedCost || 20,
-    latitude: overrides.latitude ?? 48.8566,
-    longitude: overrides.longitude ?? 2.3522,
-    rating: overrides.rating ?? 4.6,
-    mustSee: overrides.mustSee ?? false,
-    bookingRequired: overrides.bookingRequired ?? false,
-    openingHours: overrides.openingHours || { open: '09:00', close: '18:00' },
-    dataReliability: overrides.dataReliability || 'verified',
-    reviewCount: overrides.reviewCount ?? 1000,
-    ...overrides,
+    description: rest.description || name,
+    duration: rest.duration || 90,
+    estimatedCost: rest.estimatedCost || 20,
+    latitude: rest.latitude ?? 48.8566,
+    longitude: rest.longitude ?? 2.3522,
+    rating: rest.rating ?? 4.6,
+    mustSee: rest.mustSee ?? false,
+    bookingRequired: rest.bookingRequired ?? false,
+    openingHours: rest.openingHours || { open: '09:00', close: '18:00' },
+    dataReliability: rest.dataReliability || 'verified',
+    reviewCount: rest.reviewCount ?? 1000,
+    ...rest,
   };
 }
 
