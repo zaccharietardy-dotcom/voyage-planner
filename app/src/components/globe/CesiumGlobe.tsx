@@ -87,6 +87,15 @@ function applySafeBaseImagery(Cesium: any, viewer: any) {
   }
 }
 
+function supportsWebGL2(): boolean {
+  try {
+    const canvas = document.createElement('canvas');
+    return !!canvas.getContext('webgl2');
+  } catch {
+    return false;
+  }
+}
+
 // Create a simple dot marker (fallback when no image)
 function createMarkerCanvas(Cesium: any, isSelected: boolean, isOnline: boolean): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
@@ -288,6 +297,11 @@ export function CesiumGlobe({
 
     async function initCesium() {
       try {
+        if (!supportsWebGL2()) {
+          setError('Globe 3D indisponible: WebGL2 non supporté par ton navigateur/appareil.');
+          return;
+        }
+
         // Set Cesium base URL for assets (must be before import)
         (window as any).CESIUM_BASE_URL = '/cesium';
 
@@ -317,6 +331,7 @@ export function CesiumGlobe({
           timeline: false,
           navigationHelpButton: false,
           navigationInstructionsInitiallyVisible: false,
+          showRenderLoopErrors: false,
           skyBox: false,
           contextOptions: {
             webgl: {
@@ -325,18 +340,11 @@ export function CesiumGlobe({
           },
         };
 
-        // Create viewer with dark theme settings, then fallback to minimal config if needed.
-        let viewer: any;
-        try {
-          viewer = new Cesium.Viewer(containerRef.current, {
-            ...commonViewerOptions,
-            terrain: hasIonToken ? Cesium.Terrain.fromWorldTerrain() : undefined,
-            skyAtmosphere: new Cesium.SkyAtmosphere(),
-          });
-        } catch (error) {
-          console.info('[CesiumGlobe] Advanced viewer init failed, retrying minimal viewer', error);
-          viewer = new Cesium.Viewer(containerRef.current, commonViewerOptions);
-        }
+        const viewer = new Cesium.Viewer(containerRef.current, {
+          ...commonViewerOptions,
+          terrain: hasIonToken ? Cesium.Terrain.fromWorldTerrain() : undefined,
+          skyAtmosphere: new Cesium.SkyAtmosphere(),
+        });
 
         applySafeBaseImagery(Cesium, viewer);
 

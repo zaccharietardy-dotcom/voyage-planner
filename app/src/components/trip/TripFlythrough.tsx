@@ -87,6 +87,15 @@ function applySafeBaseImagery(Cesium: any, viewer: any) {
   }
 }
 
+function supportsWebGL2(): boolean {
+  try {
+    const canvas = document.createElement('canvas');
+    return !!canvas.getContext('webgl2');
+  } catch {
+    return false;
+  }
+}
+
 interface TripFlythroughProps {
   trip: Trip;
   isOpen: boolean;
@@ -177,6 +186,11 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
 
     async function initCesium() {
       try {
+        if (!supportsWebGL2()) {
+          setError('Visualisation 3D indisponible: WebGL2 non supporté par ton navigateur/appareil.');
+          return;
+        }
+
         (window as any).CESIUM_BASE_URL = '/cesium';
 
         const CesiumModule = await import('cesium');
@@ -202,20 +216,15 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
           timeline: false,
           navigationHelpButton: false,
           navigationInstructionsInitiallyVisible: false,
+          showRenderLoopErrors: false,
           skyBox: false,
         };
 
-        let viewer: any;
-        try {
-          viewer = new Cesium.Viewer(containerRef.current, {
-            ...commonViewerOptions,
-            terrain: hasIonToken ? Cesium.Terrain.fromWorldTerrain() : undefined,
-            skyAtmosphere: new Cesium.SkyAtmosphere(),
-          });
-        } catch (error) {
-          console.info('[TripFlythrough] Advanced viewer init failed, retrying minimal viewer', error);
-          viewer = new Cesium.Viewer(containerRef.current, commonViewerOptions);
-        }
+        const viewer = new Cesium.Viewer(containerRef.current, {
+          ...commonViewerOptions,
+          terrain: hasIonToken ? Cesium.Terrain.fromWorldTerrain() : undefined,
+          skyAtmosphere: new Cesium.SkyAtmosphere(),
+        });
 
         applySafeBaseImagery(Cesium, viewer);
 
