@@ -280,6 +280,7 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
   const isPlayingRef = useRef(false);
   const speedRef = useRef(1);
   const renderPumpRef = useRef<NodeJS.Timeout | null>(null);
+  const orbitRef = useRef<number | null>(null); // requestAnimationFrame ID for orbit
   const fallbackItems = useMemo(() => trip.days.flatMap((day) => day.items || []), [trip]);
 
   useEffect(() => {
@@ -737,6 +738,10 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
     return () => {
       mounted = false;
       isPlayingRef.current = false;
+      if (orbitRef.current !== null) {
+        cancelAnimationFrame(orbitRef.current);
+        orbitRef.current = null;
+      }
       if (animationRef.current) {
         clearTimeout(animationRef.current);
         animationRef.current = null;
@@ -780,7 +785,77 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
     });
   }, []);
 
-  // Fly to waypoint — street-level approach: camera offset from monument, looking AT it
+  // Stop any active orbit animation
+  const stopOrbit = useCallback(() => {
+    if (orbitRef.current !== null) {
+      cancelAnimationFrame(orbitRef.current);
+      orbitRef.current = null;
+    }
+  }, []);
+
+  // Start orbit: camera slowly rotates around the monument target
+  const startOrbit = useCallback((
+    targetLat: number,
+    targetLng: number,
+    altitude: number,
+    startHeading: number,
+    pitchDeg: number,
+    offsetDist: number,
+  ) => {
+    const Cesium = cesiumRef.current;
+    const viewer = viewerRef.current;
+    if (!Cesium || !viewer || viewer.isDestroyed?.()) return;
+
+    const ORBIT_SPEED_DEG_PER_SEC = 8; // degrees per second — slow cinematic rotation
+    let lastTime = performance.now();
+
+    const orbitStep = (now: number) => {
+      if (!viewer || viewer.isDestroyed?.()) return;
+
+      const dt = (now - lastTime) / 1000; // seconds
+      lastTime = now;
+
+      // Rotate heading
+      const headingDelta = ORBIT_SPEED_DEG_PER_SEC * dt * speedRef.current;
+      const currentHeading = Cesium.Math.toDegrees(viewer.camera.heading);
+      const newHeading = currentHeading + headingDelta;
+
+      // Compute new camera position on the orbit circle
+      const targetCartographic = Cesium.Cartographic.fromDegrees(targetLng, targetLat);
+      const headingRad = Cesium.Math.toRadians(newHeading);
+
+      // Camera orbits around the target at offsetDist meters
+      const earthRadius = 6371000;
+      const angularDist = offsetDist / earthRadius;
+      // Position opposite to heading (camera looks TOWARD target, so it's placed BEHIND)
+      const oppositeHeading = headingRad + Math.PI;
+
+      const newLat = Math.asin(
+        Math.sin(targetCartographic.latitude) * Math.cos(angularDist) +
+        Math.cos(targetCartographic.latitude) * Math.sin(angularDist) * Math.cos(oppositeHeading)
+      );
+      const newLng = targetCartographic.longitude + Math.atan2(
+        Math.sin(oppositeHeading) * Math.sin(angularDist) * Math.cos(targetCartographic.latitude),
+        Math.cos(angularDist) - Math.sin(targetCartographic.latitude) * Math.sin(newLat)
+      );
+
+      viewer.camera.setView({
+        destination: Cesium.Cartesian3.fromRadians(newLng, newLat, altitude),
+        orientation: {
+          heading: headingRad,
+          pitch: Cesium.Math.toRadians(pitchDeg),
+          roll: 0,
+        },
+      });
+
+      viewer.scene.requestRender();
+      orbitRef.current = requestAnimationFrame(orbitStep);
+    };
+
+    orbitRef.current = requestAnimationFrame(orbitStep);
+  }, []);
+
+  // Fly to waypoint — camera flies to monument then orbits around it
   // Uses refs (isPlayingRef, speedRef) to avoid stale closure issues
   const flyToWaypoint = useCallback((index: number) => {
     const Cesium = cesiumRef.current;
@@ -803,6 +878,8 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
       clearInterval(renderPumpRef.current);
       renderPumpRef.current = null;
     }
+    // Stop previous orbit
+    stopOrbit();
 
     setCurrentIndex(index);
     highlightWaypoint(index);
@@ -810,6 +887,7 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
     const profile = getStreetLevelFlightProfile(waypoints, index);
     const currentSpeed = speedRef.current;
     const flightDuration = profile.duration / currentSpeed;
+    const wp = waypoints[index];
 
     // Fly camera to offset position near the monument, looking AT it
     const flightOptions: any = {
@@ -824,42 +902,38 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
         roll: 0,
       },
       duration: flightDuration,
-      // Keep maximumHeight very close to altitude — NO sky arcs
       maximumHeight: profile.maxHeight,
-      // Called when flight animation completes
+      // Called when flight animation completes — start orbiting
       complete: () => {
         if (!viewer || viewer.isDestroyed?.()) return;
 
-        // Force tile loading at new camera position
+        // Force tile loading
         viewer.scene.requestRender();
 
-        // Render pump: force tile loading every 500ms during the pause
-        renderPumpRef.current = setInterval(() => {
-          if (viewer && !viewer.isDestroyed?.()) {
-            viewer.scene.requestRender();
-          }
-        }, 500);
+        // Start orbit around the monument
+        const offsetDist = Math.min(350, Math.max(200, profile.altitude * 1.3));
+        startOrbit(
+          wp.lat, wp.lng,
+          profile.altitude,
+          profile.headingDeg,
+          profile.pitchDeg,
+          offsetDist,
+        );
 
         // Check if still playing (read from ref, not stale closure)
         if (!isPlayingRef.current) {
-          // Not playing — just pump renders for a few seconds then stop
+          // Not playing — orbit for a few seconds then stop
           setTimeout(() => {
-            if (renderPumpRef.current) {
-              clearInterval(renderPumpRef.current);
-              renderPumpRef.current = null;
-            }
-          }, 3000);
+            stopOrbit();
+          }, 5000);
           return;
         }
 
-        // Schedule next waypoint after pause
+        // Schedule next waypoint after pause (orbit continues during pause)
         const pauseMs = profile.pauseMs / speedRef.current;
         animationRef.current = setTimeout(() => {
-          // Stop render pump
-          if (renderPumpRef.current) {
-            clearInterval(renderPumpRef.current);
-            renderPumpRef.current = null;
-          }
+          // Stop orbit before flying to next
+          stopOrbit();
 
           // Re-check playing state (user may have paused during the pause)
           if (!isPlayingRef.current) return;
@@ -876,14 +950,14 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
       },
       // Called if flight is cancelled (user interaction or cancelFlight())
       cancel: () => {
-        // Don't schedule next waypoint — flight was interrupted
+        stopOrbit();
       },
     };
     if (Cesium.EasingFunction?.QUADRATIC_IN_OUT) {
       flightOptions.easingFunction = Cesium.EasingFunction.QUADRATIC_IN_OUT;
     }
     viewer.camera.flyTo(flightOptions);
-  }, [highlightWaypoint]);
+  }, [highlightWaypoint, startOrbit, stopOrbit]);
 
   // Play/Pause
   const togglePlay = useCallback(() => {
@@ -893,6 +967,7 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
       // PAUSE: stop everything immediately
       setIsPlaying(false);
       isPlayingRef.current = false;
+      stopOrbit();
       if (animationRef.current) {
         clearTimeout(animationRef.current);
         animationRef.current = null;
@@ -912,13 +987,14 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
       isPlayingRef.current = true;
       flyToWaypoint(currentIndex);
     }
-  }, [isPlaying, isLoaded, currentIndex, flyToWaypoint]);
+  }, [isPlaying, isLoaded, currentIndex, flyToWaypoint, stopOrbit]);
 
   // Skip to next
   const skipNext = useCallback(() => {
     if (!isLoaded) return;
 
-    // Cancel current flight + pending timeout
+    // Cancel current flight + orbit + pending timeout
+    stopOrbit();
     if (animationRef.current) {
       clearTimeout(animationRef.current);
       animationRef.current = null;
@@ -935,7 +1011,7 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
     const waypoints = waypointsRef.current;
     const nextIndex = (currentIndex + 1) % waypoints.length;
     flyToWaypoint(nextIndex);
-  }, [isLoaded, currentIndex, flyToWaypoint]);
+  }, [isLoaded, currentIndex, flyToWaypoint, stopOrbit]);
 
   // Change speed
   const cycleSpeed = useCallback(() => {
@@ -948,6 +1024,7 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
   // Restart flight at new speed when speed changes mid-playback
   useEffect(() => {
     if (isPlaying && isLoaded) {
+      stopOrbit();
       if (animationRef.current) {
         clearTimeout(animationRef.current);
         animationRef.current = null;
