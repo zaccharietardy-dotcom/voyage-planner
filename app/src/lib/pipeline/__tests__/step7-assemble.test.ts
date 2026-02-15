@@ -6,6 +6,7 @@ import {
   getAirportPreDepartureLeadMinutes,
   getTransportModeFromItemData,
   normalizeReturnTransportBookingUrl,
+  resolveOutboundAirportParking,
   normalizeSuggestedDayStartHour,
   rebalanceAdjacentDayLoad,
 } from '../step7-assemble';
@@ -232,6 +233,45 @@ describe('step7-assemble helpers', () => {
 
     expect(getAirportPreDepartureLeadMinutes(majorHubFlight)).toBe(120);
     expect(getAirportPreDepartureLeadMinutes(regionalFlight)).toBe(90);
+  });
+
+  it('builds a fallback parking option with booking link when no provider is available', () => {
+    const resolved = resolveOutboundAirportParking({
+      selectedOriginAirport: {
+        code: 'ZZZ',
+        name: 'Test Airport',
+        city: 'Test City',
+        latitude: 48.0,
+        longitude: 2.0,
+      },
+      durationDays: 7,
+      budgetLevel: 'moderate',
+      hasOutboundAirTravel: true,
+    });
+
+    expect(resolved.parking).not.toBeNull();
+    expect(resolved.fallbackOptionUsed).toBe(true);
+    expect(resolved.fallbackBookingUrlUsed).toBe(true);
+    expect(resolved.parking?.bookingUrl).toContain('google.com/maps/search/');
+  });
+
+  it('returns no parking when outbound air travel is not used', () => {
+    const resolved = resolveOutboundAirportParking({
+      selectedOriginAirport: {
+        code: 'CDG',
+        name: 'Paris Charles de Gaulle',
+        city: 'Paris',
+        latitude: 49.0097,
+        longitude: 2.5479,
+      },
+      durationDays: 3,
+      budgetLevel: 'economic',
+      hasOutboundAirTravel: false,
+    });
+
+    expect(resolved.parking).toBeNull();
+    expect(resolved.fallbackOptionUsed).toBe(false);
+    expect(resolved.fallbackBookingUrlUsed).toBe(false);
   });
 
   it('compresses very large intra-day gaps without moving fixed anchors', () => {

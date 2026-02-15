@@ -5,7 +5,7 @@
  * Uses the existing DayScheduler for time slot management.
  */
 
-import type { Trip, TripDay, TripItem, TripPreferences, Flight, Accommodation, TransportOptionSummary, Restaurant } from '../types';
+import type { Trip, TripDay, TripItem, TripPreferences, Flight, Accommodation, TransportOptionSummary, Restaurant, ParkingOption } from '../types';
 import type { FetchedData, ActivityCluster, MealAssignment, BalancedPlan, ScoredActivity } from './types';
 import { DayScheduler, parseTime } from '../services/scheduler';
 import type { ScheduleItem } from '../services/scheduler';
@@ -23,7 +23,7 @@ import { dedupeActivitiesBySimilarity, isDuplicateActivityCandidate } from './ut
 import { getRestaurantMaxDistanceKmForProfile, resolveQualityCityProfile } from './qualityPolicy';
 import { isMonumentLikeActivityName, resolveOfficialTicketing } from '../services/officialTicketing';
 import { scoreViatorPlusValue } from '../services/viator';
-import { calculateParkingTime, selectBestParking } from '../services/parking';
+import { buildAirportParkingBookingUrl, calculateParkingTime, selectBestParking } from '../services/parking';
 import { accommodationHasKitchen } from './utils/accommodation';
 // ---------------------------------------------------------------------------
 // Directions cache — used to store pre-fetched real travel times
@@ -374,6 +374,70 @@ function buildDrivingGoogleMapsUrl(
   return `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(originLabel)}&destination=${encodeURIComponent(`${airport.latitude},${airport.longitude}`)}&travelmode=driving`;
 }
 
+type OutboundAirportParkingResolution = {
+  parking: ParkingOption | null;
+  fallbackOptionUsed: boolean;
+  fallbackBookingUrlUsed: boolean;
+};
+
+export function resolveOutboundAirportParking(args: {
+  selectedOriginAirport: Pick<AirportRef, 'code' | 'name' | 'city' | 'latitude' | 'longitude'> | null;
+  durationDays: number;
+  budgetLevel: TripPreferences['budgetLevel'];
+  hasOutboundAirTravel: boolean;
+}): OutboundAirportParkingResolution {
+  const { selectedOriginAirport, durationDays, budgetLevel, hasOutboundAirTravel } = args;
+  if (!hasOutboundAirTravel || !selectedOriginAirport) {
+    return {
+      parking: null,
+      fallbackOptionUsed: false,
+      fallbackBookingUrlUsed: false,
+    };
+  }
+
+  const preferredParking = selectBestParking(
+    selectedOriginAirport.code,
+    durationDays,
+    budgetLevel
+  );
+  const fallbackBookingUrl = buildAirportParkingBookingUrl(
+    selectedOriginAirport.code,
+    selectedOriginAirport.name,
+    selectedOriginAirport.city
+  );
+
+  if (preferredParking) {
+    const fallbackBookingUrlUsed = !preferredParking.bookingUrl;
+    return {
+      parking: {
+        ...preferredParking,
+        bookingUrl: preferredParking.bookingUrl || fallbackBookingUrl,
+      },
+      fallbackOptionUsed: false,
+      fallbackBookingUrlUsed,
+    };
+  }
+
+  return {
+    parking: {
+      id: `${selectedOriginAirport.code.toLowerCase()}-parking-fallback`,
+      name: `Parking aéroport ${selectedOriginAirport.code}`,
+      type: 'airport',
+      address: selectedOriginAirport.name,
+      latitude: selectedOriginAirport.latitude,
+      longitude: selectedOriginAirport.longitude,
+      distanceToTerminal: 500,
+      pricePerDay: 0,
+      totalPrice: 0,
+      currency: 'EUR',
+      amenities: ['24h'],
+      bookingUrl: fallbackBookingUrl,
+    },
+    fallbackOptionUsed: true,
+    fallbackBookingUrlUsed: true,
+  };
+}
+
 function clampToDayTime(date: Date, dayDate: Date): Date {
   const dayStart = new Date(dayDate);
   dayStart.setHours(0, 0, 0, 0);
@@ -538,13 +602,16 @@ export async function assembleTripSchedule(
       longitude: data.originCoords.lng,
     };
   }
-  const shouldAddParkingForOutboundPlane =
-    Boolean(selectedOriginAirport)
-    && (preferences.needsParking === true || preferences.transport === 'car');
-  const selectedParking =
-    shouldAddParkingForOutboundPlane && selectedOriginAirport
-      ? selectBestParking(selectedOriginAirport.code, preferences.durationDays, preferences.budgetLevel)
-      : null;
+  const hasOutboundAirTravel = Boolean(flights.outbound) || transport?.mode === 'plane';
+  const outboundParkingResolution = resolveOutboundAirportParking({
+    selectedOriginAirport,
+    durationDays: preferences.durationDays,
+    budgetLevel: preferences.budgetLevel,
+    hasOutboundAirTravel,
+  });
+  const selectedParking = outboundParkingResolution.parking;
+  const parkingOptionWasSynthesized = outboundParkingResolution.fallbackOptionUsed;
+  const parkingBookingLinkWasSynthesized = outboundParkingResolution.fallbackBookingUrlUsed;
 
   // Pre-fetch Wikipedia summaries for top activities (non-blocking enrichment)
   const wikiDescriptions = new Map<string, string>();
@@ -894,6 +961,10 @@ export async function assembleTripSchedule(
       const clampedDriveStart = clampToDayTime(driveStart, dayDate);
       const clampedDriveEnd = clampToDayTime(driveEnd, dayDate);
       if (clampedDriveEnd > clampedDriveStart) {
+        const driveQualityFlags: string[] = [];
+        if (!homeCoords) driveQualityFlags.push('home_departure_coords_estimated');
+        if (selectedParking) driveQualityFlags.push('airport_parking_included');
+        if (parkingBookingLinkWasSynthesized) driveQualityFlags.push('airport_parking_fallback_link');
         scheduler.insertFixedItem({
           id: `home-airport-out-${balancedDay.dayNumber}`,
           title: `🚗 Trajet vers ${selectedOriginAirport.code}`,
@@ -911,7 +982,7 @@ export async function assembleTripSchedule(
             transportMode: 'car',
             transportRole: 'inter_item',
             dataReliability: homeCoords ? 'verified' : 'estimated',
-            qualityFlags: homeCoords ? [] : ['home_departure_coords_estimated'],
+            qualityFlags: driveQualityFlags,
           },
         });
       }
@@ -932,9 +1003,17 @@ export async function assembleTripSchedule(
               latitude: selectedParking.latitude,
               longitude: selectedParking.longitude,
               estimatedCost: selectedParking.totalPrice || 0,
-              bookingUrl: selectedParking.bookingUrl,
-              dataReliability: 'verified',
-              qualityFlags: ['airport_parking_selected'],
+              bookingUrl: selectedParking.bookingUrl || buildAirportParkingBookingUrl(
+                selectedOriginAirport.code,
+                selectedOriginAirport.name,
+                selectedOriginAirport.city
+              ),
+              dataReliability: parkingOptionWasSynthesized || parkingBookingLinkWasSynthesized ? 'estimated' : 'verified',
+              qualityFlags: [
+                'airport_parking_selected',
+                ...(parkingOptionWasSynthesized ? ['airport_parking_option_fallback'] : []),
+                ...(parkingBookingLinkWasSynthesized ? ['airport_parking_fallback_link'] : []),
+              ],
             },
           });
         }

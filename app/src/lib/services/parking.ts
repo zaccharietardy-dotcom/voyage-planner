@@ -184,10 +184,22 @@ const AIRPORT_PARKINGS: Record<string, ParkingOption[]> = {
   ],
 };
 
+export function buildAirportParkingBookingUrl(
+  airportCode: string,
+  airportName?: string,
+  airportCity?: string
+): string {
+  const query = [airportName || airportCode, airportCity, 'parking réservation']
+    .filter(Boolean)
+    .join(' ');
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+}
+
 // Génère des parkings génériques pour les aéroports non listés
 function generateGenericParkings(airportCode: string): ParkingOption[] {
   const airport = AIRPORTS[airportCode];
   if (!airport) return [];
+  const fallbackBookingUrl = buildAirportParkingBookingUrl(airport.code, airport.name, airport.city);
 
   return [
     {
@@ -203,6 +215,7 @@ function generateGenericParkings(airportCode: string): ParkingOption[] {
       amenities: ['covered', '24h'],
       rating: 4.0,
       reviewCount: 500,
+      bookingUrl: fallbackBookingUrl,
     },
     {
       id: `${airportCode.toLowerCase()}-eco`,
@@ -217,6 +230,7 @@ function generateGenericParkings(airportCode: string): ParkingOption[] {
       amenities: ['outdoor', '24h', 'shuttle'],
       rating: 3.8,
       reviewCount: 300,
+      bookingUrl: fallbackBookingUrl,
     },
   ];
 }
@@ -226,11 +240,18 @@ function generateGenericParkings(airportCode: string): ParkingOption[] {
  */
 export function searchParkings(airportCode: string, days: number): ParkingOption[] {
   const parkings = AIRPORT_PARKINGS[airportCode] || generateGenericParkings(airportCode);
+  const airport = AIRPORTS[airportCode];
+  const fallbackBookingUrl = buildAirportParkingBookingUrl(
+    airportCode,
+    airport?.name,
+    airport?.city
+  );
 
   // Calculer le prix total
   return parkings.map((parking) => ({
     ...parking,
     totalPrice: parking.pricePerDay * days,
+    bookingUrl: parking.bookingUrl || fallbackBookingUrl,
   }));
 }
 
