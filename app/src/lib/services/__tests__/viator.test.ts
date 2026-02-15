@@ -1,4 +1,4 @@
-import { isViatorLowRelevanceCandidate, scoreViatorPlusValue } from '../viator';
+import { isViatorGenericPrivateTourCandidate, isViatorLowRelevanceCandidate, scoreViatorPlusValue } from '../viator';
 
 describe('viator quality scoring', () => {
   it('gives strong plus-value score to high-quality guided entries', () => {
@@ -35,5 +35,24 @@ describe('viator quality scoring', () => {
     expect(assessment.score).toBeLessThan(0);
     expect(assessment.reasons).toContain('low_relevance_pattern');
   });
-});
 
+  it('penalizes generic customized private tours', () => {
+    expect(
+      isViatorGenericPrivateTourCandidate(
+        'Visite privée personnalisée de Tokyo',
+        'Customized private walking tour with local insights'
+      )
+    ).toBe(true);
+
+    const assessment = scoreViatorPlusValue({
+      title: 'Visite privée personnalisée de Tokyo',
+      description: 'Customized private walking tour with local insights',
+      rating: 4.8,
+      reviewCount: 1200,
+      price: 95,
+    });
+
+    expect(assessment.reasons).toContain('generic_private_tour');
+    expect(assessment.score).toBeLessThan(2);
+  });
+});

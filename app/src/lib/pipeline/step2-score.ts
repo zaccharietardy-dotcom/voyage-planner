@@ -13,8 +13,15 @@ import { fixAttractionDuration, fixAttractionCost } from '../tripAttractions';
 import { findKnownViatorProduct } from '../services/viatorKnownProducts';
 import { calculateDistance } from '../services/geocoding';
 import { classifyOutdoorIndoor } from './utils/constants';
-import { scoreViatorPlusValue } from '../services/viator';
+import { isViatorGenericPrivateTourCandidate, scoreViatorPlusValue } from '../services/viator';
 import { isMonumentLikeActivityName } from '../services/officialTicketing';
+
+const MAX_GENERIC_PRIVATE_VIATOR = 1;
+const DISTINCTIVE_VIATOR_EXPERIENCE_KEYWORDS = [
+  'workshop', 'atelier', 'class', 'cours',
+  'cooking', 'culinary', 'knife', 'couteau',
+  'tea ceremony', 'ceremonie du the', 'craft', 'artisan',
+];
 
 /** Keywords that indicate an activity includes a meal (cooking class, food tour, etc.) */
 const MEAL_INCLUSIVE_KEYWORDS = [
@@ -307,8 +314,10 @@ export function scoreAndSelectActivities(
     }
   }
 
+  const cappedSelection = enforceGenericPrivateViatorCap(selected, nonMustSees);
+
   // 9. Fix durations, costs, and enrich with Viator known product data
-  return selected.map(a => {
+  return cappedSelection.map(a => {
     let fixed = fixAttractionCost(fixAttractionDuration(a)) as ScoredActivity;
 
     // Enrich with known Viator product data (sync dictionary lookup)
@@ -395,6 +404,68 @@ function isInterestingEnough(activity: ScoredActivity): boolean {
   return false;
 }
 
+function isDistinctiveViatorExperience(activity: ScoredActivity): boolean {
+  if (activity.source !== 'viator') return false;
+  const text = `${activity.name || ''} ${activity.description || ''}`.toLowerCase();
+  return DISTINCTIVE_VIATOR_EXPERIENCE_KEYWORDS.some((keyword) => text.includes(keyword));
+}
+
+function isGenericPrivateViatorActivity(activity: ScoredActivity): boolean {
+  if (activity.source !== 'viator') return false;
+  return isViatorGenericPrivateTourCandidate(activity.name || '', activity.description);
+}
+
+function enforceGenericPrivateViatorCap(
+  selected: ScoredActivity[],
+  rankedCandidates: ScoredActivity[]
+): ScoredActivity[] {
+  const privateIndices = selected
+    .map((activity, index) => ({ activity, index }))
+    .filter(({ activity }) => isGenericPrivateViatorActivity(activity))
+    .sort((a, b) => (b.activity.score || 0) - (a.activity.score || 0));
+
+  if (privateIndices.length <= MAX_GENERIC_PRIVATE_VIATOR) {
+    return selected;
+  }
+
+  const keepIndices = new Set(
+    privateIndices
+      .slice(0, MAX_GENERIC_PRIVATE_VIATOR)
+      .map(({ index }) => index)
+  );
+
+  const result: Array<ScoredActivity | null> = [...selected];
+  const usedIds = new Set(selected.map((activity) => activity.id));
+  let replacedCount = 0;
+  let removedCount = 0;
+
+  for (const { index, activity } of privateIndices) {
+    if (keepIndices.has(index)) continue;
+
+    const replacement = rankedCandidates.find((candidate) =>
+      !usedIds.has(candidate.id)
+      && !isGenericPrivateViatorActivity(candidate)
+    );
+
+    if (replacement) {
+      result[index] = replacement;
+      usedIds.add(replacement.id);
+      replacedCount += 1;
+    } else {
+      result[index] = null;
+      removedCount += 1;
+    }
+
+    console.log(`[Pipeline V2] Capped generic private Viator activity: "${activity.name}"`);
+  }
+
+  if (replacedCount > 0 || removedCount > 0) {
+    console.log(`[Pipeline V2] Private Viator cap applied (max=${MAX_GENERIC_PRIVATE_VIATOR}): replaced=${replacedCount}, removed=${removedCount}`);
+  }
+
+  return result.filter((activity): activity is ScoredActivity => Boolean(activity));
+}
+
 function tagActivity(
   a: Attraction,
   source: ScoredActivity['source']
@@ -469,6 +540,11 @@ function computeScore(
     if (isMonumentLike && plusValue.score < 3) {
       // Monument tours without real plus-value should lose against official entries.
       viatorBonus -= 5;
+    }
+
+    if (isGenericPrivateViatorActivity(activity) && !isDistinctiveViatorExperience(activity)) {
+      // Generic private/customized tours create itinerary noise quickly.
+      viatorBonus -= 3;
     }
 
     const geoConfidence = (activity as any).geoConfidence;

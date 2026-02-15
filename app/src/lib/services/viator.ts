@@ -667,6 +667,14 @@ const VIATOR_LOW_RELEVANCE_KEYWORDS = [
   'magic show', 'magician', 'selfie',
 ];
 
+const VIATOR_GENERIC_PRIVATE_TOUR_KEYWORDS = [
+  'private tour', 'private walking tour', 'private city tour',
+  'customized private', 'customized tour', 'customizable tour', 'custom-made tour',
+  'tailor-made', 'bespoke tour', 'personalized tour',
+  'visite privee', 'tour prive', 'personnalise', 'personnalisee',
+  'local insights', 'hidden gems',
+];
+
 function normalizeViatorText(value?: string): string {
   return (value || '')
     .toLowerCase()
@@ -679,6 +687,19 @@ export function isViatorLowRelevanceCandidate(title: string, description?: strin
   const text = `${normalizeViatorText(title)} ${normalizeViatorText(description)}`.trim();
   if (!text) return false;
   return VIATOR_LOW_RELEVANCE_KEYWORDS.some((keyword) => text.includes(keyword));
+}
+
+export function isViatorGenericPrivateTourCandidate(title: string, description?: string): boolean {
+  const text = `${normalizeViatorText(title)} ${normalizeViatorText(description)}`.trim();
+  if (!text) return false;
+
+  if (VIATOR_GENERIC_PRIVATE_TOUR_KEYWORDS.some((keyword) => text.includes(keyword))) {
+    return true;
+  }
+
+  const hasPrivateSignal = /\b(private|privee?|prive)\b/.test(text);
+  const hasCustomizedSignal = /\b(custom|customized|customizable|tailor[-\s]?made|bespoke|personalized|personnalise)\b/.test(text);
+  return hasPrivateSignal && hasCustomizedSignal;
 }
 
 export function scoreViatorPlusValue(input: ViatorPlusValueInput): ViatorPlusValueAssessment {
@@ -723,6 +744,11 @@ export function scoreViatorPlusValue(input: ViatorPlusValueInput): ViatorPlusVal
   if (isViatorLowRelevanceCandidate(input.title, input.description)) {
     score -= 4;
     reasons.push('low_relevance_pattern');
+  }
+
+  if (isViatorGenericPrivateTourCandidate(input.title, input.description)) {
+    score -= 2.5;
+    reasons.push('generic_private_tour');
   }
 
   if (price >= 180) {

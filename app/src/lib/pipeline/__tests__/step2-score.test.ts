@@ -101,4 +101,68 @@ describe('step2-score interest curation', () => {
     expect(ids).toContain('good-1');
     expect(ids).not.toContain('weak-nonmust');
   });
+
+  it('caps generic private viator tours to one and keeps distinctive experiences', () => {
+    const baseAttractions: Attraction[] = [
+      attraction({ id: 'base-1', name: 'Tokyo National Museum', rating: 4.6, reviewCount: 4200, estimatedCost: 18 }),
+      attraction({ id: 'base-2', name: 'Meiji Shrine', rating: 4.7, reviewCount: 21000, estimatedCost: 0 }),
+    ];
+
+    const viatorActivities: Attraction[] = [
+      attraction({
+        id: 'viator-private-1',
+        name: 'Visite privée personnalisée de Tokyo',
+        description: 'Customized private walking tour with local insights',
+        rating: 4.8,
+        reviewCount: 1200,
+        estimatedCost: 98,
+      }),
+      attraction({
+        id: 'viator-private-2',
+        name: 'Tokyo Private Tour Hidden Gems',
+        description: 'Private city tour fully customized',
+        rating: 4.9,
+        reviewCount: 900,
+        estimatedCost: 105,
+      }),
+      attraction({
+        id: 'viator-private-3',
+        name: 'Private Tokyo Highlights Day Tour',
+        description: 'Personalized itinerary with private guide',
+        rating: 4.7,
+        reviewCount: 500,
+        estimatedCost: 120,
+      }),
+      attraction({
+        id: 'viator-workshop-1',
+        name: 'Atelier Couteau Japonais et Sashimi',
+        description: 'Hands-on workshop with knife techniques and sushi prep',
+        rating: 4.9,
+        reviewCount: 350,
+        estimatedCost: 110,
+      }),
+    ];
+
+    const data = createFetchedData(baseAttractions);
+    data.viatorActivities = viatorActivities;
+
+    const preferences: TripPreferences = {
+      ...createPreferences(),
+      destination: 'Tokyo',
+      durationDays: 7,
+      groupType: 'solo',
+      mustSee: '',
+      activities: ['culture', 'gastronomy'],
+    };
+
+    const selected = scoreAndSelectActivities(data, preferences);
+
+    const genericPrivateTours = selected.filter((activity) =>
+      activity.source === 'viator'
+      && /private|privee?|customized|personnalise/i.test(`${activity.name} ${activity.description || ''}`)
+    );
+
+    expect(genericPrivateTours.length).toBeLessThanOrEqual(1);
+    expect(selected.some((activity) => activity.id === 'viator-workshop-1')).toBe(true);
+  });
 });
