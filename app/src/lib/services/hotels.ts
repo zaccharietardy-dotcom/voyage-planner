@@ -16,6 +16,7 @@ import { searchHotelsWithBookingApi, isRapidApiBookingConfigured, enrichHotelWit
 import { searchTripAdvisorHotels, isTripAdvisorConfigured } from './tripadvisor';
 import { searchPlacesFromDB, savePlacesToDB, type PlaceData } from './placeDatabase';
 import { normalizeHotelBookingUrl } from './bookingLinks';
+import { calculateDistance } from './geocoding';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -247,7 +248,8 @@ async function filterHotelsWithLiveAvailability(
   destination: string,
   checkIn: string,
   checkOut: string,
-  guests: number
+  guests: number,
+  cityCenter?: { lat: number; lng: number }
 ): Promise<Accommodation[]> {
   if (hotels.length === 0 || !isSerpApiPlacesConfigured()) return hotels;
 
@@ -271,10 +273,44 @@ async function filterHotelsWithLiveAvailability(
       console.log(`[Hotels] Disponibilité live: ${matchedHotels.length}/${hotels.length} hôtels confirmés`);
     }
 
-    return matchedHotels.map((hotel) => ({
+    const confirmedHotels = matchedHotels.map((hotel) => ({
       ...hotel,
       description: appendAvailabilityBadge(hotel.description),
     }));
+
+    // Avoid collapsing to a single (possibly excentré) option when name matching is partial.
+    // Keep confirmed hotels first, then complete with the best remaining options.
+    const MIN_CONFIRMED_HOTELS = 3;
+    if (confirmedHotels.length >= Math.min(MIN_CONFIRMED_HOTELS, hotels.length)) {
+      return confirmedHotels;
+    }
+
+    const confirmedIds = new Set(confirmedHotels.map((hotel) => hotel.id));
+    const fallbackCandidates = hotels
+      .filter((hotel) => !confirmedIds.has(hotel.id))
+      .sort((a, b) => {
+        const aDist = cityCenter
+          ? calculateDistance(cityCenter.lat, cityCenter.lng, a.latitude, a.longitude)
+          : Number.POSITIVE_INFINITY;
+        const bDist = cityCenter
+          ? calculateDistance(cityCenter.lat, cityCenter.lng, b.latitude, b.longitude)
+          : Number.POSITIVE_INFINITY;
+        if (aDist !== bDist) return aDist - bDist;
+        if ((b.rating || 0) !== (a.rating || 0)) return (b.rating || 0) - (a.rating || 0);
+        return (a.pricePerNight || 0) - (b.pricePerNight || 0);
+      });
+
+    const targetCount = Math.min(Math.max(5, confirmedHotels.length), hotels.length);
+    const completedHotels = [
+      ...confirmedHotels,
+      ...fallbackCandidates.slice(0, Math.max(0, targetCount - confirmedHotels.length)),
+    ];
+
+    console.log(
+      `[Hotels] Disponibilité live partielle (${confirmedHotels.length} confirmés), ` +
+      `complété à ${completedHotels.length} options pour garder des hôtels centraux`
+    );
+    return completedHotels;
   } catch (error) {
     console.warn('[Hotels] Vérification disponibilité live impossible, fallback sur liste initiale:', error);
     return hotels;
@@ -310,7 +346,8 @@ export async function searchHotels(
       destination,
       checkInStr,
       checkOutStr,
-      options.guests
+      options.guests,
+      options.cityCenter
     );
     return adjustHotelPrices(available, options);
   };
@@ -327,7 +364,7 @@ export async function searchHotels(
   if (isRapidApiBookingConfigured()) {
     try {
 
-      const bookingHotels = await searchHotelsWithBookingApi(destination, checkInStr, checkOutStr, {
+      let bookingHotels = await searchHotelsWithBookingApi(destination, checkInStr, checkOutStr, {
         guests: options.guests,
         rooms: 1,
         minPrice: priceRange.min,
@@ -336,6 +373,38 @@ export async function searchHotels(
         sortBy: options.budgetLevel === 'economic' ? 'price' : 'review_score',
         limit: 15,
       });
+
+      // If strict filters return very few results, run a relaxed pass.
+      // This avoids ending up with a single, often excentré, option.
+      if (bookingHotels.length > 0 && bookingHotels.length < 4) {
+        const strictCount = bookingHotels.length;
+        const relaxedHotels = await searchHotelsWithBookingApi(destination, checkInStr, checkOutStr, {
+          guests: options.guests,
+          rooms: 1,
+          maxPrice: Math.round(Math.max(priceRange.max * 1.6, priceRange.hardMax)),
+          minStars: Math.max(1, targetStars - 1),
+          sortBy: 'review_score',
+          limit: 30,
+        });
+
+        if (relaxedHotels.length > bookingHotels.length) {
+          const merged = new Map<string, BookingHotel>();
+          for (const hotel of [...bookingHotels, ...relaxedHotels]) {
+            const idKey = hotel.id?.trim();
+            const nameKey = normalizeHotelNameForAvailability(hotel.name || '');
+            const key = idKey || nameKey;
+            if (!key) continue;
+            if (!merged.has(key)) {
+              merged.set(key, hotel);
+            }
+          }
+          bookingHotels = Array.from(merged.values());
+          console.log(
+            `[Hotels] Booking pass relax: ${bookingHotels.length} options retained ` +
+            `(strict=${strictCount}, relaxed=${relaxedHotels.length})`
+          );
+        }
+      }
 
       if (bookingHotels.length > 0) {
         const hotels: Accommodation[] = bookingHotels.map((h: BookingHotel) => {
