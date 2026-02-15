@@ -9,6 +9,12 @@ import { TripMap } from '@/components/trip/TripMap';
 
 const GOOGLE_PHOTOREALISTIC_ION_ASSET_ID = 2275207;
 
+function isSafari(): boolean {
+  if (typeof navigator === 'undefined') return false;
+  const ua = navigator.userAgent;
+  return /Safari/.test(ua) && !/Chrome/.test(ua) && !/Chromium/.test(ua);
+}
+
 async function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   return new Promise((resolve, reject) => {
     const timer = window.setTimeout(() => reject(new Error('timeout')), ms);
@@ -375,7 +381,11 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
 
     async function initCesium() {
       try {
+        const safari = isSafari();
+        console.info(`[TripFlythrough] [1/6] Init start (safari=${safari})`);
+
         const webglSupport = detectWebGLSupport();
+        console.info(`[TripFlythrough] [2/6] WebGL: webgl1=${webglSupport.webgl1}, webgl2=${webglSupport.webgl2}`);
         if (!webglSupport.webgl1 && !webglSupport.webgl2) {
           setError('Visualisation 3D indisponible: WebGL désactivé sur cet appareil/navigateur.');
           return;
@@ -383,8 +393,10 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
 
         (window as any).CESIUM_BASE_URL = '/cesium';
 
+        console.info('[TripFlythrough] [3/6] Importing Cesium module...');
         const CesiumModule = await import('cesium');
         cesiumRef.current = CesiumModule;
+        console.info('[TripFlythrough] [3/6] Cesium imported OK');
 
         if (!mounted || !containerRef.current) return;
 
@@ -428,9 +440,11 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
           viewerProfiles.push({
             name: 'webgl2',
             requestWebgl1: false,
-            powerPreference: 'high-performance',
+            // Safari/Metal can reject 'high-performance' on integrated GPUs
+            powerPreference: safari ? 'default' : 'high-performance',
             useTerrain: true,
-            useSkyAtmosphere: true,
+            // SkyAtmosphere GLSL shaders can fail to compile on Safari Metal
+            useSkyAtmosphere: !safari,
             antialias: false,
             msaaSamples: 1,
           });
@@ -441,7 +455,7 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
             requestWebgl1: true,
             powerPreference: 'default',
             useTerrain: true,
-            useSkyAtmosphere: true,
+            useSkyAtmosphere: false,
             antialias: false,
           });
         }
@@ -466,6 +480,7 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
           });
         }
 
+        console.info(`[TripFlythrough] [4/6] ${viewerProfiles.length} profiles to try: ${viewerProfiles.map(p => p.name).join(', ')}`);
         let viewer: any | null = null;
         let lastViewerError: unknown = null;
 
@@ -496,21 +511,35 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
             }
 
             if (profile.useSkyAtmosphere) {
-              viewerOptions.skyAtmosphere = new Cesium.SkyAtmosphere();
+              try {
+                viewerOptions.skyAtmosphere = new Cesium.SkyAtmosphere();
+              } catch (skyError) {
+                console.warn('[TripFlythrough] SkyAtmosphere failed (shader compilation?), skipping', skyError);
+              }
             }
 
             viewer = new Cesium.Viewer(containerRef.current, viewerOptions);
             viewerRef.current = viewer;
 
-            // Add synchronous satellite base layer BEFORE starting the render loop
-            // ArcGIS World Imagery: realistic satellite photos, no ugly labels/symbols
-            viewer.imageryLayers.addImageryProvider(
-              new Cesium.UrlTemplateImageryProvider({
-                url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-                credit: 'Esri, Maxar, Earthstar Geographics',
-                maximumLevel: 19,
-              })
-            );
+            // Add synchronous base layer BEFORE starting the render loop
+            // Try ArcGIS satellite first (prettier), fall back to OSM (safer on Safari)
+            try {
+              viewer.imageryLayers.addImageryProvider(
+                new Cesium.UrlTemplateImageryProvider({
+                  url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+                  credit: 'Esri, Maxar, Earthstar Geographics',
+                  maximumLevel: 19,
+                })
+              );
+            } catch (imageryError) {
+              console.warn('[TripFlythrough] ArcGIS imagery failed, using OSM fallback', imageryError);
+              viewer.imageryLayers.addImageryProvider(
+                new Cesium.OpenStreetMapImageryProvider({
+                  url: 'https://tile.openstreetmap.org/',
+                  credit: 'OpenStreetMap',
+                })
+              );
+            }
 
             // Load terrain async (safe: globe renders fine without it)
             if (profile.useTerrain && hasIonToken) {
@@ -523,7 +552,7 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
 
             // NOW start the render loop (base layer is ready)
             viewer.useDefaultRenderLoop = true;
-            console.info(`[TripFlythrough] Cesium initialized with ${profile.name}`);
+            console.info(`[TripFlythrough] [5/6] Viewer ready with profile: ${profile.name}`);
             break;
           } catch (profileError) {
             lastViewerError = profileError;
@@ -696,6 +725,7 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
         }
 
 
+        console.info('[TripFlythrough] [6/6] Initialization complete');
         setIsLoaded(true);
 
         window.addEventListener('resize', resizeViewer);
@@ -718,9 +748,16 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
         }
         viewerRef.current = null;
 
-        console.error('Failed to initialize Cesium:', err);
+        console.error('[TripFlythrough] FAILED to initialize Cesium:', err);
+        console.error('[TripFlythrough] Diagnostics:', {
+          browser: isSafari() ? 'Safari' : 'other',
+          userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'N/A',
+          webgl: detectWebGLSupport(),
+          errorName: err instanceof Error ? err.name : 'unknown',
+          errorMessage: err instanceof Error ? err.message : String(err),
+        });
         if (err instanceof Error && err.stack) {
-          console.error('[TripFlythrough] Stack trace:', err.stack);
+          console.error('[TripFlythrough] Stack:', err.stack);
         }
         const rawMessage = err instanceof Error ? err.message : String(err);
         const lowerMessage = rawMessage.toLowerCase();

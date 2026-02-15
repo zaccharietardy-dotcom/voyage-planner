@@ -138,12 +138,13 @@ export async function generateTripV2(
   // Step 5: Hotel selection (~0ms) — before restaurants, need hotel coords
   console.log('[Pipeline V2] === Step 5: Selecting hotel... ===');
   emit(onEvent, { type: 'step_start', step: 5, stepName: 'Hotel selection' });
-  const hotel = selectHotelByBarycenter(
+  let hotel = selectHotelByBarycenter(
     clusters,
     data.bookingHotels,
     preferences.budgetLevel,
     data.budgetStrategy?.accommodationBudgetPerNight,
-    preferences.durationDays
+    preferences.durationDays,
+    { destination: preferences.destination }
   );
 
   const accommodationCoords = hotel
@@ -222,6 +223,26 @@ export async function generateTripV2(
   const assignedCount = meals.filter(m => m.restaurant).length;
   console.log(`[Pipeline V2] Step 4: ${assignedCount}/${meals.length} meals assigned restaurants (pool=${restaurantGeoPool.length})`);
   emit(onEvent, { type: 'step_done', step: 4, stepName: 'Restaurant assignment', durationMs: Date.now() - T4, detail: `${assignedCount}/${meals.length} meals assigned` });
+
+  // Step 4b: Balanced budget re-optimization (max 3 passes)
+  // Priority order: transport -> accommodation -> meals.
+  const budgetAdjusted = await rebalanceSelectionsForBalancedBudget({
+    preferences,
+    data,
+    clusters,
+    selectedActivities,
+    bestTransport,
+    hotel,
+    meals,
+    serpRestaurantsForAssignment,
+  });
+  bestTransport = budgetAdjusted.transport;
+  hotel = budgetAdjusted.hotel;
+  meals = budgetAdjusted.meals;
+  restaurantGeoPool = budgetAdjusted.restaurantGeoPool;
+  if (budgetAdjusted.notes.length > 0) {
+    console.log(`[Pipeline V2] Budget balancing: ${budgetAdjusted.notes.join(' | ')}`);
+  }
 
   // Step 6: LLM day balancing (~10-15s)
   const llmName = process.env.USE_GEMINI_BALANCE === 'true' ? 'Gemini Flash' : 'Claude AI';
@@ -465,6 +486,305 @@ function deduplicateRestaurantsByNameAndCoords(restaurants: Restaurant[]): Resta
   }
 
   return Array.from(map.values());
+}
+
+type BudgetRebalanceResult = {
+  transport: TransportOptionSummary | null;
+  hotel: ReturnType<typeof selectHotelByBarycenter>;
+  meals: MealAssignment[];
+  restaurantGeoPool: Restaurant[];
+  notes: string[];
+};
+
+function estimateMealCost(meal: MealAssignment): number {
+  if (meal.restaurant) {
+    const level = meal.restaurant.priceLevel || 2;
+    return level * 15;
+  }
+  if (meal.fallbackMode === 'self_catered') {
+    if (meal.mealType === 'dinner') return 10;
+    if (meal.mealType === 'lunch') return 8;
+    return 6;
+  }
+  return 0;
+}
+
+function estimateProjectedTotalCost(args: {
+  transport: TransportOptionSummary | null;
+  hotel: ReturnType<typeof selectHotelByBarycenter>;
+  selectedActivities: ScoredActivity[];
+  meals: MealAssignment[];
+  durationDays: number;
+}): number {
+  const roundTripTransport = args.transport ? (args.transport.totalPrice || 0) * 2 : 0;
+  const nights = Math.max(1, args.durationDays - 1);
+  const hotelCost = args.hotel
+    ? (args.hotel.totalPrice || (args.hotel.pricePerNight || 0) * nights)
+    : 0;
+  const activitiesCost = args.selectedActivities.reduce((sum, activity) => sum + Math.max(0, activity.estimatedCost || 0), 0);
+  const mealsCost = args.meals.reduce((sum, meal) => sum + estimateMealCost(meal), 0);
+
+  return roundTripTransport + hotelCost + activitiesCost + mealsCost;
+}
+
+function pickCheaperTransportOption(
+  current: TransportOptionSummary | null,
+  options: TransportOptionSummary[]
+): TransportOptionSummary | null {
+  if (!options.length) return current;
+  const sortedByPrice = [...options].sort((a, b) => (a.totalPrice || Infinity) - (b.totalPrice || Infinity));
+  if (!current) return sortedByPrice[0] || null;
+
+  const durationLimit = Math.max((current.totalDuration || 0) * 1.5, current.totalDuration + 120);
+  const cheaperCandidate = sortedByPrice.find((option) =>
+    option.totalPrice < current.totalPrice
+    && option.totalDuration <= durationLimit
+  );
+  return cheaperCandidate || current;
+}
+
+function selectCheaperMealAlternatives(meals: MealAssignment[]): { meals: MealAssignment[]; changed: number } {
+  let changed = 0;
+  const updated = meals.map((meal) => {
+    if (!meal.restaurant || !meal.restaurantAlternatives?.length) return meal;
+    const currentPriceLevel = meal.restaurant.priceLevel || 2;
+    const sortedAlternatives = [...meal.restaurantAlternatives]
+      .filter((alt) => !!alt)
+      .sort((a, b) => (a.priceLevel || 4) - (b.priceLevel || 4));
+    const cheaper = sortedAlternatives.find((alt) => (alt.priceLevel || 4) < currentPriceLevel);
+    if (!cheaper) return meal;
+    changed += 1;
+    return {
+      ...meal,
+      restaurant: cheaper,
+      restaurantAlternatives: [meal.restaurant, ...sortedAlternatives.filter((alt) => alt.id !== cheaper.id)].slice(0, 3),
+    };
+  });
+  return { meals: updated, changed };
+}
+
+export function selectSelfCateredMealsForBudget(
+  meals: MealAssignment[],
+  requiredReduction: number
+): { meals: MealAssignment[]; changed: number; estimatedSavings: number } {
+  if (!Number.isFinite(requiredReduction) || requiredReduction <= 0) {
+    return { meals, changed: 0, estimatedSavings: 0 };
+  }
+
+  const candidates = meals
+    .map((meal, index) => {
+      if (!meal.restaurant) return null;
+      const currentCost = estimateMealCost(meal);
+      const selfCateredCost = estimateMealCost({ ...meal, restaurant: null, fallbackMode: 'self_catered' });
+      const savings = Math.max(0, currentCost - selfCateredCost);
+      if (savings <= 0) return null;
+      // Favor expensive lunch/dinner first.
+      const priority = meal.mealType === 'dinner' ? 2 : meal.mealType === 'lunch' ? 1 : 0;
+      return { index, meal, savings, priority };
+    })
+    .filter((value): value is { index: number; meal: MealAssignment; savings: number; priority: number } => !!value)
+    .sort((a, b) => {
+      if (b.savings !== a.savings) return b.savings - a.savings;
+      return b.priority - a.priority;
+    });
+
+  if (candidates.length === 0) {
+    return { meals, changed: 0, estimatedSavings: 0 };
+  }
+
+  let changed = 0;
+  let estimatedSavings = 0;
+  const nextMeals = [...meals];
+  for (const candidate of candidates) {
+    if (estimatedSavings >= requiredReduction) break;
+    const alternatives = [
+      candidate.meal.restaurant!,
+      ...(candidate.meal.restaurantAlternatives || []),
+    ].filter(Boolean);
+    nextMeals[candidate.index] = {
+      ...candidate.meal,
+      restaurant: null,
+      fallbackMode: 'self_catered',
+      restaurantAlternatives: alternatives.slice(0, 3),
+    };
+    changed += 1;
+    estimatedSavings += candidate.savings;
+  }
+
+  return { meals: nextMeals, changed, estimatedSavings };
+}
+
+function pickAggressiveBudgetHotelFallback(
+  currentHotel: ReturnType<typeof selectHotelByBarycenter>,
+  candidates: ReturnType<typeof selectHotelByBarycenter>[]
+): ReturnType<typeof selectHotelByBarycenter> {
+  if (!currentHotel || !Array.isArray(candidates) || candidates.length === 0) return currentHotel;
+  const currentPrice = currentHotel.pricePerNight || Number.POSITIVE_INFINITY;
+  const cheaper = candidates
+    .filter((hotel): hotel is NonNullable<typeof hotel> => !!hotel && (hotel.pricePerNight || 0) > 0 && hotel.id !== currentHotel.id)
+    .sort((a, b) => (a.pricePerNight || Number.POSITIVE_INFINITY) - (b.pricePerNight || Number.POSITIVE_INFINITY))
+    .find((hotel) => (hotel.pricePerNight || Number.POSITIVE_INFINITY) < currentPrice);
+  if (!cheaper) return currentHotel;
+
+  return {
+    ...cheaper,
+    qualityFlags: Array.from(new Set([...(cheaper.qualityFlags || []), 'budget_fallback_hotel_suggestion'])),
+  };
+}
+
+async function rebalanceSelectionsForBalancedBudget(args: {
+  preferences: TripPreferences;
+  data: FetchedData;
+  clusters: ActivityCluster[];
+  selectedActivities: ScoredActivity[];
+  bestTransport: TransportOptionSummary | null;
+  hotel: ReturnType<typeof selectHotelByBarycenter>;
+  meals: MealAssignment[];
+  serpRestaurantsForAssignment: Restaurant[];
+}): Promise<BudgetRebalanceResult> {
+  const notes: string[] = [];
+  const totalBudget = args.data.resolvedBudget?.totalBudget || 0;
+  if (totalBudget <= 0) {
+    return {
+      transport: args.bestTransport,
+      hotel: args.hotel,
+      meals: args.meals,
+      restaurantGeoPool: deduplicateRestaurantsByNameAndCoords(args.serpRestaurantsForAssignment),
+      notes,
+    };
+  }
+
+  const toleranceCap = totalBudget * 1.12;
+  let currentTransport = args.bestTransport;
+  let currentHotel = args.hotel;
+  let currentMeals = args.meals;
+  let currentRestaurantPool = deduplicateRestaurantsByNameAndCoords(args.serpRestaurantsForAssignment);
+
+  for (let pass = 0; pass < 3; pass++) {
+    const projected = estimateProjectedTotalCost({
+      transport: currentTransport,
+      hotel: currentHotel,
+      selectedActivities: args.selectedActivities,
+      meals: currentMeals,
+      durationDays: args.preferences.durationDays,
+    });
+    if (projected <= toleranceCap) break;
+
+    if (pass === 0) {
+      const cheaperTransport = pickCheaperTransportOption(currentTransport, args.data.transportOptions || []);
+      if (cheaperTransport && (!currentTransport || cheaperTransport.id !== currentTransport.id)) {
+        notes.push(`transport ${(currentTransport?.mode || 'none')}->${cheaperTransport.mode}`);
+        currentTransport = cheaperTransport;
+      }
+      continue;
+    }
+
+    if (pass === 1) {
+      const currentHotelPrice = currentHotel?.pricePerNight || (args.data.budgetStrategy?.accommodationBudgetPerNight || 0);
+      const hotelBudgetTarget = currentHotelPrice > 0
+        ? currentHotelPrice * 0.9
+        : args.data.budgetStrategy?.accommodationBudgetPerNight;
+      const cheaperHotel = selectHotelByBarycenter(
+        args.clusters,
+        args.data.bookingHotels,
+        args.preferences.budgetLevel,
+        hotelBudgetTarget,
+        args.preferences.durationDays,
+        { destination: args.preferences.destination }
+      );
+      if (cheaperHotel && currentHotel && cheaperHotel.id !== currentHotel.id && cheaperHotel.pricePerNight < currentHotel.pricePerNight) {
+        currentHotel = cheaperHotel;
+        notes.push(`hotel ${currentHotel.name}`);
+
+        const accommodationCoords = { lat: currentHotel.latitude, lng: currentHotel.longitude };
+        const reassigned = assignRestaurants(
+          args.clusters,
+          args.data.tripAdvisorRestaurants,
+          currentRestaurantPool,
+          args.preferences,
+          args.data.budgetStrategy,
+          accommodationCoords,
+          currentHotel
+        );
+        currentMeals = reassigned.meals;
+        currentRestaurantPool = reassigned.restaurantGeoPool;
+      }
+      continue;
+    }
+
+    const mealRebalance = selectCheaperMealAlternatives(currentMeals);
+    if (mealRebalance.changed > 0) {
+      currentMeals = mealRebalance.meals;
+      notes.push(`meals downgraded x${mealRebalance.changed}`);
+    }
+  }
+
+  let projected = estimateProjectedTotalCost({
+    transport: currentTransport,
+    hotel: currentHotel,
+    selectedActivities: args.selectedActivities,
+    meals: currentMeals,
+    durationDays: args.preferences.durationDays,
+  });
+
+  if (projected > toleranceCap) {
+    const selfCatered = selectSelfCateredMealsForBudget(currentMeals, projected - toleranceCap);
+    if (selfCatered.changed > 0) {
+      currentMeals = selfCatered.meals;
+      notes.push(`self-catered meal suggestions x${selfCatered.changed}`);
+      projected = estimateProjectedTotalCost({
+        transport: currentTransport,
+        hotel: currentHotel,
+        selectedActivities: args.selectedActivities,
+        meals: currentMeals,
+        durationDays: args.preferences.durationDays,
+      });
+    }
+  }
+
+  if (projected > toleranceCap) {
+    const fallbackHotel = pickAggressiveBudgetHotelFallback(currentHotel, args.data.bookingHotels || []);
+    if (fallbackHotel && currentHotel && fallbackHotel.id !== currentHotel.id) {
+      currentHotel = fallbackHotel;
+      notes.push(`hotel budget fallback ${fallbackHotel.name}`);
+
+      const accommodationCoords = { lat: currentHotel.latitude, lng: currentHotel.longitude };
+      const reassigned = assignRestaurants(
+        args.clusters,
+        args.data.tripAdvisorRestaurants,
+        currentRestaurantPool,
+        args.preferences,
+        args.data.budgetStrategy,
+        accommodationCoords,
+        currentHotel
+      );
+      currentMeals = reassigned.meals;
+      currentRestaurantPool = reassigned.restaurantGeoPool;
+
+      const postHotelProjected = estimateProjectedTotalCost({
+        transport: currentTransport,
+        hotel: currentHotel,
+        selectedActivities: args.selectedActivities,
+        meals: currentMeals,
+        durationDays: args.preferences.durationDays,
+      });
+      if (postHotelProjected > toleranceCap) {
+        const selfCatered = selectSelfCateredMealsForBudget(currentMeals, postHotelProjected - toleranceCap);
+        if (selfCatered.changed > 0) {
+          currentMeals = selfCatered.meals;
+          notes.push(`self-catered meal suggestions x${selfCatered.changed} (post-hotel)`);
+        }
+      }
+    }
+  }
+
+  return {
+    transport: currentTransport,
+    hotel: currentHotel,
+    meals: currentMeals,
+    restaurantGeoPool: currentRestaurantPool,
+    notes,
+  };
 }
 
 function buildMissingMealTargets(
