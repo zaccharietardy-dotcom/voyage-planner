@@ -1,7 +1,9 @@
 import { createRouteHandlerClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 import { isAcceptedCloseFriend } from '@/lib/server/closeFriends';
 import type { Json } from '@/lib/supabase/types';
+import type { Database } from '@/lib/supabase/types';
 import type { MemberRole } from '@/lib/types/collaboration';
 import {
   formatProposalForApi,
@@ -29,6 +31,19 @@ interface VoteRow {
   vote: boolean;
 }
 
+function getServiceClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !serviceKey) {
+    throw new Error('Missing Supabase environment variables');
+  }
+
+  return createClient<Database>(supabaseUrl, serviceKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+}
+
 // GET /api/trips/[id] - Récupérer un voyage avec ses membres et propositions
 export async function GET(
   _request: Request,
@@ -37,13 +52,14 @@ export async function GET(
   try {
     const { id } = await params;
     const supabase = await createRouteHandlerClient();
+    const serviceClient = getServiceClient();
     const { data: { user } } = await supabase.auth.getUser();
 
-    const { data: trip, error: tripError } = await supabase
+    const { data: trip, error: tripError } = await serviceClient
       .from('trips')
       .select('*')
       .eq('id', id)
-      .single();
+      .maybeSingle();
 
     if (tripError || !trip) {
       return NextResponse.json({ error: 'Voyage non trouvé' }, { status: 404 });
@@ -57,7 +73,7 @@ export async function GET(
       userRole = isOwner ? 'owner' : null;
 
       if (!isOwner) {
-        const { data: member } = await supabase
+        const { data: member } = await serviceClient
           .from('trip_members')
           .select('role')
           .eq('trip_id', id)
@@ -87,7 +103,7 @@ export async function GET(
       );
     }
 
-    const { data: memberRows } = await supabase
+    const { data: memberRows } = await serviceClient
       .from('trip_members')
       .select(`
         id,
@@ -103,7 +119,7 @@ export async function GET(
       `)
       .eq('trip_id', id);
 
-    const { data: proposalRows } = await supabase
+    const { data: proposalRows } = await serviceClient
       .from('proposals')
       .select(`
         *,
@@ -118,7 +134,7 @@ export async function GET(
     const userVotes: Record<string, boolean> = {};
     if (user && proposalRows && proposalRows.length > 0) {
       const proposalIds = proposalRows.map((proposal) => proposal.id);
-      const { data: votes } = await supabase
+      const { data: votes } = await serviceClient
         .from('votes')
         .select('proposal_id, vote')
         .eq('user_id', user.id)
@@ -129,7 +145,7 @@ export async function GET(
       }
     }
 
-    const editorUserIds = await getEditorUserIds(supabase, id);
+    const editorUserIds = await getEditorUserIds(serviceClient, id);
 
     const formattedProposals = (proposalRows || []).map((proposal) =>
       formatProposalForApi(

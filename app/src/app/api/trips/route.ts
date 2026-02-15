@@ -1,5 +1,20 @@
 import { createRouteHandlerClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+import type { Database } from '@/lib/supabase/types';
+
+function getServiceClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !serviceKey) {
+    throw new Error('Missing Supabase environment variables');
+  }
+
+  return createClient<Database>(supabaseUrl, serviceKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+}
 
 // Générer un code de partage unique (6 caractères alphanumériques)
 function generateShareCode(): string {
@@ -21,24 +36,76 @@ export async function GET() {
       return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
     }
 
-    // Récupérer les voyages dont l'utilisateur est propriétaire
-    const { data: trips, error: tripsError } = await supabase
+    const serviceClient = getServiceClient();
+
+    // Voyages propriétaires
+    const { data: ownedTrips, error: ownedTripsError } = await serviceClient
       .from('trips')
       .select('*')
       .eq('owner_id', user.id)
       .order('created_at', { ascending: false });
 
-    if (tripsError) {
-      return NextResponse.json({ error: tripsError.message }, { status: 500 });
+    if (ownedTripsError) {
+      return NextResponse.json({ error: ownedTripsError.message }, { status: 500 });
     }
 
-    // Ajouter le rôle owner à chaque voyage
-    const tripsWithRole = trips?.map((trip) => ({
-      ...trip,
-      userRole: 'owner',
-    }));
+    const ownedTripIds = new Set((ownedTrips || []).map((trip) => trip.id));
 
-    return NextResponse.json(tripsWithRole || []);
+    // Voyages où l'utilisateur est invité/membre
+    const { data: memberships, error: membershipsError } = await serviceClient
+      .from('trip_members')
+      .select('trip_id, role, joined_at')
+      .eq('user_id', user.id);
+
+    if (membershipsError) {
+      return NextResponse.json({ error: membershipsError.message }, { status: 500 });
+    }
+
+    const membershipByTripId = new Map<string, { role: string; joined_at: string }>();
+    for (const membership of memberships || []) {
+      if (ownedTripIds.has(membership.trip_id)) continue;
+      membershipByTripId.set(membership.trip_id, {
+        role: membership.role,
+        joined_at: membership.joined_at,
+      });
+    }
+
+    let invitedTrips: Database['public']['Tables']['trips']['Row'][] = [];
+    const invitedTripIds = Array.from(membershipByTripId.keys());
+    if (invitedTripIds.length > 0) {
+      const { data: invitedRows, error: invitedTripsError } = await serviceClient
+        .from('trips')
+        .select('*')
+        .in('id', invitedTripIds);
+
+      if (invitedTripsError) {
+        return NextResponse.json({ error: invitedTripsError.message }, { status: 500 });
+      }
+      invitedTrips = invitedRows || [];
+    }
+
+    const tripsWithRole = [
+      ...(ownedTrips || []).map((trip) => ({
+        ...trip,
+        userRole: 'owner',
+        isInvited: false,
+      })),
+      ...invitedTrips.map((trip) => {
+        const membership = membershipByTripId.get(trip.id);
+        return {
+          ...trip,
+          userRole: membership?.role || 'viewer',
+          isInvited: true,
+          member_joined_at: membership?.joined_at || null,
+        };
+      }),
+    ].sort((a, b) => {
+      const aTime = new Date(a.created_at).getTime();
+      const bTime = new Date(b.created_at).getTime();
+      return bTime - aTime;
+    });
+
+    return NextResponse.json(tripsWithRole);
   } catch (error) {
     console.error('Error fetching trips:', error);
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });

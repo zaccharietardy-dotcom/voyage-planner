@@ -21,6 +21,13 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
 type TripVisibility = 'public' | 'friends' | 'private';
+type MemberRole = 'owner' | 'editor' | 'viewer';
+
+interface TripListItem extends Trip {
+  userRole?: MemberRole;
+  isInvited?: boolean;
+  member_joined_at?: string | null;
+}
 
 const VISIBILITY_OPTIONS: { value: TripVisibility; label: string; icon: React.ReactNode; description: string }[] = [
   { value: 'public', label: 'Public', icon: <Globe className="h-4 w-4" />, description: 'Visible par tous' },
@@ -31,7 +38,7 @@ const VISIBILITY_OPTIONS: { value: TripVisibility; label: string; icon: React.Re
 export default function MesVoyagesPage() {
   const router = useRouter();
   const { user, isLoading: authLoading } = useAuth();
-  const [trips, setTrips] = useState<Trip[]>([]);
+  const [trips, setTrips] = useState<TripListItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -55,7 +62,7 @@ export default function MesVoyagesPage() {
           setTrips([]);
           return;
         }
-        const tripsData = await res.json();
+        const tripsData = await res.json() as TripListItem[];
         setTrips(tripsData || []);
       } catch (error) {
         console.error('Error fetching trips:', error);
@@ -181,6 +188,8 @@ export default function MesVoyagesPage() {
               const isPastTrip = prefs.tripType === 'past';
               const visibility = (trip as Trip & { visibility?: TripVisibility }).visibility || 'private';
               const visibilityOption = VISIBILITY_OPTIONS.find(o => o.value === visibility) || VISIBILITY_OPTIONS[2];
+              const userRole = trip.userRole || 'owner';
+              const isInvitedTrip = userRole !== 'owner' || trip.isInvited === true;
 
               return (
                 <Card key={trip.id} className="hover:shadow-md transition-shadow">
@@ -191,6 +200,11 @@ export default function MesVoyagesPage() {
                           <CardTitle className="text-lg hover:text-primary transition-colors">
                             {trip.title}
                           </CardTitle>
+                          {isInvitedTrip && (
+                            <Badge variant="outline" className="text-xs">
+                              Invité {userRole === 'editor' ? '· éditeur' : '· lecteur'}
+                            </Badge>
+                          )}
                           {isPastTrip && (
                             <Badge variant="secondary" className="text-xs">
                               <Camera className="h-3 w-3 mr-1" />
@@ -204,34 +218,36 @@ export default function MesVoyagesPage() {
                         </CardDescription>
                       </Link>
                       <div className="flex items-center gap-2">
-                        {/* Visibility dropdown */}
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="gap-1 h-8">
-                              {visibilityOption.icon}
-                              <span className="hidden sm:inline text-xs">{visibilityOption.label}</span>
-                              <ChevronDown className="h-3 w-3" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            {VISIBILITY_OPTIONS.map((option) => (
-                              <DropdownMenuItem
-                                key={option.value}
-                                onClick={() => updateVisibility(trip.id, option.value)}
-                                className={cn(
-                                  'flex items-center gap-2',
-                                  visibility === option.value && 'bg-primary/10'
-                                )}
-                              >
-                                {option.icon}
-                                <div>
-                                  <div className="font-medium">{option.label}</div>
-                                  <div className="text-xs text-muted-foreground">{option.description}</div>
-                                </div>
-                              </DropdownMenuItem>
-                            ))}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                        {/* Visibility dropdown (owner only) */}
+                        {userRole === 'owner' && (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm" className="gap-1 h-8">
+                                {visibilityOption.icon}
+                                <span className="hidden sm:inline text-xs">{visibilityOption.label}</span>
+                                <ChevronDown className="h-3 w-3" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              {VISIBILITY_OPTIONS.map((option) => (
+                                <DropdownMenuItem
+                                  key={option.value}
+                                  onClick={() => updateVisibility(trip.id, option.value)}
+                                  className={cn(
+                                    'flex items-center gap-2',
+                                    visibility === option.value && 'bg-primary/10'
+                                  )}
+                                >
+                                  {option.icon}
+                                  <div>
+                                    <div className="font-medium">{option.label}</div>
+                                    <div className="text-xs text-muted-foreground">{option.description}</div>
+                                  </div>
+                                </DropdownMenuItem>
+                              ))}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        )}
                       </div>
                     </div>
                   </CardHeader>
