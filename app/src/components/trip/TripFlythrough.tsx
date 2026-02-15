@@ -30,16 +30,14 @@ async function applyBest3DQuality(
   hasIonToken: boolean,
   compatibilityMode: boolean
 ) {
-  viewer.resolutionScale = Math.min(window.devicePixelRatio || 1, compatibilityMode ? 1.1 : 1.5);
-  viewer.scene.highDynamicRange = !compatibilityMode;
+  viewer.resolutionScale = Math.min(window.devicePixelRatio || 1, compatibilityMode ? 1.0 : 1.25);
+  viewer.scene.highDynamicRange = false;
   viewer.scene.globe.enableLighting = true;
   viewer.scene.globe.showGroundAtmosphere = true;
-  viewer.shadows = !compatibilityMode;
+  viewer.shadows = false;
 
   if (viewer.shadowMap) {
-    viewer.shadowMap.enabled = !compatibilityMode;
-    viewer.shadowMap.softShadows = !compatibilityMode;
-    viewer.shadowMap.size = compatibilityMode ? 1024 : 2048;
+    viewer.shadowMap.enabled = false;
   }
 
   if (!hasIonToken) return;
@@ -59,7 +57,7 @@ async function applyBest3DQuality(
     }
 
     if (photorealisticTileset) {
-      photorealisticTileset.maximumScreenSpaceError = compatibilityMode ? 2.4 : 1.2;
+      photorealisticTileset.maximumScreenSpaceError = compatibilityMode ? 6 : 4;
       photorealisticTileset.dynamicScreenSpaceError = true;
       photorealisticTileset.preloadFlightDestinations = true;
       viewer.scene.primitives.add(photorealisticTileset);
@@ -183,13 +181,13 @@ function getCinematicFlightProfile(waypoints: Waypoint[], index: number) {
       ? getBearingDegrees(current.lat, current.lng, next.lat, next.lng)
       : 0;
 
-  const altitude = Math.min(3200, Math.max(850, segmentDistanceKm * 950));
-  const duration = Math.min(4.2, Math.max(1.8, segmentDistanceKm * 1.1));
-  const maxHeight = Math.max(altitude * 1.8, altitude + 700);
+  const altitude = Math.min(5000, Math.max(1200, segmentDistanceKm * 600));
+  const duration = Math.min(7.0, Math.max(3.0, segmentDistanceKm * 0.8));
+  const maxHeight = Math.max(altitude * 1.4, altitude + 500);
 
-  let pitchDeg = -50;
-  if (segmentDistanceKm > 2.5) pitchDeg = -36;
-  else if (segmentDistanceKm > 1.2) pitchDeg = -42;
+  let pitchDeg = -40;
+  if (segmentDistanceKm > 2.5) pitchDeg = -25;
+  else if (segmentDistanceKm > 1.2) pitchDeg = -32;
 
   return {
     headingDeg,
@@ -471,37 +469,35 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
         if (!viewer) {
           throw lastViewerError ?? new Error('Unable to initialize Cesium viewer');
         }
-        console.info('[TripFlythrough] CHECKPOINT: viewer created, applying styles...');
 
         try {
           const imageryLayers = viewer.imageryLayers;
           const baseLayer = imageryLayers.get(0);
           if (baseLayer) {
-            baseLayer.brightness = 0.6;
-            baseLayer.contrast = 1.1;
-            baseLayer.saturation = 0.5;
+            baseLayer.brightness = 0.85;
+            baseLayer.contrast = 1.15;
+            baseLayer.saturation = 0.7;
           }
 
           viewer.scene.backgroundColor = Cesium.Color.fromCssColorString('#0a0a12');
           viewer.scene.globe.baseColor = Cesium.Color.fromCssColorString('#0a0a12');
-          viewer.scene.globe.depthTestAgainstTerrain = true;
-          viewer.scene.fog.enabled = true;
-          viewer.scene.fog.density = compatibilityMode ? 0.00025 : 0.00035;
-          viewer.scene.fxaa = !compatibilityMode;
+          viewer.scene.globe.depthTestAgainstTerrain = false;
+          viewer.scene.fog.enabled = !compatibilityMode;
+          viewer.scene.fog.density = 0.00015;
+          viewer.scene.fxaa = false;
           if (viewer.scene.postProcessStages?.fxaa) {
-            viewer.scene.postProcessStages.fxaa.enabled = !compatibilityMode;
+            viewer.scene.postProcessStages.fxaa.enabled = false;
           }
         } catch (styleError) {
           console.warn('[TripFlythrough] Scene styling failed, continuing.', styleError);
         }
 
-        console.info('[TripFlythrough] CHECKPOINT: styles applied, loading quality...');
+
         try {
           await applyBest3DQuality(Cesium, viewer, hasIonToken, compatibilityMode);
         } catch (qualityError) {
           console.warn('[TripFlythrough] 3D quality boost failed, continuing.', qualityError);
         }
-        console.info('[TripFlythrough] CHECKPOINT: quality done, setting up render error handler...');
 
         try {
           let renderErrorCount = 0;
@@ -531,7 +527,7 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
           console.warn('[TripFlythrough] Render error hook failed, continuing.', renderHookError);
         }
 
-        console.info('[TripFlythrough] CHECKPOINT: render handler set, extracting waypoints...');
+
         // Extract waypoints
         const waypoints = extractWaypoints();
         waypointsRef.current = waypoints;
@@ -547,10 +543,10 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
               polylineRef.current = viewer.entities.add({
                 polyline: {
                   positions: positions,
-                  width: 3,
+                  width: 5,
                   material: new Cesium.PolylineGlowMaterialProperty({
-                    glowPower: 0.2,
-                    color: Cesium.Color.fromCssColorString('#fbbf24').withAlpha(0.8),
+                    glowPower: 0.35,
+                    color: Cesium.Color.fromCssColorString('#fbbf24').withAlpha(0.85),
                   }),
                 },
               });
@@ -563,7 +559,7 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
                 id: `waypoint-${waypoint.id}-${index}`,
                 position: Cesium.Cartesian3.fromDegrees(waypoint.lng, waypoint.lat, 100),
                 point: {
-                  pixelSize: isFirst ? 14 : 10,
+                  pixelSize: isFirst ? 18 : 12,
                   color: Cesium.Color.fromCssColorString('#60a5fa'),
                   outlineColor: Cesium.Color.WHITE,
                   outlineWidth: 2,
@@ -571,7 +567,7 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
                 },
                 label: {
                   text: `${index + 1}`,
-                  font: '700 11px sans-serif',
+                  font: '700 13px sans-serif',
                   fillColor: Cesium.Color.WHITE,
                   outlineColor: Cesium.Color.BLACK,
                   outlineWidth: 2,
@@ -613,7 +609,7 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
           console.info('[TripFlythrough] No activity waypoints found for this trip, showing base 3D globe only.');
         }
 
-        console.info('[TripFlythrough] CHECKPOINT: waypoints done, setting loaded...');
+
         setIsLoaded(true);
 
         window.addEventListener('resize', resizeViewer);
@@ -686,7 +682,7 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
     markersRef.current.forEach((marker, waypointIndex) => {
       const isCurrent = waypointIndex === index;
 
-      marker.point.pixelSize = isCurrent ? 14 : 10;
+      marker.point.pixelSize = isCurrent ? 18 : 12;
       marker.point.color = isCurrent
         ? Cesium.Color.fromCssColorString('#f59e0b')
         : Cesium.Color.fromCssColorString('#60a5fa');
@@ -731,7 +727,7 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
 
     // Schedule next waypoint
     if (isPlaying) {
-      const pauseDuration = 2500 / speed;
+      const pauseDuration = 4000 / speed;
       animationRef.current = setTimeout(() => {
         const nextIndex = index + 1;
         if (nextIndex < waypoints.length) {
