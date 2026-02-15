@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Calendar } from '@/components/ui/calendar';
@@ -23,6 +23,15 @@ interface StepDestinationProps {
   onChange: (data: Partial<TripPreferences>) => void;
 }
 
+type LocationSuggestion = {
+  displayName: string;
+  label: string;
+  city?: string;
+  country?: string;
+  lat: number;
+  lng: number;
+};
+
 const TYPE_LABELS: Record<DestinationSuggestion['type'], { label: string; icon: typeof Map }> = {
   single_city: { label: 'Ville unique', icon: Navigation },
   multi_city: { label: 'Multi-villes', icon: Map },
@@ -36,6 +45,13 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
   const [durationSuggestionForStage, setDurationSuggestionForStage] = useState<number | null>(null);
   const [geoLoading, setGeoLoading] = useState(false);
   const [geoError, setGeoError] = useState<string | null>(null);
+  const [originSuggestions, setOriginSuggestions] = useState<LocationSuggestion[]>([]);
+  const [homeAddressSuggestions, setHomeAddressSuggestions] = useState<LocationSuggestion[]>([]);
+  const [originSuggestionsLoading, setOriginSuggestionsLoading] = useState(false);
+  const [homeAddressSuggestionsLoading, setHomeAddressSuggestionsLoading] = useState(false);
+  const [showOriginSuggestions, setShowOriginSuggestions] = useState(false);
+  const [showHomeAddressSuggestions, setShowHomeAddressSuggestions] = useState(false);
+  const autoGeoPromptedRef = useRef(false);
   const { preferences } = useUserPreferences();
 
   const {
@@ -114,10 +130,30 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
 
   const totalDays = stages.reduce((sum, s) => sum + s.days, 0);
 
-  const handleUseCurrentLocation = (options?: { forceOriginUpdate?: boolean }) => {
+  const fetchLocationSuggestions = useCallback(
+    async (query: string, mode: 'city' | 'address', signal: AbortSignal): Promise<LocationSuggestion[]> => {
+      const params = new URLSearchParams({
+        q: query.trim(),
+        mode,
+        limit: '6',
+      });
+
+      const response = await fetch(`/api/geocode/autocomplete?${params.toString()}`, { signal });
+      if (!response.ok) return [];
+      const payload = await response.json();
+      if (!Array.isArray(payload?.results)) return [];
+      return payload.results as LocationSuggestion[];
+    },
+    []
+  );
+
+  const handleUseCurrentLocation = useCallback((options?: { forceOriginUpdate?: boolean; silentErrors?: boolean }) => {
     const forceOriginUpdate = options?.forceOriginUpdate === true;
+    const silentErrors = options?.silentErrors === true;
     if (typeof navigator === 'undefined' || !navigator.geolocation) {
-      setGeoError('La géolocalisation n’est pas disponible sur cet appareil.');
+      if (!silentErrors) {
+        setGeoError('La géolocalisation n’est pas disponible sur cet appareil.');
+      }
       return;
     }
 
@@ -161,10 +197,14 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
       (error) => {
         setGeoLoading(false);
         if (error.code === error.PERMISSION_DENIED) {
-          setGeoError('Autorisez la géolocalisation pour remplir automatiquement votre départ.');
+          if (!silentErrors) {
+            setGeoError('Autorisez la géolocalisation pour remplir automatiquement votre départ.');
+          }
           return;
         }
-        setGeoError('Impossible de récupérer votre position actuelle.');
+        if (!silentErrors) {
+          setGeoError('Impossible de récupérer votre position actuelle.');
+        }
       },
       {
         enableHighAccuracy: true,
@@ -172,6 +212,97 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
         maximumAge: 60000,
       }
     );
+  }, [data.homeAddress, data.origin, onChange]);
+
+  useEffect(() => {
+    const query = (data.origin || '').trim();
+    if (query.length < 2) {
+      setOriginSuggestions([]);
+      return;
+    }
+
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(async () => {
+      setOriginSuggestionsLoading(true);
+      try {
+        const suggestions = await fetchLocationSuggestions(query, 'city', controller.signal);
+        setOriginSuggestions(suggestions);
+      } catch {
+        setOriginSuggestions([]);
+      } finally {
+        setOriginSuggestionsLoading(false);
+      }
+    }, 250);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      controller.abort();
+    };
+  }, [data.origin, fetchLocationSuggestions]);
+
+  useEffect(() => {
+    const query = (data.homeAddress || '').trim();
+    if (query.length < 3) {
+      setHomeAddressSuggestions([]);
+      return;
+    }
+
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(async () => {
+      setHomeAddressSuggestionsLoading(true);
+      try {
+        const suggestions = await fetchLocationSuggestions(query, 'address', controller.signal);
+        setHomeAddressSuggestions(suggestions);
+      } catch {
+        setHomeAddressSuggestions([]);
+      } finally {
+        setHomeAddressSuggestionsLoading(false);
+      }
+    }, 250);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      controller.abort();
+    };
+  }, [data.homeAddress, fetchLocationSuggestions]);
+
+  useEffect(() => {
+    if (autoGeoPromptedRef.current) return;
+    if (data.homeCoords || (data.origin || '').trim().length > 0) return;
+
+    autoGeoPromptedRef.current = true;
+    const timeoutId = window.setTimeout(async () => {
+      if (typeof navigator === 'undefined' || !navigator.geolocation) return;
+      try {
+        const nav = navigator as Navigator & {
+          permissions?: { query?: (descriptor: PermissionDescriptor) => Promise<{ state: string }> };
+        };
+        const permissionsApi = nav.permissions?.query;
+        if (permissionsApi) {
+          const permissionState = await permissionsApi({ name: 'geolocation' as PermissionName });
+          if (permissionState.state === 'denied') return;
+        }
+      } catch {
+        // Safari may not support permissions API; continue.
+      }
+      handleUseCurrentLocation({ forceOriginUpdate: true, silentErrors: true });
+    }, 500);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [data.homeCoords, data.origin, handleUseCurrentLocation]);
+
+  const applyOriginSuggestion = (suggestion: LocationSuggestion) => {
+    onChange({ origin: suggestion.label || suggestion.displayName });
+    setShowOriginSuggestions(false);
+  };
+
+  const applyHomeAddressSuggestion = (suggestion: LocationSuggestion) => {
+    onChange({
+      homeAddress: suggestion.displayName,
+      homeCoords: { lat: suggestion.lat, lng: suggestion.lng },
+      ...(suggestion.city && !data.origin ? { origin: suggestion.city } : {}),
+    });
+    setShowHomeAddressSuggestions(false);
   };
 
   return (
@@ -238,8 +369,38 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
               placeholder="Paris, France"
               value={data.origin || ''}
               onChange={(e) => onChange({ origin: e.target.value })}
+              onFocus={() => setShowOriginSuggestions(true)}
+              onBlur={() => window.setTimeout(() => setShowOriginSuggestions(false), 120)}
               className="pl-10 h-12 text-base"
             />
+            {showOriginSuggestions && ((data.origin || '').trim().length >= 2) && (
+              <div className="absolute z-20 mt-1 w-full rounded-md border border-border bg-background shadow-lg overflow-hidden">
+                <div className="max-h-64 overflow-y-auto">
+                  {originSuggestionsLoading ? (
+                    <div className="px-3 py-2 text-sm text-muted-foreground flex items-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Recherche des villes...
+                    </div>
+                  ) : originSuggestions.length > 0 ? (
+                    originSuggestions.map((suggestion, index) => (
+                      <button
+                        key={`${suggestion.displayName}-${index}`}
+                        type="button"
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-muted transition-colors"
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() => applyOriginSuggestion(suggestion)}
+                      >
+                        {suggestion.label || suggestion.displayName}
+                      </button>
+                    ))
+                  ) : (
+                    <div className="px-3 py-2 text-sm text-muted-foreground">
+                      Aucune suggestion.
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
           <Button
             type="button"
@@ -280,8 +441,40 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
           placeholder="10 rue Exemple, 75011 Paris"
           value={data.homeAddress || ''}
           onChange={(e) => onChange({ homeAddress: e.target.value })}
+          onFocus={() => setShowHomeAddressSuggestions(true)}
+          onBlur={() => window.setTimeout(() => setShowHomeAddressSuggestions(false), 120)}
           className="h-12 text-base"
         />
+        {showHomeAddressSuggestions && ((data.homeAddress || '').trim().length >= 3) && (
+          <div className="relative">
+            <div className="absolute z-20 mt-1 w-full rounded-md border border-border bg-background shadow-lg overflow-hidden">
+              <div className="max-h-64 overflow-y-auto">
+                {homeAddressSuggestionsLoading ? (
+                  <div className="px-3 py-2 text-sm text-muted-foreground flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Recherche des adresses...
+                  </div>
+                ) : homeAddressSuggestions.length > 0 ? (
+                  homeAddressSuggestions.map((suggestion, index) => (
+                    <button
+                      key={`${suggestion.displayName}-${index}`}
+                      type="button"
+                      className="w-full text-left px-3 py-2 text-sm hover:bg-muted transition-colors"
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => applyHomeAddressSuggestion(suggestion)}
+                    >
+                      {suggestion.displayName}
+                    </button>
+                  ))
+                ) : (
+                  <div className="px-3 py-2 text-sm text-muted-foreground">
+                    Aucune suggestion.
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
         <p className="text-xs text-muted-foreground">
           Astuce: utilisez le bouton <span className="font-medium">Ma position actuelle</span> sur la ville de départ pour pré-remplir automatiquement cette adresse.
         </p>
