@@ -32,6 +32,13 @@ type LocationSuggestion = {
   lng: number;
 };
 
+function looksLikeStreetQuery(value: string): boolean {
+  const normalized = value.trim();
+  if (!normalized) return false;
+  if (/\d/.test(normalized)) return true;
+  return /\b(rue|street|avenue|road|boulevard|blvd|via|strasse|straße|calle|rua|quai|impasse|allee|allée|chemin|route|plaza|place)\b/i.test(normalized);
+}
+
 const TYPE_LABELS: Record<DestinationSuggestion['type'], { label: string; icon: typeof Map }> = {
   single_city: { label: 'Ville unique', icon: Navigation },
   multi_city: { label: 'Multi-villes', icon: Map },
@@ -51,7 +58,7 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
   const [homeAddressSuggestionsLoading, setHomeAddressSuggestionsLoading] = useState(false);
   const [showOriginSuggestions, setShowOriginSuggestions] = useState(false);
   const [showHomeAddressSuggestions, setShowHomeAddressSuggestions] = useState(false);
-  const autoGeoPromptedRef = useRef(false);
+  const geoPromptTriggeredRef = useRef(false);
   const { preferences } = useUserPreferences();
 
   const {
@@ -157,6 +164,13 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
       return;
     }
 
+    if (typeof window !== 'undefined' && !window.isSecureContext) {
+      if (!silentErrors) {
+        setGeoError('La géolocalisation nécessite une connexion HTTPS sécurisée.');
+      }
+      return;
+    }
+
     setGeoLoading(true);
     setGeoError(null);
 
@@ -198,7 +212,7 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
         setGeoLoading(false);
         if (error.code === error.PERMISSION_DENIED) {
           if (!silentErrors) {
-            setGeoError('Autorisez la géolocalisation pour remplir automatiquement votre départ.');
+            setGeoError('Autorisez la géolocalisation dans Safari (Réglages du site > Localisation) puis réessayez.');
           }
           return;
         }
@@ -225,7 +239,8 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
     const timeoutId = window.setTimeout(async () => {
       setOriginSuggestionsLoading(true);
       try {
-        const suggestions = await fetchLocationSuggestions(query, 'city', controller.signal);
+        const mode = looksLikeStreetQuery(query) ? 'address' : 'city';
+        const suggestions = await fetchLocationSuggestions(query, mode, controller.signal);
         setOriginSuggestions(suggestions);
       } catch {
         setOriginSuggestions([]);
@@ -266,33 +281,17 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
     };
   }, [data.homeAddress, fetchLocationSuggestions]);
 
-  useEffect(() => {
-    if (autoGeoPromptedRef.current) return;
-    if (data.homeCoords || (data.origin || '').trim().length > 0) return;
-
-    autoGeoPromptedRef.current = true;
-    const timeoutId = window.setTimeout(async () => {
-      if (typeof navigator === 'undefined' || !navigator.geolocation) return;
-      try {
-        const nav = navigator as Navigator & {
-          permissions?: { query?: (descriptor: PermissionDescriptor) => Promise<{ state: string }> };
-        };
-        const permissionsApi = nav.permissions?.query;
-        if (permissionsApi) {
-          const permissionState = await permissionsApi({ name: 'geolocation' as PermissionName });
-          if (permissionState.state === 'denied') return;
-        }
-      } catch {
-        // Safari may not support permissions API; continue.
-      }
-      handleUseCurrentLocation({ forceOriginUpdate: true, silentErrors: true });
-    }, 500);
-
-    return () => window.clearTimeout(timeoutId);
-  }, [data.homeCoords, data.origin, handleUseCurrentLocation]);
-
   const applyOriginSuggestion = (suggestion: LocationSuggestion) => {
-    onChange({ origin: suggestion.label || suggestion.displayName });
+    const queryIsAddress = looksLikeStreetQuery(data.origin || '');
+    onChange({
+      origin: suggestion.city || suggestion.label || suggestion.displayName,
+      ...(queryIsAddress
+        ? {
+            homeAddress: suggestion.displayName,
+            homeCoords: { lat: suggestion.lat, lng: suggestion.lng },
+          }
+        : {}),
+    });
     setShowOriginSuggestions(false);
   };
 
@@ -303,6 +302,13 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
       ...(suggestion.city && !data.origin ? { origin: suggestion.city } : {}),
     });
     setShowHomeAddressSuggestions(false);
+  };
+
+  const maybeTriggerGeoPrompt = () => {
+    if (geoPromptTriggeredRef.current) return;
+    if (data.homeCoords || (data.origin || '').trim().length > 0) return;
+    geoPromptTriggeredRef.current = true;
+    handleUseCurrentLocation({ forceOriginUpdate: true, silentErrors: true });
   };
 
   return (
@@ -369,7 +375,10 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
               placeholder="Paris, France"
               value={data.origin || ''}
               onChange={(e) => onChange({ origin: e.target.value })}
-              onFocus={() => setShowOriginSuggestions(true)}
+              onFocus={() => {
+                setShowOriginSuggestions(true);
+                maybeTriggerGeoPrompt();
+              }}
               onBlur={() => window.setTimeout(() => setShowOriginSuggestions(false), 120)}
               className="pl-10 h-12 text-base"
             />
@@ -386,11 +395,14 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
                       <button
                         key={`${suggestion.displayName}-${index}`}
                         type="button"
-                        className="w-full text-left px-3 py-2 text-sm hover:bg-muted transition-colors"
+                        className="w-full text-left px-3 py-2 hover:bg-muted transition-colors"
                         onMouseDown={(e) => e.preventDefault()}
                         onClick={() => applyOriginSuggestion(suggestion)}
                       >
-                        {suggestion.label || suggestion.displayName}
+                        <div className="text-sm font-medium">{suggestion.label || suggestion.displayName}</div>
+                        {suggestion.displayName !== (suggestion.label || suggestion.displayName) && (
+                          <div className="text-xs text-muted-foreground line-clamp-1">{suggestion.displayName}</div>
+                        )}
                       </button>
                     ))
                   ) : (
