@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Play, Pause, SkipForward, Gauge } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { Trip } from '@/lib/types';
+import { TripMap } from '@/components/trip/TripMap';
 
 const GOOGLE_PHOTOREALISTIC_ION_ASSET_ID = 2275207;
 
@@ -125,6 +126,7 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
   const waypointsRef = useRef<Waypoint[]>([]);
   const markersRef = useRef<Map<string, any>>(new Map());
   const polylineRef = useRef<any>(null);
+  const fallbackItems = useMemo(() => trip.days.flatMap((day) => day.items || []), [trip]);
 
   useEffect(() => {
     setHasMounted(true);
@@ -330,7 +332,13 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
 
       } catch (err) {
         console.error('Failed to initialize Cesium:', err);
-        setError('Échec du chargement de la visualisation 3D');
+        const rawMessage = err instanceof Error ? err.message : String(err);
+        const lowerMessage = rawMessage.toLowerCase();
+        if (lowerMessage.includes('cesiumwidget') || lowerMessage.includes('webgl')) {
+          setError('3D indisponible sur cet appareil. Carte 2D affichée à la place.');
+        } else {
+          setError('Échec du chargement de la visualisation 3D. Carte 2D affichée à la place.');
+        }
       }
     }
 
@@ -490,12 +498,19 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
 
       {/* Error overlay */}
       {error && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/80">
-          <div className="text-center text-red-400">
-            <p>{error}</p>
-            <Button variant="outline" onClick={onClose} className="mt-4">
-              Fermer
-            </Button>
+        <div className="absolute inset-0 bg-black/80 p-4 md:p-6 overflow-y-auto">
+          <div className="mx-auto max-w-5xl rounded-xl border border-white/20 bg-black/70 p-4 text-white">
+            <p className="text-sm text-red-300">{error}</p>
+            {fallbackItems.length > 0 && (
+              <div className="mt-3 h-[60vh] min-h-[320px] rounded-lg overflow-hidden border border-white/20 bg-white">
+                <TripMap items={fallbackItems} isVisible />
+              </div>
+            )}
+            <div className="mt-4 flex justify-end">
+              <Button variant="outline" onClick={onClose}>
+                Fermer
+              </Button>
+            </div>
           </div>
         </div>
       )}
