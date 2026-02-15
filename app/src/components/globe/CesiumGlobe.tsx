@@ -348,6 +348,14 @@ export function CesiumGlobe({
         const compatibilityMode = !webglSupport.webgl2;
         Cesium.Ion.defaultAccessToken = ionToken;
 
+        // Synchronous base layer to avoid async Ion race condition (C[0] null crash)
+        const osmBaseLayer = new Cesium.ImageryLayer(
+          new Cesium.OpenStreetMapImageryProvider({
+            url: 'https://tile.openstreetmap.org/',
+            credit: 'OpenStreetMap',
+          })
+        );
+
         const commonViewerOptions: any = {
           animation: false,
           baseLayerPicker: false,
@@ -363,6 +371,7 @@ export function CesiumGlobe({
           navigationInstructionsInitiallyVisible: false,
           showRenderLoopErrors: false,
           skyBox: false,
+          baseLayer: osmBaseLayer,
         };
 
         const viewerProfiles: Array<{
@@ -445,10 +454,6 @@ export function CesiumGlobe({
               viewerOptions.msaaSamples = profile.msaaSamples;
             }
 
-            if (profile.useTerrain && hasIonToken) {
-              viewerOptions.terrain = Cesium.Terrain.fromWorldTerrain();
-            }
-
             if (profile.useSkyAtmosphere) {
               viewerOptions.skyAtmosphere = new Cesium.SkyAtmosphere();
             }
@@ -457,6 +462,17 @@ export function CesiumGlobe({
 
             viewerRef.current = viewer;
             console.info(`[CesiumGlobe] Cesium initialized with ${profile.name}`);
+
+            // Load terrain async AFTER viewer is created to avoid race condition
+            if (profile.useTerrain && hasIonToken) {
+              try {
+                const terrain = Cesium.Terrain.fromWorldTerrain();
+                viewer.scene.setTerrain(terrain);
+                console.info('[CesiumGlobe] Terrain loading started');
+              } catch (terrainError) {
+                console.warn('[CesiumGlobe] Terrain setup failed, continuing without terrain.', terrainError);
+              }
+            }
             break;
           } catch (profileError) {
             lastViewerError = profileError;
