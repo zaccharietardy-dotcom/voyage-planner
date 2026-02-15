@@ -122,4 +122,13 @@ describe('step7-assemble helpers', () => {
       normalizeSuggestedDayStartHour(11, { isFirstDay: false, isLastDay: false, isDayTrip: false })
     ).toBe(8);
   });
+
+  it('caps first and last days at 9h by default', () => {
+    expect(
+      normalizeSuggestedDayStartHour(11, { isFirstDay: true, isLastDay: false, isDayTrip: false })
+    ).toBe(9);
+    expect(
+      normalizeSuggestedDayStartHour(11, { isFirstDay: false, isLastDay: true, isDayTrip: false })
+    ).toBe(9);
+  });
 });

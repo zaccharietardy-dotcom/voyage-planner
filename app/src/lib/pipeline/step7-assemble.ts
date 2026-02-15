@@ -203,14 +203,12 @@ export function normalizeSuggestedDayStartHour(
   let hour = Number.isFinite(suggestedHour) ? suggestedHour : 9;
   hour = Math.max(6, Math.min(11, hour));
 
-  // Full exploration days should not start too late; late starts create large idle gaps.
-  if (!opts.isFirstDay && !opts.isLastDay) {
-    hour = Math.min(hour, opts.isDayTrip ? 8 : 8);
-  }
-
-  // Keep departure days reasonably early by default to preserve a usable morning block.
-  if (opts.isLastDay) {
+  if (opts.isFirstDay || opts.isLastDay) {
+    // Arrival/departure days: default at 9:00 unless transport constraints force later.
     hour = Math.min(hour, 9);
+  } else {
+    // Full days: default at 8:00 to maximize usable morning and reduce idle gaps.
+    hour = Math.min(hour, 8);
   }
 
   return hour;
@@ -1434,6 +1432,7 @@ export async function assembleTripSchedule(
       const currentHour = scheduler.getCurrentTime().getHours();
       // Only insert if cursor is in the 13h-17h window (afternoon)
       if (currentHour >= 13 && currentHour < 17) {
+        const freeTimeAnchor = getLatestScheduledGeoPoint(scheduler);
         const freeTimeResult = scheduler.addItem({
           id: `free-time-${balancedDay.dayNumber}`,
           title: 'Temps libre',
@@ -1446,8 +1445,8 @@ export async function assembleTripSchedule(
             description: 'Pause détente — explorez à votre rythme',
             isFreeTime: true,
             estimatedCost: 0,
-            latitude: hotel?.latitude || data.destCoords.lat,
-            longitude: hotel?.longitude || data.destCoords.lng,
+            latitude: freeTimeAnchor?.latitude || hotel?.latitude || data.destCoords.lat,
+            longitude: freeTimeAnchor?.longitude || hotel?.longitude || data.destCoords.lng,
           },
         });
         if (freeTimeResult) {
@@ -1461,9 +1460,16 @@ export async function assembleTripSchedule(
     // findBestMealSlot() scans gaps between existing items to find the best time.
     if (!lunchInserted && !skipLunch && !skipLunchForMealActivity) {
       const lunchDuration = lunch?.restaurant ? 60 : 45;
+      const lunchFallbackAnchor = getLatestScheduledGeoPoint(scheduler);
       const lunchData = lunch?.restaurant
         ? { ...lunch.restaurant, _alternatives: lunch.restaurantAlternatives || [] }
-        : { name: 'Restaurant à proximité', description: 'Déjeuner', latitude: hotel?.latitude || data.destCoords.lat, longitude: hotel?.longitude || data.destCoords.lng, estimatedCost: 15 };
+        : {
+            name: 'Restaurant à proximité',
+            description: 'Déjeuner',
+            latitude: lunchFallbackAnchor?.latitude || hotel?.latitude || data.destCoords.lat,
+            longitude: lunchFallbackAnchor?.longitude || hotel?.longitude || data.destCoords.lng,
+            estimatedCost: 15,
+          };
       const lunchTitle = lunch?.restaurant
         ? `Déjeuner — ${lunch.restaurant.name}`
         : 'Déjeuner — Restaurant à proximité';
@@ -1490,9 +1496,16 @@ export async function assembleTripSchedule(
 
     if (!dinnerInserted && !skipDinner && !skipDinnerForMealActivity) {
       const dinnerDuration = dinner?.restaurant ? 75 : 60;
+      const dinnerFallbackAnchor = getLatestScheduledGeoPoint(scheduler);
       const dinnerData = dinner?.restaurant
         ? { ...dinner.restaurant, _alternatives: dinner.restaurantAlternatives || [] }
-        : { name: 'Restaurant à proximité', description: 'Dîner', latitude: hotel?.latitude || data.destCoords.lat, longitude: hotel?.longitude || data.destCoords.lng, estimatedCost: 20 };
+        : {
+            name: 'Restaurant à proximité',
+            description: 'Dîner',
+            latitude: dinnerFallbackAnchor?.latitude || hotel?.latitude || data.destCoords.lat,
+            longitude: dinnerFallbackAnchor?.longitude || hotel?.longitude || data.destCoords.lng,
+            estimatedCost: 20,
+          };
       const dinnerTitle = dinner?.restaurant
         ? `Dîner — ${dinner.restaurant.name}`
         : 'Dîner — Restaurant à proximité';
