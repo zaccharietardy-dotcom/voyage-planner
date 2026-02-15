@@ -274,10 +274,9 @@ export function scoreAndSelectActivities(
   // Arrival/departure days get fewer activities (~2 each), full days get ~4
   const fullDays = Math.max(0, preferences.durationDays - 2);
   const targetCount = Math.max(
-    2 + 2 + fullDays * 4 + 2, // time-based estimate
-    mustSees.length + fullDays * 3 + 2, // ensure must-sees + enough for full days
-    preferences.durationDays * 3, // minimum 3 per day
-    6 // absolute minimum
+    mustSees.length + Math.ceil(preferences.durationDays * 2.5),
+    preferences.durationDays * 4,
+    12 // Absolute minimum for any trip
   );
   const remainingSlots = Math.max(0, targetCount - mustSees.length);
   const selected: ScoredActivity[] = [...mustSees, ...curatedNonMustSees.slice(0, remainingSlots)];

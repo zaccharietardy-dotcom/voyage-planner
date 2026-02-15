@@ -192,6 +192,12 @@ RÈGLES STRICTES:
 12. Respecte les budgets journaliers: charge globale équilibrée (durées + déplacements + activités lourdes)
 13. Jours arrivée/départ: alléger fortement (moins d'activités et moins de déplacements)
 
+IMPORTANT — THÈME ET NARRATIVE:
+14. Le "theme" et "dayNarrative" doivent UNIQUEMENT mentionner les activités listées ci-dessus pour ce jour
+15. NE MENTIONNE AUCUNE attraction qui n'est PAS dans la liste du cluster de ce jour
+16. Si tu ne sais pas quel thème créer, utilise les noms exacts des 1-2 premières activités du jour
+17. N'invente JAMAIS de noms de lieux, utilise uniquement ceux fournis dans les clusters
+
 RÉPONDS EN JSON STRICT (pas de texte avant/après):
 {
   "days": [

@@ -16,20 +16,21 @@ export function selectHotelByBarycenter(
   clusters: ActivityCluster[],
   hotels: Accommodation[],
   budgetLevel: BudgetLevel,
-  maxPerNight?: number
+  maxPerNight?: number,
+  durationDays?: number
 ): Accommodation | null {
   if (hotels.length === 0) return null;
 
-  // 1. Compute global barycenter of ALL activities
-  const allActivities = clusters.flatMap(c => c.activities);
-  if (allActivities.length === 0) {
+  // 1. Compute global barycenter using CLUSTER CENTROIDS (not all activities)
+  // This prevents hotel being pulled toward outliers within a cluster
+  if (clusters.length === 0) {
     // Fallback: just pick the highest-rated hotel
     return [...hotels].sort((a, b) => (b.rating || 0) - (a.rating || 0))[0] || null;
   }
 
   const barycenter = {
-    lat: allActivities.reduce((s, a) => s + a.latitude, 0) / allActivities.length,
-    lng: allActivities.reduce((s, a) => s + a.longitude, 0) / allActivities.length,
+    lat: clusters.reduce((s, c) => s + c.centroid.lat, 0) / clusters.length,
+    lng: clusters.reduce((s, c) => s + c.centroid.lng, 0) / clusters.length,
   };
 
   // 2. Filter by budget (with 30% tolerance)
@@ -53,9 +54,11 @@ export function selectHotelByBarycenter(
 
   // 2b. Distance filter: keep the search anchored around the activity barycenter.
   // If the city is spread out and no close options exist, keep only the nearest slice.
-  const MAX_HOTEL_DIST_KM = 5;
-  const RELAXED_HOTEL_DIST_KM = 8;
-  const MAX_ACCEPTABLE_DIST_KM = 12;
+  // For short trips (≤4 days), tighten the radius to keep hotel close to activities.
+  const isShortTrip = (durationDays || 7) <= 4;
+  const MAX_HOTEL_DIST_KM = isShortTrip ? 3 : 5;
+  const RELAXED_HOTEL_DIST_KM = isShortTrip ? 5 : 8;
+  const MAX_ACCEPTABLE_DIST_KM = isShortTrip ? 8 : 12;
 
   const candidatesByDistance = candidates
     .map((hotel) => ({
@@ -90,6 +93,7 @@ export function selectHotelByBarycenter(
 
   // 3. Score: lower distance + higher rating = better
   // Distance dominates; rating refines among similarly located options.
+  // Increased distance exponent from 2.15 to 2.5 to penalize far hotels more.
   const scored = candidates.map(h => {
     const dist = calculateDistance(
       barycenter.lat, barycenter.lng,
@@ -103,7 +107,7 @@ export function selectHotelByBarycenter(
         : 0;
     return {
       hotel: h,
-      score: Math.pow(dist, 2.15) / ratingBoost + overBudgetPenalty,
+      score: Math.pow(dist, 2.5) / ratingBoost + overBudgetPenalty,
       distanceKm: dist,
     };
   });

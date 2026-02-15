@@ -285,6 +285,90 @@ export function validateAndFixTrip(trip: Trip): ValidationResult {
     }
   }
 
+  // ============================================
+  // Fix themes and narratives to match actual items
+  // ============================================
+  for (const day of trip.days) {
+    const actualActivities = day.items.filter(i => i.type === 'activity');
+    const actualActivityNames = actualActivities.map(i => i.title);
+
+    // 1. Fix dayNarrative activity count
+    if (day.dayNarrative) {
+      const countMatch = day.dayNarrative.match(/(\d+)\s+activités?\s+prévues?/);
+      if (countMatch) {
+        const claimedCount = parseInt(countMatch[1]);
+        if (claimedCount !== actualActivities.length) {
+          if (actualActivities.length === 0) {
+            day.dayNarrative = '';
+            autoFixes.push(`Day ${day.dayNumber}: Cleared narrative (no activities)`);
+          } else {
+            day.dayNarrative = day.dayNarrative.replace(
+              /\d+\s+activités?\s+prévues?/,
+              `${actualActivities.length} activité${actualActivities.length > 1 ? 's' : ''} prévue${actualActivities.length > 1 ? 's' : ''}`
+            );
+            autoFixes.push(`Day ${day.dayNumber}: Fixed activity count in narrative (${claimedCount} → ${actualActivities.length})`);
+          }
+        }
+      }
+    }
+
+    // 2. Regenerate theme from ACTUAL activities if current theme mentions non-existent ones
+    if (day.theme && actualActivities.length > 0) {
+      // Check if theme words match any actual activity
+      const themeLower = day.theme.toLowerCase();
+      const anyMatch = actualActivityNames.some(name => {
+        // Check if any significant word from the activity name appears in the theme
+        const words = name.toLowerCase().split(/[\s,'-]+/).filter(w => w.length > 3);
+        return words.some(word => themeLower.includes(word));
+      });
+
+      if (!anyMatch) {
+        // Theme mentions activities not in the schedule → regenerate
+        const oldTheme = day.theme;
+        const topActivities = actualActivities.slice(0, 2).map(a => a.title);
+        day.theme = topActivities.join(' et ');
+        autoFixes.push(`Day ${day.dayNumber}: Regenerated theme (no match): "${oldTheme}" → "${day.theme}"`);
+      }
+    } else if (!day.theme || actualActivities.length === 0) {
+      // No activities → generic theme
+      const restaurants = day.items.filter(i => i.type === 'restaurant');
+      const hasTransport = day.items.some(i => i.type === 'transport' && i.transportRole === 'longhaul');
+      if (hasTransport && day.dayNumber === 1) {
+        day.theme = 'Arrivée et installation';
+      } else if (hasTransport) {
+        day.theme = 'Retour';
+      } else if (restaurants.length > 0) {
+        day.theme = 'Découverte gastronomique';
+      }
+    }
+
+    // 3. Regenerate dayNarrative if it mentions specific attraction names not in the trip
+    if (day.dayNarrative && actualActivities.length > 0) {
+      // Check for well-known attraction names that might be hallucinated
+      const knownAttractions = [
+        'Louvre', 'Orangerie', 'Orsay', 'Versailles', 'Colosseum', 'Vatican',
+        'Sagrada', 'Buckingham', 'Big Ben', 'Rialto', 'Duomo', 'Eiffel',
+        'Acropolis', 'Parthenon', 'Prado', 'Reina Sofia', 'Alhambra',
+      ];
+      const narrativeLower = day.dayNarrative.toLowerCase();
+      const mentionedButMissing = knownAttractions.filter(attr => {
+        const mentioned = narrativeLower.includes(attr.toLowerCase());
+        const inTrip = actualActivityNames.some(n => n.toLowerCase().includes(attr.toLowerCase()));
+        return mentioned && !inTrip;
+      });
+
+      if (mentionedButMissing.length > 0) {
+        // Rebuild narrative from scratch
+        const actNames = actualActivities.map(a => a.title).join(', ');
+        const oldNarrative = day.dayNarrative;
+        day.dayNarrative = `Journée consacrée à ${actNames}. ${actualActivities.length} activité${actualActivities.length > 1 ? 's' : ''} prévue${actualActivities.length > 1 ? 's' : ''}.`;
+        autoFixes.push(`Day ${day.dayNumber}: Rebuilt narrative (hallucinated: ${mentionedButMissing.join(', ')})`);
+        warnings.push(`Day ${day.dayNumber}: Narrative mentioned non-existent attractions: ${mentionedButMissing.join(', ')}`);
+        penalties += 2;
+      }
+    }
+  }
+
   const score = Math.max(0, 100 - penalties);
 
   if (warnings.length > 0) {

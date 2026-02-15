@@ -142,7 +142,8 @@ export async function generateTripV2(
     clusters,
     data.bookingHotels,
     preferences.budgetLevel,
-    data.budgetStrategy?.accommodationBudgetPerNight
+    data.budgetStrategy?.accommodationBudgetPerNight,
+    preferences.durationDays
   );
 
   const accommodationCoords = hotel
@@ -634,11 +635,13 @@ function rebalanceClustersForFlights(
       const arrMin = outboundFlight.arrivalTimeDisplay
         ? parseInt(outboundFlight.arrivalTimeDisplay.split(':')[1] || '0', 10) / 60
         : new Date(outboundFlight.arrivalTime).getMinutes() / 60;
-      // Realistic start: arrHour + 1h transfer, but also respect hotel check-in at ~14:00
-      // If flight arrives early morning (before noon), tourists must wait for check-in (14:00-14:30)
-      // So effective start = max(arrHour + 1.5, 14.5) for early flights
+      // Realistic start: arrHour + 1h transfer
+      // For early arrivals (before 16:00), travelers can do activities before check-in
+      // (e.g., drop bags at hotel, explore nearby, then check-in later)
       const transferEnd = arrHour + arrMin + 1.5; // 1.5h for airport transfer + settling
-      const effectiveStart = transferEnd < 14 ? 14.5 : transferEnd; // check-in floor at 14:30
+      // Only apply check-in floor if arrival is very early (before 11:00)
+      // Otherwise, use actual arrival time to allow afternoon activities
+      const effectiveStart = transferEnd < 11 ? 13 : transferEnd;
       available = Math.max(0, 22 - effectiveStart);
     } else if (isFirst && isGroundTransport) {
       // Ground transport: estimate arrival hour

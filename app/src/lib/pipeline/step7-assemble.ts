@@ -37,6 +37,17 @@ function uuidv4(): string {
   });
 }
 
+/**
+ * Extract meal label (Petit-déjeuner/Déjeuner/Dîner) from a restaurant title.
+ * Used to rebuild title when restaurant is swapped after initial scheduler item creation.
+ */
+function extractMealLabel(title: string): string {
+  if (title.startsWith('Petit-déjeuner')) return 'Petit-déjeuner';
+  if (title.startsWith('Déjeuner')) return 'Déjeuner';
+  if (title.startsWith('Dîner')) return 'Dîner';
+  return title.split(' — ')[0] || title;
+}
+
 const MODE_LABELS: Record<string, string> = {
   train: '🚄 Train', bus: '🚌 Bus', car: '🚗 Voiture',
   combined: '🔄 Transport', ferry: '⛴️ Ferry',
@@ -751,10 +762,13 @@ export async function assembleTripSchedule(
     // 3. Hotel check-in (first day) / check-out (last day)
     // IMPORTANT: On the last day, insert breakfast BEFORE checkout.
     // Otherwise checkout advances the cursor past breakfast's maxEndTime (10:00).
-    // On the first day we prioritize check-in near arrival time, so it is not pushed
-    // after dinner by late conflict resolution.
+    // On arrival day (first day), if the traveler arrives early (before 16:00), we allow
+    // activities to be scheduled AFTER check-in but also try to fit 1-2 activities on the way
+    // from airport to hotel. Check-in is flexible and won't block the entire afternoon.
     if (isFirstDay && hotel) {
       let checkinTime = parseTime(dayDate, hotel.checkInTime || '15:00');
+      let actualArrivalMinutes: number | null = null;
+
       // If there's a flight, check-in must be AFTER arrival + transfer
       if (flights.outbound) {
         const arrivalHour = flights.outbound.arrivalTimeDisplay
@@ -763,6 +777,7 @@ export async function assembleTripSchedule(
         const arrivalMin = flights.outbound.arrivalTimeDisplay
           ? parseInt(flights.outbound.arrivalTimeDisplay.split(':')[1], 10)
           : new Date(flights.outbound.arrivalTime).getMinutes();
+        actualArrivalMinutes = arrivalHour * 60 + arrivalMin;
         const earliestCheckin = parseTime(dayDate, `${String(arrivalHour).padStart(2, '0')}:${String(arrivalMin).padStart(2, '0')}`);
         // Add 1h for transfer from airport
         const earliestCheckinWithTransfer = new Date(earliestCheckin.getTime() + 60 * 60 * 1000);
@@ -771,6 +786,7 @@ export async function assembleTripSchedule(
         }
       } else if (hasOutboundTransport && groundArrivalMinutes !== null) {
         // Ground transport: check-in after arrival at destination
+        actualArrivalMinutes = groundArrivalMinutes;
         const earliestCheckin = parseTime(dayDate, minutesToHHMM(groundArrivalMinutes + 30));
         if (earliestCheckin > checkinTime) {
           checkinTime = earliestCheckin;
@@ -784,29 +800,16 @@ export async function assembleTripSchedule(
       if (checkinTime >= midnight) {
         checkinTime = parseTime(dayDate, '23:59');
       }
-      const checkinData = {
-        id: `checkin-${balancedDay.dayNumber}`,
-        title: `Check-in ${hotel.name}`,
-        type: 'checkin',
-        startTime: checkinTime,
-        endTime: new Date(checkinTime.getTime() + 30 * 60 * 1000),
-        data: hotel,
-      };
 
-      // Insert immediately so check-in stays anchored near arrival.
-      // If fixed insert conflicts, fallback to addItem from that minimum start.
-      const checkinResult = scheduler.insertFixedItem(checkinData);
-      if (!checkinResult) {
-        scheduler.addItem({
-          id: `checkin-fallback-${balancedDay.dayNumber}`,
-          title: checkinData.title,
-          type: 'checkin',
-          duration: 30,
-          minStartTime: checkinData.startTime,
-          maxEndTime: parseTime(dayDate, '22:30'),
-          data: checkinData.data,
-        });
-      }
+      // FIX D: For early arrivals (before 16:00), defer check-in to allow afternoon activities
+      // Store check-in data for later insertion after we know activity count
+      const checkinHour = checkinTime.getHours() + checkinTime.getMinutes() / 60;
+      const hasAfternoonWindow = actualArrivalMinutes && actualArrivalMinutes < 16 * 60;
+      (scheduler as any)._deferredCheckin = {
+        time: checkinTime,
+        hasAfternoonWindow: hasAfternoonWindow && checkinHour < 18,
+        hotel,
+      };
     }
 
     // Last day breakfast: DEFERRED to after reoptMealFromPool runs (see section 4c below).
@@ -852,6 +855,49 @@ export async function assembleTripSchedule(
     console.log(`[Pipeline V2] Day ${balancedDay.dayNumber}: ${orderedActivities.length} activities to schedule (${mustSeeCount} must-sees), dayStart=${minutesToHHMM(dayStartMinutes)}, dayEnd=${minutesToHHMM(dayEndMinutes)}, window=${((dayEndMinutes - dayStartMinutes) / 60).toFixed(1)}h, cursor=${formatTimeHHMM(scheduler.getCurrentTime())}`);
     for (const a of orderedActivities) {
       console.log(`[Pipeline V2]   → "${a.name}" (${a.duration || 60}min, score=${a.score.toFixed(1)}, mustSee=${!!a.mustSee})`);
+    }
+
+    // 4a. Insert deferred check-in (arrival day only)
+    if (isFirstDay && (scheduler as any)._deferredCheckin) {
+      const deferred = (scheduler as any)._deferredCheckin;
+      if (deferred.hasAfternoonWindow && orderedActivities.length > 0) {
+        // Defer check-in: insert as a flexible item AFTER the first 1-2 activities
+        // This creates the flow: arrival → activity 1 → [activity 2] → check-in → dinner
+        scheduler.addItem({
+          id: `checkin-${balancedDay.dayNumber}`,
+          title: `Check-in ${deferred.hotel.name}`,
+          type: 'checkin',
+          duration: 30,
+          minStartTime: deferred.time,
+          maxEndTime: parseTime(dayDate, '18:30'),
+          data: deferred.hotel,
+        });
+      } else {
+        // Late arrival or no activities: insert check-in as fixed item
+        const checkinData = {
+          id: `checkin-${balancedDay.dayNumber}`,
+          title: `Check-in ${deferred.hotel.name}`,
+          type: 'checkin',
+          startTime: deferred.time,
+          endTime: new Date(deferred.time.getTime() + 30 * 60 * 1000),
+          data: deferred.hotel,
+        };
+
+        // Insert immediately so check-in stays anchored near arrival.
+        // If fixed insert conflicts, fallback to addItem from that minimum start.
+        const checkinResult = scheduler.insertFixedItem(checkinData);
+        if (!checkinResult) {
+          scheduler.addItem({
+            id: `checkin-fallback-${balancedDay.dayNumber}`,
+            title: checkinData.title,
+            type: 'checkin',
+            duration: 30,
+            minStartTime: checkinData.startTime,
+            maxEndTime: parseTime(dayDate, '22:30'),
+            data: checkinData.data,
+          });
+        }
+      }
     }
 
     // 4b. Restaurant re-optimization after geoOptimize
@@ -1610,8 +1656,20 @@ export async function assembleTripSchedule(
         ? (getTransportModeFromItemData(itemData) || 'transit')
         : undefined;
       const normalizedCoords = normalizeItemCoordinates(item.title, itemData, item.type, preferences.destination);
+
+      // FIX F: For restaurants, always rebuild title from current itemData.name (not stale item.title)
+      // This fixes mismatch when reoptMealFromPool() swapped the restaurant after scheduler item was created
+      const isRestaurant = item.type === 'restaurant';
+      const currentRestaurantName = isRestaurant ? itemData.name : null;
+      const rebuiltTitle = isRestaurant && currentRestaurantName
+        ? `${extractMealLabel(item.title)} — ${currentRestaurantName}`
+        : item.title;
+
       // Generate Google Maps "search by name" URL (more reliable than GPS coordinates)
-      const placeName = itemData.name || item.title;
+      // For restaurants, always use current restaurant name (not stale item.title)
+      const placeName = isRestaurant && currentRestaurantName
+        ? currentRestaurantName
+        : (itemData.name || item.title);
       const placeCity = preferences.destination || '';
       const googleMapsPlaceUrl = placeName
         ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(placeName + ', ' + placeCity)}`
@@ -1627,7 +1685,7 @@ export async function assembleTripSchedule(
         startTime: formatTimeHHMM(item.slot.start),
         endTime: formatTimeHHMM(item.slot.end),
         type: item.type as TripItem['type'],
-        title: item.title,
+        title: rebuiltTitle,
         description: buildDescription(itemData, item.type, wikiDescriptions),
         locationName: itemData.locationName || itemData.address || itemData.name || '',
         latitude: normalizedCoords.latitude
@@ -3178,11 +3236,12 @@ function buildDescription(itemData: any, itemType: string, wikiDescriptions?: Ma
 
   // 3. For restaurants: build from cuisineTypes / specialties
   if (itemType === 'restaurant' && itemData.cuisineTypes?.length > 0) {
-    const cuisine = itemData.cuisineTypes.slice(0, 3).join(', ');
+    // FIX F: Deduplicate cuisineTypes (often "restaurant de hamburgers, restaurant de hamburgers")
+    const uniqueCuisines = [...new Set(itemData.cuisineTypes)].slice(0, 3).join(', ');
     if (itemData.specialties?.length > 0) {
-      return cut(`${cuisine} · ${itemData.specialties[0]}`);
+      return cut(`${uniqueCuisines} · ${itemData.specialties[0]}`);
     }
-    return cut(cuisine);
+    return cut(uniqueCuisines);
   }
 
   // 4. Fallback to tips (often populated by Viator, attractions.ts curated data)
