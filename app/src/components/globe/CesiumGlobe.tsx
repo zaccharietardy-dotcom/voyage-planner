@@ -81,12 +81,22 @@ async function applyBest3DQuality(
 function applySafeBaseImagery(Cesium: any, viewer: any) {
   try {
     const imageryLayers = viewer.imageryLayers;
-    imageryLayers.removeAll();
+    const existingLayers: any[] = [];
+    for (let i = 0; i < imageryLayers.length; i += 1) {
+      existingLayers.push(imageryLayers.get(i));
+    }
+
     const osmProvider = new Cesium.OpenStreetMapImageryProvider({
       url: 'https://tile.openstreetmap.org/',
       credit: 'OpenStreetMap',
     });
-    imageryLayers.addImageryProvider(osmProvider);
+    const osmLayer = imageryLayers.addImageryProvider(osmProvider, 0);
+
+    existingLayers.forEach((layer) => {
+      if (layer && layer !== osmLayer) {
+        imageryLayers.remove(layer, false);
+      }
+    });
   } catch (error) {
     console.info('[CesiumGlobe] OSM imagery fallback unavailable', error);
   }
@@ -299,6 +309,7 @@ export function CesiumGlobe({
     let mounted = true;
     let resizeObserver: ResizeObserver | null = null;
     let rafId: number | null = null;
+    let removeRenderErrorListener: (() => void) | null = null;
 
     const resizeViewer = () => {
       const viewer = viewerRef.current;
@@ -516,6 +527,26 @@ export function CesiumGlobe({
           ),
         });
 
+        const onRenderError = (_scene: any, renderError: unknown) => {
+          console.error('[CesiumGlobe] Render error after init', renderError);
+          if (!mounted) return;
+          const currentViewer = viewerRef.current;
+          if (currentViewer && !currentViewer.isDestroyed?.()) {
+            currentViewer.destroy();
+          }
+          viewerRef.current = null;
+          setIsLoaded(false);
+          setError('Le rendu 3D du globe a échoué sur cet appareil.');
+        };
+        viewer.scene.renderError.addEventListener(onRenderError);
+        removeRenderErrorListener = () => {
+          try {
+            viewer.scene.renderError.removeEventListener(onRenderError);
+          } catch {
+            // no-op
+          }
+        };
+
         // Spin animation when zoomed out
         let lastTime = Date.now();
         const spinRate = 0.05;
@@ -595,6 +626,10 @@ export function CesiumGlobe({
       mounted = false;
       if (rafId !== null) {
         window.cancelAnimationFrame(rafId);
+      }
+      if (removeRenderErrorListener) {
+        removeRenderErrorListener();
+        removeRenderErrorListener = null;
       }
       window.removeEventListener('resize', resizeViewer);
       if (resizeObserver) {

@@ -82,12 +82,22 @@ async function applyBest3DQuality(
 function applySafeBaseImagery(Cesium: any, viewer: any) {
   try {
     const imageryLayers = viewer.imageryLayers;
-    imageryLayers.removeAll();
+    const existingLayers: any[] = [];
+    for (let i = 0; i < imageryLayers.length; i += 1) {
+      existingLayers.push(imageryLayers.get(i));
+    }
+
     const osmProvider = new Cesium.OpenStreetMapImageryProvider({
       url: 'https://tile.openstreetmap.org/',
       credit: 'OpenStreetMap',
     });
-    imageryLayers.addImageryProvider(osmProvider);
+    const osmLayer = imageryLayers.addImageryProvider(osmProvider, 0);
+
+    existingLayers.forEach((layer) => {
+      if (layer && layer !== osmLayer) {
+        imageryLayers.remove(layer, false);
+      }
+    });
   } catch (error) {
     console.info('[TripFlythrough] OSM imagery fallback unavailable', error);
   }
@@ -276,6 +286,7 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
     let mounted = true;
     let resizeObserver: ResizeObserver | null = null;
     let rafId: number | null = null;
+    let removeRenderErrorListener: (() => void) | null = null;
 
     const resizeViewer = () => {
       const viewer = viewerRef.current;
@@ -447,6 +458,26 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
         }
         void applyBest3DQuality(Cesium, viewer, hasIonToken, compatibilityMode);
 
+        const onRenderError = (_scene: any, renderError: unknown) => {
+          console.error('[TripFlythrough] Render error after init', renderError);
+          if (!mounted) return;
+          const currentViewer = viewerRef.current;
+          if (currentViewer && !currentViewer.isDestroyed?.()) {
+            currentViewer.destroy();
+          }
+          viewerRef.current = null;
+          setIsLoaded(false);
+          setError('Le rendu 3D a échoué sur cet appareil. Carte 2D affichée à la place.');
+        };
+        viewer.scene.renderError.addEventListener(onRenderError);
+        removeRenderErrorListener = () => {
+          try {
+            viewer.scene.renderError.removeEventListener(onRenderError);
+          } catch {
+            // no-op
+          }
+        };
+
         // Extract waypoints
         const waypoints = extractWaypoints();
         waypointsRef.current = waypoints;
@@ -570,6 +601,10 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
       }
       if (rafId !== null) {
         window.cancelAnimationFrame(rafId);
+      }
+      if (removeRenderErrorListener) {
+        removeRenderErrorListener();
+        removeRenderErrorListener = null;
       }
       window.removeEventListener('resize', resizeViewer);
       if (resizeObserver) {
