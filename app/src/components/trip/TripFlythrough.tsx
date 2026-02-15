@@ -244,12 +244,12 @@ function getStreetLevelFlightProfile(waypoints: Waypoint[], index: number) {
     ? haversineDistanceKm(prev.lat, prev.lng, current.lat, current.lng)
     : 0;
 
-  // Very low altitude for close-up street-level views of monuments
-  // 40m for nearby POIs, up to 180m max for very distant ones
-  const altitude = Math.min(180, Math.max(40, segmentDistanceKm * 25 + 40));
+  // Drone-style altitude: high enough to see the monument + surroundings
+  // 150m for nearby POIs, up to 400m for distant ones
+  const altitude = Math.min(400, Math.max(150, segmentDistanceKm * 30 + 150));
 
-  // Camera offset 80-150m from monument — close enough to see detail
-  const offsetDist = Math.min(150, Math.max(80, altitude * 1.2));
+  // Camera offset 200-350m from monument — far enough to see the whole building
+  const offsetDist = Math.min(350, Math.max(200, altitude * 1.3));
   const offset = getOffsetPosition(
     current.lat,
     current.lng,
@@ -261,11 +261,11 @@ function getStreetLevelFlightProfile(waypoints: Waypoint[], index: number) {
   // Flight duration: proportional to distance, slow for smooth movement
   const duration = Math.min(10.0, Math.max(2.5, segmentDistanceKm * 1.5 + 2.0));
 
-  // maximumHeight: barely above altitude — stay near ground, no sky arcs
-  const maxHeight = altitude + Math.min(60, segmentDistanceKm * 10);
+  // maximumHeight: slightly above altitude — smooth transitions, no sky arcs
+  const maxHeight = altitude + Math.min(100, segmentDistanceKm * 15);
 
-  // Pitch: look down toward the monument from close range (-30° steeper to see it)
-  const pitchDeg = -30;
+  // Pitch: look down at the monument from drone height (-25° for a good perspective)
+  const pitchDeg = -25;
 
   // Pause at this monument (ms) — long enough for tiles to load and user to appreciate
   const pauseMs = 7000;
@@ -579,8 +579,8 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
             baseLayer.gamma = 1.0;
           }
 
-          viewer.scene.backgroundColor = Cesium.Color.fromCssColorString('#1a2a3a');
-          viewer.scene.globe.baseColor = Cesium.Color.fromCssColorString('#2a3a2a');
+          viewer.scene.backgroundColor = Cesium.Color.fromCssColorString('#1a1a2e');
+          viewer.scene.globe.baseColor = Cesium.Color.fromCssColorString('#2c3e50');
           viewer.scene.globe.depthTestAgainstTerrain = true;
           // Preload adjacent terrain tiles for smoother transitions
           viewer.scene.globe.preloadSiblings = true;
@@ -700,8 +700,8 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
                 pitch: Cesium.Math.toRadians(firstProfile.pitchDeg),
                 roll: 0,
               },
-              duration: 3.0, // gentle intro flight
-              maximumHeight: firstProfile.altitude + 60,
+              duration: 3.5, // gentle intro flight
+              maximumHeight: firstProfile.altitude + 100,
               // Pump renders after arrival to force tile loading
               complete: () => {
                 if (viewer && !viewer.isDestroyed?.()) {
