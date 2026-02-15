@@ -40,57 +40,40 @@ async function applyBest3DQuality(
     viewer.shadowMap.enabled = false;
   }
 
-  // Try loading Google Photorealistic 3D Tiles using multiple strategies
-  const googleMapsApiKey = (process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '').trim();
+  // Try loading Google Photorealistic 3D Tiles via Cesium Ion
+  // Note: Direct Google Maps API key does NOT work (403 region restriction),
+  // so we only use Ion-based strategies that proxy through Cesium's agreement with Google.
   let photorealisticTileset: any = null;
 
-  // Strategy 1: Direct Google Maps API key (most reliable in Cesium 1.113+)
-  if (googleMapsApiKey && !photorealisticTileset) {
-    try {
-      console.info('[TripFlythrough] Strategy 1: Loading Google 3D Tiles via Maps API key...');
-      // Set Google Maps API key for Cesium
-      if (Cesium.GoogleMaps) {
-        Cesium.GoogleMaps.defaultApiKey = googleMapsApiKey;
-      }
-      if (typeof Cesium.createGooglePhotorealistic3DTileset === 'function') {
-        photorealisticTileset = await withTimeout(
-          Cesium.createGooglePhotorealistic3DTileset(undefined, { key: googleMapsApiKey }),
-          12000
-        );
-        console.info('[TripFlythrough] Strategy 1 SUCCESS: Google 3D tiles loaded via Maps API key');
-      }
-    } catch (error) {
-      console.warn('[TripFlythrough] Strategy 1 FAILED (Maps API key):', error);
-    }
-  }
-
-  // Strategy 2: Via Cesium Ion createGooglePhotorealistic3DTileset (Ion proxied)
-  if (!photorealisticTileset && hasIonToken) {
-    try {
-      console.info('[TripFlythrough] Strategy 2: Loading Google 3D Tiles via Ion...');
-      if (typeof Cesium.createGooglePhotorealistic3DTileset === 'function') {
+  if (!hasIonToken) {
+    console.info('[TripFlythrough] No Ion token — skipping Google 3D tiles');
+  } else {
+    // Strategy 1: Via Cesium Ion createGooglePhotorealistic3DTileset (recommended)
+    if (!photorealisticTileset && typeof Cesium.createGooglePhotorealistic3DTileset === 'function') {
+      try {
+        console.info('[TripFlythrough] Strategy 1: Loading Google 3D Tiles via Ion (createGooglePhotorealistic3DTileset)...');
         photorealisticTileset = await withTimeout(
           Cesium.createGooglePhotorealistic3DTileset(),
-          12000
+          15000
         );
-        console.info('[TripFlythrough] Strategy 2 SUCCESS: Google 3D tiles loaded via Ion');
+        console.info('[TripFlythrough] Strategy 1 SUCCESS: Google 3D tiles loaded via Ion');
+      } catch (error) {
+        console.warn('[TripFlythrough] Strategy 1 FAILED:', error);
       }
-    } catch (error) {
-      console.warn('[TripFlythrough] Strategy 2 FAILED (Ion createGooglePhotorealistic3DTileset):', error);
     }
-  }
 
-  // Strategy 3: Via Ion asset ID directly
-  if (!photorealisticTileset && hasIonToken && Cesium.Cesium3DTileset?.fromIonAssetId) {
-    try {
-      console.info('[TripFlythrough] Strategy 3: Loading via Ion asset #2275207...');
-      photorealisticTileset = await withTimeout(
-        Cesium.Cesium3DTileset.fromIonAssetId(GOOGLE_PHOTOREALISTIC_ION_ASSET_ID),
-        12000
-      );
-      console.info('[TripFlythrough] Strategy 3 SUCCESS: Google 3D tiles loaded via Ion asset ID');
-    } catch (error) {
-      console.warn('[TripFlythrough] Strategy 3 FAILED (Ion asset ID):', error);
+    // Strategy 2: Via Ion asset ID directly
+    if (!photorealisticTileset && Cesium.Cesium3DTileset?.fromIonAssetId) {
+      try {
+        console.info('[TripFlythrough] Strategy 2: Loading via Ion asset #2275207...');
+        photorealisticTileset = await withTimeout(
+          Cesium.Cesium3DTileset.fromIonAssetId(GOOGLE_PHOTOREALISTIC_ION_ASSET_ID),
+          15000
+        );
+        console.info('[TripFlythrough] Strategy 2 SUCCESS: Google 3D tiles loaded via Ion asset ID');
+      } catch (error) {
+        console.warn('[TripFlythrough] Strategy 2 FAILED:', error);
+      }
     }
   }
 
@@ -125,7 +108,7 @@ async function applyBest3DQuality(
 
   // All strategies failed — fallback to OSM 3D buildings (grey blocks)
   console.warn('[TripFlythrough] ALL Google 3D tile strategies failed. Falling back to OSM buildings (grey blocks).');
-  console.warn('[TripFlythrough] To fix: ensure NEXT_PUBLIC_GOOGLE_MAPS_API_KEY has Maps Tiles API enabled, or add asset #2275207 to Ion at https://ion.cesium.com/assets');
+  console.warn('[TripFlythrough] To fix: ensure asset #2275207 (Google Photorealistic 3D Tiles) is in your Cesium Ion account at https://ion.cesium.com/assets');
   try {
     if (typeof Cesium.createOsmBuildingsAsync === 'function') {
       const osmBuildings = await withTimeout(Cesium.createOsmBuildingsAsync(), 4000);
