@@ -57,7 +57,7 @@ async function applyBest3DQuality(
     }
 
     if (photorealisticTileset) {
-      photorealisticTileset.maximumScreenSpaceError = compatibilityMode ? 6 : 4;
+      photorealisticTileset.maximumScreenSpaceError = compatibilityMode ? 4 : 2;
       photorealisticTileset.dynamicScreenSpaceError = true;
       photorealisticTileset.preloadFlightDestinations = true;
       viewer.scene.primitives.add(photorealisticTileset);
@@ -181,13 +181,15 @@ function getCinematicFlightProfile(waypoints: Waypoint[], index: number) {
       ? getBearingDegrees(current.lat, current.lng, next.lat, next.lng)
       : 0;
 
-  const altitude = Math.min(5000, Math.max(1200, segmentDistanceKm * 600));
-  const duration = Math.min(7.0, Math.max(3.0, segmentDistanceKm * 0.8));
-  const maxHeight = Math.max(altitude * 1.4, altitude + 500);
+  // Low altitude for close-up views of monuments and points of interest
+  const altitude = Math.min(1500, Math.max(250, segmentDistanceKm * 180));
+  const duration = Math.min(8.0, Math.max(3.5, segmentDistanceKm * 1.2));
+  const maxHeight = Math.max(altitude * 2.5, altitude + 400);
 
-  let pitchDeg = -40;
-  if (segmentDistanceKm > 2.5) pitchDeg = -25;
-  else if (segmentDistanceKm > 1.2) pitchDeg = -32;
+  // Gentle pitch angles for bird's eye perspective
+  let pitchDeg = -35;
+  if (segmentDistanceKm > 5) pitchDeg = -20;
+  else if (segmentDistanceKm > 2) pitchDeg = -28;
 
   return {
     headingDeg,
