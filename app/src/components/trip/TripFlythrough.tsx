@@ -57,12 +57,31 @@ async function applyBest3DQuality(
     }
 
     if (photorealisticTileset) {
-      // Low error = more detail (important at street-level altitude)
-      photorealisticTileset.maximumScreenSpaceError = compatibilityMode ? 4 : 1.5;
+      // Street-level detail: lower MSE = more tiles loaded = sharper buildings
+      photorealisticTileset.maximumScreenSpaceError = compatibilityMode ? 4 : 1.0;
       photorealisticTileset.dynamicScreenSpaceError = true;
       photorealisticTileset.preloadFlightDestinations = true;
       photorealisticTileset.preloadWhenHidden = true;
+      // Reduce detail on screen edges for better perf (focus center)
+      if (photorealisticTileset.foveatedScreenSpaceError !== undefined) {
+        photorealisticTileset.foveatedScreenSpaceError = 2.0;
+      }
+      // Increase tile cache for smoother revisits
+      if (photorealisticTileset.cacheBytes !== undefined) {
+        photorealisticTileset.cacheBytes = 256 * 1024 * 1024; // 256 MB
+        photorealisticTileset.maximumCacheOverflowBytes = 128 * 1024 * 1024; // 128 MB overflow
+      }
       viewer.scene.primitives.add(photorealisticTileset);
+
+      // Hide the 2D base layer — Google 3D tiles cover the ground completely
+      // This removes ugly 2D map symbols/roads showing through the 3D view
+      try {
+        const baseLayer = viewer.imageryLayers.get(0);
+        if (baseLayer) {
+          baseLayer.alpha = 0.05; // Nearly invisible, kept as fallback for unloaded areas
+        }
+      } catch { /* no-op */ }
+
       return;
     }
   } catch (error) {
@@ -204,11 +223,12 @@ function getStreetLevelFlightProfile(waypoints: Waypoint[], index: number) {
     ? haversineDistanceKm(prev.lat, prev.lng, current.lat, current.lng)
     : 0;
 
-  // Low altitude: 80m for close POIs, up to 300m for far ones
-  const altitude = Math.min(300, Math.max(80, segmentDistanceKm * 40 + 80));
+  // Very low altitude for close-up street-level views of monuments
+  // 40m for nearby POIs, up to 180m max for very distant ones
+  const altitude = Math.min(180, Math.max(40, segmentDistanceKm * 25 + 40));
 
-  // Camera offset ~200m from monument, approach direction based on previous waypoint
-  const offsetDist = Math.min(250, Math.max(150, altitude * 1.5));
+  // Camera offset 80-150m from monument — close enough to see detail
+  const offsetDist = Math.min(150, Math.max(80, altitude * 1.2));
   const offset = getOffsetPosition(
     current.lat,
     current.lng,
@@ -217,15 +237,14 @@ function getStreetLevelFlightProfile(waypoints: Waypoint[], index: number) {
     offsetDist
   );
 
-  // Flight duration: proportional to distance, but slow enough for smooth movement
-  // Min 2s for very close, max 10s for far, slower = more cinematic
-  const duration = Math.min(10.0, Math.max(2.0, segmentDistanceKm * 1.5 + 1.5));
+  // Flight duration: proportional to distance, slow for smooth movement
+  const duration = Math.min(10.0, Math.max(2.5, segmentDistanceKm * 1.5 + 2.0));
 
-  // maximumHeight: barely above altitude to keep camera near ground (no sky arcs!)
-  const maxHeight = altitude + Math.min(100, segmentDistanceKm * 15);
+  // maximumHeight: barely above altitude — stay near ground, no sky arcs
+  const maxHeight = altitude + Math.min(60, segmentDistanceKm * 10);
 
-  // Pitch: look slightly down toward the monument (-20° to -30°)
-  const pitchDeg = -25;
+  // Pitch: look down toward the monument from close range (-30° steeper to see it)
+  const pitchDeg = -30;
 
   // Pause at this monument (ms) — long enough for tiles to load and user to appreciate
   const pauseMs = 7000;
@@ -495,11 +514,14 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
             viewer = new Cesium.Viewer(containerRef.current, viewerOptions);
             viewerRef.current = viewer;
 
-            // Add synchronous OSM base layer BEFORE starting the render loop
+            // Add synchronous dark base layer BEFORE starting the render loop
+            // CartoDB dark_nolabels: minimalist, no text/symbols cluttering the 3D view
             viewer.imageryLayers.addImageryProvider(
-              new Cesium.OpenStreetMapImageryProvider({
-                url: 'https://tile.openstreetmap.org/',
-                credit: 'OpenStreetMap',
+              new Cesium.UrlTemplateImageryProvider({
+                url: 'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png',
+                credit: 'CartoDB',
+                subdomains: 'abcd',
+                maximumLevel: 19,
               })
             );
 
@@ -530,16 +552,21 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
           const imageryLayers = viewer.imageryLayers;
           const baseLayer = imageryLayers.get(0);
           if (baseLayer) {
-            baseLayer.brightness = 0.85;
-            baseLayer.contrast = 1.15;
-            baseLayer.saturation = 0.7;
+            // CartoDB dark is already clean — subtle adjustments only
+            baseLayer.brightness = 1.0;
+            baseLayer.contrast = 1.1;
+            baseLayer.saturation = 0.5;
+            baseLayer.gamma = 0.95;
           }
 
           viewer.scene.backgroundColor = Cesium.Color.fromCssColorString('#0a0a12');
           viewer.scene.globe.baseColor = Cesium.Color.fromCssColorString('#0a0a12');
           viewer.scene.globe.depthTestAgainstTerrain = true;
+          // Preload adjacent terrain tiles for smoother transitions
+          viewer.scene.globe.preloadSiblings = true;
+          viewer.scene.globe.tileCacheSize = 200;
           viewer.scene.fog.enabled = !compatibilityMode;
-          viewer.scene.fog.density = 0.00015;
+          viewer.scene.fog.density = 0.0001;
           viewer.scene.fxaa = false;
           if (viewer.scene.postProcessStages?.fxaa) {
             viewer.scene.postProcessStages.fxaa.enabled = false;
@@ -593,7 +620,7 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
             // Add route polyline
             if (waypoints.length > 1) {
               const positions = waypoints.map((w) =>
-                Cesium.Cartesian3.fromDegrees(w.lng, w.lat, 15)
+                Cesium.Cartesian3.fromDegrees(w.lng, w.lat, 5)
               );
 
               polylineRef.current = viewer.entities.add({
@@ -613,7 +640,7 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
               const isFirst = index === 0;
               const marker = viewer.entities.add({
                 id: `waypoint-${waypoint.id}-${index}`,
-                position: Cesium.Cartesian3.fromDegrees(waypoint.lng, waypoint.lat, 30),
+                position: Cesium.Cartesian3.fromDegrees(waypoint.lng, waypoint.lat, 10),
                 point: {
                   pixelSize: isFirst ? 18 : 12,
                   color: Cesium.Color.fromCssColorString('#60a5fa'),
@@ -654,7 +681,7 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
                 roll: 0,
               },
               duration: 3.0, // gentle intro flight
-              maximumHeight: firstProfile.altitude + 100,
+              maximumHeight: firstProfile.altitude + 60,
               // Pump renders after arrival to force tile loading
               complete: () => {
                 if (viewer && !viewer.isDestroyed?.()) {
