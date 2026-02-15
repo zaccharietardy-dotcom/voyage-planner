@@ -15,7 +15,7 @@ import { scoreAndSelectActivities } from './step2-score';
 import { clusterActivities, computeCityDensityProfile } from './step3-cluster';
 import { assignRestaurants } from './step4-restaurants';
 import { selectHotelByBarycenter } from './step5-hotel';
-import { balanceDaysWithClaude } from './step6-balance';
+import { balanceDays, balanceDaysWithClaude } from './step6-balance';
 import { assembleTripSchedule } from './step7-assemble';
 import { validateAndFixTrip } from './step8-validate';
 import { calculateDistance } from '../services/geocoding';
@@ -222,16 +222,17 @@ export async function generateTripV2(
   console.log(`[Pipeline V2] Step 4: ${assignedCount}/${meals.length} meals assigned restaurants (pool=${restaurantGeoPool.length})`);
   emit(onEvent, { type: 'step_done', step: 4, stepName: 'Restaurant assignment', durationMs: Date.now() - T4, detail: `${assignedCount}/${meals.length} meals assigned` });
 
-  // Step 6: Claude day balancing (~10-15s)
-  console.log('[Pipeline V2] === Step 6: Claude balancing... ===');
-  emit(onEvent, { type: 'step_start', step: 6, stepName: 'Claude AI balancing' });
-  emit(onEvent, { type: 'api_call', step: 6, label: 'Claude AI' });
+  // Step 6: LLM day balancing (~10-15s)
+  const llmName = process.env.USE_GEMINI_BALANCE === 'true' ? 'Gemini Flash' : 'Claude AI';
+  console.log(`[Pipeline V2] === Step 6: ${llmName} balancing... ===`);
+  emit(onEvent, { type: 'step_start', step: 6, stepName: `${llmName} balancing` });
+  emit(onEvent, { type: 'api_call', step: 6, label: llmName });
   const T6 = Date.now();
-  const plan = await balanceDaysWithClaude(clusters, meals, hotel, bestTransport, preferences, data);
+  const plan = await balanceDays(clusters, meals, hotel, bestTransport, preferences, data);
   const step6Ms = Date.now() - T6;
   console.log(`[Pipeline V2] Step 6 done in ${step6Ms}ms — "${plan.dayOrderReason}"`);
-  emit(onEvent, { type: 'api_done', step: 6, label: 'Claude AI', durationMs: step6Ms });
-  emit(onEvent, { type: 'step_done', step: 6, stepName: 'Claude AI balancing', durationMs: step6Ms, detail: plan.dayOrderReason });
+  emit(onEvent, { type: 'api_done', step: 6, label: llmName, durationMs: step6Ms });
+  emit(onEvent, { type: 'step_done', step: 6, stepName: `${llmName} balancing`, durationMs: step6Ms, detail: plan.dayOrderReason });
 
   // Step 6b: Weather-aware day permutation (~0ms)
   // Swap outdoor-heavy days with indoor-heavy days when rain is forecast
@@ -1285,12 +1286,78 @@ function rebalanceClustersForFlights(
 
   // Phase 6b: Composite day-load balancing (time + travel + fatigue)
   // Smooths over-dense days by moving low-impact activities to lighter days.
+  // Soft caps are used (not hard caps) to avoid dropping must-sees.
   const dayLoadScore = (idx: number): number => {
     const activities = clusters[idx].activities;
-    const totalDurationMin = activities.reduce((sum, a) => sum + (a.duration || 60), 0);
-    const travelMin = Math.round(routeCostKm(activities) * 12);
+    const totalDurationMin = activities.reduce((sum, a) => sum + (a.duration || 60), 0) + computeMealOverheadMin(idx);
+    const travelMin = Math.round(routeCostKm(activities) * 14);
     const heavyCount = activities.filter((a) => (a.duration || 60) >= 90).length;
-    return totalDurationMin + travelMin + heavyCount * 35;
+    const longLegCount = Math.max(0, activities.length - 1);
+    return totalDurationMin + travelMin + heavyCount * 40 + longLegCount * 8;
+  };
+
+  const getDayLoadSoftCap = (idx: number): number => {
+    const cluster = clusters[idx];
+    const isBoundaryDay = cluster.dayNumber === 1 || cluster.dayNumber === numDays;
+    const baseCap = isBoundaryDay ? 500 : 560;
+    const availabilityCap = Math.max(360, Math.round(hoursPerDay[idx] * 60 - 20));
+    return Math.min(baseCap, availabilityCap);
+  };
+
+  const getDayLoadOverage = (idx: number): number => dayLoadScore(idx) - getDayLoadSoftCap(idx);
+
+  const findBestDayLoadMoveTarget = (
+    sourceIdx: number,
+    candidate: ScoredActivity
+  ): { targetIdx: number; gain: number } | null => {
+    const requiredMin = (candidate.duration || 60) + 20;
+    const sourceBefore = dayLoadScore(sourceIdx);
+    const sourceOverBefore = Math.max(0, getDayLoadOverage(sourceIdx));
+    let best: { targetIdx: number; gain: number } | null = null;
+
+    for (let ti = 0; ti < clusters.length; ti++) {
+      if (ti === sourceIdx || isDayTrip[ti]) continue;
+      if (dayRemainingMinutes(ti) < requiredMin) continue;
+      if (moveExceedsGeoCap(ti, candidate)) continue;
+      if (PIPELINE_GEO_STRICT && moveDegradesRouteCost(sourceIdx, ti, candidate)) continue;
+
+      const sourceBeforeActivities = clusters[sourceIdx].activities;
+      const targetBeforeActivities = clusters[ti].activities;
+      const sourceAfterActivities = sourceBeforeActivities.filter((a) => a.id !== candidate.id);
+      const targetAfterActivities = [...targetBeforeActivities, candidate];
+
+      const sourceAfterLoad = (() => {
+        const totalDurationMin = sourceAfterActivities.reduce((sum, a) => sum + (a.duration || 60), 0) + computeMealOverheadMin(sourceIdx);
+        const travelMin = Math.round(routeCostKm(sourceAfterActivities) * 14);
+        const heavyCount = sourceAfterActivities.filter((a) => (a.duration || 60) >= 90).length;
+        const longLegCount = Math.max(0, sourceAfterActivities.length - 1);
+        return totalDurationMin + travelMin + heavyCount * 40 + longLegCount * 8;
+      })();
+      const targetAfterLoad = (() => {
+        const totalDurationMin = targetAfterActivities.reduce((sum, a) => sum + (a.duration || 60), 0) + computeMealOverheadMin(ti);
+        const travelMin = Math.round(routeCostKm(targetAfterActivities) * 14);
+        const heavyCount = targetAfterActivities.filter((a) => (a.duration || 60) >= 90).length;
+        const longLegCount = Math.max(0, targetAfterActivities.length - 1);
+        return totalDurationMin + travelMin + heavyCount * 40 + longLegCount * 8;
+      })();
+
+      const sourceOverAfter = Math.max(0, sourceAfterLoad - getDayLoadSoftCap(sourceIdx));
+      const targetOverAfter = Math.max(0, targetAfterLoad - getDayLoadSoftCap(ti));
+
+      // Keep receiving day close to comfort cap.
+      if (targetAfterLoad > getDayLoadSoftCap(ti) + 40) continue;
+
+      const overageGain = sourceOverBefore - (sourceOverAfter + targetOverAfter);
+      const rawLoadGain = sourceBefore - sourceAfterLoad;
+      const gain = overageGain * 3 + rawLoadGain;
+      if (gain < 30) continue;
+
+      if (!best || gain > best.gain) {
+        best = { targetIdx: ti, gain };
+      }
+    }
+
+    return best;
   };
 
   for (let iter = 0; iter < 12; iter++) {
@@ -1337,6 +1404,59 @@ function rebalanceClustersForFlights(
       `[Pipeline V2] Phase 6b: moved \"${moved.name}\" Day ${clusters[sourceIdx].dayNumber} → Day ${clusters[targetIdx].dayNumber} `
       + `(load ${Math.round(maxLoad)}→${Math.round(dayLoadScore(sourceIdx))}, ${Math.round(minLoad)}→${Math.round(dayLoadScore(targetIdx))})`
     );
+  }
+
+  // Phase 6c: Soft day-load cap enforcement (fatigue first, no hard cut).
+  // Move only non-must-sees and only when the global overload decreases.
+  for (let iter = 0; iter < 20; iter++) {
+    let sourceIdx = -1;
+    let worstOverage = 0;
+
+    for (let ci = 0; ci < clusters.length; ci++) {
+      if (isDayTrip[ci]) continue;
+      const overage = getDayLoadOverage(ci);
+      if (overage > worstOverage) {
+        worstOverage = overage;
+        sourceIdx = ci;
+      }
+    }
+
+    if (sourceIdx === -1 || worstOverage < 45) break;
+
+    const source = clusters[sourceIdx];
+    const candidates = source.activities
+      .filter((activity) => !activity.mustSee)
+      .sort((a, b) => {
+        const scoreDelta = (a.score - b.score);
+        if (scoreDelta !== 0) return scoreDelta;
+        const durationDelta = (b.duration || 60) - (a.duration || 60);
+        if (durationDelta !== 0) return durationDelta;
+        const aOutlier = calculateDistance(a.latitude, a.longitude, source.centroid.lat, source.centroid.lng);
+        const bOutlier = calculateDistance(b.latitude, b.longitude, source.centroid.lat, source.centroid.lng);
+        return bOutlier - aOutlier;
+      });
+
+    let movedAny = false;
+    for (const candidate of candidates) {
+      const target = findBestDayLoadMoveTarget(sourceIdx, candidate);
+      if (!target) continue;
+
+      const moveIdx = source.activities.findIndex((activity) => activity.id === candidate.id);
+      if (moveIdx === -1) continue;
+      const [moved] = source.activities.splice(moveIdx, 1);
+      clusters[target.targetIdx].activities.push(moved);
+      computeClusterGeo(source);
+      computeClusterGeo(clusters[target.targetIdx]);
+
+      console.log(
+        `[Pipeline V2] Phase 6c: moved "${moved.name}" Day ${source.dayNumber} → Day ${clusters[target.targetIdx].dayNumber} `
+        + `(overage ${Math.round(worstOverage)}min, gain=${Math.round(target.gain)})`
+      );
+      movedAny = true;
+      break;
+    }
+
+    if (!movedAny) break;
   }
 
   // Phase 7: Type diversity balancing
@@ -1616,7 +1736,7 @@ function rebalanceClustersForFlights(
 
         // Move only if there is a clear geographic win.
         const improvementKm = srcDist - bestTargetDist;
-        if (improvementKm < 3) continue;
+        if (improvementKm < 1.8) continue;
         if (PIPELINE_GEO_STRICT && (moveDegradesRouteCost(ci, bestTarget, activity) || moveExceedsGeoCap(bestTarget, activity))) {
           continue;
         }
@@ -1645,11 +1765,11 @@ function rebalanceClustersForFlights(
   // We move far outliers from a day to the geographically closest day that has capacity.
   for (const c of clusters) computeClusterGeo(c);
 
-  // Use density profile for adaptive cohesion radius (1.5x cluster radius as post-processing tolerance)
+  // Use density profile for adaptive cohesion radius (slightly tighter to reduce zigzag days).
   const cohesionMaxRadiusKm = densityProfile
-    ? densityProfile.maxClusterRadius * 1.5
+    ? densityProfile.maxClusterRadius * 1.35
     : (clusters.length <= 3 ? 3.2 : clusters.length === 4 ? 3.6 : 3.8);
-  const minCohesionGainKm = densityProfile?.densityCategory === 'dense' ? 0.3 : 0.5;
+  const minCohesionGainKm = densityProfile?.densityCategory === 'dense' ? 0.2 : 0.4;
   for (let iter = 0; iter < 5; iter++) {
     let movedAny = false;
 

@@ -21,6 +21,7 @@ import {
   Copy,
   CalendarPlus,
   Download,
+  Globe,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -149,6 +150,11 @@ const TripMap = dynamic(
   }
 );
 
+const TripFlythrough = dynamic(
+  () => import('@/components/trip/TripFlythrough').then((mod) => mod.TripFlythrough),
+  { ssr: false }
+);
+
 type TripPreferencesWithType = Trip['preferences'] & { tripType?: string };
 
 interface TripApiRecord {
@@ -208,6 +214,7 @@ export default function TripPage() {
   const [addActivityDefaultEndTime, setAddActivityDefaultEndTime] = useState<string | undefined>();
   const [planningView, setPlanningView] = useState<'timeline' | 'calendar'>('timeline');
   const [showChatPanel, setShowChatPanel] = useState(false);
+  const [showFlythrough, setShowFlythrough] = useState(false);
 
   const [isDesktop, setIsDesktop] = useState(false);
   useEffect(() => {
@@ -1070,6 +1077,11 @@ export default function TripPage() {
                 </Button>
               )}
 
+              <Button variant="outline" size="sm" className="gap-1.5 h-8" onClick={() => setShowFlythrough(true)} title="Visualisation 3D">
+                <Globe className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline text-xs">3D</span>
+              </Button>
+
               <Button variant="outline" size="sm" className="gap-1.5 h-8" onClick={handleExportPdf} title="Exporter en PDF">
                 <Download className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline text-xs">PDF</span>
@@ -1462,6 +1474,15 @@ export default function TripPage() {
           isOpen={showChatPanel}
           onClose={() => setShowChatPanel(false)}
           onDaysUpdate={handleDirectUpdate}
+        />
+      )}
+
+      {/* 3D Flythrough */}
+      {trip && (
+        <TripFlythrough
+          trip={trip}
+          isOpen={showFlythrough}
+          onClose={() => setShowFlythrough(false)}
         />
       )}
 

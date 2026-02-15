@@ -1,14 +1,34 @@
 /**
- * Pipeline V2 — Step 6: Claude Day Balancing
+ * Pipeline V2 — Step 6: LLM Day Balancing
  *
- * Single Claude Sonnet call to add "human feel" to the algorithmically-built itinerary.
- * Claude can ONLY reorder, theme, and narrate. It CANNOT add/remove activities.
+ * Single LLM call (Claude or Gemini) to add "human feel" to the algorithmically-built itinerary.
+ * The LLM can ONLY reorder, theme, and narrate. It CANNOT add/remove activities.
  */
 
 import Anthropic from '@anthropic-ai/sdk';
 import type { TripPreferences, TransportOptionSummary, Accommodation } from '../types';
 import type { ActivityCluster, MealAssignment, BalancedPlan, BalancedDay, FetchedData } from './types';
 import { calculateDistance } from '../services/geocoding';
+
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent';
+
+interface GeminiResponse {
+  candidates?: Array<{
+    content?: {
+      parts?: Array<{ text?: string }>;
+    };
+    finishReason?: string;
+  }>;
+  usageMetadata?: {
+    promptTokenCount?: number;
+    candidatesTokenCount?: number;
+    totalTokenCount?: number;
+  };
+  error?: {
+    message?: string;
+    code?: number;
+  };
+}
 
 /**
  * Helper: Get day of week name for a given day number.
@@ -163,7 +183,7 @@ RÈGLES STRICTES:
 3. Le Jour 1 = arrivée (suggérer un start plus tardif si vol)
 4. Le dernier jour = départ (moins d'activités)
 5. Musées/monuments le matin, quartiers/marchés l'après-midi
-6. Alterner jours intenses et détendus si possible
+6. Par défaut, évite les pauses explicites: mets "restBreak": true uniquement pour une journée vraiment dense (>=5 activités ou charge très élevée)
 7. Pas 2 musées longs le même jour
 8. Optimise l'ordre géographique : utilise les coordonnées GPS pour minimiser les déplacements intra-journée
 9. RESPECTE les horaires d'ouverture : évite de programmer des lieux fermés (marqués [FERMÉ ce jour])
@@ -201,16 +221,22 @@ function parsePlan(text: string, clusters: ActivityCluster[], cityCenter?: { lat
       throw new Error('Invalid plan structure');
     }
 
-    const days: BalancedDay[] = parsed.days.map((d: any) => ({
-      dayNumber: d.dayNumber || 1,
-      theme: d.theme || '',
-      dayNarrative: d.dayNarrative || '',
-      activityOrder: Array.isArray(d.activityOrder) ? d.activityOrder : [],
-      suggestedStartTime: d.suggestedStartTime || '09:00',
-      restBreak: d.restBreak === true,
-      isDayTrip: d.isDayTrip === true,
-      dayTripDestination: d.dayTripDestination || undefined,
-    }));
+    const totalDays = clusters.length;
+    const clustersByDay = new Map(clusters.map((cluster) => [cluster.dayNumber, cluster]));
+    const days: BalancedDay[] = parsed.days.map((d: any) => {
+      const dayNumber = d.dayNumber || 1;
+      const cluster = clustersByDay.get(dayNumber);
+      return {
+        dayNumber,
+        theme: d.theme || '',
+        dayNarrative: d.dayNarrative || '',
+        activityOrder: Array.isArray(d.activityOrder) ? d.activityOrder : [],
+        suggestedStartTime: d.suggestedStartTime || '09:00',
+        restBreak: shouldKeepRestBreak(d.restBreak === true, cluster, dayNumber, totalDays),
+        isDayTrip: d.isDayTrip === true,
+        dayTripDestination: d.dayTripDestination || undefined,
+      };
+    });
 
     return {
       days,
@@ -220,6 +246,23 @@ function parsePlan(text: string, clusters: ActivityCluster[], cityCenter?: { lat
     console.warn('[Pipeline V2] Failed to parse Claude response, using fallback:', error);
     return buildDeterministicPlan(clusters, cityCenter);
   }
+}
+
+function shouldKeepRestBreak(
+  requested: boolean,
+  cluster: ActivityCluster | undefined,
+  dayNumber: number,
+  totalDays: number
+): boolean {
+  if (!requested || !cluster) return false;
+
+  // Keep rest breaks exceptional and mostly user-driven: never on boundary days,
+  // and only for genuinely dense schedules.
+  if (dayNumber === 1 || dayNumber === totalDays) return false;
+
+  const totalActivityMin = cluster.activities.reduce((sum, activity) => sum + (activity.duration || 60), 0);
+  const heavyActivities = cluster.activities.filter((activity) => (activity.duration || 60) >= 120).length;
+  return cluster.activities.length >= 5 || heavyActivities >= 3 || totalActivityMin >= 420;
 }
 
 /**
@@ -263,7 +306,7 @@ function buildDeterministicPlan(
             : `Journée de découverte — ${cluster.activities.length} activités prévues.`,
       activityOrder: cluster.activities.map(a => a.id),
       suggestedStartTime: isFirstDay ? '10:00' : isDayTrip ? '08:00' : '09:00',
-      restBreak: cluster.activities.length > 4,
+      restBreak: false,
       isDayTrip,
       dayTripDestination,
     };
@@ -325,4 +368,111 @@ function validateAndFixThemes(plan: BalancedPlan, clusters: ActivityCluster[]): 
     }
   }
   return plan;
+}
+
+/**
+ * Call Gemini Flash to balance and humanize the day plan.
+ * Uses the same prompt as Claude for consistency.
+ */
+export async function balanceDaysWithGemini(
+  clusters: ActivityCluster[],
+  meals: MealAssignment[],
+  hotel: Accommodation | null,
+  transport: TransportOptionSummary | null,
+  preferences: TripPreferences,
+  data: FetchedData
+): Promise<BalancedPlan> {
+  // Compute city center as average of all cluster centroids (used for day-trip detection)
+  const cityCenter = clusters.length > 0
+    ? {
+        lat: clusters.reduce((s, c) => s + c.centroid.lat, 0) / clusters.length,
+        lng: clusters.reduce((s, c) => s + c.centroid.lng, 0) / clusters.length,
+      }
+    : { lat: 0, lng: 0 };
+
+  const apiKey = process.env.GOOGLE_AI_API_KEY;
+  if (!apiKey) {
+    console.warn('[Pipeline V2] No GOOGLE_AI_API_KEY, fallback to Claude');
+    return balanceDaysWithClaude(clusters, meals, hotel, transport, preferences, data);
+  }
+
+  try {
+    const prompt = buildPrompt(clusters, meals, hotel, transport, preferences, data);
+
+    const response = await Promise.race([
+      fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: {
+            temperature: 0.3,
+            maxOutputTokens: 2000,
+          },
+        }),
+      }),
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Gemini timeout (30s)')), 30000)
+      ),
+    ]);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.warn('[Pipeline V2] Gemini API error:', response.status, errorText);
+      console.warn('[Pipeline V2] Falling back to Claude');
+      return balanceDaysWithClaude(clusters, meals, hotel, transport, preferences, data);
+    }
+
+    const geminiData: GeminiResponse = await response.json();
+
+    if (geminiData.error) {
+      console.warn('[Pipeline V2] Gemini error:', geminiData.error.message);
+      console.warn('[Pipeline V2] Falling back to Claude');
+      return balanceDaysWithClaude(clusters, meals, hotel, transport, preferences, data);
+    }
+
+    // Log token usage
+    const usage = geminiData.usageMetadata;
+    if (usage) {
+      const inputTokens = usage.promptTokenCount || 0;
+      const outputTokens = usage.candidatesTokenCount || 0;
+      // Gemini Flash pricing (approx $0.075/1M input, $0.30/1M output)
+      const costUsd = (inputTokens * 0.075 + outputTokens * 0.30) / 1_000_000;
+      console.log(`[Pipeline V2] Gemini Flash tokens: ${inputTokens} in + ${outputTokens} out, ~$${costUsd.toFixed(4)}`);
+    }
+
+    const text = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!text) {
+      console.warn('[Pipeline V2] Gemini returned no text, falling back to Claude');
+      return balanceDaysWithClaude(clusters, meals, hotel, transport, preferences, data);
+    }
+
+    return validateAndFixThemes(parsePlan(text, clusters, cityCenter), clusters);
+  } catch (error) {
+    console.warn('[Pipeline V2] Gemini balancing failed, falling back to Claude:', error instanceof Error ? error.message : error);
+    return balanceDaysWithClaude(clusters, meals, hotel, transport, preferences, data);
+  }
+}
+
+/**
+ * Router function: selects Gemini or Claude based on environment variable.
+ * Defaults to Claude for safety.
+ */
+export async function balanceDays(
+  clusters: ActivityCluster[],
+  meals: MealAssignment[],
+  hotel: Accommodation | null,
+  transport: TransportOptionSummary | null,
+  preferences: TripPreferences,
+  data: FetchedData
+): Promise<BalancedPlan> {
+  const useGemini = process.env.USE_GEMINI_BALANCE === 'true';
+
+  if (useGemini) {
+    console.log('[Pipeline V2] Using Gemini Flash for day balancing');
+    return balanceDaysWithGemini(clusters, meals, hotel, transport, preferences, data);
+  }
+
+  console.log('[Pipeline V2] Using Claude for day balancing');
+  return balanceDaysWithClaude(clusters, meals, hotel, transport, preferences, data);
 }
