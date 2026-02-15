@@ -76,6 +76,11 @@ async function applyBest3DQuality(
       photorealisticTileset.dynamicScreenSpaceError = true;
       photorealisticTileset.preloadFlightDestinations = true;
       viewer.scene.primitives.add(photorealisticTileset);
+
+      // Google 3D tiles include ground + buildings — hide the globe underneath
+      // to prevent double terrain, texture overlap, and relief artifacts
+      viewer.scene.globe.show = false;
+
       return;
     }
   } catch (error) {
