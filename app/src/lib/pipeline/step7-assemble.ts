@@ -817,7 +817,7 @@ export async function assembleTripSchedule(
     // We still insert checkout here since it's a fixed-time item.
 
     if (isLastDay && hotel) {
-      let checkoutTime = parseTime(dayDate, hotel.checkOutTime || '11:00');
+      let latestCheckoutTime = parseTime(dayDate, hotel.checkOutTime || '11:00');
       // If there's a return flight, check-out must be well before departure
       if (flights.return) {
         const departureMinutes = getLocalTimeMinutes(flights.return.departureTimeDisplay, flights.return.departureTime);
@@ -825,16 +825,19 @@ export async function assembleTripSchedule(
         // Latest checkout aligns with airport transfer/security buffer.
         const latestCheckoutMinutes = Math.max(7 * 60, departureMinutes - airportLeadMinutes);
         const latestCheckout = parseTime(dayDate, minutesToHHMM(latestCheckoutMinutes));
-        if (latestCheckout < checkoutTime) {
-          checkoutTime = latestCheckout;
+        if (latestCheckout < latestCheckoutTime) {
+          latestCheckoutTime = latestCheckout;
         }
       }
-      scheduler.insertFixedItem({
+      // Make checkout flexible: anytime between 07:00 and the hotel's checkout time
+      // This allows checkout to fit naturally in the schedule flow
+      scheduler.addItem({
         id: `checkout-${balancedDay.dayNumber}`,
         title: `Check-out ${hotel.name}`,
         type: 'checkout',
-        startTime: new Date(checkoutTime.getTime() - 30 * 60 * 1000),
-        endTime: checkoutTime,
+        duration: 15, // Checkout is quick (reduced from 30)
+        minStartTime: parseTime(dayDate, '07:00'),
+        maxEndTime: latestCheckoutTime,
         data: hotel,
       });
     }
@@ -1146,8 +1149,8 @@ export async function assembleTripSchedule(
       }
     };
 
-    // Breakfast rescue: runs even when day has no activities (e.g., departure day)
-    if (breakfast && !breakfast.restaurant && hotel && !hotel.breakfastIncluded && !skipBreakfast) {
+    // Breakfast: ALWAYS optimize near hotel (not near first activity)
+    if (breakfast && hotel && !hotel.breakfastIncluded && !skipBreakfast) {
       const hotelAsNeighbor = { latitude: hotel.latitude, longitude: hotel.longitude, name: hotel.name } as ScoredActivity;
       await reoptMealFromPool(breakfast, hotelAsNeighbor, 'breakfast');
     }
@@ -3412,6 +3415,7 @@ export function addHotelBoundaryTransportItems(params: {
   const firstOutside = outside[0];
   const lastOutside = outside[outside.length - 1];
 
+  // Annotate first outside item with hotel departure info (no separate transport item)
   if (firstOutside && !hasHotelDeparture) {
     const directDistanceKm = calculateDistance(
       hotel.latitude,
@@ -3427,48 +3431,16 @@ export function addHotelBoundaryTransportItems(params: {
       )
     );
     const inferredMode = inferInterItemTransportMode(directDistanceKm, estimatedDuration);
-    const inferredTransportMode: TripItem['transportMode'] =
-      inferredMode === 'walk' ? 'walking' : inferredMode === 'car' ? 'car' : 'transit';
-    const endMinutes = parseHHMMToMinutes(firstOutside.startTime);
-    const baseStartMinutes = Math.max(6 * 60, endMinutes - estimatedDuration);
-    const overlapEndMinutes = result.reduce((latest, item) => {
-      if (item.id === firstOutside.id) return latest;
-      const itemStart = parseHHMMToMinutes(item.startTime);
-      const itemEnd = parseHHMMToMinutes(item.endTime);
-      if (itemStart < endMinutes && itemEnd > baseStartMinutes) {
-        return Math.max(latest, itemEnd);
-      }
-      return latest;
-    }, baseStartMinutes);
-    const startMinutes = Math.max(baseStartMinutes, overlapEndMinutes);
-    const duration = Math.max(0, endMinutes - startMinutes);
 
-    if (duration < 5) {
-      console.log(
-        `[Pipeline V2] Day ${dayNumber}: skipping hotel_depart boundary due to schedule overlap before "${firstOutside.title}"`
-      );
-    } else {
-      result.push({
-        id: `hotel-depart-${dayNumber}-${firstOutside.id}`,
-        dayNumber,
-        startTime: formatMinutesToHHMM(startMinutes),
-        endTime: formatMinutesToHHMM(endMinutes),
-        type: 'transport',
-        title: "Départ de l'hôtel",
-        description: `Trajet vers ${firstOutside.locationName || firstOutside.title}`,
-        locationName: firstOutside.locationName || firstOutside.title,
-        latitude: hotel.latitude,
-        longitude: hotel.longitude,
-        orderIndex: -1,
-        estimatedCost: 0,
-        duration,
+    // Store hotel departure info on the first item (for map routing)
+    const firstOutsideIdx = result.findIndex(item => item.id === firstOutside.id);
+    if (firstOutsideIdx !== -1) {
+      result[firstOutsideIdx] = {
+        ...result[firstOutsideIdx],
         distanceFromPrevious: Math.round(directDistanceKm * 100) / 100,
         timeFromPrevious: estimatedDuration,
         transportToPrevious: inferredMode,
-        transportMode: inferredTransportMode,
-        transportRole: 'hotel_depart',
-        dataReliability: 'estimated',
-      });
+      };
     }
   }
 
@@ -3482,65 +3454,7 @@ export function addHotelBoundaryTransportItems(params: {
     return isReturnLeg && itemStart >= lastOutsideEndMinutes;
   });
 
-  if (lastOutside && !hasHotelReturn && !hasManualDayTripReturn && !hasUpcomingReturnLonghaul) {
-    const directDistanceKm = calculateDistance(
-      lastOutside.latitude || hotel.latitude,
-      lastOutside.longitude || hotel.longitude,
-      hotel.latitude,
-      hotel.longitude
-    );
-    const estimatedDuration = roundToNearestFive(
-      estimateTravel(
-        { latitude: lastOutside.latitude, longitude: lastOutside.longitude },
-        { latitude: hotel.latitude, longitude: hotel.longitude },
-        directionsCache
-      )
-    );
-    const inferredMode = inferInterItemTransportMode(directDistanceKm, estimatedDuration);
-    const inferredTransportMode: TripItem['transportMode'] =
-      inferredMode === 'walk' ? 'walking' : inferredMode === 'car' ? 'car' : 'transit';
-    const startMinutes = parseHHMMToMinutes(lastOutside.endTime);
-    const baseEndMinutes = Math.min(23 * 60 + 59, startMinutes + estimatedDuration);
-    const overlapStartMinutes = result.reduce((earliest, item) => {
-      if (item.id === lastOutside.id) return earliest;
-      const itemStart = parseHHMMToMinutes(item.startTime);
-      const itemEnd = parseHHMMToMinutes(item.endTime);
-      if (itemStart < baseEndMinutes && itemEnd > startMinutes) {
-        return Math.min(earliest, itemStart);
-      }
-      return earliest;
-    }, baseEndMinutes);
-    const endMinutes = Math.min(baseEndMinutes, overlapStartMinutes);
-    const duration = Math.max(0, endMinutes - startMinutes);
-
-    if (duration < 5) {
-      console.log(
-        `[Pipeline V2] Day ${dayNumber}: skipping hotel_return boundary due to schedule overlap after "${lastOutside.title}"`
-      );
-    } else {
-      result.push({
-        id: `hotel-return-${dayNumber}-${lastOutside.id}`,
-        dayNumber,
-        startTime: formatMinutesToHHMM(startMinutes),
-        endTime: formatMinutesToHHMM(endMinutes),
-        type: 'transport',
-        title: "Retour à l'hôtel",
-        description: `Retour vers ${hotel.name}`,
-        locationName: hotel.name,
-        latitude: hotel.latitude,
-        longitude: hotel.longitude,
-        orderIndex: -1,
-        estimatedCost: 0,
-        duration,
-        distanceFromPrevious: Math.round(directDistanceKm * 100) / 100,
-        timeFromPrevious: estimatedDuration,
-        transportToPrevious: inferredMode,
-        transportMode: inferredTransportMode,
-        transportRole: 'hotel_return',
-        dataReliability: 'estimated',
-      });
-    }
-  }
+  // Hotel return: no separate item needed (map will handle route back to hotel)
 
   result = sortItemsByTime(result).map((item, idx) => ({ ...item, orderIndex: idx }));
   return result;

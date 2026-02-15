@@ -383,8 +383,44 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
     });
 
     const dayEntries = Array.from(byDay.entries()).sort((a, b) => a[0] - b[0]);
-    dayEntries.forEach(([_, dayItems], idx) => {
-      const routeCoords = dayItems.map((item) => [item.latitude, item.longitude] as [number, number]);
+    dayEntries.forEach(([dayNum, dayItems], idx) => {
+      // Extract hotel coordinates from checkin/checkout items
+      const hotelItem = displayItems.find(
+        (item) =>
+          (item.type === 'checkin' || item.type === 'checkout') &&
+          item.dayNumber === dayNum &&
+          item.accommodation?.latitude &&
+          item.accommodation?.longitude
+      );
+      const hotelCoords = hotelItem?.accommodation
+        ? [hotelItem.accommodation.latitude, hotelItem.accommodation.longitude] as [number, number]
+        : null;
+
+      // Build route: hotel → activities → hotel (or departure transport on last day)
+      const routeCoords: [number, number][] = [];
+
+      // Start from hotel (if available)
+      if (hotelCoords) {
+        routeCoords.push(hotelCoords);
+      }
+
+      // Add all day items (excluding checkin/checkout which are at hotel)
+      for (const item of dayItems) {
+        if (item.type !== 'checkin' && item.type !== 'checkout') {
+          routeCoords.push([item.latitude, item.longitude]);
+        }
+      }
+
+      // End at hotel (unless last day with departure transport)
+      const hasReturnTransport = dayItems.some(item =>
+        (item.type === 'transport' || item.type === 'flight') &&
+        item.transportRole === 'longhaul' &&
+        (item.title.includes('→') || item.id.includes('ret-'))
+      );
+      if (hotelCoords && !hasReturnTransport) {
+        routeCoords.push(hotelCoords);
+      }
+
       if (routeCoords.length < 2) return;
 
       const color = filterDay === null ? ROUTE_COLORS[idx % ROUTE_COLORS.length] : '#3B82F6';

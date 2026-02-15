@@ -41,7 +41,7 @@ describe('step7-assemble helpers', () => {
     dataReliability: 'verified',
   });
 
-  it('uses hotel coordinates for hotel-depart boundary transport', () => {
+  it('annotates first outside item with hotel departure distance (no separate transport item)', () => {
     const items = [
       baseActivity('activity-1', '10:00', '11:00', 45.4704, 9.1793),
       baseActivity('activity-2', '12:00', '13:00', 45.4720, 9.1880),
@@ -54,12 +54,15 @@ describe('step7-assemble helpers', () => {
       destination: 'Milan',
     });
 
+    // No separate hotel-depart transport item should be created
     const depart = withBoundary.find((item) => item.id.startsWith('hotel-depart-1-'));
-    expect(depart).toBeDefined();
-    expect(depart?.latitude).toBe(hotel.latitude);
-    expect(depart?.longitude).toBe(hotel.longitude);
-    expect(depart?.transportRole).toBe('hotel_depart');
-    expect((depart?.distanceFromPrevious || 0)).toBeGreaterThan(0.1);
+    expect(depart).toBeUndefined();
+
+    // Instead, the first activity should be annotated with distance from hotel
+    const firstActivity = withBoundary.find((item) => item.id === 'activity-1');
+    expect(firstActivity).toBeDefined();
+    expect((firstActivity?.distanceFromPrevious || 0)).toBeGreaterThan(0);
+    expect(firstActivity?.timeFromPrevious).toBeDefined();
   });
 
   it('normalizes return booking URL departure_date to return day', () => {
@@ -115,7 +118,8 @@ describe('step7-assemble helpers', () => {
     });
 
     expect(withBoundary.some((item) => item.id.startsWith('hotel-return-1-'))).toBe(false);
-    expect(withBoundary.some((item) => item.id.startsWith('hotel-depart-1-'))).toBe(true);
+    // No separate hotel-depart item (annotates first activity instead)
+    expect(withBoundary.some((item) => item.id.startsWith('hotel-depart-1-'))).toBe(false);
   });
 
   it('caps full-day suggested starts to avoid late starts', () => {
