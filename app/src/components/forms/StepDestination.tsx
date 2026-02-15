@@ -232,8 +232,14 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
     );
   }, [data.homeAddress, data.origin, onChange]);
 
+  const departureInputValue = (data.homeAddress || '').trim() || (data.origin || '');
+  const originQueryIsAddress = looksLikeStreetQuery(departureInputValue);
+  const detectedOriginText = (data.homeAddress || '').trim() || (data.homeCoords
+    ? formatCoordPair(data.homeCoords.lat, data.homeCoords.lng)
+    : '');
+
   useEffect(() => {
-    const query = (data.origin || '').trim();
+    const query = departureInputValue.trim();
     if (query.length < 2) {
       setOriginSuggestions([]);
       return;
@@ -257,7 +263,7 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
       window.clearTimeout(timeoutId);
       controller.abort();
     };
-  }, [data.origin, fetchLocationSuggestions]);
+  }, [departureInputValue, fetchLocationSuggestions]);
 
   useEffect(() => {
     const query = (data.homeAddress || '').trim();
@@ -286,15 +292,14 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
   }, [data.homeAddress, fetchLocationSuggestions]);
 
   const applyOriginSuggestion = (suggestion: LocationSuggestion) => {
-    const queryIsAddress = looksLikeStreetQuery(data.origin || '');
+    const queryIsAddress = looksLikeStreetQuery(departureInputValue);
+    const nextAddress = queryIsAddress
+      ? suggestion.displayName
+      : (suggestion.label || suggestion.displayName);
     onChange({
       origin: suggestion.city || suggestion.label || suggestion.displayName,
-      ...(queryIsAddress
-        ? {
-            homeAddress: suggestion.displayName,
-            homeCoords: { lat: suggestion.lat, lng: suggestion.lng },
-          }
-        : {}),
+      homeAddress: nextAddress,
+      homeCoords: { lat: suggestion.lat, lng: suggestion.lng },
     });
     setShowOriginSuggestions(false);
   };
@@ -303,22 +308,17 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
     onChange({
       homeAddress: suggestion.displayName,
       homeCoords: { lat: suggestion.lat, lng: suggestion.lng },
-      ...(suggestion.city && !data.origin ? { origin: suggestion.city } : {}),
+      ...(suggestion.city ? { origin: suggestion.city } : {}),
     });
     setShowHomeAddressSuggestions(false);
   };
 
   const maybeTriggerGeoPrompt = () => {
     if (geoPromptTriggeredRef.current) return;
-    if (data.homeCoords || (data.origin || '').trim().length > 0) return;
+    if (data.homeCoords || (data.origin || '').trim().length > 0 || (data.homeAddress || '').trim().length > 0) return;
     geoPromptTriggeredRef.current = true;
     handleUseCurrentLocation({ forceOriginUpdate: true, silentErrors: true });
   };
-
-  const originQueryIsAddress = looksLikeStreetQuery(data.origin || '');
-  const detectedOriginText = (data.homeAddress || '').trim() || (data.homeCoords
-    ? formatCoordPair(data.homeCoords.lat, data.homeCoords.lng)
-    : '');
 
   return (
     <div className="space-y-8">
@@ -374,16 +374,27 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
       {/* Origin (common to both modes) */}
       <div className="space-y-2">
         <Label htmlFor="origin" className="text-base font-medium">
-          Ville de départ
+          D&apos;où partez-vous ?
         </Label>
         <div className="flex flex-col sm:flex-row gap-2">
           <div className="relative flex-1">
             <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               id="origin"
-              placeholder="Paris, France"
-              value={data.origin || ''}
-              onChange={(e) => onChange({ origin: e.target.value })}
+              placeholder="Adresse ou ville de départ"
+              value={departureInputValue}
+              onChange={(e) => {
+                const value = e.target.value;
+                const trimmed = value.trim();
+                const isAddressLike = looksLikeStreetQuery(value);
+
+                onChange({
+                  homeAddress: value,
+                  homeCoords: undefined,
+                  ...(!trimmed ? { origin: '' } : {}),
+                  ...(!isAddressLike ? { origin: value } : {}),
+                });
+              }}
               onFocus={() => {
                 setShowOriginSuggestions(true);
                 maybeTriggerGeoPrompt();
@@ -391,7 +402,7 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
               onBlur={() => window.setTimeout(() => setShowOriginSuggestions(false), 120)}
               className="pl-10 h-12 text-base"
             />
-            {showOriginSuggestions && ((data.origin || '').trim().length >= 2) && (
+            {showOriginSuggestions && (departureInputValue.trim().length >= 2) && (
               <div className="absolute z-20 mt-1 w-full rounded-md border border-border bg-background shadow-lg overflow-hidden">
                 <div className="max-h-64 overflow-y-auto">
                   {originSuggestionsLoading ? (
@@ -455,7 +466,7 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
 
       <div className="space-y-2">
         <Label htmlFor="homeAddress" className="text-base font-medium">
-          Adresse de départ précise (optionnel)
+          Affiner l&apos;adresse de départ (optionnel)
         </Label>
         <Input
           id="homeAddress"
@@ -500,7 +511,7 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
           </div>
         )}
         <p className="text-xs text-muted-foreground">
-          Astuce: utilisez le bouton <span className="font-medium">Ma position actuelle</span> sur la ville de départ pour pré-remplir automatiquement cette adresse.
+          Astuce: utilisez <span className="font-medium">Ma position actuelle</span> pour pré-remplir automatiquement l&apos;adresse exacte.
         </p>
       </div>
 
