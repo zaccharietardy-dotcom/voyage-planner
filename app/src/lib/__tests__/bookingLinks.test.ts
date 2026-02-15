@@ -63,7 +63,7 @@ describe('bookingLinks', () => {
     expect(url).toContain('group_children=0');
   });
 
-  it('keeps airbnb url unchanged', () => {
+  it('enriches airbnb room url with dates/adults when missing', () => {
     const url = normalizeHotelBookingUrl({
       url: 'https://www.airbnb.com/rooms/123456789',
       hotelName: 'Apartment',
@@ -73,7 +73,27 @@ describe('bookingLinks', () => {
       adults: 2,
     });
 
-    expect(url).toBe('https://www.airbnb.com/rooms/123456789');
+    expect(url).toContain('airbnb.com/rooms/123456789');
+    expect(url).toContain('check_in=2026-04-10');
+    expect(url).toContain('check_out=2026-04-12');
+    expect(url).toContain('adults=2');
+  });
+
+  it('keeps direct airbnb room url with dates/adults unchanged', () => {
+    const input = 'https://www.airbnb.com/rooms/987654321?check_in=2026-05-20&check_out=2026-05-24&adults=2';
+    const url = normalizeHotelBookingUrl({
+      url: input,
+      hotelName: 'Appartement Airbnb',
+      destinationHint: 'Paris',
+      checkIn: '2026-06-01',
+      checkOut: '2026-06-03',
+      adults: 4,
+    });
+
+    expect(url).toBe(input);
+    expect(url).toContain('check_in=2026-05-20');
+    expect(url).toContain('check_out=2026-05-24');
+    expect(url).toContain('adults=2');
   });
 
   it('slug generation strips generic tokens and accents', () => {

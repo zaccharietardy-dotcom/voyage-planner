@@ -22,6 +22,8 @@ export interface Attraction {
   mustSee: boolean; // Incontournable
   bookingRequired: boolean;
   bookingUrl?: string;
+  officialBookingUrl?: string;
+  viatorUrl?: string;
   openingHours: { open: string; close: string }; // Format "HH:MM" — simple format (daily default)
   openingHoursByDay?: Record<string, { open: string; close: string } | null>; // Per-day hours (null = closed)
   businessStatus?: 'OPERATIONAL' | 'CLOSED_TEMPORARILY' | 'CLOSED_PERMANENTLY';
@@ -30,6 +32,9 @@ export interface Attraction {
   googlePlaceId?: string; // Google Places place_id for Details lookup
   tips?: string;
   dataReliability?: 'verified' | 'estimated' | 'generated'; // Source des données
+  geoSource?: 'place' | 'known_product' | 'geocode' | 'city_fallback';
+  geoConfidence?: 'high' | 'medium' | 'low';
+  qualityFlags?: string[];
   googleMapsUrl?: string; // Lien direct vers Google Maps
   imageUrl?: string; // Photo de l'activité (Viator, etc.)
   providerName?: string; // Source: 'Viator', 'Foursquare', etc.

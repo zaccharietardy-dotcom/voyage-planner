@@ -1,5 +1,5 @@
 import { validateAndFixTrip } from '../step8-validate';
-import type { Trip, TripItem, TripPreferences } from '../../types';
+import type { Trip, TripItem, TripPreferences, TransportOptionSummary } from '../../types';
 
 function createPreferences(): TripPreferences {
   return {
@@ -222,5 +222,100 @@ describe('step8-validate geography checks', () => {
 
     expect(result.warnings.some((w) => w.includes('non-Google photo source'))).toBe(true);
     expect(result.warnings.some((w) => w.includes('fatigue risk'))).toBe(true);
+  });
+
+  it('auto-injects fallback longhaul segments on inter-city trips when missing', () => {
+    const trip: Trip = {
+      id: 'trip-4',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      preferences: createPreferences(),
+      days: [
+        {
+          dayNumber: 1,
+          date: new Date('2026-02-18T00:00:00.000Z'),
+          items: [
+            item({ id: 'a1', type: 'activity', title: 'Duomo', startTime: '10:00', endTime: '11:00', latitude: 45.4642, longitude: 9.19 }),
+          ],
+          isDayTrip: false,
+        },
+        {
+          dayNumber: 2,
+          date: new Date('2026-02-19T00:00:00.000Z'),
+          items: [
+            item({ id: 'a2', type: 'activity', title: 'Brera', startTime: '10:00', endTime: '11:00', latitude: 45.472, longitude: 9.188 }),
+          ],
+          isDayTrip: false,
+        },
+      ],
+    };
+
+    const result = validateAndFixTrip(trip);
+    expect(result.warnings.some((w) => w.includes('missing explicit inter-city outbound transport'))).toBe(true);
+    expect(result.warnings.some((w) => w.includes('missing explicit inter-city return transport'))).toBe(true);
+
+    const firstDayHasLonghaul = trip.days[0].items.some((item) => item.transportRole === 'longhaul');
+    const lastDayHasLonghaul = trip.days[trip.days.length - 1].items.some((item) => item.transportRole === 'longhaul');
+    expect(firstDayHasLonghaul).toBe(true);
+    expect(lastDayHasLonghaul).toBe(true);
+  });
+
+  it('injects plane fallback longhaul with Aviasales/Omio links when selected transport is plane', () => {
+    const preferences = createPreferences();
+    preferences.origin = 'Tokyo';
+    preferences.destination = 'Paris';
+    preferences.transport = 'plane';
+
+    const selectedTransport: TransportOptionSummary = {
+      id: 'plane',
+      mode: 'plane',
+      totalDuration: 900,
+      totalPrice: 700,
+      totalCO2: 450,
+      score: 8.3,
+      scoreDetails: {
+        priceScore: 7,
+        timeScore: 9,
+        co2Score: 5,
+      },
+      segments: [],
+      bookingUrl: 'https://www.aviasales.com/search/TOKYO0103PARIS1?currency=eur&locale=fr',
+      omioFlightUrl: 'https://www.omio.fr/vols/tokyo/paris?departure_date=2026-03-01',
+    };
+
+    const trip: Trip = {
+      id: 'trip-5',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      preferences,
+      selectedTransport,
+      days: [
+        {
+          dayNumber: 1,
+          date: new Date('2026-03-01T00:00:00.000Z'),
+          items: [
+            item({ id: 'a1', type: 'activity', title: 'Louvre', startTime: '11:00', endTime: '12:00', latitude: 48.8606, longitude: 2.3376 }),
+          ],
+          isDayTrip: false,
+        },
+        {
+          dayNumber: 2,
+          date: new Date('2026-03-02T00:00:00.000Z'),
+          items: [
+            item({ id: 'a2', type: 'activity', title: 'Tour Eiffel', startTime: '11:00', endTime: '12:00', latitude: 48.8584, longitude: 2.2945 }),
+          ],
+          isDayTrip: false,
+        },
+      ],
+    };
+
+    validateAndFixTrip(trip);
+
+    const outbound = trip.days[0].items.find((entry) => entry.id.startsWith('transport-out-'));
+    const inbound = trip.days[1].items.find((entry) => entry.id.startsWith('transport-ret-'));
+
+    expect(outbound?.bookingUrl).toContain('aviasales.com/search/');
+    expect(outbound?.qualityFlags).toContain('aviasales_fallback_link');
+    expect(inbound?.omioFlightUrl).toContain('departure_date=2026-03-02');
   });
 });

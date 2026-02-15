@@ -13,6 +13,7 @@ import { compareTransportOptions } from '../services/transport';
 import { searchAttractionsMultiQuery, searchMustSeeAttractions, searchRestaurantsWithSerpApi } from '../services/serpApiPlaces';
 import { searchAttractionsOverpass } from '../services/overpassAttractions';
 import { searchViatorActivities, getViatorProductCoordinates } from '../services/viator';
+import { findKnownViatorProduct } from '../services/viatorKnownProducts';
 import { searchTripAdvisorRestaurants } from '../services/tripadvisor';
 import { searchHotels } from '../services/hotels';
 import { generateTravelTips } from '../services/travelTips';
@@ -229,11 +230,26 @@ export async function fetchAllData(preferences: TripPreferences, onEvent?: OnPip
               activity.latitude = viatorCoords.lat;
               activity.longitude = viatorCoords.lng;
               activity.dataReliability = 'verified';
+              activity.geoSource = 'place';
+              activity.geoConfidence = 'high';
+              activity.qualityFlags = (activity.qualityFlags || []).filter((flag) => flag !== 'viator_city_center_fallback');
               return;
             }
           }
 
-          // 2) Fallback: resolve from cleaned candidate queries.
+          // 2) Known curated coordinates (local dictionary).
+          const knownViatorProduct = findKnownViatorProduct(activity.name);
+          if (knownViatorProduct?.lat && knownViatorProduct?.lng) {
+            activity.latitude = knownViatorProduct.lat;
+            activity.longitude = knownViatorProduct.lng;
+            activity.dataReliability = 'verified';
+            activity.geoSource = 'known_product';
+            activity.geoConfidence = 'high';
+            activity.qualityFlags = (activity.qualityFlags || []).filter((flag) => flag !== 'viator_city_center_fallback');
+            return;
+          }
+
+          // 3) Fallback geocoding from cleaned candidate queries.
           const candidates = buildViatorLocationCandidates(activity.name, destination);
           for (const candidate of candidates) {
             const coords = await resolveCoordinates(candidate, destination, destCoords, 'attraction');
@@ -244,9 +260,18 @@ export async function fetchAllData(preferences: TripPreferences, onEvent?: OnPip
             if (activity.dataReliability !== 'verified') {
               activity.dataReliability = 'estimated';
             }
+            activity.geoSource = 'geocode';
+            activity.geoConfidence = 'medium';
+            activity.qualityFlags = (activity.qualityFlags || []).filter((flag) => flag !== 'viator_city_center_fallback');
             return;
           }
-        } catch { /* keep city-center as fallback */ }
+        } catch {
+          // keep city-center fallback
+        }
+
+        activity.geoSource = 'city_fallback';
+        activity.geoConfidence = 'low';
+        activity.qualityFlags = Array.from(new Set([...(activity.qualityFlags || []), 'viator_city_center_fallback']));
       })
     );
     const verified = viatorEstimated.filter((a: Attraction) => a.dataReliability === 'verified').length;

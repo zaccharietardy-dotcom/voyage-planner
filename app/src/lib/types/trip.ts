@@ -238,6 +238,7 @@ export interface Accommodation {
   breakfastIncluded?: boolean; // true si petit-déjeuner inclus dans le prix
   description?: string;
   dataReliability?: 'verified' | 'estimated' | 'generated'; // Fiabilité des coordonnées GPS
+  qualityFlags?: string[]; // Flags qualité pipeline (fallback, contrainte relâchée, etc.)
 }
 
 // ============================================
@@ -327,6 +328,7 @@ export interface TripItem {
   duration?: number; // en minutes
   imageUrl?: string;
   bookingUrl?: string;
+  officialBookingUrl?: string; // Billetterie officielle (monuments/attractions)
   viatorUrl?: string;  // Lien Viator (activités/tours)
   tiqetsUrl?: string;  // Lien Tiqets (billets musées/attractions)
   rating?: number;
@@ -372,6 +374,9 @@ export interface TripItem {
   googleMapsUrl?: string; // Lien pour ouvrir l'itinéraire dans Google Maps
   googleMapsPlaceUrl?: string; // Lien de recherche Google Maps par nom (plus fiable que GPS!)
   dataReliability?: 'verified' | 'estimated' | 'generated'; // Fiabilité des données
+  geoSource?: 'place' | 'known_product' | 'geocode' | 'city_fallback'; // Origine de la coordonnée
+  geoConfidence?: 'high' | 'medium' | 'low'; // Confiance de géolocalisation
+  qualityFlags?: string[]; // Flags qualité (fallback transport, coords faibles, etc.)
   // Titre de l'activité Viator (si différent du titre de l'activité)
   // Ex: "Piazza Navona" → "Rome Walking Tour: Pantheon, Piazza Navona and Trevi Fountain"
   viatorTitle?: string;
@@ -451,6 +456,8 @@ export interface TransportOptionSummary {
   recommendationReason?: string;
   dataSource?: 'api' | 'estimated';
   priceRange?: [number, number]; // [min, max] prix pour affichage
+  aviasalesUrl?: string; // optionnel: explicite pour fallback vol
+  omioFlightUrl?: string; // optionnel: lien Omio vols complémentaire
   // Legs détaillés DB HAFAS (horaires réels, numéros de train, correspondances)
   transitLegs?: {
     mode: 'train' | 'bus' | 'ferry';
@@ -529,6 +536,12 @@ export interface Trip {
     estimated: number;
     difference: number;
     isOverBudget: boolean;
+  };
+  apiUsage?: {
+    serpApi?: {
+      totalRequests: number;
+      byEngine: Record<string, number>;
+    };
   };
   // Empreinte carbone
   carbonFootprint?: {

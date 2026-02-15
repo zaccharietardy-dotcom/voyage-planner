@@ -2,6 +2,7 @@
 
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Input } from '@/components/ui/input';
 import { TripPreferences, TransportType, TRANSPORT_LABELS } from '@/lib/types';
 import { Plane, Train, Car, Bus, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -23,6 +24,7 @@ const TRANSPORT_OPTIONS: TransportType[] = ['optimal', 'plane', 'train', 'car', 
 
 export function StepTransport({ data, onChange }: StepTransportProps) {
   const selectedTransport = data.transport || 'optimal';
+  const showPlaneLogistics = selectedTransport === 'plane' || selectedTransport === 'optimal';
 
   return (
     <div className="space-y-8">
@@ -99,6 +101,39 @@ export function StepTransport({ data, onChange }: StepTransportProps) {
           onCheckedChange={(checked) => onChange({ carRental: checked })}
         />
       </div>
+
+      {showPlaneLogistics && (
+        <div className="flex items-center justify-between p-6 rounded-xl border bg-card">
+          <div className="space-y-1">
+            <Label htmlFor="needs-parking" className="text-base font-medium cursor-pointer">
+              Parking aéroport
+            </Label>
+            <p className="text-sm text-muted-foreground">
+              Ajouter automatiquement un parking adapté à votre aéroport de départ
+            </p>
+          </div>
+          <Switch
+            id="needs-parking"
+            checked={data.needsParking || false}
+            onCheckedChange={(checked) => onChange({ needsParking: checked })}
+          />
+        </div>
+      )}
+
+      {showPlaneLogistics && (
+        <div className="space-y-2 p-6 rounded-xl border bg-card">
+          <Label htmlFor="preferred-airport" className="text-base font-medium">
+            Aéroport de départ préféré (optionnel)
+          </Label>
+          <Input
+            id="preferred-airport"
+            placeholder="Ex: HND, NRT, CDG..."
+            value={data.preferredAirport || ''}
+            onChange={(e) => onChange({ preferredAirport: e.target.value })}
+            className="h-11"
+          />
+        </div>
+      )}
     </div>
   );
 }

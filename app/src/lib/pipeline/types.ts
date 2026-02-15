@@ -118,6 +118,7 @@ export interface MealAssignment {
   restaurant: Restaurant | null; // null = self-catered
   restaurantAlternatives: Restaurant[]; // 2e et 3e choix (classés par qualité/distance)
   referenceCoords: { lat: number; lng: number };
+  fallbackMode?: 'self_catered'; // Suggestion explicite "cuisine maison" (budget balancing)
 }
 
 /** Return type of assignRestaurants() — includes the full geo-filtered restaurant pool

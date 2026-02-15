@@ -7,6 +7,8 @@
 
 import type { Trip, TripDay, TripItem } from '../types';
 import { calculateDistance } from '../services/geocoding';
+import { formatDateForUrl, generateFlightLink, generateFlightOmioLink } from '../services/linkGenerator';
+import { getHotelHardCapKmForProfile, resolveQualityCityProfile } from './qualityPolicy';
 
 const LONG_LEG_TARGET_KM = 2.5;
 const LONG_LEG_HARD_KM = 4;
@@ -40,6 +42,7 @@ export function validateAndFixTrip(trip: Trip): ValidationResult {
   let penalties = 0;
   const tripCuisineCounts = new Map<string, number>();
   let tripRestaurantCount = 0;
+  const interCityTrip = isInterCityTrip(trip);
 
   for (const day of trip.days) {
     // 1. Check for placeholder restaurants (no real data)
@@ -255,6 +258,12 @@ export function validateAndFixTrip(trip: Trip): ValidationResult {
     checkBoundaryConsistency(day, warnings, (deltaPenalty) => { penalties += deltaPenalty; });
   }
 
+  if (interCityTrip) {
+    ensureInterCityLonghaulCoverage(trip, warnings, autoFixes, (penalty) => {
+      penalties += penalty;
+    });
+  }
+
   if (tripRestaurantCount >= 5) {
     const dominantTripCuisine = [...tripCuisineCounts.entries()].sort((a, b) => b[1] - a[1])[0];
     if (dominantTripCuisine && dominantTripCuisine[0] !== 'generic' && dominantTripCuisine[1] / tripRestaurantCount >= 0.7) {
@@ -265,7 +274,7 @@ export function validateAndFixTrip(trip: Trip): ValidationResult {
     }
   }
 
-  // 10. Check hotel distance from activities centroid
+  // 10. Check hotel distance from activities centroid (city-profile aware caps)
   const allActivityCoords = trip.days.flatMap(d =>
     d.items.filter(i => i.type === 'activity' && i.latitude && i.longitude && i.latitude !== 0)
   );
@@ -278,8 +287,12 @@ export function validateAndFixTrip(trip: Trip): ValidationResult {
     const hotelItem = trip.days[0]?.items.find(i => i.type === 'checkin');
     if (hotelItem && hotelItem.latitude && hotelItem.latitude !== 0) {
       const hotelDist = calculateDistance(centroid.lat, centroid.lng, hotelItem.latitude, hotelItem.longitude);
-      if (hotelDist > 5) {
-        warnings.push(`Hotel "${hotelItem.title}" is ${hotelDist.toFixed(1)}km from activities centroid`);
+      const profile = resolveQualityCityProfile({ destination: trip.preferences.destination });
+      const hotelHardCap = getHotelHardCapKmForProfile(profile, trip.preferences.durationDays);
+      if (hotelDist > hotelHardCap) {
+        warnings.push(
+          `Hotel "${hotelItem.title}" is ${hotelDist.toFixed(1)}km from activities centroid (cap=${hotelHardCap.toFixed(1)}km, profile=${profile.id})`
+        );
         penalties += 5;
       }
     }
@@ -495,6 +508,175 @@ function checkBoundaryConsistency(
       }
     }
   }
+}
+
+function normalizePlaceName(value?: string): string {
+  return (value || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+function isInterCityTrip(trip: Trip): boolean {
+  const origin = normalizePlaceName(trip.preferences.origin);
+  const destination = normalizePlaceName(trip.preferences.destination);
+  if (!origin || !destination) return false;
+  return origin !== destination;
+}
+
+function isLonghaulItem(item: TripItem): boolean {
+  if ((item.type === 'transport' || item.type === 'flight') && item.transportRole === 'longhaul') return true;
+  if (item.id.startsWith('transport-out-') || item.id.startsWith('transport-ret-')) return true;
+  if (item.id.startsWith('flight-out-') || item.id.startsWith('flight-ret-')) return true;
+  return false;
+}
+
+function ensureInterCityLonghaulCoverage(
+  trip: Trip,
+  warnings: string[],
+  autoFixes: string[],
+  addPenalty: (penalty: number) => void
+): void {
+  const firstDay = trip.days[0];
+  const lastDay = trip.days[trip.days.length - 1];
+  if (!firstDay || !lastDay) return;
+
+  const hasOutbound = firstDay.items.some((item) => isLonghaulItem(item));
+  const hasReturn = lastDay.items.some((item) => isLonghaulItem(item));
+
+  if (!hasOutbound) {
+    warnings.push(`Day ${firstDay.dayNumber}: missing explicit inter-city outbound transport`);
+    addPenalty(8);
+    insertFallbackLonghaulItem(firstDay, 'outbound', trip.preferences.origin, trip.preferences.destination, {
+      transport: resolveFallbackTransportOption(trip),
+      groupSize: Math.max(1, trip.preferences.groupSize || 1),
+      date: firstDay.date,
+    });
+    autoFixes.push(`Day ${firstDay.dayNumber}: inserted fallback outbound longhaul transport`);
+  }
+
+  if (!hasReturn) {
+    warnings.push(`Day ${lastDay.dayNumber}: missing explicit inter-city return transport`);
+    addPenalty(8);
+    insertFallbackLonghaulItem(lastDay, 'return', trip.preferences.destination, trip.preferences.origin, {
+      transport: resolveFallbackTransportOption(trip),
+      groupSize: Math.max(1, trip.preferences.groupSize || 1),
+      date: lastDay.date,
+    });
+    autoFixes.push(`Day ${lastDay.dayNumber}: inserted fallback return longhaul transport`);
+  }
+}
+
+function resolveFallbackTransportOption(trip: Trip): Trip['selectedTransport'] | null {
+  if (trip.selectedTransport) return trip.selectedTransport;
+  if (!trip.transportOptions?.length) return null;
+  return trip.transportOptions.find((option) => option.recommended) || trip.transportOptions[0] || null;
+}
+
+function normalizeFallbackBookingDate(rawUrl: string | undefined, date: Date): string | undefined {
+  if (!rawUrl) return rawUrl;
+  try {
+    const url = new URL(rawUrl);
+    const dateStr = formatDateForUrl(date);
+    if (url.searchParams.has('departure_date')) {
+      url.searchParams.set('departure_date', dateStr);
+    }
+    return url.toString();
+  } catch {
+    return rawUrl;
+  }
+}
+
+function insertFallbackLonghaulItem(
+  day: TripDay,
+  direction: 'outbound' | 'return',
+  from: string,
+  to: string,
+  context: {
+    transport: Trip['selectedTransport'] | null;
+    groupSize: number;
+    date: Date;
+  }
+): void {
+  const sorted = [...day.items].sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
+  const fallbackStartMinutes = direction === 'outbound'
+    ? Math.max(6 * 60, (sorted[0] ? timeToMinutes(sorted[0].startTime) - 150 : 8 * 60))
+    : Math.min(22 * 60, (sorted[sorted.length - 1] ? timeToMinutes(sorted[sorted.length - 1].endTime) + 30 : 15 * 60));
+  const fallbackEndMinutes = Math.min(23 * 60 + 59, fallbackStartMinutes + 150);
+  const fallbackIdPrefix = direction === 'outbound' ? 'transport-out' : 'transport-ret';
+  const fallbackStartDate = new Date(context.date);
+  const fallbackHour = Math.floor(fallbackStartMinutes / 60);
+  const fallbackMinute = fallbackStartMinutes % 60;
+  fallbackStartDate.setHours(fallbackHour, fallbackMinute, 0, 0);
+  const fallbackDateStr = formatDateForUrl(fallbackStartDate);
+
+  const qualityFlags = ['longhaul_fallback_injected'];
+  let title = `Transport inter-ville ${direction === 'outbound' ? 'aller' : 'retour'}`;
+  let bookingUrl: string | undefined;
+  let aviasalesUrl: string | undefined;
+  let omioFlightUrl: string | undefined;
+  const estimatedCost = context.transport?.totalPrice || 0;
+
+  if (context.transport?.mode === 'plane') {
+    title = `✈️ Vol ${direction === 'outbound' ? 'aller' : 'retour'}`;
+    aviasalesUrl = generateFlightLink(
+      { origin: from, destination: to },
+      { date: fallbackDateStr, passengers: context.groupSize }
+    );
+
+    const preferredBooking = direction === 'return'
+      ? (context.transport.aviasalesUrl || aviasalesUrl)
+      : (context.transport.bookingUrl || context.transport.aviasalesUrl || aviasalesUrl);
+    bookingUrl = direction === 'return'
+      ? normalizeFallbackBookingDate(preferredBooking, fallbackStartDate)
+      : preferredBooking;
+    omioFlightUrl = direction === 'return'
+      ? normalizeFallbackBookingDate(
+        context.transport.omioFlightUrl || generateFlightOmioLink(from, to, fallbackDateStr),
+        fallbackStartDate
+      )
+      : (context.transport.omioFlightUrl || generateFlightOmioLink(from, to, fallbackDateStr));
+    qualityFlags.push('plane_transport_fallback');
+    if ((bookingUrl || aviasalesUrl || '').includes('aviasales.com')) {
+      qualityFlags.push('aviasales_fallback_link');
+    }
+  } else {
+    bookingUrl = direction === 'return'
+      ? normalizeFallbackBookingDate(context.transport?.bookingUrl, fallbackStartDate)
+      : context.transport?.bookingUrl;
+  }
+
+  const fallback: TripItem = {
+    id: `${fallbackIdPrefix}-${day.dayNumber}-fallback`,
+    dayNumber: day.dayNumber,
+    startTime: minutesToTime(fallbackStartMinutes),
+    endTime: minutesToTime(fallbackEndMinutes),
+    type: 'transport',
+    title,
+    description: context.transport?.mode === 'plane'
+      ? `${from} → ${to} (estimation, lien vols recommandé)`
+      : `${from} → ${to} (estimation)`,
+    locationName: `${from} → ${to}`,
+    latitude: day.items[0]?.latitude || 0,
+    longitude: day.items[0]?.longitude || 0,
+    orderIndex: 0,
+    duration: fallbackEndMinutes - fallbackStartMinutes,
+    estimatedCost,
+    bookingUrl,
+    aviasalesUrl,
+    omioFlightUrl,
+    transportMode: 'transit',
+    transportRole: 'longhaul',
+    dataReliability: 'estimated',
+    qualityFlags,
+  };
+
+  day.items.push(fallback);
+  day.items = day.items
+    .sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime))
+    .map((item, index) => ({ ...item, orderIndex: index }));
 }
 
 function percentile(sorted: number[], p: number): number {

@@ -12,10 +12,11 @@ import type { Restaurant, BudgetStrategy, TripPreferences } from '../types';
 import type { ActivityCluster, MealAssignment, RestaurantAssignmentResult } from './types';
 import { calculateDistance } from '../services/geocoding';
 import { mergeRestaurantSources } from './utils/dedup';
+import { getRestaurantMaxDistanceKmForProfile, resolveQualityCityProfile } from './qualityPolicy';
 
 type MealType = 'breakfast' | 'lunch' | 'dinner';
 
-const MEAL_DISTANCE_LIMITS: Record<MealType, { idealKm: number; hardKm: number; absoluteKm: number }> = {
+const DEFAULT_MEAL_DISTANCE_LIMITS: Record<MealType, { idealKm: number; hardKm: number; absoluteKm: number }> = {
   // Breakfast should stay very close to the hotel.
   breakfast: { idealKm: 0.4, hardKm: 0.8, absoluteKm: 1.2 },
   // Lunch/dinner: allow up to 2km in step4 (cluster centroids can differ from final activity positions).
@@ -23,6 +24,33 @@ const MEAL_DISTANCE_LIMITS: Record<MealType, { idealKm: number; hardKm: number; 
   lunch: { idealKm: 0.5, hardKm: 1.0, absoluteKm: 2.0 },
   dinner: { idealKm: 0.5, hardKm: 1.0, absoluteKm: 2.0 },
 };
+
+function getMealDistanceLimits(
+  destination: string,
+  clusters: ActivityCluster[]
+): Record<MealType, { idealKm: number; hardKm: number; absoluteKm: number }> {
+  const profile = resolveQualityCityProfile({ destination, clusters });
+  const breakfastMax = getRestaurantMaxDistanceKmForProfile(profile, 'breakfast');
+  const mealMax = getRestaurantMaxDistanceKmForProfile(profile, 'lunch');
+
+  return {
+    breakfast: {
+      idealKm: Math.min(DEFAULT_MEAL_DISTANCE_LIMITS.breakfast.idealKm, breakfastMax * 0.5),
+      hardKm: Math.min(DEFAULT_MEAL_DISTANCE_LIMITS.breakfast.hardKm, breakfastMax * 0.8),
+      absoluteKm: breakfastMax,
+    },
+    lunch: {
+      idealKm: Math.min(DEFAULT_MEAL_DISTANCE_LIMITS.lunch.idealKm, mealMax * 0.5),
+      hardKm: Math.min(DEFAULT_MEAL_DISTANCE_LIMITS.lunch.hardKm, mealMax * 0.8),
+      absoluteKm: mealMax,
+    },
+    dinner: {
+      idealKm: Math.min(DEFAULT_MEAL_DISTANCE_LIMITS.dinner.idealKm, mealMax * 0.5),
+      hardKm: Math.min(DEFAULT_MEAL_DISTANCE_LIMITS.dinner.hardKm, mealMax * 0.8),
+      absoluteKm: mealMax,
+    },
+  };
+}
 
 /**
  * Cuisine types that are inappropriate for breakfast.
@@ -118,11 +146,14 @@ export function assignRestaurants(
   const assignments: MealAssignment[] = [];
   const usedIds = new Set<string>(previouslyUsedIds || []);
   const mealOrder: MealType[] = ['breakfast', 'lunch', 'dinner'];
+  const mealDistanceLimits = getMealDistanceLimits(preferences.destination, clusters);
   const cuisineHistoryByMeal: Record<MealType, string[]> = {
     breakfast: [],
     lunch: [],
     dinner: [],
   };
+  const tripCuisineCounts = new Map<string, number>();
+  let tripMealCount = 0;
 
   for (const cluster of clusters) {
     const dayCuisineFamilies = new Set<string>();
@@ -158,11 +189,15 @@ export function assignRestaurants(
         usedIds,
         mealType,
         3,
-        preferences.destination
+        preferences.destination,
+        mealDistanceLimits
         ),
         mealType,
         dayCuisineFamilies,
-        cuisineHistoryByMeal[mealType]
+        cuisineHistoryByMeal[mealType],
+        tripCuisineCounts,
+        tripMealCount,
+        preferences.durationDays
       );
 
       // If no reasonable local restaurant exists, leave it null.
@@ -186,6 +221,8 @@ export function assignRestaurants(
         const selectedFamily = getCuisineFamily(best);
         dayCuisineFamilies.add(selectedFamily);
         cuisineHistoryByMeal[mealType].push(selectedFamily);
+        tripCuisineCounts.set(selectedFamily, (tripCuisineCounts.get(selectedFamily) || 0) + 1);
+        tripMealCount += 1;
       }
 
       assignments.push({
@@ -208,11 +245,15 @@ function prioritizeCuisineVariety(
   candidates: Restaurant[],
   mealType: MealType,
   dayCuisineFamilies: Set<string>,
-  mealHistory: string[]
+  mealHistory: string[],
+  tripCuisineCounts: Map<string, number>,
+  tripMealCount: number,
+  durationDays: number
 ): Restaurant[] {
   if (candidates.length <= 1) return candidates;
 
   const recentFamilies = new Set(mealHistory.slice(-2));
+  const requiresStrongTripVariety = durationDays >= 3;
   const rescored = candidates.map((restaurant, index) => {
     const family = getCuisineFamily(restaurant);
     let diversityScore = 0;
@@ -225,6 +266,21 @@ function prioritizeCuisineVariety(
 
     // Slightly prefer explicit cuisine labels over generic buckets.
     if (family !== 'generic') diversityScore += 0.6;
+
+    // Trip-wide balance: avoid one cuisine dominating >50% of meals.
+    if (tripMealCount >= 2) {
+      const futureCount = (tripCuisineCounts.get(family) || 0) + 1;
+      const projectedRatio = futureCount / (tripMealCount + 1);
+      if (projectedRatio > 0.5) diversityScore -= 1.8;
+    }
+
+    // Urban 3+ day stays should expose at least 3 cuisine families.
+    if (requiresStrongTripVariety) {
+      const uniqueFamilies = new Set(tripCuisineCounts.keys());
+      if (!uniqueFamilies.has(family) && uniqueFamilies.size < 3) {
+        diversityScore += 2;
+      }
+    }
 
     return { restaurant, index, diversityScore };
   });
@@ -382,12 +438,17 @@ function isLocalCuisine(restaurant: Restaurant, country: string): boolean {
  * Score candidates with strong distance penalties.
  * Proximity dominates once we are outside the ideal radius.
  */
-function scoreCandidate(restaurant: Restaurant, mealType: MealType, distanceKm: number): number {
+function scoreCandidate(
+  restaurant: Restaurant,
+  mealType: MealType,
+  distanceKm: number,
+  distanceLimits: Record<MealType, { idealKm: number; hardKm: number; absoluteKm: number }>
+): number {
   const rating = restaurant.rating || 3;
   const reviews = Math.max(restaurant.reviewCount || 1, 1);
   const quality = rating * 2 + Math.log10(reviews + 1) * 1.5;
 
-  const limits = MEAL_DISTANCE_LIMITS[mealType];
+  const limits = distanceLimits[mealType];
   const distanceWeight = mealType === 'breakfast' ? 4.0 : 3.5;
   let score = quality - distanceKm * distanceWeight;
 
@@ -413,9 +474,10 @@ function selectTopNearbyRestaurants(
   usedIds: Set<string>,
   mealType: MealType,
   count: number = 3,
-  destination?: string
+  destination?: string,
+  distanceLimits: Record<MealType, { idealKm: number; hardKm: number; absoluteKm: number }> = DEFAULT_MEAL_DISTANCE_LIMITS
 ): Restaurant[] {
-  const limits = MEAL_DISTANCE_LIMITS[mealType];
+  const limits = distanceLimits[mealType];
   const scored: { restaurant: Restaurant; score: number; distanceKm: number }[] = [];
 
   for (const r of pool) {
@@ -432,7 +494,7 @@ function selectTopNearbyRestaurants(
     if (distanceKm > limits.absoluteKm) continue;
     scored.push({
       restaurant: r,
-      score: scoreCandidate(r, mealType, distanceKm),
+      score: scoreCandidate(r, mealType, distanceKm, distanceLimits),
       distanceKm,
     });
   }

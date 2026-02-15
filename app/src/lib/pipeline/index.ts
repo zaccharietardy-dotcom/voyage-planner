@@ -20,6 +20,13 @@ import { assembleTripSchedule } from './step7-assemble';
 import { validateAndFixTrip } from './step8-validate';
 import { calculateDistance } from '../services/geocoding';
 import { searchRestaurantsWithSerpApi } from '../services/serpApiPlaces';
+import { diffSerpApiUsage, getSerpApiUsageSnapshot } from '../services/apiUsageTracker';
+import {
+  accommodationHasKitchen,
+  budgetStrategyRequestsSelfCatering,
+  sanitizeBudgetStrategyForKitchen,
+  stripSelfCateredFallbacks,
+} from './utils/accommodation';
 
 // ---------------------------------------------------------------------------
 // Pipeline Event System — emit helper
@@ -36,6 +43,7 @@ export async function generateTripV2(
   onEvent?: OnPipelineEvent
 ): Promise<Trip> {
   const T0 = Date.now();
+  const serpApiUsageStart = getSerpApiUsageSnapshot();
 
   // Step 1: Fetch all data in parallel (~5-10s)
   console.log('[Pipeline V2] === Step 1: Fetching data... ===');
@@ -147,6 +155,20 @@ export async function generateTripV2(
     { destination: preferences.destination }
   );
 
+  const hotelSupportsKitchen = accommodationHasKitchen(hotel);
+  const budgetStrategySelfCateringRequested = budgetStrategyRequestsSelfCatering(data.budgetStrategy);
+  const budgetStrategySanitization = sanitizeBudgetStrategyForKitchen(data.budgetStrategy, hotelSupportsKitchen);
+  const budgetStrategyForMeals = (budgetStrategySanitization.strategy || data.budgetStrategy);
+  if (budgetStrategySanitization.adjusted && hotel) {
+    hotel = {
+      ...hotel,
+      qualityFlags: Array.from(new Set([...(hotel.qualityFlags || []), 'self_catering_disabled_no_kitchen'])),
+    };
+    console.log('[Pipeline V2] Self-catered meals disabled: selected accommodation has no kitchen');
+  } else if (budgetStrategySelfCateringRequested && hotelSupportsKitchen) {
+    console.log('[Pipeline V2] Self-catered meals enabled: accommodation kitchen detected');
+  }
+
   const accommodationCoords = hotel
     ? { lat: hotel.latitude, lng: hotel.longitude }
     : data.destCoords;
@@ -177,7 +199,7 @@ export async function generateTripV2(
     data.tripAdvisorRestaurants,
     serpRestaurantsForAssignment,
     preferences,
-    data.budgetStrategy,
+    budgetStrategyForMeals,
     accommodationCoords,
     hotel
   );
@@ -207,7 +229,7 @@ export async function generateTripV2(
         data.tripAdvisorRestaurants,
         serpRestaurantsForAssignment,
         preferences,
-        data.budgetStrategy,
+        budgetStrategyForMeals,
         accommodationCoords,
         hotel,
         firstPassUsedIds
@@ -229,6 +251,7 @@ export async function generateTripV2(
   const budgetAdjusted = await rebalanceSelectionsForBalancedBudget({
     preferences,
     data,
+    budgetStrategyForMeals,
     clusters,
     selectedActivities,
     bestTransport,
@@ -279,6 +302,9 @@ export async function generateTripV2(
   emit(onEvent, { type: 'step_start', step: 8, stepName: 'Quality validation' });
   const validationResult = validateAndFixTrip(trip);
   console.log(`[Pipeline V2] Step 8: Quality score ${validationResult.score}/100 (${validationResult.warnings.length} warnings, ${validationResult.autoFixes.length} auto-fixes)`);
+  const serpApiUsageDelta = diffSerpApiUsage(serpApiUsageStart, getSerpApiUsageSnapshot());
+  trip.apiUsage = { serpApi: serpApiUsageDelta };
+  console.log(`[Pipeline V2] SerpAPI usage: ${serpApiUsageDelta.totalRequests} request(s) this generation`);
   emit(onEvent, { type: 'step_done', step: 8, stepName: 'Quality validation', durationMs: 0, detail: `Score ${validationResult.score}/100 (${validationResult.warnings.length} warnings)` });
 
   const totalTime = Date.now() - T0;
@@ -635,6 +661,7 @@ function pickAggressiveBudgetHotelFallback(
 async function rebalanceSelectionsForBalancedBudget(args: {
   preferences: TripPreferences;
   data: FetchedData;
+  budgetStrategyForMeals: FetchedData['budgetStrategy'];
   clusters: ActivityCluster[];
   selectedActivities: ScoredActivity[];
   bestTransport: TransportOptionSummary | null;
@@ -659,6 +686,13 @@ async function rebalanceSelectionsForBalancedBudget(args: {
   let currentHotel = args.hotel;
   let currentMeals = args.meals;
   let currentRestaurantPool = deduplicateRestaurantsByNameAndCoords(args.serpRestaurantsForAssignment);
+
+  let kitchenAvailable = accommodationHasKitchen(currentHotel);
+  const initialSelfCateredCleanup = stripSelfCateredFallbacks(currentMeals, kitchenAvailable);
+  if (initialSelfCateredCleanup.changed > 0) {
+    currentMeals = initialSelfCateredCleanup.meals;
+    notes.push(`self-catered removed x${initialSelfCateredCleanup.changed} (no kitchen)`);
+  }
 
   for (let pass = 0; pass < 3; pass++) {
     const projected = estimateProjectedTotalCost({
@@ -695,6 +729,7 @@ async function rebalanceSelectionsForBalancedBudget(args: {
       if (cheaperHotel && currentHotel && cheaperHotel.id !== currentHotel.id && cheaperHotel.pricePerNight < currentHotel.pricePerNight) {
         currentHotel = cheaperHotel;
         notes.push(`hotel ${currentHotel.name}`);
+        kitchenAvailable = accommodationHasKitchen(currentHotel);
 
         const accommodationCoords = { lat: currentHotel.latitude, lng: currentHotel.longitude };
         const reassigned = assignRestaurants(
@@ -702,12 +737,18 @@ async function rebalanceSelectionsForBalancedBudget(args: {
           args.data.tripAdvisorRestaurants,
           currentRestaurantPool,
           args.preferences,
-          args.data.budgetStrategy,
+          args.budgetStrategyForMeals,
           accommodationCoords,
           currentHotel
         );
         currentMeals = reassigned.meals;
         currentRestaurantPool = reassigned.restaurantGeoPool;
+
+        const sanitizedMeals = stripSelfCateredFallbacks(currentMeals, kitchenAvailable);
+        if (sanitizedMeals.changed > 0) {
+          currentMeals = sanitizedMeals.meals;
+          notes.push(`self-catered removed x${sanitizedMeals.changed} (no kitchen)`);
+        }
       }
       continue;
     }
@@ -728,17 +769,21 @@ async function rebalanceSelectionsForBalancedBudget(args: {
   });
 
   if (projected > toleranceCap) {
-    const selfCatered = selectSelfCateredMealsForBudget(currentMeals, projected - toleranceCap);
-    if (selfCatered.changed > 0) {
-      currentMeals = selfCatered.meals;
-      notes.push(`self-catered meal suggestions x${selfCatered.changed}`);
-      projected = estimateProjectedTotalCost({
-        transport: currentTransport,
-        hotel: currentHotel,
-        selectedActivities: args.selectedActivities,
-        meals: currentMeals,
-        durationDays: args.preferences.durationDays,
-      });
+    if (kitchenAvailable) {
+      const selfCatered = selectSelfCateredMealsForBudget(currentMeals, projected - toleranceCap);
+      if (selfCatered.changed > 0) {
+        currentMeals = selfCatered.meals;
+        notes.push(`self-catered meal suggestions x${selfCatered.changed}`);
+        projected = estimateProjectedTotalCost({
+          transport: currentTransport,
+          hotel: currentHotel,
+          selectedActivities: args.selectedActivities,
+          meals: currentMeals,
+          durationDays: args.preferences.durationDays,
+        });
+      }
+    } else {
+      notes.push('self-catered skipped (no kitchen)');
     }
   }
 
@@ -747,6 +792,7 @@ async function rebalanceSelectionsForBalancedBudget(args: {
     if (fallbackHotel && currentHotel && fallbackHotel.id !== currentHotel.id) {
       currentHotel = fallbackHotel;
       notes.push(`hotel budget fallback ${fallbackHotel.name}`);
+      kitchenAvailable = accommodationHasKitchen(currentHotel);
 
       const accommodationCoords = { lat: currentHotel.latitude, lng: currentHotel.longitude };
       const reassigned = assignRestaurants(
@@ -754,12 +800,18 @@ async function rebalanceSelectionsForBalancedBudget(args: {
         args.data.tripAdvisorRestaurants,
         currentRestaurantPool,
         args.preferences,
-        args.data.budgetStrategy,
+        args.budgetStrategyForMeals,
         accommodationCoords,
         currentHotel
       );
       currentMeals = reassigned.meals;
       currentRestaurantPool = reassigned.restaurantGeoPool;
+
+      const sanitizedMeals = stripSelfCateredFallbacks(currentMeals, kitchenAvailable);
+      if (sanitizedMeals.changed > 0) {
+        currentMeals = sanitizedMeals.meals;
+        notes.push(`self-catered removed x${sanitizedMeals.changed} (no kitchen)`);
+      }
 
       const postHotelProjected = estimateProjectedTotalCost({
         transport: currentTransport,
@@ -769,10 +821,14 @@ async function rebalanceSelectionsForBalancedBudget(args: {
         durationDays: args.preferences.durationDays,
       });
       if (postHotelProjected > toleranceCap) {
-        const selfCatered = selectSelfCateredMealsForBudget(currentMeals, postHotelProjected - toleranceCap);
-        if (selfCatered.changed > 0) {
-          currentMeals = selfCatered.meals;
-          notes.push(`self-catered meal suggestions x${selfCatered.changed} (post-hotel)`);
+        if (kitchenAvailable) {
+          const selfCatered = selectSelfCateredMealsForBudget(currentMeals, postHotelProjected - toleranceCap);
+          if (selfCatered.changed > 0) {
+            currentMeals = selfCatered.meals;
+            notes.push(`self-catered meal suggestions x${selfCatered.changed} (post-hotel)`);
+          }
+        } else {
+          notes.push('self-catered skipped (post-hotel, no kitchen)');
         }
       }
     }

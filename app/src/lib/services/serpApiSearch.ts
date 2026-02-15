@@ -12,10 +12,26 @@
 
 import { Flight } from '../types';
 import { generateFlightLink } from './linkGenerator';
+import { trackSerpApiRequest } from './apiUsageTracker';
 
 // Protection contre les espaces parasites dans les clés
 function getSerpApiKey() { return process.env.SERPAPI_KEY?.trim(); }
 const SERPAPI_BASE_URL = 'https://serpapi.com/search.json';
+const FLIGHT_CACHE_TTL_MS = 30 * 60 * 1000;
+const FLIGHT_CACHE_MAX_ENTRIES = 120;
+const flightSearchCache = new Map<string, { timestamp: number; flights: Flight[] }>();
+
+async function trackedSerpApiFetch(input: string, init?: RequestInit): Promise<Response> {
+  let engine = 'unknown';
+  try {
+    const url = new URL(input);
+    engine = url.searchParams.get('engine') || 'unknown';
+  } catch {
+    // noop
+  }
+  trackSerpApiRequest(engine);
+  return fetch(input, init);
+}
 
 interface SerpApiFlightOffer {
   flights: Array<{
@@ -51,6 +67,42 @@ interface SerpApiFlightResult {
   error?: string;
 }
 
+function cloneFlights(flights: Flight[]): Flight[] {
+  return flights.map((flight) => ({
+    ...flight,
+    stopCities: flight.stopCities ? [...flight.stopCities] : undefined,
+  }));
+}
+
+function getFlightCacheKey(origin: string, destination: string, date: string, passengers: number): string {
+  return `${origin}|${destination}|${date}|${passengers}`;
+}
+
+function readFlightCache(cacheKey: string): Flight[] | null {
+  const cached = flightSearchCache.get(cacheKey);
+  if (!cached) return null;
+  if (Date.now() - cached.timestamp > FLIGHT_CACHE_TTL_MS) {
+    flightSearchCache.delete(cacheKey);
+    return null;
+  }
+  return cloneFlights(cached.flights);
+}
+
+function writeFlightCache(cacheKey: string, flights: Flight[]): void {
+  if (flightSearchCache.size >= FLIGHT_CACHE_MAX_ENTRIES) {
+    const oldest = flightSearchCache.keys().next().value as string | undefined;
+    if (oldest) flightSearchCache.delete(oldest);
+  }
+  flightSearchCache.set(cacheKey, { timestamp: Date.now(), flights: cloneFlights(flights) });
+}
+
+function summarizeTopLocations(counter: Map<string, number>, maxItems: number = 3): string {
+  const top = [...counter.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, maxItems);
+  return top.map(([name, count]) => `${name}×${count}`).join(', ');
+}
+
 /**
  * Recherche des vols RÉELS via SerpAPI (Google Flights)
  */
@@ -64,6 +116,12 @@ export async function searchFlightsWithSerpApi(
   if (!getSerpApiKey()) {
     console.warn('[SerpAPI] SERPAPI_KEY non configurée');
     return [];
+  }
+
+  const cacheKey = getFlightCacheKey(origin, destination, date, passengers);
+  const cachedFlights = readFlightCache(cacheKey);
+  if (cachedFlights) {
+    return cachedFlights;
   }
 
   const params = new URLSearchParams({
@@ -81,7 +139,7 @@ export async function searchFlightsWithSerpApi(
   });
 
   try {
-    const response = await fetch(`${SERPAPI_BASE_URL}?${params}`);
+    const response = await trackedSerpApiFetch(`${SERPAPI_BASE_URL}?${params}`);
 
     if (!response.ok) {
       console.error('[SerpAPI] Erreur HTTP:', response.status);
@@ -98,6 +156,14 @@ export async function searchFlightsWithSerpApi(
     const flights: Flight[] = [];
     const googleFlightsUrl = data.search_metadata?.google_flights_url ||
       `https://www.google.com/travel/flights?q=flights%20from%20${origin}%20to%20${destination}%20on%20${date}`;
+    const rejectionStats = {
+      wrongDestination: 0,
+      overnightLayover: 0,
+      longLayover: 0,
+      missingFlightNumber: 0,
+    };
+    const overnightByAirport = new Map<string, number>();
+    const longLayoverByAirport = new Map<string, number>();
 
     // Traiter les meilleurs vols
     const allFlights = [...(data.best_flights || []), ...(data.other_flights || [])];
@@ -111,7 +177,7 @@ export async function searchFlightsWithSerpApi(
 
       // VALIDATION: Vérifier que le vol arrive bien à la destination demandée
       if (lastLeg.arrival_airport.id !== destination) {
-        console.warn(`[SerpAPI] ⚠️ Vol ignoré: arrive à ${lastLeg.arrival_airport.id} au lieu de ${destination}`);
+        rejectionStats.wrongDestination++;
         continue;
       }
 
@@ -121,7 +187,8 @@ export async function searchFlightsWithSerpApi(
       if (hasOvernightLayover) {
         const layoverInfo = flightOffer.layovers?.find(l => l.overnight);
         if (!layoverInfo) continue;
-        console.warn(`[SerpAPI] ⚠️ Vol ignoré: escale de nuit à ${layoverInfo.name} (${Math.round(layoverInfo.duration / 60)}h)`);
+        rejectionStats.overnightLayover++;
+        overnightByAirport.set(layoverInfo.name, (overnightByAirport.get(layoverInfo.name) || 0) + 1);
         continue;
       }
 
@@ -130,13 +197,14 @@ export async function searchFlightsWithSerpApi(
       if (hasLongLayover) {
         const layoverInfo = flightOffer.layovers?.find(l => l.duration > 240);
         if (!layoverInfo) continue;
-        console.warn(`[SerpAPI] ⚠️ Vol ignoré: escale trop longue à ${layoverInfo.name} (${Math.round(layoverInfo.duration / 60)}h)`);
+        rejectionStats.longLayover++;
+        longLayoverByAirport.set(layoverInfo.name, (longLayoverByAirport.get(layoverInfo.name) || 0) + 1);
         continue;
       }
 
       // VALIDATION: Rejeter les vols sans numéro valide
       if (!firstLeg.flight_number) {
-        console.warn(`[SerpAPI] Vol sans numéro ignoré: ${firstLeg.airline} ${firstLeg.departure_airport.id} → ${lastLeg.arrival_airport.id}`);
+        rejectionStats.missingFlightNumber++;
         continue;
       }
 
@@ -204,8 +272,28 @@ export async function searchFlightsWithSerpApi(
 
     // NOTE: On garde l'ordre "best flights" de Google Flights (prix + durée + escales)
     // pour que le premier vol corresponde à celui affiché sur Google Flights
+    const filteredCount =
+      rejectionStats.wrongDestination +
+      rejectionStats.overnightLayover +
+      rejectionStats.longLayover +
+      rejectionStats.missingFlightNumber;
+    if (filteredCount > 0) {
+      const reasons: string[] = [];
+      if (rejectionStats.overnightLayover > 0) {
+        const top = summarizeTopLocations(overnightByAirport);
+        reasons.push(`escale_nuit=${rejectionStats.overnightLayover}${top ? ` (${top})` : ''}`);
+      }
+      if (rejectionStats.longLayover > 0) {
+        const top = summarizeTopLocations(longLayoverByAirport);
+        reasons.push(`escale_longue=${rejectionStats.longLayover}${top ? ` (${top})` : ''}`);
+      }
+      if (rejectionStats.wrongDestination > 0) reasons.push(`mauvaise_destination=${rejectionStats.wrongDestination}`);
+      if (rejectionStats.missingFlightNumber > 0) reasons.push(`sans_numero=${rejectionStats.missingFlightNumber}`);
+      console.warn(`[SerpAPI] Vols filtrés ${origin}→${destination} ${date}: ${reasons.join(', ')}`);
+    }
 
-    return flights;
+    writeFlightCache(cacheKey, flights);
+    return cloneFlights(flights);
   } catch (error) {
     console.error('[SerpAPI] Erreur:', error);
     return [];
@@ -241,7 +329,7 @@ export async function verifyPlaceWithSerpApi(
   });
 
   try {
-    const response = await fetch(`${SERPAPI_BASE_URL}?${params}`);
+    const response = await trackedSerpApiFetch(`${SERPAPI_BASE_URL}?${params}`);
     if (!response.ok) return null;
 
     const data = await response.json();

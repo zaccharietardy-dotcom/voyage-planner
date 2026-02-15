@@ -34,6 +34,8 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
   const stages = data.cityPlan || [{ city: '', days: 7 }];
   const [inspireQuery, setInspireQuery] = useState('');
   const [durationSuggestionForStage, setDurationSuggestionForStage] = useState<number | null>(null);
+  const [geoLoading, setGeoLoading] = useState(false);
+  const [geoError, setGeoError] = useState<string | null>(null);
   const { preferences } = useUserPreferences();
 
   const {
@@ -112,6 +114,65 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
 
   const totalDays = stages.reduce((sum, s) => sum + s.days, 0);
 
+  const handleUseCurrentLocation = () => {
+    if (typeof navigator === 'undefined' || !navigator.geolocation) {
+      setGeoError('La géolocalisation n’est pas disponible sur cet appareil.');
+      return;
+    }
+
+    setGeoLoading(true);
+    setGeoError(null);
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+
+        onChange({
+          homeCoords: { lat, lng },
+        });
+
+        try {
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lng)}`
+          );
+
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+          }
+
+          const payload = await response.json();
+          const displayName = payload?.display_name as string | undefined;
+          const address = payload?.address || {};
+          const cityName = address.city || address.town || address.village || address.municipality;
+
+          onChange({
+            homeCoords: { lat, lng },
+            homeAddress: displayName || data.homeAddress || '',
+            ...(cityName && !data.origin ? { origin: cityName } : {}),
+          });
+        } catch {
+          onChange({ homeCoords: { lat, lng } });
+        } finally {
+          setGeoLoading(false);
+        }
+      },
+      (error) => {
+        setGeoLoading(false);
+        if (error.code === error.PERMISSION_DENIED) {
+          setGeoError('Autorisez la géolocalisation pour remplir automatiquement votre départ.');
+          return;
+        }
+        setGeoError('Impossible de récupérer votre position actuelle.');
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 60000,
+      }
+    );
+  };
+
   return (
     <div className="space-y-8">
       <div className="text-center mb-8">
@@ -178,6 +239,48 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
             className="pl-10 h-12 text-base"
           />
         </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="homeAddress" className="text-base font-medium">
+          Adresse de départ précise (optionnel)
+        </Label>
+        <Input
+          id="homeAddress"
+          placeholder="10 rue Exemple, 75011 Paris"
+          value={data.homeAddress || ''}
+          onChange={(e) => onChange({ homeAddress: e.target.value })}
+          className="h-12 text-base"
+        />
+        <div className="flex items-center gap-3">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleUseCurrentLocation}
+            disabled={geoLoading}
+          >
+            {geoLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Localisation...
+              </>
+            ) : (
+              <>
+                <Navigation className="mr-2 h-4 w-4" />
+                Utiliser ma position actuelle
+              </>
+            )}
+          </Button>
+          {data.homeCoords && (
+            <span className="text-xs text-muted-foreground">
+              {data.homeCoords.lat.toFixed(4)}, {data.homeCoords.lng.toFixed(4)}
+            </span>
+          )}
+        </div>
+        {geoError && (
+          <p className="text-xs text-destructive">{geoError}</p>
+        )}
       </div>
 
       {/* ============ MODE PRECISE ============ */}

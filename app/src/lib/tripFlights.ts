@@ -41,9 +41,42 @@ export async function findBestFlights(
   // Distance penalty: 0.30€/km for distance from city to airport
   // This prevents selecting a cheap flight from an airport 450km away
   const DISTANCE_PENALTY_PER_KM = 0.30;
+  const sortAirportsByCityDistance = (
+    airports: AirportInfo[],
+    cityCoords?: { lat: number; lng: number }
+  ): AirportInfo[] => {
+    if (!cityCoords) return airports;
+    return [...airports].sort((a, b) => {
+      const distA = calculateDistance(cityCoords.lat, cityCoords.lng, a.latitude, a.longitude);
+      const distB = calculateDistance(cityCoords.lat, cityCoords.lng, b.latitude, b.longitude);
+      return distA - distB;
+    });
+  };
 
-  for (const originAirport of originAirports) {
-    for (const destAirport of destAirports) {
+  // By default, evaluate every airport pair (no implicit SerpAPI request cap).
+  // Optional override: set FLIGHT_AIRPORT_PAIR_CAP to a positive integer to cap pair count.
+  const sortedOriginAirports = sortAirportsByCityDistance(originAirports, originCityCoords);
+  const sortedDestAirports = sortAirportsByCityDistance(destAirports, destCityCoords);
+  let scopedOriginAirports = sortedOriginAirports;
+  let scopedDestAirports = sortedDestAirports;
+
+  const fullPairCount = originAirports.length * destAirports.length;
+  const pairCapRaw = process.env.FLIGHT_AIRPORT_PAIR_CAP;
+  const pairCap = pairCapRaw ? Number.parseInt(pairCapRaw, 10) : NaN;
+  if (Number.isFinite(pairCap) && pairCap > 0) {
+    const maxPerSide = Math.max(1, Math.floor(Math.sqrt(pairCap)));
+    scopedOriginAirports = sortedOriginAirports.slice(0, Math.min(maxPerSide, sortedOriginAirports.length));
+    scopedDestAirports = sortedDestAirports.slice(0, Math.min(maxPerSide, sortedDestAirports.length));
+    const scopedPairCount = scopedOriginAirports.length * scopedDestAirports.length;
+    console.log(
+      `[Flights] Airport pair cap active: ${scopedPairCount}/${fullPairCount} pairs (FLIGHT_AIRPORT_PAIR_CAP=${pairCap})`
+    );
+  } else {
+    console.log(`[Flights] Airport search scope: full (${fullPairCount} airport pairs)`);
+  }
+
+  for (const originAirport of scopedOriginAirports) {
+    for (const destAirport of scopedDestAirports) {
       try {
 
         const flightResults = await searchFlights({
@@ -206,4 +239,3 @@ export function selectFlightByBudget(flights: Flight[], budgetLevel?: BudgetLeve
 
   return scoredFlights[0].flight;
 }
-

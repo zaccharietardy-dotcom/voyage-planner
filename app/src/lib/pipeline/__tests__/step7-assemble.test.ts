@@ -1,5 +1,6 @@
 import {
   addHotelBoundaryTransportItems,
+  buildInterCityFallbackTransportPayload,
   compressIntraDayGaps,
   fixRestaurantOutliers,
   getAirportPreDepartureLeadMinutes,
@@ -8,7 +9,7 @@ import {
   normalizeSuggestedDayStartHour,
   rebalanceAdjacentDayLoad,
 } from '../step7-assemble';
-import type { Accommodation, Flight, Restaurant, TripDay, TripItem } from '../../types';
+import type { Accommodation, Flight, Restaurant, TripDay, TripItem, TripPreferences, TransportOptionSummary } from '../../types';
 
 describe('step7-assemble helpers', () => {
   const hotel: Accommodation = {
@@ -44,6 +45,38 @@ describe('step7-assemble helpers', () => {
     dataReliability: 'verified',
   });
 
+  const basePreferences: TripPreferences = {
+    origin: 'Tokyo',
+    destination: 'Paris',
+    startDate: new Date('2026-03-01T00:00:00.000Z'),
+    durationDays: 7,
+    transport: 'plane',
+    carRental: false,
+    groupSize: 1,
+    groupType: 'solo',
+    budgetLevel: 'moderate',
+    activities: ['culture'],
+    dietary: ['none'],
+    mustSee: '',
+  };
+
+  const planeTransport: TransportOptionSummary = {
+    id: 'plane',
+    mode: 'plane',
+    totalDuration: 900,
+    totalPrice: 520,
+    totalCO2: 500,
+    score: 8.1,
+    scoreDetails: {
+      priceScore: 7,
+      timeScore: 9,
+      co2Score: 5,
+    },
+    segments: [],
+    bookingUrl: 'https://www.aviasales.com/search/TOKYO1003PARIS1?currency=eur&locale=fr',
+    omioFlightUrl: 'https://www.omio.fr/vols/tokyo/paris?departure_date=2026-03-10',
+  };
+
   it('annotates first outside item with hotel departure distance (no separate transport item)', () => {
     const items = [
       baseActivity('activity-1', '10:00', '11:00', 45.4704, 9.1793),
@@ -78,6 +111,33 @@ describe('step7-assemble helpers', () => {
     expect(normalized).toContain('departure_date=2026-02-22');
     expect(normalized).toContain('foo=bar');
     expect(normalized).not.toContain(`departure_date=${outboundDate}`);
+  });
+
+  it('builds a plane fallback payload with Aviasales/Omio links for inter-city trips', () => {
+    const payload = buildInterCityFallbackTransportPayload({
+      direction: 'outbound',
+      preferences: basePreferences,
+      transport: planeTransport,
+      date: new Date('2026-03-01T08:00:00.000Z'),
+    });
+
+    expect(payload.title).toBe('✈️ Vol → Paris');
+    expect(payload.data.bookingUrl).toContain('aviasales.com/search/');
+    expect(payload.data.aviasalesUrl).toContain('aviasales.com/search/');
+    expect(payload.data.omioFlightUrl).toContain('omio.fr/vols/');
+    expect(payload.data.qualityFlags).toContain('aviasales_fallback_link');
+  });
+
+  it('normalizes return plane fallback Omio date to return day', () => {
+    const payload = buildInterCityFallbackTransportPayload({
+      direction: 'return',
+      preferences: basePreferences,
+      transport: planeTransport,
+      date: new Date('2026-03-07T15:00:00.000Z'),
+    });
+
+    expect(payload.title).toBe('✈️ Vol → Tokyo');
+    expect(payload.data.omioFlightUrl).toContain('departure_date=2026-03-07');
   });
 
   it('detects dominant transit mode by weighted legs duration', () => {

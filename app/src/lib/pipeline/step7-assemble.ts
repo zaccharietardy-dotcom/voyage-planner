@@ -9,7 +9,7 @@ import type { Trip, TripDay, TripItem, TripPreferences, Flight, Accommodation, T
 import type { FetchedData, ActivityCluster, MealAssignment, BalancedPlan, ScoredActivity } from './types';
 import { DayScheduler, parseTime } from '../services/scheduler';
 import type { ScheduleItem } from '../services/scheduler';
-import { calculateDistance } from '../services/geocoding';
+import { calculateDistance, geocodeAddress } from '../services/geocoding';
 import { getDirections } from '../services/directions';
 import { fetchPlaceImage, fetchRestaurantPhotoByPlaceId } from './services/wikimediaImages';
 import type { OnPipelineEvent } from './types';
@@ -17,8 +17,14 @@ import { isAppropriateForMeal, getCuisineFamily, isBreakfastSpecialized } from '
 import { searchRestaurantsNearby } from '../services/serpApiPlaces';
 import { batchFetchWikipediaSummaries, getWikiLanguageForDestination } from '../services/wikipedia';
 import { normalizeHotelBookingUrl } from '../services/bookingLinks';
+import { generateFlightLink, generateFlightOmioLink, formatDateForUrl } from '../services/linkGenerator';
 import { sanitizeApiKeyLeaksInString, sanitizeGoogleMapsUrl } from '../services/googlePlacePhoto';
 import { dedupeActivitiesBySimilarity, isDuplicateActivityCandidate } from './utils/activityDedup';
+import { getRestaurantMaxDistanceKmForProfile, resolveQualityCityProfile } from './qualityPolicy';
+import { isMonumentLikeActivityName, resolveOfficialTicketing } from '../services/officialTicketing';
+import { scoreViatorPlusValue } from '../services/viator';
+import { calculateParkingTime, selectBestParking } from '../services/parking';
+import { accommodationHasKitchen } from './utils/accommodation';
 // ---------------------------------------------------------------------------
 // Directions cache — used to store pre-fetched real travel times
 // ---------------------------------------------------------------------------
@@ -35,6 +41,15 @@ function uuidv4(): string {
     const v = c === 'x' ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
+}
+
+function normalizeLocationKey(value: string): string {
+  return (value || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
 }
 
 /**
@@ -70,8 +85,8 @@ const PIPELINE_MEDIA_PROXY = !['0', 'false', 'off'].includes(
 );
 
 const MAX_INTRA_DAY_GAP_MIN = 150;
-const BREAKFAST_RESTAURANT_MAX_KM = 1.2;
-const MEAL_RESTAURANT_MAX_KM = 1.8;
+const DEFAULT_BREAKFAST_RESTAURANT_MAX_KM = 1.2;
+const DEFAULT_MEAL_RESTAURANT_MAX_KM = 1.8;
 const ADJACENT_LOAD_REBALANCE_THRESHOLD_MIN = 430;
 
 export function getAirportPreDepartureLeadMinutes(flight: Flight): number {
@@ -223,11 +238,150 @@ export function normalizeReturnTransportBookingUrl(rawUrl: string | undefined, r
   }
 }
 
+type InterCityFallbackDirection = 'outbound' | 'return';
+
+export function buildInterCityFallbackTransportPayload(params: {
+  direction: InterCityFallbackDirection;
+  preferences: TripPreferences;
+  transport: TransportOptionSummary | null;
+  date: Date;
+}): { title: string; data: Record<string, any> } {
+  const { direction, preferences, transport, date } = params;
+  const from = direction === 'outbound' ? preferences.origin : preferences.destination;
+  const to = direction === 'outbound' ? preferences.destination : preferences.origin;
+  const dateStr = formatDateForUrl(date);
+  const passengers = Math.max(1, preferences.groupSize || 1);
+
+  if (transport?.mode === 'plane') {
+    const computedAviasalesUrl = generateFlightLink(
+      { origin: from, destination: to },
+      { date: dateStr, passengers }
+    );
+    const baseBookingUrl = direction === 'return'
+      ? (transport.aviasalesUrl || computedAviasalesUrl)
+      : (transport.bookingUrl || transport.aviasalesUrl || computedAviasalesUrl);
+    const bookingUrl = direction === 'return'
+      ? normalizeReturnTransportBookingUrl(baseBookingUrl, date)
+      : baseBookingUrl;
+    const baseOmioUrl = transport.omioFlightUrl || generateFlightOmioLink(from, to, dateStr);
+    const omioFlightUrl = direction === 'return'
+      ? normalizeReturnTransportBookingUrl(baseOmioUrl, date)
+      : baseOmioUrl;
+    const aviasalesUrl = bookingUrl?.includes('aviasales.com') ? bookingUrl : computedAviasalesUrl;
+    const qualityFlags = ['longhaul_fallback_injected', 'plane_transport_fallback'];
+    if (aviasalesUrl.includes('aviasales.com')) qualityFlags.push('aviasales_fallback_link');
+
+    return {
+      title: `✈️ Vol → ${to}`,
+      data: {
+        description: `${from} → ${to} (estimation, lien vols recommandé)`,
+        locationName: `${from} → ${to}`,
+        transportMode: 'transit',
+        transportRole: 'longhaul',
+        estimatedCost: transport.totalPrice || 0,
+        bookingUrl,
+        aviasalesUrl,
+        omioFlightUrl,
+        dataReliability: 'estimated',
+        qualityFlags,
+      },
+    };
+  }
+
+  const bookingUrl = direction === 'return'
+    ? normalizeReturnTransportBookingUrl(transport?.bookingUrl, date)
+    : transport?.bookingUrl;
+
+  return {
+    title: `🔄 Transport → ${to}`,
+    data: {
+      description: `${from} → ${to} (estimation)`,
+      locationName: `${from} → ${to}`,
+      transportMode: 'transit',
+      transportRole: 'longhaul',
+      estimatedCost: transport?.totalPrice || 0,
+      bookingUrl,
+      dataReliability: 'estimated',
+      qualityFlags: ['longhaul_fallback_injected'],
+    },
+  };
+}
+
 function inferInterItemTransportMode(distanceKm: number, travelMinutes: number): TripItem['transportToPrevious'] {
   if (distanceKm <= 1.2) return 'walk';
   if (distanceKm >= 6) return 'car';
   if (distanceKm >= 3.5 && travelMinutes <= 20) return 'car';
   return 'public';
+}
+
+type AirportRef = FetchedData['originAirports'][number];
+
+function normalizeAirportToken(value?: string): string {
+  return (value || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '')
+    .trim();
+}
+
+function chooseOriginAirportForDeparture(args: {
+  preferences: TripPreferences;
+  airports: AirportRef[];
+  outboundFlight: Flight | null;
+  anchorCoords: { lat: number; lng: number };
+}): AirportRef | null {
+  const { preferences, airports, outboundFlight, anchorCoords } = args;
+  if (!airports || airports.length === 0) return null;
+
+  if (outboundFlight?.departureAirportCode) {
+    const byFlight = airports.find((airport) => airport.code === outboundFlight.departureAirportCode);
+    if (byFlight) return byFlight;
+  }
+
+  const preferredToken = normalizeAirportToken(preferences.preferredAirport);
+  if (preferredToken) {
+    const byPreference = airports.find((airport) => {
+      const codeToken = normalizeAirportToken(airport.code);
+      const nameToken = normalizeAirportToken(airport.name);
+      return codeToken === preferredToken || nameToken.includes(preferredToken) || preferredToken.includes(codeToken);
+    });
+    if (byPreference) return byPreference;
+  }
+
+  return [...airports].sort((a, b) => {
+    const distA = calculateDistance(anchorCoords.lat, anchorCoords.lng, a.latitude, a.longitude);
+    const distB = calculateDistance(anchorCoords.lat, anchorCoords.lng, b.latitude, b.longitude);
+    return distA - distB;
+  })[0];
+}
+
+function estimateDriveMinutesToAirport(
+  from: { lat: number; lng: number } | null,
+  to: { lat: number; lng: number } | null
+): number {
+  if (!from || !to) return 45;
+  const distanceKm = calculateDistance(from.lat, from.lng, to.lat, to.lng);
+  if (!Number.isFinite(distanceKm) || distanceKm <= 0) return 45;
+  const minutes = Math.round((distanceKm / 45) * 60 + 12); // average urban/suburban drive + parking drop-off buffer
+  return Math.max(15, Math.min(240, minutes));
+}
+
+function buildDrivingGoogleMapsUrl(
+  originLabel: string,
+  airport: AirportRef
+): string {
+  return `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(originLabel)}&destination=${encodeURIComponent(`${airport.latitude},${airport.longitude}`)}&travelmode=driving`;
+}
+
+function clampToDayTime(date: Date, dayDate: Date): Date {
+  const dayStart = new Date(dayDate);
+  dayStart.setHours(0, 0, 0, 0);
+  const dayEnd = new Date(dayDate);
+  dayEnd.setHours(23, 59, 0, 0);
+  if (date < dayStart) return dayStart;
+  if (date > dayEnd) return dayEnd;
+  return date;
 }
 
 type GeoPoint = { latitude: number; longitude: number };
@@ -335,6 +489,62 @@ export async function assembleTripSchedule(
 ): Promise<Trip> {
   const startDate = new Date(preferences.startDate);
   const days: TripDay[] = [];
+  const qualityProfile = resolveQualityCityProfile({
+    destination: preferences.destination,
+    clusters,
+  });
+  const breakfastRestaurantMaxKm = getRestaurantMaxDistanceKmForProfile(qualityProfile, 'breakfast') || DEFAULT_BREAKFAST_RESTAURANT_MAX_KM;
+  const mealRestaurantMaxKm = getRestaurantMaxDistanceKmForProfile(qualityProfile, 'lunch') || DEFAULT_MEAL_RESTAURANT_MAX_KM;
+  const isInterCityTrip = normalizeLocationKey(preferences.origin) !== normalizeLocationKey(preferences.destination);
+  const interCityDistanceKm = calculateDistance(
+    data.originCoords.lat,
+    data.originCoords.lng,
+    data.destCoords.lat,
+    data.destCoords.lng
+  );
+  const fallbackInterCityTravelMin = Math.max(120, Math.round((interCityDistanceKm / 90) * 60));
+  const hotelSupportsKitchen = accommodationHasKitchen(hotel);
+
+  let departureAnchorCoords = preferences.homeCoords
+    ? { lat: preferences.homeCoords.lat, lng: preferences.homeCoords.lng }
+    : { lat: data.originCoords.lat, lng: data.originCoords.lng };
+  let departureAddressLabel = (preferences.homeAddress || '').trim() || preferences.origin;
+
+  if (!preferences.homeCoords && (preferences.homeAddress || '').trim()) {
+    try {
+      const geocodedHome = await geocodeAddress(preferences.homeAddress!.trim());
+      if (geocodedHome) {
+        departureAnchorCoords = { lat: geocodedHome.lat, lng: geocodedHome.lng };
+        departureAddressLabel = geocodedHome.displayName || preferences.homeAddress!.trim();
+      }
+    } catch (error) {
+      console.warn('[Pipeline V2] Home address geocoding failed, fallback to origin city:', error);
+    }
+  }
+
+  let selectedOriginAirport = chooseOriginAirportForDeparture({
+    preferences,
+    airports: data.originAirports || [],
+    outboundFlight: flights.outbound || null,
+    anchorCoords: departureAnchorCoords,
+  });
+  if (!selectedOriginAirport && flights.outbound?.departureAirportCode) {
+    selectedOriginAirport = {
+      code: flights.outbound.departureAirportCode,
+      name: flights.outbound.departureAirport || flights.outbound.departureAirportCode,
+      city: preferences.origin,
+      country: '',
+      latitude: data.originCoords.lat,
+      longitude: data.originCoords.lng,
+    };
+  }
+  const shouldAddParkingForOutboundPlane =
+    Boolean(selectedOriginAirport)
+    && (preferences.needsParking === true || preferences.transport === 'car');
+  const selectedParking =
+    shouldAddParkingForOutboundPlane && selectedOriginAirport
+      ? selectBestParking(selectedOriginAirport.code, preferences.durationDays, preferences.budgetLevel)
+      : null;
 
   // Pre-fetch Wikipedia summaries for top activities (non-blocking enrichment)
   const wikiDescriptions = new Map<string, string>();
@@ -660,10 +870,83 @@ export async function assembleTripSchedule(
 
     const scheduler = new DayScheduler(dayDate, dayStart, dayEnd);
 
+    const insertHomeToAirportLogistics = (departureTime: Date, airportLeadMinutes: number) => {
+      if (!isFirstDay || !selectedOriginAirport) return;
+
+      const airportCoords = { lat: selectedOriginAirport.latitude, lng: selectedOriginAirport.longitude };
+      const homeCoords = departureAnchorCoords || null;
+      const estimatedDriveMinutes = estimateDriveMinutesToAirport(homeCoords, airportCoords);
+      const estimatedDriveDistanceKm = homeCoords
+        ? calculateDistance(homeCoords.lat, homeCoords.lng, airportCoords.lat, airportCoords.lng)
+        : 0;
+      const estimatedDriveCost = estimatedDriveDistanceKm > 0
+        ? Math.round(estimatedDriveDistanceKm * 0.23)
+        : 0;
+
+      const airportArrivalTime = new Date(departureTime.getTime() - airportLeadMinutes * 60 * 1000);
+      const parkingMinutes = selectedParking ? calculateParkingTime(selectedParking) : 0;
+      const parkingStart = selectedParking
+        ? new Date(airportArrivalTime.getTime() - parkingMinutes * 60 * 1000)
+        : null;
+      const driveEnd = parkingStart || airportArrivalTime;
+      const driveStart = new Date(driveEnd.getTime() - estimatedDriveMinutes * 60 * 1000);
+
+      const clampedDriveStart = clampToDayTime(driveStart, dayDate);
+      const clampedDriveEnd = clampToDayTime(driveEnd, dayDate);
+      if (clampedDriveEnd > clampedDriveStart) {
+        scheduler.insertFixedItem({
+          id: `home-airport-out-${balancedDay.dayNumber}`,
+          title: `🚗 Trajet vers ${selectedOriginAirport.code}`,
+          type: 'transport',
+          startTime: clampedDriveStart,
+          endTime: clampedDriveEnd,
+          data: {
+            description: `${departureAddressLabel} → ${selectedOriginAirport.name}`,
+            locationName: selectedOriginAirport.name,
+            latitude: selectedOriginAirport.latitude,
+            longitude: selectedOriginAirport.longitude,
+            estimatedCost: estimatedDriveCost,
+            bookingUrl: buildDrivingGoogleMapsUrl(departureAddressLabel, selectedOriginAirport),
+            googleMapsUrl: buildDrivingGoogleMapsUrl(departureAddressLabel, selectedOriginAirport),
+            transportMode: 'car',
+            transportRole: 'inter_item',
+            dataReliability: homeCoords ? 'verified' : 'estimated',
+            qualityFlags: homeCoords ? [] : ['home_departure_coords_estimated'],
+          },
+        });
+      }
+
+      if (selectedParking && parkingStart) {
+        const clampedParkingStart = clampToDayTime(parkingStart, dayDate);
+        const clampedParkingEnd = clampToDayTime(airportArrivalTime, dayDate);
+        if (clampedParkingEnd > clampedParkingStart) {
+          scheduler.insertFixedItem({
+            id: `parking-out-${balancedDay.dayNumber}`,
+            title: `Parking aéroport — ${selectedParking.name}`,
+            type: 'parking',
+            startTime: clampedParkingStart,
+            endTime: clampedParkingEnd,
+            data: {
+              ...selectedParking,
+              locationName: selectedParking.address,
+              latitude: selectedParking.latitude,
+              longitude: selectedParking.longitude,
+              estimatedCost: selectedParking.totalPrice || 0,
+              bookingUrl: selectedParking.bookingUrl,
+              dataReliability: 'verified',
+              qualityFlags: ['airport_parking_selected'],
+            },
+          });
+        }
+      }
+    };
+
     // 1. Fixed items: flights OR ground transport
     if (isFirstDay && flights.outbound) {
       const depTime = new Date(flights.outbound.departureTime);
       const arrTime = new Date(flights.outbound.arrivalTime);
+      const airportLeadMinutes = getAirportPreDepartureLeadMinutes(flights.outbound);
+      insertHomeToAirportLogistics(depTime, airportLeadMinutes);
       scheduler.insertFixedItem({
         id: `flight-out-${balancedDay.dayNumber}`,
         title: `Vol ${flights.outbound.flightNumber}`,
@@ -693,6 +976,26 @@ export async function assembleTripSchedule(
           transportMode: normalizeTransportMode(transport.mode),
           transportRole: 'longhaul',
         },
+      });
+    } else if (isFirstDay && isInterCityTrip) {
+      const fallbackStart = parseTime(dayDate, '08:00');
+      const fallbackEnd = new Date(fallbackStart.getTime() + fallbackInterCityTravelMin * 60 * 1000);
+      const fallbackPayload = buildInterCityFallbackTransportPayload({
+        direction: 'outbound',
+        preferences,
+        transport,
+        date: fallbackStart,
+      });
+      if (transport?.mode === 'plane') {
+        insertHomeToAirportLogistics(fallbackStart, 120);
+      }
+      scheduler.insertFixedItem({
+        id: `transport-out-${balancedDay.dayNumber}-fallback`,
+        title: fallbackPayload.title,
+        type: 'transport',
+        startTime: fallbackStart,
+        endTime: fallbackEnd,
+        data: fallbackPayload.data,
       });
     }
 
@@ -782,6 +1085,23 @@ export async function assembleTripSchedule(
           transportMode: normalizeTransportMode(transport.mode),
           transportRole: 'longhaul',
         },
+      };
+    } else if (isLastDay && isInterCityTrip) {
+      const fallbackStart = parseTime(dayDate, '15:00');
+      const fallbackEnd = new Date(fallbackStart.getTime() + fallbackInterCityTravelMin * 60 * 1000);
+      const fallbackPayload = buildInterCityFallbackTransportPayload({
+        direction: 'return',
+        preferences,
+        transport,
+        date: fallbackStart,
+      });
+      returnTransportData = {
+        id: `transport-ret-${balancedDay.dayNumber}-fallback`,
+        title: fallbackPayload.title,
+        type: 'transport',
+        startTime: fallbackStart,
+        endTime: fallbackEnd,
+        data: fallbackPayload.data,
       };
     }
 
@@ -959,11 +1279,11 @@ export async function assembleTripSchedule(
     // After activity reordering, a restaurant assigned near the old cluster centroid
     // may now be far from the nearest activity. Search the FULL restaurant pool
     // for a better option near the actual neighbor activity.
-    // Hard max: restaurant must be within 500m of the neighbor activity.
+    // Hard max: city-profile aware proximity limits.
     const MEAL_REOPT_LIMITS: Record<string, number> = {
-      breakfast: 0.5,
-      lunch: 0.5,
-      dinner: 0.5,
+      breakfast: Math.max(0.5, Math.min(0.9, breakfastRestaurantMaxKm)),
+      lunch: mealRestaurantMaxKm,
+      dinner: mealRestaurantMaxKm,
     };
 
     const usedRestaurantIds = new Set<string>(crossDayUsedRestaurantIds);
@@ -983,6 +1303,7 @@ export async function assembleTripSchedule(
       mealType: 'breakfast' | 'lunch' | 'dinner',
     ) => {
       if (!meal || !neighborActivity) return;
+      if (meal.fallbackMode === 'self_catered' && hotelSupportsKitchen) return;
       if (!neighborActivity.latitude || !neighborActivity.longitude) return;
 
       const maxDist = MEAL_REOPT_LIMITS[mealType] || 2.0;
@@ -1249,10 +1570,24 @@ export async function assembleTripSchedule(
         });
       } else {
         // Self-catered breakfast placeholder
-        const bkfTitle = hotel ? 'Petit-déjeuner à l\'hôtel' : 'Petit-déjeuner — Café/Boulangerie à proximité';
-        const bkfData = hotel
-          ? { name: hotel.name || 'Hôtel', description: 'Petit-déjeuner', latitude: hotel.latitude, longitude: hotel.longitude, estimatedCost: 0 }
-          : { name: 'Café/Boulangerie', description: 'Petit-déjeuner à proximité de l\'hôtel', latitude: data.destCoords.lat, longitude: data.destCoords.lng, estimatedCost: 8 };
+        const breakfastSelfCatered = breakfast?.fallbackMode === 'self_catered' && hotelSupportsKitchen;
+        const bkfTitle = breakfastSelfCatered
+          ? 'Petit-déjeuner — Cuisine maison (option budget)'
+          : hotel
+            ? 'Petit-déjeuner à l\'hôtel'
+            : 'Petit-déjeuner — Café/Boulangerie à proximité';
+        const bkfData = breakfastSelfCatered
+          ? {
+              name: 'Cuisine maison',
+              description: 'Option budget: petit-déjeuner maison',
+              latitude: hotel?.latitude || data.destCoords.lat,
+              longitude: hotel?.longitude || data.destCoords.lng,
+              estimatedCost: 6,
+              qualityFlags: ['budget_self_catered_meal'],
+            }
+          : hotel
+            ? { name: hotel.name || 'Hôtel', description: 'Petit-déjeuner', latitude: hotel.latitude, longitude: hotel.longitude, estimatedCost: 0 }
+            : { name: 'Café/Boulangerie', description: 'Petit-déjeuner à proximité de l\'hôtel', latitude: data.destCoords.lat, longitude: data.destCoords.lng, estimatedCost: 8 };
         scheduler.insertFixedItem({
           id: `self-breakfast-${balancedDay.dayNumber}`,
           title: bkfTitle,
@@ -1290,7 +1625,18 @@ export async function assembleTripSchedule(
       // Self-catered breakfast placeholder
       let bkfTitle: string;
       let bkfData: any;
-      if (hotel) {
+      const breakfastSelfCatered = breakfast?.fallbackMode === 'self_catered' && hotelSupportsKitchen;
+      if (breakfastSelfCatered) {
+        bkfTitle = 'Petit-déjeuner — Cuisine maison (option budget)';
+        bkfData = {
+          name: 'Cuisine maison',
+          description: 'Option budget: petit-déjeuner maison',
+          latitude: hotel?.latitude || data.destCoords.lat,
+          longitude: hotel?.longitude || data.destCoords.lng,
+          estimatedCost: 6,
+          qualityFlags: ['budget_self_catered_meal'],
+        };
+      } else if (hotel) {
         const estimatedBreakfastCost = hotel.breakfastIncluded
           ? 0
           : Math.max(8, Math.round((preferences.groupSize || 2) * 6));
@@ -1634,21 +1980,35 @@ export async function assembleTripSchedule(
     if (!lunchInserted && !skipLunch && !skipLunchForMealActivity) {
       const lunchDuration = lunch?.restaurant ? 60 : 45;
       const lunchFallbackAnchor = getLatestScheduledGeoPoint(scheduler);
+      const lunchSelfCatered = lunch?.fallbackMode === 'self_catered' && hotelSupportsKitchen;
       const lunchData = lunch?.restaurant
         ? { ...lunch.restaurant, _alternatives: lunch.restaurantAlternatives || [] }
-        : {
-            name: 'Restaurant à proximité',
-            description: 'Déjeuner',
-            latitude: lunchFallbackAnchor?.latitude || hotel?.latitude || data.destCoords.lat,
-            longitude: lunchFallbackAnchor?.longitude || hotel?.longitude || data.destCoords.lng,
-            estimatedCost: 15,
-          };
+        : lunchSelfCatered
+          ? {
+              name: 'Cuisine maison',
+              description: 'Option budget: repas maison / courses locales',
+              latitude: lunchFallbackAnchor?.latitude || hotel?.latitude || data.destCoords.lat,
+              longitude: lunchFallbackAnchor?.longitude || hotel?.longitude || data.destCoords.lng,
+              estimatedCost: 8,
+              qualityFlags: ['budget_self_catered_meal'],
+            }
+          : {
+              name: 'Restaurant à proximité',
+              description: 'Déjeuner',
+              latitude: lunchFallbackAnchor?.latitude || hotel?.latitude || data.destCoords.lat,
+              longitude: lunchFallbackAnchor?.longitude || hotel?.longitude || data.destCoords.lng,
+              estimatedCost: 15,
+            };
       const lunchTitle = lunch?.restaurant
         ? `Déjeuner — ${lunch.restaurant.name}`
-        : 'Déjeuner — Restaurant à proximité';
+        : lunchSelfCatered
+          ? 'Déjeuner — Cuisine maison (option budget)'
+          : 'Déjeuner — Restaurant à proximité';
       const lunchId = lunch?.restaurant
         ? `meal-${balancedDay.dayNumber}-lunch`
-        : `self-lunch-${balancedDay.dayNumber}`;
+        : lunchSelfCatered
+          ? `self-cooked-lunch-${balancedDay.dayNumber}`
+          : `self-lunch-${balancedDay.dayNumber}`;
 
       const slot = findBestMealSlot(scheduler, dayDate, '12:00', '15:00', lunchDuration, '13:00');
       if (slot) {
@@ -1670,21 +2030,35 @@ export async function assembleTripSchedule(
     if (!dinnerInserted && !skipDinner && !skipDinnerForMealActivity) {
       const dinnerDuration = dinner?.restaurant ? 75 : 60;
       const dinnerFallbackAnchor = getLatestScheduledGeoPoint(scheduler);
+      const dinnerSelfCatered = dinner?.fallbackMode === 'self_catered' && hotelSupportsKitchen;
       const dinnerData = dinner?.restaurant
         ? { ...dinner.restaurant, _alternatives: dinner.restaurantAlternatives || [] }
-        : {
-            name: 'Restaurant à proximité',
-            description: 'Dîner',
-            latitude: dinnerFallbackAnchor?.latitude || hotel?.latitude || data.destCoords.lat,
-            longitude: dinnerFallbackAnchor?.longitude || hotel?.longitude || data.destCoords.lng,
-            estimatedCost: 20,
-          };
+        : dinnerSelfCatered
+          ? {
+              name: 'Cuisine maison',
+              description: 'Option budget: dîner maison / courses locales',
+              latitude: dinnerFallbackAnchor?.latitude || hotel?.latitude || data.destCoords.lat,
+              longitude: dinnerFallbackAnchor?.longitude || hotel?.longitude || data.destCoords.lng,
+              estimatedCost: 10,
+              qualityFlags: ['budget_self_catered_meal'],
+            }
+          : {
+              name: 'Restaurant à proximité',
+              description: 'Dîner',
+              latitude: dinnerFallbackAnchor?.latitude || hotel?.latitude || data.destCoords.lat,
+              longitude: dinnerFallbackAnchor?.longitude || hotel?.longitude || data.destCoords.lng,
+              estimatedCost: 20,
+            };
       const dinnerTitle = dinner?.restaurant
         ? `Dîner — ${dinner.restaurant.name}`
-        : 'Dîner — Restaurant à proximité';
+        : dinnerSelfCatered
+          ? 'Dîner — Cuisine maison (option budget)'
+          : 'Dîner — Restaurant à proximité';
       const dinnerId = dinner?.restaurant
         ? `meal-${balancedDay.dayNumber}-dinner`
-        : `self-dinner-${balancedDay.dayNumber}`;
+        : dinnerSelfCatered
+          ? `self-cooked-dinner-${balancedDay.dayNumber}`
+          : `self-dinner-${balancedDay.dayNumber}`;
 
       const slot = findBestMealSlot(scheduler, dayDate, '19:00', '22:00', dinnerDuration, '20:00');
       if (slot) {
@@ -1743,6 +2117,55 @@ export async function assembleTripSchedule(
         ? getRestaurantPrimaryGooglePhoto(itemData)
         : undefined;
 
+      const rawBookingUrl = itemData.bookingUrl || itemData.googleMapsUrl
+        || (item.type === 'restaurant' && (itemData.name || item.title)
+          ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((itemData.name || item.title) + ', ' + preferences.destination)}`
+          : undefined);
+      const bookingIsViator = typeof rawBookingUrl === 'string' && rawBookingUrl.includes('viator.com');
+
+      const officialTicketing = item.type === 'activity'
+        ? resolveOfficialTicketing({
+            name: itemData.name || item.title,
+            title: item.title,
+            description: itemData.description,
+            bookingUrl: rawBookingUrl,
+          })
+        : null;
+
+      const officialBookingUrl = item.type === 'activity'
+        ? (itemData.officialBookingUrl || officialTicketing?.officialUrl || (!bookingIsViator ? rawBookingUrl : undefined))
+        : undefined;
+
+      const candidateViatorUrl = item.type === 'activity'
+        ? (itemData.viatorUrl || (bookingIsViator ? rawBookingUrl : undefined))
+        : undefined;
+
+      const viatorAssessment = item.type === 'activity' && candidateViatorUrl
+        ? scoreViatorPlusValue({
+            title: itemData.viatorTitle || itemData.name || item.title,
+            description: itemData.description,
+            rating: itemData.viatorRating || itemData.rating,
+            reviewCount: itemData.viatorReviewCount || itemData.reviewCount,
+            price: itemData.viatorPrice || itemData.estimatedCost,
+            freeCancellation: Boolean(itemData.freeCancellation),
+            instantConfirmation: Boolean(itemData.instantConfirmation),
+          })
+        : null;
+      const monumentLikeActivity = item.type === 'activity'
+        ? isMonumentLikeActivityName(itemData.name || item.title)
+        : false;
+      const keepViator = !candidateViatorUrl
+        ? false
+        : (!monumentLikeActivity || (viatorAssessment?.score || 0) >= 3);
+      const resolvedViatorUrl = keepViator ? candidateViatorUrl : undefined;
+      const mergedQualityFlags = Array.from(new Set([
+        ...((itemData.qualityFlags || []) as string[]),
+        ...(candidateViatorUrl && !keepViator ? ['viator_filtered_low_plus_value'] : []),
+      ]));
+      const finalBookingUrl = item.type === 'activity'
+        ? (officialBookingUrl || (!bookingIsViator ? rawBookingUrl : undefined) || resolvedViatorUrl)
+        : rawBookingUrl;
+
       return {
         id: item.id || uuidv4(),
         dayNumber: balancedDay.dayNumber,
@@ -1764,16 +2187,15 @@ export async function assembleTripSchedule(
           || (itemData.priceLevel ? (itemData.priceLevel || 1) * 15 : 0),
         duration: item.duration,
         rating: itemData.rating,
-        bookingUrl: itemData.bookingUrl || itemData.googleMapsUrl
-          || (item.type === 'restaurant' && (itemData.name || item.title)
-            ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((itemData.name || item.title) + ', ' + preferences.destination)}`
-            : undefined),
-        viatorUrl: itemData.viatorUrl,
+        bookingUrl: finalBookingUrl,
+        officialBookingUrl,
+        viatorUrl: resolvedViatorUrl,
         googleMapsPlaceUrl,
         restaurant: item.type === 'restaurant' ? itemData : undefined,
         restaurantAlternatives: item.type === 'restaurant' && itemData._alternatives?.length > 0
           ? itemData._alternatives
           : undefined,
+        parking: item.type === 'parking' ? itemData : undefined,
         accommodation: (item.type === 'checkin' || item.type === 'checkout') ? itemData : undefined,
         flight: item.type === 'flight' ? itemData : undefined,
         // Transport-specific fields (train/bus legs, price range)
@@ -1783,6 +2205,9 @@ export async function assembleTripSchedule(
         transportMode: resolvedTransportMode,
         transportRole: itemData.transportRole || (item.type === 'transport' ? 'inter_item' : undefined),
         dataReliability: itemData.dataReliability || 'verified',
+        geoSource: itemData.geoSource,
+        geoConfidence: itemData.geoConfidence,
+        qualityFlags: mergedQualityFlags.length > 0 ? mergedQualityFlags : undefined,
         imageUrl: restaurantImageUrl
           || (item.type !== 'restaurant' ? (itemData.photos?.[0] || itemData.imageUrl || itemData.photoUrl) : undefined)
           || (item.type === 'flight' ? TRANSPORT_IMAGES.flight : undefined)
@@ -1886,6 +2311,7 @@ export async function assembleTripSchedule(
     for (const d of days) {
       for (const item of d.items) {
         if (item.type === 'restaurant') {
+          if (isBudgetSelfCateredItem(item)) continue;
           usedIds.add(item.id);
           if (item.restaurant?.name) usedNames.add(item.restaurant.name);
           else if (item.locationName) usedNames.add(item.locationName);
@@ -1900,6 +2326,7 @@ export async function assembleTripSchedule(
       for (let i = 0; i < day.items.length; i++) {
         const item = day.items[i];
         if (item.type !== 'restaurant') continue;
+        if (isBudgetSelfCateredItem(item)) continue;
         if (!item.latitude || !item.longitude || item.latitude === 0) continue;
 
         // Find nearest activity neighbors (scan across transport/checkin/checkouts).
@@ -2313,9 +2740,9 @@ export async function assembleTripSchedule(
             const itemKeys: (keyof TripItem)[] = [
               'id', 'title', 'description', 'locationName',
               'latitude', 'longitude', 'estimatedCost', 'duration',
-              'imageUrl', 'bookingUrl', 'viatorUrl', 'rating',
+              'imageUrl', 'bookingUrl', 'officialBookingUrl', 'viatorUrl', 'rating',
               'googleMapsPlaceUrl', 'freeCancellation', 'instantConfirmation',
-              'dataReliability',
+              'dataReliability', 'geoSource', 'geoConfidence', 'qualityFlags',
             ];
 
             const tempValues: Partial<TripItem> = {};
@@ -2386,10 +2813,18 @@ export async function assembleTripSchedule(
     console.warn('[Pipeline V2] Section 13f failed (non-critical):', error);
   }
 
-  // 13g. Hard-cap restaurant proximity (breakfast 1.2km, lunch/dinner 1.8km),
+  // 13g. Hard-cap restaurant proximity (city-profile aware),
   // with pool/api replacement and fallback diagnostics.
   try {
-    const outlierFixStats = await fixRestaurantOutliers(days, restaurantGeoPool || [], preferences.destination);
+    const outlierFixStats = await fixRestaurantOutliers(
+      days,
+      restaurantGeoPool || [],
+      preferences.destination,
+      {
+        breakfastMaxKm: breakfastRestaurantMaxKm,
+        mealMaxKm: mealRestaurantMaxKm,
+      }
+    );
     if (outlierFixStats.replaced > 0 || outlierFixStats.flaggedFallback > 0) {
       console.log(
         `[Pipeline V2] Section 13g: restaurant outliers fixed=${outlierFixStats.replaced}, fallback-flagged=${outlierFixStats.flaggedFallback}`
@@ -2414,7 +2849,7 @@ export async function assembleTripSchedule(
   refreshScheduleDiagnostics(days);
 
   // 13. Build cost breakdown
-  const costBreakdown = computeCostBreakdown(days, flights, hotel, preferences, transport);
+  const costBreakdown = computeCostBreakdown(days, flights, hotel, preferences, transport, selectedParking);
 
   // 13b. Enrich hotel booking URLs with actual dates and guest count
   const checkinDate = startDate.toISOString().split('T')[0];
@@ -2442,6 +2877,17 @@ export async function assembleTripSchedule(
     }
   }
 
+  const accommodationOptions = (data.bookingHotels || [])
+    .slice()
+    .sort((a, b) => {
+      const priceA = a.pricePerNight || Number.POSITIVE_INFINITY;
+      const priceB = b.pricePerNight || Number.POSITIVE_INFINITY;
+      return priceA - priceB;
+    });
+  if (hotel && !accommodationOptions.some((option) => option.id === hotel.id)) {
+    accommodationOptions.unshift(hotel);
+  }
+
   // 14. Assemble final Trip
   const trip: Trip = {
     id: uuidv4(),
@@ -2454,7 +2900,8 @@ export async function assembleTripSchedule(
     outboundFlight: flights.outbound || undefined,
     returnFlight: flights.return || undefined,
     accommodation: hotel || undefined,
-    accommodationOptions: data.bookingHotels?.slice(0, 5),
+    parking: selectedParking || undefined,
+    accommodationOptions: accommodationOptions.slice(0, 5),
     totalEstimatedCost: costBreakdown.total,
     costBreakdown: costBreakdown.breakdown,
     travelTips: data.travelTips,
@@ -3446,6 +3893,12 @@ function sortItemsByTime(items: TripItem[]): TripItem[] {
   });
 }
 
+function isBudgetSelfCateredItem(item: TripItem): boolean {
+  const flags = Array.isArray(item.qualityFlags) ? item.qualityFlags : [];
+  if (flags.includes('budget_self_catered_meal')) return true;
+  return (item.title || '').toLowerCase().includes('cuisine maison');
+}
+
 function dedupeScheduledActivityItems(items: TripItem[], dayNumber: number): TripItem[] {
   const result: TripItem[] = [];
   const seenActivities: TripItem[] = [];
@@ -3573,12 +4026,12 @@ function swapTripItemPayload(source: TripItem, target: TripItem): void {
   const mutableKeys: (keyof TripItem)[] = [
     'id', 'type', 'title', 'description', 'locationName',
     'latitude', 'longitude', 'estimatedCost', 'duration', 'rating',
-    'bookingUrl', 'viatorUrl', 'viatorTitle', 'viatorImageUrl', 'viatorRating',
+    'bookingUrl', 'officialBookingUrl', 'viatorUrl', 'viatorTitle', 'viatorImageUrl', 'viatorRating',
     'viatorReviewCount', 'viatorDuration', 'viatorPrice', 'aviasalesUrl',
     'omioFlightUrl', 'googleMapsUrl', 'googleMapsPlaceUrl', 'restaurant',
     'restaurantAlternatives', 'accommodation', 'flight', 'flightAlternatives',
     'transitInfo', 'transitLegs', 'transitDataSource', 'priceRange',
-    'transportMode', 'transportRole', 'dataReliability', 'imageUrl',
+    'transportMode', 'transportRole', 'dataReliability', 'geoSource', 'geoConfidence', 'qualityFlags', 'imageUrl',
     'freeCancellation', 'instantConfirmation', 'distanceFromPrevious',
     'timeFromPrevious', 'transportToPrevious',
   ];
@@ -4004,9 +4457,11 @@ export async function fixRestaurantOutliers(
   days: TripDay[],
   altPool: Restaurant[],
   destination: string,
-  options: { allowApiFallback?: boolean } = {}
+  options: { allowApiFallback?: boolean; breakfastMaxKm?: number; mealMaxKm?: number } = {}
 ): Promise<RestaurantFixStats> {
   const allowApiFallback = options.allowApiFallback ?? true;
+  const breakfastMaxKm = options.breakfastMaxKm || DEFAULT_BREAKFAST_RESTAURANT_MAX_KM;
+  const mealMaxKm = options.mealMaxKm || DEFAULT_MEAL_RESTAURANT_MAX_KM;
   const stats: RestaurantFixStats = { replaced: 0, flaggedFallback: 0 };
   let apiCalls = 0;
   const MAX_API_CALLS = 8;
@@ -4019,9 +4474,10 @@ export async function fixRestaurantOutliers(
     for (let idx = 0; idx < sorted.length; idx++) {
       const item = sorted[idx];
       if (item.type !== 'restaurant') continue;
+      if (isBudgetSelfCateredItem(item)) continue;
 
       const mealType = getRestaurantMealType(item);
-      const maxDistanceKm = mealType === 'breakfast' ? BREAKFAST_RESTAURANT_MAX_KM : MEAL_RESTAURANT_MAX_KM;
+      const maxDistanceKm = mealType === 'breakfast' ? breakfastMaxKm : mealMaxKm;
       const anchors = restaurantAnchorPoints(day, idx, mealType);
       const currentName = normalizeRestaurantName(item.restaurant?.name || item.locationName || stripMealPrefix(item.title));
       const duplicateInDay = currentName.length > 0 && usedNames.has(currentName);
@@ -4296,6 +4752,9 @@ function computeDailyBudget(items: TripItem[]): { activities: number; food: numb
       case 'transport':
         transport += cost;
         break;
+      case 'parking':
+        transport += cost;
+        break;
       // flights, hotel: not counted in daily budget (they're trip-level costs)
     }
   }
@@ -4313,7 +4772,8 @@ function computeCostBreakdown(
   flights: { outbound: Flight | null; return: Flight | null },
   hotel: Accommodation | null,
   preferences: TripPreferences,
-  groundTransport?: TransportOptionSummary | null
+  groundTransport?: TransportOptionSummary | null,
+  parking?: { totalPrice?: number } | null
 ) {
   let flightCost = 0;
   if (flights.outbound?.price) flightCost += flights.outbound.price;
@@ -4331,14 +4791,19 @@ function computeCostBreakdown(
 
   let foodCost = 0;
   let activitiesCost = 0;
+  let parkingCost = 0;
   for (const day of days) {
     for (const item of day.items) {
       if (item.type === 'restaurant') foodCost += (item.estimatedCost || 0);
       if (item.type === 'activity') activitiesCost += (item.estimatedCost || 0);
+      if (item.type === 'parking') parkingCost += (item.estimatedCost || 0);
     }
   }
+  if (parkingCost <= 0 && parking?.totalPrice) {
+    parkingCost = parking.totalPrice;
+  }
 
-  const total = flightCost + accommodationCost + foodCost + activitiesCost + transportCost;
+  const total = flightCost + accommodationCost + foodCost + activitiesCost + transportCost + parkingCost;
 
   return {
     total: Math.round(total),
@@ -4348,7 +4813,7 @@ function computeCostBreakdown(
       food: Math.round(foodCost),
       activities: Math.round(activitiesCost),
       transport: Math.round(transportCost),
-      parking: 0,
+      parking: Math.round(parkingCost),
       other: 0,
     },
   };

@@ -764,17 +764,27 @@ function BookingButtons({ item }: { item: TripItem }) {
   }
 
   // Activity
-  if (item.type === 'activity' && bookingUrl) {
-    if (bookingUrl.includes('viator.com')) {
-      buttons.push({ label: 'Viator', url: bookingUrl, variant: 'primary', icon: <Ticket className="h-3 w-3" /> });
-    } else {
-      buttons.push({ label: 'Site officiel', url: bookingUrl, variant: 'primary', icon: <Globe className="h-3 w-3" /> });
-    }
-  }
+  if (item.type === 'activity') {
+    const officialBookingUrl = item.officialBookingUrl || (bookingUrl && !bookingUrl.includes('viator.com') ? bookingUrl : '');
+    const viatorBookingUrl = item.viatorUrl || (bookingUrl.includes('viator.com') ? bookingUrl : '');
 
-  // Viator alt
-  if (item.viatorUrl && !bookingUrl.includes('viator.com') && !item.viatorImageUrl) {
-    buttons.push({ label: 'Viator', url: item.viatorUrl, variant: 'secondary', icon: <Ticket className="h-3 w-3" /> });
+    if (officialBookingUrl) {
+      buttons.push({
+        label: 'Billetterie officielle',
+        url: officialBookingUrl,
+        variant: 'primary',
+        icon: <Globe className="h-3 w-3" />,
+      });
+    }
+
+    if (viatorBookingUrl && !item.viatorImageUrl) {
+      buttons.push({
+        label: 'Option guidée Viator',
+        url: viatorBookingUrl,
+        variant: officialBookingUrl ? 'secondary' : 'primary',
+        icon: <Ticket className="h-3 w-3" />,
+      });
+    }
   }
 
   // Google Maps

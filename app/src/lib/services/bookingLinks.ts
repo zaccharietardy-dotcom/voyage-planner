@@ -175,6 +175,29 @@ function sanitizeDate(input?: string): string | undefined {
   return /^\d{4}-\d{2}-\d{2}$/.test(input) ? input : undefined;
 }
 
+function enrichAirbnbUrl(rawUrl: string, checkIn?: string, checkOut?: string, adults?: number): string {
+  try {
+    const url = new URL(rawUrl);
+    const normalizedCheckIn = sanitizeDate(checkIn);
+    const normalizedCheckOut = sanitizeDate(checkOut);
+    const normalizedAdults = adults && adults > 0 ? adults : 2;
+
+    if (normalizedCheckIn && !url.searchParams.has('check_in')) {
+      url.searchParams.set('check_in', normalizedCheckIn);
+    }
+    if (normalizedCheckOut && !url.searchParams.has('check_out')) {
+      url.searchParams.set('check_out', normalizedCheckOut);
+    }
+    if (!url.searchParams.has('adults')) {
+      url.searchParams.set('adults', String(normalizedAdults));
+    }
+
+    return url.toString();
+  } catch {
+    return rawUrl;
+  }
+}
+
 export function isBookingDomain(url?: string | null): boolean {
   if (!url) return false;
 
@@ -333,7 +356,7 @@ export function normalizeHotelBookingUrl({
   const raw = url?.trim();
 
   if (raw && raw.toLowerCase().includes('airbnb.com')) {
-    return raw;
+    return enrichAirbnbUrl(raw, checkIn, checkOut, adults);
   }
 
   if (!raw) {

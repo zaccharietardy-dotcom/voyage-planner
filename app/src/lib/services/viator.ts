@@ -32,7 +32,22 @@ export function isViatorConfigured(): boolean {
 export interface ViatorProductCoordinates {
   lat: number;
   lng: number;
-  source: 'viator_product';
+  source: 'place';
+}
+
+export interface ViatorPlusValueInput {
+  title: string;
+  description?: string;
+  rating?: number;
+  reviewCount?: number;
+  price?: number;
+  freeCancellation?: boolean;
+  instantConfirmation?: boolean;
+}
+
+export interface ViatorPlusValueAssessment {
+  score: number;
+  reasons: string[];
 }
 
 interface CoordinateCandidate {
@@ -175,7 +190,7 @@ export async function getViatorProductCoordinates(
       if (best.score < 0) continue;
       if (best.score === 0 && candidates.length > 1) continue;
 
-      return { lat: best.lat, lng: best.lng, source: 'viator_product' };
+      return { lat: best.lat, lng: best.lng, source: 'place' };
     } catch {
       // Try next endpoint silently
     }
@@ -551,7 +566,9 @@ export async function findViatorProduct(
     // Filtrer les produits avec les keywords exclus
     const filteredProducts = products.filter((p: ViatorProduct) => {
       const titleLower = (p.title || '').toLowerCase();
-      return !VIATOR_EXCLUDED_KEYWORDS.some(kw => titleLower.includes(kw));
+      if (VIATOR_EXCLUDED_KEYWORDS.some(kw => titleLower.includes(kw))) return false;
+      if (isViatorLowRelevanceCandidate(p.title || '', p.description)) return false;
+      return true;
     });
 
     if (filteredProducts.length === 0) return null;
@@ -635,7 +652,92 @@ const VIATOR_EXCLUDED_KEYWORDS = [
   'private yacht', 'luxury sailing', 'private sailing', 'private boat charter',
   'helicopter', 'helicoptère', 'limousine', 'limo tour',
   'ferrari', 'lamborghini', 'supercar', 'sports car',
+  // Low-relevance experiences for most sightseeing itineraries
+  'magic show', 'magician', 'illusion show',
 ];
+
+const VIATOR_MONUMENT_PLUS_VALUE_KEYWORDS = [
+  'skip the line', 'priority access', 'small group', 'expert guide',
+  'private guide', 'after hours', 'exclusive access', 'audio guide',
+  'fast-track', 'quick access',
+];
+
+const VIATOR_LOW_RELEVANCE_KEYWORDS = [
+  'photoshoot', 'photo shoot', 'photo session', 'professional photographer',
+  'magic show', 'magician', 'selfie',
+];
+
+function normalizeViatorText(value?: string): string {
+  return (value || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim();
+}
+
+export function isViatorLowRelevanceCandidate(title: string, description?: string): boolean {
+  const text = `${normalizeViatorText(title)} ${normalizeViatorText(description)}`.trim();
+  if (!text) return false;
+  return VIATOR_LOW_RELEVANCE_KEYWORDS.some((keyword) => text.includes(keyword));
+}
+
+export function scoreViatorPlusValue(input: ViatorPlusValueInput): ViatorPlusValueAssessment {
+  const reasons: string[] = [];
+  const text = `${normalizeViatorText(input.title)} ${normalizeViatorText(input.description)}`.trim();
+  let score = 0;
+
+  if (VIATOR_MONUMENT_PLUS_VALUE_KEYWORDS.some((keyword) => text.includes(keyword))) {
+    score += 2;
+    reasons.push('has_clear_operational_benefit');
+  }
+
+  const rating = Number(input.rating || 0);
+  const reviewCount = Number(input.reviewCount || 0);
+  const price = Number(input.price || 0);
+
+  if (rating >= 4.6) {
+    score += 1;
+    reasons.push('high_rating');
+  } else if (rating > 0 && rating < 4.2) {
+    score -= 1;
+    reasons.push('low_rating');
+  }
+
+  if (reviewCount >= 500) {
+    score += 1;
+    reasons.push('high_social_proof');
+  } else if (reviewCount > 0 && reviewCount < 30) {
+    score -= 1;
+    reasons.push('weak_social_proof');
+  }
+
+  if (input.freeCancellation) {
+    score += 0.5;
+    reasons.push('free_cancellation');
+  }
+  if (input.instantConfirmation) {
+    score += 0.5;
+    reasons.push('instant_confirmation');
+  }
+
+  if (isViatorLowRelevanceCandidate(input.title, input.description)) {
+    score -= 4;
+    reasons.push('low_relevance_pattern');
+  }
+
+  if (price >= 180) {
+    score -= 2;
+    reasons.push('very_high_price');
+  } else if (price >= 120) {
+    score -= 1;
+    reasons.push('high_price');
+  }
+
+  return {
+    score: Math.round(score * 10) / 10,
+    reasons,
+  };
+}
 
 function inferViatorOpeningHours(title: string, description?: string): { open: string; close: string } {
   const text = `${title} ${description || ''}`.toLowerCase();
@@ -670,6 +772,9 @@ function processViatorResults(
         if (titleLower.includes(kw)) {
           return false;
         }
+      }
+      if (isViatorLowRelevanceCandidate(p.title, p.description)) {
+        return false;
       }
       // Filter out overpriced activities
       const price = p.pricing?.summary?.fromPrice || 0;
@@ -707,6 +812,16 @@ function processViatorResults(
         .replace(/\s+/g, ' ')
         .trim();
 
+      const plusValue = scoreViatorPlusValue({
+        title: p.title,
+        description: cleanDescription,
+        rating,
+        reviewCount,
+        price,
+        freeCancellation: (p.flags || []).some(f => /free.?cancel/i.test(f) || /annulation.?gratuite/i.test(f)),
+        instantConfirmation: (p.flags || []).some(f => /instant.?confirm/i.test(f) || /confirmation.?instantan/i.test(f)),
+      });
+
       return {
         id: `viator-${p.productCode}`,
         name: p.title,
@@ -722,6 +837,9 @@ function processViatorResults(
         bookingUrl: affiliateUrl,
         openingHours: inferViatorOpeningHours(p.title, p.description),
         dataReliability: 'estimated', // coords are city center, not exact — will be resolved
+        geoSource: 'city_fallback',
+        geoConfidence: 'low',
+        qualityFlags: ['viator_city_center_fallback', ...(plusValue.score < 1 ? ['viator_low_plus_value'] : [])],
         imageUrl,
         providerName: 'Viator',
         reviewCount,

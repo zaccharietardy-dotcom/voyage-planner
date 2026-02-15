@@ -76,4 +76,22 @@ describe('step5-hotel selection', () => {
     const selected = selectHotelByBarycenter(clusters, hotels, 'moderate');
     expect(['d9', 'd10']).toContain(selected?.id);
   });
+
+  it('applies dense-urban cap for Paris profile', () => {
+    const parisCluster: ActivityCluster[] = [
+      makeCluster([
+        { lat: 48.8606, lng: 2.3376 },
+        { lat: 48.8584, lng: 2.2945 },
+        { lat: 48.8738, lng: 2.2950 },
+      ]),
+    ];
+
+    const hotels: Accommodation[] = [
+      makeHotel('near', 'Paris Centre', 48.8612, 2.3334, 8.1, 140),
+      makeHotel('far', 'Paris Excentré', 48.8879, 2.3912, 9.2, 120), // >4km from center
+    ];
+
+    const selected = selectHotelByBarycenter(parisCluster, hotels, 'moderate', undefined, 3, { destination: 'Paris' });
+    expect(selected?.id).toBe('near');
+  });
 });

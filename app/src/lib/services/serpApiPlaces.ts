@@ -16,9 +16,22 @@ import { Restaurant, DietaryType, ActivityType } from '../types';
 import { Attraction } from './attractions';
 import { calculateDistance } from './geocoding';
 import { getDestinationSize, getCostMultiplier, getDestinationArchetypes } from './destinationData';
+import { trackSerpApiRequest } from './apiUsageTracker';
 
 function getSerpApiKey() { return process.env.SERPAPI_KEY?.trim(); }
 const SERPAPI_BASE_URL = 'https://serpapi.com/search.json';
+
+async function trackedSerpApiFetch(input: string, init?: RequestInit): Promise<Response> {
+  let engine = 'unknown';
+  try {
+    const url = new URL(input);
+    engine = url.searchParams.get('engine') || 'unknown';
+  } catch {
+    // noop
+  }
+  trackSerpApiRequest(engine);
+  return fetch(input, init);
+}
 
 // ============================================
 // Cache attractions (7 jours TTL)
@@ -164,7 +177,7 @@ export async function searchRestaurantsWithSerpApi(
 
   const tryFetch = async (p: Record<string, string>): Promise<SerpApiLocalResponse | null> => {
     const url = `${SERPAPI_BASE_URL}?${new URLSearchParams(p)}`;
-    const resp = await fetch(url);
+    const resp = await trackedSerpApiFetch(url);
     if (!resp.ok) {
       const body = await resp.text();
       // HTTP 400 = "Unsupported location" — fallback possible
@@ -317,7 +330,7 @@ export async function searchHotelsWithSerpApi(
   }
 
   try {
-    const response = await fetch(`${SERPAPI_BASE_URL}?${params}`);
+    const response = await trackedSerpApiFetch(`${SERPAPI_BASE_URL}?${params}`);
 
     if (!response.ok) {
       console.error('[SerpAPI Hotels] Erreur HTTP:', response.status);
@@ -403,7 +416,7 @@ export async function getAvailableHotelNames(
   });
 
   try {
-    const response = await fetch(`${SERPAPI_BASE_URL}?${params}`);
+    const response = await trackedSerpApiFetch(`${SERPAPI_BASE_URL}?${params}`);
 
     if (!response.ok) {
       console.error('[SerpAPI] Erreur HTTP:', response.status);
@@ -474,7 +487,7 @@ export async function searchAttractionsWithSerpApi(
   });
 
   try {
-    const response = await fetch(`${SERPAPI_BASE_URL}?${params}`);
+    const response = await trackedSerpApiFetch(`${SERPAPI_BASE_URL}?${params}`);
 
     if (!response.ok) {
       console.error('[SerpAPI Attractions] Erreur HTTP:', response.status);
@@ -701,7 +714,7 @@ export async function searchAttractionsMultiQuery(
     });
 
     try {
-      const response = await fetch(`${SERPAPI_BASE_URL}?${params}`);
+      const response = await trackedSerpApiFetch(`${SERPAPI_BASE_URL}?${params}`);
       if (!response.ok) return [];
 
       const data = await response.json();
@@ -842,7 +855,7 @@ export async function searchMustSeeAttractions(
     });
 
     try {
-      const response = await fetch(`${SERPAPI_BASE_URL}?${params}`);
+      const response = await trackedSerpApiFetch(`${SERPAPI_BASE_URL}?${params}`);
       if (!response.ok) return null;
 
       const data = await response.json();
@@ -870,7 +883,7 @@ export async function searchMustSeeAttractions(
             hl: 'fr',
             gl: countryCode,
           });
-          const retryResponse = await fetch(`${SERPAPI_BASE_URL}?${retryParams}`);
+          const retryResponse = await trackedSerpApiFetch(`${SERPAPI_BASE_URL}?${retryParams}`);
           if (retryResponse.ok) {
             const retryData = await retryResponse.json();
             const retryPlaces: SerpApiLocalResult[] = retryData.local_results || [];
@@ -959,7 +972,7 @@ export async function searchRestaurantsNearby(
   });
 
   try {
-    const response = await fetch(`${SERPAPI_BASE_URL}?${params}`);
+    const response = await trackedSerpApiFetch(`${SERPAPI_BASE_URL}?${params}`);
 
     if (!response.ok) {
       console.error('[SerpAPI Restaurants Nearby] Erreur HTTP:', response.status);
@@ -1094,7 +1107,7 @@ export async function searchGroceryStores(
   });
 
   try {
-    const response = await fetch(`${SERPAPI_BASE_URL}?${params}`);
+    const response = await trackedSerpApiFetch(`${SERPAPI_BASE_URL}?${params}`);
 
     if (!response.ok) {
       console.error('[SerpAPI Grocery] Erreur HTTP:', response.status);
@@ -1178,7 +1191,7 @@ export async function geocodeViaSerpApi(
   }
 
   try {
-    const response = await fetch(`${SERPAPI_BASE_URL}?${params}`);
+    const response = await trackedSerpApiFetch(`${SERPAPI_BASE_URL}?${params}`);
     if (!response.ok) {
       console.warn(`[SerpAPI Geocode] HTTP ${response.status} pour "${query}"`);
       return null;

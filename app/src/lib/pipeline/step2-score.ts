@@ -13,6 +13,8 @@ import { fixAttractionDuration, fixAttractionCost } from '../tripAttractions';
 import { findKnownViatorProduct } from '../services/viatorKnownProducts';
 import { calculateDistance } from '../services/geocoding';
 import { classifyOutdoorIndoor } from './utils/constants';
+import { scoreViatorPlusValue } from '../services/viator';
+import { isMonumentLikeActivityName } from '../services/officialTicketing';
 
 /** Keywords that indicate an activity includes a meal (cooking class, food tour, etc.) */
 const MEAL_INCLUSIVE_KEYWORDS = [
@@ -252,7 +254,13 @@ export function scoreAndSelectActivities(
 
   const scored = filtered.map(a => ({
     ...a,
-    score: computeScore(a, preferences, cityCenter, activityCentroid),
+    score: computeScore(
+      a,
+      preferences,
+      cityCenter,
+      activityCentroid,
+      data.budgetStrategy?.maxPricePerActivity
+    ),
   }));
 
   // 6. Sort by score descending
@@ -410,7 +418,8 @@ function computeScore(
   activity: ScoredActivity,
   preferences: TripPreferences,
   cityCenter: { lat: number; lng: number },
-  activityCentroid: { lat: number; lng: number }
+  activityCentroid: { lat: number; lng: number },
+  maxPricePerActivity?: number
 ): number {
   // Must-see bonus: user-specified get full +100, OSM auto-detected get +50
   // This ensures user must-sees always rank above OSM auto-detected ones
@@ -443,12 +452,28 @@ function computeScore(
   // Higher bonus for experiential activities that aren't just monument visits
   let viatorBonus = 0;
   if (activity.source === 'viator') {
-    viatorBonus = 2; // Base bonus for bookable experiences
-    const expName = (activity.name || '').toLowerCase();
-    const isExperiential = ['cruise', 'croisière', 'tour', 'visite guidée',
-      'food', 'cooking', 'tasting', 'dégustation', 'bike', 'vélo',
-      'boat', 'bateau', 'canal', 'workshop', 'atelier'].some(k => expName.includes(k));
-    if (isExperiential) viatorBonus = 4; // Strong bonus for unique experiences
+    const plusValue = scoreViatorPlusValue({
+      title: activity.name || '',
+      description: (activity as any).description,
+      rating: activity.rating,
+      reviewCount: activity.reviewCount,
+      price: activity.estimatedCost,
+      freeCancellation: Boolean((activity as any).freeCancellation),
+      instantConfirmation: Boolean((activity as any).instantConfirmation),
+    });
+
+    // Base Viator variety bonus + plus-value modulation.
+    viatorBonus = 1.5 + plusValue.score;
+
+    const isMonumentLike = isMonumentLikeActivityName(activity.name);
+    if (isMonumentLike && plusValue.score < 3) {
+      // Monument tours without real plus-value should lose against official entries.
+      viatorBonus -= 5;
+    }
+
+    const geoConfidence = (activity as any).geoConfidence;
+    if (geoConfidence === 'low') viatorBonus -= 2;
+    if (geoConfidence === 'medium') viatorBonus -= 0.5;
   }
 
   // Data quality bonus (verified > estimated > generated)
@@ -492,8 +517,17 @@ function computeScore(
     }
   }
 
+  // Budget adherence penalty (balanced mode): expensive optional activities are deprioritized.
+  let budgetPenalty = 0;
+  if (!activity.mustSee && maxPricePerActivity && maxPricePerActivity > 0) {
+    const price = Number(activity.estimatedCost || 0);
+    if (price > maxPricePerActivity * 1.8) budgetPenalty = -6;
+    else if (price > maxPricePerActivity * 1.4) budgetPenalty = -3;
+    else if (price > maxPricePerActivity * 1.15) budgetPenalty = -1.5;
+  }
+
   return mustSeeBonus + popularityScore + ratingScore + typeMatchBonus + viatorBonus
-    + reliabilityBonus + distancePenalty + contextFitBonus + preferenceDepthBonus + proximityPenalty;
+    + reliabilityBonus + distancePenalty + contextFitBonus + preferenceDepthBonus + proximityPenalty + budgetPenalty;
 }
 
 // ─── Contextual scoring helpers ─────────────────────────────────────────────

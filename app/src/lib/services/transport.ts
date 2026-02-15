@@ -380,7 +380,10 @@ export async function compareTransportOptions(
   }
 
   // 6. Options multi-modales (ferry+train, voiture+avion, etc.)
-  if (ferryRequired || (distance > 800 && feasibleModes.size > 1)) {
+  // Skip very long-haul routes to avoid expensive low-value flight API fan-out.
+  const shouldTryMultiModal = ferryRequired || (distance > 800 && feasibleModes.size > 1);
+  const skipMultiModalForLongHaul = !ferryRequired && distance > 3500;
+  if (shouldTryMultiModal && !skipMultiModalForLongHaul) {
     try {
       const multiModalOptions = await findMultiModalOptions(
         params.origin,
@@ -407,6 +410,8 @@ export async function compareTransportOptions(
     } catch (err) {
       console.warn('[Transport] Multi-modal search failed:', err instanceof Error ? err.message : err);
     }
+  } else if (shouldTryMultiModal && skipMultiModalForLongHaul) {
+    console.log(`[Transport] Multi-modal skipped for long-haul route (${Math.round(distance)}km)`);
   }
 
   // Calculer les scores
