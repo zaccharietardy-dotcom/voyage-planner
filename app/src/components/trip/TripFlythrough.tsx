@@ -88,13 +88,96 @@ function applySafeBaseImagery(Cesium: any, viewer: any) {
   }
 }
 
-function supportsWebGL2(): boolean {
+function detectWebGLSupport(): { webgl1: boolean; webgl2: boolean } {
   try {
     const canvas = document.createElement('canvas');
-    return !!canvas.getContext('webgl2');
+    const webgl2 = !!canvas.getContext('webgl2');
+    const webgl1 =
+      !!canvas.getContext('webgl') || !!canvas.getContext('experimental-webgl');
+
+    return { webgl1, webgl2 };
   } catch {
-    return false;
+    return { webgl1: false, webgl2: false };
   }
+}
+
+function toRadians(degrees: number): number {
+  return (degrees * Math.PI) / 180;
+}
+
+function normalizeBearing(degrees: number): number {
+  return (degrees + 360) % 360;
+}
+
+function getBearingDegrees(
+  startLat: number,
+  startLng: number,
+  endLat: number,
+  endLng: number
+): number {
+  const startLatRad = toRadians(startLat);
+  const endLatRad = toRadians(endLat);
+  const deltaLngRad = toRadians(endLng - startLng);
+
+  const y = Math.sin(deltaLngRad) * Math.cos(endLatRad);
+  const x =
+    Math.cos(startLatRad) * Math.sin(endLatRad) -
+    Math.sin(startLatRad) * Math.cos(endLatRad) * Math.cos(deltaLngRad);
+
+  return normalizeBearing((Math.atan2(y, x) * 180) / Math.PI);
+}
+
+function haversineDistanceKm(
+  startLat: number,
+  startLng: number,
+  endLat: number,
+  endLng: number
+): number {
+  const earthRadiusKm = 6371;
+  const dLat = toRadians(endLat - startLat);
+  const dLng = toRadians(endLng - startLng);
+  const lat1 = toRadians(startLat);
+  const lat2 = toRadians(endLat);
+
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return earthRadiusKm * c;
+}
+
+function getCinematicFlightProfile(waypoints: Waypoint[], index: number) {
+  const current = waypoints[index];
+  const next = waypoints[Math.min(index + 1, waypoints.length - 1)] || current;
+
+  const segmentDistanceKm = haversineDistanceKm(
+    current.lat,
+    current.lng,
+    next.lat,
+    next.lng
+  );
+
+  const headingDeg =
+    waypoints.length > 1
+      ? getBearingDegrees(current.lat, current.lng, next.lat, next.lng)
+      : 0;
+
+  const altitude = Math.min(3200, Math.max(850, segmentDistanceKm * 950));
+  const duration = Math.min(4.2, Math.max(1.8, segmentDistanceKm * 1.1));
+  const maxHeight = Math.max(altitude * 1.8, altitude + 700);
+
+  let pitchDeg = -50;
+  if (segmentDistanceKm > 2.5) pitchDeg = -36;
+  else if (segmentDistanceKm > 1.2) pitchDeg = -42;
+
+  return {
+    headingDeg,
+    pitchDeg,
+    altitude,
+    duration,
+    maxHeight,
+  };
 }
 
 interface TripFlythroughProps {
@@ -188,8 +271,9 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
 
     async function initCesium() {
       try {
-        if (!supportsWebGL2()) {
-          setError('Visualisation 3D indisponible: WebGL2 non supporté par ton navigateur/appareil.');
+        const webglSupport = detectWebGLSupport();
+        if (!webglSupport.webgl1 && !webglSupport.webgl2) {
+          setError('Visualisation 3D indisponible: WebGL désactivé sur cet appareil/navigateur.');
           return;
         }
 
@@ -222,11 +306,55 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
           skyBox: false,
         };
 
-        const viewer = new Cesium.Viewer(containerRef.current, {
-          ...commonViewerOptions,
-          terrain: hasIonToken ? Cesium.Terrain.fromWorldTerrain() : undefined,
-          skyAtmosphere: new Cesium.SkyAtmosphere(),
-        });
+        const viewerProfiles: Array<{ name: 'webgl2' | 'webgl1'; requestWebgl1: boolean; powerPreference: 'default' | 'high-performance' }> = [];
+        if (webglSupport.webgl2) {
+          viewerProfiles.push({
+            name: 'webgl2',
+            requestWebgl1: false,
+            powerPreference: 'high-performance',
+          });
+        }
+        if (webglSupport.webgl1) {
+          viewerProfiles.push({
+            name: 'webgl1',
+            requestWebgl1: true,
+            powerPreference: 'default',
+          });
+        }
+
+        let viewer: any | null = null;
+        let lastViewerError: unknown = null;
+
+        for (const profile of viewerProfiles) {
+          try {
+            viewer = new Cesium.Viewer(containerRef.current, {
+              ...commonViewerOptions,
+              contextOptions: {
+                requestWebgl1: profile.requestWebgl1,
+                webgl: {
+                  alpha: true,
+                  depth: true,
+                  stencil: true,
+                  antialias: true,
+                  powerPreference: profile.powerPreference,
+                  failIfMajorPerformanceCaveat: false,
+                },
+              },
+              terrain: hasIonToken ? Cesium.Terrain.fromWorldTerrain() : undefined,
+              skyAtmosphere: new Cesium.SkyAtmosphere(),
+            });
+
+            console.info(`[TripFlythrough] Cesium initialized with ${profile.name}`);
+            break;
+          } catch (profileError) {
+            lastViewerError = profileError;
+            console.warn(`[TripFlythrough] Failed to init with ${profile.name}`, profileError);
+          }
+        }
+
+        if (!viewer) {
+          throw lastViewerError ?? new Error('Unable to initialize Cesium viewer');
+        }
 
         applySafeBaseImagery(Cesium, viewer);
 
@@ -241,6 +369,13 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
 
         viewer.scene.backgroundColor = Cesium.Color.fromCssColorString('#0a0a12');
         viewer.scene.globe.baseColor = Cesium.Color.fromCssColorString('#0a0a12');
+        viewer.scene.globe.depthTestAgainstTerrain = true;
+        viewer.scene.fog.enabled = true;
+        viewer.scene.fog.density = 0.00035;
+        viewer.scene.fxaa = true;
+        if (viewer.scene.postProcessStages?.fxaa) {
+          viewer.scene.postProcessStages.fxaa.enabled = true;
+        }
         void applyBest3DQuality(Cesium, viewer, hasIonToken);
 
         // Extract waypoints
@@ -300,19 +435,26 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
 
         // Fly to first waypoint
         const firstWaypoint = waypoints[0];
-        viewer.camera.flyTo({
+        const firstFlightProfile = getCinematicFlightProfile(waypoints, 0);
+        const firstFlightOptions: any = {
           destination: Cesium.Cartesian3.fromDegrees(
             firstWaypoint.lng,
             firstWaypoint.lat,
-            1100
+            firstFlightProfile.altitude
           ),
           orientation: {
-            heading: 0,
-            pitch: Cesium.Math.toRadians(-38),
+            heading: Cesium.Math.toRadians(firstFlightProfile.headingDeg),
+            pitch: Cesium.Math.toRadians(firstFlightProfile.pitchDeg),
             roll: 0,
           },
-          duration: 2,
-        });
+          duration: firstFlightProfile.duration,
+          maximumHeight: firstFlightProfile.maxHeight,
+          pitchAdjustHeight: Math.max(3500, firstFlightProfile.maxHeight * 0.8),
+        };
+        if (Cesium.EasingFunction?.CUBIC_IN_OUT) {
+          firstFlightOptions.easingFunction = Cesium.EasingFunction.CUBIC_IN_OUT;
+        }
+        viewer.camera.flyTo(firstFlightOptions);
 
         viewerRef.current = viewer;
         setIsLoaded(true);
@@ -396,19 +538,26 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
     setCurrentIndex(index);
     highlightWaypoint(index);
 
-    viewer.camera.flyTo({
+    const flightProfile = getCinematicFlightProfile(waypoints, index);
+    const flightOptions: any = {
       destination: Cesium.Cartesian3.fromDegrees(
         waypoint.lng,
         waypoint.lat,
-        950
+        flightProfile.altitude
       ),
       orientation: {
-        heading: 0,
-        pitch: Cesium.Math.toRadians(-35),
+        heading: Cesium.Math.toRadians(flightProfile.headingDeg),
+        pitch: Cesium.Math.toRadians(flightProfile.pitchDeg),
         roll: 0,
       },
-      duration: 2 / speed,
-    });
+      duration: flightProfile.duration / speed,
+      maximumHeight: flightProfile.maxHeight,
+      pitchAdjustHeight: Math.max(3500, flightProfile.maxHeight * 0.8),
+    };
+    if (Cesium.EasingFunction?.QUADRATIC_IN_OUT) {
+      flightOptions.easingFunction = Cesium.EasingFunction.QUADRATIC_IN_OUT;
+    }
+    viewer.camera.flyTo(flightOptions);
 
     // Schedule next waypoint
     if (isPlaying) {

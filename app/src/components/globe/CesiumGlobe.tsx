@@ -87,12 +87,16 @@ function applySafeBaseImagery(Cesium: any, viewer: any) {
   }
 }
 
-function supportsWebGL2(): boolean {
+function detectWebGLSupport(): { webgl1: boolean; webgl2: boolean } {
   try {
     const canvas = document.createElement('canvas');
-    return !!canvas.getContext('webgl2');
+    const webgl2 = !!canvas.getContext('webgl2');
+    const webgl1 =
+      !!canvas.getContext('webgl') || !!canvas.getContext('experimental-webgl');
+
+    return { webgl1, webgl2 };
   } catch {
-    return false;
+    return { webgl1: false, webgl2: false };
   }
 }
 
@@ -297,8 +301,9 @@ export function CesiumGlobe({
 
     async function initCesium() {
       try {
-        if (!supportsWebGL2()) {
-          setError('Globe 3D indisponible: WebGL2 non supporté par ton navigateur/appareil.');
+        const webglSupport = detectWebGLSupport();
+        if (!webglSupport.webgl1 && !webglSupport.webgl2) {
+          setError('Globe 3D indisponible: WebGL désactivé sur cet appareil/navigateur.');
           return;
         }
 
@@ -333,18 +338,57 @@ export function CesiumGlobe({
           navigationInstructionsInitiallyVisible: false,
           showRenderLoopErrors: false,
           skyBox: false,
-          contextOptions: {
-            webgl: {
-              alpha: true,
-            },
-          },
         };
 
-        const viewer = new Cesium.Viewer(containerRef.current, {
-          ...commonViewerOptions,
-          terrain: hasIonToken ? Cesium.Terrain.fromWorldTerrain() : undefined,
-          skyAtmosphere: new Cesium.SkyAtmosphere(),
-        });
+        const viewerProfiles: Array<{ name: 'webgl2' | 'webgl1'; requestWebgl1: boolean; powerPreference: 'default' | 'high-performance' }> = [];
+        if (webglSupport.webgl2) {
+          viewerProfiles.push({
+            name: 'webgl2',
+            requestWebgl1: false,
+            powerPreference: 'high-performance',
+          });
+        }
+        if (webglSupport.webgl1) {
+          viewerProfiles.push({
+            name: 'webgl1',
+            requestWebgl1: true,
+            powerPreference: 'default',
+          });
+        }
+
+        let viewer: any | null = null;
+        let lastViewerError: unknown = null;
+
+        for (const profile of viewerProfiles) {
+          try {
+            viewer = new Cesium.Viewer(containerRef.current, {
+              ...commonViewerOptions,
+              contextOptions: {
+                requestWebgl1: profile.requestWebgl1,
+                webgl: {
+                  alpha: true,
+                  depth: true,
+                  stencil: true,
+                  antialias: true,
+                  powerPreference: profile.powerPreference,
+                  failIfMajorPerformanceCaveat: false,
+                },
+              },
+              terrain: hasIonToken ? Cesium.Terrain.fromWorldTerrain() : undefined,
+              skyAtmosphere: new Cesium.SkyAtmosphere(),
+            });
+
+            console.info(`[CesiumGlobe] Cesium initialized with ${profile.name}`);
+            break;
+          } catch (profileError) {
+            lastViewerError = profileError;
+            console.warn(`[CesiumGlobe] Failed to init with ${profile.name}`, profileError);
+          }
+        }
+
+        if (!viewer) {
+          throw lastViewerError ?? new Error('Unable to initialize Cesium viewer');
+        }
 
         applySafeBaseImagery(Cesium, viewer);
 
