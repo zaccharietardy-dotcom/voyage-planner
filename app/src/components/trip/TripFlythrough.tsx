@@ -40,75 +40,41 @@ async function applyBest3DQuality(
     viewer.shadowMap.enabled = false;
   }
 
-  // Try loading Google Photorealistic 3D Tiles via Cesium Ion
-  // Note: Direct Google Maps API key does NOT work (403 region restriction),
-  // so we only use Ion-based strategies that proxy through Cesium's agreement with Google.
-  let photorealisticTileset: any = null;
-
+  // Load Google Photorealistic 3D Tiles via Cesium Ion
+  // Mirrors CesiumGlobe.tsx logic (which works) — keep it simple
   if (!hasIonToken) {
-    console.info('[TripFlythrough] No Ion token — skipping Google 3D tiles');
-  } else {
-    // Strategy 1: Via Cesium Ion createGooglePhotorealistic3DTileset (recommended)
-    if (!photorealisticTileset && typeof Cesium.createGooglePhotorealistic3DTileset === 'function') {
-      try {
-        console.info('[TripFlythrough] Strategy 1: Loading Google 3D Tiles via Ion (createGooglePhotorealistic3DTileset)...');
-        photorealisticTileset = await withTimeout(
-          Cesium.createGooglePhotorealistic3DTileset(),
-          15000
-        );
-        console.info('[TripFlythrough] Strategy 1 SUCCESS: Google 3D tiles loaded via Ion');
-      } catch (error) {
-        console.warn('[TripFlythrough] Strategy 1 FAILED:', error);
-      }
-    }
-
-    // Strategy 2: Via Ion asset ID directly
-    if (!photorealisticTileset && Cesium.Cesium3DTileset?.fromIonAssetId) {
-      try {
-        console.info('[TripFlythrough] Strategy 2: Loading via Ion asset #2275207...');
-        photorealisticTileset = await withTimeout(
-          Cesium.Cesium3DTileset.fromIonAssetId(GOOGLE_PHOTOREALISTIC_ION_ASSET_ID),
-          15000
-        );
-        console.info('[TripFlythrough] Strategy 2 SUCCESS: Google 3D tiles loaded via Ion asset ID');
-      } catch (error) {
-        console.warn('[TripFlythrough] Strategy 2 FAILED:', error);
-      }
-    }
-  }
-
-  // Apply settings if any strategy succeeded
-  if (photorealisticTileset) {
-    // Street-level detail: lower MSE = more tiles loaded = sharper buildings
-    photorealisticTileset.maximumScreenSpaceError = compatibilityMode ? 4 : 1.0;
-    photorealisticTileset.dynamicScreenSpaceError = true;
-    photorealisticTileset.preloadFlightDestinations = true;
-    photorealisticTileset.preloadWhenHidden = true;
-    // Reduce detail on screen edges for better perf (focus center)
-    if (photorealisticTileset.foveatedScreenSpaceError !== undefined) {
-      photorealisticTileset.foveatedScreenSpaceError = 2.0;
-    }
-    // Increase tile cache for smoother revisits
-    if (photorealisticTileset.cacheBytes !== undefined) {
-      photorealisticTileset.cacheBytes = 256 * 1024 * 1024; // 256 MB
-      photorealisticTileset.maximumCacheOverflowBytes = 128 * 1024 * 1024; // 128 MB overflow
-    }
-    viewer.scene.primitives.add(photorealisticTileset);
-
-    // Hide the 2D base layer — Google 3D tiles cover the ground completely
-    try {
-      const baseLayer = viewer.imageryLayers.get(0);
-      if (baseLayer) {
-        baseLayer.alpha = 0.05;
-      }
-    } catch { /* no-op */ }
-
+    console.info('[TripFlythrough] No Ion token — skipping 3D tiles');
     return;
   }
 
-  // All strategies failed — fallback to OSM 3D buildings (grey blocks)
-  console.warn('[TripFlythrough] ALL Google 3D tile strategies failed. Falling back to OSM buildings (grey blocks).');
-  console.warn('[TripFlythrough] To fix: ensure asset #2275207 (Google Photorealistic 3D Tiles) is in your Cesium Ion account at https://ion.cesium.com/assets');
+  try {
+    let photorealisticTileset: any = null;
+    console.info('[TripFlythrough] Loading Google Photorealistic 3D Tiles via Ion...');
+    if (typeof Cesium.createGooglePhotorealistic3DTileset === 'function') {
+      photorealisticTileset = await withTimeout(
+        Cesium.createGooglePhotorealistic3DTileset(),
+        15000
+      );
+    } else if (Cesium.Cesium3DTileset?.fromIonAssetId) {
+      photorealisticTileset = await withTimeout(
+        Cesium.Cesium3DTileset.fromIonAssetId(GOOGLE_PHOTOREALISTIC_ION_ASSET_ID),
+        15000
+      );
+    }
+
+    if (photorealisticTileset) {
+      console.info('[TripFlythrough] Google 3D tiles loaded OK');
+      photorealisticTileset.maximumScreenSpaceError = compatibilityMode ? 4 : 1.5;
+      photorealisticTileset.dynamicScreenSpaceError = true;
+      photorealisticTileset.preloadFlightDestinations = true;
+      viewer.scene.primitives.add(photorealisticTileset);
+      return;
+    }
+  } catch (error) {
+    console.warn('[TripFlythrough] Google 3D tiles failed, fallback to OSM buildings', error);
+  }
+
+  // Fallback: OSM 3D buildings (grey blocks)
   try {
     if (typeof Cesium.createOsmBuildingsAsync === 'function') {
       const osmBuildings = await withTimeout(Cesium.createOsmBuildingsAsync(), 4000);
