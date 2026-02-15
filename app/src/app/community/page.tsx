@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
-import { Users, UserPlus, Bell, Loader2, Check, X, Search, Link2, Copy } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Users, UserPlus, Bell, Loader2, Check, X, Search, Link2, MapPin, Route } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -12,6 +12,7 @@ import { UserProfileCard } from '@/components/social/UserProfileCard';
 import { FollowButton } from '@/components/social/FollowButton';
 import { useAuth } from '@/components/auth';
 import { toast } from 'sonner';
+import Link from 'next/link';
 
 interface SearchResult {
   id: string;
@@ -21,12 +22,25 @@ interface SearchResult {
   bio: string | null;
 }
 
+interface CommunityTrip {
+  id: string;
+  title: string;
+  destination: string;
+  cover_url: string | null;
+  points: Array<{ id: string }>;
+  owner?: {
+    display_name?: string | null;
+    username?: string | null;
+  } | null;
+}
+
 export default function CommunityPage() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('search');
   const [closeFriends, setCloseFriends] = useState<any[]>([]);
   const [requests, setRequests] = useState<any[]>([]);
   const [following, setFollowing] = useState<any[]>([]);
+  const [communityTrips, setCommunityTrips] = useState<CommunityTrip[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Search
@@ -53,14 +67,16 @@ export default function CommunityPage() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [cfRes, reqRes, followRes] = await Promise.all([
+      const [cfRes, reqRes, followRes, globeRes] = await Promise.all([
         fetch('/api/close-friends?type=accepted').then(r => r.ok ? r.json() : []),
         fetch('/api/close-friends?type=received').then(r => r.ok ? r.json() : []),
         fetch('/api/follows?type=following').then(r => r.ok ? r.json() : []),
+        fetch('/api/globe').then(r => r.ok ? r.json() : { trips: [] }),
       ]);
       setCloseFriends(cfRes);
       setRequests(reqRes);
       setFollowing(followRes);
+      setCommunityTrips(Array.isArray(globeRes?.trips) ? globeRes.trips : []);
     } catch (e) {
       console.error('Error loading community data:', e);
     } finally {
@@ -201,6 +217,7 @@ export default function CommunityPage() {
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="w-full">
               <TabsTrigger value="search" className="flex-1">Abonnements</TabsTrigger>
+              <TabsTrigger value="trips" className="flex-1">Voyages</TabsTrigger>
               <TabsTrigger value="friends" className="flex-1">Amis proches</TabsTrigger>
               <TabsTrigger value="requests" className="flex-1 relative">
                 Demandes
@@ -235,6 +252,55 @@ export default function CommunityPage() {
                           user={f.following || { id: '', display_name: 'Utilisateur', avatar_url: null }}
                         />
                       ))}
+                    </div>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="trips" className="mt-4">
+                  {communityTrips.length === 0 ? (
+                    <div className="text-center py-16">
+                      <MapPin className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                      <p className="text-muted-foreground font-medium">Pas encore de voyages à explorer</p>
+                      <p className="text-muted-foreground text-sm mt-1">
+                        Suis des voyageurs pour voir leurs itinéraires partagés ici
+                      </p>
+                      <Button className="mt-4" variant="outline" asChild>
+                        <Link href="/globe">Ouvrir le globe</Link>
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {communityTrips.map((trip) => {
+                        const ownerLabel = trip.owner?.display_name || trip.owner?.username || 'Voyageur';
+                        return (
+                          <Card key={trip.id}>
+                            <CardContent className="p-3">
+                              <div className="flex items-center gap-3">
+                                {trip.cover_url ? (
+                                  <img
+                                    src={trip.cover_url}
+                                    alt={trip.destination || trip.title}
+                                    className="h-14 w-14 rounded-lg object-cover shrink-0"
+                                  />
+                                ) : (
+                                  <div className="h-14 w-14 rounded-lg bg-muted shrink-0" />
+                                )}
+                                <div className="min-w-0 flex-1">
+                                  <p className="font-medium text-sm truncate">{trip.title || trip.destination}</p>
+                                  <p className="text-xs text-muted-foreground truncate">{ownerLabel}</p>
+                                  <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                                    <Route className="w-3 h-3" />
+                                    {(trip.points?.length || 0)} étapes
+                                  </p>
+                                </div>
+                                <Button size="sm" variant="outline" asChild>
+                                  <Link href={`/trip/${trip.id}`}>Voir</Link>
+                                </Button>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
                     </div>
                   )}
                 </TabsContent>

@@ -196,6 +196,15 @@ export function CesiumGlobe({
   // Initialize Cesium
   useEffect(() => {
     let mounted = true;
+    let resizeObserver: ResizeObserver | null = null;
+    let rafId: number | null = null;
+
+    const resizeViewer = () => {
+      const viewer = viewerRef.current;
+      if (!viewer || viewer.isDestroyed?.()) return;
+      viewer.resize();
+      viewer.scene.requestRender();
+    };
 
     async function initCesium() {
       try {
@@ -334,6 +343,19 @@ export function CesiumGlobe({
         viewerRef.current = viewer;
         setIsLoaded(true);
 
+        window.addEventListener('resize', resizeViewer);
+        if (typeof ResizeObserver !== 'undefined' && containerRef.current) {
+          resizeObserver = new ResizeObserver(() => {
+            resizeViewer();
+          });
+          resizeObserver.observe(containerRef.current);
+        }
+
+        rafId = window.requestAnimationFrame(() => {
+          resizeViewer();
+          window.requestAnimationFrame(() => resizeViewer());
+        });
+
       } catch (err) {
         console.error('Failed to initialize Cesium:', err);
         setError('Échec du chargement du globe 3D');
@@ -344,6 +366,13 @@ export function CesiumGlobe({
 
     return () => {
       mounted = false;
+      if (rafId !== null) {
+        window.cancelAnimationFrame(rafId);
+      }
+      window.removeEventListener('resize', resizeViewer);
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+      }
       if (viewerRef.current) {
         viewerRef.current.destroy();
         viewerRef.current = null;
@@ -606,7 +635,7 @@ export function CesiumGlobe({
   };
 
   return (
-    <div className={`relative w-full h-full ${className}`}>
+    <div className={`relative w-full h-full min-h-[320px] ${className}`}>
       {/* Loading state */}
       {!isLoaded && !error && (
         <div className="absolute inset-0 flex items-center justify-center bg-[#0a0a0f] z-10">

@@ -208,7 +208,7 @@ export default function GlobePage() {
   }, [arcs, selectedTrip]);
 
   return (
-    <div className="h-screen flex flex-col bg-background">
+    <div className="flex h-[calc(100dvh-4rem)] flex-col bg-background">
       <div className="flex items-center gap-4 px-4 py-3 border-b bg-background/95 backdrop-blur z-20">
         <Button variant="ghost" size="icon" asChild>
           <Link href="/explore">
@@ -223,7 +223,7 @@ export default function GlobePage() {
         </div>
       </div>
 
-      <div className="flex-1 relative">
+      <div className="relative flex-1 min-h-0">
         {!loading && (
           <Suspense
             fallback={(

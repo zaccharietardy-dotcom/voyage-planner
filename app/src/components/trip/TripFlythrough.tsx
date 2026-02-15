@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Play, Pause, SkipForward, Gauge } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import type { Trip, TripItem } from '@/lib/types';
+import type { Trip } from '@/lib/types';
 
 interface TripFlythroughProps {
   trip: Trip;
@@ -26,6 +27,7 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
   const cesiumRef = useRef<any>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasMounted, setHasMounted] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [speed, setSpeed] = useState(1); // 1x, 2x, 4x
@@ -33,6 +35,20 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
   const waypointsRef = useRef<Waypoint[]>([]);
   const markersRef = useRef<Map<string, any>>(new Map());
   const polylineRef = useRef<any>(null);
+
+  useEffect(() => {
+    setHasMounted(true);
+    return () => setHasMounted(false);
+  }, []);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isOpen]);
 
   // Extract waypoints from trip (activities only, exclude flights/transport)
   const extractWaypoints = useCallback((): Waypoint[] => {
@@ -68,6 +84,15 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
     if (!isOpen) return;
 
     let mounted = true;
+    let resizeObserver: ResizeObserver | null = null;
+    let rafId: number | null = null;
+
+    const resizeViewer = () => {
+      const viewer = viewerRef.current;
+      if (!viewer || viewer.isDestroyed?.()) return;
+      viewer.resize();
+      viewer.scene.requestRender();
+    };
 
     async function initCesium() {
       try {
@@ -185,6 +210,19 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
         viewerRef.current = viewer;
         setIsLoaded(true);
 
+        window.addEventListener('resize', resizeViewer);
+        if (typeof ResizeObserver !== 'undefined' && containerRef.current) {
+          resizeObserver = new ResizeObserver(() => {
+            resizeViewer();
+          });
+          resizeObserver.observe(containerRef.current);
+        }
+
+        rafId = window.requestAnimationFrame(() => {
+          resizeViewer();
+          window.requestAnimationFrame(() => resizeViewer());
+        });
+
       } catch (err) {
         console.error('Failed to initialize Cesium:', err);
         setError('Échec du chargement de la visualisation 3D');
@@ -197,6 +235,13 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
       mounted = false;
       if (animationRef.current) {
         clearTimeout(animationRef.current);
+      }
+      if (rafId !== null) {
+        window.cancelAnimationFrame(rafId);
+      }
+      window.removeEventListener('resize', resizeViewer);
+      if (resizeObserver) {
+        resizeObserver.disconnect();
       }
       if (viewerRef.current) {
         viewerRef.current.destroy();
@@ -317,9 +362,9 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
     ? ((currentIndex + 1) / waypointsRef.current.length) * 100
     : 0;
 
-  if (!isOpen) return null;
+  if (!isOpen || !hasMounted) return null;
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 bg-black">
       {/* Cesium container */}
       <div
@@ -429,6 +474,7 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
           display: none !important;
         }
       `}</style>
-    </div>
+    </div>,
+    document.body
   );
 }
