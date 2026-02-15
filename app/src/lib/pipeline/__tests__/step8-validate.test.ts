@@ -140,4 +140,87 @@ describe('step8-validate geography checks', () => {
     expect(result.warnings.some((w) => w.includes('hard long leg'))).toBe(false);
     expect(result.warnings.some((w) => w.includes('impossible transition'))).toBe(false);
   });
+
+  it('flags non-Google restaurant photos and high-fatigue day plans', () => {
+    const dayItems: TripItem[] = [
+      item({
+        id: 'a1',
+        type: 'activity',
+        title: 'A1',
+        startTime: '09:00',
+        endTime: '11:00',
+        duration: 120,
+        latitude: 48.8606,
+        longitude: 2.3376,
+      }),
+      item({
+        id: 'a2',
+        type: 'activity',
+        title: 'A2',
+        startTime: '11:20',
+        endTime: '13:20',
+        duration: 120,
+        latitude: 48.8738,
+        longitude: 2.2950,
+        distanceFromPrevious: 3.4,
+        timeFromPrevious: 22,
+      }),
+      item({
+        id: 'lunch-1',
+        type: 'restaurant',
+        title: 'Déjeuner — Test Bistro',
+        startTime: '13:20',
+        endTime: '14:30',
+        duration: 70,
+        latitude: 48.8684,
+        longitude: 2.3212,
+        imageUrl: 'https://example.com/not-google.jpg',
+        restaurant: {
+          id: 'r-1',
+          name: 'Test Bistro',
+          address: 'Paris',
+          latitude: 48.8684,
+          longitude: 2.3212,
+          rating: 4.6,
+          reviewCount: 1200,
+          priceLevel: 2,
+          cuisineTypes: ['restaurant français'],
+          dietaryOptions: ['none'],
+          openingHours: {},
+        },
+      }),
+      item({
+        id: 'a3',
+        type: 'activity',
+        title: 'A3',
+        startTime: '14:45',
+        endTime: '16:45',
+        duration: 120,
+        latitude: 48.8867,
+        longitude: 2.3431,
+        distanceFromPrevious: 2.6,
+        timeFromPrevious: 18,
+      }),
+    ];
+
+    const trip: Trip = {
+      id: 'trip-3',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      preferences: createPreferences(),
+      days: [
+        {
+          dayNumber: 2,
+          date: new Date('2026-02-19T00:00:00.000Z'),
+          items: dayItems,
+          isDayTrip: false,
+        },
+      ],
+    };
+
+    const result = validateAndFixTrip(trip);
+
+    expect(result.warnings.some((w) => w.includes('non-Google photo source'))).toBe(true);
+    expect(result.warnings.some((w) => w.includes('fatigue risk'))).toBe(true);
+  });
 });

@@ -268,6 +268,7 @@ export function scoreAndSelectActivities(
   // 7. Separate must-sees from regular activities
   const mustSees = scored.filter(a => a.mustSee);
   const nonMustSees = scored.filter(a => !a.mustSee);
+  const curatedNonMustSees = curateNonMustSeePool(nonMustSees, preferences);
 
   // 8. Select the right count
   // Arrival/departure days get fewer activities (~2 each), full days get ~4
@@ -279,7 +280,7 @@ export function scoreAndSelectActivities(
     6 // absolute minimum
   );
   const remainingSlots = Math.max(0, targetCount - mustSees.length);
-  const selected: ScoredActivity[] = [...mustSees, ...nonMustSees.slice(0, remainingSlots)];
+  const selected: ScoredActivity[] = [...mustSees, ...curatedNonMustSees.slice(0, remainingSlots)];
 
   // 8b. Guarantee at least 1 Viator experiential activity (cruise, food tour, bike tour…)
   // Aligned with scoring keywords in computeScore() — same breadth
@@ -326,6 +327,65 @@ export function scoreAndSelectActivities(
 
     return fixed;
   });
+}
+
+/**
+ * Keep a high-interest activity pool for short city trips:
+ * - Preserve all must-sees (handled upstream)
+ * - Down-select weak popularity/rating entries unless the pool would become too small
+ */
+function curateNonMustSeePool(
+  nonMustSees: ScoredActivity[],
+  preferences: TripPreferences
+): ScoredActivity[] {
+  if (nonMustSees.length === 0) return nonMustSees;
+
+  // For short trips, quality matters more than long-tail variety.
+  const isShortTrip = preferences.durationDays <= 5;
+  if (!isShortTrip) return nonMustSees;
+
+  const interesting = nonMustSees.filter((activity) => isInterestingEnough(activity));
+
+  // Safety valve: never starve the planner when API coverage is sparse.
+  const minPoolSize = Math.max(6, preferences.durationDays * 2);
+  if (interesting.length < minPoolSize) {
+    console.log(
+      `[Pipeline V2] Step 2: interest filter kept ${interesting.length}/${nonMustSees.length} non-must-sees (below floor=${minPoolSize}), fallback to full pool`
+    );
+    return nonMustSees;
+  }
+
+  if (interesting.length !== nonMustSees.length) {
+    console.log(
+      `[Pipeline V2] Step 2: filtered low-interest non-must-sees ${nonMustSees.length - interesting.length}/${nonMustSees.length}`
+    );
+  }
+
+  return interesting;
+}
+
+function isInterestingEnough(activity: ScoredActivity): boolean {
+  const rating = Number(activity.rating || 0);
+  const reviews = Number(activity.reviewCount || 0);
+  const source = String(activity.source || '');
+
+  // Viator items can be niche but still valuable if reasonably rated.
+  if (source === 'viator') {
+    return rating >= 4.1 || reviews >= 40;
+  }
+
+  // Overpass often lacks engagement signals. Keep only very well-rated entries.
+  if (source === 'overpass' && reviews === 0) {
+    return rating >= 4.5;
+  }
+
+  // Generic quality gate for city-break relevance.
+  if (rating >= 4.5) return true;
+  if (rating >= 4.3 && reviews >= 120) return true;
+  if (rating >= 4.2 && reviews >= 250) return true;
+  if (reviews >= 1500 && rating >= 4.0) return true;
+
+  return false;
 }
 
 function tagActivity(

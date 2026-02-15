@@ -1238,8 +1238,9 @@ export async function assembleTripSchedule(
       // Check if it's time for dinner (cursor between 18:30 and 21:00)
       const cursorTime2 = scheduler.getCurrentTime();
       const cursorHour2 = cursorTime2.getHours() + cursorTime2.getMinutes() / 60;
+      const pendingMustSee = orderedActivities.slice(i).some((candidate) => candidate.mustSee);
 
-      if (!dinnerInserted && !skipDinner && !skipDinnerForMealActivity && dinner?.restaurant && cursorHour2 >= 18.5 && cursorHour2 < 21) {
+      if (!dinnerInserted && !skipDinner && !skipDinnerForMealActivity && dinner?.restaurant && cursorHour2 >= 18.5 && cursorHour2 < 21 && !pendingMustSee) {
         const result = scheduler.addItem({
           id: `meal-${balancedDay.dayNumber}-dinner`,
           title: `Dîner — ${dinner.restaurant.name}`,

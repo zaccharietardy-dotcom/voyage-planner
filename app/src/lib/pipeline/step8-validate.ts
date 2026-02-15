@@ -11,6 +11,10 @@ import { calculateDistance } from '../services/geocoding';
 const LONG_LEG_TARGET_KM = 2.5;
 const LONG_LEG_HARD_KM = 4;
 const IMPOSSIBLE_SPEED_KMH = 65;
+const MAX_FULL_DAY_LOAD_MIN = 600;
+const MAX_BOUNDARY_DAY_LOAD_MIN = 510;
+const MAX_NON_DAYTRIP_TRAVEL_MIN = 130;
+const MAX_HEAVY_ACTIVITIES_PER_DAY = 2;
 const LOGISTICS_TYPES: TripItem['type'][] = ['flight', 'transport', 'checkin', 'checkout', 'parking', 'luggage'];
 const GEO_STRICT_ENABLED = !['0', 'false', 'off'].includes(
   String(process.env.PIPELINE_GEO_STRICT || 'true').toLowerCase()
@@ -34,6 +38,8 @@ export function validateAndFixTrip(trip: Trip): ValidationResult {
   const warnings: string[] = [];
   const autoFixes: string[] = [];
   let penalties = 0;
+  const tripCuisineCounts = new Map<string, number>();
+  let tripRestaurantCount = 0;
 
   for (const day of trip.days) {
     // 1. Check for placeholder restaurants (no real data)
@@ -47,6 +53,36 @@ export function validateAndFixTrip(trip: Trip): ValidationResult {
     // 2. Check restaurant distances (should be < 2km from nearest activity)
     const activities = day.items.filter(i => i.type === 'activity');
     const restaurants = day.items.filter(i => i.type === 'restaurant' && !isHotelMeal(i));
+    const nonGooglePhotoRestaurants = restaurants.filter((restaurant) => hasNonGoogleRestaurantPhoto(restaurant));
+    for (const restaurant of nonGooglePhotoRestaurants) {
+      warnings.push(`Day ${day.dayNumber}: Restaurant "${restaurant.title}" has a non-Google photo source`);
+      penalties += 3;
+    }
+
+    for (const restaurant of restaurants) {
+      const cuisineFamily = inferRestaurantCuisineFamily(restaurant);
+      if (cuisineFamily) {
+        tripCuisineCounts.set(cuisineFamily, (tripCuisineCounts.get(cuisineFamily) || 0) + 1);
+        tripRestaurantCount += 1;
+      }
+    }
+
+    if (restaurants.length >= 2) {
+      const dayCuisineCounts = new Map<string, number>();
+      for (const restaurant of restaurants) {
+        const family = inferRestaurantCuisineFamily(restaurant);
+        if (!family) continue;
+        dayCuisineCounts.set(family, (dayCuisineCounts.get(family) || 0) + 1);
+      }
+      const dominant = [...dayCuisineCounts.entries()].sort((a, b) => b[1] - a[1])[0];
+      if (dominant && dominant[0] !== 'generic' && dominant[1] >= 2 && dominant[1] === restaurants.length) {
+        warnings.push(
+          `Day ${day.dayNumber}: Restaurant variety is low (${dominant[0]} repeated ${dominant[1]}x)`
+        );
+        penalties += 3;
+      }
+    }
+
     for (const resto of restaurants) {
       if (!resto.latitude || !resto.longitude || resto.latitude === 0) continue;
       const nearestDist = activities.length > 0
@@ -135,6 +171,43 @@ export function validateAndFixTrip(trip: Trip): ValidationResult {
       totalTravelMin: Math.round(totalTravelMin),
     };
 
+    const isBoundaryDay = day.dayNumber === 1 || day.dayNumber === trip.days.length;
+    const heavyActivities = activities.filter((item) => (item.duration || 60) >= 120).length;
+    if (!day.isDayTrip && heavyActivities > MAX_HEAVY_ACTIVITIES_PER_DAY) {
+      warnings.push(
+        `Day ${day.dayNumber}: ${heavyActivities} long activities scheduled (fatigue risk)`
+      );
+      penalties += (heavyActivities - MAX_HEAVY_ACTIVITIES_PER_DAY) * 3;
+    }
+
+    const activityMinutes = activities.reduce((sum, item) => sum + (item.duration || 60), 0);
+    const mealMinutes = restaurants.reduce((sum, item) => sum + Math.max(30, item.duration || 60), 0);
+    const dayLoadMinutes = activityMinutes + mealMinutes + totalTravelMin;
+    const maxLoad = isBoundaryDay ? MAX_BOUNDARY_DAY_LOAD_MIN : MAX_FULL_DAY_LOAD_MIN;
+    if (!day.isDayTrip && dayLoadMinutes > maxLoad) {
+      warnings.push(
+        `Day ${day.dayNumber}: day load is high (${Math.round(dayLoadMinutes)}min planned incl. travel)`
+      );
+      penalties += 4;
+    }
+
+    if (!day.isDayTrip && totalTravelMin > MAX_NON_DAYTRIP_TRAVEL_MIN) {
+      warnings.push(
+        `Day ${day.dayNumber}: too much travel time (${Math.round(totalTravelMin)}min)`
+      );
+      penalties += 3;
+    }
+
+    const firstActivityStart = activities.length > 0
+      ? Math.min(...activities.map((item) => timeToMinutes(item.startTime)))
+      : null;
+    if (!day.isDayTrip && !isBoundaryDay && activities.length >= 3 && firstActivityStart !== null && firstActivityStart > 9 * 60 + 30) {
+      warnings.push(
+        `Day ${day.dayNumber}: first activity starts late (${minutesToTime(firstActivityStart)})`
+      );
+      penalties += 2;
+    }
+
     if (!day.isDayTrip && GEO_STRICT_ENABLED) {
       const longTargetLegs = legMetrics.filter((l) => l.distanceKm > LONG_LEG_TARGET_KM);
       const hardLongLegs = legMetrics.filter((l) => l.distanceKm > LONG_LEG_HARD_KM);
@@ -171,6 +244,16 @@ export function validateAndFixTrip(trip: Trip): ValidationResult {
 
     // Boundary transport sanity: should not be 0km when source and destination differ
     checkBoundaryConsistency(day, warnings, (deltaPenalty) => { penalties += deltaPenalty; });
+  }
+
+  if (tripRestaurantCount >= 5) {
+    const dominantTripCuisine = [...tripCuisineCounts.entries()].sort((a, b) => b[1] - a[1])[0];
+    if (dominantTripCuisine && dominantTripCuisine[0] !== 'generic' && dominantTripCuisine[1] / tripRestaurantCount >= 0.7) {
+      warnings.push(
+        `Trip-wide restaurant variety is limited (${dominantTripCuisine[0]} = ${dominantTripCuisine[1]}/${tripRestaurantCount})`
+      );
+      penalties += 4;
+    }
   }
 
   // 10. Check hotel distance from activities centroid
@@ -318,4 +401,58 @@ function round2(value: number): number {
 function timeToMinutes(time: string): number {
   const [h, m] = time.split(':').map(Number);
   return (h || 0) * 60 + (m || 0);
+}
+
+function minutesToTime(totalMinutes: number): string {
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+}
+
+function isGoogleRestaurantPhoto(url?: string): boolean {
+  if (!url) return false;
+  return url.includes('/api/place-photo?') || url.includes('maps.googleapis.com/maps/api/place/photo');
+}
+
+function hasNonGoogleRestaurantPhoto(item: TripItem): boolean {
+  if (item.type !== 'restaurant') return false;
+  const photoCandidates = [
+    item.imageUrl,
+    ...(item.restaurant?.photos || []),
+  ].filter((value): value is string => typeof value === 'string' && value.length > 0);
+
+  if (photoCandidates.length === 0) return false;
+  return photoCandidates.some((photo) => !isGoogleRestaurantPhoto(photo));
+}
+
+function inferRestaurantCuisineFamily(item: TripItem): string | null {
+  if (item.type !== 'restaurant') return null;
+  const restaurant = item.restaurant;
+  const text = [
+    restaurant?.name || '',
+    ...(restaurant?.cuisineTypes || []),
+    restaurant?.description || '',
+    item.title || '',
+  ].join(' ').toLowerCase();
+
+  const families: Array<{ key: string; keywords: string[] }> = [
+    { key: 'french', keywords: ['français', 'french', 'brasserie', 'bistro'] },
+    { key: 'italian', keywords: ['italien', 'italian', 'trattoria', 'pizzeria', 'osteria'] },
+    { key: 'japanese', keywords: ['japonais', 'japanese', 'sushi', 'ramen', 'izakaya'] },
+    { key: 'chinese', keywords: ['chinois', 'chinese', 'dim sum', 'szechuan'] },
+    { key: 'indian', keywords: ['indien', 'indian', 'curry', 'tandoori'] },
+    { key: 'thai', keywords: ['thai', 'thaï', 'thaïlandais'] },
+    { key: 'mexican', keywords: ['mexicain', 'mexican', 'taco', 'taqueria'] },
+    { key: 'middle-eastern', keywords: ['libanais', 'lebanese', 'mezze', 'shawarma'] },
+    { key: 'bakery-cafe', keywords: ['boulangerie', 'bakery', 'café', 'coffee', 'brunch', 'salon de thé'] },
+    { key: 'seafood', keywords: ['seafood', 'fruits de mer', 'poisson', 'fish'] },
+  ];
+
+  for (const family of families) {
+    if (family.keywords.some((keyword) => text.includes(keyword))) {
+      return family.key;
+    }
+  }
+
+  return 'generic';
 }

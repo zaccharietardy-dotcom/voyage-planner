@@ -118,8 +118,14 @@ export function assignRestaurants(
   const assignments: MealAssignment[] = [];
   const usedIds = new Set<string>(previouslyUsedIds || []);
   const mealOrder: MealType[] = ['breakfast', 'lunch', 'dinner'];
+  const cuisineHistoryByMeal: Record<MealType, string[]> = {
+    breakfast: [],
+    lunch: [],
+    dinner: [],
+  };
 
   for (const cluster of clusters) {
+    const dayCuisineFamilies = new Set<string>();
     for (const mealType of mealOrder) {
       if (shouldSelfCater(mealType, budgetStrategy)) {
         assignments.push({
@@ -145,13 +151,18 @@ export function assignRestaurants(
 
       const refCoords = getMealReferenceCoords(mealType, cluster, accommodationCoords);
 
-      const topRestaurants = selectTopNearbyRestaurants(
+      const topRestaurants = prioritizeCuisineVariety(
+        selectTopNearbyRestaurants(
         geoPool,
         refCoords,
         usedIds,
         mealType,
         3,
         preferences.destination
+        ),
+        mealType,
+        dayCuisineFamilies,
+        cuisineHistoryByMeal[mealType]
       );
 
       // If no reasonable local restaurant exists, leave it null.
@@ -172,6 +183,9 @@ export function assignRestaurants(
 
       if (best) {
         usedIds.add(best.id);
+        const selectedFamily = getCuisineFamily(best);
+        dayCuisineFamilies.add(selectedFamily);
+        cuisineHistoryByMeal[mealType].push(selectedFamily);
       }
 
       assignments.push({
@@ -188,6 +202,39 @@ export function assignRestaurants(
     meals: assignments,
     restaurantGeoPool: geoPool,
   };
+}
+
+function prioritizeCuisineVariety(
+  candidates: Restaurant[],
+  mealType: MealType,
+  dayCuisineFamilies: Set<string>,
+  mealHistory: string[]
+): Restaurant[] {
+  if (candidates.length <= 1) return candidates;
+
+  const recentFamilies = new Set(mealHistory.slice(-2));
+  const rescored = candidates.map((restaurant, index) => {
+    const family = getCuisineFamily(restaurant);
+    let diversityScore = 0;
+
+    // Avoid repeating the same cuisine multiple times in a single day.
+    if (dayCuisineFamilies.has(family)) diversityScore -= 2.5;
+
+    // Avoid repeating the exact same cuisine for the same meal across recent days.
+    if (recentFamilies.has(family)) diversityScore -= mealType === 'breakfast' ? 1.25 : 1.75;
+
+    // Slightly prefer explicit cuisine labels over generic buckets.
+    if (family !== 'generic') diversityScore += 0.6;
+
+    return { restaurant, index, diversityScore };
+  });
+
+  rescored.sort((a, b) => {
+    if (b.diversityScore !== a.diversityScore) return b.diversityScore - a.diversityScore;
+    return a.index - b.index;
+  });
+
+  return rescored.map((entry) => entry.restaurant);
 }
 
 function hasValidCoordinates(restaurant: Restaurant): boolean {
