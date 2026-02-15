@@ -293,6 +293,9 @@ export function CesiumGlobe({
 
   // Initialize Cesium
   useEffect(() => {
+    setError(null);
+    setIsLoaded(false);
+
     let mounted = true;
     let resizeObserver: ResizeObserver | null = null;
     let rafId: number | null = null;
@@ -346,12 +349,24 @@ export function CesiumGlobe({
           skyBox: false,
         };
 
-        const viewerProfiles: Array<{ name: 'webgl2' | 'webgl1'; requestWebgl1: boolean; powerPreference: 'default' | 'high-performance' }> = [];
+        const viewerProfiles: Array<{
+          name: string;
+          requestWebgl1?: boolean;
+          powerPreference?: 'default' | 'high-performance';
+          useTerrain?: boolean;
+          useSkyAtmosphere?: boolean;
+          antialias?: boolean;
+          msaaSamples?: number;
+        }> = [];
         if (webglSupport.webgl2) {
           viewerProfiles.push({
             name: 'webgl2',
             requestWebgl1: false,
             powerPreference: 'high-performance',
+            useTerrain: true,
+            useSkyAtmosphere: true,
+            antialias: false,
+            msaaSamples: 1,
           });
         }
         if (webglSupport.webgl1) {
@@ -359,6 +374,29 @@ export function CesiumGlobe({
             name: 'webgl1',
             requestWebgl1: true,
             powerPreference: 'default',
+            useTerrain: true,
+            useSkyAtmosphere: true,
+            antialias: false,
+          });
+        }
+        if (webglSupport.webgl2) {
+          viewerProfiles.push({
+            name: 'minimal-webgl2',
+            requestWebgl1: false,
+            powerPreference: 'default',
+            useTerrain: false,
+            useSkyAtmosphere: false,
+            antialias: false,
+          });
+        }
+        if (webglSupport.webgl1) {
+          viewerProfiles.push({
+            name: 'minimal-webgl1',
+            requestWebgl1: true,
+            powerPreference: 'default',
+            useTerrain: false,
+            useSkyAtmosphere: false,
+            antialias: false,
           });
         }
 
@@ -367,25 +405,39 @@ export function CesiumGlobe({
 
         for (const profile of viewerProfiles) {
           try {
-            viewer = new Cesium.Viewer(containerRef.current, {
+            const viewerOptions: any = {
               ...commonViewerOptions,
-              contextOptions: {
+            };
+
+            if (profile.requestWebgl1 !== undefined) {
+              viewerOptions.contextOptions = {
                 requestWebgl1: profile.requestWebgl1,
                 webgl: {
                   alpha: false,
                   depth: true,
                   stencil: false,
-                  antialias: false,
+                  antialias: profile.antialias ?? false,
                   premultipliedAlpha: false,
                   preserveDrawingBuffer: false,
-                  powerPreference: profile.powerPreference,
+                  powerPreference: profile.powerPreference ?? 'default',
                   failIfMajorPerformanceCaveat: false,
                 },
-              },
-              msaaSamples: profile.requestWebgl1 ? undefined : 1,
-              terrain: hasIonToken ? Cesium.Terrain.fromWorldTerrain() : undefined,
-              skyAtmosphere: new Cesium.SkyAtmosphere(),
-            });
+              };
+            }
+
+            if (typeof profile.msaaSamples === 'number') {
+              viewerOptions.msaaSamples = profile.msaaSamples;
+            }
+
+            if (profile.useTerrain && hasIonToken) {
+              viewerOptions.terrain = Cesium.Terrain.fromWorldTerrain();
+            }
+
+            if (profile.useSkyAtmosphere) {
+              viewerOptions.skyAtmosphere = new Cesium.SkyAtmosphere();
+            }
+
+            viewer = new Cesium.Viewer(containerRef.current, viewerOptions);
 
             viewerRef.current = viewer;
             console.info(`[CesiumGlobe] Cesium initialized with ${profile.name}`);

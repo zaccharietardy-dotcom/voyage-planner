@@ -212,7 +212,7 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
   const [speed, setSpeed] = useState(1); // 1x, 2x, 4x
   const animationRef = useRef<NodeJS.Timeout | null>(null);
   const waypointsRef = useRef<Waypoint[]>([]);
-  const markersRef = useRef<Map<string, any>>(new Map());
+  const markersRef = useRef<Map<number, any>>(new Map());
   const polylineRef = useRef<any>(null);
   const fallbackItems = useMemo(() => trip.days.flatMap((day) => day.items || []), [trip]);
 
@@ -236,19 +236,22 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
 
     for (const day of trip.days) {
       for (const item of day.items) {
+        const lat = Number(item.latitude);
+        const lng = Number(item.longitude);
+
         // Only include activities with valid GPS coordinates
         if (
           item.type === 'activity' &&
-          item.latitude &&
-          item.longitude &&
-          Math.abs(item.latitude) > 0.01 &&
-          Math.abs(item.longitude) > 0.01
+          Number.isFinite(lat) &&
+          Number.isFinite(lng) &&
+          Math.abs(lat) > 0.01 &&
+          Math.abs(lng) > 0.01
         ) {
           waypoints.push({
             id: item.id,
             name: item.title,
-            lat: item.latitude,
-            lng: item.longitude,
+            lat,
+            lng,
             dayNumber: item.dayNumber,
             type: item.type,
           });
@@ -262,6 +265,13 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
   // Initialize Cesium viewer
   useEffect(() => {
     if (!isOpen) return;
+
+    setError(null);
+    setIsLoaded(false);
+    setIsPlaying(false);
+    setCurrentIndex(0);
+    markersRef.current.clear();
+    polylineRef.current = null;
 
     let mounted = true;
     let resizeObserver: ResizeObserver | null = null;
@@ -312,12 +322,24 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
           skyBox: false,
         };
 
-        const viewerProfiles: Array<{ name: 'webgl2' | 'webgl1'; requestWebgl1: boolean; powerPreference: 'default' | 'high-performance' }> = [];
+        const viewerProfiles: Array<{
+          name: string;
+          requestWebgl1?: boolean;
+          powerPreference?: 'default' | 'high-performance';
+          useTerrain?: boolean;
+          useSkyAtmosphere?: boolean;
+          antialias?: boolean;
+          msaaSamples?: number;
+        }> = [];
         if (webglSupport.webgl2) {
           viewerProfiles.push({
             name: 'webgl2',
             requestWebgl1: false,
             powerPreference: 'high-performance',
+            useTerrain: true,
+            useSkyAtmosphere: true,
+            antialias: false,
+            msaaSamples: 1,
           });
         }
         if (webglSupport.webgl1) {
@@ -325,6 +347,29 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
             name: 'webgl1',
             requestWebgl1: true,
             powerPreference: 'default',
+            useTerrain: true,
+            useSkyAtmosphere: true,
+            antialias: false,
+          });
+        }
+        if (webglSupport.webgl2) {
+          viewerProfiles.push({
+            name: 'minimal-webgl2',
+            requestWebgl1: false,
+            powerPreference: 'default',
+            useTerrain: false,
+            useSkyAtmosphere: false,
+            antialias: false,
+          });
+        }
+        if (webglSupport.webgl1) {
+          viewerProfiles.push({
+            name: 'minimal-webgl1',
+            requestWebgl1: true,
+            powerPreference: 'default',
+            useTerrain: false,
+            useSkyAtmosphere: false,
+            antialias: false,
           });
         }
 
@@ -333,25 +378,39 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
 
         for (const profile of viewerProfiles) {
           try {
-            viewer = new Cesium.Viewer(containerRef.current, {
+            const viewerOptions: any = {
               ...commonViewerOptions,
-              contextOptions: {
+            };
+
+            if (profile.requestWebgl1 !== undefined) {
+              viewerOptions.contextOptions = {
                 requestWebgl1: profile.requestWebgl1,
                 webgl: {
                   alpha: false,
                   depth: true,
                   stencil: false,
-                  antialias: false,
+                  antialias: profile.antialias ?? false,
                   premultipliedAlpha: false,
                   preserveDrawingBuffer: false,
-                  powerPreference: profile.powerPreference,
+                  powerPreference: profile.powerPreference ?? 'default',
                   failIfMajorPerformanceCaveat: false,
                 },
-              },
-              msaaSamples: profile.requestWebgl1 ? undefined : 1,
-              terrain: hasIonToken ? Cesium.Terrain.fromWorldTerrain() : undefined,
-              skyAtmosphere: new Cesium.SkyAtmosphere(),
-            });
+              };
+            }
+
+            if (typeof profile.msaaSamples === 'number') {
+              viewerOptions.msaaSamples = profile.msaaSamples;
+            }
+
+            if (profile.useTerrain && hasIonToken) {
+              viewerOptions.terrain = Cesium.Terrain.fromWorldTerrain();
+            }
+
+            if (profile.useSkyAtmosphere) {
+              viewerOptions.skyAtmosphere = new Cesium.SkyAtmosphere();
+            }
+
+            viewer = new Cesium.Viewer(containerRef.current, viewerOptions);
 
             viewerRef.current = viewer;
             console.info(`[TripFlythrough] Cesium initialized with ${profile.name}`);
@@ -392,79 +451,82 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
         const waypoints = extractWaypoints();
         waypointsRef.current = waypoints;
 
-        if (waypoints.length === 0) {
-          setError('Aucune activité avec coordonnées GPS trouvée');
-          return;
+        if (waypoints.length > 0) {
+          try {
+            // Add route polyline
+            if (waypoints.length > 1) {
+              const positions = waypoints.map((w) =>
+                Cesium.Cartesian3.fromDegrees(w.lng, w.lat, 50)
+              );
+
+              polylineRef.current = viewer.entities.add({
+                polyline: {
+                  positions: positions,
+                  width: 3,
+                  material: new Cesium.PolylineGlowMaterialProperty({
+                    glowPower: 0.2,
+                    color: Cesium.Color.fromCssColorString('#fbbf24').withAlpha(0.8),
+                  }),
+                },
+              });
+            }
+
+            // Add waypoint markers
+            waypoints.forEach((waypoint, index) => {
+              const isFirst = index === 0;
+              const marker = viewer.entities.add({
+                id: `waypoint-${waypoint.id}-${index}`,
+                position: Cesium.Cartesian3.fromDegrees(waypoint.lng, waypoint.lat, 100),
+                point: {
+                  pixelSize: isFirst ? 14 : 10,
+                  color: Cesium.Color.fromCssColorString('#60a5fa'),
+                  outlineColor: Cesium.Color.WHITE,
+                  outlineWidth: 2,
+                  heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND,
+                },
+                label: {
+                  text: `${index + 1}`,
+                  font: '700 11px sans-serif',
+                  fillColor: Cesium.Color.WHITE,
+                  outlineColor: Cesium.Color.BLACK,
+                  outlineWidth: 2,
+                  style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                  verticalOrigin: Cesium.VerticalOrigin.CENTER,
+                  horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
+                  heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND,
+                },
+              });
+              markersRef.current.set(index, marker);
+            });
+
+            // Fly to first waypoint
+            const firstWaypoint = waypoints[0];
+            const firstFlightProfile = getCinematicFlightProfile(waypoints, 0);
+            const firstFlightOptions: any = {
+              destination: Cesium.Cartesian3.fromDegrees(
+                firstWaypoint.lng,
+                firstWaypoint.lat,
+                firstFlightProfile.altitude
+              ),
+              orientation: {
+                heading: Cesium.Math.toRadians(firstFlightProfile.headingDeg),
+                pitch: Cesium.Math.toRadians(firstFlightProfile.pitchDeg),
+                roll: 0,
+              },
+              duration: firstFlightProfile.duration,
+              maximumHeight: firstFlightProfile.maxHeight,
+              pitchAdjustHeight: Math.max(3500, firstFlightProfile.maxHeight * 0.8),
+            };
+            if (Cesium.EasingFunction?.CUBIC_IN_OUT) {
+              firstFlightOptions.easingFunction = Cesium.EasingFunction.CUBIC_IN_OUT;
+            }
+            viewer.camera.flyTo(firstFlightOptions);
+          } catch (waypointError) {
+            console.warn('[TripFlythrough] Waypoint overlay initialization failed, keeping base 3D viewer.', waypointError);
+          }
+        } else {
+          console.info('[TripFlythrough] No activity waypoints found for this trip, showing base 3D globe only.');
         }
-
-        // Add route polyline
-        if (waypoints.length > 1) {
-          const positions = waypoints.map(w =>
-            Cesium.Cartesian3.fromDegrees(w.lng, w.lat, 50)
-          );
-
-          polylineRef.current = viewer.entities.add({
-            polyline: {
-              positions: positions,
-              width: 3,
-              material: new Cesium.PolylineGlowMaterialProperty({
-                glowPower: 0.2,
-                color: Cesium.Color.fromCssColorString('#fbbf24').withAlpha(0.8),
-              }),
-            },
-          });
-        }
-
-        // Add waypoint markers
-        waypoints.forEach((waypoint, index) => {
-          const isFirst = index === 0;
-          const marker = viewer.entities.add({
-            id: `waypoint-${waypoint.id}`,
-            position: Cesium.Cartesian3.fromDegrees(waypoint.lng, waypoint.lat, 100),
-            point: {
-              pixelSize: isFirst ? 14 : 10,
-              color: Cesium.Color.fromCssColorString('#60a5fa'),
-              outlineColor: Cesium.Color.WHITE,
-              outlineWidth: 2,
-              heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND,
-            },
-            label: {
-              text: `${index + 1}`,
-              font: '700 11px sans-serif',
-              fillColor: Cesium.Color.WHITE,
-              outlineColor: Cesium.Color.BLACK,
-              outlineWidth: 2,
-              style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-              verticalOrigin: Cesium.VerticalOrigin.CENTER,
-              horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
-              heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND,
-            },
-          });
-          markersRef.current.set(waypoint.id, marker);
-        });
-
-        // Fly to first waypoint
-        const firstWaypoint = waypoints[0];
-        const firstFlightProfile = getCinematicFlightProfile(waypoints, 0);
-        const firstFlightOptions: any = {
-          destination: Cesium.Cartesian3.fromDegrees(
-            firstWaypoint.lng,
-            firstWaypoint.lat,
-            firstFlightProfile.altitude
-          ),
-          orientation: {
-            heading: Cesium.Math.toRadians(firstFlightProfile.headingDeg),
-            pitch: Cesium.Math.toRadians(firstFlightProfile.pitchDeg),
-            roll: 0,
-          },
-          duration: firstFlightProfile.duration,
-          maximumHeight: firstFlightProfile.maxHeight,
-          pitchAdjustHeight: Math.max(3500, firstFlightProfile.maxHeight * 0.8),
-        };
-        if (Cesium.EasingFunction?.CUBIC_IN_OUT) {
-          firstFlightOptions.easingFunction = Cesium.EasingFunction.CUBIC_IN_OUT;
-        }
-        viewer.camera.flyTo(firstFlightOptions);
 
         setIsLoaded(true);
 
@@ -517,6 +579,8 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
         viewerRef.current.destroy();
         viewerRef.current = null;
       }
+      markersRef.current.clear();
+      polylineRef.current = null;
     };
   }, [isOpen, extractWaypoints]);
 
@@ -525,10 +589,7 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
     const Cesium = cesiumRef.current;
     if (!Cesium || !viewerRef.current) return;
 
-    const waypoints = waypointsRef.current;
-
-    markersRef.current.forEach((marker, waypointId) => {
-      const waypointIndex = waypoints.findIndex(w => w.id === waypointId);
+    markersRef.current.forEach((marker, waypointIndex) => {
       const isCurrent = waypointIndex === index;
 
       marker.point.pixelSize = isCurrent ? 14 : 10;
