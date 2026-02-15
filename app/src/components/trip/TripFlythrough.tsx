@@ -73,6 +73,20 @@ async function applyBest3DQuality(Cesium: any, viewer: any, hasIonToken: boolean
   }
 }
 
+function applySafeBaseImagery(Cesium: any, viewer: any) {
+  try {
+    const imageryLayers = viewer.imageryLayers;
+    imageryLayers.removeAll();
+    const osmProvider = new Cesium.OpenStreetMapImageryProvider({
+      url: 'https://tile.openstreetmap.org/',
+      credit: 'OpenStreetMap',
+    });
+    imageryLayers.addImageryProvider(osmProvider);
+  } catch (error) {
+    console.info('[TripFlythrough] OSM imagery fallback unavailable', error);
+  }
+}
+
 interface TripFlythroughProps {
   trip: Trip;
   isOpen: boolean;
@@ -175,8 +189,7 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
         const hasIonToken = ionToken.length > 0;
         Cesium.Ion.defaultAccessToken = ionToken;
 
-        const viewer = new Cesium.Viewer(containerRef.current, {
-          terrain: hasIonToken ? Cesium.Terrain.fromWorldTerrain() : undefined,
+        const commonViewerOptions: any = {
           animation: false,
           baseLayerPicker: false,
           fullscreenButton: false,
@@ -190,8 +203,21 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
           navigationHelpButton: false,
           navigationInstructionsInitiallyVisible: false,
           skyBox: false,
-          skyAtmosphere: new Cesium.SkyAtmosphere(),
-        });
+        };
+
+        let viewer: any;
+        try {
+          viewer = new Cesium.Viewer(containerRef.current, {
+            ...commonViewerOptions,
+            terrain: hasIonToken ? Cesium.Terrain.fromWorldTerrain() : undefined,
+            skyAtmosphere: new Cesium.SkyAtmosphere(),
+          });
+        } catch (error) {
+          console.info('[TripFlythrough] Advanced viewer init failed, retrying minimal viewer', error);
+          viewer = new Cesium.Viewer(containerRef.current, commonViewerOptions);
+        }
+
+        applySafeBaseImagery(Cesium, viewer);
 
         // Dark theme
         const imageryLayers = viewer.imageryLayers;

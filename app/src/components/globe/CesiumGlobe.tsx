@@ -73,6 +73,20 @@ async function applyBest3DQuality(Cesium: any, viewer: any, hasIonToken: boolean
   }
 }
 
+function applySafeBaseImagery(Cesium: any, viewer: any) {
+  try {
+    const imageryLayers = viewer.imageryLayers;
+    imageryLayers.removeAll();
+    const osmProvider = new Cesium.OpenStreetMapImageryProvider({
+      url: 'https://tile.openstreetmap.org/',
+      credit: 'OpenStreetMap',
+    });
+    imageryLayers.addImageryProvider(osmProvider);
+  } catch (error) {
+    console.info('[CesiumGlobe] OSM imagery fallback unavailable', error);
+  }
+}
+
 // Create a simple dot marker (fallback when no image)
 function createMarkerCanvas(Cesium: any, isSelected: boolean, isOnline: boolean): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
@@ -290,9 +304,7 @@ export function CesiumGlobe({
         const hasIonToken = ionToken.length > 0;
         Cesium.Ion.defaultAccessToken = ionToken;
 
-        // Create viewer with dark theme settings
-        const viewer = new Cesium.Viewer(containerRef.current, {
-          terrain: hasIonToken ? Cesium.Terrain.fromWorldTerrain() : undefined,
+        const commonViewerOptions: any = {
           animation: false,
           baseLayerPicker: false,
           fullscreenButton: false,
@@ -306,13 +318,27 @@ export function CesiumGlobe({
           navigationHelpButton: false,
           navigationInstructionsInitiallyVisible: false,
           skyBox: false,
-          skyAtmosphere: new Cesium.SkyAtmosphere(),
           contextOptions: {
             webgl: {
               alpha: true,
             },
           },
-        });
+        };
+
+        // Create viewer with dark theme settings, then fallback to minimal config if needed.
+        let viewer: any;
+        try {
+          viewer = new Cesium.Viewer(containerRef.current, {
+            ...commonViewerOptions,
+            terrain: hasIonToken ? Cesium.Terrain.fromWorldTerrain() : undefined,
+            skyAtmosphere: new Cesium.SkyAtmosphere(),
+          });
+        } catch (error) {
+          console.info('[CesiumGlobe] Advanced viewer init failed, retrying minimal viewer', error);
+          viewer = new Cesium.Viewer(containerRef.current, commonViewerOptions);
+        }
+
+        applySafeBaseImagery(Cesium, viewer);
 
         // Dark theme - visible but muted
         const imageryLayers = viewer.imageryLayers;
