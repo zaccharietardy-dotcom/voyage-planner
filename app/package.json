@@ -14,7 +14,8 @@
     "debug:generate": "npx tsx scripts/debug-pipeline/generate-trip.ts",
     "debug:analyze": "npx tsx scripts/debug-pipeline/analyze-trip.ts",
     "debug:run": "npx tsx scripts/debug-pipeline/generate-trip.ts --all-and-analyze",
-    "debug:campaign": "npx tsx scripts/debug-pipeline/run-campaign.ts"
+    "debug:campaign": "npx tsx scripts/debug-pipeline/run-campaign.ts",
+    "smoke:collab": "node --import tsx scripts/smoke-collaboration-api.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.71.2",

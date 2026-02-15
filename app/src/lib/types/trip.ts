@@ -339,6 +339,7 @@ export interface TripItem {
   parking?: ParkingOption;
   restaurant?: Restaurant;
   restaurantAlternatives?: Restaurant[]; // Top 2-3 restaurants alternatifs classés par qualité/distance
+  selectionSource?: 'pool' | 'api' | 'fallback'; // Source de sélection du restaurant (post-optimisation)
   accommodation?: Accommodation;
   localTransport?: LocalTransport;
   // Distance/temps par rapport à l'item précédent
@@ -383,6 +384,8 @@ export interface TripItem {
   // Viator flags
   freeCancellation?: boolean;
   instantConfirmation?: boolean;
+  // Preserve must-see protection in post-assembly passes
+  mustSee?: boolean;
 }
 
 export interface TripDay {
@@ -393,6 +396,11 @@ export interface TripDay {
     maxLegKm: number;
     p95LegKm: number;
     totalTravelMin: number;
+  };
+  scheduleDiagnostics?: {
+    largestGapMin?: number;
+    outlierRestaurantsCount?: number;
+    loadRebalanced?: boolean;
   };
   // Résumé du jour
   totalDistance?: number;

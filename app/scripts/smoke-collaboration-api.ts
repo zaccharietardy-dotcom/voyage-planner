@@ -167,12 +167,14 @@ async function main() {
   const owner = await ensureUser('test1@voyage-dev.local', 'testpass123', 'Alice Test');
   const invited = await ensureUser('test2@voyage-dev.local', 'testpass123', 'Bob Test');
   const joiner = await ensureUser('test3@voyage-dev.local', 'testpass123', 'Charlie Test');
+  const outsider = await ensureUser('test4@voyage-dev.local', 'testpass123', 'Dana Test');
 
   await deleteTripsByPrefix(owner.id, '[SMOKE-COLLAB-');
 
   const ownerClient = await createAuthedApiClient(owner);
   const invitedClient = await createAuthedApiClient(invited);
   const joinerClient = await createAuthedApiClient(joiner);
+  const outsiderClient = await createAuthedApiClient(outsider);
 
   const createPayload = {
     title: `${prefix} Rome`,
@@ -269,6 +271,21 @@ async function main() {
   assert(joinerGetTrip.json?.userRole === 'viewer', `joiner userRole mismatch: ${joinerGetTrip.json?.userRole}`);
   console.log('✓ Joiner can open trip detail');
 
+  const ownerSetPublic = await ownerClient.api(`/api/trips/${tripId}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ visibility: 'public' }),
+  });
+  assert(ownerSetPublic.response.status === 200, `owner PATCH visibility failed: ${ownerSetPublic.response.status} ${JSON.stringify(ownerSetPublic.json)}`);
+  console.log('✓ Owner can switch trip visibility to public');
+
+  const outsiderGetTrip = await outsiderClient.api(`/api/trips/${tripId}`);
+  assert(outsiderGetTrip.response.status === 200, `outsider public get trip failed: ${outsiderGetTrip.response.status} ${JSON.stringify(outsiderGetTrip.json)}`);
+  assert(outsiderGetTrip.json?.userRole === 'viewer', `outsider role mismatch: ${outsiderGetTrip.json?.userRole}`);
+  assert(Array.isArray(outsiderGetTrip.json?.members) && outsiderGetTrip.json.members.length === 0, 'outsider should not receive members');
+  assert(Array.isArray(outsiderGetTrip.json?.proposals) && outsiderGetTrip.json.proposals.length === 0, 'outsider should not receive proposals');
+  assert(!outsiderGetTrip.json?.share_code, 'outsider should not receive share_code');
+  console.log('✓ Public viewer (non-member) gets redacted collaboration payload');
+
   const ownerDelete = await ownerClient.api(`/api/trips/${tripId}`, { method: 'DELETE' });
   assert(ownerDelete.response.status === 200, `owner delete failed: ${ownerDelete.response.status}`);
   console.log('✓ Owner deleted smoke trip');
@@ -280,4 +297,3 @@ main().catch((error) => {
   console.error('\n❌ Collaboration smoke test failed:', error);
   process.exit(1);
 });
-

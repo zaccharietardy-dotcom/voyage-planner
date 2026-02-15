@@ -187,7 +187,7 @@ export async function GET(
           joinedAt: member.joined_at,
           profile: {
             displayName: profile?.display_name || 'Utilisateur',
-            avatarUrl: profile?.avatar_url,
+            avatarUrl: profile?.avatar_url ?? null,
             email: profile?.email || '',
           },
         };

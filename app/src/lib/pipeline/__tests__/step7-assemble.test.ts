@@ -1,11 +1,14 @@
 import {
   addHotelBoundaryTransportItems,
+  compressIntraDayGaps,
+  fixRestaurantOutliers,
   getAirportPreDepartureLeadMinutes,
   getTransportModeFromItemData,
   normalizeReturnTransportBookingUrl,
   normalizeSuggestedDayStartHour,
+  rebalanceAdjacentDayLoad,
 } from '../step7-assemble';
-import type { Accommodation, Flight, TripItem } from '../../types';
+import type { Accommodation, Flight, Restaurant, TripDay, TripItem } from '../../types';
 
 describe('step7-assemble helpers', () => {
   const hotel: Accommodation = {
@@ -169,5 +172,190 @@ describe('step7-assemble helpers', () => {
 
     expect(getAirportPreDepartureLeadMinutes(majorHubFlight)).toBe(120);
     expect(getAirportPreDepartureLeadMinutes(regionalFlight)).toBe(90);
+  });
+
+  it('compresses very large intra-day gaps without moving fixed anchors', () => {
+    const day: TripDay = {
+      dayNumber: 1,
+      date: new Date('2026-03-01T00:00:00.000Z'),
+      items: [
+        baseActivity('a1', '09:00', '10:00', 48.8606, 2.3376),
+        baseActivity('a2', '14:30', '15:30', 48.8738, 2.295),
+        {
+          id: 'transport-ret-1',
+          dayNumber: 1,
+          startTime: '18:00',
+          endTime: '20:00',
+          type: 'transport',
+          title: 'Train retour',
+          description: 'Retour',
+          locationName: 'Paris → Lyon',
+          latitude: 48.8566,
+          longitude: 2.3522,
+          orderIndex: 2,
+          transportRole: 'longhaul',
+        },
+      ],
+    };
+
+    const changed = compressIntraDayGaps([day]);
+    expect(changed).toBeGreaterThan(0);
+
+    const sorted = [...day.items].sort((a, b) => a.startTime.localeCompare(b.startTime));
+    const gap = (time: string) => {
+      const [h, m] = time.split(':').map(Number);
+      return h * 60 + m;
+    };
+    const firstGap = gap(sorted[1].startTime) - gap(sorted[0].endTime);
+    expect(firstGap).toBeLessThanOrEqual(150);
+    expect(sorted[2].startTime).toBe('18:00');
+  });
+
+  it('replaces outlier restaurants from pool and avoids same-day duplicates', async () => {
+    const closeRestaurant: Restaurant = {
+      id: 'r-close',
+      name: 'Bistro Proche',
+      address: 'Paris',
+      latitude: 48.8609,
+      longitude: 2.338,
+      rating: 4.6,
+      reviewCount: 120,
+      priceLevel: 2,
+      cuisineTypes: ['restaurant français'],
+      dietaryOptions: ['none'],
+      openingHours: {},
+      googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Bistro%20Proche%2C%20Paris',
+      photos: ['/api/place-photo?photo_reference=test&maxwidth=800'],
+    };
+    const closeRestaurant2: Restaurant = {
+      ...closeRestaurant,
+      id: 'r-close-2',
+      name: 'Table Voisine',
+      latitude: 48.8611,
+      longitude: 2.3382,
+      googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Table%20Voisine%2C%20Paris',
+    };
+    const closeBreakfast: Restaurant = {
+      ...closeRestaurant,
+      id: 'r-close-3',
+      name: 'Boulangerie Matin',
+      cuisineTypes: ['boulangerie'],
+      latitude: 48.8608,
+      longitude: 2.3379,
+      googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Boulangerie%20Matin%2C%20Paris',
+    };
+
+    const day: TripDay = {
+      dayNumber: 1,
+      date: new Date('2026-03-02T00:00:00.000Z'),
+      items: [
+        {
+          id: 'checkin-1',
+          dayNumber: 1,
+          startTime: '08:30',
+          endTime: '09:00',
+          type: 'checkin',
+          title: 'Check-in Hôtel',
+          description: '',
+          locationName: 'Hotel',
+          latitude: 48.8607,
+          longitude: 2.3381,
+          orderIndex: 0,
+        },
+        baseActivity('a1', '09:30', '11:00', 48.8606, 2.3376),
+        {
+          id: 'meal-1-breakfast',
+          dayNumber: 1,
+          startTime: '11:00',
+          endTime: '11:45',
+          type: 'restaurant',
+          title: 'Petit-déjeuner — Restaurant à proximité',
+          description: '',
+          locationName: 'Loin',
+          latitude: 48.901,
+          longitude: 2.39,
+          orderIndex: 2,
+          restaurant: {
+            id: 'r-far',
+            name: 'Restaurant à proximité',
+            address: 'Far',
+            latitude: 48.901,
+            longitude: 2.39,
+            rating: 4.0,
+            reviewCount: 10,
+            priceLevel: 2,
+            cuisineTypes: ['restaurant'],
+            dietaryOptions: ['none'],
+            openingHours: {},
+          },
+        },
+        {
+          id: 'meal-1-lunch',
+          dayNumber: 1,
+          startTime: '12:30',
+          endTime: '13:30',
+          type: 'restaurant',
+          title: 'Déjeuner — Restaurant à proximité',
+          description: '',
+          locationName: 'Loin',
+          latitude: 48.901,
+          longitude: 2.39,
+          orderIndex: 3,
+          restaurant: {
+            id: 'r-far-2',
+            name: 'Restaurant à proximité',
+            address: 'Far',
+            latitude: 48.901,
+            longitude: 2.39,
+            rating: 4.1,
+            reviewCount: 11,
+            priceLevel: 2,
+            cuisineTypes: ['restaurant'],
+            dietaryOptions: ['none'],
+            openingHours: {},
+          },
+        },
+      ],
+    };
+
+    const stats = await fixRestaurantOutliers([day], [closeRestaurant, closeRestaurant2, closeBreakfast], 'Paris', { allowApiFallback: false });
+    expect(stats.replaced).toBeGreaterThan(0);
+    expect(day.items.filter((i) => i.type === 'restaurant').every((i) => i.selectionSource === 'pool')).toBe(true);
+
+    const restaurantNames = day.items
+      .filter((i) => i.type === 'restaurant')
+      .map((i) => i.restaurant?.name || i.locationName);
+    expect(new Set(restaurantNames).size).toBe(restaurantNames.length);
+    expect(day.scheduleDiagnostics?.outlierRestaurantsCount).toBe(0);
+  });
+
+  it('rebalances adjacent day load by moving an optional activity', () => {
+    const day1: TripDay = {
+      dayNumber: 1,
+      date: new Date('2026-03-01T00:00:00.000Z'),
+      geoDiagnostics: { maxLegKm: 2, p95LegKm: 1.5, totalTravelMin: 80 },
+      items: [
+        { ...baseActivity('d1-a1', '09:00', '11:00', 48.8606, 2.3376), mustSee: true },
+        baseActivity('d1-a2', '11:20', '13:00', 48.861, 2.338),
+        baseActivity('d1-a3', '14:00', '15:40', 48.872, 2.295),
+        baseActivity('d1-a4', '16:00', '18:00', 48.862, 2.339),
+      ],
+    };
+
+    const day2: TripDay = {
+      dayNumber: 2,
+      date: new Date('2026-03-02T00:00:00.000Z'),
+      geoDiagnostics: { maxLegKm: 1.2, p95LegKm: 1.0, totalTravelMin: 20 },
+      items: [
+        baseActivity('d2-a1', '10:00', '12:00', 48.873, 2.296),
+      ],
+    };
+
+    const moved = rebalanceAdjacentDayLoad([day1, day2]);
+    expect(moved).toBeGreaterThan(0);
+    expect(day2.items.filter((item) => item.type === 'activity').length).toBe(2);
+    expect(day1.items.some((item) => item.id === 'd1-a1')).toBe(true); // must-see remains in source day
+    expect(day1.scheduleDiagnostics?.loadRebalanced).toBe(true);
+    expect(day2.scheduleDiagnostics?.loadRebalanced).toBe(true);
   });
 });

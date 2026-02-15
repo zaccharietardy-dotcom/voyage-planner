@@ -69,6 +69,11 @@ const PIPELINE_MEDIA_PROXY = !['0', 'false', 'off'].includes(
   String(process.env.PIPELINE_MEDIA_PROXY || 'true').toLowerCase()
 );
 
+const MAX_INTRA_DAY_GAP_MIN = 150;
+const BREAKFAST_RESTAURANT_MAX_KM = 1.2;
+const MEAL_RESTAURANT_MAX_KM = 1.8;
+const ADJACENT_LOAD_REBALANCE_THRESHOLD_MIN = 430;
+
 export function getAirportPreDepartureLeadMinutes(flight: Flight): number {
   const airportText = `${flight.departureAirport || ''} ${flight.departureAirportCode || ''}`.toLowerCase();
   const needsExtraMargin = /international|intl|orly|charles|gaulle|fiumicino|heathrow|gatwick|schiphol|barajas|frankfurt/.test(airportText);
@@ -1785,6 +1790,7 @@ export async function assembleTripSchedule(
         // Viator flags (activities only)
         freeCancellation: item.type === 'activity' ? itemData.freeCancellation : undefined,
         instantConfirmation: item.type === 'activity' ? itemData.instantConfirmation : undefined,
+        mustSee: item.type === 'activity' ? Boolean(itemData.mustSee) : undefined,
       };
     });
 
@@ -2370,8 +2376,42 @@ export async function assembleTripSchedule(
     console.warn('[Pipeline V2] Section 13e failed (non-critical):', error);
   }
 
+  // 13f. Compress large intra-day idle gaps without touching fixed transport/check-in slots.
+  try {
+    const compressedCount = compressIntraDayGaps(days, directionsCache);
+    if (compressedCount > 0) {
+      console.log(`[Pipeline V2] Section 13f: compressed ${compressedCount} large intra-day gap segment(s)`);
+    }
+  } catch (error) {
+    console.warn('[Pipeline V2] Section 13f failed (non-critical):', error);
+  }
+
+  // 13g. Hard-cap restaurant proximity (breakfast 1.2km, lunch/dinner 1.8km),
+  // with pool/api replacement and fallback diagnostics.
+  try {
+    const outlierFixStats = await fixRestaurantOutliers(days, restaurantGeoPool || [], preferences.destination);
+    if (outlierFixStats.replaced > 0 || outlierFixStats.flaggedFallback > 0) {
+      console.log(
+        `[Pipeline V2] Section 13g: restaurant outliers fixed=${outlierFixStats.replaced}, fallback-flagged=${outlierFixStats.flaggedFallback}`
+      );
+    }
+  } catch (error) {
+    console.warn('[Pipeline V2] Section 13g failed (non-critical):', error);
+  }
+
+  // 13h. Rebalance load between adjacent days by moving optional activities only.
+  try {
+    const moveCount = rebalanceAdjacentDayLoad(days);
+    if (moveCount > 0) {
+      console.log(`[Pipeline V2] Section 13h: moved ${moveCount} optional activity(ies) across adjacent days`);
+    }
+  } catch (error) {
+    console.warn('[Pipeline V2] Section 13h failed (non-critical):', error);
+  }
+
   // 13f. Final route metadata coherence pass after all swaps/re-orders.
   refreshRouteMetadataAfterMutations(days, directionsCache);
+  refreshScheduleDiagnostics(days);
 
   // 13. Build cost breakdown
   const costBreakdown = computeCostBreakdown(days, flights, hotel, preferences, transport);
@@ -3703,6 +3743,534 @@ function refreshRouteMetadataAfterMutations(days: TripDay[], cache?: DirectionsC
     }
 
     day.items = sorted.map((item, index) => ({ ...item, orderIndex: index }));
+  }
+}
+
+function isFixedScheduleItem(item: TripItem): boolean {
+  if (item.type === 'checkin' || item.type === 'checkout' || item.type === 'flight') return true;
+  if (item.type === 'transport' && (
+    item.transportRole === 'longhaul'
+    || item.transportRole === 'hotel_depart'
+    || item.transportRole === 'hotel_return'
+  )) {
+    return true;
+  }
+  return false;
+}
+
+function getItemDurationMinutes(item: TripItem): number {
+  const start = parseHHMMToMinutes(item.startTime);
+  const end = parseHHMMToMinutes(item.endTime);
+  const fromSlot = end - start;
+  if (fromSlot > 0) return fromSlot;
+  if (item.duration && item.duration > 0) return item.duration;
+  if (item.type === 'restaurant') return 60;
+  if (item.type === 'activity') return 90;
+  return 30;
+}
+
+function getTransitionMinutesForItems(from: TripItem, to: TripItem, cache?: DirectionsCache): number {
+  const estimated = estimateTravel(from, to, cache);
+  const minFloor = from.type === 'restaurant' || to.type === 'restaurant' ? 10 : 5;
+  return Math.max(minFloor, Math.min(45, roundToNearestFive(estimated)));
+}
+
+function isOptionalActivityItem(item: TripItem): boolean {
+  return item.type === 'activity' && !item.mustSee && !isFixedScheduleItem(item);
+}
+
+function isCandidateGeoCompatible(prev: TripItem, candidate: TripItem, next: TripItem): boolean {
+  if (!prev.latitude || !prev.longitude || !candidate.latitude || !candidate.longitude || !next.latitude || !next.longitude) {
+    return true;
+  }
+  const dPrev = calculateDistance(prev.latitude, prev.longitude, candidate.latitude, candidate.longitude);
+  const dNext = calculateDistance(candidate.latitude, candidate.longitude, next.latitude, next.longitude);
+  return dPrev <= 3.5 && dNext <= 3.5;
+}
+
+function tryMoveOptionalActivityIntoGap(
+  items: TripItem[],
+  gapIndex: number,
+  cache?: DirectionsCache
+): boolean {
+  const prev = items[gapIndex];
+  const next = items[gapIndex + 1];
+  if (!prev || !next) return false;
+
+  const prevEnd = parseHHMMToMinutes(prev.endTime);
+  const nextStart = parseHHMMToMinutes(next.startTime);
+  if (nextStart - prevEnd <= MAX_INTRA_DAY_GAP_MIN) return false;
+
+  for (let idx = gapIndex + 2; idx < items.length; idx++) {
+    const candidate = items[idx];
+    if (!isOptionalActivityItem(candidate)) continue;
+    if (!isCandidateGeoCompatible(prev, candidate, next)) continue;
+
+    const candidateDuration = getItemDurationMinutes(candidate);
+    const startMin = prevEnd + getTransitionMinutesForItems(prev, candidate, cache);
+    const latestStart = nextStart - getTransitionMinutesForItems(candidate, next, cache) - candidateDuration;
+    if (latestStart < startMin) continue;
+
+    candidate.startTime = formatMinutesToHHMM(startMin);
+    candidate.endTime = formatMinutesToHHMM(startMin + candidateDuration);
+    return true;
+  }
+
+  return false;
+}
+
+export function compressIntraDayGaps(days: TripDay[], cache?: DirectionsCache): number {
+  let adjustedSegments = 0;
+
+  for (const day of days) {
+    let guard = 0;
+    let changed = true;
+
+    while (changed && guard < 20) {
+      guard++;
+      changed = false;
+      const sorted = sortItemsByTime(day.items);
+
+      for (let i = 1; i < sorted.length; i++) {
+        const prev = sorted[i - 1];
+        const curr = sorted[i];
+        if (isFixedScheduleItem(prev) || isFixedScheduleItem(curr)) continue;
+
+        const prevEnd = parseHHMMToMinutes(prev.endTime);
+        const currStart = parseHHMMToMinutes(curr.startTime);
+        const gap = currStart - prevEnd;
+        if (gap <= MAX_INTRA_DAY_GAP_MIN) continue;
+
+        const currDuration = getItemDurationMinutes(curr);
+        const earliestStart = prevEnd + getTransitionMinutesForItems(prev, curr, cache);
+        let latestStart = currStart;
+        if (i < sorted.length - 1) {
+          const next = sorted[i + 1];
+          const nextStart = parseHHMMToMinutes(next.startTime);
+          const transitionToNext = getTransitionMinutesForItems(curr, next, cache);
+          latestStart = Math.min(latestStart, nextStart - transitionToNext - currDuration);
+        }
+
+        if (earliestStart <= latestStart && earliestStart < currStart) {
+          curr.startTime = formatMinutesToHHMM(earliestStart);
+          curr.endTime = formatMinutesToHHMM(earliestStart + currDuration);
+          adjustedSegments++;
+          changed = true;
+          break;
+        }
+
+        if (tryMoveOptionalActivityIntoGap(sorted, i - 1, cache)) {
+          adjustedSegments++;
+          changed = true;
+          break;
+        }
+      }
+
+      day.items = sortItemsByTime(sorted).map((item, idx) => ({ ...item, orderIndex: idx }));
+    }
+  }
+
+  return adjustedSegments;
+}
+
+function stripMealPrefix(title: string): string {
+  return title.replace(/^(Petit-déjeuner|Déjeuner|Dîner)\s+—\s+/, '').trim();
+}
+
+function normalizeRestaurantName(name: string): string {
+  return name
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+function getRestaurantMealType(item: TripItem): 'breakfast' | 'lunch' | 'dinner' {
+  const title = item.title || '';
+  if (title.includes('Petit-déjeuner')) return 'breakfast';
+  if (title.includes('Déjeuner')) return 'lunch';
+  return 'dinner';
+}
+
+type AnchorPoint = { latitude: number; longitude: number };
+
+function hasValidCoords(point?: { latitude?: number; longitude?: number }): point is AnchorPoint {
+  if (!point) return false;
+  if (typeof point.latitude !== 'number' || typeof point.longitude !== 'number') return false;
+  return point.latitude !== 0 && point.longitude !== 0;
+}
+
+function restaurantAnchorPoints(
+  day: TripDay,
+  restaurantIndex: number,
+  mealType: 'breakfast' | 'lunch' | 'dinner'
+): AnchorPoint[] {
+  const points: AnchorPoint[] = [];
+  const sorted = sortItemsByTime(day.items);
+  const hotelAnchor = sorted.find((item) => (item.type === 'checkin' || item.type === 'checkout') && hasValidCoords(item));
+  const firstActivity = sorted.find((item) => item.type === 'activity' && hasValidCoords(item));
+
+  if (mealType === 'breakfast') {
+    if (hotelAnchor && hasValidCoords(hotelAnchor)) points.push({ latitude: hotelAnchor.latitude, longitude: hotelAnchor.longitude });
+    if (firstActivity && hasValidCoords(firstActivity)) points.push({ latitude: firstActivity.latitude, longitude: firstActivity.longitude });
+    return points;
+  }
+
+  for (let i = restaurantIndex - 1; i >= 0; i--) {
+    const candidate = sorted[i];
+    if (candidate.type === 'activity' && hasValidCoords(candidate)) {
+      points.push({ latitude: candidate.latitude, longitude: candidate.longitude });
+      break;
+    }
+  }
+  for (let i = restaurantIndex + 1; i < sorted.length; i++) {
+    const candidate = sorted[i];
+    if (candidate.type === 'activity' && hasValidCoords(candidate)) {
+      points.push({ latitude: candidate.latitude, longitude: candidate.longitude });
+      break;
+    }
+  }
+
+  if (points.length === 0) {
+    if (hotelAnchor && hasValidCoords(hotelAnchor)) points.push({ latitude: hotelAnchor.latitude, longitude: hotelAnchor.longitude });
+    if (firstActivity && hasValidCoords(firstActivity)) points.push({ latitude: firstActivity.latitude, longitude: firstActivity.longitude });
+  }
+
+  return points;
+}
+
+function minDistanceToAnchorsKm(restaurant: TripItem, anchors: AnchorPoint[]): number {
+  if (!hasValidCoords(restaurant) || anchors.length === 0) return Infinity;
+  let minDistance = Infinity;
+  for (const anchor of anchors) {
+    const dist = calculateDistance(restaurant.latitude, restaurant.longitude, anchor.latitude, anchor.longitude);
+    if (dist < minDistance) minDistance = dist;
+  }
+  return minDistance;
+}
+
+function applyRestaurantCandidateToItem(
+  item: TripItem,
+  candidate: Restaurant,
+  source: TripItem['selectionSource'],
+  destination: string
+): void {
+  const mealLabel = extractMealLabel(item.title);
+  const baseRestaurant: Restaurant = { ...candidate };
+  enforceGoogleRestaurantPhotoPolicy(baseRestaurant);
+
+  item.title = `${mealLabel} — ${baseRestaurant.name}`;
+  item.locationName = baseRestaurant.address || baseRestaurant.name;
+  item.latitude = baseRestaurant.latitude || item.latitude;
+  item.longitude = baseRestaurant.longitude || item.longitude;
+  item.rating = baseRestaurant.rating ?? item.rating;
+  item.estimatedCost = baseRestaurant.priceLevel ? baseRestaurant.priceLevel * 15 : item.estimatedCost;
+  item.bookingUrl = baseRestaurant.googleMapsUrl || baseRestaurant.website || item.bookingUrl;
+  item.googleMapsPlaceUrl = baseRestaurant.googleMapsUrl
+    || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${baseRestaurant.name}, ${destination}`)}`;
+  item.restaurant = baseRestaurant;
+  item.imageUrl = baseRestaurant.photos?.[0];
+  item.selectionSource = source;
+  item.dataReliability = source === 'fallback' ? 'estimated' : 'verified';
+}
+
+function rankRestaurantCandidate(
+  candidate: Restaurant,
+  anchors: AnchorPoint[],
+  usedNames: Set<string>,
+  currentRestaurantId: string | undefined,
+  mealType: 'breakfast' | 'lunch' | 'dinner',
+  maxDistanceKm: number
+): { restaurant: Restaurant; distance: number } | null {
+  if (!candidate.latitude || !candidate.longitude) return null;
+  if (currentRestaurantId && candidate.id === currentRestaurantId) return null;
+  if (!isAppropriateForMeal(candidate, mealType)) return null;
+  if (mealType === 'breakfast' && !isBreakfastSpecialized(candidate)) return null;
+
+  const normalizedName = normalizeRestaurantName(candidate.name || '');
+  if (!normalizedName || usedNames.has(normalizedName)) return null;
+
+  const distances = anchors.map((anchor) => calculateDistance(candidate.latitude!, candidate.longitude!, anchor.latitude, anchor.longitude));
+  const distance = distances.length > 0 ? Math.min(...distances) : Infinity;
+  if (!Number.isFinite(distance) || distance > maxDistanceKm) return null;
+
+  return { restaurant: candidate, distance };
+}
+
+type RestaurantFixStats = { replaced: number; flaggedFallback: number };
+
+export async function fixRestaurantOutliers(
+  days: TripDay[],
+  altPool: Restaurant[],
+  destination: string,
+  options: { allowApiFallback?: boolean } = {}
+): Promise<RestaurantFixStats> {
+  const allowApiFallback = options.allowApiFallback ?? true;
+  const stats: RestaurantFixStats = { replaced: 0, flaggedFallback: 0 };
+  let apiCalls = 0;
+  const MAX_API_CALLS = 8;
+
+  for (const day of days) {
+    const sorted = sortItemsByTime(day.items);
+    const usedNames = new Set<string>();
+    let dayOutliers = 0;
+
+    for (let idx = 0; idx < sorted.length; idx++) {
+      const item = sorted[idx];
+      if (item.type !== 'restaurant') continue;
+
+      const mealType = getRestaurantMealType(item);
+      const maxDistanceKm = mealType === 'breakfast' ? BREAKFAST_RESTAURANT_MAX_KM : MEAL_RESTAURANT_MAX_KM;
+      const anchors = restaurantAnchorPoints(day, idx, mealType);
+      const currentName = normalizeRestaurantName(item.restaurant?.name || item.locationName || stripMealPrefix(item.title));
+      const duplicateInDay = currentName.length > 0 && usedNames.has(currentName);
+      const currentDistanceKm = minDistanceToAnchorsKm(item, anchors);
+      const isOutlier = Number.isFinite(currentDistanceKm) && currentDistanceKm > maxDistanceKm;
+
+      if (!duplicateInDay && !isOutlier) {
+        if (currentName) usedNames.add(currentName);
+        if (!item.selectionSource) item.selectionSource = 'pool';
+        continue;
+      }
+
+      let best: { restaurant: Restaurant; distance: number; source: TripItem['selectionSource'] } | null = null;
+      const combinedPool = [
+        ...(item.restaurantAlternatives || []),
+        ...altPool,
+      ];
+
+      for (const candidate of combinedPool) {
+        const ranked = rankRestaurantCandidate(
+          candidate,
+          anchors,
+          usedNames,
+          item.restaurant?.id,
+          mealType,
+          maxDistanceKm
+        );
+        if (!ranked) continue;
+        if (!best
+          || ranked.distance < best.distance
+          || (Math.abs(ranked.distance - best.distance) < 0.1 && (ranked.restaurant.rating || 0) > (best.restaurant.rating || 0))
+        ) {
+          best = { ...ranked, source: 'pool' };
+        }
+      }
+
+      if (!best && allowApiFallback && anchors.length > 0 && apiCalls < MAX_API_CALLS) {
+        apiCalls++;
+        try {
+          const anchor = anchors[0];
+          const apiCandidates = await searchRestaurantsNearby(
+            { lat: anchor.latitude, lng: anchor.longitude },
+            destination,
+            { mealType, maxDistance: Math.round(maxDistanceKm * 1000), limit: 8 }
+          );
+          for (const apiCandidate of apiCandidates) {
+            const ranked = rankRestaurantCandidate(
+              apiCandidate,
+              anchors,
+              usedNames,
+              item.restaurant?.id,
+              mealType,
+              maxDistanceKm
+            );
+            if (!ranked) continue;
+            if (!best
+              || ranked.distance < best.distance
+              || (Math.abs(ranked.distance - best.distance) < 0.1 && (ranked.restaurant.rating || 0) > (best.restaurant.rating || 0))
+            ) {
+              best = { ...ranked, source: 'api' };
+            }
+          }
+          if (apiCandidates.length > 0) {
+            altPool.push(...apiCandidates);
+          }
+        } catch {
+          // Non-blocking: keep fallback below.
+        }
+      }
+
+      if (best) {
+        applyRestaurantCandidateToItem(item, best.restaurant, best.source, destination);
+        usedNames.add(normalizeRestaurantName(best.restaurant.name || item.locationName || ''));
+        stats.replaced++;
+        continue;
+      }
+
+      item.selectionSource = 'fallback';
+      item.dataReliability = 'estimated';
+      item.description = item.description
+        ? `${item.description} · Restaurant conservé faute d'alternative proche`
+        : "Restaurant conservé faute d'alternative proche";
+      if (currentName) usedNames.add(currentName);
+      dayOutliers++;
+      stats.flaggedFallback++;
+    }
+
+    day.items = sortItemsByTime(sorted).map((item, orderIndex) => ({ ...item, orderIndex }));
+    day.scheduleDiagnostics = {
+      ...(day.scheduleDiagnostics || {}),
+      outlierRestaurantsCount: dayOutliers,
+      loadRebalanced: day.scheduleDiagnostics?.loadRebalanced || false,
+    };
+  }
+
+  return stats;
+}
+
+function computeDayLoadMinutes(day: TripDay): number {
+  const activityMinutes = day.items
+    .filter((item) => item.type === 'activity')
+    .reduce((sum, item) => sum + getItemDurationMinutes(item), 0);
+  const mealMinutes = day.items
+    .filter((item) => item.type === 'restaurant')
+    .reduce((sum, item) => sum + Math.max(30, getItemDurationMinutes(item)), 0);
+  const travelMinutes = typeof day.geoDiagnostics?.totalTravelMin === 'number'
+    ? day.geoDiagnostics.totalTravelMin
+    : day.items.reduce((sum, item) => sum + (item.timeFromPrevious || 0), 0);
+  return activityMinutes + mealMinutes + travelMinutes;
+}
+
+function computeActivityCount(day: TripDay): number {
+  return day.items.filter((item) => item.type === 'activity').length;
+}
+
+function findBestRebalanceCandidate(source: TripDay, target: TripDay): TripItem | null {
+  const sourceCentroid = computeDayActivityCentroid(source);
+  const targetCentroid = computeDayActivityCentroid(target);
+  if (!sourceCentroid || !targetCentroid) return null;
+
+  const candidates = source.items
+    .filter((item) => isOptionalActivityItem(item) && hasValidCoords(item))
+    .map((item) => {
+      const toSource = calculateDistance(item.latitude, item.longitude, sourceCentroid.lat, sourceCentroid.lng);
+      const toTarget = calculateDistance(item.latitude, item.longitude, targetCentroid.lat, targetCentroid.lng);
+      return { item, gain: toSource - toTarget };
+    })
+    .filter((entry) => entry.gain > 0.4)
+    .sort((a, b) => b.gain - a.gain);
+
+  return candidates[0]?.item || null;
+}
+
+function findSlotForMovedActivity(day: TripDay, durationMin: number, preferredStartMin: number): number | null {
+  const sorted = sortItemsByTime(day.items);
+  const windowStart = 8 * 60;
+  const windowEnd = 20 * 60;
+  const candidates: number[] = [];
+
+  let cursor = windowStart;
+  for (const item of sorted) {
+    const start = parseHHMMToMinutes(item.startTime);
+    const end = parseHHMMToMinutes(item.endTime);
+    if (start - cursor >= durationMin + 10) {
+      const latest = start - durationMin;
+      const proposed = Math.max(cursor, Math.min(preferredStartMin, latest));
+      candidates.push(proposed);
+    }
+    cursor = Math.max(cursor, end);
+  }
+
+  if (windowEnd - cursor >= durationMin + 10) {
+    const latest = windowEnd - durationMin;
+    const proposed = Math.max(cursor, Math.min(preferredStartMin, latest));
+    candidates.push(proposed);
+  }
+
+  if (candidates.length === 0) return null;
+  candidates.sort((a, b) => Math.abs(a - preferredStartMin) - Math.abs(b - preferredStartMin));
+  return candidates[0];
+}
+
+function moveOptionalActivity(source: TripDay, target: TripDay): boolean {
+  const sourceActivities = computeActivityCount(source);
+  const targetActivities = computeActivityCount(target);
+  if (sourceActivities - targetActivities < 2) return false;
+  if (computeDayLoadMinutes(source) < ADJACENT_LOAD_REBALANCE_THRESHOLD_MIN) return false;
+
+  const candidate = findBestRebalanceCandidate(source, target);
+  if (!candidate) return false;
+
+  const duration = getItemDurationMinutes(candidate);
+  const preferredStart = parseHHMMToMinutes(candidate.startTime);
+  const slot = findSlotForMovedActivity(target, duration, preferredStart);
+  if (slot == null) return false;
+
+  source.items = source.items.filter((item) => item.id !== candidate.id);
+  const moved: TripItem = {
+    ...candidate,
+    dayNumber: target.dayNumber,
+    startTime: formatMinutesToHHMM(slot),
+    endTime: formatMinutesToHHMM(slot + duration),
+  };
+  target.items.push(moved);
+
+  source.items = sortItemsByTime(source.items).map((item, idx) => ({ ...item, orderIndex: idx }));
+  target.items = sortItemsByTime(target.items).map((item, idx) => ({ ...item, orderIndex: idx }));
+
+  source.scheduleDiagnostics = {
+    ...(source.scheduleDiagnostics || {}),
+    loadRebalanced: true,
+  };
+  target.scheduleDiagnostics = {
+    ...(target.scheduleDiagnostics || {}),
+    loadRebalanced: true,
+  };
+  return true;
+}
+
+export function rebalanceAdjacentDayLoad(days: TripDay[]): number {
+  let moved = 0;
+  let changed = true;
+  let guard = 0;
+
+  while (changed && guard < 8) {
+    guard++;
+    changed = false;
+
+    for (let i = 0; i < days.length - 1; i++) {
+      const left = days[i];
+      const right = days[i + 1];
+      const leftCount = computeActivityCount(left);
+      const rightCount = computeActivityCount(right);
+
+      let didMove = false;
+      if (leftCount - rightCount >= 2) {
+        didMove = moveOptionalActivity(left, right);
+      } else if (rightCount - leftCount >= 2) {
+        didMove = moveOptionalActivity(right, left);
+      }
+
+      if (didMove) {
+        moved++;
+        changed = true;
+      }
+    }
+  }
+
+  return moved;
+}
+
+function computeLargestGapMinutes(day: TripDay): number {
+  const sorted = sortItemsByTime(day.items);
+  let maxGap = 0;
+  for (let i = 1; i < sorted.length; i++) {
+    const prevEnd = parseHHMMToMinutes(sorted[i - 1].endTime);
+    const currStart = parseHHMMToMinutes(sorted[i].startTime);
+    maxGap = Math.max(maxGap, currStart - prevEnd);
+  }
+  return Math.max(0, maxGap);
+}
+
+function refreshScheduleDiagnostics(days: TripDay[]): void {
+  for (const day of days) {
+    day.scheduleDiagnostics = {
+      largestGapMin: computeLargestGapMinutes(day),
+      outlierRestaurantsCount: day.scheduleDiagnostics?.outlierRestaurantsCount || 0,
+      loadRebalanced: day.scheduleDiagnostics?.loadRebalanced || false,
+    };
   }
 }
 
