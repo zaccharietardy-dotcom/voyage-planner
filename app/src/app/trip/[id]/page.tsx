@@ -230,6 +230,7 @@ export default function TripPage() {
   const [showFlythrough, setShowFlythrough] = useState(false);
   const [showImportPlaces, setShowImportPlaces] = useState(false);
   const [showLiveDashboard, setShowLiveDashboard] = useState(false);
+  const [showMobileActions, setShowMobileActions] = useState(false);
 
   const [isDesktop, setIsDesktop] = useState(false);
   useEffect(() => {
@@ -1220,63 +1221,121 @@ export default function TripPage() {
                 </div>
               )}
 
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
+              <Sheet open={showMobileActions} onOpenChange={setShowMobileActions}>
+                <SheetTrigger asChild>
                   <Button variant="outline" size="sm" className="h-8 gap-1.5 shrink-0 sm:hidden">
                     <MoreHorizontal className="h-3.5 w-3.5" />
                     <span className="text-xs">Actions</span>
                   </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 z-[120]">
-                  {isOwner && (
-                    <DropdownMenuItem onSelect={() => setShowShareDialog(true)}>
-                      <Share2 className="h-4 w-4" />
-                      Partager le voyage
-                    </DropdownMenuItem>
-                  )}
-                  {useCollaborativeMode && (
-                    <DropdownMenuItem onSelect={() => setShowCollabPanel(true)}>
-                      <GitPullRequest className="h-4 w-4" />
-                      Collaboration
-                    </DropdownMenuItem>
-                  )}
-                  {!canOwnerEdit && useCollaborativeMode && (
-                    <DropdownMenuItem onSelect={() => setShowCloneModal(true)}>
-                      <Copy className="h-4 w-4" />
-                      Cloner ce voyage
-                    </DropdownMenuItem>
-                  )}
-                  <DropdownMenuItem onSelect={() => setShowFlythrough(true)}>
-                    <Globe className="h-4 w-4" />
-                    Vue 3D
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={handleExportPdf}>
-                    <Download className="h-4 w-4" />
-                    Exporter en PDF
-                  </DropdownMenuItem>
-                  {canOwnerEdit && (
-                    <DropdownMenuItem onSelect={() => setShowImportPlaces(true)}>
-                      <Upload className="h-4 w-4" />
-                      Importer des lieux
-                    </DropdownMenuItem>
-                  )}
-                  {canOwnerEdit && (
-                    <DropdownMenuItem onSelect={() => setShowChatPanel(true)}>
-                      <MessageCircle className="h-4 w-4" />
-                      Assistant IA
-                    </DropdownMenuItem>
-                  )}
-                  {canOwnerEdit && (
-                    <>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onSelect={() => handleExportDebug(true)}>
+                </SheetTrigger>
+                <SheetContent side="bottom" className="max-h-[80vh] rounded-t-2xl">
+                  <SheetHeader>
+                    <SheetTitle>Actions du voyage</SheetTitle>
+                  </SheetHeader>
+                  <div className="mt-5 grid gap-2">
+                    {isOwner && (
+                      <Button
+                        variant="outline"
+                        className="justify-start gap-2"
+                        onClick={() => {
+                          setShowMobileActions(false);
+                          setShowShareDialog(true);
+                        }}
+                      >
+                        <Share2 className="h-4 w-4" />
+                        Partager le voyage
+                      </Button>
+                    )}
+                    {useCollaborativeMode && (
+                      <Button
+                        variant="outline"
+                        className="justify-start gap-2"
+                        onClick={() => {
+                          setShowMobileActions(false);
+                          setShowCollabPanel(true);
+                        }}
+                      >
+                        <GitPullRequest className="h-4 w-4" />
+                        Collaboration
+                      </Button>
+                    )}
+                    {!canOwnerEdit && useCollaborativeMode && (
+                      <Button
+                        variant="outline"
+                        className="justify-start gap-2"
+                        onClick={() => {
+                          setShowMobileActions(false);
+                          setShowCloneModal(true);
+                        }}
+                      >
+                        <Copy className="h-4 w-4" />
+                        Cloner ce voyage
+                      </Button>
+                    )}
+                    <Button
+                      variant="outline"
+                      className="justify-start gap-2"
+                      onClick={() => {
+                        setShowMobileActions(false);
+                        setShowFlythrough(true);
+                      }}
+                    >
+                      <Globe className="h-4 w-4" />
+                      Vue 3D
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="justify-start gap-2"
+                      onClick={() => {
+                        setShowMobileActions(false);
+                        handleExportPdf();
+                      }}
+                    >
+                      <Download className="h-4 w-4" />
+                      Exporter en PDF
+                    </Button>
+                    {canOwnerEdit && (
+                      <Button
+                        variant="outline"
+                        className="justify-start gap-2"
+                        onClick={() => {
+                          setShowMobileActions(false);
+                          setShowImportPlaces(true);
+                        }}
+                      >
+                        <Upload className="h-4 w-4" />
+                        Importer des lieux
+                      </Button>
+                    )}
+                    {canOwnerEdit && (
+                      <Button
+                        variant="outline"
+                        className="justify-start gap-2"
+                        onClick={() => {
+                          setShowMobileActions(false);
+                          setShowChatPanel(true);
+                        }}
+                      >
+                        <MessageCircle className="h-4 w-4" />
+                        Assistant IA
+                      </Button>
+                    )}
+                    {canOwnerEdit && (
+                      <Button
+                        variant="outline"
+                        className="justify-start gap-2"
+                        onClick={() => {
+                          setShowMobileActions(false);
+                          handleExportDebug(true);
+                        }}
+                      >
                         <Bug className="h-4 w-4" />
                         Export debug
-                      </DropdownMenuItem>
-                    </>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
+                      </Button>
+                    )}
+                  </div>
+                </SheetContent>
+              </Sheet>
               </div>
             </div>
 
