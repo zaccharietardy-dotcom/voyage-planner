@@ -16,9 +16,10 @@ import Link from 'next/link';
 
 interface UserMenuProps {
   onAction?: () => void;
+  mode?: 'dropdown' | 'panel';
 }
 
-export function UserMenu({ onAction }: UserMenuProps) {
+export function UserMenu({ onAction, mode = 'dropdown' }: UserMenuProps) {
   const { user, profile, isLoading, signOut } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
@@ -63,6 +64,71 @@ export function UserMenu({ onAction }: UserMenuProps) {
     .toUpperCase()
     .slice(0, 2) || 'U';
 
+  if (mode === 'panel') {
+    return (
+      <div className="space-y-3">
+        <Link
+          href="/profil"
+          onClick={handleNavigate}
+          className="flex items-center gap-3 rounded-xl border border-border/60 bg-muted/20 p-3 transition-colors hover:bg-muted/40"
+        >
+          <Avatar className="h-10 w-10 border-2 border-primary/20">
+            <AvatarImage src={avatarUrl} alt={displayName} referrerPolicy="no-referrer" />
+            <AvatarFallback className="text-sm font-semibold bg-primary/10">{initials}</AvatarFallback>
+          </Avatar>
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold">{displayName}</p>
+            {(profile?.email || user.email) && (
+              <p className="truncate text-xs text-muted-foreground">{profile?.email || user.email}</p>
+            )}
+          </div>
+        </Link>
+
+        <div className="grid gap-1.5">
+          <Link
+            href="/mes-voyages"
+            onClick={handleNavigate}
+            className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+          >
+            <Map className="h-4 w-4" />
+            Mes voyages
+          </Link>
+          <Link
+            href="/profil"
+            onClick={handleNavigate}
+            className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+          >
+            <User className="h-4 w-4" />
+            Mon profil
+          </Link>
+          <Link
+            href="/preferences"
+            onClick={handleNavigate}
+            className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+          >
+            <Settings className="h-4 w-4" />
+            Préférences
+          </Link>
+        </div>
+
+        <Button
+          type="button"
+          variant="outline"
+          disabled={isSigningOut}
+          onClick={handleSignOut}
+          className="w-full justify-start gap-2 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 dark:border-red-900/40 dark:hover:bg-red-950"
+        >
+          {isSigningOut ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <LogOut className="h-4 w-4" />
+          )}
+          {isSigningOut ? 'Déconnexion...' : 'Déconnexion'}
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
@@ -73,7 +139,7 @@ export function UserMenu({ onAction }: UserMenuProps) {
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56" align="end" forceMount>
+      <DropdownMenuContent className="w-56 z-[120]" align="end" forceMount>
         <div className="flex items-center justify-start gap-2 p-2">
           <div className="flex flex-col space-y-1 leading-none">
             {profile?.display_name && (
@@ -100,9 +166,9 @@ export function UserMenu({ onAction }: UserMenuProps) {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild className="cursor-pointer" onSelect={handleNavigate}>
-          <Link href="/parametres" onClick={handleNavigate} className="w-full flex items-center">
+          <Link href="/preferences" onClick={handleNavigate} className="w-full flex items-center">
             <Settings className="mr-2 h-4 w-4" />
-            Paramètres
+            Préférences
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />

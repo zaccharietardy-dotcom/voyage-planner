@@ -161,7 +161,7 @@ export function Header() {
         <div className="flex-1" />
 
         <div className="mt-6 border-t border-border pt-4">
-          <UserMenu onAction={closeMobileMenu} />
+          <UserMenu onAction={closeMobileMenu} mode="panel" />
         </div>
       </div>
     </>
