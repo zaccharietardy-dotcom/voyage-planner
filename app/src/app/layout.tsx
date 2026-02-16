@@ -115,9 +115,74 @@ export default function RootLayout({
           strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: `
-              if ('serviceWorker' in navigator) {
+              (function() {
+                if (typeof window === 'undefined' || typeof navigator === 'undefined') return;
+
+                var cacheVersion = 'native-cache-v3';
+                var capacitor = window.Capacitor;
+                var nativeFromRuntime = false;
+                var nativeFromUA = /capacitor/i.test(navigator.userAgent || '');
+
+                try {
+                  nativeFromRuntime = Boolean(
+                    capacitor &&
+                    (typeof capacitor.isNativePlatform === 'function'
+                      ? capacitor.isNativePlatform()
+                      : capacitor.platform === 'ios' || capacitor.platform === 'android')
+                  );
+                } catch (e) {
+                  nativeFromRuntime = false;
+                }
+
+                var isNative = nativeFromRuntime || nativeFromUA;
+                if (!('serviceWorker' in navigator)) return;
+
+                function clearNativeCaches() {
+                  try {
+                    if (!window.caches || typeof window.caches.keys !== 'function') return Promise.resolve();
+
+                    return window.caches.keys().then(function(keys) {
+                      return Promise.all(keys.map(function(key) { return window.caches.delete(key); }));
+                    });
+                  } catch (e) {
+                    return Promise.resolve();
+                  }
+                }
+
+                function unregisterWorkers() {
+                  return navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                    return Promise.all(registrations.map(function(registration) { return registration.unregister(); }));
+                  });
+                }
+
                 window.addEventListener('load', function() {
-                  navigator.serviceWorker.register('/sw.js', { scope: '/' })
+                  if (isNative) {
+                    var appliedVersion = null;
+                    try {
+                      appliedVersion = window.localStorage.getItem('narae-native-cache-version');
+                    } catch (e) {
+                      appliedVersion = null;
+                    }
+
+                    if (appliedVersion !== cacheVersion) {
+                      unregisterWorkers()
+                        .catch(function() {})
+                        .then(clearNativeCaches)
+                        .finally(function() {
+                          try {
+                            window.localStorage.setItem('narae-native-cache-version', cacheVersion);
+                          } catch (e) {}
+
+                          window.location.reload();
+                        });
+                    } else {
+                      unregisterWorkers().catch(function() {});
+                    }
+
+                    return;
+                  }
+
+                  navigator.serviceWorker.register('/sw.js?v=2026-02-16-3', { scope: '/' })
                     .then(function(registration) {
                       console.log('SW registered:', registration.scope);
                     })
@@ -125,7 +190,7 @@ export default function RootLayout({
                       console.error('SW registration failed:', error);
                     });
                 });
-              }
+              })();
             `,
           }}
         />
