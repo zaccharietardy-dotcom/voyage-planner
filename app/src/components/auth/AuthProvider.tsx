@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { getSupabaseClient, Profile } from '@/lib/supabase';
 
@@ -29,7 +29,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [supabase] = useState(() => getSupabaseClient());
 
-  const fetchProfile = async (userId: string) => {
+  const fetchProfile = useCallback(async (userId: string) => {
     const { data } = await supabase
       .from('profiles')
       .select('*')
@@ -40,14 +40,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setProfile(data);
     }
     return data;
-  };
+  }, [supabase]);
 
-  const createProfile = async (user: User) => {
+  const createProfile = useCallback(async (authUser: User) => {
     const newProfile = {
-      id: user.id,
-      email: user.email || '',
-      display_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Voyageur',
-      avatar_url: user.user_metadata?.avatar_url || null,
+      id: authUser.id,
+      email: authUser.email || '',
+      display_name: authUser.user_metadata?.full_name || authUser.email?.split('@')[0] || 'Voyageur',
+      avatar_url: authUser.user_metadata?.avatar_url || null,
     };
 
     const { data, error } = await supabase
@@ -60,20 +60,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setProfile(data);
     }
     return data;
-  };
+  }, [supabase]);
 
-  const refreshProfile = async () => {
+  const refreshProfile = useCallback(async () => {
     if (user) {
       await fetchProfile(user.id);
     }
-  };
+  }, [fetchProfile, user]);
 
-  const signOut = async () => {
+  const signOut = useCallback(async () => {
     await supabase.auth.signOut();
     setUser(null);
     setProfile(null);
     setSession(null);
-  };
+  }, [supabase]);
 
   useEffect(() => {
     // Timeout fallback - give enough time for session restore
@@ -104,15 +104,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
 
       if (event === 'SIGNED_IN' && session?.user) {
-        const existingProfile = await fetchProfile(session.user.id);
-        if (!existingProfile) {
-          await createProfile(session.user);
-        }
+        void (async () => {
+          try {
+            const existingProfile = await fetchProfile(session.user.id);
+            if (!existingProfile) {
+              await createProfile(session.user);
+            }
+          } catch (profileError) {
+            console.error('Erreur chargement profil:', profileError);
+          }
+        })();
       }
 
       if (event === 'SIGNED_OUT') {
@@ -123,7 +129,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [createProfile, fetchProfile, supabase]);
 
   return (
     <AuthContext.Provider

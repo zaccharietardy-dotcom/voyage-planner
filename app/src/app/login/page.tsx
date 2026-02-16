@@ -101,7 +101,7 @@ function LoginContent() {
 
         <CardContent className="space-y-6">
           <GoogleSignIn
-            redirectTo={`${typeof window !== 'undefined' ? window.location.origin : ''}/auth/callback?redirect=${encodeURIComponent(redirectTo)}`}
+            redirectTo={redirectTo}
             className="w-full"
           />
 

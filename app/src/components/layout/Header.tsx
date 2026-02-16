@@ -35,9 +35,28 @@ export function Header() {
   }, []);
 
   useEffect(() => {
-    document.body.style.overflow = isMobileMenuOpen ? 'hidden' : '';
+    if (!isMobileMenuOpen) return;
+
+    const scrollY = window.scrollY;
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousBodyPosition = document.body.style.position;
+    const previousBodyTop = document.body.style.top;
+    const previousBodyWidth = document.body.style.width;
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = '100%';
+    document.documentElement.style.overflow = 'hidden';
+
     return () => {
-      document.body.style.overflow = '';
+      document.body.style.overflow = previousBodyOverflow;
+      document.body.style.position = previousBodyPosition;
+      document.body.style.top = previousBodyTop;
+      document.body.style.width = previousBodyWidth;
+      document.documentElement.style.overflow = previousHtmlOverflow;
+      window.scrollTo(0, scrollY);
     };
   }, [isMobileMenuOpen]);
 
@@ -109,14 +128,14 @@ export function Header() {
 
       {isMobileMenuOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/45 md:hidden"
+          className="fixed inset-0 z-40 bg-black/45 backdrop-blur-[1px] md:hidden"
           onClick={closeMobileMenu}
         />
       )}
 
       <div
         className={cn(
-          'fixed bottom-0 right-0 top-0 z-40 w-72 border-l border-[#1e3a5f]/15 bg-background/95 px-4 pb-6 pt-20 backdrop-blur-xl transition-transform duration-300 md:hidden',
+          'fixed bottom-0 right-0 top-0 z-40 w-72 overflow-y-auto overscroll-contain border-l border-[#1e3a5f]/15 bg-background/95 px-4 pb-[calc(env(safe-area-inset-bottom)+1.5rem)] pt-20 backdrop-blur-xl transition-transform duration-300 md:hidden',
           isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
         )}
       >
@@ -142,7 +161,7 @@ export function Header() {
         <div className="flex-1" />
 
         <div className="mt-6 border-t border-border pt-4">
-          <UserMenu />
+          <UserMenu onAction={closeMobileMenu} />
         </div>
       </div>
     </>

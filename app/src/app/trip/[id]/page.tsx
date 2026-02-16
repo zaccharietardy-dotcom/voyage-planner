@@ -65,6 +65,8 @@ import { exportTripPdf } from '@/lib/exportPdf';
 import { useLiveTrip } from '@/hooks/useLiveTrip';
 import { LiveTripBanner } from '@/components/trip/LiveTripBanner';
 import { LiveTripDashboard } from '@/components/trip/LiveTripDashboard';
+import { useConnectivity } from '@/hooks/useConnectivity';
+import { cacheTripById, readCachedTripById } from '@/lib/mobile/offline-cache';
 
 function updateTripWithNewHotel(trip: Trip, newHotel: Accommodation): Trip {
   const oldHotelName = trip.accommodation?.name || '';
@@ -181,6 +183,7 @@ export default function TripPage() {
   const router = useRouter();
   const tripId = params.id as string;
   const { user } = useAuth();
+  const { isOffline } = useConnectivity();
 
   const [useCollaborativeMode, setUseCollaborativeMode] = useState(false);
   const [localTrip, setLocalTrip] = useState<Trip | null>(null);
@@ -254,28 +257,44 @@ export default function TripPage() {
   const canOwnerDecide = useCollaborativeMode ? userRole === 'owner' : false;
 
   useEffect(() => {
+    const hydrateTrip = (rawTrip: Trip): Trip => {
+      const hydrated = { ...rawTrip };
+      if (hydrated.createdAt) hydrated.createdAt = new Date(hydrated.createdAt);
+      if (hydrated.updatedAt) hydrated.updatedAt = new Date(hydrated.updatedAt);
+      if (hydrated.preferences?.startDate) {
+        hydrated.preferences.startDate = new Date(hydrated.preferences.startDate);
+      }
+      if (hydrated.days) {
+        hydrated.days = hydrated.days.map((day: TripDay) => ({
+          ...day,
+          date: day.date ? new Date(day.date) : new Date(),
+        }));
+      }
+      return hydrated;
+    };
+
+    const applyLocalTrip = (candidate: Trip | null): boolean => {
+      if (!candidate || candidate.id !== tripId) return false;
+      const hydrated = hydrateTrip(candidate);
+      setLocalTrip(hydrated);
+      setOriginalTransportId(hydrated.selectedTransport?.id);
+      setSelectedHotelId(hydrated.accommodation?.id);
+      setLocalLoading(false);
+      return true;
+    };
+
     const stored = localStorage.getItem('currentTrip');
     if (stored) {
       try {
-        const parsed = JSON.parse(stored);
-        if (parsed.id === tripId) {
-          parsed.createdAt = new Date(parsed.createdAt);
-          parsed.updatedAt = new Date(parsed.updatedAt);
-          parsed.preferences.startDate = new Date(parsed.preferences.startDate);
-          parsed.days = parsed.days.map((day: TripDay) => ({
-            ...day,
-            date: new Date(day.date),
-          }));
-          setLocalTrip(parsed);
-          setOriginalTransportId(parsed.selectedTransport?.id);
-          setSelectedHotelId(parsed.accommodation?.id);
-          setLocalLoading(false);
-          return;
-        }
+        const parsed = JSON.parse(stored) as Trip;
+        if (applyLocalTrip(parsed)) return;
       } catch (e) {
         console.error('Error parsing localStorage trip:', e);
       }
     }
+
+    const cachedTrip = readCachedTripById<Trip>(tripId);
+    if (applyLocalTrip(cachedTrip)) return;
 
     const fetchFromApi = async (retries = 0): Promise<void> => {
       try {
@@ -284,11 +303,21 @@ export default function TripPage() {
           await new Promise(resolve => setTimeout(resolve, (retries + 1) * 800));
           return fetchFromApi(retries + 1);
         }
-        if (!r.ok) return;
+        if (!r.ok) {
+          const fallback = readCachedTripById<Trip>(tripId);
+          if (fallback) {
+            applyLocalTrip(fallback);
+          }
+          return;
+        }
         const data = await r.json();
         handleApiData(data);
       } catch (e) {
         console.error('Error fetching trip from API:', e);
+        const fallback = readCachedTripById<Trip>(tripId);
+        if (fallback) {
+          applyLocalTrip(fallback);
+        }
       } finally {
         setLocalLoading(false);
       }
@@ -298,19 +327,11 @@ export default function TripPage() {
       if (data) {
         setDbTrip(data);
         if (data.data && Object.keys(data.data).length > 0) {
-          const tripData = data.data;
-          if (tripData.createdAt) tripData.createdAt = new Date(tripData.createdAt);
-          if (tripData.updatedAt) tripData.updatedAt = new Date(tripData.updatedAt);
-          if (tripData.preferences?.startDate) tripData.preferences.startDate = new Date(tripData.preferences.startDate);
-          if (tripData.days) {
-            tripData.days = tripData.days.map((day: TripDay) => ({
-              ...day,
-              date: day.date ? new Date(day.date) : new Date(),
-            }));
-          }
+          const tripData = hydrateTrip(data.data);
           tripData.id = tripId;
           setLocalTrip(tripData);
           localStorage.setItem('currentTrip', JSON.stringify(tripData));
+          cacheTripById(tripId, tripData);
         }
       }
     };
@@ -337,6 +358,11 @@ export default function TripPage() {
       localStorage.setItem('currentTrip', JSON.stringify(updatedTrip));
     }
   }, [useCollaborativeMode, canOwnerEdit, updateDays]);
+
+  useEffect(() => {
+    if (!trip) return;
+    cacheTripById(tripId, trip);
+  }, [trip, tripId]);
 
   const handleDirectUpdate = useCallback((updatedDays: TripDay[]) => {
     if (!trip) return;
@@ -370,6 +396,10 @@ export default function TripPage() {
 
   const handleRegenerateTrip = async () => {
     if (!trip) return;
+    if (isOffline) {
+      toast.error('Régénération indisponible hors ligne');
+      return;
+    }
     setRegenerating(true);
     try {
       const response = await fetch('/api/generate', {
@@ -984,6 +1014,14 @@ export default function TripPage() {
           onShowMap={() => setMainTab('carte')}
           onReportIssue={() => setShowChatPanel(true)}
         />
+      )}
+
+      {isOffline && (
+        <div className="container mx-auto px-4 pt-3">
+          <div className="rounded-xl border border-amber-300/50 bg-amber-50 px-3 py-2 text-xs text-amber-700 dark:border-amber-900/40 dark:bg-amber-900/20 dark:text-amber-300">
+            Mode hors ligne: certaines actions (IA, collaboration, paiements) sont indisponibles.
+          </div>
+        </div>
       )}
 
       {/* Header */}

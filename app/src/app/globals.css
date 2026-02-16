@@ -146,6 +146,12 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html,
+  body {
+    max-width: 100%;
+    overflow-x: clip;
+  }
+
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-geist-sans);
@@ -153,11 +159,19 @@
       radial-gradient(circle at 20% 15%, rgba(30, 58, 95, 0.08), transparent 40%),
       radial-gradient(circle at 85% 5%, rgba(212, 168, 83, 0.12), transparent 35%);
     background-attachment: fixed;
+    -webkit-tap-highlight-color: transparent;
   }
 
   /* Transition fluide pour le changement de theme */
   html {
     transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  @media (pointer: coarse) {
+    html,
+    body {
+      overscroll-behavior-y: contain;
+    }
   }
 
   html.dark {

@@ -1,6 +1,6 @@
 'use client';
 
-import { LogOut, Loader2, ArrowLeft, MapPin, Settings, Users, UserPlus, Calendar, Crown, CreditCard, Sparkles, Check, Trophy } from 'lucide-react';
+import { LogOut, Loader2, ArrowLeft, MapPin, Settings, Users, UserPlus, Crown, CreditCard, Sparkles, Check, Trophy } from 'lucide-react';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -15,6 +15,9 @@ import { GamificationSection } from '@/components/gamification/GamificationSecti
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { getPlatform, isNativeApp } from '@/lib/mobile/runtime';
+import { purchaseProPlan, restoreMobilePurchases } from '@/lib/mobile/purchases';
+import { toast } from 'sonner';
 
 interface ProfileData {
   followers_count: number;
@@ -41,9 +44,11 @@ export default function ProfilPage() {
   const [following, setFollowing] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState('trips');
   const [dataLoading, setDataLoading] = useState(true);
-  const { isPro, status, expiresAt, loading: subLoading } = useSubscription();
+  const { isPro, expiresAt } = useSubscription();
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
   const [billingPeriod, setBillingPeriod] = useState<'yearly' | 'monthly'>('yearly');
+  const nativeApp = isNativeApp();
+  const platform = getPlatform();
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -110,6 +115,23 @@ export default function ProfilPage() {
   const handleCheckout = async (plan: 'monthly' | 'yearly') => {
     setCheckoutLoading('pro');
     try {
+      if (nativeApp) {
+        if (!user) {
+          toast.error('Connectez-vous pour acheter depuis l’app');
+          return;
+        }
+
+        const result = await purchaseProPlan(plan, user.id);
+        if (!result.success) {
+          toast.error(result.message || 'Achat in-app annulé ou échoué');
+          return;
+        }
+
+        toast.success('Achat validé');
+        window.location.reload();
+        return;
+      }
+
       const res = await fetch('/api/billing/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -124,6 +146,11 @@ export default function ProfilPage() {
   const handleOneTime = async () => {
     setCheckoutLoading('one-time');
     try {
+      if (nativeApp) {
+        toast.info('Achat à l’unité disponible sur le site web.');
+        return;
+      }
+
       const res = await fetch('/api/billing/one-time', { method: 'POST' });
       const data = await res.json();
       if (data.url) window.location.href = data.url;
@@ -134,11 +161,32 @@ export default function ProfilPage() {
   const handlePortal = async () => {
     setCheckoutLoading('portal');
     try {
+      if (nativeApp) {
+        toast.info('Gérez l’abonnement depuis App Store / Google Play.');
+        return;
+      }
+
       const res = await fetch('/api/billing/portal', { method: 'POST' });
       const data = await res.json();
       if (data.url) window.location.href = data.url;
     } catch (e) { console.error(e); }
     finally { setCheckoutLoading(null); }
+  };
+
+  const handleRestore = async () => {
+    if (!nativeApp || !user) return;
+    setCheckoutLoading('restore');
+    try {
+      const result = await restoreMobilePurchases(user.id);
+      if (!result.success) {
+        toast.error(result.message || 'Restauration impossible');
+        return;
+      }
+      toast.success('Achats restaurés');
+      window.location.reload();
+    } finally {
+      setCheckoutLoading(null);
+    }
   };
 
   const handleSignOut = async () => {
@@ -319,34 +367,51 @@ export default function ProfilPage() {
                   </div>
                 </div>
                 {isPro && (
-                  <Button
-                    variant="outline"
-                    className="w-full mt-3"
-                    onClick={handlePortal}
-                    disabled={!!checkoutLoading}
-                  >
-                    {checkoutLoading === 'portal' ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Gérer mon abonnement'}
-                  </Button>
+                  <div className="mt-3 space-y-2">
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={handlePortal}
+                      disabled={!!checkoutLoading}
+                    >
+                      {checkoutLoading === 'portal'
+                        ? <Loader2 className="w-4 h-4 animate-spin" />
+                        : nativeApp
+                          ? 'Gérer sur le store'
+                          : 'Gérer mon abonnement'}
+                    </Button>
+                    {nativeApp && (
+                      <Button
+                        variant="ghost"
+                        className="w-full"
+                        onClick={handleRestore}
+                        disabled={!!checkoutLoading || !user}
+                      >
+                        {checkoutLoading === 'restore' ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Restaurer mes achats'}
+                      </Button>
+                    )}
+                  </div>
                 )}
               </CardContent>
             </Card>
 
             {!isPro && (
               <>
-                {/* One-time */}
-                <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={handleOneTime}>
-                  <CardContent className="p-4 flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Voyage à l&apos;unité</p>
-                      <p className="text-xs text-muted-foreground">1 voyage supplémentaire, sans engagement</p>
-                    </div>
-                    {checkoutLoading === 'one-time' ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <span className="font-bold text-lg">0.99€</span>
-                    )}
-                  </CardContent>
-                </Card>
+                {!nativeApp && (
+                  <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={handleOneTime}>
+                    <CardContent className="p-4 flex items-center justify-between">
+                      <div>
+                        <p className="font-medium">Voyage à l&apos;unité</p>
+                        <p className="text-xs text-muted-foreground">1 voyage supplémentaire, sans engagement</p>
+                      </div>
+                      {checkoutLoading === 'one-time' ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <span className="font-bold text-lg">0.99€</span>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
 
                 {/* Pro subscription */}
                 <Card className="border-amber-500/30 bg-amber-50/50 dark:bg-amber-900/10">
@@ -393,12 +458,28 @@ export default function ProfilPage() {
                     >
                       {checkoutLoading === 'pro' ? (
                         <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : nativeApp ? (
+                        platform === 'ios'
+                          ? 'Acheter via App Store'
+                          : platform === 'android'
+                            ? 'Acheter via Google Play'
+                            : 'Acheter'
                       ) : billingPeriod === 'yearly' ? (
                         "S'abonner — 9.99€/an"
                       ) : (
                         "S'abonner — 1.99€/mois"
                       )}
                     </Button>
+                    {nativeApp && (
+                      <Button
+                        variant="ghost"
+                        className="w-full mt-2"
+                        onClick={handleRestore}
+                        disabled={!!checkoutLoading || !user}
+                      >
+                        {checkoutLoading === 'restore' ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Restaurer mes achats'}
+                      </Button>
+                    )}
                     {billingPeriod === 'yearly' && (
                       <p className="text-center text-[10px] text-muted-foreground mt-2">
                         soit 0.83€/mois · économise 58%

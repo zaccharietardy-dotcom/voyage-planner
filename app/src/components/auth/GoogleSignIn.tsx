@@ -4,28 +4,266 @@ import { getSupabaseClient } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { useState } from 'react';
+import { isNativeApp } from '@/lib/mobile/runtime';
+import { toast } from 'sonner';
 
 interface GoogleSignInProps {
   redirectTo?: string;
   className?: string;
 }
 
+type AppUrlOpenEvent = { url?: string };
+
+type NativeListenerHandle = {
+  remove: () => Promise<void> | void;
+};
+
+type NativeAppPlugin = {
+  addListener?: (
+    eventName: 'appUrlOpen',
+    listenerFunc: (event: AppUrlOpenEvent) => void | Promise<void>
+  ) => Promise<NativeListenerHandle> | NativeListenerHandle;
+};
+
+type NativeBrowserPlugin = {
+  open?: (options: { url: string }) => Promise<void>;
+  close?: () => Promise<void>;
+};
+
+type CapacitorGlobal = {
+  Plugins?: {
+    App?: NativeAppPlugin;
+    Browser?: NativeBrowserPlugin;
+  };
+  registerPlugin?: <T>(pluginName: string) => T;
+};
+
+function toErrorMessage(error: unknown): string {
+  if (error instanceof Error && error.message) return error.message;
+  if (typeof error === 'string') return error;
+  return '';
+}
+
+function getAuthToastMessage(error: unknown): string {
+  const message = toErrorMessage(error).toLowerCase();
+
+  if (message.includes('redirect') || message.includes('redirect_to') || message.includes('not allowed')) {
+    return 'Redirect Google non autorisé. Ajoute com.naraevoyage.app://auth/callback dans Supabase Auth > Redirect URLs.';
+  }
+
+  if (message.includes('cancel')) {
+    return 'Connexion annulée.';
+  }
+
+  return 'Connexion Google impossible, réessayez.';
+}
+
 export function GoogleSignIn({ redirectTo, className }: GoogleSignInProps) {
   const [isLoading, setIsLoading] = useState(false);
+
+  const resolveNativePlugins = () => {
+    const capacitor = (window as Window & { Capacitor?: CapacitorGlobal }).Capacitor;
+    const appFromPlugins = capacitor?.Plugins?.App;
+    const browserFromPlugins = capacitor?.Plugins?.Browser;
+
+    if (!capacitor?.registerPlugin) {
+      return {
+        App: appFromPlugins,
+        Browser: browserFromPlugins,
+      };
+    }
+
+    let appFromRegister: NativeAppPlugin | undefined;
+    let browserFromRegister: NativeBrowserPlugin | undefined;
+
+    try {
+      appFromRegister = capacitor.registerPlugin<NativeAppPlugin>('App');
+      browserFromRegister = capacitor.registerPlugin<NativeBrowserPlugin>('Browser');
+    } catch {
+      // ignore plugin registration errors and fallback to Plugins map
+    }
+
+    return {
+      App: appFromPlugins || appFromRegister,
+      Browser: browserFromPlugins || browserFromRegister,
+    };
+  };
 
   const handleSignIn = async () => {
     setIsLoading(true);
     const supabase = getSupabaseClient();
+    let postLoginPath = '/mes-voyages';
+    if (redirectTo?.startsWith('/')) {
+      postLoginPath = redirectTo;
+    } else if (redirectTo) {
+      try {
+        const parsed = new URL(redirectTo);
+        const parsedRedirect = parsed.searchParams.get('redirect');
+        if (parsedRedirect?.startsWith('/')) {
+          postLoginPath = parsedRedirect;
+        }
+      } catch {
+        // ignore invalid redirect values
+      }
+    }
+    const nativeRedirectUrl = 'com.naraevoyage.app://auth/callback';
+    const nativeOAuthRedirect = nativeRedirectUrl;
+    const webCallback = `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(postLoginPath)}`;
 
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
+    try {
+      if (isNativeApp()) {
+        const { App, Browser } = resolveNativePlugins();
 
-    if (error) {
+        // Capacitor bridge indisponible: fallback OAuth web dans la WebView native.
+        if (!App?.addListener) {
+          const { error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+              redirectTo: webCallback,
+              queryParams: {
+                prompt: 'select_account',
+              },
+            },
+          });
+
+          if (error) throw error;
+          return;
+        }
+
+        let listenerHandle: NativeListenerHandle | null = null;
+        let timeoutId: number | null = null;
+
+        const cleanup = async () => {
+          if (timeoutId) {
+            window.clearTimeout(timeoutId);
+            timeoutId = null;
+          }
+          if (listenerHandle) {
+            await Promise.resolve(listenerHandle.remove());
+            listenerHandle = null;
+          }
+        };
+
+        listenerHandle = await Promise.resolve(
+          App.addListener('appUrlOpen', async ({ url }) => {
+            if (!url?.startsWith(nativeRedirectUrl)) return;
+
+            try {
+              const parsedUrl = new URL(url);
+              const callbackError = parsedUrl.searchParams.get('error');
+              if (callbackError) {
+                throw new Error(callbackError);
+              }
+
+              const code = parsedUrl.searchParams.get('code');
+              const queryAccessToken = parsedUrl.searchParams.get('access_token');
+              const queryRefreshToken = parsedUrl.searchParams.get('refresh_token');
+              const callbackRedirect = parsedUrl.searchParams.get('redirect');
+              const hashParams = new URLSearchParams(parsedUrl.hash.replace('#', ''));
+              const hashAccessToken = hashParams.get('access_token');
+              const hashRefreshToken = hashParams.get('refresh_token');
+
+              if (code) {
+                const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+                if (exchangeError) {
+                  throw exchangeError;
+                }
+              } else {
+                const accessToken = hashAccessToken || queryAccessToken;
+                const refreshToken = hashRefreshToken || queryRefreshToken;
+
+                if (!accessToken || !refreshToken) {
+                  throw new Error('Jetons OAuth manquants');
+                }
+
+                const { error: setSessionError } = await supabase.auth.setSession({
+                  access_token: accessToken,
+                  refresh_token: refreshToken,
+                });
+
+                if (setSessionError) {
+                  throw setSessionError;
+                }
+              }
+
+              if (Browser?.close) {
+                await Browser.close();
+              }
+
+              window.location.replace(
+                callbackRedirect?.startsWith('/') ? callbackRedirect : postLoginPath
+              );
+            } catch (callbackError) {
+              console.error('[Auth] Native OAuth callback error:', callbackError);
+              toast.error(getAuthToastMessage(callbackError));
+            } finally {
+              await cleanup();
+              setIsLoading(false);
+            }
+          })
+        );
+
+        timeoutId = window.setTimeout(async () => {
+          await cleanup();
+          try {
+            const {
+              data: { session },
+            } = await supabase.auth.getSession();
+
+            if (session) {
+              window.location.replace(postLoginPath);
+              return;
+            }
+          } catch {
+            // ignore fallback session check failure
+          }
+
+          setIsLoading(false);
+          toast.error('La connexion a expiré. Réessayez.');
+        }, 90000);
+
+        const { data, error } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: nativeOAuthRedirect,
+            skipBrowserRedirect: true,
+            queryParams: {
+              prompt: 'select_account',
+            },
+          },
+        });
+
+        if (error || !data?.url) {
+          await cleanup();
+          throw error || new Error('URL OAuth manquante');
+        }
+
+        if (Browser?.open) {
+          await Browser.open({ url: data.url });
+        } else {
+          window.location.assign(data.url);
+        }
+
+        return;
+      }
+
+      const webRedirect = redirectTo?.startsWith('http')
+        ? redirectTo
+        : webCallback;
+
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: webRedirect,
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
+    } catch (error) {
       console.error('Error signing in:', error);
+      toast.error(getAuthToastMessage(error));
       setIsLoading(false);
     }
   };

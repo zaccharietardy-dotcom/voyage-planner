@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@/lib/supabase/server';
+import { deriveBillingState, fetchEntitlementsForUser } from '@/lib/server/billingEntitlements';
 
 export async function GET() {
   try {
@@ -16,10 +17,10 @@ export async function GET() {
       .eq('id', user.id)
       .single();
 
-    return NextResponse.json({
-      status: profile?.subscription_status || 'free',
-      expiresAt: profile?.subscription_ends_at || null,
-    });
+    const entitlements = await fetchEntitlementsForUser(supabase, user.id);
+    const billingState = deriveBillingState(profile, entitlements);
+
+    return NextResponse.json(billingState);
   } catch (error) {
     console.error('Error fetching subscription status:', error);
     return NextResponse.json({ error: 'Erreur interne' }, { status: 500 });

@@ -19,6 +19,8 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { useConnectivity } from '@/hooks/useConnectivity';
+import { cacheTripsList, readCachedTripsList } from '@/lib/mobile/offline-cache';
 
 type TripVisibility = 'public' | 'friends' | 'private';
 type MemberRole = 'owner' | 'editor' | 'viewer';
@@ -40,6 +42,7 @@ export default function MesVoyagesPage() {
   const { user, isLoading: authLoading } = useAuth();
   const [trips, setTrips] = useState<TripListItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { isOffline } = useConnectivity();
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -59,13 +62,19 @@ export default function MesVoyagesPage() {
         const res = await fetch('/api/trips');
         if (!res.ok) {
           console.error('Error fetching trips:', res.status, await res.text());
-          setTrips([]);
+          const cached = readCachedTripsList<TripListItem>();
+          setTrips(cached);
           return;
         }
         const tripsData = await res.json() as TripListItem[];
         setTrips(tripsData || []);
+        cacheTripsList<TripListItem>(tripsData || []);
       } catch (error) {
         console.error('Error fetching trips:', error);
+        const cached = readCachedTripsList<TripListItem>();
+        if (cached.length > 0) {
+          setTrips(cached);
+        }
       } finally {
         setIsLoading(false);
       }
@@ -133,6 +142,11 @@ export default function MesVoyagesPage() {
             <p className="text-muted-foreground">
               Retrouvez tous vos voyages planifiés
             </p>
+            {isOffline && (
+              <p className="text-xs text-amber-600 mt-2">
+                Mode hors ligne: affichage des derniers voyages en cache.
+              </p>
+            )}
           </div>
           <div className="flex gap-2">
             <Button variant="outline" asChild>

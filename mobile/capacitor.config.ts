@@ -8,7 +8,7 @@ const config: CapacitorConfig = {
     cleartext: false,
   },
   ios: {
-    scheme: 'Narae Voyage',
+    scheme: 'com.naraevoyage.app',
     contentInset: 'automatic',
   },
   android: {

@@ -6,6 +6,9 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useSubscription } from '@/hooks/useSubscription';
 import { cn } from '@/lib/utils';
+import { getPlatform, isNativeApp } from '@/lib/mobile/runtime';
+import { purchaseProPlan, restoreMobilePurchases } from '@/lib/mobile/purchases';
+import { toast } from 'sonner';
 
 const freePlan = {
   name: 'Gratuit',
@@ -31,10 +34,29 @@ export function PricingCards() {
   const { isPro, loading: subLoading } = useSubscription();
   const [loading, setLoading] = useState<string | null>(null);
   const [billingPeriod, setBillingPeriod] = useState<'yearly' | 'monthly'>('yearly');
+  const nativeApp = isNativeApp();
+  const platform = getPlatform();
 
   const handleCheckout = async (plan: 'monthly' | 'yearly') => {
     setLoading('pro');
     try {
+      if (nativeApp) {
+        if (!user) {
+          toast.error('Connectez-vous pour acheter depuis l’app');
+          return;
+        }
+
+        const result = await purchaseProPlan(plan, user.id);
+        if (!result.success) {
+          toast.error(result.message || 'Achat in-app annulé ou échoué');
+          return;
+        }
+
+        toast.success('Achat validé');
+        window.location.reload();
+        return;
+      }
+
       const res = await fetch('/api/billing/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -54,6 +76,11 @@ export function PricingCards() {
   const handleOneTime = async () => {
     setLoading('one-time');
     try {
+      if (nativeApp) {
+        toast.info('Achat à l’unité disponible sur le site web.');
+        return;
+      }
+
       const res = await fetch('/api/billing/one-time', { method: 'POST' });
       const data = await res.json();
       if (data.url) {
@@ -69,6 +96,11 @@ export function PricingCards() {
   const handlePortal = async () => {
     setLoading('portal');
     try {
+      if (nativeApp) {
+        toast.info('Gestion d’abonnement dans les réglages App Store / Google Play.');
+        return;
+      }
+
       const res = await fetch('/api/billing/portal', { method: 'POST' });
       const data = await res.json();
       if (data.url) {
@@ -76,6 +108,22 @@ export function PricingCards() {
       }
     } catch (error) {
       console.error('Portal error:', error);
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  const handleRestore = async () => {
+    if (!nativeApp || !user) return;
+    setLoading('restore');
+    try {
+      const result = await restoreMobilePurchases(user.id);
+      if (!result.success) {
+        toast.error(result.message || 'Restauration impossible');
+        return;
+      }
+      toast.success('Achats restaurés');
+      window.location.reload();
     } finally {
       setLoading(null);
     }
@@ -139,38 +187,39 @@ export function PricingCards() {
           )}
         </div>
 
-        {/* One-Time */}
-        <div className="rounded-2xl border p-6 flex flex-col">
-          <h3 className="text-xl font-bold">À l&apos;unité</h3>
-          <div className="mt-4 mb-6">
-            <span className="text-4xl font-bold">0.99€</span>
-            <span className="text-muted-foreground">/voyage</span>
+        {!nativeApp && (
+          <div className="rounded-2xl border p-6 flex flex-col">
+            <h3 className="text-xl font-bold">À l&apos;unité</h3>
+            <div className="mt-4 mb-6">
+              <span className="text-4xl font-bold">0.99€</span>
+              <span className="text-muted-foreground">/voyage</span>
+            </div>
+            <ul className="space-y-3 flex-1">
+              {['1 voyage supplémentaire', 'Itinéraire IA complet', 'Sans engagement'].map((f) => (
+                <li key={f} className="flex items-center gap-2 text-sm">
+                  <Check className="h-4 w-4 text-green-500 shrink-0" />
+                  {f}
+                </li>
+              ))}
+            </ul>
+            <Button
+              variant="outline"
+              className="mt-6 w-full"
+              onClick={user ? handleOneTime : undefined}
+              disabled={!!loading || !user || isPro}
+            >
+              {loading === 'one-time' ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : isPro ? (
+                'Inclus dans Pro'
+              ) : !user ? (
+                'Connectez-vous'
+              ) : (
+                'Acheter 1 voyage'
+              )}
+            </Button>
           </div>
-          <ul className="space-y-3 flex-1">
-            {['1 voyage supplémentaire', 'Itinéraire IA complet', 'Sans engagement'].map((f) => (
-              <li key={f} className="flex items-center gap-2 text-sm">
-                <Check className="h-4 w-4 text-green-500 shrink-0" />
-                {f}
-              </li>
-            ))}
-          </ul>
-          <Button
-            variant="outline"
-            className="mt-6 w-full"
-            onClick={user ? handleOneTime : undefined}
-            disabled={!!loading || !user || isPro}
-          >
-            {loading === 'one-time' ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : isPro ? (
-              'Inclus dans Pro'
-            ) : !user ? (
-              'Connectez-vous'
-            ) : (
-              'Acheter 1 voyage'
-            )}
-          </Button>
-        </div>
+        )}
 
         {/* Pro Plan */}
         <div className={cn(
@@ -216,30 +265,60 @@ export function PricingCards() {
               <Loader2 className="h-4 w-4 animate-spin" />
             </Button>
           ) : isPro ? (
-            <Button
-              variant="outline"
-              className="mt-6 w-full"
-              onClick={handlePortal}
-              disabled={!!loading}
-            >
-              {loading === 'portal' ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Gérer mon abonnement'}
-            </Button>
-          ) : (
-            <Button
-              className="mt-6 w-full bg-[#d4a853] hover:bg-[#b8923d] text-white"
-              onClick={user ? () => handleCheckout(billingPeriod) : undefined}
-              disabled={!!loading || !user}
-            >
-              {loading === 'pro' ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : !user ? (
-                'Connectez-vous'
-              ) : billingPeriod === 'yearly' ? (
-                'S\'abonner — 9.99€/an'
-              ) : (
-                'S\'abonner — 1.99€/mois'
+            <div className="mt-6 space-y-2">
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={handlePortal}
+                disabled={!!loading}
+              >
+                {loading === 'portal' ? <Loader2 className="h-4 w-4 animate-spin" /> : nativeApp ? 'Gérer sur le store' : 'Gérer mon abonnement'}
+              </Button>
+              {nativeApp && (
+                <Button
+                  variant="ghost"
+                  className="w-full"
+                  onClick={handleRestore}
+                  disabled={!!loading || !user}
+                >
+                  {loading === 'restore' ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Restaurer mes achats'}
+                </Button>
               )}
-            </Button>
+            </div>
+          ) : (
+            <div className="mt-6 space-y-2">
+              <Button
+                className="w-full bg-[#d4a853] hover:bg-[#b8923d] text-white"
+                onClick={user ? () => handleCheckout(billingPeriod) : undefined}
+                disabled={!!loading || !user}
+              >
+                {loading === 'pro' ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : !user ? (
+                  'Connectez-vous'
+                ) : nativeApp ? (
+                  platform === 'ios'
+                    ? 'Acheter via App Store'
+                    : platform === 'android'
+                      ? 'Acheter via Google Play'
+                      : 'Acheter'
+                ) : billingPeriod === 'yearly' ? (
+                  'S\'abonner — 9.99€/an'
+                ) : (
+                  'S\'abonner — 1.99€/mois'
+                )}
+              </Button>
+              {nativeApp && (
+                <Button
+                  variant="ghost"
+                  className="w-full"
+                  onClick={handleRestore}
+                  disabled={!!loading || !user}
+                >
+                  {loading === 'restore' ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Restaurer mes achats'}
+                </Button>
+              )}
+            </div>
           )}
         </div>
       </div>

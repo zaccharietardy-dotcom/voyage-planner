@@ -32,6 +32,26 @@ const serwist = new Serwist({
         ],
       }),
     },
+    // Keep key app pages available for offline read-only navigation.
+    {
+      matcher: ({ request, url }) =>
+        request.mode === "navigate" &&
+        (url.pathname === "/mes-voyages" ||
+          url.pathname.startsWith("/trip/") ||
+          url.pathname.startsWith("/profil")),
+      handler: new NetworkFirst({
+        cacheName: "app-pages-cache",
+        plugins: [
+          new ExpirationPlugin({
+            maxEntries: 60,
+            maxAgeSeconds: 7 * 24 * 60 * 60,
+          }),
+          new CacheableResponsePlugin({
+            statuses: [0, 200],
+          }),
+        ],
+      }),
+    },
     ...defaultCache,
     // Cache trip API responses with stale-while-revalidate
     {

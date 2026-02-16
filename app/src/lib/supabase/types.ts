@@ -54,6 +54,55 @@ export interface Database {
         };
         Relationships: [];
       };
+      billing_entitlements: {
+        Row: {
+          id: string;
+          user_id: string;
+          source: 'stripe' | 'app_store' | 'play_store';
+          external_customer_id: string | null;
+          external_subscription_id: string | null;
+          product_id: string | null;
+          status: 'active' | 'grace' | 'expired' | 'canceled';
+          expires_at: string | null;
+          payload: Json | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          source: 'stripe' | 'app_store' | 'play_store';
+          external_customer_id?: string | null;
+          external_subscription_id?: string | null;
+          product_id?: string | null;
+          status: 'active' | 'grace' | 'expired' | 'canceled';
+          expires_at?: string | null;
+          payload?: Json | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          source?: 'stripe' | 'app_store' | 'play_store';
+          external_customer_id?: string | null;
+          external_subscription_id?: string | null;
+          product_id?: string | null;
+          status?: 'active' | 'grace' | 'expired' | 'canceled';
+          expires_at?: string | null;
+          payload?: Json | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "billing_entitlements_user_id_fkey";
+            columns: ["user_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
       trips: {
         Row: {
           id: string;

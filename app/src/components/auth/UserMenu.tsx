@@ -13,14 +13,24 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { LogOut, User, Map, Settings, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 
-export function UserMenu() {
+interface UserMenuProps {
+  onAction?: () => void;
+}
+
+export function UserMenu({ onAction }: UserMenuProps) {
   const { user, profile, isLoading, signOut } = useAuth();
+  const [isOpen, setIsOpen] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
-  const router = useRouter();
+
+  const handleNavigate = () => {
+    setIsOpen(false);
+    onAction?.();
+  };
 
   const handleSignOut = async () => {
+    setIsOpen(false);
+    onAction?.();
     setIsSigningOut(true);
     try {
       await signOut();
@@ -39,7 +49,7 @@ export function UserMenu() {
   if (!user) {
     return (
       <Button asChild variant="default" size="default" className="px-6">
-        <Link href="/login">Connexion</Link>
+        <Link href="/login" onClick={handleNavigate}>Connexion</Link>
       </Button>
     );
   }
@@ -54,7 +64,7 @@ export function UserMenu() {
     .slice(0, 2) || 'U';
 
   return (
-    <DropdownMenu>
+    <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0 hover:ring-2 hover:ring-primary/50 transition-all">
           <Avatar className="h-10 w-10 border-2 border-primary/20">
@@ -77,20 +87,20 @@ export function UserMenu() {
           </div>
         </div>
         <DropdownMenuSeparator />
-        <DropdownMenuItem asChild className="cursor-pointer">
-          <Link href="/mes-voyages" className="w-full flex items-center">
+        <DropdownMenuItem asChild className="cursor-pointer" onSelect={handleNavigate}>
+          <Link href="/mes-voyages" onClick={handleNavigate} className="w-full flex items-center">
             <Map className="mr-2 h-4 w-4" />
             Mes voyages
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem asChild className="cursor-pointer">
-          <Link href="/profil" className="w-full flex items-center">
+        <DropdownMenuItem asChild className="cursor-pointer" onSelect={handleNavigate}>
+          <Link href="/profil" onClick={handleNavigate} className="w-full flex items-center">
             <User className="mr-2 h-4 w-4" />
             Mon profil
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem asChild className="cursor-pointer">
-          <Link href="/parametres" className="w-full flex items-center">
+        <DropdownMenuItem asChild className="cursor-pointer" onSelect={handleNavigate}>
+          <Link href="/parametres" onClick={handleNavigate} className="w-full flex items-center">
             <Settings className="mr-2 h-4 w-4" />
             Paramètres
           </Link>

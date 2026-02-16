@@ -3,6 +3,10 @@
 import { useState } from 'react';
 import { Sparkles, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/components/auth/AuthProvider';
+import { isNativeApp } from '@/lib/mobile/runtime';
+import { purchaseProPlan } from '@/lib/mobile/purchases';
+import { toast } from 'sonner';
 
 interface UpgradePromptProps {
   message?: string;
@@ -11,12 +15,31 @@ interface UpgradePromptProps {
 export function UpgradePrompt({ message = 'Tu as atteint la limite de 2 voyages/mois.' }: UpgradePromptProps) {
   const [dismissed, setDismissed] = useState(false);
   const [loading, setLoading] = useState<string | null>(null);
+  const { user } = useAuth();
+  const nativeApp = isNativeApp();
 
   if (dismissed) return null;
 
   const handleUpgrade = async () => {
     setLoading('pro');
     try {
+      if (nativeApp) {
+        if (!user) {
+          toast.error('Connectez-vous pour acheter depuis l’app');
+          return;
+        }
+
+        const result = await purchaseProPlan('yearly', user.id);
+        if (!result.success) {
+          toast.error(result.message || 'Achat in-app annulé ou échoué');
+          return;
+        }
+
+        toast.success('Achat validé');
+        window.location.reload();
+        return;
+      }
+
       const res = await fetch('/api/billing/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -36,6 +59,11 @@ export function UpgradePrompt({ message = 'Tu as atteint la limite de 2 voyages/
   const handleOneTime = async () => {
     setLoading('one-time');
     try {
+      if (nativeApp) {
+        toast.info('Achat à l’unité disponible sur le site web.');
+        return;
+      }
+
       const res = await fetch('/api/billing/one-time', { method: 'POST' });
       const data = await res.json();
       if (data.url) {
@@ -58,21 +86,27 @@ export function UpgradePrompt({ message = 'Tu as atteint la limite de 2 voyages/
         </p>
       </div>
       <div className="flex gap-2 shrink-0">
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={handleOneTime}
-          disabled={!!loading}
-        >
-          {loading === 'one-time' ? <Loader2 className="h-4 w-4 animate-spin" /> : '0.99€ ce voyage'}
-        </Button>
+        {!nativeApp && (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={handleOneTime}
+            disabled={!!loading}
+          >
+            {loading === 'one-time' ? <Loader2 className="h-4 w-4 animate-spin" /> : '0.99€ ce voyage'}
+          </Button>
+        )}
         <Button
           size="sm"
           className="bg-[#d4a853] hover:bg-[#b8923d] text-white"
           onClick={handleUpgrade}
           disabled={!!loading}
         >
-          {loading === 'pro' ? <Loader2 className="h-4 w-4 animate-spin" /> : '9.99€/an'}
+          {loading === 'pro'
+            ? <Loader2 className="h-4 w-4 animate-spin" />
+            : nativeApp
+              ? 'Achat in-app'
+              : '9.99€/an'}
         </Button>
       </div>
       <button

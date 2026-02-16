@@ -2,13 +2,24 @@ import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
 import { createClient } from '@supabase/supabase-js';
 import Stripe from 'stripe';
+import { upsertBillingEntitlement } from '@/lib/server/billingEntitlements';
+import type { Database } from '@/lib/supabase/types';
 
 // Use service role client to bypass RLS (webhook has no user session)
 function getAdminClient() {
-  return createClient(
+  return createClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
+}
+
+async function findUserIdByStripeCustomer(supabase: ReturnType<typeof getAdminClient>, customerId: string): Promise<string | null> {
+  const { data } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('stripe_customer_id', customerId)
+    .single();
+  return data?.id || null;
 }
 
 export async function POST(request: NextRequest) {
@@ -47,6 +58,7 @@ export async function POST(request: NextRequest) {
           const subData = JSON.parse(JSON.stringify(subscription));
           const periodEnd = subData.current_period_end;
           const endsAt = periodEnd ? new Date(periodEnd * 1000).toISOString() : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+          const linePriceId = subData?.items?.data?.[0]?.price?.id || null;
 
           const { error: updateError } = await supabase
             .from('profiles')
@@ -60,6 +72,20 @@ export async function POST(request: NextRequest) {
           if (updateError) {
             console.error(`[Stripe] Supabase update error:`, updateError);
             return NextResponse.json({ error: `DB error: ${updateError.message}` }, { status: 500 });
+          }
+
+          const userId = await findUserIdByStripeCustomer(supabase, customerId);
+          if (userId) {
+            await upsertBillingEntitlement(supabase, {
+              userId,
+              source: 'stripe',
+              status: 'active',
+              expiresAt: endsAt,
+              externalCustomerId: customerId,
+              externalSubscriptionId: subscriptionId,
+              productId: linePriceId,
+              payload: subData,
+            });
           }
 
         } else if (session.mode === 'payment') {
@@ -110,6 +136,7 @@ export async function POST(request: NextRequest) {
         const subData = JSON.parse(JSON.stringify(subscription));
         const periodEnd = subData.current_period_end;
         const endsAt = periodEnd ? new Date(periodEnd * 1000).toISOString() : null;
+        const entitlementStatus = subscription.status === 'active' ? 'active' : subscription.status === 'past_due' ? 'grace' : 'canceled';
 
         await supabase
           .from('profiles')
@@ -118,6 +145,20 @@ export async function POST(request: NextRequest) {
             subscription_ends_at: endsAt,
           })
           .eq('stripe_customer_id', customerId);
+
+        const userId = await findUserIdByStripeCustomer(supabase, customerId);
+        if (userId) {
+          await upsertBillingEntitlement(supabase, {
+            userId,
+            source: 'stripe',
+            status: entitlementStatus,
+            expiresAt: endsAt,
+            externalCustomerId: customerId,
+            externalSubscriptionId: (subscription.id as string) || null,
+            productId: subData?.items?.data?.[0]?.price?.id || null,
+            payload: subData,
+          });
+        }
 
         break;
       }
@@ -134,6 +175,19 @@ export async function POST(request: NextRequest) {
             subscription_ends_at: null,
           })
           .eq('stripe_customer_id', customerId);
+
+        const userId = await findUserIdByStripeCustomer(supabase, customerId);
+        if (userId) {
+          await upsertBillingEntitlement(supabase, {
+            userId,
+            source: 'stripe',
+            status: 'expired',
+            expiresAt: null,
+            externalCustomerId: customerId,
+            externalSubscriptionId: (subscription.id as string) || null,
+            payload: JSON.parse(JSON.stringify(subscription)),
+          });
+        }
 
         break;
       }

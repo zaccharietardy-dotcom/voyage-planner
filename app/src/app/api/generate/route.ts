@@ -3,6 +3,7 @@ import { generateTripV2, type PipelineEvent } from '@/lib/pipeline';
 import { TripPreferences } from '@/lib/types';
 import { normalizeCity } from '@/lib/services/cityNormalization';
 import { createRouteHandlerClient } from '@/lib/supabase/server';
+import { deriveBillingState, fetchEntitlementsForUser } from '@/lib/server/billingEntitlements';
 
 export const maxDuration = 300; // 5 minutes max
 
@@ -33,11 +34,14 @@ export async function POST(request: NextRequest) {
 
     const { data: profile } = await supabase
       .from('profiles')
-      .select('subscription_status, extra_trips')
+      .select('subscription_status, subscription_ends_at, extra_trips')
       .eq('id', user.id)
       .single();
 
-    if (!profile?.subscription_status || profile.subscription_status !== 'pro') {
+    const entitlements = await fetchEntitlementsForUser(supabase, user.id);
+    const billingState = deriveBillingState(profile, entitlements);
+
+    if (billingState.status !== 'pro') {
       const startOfMonth = new Date();
       startOfMonth.setDate(1);
       startOfMonth.setHours(0, 0, 0, 0);

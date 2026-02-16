@@ -5,3 +5,4 @@ export * from './reviews';
 export * from './prices';
 export * from './collaboration';
 export * from './expenses';
+export * from './billing';
