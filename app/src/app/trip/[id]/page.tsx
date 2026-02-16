@@ -25,6 +25,8 @@ import {
   Upload,
   ChevronsLeftRight,
   MapPinned,
+  MoreHorizontal,
+  MessageCircle,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -1027,7 +1029,7 @@ export default function TripPage() {
       )}
 
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-[#1e3a5f]/10 bg-background/85 shadow-sm backdrop-blur-xl">
+      <header className="sticky top-16 z-40 border-b border-[#1e3a5f]/10 bg-background/85 shadow-sm backdrop-blur-xl">
         <div className="container mx-auto px-4 py-3">
           <div className="rounded-2xl border border-[#1e3a5f]/10 bg-background/75 px-3 py-2 shadow-sm">
             <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
@@ -1138,7 +1140,7 @@ export default function TripPage() {
               {useCollaborativeMode && (
                 <Sheet open={showCollabPanel} onOpenChange={setShowCollabPanel}>
                   <SheetTrigger asChild>
-                    <Button variant="outline" size="sm" className="gap-1.5 h-8 relative shrink-0">
+                    <Button variant="outline" size="sm" className="gap-1.5 h-8 relative shrink-0 hidden sm:inline-flex">
                       <GitPullRequest className="h-3.5 w-3.5" />
                       {openProposalCount > 0 && (
                         <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary text-primary-foreground text-[10px] rounded-full flex items-center justify-center">
@@ -1165,23 +1167,23 @@ export default function TripPage() {
               )}
 
               {!canOwnerEdit && useCollaborativeMode && (
-                <Button variant="outline" size="sm" className="gap-1.5 h-8 shrink-0" onClick={() => setShowCloneModal(true)}>
+                <Button variant="outline" size="sm" className="gap-1.5 h-8 shrink-0 hidden sm:inline-flex" onClick={() => setShowCloneModal(true)}>
                   <Copy className="h-3.5 w-3.5" />
                 </Button>
               )}
 
               {isOwner && (
-                <Button variant="outline" size="sm" className="gap-1.5 h-8 shrink-0" onClick={() => setShowShareDialog(true)} data-tour="share-button">
+                <Button variant="outline" size="sm" className="gap-1.5 h-8 shrink-0 hidden sm:inline-flex" onClick={() => setShowShareDialog(true)} data-tour="share-button">
                   <Share2 className="h-3.5 w-3.5" />
                 </Button>
               )}
 
-              <Button variant="outline" size="sm" className="gap-1.5 h-8 shrink-0" onClick={() => setShowFlythrough(true)} title="Visualisation 3D">
+              <Button variant="outline" size="sm" className="gap-1.5 h-8 shrink-0 hidden sm:inline-flex" onClick={() => setShowFlythrough(true)} title="Visualisation 3D">
                 <Globe className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline text-xs">3D</span>
               </Button>
 
-              <Button variant="outline" size="sm" className="gap-1.5 h-8 shrink-0" onClick={handleExportPdf} title="Exporter en PDF">
+              <Button variant="outline" size="sm" className="gap-1.5 h-8 shrink-0 hidden sm:inline-flex" onClick={handleExportPdf} title="Exporter en PDF">
                 <Download className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline text-xs">PDF</span>
               </Button>
@@ -1201,7 +1203,7 @@ export default function TripPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="gap-1.5 h-8 shrink-0"
+                  className="gap-1.5 h-8 shrink-0 hidden sm:inline-flex"
                   onClick={() => setShowImportPlaces(true)}
                   title="Importer des lieux depuis Google Maps"
                 >
@@ -1214,7 +1216,7 @@ export default function TripPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="gap-1.5 h-8 shrink-0"
+                  className="gap-1.5 h-8 shrink-0 hidden sm:inline-flex"
                   onClick={(event) => handleExportDebug(!event.shiftKey)}
                   title="Export debug compact (Shift+clic pour inclure _rawTrip)"
                 >
@@ -1224,10 +1226,68 @@ export default function TripPage() {
 
               {/* Chat Assistant Button */}
               {canOwnerEdit && (
-                <div className="shrink-0" data-tour="chat-button">
+                <div className="shrink-0 hidden sm:block" data-tour="chat-button">
                   <ChatButton onClick={() => setShowChatPanel(true)} />
                 </div>
               )}
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="h-8 gap-1.5 shrink-0 sm:hidden">
+                    <MoreHorizontal className="h-3.5 w-3.5" />
+                    <span className="text-xs">Actions</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  {isOwner && (
+                    <DropdownMenuItem onClick={() => setShowShareDialog(true)}>
+                      <Share2 className="h-4 w-4" />
+                      Partager le voyage
+                    </DropdownMenuItem>
+                  )}
+                  {useCollaborativeMode && (
+                    <DropdownMenuItem onClick={() => setShowCollabPanel(true)}>
+                      <GitPullRequest className="h-4 w-4" />
+                      Collaboration
+                    </DropdownMenuItem>
+                  )}
+                  {!canOwnerEdit && useCollaborativeMode && (
+                    <DropdownMenuItem onClick={() => setShowCloneModal(true)}>
+                      <Copy className="h-4 w-4" />
+                      Cloner ce voyage
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuItem onClick={() => setShowFlythrough(true)}>
+                    <Globe className="h-4 w-4" />
+                    Vue 3D
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleExportPdf}>
+                    <Download className="h-4 w-4" />
+                    Exporter en PDF
+                  </DropdownMenuItem>
+                  {canOwnerEdit && (
+                    <DropdownMenuItem onClick={() => setShowImportPlaces(true)}>
+                      <Upload className="h-4 w-4" />
+                      Importer des lieux
+                    </DropdownMenuItem>
+                  )}
+                  {canOwnerEdit && (
+                    <DropdownMenuItem onClick={() => setShowChatPanel(true)}>
+                      <MessageCircle className="h-4 w-4" />
+                      Assistant IA
+                    </DropdownMenuItem>
+                  )}
+                  {canOwnerEdit && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => handleExportDebug(true)}>
+                        <Bug className="h-4 w-4" />
+                        Export debug
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
               </div>
             </div>
 
@@ -1250,7 +1310,7 @@ export default function TripPage() {
         {/* Mobile layout */}
         <div className="lg:hidden">
           <Tabs value={mainTab} onValueChange={setMainTab}>
-            <TabsList className="sticky top-[74px] z-30 mb-2 flex w-full gap-1 overflow-x-auto rounded-xl border border-[#1e3a5f]/12 bg-background/85 p-1 backdrop-blur-xl scrollbar-hide" data-tour="tabs">
+            <TabsList className="mb-2 flex w-full gap-1 overflow-x-auto rounded-xl border border-[#1e3a5f]/12 bg-background/85 p-1 backdrop-blur-xl scrollbar-hide" data-tour="tabs">
               {liveState && <TabsTrigger value="live" className="shrink-0 px-3 text-xs bg-gradient-to-r from-purple-500 to-blue-500 text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600">🔴 Live</TabsTrigger>}
               <TabsTrigger value="planning" className="shrink-0 px-3 text-xs">Planning</TabsTrigger>
               <TabsTrigger value="reserver" className="shrink-0 px-3 text-xs">Réserver</TabsTrigger>

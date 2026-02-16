@@ -128,14 +128,14 @@ export function Header() {
 
       {isMobileMenuOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/45 backdrop-blur-[1px] md:hidden"
+          className="fixed inset-0 z-[80] bg-black/45 backdrop-blur-[1px] md:hidden"
           onClick={closeMobileMenu}
         />
       )}
 
       <div
         className={cn(
-          'fixed bottom-0 right-0 top-0 z-40 w-72 overflow-y-auto overscroll-contain border-l border-[#1e3a5f]/15 bg-background/95 px-4 pb-[calc(env(safe-area-inset-bottom)+1.5rem)] pt-20 backdrop-blur-xl transition-transform duration-300 md:hidden',
+          'fixed bottom-0 right-0 top-0 z-[90] w-72 overflow-y-auto overscroll-contain border-l border-[#1e3a5f]/15 bg-background/95 px-4 pb-[calc(env(safe-area-inset-bottom)+1.5rem)] pt-20 backdrop-blur-xl transition-transform duration-300 md:hidden',
           isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
         )}
       >
