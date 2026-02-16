@@ -1777,6 +1777,20 @@ export async function assembleTripSchedule(
     // In this case, the interleave loop will never hit the 11:30-14:30 window
     let lunchInserted = false;
     let dinnerInserted = false;
+    let pendingDayTripReturn:
+      | {
+          id: string;
+          title: string;
+          durationMin: number;
+          data: {
+            description: string;
+            locationName: string;
+            latitude: number;
+            longitude: number;
+          };
+          earliestStart: Date;
+        }
+      | null = null;
 
     const initialCursor = scheduler.getCurrentTime();
     const initialHour = initialCursor.getHours() + initialCursor.getMinutes() / 60;
@@ -1996,8 +2010,9 @@ export async function assembleTripSchedule(
         console.warn(`[Pipeline V2] Day ${balancedDay.dayNumber}: REJECTED activity "${activity.name}" (duration=${activityDuration}min, travel=${travelTime}min, cursor=${formatTimeHHMM(scheduler.getCurrentTime())}, dayEnd=${dayEndHour}:00)${activity.mustSee ? ' ⚠️ MUST-SEE LOST' : ''}`);
       }
 
-      // After day-trip activity, add explicit return travel to hotel
-      // This prevents dinner from showing 7h travel time from the day-trip location
+      // After day-trip activity, queue explicit return travel to hotel.
+      // We insert it later (after lunch slot placement) to avoid contradictory
+      // schedules where "Retour" appears before lunch at the day-trip location.
       if (balancedDay.isDayTrip && hotel && i === prioritizedActivities.length - 1) {
         const distKm = calculateDistance(
           activity.latitude, activity.longitude,
@@ -2005,19 +2020,22 @@ export async function assembleTripSchedule(
         );
         const returnTravelMin = Math.round((distKm / 50) * 60);
         if (returnTravelMin > 15) {
-          scheduler.addItem({
+          const latestScheduled = scheduler.getItems()
+            .filter((scheduledItem) => scheduledItem.type === 'activity')
+            .reduce((max, scheduledItem) => Math.max(max, scheduledItem.slot.end.getTime()), scheduler.getCurrentTime().getTime());
+
+          pendingDayTripReturn = {
             id: `daytrip-return-${balancedDay.dayNumber}`,
             title: `Retour vers ${preferences.destination}`,
-            type: 'transport',
-            duration: returnTravelMin,
-            travelTime: 0, // Travel IS the item
+            durationMin: returnTravelMin,
+            earliestStart: new Date(latestScheduled),
             data: {
               description: `Retour depuis ${activity.name}`,
               locationName: hotel.name,
               latitude: hotel.latitude,
               longitude: hotel.longitude,
             },
-          });
+          };
         }
       }
     }
@@ -2112,6 +2130,66 @@ export async function assembleTripSchedule(
           lunchInserted = true;
           console.log(`[Pipeline V2] Day ${balancedDay.dayNumber}: Lunch inserted via findBestMealSlot at ${formatTimeHHMM(slot.start)}-${formatTimeHHMM(slot.end)}`);
         }
+      }
+    }
+
+    if (pendingDayTripReturn) {
+      const scheduledNow = scheduler.getItems();
+      const lunchIds = new Set([
+        `meal-${balancedDay.dayNumber}-lunch`,
+        `self-cooked-lunch-${balancedDay.dayNumber}`,
+        `self-lunch-${balancedDay.dayNumber}`,
+      ]);
+      const lunchEnd = scheduledNow
+        .filter((scheduledItem) => lunchIds.has(scheduledItem.id))
+        .reduce((max, scheduledItem) => Math.max(max, scheduledItem.slot.end.getTime()), 0);
+
+      const longhaulStartMs = returnTransportData?.startTime?.getTime();
+      const longhaulBufferMs = 10 * 60 * 1000;
+      const desiredEndBeforeLonghaul = longhaulStartMs ? (longhaulStartMs - longhaulBufferMs) : null;
+
+      const baseStartMs = Math.max(
+        pendingDayTripReturn.earliestStart.getTime(),
+        lunchEnd
+      );
+      let returnStartMs = baseStartMs;
+
+      if (desiredEndBeforeLonghaul !== null) {
+        const latestStart = desiredEndBeforeLonghaul - pendingDayTripReturn.durationMin * 60 * 1000;
+        if (latestStart > returnStartMs) {
+          returnStartMs = latestStart;
+        }
+      }
+
+      const returnStart = new Date(returnStartMs);
+      const returnEnd = new Date(returnStart.getTime() + pendingDayTripReturn.durationMin * 60 * 1000);
+
+      const canFitBeforeLonghaul = desiredEndBeforeLonghaul === null || returnEnd.getTime() <= desiredEndBeforeLonghaul;
+      if (canFitBeforeLonghaul) {
+        const inserted = scheduler.insertFixedItem({
+          id: pendingDayTripReturn.id,
+          title: pendingDayTripReturn.title,
+          type: 'transport',
+          startTime: returnStart,
+          endTime: returnEnd,
+          data: pendingDayTripReturn.data,
+        });
+
+        if (!inserted) {
+          scheduler.advanceTo(returnStart);
+          scheduler.addItem({
+            id: pendingDayTripReturn.id,
+            title: pendingDayTripReturn.title,
+            type: 'transport',
+            duration: pendingDayTripReturn.durationMin,
+            travelTime: 0,
+            data: pendingDayTripReturn.data,
+          });
+        }
+      } else {
+        console.warn(
+          `[Pipeline V2] Day ${balancedDay.dayNumber}: skipped explicit day-trip return; no safe slot before longhaul departure`
+        );
       }
     }
 
@@ -2505,6 +2583,8 @@ export async function assembleTripSchedule(
           item.rating = bestR.rating;
           item.estimatedCost = bestR.priceLevel ? (bestR.priceLevel || 1) * 15 : item.estimatedCost;
           item.bookingUrl = bestR.googleMapsUrl || bestR.website;
+          item.googleMapsPlaceUrl = bestR.googleMapsUrl
+            || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${bestR.name}, ${preferences.destination}`)}`;
           item.restaurant = bestR;
           item.restaurantAlternatives = []; // Clear stale alts — section 13b will refill
           // Restaurant changed: clear previous image so we don't keep a stale photo.
@@ -2567,6 +2647,8 @@ export async function assembleTripSchedule(
           item.rating = bestR.rating;
           item.estimatedCost = bestR.priceLevel ? (bestR.priceLevel || 1) * 15 : item.estimatedCost;
           item.bookingUrl = bestR.googleMapsUrl || bestR.website;
+          item.googleMapsPlaceUrl = bestR.googleMapsUrl
+            || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${bestR.name}, ${preferences.destination}`)}`;
           item.restaurant = bestR;
           item.restaurantAlternatives = []; // Clear stale alts — section 13b will refill
           // Restaurant changed: clear previous image so we don't keep a stale photo.
