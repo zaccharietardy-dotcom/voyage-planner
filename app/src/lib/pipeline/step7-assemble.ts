@@ -374,6 +374,13 @@ function buildDrivingGoogleMapsUrl(
   return `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(originLabel)}&destination=${encodeURIComponent(`${airport.latitude},${airport.longitude}`)}&travelmode=driving`;
 }
 
+function buildDrivingGoogleMapsUrlToCoords(
+  originLabel: string,
+  destination: { lat: number; lng: number }
+): string {
+  return `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(originLabel)}&destination=${encodeURIComponent(`${destination.lat},${destination.lng}`)}&travelmode=driving`;
+}
+
 type OutboundAirportParkingResolution = {
   parking: ParkingOption | null;
   fallbackOptionUsed: boolean;
@@ -1029,6 +1036,75 @@ export async function assembleTripSchedule(
       }
     };
 
+    const insertHomeToGroundDepartureLogistics = (
+      departureTime: Date,
+      mode?: TransportOptionSummary['mode']
+    ) => {
+      if (!isFirstDay) return;
+
+      const originPoint = { lat: data.originCoords.lat, lng: data.originCoords.lng };
+      const homeCoords = departureAnchorCoords || null;
+      const normalizedOrigin = normalizeLocationKey(preferences.origin);
+      const normalizedHome = normalizeLocationKey(departureAddressLabel);
+
+      const hasDistinctHomeAddress = Boolean(normalizedHome && normalizedHome !== normalizedOrigin);
+      const homeToOriginKm = homeCoords
+        ? calculateDistance(homeCoords.lat, homeCoords.lng, originPoint.lat, originPoint.lng)
+        : 0;
+
+      // Keep an explicit departure block:
+      // - always when home address differs from origin city
+      // - or when geocoded home is materially far from the origin anchor
+      // - or as a lightweight prep slot for inter-city readability
+      const needsActualTransfer = hasDistinctHomeAddress || homeToOriginKm > 0.4;
+      const localLeadMinutes = needsActualTransfer
+        ? Math.max(10, Math.min(120, estimateDriveMinutesToAirport(homeCoords, originPoint)))
+        : 15;
+      const transferEnd = clampToDayTime(departureTime, dayDate);
+      const transferStart = clampToDayTime(
+        new Date(transferEnd.getTime() - localLeadMinutes * 60 * 1000),
+        dayDate
+      );
+      if (transferEnd <= transferStart) return;
+
+      const modeLabel = mode === 'train'
+        ? 'départ train'
+        : mode === 'bus'
+          ? 'départ bus'
+          : mode === 'ferry'
+            ? 'départ ferry'
+            : 'départ';
+      const driveMapsUrl = buildDrivingGoogleMapsUrlToCoords(departureAddressLabel, originPoint);
+      const qualityFlags: string[] = ['home_departure_local_segment'];
+      if (!homeCoords) qualityFlags.push('home_departure_coords_estimated');
+      if (!needsActualTransfer) qualityFlags.push('home_departure_prep_only');
+
+      scheduler.insertFixedItem({
+        id: `home-ground-out-${balancedDay.dayNumber}`,
+        title: needsActualTransfer
+          ? `🚗 Trajet vers ${modeLabel}`
+          : `🧭 Départ depuis ${preferences.origin}`,
+        type: 'transport',
+        startTime: transferStart,
+        endTime: transferEnd,
+        data: {
+          description: needsActualTransfer
+            ? `${departureAddressLabel} → ${preferences.origin}`
+            : `Départ depuis ${preferences.origin}`,
+          locationName: preferences.origin,
+          latitude: data.originCoords.lat,
+          longitude: data.originCoords.lng,
+          estimatedCost: needsActualTransfer ? Math.round(homeToOriginKm * 0.23) : 0,
+          bookingUrl: driveMapsUrl,
+          googleMapsUrl: driveMapsUrl,
+          transportMode: 'car',
+          transportRole: 'inter_item',
+          dataReliability: homeCoords ? 'verified' : 'estimated',
+          qualityFlags,
+        },
+      });
+    };
+
     // 1. Fixed items: flights OR ground transport
     if (isFirstDay && outboundFlight) {
       const depTime = new Date(outboundFlight.departureTime);
@@ -1046,6 +1122,7 @@ export async function assembleTripSchedule(
     } else if (hasOutboundTransport && transport) {
       // Ground transport outbound (train, bus, car)
       const { start: tStart, end: tEnd } = getGroundTransportTimes(transport, dayDate, 'outbound');
+      insertHomeToGroundDepartureLogistics(tStart, transport.mode);
       scheduler.insertFixedItem({
         id: `transport-out-${balancedDay.dayNumber}`,
         title: `${MODE_LABELS[transport.mode] || '🚊 Transport'} → ${preferences.destination}`,
@@ -1076,6 +1153,8 @@ export async function assembleTripSchedule(
       });
       if (transport?.mode === 'plane') {
         insertHomeToAirportLogistics(fallbackStart, 120);
+      } else {
+        insertHomeToGroundDepartureLogistics(fallbackStart, transport?.mode);
       }
       scheduler.insertFixedItem({
         id: `transport-out-${balancedDay.dayNumber}-fallback`,
