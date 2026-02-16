@@ -429,6 +429,69 @@ describe('step7-assemble helpers', () => {
     expect(day.scheduleDiagnostics?.outlierRestaurantsCount).toBe(0);
   });
 
+  it('anchors breakfast proximity to hotel coordinates when checkin/checkout is missing', async () => {
+    const nearbyBreakfast: Restaurant = {
+      id: 'r-near-hotel',
+      name: 'Boulangerie Hôtel',
+      address: 'Paris',
+      latitude: 48.8609,
+      longitude: 2.338,
+      rating: 4.7,
+      reviewCount: 220,
+      priceLevel: 2,
+      cuisineTypes: ['boulangerie'],
+      dietaryOptions: ['none'],
+      openingHours: {},
+      googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Boulangerie%20Hotel%2C%20Paris',
+      photos: ['/api/place-photo?photo_reference=test&maxwidth=800'],
+    };
+
+    const day: TripDay = {
+      dayNumber: 1,
+      date: new Date('2026-03-02T00:00:00.000Z'),
+      items: [
+        {
+          id: 'meal-1-breakfast',
+          dayNumber: 1,
+          startTime: '08:00',
+          endTime: '08:45',
+          type: 'restaurant',
+          title: 'Petit-déjeuner — Loin du centre',
+          description: '',
+          locationName: 'Loin',
+          latitude: 46.4599,
+          longitude: 6.8441,
+          orderIndex: 0,
+          restaurant: {
+            id: 'r-far',
+            name: 'Loin du centre',
+            address: 'Far',
+            latitude: 46.4599,
+            longitude: 6.8441,
+            rating: 4.0,
+            reviewCount: 12,
+            priceLevel: 2,
+            cuisineTypes: ['restaurant'],
+            dietaryOptions: ['none'],
+            openingHours: {},
+          },
+        },
+        baseActivity('a1', '10:00', '11:00', 46.4592, 6.8446),
+      ],
+    };
+
+    const stats = await fixRestaurantOutliers([day], [nearbyBreakfast], 'Paris', {
+      allowApiFallback: false,
+      breakfastMaxKm: 1.2,
+      hotelCoords: { latitude: 48.8607, longitude: 2.3381 },
+    });
+
+    expect(stats.replaced).toBe(1);
+    const breakfastItem = day.items.find((item) => item.id === 'meal-1-breakfast');
+    expect(breakfastItem?.restaurant?.name).toBe('Boulangerie Hôtel');
+    expect(breakfastItem?.selectionSource).toBe('pool');
+  });
+
   it('rebalances adjacent day load by moving an optional activity', () => {
     const day1: TripDay = {
       dayNumber: 1,

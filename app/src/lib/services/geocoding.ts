@@ -235,6 +235,9 @@ const CITY_CENTERS: Record<string, { lat: number; lng: number }> = {
   'zurich': { lat: 47.3769, lng: 8.5417 }, // Bahnhofstrasse
   'geneva': { lat: 46.2044, lng: 6.1432 }, // Jet d'eau
   'genève': { lat: 46.2044, lng: 6.1432 },
+  'lausanne': { lat: 46.5197, lng: 6.6323 }, // Place de la Palud
+  'vevey': { lat: 46.4628, lng: 6.8423 }, // Place du Marché
+  'montreux': { lat: 46.4312, lng: 6.9107 }, // Promenade
   'prague': { lat: 50.0755, lng: 14.4378 }, // Old Town Square
   'vienna': { lat: 48.2082, lng: 16.3738 }, // Stephansdom
   'vienne': { lat: 48.2082, lng: 16.3738 },
@@ -429,8 +432,42 @@ export async function geocodeAddress(address: string): Promise<GeocodingResult |
 /**
  * Trouve tous les aéroports proches d'une ville (pour chercher les vols)
  */
+function normalizeGeoLookupValue(value: string): string {
+  return value
+    .toLowerCase()
+    .trim()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+function containsWholePhrase(haystack: string, phrase: string): boolean {
+  if (!haystack || !phrase) return false;
+  const escapedPhrase = phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const pattern = new RegExp(`(?:^|\\s)${escapedPhrase}(?:$|\\s)`);
+  return pattern.test(haystack);
+}
+
+function matchesCityAlias(normalizedCity: string, cityTokens: Set<string>, alias: string): boolean {
+  const normalizedAlias = normalizeGeoLookupValue(alias);
+  if (!normalizedAlias) return false;
+
+  // Avoid false positives like "la" matching "lausanne"
+  if (normalizedAlias.length <= 2) {
+    return cityTokens.has(normalizedAlias) || normalizedCity === normalizedAlias;
+  }
+
+  if (normalizedAlias.includes(' ')) {
+    return containsWholePhrase(normalizedCity, normalizedAlias);
+  }
+
+  return cityTokens.has(normalizedAlias) || normalizedCity === normalizedAlias;
+}
+
 export function findNearbyAirports(city: string): AirportInfo[] {
-  const normalizedCity = city.toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const normalizedCity = normalizeGeoLookupValue(city);
+  const cityTokens = new Set(normalizedCity.split(/\s+/).filter(Boolean));
 
   // Régions avec plusieurs aéroports
   const regionAirports: Record<string, string[]> = {
@@ -487,6 +524,7 @@ export function findNearbyAirports(city: string): AirportInfo[] {
     'munich': 'MUC', 'munchen': 'MUC', 'munic': 'MUC',
     'zurich': 'ZRH', 'zuric': 'ZRH',
     'geneva': 'GVA', 'geneve': 'GVA', 'genev': 'GVA',
+    'lausanne': 'GVA', 'vevey': 'GVA', 'montreux': 'GVA', 'lutry': 'GVA',
     // France
     'nice': 'NCE',
     'lyon': 'LYS',
@@ -558,22 +596,22 @@ export function findNearbyAirports(city: string): AirportInfo[] {
 
   // Chercher dans les régions avec plusieurs aéroports
   for (const [key, codes] of Object.entries(regionAirports)) {
-    if (normalizedCity.includes(key) || key.includes(normalizedCity)) {
+    if (matchesCityAlias(normalizedCity, cityTokens, key)) {
       return codes.map(code => AIRPORTS[code]).filter(Boolean);
     }
   }
 
   // Chercher dans les mappings simples
   for (const [key, code] of Object.entries(cityMappings)) {
-    if (normalizedCity.includes(key) || key.includes(normalizedCity)) {
+    if (matchesCityAlias(normalizedCity, cityTokens, key)) {
       return [AIRPORTS[code]].filter(Boolean);
     }
   }
 
   // Recherche directe par ville d'aéroport
   for (const airport of Object.values(AIRPORTS)) {
-    const normalizedAirportCity = airport.city.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-    if (normalizedCity.includes(normalizedAirportCity) || normalizedAirportCity.includes(normalizedCity)) {
+    const normalizedAirportCity = normalizeGeoLookupValue(airport.city);
+    if (matchesCityAlias(normalizedCity, cityTokens, normalizedAirportCity)) {
       return [airport];
     }
   }

@@ -318,6 +318,7 @@ export function isIrrelevantAttraction(activity: ScoredActivity): boolean {
     /\boficina\s+de\s+turism[eo]\b/i,
     /\boffice\s+(?:de\s+)?tourisme\b/i,
     /\btourist\s+(?:info(?:rmation)?|office|center|centre)\b/i,
+    /\b(?:voyages?|travel|reisen|viaggi|viajes)\b/i,
   ];
   // Exception: Viator activities that ARE tours (food tours, bike tours) should NOT be filtered
   const isTourExperience = activity.source === 'viator' ||

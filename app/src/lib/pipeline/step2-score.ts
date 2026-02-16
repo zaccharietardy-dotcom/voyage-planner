@@ -101,7 +101,7 @@ const CONTEXT_FIT_MATRIX: Record<GroupType, Record<ProfileTag, number>> = {
     instagram: 0, deep_culture: +3, active: +2, relaxing: +2, foodie: +2,
   },
   family_without_kids: {
-    kid_friendly: 0, romantic: +2, party: -2, adult_only: -5,
+    kid_friendly: 0, romantic: -1, party: -2, adult_only: -5,
     instagram: 0, deep_culture: +3, active: +2, relaxing: +2, foodie: +3,
   },
 };
@@ -548,7 +548,13 @@ function computeScore(
     }
 
     const geoConfidence = (activity as any).geoConfidence;
-    if (geoConfidence === 'low') viatorBonus -= 2;
+    if (geoConfidence === 'low') {
+      // Unreliable GPS frequently creates bad day geometry and fake proximity.
+      viatorBonus -= 6;
+      if (plusValue.score < 2) {
+        viatorBonus -= 3;
+      }
+    }
     if (geoConfidence === 'medium') viatorBonus -= 0.5;
   }
 

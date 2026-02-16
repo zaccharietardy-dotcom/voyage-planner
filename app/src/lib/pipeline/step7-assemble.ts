@@ -568,6 +568,15 @@ export async function assembleTripSchedule(
   );
   const fallbackInterCityTravelMin = Math.max(120, Math.round((interCityDistanceKm / 90) * 60));
   const hotelSupportsKitchen = accommodationHasKitchen(hotel);
+  const hasAnyFlightPayload = Boolean(flights.outbound || flights.return);
+  const useAirLonghaul = transport?.mode === 'plane' || (!transport && hasAnyFlightPayload);
+  const outboundFlight = useAirLonghaul ? (flights.outbound || null) : null;
+  const returnFlight = useAirLonghaul ? (flights.return || null) : null;
+  const effectiveFlights = { outbound: outboundFlight, return: returnFlight };
+
+  if (!useAirLonghaul && hasAnyFlightPayload) {
+    console.warn('[Pipeline V2] Ignoring fetched flights because selected longhaul mode is not plane');
+  }
 
   let departureAnchorCoords = preferences.homeCoords
     ? { lat: preferences.homeCoords.lat, lng: preferences.homeCoords.lng }
@@ -589,20 +598,20 @@ export async function assembleTripSchedule(
   let selectedOriginAirport = chooseOriginAirportForDeparture({
     preferences,
     airports: data.originAirports || [],
-    outboundFlight: flights.outbound || null,
+    outboundFlight,
     anchorCoords: departureAnchorCoords,
   });
-  if (!selectedOriginAirport && flights.outbound?.departureAirportCode) {
+  if (!selectedOriginAirport && outboundFlight?.departureAirportCode) {
     selectedOriginAirport = {
-      code: flights.outbound.departureAirportCode,
-      name: flights.outbound.departureAirport || flights.outbound.departureAirportCode,
+      code: outboundFlight.departureAirportCode,
+      name: outboundFlight.departureAirport || outboundFlight.departureAirportCode,
       city: preferences.origin,
       country: '',
       latitude: data.originCoords.lat,
       longitude: data.originCoords.lng,
     };
   }
-  const hasOutboundAirTravel = Boolean(flights.outbound) || transport?.mode === 'plane';
+  const hasOutboundAirTravel = Boolean(outboundFlight) || transport?.mode === 'plane';
   const outboundParkingResolution = resolveOutboundAirportParking({
     selectedOriginAirport,
     durationDays: preferences.durationDays,
@@ -891,17 +900,17 @@ export async function assembleTripSchedule(
       groundDepartureMinutes = (durationHours > 4 ? 14 : 15) * 60;
     }
 
-    if (isFirstDay && flights.outbound) {
-      const arrivalMinutes = getLocalTimeMinutes(flights.outbound.arrivalTimeDisplay, flights.outbound.arrivalTime);
+    if (isFirstDay && outboundFlight) {
+      const arrivalMinutes = getLocalTimeMinutes(outboundFlight.arrivalTimeDisplay, outboundFlight.arrivalTime);
       dayStartMinutes = Math.max(dayStartMinutes, arrivalMinutes + 60); // +1h transfer
     } else if (hasOutboundTransport && groundArrivalMinutes !== null) {
       // Ground transport: activities start after arrival
       dayStartMinutes = Math.max(dayStartMinutes, groundArrivalMinutes + 60);
     }
 
-    if (isLastDay && flights.return) {
-      const departureMinutes = getLocalTimeMinutes(flights.return.departureTimeDisplay, flights.return.departureTime);
-      const airportLeadMinutes = getAirportPreDepartureLeadMinutes(flights.return);
+    if (isLastDay && returnFlight) {
+      const departureMinutes = getLocalTimeMinutes(returnFlight.departureTimeDisplay, returnFlight.departureTime);
+      const airportLeadMinutes = getAirportPreDepartureLeadMinutes(returnFlight);
       if (departureMinutes >= 14 * 60) {
         dayStartMinutes = Math.min(dayStartMinutes, 8 * 60);
       }
@@ -1021,18 +1030,18 @@ export async function assembleTripSchedule(
     };
 
     // 1. Fixed items: flights OR ground transport
-    if (isFirstDay && flights.outbound) {
-      const depTime = new Date(flights.outbound.departureTime);
-      const arrTime = new Date(flights.outbound.arrivalTime);
-      const airportLeadMinutes = getAirportPreDepartureLeadMinutes(flights.outbound);
+    if (isFirstDay && outboundFlight) {
+      const depTime = new Date(outboundFlight.departureTime);
+      const arrTime = new Date(outboundFlight.arrivalTime);
+      const airportLeadMinutes = getAirportPreDepartureLeadMinutes(outboundFlight);
       insertHomeToAirportLogistics(depTime, airportLeadMinutes);
       scheduler.insertFixedItem({
         id: `flight-out-${balancedDay.dayNumber}`,
-        title: `Vol ${flights.outbound.flightNumber}`,
+        title: `Vol ${outboundFlight.flightNumber}`,
         type: 'flight',
         startTime: depTime,
         endTime: arrTime,
-        data: flights.outbound,
+        data: outboundFlight,
       });
     } else if (hasOutboundTransport && transport) {
       // Ground transport outbound (train, bus, car)
@@ -1090,19 +1099,19 @@ export async function assembleTripSchedule(
       startTime: Date; endTime: Date; data: any;
     } | null = null;
 
-    if (isLastDay && flights.return) {
-      const flightDeparture = new Date(flights.return.departureTime);
-      const airportLeadMinutes = getAirportPreDepartureLeadMinutes(flights.return);
+    if (isLastDay && returnFlight) {
+      const flightDeparture = new Date(returnFlight.departureTime);
+      const airportLeadMinutes = getAirportPreDepartureLeadMinutes(returnFlight);
       const airportPrepStart = new Date(flightDeparture.getTime() - airportLeadMinutes * 60 * 1000);
 
       returnAirportPrepData = {
         id: `airport-prep-${balancedDay.dayNumber}`,
-        title: `Trajet vers ${flights.return.departureAirportCode || "l'aéroport"} + check-in`,
+        title: `Trajet vers ${returnFlight.departureAirportCode || "l'aéroport"} + check-in`,
         type: 'transport',
         startTime: airportPrepStart,
         endTime: flightDeparture,
         data: {
-          locationName: flights.return.departureAirport || flights.return.departureAirportCode || "Aéroport",
+          locationName: returnFlight.departureAirport || returnFlight.departureAirportCode || "Aéroport",
           description: `Trajet + formalités aéroport (${airportLeadMinutes} min)`,
           estimatedCost: 0,
           transportMode: 'transit',
@@ -1112,11 +1121,11 @@ export async function assembleTripSchedule(
 
       returnTransportData = {
         id: `flight-ret-${balancedDay.dayNumber}`,
-        title: `Vol ${flights.return.flightNumber}`,
+        title: `Vol ${returnFlight.flightNumber}`,
         type: 'flight',
         startTime: flightDeparture,
-        endTime: new Date(flights.return.arrivalTime),
-        data: flights.return,
+        endTime: new Date(returnFlight.arrivalTime),
+        data: returnFlight,
       };
     } else if (hasReturnTransport && transport) {
       const { start: tStart, end: tEnd } = getGroundTransportTimes(transport, dayDate, 'return');
@@ -1191,7 +1200,7 @@ export async function assembleTripSchedule(
     const dinner = dayMeals.find(m => m.mealType === 'dinner');
 
     // Determine which meals to skip based on time constraints
-    const hasReturnTravel = !!(flights.return || hasReturnTransport);
+    const hasReturnTravel = !!(returnFlight || hasReturnTransport);
     // Skip breakfast only if we physically can't have it (arriving after 10am)
     const skipBreakfast = isFirstDay && dayStartHour >= 10;
     // Skip lunch only if the day ends before lunch time (e.g. very early departure)
@@ -1212,13 +1221,13 @@ export async function assembleTripSchedule(
       let actualArrivalMinutes: number | null = null;
 
       // If there's a flight, check-in must be AFTER arrival + transfer
-      if (flights.outbound) {
-        const arrivalHour = flights.outbound.arrivalTimeDisplay
-          ? parseInt(flights.outbound.arrivalTimeDisplay.split(':')[0], 10)
-          : new Date(flights.outbound.arrivalTime).getHours();
-        const arrivalMin = flights.outbound.arrivalTimeDisplay
-          ? parseInt(flights.outbound.arrivalTimeDisplay.split(':')[1], 10)
-          : new Date(flights.outbound.arrivalTime).getMinutes();
+      if (outboundFlight) {
+        const arrivalHour = outboundFlight.arrivalTimeDisplay
+          ? parseInt(outboundFlight.arrivalTimeDisplay.split(':')[0], 10)
+          : new Date(outboundFlight.arrivalTime).getHours();
+        const arrivalMin = outboundFlight.arrivalTimeDisplay
+          ? parseInt(outboundFlight.arrivalTimeDisplay.split(':')[1], 10)
+          : new Date(outboundFlight.arrivalTime).getMinutes();
         actualArrivalMinutes = arrivalHour * 60 + arrivalMin;
         const earliestCheckin = parseTime(dayDate, `${String(arrivalHour).padStart(2, '0')}:${String(arrivalMin).padStart(2, '0')}`);
         // Add 1h for transfer from airport
@@ -1261,9 +1270,9 @@ export async function assembleTripSchedule(
     if (isLastDay && hotel) {
       let latestCheckoutTime = parseTime(dayDate, hotel.checkOutTime || '11:00');
       // If there's a return flight, check-out must be well before departure
-      if (flights.return) {
-        const departureMinutes = getLocalTimeMinutes(flights.return.departureTimeDisplay, flights.return.departureTime);
-        const airportLeadMinutes = getAirportPreDepartureLeadMinutes(flights.return);
+      if (returnFlight) {
+        const departureMinutes = getLocalTimeMinutes(returnFlight.departureTimeDisplay, returnFlight.departureTime);
+        const airportLeadMinutes = getAirportPreDepartureLeadMinutes(returnFlight);
         // Latest checkout aligns with airport transfer/security buffer.
         const latestCheckoutMinutes = Math.max(7 * 60, departureMinutes - airportLeadMinutes);
         const latestCheckout = parseTime(dayDate, minutesToHHMM(latestCheckoutMinutes));
@@ -2902,6 +2911,9 @@ export async function assembleTripSchedule(
       {
         breakfastMaxKm: breakfastRestaurantMaxKm,
         mealMaxKm: mealRestaurantMaxKm,
+        hotelCoords: hotel && hasValidCoords(hotel)
+          ? { latitude: hotel.latitude, longitude: hotel.longitude }
+          : undefined,
       }
     );
     if (outlierFixStats.replaced > 0 || outlierFixStats.flaggedFallback > 0) {
@@ -2928,7 +2940,7 @@ export async function assembleTripSchedule(
   refreshScheduleDiagnostics(days);
 
   // 13. Build cost breakdown
-  const costBreakdown = computeCostBreakdown(days, flights, hotel, preferences, transport, selectedParking);
+  const costBreakdown = computeCostBreakdown(days, effectiveFlights, hotel, preferences, transport, selectedParking);
 
   // 13b. Enrich hotel booking URLs with actual dates and guest count
   const checkinDate = startDate.toISOString().split('T')[0];
@@ -2976,8 +2988,8 @@ export async function assembleTripSchedule(
     days,
     transportOptions: data.transportOptions,
     selectedTransport: transport || undefined,
-    outboundFlight: flights.outbound || undefined,
-    returnFlight: flights.return || undefined,
+    outboundFlight: outboundFlight || undefined,
+    returnFlight: returnFlight || undefined,
     accommodation: hotel || undefined,
     parking: selectedParking || undefined,
     accommodationOptions: accommodationOptions.slice(0, 5),
@@ -4436,16 +4448,27 @@ function hasValidCoords(point?: { latitude?: number; longitude?: number }): poin
 function restaurantAnchorPoints(
   day: TripDay,
   restaurantIndex: number,
-  mealType: 'breakfast' | 'lunch' | 'dinner'
+  mealType: 'breakfast' | 'lunch' | 'dinner',
+  defaultHotelAnchor?: AnchorPoint
 ): AnchorPoint[] {
   const points: AnchorPoint[] = [];
   const sorted = sortItemsByTime(day.items);
-  const hotelAnchor = sorted.find((item) => (item.type === 'checkin' || item.type === 'checkout') && hasValidCoords(item));
+  const hotelAnchorItem = sorted.find((item) => (item.type === 'checkin' || item.type === 'checkout') && hasValidCoords(item));
+  const hotelAnchor = hotelAnchorItem && hasValidCoords(hotelAnchorItem)
+    ? { latitude: hotelAnchorItem.latitude, longitude: hotelAnchorItem.longitude }
+    : defaultHotelAnchor;
   const firstActivity = sorted.find((item) => item.type === 'activity' && hasValidCoords(item));
 
   if (mealType === 'breakfast') {
-    if (hotelAnchor && hasValidCoords(hotelAnchor)) points.push({ latitude: hotelAnchor.latitude, longitude: hotelAnchor.longitude });
-    if (firstActivity && hasValidCoords(firstActivity)) points.push({ latitude: firstActivity.latitude, longitude: firstActivity.longitude });
+    // Breakfast should be anchored to hotel area when known.
+    // Using first activity as a co-anchor here can hide hotel-distance outliers.
+    if (hotelAnchor) {
+      points.push({ latitude: hotelAnchor.latitude, longitude: hotelAnchor.longitude });
+      return points;
+    }
+    if (firstActivity && hasValidCoords(firstActivity)) {
+      points.push({ latitude: firstActivity.latitude, longitude: firstActivity.longitude });
+    }
     return points;
   }
 
@@ -4465,7 +4488,7 @@ function restaurantAnchorPoints(
   }
 
   if (points.length === 0) {
-    if (hotelAnchor && hasValidCoords(hotelAnchor)) points.push({ latitude: hotelAnchor.latitude, longitude: hotelAnchor.longitude });
+    if (hotelAnchor) points.push({ latitude: hotelAnchor.latitude, longitude: hotelAnchor.longitude });
     if (firstActivity && hasValidCoords(firstActivity)) points.push({ latitude: firstActivity.latitude, longitude: firstActivity.longitude });
   }
 
@@ -4536,11 +4559,19 @@ export async function fixRestaurantOutliers(
   days: TripDay[],
   altPool: Restaurant[],
   destination: string,
-  options: { allowApiFallback?: boolean; breakfastMaxKm?: number; mealMaxKm?: number } = {}
+  options: {
+    allowApiFallback?: boolean;
+    breakfastMaxKm?: number;
+    mealMaxKm?: number;
+    hotelCoords?: AnchorPoint;
+  } = {}
 ): Promise<RestaurantFixStats> {
   const allowApiFallback = options.allowApiFallback ?? true;
   const breakfastMaxKm = options.breakfastMaxKm || DEFAULT_BREAKFAST_RESTAURANT_MAX_KM;
   const mealMaxKm = options.mealMaxKm || DEFAULT_MEAL_RESTAURANT_MAX_KM;
+  const defaultHotelAnchor = options.hotelCoords && hasValidCoords(options.hotelCoords)
+    ? options.hotelCoords
+    : undefined;
   const stats: RestaurantFixStats = { replaced: 0, flaggedFallback: 0 };
   let apiCalls = 0;
   const MAX_API_CALLS = 8;
@@ -4557,7 +4588,7 @@ export async function fixRestaurantOutliers(
 
       const mealType = getRestaurantMealType(item);
       const maxDistanceKm = mealType === 'breakfast' ? breakfastMaxKm : mealMaxKm;
-      const anchors = restaurantAnchorPoints(day, idx, mealType);
+      const anchors = restaurantAnchorPoints(day, idx, mealType, defaultHotelAnchor);
       const currentName = normalizeRestaurantName(item.restaurant?.name || item.locationName || stripMealPrefix(item.title));
       const duplicateInDay = currentName.length > 0 && usedNames.has(currentName);
       const currentDistanceKm = minDistanceToAnchorsKm(item, anchors);

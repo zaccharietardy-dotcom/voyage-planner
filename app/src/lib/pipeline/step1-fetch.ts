@@ -12,7 +12,7 @@ import { getCityCenterCoordsAsync, findNearbyAirportsAsync } from '../services/g
 import { compareTransportOptions } from '../services/transport';
 import { searchAttractionsMultiQuery, searchMustSeeAttractions, searchRestaurantsWithSerpApi } from '../services/serpApiPlaces';
 import { searchAttractionsOverpass } from '../services/overpassAttractions';
-import { searchViatorActivities, getViatorProductCoordinates } from '../services/viator';
+import { searchViatorActivities, getViatorProductCoordinatesBulk } from '../services/viator';
 import { findKnownViatorProduct } from '../services/viatorKnownProducts';
 import { searchTripAdvisorRestaurants } from '../services/tripadvisor';
 import { searchHotels } from '../services/hotels';
@@ -215,17 +215,32 @@ export async function fetchAllData(preferences: TripPreferences, onEvent?: OnPip
 
   // ── Resolve GPS for Viator activities (they default to city-center coords) ──
   const viatorEstimated = viatorActivities.filter(
-    (a: Attraction) => a.dataReliability === 'estimated'
+    (a: Attraction) =>
+      a.dataReliability === 'estimated' &&
+      !(a.qualityFlags || []).includes('viator_low_plus_value')
   );
   if (viatorEstimated.length > 0) {
     console.log(`[Pipeline V2] Resolving GPS for ${viatorEstimated.length} Viator activities...`);
+
+    const viatorProductCodes = Array.from(
+      new Set(
+        viatorEstimated
+          .map((activity: Attraction) => extractViatorProductCode(activity))
+          .filter((code): code is string => Boolean(code))
+      )
+    );
+
+    const bulkCoordinates = viatorProductCodes.length > 0
+      ? await getViatorProductCoordinatesBulk(viatorProductCodes, destCoords)
+      : new Map<string, { lat: number; lng: number }>();
+
     await Promise.allSettled(
       viatorEstimated.map(async (activity: Attraction) => {
         try {
           // 1) Try Viator product details first (true source coordinates when available).
           const productCode = extractViatorProductCode(activity);
           if (productCode) {
-            const viatorCoords = await getViatorProductCoordinates(productCode, destCoords);
+            const viatorCoords = bulkCoordinates.get(productCode);
             if (viatorCoords) {
               activity.latitude = viatorCoords.lat;
               activity.longitude = viatorCoords.lng;
@@ -249,21 +264,31 @@ export async function fetchAllData(preferences: TripPreferences, onEvent?: OnPip
             return;
           }
 
-          // 3) Fallback geocoding from cleaned candidate queries.
+          // 3) Fallback geocoding from a cleaned candidate query.
+          // Important: keep SerpAPI geocoding disabled for Viator fallback to avoid expensive
+          // per-activity paid requests when product/location coordinates are unavailable.
           const candidates = buildViatorLocationCandidates(activity.name, destination);
-          for (const candidate of candidates) {
-            const coords = await resolveCoordinates(candidate, destination, destCoords, 'attraction');
-            if (!coords) continue;
-            activity.latitude = coords.lat;
-            activity.longitude = coords.lng;
-            // Fallback geocoding improves map placement but is less reliable than Viator product coordinates.
-            if (activity.dataReliability !== 'verified') {
-              activity.dataReliability = 'estimated';
+          const fallbackCandidate = candidates[0];
+          if (fallbackCandidate) {
+            const coords = await resolveCoordinates(
+              fallbackCandidate,
+              destination,
+              destCoords,
+              'attraction',
+              { allowPaidFallback: false }
+            );
+            if (coords) {
+              activity.latitude = coords.lat;
+              activity.longitude = coords.lng;
+              // Fallback geocoding improves map placement but is less reliable than Viator product coordinates.
+              if (activity.dataReliability !== 'verified') {
+                activity.dataReliability = 'estimated';
+              }
+              activity.geoSource = 'geocode';
+              activity.geoConfidence = 'medium';
+              activity.qualityFlags = (activity.qualityFlags || []).filter((flag) => flag !== 'viator_city_center_fallback');
+              return;
             }
-            activity.geoSource = 'geocode';
-            activity.geoConfidence = 'medium';
-            activity.qualityFlags = (activity.qualityFlags || []).filter((flag) => flag !== 'viator_city_center_fallback');
-            return;
           }
         } catch {
           // keep city-center fallback
@@ -330,9 +355,9 @@ export async function fetchAllData(preferences: TripPreferences, onEvent?: OnPip
   let flightAlternatives = { outbound: [] as any[], return: [] as any[] };
 
   const bestTransport = transportOptions.find((t: any) => t.recommended) || transportOptions[0];
-  const shouldSearchFlights = (bestTransport as any)?.mode === 'plane'
-    || preferences.transport === 'plane'
-    || preferences.transport === 'optimal'; // optimal often means plane for long distances
+  const selectedTransportMode = (bestTransport as any)?.mode || preferences.transport;
+  const shouldSearchFlights = selectedTransportMode === 'plane'
+    || preferences.transport === 'plane';
   if (shouldSearchFlights) {
     const FLIGHT_TIMEOUT = 20_000; // 20s max for flight search
     const T_FLIGHTS = Date.now();

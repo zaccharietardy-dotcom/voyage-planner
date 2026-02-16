@@ -165,4 +165,37 @@ describe('step2-score interest curation', () => {
     expect(genericPrivateTours.length).toBeLessThanOrEqual(1);
     expect(selected.some((activity) => activity.id === 'viator-workshop-1')).toBe(true);
   });
+
+  it('filters travel agencies from attraction candidates', () => {
+    const activities: Attraction[] = [
+      attraction({
+        id: 'valid-1',
+        name: 'Musée cantonal des Beaux-Arts de Lausanne',
+        rating: 4.5,
+        reviewCount: 5000,
+        latitude: 46.5179789,
+        longitude: 6.6254456,
+      }),
+      attraction({
+        id: 'agency-1',
+        name: 'Sol Voyages Vevey S.à r.l.',
+        description: 'Agence de voyage locale',
+        rating: 5,
+        reviewCount: 10,
+        latitude: 46.4592309,
+        longitude: 6.8446253,
+      }),
+    ];
+
+    const lausanneData = createFetchedData(activities);
+    lausanneData.destCoords = { lat: 46.5197, lng: 6.6323 };
+    const selectedInLausanne = scoreAndSelectActivities(lausanneData, {
+      ...createPreferences(),
+      destination: 'Lausanne',
+      mustSee: '',
+    });
+
+    expect(selectedInLausanne.some((activity) => activity.id === 'agency-1')).toBe(false);
+    expect(selectedInLausanne.some((activity) => activity.id === 'valid-1')).toBe(true);
+  });
 });
