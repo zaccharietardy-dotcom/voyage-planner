@@ -6,6 +6,7 @@ import { X, Play, Pause, SkipForward, Gauge } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { Trip } from '@/lib/types';
 import { TripMap } from '@/components/trip/TripMap';
+import { isNativeApp } from '@/lib/mobile/runtime';
 
 const GOOGLE_PHOTOREALISTIC_ION_ASSET_ID = 2275207;
 
@@ -388,6 +389,11 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
 
     async function initCesium() {
       try {
+        if (isNativeApp()) {
+          setError('La vue 3D est désactivée dans l’app mobile pour la stabilité. Carte 2D affichée à la place.');
+          return;
+        }
+
         const safari = isSafari();
         console.info(`[TripFlythrough] [1/6] Init start (safari=${safari})`);
 
