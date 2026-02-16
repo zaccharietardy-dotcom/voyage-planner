@@ -267,8 +267,7 @@ export async function fetchAllData(preferences: TripPreferences, onEvent?: OnPip
               fallbackCandidate,
               destination,
               destCoords,
-              'attraction',
-              { allowPaidFallback: false }
+              'attraction'
             );
             if (coords) {
               activity.latitude = coords.lat;
