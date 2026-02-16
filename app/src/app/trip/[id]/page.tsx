@@ -1188,17 +1188,6 @@ export default function TripPage() {
                 <span className="hidden sm:inline text-xs">PDF</span>
               </Button>
 
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-1.5 h-8 shrink-0 lg:hidden"
-                onClick={() => setMainTab('carte')}
-                title="Afficher la carte"
-              >
-                <MapPinned className="h-3.5 w-3.5" />
-                <span className="text-xs">Carte</span>
-              </Button>
-
               {canOwnerEdit && (
                 <Button
                   variant="outline"
@@ -1238,41 +1227,41 @@ export default function TripPage() {
                     <span className="text-xs">Actions</span>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuContent align="end" className="w-56 z-[120]">
                   {isOwner && (
-                    <DropdownMenuItem onClick={() => setShowShareDialog(true)}>
+                    <DropdownMenuItem onSelect={() => setShowShareDialog(true)}>
                       <Share2 className="h-4 w-4" />
                       Partager le voyage
                     </DropdownMenuItem>
                   )}
                   {useCollaborativeMode && (
-                    <DropdownMenuItem onClick={() => setShowCollabPanel(true)}>
+                    <DropdownMenuItem onSelect={() => setShowCollabPanel(true)}>
                       <GitPullRequest className="h-4 w-4" />
                       Collaboration
                     </DropdownMenuItem>
                   )}
                   {!canOwnerEdit && useCollaborativeMode && (
-                    <DropdownMenuItem onClick={() => setShowCloneModal(true)}>
+                    <DropdownMenuItem onSelect={() => setShowCloneModal(true)}>
                       <Copy className="h-4 w-4" />
                       Cloner ce voyage
                     </DropdownMenuItem>
                   )}
-                  <DropdownMenuItem onClick={() => setShowFlythrough(true)}>
+                  <DropdownMenuItem onSelect={() => setShowFlythrough(true)}>
                     <Globe className="h-4 w-4" />
                     Vue 3D
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleExportPdf}>
+                  <DropdownMenuItem onSelect={handleExportPdf}>
                     <Download className="h-4 w-4" />
                     Exporter en PDF
                   </DropdownMenuItem>
                   {canOwnerEdit && (
-                    <DropdownMenuItem onClick={() => setShowImportPlaces(true)}>
+                    <DropdownMenuItem onSelect={() => setShowImportPlaces(true)}>
                       <Upload className="h-4 w-4" />
                       Importer des lieux
                     </DropdownMenuItem>
                   )}
                   {canOwnerEdit && (
-                    <DropdownMenuItem onClick={() => setShowChatPanel(true)}>
+                    <DropdownMenuItem onSelect={() => setShowChatPanel(true)}>
                       <MessageCircle className="h-4 w-4" />
                       Assistant IA
                     </DropdownMenuItem>
@@ -1280,7 +1269,7 @@ export default function TripPage() {
                   {canOwnerEdit && (
                     <>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => handleExportDebug(true)}>
+                      <DropdownMenuItem onSelect={() => handleExportDebug(true)}>
                         <Bug className="h-4 w-4" />
                         Export debug
                       </DropdownMenuItem>
