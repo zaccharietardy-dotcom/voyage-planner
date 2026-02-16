@@ -187,6 +187,47 @@ function isHotelBoundaryTransportItem(item: TripItem): boolean {
     (item.id.startsWith('hotel-depart-') || item.id.startsWith('hotel-return-'));
 }
 
+type TransportRegenerateMode = Trip['preferences']['transport'];
+
+function getRequestedTransportModeForRegeneration(trip: Trip): TransportRegenerateMode {
+  const selectedMode = trip.selectedTransport?.mode;
+  if (
+    selectedMode === 'plane'
+    || selectedMode === 'train'
+    || selectedMode === 'car'
+    || selectedMode === 'bus'
+  ) {
+    return selectedMode;
+  }
+  return trip.preferences.transport || 'optimal';
+}
+
+function toTripPreferenceTransportMode(mode: string | undefined): Trip['preferences']['transport'] {
+  if (mode === 'plane' || mode === 'train' || mode === 'car' || mode === 'bus' || mode === 'optimal') {
+    return mode;
+  }
+  return 'optimal';
+}
+
+function resolveSelectedTransportFromGeneratedTrip(
+  generatedTrip: Trip,
+  requestedMode: TransportRegenerateMode,
+): Trip['selectedTransport'] {
+  const options = generatedTrip.transportOptions || [];
+
+  const byMode = options.find((option) => option.mode === requestedMode);
+  if (byMode) return byMode;
+
+  const byGeneratedId = generatedTrip.selectedTransport
+    ? options.find((option) => option.id === generatedTrip.selectedTransport?.id)
+    : undefined;
+  if (byGeneratedId) return byGeneratedId;
+
+  return generatedTrip.selectedTransport
+    || options.find((option) => option.recommended)
+    || options[0];
+}
+
 export default function TripPage() {
   const params = useParams();
   const router = useRouter();
@@ -445,20 +486,24 @@ export default function TripPage() {
     }
     setRegenerating(true);
     try {
-      const selectedMode = trip.selectedTransport?.mode;
-      const regenerateTransport: Trip['preferences']['transport'] =
-        selectedMode === 'plane' || selectedMode === 'train' || selectedMode === 'car' || selectedMode === 'bus'
-          ? selectedMode
-          : trip.preferences.transport;
+      const requestedMode = getRequestedTransportModeForRegeneration(trip);
 
       const newTrip = await generateTripStream({
         ...trip.preferences,
-        transport: regenerateTransport,
+        transport: requestedMode,
       });
-      newTrip.selectedTransport = trip.selectedTransport;
-      saveTrip(newTrip);
+      const resolvedSelectedTransport = resolveSelectedTransportFromGeneratedTrip(newTrip, requestedMode);
+      const updatedTrip: Trip = {
+        ...newTrip,
+        selectedTransport: resolvedSelectedTransport,
+        preferences: {
+          ...newTrip.preferences,
+          transport: toTripPreferenceTransportMode(resolvedSelectedTransport?.mode || requestedMode),
+        },
+      };
+      saveTrip(updatedTrip);
       setTransportChanged(false);
-      setOriginalTransportId(newTrip.selectedTransport?.id);
+      setOriginalTransportId(updatedTrip.selectedTransport?.id);
     } catch (error) {
       console.error('Erreur régénération:', error);
       alert('Erreur lors de la régénération du voyage');
@@ -806,16 +851,29 @@ export default function TripPage() {
     }
     setRegenerating(true);
     try {
+      const requestedMode = getRequestedTransportModeForRegeneration(trip);
       const newTrip = await generateTripStream({
         ...trip.preferences,
+        transport: requestedMode,
         regenerateDay: dayNumber,
       });
+      const resolvedSelectedTransport = resolveSelectedTransportFromGeneratedTrip(newTrip, requestedMode);
       const updatedDays = trip.days.map((day) =>
         day.dayNumber === dayNumber
           ? newTrip.days.find((d: TripDay) => d.dayNumber === dayNumber) || day
           : day
       );
-      const updatedTrip = { ...trip, days: updatedDays, updatedAt: new Date() };
+      const updatedTrip: Trip = {
+        ...trip,
+        days: updatedDays,
+        transportOptions: newTrip.transportOptions || trip.transportOptions,
+        selectedTransport: resolvedSelectedTransport || trip.selectedTransport,
+        preferences: {
+          ...trip.preferences,
+          transport: toTripPreferenceTransportMode(resolvedSelectedTransport?.mode || requestedMode),
+        },
+        updatedAt: new Date(),
+      };
       saveTrip(updatedTrip);
       toast.success(`Jour ${dayNumber} régénéré`);
     } catch (error) {
@@ -834,10 +892,13 @@ export default function TripPage() {
     }
     setRegenerating(true);
     try {
+      const requestedMode = getRequestedTransportModeForRegeneration(trip);
       const newTrip = await generateTripStream({
         ...trip.preferences,
+        transport: requestedMode,
         regenerateRestaurants: true,
       });
+      const resolvedSelectedTransport = resolveSelectedTransportFromGeneratedTrip(newTrip, requestedMode);
       const updatedDays = trip.days.map((day, dayIdx) => ({
         ...day,
         items: day.items.map((item) => {
@@ -851,7 +912,17 @@ export default function TripPage() {
           return item;
         }),
       }));
-      const updatedTrip = { ...trip, days: updatedDays, updatedAt: new Date() };
+      const updatedTrip: Trip = {
+        ...trip,
+        days: updatedDays,
+        transportOptions: newTrip.transportOptions || trip.transportOptions,
+        selectedTransport: resolvedSelectedTransport || trip.selectedTransport,
+        preferences: {
+          ...trip.preferences,
+          transport: toTripPreferenceTransportMode(resolvedSelectedTransport?.mode || requestedMode),
+        },
+        updatedAt: new Date(),
+      };
       saveTrip(updatedTrip);
       toast.success('Restaurants régénérés');
     } catch (error) {
@@ -1119,7 +1190,15 @@ export default function TripPage() {
                     options={trip.transportOptions}
                     selectedId={trip.selectedTransport?.id}
                     onSelect={(option) => {
-                      const updatedTrip = { ...trip, selectedTransport: option, updatedAt: new Date() };
+                      const updatedTrip: Trip = {
+                        ...trip,
+                        selectedTransport: option,
+                        preferences: {
+                          ...trip.preferences,
+                          transport: toTripPreferenceTransportMode(option.mode),
+                        },
+                        updatedAt: new Date(),
+                      };
                       saveTrip(updatedTrip);
                       setTransportChanged(option.id !== originalTransportId);
                     }}
@@ -1380,7 +1459,7 @@ export default function TripPage() {
             {/* Transport changed warning */}
             {transportChanged && canOwnerEdit && (
               <div className="mt-2 flex items-center justify-between gap-3 rounded-lg border border-amber-200 bg-amber-50 p-2 text-sm dark:border-amber-700 dark:bg-amber-900/20">
-                <p className="text-xs text-amber-800 dark:text-amber-300">Transport modifié — régénérez pour mettre à jour les horaires</p>
+                <p className="text-xs text-amber-800 dark:text-amber-300">Transport modifié — régénérez pour recalculer horaires et liens</p>
                 <Button size="sm" className="h-7 bg-amber-600 text-xs hover:bg-amber-700" onClick={handleRegenerateTrip} disabled={regenerating}>
                   {regenerating ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <RefreshCw className="mr-1 h-3 w-3" />}
                   Régénérer
