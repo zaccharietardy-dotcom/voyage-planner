@@ -54,7 +54,7 @@ export function ItineraryConnector({
       href={googleMapsUrl}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-center gap-2 py-1.5 px-3 my-1 ml-2 rounded-md text-xs text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-colors cursor-pointer group"
+      className="flex items-center gap-2 py-2 px-3 my-1.5 ml-2 rounded-lg border border-dashed border-border/50 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/40 hover:border-primary/30 transition-all cursor-pointer group"
     >
       <ModeIcon className="h-3.5 w-3.5 shrink-0 opacity-50 group-hover:opacity-80 transition-opacity" />
 

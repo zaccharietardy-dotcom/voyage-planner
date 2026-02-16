@@ -160,6 +160,7 @@
       radial-gradient(circle at 85% 5%, rgba(212, 168, 83, 0.12), transparent 35%);
     background-attachment: fixed;
     -webkit-tap-highlight-color: transparent;
+    -webkit-overflow-scrolling: touch;
   }
 
   /* Transition fluide pour le changement de theme */
@@ -168,9 +169,8 @@
   }
 
   @media (pointer: coarse) {
-    html,
-    body {
-      overscroll-behavior-y: contain;
+    img, video, iframe {
+      max-width: 100%;
     }
   }
 
@@ -199,6 +199,19 @@
   }
   .glow-gold-strong {
     box-shadow: 0 0 40px rgba(212, 168, 83, 0.5);
+  }
+
+  .scroll-snap-x {
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scroll-padding: 0 1rem;
+  }
+  .scroll-snap-x > * {
+    scroll-snap-align: center;
+  }
+
+  .touch-manipulation {
+    touch-action: manipulation;
   }
 
   .premium-surface {

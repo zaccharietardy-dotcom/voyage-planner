@@ -195,8 +195,7 @@ export function DayTimeline({
         {onAddItem && (
           <Button
             variant="outline"
-            size="sm"
-            className="gap-1"
+            className="gap-1.5 h-10 px-4"
             onClick={() => onAddItem(day.dayNumber)}
           >
             <Plus className="h-4 w-4" />

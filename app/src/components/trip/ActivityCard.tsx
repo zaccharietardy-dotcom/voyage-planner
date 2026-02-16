@@ -277,7 +277,7 @@ export function ActivityCard({
   return (
     <Card
       className={cn(
-        'relative group transition-all duration-200 cursor-pointer overflow-hidden',
+        'relative group transition-all duration-200 cursor-pointer overflow-hidden active:scale-[0.98]',
         'border-border/60 hover:border-primary/40 hover:shadow-lg',
         isSelected && 'ring-2 ring-primary/80 border-primary shadow-lg',
         isDragging && 'shadow-xl rotate-1 scale-[1.03]',

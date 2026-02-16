@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { Trip, TripItem, TripDay, Accommodation, GROUP_TYPE_LABELS, ACTIVITY_LABELS } from '@/lib/types';
@@ -27,7 +27,11 @@ import {
   MapPinned,
   MoreHorizontal,
   MessageCircle,
+  Maximize2,
+  Minimize2,
+  GripHorizontal,
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { generateHotelSearchLinks } from '@/lib/services/linkGenerator';
@@ -232,6 +236,10 @@ export default function TripPage() {
   const [showImportPlaces, setShowImportPlaces] = useState(false);
   const [showLiveDashboard, setShowLiveDashboard] = useState(false);
   const [showMobileActions, setShowMobileActions] = useState(false);
+  const [mobileMapHeight, setMobileMapHeight] = useState(30); // vh percentage for mobile split view
+  const [mobileMapFullscreen, setMobileMapFullscreen] = useState(false);
+  const prevDayRef = useRef('1');
+  const dayDirection = useRef(0);
 
   const [isDesktop, setIsDesktop] = useState(false);
   useEffect(() => {
@@ -240,6 +248,35 @@ export default function TripPage() {
     const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
     mql.addEventListener('change', handler);
     return () => mql.removeEventListener('change', handler);
+  }, []);
+
+  // Track day direction for slide animations
+  const handleDayChange = useCallback((newDay: string) => {
+    const prev = parseInt(prevDayRef.current);
+    const next = parseInt(newDay);
+    dayDirection.current = next > prev ? 1 : next < prev ? -1 : 0;
+    prevDayRef.current = newDay;
+    setActiveDay(newDay);
+  }, []);
+
+  // Drag handler for mobile split view resize
+  const dragStartY = useRef(0);
+  const dragStartHeight = useRef(30);
+  const handleDragStart = useCallback((e: React.PointerEvent) => {
+    dragStartY.current = e.clientY;
+    dragStartHeight.current = mobileMapHeight;
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+  }, [mobileMapHeight]);
+
+  const handleDragMove = useCallback((e: React.PointerEvent) => {
+    if (!dragStartY.current) return;
+    const deltaVh = ((e.clientY - dragStartY.current) / window.innerHeight) * 100;
+    const newHeight = Math.min(55, Math.max(15, dragStartHeight.current + deltaVh));
+    setMobileMapHeight(newHeight);
+  }, []);
+
+  const handleDragEnd = useCallback(() => {
+    dragStartY.current = 0;
   }, []);
 
   const trip = useCollaborativeMode ? collaborativeTrip?.data : localTrip;
@@ -1356,22 +1393,94 @@ export default function TripPage() {
 
       {/* Main content */}
       <div className="container mx-auto px-4 py-6">
-        {/* Mobile layout */}
+        {/* Mobile layout - Split View: Map on top + Planning below */}
         <div className="lg:hidden">
-          <Tabs value={mainTab} onValueChange={setMainTab}>
-            <TabsList className="mb-2 flex w-full gap-1 overflow-x-auto rounded-xl border border-[#1e3a5f]/12 bg-background/85 p-1 backdrop-blur-xl scrollbar-hide" data-tour="tabs">
-              {liveState && <TabsTrigger value="live" className="shrink-0 px-3 text-xs bg-gradient-to-r from-purple-500 to-blue-500 text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600">🔴 Live</TabsTrigger>}
-              <TabsTrigger value="planning" className="shrink-0 px-3 text-xs">Planning</TabsTrigger>
-              <TabsTrigger value="reserver" className="shrink-0 px-3 text-xs">Réserver</TabsTrigger>
-              <TabsTrigger value="carte" className="shrink-0 px-3 text-xs">Carte</TabsTrigger>
-              {user && <TabsTrigger value="photos" className="shrink-0 px-3 text-xs">Photos</TabsTrigger>}
-              {user && <TabsTrigger value="depenses" className="shrink-0 px-3 text-xs">Dépenses</TabsTrigger>}
-              <TabsTrigger value="infos" className="shrink-0 px-3 text-xs">Infos</TabsTrigger>
-            </TabsList>
-            <div className="mb-3 flex items-center justify-end gap-1 text-[11px] text-muted-foreground">
-              <ChevronsLeftRight className="h-3 w-3" />
-              Faites glisser les onglets
+          {/* Mini map - always visible on planning tab, fullscreen on carte tab */}
+          {mainTab !== 'carte' && !mobileMapFullscreen && (
+            <div className="mb-2">
+              <div
+                className="relative rounded-2xl overflow-hidden border border-[#1e3a5f]/15 shadow-sm"
+                style={{ height: `${mobileMapHeight}vh` }}
+              >
+                <TripMap
+                  items={editMode ? allItems : activeDayItems}
+                  selectedItemId={selectedItemId}
+                  hoveredItemId={hoveredItemId || undefined}
+                  onItemClick={handleSelectItem}
+                  mapNumbers={itemMapNumbers}
+                  isVisible={true}
+                  importedPlaces={trip.importedPlaces?.items}
+                  flightInfo={{
+                    departureCity: trip.preferences.origin,
+                    departureCoords: trip.preferences.originCoords,
+                    arrivalCity: trip.preferences.destination,
+                    arrivalCoords: trip.preferences.destinationCoords,
+                    stopoverCities: trip.outboundFlight?.stopCities,
+                  }}
+                />
+                {/* Fullscreen toggle */}
+                <button
+                  className="absolute top-2 right-2 z-[1000] flex h-8 w-8 items-center justify-center rounded-lg bg-background/90 shadow-md backdrop-blur-sm border border-border/50 active:scale-95 transition-transform"
+                  onClick={() => setMobileMapFullscreen(true)}
+                >
+                  <Maximize2 className="h-4 w-4" />
+                </button>
+              </div>
+              {/* Drag handle to resize */}
+              <div
+                className="flex items-center justify-center py-1 cursor-row-resize touch-none select-none"
+                onPointerDown={handleDragStart}
+                onPointerMove={handleDragMove}
+                onPointerUp={handleDragEnd}
+                onPointerCancel={handleDragEnd}
+              >
+                <div className="flex items-center gap-1 rounded-full bg-muted/80 px-4 py-1">
+                  <GripHorizontal className="h-4 w-4 text-muted-foreground/60" />
+                </div>
+              </div>
             </div>
+          )}
+
+          {/* Fullscreen map overlay */}
+          {mobileMapFullscreen && (
+            <div className="fixed inset-0 z-50 bg-background">
+              <div className="h-full w-full">
+                <TripMap
+                  items={editMode ? allItems : activeDayItems}
+                  selectedItemId={selectedItemId}
+                  hoveredItemId={hoveredItemId || undefined}
+                  onItemClick={handleSelectItem}
+                  mapNumbers={itemMapNumbers}
+                  isVisible={true}
+                  importedPlaces={trip.importedPlaces?.items}
+                  flightInfo={{
+                    departureCity: trip.preferences.origin,
+                    departureCoords: trip.preferences.originCoords,
+                    arrivalCity: trip.preferences.destination,
+                    arrivalCoords: trip.preferences.destinationCoords,
+                    stopoverCities: trip.outboundFlight?.stopCities,
+                  }}
+                />
+              </div>
+              <button
+                className="absolute top-4 right-4 z-[1000] flex h-10 w-10 items-center justify-center rounded-xl bg-background/90 shadow-lg backdrop-blur-sm border border-border/50 active:scale-95 transition-transform"
+                onClick={() => setMobileMapFullscreen(false)}
+              >
+                <Minimize2 className="h-5 w-5" />
+              </button>
+            </div>
+          )}
+
+          <Tabs value={mainTab} onValueChange={setMainTab}>
+            <TabsList className="mb-2 flex w-full gap-1 overflow-x-auto scroll-snap-x rounded-xl border border-[#1e3a5f]/12 bg-background/85 p-1 backdrop-blur-xl scrollbar-hide" data-tour="tabs">
+              {liveState && <TabsTrigger value="live" className="shrink-0 px-4 py-2 text-sm bg-gradient-to-r from-purple-500 to-blue-500 text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600">🔴 Live</TabsTrigger>}
+              <TabsTrigger value="planning" className="shrink-0 px-4 py-2 text-sm">Planning</TabsTrigger>
+              <TabsTrigger value="reserver" className="shrink-0 px-4 py-2 text-sm">Réserver</TabsTrigger>
+              <TabsTrigger value="carte" className="shrink-0 px-4 py-2 text-sm">Carte</TabsTrigger>
+              {user && <TabsTrigger value="photos" className="shrink-0 px-4 py-2 text-sm">Photos</TabsTrigger>}
+              {user && <TabsTrigger value="depenses" className="shrink-0 px-4 py-2 text-sm">Dépenses</TabsTrigger>}
+              <TabsTrigger value="infos" className="shrink-0 px-4 py-2 text-sm">Infos</TabsTrigger>
+            </TabsList>
 
             {liveState && (
               <TabsContent value="live">
@@ -1379,11 +1488,10 @@ export default function TripPage() {
                   liveState={liveState}
                   trip={trip}
                   onNavigateToActivity={(activityId) => {
-                    // Find the activity and open it in the map
                     const item = trip.days.flatMap(d => d.items).find(i => i.id === activityId);
                     if (item) {
                       setSelectedItemId(activityId);
-                      setMainTab('carte');
+                      setMobileMapFullscreen(true);
                     }
                   }}
                 />
@@ -1391,31 +1499,18 @@ export default function TripPage() {
             )}
 
             <TabsContent value="planning">
-              <div className="mb-3 grid grid-cols-2 gap-2">
-                <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs" onClick={() => setMainTab('carte')}>
-                  <MapPinned className="h-3.5 w-3.5" />
-                  Voir la carte
-                </Button>
-                <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs" onClick={() => setMainTab('reserver')}>
-                  <Download className="h-3.5 w-3.5" />
-                  Réserver
-                </Button>
-              </div>
-
               <div className="space-y-0 rounded-2xl border border-[#1e3a5f]/10 bg-background/65 p-3 shadow-sm">
-                {/* Hotel selector moved to check-in in timeline */}
-
                 {/* Planning view toggle */}
                 <div className="flex items-center justify-between mb-3">
                   <h2 className="font-semibold">Itinéraire</h2>
-                  <div className="flex items-center gap-0.5 bg-muted rounded-md p-0.5" data-tour="view-toggle">
-                    <Button variant={planningView === 'timeline' ? 'default' : 'ghost'} size="sm" className="h-6 text-xs px-2" onClick={() => setPlanningView('timeline')}>Timeline</Button>
-                    <Button variant={planningView === 'calendar' ? 'default' : 'ghost'} size="sm" className="h-6 text-xs px-2" onClick={() => setPlanningView('calendar')}>Calendrier</Button>
+                  <div className="flex items-center gap-0.5 bg-muted rounded-lg p-0.5" data-tour="view-toggle">
+                    <Button variant={planningView === 'timeline' ? 'default' : 'ghost'} size="sm" className="h-9 text-sm px-3" onClick={() => setPlanningView('timeline')}>Timeline</Button>
+                    <Button variant={planningView === 'calendar' ? 'default' : 'ghost'} size="sm" className="h-9 text-sm px-3" onClick={() => setPlanningView('calendar')}>Calendrier</Button>
                   </div>
                 </div>
 
                 {planningView === 'calendar' ? (
-                  <div className="h-[70vh]">
+                  <div className="h-[60vh]">
                     <CalendarView
                       days={trip.days}
                       isEditable={canOwnerEdit}
@@ -1443,59 +1538,69 @@ export default function TripPage() {
                     hotelSelectorData={hotelSelectorData}
                   />
                 ) : !editMode ? (
-                  <Tabs value={activeDay} onValueChange={setActiveDay}>
-                    <TabsList className="mb-1 flex h-auto w-full flex-nowrap gap-1 overflow-x-auto bg-transparent p-0 scrollbar-hide">
+                  <div>
+                    {/* Day pills with scroll snap */}
+                    <div className="mb-2 flex h-auto w-full flex-nowrap gap-1.5 overflow-x-auto scroll-snap-x bg-transparent p-0.5 pb-2 scrollbar-hide">
                       {trip.days.map((day) => (
-                        <TabsTrigger
+                        <button
                           key={day.dayNumber}
-                          value={day.dayNumber.toString()}
-                          className="shrink-0 rounded-lg border border-[#1e3a5f]/15 bg-background/70 px-3 text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                          onClick={() => handleDayChange(day.dayNumber.toString())}
+                          className={`relative shrink-0 rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-200 ${
+                            activeDay === day.dayNumber.toString()
+                              ? 'bg-primary text-primary-foreground shadow-md'
+                              : 'border border-[#1e3a5f]/15 bg-background/70 text-foreground hover:bg-muted/60'
+                          }`}
                         >
                           Jour {day.dayNumber}
-                        </TabsTrigger>
+                        </button>
                       ))}
-                    </TabsList>
-                    {trip.days.length > 5 && (
-                      <p className="mb-2 flex items-center gap-1 text-[11px] text-muted-foreground">
-                        <ChevronsLeftRight className="h-3 w-3" />
-                        Faites glisser pour afficher tous les jours
-                      </p>
-                    )}
-                    {trip.days.map((day, idx) => (
-                      <TabsContent key={day.dayNumber} value={day.dayNumber.toString()} className="mt-0">
-                        <DayTimeline
-                          day={day}
-                          selectedItemId={selectedItemId}
-                          globalIndexOffset={getDayIndexOffset(day.dayNumber)}
-                          mapNumbers={itemMapNumbers}
-                          onSelectItem={handleSelectItem}
-                          onEditItem={canOwnerEdit ? handleEditItem : undefined}
-                          onDeleteItem={canOwnerEdit ? handleDeleteItem : undefined}
-                          onMoveItem={canOwnerEdit ? handleMoveItem : undefined}
-                          onHoverItem={setHoveredItemId}
-                          showMoveButtons={canOwnerEdit}
-                          renderSwapButton={renderSwapButton}
-                          hotelSelectorData={hotelSelectorData}
-                          onSelectRestaurantAlternative={canOwnerEdit ? handleSelectRestaurantAlternative : undefined}
-                          onSelectSelfMeal={canOwnerEdit ? handleSelectSelfMeal : undefined}
-                        />
-                        {/* Bouton "Ajouter un jour après" (mobile) */}
-                        {canOwnerEdit && idx > 0 && idx < trip.days.length - 1 && (
-                          <div className="flex items-center justify-center py-3 mt-3">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-8 text-xs text-muted-foreground gap-1.5"
-                              onClick={() => handleInsertDay(day.dayNumber)}
-                            >
-                              <CalendarPlus className="h-3.5 w-3.5" />
-                              Ajouter un jour après le jour {day.dayNumber}
-                            </Button>
-                          </div>
-                        )}
-                      </TabsContent>
-                    ))}
-                  </Tabs>
+                    </div>
+
+                    {/* Animated day content */}
+                    <AnimatePresence mode="wait" initial={false}>
+                      {trip.days.filter(d => d.dayNumber.toString() === activeDay).map((day) => {
+                        const idx = trip.days.indexOf(day);
+                        return (
+                          <motion.div
+                            key={day.dayNumber}
+                            initial={{ x: dayDirection.current * 40, opacity: 0 }}
+                            animate={{ x: 0, opacity: 1 }}
+                            exit={{ x: dayDirection.current * -40, opacity: 0 }}
+                            transition={{ duration: 0.25, ease: 'easeOut' }}
+                          >
+                            <DayTimeline
+                              day={day}
+                              selectedItemId={selectedItemId}
+                              globalIndexOffset={getDayIndexOffset(day.dayNumber)}
+                              mapNumbers={itemMapNumbers}
+                              onSelectItem={handleSelectItem}
+                              onEditItem={canOwnerEdit ? handleEditItem : undefined}
+                              onDeleteItem={canOwnerEdit ? handleDeleteItem : undefined}
+                              onMoveItem={canOwnerEdit ? handleMoveItem : undefined}
+                              onHoverItem={setHoveredItemId}
+                              showMoveButtons={canOwnerEdit}
+                              renderSwapButton={renderSwapButton}
+                              hotelSelectorData={hotelSelectorData}
+                              onSelectRestaurantAlternative={canOwnerEdit ? handleSelectRestaurantAlternative : undefined}
+                              onSelectSelfMeal={canOwnerEdit ? handleSelectSelfMeal : undefined}
+                            />
+                            {canOwnerEdit && idx > 0 && idx < trip.days.length - 1 && (
+                              <div className="flex items-center justify-center py-3 mt-3">
+                                <Button
+                                  variant="outline"
+                                  className="h-10 text-sm text-muted-foreground gap-2"
+                                  onClick={() => handleInsertDay(day.dayNumber)}
+                                >
+                                  <CalendarPlus className="h-4 w-4" />
+                                  Ajouter un jour après le jour {day.dayNumber}
+                                </Button>
+                              </div>
+                            )}
+                          </motion.div>
+                        );
+                      })}
+                    </AnimatePresence>
+                  </div>
                 ) : null}
               </div>
             </TabsContent>
@@ -1505,7 +1610,7 @@ export default function TripPage() {
             </TabsContent>
 
             <TabsContent value="carte">
-              <div className="h-[calc(100vh-14rem)] min-h-[340px] rounded-lg overflow-hidden">
+              <div className="h-[calc(100vh-10rem)] min-h-[400px] rounded-2xl overflow-hidden border border-[#1e3a5f]/15 shadow-sm">
                 <TripMap items={editMode ? allItems : activeDayItems} selectedItemId={selectedItemId} hoveredItemId={hoveredItemId || undefined} onItemClick={handleSelectItem} mapNumbers={itemMapNumbers} isVisible={mainTab === 'carte'} importedPlaces={trip.importedPlaces?.items} flightInfo={{ departureCity: trip.preferences.origin, departureCoords: trip.preferences.originCoords, arrivalCity: trip.preferences.destination, arrivalCoords: trip.preferences.destinationCoords, stopoverCities: trip.outboundFlight?.stopCities }} />
               </div>
             </TabsContent>
