@@ -12,7 +12,7 @@ import { getCityCenterCoordsAsync, findNearbyAirportsAsync } from '../services/g
 import { compareTransportOptions } from '../services/transport';
 import { searchAttractionsMultiQuery, searchMustSeeAttractions, searchRestaurantsWithSerpApi } from '../services/serpApiPlaces';
 import { searchAttractionsOverpass } from '../services/overpassAttractions';
-import { searchViatorActivities, getViatorProductCoordinatesBulk } from '../services/viator';
+import { searchViatorActivities, getViatorProductCoordinates } from '../services/viator';
 import { findKnownViatorProduct } from '../services/viatorKnownProducts';
 import { searchTripAdvisorRestaurants } from '../services/tripadvisor';
 import { searchHotels } from '../services/hotels';
@@ -221,18 +221,7 @@ export async function fetchAllData(preferences: TripPreferences, onEvent?: OnPip
   );
   if (viatorEstimated.length > 0) {
     console.log(`[Pipeline V2] Resolving GPS for ${viatorEstimated.length} Viator activities...`);
-
-    const viatorProductCodes = Array.from(
-      new Set(
-        viatorEstimated
-          .map((activity: Attraction) => extractViatorProductCode(activity))
-          .filter((code): code is string => Boolean(code))
-      )
-    );
-
-    const bulkCoordinates = viatorProductCodes.length > 0
-      ? await getViatorProductCoordinatesBulk(viatorProductCodes, destCoords)
-      : new Map<string, { lat: number; lng: number }>();
+    const productCoordsCache = new Map<string, { lat: number; lng: number } | null>();
 
     await Promise.allSettled(
       viatorEstimated.map(async (activity: Attraction) => {
@@ -240,7 +229,11 @@ export async function fetchAllData(preferences: TripPreferences, onEvent?: OnPip
           // 1) Try Viator product details first (true source coordinates when available).
           const productCode = extractViatorProductCode(activity);
           if (productCode) {
-            const viatorCoords = bulkCoordinates.get(productCode);
+            let viatorCoords = productCoordsCache.get(productCode);
+            if (viatorCoords === undefined) {
+              viatorCoords = await getViatorProductCoordinates(productCode, destCoords);
+              productCoordsCache.set(productCode, viatorCoords);
+            }
             if (viatorCoords) {
               activity.latitude = viatorCoords.lat;
               activity.longitude = viatorCoords.lng;
