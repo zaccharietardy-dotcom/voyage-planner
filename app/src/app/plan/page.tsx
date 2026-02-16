@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -15,7 +15,7 @@ import {
   StepActivities,
 } from '@/components/forms';
 import { TripPreferences } from '@/lib/types';
-import { ArrowLeft, ArrowRight, Sparkles, Loader2, UserCog, Check, Shuffle } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Sparkles, Loader2, UserCog, Check, Shuffle, ChevronsLeftRight } from 'lucide-react';
 import { generateRandomPreferences } from '@/lib/randomExample';
 import { generateTripStream } from '@/lib/generateTrip';
 import { cn } from '@/lib/utils';
@@ -321,7 +321,7 @@ export default function PlanPage() {
 
         {/* Progress header */}
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <h1 className="text-lg font-semibold">Planifier votre voyage</h1>
               <Button
@@ -345,7 +345,12 @@ export default function PlanPage() {
           <Progress value={progress} className="h-2" />
 
           {/* Step indicators */}
-          <div className="flex justify-between mt-4">
+          <div className="mt-4">
+            <div className="mb-2 flex items-center gap-1 text-[11px] text-muted-foreground sm:hidden">
+              <ChevronsLeftRight className="h-3 w-3" />
+              Faites glisser pour naviguer entre les étapes
+            </div>
+            <div className="scrollbar-hide flex gap-2 overflow-x-auto pb-1">
             {STEPS.map((step) => (
               <button
                 key={step.id}
@@ -357,7 +362,8 @@ export default function PlanPage() {
                 }}
                 disabled={step.id > currentStep}
                 className={cn(
-                  'relative flex flex-col items-center gap-1 transition-all',
+                  'relative flex min-w-[86px] flex-col items-center gap-1 rounded-xl border border-transparent px-2 py-1.5 transition-all',
+                  step.id === currentStep && 'border-primary/30 bg-primary/5',
                   step.id < currentStep && 'cursor-pointer opacity-70 hover:opacity-100',
                   step.id > currentStep && 'opacity-40 cursor-not-allowed'
                 )}
@@ -370,9 +376,10 @@ export default function PlanPage() {
                   />
                 )}
                 <span className="relative text-2xl">{step.icon}</span>
-                <span className="relative text-xs font-medium hidden sm:block">{step.title}</span>
+                <span className="relative text-xs font-medium">{step.title}</span>
               </button>
             ))}
+            </div>
           </div>
         </div>
 

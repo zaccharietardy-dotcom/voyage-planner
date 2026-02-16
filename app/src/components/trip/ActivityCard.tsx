@@ -32,6 +32,7 @@ import {
   ChevronUp,
   ChevronDown,
   ChevronRight,
+  ChevronsLeftRight,
   Coffee,
   Ticket,
   Globe,
@@ -950,28 +951,38 @@ function FlightAlternatives({ alternatives }: { alternatives: Flight[] }) {
         {alternatives.length} autre{alternatives.length > 1 ? 's' : ''} vol{alternatives.length > 1 ? 's' : ''}
       </button>
       {expanded && (
-        <div className="flex gap-2 mt-2 overflow-x-auto pb-2 -mx-1 px-1">
-          {alternatives.map((alt) => (
-            <a
-              key={alt.id}
-              href={alt.bookingUrl || '#'}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex-shrink-0 border border-border/50 rounded-lg p-2.5 text-xs hover:border-primary/40 hover:shadow-sm transition-all min-w-[140px] bg-card"
-            >
-              <div className="font-medium">{alt.airline}</div>
-              <div className="text-muted-foreground text-[10px]">{alt.flightNumber}</div>
-              <div className="mt-1.5 font-mono text-[11px]">
-                {alt.departureTimeDisplay || alt.departureTime?.split('T')[1]?.slice(0, 5)} → {alt.arrivalTimeDisplay || alt.arrivalTime?.split('T')[1]?.slice(0, 5)}
-              </div>
-              <div className="flex items-center justify-between mt-1.5">
-                <span className="font-semibold text-primary">{alt.pricePerPerson || alt.price}€</span>
-                <span className="text-muted-foreground text-[10px]">
-                  {formatDuration(alt.duration)} · {alt.stops === 0 ? 'Direct' : `${alt.stops} esc.`}
-                </span>
-              </div>
-            </a>
-          ))}
+        <div className="mt-2">
+          <div className="mb-1 flex items-center gap-1 text-[10px] text-muted-foreground sm:hidden">
+            <ChevronsLeftRight className="h-3 w-3" />
+            Faites glisser pour voir tous les vols
+          </div>
+          <div className="relative">
+            <div className="pointer-events-none absolute bottom-0 left-0 top-0 w-5 bg-gradient-to-r from-background to-transparent sm:hidden" />
+            <div className="pointer-events-none absolute bottom-0 right-0 top-0 w-5 bg-gradient-to-l from-background to-transparent sm:hidden" />
+            <div className="scrollbar-hide -mx-1 flex gap-2 overflow-x-auto px-1 pb-2">
+              {alternatives.map((alt) => (
+                <a
+                  key={alt.id}
+                  href={alt.bookingUrl || '#'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="min-w-[140px] flex-shrink-0 rounded-lg border border-border/50 bg-card p-2.5 text-xs transition-all hover:border-primary/40 hover:shadow-sm"
+                >
+                  <div className="font-medium">{alt.airline}</div>
+                  <div className="text-muted-foreground text-[10px]">{alt.flightNumber}</div>
+                  <div className="mt-1.5 font-mono text-[11px]">
+                    {alt.departureTimeDisplay || alt.departureTime?.split('T')[1]?.slice(0, 5)} → {alt.arrivalTimeDisplay || alt.arrivalTime?.split('T')[1]?.slice(0, 5)}
+                  </div>
+                  <div className="mt-1.5 flex items-center justify-between">
+                    <span className="font-semibold text-primary">{alt.pricePerPerson || alt.price}€</span>
+                    <span className="text-muted-foreground text-[10px]">
+                      {formatDuration(alt.duration)} · {alt.stops === 0 ? 'Direct' : `${alt.stops} esc.`}
+                    </span>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
         </div>
       )}
     </div>
@@ -1102,8 +1113,19 @@ function RestaurantSuggestionsFlat({
 
   return (
     <div className="px-3.5 pb-3" onClick={(e) => e.stopPropagation()}>
+      <div className="mb-2 flex items-center justify-between text-[11px] text-muted-foreground sm:hidden">
+        <span>{suggestions.length} choix disponibles</span>
+        <span className="inline-flex items-center gap-1">
+          <ChevronsLeftRight className="h-3 w-3" />
+          Faites glisser
+        </span>
+      </div>
+
       {/* Carousel horizontal mobile, grille 3 colonnes desktop */}
-      <div className="flex gap-2 overflow-x-auto snap-x snap-mandatory sm:overflow-visible sm:grid sm:grid-cols-3 scrollbar-hide pb-1 -mx-1 px-1">
+      <div className="relative">
+        <div className="pointer-events-none absolute bottom-1 left-0 top-0 w-5 bg-gradient-to-r from-background to-transparent sm:hidden" />
+        <div className="pointer-events-none absolute bottom-1 right-0 top-0 w-5 bg-gradient-to-l from-background to-transparent sm:hidden" />
+        <div className="scrollbar-hide -mx-1 flex gap-2 overflow-x-auto px-1 pb-1 snap-x snap-mandatory sm:overflow-visible sm:grid sm:grid-cols-3">
         {suggestions.map((option) => {
           const isSelected = option.id === current.id;
           const bookingUrl = option.googleMapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(option.name)}`;
@@ -1242,6 +1264,7 @@ function RestaurantSuggestionsFlat({
             </div>
           );
         })}
+        </div>
       </div>
     </div>
   );

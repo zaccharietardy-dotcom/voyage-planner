@@ -23,6 +23,8 @@ import {
   Download,
   Globe,
   Upload,
+  ChevronsLeftRight,
+  MapPinned,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -1028,13 +1030,13 @@ export default function TripPage() {
       <header className="sticky top-0 z-50 border-b border-[#1e3a5f]/10 bg-background/85 shadow-sm backdrop-blur-xl">
         <div className="container mx-auto px-4 py-3">
           <div className="rounded-2xl border border-[#1e3a5f]/10 bg-background/75 px-3 py-2 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
+            <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+              <div className="flex items-start gap-2 sm:gap-3">
               <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => router.push('/')}>
                 <ArrowLeft className="h-4 w-4" />
               </Button>
-              <div>
-                <div className="flex items-center gap-3">
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                   <h1 className="font-bold text-lg">
                     {trip.preferences.origin && <span className="text-muted-foreground font-normal">{trip.preferences.origin} → </span>}
                     {trip.preferences.destination}
@@ -1068,34 +1070,40 @@ export default function TripPage() {
                 </div>
               </div>
             </div>
-              <div className="flex items-center gap-1.5">
+              <div className="flex max-w-full items-center gap-1.5 overflow-x-auto pb-1 scrollbar-hide md:max-w-[60%] md:flex-wrap md:justify-end md:overflow-visible md:pb-0">
               {/* Transport selector - compact popover */}
               {canOwnerEdit && trip.transportOptions && trip.transportOptions.length > 0 && (
-                <TransportOptions
-                  options={trip.transportOptions}
-                  selectedId={trip.selectedTransport?.id}
-                  onSelect={(option) => {
-                    const updatedTrip = { ...trip, selectedTransport: option, updatedAt: new Date() };
-                    saveTrip(updatedTrip);
-                    setTransportChanged(option.id !== originalTransportId);
-                  }}
-                />
+                <div className="shrink-0">
+                  <TransportOptions
+                    options={trip.transportOptions}
+                    selectedId={trip.selectedTransport?.id}
+                    onSelect={(option) => {
+                      const updatedTrip = { ...trip, selectedTransport: option, updatedAt: new Date() };
+                      saveTrip(updatedTrip);
+                      setTransportChanged(option.id !== originalTransportId);
+                    }}
+                  />
+                </div>
               )}
 
               {useCollaborativeMode && isOwner && collaborativeTrip && (
-                <TripVisibilitySelector
-                  tripId={tripId}
-                  currentVisibility={collaborativeTrip.visibility || 'private'}
-                />
+                <div className="shrink-0">
+                  <TripVisibilitySelector
+                    tripId={tripId}
+                    currentVisibility={collaborativeTrip.visibility || 'private'}
+                  />
+                </div>
               )}
               {useCollaborativeMode && !isOwner && collaborativeTrip && (
-                <VisibilityBadge visibility={collaborativeTrip.visibility || 'private'} />
+                <div className="shrink-0">
+                  <VisibilityBadge visibility={collaborativeTrip.visibility || 'private'} />
+                </div>
               )}
 
               {canOwnerEdit && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm" className="gap-1.5 h-8" disabled={regenerating}>
+                    <Button variant="outline" size="sm" className="gap-1.5 h-8 shrink-0" disabled={regenerating}>
                       {regenerating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
                       <span className="hidden sm:inline text-xs">Régénérer</span>
                     </Button>
@@ -1115,13 +1123,13 @@ export default function TripPage() {
               )}
 
               {canPropose && !editMode && (
-                <Button variant="outline" size="sm" className="gap-1.5 h-8" onClick={() => setEditMode(true)} data-tour="edit-mode">
+                <Button variant="outline" size="sm" className="gap-1.5 h-8 shrink-0" onClick={() => setEditMode(true)} data-tour="edit-mode">
                   <GripVertical className="h-3.5 w-3.5" />
                   <span className="hidden sm:inline text-xs">{canOwnerEdit ? 'Éditer' : 'Proposer'}</span>
                 </Button>
               )}
               {canPropose && editMode && (
-                <Button variant="default" size="sm" className="gap-1.5 h-8" onClick={() => setEditMode(false)}>
+                <Button variant="default" size="sm" className="gap-1.5 h-8 shrink-0" onClick={() => setEditMode(false)}>
                   <ArrowLeft className="h-3.5 w-3.5" />
                   <span className="text-xs">Terminer</span>
                 </Button>
@@ -1130,7 +1138,7 @@ export default function TripPage() {
               {useCollaborativeMode && (
                 <Sheet open={showCollabPanel} onOpenChange={setShowCollabPanel}>
                   <SheetTrigger asChild>
-                    <Button variant="outline" size="sm" className="gap-1.5 h-8 relative">
+                    <Button variant="outline" size="sm" className="gap-1.5 h-8 relative shrink-0">
                       <GitPullRequest className="h-3.5 w-3.5" />
                       {openProposalCount > 0 && (
                         <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary text-primary-foreground text-[10px] rounded-full flex items-center justify-center">
@@ -1157,32 +1165,43 @@ export default function TripPage() {
               )}
 
               {!canOwnerEdit && useCollaborativeMode && (
-                <Button variant="outline" size="sm" className="gap-1.5 h-8" onClick={() => setShowCloneModal(true)}>
+                <Button variant="outline" size="sm" className="gap-1.5 h-8 shrink-0" onClick={() => setShowCloneModal(true)}>
                   <Copy className="h-3.5 w-3.5" />
                 </Button>
               )}
 
               {isOwner && (
-                <Button variant="outline" size="sm" className="gap-1.5 h-8" onClick={() => setShowShareDialog(true)} data-tour="share-button">
+                <Button variant="outline" size="sm" className="gap-1.5 h-8 shrink-0" onClick={() => setShowShareDialog(true)} data-tour="share-button">
                   <Share2 className="h-3.5 w-3.5" />
                 </Button>
               )}
 
-              <Button variant="outline" size="sm" className="gap-1.5 h-8" onClick={() => setShowFlythrough(true)} title="Visualisation 3D">
+              <Button variant="outline" size="sm" className="gap-1.5 h-8 shrink-0" onClick={() => setShowFlythrough(true)} title="Visualisation 3D">
                 <Globe className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline text-xs">3D</span>
               </Button>
 
-              <Button variant="outline" size="sm" className="gap-1.5 h-8" onClick={handleExportPdf} title="Exporter en PDF">
+              <Button variant="outline" size="sm" className="gap-1.5 h-8 shrink-0" onClick={handleExportPdf} title="Exporter en PDF">
                 <Download className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline text-xs">PDF</span>
+              </Button>
+
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5 h-8 shrink-0 lg:hidden"
+                onClick={() => setMainTab('carte')}
+                title="Afficher la carte"
+              >
+                <MapPinned className="h-3.5 w-3.5" />
+                <span className="text-xs">Carte</span>
               </Button>
 
               {canOwnerEdit && (
                 <Button
                   variant="outline"
                   size="sm"
-                  className="gap-1.5 h-8"
+                  className="gap-1.5 h-8 shrink-0"
                   onClick={() => setShowImportPlaces(true)}
                   title="Importer des lieux depuis Google Maps"
                 >
@@ -1195,7 +1214,7 @@ export default function TripPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="gap-1.5 h-8"
+                  className="gap-1.5 h-8 shrink-0"
                   onClick={(event) => handleExportDebug(!event.shiftKey)}
                   title="Export debug compact (Shift+clic pour inclure _rawTrip)"
                 >
@@ -1205,7 +1224,7 @@ export default function TripPage() {
 
               {/* Chat Assistant Button */}
               {canOwnerEdit && (
-                <div data-tour="chat-button">
+                <div className="shrink-0" data-tour="chat-button">
                   <ChatButton onClick={() => setShowChatPanel(true)} />
                 </div>
               )}
@@ -1231,15 +1250,19 @@ export default function TripPage() {
         {/* Mobile layout */}
         <div className="lg:hidden">
           <Tabs value={mainTab} onValueChange={setMainTab}>
-            <TabsList className="mb-4 flex w-full overflow-x-auto rounded-xl border border-[#1e3a5f]/12 bg-background/70 p-1" data-tour="tabs">
-              {liveState && <TabsTrigger value="live" className="text-xs flex-1 bg-gradient-to-r from-purple-500 to-blue-500 text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600">🔴 Live</TabsTrigger>}
-              <TabsTrigger value="planning" className="text-xs flex-1">Planning</TabsTrigger>
-              <TabsTrigger value="reserver" className="text-xs flex-1">Reserver</TabsTrigger>
-              <TabsTrigger value="carte" className="text-xs flex-1">Carte</TabsTrigger>
-              {user && <TabsTrigger value="photos" className="text-xs flex-1">Photos</TabsTrigger>}
-              {user && <TabsTrigger value="depenses" className="text-xs flex-1">Dépenses</TabsTrigger>}
-              <TabsTrigger value="infos" className="text-xs flex-1">Infos</TabsTrigger>
+            <TabsList className="sticky top-[74px] z-30 mb-2 flex w-full gap-1 overflow-x-auto rounded-xl border border-[#1e3a5f]/12 bg-background/85 p-1 backdrop-blur-xl scrollbar-hide" data-tour="tabs">
+              {liveState && <TabsTrigger value="live" className="shrink-0 px-3 text-xs bg-gradient-to-r from-purple-500 to-blue-500 text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600">🔴 Live</TabsTrigger>}
+              <TabsTrigger value="planning" className="shrink-0 px-3 text-xs">Planning</TabsTrigger>
+              <TabsTrigger value="reserver" className="shrink-0 px-3 text-xs">Réserver</TabsTrigger>
+              <TabsTrigger value="carte" className="shrink-0 px-3 text-xs">Carte</TabsTrigger>
+              {user && <TabsTrigger value="photos" className="shrink-0 px-3 text-xs">Photos</TabsTrigger>}
+              {user && <TabsTrigger value="depenses" className="shrink-0 px-3 text-xs">Dépenses</TabsTrigger>}
+              <TabsTrigger value="infos" className="shrink-0 px-3 text-xs">Infos</TabsTrigger>
             </TabsList>
+            <div className="mb-3 flex items-center justify-end gap-1 text-[11px] text-muted-foreground">
+              <ChevronsLeftRight className="h-3 w-3" />
+              Faites glisser les onglets
+            </div>
 
             {liveState && (
               <TabsContent value="live">
@@ -1259,6 +1282,17 @@ export default function TripPage() {
             )}
 
             <TabsContent value="planning">
+              <div className="mb-3 grid grid-cols-2 gap-2">
+                <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs" onClick={() => setMainTab('carte')}>
+                  <MapPinned className="h-3.5 w-3.5" />
+                  Voir la carte
+                </Button>
+                <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs" onClick={() => setMainTab('reserver')}>
+                  <Download className="h-3.5 w-3.5" />
+                  Réserver
+                </Button>
+              </div>
+
               <div className="space-y-0 rounded-2xl border border-[#1e3a5f]/10 bg-background/65 p-3 shadow-sm">
                 {/* Hotel selector moved to check-in in timeline */}
 
@@ -1301,13 +1335,23 @@ export default function TripPage() {
                   />
                 ) : !editMode ? (
                   <Tabs value={activeDay} onValueChange={setActiveDay}>
-                    <TabsList className="w-full flex-wrap h-auto gap-1 bg-transparent p-0 mb-3">
+                    <TabsList className="mb-1 flex h-auto w-full flex-nowrap gap-1 overflow-x-auto bg-transparent p-0 scrollbar-hide">
                       {trip.days.map((day) => (
-                        <TabsTrigger key={day.dayNumber} value={day.dayNumber.toString()} className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs">
+                        <TabsTrigger
+                          key={day.dayNumber}
+                          value={day.dayNumber.toString()}
+                          className="shrink-0 rounded-lg border border-[#1e3a5f]/15 bg-background/70 px-3 text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                        >
                           Jour {day.dayNumber}
                         </TabsTrigger>
                       ))}
                     </TabsList>
+                    {trip.days.length > 5 && (
+                      <p className="mb-2 flex items-center gap-1 text-[11px] text-muted-foreground">
+                        <ChevronsLeftRight className="h-3 w-3" />
+                        Faites glisser pour afficher tous les jours
+                      </p>
+                    )}
                     {trip.days.map((day, idx) => (
                       <TabsContent key={day.dayNumber} value={day.dayNumber.toString()} className="mt-0">
                         <DayTimeline
@@ -1352,7 +1396,7 @@ export default function TripPage() {
             </TabsContent>
 
             <TabsContent value="carte">
-              <div className="h-[70vh] rounded-lg overflow-hidden">
+              <div className="h-[calc(100vh-14rem)] min-h-[340px] rounded-lg overflow-hidden">
                 <TripMap items={editMode ? allItems : activeDayItems} selectedItemId={selectedItemId} hoveredItemId={hoveredItemId || undefined} onItemClick={handleSelectItem} mapNumbers={itemMapNumbers} isVisible={mainTab === 'carte'} importedPlaces={trip.importedPlaces?.items} flightInfo={{ departureCity: trip.preferences.origin, departureCoords: trip.preferences.originCoords, arrivalCity: trip.preferences.destination, arrivalCoords: trip.preferences.destinationCoords, stopoverCities: trip.outboundFlight?.stopCities }} />
               </div>
             </TabsContent>
