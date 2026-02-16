@@ -71,6 +71,7 @@ import { LiveTripBanner } from '@/components/trip/LiveTripBanner';
 import { LiveTripDashboard } from '@/components/trip/LiveTripDashboard';
 import { useConnectivity } from '@/hooks/useConnectivity';
 import { cacheTripById, readCachedTripById } from '@/lib/mobile/offline-cache';
+import { generateTripStream } from '@/lib/generateTrip';
 
 function updateTripWithNewHotel(trip: Trip, newHotel: Accommodation): Trip {
   const oldHotelName = trip.accommodation?.name || '';
@@ -407,18 +408,16 @@ export default function TripPage() {
     }
     setRegenerating(true);
     try {
-      const response = await fetch('/api/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...trip.preferences,
-          transport: trip.selectedTransport?.mode,
-        }),
+      const selectedMode = trip.selectedTransport?.mode;
+      const regenerateTransport: Trip['preferences']['transport'] =
+        selectedMode === 'plane' || selectedMode === 'train' || selectedMode === 'car' || selectedMode === 'bus'
+          ? selectedMode
+          : trip.preferences.transport;
+
+      const newTrip = await generateTripStream({
+        ...trip.preferences,
+        transport: regenerateTransport,
       });
-
-      if (!response.ok) throw new Error('Erreur régénération');
-
-      const newTrip = await response.json();
       newTrip.selectedTransport = trip.selectedTransport;
       saveTrip(newTrip);
       setTransportChanged(false);
@@ -764,15 +763,16 @@ export default function TripPage() {
 
   const handleRegenerateDay = async (dayNumber: number) => {
     if (!trip) return;
+    if (isOffline) {
+      toast.error('Régénération indisponible hors ligne');
+      return;
+    }
     setRegenerating(true);
     try {
-      const response = await fetch('/api/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...trip.preferences, regenerateDay: dayNumber }),
+      const newTrip = await generateTripStream({
+        ...trip.preferences,
+        regenerateDay: dayNumber,
       });
-      if (!response.ok) throw new Error('Erreur régénération');
-      const newTrip = await response.json();
       const updatedDays = trip.days.map((day) =>
         day.dayNumber === dayNumber
           ? newTrip.days.find((d: TripDay) => d.dayNumber === dayNumber) || day
@@ -791,15 +791,16 @@ export default function TripPage() {
 
   const handleRegenerateRestaurants = async () => {
     if (!trip) return;
+    if (isOffline) {
+      toast.error('Régénération indisponible hors ligne');
+      return;
+    }
     setRegenerating(true);
     try {
-      const response = await fetch('/api/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...trip.preferences, regenerateRestaurants: true }),
+      const newTrip = await generateTripStream({
+        ...trip.preferences,
+        regenerateRestaurants: true,
       });
-      if (!response.ok) throw new Error('Erreur régénération');
-      const newTrip = await response.json();
       const updatedDays = trip.days.map((day, dayIdx) => ({
         ...day,
         items: day.items.map((item) => {

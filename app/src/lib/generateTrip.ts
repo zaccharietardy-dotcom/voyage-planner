@@ -11,7 +11,7 @@ import { Trip, TripPreferences } from './types';
  * stream se ferme.
  */
 export async function generateTripStream(
-  preferences: Partial<TripPreferences>,
+  preferences: Partial<TripPreferences> & Record<string, unknown>,
   onProgress?: (status: string) => void,
 ): Promise<Trip> {
   const res = await fetch('/api/generate', {
