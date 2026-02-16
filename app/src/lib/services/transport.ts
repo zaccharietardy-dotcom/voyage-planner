@@ -11,7 +11,7 @@ import { getCheapestTrainPrice, type DBLeg } from './dbTransport';
 import { checkTransportFeasibility } from './transportFeasibility';
 import { findMultiModalOptions } from './multiModalTransport';
 import { calculateCarCost } from './carCostCalculator';
-import { generateFlightLink, generateFlightOmioLink } from './linkGenerator';
+import { formatDateForUrl, generateFlightLink, generateFlightOmioLink, toOmioLocationSlug } from './linkGenerator';
 
 // Types
 export interface TransportOption {
@@ -671,9 +671,9 @@ function calculateBusOption(params: TransportSearchParams, distance: number): Tr
 
   // Full Omio pour les bus aussi (agrège FlixBus + BlaBlaCar + autres) → affilié Impact
   // Format: /bus/{origin}/{destination}?departure_date=YYYY-MM-DD
-  const originSlug = params.origin.toLowerCase().replace(/\s+/g, '-');
-  const destSlug = params.destination.toLowerCase().replace(/\s+/g, '-');
-  const omioDate = params.date ? params.date.toISOString().split('T')[0] : '';
+  const originSlug = toOmioLocationSlug(params.origin);
+  const destSlug = toOmioLocationSlug(params.destination);
+  const omioDate = params.date ? formatDateForUrl(params.date) : '';
   const dateParam = omioDate ? `?departure_date=${omioDate}` : '';
   const bookingUrl = `https://www.omio.fr/bus/${encodeURIComponent(originSlug)}/${encodeURIComponent(destSlug)}${dateParam}`;
 
@@ -970,9 +970,9 @@ export function getTrainBookingUrl(origin: string, destination: string, passenge
 
   // Full Omio: tous les trains (y compris Eurostar) passent par Omio → affilié Impact
   // Format: /trains/{origin}/{destination}?departure_date=YYYY-MM-DD
-  const originSlug = origin.toLowerCase().replace(/\s+/g, '-');
-  const destSlug = destination.toLowerCase().replace(/\s+/g, '-');
-  const dateStr = date ? date.toISOString().split('T')[0] : '';
+  const originSlug = toOmioLocationSlug(origin);
+  const destSlug = toOmioLocationSlug(destination);
+  const dateStr = date ? formatDateForUrl(date) : '';
   const dateParam = dateStr ? `?departure_date=${dateStr}` : '';
   return `https://www.omio.fr/trains/${encodeURIComponent(originSlug)}/${encodeURIComponent(destSlug)}${dateParam}`;
 }

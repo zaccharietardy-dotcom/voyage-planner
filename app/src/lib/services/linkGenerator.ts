@@ -189,10 +189,26 @@ export function generateFlightOmioLink(
   destination: string,
   date?: string
 ): string {
-  const originSlug = origin.toLowerCase().replace(/\s+/g, '-');
-  const destSlug = destination.toLowerCase().replace(/\s+/g, '-');
+  const originSlug = toOmioLocationSlug(origin);
+  const destSlug = toOmioLocationSlug(destination);
   const dateParam = date ? `?departure_date=${date}` : '';
   return `https://www.omio.fr/vols/${encodeURIComponent(originSlug)}/${encodeURIComponent(destSlug)}${dateParam}`;
+}
+
+/**
+ * Normalise un lieu en slug Omio robuste.
+ * Gère accents, apostrophes et ponctuation pour éviter les liens cassés.
+ */
+export function toOmioLocationSlug(location: string): string {
+  return location
+    .trim()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/['’`]/g, '')
+    .replace(/&/g, ' and ')
+    .replace(/[^\p{L}\p{N}]+/gu, '-')
+    .replace(/^-+|-+$/g, '');
 }
 
 /**

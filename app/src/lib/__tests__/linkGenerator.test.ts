@@ -13,6 +13,8 @@ import {
   generateRestaurantLink,
   generateHotelLink,
   generateFlightLink,
+  generateFlightOmioLink,
+  toOmioLocationSlug,
   generateAttractionLink,
   generateReservationLink,
   formatDateForUrl,
@@ -183,6 +185,19 @@ describe('Link Generator (Bug #10)', () => {
 
       expect(link).toContain('PARIS');
       expect(link).toContain('BARCELONA');
+    });
+  });
+
+  describe('Omio links', () => {
+    it('normalizes accents and punctuation in Omio slugs', () => {
+      expect(toOmioLocationSlug("L'Haÿ-les-Roses")).toBe('lhay-les-roses');
+      expect(toOmioLocationSlug('São Paulo')).toBe('sao-paulo');
+      expect(toOmioLocationSlug('St. Gallen / Zürich')).toBe('st-gallen-zurich');
+    });
+
+    it('generates Omio flight link with normalized slugs and date', () => {
+      const link = generateFlightOmioLink('São Paulo', 'Île-de-France', '2026-02-19');
+      expect(link).toBe('https://www.omio.fr/vols/sao-paulo/ile-de-france?departure_date=2026-02-19');
     });
   });
 
