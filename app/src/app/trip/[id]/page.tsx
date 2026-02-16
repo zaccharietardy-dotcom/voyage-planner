@@ -71,7 +71,6 @@ import { LiveTripBanner } from '@/components/trip/LiveTripBanner';
 import { LiveTripDashboard } from '@/components/trip/LiveTripDashboard';
 import { useConnectivity } from '@/hooks/useConnectivity';
 import { cacheTripById, readCachedTripById } from '@/lib/mobile/offline-cache';
-import { isNativeApp } from '@/lib/mobile/runtime';
 
 function updateTripWithNewHotel(trip: Trip, newHotel: Accommodation): Trip {
   const oldHotelName = trip.accommodation?.name || '';
@@ -233,17 +232,12 @@ export default function TripPage() {
   const [showLiveDashboard, setShowLiveDashboard] = useState(false);
 
   const [isDesktop, setIsDesktop] = useState(false);
-  const [isNativeShell, setIsNativeShell] = useState(false);
   useEffect(() => {
     const mql = window.matchMedia('(min-width: 1024px)');
     setIsDesktop(mql.matches);
     const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
     mql.addEventListener('change', handler);
     return () => mql.removeEventListener('change', handler);
-  }, []);
-
-  useEffect(() => {
-    setIsNativeShell(isNativeApp());
   }, []);
 
   const trip = useCollaborativeMode ? collaborativeTrip?.data : localTrip;
@@ -885,15 +879,6 @@ export default function TripPage() {
     }
   };
 
-  const handleOpenFlythrough = useCallback(() => {
-    if (isNativeShell) {
-      setMainTab('carte');
-      toast.info('La vue 3D est temporairement désactivée dans l’app mobile pour éviter les crashs.');
-      return;
-    }
-    setShowFlythrough(true);
-  }, [isNativeShell]);
-
   const handleImportPlaces = async (places: ImportedPlace[]) => {
     if (!trip) return;
 
@@ -1193,7 +1178,7 @@ export default function TripPage() {
                 </Button>
               )}
 
-              <Button variant="outline" size="sm" className="gap-1.5 h-8 shrink-0 hidden sm:inline-flex" onClick={handleOpenFlythrough} title="Visualisation 3D">
+              <Button variant="outline" size="sm" className="gap-1.5 h-8 shrink-0 hidden sm:inline-flex" onClick={() => setShowFlythrough(true)} title="Visualisation 3D">
                 <Globe className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline text-xs">3D</span>
               </Button>
@@ -1261,9 +1246,9 @@ export default function TripPage() {
                       Cloner ce voyage
                     </DropdownMenuItem>
                   )}
-                  <DropdownMenuItem onSelect={handleOpenFlythrough}>
+                  <DropdownMenuItem onSelect={() => setShowFlythrough(true)}>
                     <Globe className="h-4 w-4" />
-                    {isNativeShell ? 'Carte 2D (mobile)' : 'Vue 3D'}
+                    Vue 3D
                   </DropdownMenuItem>
                   <DropdownMenuItem onSelect={handleExportPdf}>
                     <Download className="h-4 w-4" />

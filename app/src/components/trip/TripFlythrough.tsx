@@ -16,6 +16,12 @@ function isSafari(): boolean {
   return /Safari/.test(ua) && !/Chrome/.test(ua) && !/Chromium/.test(ua);
 }
 
+function isLikelyMobileDevice(): boolean {
+  if (typeof navigator === 'undefined') return false;
+  const ua = navigator.userAgent.toLowerCase();
+  return /iphone|ipad|ipod|android|mobile/.test(ua);
+}
+
 async function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   return new Promise((resolve, reject) => {
     const timer = window.setTimeout(() => reject(new Error('timeout')), ms);
@@ -291,6 +297,7 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
   const waypointsRef = useRef<Waypoint[]>([]);
   const markersRef = useRef<Map<number, any>>(new Map());
   const polylineRef = useRef<any>(null);
+  const lowPowerModeRef = useRef(false);
   const isPlayingRef = useRef(false);
   const speedRef = useRef(1);
   const renderPumpRef = useRef<NodeJS.Timeout | null>(null);
@@ -389,12 +396,9 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
 
     async function initCesium() {
       try {
-        if (isNativeApp()) {
-          setError('La vue 3D est désactivée dans l’app mobile pour la stabilité. Carte 2D affichée à la place.');
-          return;
-        }
-
         const safari = isSafari();
+        const mobileSafeMode = isNativeApp() || isLikelyMobileDevice();
+        lowPowerModeRef.current = mobileSafeMode;
         console.info(`[TripFlythrough] [1/6] Init start (safari=${safari})`);
 
         const webglSupport = detectWebGLSupport();
@@ -416,7 +420,7 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
         const Cesium = CesiumModule;
         const ionToken = (process.env.NEXT_PUBLIC_CESIUM_ION_TOKEN || '').trim();
         const hasIonToken = ionToken.length > 0;
-        const compatibilityMode = !webglSupport.webgl2;
+        const compatibilityMode = mobileSafeMode || !webglSupport.webgl2;
         Cesium.Ion.defaultAccessToken = ionToken;
 
         const commonViewerOptions: any = {
@@ -449,48 +453,72 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
           antialias?: boolean;
           msaaSamples?: number;
         }> = [];
-        if (webglSupport.webgl2) {
-          viewerProfiles.push({
-            name: 'webgl2',
-            requestWebgl1: false,
-            // Safari/Metal can reject 'high-performance' on integrated GPUs
-            powerPreference: safari ? 'default' : 'high-performance',
-            useTerrain: true,
-            // SkyAtmosphere GLSL shaders can fail to compile on Safari Metal
-            useSkyAtmosphere: !safari,
-            antialias: false,
-            msaaSamples: 1,
-          });
-        }
-        if (webglSupport.webgl1) {
-          viewerProfiles.push({
-            name: 'webgl1',
-            requestWebgl1: true,
-            powerPreference: 'default',
-            useTerrain: true,
-            useSkyAtmosphere: false,
-            antialias: false,
-          });
-        }
-        if (webglSupport.webgl2) {
-          viewerProfiles.push({
-            name: 'minimal-webgl2',
-            requestWebgl1: false,
-            powerPreference: 'default',
-            useTerrain: false,
-            useSkyAtmosphere: false,
-            antialias: false,
-          });
-        }
-        if (webglSupport.webgl1) {
-          viewerProfiles.push({
-            name: 'minimal-webgl1',
-            requestWebgl1: true,
-            powerPreference: 'default',
-            useTerrain: false,
-            useSkyAtmosphere: false,
-            antialias: false,
-          });
+        if (mobileSafeMode) {
+          if (webglSupport.webgl1) {
+            viewerProfiles.push({
+              name: 'mobile-webgl1',
+              requestWebgl1: true,
+              powerPreference: 'default',
+              useTerrain: false,
+              useSkyAtmosphere: false,
+              antialias: false,
+            });
+          }
+          if (webglSupport.webgl2) {
+            viewerProfiles.push({
+              name: 'mobile-webgl2',
+              requestWebgl1: false,
+              powerPreference: 'default',
+              useTerrain: false,
+              useSkyAtmosphere: false,
+              antialias: false,
+              msaaSamples: 1,
+            });
+          }
+        } else {
+          if (webglSupport.webgl2) {
+            viewerProfiles.push({
+              name: 'webgl2',
+              requestWebgl1: false,
+              // Safari/Metal can reject 'high-performance' on integrated GPUs
+              powerPreference: safari ? 'default' : 'high-performance',
+              useTerrain: true,
+              // SkyAtmosphere GLSL shaders can fail to compile on Safari Metal
+              useSkyAtmosphere: !safari,
+              antialias: false,
+              msaaSamples: 1,
+            });
+          }
+          if (webglSupport.webgl1) {
+            viewerProfiles.push({
+              name: 'webgl1',
+              requestWebgl1: true,
+              powerPreference: 'default',
+              useTerrain: true,
+              useSkyAtmosphere: false,
+              antialias: false,
+            });
+          }
+          if (webglSupport.webgl2) {
+            viewerProfiles.push({
+              name: 'minimal-webgl2',
+              requestWebgl1: false,
+              powerPreference: 'default',
+              useTerrain: false,
+              useSkyAtmosphere: false,
+              antialias: false,
+            });
+          }
+          if (webglSupport.webgl1) {
+            viewerProfiles.push({
+              name: 'minimal-webgl1',
+              requestWebgl1: true,
+              powerPreference: 'default',
+              useTerrain: false,
+              useSkyAtmosphere: false,
+              antialias: false,
+            });
+          }
         }
 
         console.info(`[TripFlythrough] [4/6] ${viewerProfiles.length} profiles to try: ${viewerProfiles.map(p => p.name).join(', ')}`);
@@ -535,23 +563,32 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
             viewerRef.current = viewer;
 
             // Add synchronous base layer BEFORE starting the render loop
-            // Try ArcGIS satellite first (prettier), fall back to OSM (safer on Safari)
-            try {
-              viewer.imageryLayers.addImageryProvider(
-                new Cesium.UrlTemplateImageryProvider({
-                  url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-                  credit: 'Esri, Maxar, Earthstar Geographics',
-                  maximumLevel: 19,
-                })
-              );
-            } catch (imageryError) {
-              console.warn('[TripFlythrough] ArcGIS imagery failed, using OSM fallback', imageryError);
+            // On mobile-safe mode, keep OSM only to reduce memory pressure.
+            if (mobileSafeMode) {
               viewer.imageryLayers.addImageryProvider(
                 new Cesium.OpenStreetMapImageryProvider({
                   url: 'https://tile.openstreetmap.org/',
                   credit: 'OpenStreetMap',
                 })
               );
+            } else {
+              try {
+                viewer.imageryLayers.addImageryProvider(
+                  new Cesium.UrlTemplateImageryProvider({
+                    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+                    credit: 'Esri, Maxar, Earthstar Geographics',
+                    maximumLevel: 19,
+                  })
+                );
+              } catch (imageryError) {
+                console.warn('[TripFlythrough] ArcGIS imagery failed, using OSM fallback', imageryError);
+                viewer.imageryLayers.addImageryProvider(
+                  new Cesium.OpenStreetMapImageryProvider({
+                    url: 'https://tile.openstreetmap.org/',
+                    credit: 'OpenStreetMap',
+                  })
+                );
+              }
             }
 
             // Load terrain async (safe: globe renders fine without it)
@@ -565,6 +602,11 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
 
             // NOW start the render loop (base layer is ready)
             viewer.useDefaultRenderLoop = true;
+            if (mobileSafeMode) {
+              viewer.targetFrameRate = 30;
+              viewer.scene.requestRenderMode = true;
+              viewer.scene.maximumRenderTimeChange = Infinity;
+            }
             console.info(`[TripFlythrough] [5/6] Viewer ready with profile: ${profile.name}`);
             break;
           } catch (profileError) {
@@ -607,7 +649,18 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
 
 
         try {
-          await applyBest3DQuality(Cesium, viewer, hasIonToken, compatibilityMode);
+          if (mobileSafeMode) {
+            viewer.resolutionScale = 1;
+            viewer.scene.highDynamicRange = false;
+            viewer.scene.globe.enableLighting = false;
+            viewer.scene.globe.showGroundAtmosphere = false;
+            viewer.shadows = false;
+            if (viewer.shadowMap) {
+              viewer.shadowMap.enabled = false;
+            }
+          } else {
+            await applyBest3DQuality(Cesium, viewer, hasIonToken, compatibilityMode);
+          }
         } catch (qualityError) {
           console.warn('[TripFlythrough] 3D quality boost failed, continuing.', qualityError);
         }
@@ -643,20 +696,21 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
 
         // Extract waypoints
         const waypoints = extractWaypoints();
-        waypointsRef.current = waypoints;
+        const activeWaypoints = lowPowerModeRef.current ? waypoints.slice(0, 24) : waypoints;
+        waypointsRef.current = activeWaypoints;
 
-        if (waypoints.length > 0) {
+        if (activeWaypoints.length > 0) {
           try {
             // Add route polyline
-            if (waypoints.length > 1) {
-              const positions = waypoints.map((w) =>
+            if (activeWaypoints.length > 1) {
+              const positions = activeWaypoints.map((w) =>
                 Cesium.Cartesian3.fromDegrees(w.lng, w.lat, 5)
               );
 
               polylineRef.current = viewer.entities.add({
                 polyline: {
                   positions: positions,
-                  width: 5,
+                  width: lowPowerModeRef.current ? 3 : 5,
                   material: new Cesium.PolylineGlowMaterialProperty({
                     glowPower: 0.35,
                     color: Cesium.Color.fromCssColorString('#fbbf24').withAlpha(0.85),
@@ -666,8 +720,22 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
             }
 
             // Add waypoint markers
-            waypoints.forEach((waypoint, index) => {
+            activeWaypoints.forEach((waypoint, index) => {
               const isFirst = index === 0;
+              const markerLabel = lowPowerModeRef.current ? undefined : {
+                text: `${index + 1}. ${waypoint.name}`,
+                font: '700 14px sans-serif',
+                fillColor: Cesium.Color.WHITE,
+                outlineColor: Cesium.Color.BLACK,
+                outlineWidth: 3,
+                style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+                horizontalOrigin: Cesium.HorizontalOrigin.LEFT,
+                pixelOffset: new Cesium.Cartesian2(12, -8),
+                heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND,
+                disableDepthTestDistance: Number.POSITIVE_INFINITY,
+                distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0, 5000),
+              };
               const marker = viewer.entities.add({
                 id: `waypoint-${waypoint.id}-${index}`,
                 position: Cesium.Cartesian3.fromDegrees(waypoint.lng, waypoint.lat, 10),
@@ -679,26 +747,13 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
                   heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND,
                   disableDepthTestDistance: Number.POSITIVE_INFINITY,
                 },
-                label: {
-                  text: `${index + 1}. ${waypoint.name}`,
-                  font: '700 14px sans-serif',
-                  fillColor: Cesium.Color.WHITE,
-                  outlineColor: Cesium.Color.BLACK,
-                  outlineWidth: 3,
-                  style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-                  verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-                  horizontalOrigin: Cesium.HorizontalOrigin.LEFT,
-                  pixelOffset: new Cesium.Cartesian2(12, -8),
-                  heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND,
-                  disableDepthTestDistance: Number.POSITIVE_INFINITY,
-                  distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0, 5000),
-                },
+                label: markerLabel,
               });
               markersRef.current.set(index, marker);
             });
 
             // Fly to first waypoint using street-level profile
-            const firstProfile = getStreetLevelFlightProfile(waypoints, 0);
+            const firstProfile = getStreetLevelFlightProfile(activeWaypoints, 0);
             const firstFlightOptions: any = {
               destination: Cesium.Cartesian3.fromDegrees(
                 firstProfile.cameraLng,
@@ -722,8 +777,8 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
                       viewer.scene.requestRender();
                     }
                     pumps++;
-                    if (pumps >= 6) clearInterval(interval);
-                  }, 500);
+                    if (pumps >= (lowPowerModeRef.current ? 3 : 6)) clearInterval(interval);
+                  }, lowPowerModeRef.current ? 700 : 500);
                 }
               },
             };
@@ -788,6 +843,7 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
 
     return () => {
       mounted = false;
+      lowPowerModeRef.current = false;
       isPlayingRef.current = false;
       if (orbitRef.current !== null) {
         cancelAnimationFrame(orbitRef.current);
@@ -856,6 +912,8 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
     const Cesium = cesiumRef.current;
     const viewer = viewerRef.current;
     if (!Cesium || !viewer || viewer.isDestroyed?.()) return;
+
+    if (lowPowerModeRef.current) return;
 
     const ORBIT_SPEED_DEG_PER_SEC = 8; // degrees per second — slow cinematic rotation
     const MIN_FRAME_MS = 100; // ~10fps max — give tiles time to load between frames
