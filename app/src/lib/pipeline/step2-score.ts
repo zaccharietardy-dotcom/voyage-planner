@@ -247,6 +247,20 @@ export function scoreAndSelectActivities(
   // 4. Filter irrelevant types
   const filtered = deduped.filter(a => !isIrrelevantAttraction(a));
 
+  // 4b. Auto-detect must-sees from API popularity data
+  const existingMustSeeCount = filtered.filter(a => a.mustSee).length;
+  if (existingMustSeeCount < 5) {
+    const autoDetectCandidates = filtered
+      .filter(a => !a.mustSee && (a.reviewCount || 0) >= 2000 && (a.rating || 0) >= 4.4
+        && a.source !== 'viator') // Don't auto-flag Viator tours as must-sees
+      .sort((a, b) => (b.reviewCount || 0) - (a.reviewCount || 0));
+    const slotsRemaining = 5 - existingMustSeeCount;
+    for (const candidate of autoDetectCandidates.slice(0, slotsRemaining)) {
+      candidate.mustSee = true;
+      console.log(`[Pipeline V2] Auto must-see: "${candidate.name}" (${candidate.reviewCount} reviews, ${candidate.rating} rating)`);
+    }
+  }
+
   // 5. Score each activity
   const cityCenter = data.destCoords;
 
@@ -290,9 +304,9 @@ export function scoreAndSelectActivities(
   // Over-select to provide margin for rebalancing drops and gap-fill candidates.
   const fullDays = Math.max(0, preferences.durationDays - 2);
   const targetCount = Math.max(
-    mustSees.length + Math.ceil(preferences.durationDays * 3.5),
-    preferences.durationDays * 5,
-    14 // Absolute minimum for any trip
+    mustSees.length + Math.ceil(preferences.durationDays * 4.5),
+    preferences.durationDays * 6,
+    16 // Absolute minimum for any trip
   );
   const remainingSlots = Math.max(0, targetCount - mustSees.length);
   const selected: ScoredActivity[] = [...mustSees, ...curatedNonMustSees.slice(0, remainingSlots)];
@@ -401,6 +415,8 @@ function isInterestingEnough(activity: ScoredActivity): boolean {
   if (rating >= 4.3 && reviews >= 120) return true;
   if (rating >= 4.2 && reviews >= 250) return true;
   if (reviews >= 1500 && rating >= 4.0) return true;
+  if (rating >= 4.0 && reviews >= 500) return true;  // Popular but not top-rated
+  if (rating >= 4.1 && reviews >= 200) return true;  // Decent with moderate engagement
 
   return false;
 }

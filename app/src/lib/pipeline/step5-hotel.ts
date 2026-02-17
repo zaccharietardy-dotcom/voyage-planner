@@ -52,7 +52,7 @@ export function selectHotelByBarycenter(
   // If too few candidates, relax constraint
   if (candidates.length < 3) {
     candidates = hotels
-      .filter(h => h.latitude && h.longitude)
+      .filter(h => h.latitude && h.longitude && h.pricePerNight > 0)
       .sort((a, b) => a.pricePerNight - b.pricePerNight)
       .slice(0, 10);
   }

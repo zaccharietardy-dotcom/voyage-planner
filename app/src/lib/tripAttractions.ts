@@ -1,7 +1,7 @@
 import { Attraction } from './services/attractions';
 import { Flight } from './types';
 import { findKnownViatorProduct } from './services/viatorKnownProducts';
-import { applyDurationRules } from './services/claudeItinerary';
+import { applyDurationRules, getMinimumDurationOverrides } from './services/claudeItinerary';
 
 /**
  * Post-traitement: corrige les durées irréalistes
@@ -9,11 +9,23 @@ import { applyDurationRules } from './services/claudeItinerary';
  * Sinon → déléguer à applyDurationRules() (caps/floors partagés)
  */
 export function fixAttractionDuration(attraction: Attraction): Attraction {
-  // Apply duration rules to ALL attractions — even "verified" ones.
-  // "Verified" means the source data (name, GPS, rating) is reliable,
-  // but durations are often wildly wrong (e.g. Square Louise Michel = 180min).
-  // Duration CAPS (square → 30min, bridge → 45min) are about realistic visit times,
-  // not data source quality. FLOORS (Louvre ≥ 150min) are also always applicable.
+  // Viator activities have API-verified bookable durations (fixedDurationInMinutes).
+  // Only apply duration FLOORS (e.g., Vatican >= 180min) but NEVER caps
+  // (e.g., "tower" -> 90min would wrongly truncate a 3h tower tour).
+  if (attraction.providerName === 'Viator' && attraction.duration > 0) {
+    let floored = attraction.duration;
+    const overrides = getMinimumDurationOverrides();
+    for (const [pattern, minMin] of overrides) {
+      if (pattern.test(attraction.name) && floored < minMin) {
+        floored = minMin;
+        break;
+      }
+    }
+    if (floored < 15) floored = 15;
+    return floored !== attraction.duration ? { ...attraction, duration: floored } : attraction;
+  }
+
+  // Non-Viator: apply full rules (caps + floors) as before
   const fixedDuration = applyDurationRules(attraction.name, attraction.duration);
   if (fixedDuration !== attraction.duration) {
     return { ...attraction, duration: fixedDuration };

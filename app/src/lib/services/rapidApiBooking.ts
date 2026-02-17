@@ -64,7 +64,7 @@ interface RawBookingProperty {
   url?: string;
   photoUrls?: string[];
   mainPhotoUrl?: string;
-  priceBreakdown?: { grossPrice?: { value?: number } };
+  priceBreakdown?: { grossPrice?: { value?: number }; allInclusivePrice?: { value?: number }; strikethroughPrice?: { value?: number } };
 }
 
 interface RawBookingHotelItem {
@@ -72,9 +72,10 @@ interface RawBookingHotelItem {
   hotel_id?: string | number;
   id?: string | number;
   property?: RawBookingProperty;
-  price_breakdown?: { gross_price?: number };
+  price_breakdown?: { gross_price?: number; all_inclusive_price?: number };
   min_total_price?: number;
-  composite_price_breakdown?: { gross_amount_per_night?: { value?: number } };
+  composite_price_breakdown?: { gross_amount_per_night?: { value?: number }; all_inclusive_amount?: { value?: number } };
+  price?: number;
   hotel_name?: string;
   hotel_name_trans?: string;
   country_trans?: string;
@@ -341,9 +342,14 @@ export async function searchHotelsWithBookingApi(
         if (p.soldout === 1 || p.soldout === true) return false;
         // Garder seulement ceux avec un prix
         const price = p.property?.priceBreakdown?.grossPrice?.value
+          || p.property?.priceBreakdown?.allInclusivePrice?.value
+          || p.property?.priceBreakdown?.strikethroughPrice?.value
           || p.price_breakdown?.gross_price
+          || p.price_breakdown?.all_inclusive_price
           || p.min_total_price
           || p.composite_price_breakdown?.gross_amount_per_night?.value
+          || p.composite_price_breakdown?.all_inclusive_amount?.value
+          || p.price
           || 0;
         return price > 0;
       })
@@ -367,10 +373,18 @@ export async function searchHotelsWithBookingApi(
     const hotels: BookingHotel[] = availableHotels.map((p, index: number) => {
       // Extraire le prix (plusieurs formats possibles selon la version de l'API)
       const grossPrice = p.property?.priceBreakdown?.grossPrice?.value
+        || p.property?.priceBreakdown?.allInclusivePrice?.value
+        || p.property?.priceBreakdown?.strikethroughPrice?.value
         || p.price_breakdown?.gross_price
+        || p.price_breakdown?.all_inclusive_price
         || p.min_total_price
         || p.composite_price_breakdown?.gross_amount_per_night?.value
+        || p.composite_price_breakdown?.all_inclusive_amount?.value
+        || p.price
         || 0;
+      if (grossPrice === 0) {
+        console.warn(`[RapidAPI Booking] Hotel "${p.property?.name || p.hotel_name || 'unknown'}" has no extractable price — skipping`);
+      }
       const totalPrice = Math.round(grossPrice);
       const pricePerNight = nights > 0 ? Math.round(totalPrice / nights) : totalPrice;
 

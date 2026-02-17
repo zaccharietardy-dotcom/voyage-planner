@@ -3357,9 +3357,8 @@ export async function assembleTripSchedule(
     if (day.isDayTrip) return false;
     const isArrivalOrDeparture = day.dayNumber === 1 || day.dayNumber === days.length;
     if (isArrivalOrDeparture) return false;
-    const activityCount = day.items.filter((item) => item.type === 'activity').length;
-    if (activityCount >= 3) return false; // Day has enough activities
-    return computeLargestGapMinutes(day) >= 180;
+    // Removed activityCount gate: a day with 3 short activities can still have 4h+ gaps
+    return computeLargestGapMinutes(day) >= 150; // Lowered from 180 to 150 min
   });
   if (catastrophicGapDays.length > 0) {
     console.warn(`[Pipeline V2] ⚠ ${catastrophicGapDays.length} full day(s) still have gaps >= 3h after gap-fill. Running emergency fill...`);
@@ -5271,12 +5270,17 @@ function containsAnyKeyword(text: string, keywords: string[]): boolean {
 }
 
 function isWorthwhileGapFillActivity(activity: ScoredActivity): boolean {
+  // Block food/drink/shopping/nightlife by ActivityType
+  const actType = (activity.type || '').toLowerCase();
+  if (['gastronomy', 'nightlife', 'shopping'].includes(actType)) return false;
+
   const text = normalizeActivityCandidateName(`${activity.name || ''} ${activity.description || ''}`);
   if (text && containsAnyKeyword(text, GAP_FILL_LOW_VALUE_KEYWORDS)) return false;
   if (text && containsAnyKeyword(text, GAP_FILL_FOOD_ESTABLISHMENT_KEYWORDS)) return false;
 
-  const type = (activity.type || '').toLowerCase();
-  if (type === 'culture' || type === 'nature') return true;
+  // Accept all attraction-like types (including Google Places mapped types like 'museum', 'park', 'attraction')
+  if (['culture', 'nature', 'museum', 'park', 'gallery', 'religious',
+       'zoo', 'attraction', 'stadium', 'amusement_park', 'market'].includes(actType)) return true;
   if (!text) return false;
 
   return containsAnyKeyword(text, GAP_FILL_WORTHWHILE_KEYWORDS);

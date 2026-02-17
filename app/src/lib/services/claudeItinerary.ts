@@ -57,6 +57,17 @@ const DURATION_FLOORS: [RegExp, number][] = [
 ];
 
 /**
+ * Returns the combined list of duration floor patterns (minimum visit times).
+ * Merges MINIMUM_DURATION_OVERRIDES (from destinationData) with the local
+ * DURATION_FLOORS defined above.
+ * Used by fixAttractionDuration to apply floors-only logic to Viator activities
+ * without applying any caps that would incorrectly truncate API-verified durations.
+ */
+export function getMinimumDurationOverrides(): [RegExp, number][] {
+  return [...MINIMUM_DURATION_OVERRIDES, ...DURATION_FLOORS];
+}
+
+/**
  * Applique toutes les règles de durée (overrides, caps, floors) à une attraction.
  * Utilisable pour les attractions du pool ET les additionalSuggestions.
  *

@@ -23,6 +23,9 @@ const EXCLUDED_GOOGLE_TYPES = [
   'administrative_area_level_4', 'administrative_area_level_5',
   'country', 'colloquial_area', 'sublocality',
   'travel_agency', 'real_estate_agency', 'insurance_agency',
+  // Food/drink establishments should not be in attraction pool
+  'restaurant', 'cafe', 'bakery', 'meal_takeaway', 'meal_delivery',
+  'food', 'bar', 'night_club',
 ];
 
 /** Google Places types that indicate a genuine tourist attraction */

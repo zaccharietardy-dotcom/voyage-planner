@@ -106,8 +106,8 @@ export function TripOnboarding() {
     const placement = rect.top < viewportHeight / 2 ? 'bottom' : 'top';
 
     setTooltipPos({
-      top: rect.top + window.scrollY,
-      left: rect.left + window.scrollX,
+      top: rect.top,
+      left: rect.left,
       width: rect.width,
       height: rect.height,
       placement,
@@ -167,7 +167,7 @@ export function TripOnboarding() {
         onClick={dismiss}
         style={{ pointerEvents: 'auto' }}
       >
-        <svg className="w-full h-full" style={{ position: 'absolute', top: 0, left: 0 }}>
+        <svg className="w-full h-full" style={{ position: 'fixed', top: 0, left: 0 }}>
           <defs>
             <mask id="onboarding-mask">
               <rect x="0" y="0" width="100%" height="100%" fill="white" />

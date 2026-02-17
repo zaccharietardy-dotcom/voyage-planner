@@ -91,6 +91,11 @@ describe('step2-score interest curation', () => {
       attraction({ id: 'good-4', name: 'Panthéon', rating: 4.6, reviewCount: 20000 }),
       attraction({ id: 'good-5', name: 'Tuileries', rating: 4.5, reviewCount: 18000 }),
       attraction({ id: 'good-6', name: 'Opéra Garnier', rating: 4.5, reviewCount: 25000 }),
+      // Extra good activities to keep pool above safety floor after auto must-see detection
+      attraction({ id: 'good-7', name: 'Arc de Triomphe', rating: 4.6, reviewCount: 30000 }),
+      attraction({ id: 'good-8', name: 'Musée Rodin', rating: 4.5, reviewCount: 12000 }),
+      attraction({ id: 'good-9', name: 'Palais Royal', rating: 4.5, reviewCount: 10000 }),
+      attraction({ id: 'good-10', name: 'Place des Vosges', rating: 4.5, reviewCount: 8000 }),
       attraction({ id: 'weak-nonmust', name: 'Generic Spot', rating: 3.9, reviewCount: 24 }),
     ];
 

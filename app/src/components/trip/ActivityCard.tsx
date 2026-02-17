@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { TripItem, TripItemType, Flight, Restaurant, TRIP_ITEM_COLORS } from '@/lib/types';
+import { TripItem, TripItemType, Flight, Restaurant, Accommodation, TRIP_ITEM_COLORS } from '@/lib/types';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -67,6 +67,7 @@ interface ActivityCardProps {
   onSelectRestaurantAlternative?: (item: TripItem, restaurant: Restaurant) => void;
   onSelectSelfMeal?: (item: TripItem) => void;
   showPriceComparison?: boolean;
+  hotelAlternatives?: Accommodation[];
 }
 
 const TYPE_ICONS: Record<TripItemType, SvgIconComponent> = {
@@ -256,6 +257,7 @@ export function ActivityCard({
   onSelectRestaurantAlternative,
   onSelectSelfMeal,
   showPriceComparison = false,
+  hotelAlternatives,
 }: ActivityCardProps) {
   const [showPriceComparisonDialog, setShowPriceComparisonDialog] = useState(false);
   const transportMode = item.type === 'transport' ? getTransportModeForItem(item) : undefined;
@@ -270,6 +272,8 @@ export function ActivityCard({
   const showImage = hasImage && !imgError;
   // Restaurant with alternatives: render as flat card with 3 equal suggestion cards
   const hasRestaurantAlternatives = item.type === 'restaurant' && item.restaurant && item.restaurantAlternatives && item.restaurantAlternatives.length > 0;
+  // Hotel with alternatives: show flat carousel of options below the main card
+  const hasHotelAlternatives = (item.type === 'hotel' || item.type === 'checkin') && hotelAlternatives && hotelAlternatives.length > 0;
   const isHeroType = IMAGE_TYPES.includes(item.type) && !hasRestaurantAlternatives;
   // Hero cards always use the "image" style (white text, overlay) — either with a real image or a gradient fallback
   const useHeroStyle = isHeroType;
@@ -638,6 +642,14 @@ export function ActivityCard({
         <RestaurantSuggestionsFlat
           item={item}
           onSelectRestaurantAlternative={onSelectRestaurantAlternative}
+        />
+      )}
+
+      {/* Hotel alternatives carousel */}
+      {hasHotelAlternatives && (
+        <HotelAlternativesFlat
+          alternatives={hotelAlternatives!}
+          selectedId={item.accommodation?.id}
         />
       )}
 
@@ -1278,6 +1290,166 @@ function RestaurantSuggestionsFlat({
             </div>
           );
         })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Flat hotel alternatives layout: up to 3 equal cards side-by-side.
+ * Mirrors the RestaurantSuggestionsFlat pattern for visual consistency.
+ */
+function HotelAlternativesFlat({
+  alternatives,
+  selectedId,
+  onSelect,
+}: {
+  alternatives: Accommodation[];
+  selectedId?: string;
+  onSelect?: (hotel: Accommodation) => void;
+}) {
+  const hotels = alternatives.slice(0, 3);
+  if (hotels.length === 0) return null;
+
+  const renderStars = (stars?: number) => {
+    const count = Math.min(stars || 0, 5);
+    if (count === 0) return null;
+    return (
+      <span className="inline-flex items-center gap-0.5">
+        {Array.from({ length: count }).map((_, i) => (
+          <Star key={i} className="h-2.5 w-2.5 fill-amber-400 text-amber-400" />
+        ))}
+      </span>
+    );
+  };
+
+  const getHotelTypeLabel = (type: Accommodation['type']): string => {
+    const LABELS: Record<Accommodation['type'], string> = {
+      hotel: 'Hotel',
+      apartment: 'Appartement',
+      hostel: 'Auberge',
+      bnb: 'B&B',
+      resort: 'Resort',
+    };
+    return LABELS[type] ?? 'Hébergement';
+  };
+
+  return (
+    <div className="px-3.5 pb-3" onClick={(e) => e.stopPropagation()}>
+      <div className="mb-2 flex items-center justify-between text-[11px] text-muted-foreground sm:hidden">
+        <span>{hotels.length} hébergements disponibles</span>
+        <span className="inline-flex items-center gap-1">
+          <ChevronsLeftRight className="h-3 w-3" />
+          Faites glisser
+        </span>
+      </div>
+
+      {/* Carousel horizontal mobile, grille 3 colonnes desktop */}
+      <div className="relative">
+        <div className="pointer-events-none absolute bottom-1 left-0 top-0 w-5 bg-gradient-to-r from-background to-transparent sm:hidden" />
+        <div className="pointer-events-none absolute bottom-1 right-0 top-0 w-5 bg-gradient-to-l from-background to-transparent sm:hidden" />
+        <div className="scrollbar-hide -mx-1 flex gap-2 overflow-x-auto px-1 pb-1 snap-x snap-mandatory sm:overflow-visible sm:grid sm:grid-cols-3">
+          {hotels.map((hotel) => {
+            const isSelected = hotel.id === selectedId;
+            const photo = hotel.photos?.[0];
+
+            return (
+              <div
+                key={hotel.id}
+                className={cn(
+                  "relative overflow-hidden rounded-xl border-2 transition-all duration-200 snap-center cursor-pointer",
+                  "min-w-[75vw] sm:min-w-0 aspect-[4/3]",
+                  isSelected
+                    ? "border-primary shadow-lg shadow-primary/20 ring-2 ring-primary/40"
+                    : "border-border/50 hover:border-white/20 hover:shadow-md opacity-90 hover:opacity-100"
+                )}
+                style={{ minHeight: '160px' }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSelect?.(hotel);
+                }}
+              >
+                {/* Background photo or gradient */}
+                {photo ? (
+                  <img
+                    src={photo}
+                    alt={hotel.name}
+                    className="absolute inset-0 h-full w-full object-cover"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="absolute inset-0 bg-gradient-to-br from-slate-600 to-slate-800" />
+                )}
+                {/* Dark gradient overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-black/15" />
+
+                {/* Selected checkmark */}
+                {isSelected && (
+                  <div className="absolute top-2 right-2 z-20 bg-emerald-500 rounded-full p-1.5 shadow-lg">
+                    <Check className="h-3.5 w-3.5 text-white" strokeWidth={3} />
+                  </div>
+                )}
+
+                {/* Card content */}
+                <div className="relative z-10 h-full flex flex-col justify-between p-2.5">
+                  {/* Top: type badge + breakfast badge */}
+                  <div className="flex items-start justify-between gap-1">
+                    <div className="flex items-center gap-1 flex-wrap">
+                      <span className="inline-flex items-center rounded-full bg-black/40 backdrop-blur-sm px-2 py-0.5 text-[10px] font-medium text-white/90">
+                        {getHotelTypeLabel(hotel.type)}
+                      </span>
+                      {hotel.breakfastIncluded && (
+                        <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-500/30 backdrop-blur-sm px-2 py-0.5 text-[10px] font-medium text-emerald-200">
+                          Petit-déj inclus
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Bottom: name, stars, rating, price, booking */}
+                  <div>
+                    <h5 className="font-bold text-sm text-white leading-tight line-clamp-2 drop-shadow-md">
+                      {hotel.name}
+                    </h5>
+                    <div className="flex items-center gap-2 mt-1 text-[11px] text-white/85">
+                      {renderStars(hotel.stars)}
+                      {hotel.rating > 0 && (
+                        <span className="inline-flex items-center gap-0.5 font-semibold">
+                          <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                          {hotel.rating.toFixed(1)}
+                          {hotel.reviewCount > 0 && (
+                            <span className="text-white/50 font-normal">({hotel.reviewCount})</span>
+                          )}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1.5 mt-1 text-[11px] text-white/85">
+                      <span className="font-bold text-white">{hotel.pricePerNight}€</span>
+                      <span className="text-white/60 font-normal">/nuit</span>
+                      {hotel.totalPrice && hotel.totalPrice > 0 && (
+                        <span className="text-white/55 text-[10px]">· Total: {hotel.totalPrice}€</span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1.5 mt-1.5">
+                      {hotel.bookingUrl && (
+                        <a
+                          href={hotel.bookingUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-primary text-primary-foreground text-[10px] font-semibold hover:opacity-90 transition-opacity shadow-sm"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <ExternalLink className="h-2.5 w-2.5" />
+                          Réserver
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
