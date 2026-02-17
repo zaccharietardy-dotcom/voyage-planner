@@ -101,7 +101,7 @@ const GEO_STRICT_MAX_PRUNED_OPTIONALS_PER_DAY = 2;
 const GEO_STRICT_LOCAL_LEG_MAX_KM = 3.5;
 const GEO_STRICT_LOCAL_MOVE_TOLERANCE_KM = 0.1;
 const GAP_FILL_MIN_GAP_MIN = 105;
-const GAP_FILL_MAX_INSERTIONS_PER_DAY = 2;
+const GAP_FILL_MAX_INSERTIONS_PER_DAY = 3;
 const GAP_FILL_MAX_DETOUR_KM = 1.2;
 const GAP_FILL_MIN_DURATION_MIN = 45;
 const GAP_FILL_WORTHWHILE_KEYWORDS = [
@@ -133,6 +133,36 @@ const GAP_FILL_WORTHWHILE_KEYWORDS = [
   'belvedere',
   'waterfront',
   'canal',
+  'piazza',
+  'plaza',
+  'square',
+  'fountain',
+  'fontana',
+  'ponte',
+  'bridge',
+  'torre',
+  'tower',
+  'duomo',
+  'teatro',
+  'theatre',
+  'theater',
+  'opera',
+  'library',
+  'biblioteca',
+  'arch',
+  'arco',
+  'porta',
+  'gate',
+  'cemetery',
+  'cimetiere',
+  'cimitero',
+  'statue',
+  'sculpture',
+  'arena',
+  'ruin',
+  'quartier',
+  'quarter',
+  'district',
 ];
 const GAP_FILL_LOW_VALUE_KEYWORDS = [
   'segway',
@@ -157,6 +187,14 @@ const GAP_FILL_WEAK_QUALITY_FLAG_FRAGMENTS = [
   'filtered_low_plus_value',
   'city_fallback',
   'geo_fallback',
+];
+const GAP_FILL_FOOD_ESTABLISHMENT_KEYWORDS = [
+  'restaurant', 'ristorante', 'trattoria', 'osteria', 'pizzeria', 'gelateria',
+  'panificio', 'paninoteca', 'sandwicherie', 'brasserie', 'bistrot', 'bistro',
+  'cafe', 'caffe', 'caffetteria', 'coffee', 'bakery', 'boulangerie', 'patisserie',
+  'pasticceria', 'bar ', 'pub ', 'taverna', 'taverne', 'kebab', 'sushi',
+  'burger', 'grill', 'diner', 'cantina', 'enoteca', 'wine bar',
+  'food', 'brunch', 'breakfast', 'lunch', 'dinner',
 ];
 
 export function getAirportPreDepartureLeadMinutes(flight: Flight): number {
@@ -3286,7 +3324,19 @@ export async function assembleTripSchedule(
     console.warn('[Pipeline V2] Section 13h failed (non-critical):', error);
   }
 
+  // 13i. Geo-strict intra-day cleanup: prune optional outliers that create zigzags.
+  // Run BEFORE gap-fill so that gap-fill can backfill any gaps created by pruning.
+  try {
+    const prunedCount = pruneIntraDayZigzagsStrict(days, directionsCache);
+    if (prunedCount > 0) {
+      console.log(`[Pipeline V2] Section 13i: pruned ${prunedCount} optional activity(ies) to reduce intra-day zigzags`);
+    }
+  } catch (error) {
+    console.warn('[Pipeline V2] Section 13i failed (non-critical):', error);
+  }
+
   // 13ha. Fill large idle gaps with nearby worthwhile optional activities.
+  // Runs after zigzag pruning to also backfill gaps created by the pruner.
   try {
     const filledCount = fillLargeIntraDayGapsWithNearbyActivities(
       days,
@@ -3299,16 +3349,6 @@ export async function assembleTripSchedule(
     }
   } catch (error) {
     console.warn('[Pipeline V2] Section 13ha failed (non-critical):', error);
-  }
-
-  // 13i. Geo-strict intra-day cleanup: prune optional outliers that create zigzags.
-  try {
-    const prunedCount = pruneIntraDayZigzagsStrict(days, directionsCache);
-    if (prunedCount > 0) {
-      console.log(`[Pipeline V2] Section 13i: pruned ${prunedCount} optional activity(ies) to reduce intra-day zigzags`);
-    }
-  } catch (error) {
-    console.warn('[Pipeline V2] Section 13i failed (non-critical):', error);
   }
 
   // 13f. Final route metadata coherence pass after all swaps/re-orders.
@@ -5206,6 +5246,7 @@ function containsAnyKeyword(text: string, keywords: string[]): boolean {
 function isWorthwhileGapFillActivity(activity: ScoredActivity): boolean {
   const text = normalizeActivityCandidateName(`${activity.name || ''} ${activity.description || ''}`);
   if (text && containsAnyKeyword(text, GAP_FILL_LOW_VALUE_KEYWORDS)) return false;
+  if (text && containsAnyKeyword(text, GAP_FILL_FOOD_ESTABLISHMENT_KEYWORDS)) return false;
 
   const type = (activity.type || '').toLowerCase();
   if (type === 'culture' || type === 'nature') return true;
@@ -5434,11 +5475,15 @@ export function fillLargeIntraDayGapsWithNearbyActivities(
 
           const prevLegKm = calculateDistance(prev.latitude, prev.longitude, candidate.latitude, candidate.longitude);
           const nextLegKm = calculateDistance(candidate.latitude, candidate.longitude, next.latitude, next.longitude);
-          if (prevLegKm > GEO_STRICT_LOCAL_LEG_MAX_KM || nextLegKm > GEO_STRICT_LOCAL_LEG_MAX_KM) continue;
+
+          // Scale constraints based on gap severity: larger gaps allow more geographic flexibility
+          const effectiveMaxDetourKm = gapMinutes >= 240 ? 3.5 : gapMinutes >= 180 ? 2.5 : GAP_FILL_MAX_DETOUR_KM;
+          const effectiveMaxLegKm = gapMinutes >= 240 ? 5.0 : gapMinutes >= 180 ? 4.5 : GEO_STRICT_LOCAL_LEG_MAX_KM;
+          if (prevLegKm > effectiveMaxLegKm || nextLegKm > effectiveMaxLegKm) continue;
 
           const directKm = calculateDistance(prev.latitude, prev.longitude, next.latitude, next.longitude);
           const detourKm = prevLegKm + nextLegKm - directKm;
-          if (detourKm > GAP_FILL_MAX_DETOUR_KM) continue;
+          if (detourKm > effectiveMaxDetourKm) continue;
 
           const angle = computeTurnAngleDeg(
             { latitude: prev.latitude, longitude: prev.longitude },

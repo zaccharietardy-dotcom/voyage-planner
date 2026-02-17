@@ -1172,6 +1172,36 @@ function rebalanceClustersForFlights(
     const routeDeltaKm = combinedRouteCostDeltaKm(sourceIdx, targetIdx, activity);
 
     if (!activity.mustSee) {
+      // Relax constraints when the SOURCE day is overloaded AND the target is nearly empty,
+      // but never separate activities that are geographically close neighbors in the source cluster.
+      const sourceOverloadMin = dayTemporalOverloadMinutes(sourceIdx);
+      const targetIsNearlySparse = clusters[targetIdx].activities.length <= 1;
+      const sourceIsOverloaded = sourceOverloadMin >= 30;
+
+      if (targetIsNearlySparse && sourceIsOverloaded) {
+        // Before allowing a relaxed move, check that the activity is NOT tightly coupled
+        // geographically to another activity in the source cluster (< 400m apart).
+        // This prevents splitting e.g. Tour Eiffel and Champs de Mars across different days.
+        const hasCloseNeighborInSource = clusters[sourceIdx].activities.some(
+          (a) =>
+            a.id !== activity.id
+            && a.latitude && a.longitude
+            && calculateDistance(activity.latitude!, activity.longitude!, a.latitude, a.longitude) < 0.4
+        );
+        if (hasCloseNeighborInSource) {
+          // Fall through to default strict constraints — don't separate geo-coupled POIs
+          if (routeDeltaKm > 0.25) return false;
+          if (moveExceedsGeoCap(targetIdx, activity)) return false;
+          if (targetDist >= sourceDist - 0.01) return false;
+          return true;
+        }
+        // Relaxed move: allow up to 1.0 km route delta for isolated activities
+        if (routeDeltaKm > 1.0) return false;
+        if (moveExceedsGeoCap(targetIdx, activity)) return false;
+        return true;
+      }
+
+      // Default strict constraints
       if (routeDeltaKm > 0.25) return false;
       if (moveExceedsGeoCap(targetIdx, activity)) return false;
       if (targetDist >= sourceDist - 0.01) return false;
