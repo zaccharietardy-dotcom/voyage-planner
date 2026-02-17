@@ -147,30 +147,36 @@ https://www.google.com/maps/search/?api=1&query=Restaurant+Name,+Address
 ## 5. Transport (Trains)
 
 ### Pas d'API - Liens manuels vers Omio
-Pas d'API de train utilisée. Les liens sont générés manuellement vers Omio.
+Pas d'API Omio de recherche trajets utilisée. Les liens sont générés en deep-link Omio.
 
 ### Génération du lien
 ```typescript
-https://www.omio.fr/search-frontend/results/train/paris/amsterdam/2026-02-10/2
+https://www.omio.fr/trains/{originSlug}/{destinationSlug}?departure_date=YYYY-MM-DD
 ```
 
 ### Fichier
-`src/lib/services/linkGenerator.ts`
+`src/lib/services/transport.ts`
+
+### Notes importantes
+- Fallback hub géographique pour villes suburbaines (ex: `Palaiseau` -> `Paris`).
+- Retour avec inversion de direction (`destination -> origin`) + date retour.
+- Référence détaillée: `docs/omio-link-strategy.md`
 
 ---
 
-## 6. Transport (Avions)
+## 6. Transport (Bus / Avions)
 
-### Pas d'API - Liens manuels vers Google Flights
-Pas d'API de vol utilisée. Les liens sont générés vers Google Flights.
+### Pas d'API de recherche Omio - Liens deep-link
+Les liens bus et vols sont générés en deep-link Omio (et Aviasales pour les vols selon le contexte pipeline).
 
-### Génération du lien
+### Génération des liens
 ```typescript
-https://www.google.com/travel/flights?q=Flights%20from%20Paris%20to%20Amsterdam%20on%202026-02-10
+https://www.omio.fr/bus/{originSlug}/{destinationSlug}?departure_date=YYYY-MM-DD
+https://www.omio.fr/vols/{originSlug}/{destinationSlug}?departure_date=YYYY-MM-DD
 ```
 
 ### Fichier
-`src/lib/services/linkGenerator.ts`
+`src/lib/services/transport.ts`
 
 ---
 

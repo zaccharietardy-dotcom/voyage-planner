@@ -2,14 +2,20 @@ import {
   addHotelBoundaryTransportItems,
   buildInterCityFallbackTransportPayload,
   compressIntraDayGaps,
+  fillLargeIntraDayGapsWithNearbyActivities,
+  findBestMealSlot,
   fixRestaurantOutliers,
   getAirportPreDepartureLeadMinutes,
   getTransportModeFromItemData,
   normalizeReturnTransportBookingUrl,
+  pruneIntraDayZigzagsStrict,
   resolveOutboundAirportParking,
   normalizeSuggestedDayStartHour,
   rebalanceAdjacentDayLoad,
+  tryMoveOptionalActivityIntoGap,
 } from '../step7-assemble';
+import type { ScoredActivity } from '../types';
+import { DayScheduler, parseTime } from '../../services/scheduler';
 import type { Accommodation, Flight, Restaurant, TripDay, TripItem, TripPreferences, TransportOptionSummary } from '../../types';
 
 describe('step7-assemble helpers', () => {
@@ -44,6 +50,31 @@ describe('step7-assemble helpers', () => {
     estimatedCost: 0,
     duration: 60,
     dataReliability: 'verified',
+  });
+
+  const gapFillActivity = (
+    id: string,
+    name: string,
+    lat: number,
+    lng: number,
+    overrides: Partial<ScoredActivity> = {}
+  ): ScoredActivity => ({
+    id,
+    name,
+    type: 'culture',
+    description: name,
+    duration: 60,
+    estimatedCost: 0,
+    latitude: lat,
+    longitude: lng,
+    rating: 4.6,
+    mustSee: false,
+    bookingRequired: false,
+    openingHours: { open: '09:00', close: '19:00' },
+    score: 55,
+    source: 'google_places',
+    reviewCount: 1200,
+    ...overrides,
   });
 
   const basePreferences: TripPreferences = {
@@ -311,6 +342,52 @@ describe('step7-assemble helpers', () => {
     expect(sorted[2].startTime).toBe('18:00');
   });
 
+  it('findBestMealSlot favors geo-cleaner gap when timing penalty is equivalent', () => {
+    const dayDate = new Date('2026-03-02T00:00:00.000Z');
+    const scheduler = new DayScheduler(dayDate, parseTime(dayDate, '08:00'), parseTime(dayDate, '22:00'));
+
+    scheduler.insertFixedItem({
+      id: 'before-lunch',
+      title: 'Before Lunch',
+      type: 'activity',
+      startTime: parseTime(dayDate, '11:30'),
+      endTime: parseTime(dayDate, '12:00'),
+      data: { latitude: 45.4628, longitude: 9.1800 },
+    });
+    scheduler.insertFixedItem({
+      id: 'midday',
+      title: 'Midday',
+      type: 'activity',
+      startTime: parseTime(dayDate, '13:00'),
+      endTime: parseTime(dayDate, '13:30'),
+      data: { latitude: 45.4628, longitude: 9.2000 },
+    });
+    scheduler.insertFixedItem({
+      id: 'after-lunch',
+      title: 'After Lunch',
+      type: 'activity',
+      startTime: parseTime(dayDate, '14:30'),
+      endTime: parseTime(dayDate, '15:00'),
+      data: { latitude: 45.4628, longitude: 9.2200 },
+    });
+
+    const slot = findBestMealSlot(
+      scheduler,
+      dayDate,
+      '12:00',
+      '15:00',
+      30,
+      '13:00',
+      {
+        mealCoords: { latitude: 45.4628, longitude: 9.1900 },
+      }
+    );
+
+    expect(slot).toBeTruthy();
+    expect(slot?.start).toEqual(parseTime(dayDate, '12:30'));
+    expect(slot?.end).toEqual(parseTime(dayDate, '13:00'));
+  });
+
   it('replaces outlier restaurants from pool and avoids same-day duplicates', async () => {
     const closeRestaurant: Restaurant = {
       id: 'r-close',
@@ -459,15 +536,15 @@ describe('step7-assemble helpers', () => {
           title: 'Petit-déjeuner — Loin du centre',
           description: '',
           locationName: 'Loin',
-          latitude: 46.4599,
-          longitude: 6.8441,
+          latitude: 48.8899,
+          longitude: 2.3891,
           orderIndex: 0,
           restaurant: {
             id: 'r-far',
             name: 'Loin du centre',
             address: 'Far',
-            latitude: 46.4599,
-            longitude: 6.8441,
+            latitude: 48.8899,
+            longitude: 2.3891,
             rating: 4.0,
             reviewCount: 12,
             priceLevel: 2,
@@ -476,7 +553,7 @@ describe('step7-assemble helpers', () => {
             openingHours: {},
           },
         },
-        baseActivity('a1', '10:00', '11:00', 46.4592, 6.8446),
+        baseActivity('a1', '10:00', '11:00', 48.8612, 2.3386),
       ],
     };
 
@@ -492,7 +569,271 @@ describe('step7-assemble helpers', () => {
     expect(breakfastItem?.selectionSource).toBe('pool');
   });
 
-  it('rebalances adjacent day load by moving an optional activity', () => {
+  it('replaces breakfast that is close to hotel but too far from first activity', async () => {
+    const breakfastNearHotelButFarActivity: Restaurant = {
+      id: 'r-near-hotel',
+      name: 'Hotel Corner Cafe',
+      address: 'Paris',
+      latitude: 48.8569,
+      longitude: 2.3524,
+      rating: 4.7,
+      reviewCount: 450,
+      priceLevel: 2,
+      cuisineTypes: ['cafe'],
+      dietaryOptions: ['none'],
+      openingHours: {},
+    };
+    const balancedBreakfast: Restaurant = {
+      id: 'r-balanced',
+      name: 'Canal Morning Cafe',
+      address: 'Paris',
+      latitude: 48.8622,
+      longitude: 2.3526,
+      rating: 4.6,
+      reviewCount: 260,
+      priceLevel: 2,
+      cuisineTypes: ['cafe'],
+      dietaryOptions: ['none'],
+      openingHours: {},
+    };
+
+    const day: TripDay = {
+      dayNumber: 1,
+      date: new Date('2026-03-02T00:00:00.000Z'),
+      items: [
+        {
+          id: 'meal-1-breakfast',
+          dayNumber: 1,
+          startTime: '08:00',
+          endTime: '08:45',
+          type: 'restaurant',
+          title: 'Petit-déjeuner — Loin du programme',
+          description: '',
+          locationName: 'Loin',
+          latitude: 48.8568,
+          longitude: 2.3523,
+          orderIndex: 0,
+          restaurant: {
+            id: 'r-original',
+            name: 'Loin du programme',
+            address: 'Paris',
+            latitude: 48.8568,
+            longitude: 2.3523,
+            rating: 4.1,
+            reviewCount: 80,
+            priceLevel: 2,
+            cuisineTypes: ['cafe'],
+            dietaryOptions: ['none'],
+            openingHours: {},
+          },
+        },
+        baseActivity('a1', '10:00', '11:00', 48.8890, 2.3522),
+      ],
+    };
+
+    const stats = await fixRestaurantOutliers(
+      [day],
+      [breakfastNearHotelButFarActivity, balancedBreakfast],
+      'Paris',
+      {
+        allowApiFallback: false,
+        breakfastMaxKm: 1.2,
+        hotelCoords: { latitude: 48.8566, longitude: 2.3522 },
+      }
+    );
+
+    expect(stats.replaced).toBe(1);
+    const breakfastItem = day.items.find((item) => item.id === 'meal-1-breakfast');
+    expect(breakfastItem?.restaurant?.name).toBe('Canal Morning Cafe');
+  });
+
+  it('rejects optional gap move when local geo cost increases', () => {
+    const items: TripItem[] = [
+      baseActivity('prev', '09:00', '10:00', 48.8566, 2.3522),
+      baseActivity('next', '14:00', '15:00', 48.8570, 2.3540),
+      baseActivity('candidate', '16:00', '17:00', 48.8710, 2.3650),
+      baseActivity('tail', '17:30', '18:30', 48.8715, 2.3655),
+    ];
+
+    const moved = tryMoveOptionalActivityIntoGap(items, 0);
+    expect(moved).toBe(false);
+  });
+
+  it('prunes at most 2 optional activities and never removes must-see activities', () => {
+    const day: TripDay = {
+      dayNumber: 1,
+      date: new Date('2026-03-03T00:00:00.000Z'),
+      isDayTrip: false,
+      items: [
+        { ...baseActivity('must-see', '09:00', '10:00', 45.4628, 9.1800), mustSee: true },
+        baseActivity('opt-1', '10:15', '11:00', 45.4628, 9.2100),
+        baseActivity('opt-2', '11:15', '12:00', 45.4628, 9.1800),
+        baseActivity('opt-3', '12:15', '13:00', 45.4628, 9.2200),
+        baseActivity('opt-4', '13:15', '14:00', 45.4628, 9.1800),
+      ],
+    };
+
+    const removed = pruneIntraDayZigzagsStrict([day]);
+    expect(removed).toBeLessThanOrEqual(2);
+    expect(day.items.some((item) => item.id === 'must-see')).toBe(true);
+    expect(day.scheduleDiagnostics?.geoPrunedActivitiesCount || 0).toBeLessThanOrEqual(2);
+    if (removed > 0) {
+      expect(day.scheduleDiagnostics?.geoCleanupApplied).toBe(true);
+    }
+  });
+
+  it('keeps dinner within evening window during intra-day gap compression', () => {
+    const day: TripDay = {
+      dayNumber: 1,
+      date: new Date('2026-03-03T00:00:00.000Z'),
+      isDayTrip: false,
+      items: [
+        baseActivity('a1', '09:00', '10:00', 45.4628, 9.1800),
+        baseActivity('a2', '10:15', '11:15', 45.4635, 9.1810),
+        {
+          id: 'meal-1-dinner',
+          dayNumber: 1,
+          startTime: '20:30',
+          endTime: '21:45',
+          type: 'restaurant',
+          title: 'Dîner — Test Bistro',
+          description: '',
+          locationName: 'Test Bistro',
+          latitude: 45.4640,
+          longitude: 9.1820,
+          orderIndex: 2,
+          estimatedCost: 20,
+          duration: 75,
+        },
+      ],
+    };
+
+    compressIntraDayGaps([day]);
+    const dinner = day.items.find((item) => item.id === 'meal-1-dinner');
+    expect(dinner).toBeDefined();
+    expect(dinner!.startTime >= '19:00').toBe(true);
+    expect(dinner!.endTime <= '22:00').toBe(true);
+  });
+
+  it('fills large idle gap with a nearby worthwhile activity', () => {
+    const day: TripDay = {
+      dayNumber: 2,
+      date: new Date('2026-03-04T00:00:00.000Z'),
+      isDayTrip: false,
+      items: [
+        baseActivity('morning', '09:00', '10:00', 45.4638, 9.1883),
+        {
+          id: 'meal-2-dinner',
+          dayNumber: 2,
+          startTime: '19:00',
+          endTime: '20:15',
+          type: 'restaurant',
+          title: 'Dîner — Test Resto',
+          description: '',
+          locationName: 'Test Resto',
+          latitude: 45.4647,
+          longitude: 9.1902,
+          orderIndex: 1,
+          estimatedCost: 20,
+          duration: 75,
+        },
+      ],
+    };
+
+    const candidates: ScoredActivity[] = [
+      gapFillActivity('museum-near', 'Musée de Quartier', 45.4642, 9.1894, {
+        type: 'culture',
+        score: 72,
+      }),
+    ];
+
+    const inserted = fillLargeIntraDayGapsWithNearbyActivities([day], candidates, 'Milan');
+    expect(inserted).toBe(1);
+    expect(day.items.some((item) => item.id === 'museum-near')).toBe(true);
+  });
+
+  it('does not fill a gap with a far candidate that would create a large detour', () => {
+    const day: TripDay = {
+      dayNumber: 2,
+      date: new Date('2026-03-04T00:00:00.000Z'),
+      isDayTrip: false,
+      items: [
+        baseActivity('morning', '09:00', '10:00', 45.4638, 9.1883),
+        {
+          id: 'meal-2-dinner',
+          dayNumber: 2,
+          startTime: '19:00',
+          endTime: '20:15',
+          type: 'restaurant',
+          title: 'Dîner — Test Resto',
+          description: '',
+          locationName: 'Test Resto',
+          latitude: 45.4647,
+          longitude: 9.1902,
+          orderIndex: 1,
+          estimatedCost: 20,
+          duration: 75,
+        },
+      ],
+    };
+
+    const farCandidates: ScoredActivity[] = [
+      gapFillActivity('museum-far', 'Musée Trop Loin', 45.5200, 9.2600, {
+        type: 'culture',
+        score: 95,
+      }),
+    ];
+
+    const inserted = fillLargeIntraDayGapsWithNearbyActivities([day], farCandidates, 'Milan');
+    expect(inserted).toBe(0);
+    expect(day.items.some((item) => item.id === 'museum-far')).toBe(false);
+  });
+
+  it('prefers worthwhile activities and skips low-value tour fillers', () => {
+    const day: TripDay = {
+      dayNumber: 2,
+      date: new Date('2026-03-04T00:00:00.000Z'),
+      isDayTrip: false,
+      items: [
+        baseActivity('morning', '09:00', '10:00', 45.4638, 9.1883),
+        {
+          id: 'meal-2-dinner',
+          dayNumber: 2,
+          startTime: '19:00',
+          endTime: '20:15',
+          type: 'restaurant',
+          title: 'Dîner — Test Resto',
+          description: '',
+          locationName: 'Test Resto',
+          latitude: 45.4647,
+          longitude: 9.1902,
+          orderIndex: 1,
+          estimatedCost: 20,
+          duration: 75,
+        },
+      ],
+    };
+
+    const candidates: ScoredActivity[] = [
+      gapFillActivity('tour-near', 'Segway tour city center', 45.4642, 9.1894, {
+        score: 95,
+        reviewCount: 400,
+        rating: 4.7,
+      }),
+      gapFillActivity('museum-near', 'Musee d art municipal', 45.4640, 9.1890, {
+        score: 72,
+        reviewCount: 180,
+        rating: 4.6,
+      }),
+    ];
+
+    const inserted = fillLargeIntraDayGapsWithNearbyActivities([day], candidates, 'Milan');
+    expect(inserted).toBe(1);
+    expect(day.items.some((item) => item.id === 'museum-near')).toBe(true);
+    expect(day.items.some((item) => item.id === 'tour-near')).toBe(false);
+  });
+
+  it('rebalances adjacent day load when load + geo gain are both positive', () => {
     const day1: TripDay = {
       dayNumber: 1,
       date: new Date('2026-03-01T00:00:00.000Z'),
@@ -500,7 +841,7 @@ describe('step7-assemble helpers', () => {
       items: [
         { ...baseActivity('d1-a1', '09:00', '11:00', 48.8606, 2.3376), mustSee: true },
         baseActivity('d1-a2', '11:20', '13:00', 48.861, 2.338),
-        baseActivity('d1-a3', '14:00', '15:40', 48.872, 2.295),
+        baseActivity('d1-a3', '14:00', '15:40', 48.9205, 2.411),
         baseActivity('d1-a4', '16:00', '18:00', 48.862, 2.339),
       ],
     };
@@ -510,7 +851,7 @@ describe('step7-assemble helpers', () => {
       date: new Date('2026-03-02T00:00:00.000Z'),
       geoDiagnostics: { maxLegKm: 1.2, p95LegKm: 1.0, totalTravelMin: 20 },
       items: [
-        baseActivity('d2-a1', '10:00', '12:00', 48.873, 2.296),
+        baseActivity('d2-a1', '10:00', '12:00', 48.9211, 2.4112),
       ],
     };
 
@@ -520,5 +861,33 @@ describe('step7-assemble helpers', () => {
     expect(day1.items.some((item) => item.id === 'd1-a1')).toBe(true); // must-see remains in source day
     expect(day1.scheduleDiagnostics?.loadRebalanced).toBe(true);
     expect(day2.scheduleDiagnostics?.loadRebalanced).toBe(true);
+  });
+
+  it('does not move optional activity when geo guard rejects the transfer', () => {
+    const day1: TripDay = {
+      dayNumber: 1,
+      date: new Date('2026-03-01T00:00:00.000Z'),
+      geoDiagnostics: { maxLegKm: 2, p95LegKm: 1.5, totalTravelMin: 80 },
+      items: [
+        { ...baseActivity('d1-a1', '09:00', '11:00', 49.03, 2.56), mustSee: true },
+        baseActivity('d1-a2', '11:20', '13:00', 49.031, 2.561),
+        baseActivity('d1-a3', '14:00', '15:40', 48.95, 2.45),
+        baseActivity('d1-a4', '16:00', '18:00', 49.032, 2.562),
+      ],
+    };
+
+    const day2: TripDay = {
+      dayNumber: 2,
+      date: new Date('2026-03-02T00:00:00.000Z'),
+      geoDiagnostics: { maxLegKm: 1.2, p95LegKm: 1.0, totalTravelMin: 20 },
+      items: [
+        baseActivity('d2-a1', '10:00', '12:00', 48.91, 2.4),
+      ],
+    };
+
+    const moved = rebalanceAdjacentDayLoad([day1, day2]);
+    expect(moved).toBe(0);
+    expect(day2.items.filter((item) => item.type === 'activity').length).toBe(1);
+    expect(day1.items.some((item) => item.id === 'd1-a3')).toBe(true);
   });
 });

@@ -167,15 +167,43 @@ export function validateAndFixTrip(trip: Trip): ValidationResult {
     // 9. New geographic diagnostics + impossible transition checks
     const legMetrics = computeLegMetrics(day);
     const distances = legMetrics.map((l) => l.distanceKm).sort((a, b) => a - b);
+    const totalLegKm = legMetrics.reduce((sum, leg) => sum + leg.distanceKm, 0);
     const maxLegKm = distances.length > 0 ? distances[distances.length - 1] : 0;
     const p95LegKm = distances.length > 0 ? percentile(distances, 0.95) : 0;
     const totalTravelMin = legMetrics.reduce((sum, leg) => sum + leg.travelMin, 0);
+    const routePoints = computeRoutePoints(day);
+    const zigzagTurns = computeZigzagTurns(routePoints);
+    const mstLowerBoundKm = computeMstLowerBoundKm(routePoints);
+    const routeInefficiencyRatio = mstLowerBoundKm > 0.05
+      ? totalLegKm / mstLowerBoundKm
+      : 1;
 
     day.geoDiagnostics = {
       maxLegKm: round2(maxLegKm),
       p95LegKm: round2(p95LegKm),
       totalTravelMin: Math.round(totalTravelMin),
+      totalLegKm: round2(totalLegKm),
+      zigzagTurns,
+      routeInefficiencyRatio: round2(routeInefficiencyRatio),
+      mstLowerBoundKm: round2(mstLowerBoundKm),
     };
+
+    const routeIsNonTrivial =
+      routePoints.length >= 4
+      && totalLegKm > 1.5
+      && mstLowerBoundKm > 0.5;
+    if (!day.isDayTrip && zigzagTurns >= 2) {
+      warnings.push(
+        `Day ${day.dayNumber}: zigzag route detected (${zigzagTurns} turnbacks)`
+      );
+      penalties += 4;
+    }
+    if (!day.isDayTrip && routeIsNonTrivial && routeInefficiencyRatio > 1.75) {
+      warnings.push(
+        `Day ${day.dayNumber}: route inefficiency is high (${routeInefficiencyRatio.toFixed(2)}x vs MST lower bound)`
+      );
+      penalties += 3;
+    }
 
     const isBoundaryDay = day.dayNumber === 1 || day.dayNumber === trip.days.length;
     const heavyActivities = activities.filter((item) => (item.duration || 60) >= 120).length;
@@ -438,6 +466,81 @@ function computeLegMetrics(day: TripDay): LegMetric[] {
   }
 
   return legs;
+}
+
+function computeRoutePoints(day: TripDay): Array<{ latitude: number; longitude: number }> {
+  return [...day.items]
+    .sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime))
+    .filter((item) => !isLogisticsItem(item) && !isHotelMeal(item))
+    .filter((item) =>
+      !!item.latitude
+      && !!item.longitude
+      && item.latitude !== 0
+      && item.longitude !== 0
+    )
+    .map((item) => ({ latitude: item.latitude, longitude: item.longitude }));
+}
+
+function computeZigzagTurns(points: Array<{ latitude: number; longitude: number }>): number {
+  if (points.length < 3) return 0;
+  let turns = 0;
+
+  for (let i = 1; i < points.length - 1; i++) {
+    const prev = points[i - 1];
+    const current = points[i];
+    const next = points[i + 1];
+
+    const v1x = current.longitude - prev.longitude;
+    const v1y = current.latitude - prev.latitude;
+    const v2x = next.longitude - current.longitude;
+    const v2y = next.latitude - current.latitude;
+    const norm1 = Math.hypot(v1x, v1y);
+    const norm2 = Math.hypot(v2x, v2y);
+    if (norm1 < 1e-6 || norm2 < 1e-6) continue;
+
+    const cosTheta = Math.max(-1, Math.min(1, (v1x * v2x + v1y * v2y) / (norm1 * norm2)));
+    const angleDeg = Math.acos(cosTheta) * (180 / Math.PI);
+    if (angleDeg >= 115) turns += 1;
+  }
+
+  return turns;
+}
+
+function computeMstLowerBoundKm(points: Array<{ latitude: number; longitude: number }>): number {
+  const n = points.length;
+  if (n <= 1) return 0;
+
+  const visited = new Array<boolean>(n).fill(false);
+  const bestEdge = new Array<number>(n).fill(Number.POSITIVE_INFINITY);
+  bestEdge[0] = 0;
+  let total = 0;
+
+  for (let step = 0; step < n; step++) {
+    let u = -1;
+    let min = Number.POSITIVE_INFINITY;
+    for (let i = 0; i < n; i++) {
+      if (!visited[i] && bestEdge[i] < min) {
+        min = bestEdge[i];
+        u = i;
+      }
+    }
+    if (u === -1) break;
+    visited[u] = true;
+    total += min;
+
+    for (let v = 0; v < n; v++) {
+      if (visited[v]) continue;
+      const dist = calculateDistance(
+        points[u].latitude,
+        points[u].longitude,
+        points[v].latitude,
+        points[v].longitude
+      );
+      if (dist < bestEdge[v]) bestEdge[v] = dist;
+    }
+  }
+
+  return total;
 }
 
 function isLogisticsItem(item: TripItem): boolean {

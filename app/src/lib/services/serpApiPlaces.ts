@@ -121,6 +121,49 @@ interface SerpApiLocalResponse {
   error?: string;
 }
 
+const RESTAURANTS_SEARCH_CACHE_TTL_MS = 12 * 60 * 60 * 1000; // 12h
+const restaurantsSearchCache = new Map<string, { expiresAt: number; results: Restaurant[] }>();
+const restaurantsSearchInFlight = new Map<string, Promise<Restaurant[]>>();
+
+function cloneRestaurantForSearchCache(restaurant: Restaurant): Restaurant {
+  return {
+    ...restaurant,
+    cuisineTypes: restaurant.cuisineTypes ? [...restaurant.cuisineTypes] : [],
+    dietaryOptions: restaurant.dietaryOptions ? [...restaurant.dietaryOptions] : [],
+    specialties: restaurant.specialties ? [...restaurant.specialties] : undefined,
+    photos: restaurant.photos ? [...restaurant.photos] : undefined,
+    openingHours: restaurant.openingHours
+      ? JSON.parse(JSON.stringify(restaurant.openingHours))
+      : undefined,
+  };
+}
+
+function cloneRestaurantsForSearchCache(restaurants: Restaurant[]): Restaurant[] {
+  return restaurants.map(cloneRestaurantForSearchCache);
+}
+
+function buildRestaurantsSearchCacheKey(
+  destination: string,
+  options: {
+    mealType?: 'breakfast' | 'lunch' | 'dinner';
+    cuisineType?: string;
+    latitude?: number;
+    longitude?: number;
+  }
+): string {
+  const mealType = options.mealType || 'any';
+  const cuisineType = (options.cuisineType || '').toLowerCase().trim();
+  const latKey = Number.isFinite(options.latitude) ? Number(options.latitude).toFixed(2) : 'none';
+  const lngKey = Number.isFinite(options.longitude) ? Number(options.longitude).toFixed(2) : 'none';
+  return [
+    destination.toLowerCase().trim(),
+    mealType,
+    cuisineType,
+    latKey,
+    lngKey,
+  ].join('|');
+}
+
 /**
  * Recherche des restaurants via SerpAPI Google Local
  */
@@ -140,6 +183,21 @@ export async function searchRestaurantsWithSerpApi(
   }
 
   const { mealType, cuisineType, limit = 10 } = options;
+  const cacheKey = buildRestaurantsSearchCacheKey(destination, options);
+
+  const cached = restaurantsSearchCache.get(cacheKey);
+  if (cached && cached.expiresAt > Date.now()) {
+    return cloneRestaurantsForSearchCache(cached.results).slice(0, limit);
+  }
+  if (cached && cached.expiresAt <= Date.now()) {
+    restaurantsSearchCache.delete(cacheKey);
+  }
+
+  const inflight = restaurantsSearchInFlight.get(cacheKey);
+  if (inflight) {
+    const results = await inflight;
+    return cloneRestaurantsForSearchCache(results).slice(0, limit);
+  }
 
   // Construire la requête selon le type de repas + langue locale
   const countryCode = getCountryCode(destination);
@@ -195,79 +253,94 @@ export async function searchRestaurantsWithSerpApi(
     return data;
   };
 
-  try {
-    console.log(`[SerpAPI Places] Requête: q="${query}", location="${destination}", ll="${serpParams.ll || 'none'}", gl="${serpParams.gl}"`);
-    let data = await tryFetch(serpParams);
+  const searchPromise = (async (): Promise<Restaurant[]> => {
+    try {
+      console.log(`[SerpAPI Places] Requête: q="${query}", location="${destination}", ll="${serpParams.ll || 'none'}", gl="${serpParams.gl}"`);
+      let data = await tryFetch(serpParams);
 
-    // Fallback: si location échoue, mettre le nom de la ville dans la query
-    if (!data) {
-      console.log(`[SerpAPI Places] Location "${destination}" non supportée, fallback → query avec nom de ville`);
-      const fallbackParams = { ...serpParams };
-      delete fallbackParams.location;
-      fallbackParams.q = `${query} ${destination}`;
-      data = await tryFetch(fallbackParams);
-    }
+      // Fallback: si location échoue, mettre le nom de la ville dans la query
+      if (!data) {
+        console.log(`[SerpAPI Places] Location "${destination}" non supportée, fallback → query avec nom de ville`);
+        const fallbackParams = { ...serpParams };
+        delete fallbackParams.location;
+        fallbackParams.q = `${query} ${destination}`;
+        data = await tryFetch(fallbackParams);
+      }
 
-    if (!data) {
-      console.warn('[SerpAPI Places] Toutes les tentatives ont échoué');
+      if (!data) {
+        console.warn('[SerpAPI Places] Toutes les tentatives ont échoué');
+        return [];
+      }
+
+      const results = data.local_results || [];
+      console.log(`[SerpAPI Places] ${results.length} résultats local_results`);
+
+      // Filtrer les restaurants fermés définitivement
+      const openResults = results.filter(r => {
+        const openState = r.open_state?.toLowerCase() || '';
+        // Exclure les restaurants fermés définitivement
+        if (openState.includes('permanently closed') ||
+            openState.includes('fermé définitivement') ||
+            openState.includes('cerrado permanentemente') ||
+            openState.includes('chiuso definitivamente')) {
+          return false;
+        }
+        return true;
+      });
+
+      // Convertir en format Restaurant
+      const restaurants: Restaurant[] = openResults.map((r, index) => {
+        // Générer une URL Google Maps fiable en utilisant le NOM + ADRESSE COMPLÈTE
+        // Cela permet à Google Maps de trouver le lieu exact
+        const searchQuery = r.address
+          ? `${r.title}, ${r.address}`
+          : `${r.title}, ${destination}`;
+        const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(searchQuery)}`;
+
+        return {
+          id: `serp-${r.place_id || r.data_cid || index}`,
+          name: r.title,
+          address: r.address || 'Adresse non disponible',
+          latitude: r.gps_coordinates?.latitude || 0,
+          longitude: r.gps_coordinates?.longitude || 0,
+          rating: r.rating || 0,
+          reviewCount: r.reviews || 0,
+          priceLevel: parsePriceLevel(r.price),
+          cuisineTypes: parseCuisineTypes(r.type, r.types),
+          dietaryOptions: ['none'] as DietaryType[],
+          specialties: r.description ? [r.description] : undefined,
+          description: r.description,
+          phoneNumber: r.phone,
+          website: r.website,
+          googleMapsUrl, // URL Google Maps fiable avec nom + adresse complète
+          // Pas de reservationUrl TheFork (liens de recherche générique peu fiables)
+          // Google Maps est utilisé via googleMapsUrl ci-dessus
+          photos: r.thumbnail ? [r.thumbnail] : undefined,
+          googlePlaceId: r.place_id || undefined,
+          openingHours: parseOpeningHours(r.operating_hours) || {},
+          distance: 0, // Sera calculé plus tard
+          walkingTime: 0,
+        };
+      });
+
+      restaurantsSearchCache.set(cacheKey, {
+        expiresAt: Date.now() + RESTAURANTS_SEARCH_CACHE_TTL_MS,
+        results: cloneRestaurantsForSearchCache(restaurants),
+      });
+
+      return restaurants;
+    } catch (error) {
+      console.error('[SerpAPI Places] Erreur:', error);
       return [];
     }
+  })();
 
-    const results = data.local_results || [];
-    console.log(`[SerpAPI Places] ${results.length} résultats local_results`);
-
-    // Filtrer les restaurants fermés définitivement
-    const openResults = results.filter(r => {
-      const openState = r.open_state?.toLowerCase() || '';
-      // Exclure les restaurants fermés définitivement
-      if (openState.includes('permanently closed') ||
-          openState.includes('fermé définitivement') ||
-          openState.includes('cerrado permanentemente') ||
-          openState.includes('chiuso definitivamente')) {
-        return false;
-      }
-      return true;
-    });
-
-    // Convertir en format Restaurant
-    const restaurants: Restaurant[] = openResults.slice(0, limit).map((r, index) => {
-      // Générer une URL Google Maps fiable en utilisant le NOM + ADRESSE COMPLÈTE
-      // Cela permet à Google Maps de trouver le lieu exact
-      const searchQuery = r.address
-        ? `${r.title}, ${r.address}`
-        : `${r.title}, ${destination}`;
-      const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(searchQuery)}`;
-
-      return {
-        id: `serp-${r.place_id || r.data_cid || index}`,
-        name: r.title,
-        address: r.address || 'Adresse non disponible',
-        latitude: r.gps_coordinates?.latitude || 0,
-        longitude: r.gps_coordinates?.longitude || 0,
-        rating: r.rating || 0,
-        reviewCount: r.reviews || 0,
-        priceLevel: parsePriceLevel(r.price),
-        cuisineTypes: parseCuisineTypes(r.type, r.types),
-        dietaryOptions: ['none'] as DietaryType[],
-        specialties: r.description ? [r.description] : undefined,
-        description: r.description,
-        phoneNumber: r.phone,
-        website: r.website,
-        googleMapsUrl, // URL Google Maps fiable avec nom + adresse complète
-        // Pas de reservationUrl TheFork (liens de recherche générique peu fiables)
-        // Google Maps est utilisé via googleMapsUrl ci-dessus
-        photos: r.thumbnail ? [r.thumbnail] : undefined,
-        googlePlaceId: r.place_id || undefined,
-        openingHours: parseOpeningHours(r.operating_hours) || {},
-        distance: 0, // Sera calculé plus tard
-        walkingTime: 0,
-      };
-    });
-
-    return restaurants;
-  } catch (error) {
-    console.error('[SerpAPI Places] Erreur:', error);
-    return [];
+  restaurantsSearchInFlight.set(cacheKey, searchPromise);
+  try {
+    const results = await searchPromise;
+    return cloneRestaurantsForSearchCache(results).slice(0, limit);
+  } finally {
+    restaurantsSearchInFlight.delete(cacheKey);
   }
 }
 
@@ -923,16 +996,17 @@ const NEARBY_RESTAURANTS_CACHE_TTL_MS = 12 * 60 * 60 * 1000; // 12h
 function buildNearbyRestaurantsCacheKey(
   destination: string,
   coords: { lat: number; lng: number },
-  mealType: string,
+  queryMode: 'breakfast' | 'main',
   maxDistance: number,
   minRating: number,
   minReviews: number
 ): string {
+  const precision = maxDistance > 1200 ? 2 : 3;
   return [
     destination.toLowerCase().trim(),
-    mealType,
-    coords.lat.toFixed(4),
-    coords.lng.toFixed(4),
+    queryMode,
+    coords.lat.toFixed(precision),
+    coords.lng.toFixed(precision),
     maxDistance,
     minRating.toFixed(1),
     minReviews,
@@ -974,10 +1048,12 @@ export async function searchRestaurantsNearby(
     limit = 5,
   } = options;
 
+  const queryMode: 'breakfast' | 'main' = mealType === 'breakfast' ? 'breakfast' : 'main';
+
   const cacheKey = buildNearbyRestaurantsCacheKey(
     destination,
     activityCoords,
-    mealType,
+    queryMode,
     maxDistance,
     minRating,
     minReviews
@@ -997,7 +1073,7 @@ export async function searchRestaurantsNearby(
   // Construire la requête selon le type de repas + langue locale
   const countryCode = getCountryCode(destination);
   let query: string;
-  switch (mealType) {
+  switch (queryMode) {
     case 'breakfast': {
       const breakfastQueries: Record<string, string> = {
         fr: 'café boulangerie petit déjeuner',
@@ -1008,11 +1084,8 @@ export async function searchRestaurantsNearby(
       query = breakfastQueries[countryCode] || 'breakfast brunch café bakery';
       break;
     }
-    case 'dinner':
-      query = 'restaurant dinner';
-      break;
     default:
-      query = 'restaurant lunch';
+      query = 'restaurant';
   }
 
   // Zoom 16z = ~300m de rayon, parfait pour proximité

@@ -170,6 +170,12 @@ function extractCountryCodeFromHotelPath(pathname: string): string | null {
   return null;
 }
 
+function isCanonicalBookingHotelPathname(pathname: string): boolean {
+  // Canonical Booking hotel path:
+  // /hotel/{countryCode}/{hotel-slug}.html
+  return /^\/hotel\/[a-z]{2}\/.+\.html$/i.test(pathname);
+}
+
 function sanitizeDate(input?: string): string | undefined {
   if (!input) return undefined;
   return /^\d{4}-\d{2}-\d{2}$/.test(input) ? input : undefined;
@@ -281,8 +287,11 @@ export function buildDirectBookingHotelUrl({
   adults,
   existingUrl,
 }: BuildDirectBookingHotelUrlParams): string {
-  const parsedExisting = existingUrl && isBookingHotelPath(existingUrl)
+  const parsedCandidate = existingUrl && isBookingHotelPath(existingUrl)
     ? toBookingUrl(existingUrl)
+    : null;
+  const parsedExisting = parsedCandidate && isCanonicalBookingHotelPathname(parsedCandidate.pathname)
+    ? parsedCandidate
     : null;
 
   const countryFromPath = parsedExisting
@@ -370,6 +379,23 @@ export function normalizeHotelBookingUrl({
   }
 
   if (isBookingHotelPath(raw)) {
+    const parsed = toBookingUrl(raw);
+    const hasCanonicalPath = parsed
+      ? isCanonicalBookingHotelPathname(parsed.pathname)
+      : /^\/?hotel\/[a-z]{2}\/.+\.html$/i.test(raw);
+
+    if (!hasCanonicalPath) {
+      // Some Booking links from third-party feeds use locale-prefixed non-canonical paths
+      // (e.g. /fr/hotel/...) that frequently break. Search URL is much more resilient.
+      return buildBookingSearchUrl({
+        hotelName,
+        destinationHint,
+        checkIn,
+        checkOut,
+        adults,
+      });
+    }
+
     return buildDirectBookingHotelUrl({
       hotelName,
       destinationHint,

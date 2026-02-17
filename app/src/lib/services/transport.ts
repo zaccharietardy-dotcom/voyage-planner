@@ -6,7 +6,7 @@
  */
 
 import { calculateDistance } from './geocoding';
-import { normalizeCitySync } from './cityNormalization';
+import { getCityCoords, normalizeCitySync } from './cityNormalization';
 import { getCheapestTrainPrice, type DBLeg } from './dbTransport';
 import { checkTransportFeasibility } from './transportFeasibility';
 import { findMultiModalOptions } from './multiModalTransport';
@@ -254,6 +254,47 @@ const CONNECTED_ISLANDS: Record<string, string[]> = {
   'palermo': ['italy', 'italie', 'rome', 'roma', 'naples', 'napoli', 'milan', 'milano', 'florence', 'firenze'],
   'palerme': ['italy', 'italie', 'rome', 'roma', 'naples', 'napoli', 'milan', 'milano', 'florence', 'firenze'],
 };
+
+const OMIO_FALLBACK_HUBS = [
+  'Paris', 'Lyon', 'Marseille', 'Lille', 'Bordeaux', 'Nantes', 'Toulouse', 'Nice', 'Strasbourg',
+  'Lausanne', 'Geneva', 'Zurich',
+  'Milan', 'Rome', 'Barcelona', 'Madrid',
+  'London', 'Brussels', 'Amsterdam', 'Berlin', 'Munich', 'Vienna', 'Prague',
+] as const;
+
+function resolveOmioCityLabel(city: string, coords?: { lat: number; lng: number }): string {
+  const trimmed = city.trim();
+  if (!trimmed) return city;
+
+  const normalized = normalizeCitySync(trimmed);
+  if (normalized.confidence === 'high' && normalized.displayName) {
+    return normalized.displayName;
+  }
+
+  const primaryToken = trimmed.split(',')[0].trim();
+
+  if (coords) {
+    let nearestHub: string | null = null;
+    let nearestDistanceKm = Number.POSITIVE_INFINITY;
+
+    for (const hub of OMIO_FALLBACK_HUBS) {
+      const hubCoords = getCityCoords(hub);
+      if (!hubCoords) continue;
+      const dist = calculateDistance(coords.lat, coords.lng, hubCoords.lat, hubCoords.lng);
+      if (dist < nearestDistanceKm) {
+        nearestDistanceKm = dist;
+        nearestHub = hub;
+      }
+    }
+
+    // Omio route pages are often indexed under major nearby hubs rather than suburbs.
+    if (nearestHub && nearestDistanceKm <= 35) {
+      return nearestHub;
+    }
+  }
+
+  return primaryToken || trimmed;
+}
 
 function isIslandDestination(city: string): boolean {
   const norm = city.toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
@@ -603,7 +644,15 @@ function buildTrainOption(
 
   const co2Factor = isHighSpeed ? CO2_PER_KM.train_highspeed : CO2_PER_KM.train_regular;
   const co2 = Math.round(distance * co2Factor);
-  const bookingUrl = getTrainBookingUrl(params.origin, params.destination, params.passengers, params.date, params.returnDate);
+  const bookingUrl = getTrainBookingUrl(
+    params.origin,
+    params.destination,
+    params.passengers,
+    params.date,
+    params.returnDate,
+    params.originCoords,
+    params.destCoords
+  );
 
   // Convertir les legs DB HAFAS pour TransportOption (filtrer walk/transfer)
   const transitLegs = dbLegs
@@ -671,8 +720,8 @@ function calculateBusOption(params: TransportSearchParams, distance: number): Tr
 
   // Full Omio pour les bus aussi (agrège FlixBus + BlaBlaCar + autres) → affilié Impact
   // Format: /bus/{origin}/{destination}?departure_date=YYYY-MM-DD
-  const originSlug = toOmioLocationSlug(params.origin);
-  const destSlug = toOmioLocationSlug(params.destination);
+  const originSlug = toOmioLocationSlug(resolveOmioCityLabel(params.origin, params.originCoords));
+  const destSlug = toOmioLocationSlug(resolveOmioCityLabel(params.destination, params.destCoords));
   const omioDate = params.date ? formatDateForUrl(params.date) : '';
   const dateParam = omioDate ? `?departure_date=${omioDate}` : '';
   const bookingUrl = `https://www.omio.fr/bus/${encodeURIComponent(originSlug)}/${encodeURIComponent(destSlug)}${dateParam}`;
@@ -962,16 +1011,22 @@ function getTrainOperator(origin: string, destination: string): string {
  * Format Trainline.fr: /search/{origin}/{destination}/{date}[/{returnDate}]
  * Eurostar: format dédié avec codes gare pour Londres
  */
-export function getTrainBookingUrl(origin: string, destination: string, passengers: number = 1, date?: Date, returnDate?: Date): string {
-  const originNorm = normalizeCitySync(origin);
-  const destNorm = normalizeCitySync(destination);
-  const originKey = originNorm.normalized.toLowerCase();
-  const destKey = destNorm.normalized.toLowerCase();
+export function getTrainBookingUrl(
+  origin: string,
+  destination: string,
+  passengers: number = 1,
+  date?: Date,
+  returnDate?: Date,
+  originCoords?: { lat: number; lng: number },
+  destinationCoords?: { lat: number; lng: number }
+): string {
+  const resolvedOrigin = resolveOmioCityLabel(origin, originCoords);
+  const resolvedDestination = resolveOmioCityLabel(destination, destinationCoords);
 
   // Full Omio: tous les trains (y compris Eurostar) passent par Omio → affilié Impact
   // Format: /trains/{origin}/{destination}?departure_date=YYYY-MM-DD
-  const originSlug = toOmioLocationSlug(origin);
-  const destSlug = toOmioLocationSlug(destination);
+  const originSlug = toOmioLocationSlug(resolvedOrigin);
+  const destSlug = toOmioLocationSlug(resolvedDestination);
   const dateStr = date ? formatDateForUrl(date) : '';
   const dateParam = dateStr ? `?departure_date=${dateStr}` : '';
   return `https://www.omio.fr/trains/${encodeURIComponent(originSlug)}/${encodeURIComponent(destSlug)}${dateParam}`;

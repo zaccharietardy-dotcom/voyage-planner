@@ -46,6 +46,10 @@ export interface ResolutionResult {
   operatingHours?: Record<string, string>;
 }
 
+interface ResolveCoordinatesOptions {
+  allowPaidFallback?: boolean;
+}
+
 // In-memory resolution cache (avoids re-resolving the same item in a single generation)
 const resolutionCache = new Map<string, ResolutionResult | null>();
 let totalResolutionAttempts = 0;
@@ -88,12 +92,14 @@ export async function resolveCoordinates(
   name: string,
   city: string,
   nearbyCoords: { lat: number; lng: number },
-  itemType: 'attraction' | 'restaurant' | 'hotel' | string = 'attraction'
+  itemType: 'attraction' | 'restaurant' | 'hotel' | string = 'attraction',
+  options?: ResolveCoordinatesOptions
 ): Promise<ResolutionResult | null> {
   if (!name || !city) return null;
 
+  const allowPaidFallback = options?.allowPaidFallback !== false;
   totalResolutionAttempts++;
-  const cacheKey = `${name.toLowerCase().trim()}|${city.toLowerCase().trim()}`;
+  const cacheKey = `${name.toLowerCase().trim()}|${city.toLowerCase().trim()}|paid:${allowPaidFallback ? '1' : '0'}`;
 
   // Check in-memory cache first
   if (resolutionCache.has(cacheKey)) {
@@ -172,26 +178,28 @@ export async function resolveCoordinates(
   }
 
   // Step 4: SerpAPI Google Maps (payant, dernier recours)
-  try {
-    const serpResult = await geocodeViaSerpApi(name, city, nearbyCoords);
-    if (serpResult && serpResult.lat && serpResult.lng) {
-      if (isResultNearDestination(serpResult, nearbyCoords, name, 'SerpAPI')) {
-        const result: ResolutionResult = {
-          lat: serpResult.lat,
-          lng: serpResult.lng,
-          source: 'serpapi',
-          address: serpResult.address,
-          operatingHours: serpResult.operatingHours,
-        };
-        resolutionCache.set(cacheKey, result);
-        resolutionsBySource.serpapi++;
-        totalResolved++;
-        return result;
+  if (allowPaidFallback) {
+    try {
+      const serpResult = await geocodeViaSerpApi(name, city, nearbyCoords);
+      if (serpResult && serpResult.lat && serpResult.lng) {
+        if (isResultNearDestination(serpResult, nearbyCoords, name, 'SerpAPI')) {
+          const result: ResolutionResult = {
+            lat: serpResult.lat,
+            lng: serpResult.lng,
+            source: 'serpapi',
+            address: serpResult.address,
+            operatingHours: serpResult.operatingHours,
+          };
+          resolutionCache.set(cacheKey, result);
+          resolutionsBySource.serpapi++;
+          totalResolved++;
+          return result;
+        }
+        // Result too far from destination, try next API
       }
-      // Result too far from destination, try next API
+    } catch (e) {
+      console.warn(`[CoordsResolver] SerpAPI échoué pour "${name}":`, e);
     }
-  } catch (e) {
-    console.warn(`[CoordsResolver] SerpAPI échoué pour "${name}":`, e);
   }
 
   // Toutes les APIs ont échoué

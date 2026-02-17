@@ -730,6 +730,7 @@ function formatDuration(minutes: number): string {
 function BookingButtons({ item }: { item: TripItem }) {
   const buttons: { label: string; url: string; variant: 'primary' | 'secondary' | 'ghost'; icon: React.ReactNode }[] = [];
   const bookingUrl = item.bookingUrl || '';
+  const isLocalTransport = item.type === 'transport' && item.transportRole === 'inter_item';
 
   // Flight
   if (item.type === 'flight' && bookingUrl) {
@@ -757,11 +758,22 @@ function BookingButtons({ item }: { item: TripItem }) {
   if (item.type === 'transport' && bookingUrl) {
     const transportMode = getTransportModeForItem(item) || 'transit';
     const TransportIcon = TRANSPORT_MODE_ICONS[transportMode] || TrainFront;
-    const label = bookingUrl.includes('omio') || bookingUrl.includes('sjv.io') ? 'Omio'
-      : bookingUrl.includes('trainline') ? 'Trainline'
-      : bookingUrl.includes('flixbus') ? 'FlixBus'
-      : 'Réserver';
-    buttons.push({ label, url: bookingUrl, variant: 'primary', icon: <TransportIcon className="h-3 w-3" /> });
+    if (!isLocalTransport) {
+      const label = bookingUrl.includes('omio') || bookingUrl.includes('sjv.io') ? 'Omio'
+        : bookingUrl.includes('trainline') ? 'Trainline'
+        : bookingUrl.includes('flixbus') ? 'FlixBus'
+        : 'Réserver';
+      buttons.push({ label, url: bookingUrl, variant: 'primary', icon: <TransportIcon className="h-3 w-3" /> });
+    }
+  }
+
+  if (isLocalTransport) {
+    const transportMode = getTransportModeForItem(item) || 'transit';
+    const TransportIcon = TRANSPORT_MODE_ICONS[transportMode] || TrainFront;
+    const itineraryUrl = item.googleMapsUrl || item.googleMapsPlaceUrl;
+    if (itineraryUrl) {
+      buttons.push({ label: 'Itinéraire', url: itineraryUrl, variant: 'primary', icon: <TransportIcon className="h-3 w-3" /> });
+    }
   }
 
   // Activity
@@ -791,7 +803,7 @@ function BookingButtons({ item }: { item: TripItem }) {
   // Google Maps
   const mapsUrl = item.googleMapsPlaceUrl || item.googleMapsUrl ||
     (item.latitude && item.longitude ? `https://www.google.com/maps/search/?api=1&query=${item.latitude},${item.longitude}` : null);
-  if (mapsUrl) {
+  if (mapsUrl && !isLocalTransport) {
     buttons.push({ label: 'Maps', url: mapsUrl, variant: 'ghost', icon: <MapIcon className="h-3 w-3" /> });
   }
 
@@ -822,9 +834,9 @@ function BookingButtons({ item }: { item: TripItem }) {
 }
 
 function TransportCard({ item }: { item: TripItem }) {
-  if (item.type !== 'transport' || !item.bookingUrl) return null;
+  if (item.type !== 'transport' || item.transportRole === 'inter_item') return null;
 
-  const bookingUrl = item.bookingUrl;
+  const bookingUrl = item.bookingUrl || '';
   const isOmio = bookingUrl.includes('omio') || bookingUrl.includes('sjv.io');
   const legs = item.transitLegs;
   const hasRealData = legs && legs.length > 0;
@@ -923,15 +935,17 @@ function TransportCard({ item }: { item: TripItem }) {
             </span>
           ) : null}
         </div>
-        <a
-          href={bookingUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-primary text-primary-foreground text-[11px] font-medium hover:opacity-90 transition-opacity"
-        >
-          <ExternalLink className="h-3 w-3" />
-          {isRealTime ? 'Réserver' : `Voir sur ${isOmio ? 'Omio' : 'le site'}`}
-        </a>
+        {bookingUrl ? (
+          <a
+            href={bookingUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-primary text-primary-foreground text-[11px] font-medium hover:opacity-90 transition-opacity"
+          >
+            <ExternalLink className="h-3 w-3" />
+            {isRealTime ? 'Réserver' : `Voir sur ${isOmio ? 'Omio' : 'le site'}`}
+          </a>
+        ) : null}
       </div>
     </div>
   );

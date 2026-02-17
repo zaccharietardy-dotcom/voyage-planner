@@ -8,6 +8,8 @@ import { AnalysisIssue } from './schedule';
 const URBAN_LONG_LEG_TARGET_KM = 2.5;
 const URBAN_LONG_LEG_HARD_KM = 4;
 const OUTLIER_MIN_THRESHOLD_KM = 3;
+const ROUTE_INEFFICIENCY_WARNING_RATIO = 1.75;
+const ZIGZAG_WARNING_THRESHOLD = 2;
 const LOGISTICS_TYPES = ['flight', 'transport', 'checkin', 'checkout', 'parking', 'luggage'];
 
 function isHotelMeal(item: TripItem): boolean {
@@ -234,6 +236,60 @@ export function analyzeGeography(trip: Trip): AnalysisIssue[] {
       }
     }
 
+    const routePoints = nonLogistics
+      .filter((item) => item.latitude !== 0 && item.longitude !== 0)
+      .map((item) => ({ latitude: item.latitude, longitude: item.longitude }));
+    const totalLegKm = typeof day.geoDiagnostics?.totalLegKm === 'number'
+      ? day.geoDiagnostics.totalLegKm
+      : dayLegDistancesKm.reduce((sum, leg) => sum + leg, 0);
+    const zigzagTurns = typeof day.geoDiagnostics?.zigzagTurns === 'number'
+      ? day.geoDiagnostics.zigzagTurns
+      : computeZigzagTurns(routePoints);
+    const mstLowerBoundKm = typeof day.geoDiagnostics?.mstLowerBoundKm === 'number'
+      ? day.geoDiagnostics.mstLowerBoundKm
+      : computeMstLowerBoundKm(routePoints);
+    const routeInefficiencyRatio = typeof day.geoDiagnostics?.routeInefficiencyRatio === 'number'
+      ? day.geoDiagnostics.routeInefficiencyRatio
+      : (mstLowerBoundKm > 0.05 ? totalLegKm / mstLowerBoundKm : 1);
+    const routeIsNonTrivial = routePoints.length >= 4 && totalLegKm > 1.5 && mstLowerBoundKm > 0.5;
+
+    if (!day.isDayTrip && zigzagTurns >= ZIGZAG_WARNING_THRESHOLD) {
+      issues.push({
+        severity: 'warning',
+        category: 'geography',
+        message: `Jour ${day.dayNumber}: itinéraire en zigzag (${zigzagTurns} demi-tours détectés)`,
+        dayNumber: day.dayNumber,
+        details: {
+          zigzagTurns,
+          routeInefficiencyRatio: Number(routeInefficiencyRatio.toFixed(2)),
+          totalLegKm: Number(totalLegKm.toFixed(2)),
+        },
+        code: 'GEO_INTRA_DAY_ZIGZAG',
+        component: 'pipeline/step8-validate',
+        frequencyWeight: 1.8,
+        autofixCandidate: true,
+      });
+    }
+
+    if (!day.isDayTrip && routeIsNonTrivial && routeInefficiencyRatio > ROUTE_INEFFICIENCY_WARNING_RATIO) {
+      issues.push({
+        severity: 'warning',
+        category: 'geography',
+        message: `Jour ${day.dayNumber}: efficacité de route faible (${routeInefficiencyRatio.toFixed(2)}x du minimum MST)`,
+        dayNumber: day.dayNumber,
+        details: {
+          routeInefficiencyRatio: Number(routeInefficiencyRatio.toFixed(2)),
+          threshold: ROUTE_INEFFICIENCY_WARNING_RATIO,
+          totalLegKm: Number(totalLegKm.toFixed(2)),
+          mstLowerBoundKm: Number(mstLowerBoundKm.toFixed(2)),
+        },
+        code: 'GEO_DAY_ROUTE_EFFICIENCY_LOW',
+        component: 'pipeline/step8-validate',
+        frequencyWeight: 1.5,
+        autofixCandidate: true,
+      });
+    }
+
     // Outliers intra-journée par percentile
     const distByItemId = activityDistanceFromCentroid(nonLogistics);
     if (distByItemId.size >= 3) {
@@ -304,4 +360,66 @@ export function analyzeGeography(trip: Trip): AnalysisIssue[] {
   }
 
   return issues;
+}
+
+function computeZigzagTurns(points: Array<{ latitude: number; longitude: number }>): number {
+  if (points.length < 3) return 0;
+  let turns = 0;
+
+  for (let i = 1; i < points.length - 1; i++) {
+    const prev = points[i - 1];
+    const current = points[i];
+    const next = points[i + 1];
+
+    const v1x = current.longitude - prev.longitude;
+    const v1y = current.latitude - prev.latitude;
+    const v2x = next.longitude - current.longitude;
+    const v2y = next.latitude - current.latitude;
+    const norm1 = Math.hypot(v1x, v1y);
+    const norm2 = Math.hypot(v2x, v2y);
+    if (norm1 < 1e-6 || norm2 < 1e-6) continue;
+
+    const cosTheta = Math.max(-1, Math.min(1, (v1x * v2x + v1y * v2y) / (norm1 * norm2)));
+    const angleDeg = Math.acos(cosTheta) * (180 / Math.PI);
+    if (angleDeg >= 115) turns += 1;
+  }
+
+  return turns;
+}
+
+function computeMstLowerBoundKm(points: Array<{ latitude: number; longitude: number }>): number {
+  const n = points.length;
+  if (n <= 1) return 0;
+
+  const visited = new Array<boolean>(n).fill(false);
+  const bestEdge = new Array<number>(n).fill(Number.POSITIVE_INFINITY);
+  bestEdge[0] = 0;
+  let total = 0;
+
+  for (let step = 0; step < n; step++) {
+    let u = -1;
+    let min = Number.POSITIVE_INFINITY;
+    for (let i = 0; i < n; i++) {
+      if (!visited[i] && bestEdge[i] < min) {
+        min = bestEdge[i];
+        u = i;
+      }
+    }
+    if (u === -1) break;
+    visited[u] = true;
+    total += min;
+
+    for (let v = 0; v < n; v++) {
+      if (visited[v]) continue;
+      const dist = haversineDistance(
+        points[u].latitude,
+        points[u].longitude,
+        points[v].latitude,
+        points[v].longitude
+      );
+      if (dist < bestEdge[v]) bestEdge[v] = dist;
+    }
+  }
+
+  return total;
 }

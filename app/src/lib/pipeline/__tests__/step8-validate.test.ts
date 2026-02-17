@@ -49,6 +49,125 @@ function item(partial: Partial<TripItem> & Pick<TripItem, 'id' | 'type' | 'title
 }
 
 describe('step8-validate geography checks', () => {
+  it('flags zigzag intra-day routes and fills zigzag diagnostics', () => {
+    const dayItems: TripItem[] = [
+      item({ id: 'a1', type: 'activity', title: 'A1', startTime: '09:00', endTime: '09:45', latitude: 45.4628, longitude: 9.18 }),
+      item({ id: 'a2', type: 'activity', title: 'A2', startTime: '10:00', endTime: '10:45', latitude: 45.4628, longitude: 9.205 }),
+      item({ id: 'a3', type: 'activity', title: 'A3', startTime: '11:00', endTime: '11:45', latitude: 45.4628, longitude: 9.18 }),
+      item({ id: 'a4', type: 'activity', title: 'A4', startTime: '12:00', endTime: '12:45', latitude: 45.4628, longitude: 9.205 }),
+    ];
+
+    const trip: Trip = {
+      id: 'trip-zigzag',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      preferences: createPreferences(),
+      days: [
+        {
+          dayNumber: 1,
+          date: new Date('2026-02-18T00:00:00.000Z'),
+          items: dayItems,
+          isDayTrip: false,
+        },
+      ],
+    };
+
+    const result = validateAndFixTrip(trip);
+    expect(result.warnings.some((w) => w.includes('zigzag route detected'))).toBe(true);
+    expect((trip.days[0].geoDiagnostics?.zigzagTurns || 0)).toBeGreaterThanOrEqual(2);
+    expect((trip.days[0].geoDiagnostics?.totalLegKm || 0)).toBeGreaterThan(0);
+  });
+
+  it('does not flag zigzag on near-linear routes', () => {
+    const dayItems: TripItem[] = [
+      item({ id: 'a1', type: 'activity', title: 'A1', startTime: '09:00', endTime: '09:45', latitude: 45.4628, longitude: 9.18 }),
+      item({ id: 'a2', type: 'activity', title: 'A2', startTime: '10:00', endTime: '10:45', latitude: 45.4628, longitude: 9.185 }),
+      item({ id: 'a3', type: 'activity', title: 'A3', startTime: '11:00', endTime: '11:45', latitude: 45.4628, longitude: 9.19 }),
+      item({ id: 'a4', type: 'activity', title: 'A4', startTime: '12:00', endTime: '12:45', latitude: 45.4628, longitude: 9.195 }),
+    ];
+
+    const trip: Trip = {
+      id: 'trip-linear',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      preferences: createPreferences(),
+      days: [
+        {
+          dayNumber: 1,
+          date: new Date('2026-02-18T00:00:00.000Z'),
+          items: dayItems,
+          isDayTrip: false,
+        },
+      ],
+    };
+
+    const result = validateAndFixTrip(trip);
+    expect(result.warnings.some((w) => w.includes('zigzag route detected'))).toBe(false);
+  });
+
+  it('flags low route efficiency when ratio exceeds threshold', () => {
+    const dayItems: TripItem[] = [
+      item({ id: 'a1', type: 'activity', title: 'A1', startTime: '09:00', endTime: '09:45', latitude: 45.4628, longitude: 9.19 }),
+      item({ id: 'a2', type: 'activity', title: 'A2', startTime: '10:00', endTime: '10:45', latitude: 45.4628, longitude: 9.22 }),
+      item({ id: 'a3', type: 'activity', title: 'A3', startTime: '11:00', endTime: '11:45', latitude: 45.4628, longitude: 9.19 }),
+      item({ id: 'a4', type: 'activity', title: 'A4', startTime: '12:00', endTime: '12:45', latitude: 45.4628, longitude: 9.16 }),
+      item({ id: 'a5', type: 'activity', title: 'A5', startTime: '13:00', endTime: '13:45', latitude: 45.4628, longitude: 9.19 }),
+    ];
+
+    const trip: Trip = {
+      id: 'trip-ineff',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      preferences: createPreferences(),
+      days: [
+        {
+          dayNumber: 1,
+          date: new Date('2026-02-18T00:00:00.000Z'),
+          items: dayItems,
+          isDayTrip: false,
+        },
+      ],
+    };
+
+    const result = validateAndFixTrip(trip);
+    expect(result.warnings.some((w) => w.includes('route inefficiency is high'))).toBe(true);
+    expect((trip.days[0].geoDiagnostics?.routeInefficiencyRatio || 0)).toBeGreaterThan(1.75);
+  });
+
+  it('keeps zigzag diagnostics coherent when strict geo-cleanup flags are present', () => {
+    const dayItems: TripItem[] = [
+      item({ id: 'a1', type: 'activity', title: 'A1', startTime: '09:00', endTime: '09:45', latitude: 45.4628, longitude: 9.19 }),
+      item({ id: 'a2', type: 'activity', title: 'A2', startTime: '10:00', endTime: '10:45', latitude: 45.4628, longitude: 9.22 }),
+      item({ id: 'a3', type: 'activity', title: 'A3', startTime: '11:00', endTime: '11:45', latitude: 45.4628, longitude: 9.19 }),
+      item({ id: 'a4', type: 'activity', title: 'A4', startTime: '12:00', endTime: '12:45', latitude: 45.4628, longitude: 9.16 }),
+      item({ id: 'a5', type: 'activity', title: 'A5', startTime: '13:00', endTime: '13:45', latitude: 45.4628, longitude: 9.19 }),
+    ];
+
+    const trip: Trip = {
+      id: 'trip-cleanup-flags',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      preferences: createPreferences(),
+      days: [
+        {
+          dayNumber: 1,
+          date: new Date('2026-02-18T00:00:00.000Z'),
+          items: dayItems,
+          isDayTrip: false,
+          scheduleDiagnostics: {
+            geoCleanupApplied: true,
+            geoPrunedActivitiesCount: 2,
+          },
+        },
+      ],
+    };
+
+    const result = validateAndFixTrip(trip);
+    expect(result.warnings.some((w) => w.includes('zigzag route detected'))).toBe(true);
+    expect((trip.days[0].geoDiagnostics?.zigzagTurns || 0)).toBeGreaterThanOrEqual(2);
+    expect((trip.days[0].geoDiagnostics?.routeInefficiencyRatio || 0)).toBeGreaterThan(1.75);
+  });
+
   it('adds geoDiagnostics and flags impossible/long transitions', () => {
     const dayItems: TripItem[] = [
       item({ id: 'a1', type: 'activity', title: 'A1', startTime: '09:00', endTime: '10:00', latitude: 45.4628, longitude: 9.1695 }),

@@ -116,4 +116,22 @@ describe('bookingLinks', () => {
     expect(url).toContain('group_adults=2');
     expect(url).toContain('group_children=0');
   });
+
+  it('falls back to resilient booking search URL for non-canonical hotel paths', () => {
+    const url = normalizeHotelBookingUrl({
+      url: 'https://www.booking.com/fr/hotel/lausanne-crissier?utm_source=googlemaps',
+      hotelName: 'Hotel Royal Savoy Lausanne',
+      destinationHint: 'Lausanne',
+      checkIn: '2026-02-20',
+      checkOut: '2026-02-22',
+      adults: 2,
+    });
+
+    expect(isBookingSearchUrl(url)).toBe(true);
+    expect(url).toContain('searchresults.html');
+    expect(url).toContain('ss=Hotel+Royal+Savoy+Lausanne+Lausanne');
+    expect(url).toContain('checkin=2026-02-20');
+    expect(url).toContain('checkout=2026-02-22');
+    expect(url).toContain('group_adults=2');
+  });
 });

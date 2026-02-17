@@ -401,11 +401,17 @@ export interface TripDay {
     maxLegKm: number;
     p95LegKm: number;
     totalTravelMin: number;
+    totalLegKm?: number;
+    zigzagTurns?: number;
+    routeInefficiencyRatio?: number;
+    mstLowerBoundKm?: number;
   };
   scheduleDiagnostics?: {
     largestGapMin?: number;
     outlierRestaurantsCount?: number;
     loadRebalanced?: boolean;
+    geoCleanupApplied?: boolean;
+    geoPrunedActivitiesCount?: number;
   };
   // Résumé du jour
   totalDistance?: number;

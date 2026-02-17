@@ -1139,6 +1139,60 @@ function rebalanceClustersForFlights(
     return maxRadiusKm(projected) > dayGeoSpreadCapKm[targetIdx];
   };
 
+  const combinedRouteCostDeltaKm = (sourceIdx: number, targetIdx: number, activity: ScoredActivity): number => {
+    const sourceBefore = clusters[sourceIdx].activities;
+    const targetBefore = clusters[targetIdx].activities;
+    const sourceAfter = sourceBefore.filter((a) => a.id !== activity.id);
+    const targetAfter = [...targetBefore, activity];
+    const beforeCost = routeCostKm(sourceBefore) + routeCostKm(targetBefore);
+    const afterCost = routeCostKm(sourceAfter) + routeCostKm(targetAfter);
+    return afterCost - beforeCost;
+  };
+
+  const dayTemporalOverloadMinutes = (idx: number): number => {
+    const availableMin = Math.max(0, hoursPerDay[idx] * 60);
+    const usedMin = dayUsedMinutes(idx);
+    return Math.max(0, usedMin - availableMin);
+  };
+
+  const canMoveBetweenDaysGeoSafe = (
+    sourceIdx: number,
+    targetIdx: number,
+    activity: ScoredActivity
+  ): boolean => {
+    if (sourceIdx === targetIdx) return false;
+    if (!clusters[sourceIdx] || !clusters[targetIdx]) return false;
+    if (!clusters[sourceIdx].activities.some((a) => a.id === activity.id)) return false;
+    if (!activity.latitude || !activity.longitude) return true;
+
+    const sourceCentroid = clusters[sourceIdx].centroid;
+    const targetCentroid = clusters[targetIdx].centroid;
+    const sourceDist = calculateDistance(activity.latitude, activity.longitude, sourceCentroid.lat, sourceCentroid.lng);
+    const targetDist = calculateDistance(activity.latitude, activity.longitude, targetCentroid.lat, targetCentroid.lng);
+    const routeDeltaKm = combinedRouteCostDeltaKm(sourceIdx, targetIdx, activity);
+
+    if (!activity.mustSee) {
+      if (routeDeltaKm > 0.25) return false;
+      if (moveExceedsGeoCap(targetIdx, activity)) return false;
+      if (targetDist >= sourceDist - 0.01) return false;
+      return true;
+    }
+
+    // Must-see moves are allowed only for real source overload,
+    // with bounded geographic degradation.
+    if (dayTemporalOverloadMinutes(sourceIdx) < 30) return false;
+    if (routeDeltaKm > 0.9) return false;
+    if (moveExceedsGeoCap(targetIdx, activity)) return false;
+
+    const extremeJumpKm = Math.max(6.5, sourceDist + 2.5);
+    if (targetDist > extremeJumpKm) return false;
+    return true;
+  };
+
+  for (const cluster of clusters) {
+    computeClusterGeo(cluster);
+  }
+
   // Phase 1: Empty days — merge activities into nearest non-day-trip day with capacity
   // BUT: ensure the day keeps at least its must-sees if it has ANY usable time
   for (let ci = 0; ci < clusters.length; ci++) {
@@ -1163,6 +1217,8 @@ function rebalanceClustersForFlights(
 
       const moved = cluster.activities.pop()!;
       clusters[bestTarget].activities.push(moved);
+      computeClusterGeo(cluster);
+      computeClusterGeo(clusters[bestTarget]);
     }
   }
 
@@ -1217,7 +1273,7 @@ function rebalanceClustersForFlights(
         const targetAvail = hoursPerDay[ti] * 60;
         const targetUsed = clusters[ti].activities.reduce((s, a) => s + (a.duration || 60), 0) + clusters[ti].activities.length * 20 + mealOverhead;
         const remaining = targetAvail - targetUsed;
-        if (remaining > bestRemainingMin && remaining >= (toMove.duration || 60) + 20) {
+        if (remaining > bestRemainingMin && remaining >= (toMove.duration || 60) + 20 && canMoveBetweenDaysGeoSafe(ci, ti, toMove)) {
           bestRemainingMin = remaining;
           bestTarget = ti;
         }
@@ -1227,6 +1283,8 @@ function rebalanceClustersForFlights(
 
       const [moved] = cluster.activities.splice(moveIdx, 1);
       clusters[bestTarget].activities.push(moved);
+      computeClusterGeo(cluster);
+      computeClusterGeo(clusters[bestTarget]);
       if (moved.mustSee) {
         console.log(`[Pipeline V2] Moved must-see "${moved.name}" (${moved.duration}min) from Day ${cluster.dayNumber} → Day ${clusters[bestTarget].dayNumber} (${Math.round(bestRemainingMin)}min remaining)`);
       }
@@ -1264,7 +1322,7 @@ function rebalanceClustersForFlights(
         const targetUsed = clusters[ti].activities.reduce((s, a) => s + (a.duration || 60), 0)
           + clusters[ti].activities.length * 20 + mealOverhead;
         const remaining = targetAvail - targetUsed;
-        if (remaining > bestRemaining && remaining >= (mustSee.duration || 60) + 20) {
+        if (remaining > bestRemaining && remaining >= (mustSee.duration || 60) + 20 && canMoveBetweenDaysGeoSafe(ci, ti, mustSee)) {
           bestRemaining = remaining;
           bestTarget = ti;
         }
@@ -1276,6 +1334,8 @@ function rebalanceClustersForFlights(
       if (idx !== -1) {
         const [moved] = cluster.activities.splice(idx, 1);
         clusters[bestTarget].activities.push(moved);
+        computeClusterGeo(cluster);
+        computeClusterGeo(clusters[bestTarget]);
         minutesToFree -= (mustSee.duration || 60) + 20;
         console.log(`[Pipeline V2] Must-see audit: moved "${mustSee.name}" (${mustSee.duration}min) from Day ${cluster.dayNumber} → Day ${clusters[bestTarget].dayNumber}`);
       }
@@ -1334,7 +1394,11 @@ function rebalanceClustersForFlights(
         const targetUsed = clusters[ti].activities.reduce((s, act) => s + (act.duration || 60), 0)
           + clusters[ti].activities.length * 20 + 180;
         const remaining = targetAvail - targetUsed;
-        if (remaining >= (a.duration || 60) + 20 && startHourPerDay[ti] < bestStartHour) {
+        if (
+          remaining >= (a.duration || 60) + 20
+          && startHourPerDay[ti] < bestStartHour
+          && canMoveBetweenDaysGeoSafe(ci, ti, a)
+        ) {
           bestStartHour = startHourPerDay[ti];
           bestTarget = ti;
         }
@@ -1343,6 +1407,8 @@ function rebalanceClustersForFlights(
       if (bestTarget !== -1) {
         const [moved] = cluster.activities.splice(ai, 1);
         clusters[bestTarget].activities.push(moved);
+        computeClusterGeo(cluster);
+        computeClusterGeo(clusters[bestTarget]);
         console.log(`[Pipeline V2] Phase 2c: moved outdoor must-see "${moved.name}" from Day ${cluster.dayNumber} (starts ${dayStart}h) → Day ${clusters[bestTarget].dayNumber} (starts ${startHourPerDay[bestTarget]}h)`);
       }
     }
@@ -1400,6 +1466,7 @@ function rebalanceClustersForFlights(
             const a = clusters[ti].activities[ai];
             // Prefer short activities that fit the available time
             if ((a.duration || 60) + 20 > availMinutes) continue;
+            if (!canMoveBetweenDaysGeoSafe(ti, ci, a)) continue;
             if (a.score < worstMustSeeScore) {
               worstMustSeeScore = a.score;
               bestSource = ti;
@@ -1410,6 +1477,8 @@ function rebalanceClustersForFlights(
         if (bestSource !== -1 && bestIdx !== -1) {
           const [moved] = clusters[bestSource].activities.splice(bestIdx, 1);
           clusters[ci].activities.push(moved);
+          computeClusterGeo(clusters[bestSource]);
+          computeClusterGeo(clusters[ci]);
           console.log(`[Pipeline V2] Phase 3 PASS 3: moved "${moved.name}" from Day ${clusters[bestSource].dayNumber} → empty Day ${clusters[ci].dayNumber}`);
           continue; // Next slot
         }
@@ -1423,6 +1492,7 @@ function rebalanceClustersForFlights(
       let bestFitScore = Infinity;
       for (let ai = 0; ai < source.activities.length; ai++) {
         if (source.activities[ai].mustSee) continue;
+        if (!canMoveBetweenDaysGeoSafe(bestSource, ci, source.activities[ai])) continue;
         const dur = source.activities[ai].duration || 60;
         // For short days (<4h), prefer shorter activities; otherwise pick lowest score
         const fitScore = availMinutes < 240
@@ -1437,6 +1507,8 @@ function rebalanceClustersForFlights(
 
       const [moved] = source.activities.splice(worstIdx, 1);
       clusters[ci].activities.push(moved);
+      computeClusterGeo(source);
+      computeClusterGeo(clusters[ci]);
     }
   }
 
@@ -1471,7 +1543,7 @@ function rebalanceClustersForFlights(
           const tAvail = hoursPerDay[ti] * 60;
           const tUsed = clusters[ti].activities.reduce((s, a) => s + (a.duration || 60) + 20, 0) + 180;
           const remaining = tAvail - tUsed;
-          if (remaining > bestRemaining && remaining >= (nm.duration || 60) + 20) {
+          if (remaining > bestRemaining && remaining >= (nm.duration || 60) + 20 && canMoveBetweenDaysGeoSafe(ci, ti, nm)) {
             bestRemaining = remaining;
             bestTarget = ti;
           }
@@ -1482,6 +1554,8 @@ function rebalanceClustersForFlights(
           if (idx !== -1) {
             const [moved] = cluster.activities.splice(idx, 1);
             clusters[bestTarget].activities.push(moved);
+            computeClusterGeo(cluster);
+            computeClusterGeo(clusters[bestTarget]);
             freedMin += (moved.duration || 60) + 20;
             console.log(`[Pipeline V2] Phase 4: moved non-must-see "${moved.name}" from overloaded Day ${cluster.dayNumber} → Day ${clusters[bestTarget].dayNumber} to protect must-sees`);
           }
@@ -1564,7 +1638,7 @@ function rebalanceClustersForFlights(
         const tAvail = hoursPerDay[ti] * 60;
         const tUsed = clusters[ti].activities.reduce((s, a) => s + (a.duration || 60) + 20, 0) + mealOverhead;
         const remaining = tAvail - tUsed;
-        if (remaining > bestRemaining && remaining >= (activity.duration || 60) + 20) {
+        if (remaining > bestRemaining && remaining >= (activity.duration || 60) + 20 && canMoveBetweenDaysGeoSafe(ci, ti, activity)) {
           bestRemaining = remaining;
           bestTarget = ti;
         }
@@ -1574,6 +1648,8 @@ function rebalanceClustersForFlights(
         // Move must-see to a day with capacity
         const [moved] = cluster.activities.splice(ai, 1);
         clusters[bestTarget].activities.push(moved);
+        computeClusterGeo(cluster);
+        computeClusterGeo(clusters[bestTarget]);
         console.log(`[Pipeline V2] Phase 5: moved must-see "${moved.name}" from overloaded Day ${cluster.dayNumber} (${availMin}min avail, ${totalDuration}min needed) → Day ${clusters[bestTarget].dayNumber} (${Math.round(bestRemaining)}min remaining)`);
       } else {
         // No day has enough room — evict the lowest-scored non-must-see from the best day
@@ -1602,9 +1678,12 @@ function rebalanceClustersForFlights(
           if (evictTarget) {
             const evictIdx = clusters[evictDay].activities.findIndex(a => a.id === evictTarget.id);
             if (evictIdx !== -1) {
+              if (!canMoveBetweenDaysGeoSafe(ci, evictDay, activity)) continue;
               clusters[evictDay].activities.splice(evictIdx, 1);
               const [moved] = cluster.activities.splice(ai, 1);
               clusters[evictDay].activities.push(moved);
+              computeClusterGeo(cluster);
+              computeClusterGeo(clusters[evictDay]);
               console.log(`[Pipeline V2] Phase 5: evicted "${evictTarget.name}" (score=${evictTarget.score.toFixed(1)}) from Day ${clusters[evictDay].dayNumber}, injected must-see "${moved.name}" (score=${moved.score.toFixed(1)})`);
             }
           }
@@ -1645,7 +1724,11 @@ function rebalanceClustersForFlights(
         const tAvail = hoursPerDay[ti] * 60;
         const tUsed = clusters[ti].activities.reduce((s, a) => s + (a.duration || 60) + 20, 0) + 180;
         const remaining = tAvail - tUsed;
-        if (targetHeavy < fewestHeavy && remaining >= (candidate.duration || 60) + 20) {
+        if (
+          targetHeavy < fewestHeavy
+          && remaining >= (candidate.duration || 60) + 20
+          && canMoveBetweenDaysGeoSafe(ci, ti, candidate)
+        ) {
           fewestHeavy = targetHeavy;
           bestTarget = ti;
         }
@@ -1656,6 +1739,8 @@ function rebalanceClustersForFlights(
         if (idx !== -1) {
           const [moved] = cluster.activities.splice(idx, 1);
           clusters[bestTarget].activities.push(moved);
+          computeClusterGeo(cluster);
+          computeClusterGeo(clusters[bestTarget]);
           toMove--;
           console.log(`[Pipeline V2] Phase 6: moved heavy activity "${moved.name}" (${moved.duration}min) from Day ${cluster.dayNumber} → Day ${clusters[bestTarget].dayNumber} (fatigue balancing)`);
         }
@@ -1697,8 +1782,7 @@ function rebalanceClustersForFlights(
     for (let ti = 0; ti < clusters.length; ti++) {
       if (ti === sourceIdx || isDayTrip[ti]) continue;
       if (dayRemainingMinutes(ti) < requiredMin) continue;
-      if (moveExceedsGeoCap(ti, candidate)) continue;
-      if (PIPELINE_GEO_STRICT && moveDegradesRouteCost(sourceIdx, ti, candidate)) continue;
+      if (!canMoveBetweenDaysGeoSafe(sourceIdx, ti, candidate)) continue;
 
       const sourceBeforeActivities = clusters[sourceIdx].activities;
       const targetBeforeActivities = clusters[ti].activities;
@@ -1768,8 +1852,7 @@ function rebalanceClustersForFlights(
 
     if (!moveCandidate) break;
     if (dayRemainingMinutes(targetIdx) < (moveCandidate.duration || 60) + 20) break;
-    if (moveExceedsGeoCap(targetIdx, moveCandidate)) break;
-    if (PIPELINE_GEO_STRICT && moveDegradesRouteCost(sourceIdx, targetIdx, moveCandidate)) break;
+    if (!canMoveBetweenDaysGeoSafe(sourceIdx, targetIdx, moveCandidate)) break;
 
     const moveIdx = source.activities.findIndex((a) => a.id === moveCandidate.id);
     if (moveIdx === -1) break;
@@ -1899,7 +1982,11 @@ function rebalanceClustersForFlights(
           const tAvail = hoursPerDay[ti] * 60;
           const tUsed = clusters[ti].activities.reduce((s, a) => s + (a.duration || 60) + 20, 0) + 180;
           const remaining = tAvail - tUsed;
-          if (targetCatCount < fewestCat && remaining >= (candidate.duration || 60) + 20) {
+          if (
+            targetCatCount < fewestCat
+            && remaining >= (candidate.duration || 60) + 20
+            && canMoveBetweenDaysGeoSafe(ci, ti, candidate)
+          ) {
             fewestCat = targetCatCount;
             bestTarget = ti;
           }
@@ -1910,6 +1997,8 @@ function rebalanceClustersForFlights(
           if (idx !== -1) {
             const [moved] = cluster.activities.splice(idx, 1);
             clusters[bestTarget].activities.push(moved);
+            computeClusterGeo(cluster);
+            computeClusterGeo(clusters[bestTarget]);
             toMove--;
             console.log(`[Pipeline V2] Phase 7: moved "${moved.name}" (${cat}) from Day ${cluster.dayNumber} → Day ${clusters[bestTarget].dayNumber} (type diversity)`);
           }
@@ -1946,6 +2035,7 @@ function rebalanceClustersForFlights(
         if (ti === targetIdx || isDayTrip[ti]) continue;
         const receiverRemaining = dayRemainingMinutes(ti);
         if (receiverRemaining < evictMin) continue;
+        if (!canMoveBetweenDaysGeoSafe(targetIdx, ti, evict)) continue;
         if (receiverRemaining > bestReceiverRemaining) {
           bestReceiverRemaining = receiverRemaining;
           bestReceiver = ti;
@@ -2050,6 +2140,7 @@ function rebalanceClustersForFlights(
         const neededMin = (activity.duration || 60) + 20;
         const canFit = ensureCapacityOnDay(targetIdx, neededMin, groupIds);
         if (!canFit) continue;
+        if (!canMoveBetweenDaysGeoSafe(sourceIdx, targetIdx, activity)) continue;
 
         const moveIdx = clusters[sourceIdx].activities.findIndex(a => a.id === activityId);
         if (moveIdx === -1) continue;

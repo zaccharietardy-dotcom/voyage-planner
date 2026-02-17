@@ -35,6 +35,18 @@ export interface ViatorProductCoordinates {
   source: 'place';
 }
 
+const viatorProductCoordinatesCache = new Map<string, ViatorProductCoordinates | null>();
+const viatorProductCoordinatesInFlight = new Map<string, Promise<ViatorProductCoordinates | null>>();
+const viatorLocationCoordinatesCache = new Map<string, ViatorProductCoordinates | null>();
+
+const LOCATION_REFERENCE_PATTERN = /^(LOC-[A-Za-z0-9+/=_-]{4,}|MEET_AT_DEPARTURE_POINT|CONTACT_SUPPLIER_LATER)$/i;
+
+function isViatorLocationReference(value: string): boolean {
+  const ref = value.trim();
+  if (!ref) return false;
+  return LOCATION_REFERENCE_PATTERN.test(ref);
+}
+
 export interface ViatorPlusValueInput {
   title: string;
   description?: string;
@@ -129,6 +141,400 @@ function isCoordinateNearDestination(
   return distance <= maxDistanceKm;
 }
 
+function selectBestCoordinateCandidate(
+  value: unknown,
+  destinationCenter: { lat: number; lng: number }
+): ViatorProductCoordinates | null {
+  const candidates = extractCoordinateCandidates(value)
+    .filter(c => isCoordinateNearDestination({ lat: c.lat, lng: c.lng }, destinationCenter))
+    .sort((a, b) => {
+      if (b.score !== a.score) return b.score - a.score;
+      const dA = calculateDistance(a.lat, a.lng, destinationCenter.lat, destinationCenter.lng);
+      const dB = calculateDistance(b.lat, b.lng, destinationCenter.lat, destinationCenter.lng);
+      return dA - dB;
+    });
+
+  if (candidates.length === 0) return null;
+  const best = candidates[0];
+
+  // Avoid "verified" on generic coordinates when payload contains many ambiguous pairs.
+  if (best.score < 0) return null;
+  if (best.score === 0 && candidates.length > 1) return null;
+
+  return { lat: best.lat, lng: best.lng, source: 'place' };
+}
+
+function buildViatorHeaders(): Record<string, string> {
+  return {
+    'exp-api-key': getViatorApiKey() || '',
+    'Accept-Language': 'fr-FR',
+    'Content-Type': 'application/json',
+    'Accept': 'application/json;version=2.0',
+  };
+}
+
+function collectProductPayloadsByCode(
+  value: unknown,
+  out: Map<string, unknown>,
+): void {
+  if (!value || typeof value !== 'object') return;
+
+  if (Array.isArray(value)) {
+    for (const item of value) collectProductPayloadsByCode(item, out);
+    return;
+  }
+
+  const record = value as Record<string, unknown>;
+  const codeRaw = record.productCode;
+  const productCode = typeof codeRaw === 'string' ? codeRaw.trim() : '';
+  if (productCode && !out.has(productCode)) {
+    out.set(productCode, record);
+  }
+
+  for (const child of Object.values(record)) {
+    if (!child || typeof child !== 'object') continue;
+    collectProductPayloadsByCode(child, out);
+  }
+}
+
+function collectLocationReferences(
+  value: unknown,
+  path: string,
+  out: Set<string>
+): void {
+  if (!value || typeof value !== 'object') return;
+
+  if (Array.isArray(value)) {
+    value.forEach((item, index) => collectLocationReferences(item, `${path}[${index}]`, out));
+    return;
+  }
+
+  const record = value as Record<string, unknown>;
+
+  // Booking answers can carry pickup references in a generic "answer" field.
+  const bookingAnswer = typeof record.answer === 'string' ? record.answer.trim() : '';
+  const bookingQuestion = typeof record.question === 'string' ? record.question.trim().toUpperCase() : '';
+  const bookingUnit = typeof record.unit === 'string' ? record.unit.trim().toUpperCase() : '';
+  if (
+    bookingAnswer &&
+    isViatorLocationReference(bookingAnswer) &&
+    (bookingQuestion.includes('PICKUP') || bookingQuestion.includes('MEET')) &&
+    (bookingUnit.includes('LOCATION_REFERENCE') || bookingUnit.includes('REFERENCE'))
+  ) {
+    out.add(bookingAnswer);
+  }
+
+  for (const [key, child] of Object.entries(record)) {
+    const nextPath = `${path}.${key}`;
+    if (typeof child === 'string') {
+      const ref = child.trim();
+      const keyLooksLikeRef = /ref|location|meeting|pickup|departure|start/i.test(key);
+      const pathLooksLikeLocation = /location|meeting|pickup|departure|start/i.test(nextPath);
+      if ((keyLooksLikeRef || pathLooksLikeLocation) && isViatorLocationReference(ref)) {
+        out.add(ref);
+      }
+      continue;
+    }
+    if (child && typeof child === 'object') {
+      collectLocationReferences(child, nextPath, out);
+    }
+  }
+}
+
+function extractLocationReference(locationPayload: Record<string, unknown>): string | null {
+  const candidateKeys = ['ref', 'reference', 'locationRef', 'locationReference', 'id', 'answer'];
+  for (const key of candidateKeys) {
+    const value = locationPayload[key];
+    if (typeof value === 'string' && isViatorLocationReference(value)) {
+      return value.trim();
+    }
+  }
+  return null;
+}
+
+function collectLocationPayloads(
+  value: unknown,
+  path: string,
+  out: Record<string, unknown>[]
+): void {
+  if (!value || typeof value !== 'object') return;
+
+  if (Array.isArray(value)) {
+    value.forEach((item, index) => collectLocationPayloads(item, `${path}[${index}]`, out));
+    return;
+  }
+
+  const record = value as Record<string, unknown>;
+  const hasRef = extractLocationReference(record);
+  if (hasRef && /location/i.test(path)) {
+    out.push(record);
+  }
+
+  for (const [key, child] of Object.entries(record)) {
+    if (!child || typeof child !== 'object') continue;
+    collectLocationPayloads(child, `${path}.${key}`, out);
+  }
+}
+
+async function fetchProductsBulk(productCodes: string[]): Promise<Map<string, unknown>> {
+  const byCode = new Map<string, unknown>();
+  if (!getViatorApiKey() || productCodes.length === 0) return byCode;
+
+  const headers = buildViatorHeaders();
+
+  const calls: Array<{ url: string; body: Record<string, unknown> }> = [
+    {
+      url: `${VIATOR_BASE_URL}/products/bulk`,
+      body: { productCodes, currency: 'EUR' },
+    },
+    {
+      url: `${VIATOR_BASE_URL}/products/search`,
+      body: {
+        currency: 'EUR',
+        pagination: { start: 1, count: Math.max(productCodes.length, 20) },
+        filtering: { productCodes },
+      },
+    },
+  ];
+
+  for (const call of calls) {
+    try {
+      const response = await fetch(call.url, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(call.body),
+      });
+      if (!response.ok) continue;
+      const data = await response.json();
+      collectProductPayloadsByCode(data, byCode);
+      if (byCode.size >= productCodes.length) break;
+    } catch {
+      // Try next endpoint silently.
+    }
+  }
+
+  // Last resort for unresolved products: product-by-product endpoint.
+  const unresolved = productCodes.filter((code) => !byCode.has(code));
+  if (unresolved.length === 0) return byCode;
+
+  await Promise.allSettled(
+    unresolved.map(async (code) => {
+      try {
+        const response = await fetch(`${VIATOR_BASE_URL}/products/${encodeURIComponent(code)}`, {
+          method: 'GET',
+          headers,
+        });
+        if (!response.ok) return;
+        const data = await response.json();
+        collectProductPayloadsByCode(data, byCode);
+      } catch {
+        // Ignore single-product failures.
+      }
+    })
+  );
+
+  return byCode;
+}
+
+async function fetchScheduleLocationReferences(
+  productCodes: string[],
+  destinationCenter: { lat: number; lng: number }
+): Promise<Map<string, string[]>> {
+  const refsByCode = new Map<string, string[]>();
+  if (!getViatorApiKey() || productCodes.length === 0) return refsByCode;
+
+  const headers = buildViatorHeaders();
+  const startDate = new Date().toISOString().slice(0, 10);
+
+  const responses = await Promise.allSettled(
+    productCodes.map(async (code) => {
+      const url = `${VIATOR_BASE_URL}/availability/schedules/${encodeURIComponent(code)}?startDate=${encodeURIComponent(startDate)}&currency=EUR`;
+      const response = await fetch(url, {
+        method: 'GET',
+        headers,
+      });
+      if (!response.ok) return { code, refs: [] as string[], direct: null as ViatorProductCoordinates | null };
+      const data = await response.json();
+
+      const direct = selectBestCoordinateCandidate(data, destinationCenter);
+      const refs = new Set<string>();
+      collectLocationReferences(data, 'schedule', refs);
+
+      return { code, refs: Array.from(refs), direct };
+    })
+  );
+
+  for (const result of responses) {
+    if (result.status !== 'fulfilled') continue;
+    const { code, refs, direct } = result.value;
+
+    if (direct && !viatorProductCoordinatesCache.has(code)) {
+      viatorProductCoordinatesCache.set(code, direct);
+    }
+    if (refs.length > 0) {
+      refsByCode.set(code, refs);
+    }
+  }
+
+  return refsByCode;
+}
+
+async function fetchLocationsBulk(
+  refs: string[],
+  destinationCenter: { lat: number; lng: number }
+): Promise<Map<string, ViatorProductCoordinates>> {
+  const resolved = new Map<string, ViatorProductCoordinates>();
+  if (!getViatorApiKey() || refs.length === 0) return resolved;
+
+  const refsToFetch = refs.filter((ref) => !viatorLocationCoordinatesCache.has(ref));
+  if (refsToFetch.length === 0) {
+    for (const ref of refs) {
+      const cached = viatorLocationCoordinatesCache.get(ref);
+      if (cached) resolved.set(ref, cached);
+    }
+    return resolved;
+  }
+
+  const headers = buildViatorHeaders();
+  const calls = [
+    { url: `${VIATOR_BASE_URL}/locations/bulk`, body: { locations: refsToFetch } },
+    { url: `${VIATOR_BASE_URL}/locations/bulk`, body: { locationRefs: refsToFetch } },
+  ];
+
+  let data: unknown = null;
+  for (const call of calls) {
+    try {
+      const response = await fetch(call.url, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(call.body),
+      });
+      if (!response.ok) continue;
+      data = await response.json();
+      break;
+    } catch {
+      // Try alternate payload format.
+    }
+  }
+
+  if (data) {
+    const locationPayloads: Record<string, unknown>[] = [];
+    collectLocationPayloads(data, 'root', locationPayloads);
+
+    for (const payload of locationPayloads) {
+      const ref = extractLocationReference(payload);
+      if (!ref) continue;
+      const coords = selectBestCoordinateCandidate(payload, destinationCenter);
+      if (coords) {
+        viatorLocationCoordinatesCache.set(ref, coords);
+      }
+    }
+  }
+
+  for (const ref of refsToFetch) {
+    if (!viatorLocationCoordinatesCache.has(ref)) {
+      viatorLocationCoordinatesCache.set(ref, null);
+    }
+  }
+
+  for (const ref of refs) {
+    const cached = viatorLocationCoordinatesCache.get(ref);
+    if (cached) resolved.set(ref, cached);
+  }
+
+  return resolved;
+}
+
+export async function getViatorProductCoordinatesBulk(
+  productCodes: string[],
+  destinationCenter: { lat: number; lng: number }
+): Promise<Map<string, ViatorProductCoordinates>> {
+  const resolved = new Map<string, ViatorProductCoordinates>();
+  if (!getViatorApiKey() || productCodes.length === 0) return resolved;
+
+  const normalizedCodes = Array.from(
+    new Set(
+      productCodes
+        .map((code) => code.trim())
+        .filter(Boolean)
+    )
+  );
+
+  const unresolvedCodes: string[] = [];
+  for (const code of normalizedCodes) {
+    if (viatorProductCoordinatesCache.has(code)) {
+      const cached = viatorProductCoordinatesCache.get(code);
+      if (cached) resolved.set(code, cached);
+      continue;
+    }
+    unresolvedCodes.push(code);
+  }
+
+  if (unresolvedCodes.length === 0) return resolved;
+
+  const productPayloadsByCode = await fetchProductsBulk(unresolvedCodes);
+  const locationRefsByCode = new Map<string, string[]>();
+  const refsToResolve = new Set<string>();
+  const unresolvedWithoutRefs: string[] = [];
+
+  for (const code of unresolvedCodes) {
+    const payload = productPayloadsByCode.get(code);
+    if (!payload) continue;
+
+    const directCoords = selectBestCoordinateCandidate(payload, destinationCenter);
+    if (directCoords) {
+      viatorProductCoordinatesCache.set(code, directCoords);
+      resolved.set(code, directCoords);
+      continue;
+    }
+
+    const refs = new Set<string>();
+    collectLocationReferences(payload, 'product', refs);
+    const refsList = Array.from(refs);
+    if (refsList.length > 0) {
+      locationRefsByCode.set(code, refsList);
+      refsList.forEach((ref) => refsToResolve.add(ref));
+    } else {
+      unresolvedWithoutRefs.push(code);
+    }
+  }
+
+  if (unresolvedWithoutRefs.length > 0) {
+    const scheduleRefs = await fetchScheduleLocationReferences(unresolvedWithoutRefs, destinationCenter);
+    for (const code of unresolvedWithoutRefs) {
+      if (viatorProductCoordinatesCache.has(code) && viatorProductCoordinatesCache.get(code)) {
+        resolved.set(code, viatorProductCoordinatesCache.get(code)!);
+        continue;
+      }
+      const refs = scheduleRefs.get(code) || [];
+      if (refs.length === 0) continue;
+      locationRefsByCode.set(code, refs);
+      refs.forEach((ref) => refsToResolve.add(ref));
+    }
+  }
+
+  const locationsByRef = await fetchLocationsBulk(Array.from(refsToResolve), destinationCenter);
+
+  for (const code of unresolvedCodes) {
+    if (resolved.has(code)) continue;
+
+    const refs = locationRefsByCode.get(code) || [];
+    let coords: ViatorProductCoordinates | null = null;
+    for (const ref of refs) {
+      const refCoords = locationsByRef.get(ref);
+      if (refCoords && isCoordinateNearDestination(refCoords, destinationCenter)) {
+        coords = refCoords;
+        break;
+      }
+    }
+
+    viatorProductCoordinatesCache.set(code, coords);
+    if (coords) resolved.set(code, coords);
+  }
+
+  return resolved;
+}
+
 /**
  * Try to get precise coordinates from Viator product APIs using productCode.
  * Some products expose meeting-point/location coordinates in product details.
@@ -137,66 +543,32 @@ export async function getViatorProductCoordinates(
   productCode: string,
   destinationCenter: { lat: number; lng: number }
 ): Promise<ViatorProductCoordinates | null> {
-  if (!getViatorApiKey() || !productCode?.trim()) return null;
+  const normalizedCode = productCode?.trim();
+  if (!getViatorApiKey() || !normalizedCode) return null;
 
-  const headers = {
-    'exp-api-key': getViatorApiKey() || '',
-    'Accept-Language': 'fr-FR',
-    'Content-Type': 'application/json',
-    'Accept': 'application/json;version=2.0',
-  };
-
-  const calls: Array<{ url: string; method: 'GET' | 'POST'; body?: Record<string, unknown> }> = [
-    { url: `${VIATOR_BASE_URL}/products/${encodeURIComponent(productCode)}`, method: 'GET' },
-    {
-      url: `${VIATOR_BASE_URL}/products/bulk`,
-      method: 'POST',
-      body: { productCodes: [productCode], currency: 'EUR' },
-    },
-    {
-      url: `${VIATOR_BASE_URL}/products/search`,
-      method: 'POST',
-      body: {
-        currency: 'EUR',
-        pagination: { start: 1, count: 3 },
-        filtering: { productCodes: [productCode] },
-      },
-    },
-  ];
-
-  for (const call of calls) {
-    try {
-      const response = await fetch(call.url, {
-        method: call.method,
-        headers,
-        body: call.body ? JSON.stringify(call.body) : undefined,
-      });
-      if (!response.ok) continue;
-
-      const data = await response.json();
-      const candidates = extractCoordinateCandidates(data)
-        .filter(c => isCoordinateNearDestination({ lat: c.lat, lng: c.lng }, destinationCenter))
-        .sort((a, b) => {
-          if (b.score !== a.score) return b.score - a.score;
-          const dA = calculateDistance(a.lat, a.lng, destinationCenter.lat, destinationCenter.lng);
-          const dB = calculateDistance(b.lat, b.lng, destinationCenter.lat, destinationCenter.lng);
-          return dA - dB;
-        });
-
-      if (candidates.length === 0) continue;
-      const best = candidates[0];
-
-      // Avoid "verified" on generic coordinates when payload contains many ambiguous pairs.
-      if (best.score < 0) continue;
-      if (best.score === 0 && candidates.length > 1) continue;
-
-      return { lat: best.lat, lng: best.lng, source: 'place' };
-    } catch {
-      // Try next endpoint silently
-    }
+  if (viatorProductCoordinatesCache.has(normalizedCode)) {
+    return viatorProductCoordinatesCache.get(normalizedCode) || null;
   }
 
-  return null;
+  if (viatorProductCoordinatesInFlight.has(normalizedCode)) {
+    return viatorProductCoordinatesInFlight.get(normalizedCode) || null;
+  }
+
+  const inFlight = (async () => {
+    const bulk = await getViatorProductCoordinatesBulk([normalizedCode], destinationCenter);
+    return bulk.get(normalizedCode) || null;
+  })();
+
+  viatorProductCoordinatesInFlight.set(normalizedCode, inFlight);
+  try {
+    const coords = await inFlight;
+    if (!viatorProductCoordinatesCache.has(normalizedCode)) {
+      viatorProductCoordinatesCache.set(normalizedCode, coords);
+    }
+    return coords;
+  } finally {
+    viatorProductCoordinatesInFlight.delete(normalizedCode);
+  }
 }
 
 /**
