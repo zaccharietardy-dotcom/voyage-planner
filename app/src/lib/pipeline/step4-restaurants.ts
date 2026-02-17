@@ -82,6 +82,14 @@ const DINNER_EXCLUDED_KEYWORDS = [
   'bakery', 'boulangerie', 'pâtisserie', 'patisserie',
   'coffee shop', 'salon de thé', 'salon de the', 'tea room',
   'viennoiserie', 'croissanterie',
+  // Food shops and dessert-only places (FR/EN/IT)
+  'magasin de gâteaux', 'magasin de gateaux', 'magasin de bonbons',
+  'cake shop', 'candy store', 'sweet shop', 'dessert shop',
+  'glacier', 'gelateria', 'gelato', 'ice cream', 'glace',
+  'confiserie', 'chocolaterie', 'chocolate shop',
+  'pasticceria', 'dolceria',
+  'frozen yogurt', 'froyo', 'juice bar', 'smoothie',
+  'boutique de desserts',
 ];
 
 const LUNCH_EXCLUDED_KEYWORDS = [
@@ -326,6 +334,25 @@ export function isAppropriateForMeal(restaurant: Restaurant, mealType: MealType)
     for (const excluded of DINNER_EXCLUDED_KEYWORDS) {
       if (allText.includes(excluded)) return false;
     }
+    // Positive signal: require at least one "real restaurant" indicator for dinner
+    const DINNER_POSITIVE_SIGNALS = [
+      'restaurant', 'ristorante', 'trattoria', 'osteria', 'brasserie',
+      'bistro', 'bistrot', 'taverna', 'steakhouse', 'grill', 'grillades',
+      'pizzeria', 'gastropub', 'gastro pub',
+      'seafood', 'fruits de mer', 'tapas', 'ramen', 'sushi', 'izakaya',
+      'cuisine', 'cucina', 'ristorante',
+      'viande', 'meat', 'poisson', 'fish',
+      'italien', 'italian', 'francais', 'french', 'japonais', 'japanese',
+      'chinois', 'chinese', 'indien', 'indian', 'thai', 'mexicain', 'mexican',
+      'mediterraneen', 'mediterranean', 'coreen', 'korean', 'vietnamien', 'vietnamese',
+      'libanais', 'lebanese', 'turc', 'turkish', 'grec', 'greek',
+      'marocain', 'moroccan', 'peruvien', 'peruvian',
+      'lombardie', 'lombard', 'toscane', 'toscan',
+    ];
+    const hasPositiveSignal = DINNER_POSITIVE_SIGNALS.some(s => allText.includes(s));
+    const hasStrongProfile = (restaurant.priceLevel || 0) >= 2
+      || ((restaurant.rating || 0) >= 4.5 && (restaurant.reviewCount || 0) >= 100);
+    if (!hasPositiveSignal && !hasStrongProfile) return false;
     return true;
   }
 

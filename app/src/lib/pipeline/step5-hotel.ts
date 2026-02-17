@@ -57,7 +57,16 @@ export function selectHotelByBarycenter(
       .slice(0, 10);
   }
 
-  if (candidates.length === 0) return hotels[0] || null;
+  if (candidates.length === 0) {
+    const fallback = hotels.find(h => h.latitude && h.longitude) || hotels[0] || null;
+    if (fallback && (!fallback.pricePerNight || fallback.pricePerNight <= 0)) {
+      return appendHotelQualityFlag(
+        { ...fallback, pricePerNight: estimatePriceFromBudget(budgetLevel) },
+        'hotel_price_estimated'
+      );
+    }
+    return fallback;
+  }
 
   // 2b. Distance hard-filter with controlled relaxations (+0.4km, max 2 passes).
   const hardCapKm = getHotelHardCapKmForProfile(profile, durationDays);
@@ -130,6 +139,75 @@ export function selectHotelByBarycenter(
 }
 
 /**
+ * Select the top N hotels ranked by the barycenter scoring algorithm.
+ * Used for accommodationOptions (hotel alternatives shown to user).
+ */
+export function selectTopHotelsByBarycenter(
+  clusters: ActivityCluster[],
+  hotels: Accommodation[],
+  budgetLevel: BudgetLevel,
+  maxPerNight?: number,
+  durationDays?: number,
+  options?: SelectHotelOptions,
+  count: number = 3
+): Accommodation[] {
+  if (hotels.length === 0) return [];
+
+  const profile = resolveQualityCityProfile({
+    destination: options?.destination,
+    clusters,
+  });
+
+  const weightedCenter = computeWeightedActivityCenter(clusters);
+  if (!weightedCenter) {
+    return hotels
+      .filter(h => Number.isFinite(h.latitude) && Number.isFinite(h.longitude) && h.pricePerNight > 0)
+      .sort((a, b) => (b.rating || 0) - (a.rating || 0))
+      .slice(0, count);
+  }
+
+  const budgetMax = maxPerNight || getBudgetMaxPerNight(budgetLevel);
+  const tolerance = budgetMax * 1.5;
+
+  let candidates = hotels.filter(h =>
+    h.pricePerNight > 0 && h.pricePerNight <= tolerance &&
+    h.latitude && h.longitude
+  );
+
+  if (candidates.length < count) {
+    candidates = hotels
+      .filter(h => h.latitude && h.longitude && h.pricePerNight > 0)
+      .sort((a, b) => a.pricePerNight - b.pricePerNight)
+      .slice(0, Math.max(count * 3, 10));
+  }
+
+  if (candidates.length === 0) {
+    return hotels.filter(h => h.pricePerNight > 0).slice(0, count);
+  }
+
+  const activityAnchors = collectDailyBoundaryAnchors(clusters);
+  const scored = candidates.map(h => {
+    const dist = calculateDistance(weightedCenter.lat, weightedCenter.lng, h.latitude, h.longitude);
+    const boundaryDist = averageBoundaryDistance(h, activityAnchors);
+    const ratingNorm = Math.max(0, Math.min(1, normalizeHotelRating(h) / 10));
+    const ratingBoost = 0.75 + ratingNorm * 0.25;
+    const overBudgetPenalty =
+      h.pricePerNight > budgetMax
+        ? ((h.pricePerNight - budgetMax) / Math.max(1, budgetMax)) * 4
+        : 0;
+    const distanceScore = Math.pow(dist / Math.max(0.35, profile.hotelTargetKm), 2.3);
+    const boundaryPenalty = boundaryDist * 0.55;
+    return {
+      hotel: h,
+      score: (distanceScore + boundaryPenalty) / ratingBoost + overBudgetPenalty,
+    };
+  });
+
+  scored.sort((a, b) => a.score - b.score);
+  return scored.slice(0, count).map(s => s.hotel);
+}
+
+/**
  * Normalize hotel rating to 0-10 scale.
  * Booking.com uses 0-10, Airbnb uses 0-5.
  */
@@ -148,6 +226,16 @@ function getBudgetMaxPerNight(budgetLevel: BudgetLevel): number {
     case 'comfort': return 250;
     case 'luxury': return 1000;
     default: return 150;
+  }
+}
+
+function estimatePriceFromBudget(budgetLevel: BudgetLevel): number {
+  switch (budgetLevel) {
+    case 'economic': return 55;
+    case 'moderate': return 110;
+    case 'comfort': return 180;
+    case 'luxury': return 300;
+    default: return 100;
   }
 }
 

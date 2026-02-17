@@ -117,7 +117,7 @@ export async function compareHotelPrices(params: {
 
 /**
  * Compare les prix de vols sur différentes plateformes
- * Note: Le service flights.ts retourne déjà des résultats de plusieurs sources (SerpAPI, Amadeus, etc.)
+ * Note: Le service flights.ts retourne déjà des résultats de plusieurs sources (SerpAPI, Gemini)
  */
 export async function compareFlightPrices(params: {
   origin: string;

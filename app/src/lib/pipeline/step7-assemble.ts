@@ -14,6 +14,7 @@ import { getDirections } from '../services/directions';
 import { fetchPlaceImage, fetchRestaurantPhotoByPlaceId } from './services/wikimediaImages';
 import type { OnPipelineEvent } from './types';
 import { isAppropriateForMeal, getCuisineFamily, isBreakfastSpecialized } from './step4-restaurants';
+import { selectTopHotelsByBarycenter } from './step5-hotel';
 import { searchRestaurantsNearby } from '../services/serpApiPlaces';
 import { batchFetchWikipediaSummaries, getWikiLanguageForDestination } from '../services/wikipedia';
 import { normalizeHotelBookingUrl } from '../services/bookingLinks';
@@ -3410,13 +3411,15 @@ export async function assembleTripSchedule(
     }
   }
 
-  const accommodationOptions = (data.bookingHotels || [])
-    .slice()
-    .sort((a, b) => {
-      const priceA = a.pricePerNight || Number.POSITIVE_INFINITY;
-      const priceB = b.pricePerNight || Number.POSITIVE_INFINITY;
-      return priceA - priceB;
-    });
+  const accommodationOptions = selectTopHotelsByBarycenter(
+    clusters,
+    data.bookingHotels || [],
+    preferences.budgetLevel,
+    data.budgetStrategy?.accommodationBudgetPerNight,
+    preferences.durationDays,
+    { destination: preferences.destination },
+    3
+  );
   if (hotel && !accommodationOptions.some((option) => option.id === hotel.id)) {
     accommodationOptions.unshift(hotel);
   }
@@ -5394,6 +5397,17 @@ function buildGapFillActivityPool(
     .slice(0, 160);
 }
 
+const WALK_ACTIVITY_KEYWORDS = [
+  'walk', 'promenade', 'canal walk', 'stroll', 'passeggiata',
+  'balade', 'randonnee urbaine', 'marche',
+];
+
+function isWalkActivity(name: string): boolean {
+  const lower = (name || '').toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  return WALK_ACTIVITY_KEYWORDS.some(k => lower.includes(k));
+}
+
 function createGapFillTripItem(
   candidate: ScoredActivity,
   dayNumber: number,
@@ -5420,7 +5434,9 @@ function createGapFillTripItem(
     estimatedCost: candidate.estimatedCost || 0,
     duration: slotDuration,
     rating: candidate.rating,
-    bookingUrl: candidate.bookingUrl || candidate.officialBookingUrl || candidate.googleMapsUrl,
+    bookingUrl: isWalkActivity(candidateName)
+      ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(placeQuery)}&travelmode=walking`
+      : (candidate.bookingUrl || candidate.officialBookingUrl || candidate.googleMapsUrl),
     officialBookingUrl: candidate.officialBookingUrl,
     viatorUrl: candidate.viatorUrl,
     googleMapsPlaceUrl:
@@ -5442,14 +5458,17 @@ export function fillLargeIntraDayGapsWithNearbyActivities(
   const scheduledActivityIds = new Set(
     days.flatMap((day) => day.items.filter((item) => item.type === 'activity').map((item) => item.id))
   );
-  const scheduledActivityNames = new Set(
+  const scheduledActivitiesList: Array<{ id: string; name: string; latitude: number; longitude: number }> =
     days.flatMap((day) =>
       day.items
         .filter((item) => item.type === 'activity')
-        .map((item) => normalizeActivityCandidateName(item.title))
-        .filter(Boolean)
-    )
-  );
+        .map((item) => ({
+          id: item.id,
+          name: item.title,
+          latitude: item.latitude,
+          longitude: item.longitude,
+        }))
+    );
 
   for (const day of days) {
     if (day.isDayTrip) continue;
@@ -5479,10 +5498,9 @@ export function fillLargeIntraDayGapsWithNearbyActivities(
 
         for (const candidate of candidatePool) {
           if (!isGapFillCandidateEligible(candidate)) continue;
-          const nameKey = normalizeActivityCandidateName(candidate.name || '');
-          if (!nameKey) continue;
           if (scheduledActivityIds.has(candidate.id)) continue;
-          if (scheduledActivityNames.has(nameKey)) continue;
+          if (scheduledActivitiesList.some(existing =>
+            isDuplicateActivityCandidate(candidate, existing))) continue;
           if (!isActivityOpenOnDay(candidate, dayDate)) continue;
 
           const travelPrev = roundToNearestFive(estimateTravel(prev, candidate, cache));
@@ -5558,7 +5576,12 @@ export function fillLargeIntraDayGapsWithNearbyActivities(
       refreshRouteMetadataAfterMutations([day], cache);
 
       scheduledActivityIds.add(bestPlacement.candidate.id);
-      scheduledActivityNames.add(normalizeActivityCandidateName(bestPlacement.candidate.name || ''));
+      scheduledActivitiesList.push({
+        id: bestPlacement.candidate.id || '',
+        name: bestPlacement.candidate.name || '',
+        latitude: bestPlacement.candidate.latitude,
+        longitude: bestPlacement.candidate.longitude,
+      });
       insertedForDay += 1;
       totalInserted += 1;
 

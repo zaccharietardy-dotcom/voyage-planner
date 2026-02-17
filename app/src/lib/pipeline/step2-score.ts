@@ -9,6 +9,7 @@ import type { TripPreferences, GroupType, ActivityType } from '../types';
 import type { Attraction } from '../services/attractions';
 import type { FetchedData, ScoredActivity } from './types';
 import { deduplicateByProximity, deduplicateByBookingUrl, deduplicateSameLocationSameType, isIrrelevantAttraction } from './utils/dedup';
+import { classifyExperienceCategory } from './utils/activityDedup';
 import { fixAttractionDuration, fixAttractionCost } from '../tripAttractions';
 import { findKnownViatorProduct } from '../services/viatorKnownProducts';
 import { calculateDistance } from '../services/geocoding';
@@ -247,17 +248,26 @@ export function scoreAndSelectActivities(
   // 4. Filter irrelevant types
   const filtered = deduped.filter(a => !isIrrelevantAttraction(a));
 
-  // 4b. Auto-detect must-sees from API popularity data
+  // 4b. Auto-detect must-sees from popularity data (no arbitrary threshold or cap)
+  // Top N non-Viator activities by popularity score are flagged as must-see.
+  // N scales with trip duration — longer trips get more incontournables.
+  const autoMustSeeCount = Math.ceil(preferences.durationDays * 1.5);
   const existingMustSeeCount = filtered.filter(a => a.mustSee).length;
-  if (existingMustSeeCount < 5) {
+  const autoDetectSlots = Math.max(0, autoMustSeeCount - existingMustSeeCount);
+
+  if (autoDetectSlots > 0) {
     const autoDetectCandidates = filtered
-      .filter(a => !a.mustSee && (a.reviewCount || 0) >= 2000 && (a.rating || 0) >= 4.4
-        && a.source !== 'viator') // Don't auto-flag Viator tours as must-sees
-      .sort((a, b) => (b.reviewCount || 0) - (a.reviewCount || 0));
-    const slotsRemaining = 5 - existingMustSeeCount;
-    for (const candidate of autoDetectCandidates.slice(0, slotsRemaining)) {
-      candidate.mustSee = true;
-      console.log(`[Pipeline V2] Auto must-see: "${candidate.name}" (${candidate.reviewCount} reviews, ${candidate.rating} rating)`);
+      .filter(a => !a.mustSee && a.source !== 'viator')
+      .map(a => ({
+        activity: a,
+        popScore: computePopularityScore(a.rating || 0, a.reviewCount || 0),
+      }))
+      .filter(({ popScore }) => popScore >= 12) // Minimum quality floor
+      .sort((a, b) => b.popScore - a.popScore);
+
+    for (const { activity, popScore } of autoDetectCandidates.slice(0, autoDetectSlots)) {
+      activity.mustSee = true;
+      console.log(`[Pipeline V2] Auto must-see: "${activity.name}" (pop=${popScore.toFixed(1)}, reviews=${activity.reviewCount}, rating=${activity.rating})`);
     }
   }
 
@@ -330,9 +340,10 @@ export function scoreAndSelectActivities(
   }
 
   const cappedSelection = enforceGenericPrivateViatorCap(selected, nonMustSees);
+  const categoryCapped = enforceExperienceCategoryCaps(cappedSelection, nonMustSees);
 
   // 9. Fix durations, costs, and enrich with Viator known product data
-  return cappedSelection.map(a => {
+  return categoryCapped.map(a => {
     let fixed = fixAttractionCost(fixAttractionDuration(a)) as ScoredActivity;
 
     // Enrich with known Viator product data (sync dictionary lookup)
@@ -483,6 +494,64 @@ function enforceGenericPrivateViatorCap(
   return result.filter((activity): activity is ScoredActivity => Boolean(activity));
 }
 
+/**
+ * Cap experiential activities by category: max 1 cooking class, 1 food tour, etc.
+ * Replaces excess entries with the next best non-same-category candidates.
+ */
+function enforceExperienceCategoryCaps(
+  selected: ScoredActivity[],
+  rankedCandidates: ScoredActivity[]
+): ScoredActivity[] {
+  const MAX_PER_CATEGORY = 1;
+
+  // Group by experience category
+  const categoryMap = new Map<string, { activity: ScoredActivity; index: number }[]>();
+  for (let i = 0; i < selected.length; i++) {
+    const cat = classifyExperienceCategory(selected[i].name || '');
+    if (!cat) continue;
+    if (!categoryMap.has(cat)) categoryMap.set(cat, []);
+    categoryMap.get(cat)!.push({ activity: selected[i], index: i });
+  }
+
+  // Check if any category exceeds the cap
+  let needsCapping = false;
+  for (const entries of categoryMap.values()) {
+    if (entries.length > MAX_PER_CATEGORY) { needsCapping = true; break; }
+  }
+  if (!needsCapping) return selected;
+
+  const result: Array<ScoredActivity | null> = [...selected];
+  const usedIds = new Set(selected.map(a => a.id));
+
+  for (const [cat, entries] of categoryMap) {
+    if (entries.length <= MAX_PER_CATEGORY) continue;
+
+    // Keep the highest-scored, replace others
+    entries.sort((a, b) => (b.activity.score || 0) - (a.activity.score || 0));
+
+    for (let i = MAX_PER_CATEGORY; i < entries.length; i++) {
+      const { index, activity } = entries[i];
+
+      // Find a replacement that is NOT in the same category
+      const replacement = rankedCandidates.find(c =>
+        !usedIds.has(c.id)
+        && classifyExperienceCategory(c.name || '') !== cat
+      );
+
+      if (replacement) {
+        result[index] = replacement;
+        usedIds.add(replacement.id);
+      } else {
+        result[index] = null;
+      }
+
+      console.log(`[Pipeline V2] Category cap: removed "${activity.name}" (${cat}, max=${MAX_PER_CATEGORY}), replaced with "${replacement?.name || 'none'}"`);
+    }
+  }
+
+  return result.filter((a): a is ScoredActivity => Boolean(a));
+}
+
 function tagActivity(
   a: Attraction,
   source: ScoredActivity['source']
@@ -502,6 +571,24 @@ function tagActivity(
   };
 }
 
+/**
+ * Combined popularity score: higher rating matters more, reviews provide scale.
+ * (rating/5)^2 * log10(reviews+1) * 10
+ *
+ * Examples:
+ *   4.8★ / 5000 reviews → ~34
+ *   4.5★ / 1000 reviews → ~24
+ *   4.0★ / 200 reviews  → ~15
+ *   3.5★ / 50 reviews   → ~8
+ *   3.0★ / 10 reviews   → ~4
+ */
+function computePopularityScore(rating: number, reviewCount: number): number {
+  const r = Math.max(0, Math.min(5, rating));
+  const ratingFactor = Math.pow(r / 5, 2);
+  const reviewFactor = Math.log10(Math.max(reviewCount, 1) + 1);
+  return ratingFactor * reviewFactor * 10;
+}
+
 function computeScore(
   activity: ScoredActivity,
   preferences: TripPreferences,
@@ -515,12 +602,9 @@ function computeScore(
     ? (activity.source === 'overpass' ? 50 : 100)
     : 0;
 
-  // Popularity: log10 of review count (0-10 scale)
-  const reviews = Math.max(activity.reviewCount || 1, 1);
-  const popularityScore = Math.log10(reviews) * 2; // 1 review = 0, 10K = 8, 50K = 9.4
-
-  // Rating: 0-10 scale
-  const ratingScore = (activity.rating || 3) * 2;
+  // Combined popularity: (rating/5)^2 * log10(reviews+1) — penalizes bad ratings exponentially
+  const popularityScore = computePopularityScore(activity.rating || 0, activity.reviewCount || 0);
+  const ratingScore = 0; // Absorbed into popularityScore
 
   // Type match: bonus if activity type matches user preferences
   const activityType = (activity.type || '').toLowerCase();
