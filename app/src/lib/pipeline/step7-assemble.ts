@@ -3351,6 +3351,33 @@ export async function assembleTripSchedule(
     console.warn('[Pipeline V2] Section 13ha failed (non-critical):', error);
   }
 
+  // 13hb. Safety net: detect days with catastrophic gaps (>= 180 min) and force a second
+  // gap-fill pass with relaxed constraints for those specific days.
+  const catastrophicGapDays = days.filter((day) => {
+    if (day.isDayTrip) return false;
+    const isArrivalOrDeparture = day.dayNumber === 1 || day.dayNumber === days.length;
+    if (isArrivalOrDeparture) return false;
+    const activityCount = day.items.filter((item) => item.type === 'activity').length;
+    if (activityCount >= 3) return false; // Day has enough activities
+    return computeLargestGapMinutes(day) >= 180;
+  });
+  if (catastrophicGapDays.length > 0) {
+    console.warn(`[Pipeline V2] ⚠ ${catastrophicGapDays.length} full day(s) still have gaps >= 3h after gap-fill. Running emergency fill...`);
+    try {
+      const emergencyFilled = fillLargeIntraDayGapsWithNearbyActivities(
+        catastrophicGapDays,
+        gapFillCandidatePool,
+        preferences.destination,
+        directionsCache
+      );
+      if (emergencyFilled > 0) {
+        console.log(`[Pipeline V2] Section 13hb: emergency gap-fill inserted ${emergencyFilled} activity(ies)`);
+      }
+    } catch (error) {
+      console.warn('[Pipeline V2] Section 13hb emergency gap-fill failed (non-critical):', error);
+    }
+  }
+
   // 13f. Final route metadata coherence pass after all swaps/re-orders.
   refreshRouteMetadataAfterMutations(days, directionsCache);
   refreshScheduleDiagnostics(days);

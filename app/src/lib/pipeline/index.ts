@@ -137,6 +137,28 @@ export async function generateTripV2(
     }
   }
 
+  // Post-rebalance audit: detect dropped activities and recover them into sparse days
+  const postRebalanceIds = new Set(clusters.flatMap(c => c.activities.map(a => a.id)));
+  const droppedActivities = selectedActivities.filter(a => !a.mustSee && !postRebalanceIds.has(a.id));
+  if (droppedActivities.length > 0) {
+    console.warn(`[Pipeline V2] ⚠ ${droppedActivities.length} activities lost during rebalancing: ${droppedActivities.map(a => `"${a.name}"`).join(', ')}`);
+    for (const dropped of droppedActivities) {
+      let bestTarget = -1;
+      let fewestActivities = Infinity;
+      for (let ci = 0; ci < clusters.length; ci++) {
+        const count = clusters[ci].activities.length;
+        if (count < fewestActivities) {
+          fewestActivities = count;
+          bestTarget = ci;
+        }
+      }
+      if (bestTarget !== -1 && fewestActivities < 3) {
+        clusters[bestTarget].activities.push(dropped);
+        console.log(`[Pipeline V2] Recovered dropped "${dropped.name}" → Day ${clusters[bestTarget].dayNumber} (had ${fewestActivities} activities)`);
+      }
+    }
+  }
+
   console.log(`[Pipeline V2] Step 3: ${clusters.length} clusters created`);
   for (const c of clusters) {
     console.log(`[Pipeline V2]   Day ${c.dayNumber}: ${c.activities.map(a => a.name).join(', ')} (${c.totalIntraDistance.toFixed(1)}km intra)`);

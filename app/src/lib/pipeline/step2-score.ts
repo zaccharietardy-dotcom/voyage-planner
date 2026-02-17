@@ -286,12 +286,13 @@ export function scoreAndSelectActivities(
   const curatedNonMustSees = curateNonMustSeePool(nonMustSees, preferences);
 
   // 8. Select the right count
-  // Arrival/departure days get fewer activities (~2 each), full days get ~4
+  // Arrival/departure days get fewer activities (~2 each), full days get ~5
+  // Over-select to provide margin for rebalancing drops and gap-fill candidates.
   const fullDays = Math.max(0, preferences.durationDays - 2);
   const targetCount = Math.max(
-    mustSees.length + Math.ceil(preferences.durationDays * 2.5),
-    preferences.durationDays * 4,
-    12 // Absolute minimum for any trip
+    mustSees.length + Math.ceil(preferences.durationDays * 3.5),
+    preferences.durationDays * 5,
+    14 // Absolute minimum for any trip
   );
   const remainingSlots = Math.max(0, targetCount - mustSees.length);
   const selected: ScoredActivity[] = [...mustSees, ...curatedNonMustSees.slice(0, remainingSlots)];
