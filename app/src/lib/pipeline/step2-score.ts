@@ -41,6 +41,8 @@ const MUST_SEE_EXCLUDED_KEYWORDS = [
   'transfer', 'shuttle',
   'walk', 'promenade', 'passeggiata', 'balade', 'stroll',
   'canal walk', 'river walk', 'lakeside walk',
+  // Stadiums: can't visit interior without event ticket — not true tourist attractions
+  'stadium', 'stade', 'stadio', 'arena',
 ];
 
 /** Keywords that indicate an activity includes a meal (cooking class, food tour, etc.) */
@@ -242,11 +244,28 @@ export function scoreAndSelectActivities(
         if (nameRatio < 0.3 || nameRatio > 3.0) continue;
         // Check if activity name contains the must-see item or vice versa
         if (actNameNorm.includes(mustSeeNorm) || mustSeeNorm.includes(actNameNorm)) {
+          // Guard: don't mark experiences/walks/tours as must-see even if name-matched
+          const actTextForExclude = `${(activity.name || '').toLowerCase()} ${((activity as any).description || '').toLowerCase()}`;
+          if (MUST_SEE_EXCLUDED_KEYWORDS.some(kw => actTextForExclude.includes(kw))) {
+            console.log(`[Pipeline V2] Fallback must-see: "${activity.name}" matched "${mustSeeItem}" but excluded by keyword guard`);
+            continue;
+          }
           console.log(`[Pipeline V2] Fallback must-see: "${activity.name}" matched "${mustSeeItem}" from user preferences (ratio=${nameRatio.toFixed(2)})`);
           activity.mustSee = true;
           break;
         }
       }
+    }
+  }
+
+  // 3c-bis. Strip mustSee from experiences/walks/tours that bypassed earlier guards
+  // (e.g. activities from dedicated must-see API search with source='mustsee').
+  for (const activity of deduped) {
+    if (!activity.mustSee) continue;
+    const actText = `${(activity.name || '').toLowerCase()} ${((activity as any).description || '').toLowerCase()}`;
+    if (MUST_SEE_EXCLUDED_KEYWORDS.some(kw => actText.includes(kw))) {
+      activity.mustSee = false;
+      console.log(`[Pipeline V2] Stripped mustSee from "${activity.name}" — matches excluded keyword (source=${activity.source})`);
     }
   }
 
@@ -736,8 +755,16 @@ function computeScore(
     else if (price > maxPricePerActivity * 1.15) budgetPenalty = -1.5;
   }
 
+  // Stadium/arena penalty: exterior-only visits are not worthwhile tourist activities.
+  // Users can't enter without an event ticket — deprioritize heavily so they lose to
+  // real cultural attractions.
+  let stadiumPenalty = 0;
+  if (/\b(stadium|stade|stadio)\b/i.test(activity.name || '') || activityType === 'stadium') {
+    stadiumPenalty = -8;
+  }
+
   return mustSeeBonus + popularityScore + ratingScore + typeMatchBonus + viatorBonus
-    + reliabilityBonus + distancePenalty + contextFitBonus + preferenceDepthBonus + proximityPenalty + budgetPenalty;
+    + reliabilityBonus + distancePenalty + contextFitBonus + preferenceDepthBonus + proximityPenalty + budgetPenalty + stadiumPenalty;
 }
 
 // ─── Contextual scoring helpers ─────────────────────────────────────────────

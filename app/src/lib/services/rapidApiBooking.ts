@@ -23,7 +23,7 @@ function getRapidApiKey() { return process.env.RAPIDAPI_KEY?.trim(); }
 /**
  * Strip ranking prefixes injected by some API responses (e.g. "3. Hotel Name" → "Hotel Name").
  */
-function sanitizeHotelName(raw: string | undefined): string {
+export function sanitizeHotelName(raw: string | undefined): string {
   if (!raw) return 'Hotel';
   return raw.replace(/^\d+\.\s+/, '').trim() || 'Hotel';
 }

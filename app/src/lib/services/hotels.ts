@@ -12,7 +12,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { Accommodation } from '../types';
 import { tokenTracker } from './tokenTracker';
 import { searchHotelsWithSerpApi, isSerpApiPlacesConfigured, getAvailableHotelNames } from './serpApiPlaces';
-import { searchHotelsWithBookingApi, isRapidApiBookingConfigured, enrichHotelWithGooglePlaces, type BookingHotel } from './rapidApiBooking';
+import { searchHotelsWithBookingApi, isRapidApiBookingConfigured, enrichHotelWithGooglePlaces, sanitizeHotelName, type BookingHotel } from './rapidApiBooking';
 import { searchTripAdvisorHotels, isTripAdvisorConfigured } from './tripadvisor';
 import { searchPlacesFromDB, savePlacesToDB, type PlaceData } from './placeDatabase';
 import { normalizeHotelBookingUrl } from './bookingLinks';
@@ -340,7 +340,8 @@ export async function searchHotels(
   const priceRange = getPriceRange(options.budgetLevel);
 
   const finalizeHotels = async (hotels: Accommodation[]): Promise<Accommodation[]> => {
-    const normalized = normalizeHotelsBookingUrls(hotels, destination, checkInStr, checkOutStr, options.guests);
+    const sanitized = hotels.map(h => ({ ...h, name: sanitizeHotelName(h.name) }));
+    const normalized = normalizeHotelsBookingUrls(sanitized, destination, checkInStr, checkOutStr, options.guests);
     const available = await filterHotelsWithLiveAvailability(
       normalized,
       destination,

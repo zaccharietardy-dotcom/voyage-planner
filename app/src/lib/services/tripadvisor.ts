@@ -317,7 +317,7 @@ export async function searchTripAdvisorHotels(
 
         return {
           id: `ta-hotel-${h.id || i}`,
-          name: h.title,
+          name: (h.title || '').replace(/^\d+\.\s+/, '').trim() || 'Hotel',
           type,
           address: destination,
           latitude: location.latitude,

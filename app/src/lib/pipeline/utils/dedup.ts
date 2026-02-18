@@ -35,6 +35,8 @@ function extractSignificantWords(name: string): Set<string> {
   const stopWords = new Set([
     'museum', 'musee', 'visite', 'guided', 'guidee', 'private', 'privee',
     'amsterdam', 'paris', 'london', 'rome', 'barcelona', 'berlin', 'madrid',
+    'milano', 'milan', 'napoli', 'naples', 'firenze', 'florence', 'venice',
+    'venezia', 'lisbon', 'lisbonne', 'lisboa', 'prague', 'vienna', 'munich',
     'ticket', 'tickets', 'access', 'acces', 'priority', 'prioritaire',
     'walking', 'balade', 'promenade',
   ]);

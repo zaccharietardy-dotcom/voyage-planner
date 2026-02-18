@@ -2626,9 +2626,12 @@ export async function assembleTripSchedule(
       const monumentLikeActivity = item.type === 'activity'
         ? isMonumentLikeActivityName(itemData.name || item.title)
         : false;
+      // Lower threshold for monuments WITH an official ticketing URL — both buttons
+      // should show (official + Viator "guided option") when Viator adds real value.
+      const viatorScoreThreshold = monumentLikeActivity && officialBookingUrl ? 2 : 3;
       const keepViator = !candidateViatorUrl
         ? false
-        : (!monumentLikeActivity || (viatorAssessment?.score || 0) >= 3);
+        : (!monumentLikeActivity || (viatorAssessment?.score || 0) >= viatorScoreThreshold);
       const resolvedViatorUrl = keepViator ? candidateViatorUrl : undefined;
       const mergedQualityFlags = Array.from(new Set([
         ...((itemData.qualityFlags || []) as string[]),
@@ -3401,15 +3404,44 @@ export async function assembleTripSchedule(
     // Collect all must-see candidates from the pool.
     const mustSeeCandidates = gapFillCandidatePool.filter((c) => c.mustSee && c.id);
 
-    // Build set of IDs that are already scheduled across all days.
+    // Build set of IDs AND a list with name+GPS for similarity matching across all days.
     const scheduledMustSeeIds = new Set<string>();
+    const scheduledActivitiesList: Array<{ id: string; name: string; latitude: number; longitude: number }> = [];
     for (const day of days) {
       for (const item of day.items) {
         if (item.id) scheduledMustSeeIds.add(item.id);
+        if (item.type === 'activity' && item.latitude && item.longitude) {
+          scheduledActivitiesList.push({
+            id: item.id,
+            name: item.title || '',
+            latitude: item.latitude,
+            longitude: item.longitude,
+          });
+        }
       }
     }
 
-    const missingMustSees = mustSeeCandidates.filter((c) => !scheduledMustSeeIds.has(c.id));
+    // Filter missing must-sees: check BOTH exact ID AND name-similarity dedup.
+    // This prevents re-inserting landmarks that are already scheduled under a
+    // different ID from another data source (e.g., "Galleria Vittorio Emanuele II"
+    // from SerpAPI vs. Overpass with different IDs).
+    const missingMustSees = mustSeeCandidates.filter((c) => {
+      if (scheduledMustSeeIds.has(c.id)) return false;
+      // Also check name-similarity against all scheduled activities
+      if (c.latitude && c.longitude) {
+        const isDup = scheduledActivitiesList.some((scheduled) =>
+          isDuplicateActivityCandidate(
+            { id: c.id, name: c.name || '', latitude: c.latitude!, longitude: c.longitude! },
+            { id: scheduled.id, name: scheduled.name, latitude: scheduled.latitude, longitude: scheduled.longitude }
+          )
+        );
+        if (isDup) {
+          console.log(`[Pipeline V2] Must-see recovery: skipping "${c.name}" — name-similar to already-scheduled activity`);
+          return false;
+        }
+      }
+      return true;
+    });
 
     if (missingMustSees.length > 0) {
       console.warn(`[Pipeline V2] Must-see recovery: ${missingMustSees.length} must-see(s) missing from schedule — attempting recovery`);
@@ -3455,6 +3487,9 @@ export async function assembleTripSchedule(
           bestDay.items = sortItemsByTime([...bestDay.items, newItem]).map((item, index) => ({ ...item, orderIndex: index }));
           refreshRouteMetadataAfterMutations([bestDay], directionsCache);
           scheduledMustSeeIds.add(mustSeeCandidate.id);
+          if (mustSeeCandidate.latitude && mustSeeCandidate.longitude) {
+            scheduledActivitiesList.push({ id: mustSeeCandidate.id, name: mustSeeCandidate.name || '', latitude: mustSeeCandidate.latitude, longitude: mustSeeCandidate.longitude });
+          }
           console.log(`[Pipeline V2] Must-see recovery: inserted "${mustSeeCandidate.name}" into day ${bestDay.dayNumber} (gap=${bestDayGap}min)`);
         } else {
           // No gap found — evict the lowest-scored non-must-see activity across all days.
@@ -3492,6 +3527,9 @@ export async function assembleTripSchedule(
             evictDay.items = sortItemsByTime([...evictDay.items, newItem]).map((item, index) => ({ ...item, orderIndex: index }));
             refreshRouteMetadataAfterMutations([evictDay], directionsCache);
             scheduledMustSeeIds.add(mustSeeCandidate.id);
+            if (mustSeeCandidate.latitude && mustSeeCandidate.longitude) {
+              scheduledActivitiesList.push({ id: mustSeeCandidate.id, name: mustSeeCandidate.name || '', latitude: mustSeeCandidate.latitude, longitude: mustSeeCandidate.longitude });
+            }
             console.log(`[Pipeline V2] Must-see recovery: evicted "${evictItem.title}" (score=${evictScore.toFixed(1)}) and replaced with must-see "${mustSeeCandidate.name}" on day ${evictDay.dayNumber}`);
           } else {
             console.warn(`[Pipeline V2] Must-see recovery: could not place "${mustSeeCandidate.name}" — no eviction candidate found`);
@@ -5408,7 +5446,8 @@ function isWorthwhileGapFillActivity(activity: ScoredActivity): boolean {
 
   // Accept all attraction-like types (including Google Places mapped types like 'museum', 'park', 'attraction')
   if (['culture', 'nature', 'museum', 'park', 'gallery', 'religious',
-       'zoo', 'attraction', 'stadium', 'amusement_park', 'market'].includes(actType)) return true;
+       'zoo', 'attraction', 'amusement_park', 'market'].includes(actType)) return true;
+  // Stadiums are excluded: exterior-only, can't visit without event ticket
   if (!text) return false;
 
   return containsAnyKeyword(text, GAP_FILL_WORTHWHILE_KEYWORDS);
@@ -5900,6 +5939,15 @@ export async function fixRestaurantOutliers(
       const currentName = normalizeRestaurantName(item.restaurant?.name || item.locationName || stripMealPrefix(item.title));
       const duplicateInDay = currentName.length > 0 && usedNames.has(currentName);
       const currentDistanceKm = minDistanceToAnchorsKm(item, anchors);
+      // Bug 5 fix: also check distance to PREVIOUS activity specifically for lunch/dinner.
+      // A restaurant close to the next anchor (hotel) but far from the previous activity
+      // creates a bad user experience ("why am I walking 3km backwards for dinner?").
+      const prevAnchorDistKm = (mealType !== 'breakfast' && anchors.length > 0 && hasValidCoords(item))
+        ? calculateDistance(item.latitude, item.longitude, anchors[0].latitude, anchors[0].longitude)
+        : 0;
+      const prevAnchorOutlier = mealType !== 'breakfast'
+        && Number.isFinite(prevAnchorDistKm)
+        && prevAnchorDistKm > maxDistanceKm * 1.5; // Hard cap: 2.7km from previous activity
       const breakfastToFirstActivityKm = mealType === 'breakfast' && anchors.length >= 2 && hasValidCoords(item)
         ? calculateDistance(item.latitude, item.longitude, anchors[1].latitude, anchors[1].longitude)
         : 0;
@@ -5909,7 +5957,8 @@ export async function fixRestaurantOutliers(
         && breakfastToFirstActivityKm > GEO_STRICT_LOCAL_LEG_MAX_KM;
       const isOutlier =
         (Number.isFinite(currentDistanceKm) && currentDistanceKm > maxDistanceKm)
-        || breakfastTransitionOutlier;
+        || breakfastTransitionOutlier
+        || prevAnchorOutlier;
 
       if (!duplicateInDay && !isOutlier) {
         if (currentName) usedNames.add(currentName);

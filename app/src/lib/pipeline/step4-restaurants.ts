@@ -406,10 +406,20 @@ export function isAppropriateForMeal(restaurant: Restaurant, mealType: MealType)
   }
 
   if (mealType === 'dinner') {
-    // B2: Reject bare bars / cafes that have no qualifying restaurant signal.
+    // B2: Reject bare bars / cafes unless they have STRONG restaurant evidence.
+    // Generic cuisine nationality keywords ("italian", "french") are too common for
+    // cafés — we require explicit restaurant-type words to override.
     if (isBareBarOrCafe(name, allText)) {
-      const hasRestaurantSignal = DINNER_POSITIVE_SIGNALS.some(s => allText.includes(s));
-      if (!hasRestaurantSignal) return false;
+      const STRONG_RESTAURANT_SIGNALS = [
+        'restaurant', 'ristorante', 'trattoria', 'osteria', 'brasserie',
+        'bistro', 'bistrot', 'taverna', 'steakhouse', 'grill', 'grillades',
+        'pizzeria', 'gastropub', 'gastro pub',
+        'seafood', 'fruits de mer', 'tapas', 'ramen', 'sushi', 'izakaya',
+        'cuisine', 'cucina',
+      ];
+      const strongSignalCount = STRONG_RESTAURANT_SIGNALS.filter(s => allText.includes(s)).length;
+      // Require at least 1 strong restaurant-type signal (not just "italian" or "french")
+      if (strongSignalCount === 0) return false;
     }
 
     for (const excluded of DINNER_EXCLUDED_KEYWORDS) {
