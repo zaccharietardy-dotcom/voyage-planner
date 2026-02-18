@@ -379,42 +379,64 @@ export async function generateTripV2(
           const evicted = evictCandidates[0];
           const evictIdx = targetDay.items.findIndex((i: any) => i.id === evicted.id);
           if (evictIdx >= 0) {
-            // Use evicted item's time slot for the must-see
             const startMinutes = msTimeToMin(evicted.startTime);
-            const duration = missing.duration || 90;
+            const requestedDuration = missing.duration || 90;
 
             targetDay.items.splice(evictIdx, 1);
             console.warn(
               `[Pipeline V2] Must-see recovery: evicted "${evicted.title}" from Day ${targetDay.dayNumber}`
             );
 
-            targetDay.items.push({
-              id: missing.id,
-              dayNumber: targetDay.dayNumber,
-              type: 'activity' as const,
-              title: missing.name,
-              description: missing.description || missing.name,
-              locationName: missing.name,
-              latitude: missing.latitude || 0,
-              longitude: missing.longitude || 0,
-              startTime: msMinToHHMM(startMinutes),
-              endTime: msMinToHHMM(startMinutes + duration),
-              duration,
-              orderIndex: targetDay.items.length,
-              estimatedCost: missing.estimatedCost || 0,
-              mustSee: true,
-              rating: missing.rating,
-              reviewCount: missing.reviewCount,
-              dataReliability: 'verified' as const,
-            } as any);
-
-            // Re-sort and re-index
-            targetDay.items.sort((a: any, b: any) => (a.startTime || '').localeCompare(b.startTime || ''));
-            targetDay.items.forEach((item: any, idx: number) => { item.orderIndex = idx; });
-
-            console.warn(
-              `[Pipeline V2] Must-see recovery: injected "${missing.name}" into Day ${targetDay.dayNumber} at ${msMinToHHMM(startMinutes)}`
+            // Calculate the real available gap after eviction to prevent overlaps
+            const sortedAfterEvict = [...targetDay.items].sort(
+              (a: any, b: any) => (a.startTime || '').localeCompare(b.startTime || '')
             );
+            const nextItem = sortedAfterEvict.find(
+              (i: any) => msTimeToMin(i.startTime) > startMinutes
+            );
+            const prevItem = [...sortedAfterEvict].reverse().find(
+              (i: any) => msTimeToMin(i.endTime || i.startTime) <= startMinutes
+            );
+
+            // Constrain to available gap: [prevEnd..nextStart]
+            const gapStart = prevItem ? Math.max(startMinutes, msTimeToMin(prevItem.endTime)) : startMinutes;
+            const gapEnd = nextItem ? msTimeToMin(nextItem.startTime) : 23 * 60;
+            const availableMinutes = gapEnd - gapStart - 15; // 15min buffer before next item
+            const duration = Math.min(requestedDuration, Math.max(45, availableMinutes));
+
+            if (duration >= 45) {
+              targetDay.items.push({
+                id: missing.id,
+                dayNumber: targetDay.dayNumber,
+                type: 'activity' as const,
+                title: missing.name,
+                description: missing.description || missing.name,
+                locationName: missing.name,
+                latitude: missing.latitude || 0,
+                longitude: missing.longitude || 0,
+                startTime: msMinToHHMM(gapStart),
+                endTime: msMinToHHMM(gapStart + duration),
+                duration,
+                orderIndex: targetDay.items.length,
+                estimatedCost: missing.estimatedCost || 0,
+                mustSee: true,
+                rating: missing.rating,
+                reviewCount: missing.reviewCount,
+                dataReliability: 'verified' as const,
+              } as any);
+
+              // Re-sort and re-index
+              targetDay.items.sort((a: any, b: any) => (a.startTime || '').localeCompare(b.startTime || ''));
+              targetDay.items.forEach((item: any, idx: number) => { item.orderIndex = idx; });
+
+              console.warn(
+                `[Pipeline V2] Must-see recovery: injected "${missing.name}" into Day ${targetDay.dayNumber} at ${msMinToHHMM(gapStart)} (${duration}min, gap=${availableMinutes + 15}min)`
+              );
+            } else {
+              console.warn(
+                `[Pipeline V2] Must-see recovery: gap too small (${availableMinutes + 15}min) for "${missing.name}" on Day ${targetDay.dayNumber} — skipping`
+              );
+            }
           }
         }
       }

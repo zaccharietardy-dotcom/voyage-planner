@@ -72,9 +72,13 @@ const BREAKFAST_EXCLUDED_CUISINES = [
 
 const BREAKFAST_SPECIALIZED_KEYWORDS = [
   'boulangerie', 'bakery', 'pâtisserie', 'patisserie',
-  'café', 'cafe', 'coffee', 'coffee shop', 'caffè', 'cafe bar',
+  'café', 'cafe', 'coffee', 'coffee shop', 'caffè', 'cafe bar', 'caffetteria',
   'brunch', 'breakfast', 'petit-déjeuner', 'petit dejeuner',
   'viennoiserie', 'croissant', 'tea room', 'salon de thé', 'salon de the',
+  // International breakfast terms
+  'cornetteria', 'colazione', 'desayuno', 'pasteleria', 'pastelería',
+  'panaderia', 'panadería', 'konditorei', 'frühstück', 'kahvalti', 'kahvaltı',
+  'forn', 'bar ', 'cafeteria', 'cafetería',
 ];
 
 const DINNER_EXCLUDED_KEYWORDS = [
@@ -594,6 +598,7 @@ function selectTopNearbyRestaurants(
   const limits = distanceLimits[mealType];
   const scored: { restaurant: Restaurant; score: number; distanceKm: number }[] = [];
 
+  // Pass 1: strict filters (all criteria)
   for (const r of pool) {
     if (usedIds.has(r.id)) continue;
     if (!hasValidCoordinates(r)) continue;
@@ -611,6 +616,44 @@ function selectTopNearbyRestaurants(
       score: scoreCandidate(r, mealType, distanceKm, distanceLimits),
       distanceKm,
     });
+  }
+
+  // Pass 2: if 0 results for breakfast, drop isBreakfastSpecialized (accept any appropriate restaurant)
+  if (scored.length === 0 && mealType === 'breakfast') {
+    for (const r of pool) {
+      if (usedIds.has(r.id)) continue;
+      if (!hasValidCoordinates(r)) continue;
+      if (!isAppropriateForMeal(r, mealType)) continue;
+      const distanceKm = calculateDistance(refCoords.lat, refCoords.lng, r.latitude, r.longitude);
+      if (distanceKm > limits.absoluteKm) continue;
+      scored.push({
+        restaurant: r,
+        score: scoreCandidate(r, mealType, distanceKm, distanceLimits) * 0.9, // slight penalty for non-specialized
+        distanceKm,
+      });
+    }
+    if (scored.length > 0) {
+      console.log(`[Pipeline V2] Restaurant pass 2 (drop breakfast filter): found ${scored.length} candidates for ${mealType}`);
+    }
+  }
+
+  // Pass 3: if still 0, double distance cap (max 3km) and drop meal-type filter
+  if (scored.length === 0) {
+    const relaxedAbsoluteKm = Math.min(limits.absoluteKm * 2, 3.0);
+    for (const r of pool) {
+      if (usedIds.has(r.id)) continue;
+      if (!hasValidCoordinates(r)) continue;
+      const distanceKm = calculateDistance(refCoords.lat, refCoords.lng, r.latitude, r.longitude);
+      if (distanceKm > relaxedAbsoluteKm) continue;
+      scored.push({
+        restaurant: r,
+        score: scoreCandidate(r, mealType, distanceKm, distanceLimits) * 0.8, // penalty for relaxed pass
+        distanceKm,
+      });
+    }
+    if (scored.length > 0) {
+      console.log(`[Pipeline V2] Restaurant pass 3 (relaxed distance ${relaxedAbsoluteKm.toFixed(1)}km): found ${scored.length} candidates for ${mealType}`);
+    }
   }
 
   if (scored.length === 0) return [];

@@ -1091,6 +1091,21 @@ export async function assembleTripSchedule(
       isDayTrip: !!balancedDay.isDayTrip,
     }));
 
+    // Day 1 late arrival: if available window < 2h, skip activity scheduling.
+    // Activities from this cluster will be picked up by the gap-fill pool on other days.
+    const dayAvailableMinutes = dayEndMinutes - dayStartMinutes;
+    const day1TooShort = isFirstDay && dayAvailableMinutes < 120;
+    if (day1TooShort) {
+      const actCount = (prepassActivities.get(balancedDay.dayNumber) || []).length;
+      if (actCount > 0) {
+        console.log(
+          `[Pipeline V2] Day 1: only ${dayAvailableMinutes}min available (arrival too late) — ` +
+          `clearing ${actCount} activities for redistribution to other days`
+        );
+        prepassActivities.set(balancedDay.dayNumber, []);
+      }
+    }
+
     dayStartHour = Math.floor(dayStartMinutes / 60);
     dayEndHour = Math.floor(dayEndMinutes / 60);
 
@@ -3512,25 +3527,38 @@ export async function assembleTripSchedule(
           }
 
           if (evictDay && evictItem) {
-            // Replace the evicted item with the must-see.
+            // Replace the evicted item with the must-see, but check for overlaps first.
             const startMin = parseHHMMToMinutes(evictItem.startTime);
-            const endMin = parseHHMMToMinutes(evictItem.endTime);
-            const slotDuration = Math.max(candidateDuration, endMin - startMin);
-            const newItem = createGapFillTripItem(
-              mustSeeCandidate,
-              evictDay.dayNumber,
-              startMin,
-              startMin + slotDuration,
-              preferences.destination
+            const itemsAfterEvict = evictDay.items.filter((i) => i.id !== evictItem!.id);
+            const sortedAfterEvict = sortItemsByTime(itemsAfterEvict);
+
+            // Find the real available gap after eviction
+            const nextItem = sortedAfterEvict.find((i) => parseHHMMToMinutes(i.startTime) > startMin);
+            const gapEnd = nextItem ? parseHHMMToMinutes(nextItem.startTime) : 23 * 60;
+            const maxAvailableDuration = gapEnd - startMin - 15; // 15min buffer
+            const slotDuration = Math.min(
+              Math.max(candidateDuration, parseHHMMToMinutes(evictItem.endTime) - startMin),
+              Math.max(45, maxAvailableDuration)
             );
-            evictDay.items = evictDay.items.filter((i) => i.id !== evictItem!.id);
-            evictDay.items = sortItemsByTime([...evictDay.items, newItem]).map((item, index) => ({ ...item, orderIndex: index }));
-            refreshRouteMetadataAfterMutations([evictDay], directionsCache);
-            scheduledMustSeeIds.add(mustSeeCandidate.id);
-            if (mustSeeCandidate.latitude && mustSeeCandidate.longitude) {
-              scheduledActivitiesList.push({ id: mustSeeCandidate.id, name: mustSeeCandidate.name || '', latitude: mustSeeCandidate.latitude, longitude: mustSeeCandidate.longitude });
+
+            if (slotDuration >= 45) {
+              const newItem = createGapFillTripItem(
+                mustSeeCandidate,
+                evictDay.dayNumber,
+                startMin,
+                startMin + slotDuration,
+                preferences.destination
+              );
+              evictDay.items = sortItemsByTime([...itemsAfterEvict, newItem]).map((item, index) => ({ ...item, orderIndex: index }));
+              refreshRouteMetadataAfterMutations([evictDay], directionsCache);
+              scheduledMustSeeIds.add(mustSeeCandidate.id);
+              if (mustSeeCandidate.latitude && mustSeeCandidate.longitude) {
+                scheduledActivitiesList.push({ id: mustSeeCandidate.id, name: mustSeeCandidate.name || '', latitude: mustSeeCandidate.latitude, longitude: mustSeeCandidate.longitude });
+              }
+              console.log(`[Pipeline V2] Must-see recovery: evicted "${evictItem.title}" (score=${evictScore.toFixed(1)}) and replaced with must-see "${mustSeeCandidate.name}" on day ${evictDay.dayNumber} (${slotDuration}min, gap=${maxAvailableDuration + 15}min)`);
+            } else {
+              console.warn(`[Pipeline V2] Must-see recovery: gap too small (${maxAvailableDuration + 15}min) after evicting "${evictItem.title}" — cannot place "${mustSeeCandidate.name}"`);
             }
-            console.log(`[Pipeline V2] Must-see recovery: evicted "${evictItem.title}" (score=${evictScore.toFixed(1)}) and replaced with must-see "${mustSeeCandidate.name}" on day ${evictDay.dayNumber}`);
           } else {
             console.warn(`[Pipeline V2] Must-see recovery: could not place "${mustSeeCandidate.name}" — no eviction candidate found`);
           }
@@ -4004,11 +4032,35 @@ function getActivityMaxEndTime(activity: ScoredActivity, dayDate: Date): Date | 
 }
 
 /**
+ * Detect public spaces that are always open (bridges, squares, parks, monuments, etc.).
+ * Google Places often returns `null` opening hours for these, which would incorrectly
+ * flag them as "closed". This whitelist bypasses the opening hours check entirely.
+ */
+function isAlwaysOpenPublicSpace(activity: ScoredActivity): boolean {
+  const name = (activity.name || '').toLowerCase();
+  const ALWAYS_OPEN_KEYWORDS = [
+    'piazza', 'plaza', 'place', 'square', 'platz', 'náměstí', 'namesti', 'tér',
+    'bridge', 'pont', 'puente', 'brücke', 'most', 'ponte',
+    'park', 'jardin', 'garden', 'garten', 'parc',
+    'fountain', 'fontaine', 'fontana', 'fuente',
+    'promenade', 'boulevard', 'esplanade', 'paseo',
+    'viewpoint', 'belvedere', 'mirador', 'belvédère',
+    'quai', 'waterfront', 'lungomare', 'boardwalk',
+    'wall', 'mur ', 'muralla', 'mauer',
+    'gate', 'porte', 'porta', 'tor ', 'puerta',
+    'column', 'colonne', 'obelisk', 'obélisque',
+    'statue', 'monument',
+  ];
+  return ALWAYS_OPEN_KEYWORDS.some(kw => name.includes(kw));
+}
+
+/**
  * Check if an activity is open on a specific day.
  * Returns false only if we have per-day data and the day is explicitly null (closed).
  * Returns true for unknown hours (default — err on side of scheduling).
  */
 function isActivityOpenOnDay(activity: ScoredActivity, dayDate: Date): boolean {
+  if (isAlwaysOpenPublicSpace(activity)) return true; // Public spaces never close
   if (!activity.openingHoursByDay) return true; // No per-day data — assume open
   const dayName = DAY_NAMES_EN[dayDate.getDay()];
   if (!(dayName in activity.openingHoursByDay)) return true; // Day not in data — assume open
@@ -4032,6 +4084,9 @@ function isOpenAtTime(
   startTime: string,
   endTime: string
 ): boolean {
+  // Public spaces (bridges, squares, parks, etc.) are always accessible
+  if (isAlwaysOpenPublicSpace(activity)) return true;
+
   // Step 1: Get the hours for this specific day
   const dayHours = getActivityHoursForDay(activity, dayDate);
 

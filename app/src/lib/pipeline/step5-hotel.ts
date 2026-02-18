@@ -28,22 +28,31 @@ function hasValidPriceAndBookingUrl(hotel: Accommodation): boolean {
   return url.toLowerCase().includes('booking.com');
 }
 
+/** Absolute maximum distance for any hotel, even in fallback/last-resort scenarios. */
+const ABSOLUTE_MAX_HOTEL_DISTANCE_KM = 5.0;
+
 /**
  * Build a last-resort Accommodation that has an estimated price and a
  * Booking.com search URL. Only used when NO hotel in the pool passes the
  * hasValidPriceAndBookingUrl() filter.
+ * If centerCoords is provided, the hotel's coordinates are overridden to the
+ * weighted activity center (avoids placing route calculations 17km from activities).
  */
 function buildLastResortHotel(
   hotel: Accommodation,
   budgetLevel: BudgetLevel,
-  destination?: string
+  destination?: string,
+  centerCoords?: { lat: number; lng: number }
 ): Accommodation {
   const estimatedPrice = estimatePriceFromBudget(budgetLevel);
   const searchUrl = destination
     ? `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(destination)}&group_adults=2&no_rooms=1`
     : 'https://www.booking.com/searchresults.html?group_adults=2&no_rooms=1';
+  const coords = centerCoords
+    ? { latitude: centerCoords.lat, longitude: centerCoords.lng }
+    : { latitude: hotel.latitude, longitude: hotel.longitude };
   return appendHotelQualityFlag(
-    { ...hotel, pricePerNight: estimatedPrice, bookingUrl: searchUrl },
+    { ...hotel, ...coords, pricePerNight: estimatedPrice, bookingUrl: searchUrl },
     'hotel_price_estimated'
   );
 }
@@ -95,9 +104,10 @@ export function selectHotelByBarycenter(
   if (candidates.length === 0) {
     // LAST RESORT: no hotel passes the price+URL filter.
     // Pick the best available hotel and synthesize an estimated price + booking.com search URL.
+    // Use weightedCenter coords so route calculations stay near activities.
     const fallback = hotels.find(h => h.latitude && h.longitude) || hotels[0] || null;
     if (fallback) {
-      return buildLastResortHotel(fallback, budgetLevel, options?.destination);
+      return buildLastResortHotel(fallback, budgetLevel, options?.destination, weightedCenter || undefined);
     }
     return null;
   }
@@ -128,8 +138,21 @@ export function selectHotelByBarycenter(
   if (filteredByRadius.length > 0) {
     candidates = filteredByRadius.map((entry) => entry.hotel);
   } else {
-    const nearestSliceSize = Math.min(8, Math.max(3, Math.ceil(candidatesByDistance.length * 0.4)));
-    candidates = candidatesByDistance.slice(0, nearestSliceSize).map((entry) => entry.hotel);
+    // All 3 relaxation passes failed — apply absolute distance cap to prevent 17km hotels
+    const cappedByAbsolute = candidatesByDistance.filter(
+      (entry) => entry.distanceToCenterKm <= ABSOLUTE_MAX_HOTEL_DISTANCE_KM
+    );
+    if (cappedByAbsolute.length > 0) {
+      const nearestSliceSize = Math.min(8, Math.max(3, Math.ceil(cappedByAbsolute.length * 0.4)));
+      candidates = cappedByAbsolute.slice(0, nearestSliceSize).map((entry) => entry.hotel);
+    } else {
+      // No hotel within 5km — use last resort with center coordinates
+      const fallback = candidatesByDistance[0]?.hotel;
+      if (fallback) {
+        return buildLastResortHotel(fallback, budgetLevel, options?.destination, weightedCenter);
+      }
+      return null;
+    }
     selectedPass = 3;
   }
 
