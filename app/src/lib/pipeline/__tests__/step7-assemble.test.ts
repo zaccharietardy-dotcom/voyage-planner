@@ -262,8 +262,8 @@ describe('step7-assemble helpers', () => {
       departureAirportCode: 'FNI',
     };
 
-    expect(getAirportPreDepartureLeadMinutes(majorHubFlight)).toBe(120);
-    expect(getAirportPreDepartureLeadMinutes(regionalFlight)).toBe(90);
+    expect(getAirportPreDepartureLeadMinutes(majorHubFlight)).toBe(150);
+    expect(getAirportPreDepartureLeadMinutes(regionalFlight)).toBe(120);
   });
 
   it('builds a fallback parking option with booking link when no provider is available', () => {
@@ -338,7 +338,7 @@ describe('step7-assemble helpers', () => {
       return h * 60 + m;
     };
     const firstGap = gap(sorted[1].startTime) - gap(sorted[0].endTime);
-    expect(firstGap).toBeLessThanOrEqual(150);
+    expect(firstGap).toBeLessThanOrEqual(90);
     expect(sorted[2].startTime).toBe('18:00');
   });
 

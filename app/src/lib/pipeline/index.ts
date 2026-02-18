@@ -340,11 +340,90 @@ export async function generateTripV2(
   const missingMustSees = poolMustSees.filter(a => !scheduledActivityIds.has(a.id));
 
   if (missingMustSees.length > 0) {
-    console.error(`[Pipeline V2] ⚠️ MUST-SEES MISSING FROM SCHEDULE: ${missingMustSees.map(a => `"${a.name}"`).join(', ')}`);
-    // Show what IS on each day for diagnosis
+    console.warn(`[Pipeline V2] ⚠️ MUST-SEES MISSING FROM SCHEDULE: ${missingMustSees.map(a => `"${a.name}"`).join(', ')}`);
+
+    // Helper functions for must-see recovery
+    const msTimeToMin = (t: string): number => {
+      const [h, m] = t.split(':').map(Number);
+      return (h || 0) * 60 + (m || 0);
+    };
+    const msMinToHHMM = (min: number): string => {
+      const clamped = Math.max(0, Math.min(1439, min));
+      const h = Math.floor(clamped / 60);
+      const m = Math.round(clamped % 60);
+      return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+    };
+
+    for (const missing of missingMustSees) {
+      // Find the day with most non-must-see activities (most room to evict)
+      let bestDayIdx = -1;
+      let bestEvictableCount = 0;
+      for (let di = 0; di < trip.days.length; di++) {
+        const dayActivities = trip.days[di].items.filter(
+          (i: any) => i.type === 'activity' && !i.mustSee
+        );
+        if (dayActivities.length > bestEvictableCount) {
+          bestEvictableCount = dayActivities.length;
+          bestDayIdx = di;
+        }
+      }
+
+      if (bestDayIdx >= 0 && bestEvictableCount > 0) {
+        const targetDay = trip.days[bestDayIdx];
+        // Find lowest-rated non-must-see activity to evict
+        const evictCandidates = targetDay.items
+          .filter((i: any) => i.type === 'activity' && !i.mustSee)
+          .sort((a: any, b: any) => (a.rating || 0) - (b.rating || 0));
+
+        if (evictCandidates.length > 0) {
+          const evicted = evictCandidates[0];
+          const evictIdx = targetDay.items.findIndex((i: any) => i.id === evicted.id);
+          if (evictIdx >= 0) {
+            // Use evicted item's time slot for the must-see
+            const startMinutes = msTimeToMin(evicted.startTime);
+            const duration = missing.duration || 90;
+
+            targetDay.items.splice(evictIdx, 1);
+            console.warn(
+              `[Pipeline V2] Must-see recovery: evicted "${evicted.title}" from Day ${targetDay.dayNumber}`
+            );
+
+            targetDay.items.push({
+              id: missing.id,
+              dayNumber: targetDay.dayNumber,
+              type: 'activity' as const,
+              title: missing.name,
+              description: missing.description || missing.name,
+              locationName: missing.name,
+              latitude: missing.latitude || 0,
+              longitude: missing.longitude || 0,
+              startTime: msMinToHHMM(startMinutes),
+              endTime: msMinToHHMM(startMinutes + duration),
+              duration,
+              orderIndex: targetDay.items.length,
+              estimatedCost: missing.estimatedCost || 0,
+              mustSee: true,
+              rating: missing.rating,
+              reviewCount: missing.reviewCount,
+              dataReliability: 'verified' as const,
+            } as any);
+
+            // Re-sort and re-index
+            targetDay.items.sort((a: any, b: any) => (a.startTime || '').localeCompare(b.startTime || ''));
+            targetDay.items.forEach((item: any, idx: number) => { item.orderIndex = idx; });
+
+            console.warn(
+              `[Pipeline V2] Must-see recovery: injected "${missing.name}" into Day ${targetDay.dayNumber} at ${msMinToHHMM(startMinutes)}`
+            );
+          }
+        }
+      }
+    }
+
+    // Log final state for diagnosis
     for (const day of trip.days) {
-      const activities = day.items.filter(i => i.type === 'activity');
-      console.error(`[Pipeline V2]   Day ${day.dayNumber}: ${activities.map(i => i.title).join(', ') || '(no activities)'}`);
+      const activities = day.items.filter((i: any) => i.type === 'activity');
+      console.log(`[Pipeline V2]   Day ${day.dayNumber}: ${activities.map((i: any) => i.title).join(', ') || '(no activities)'}`);
     }
   } else {
     console.log(`[Pipeline V2] ✅ All ${poolMustSees.length} must-sees are in the schedule`);

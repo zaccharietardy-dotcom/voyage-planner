@@ -1015,9 +1015,10 @@ const VIATOR_EXCLUDED_KEYWORDS = [
   'photoshoot', 'photo shoot', 'photo tour', 'photo session',
   'photography tour', 'photography experience', 'photo experience',
   'professional photographer', 'professional photo',
-  // Tourist traps
+  // Tourist traps + commercial experience museums
   'madame tussauds', 'tussaud', 'wax museum', 'trick eye',
   'selfie museum', "ripley's",
+  'museum of illusions', 'upside down', 'banksy museum', 'wondr', 'ice bar',
   // Wellness/spa — non pertinent pour tourisme standard
   'massage', 'thai massage', 'spa treatment', 'hammam', 'thermal bath treatment',
   // Ultra-luxe inaccessible pour budgets normaux

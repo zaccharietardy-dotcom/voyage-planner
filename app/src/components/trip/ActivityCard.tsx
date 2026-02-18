@@ -479,7 +479,11 @@ export function ActivityCard({
                         )}
                       </span>
                     ) : item.type === 'activity' ? (
-                      <span className={cn("font-medium", useHeroStyle ? "text-emerald-300" : "text-emerald-600 dark:text-emerald-400")}>Gratuit</span>
+                      item.officialBookingUrl ? (
+                        <span className={cn("font-medium", useHeroStyle ? "text-blue-300" : "text-blue-600 dark:text-blue-400")}>Voir billetterie</span>
+                      ) : (
+                        <span className={cn("font-medium", useHeroStyle ? "text-emerald-300" : "text-emerald-600 dark:text-emerald-400")}>Gratuit</span>
+                      )
                     ) : null}
                   </>
                 )}

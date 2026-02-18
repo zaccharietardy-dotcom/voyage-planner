@@ -329,7 +329,7 @@ export function scoreAndSelectActivities(
       }
     : cityCenter;
 
-  const scored = filtered.map(a => ({
+  let scored = filtered.map(a => ({
     ...a,
     score: computeScore(
       a,
@@ -339,6 +339,17 @@ export function scoreAndSelectActivities(
       data.budgetStrategy?.maxPricePerActivity
     ),
   }));
+
+  // 5b. Exclude Viator activities with unreliable GPS (city-center fallback).
+  // These have geoConfidence='low' meaning no real meeting point was resolved from Viator API.
+  // Keeping them would corrupt geographic clustering and show wrong positions on the map.
+  const beforeViatorGpsFilter = scored.length;
+  scored = scored.filter(a =>
+    !(a.source === 'viator' && (a as any).geoConfidence === 'low')
+  );
+  if (scored.length < beforeViatorGpsFilter) {
+    console.log(`[Pipeline V2] Excluded ${beforeViatorGpsFilter - scored.length} Viator activities with unreliable GPS (city-center fallback)`);
+  }
 
   // 6. Sort by score descending
   scored.sort((a, b) => b.score - a.score);
@@ -628,10 +639,22 @@ function tagActivity(
  *   3.5★ / 50 reviews   → ~8
  *   3.0★ / 10 reviews   → ~4
  */
+// Bayesian priors: pull low-review ratings toward a reasonable mean.
+// This prevents tourist traps with 4.9★/15 reviews from outscoring
+// established attractions with 4.2★/5000 reviews.
+const BAYESIAN_PRIOR_COUNT = 50;
+const BAYESIAN_PRIOR_MEAN = 4.0;
+
 function computePopularityScore(rating: number, reviewCount: number): number {
   const r = Math.max(0, Math.min(5, rating));
-  const ratingFactor = Math.pow(r / 5, 2);
-  const reviewFactor = Math.log10(Math.max(reviewCount, 1) + 1);
+  const reviews = Math.max(0, reviewCount);
+  // Bayesian average: pulls outlier ratings toward the prior mean (4.0)
+  // High-volume attractions (1000+ reviews) are barely affected (~0.2pt)
+  // Low-volume 4.8★/15 reviews: dampened by ~0.9pt
+  const bayesianRating = (reviews * r + BAYESIAN_PRIOR_COUNT * BAYESIAN_PRIOR_MEAN)
+    / (reviews + BAYESIAN_PRIOR_COUNT);
+  const ratingFactor = Math.pow(bayesianRating / 5, 2);
+  const reviewFactor = Math.log10(Math.max(reviews, 1) + 1);
   return ratingFactor * reviewFactor * 10;
 }
 

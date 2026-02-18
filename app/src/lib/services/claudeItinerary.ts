@@ -55,9 +55,6 @@ const DURATION_FLOORS: [RegExp, number][] = [
   [/\b(musée d'orsay|orsay)\b/i, 90],
   [/\b(colosseum|colisée|colosseo|coliseum|colisee)\b/i, 90],
   [/\bduomo\b/i, 90],
-  [/\b(scala|teatro alla scala)\b/i, 120],
-  [/\b(pinacoteca|brera)\b/i, 90],
-  [/\b(opera|opéra)\b/i, 90],
 ];
 
 /**

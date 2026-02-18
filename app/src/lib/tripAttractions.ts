@@ -66,11 +66,6 @@ export function fixAttractionCost(attraction: Attraction): Attraction {
     if (cost > 0) return { ...attraction, estimatedCost: 0 };
   }
 
-  // Theatre/opera houses are NOT free — minimum cost floor
-  if (/\b(teatro|theatre|théâtre|theater|opera|opéra|scala)\b/i.test(name) && cost === 0) {
-    return { ...attraction, estimatedCost: 15 };
-  }
-
   // Églises et cathédrales: généralement gratuit (sauf tours/cryptes/chapelles payantes)
   if (/\b(église|eglise|cathédrale|cathedrale|basilique|church|cathedral|basilica|mosquée|mosque|temple|synagogue|chapel|chapelle)\b/i.test(name)) {
     if (cost > 0 && !/\b(tour|tower|crypte|crypt|sainte-chapelle|vatican|vaticano|sixtine|sistine)\b/i.test(name)) {

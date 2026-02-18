@@ -86,9 +86,9 @@ const PIPELINE_MEDIA_PROXY = !['0', 'false', 'off'].includes(
   String(process.env.PIPELINE_MEDIA_PROXY || 'true').toLowerCase()
 );
 
-const MAX_INTRA_DAY_GAP_MIN = 150;
+const MAX_INTRA_DAY_GAP_MIN = 90;
 const DEFAULT_BREAKFAST_RESTAURANT_MAX_KM = 1.2;
-const DEFAULT_MEAL_RESTAURANT_MAX_KM = 1.8;
+const DEFAULT_MEAL_RESTAURANT_MAX_KM = 1.0;
 const ADJACENT_LOAD_REBALANCE_THRESHOLD_MIN = 430;
 const ADJACENT_GEO_NET_GAIN_MIN_KM = 1.5;
 const ADJACENT_GEO_TARGET_RADIUS_TOLERANCE_KM = 0.35;
@@ -101,8 +101,8 @@ const GEO_STRICT_INEFFICIENCY_RATIO_THRESHOLD = 1.75;
 const GEO_STRICT_MAX_PRUNED_OPTIONALS_PER_DAY = 2;
 const GEO_STRICT_LOCAL_LEG_MAX_KM = 3.5;
 const GEO_STRICT_LOCAL_MOVE_TOLERANCE_KM = 0.1;
-const GAP_FILL_MIN_GAP_MIN = 105;
-const GAP_FILL_MAX_INSERTIONS_PER_DAY = 3;
+const GAP_FILL_MIN_GAP_MIN = 75;
+const GAP_FILL_MAX_INSERTIONS_PER_DAY = 5;
 const GAP_FILL_MAX_DETOUR_KM = 1.2;
 const GAP_FILL_MIN_DURATION_MIN = 45;
 const GAP_FILL_WORTHWHILE_KEYWORDS = [
@@ -202,7 +202,7 @@ export function getAirportPreDepartureLeadMinutes(flight: Flight): number {
   const airportText = `${flight.departureAirport || ''} ${flight.departureAirportCode || ''}`.toLowerCase();
   const needsExtraMargin = /international|intl|orly|charles|gaulle|fiumicino|heathrow|gatwick|schiphol|barajas|frankfurt/.test(airportText);
   // User constraint: include transfer + check-in/security in a 1h30 to 2h window.
-  return needsExtraMargin ? 120 : 90;
+  return needsExtraMargin ? 150 : 120;
 }
 
 function getLocalTimeMinutes(displayTime?: string, isoTime?: string): number {
@@ -2601,7 +2601,7 @@ export async function assembleTripSchedule(
             title: item.title,
             description: itemData.description,
             bookingUrl: rawBookingUrl,
-          })
+          }, preferences.destination)
         : null;
 
       const officialBookingUrl = item.type === 'activity'
@@ -5210,7 +5210,7 @@ function getItemDurationMinutes(item: TripItem): number {
 
 function getTransitionMinutesForItems(from: TripItem, to: TripItem, cache?: DirectionsCache): number {
   const estimated = estimateTravel(from, to, cache);
-  const minFloor = from.type === 'restaurant' || to.type === 'restaurant' ? 10 : 5;
+  const minFloor = from.type === 'restaurant' || to.type === 'restaurant' ? 10 : 15;
   return Math.max(minFloor, Math.min(45, roundToNearestFive(estimated)));
 }
 
@@ -5613,8 +5613,8 @@ function createGapFillTripItem(
 }
 
 function getDynamicGapFillCap(largestGapMinutes: number): number {
-  if (largestGapMinutes >= 240) return 6;
-  if (largestGapMinutes >= 180) return 5;
+  if (largestGapMinutes >= 240) return 8;
+  if (largestGapMinutes >= 180) return 7;
   return GAP_FILL_MAX_INSERTIONS_PER_DAY;
 }
 
@@ -5821,7 +5821,8 @@ function restaurantAnchorPoints(
   }
   for (let i = restaurantIndex + 1; i < sorted.length; i++) {
     const candidate = sorted[i];
-    if (candidate.type === 'activity' && hasValidCoords(candidate)) {
+    // Include checkin/checkout as valid forward anchors (hotel counts for end-of-day dinners)
+    if ((candidate.type === 'activity' || candidate.type === 'checkin' || candidate.type === 'checkout') && hasValidCoords(candidate)) {
       points.push({ latitude: candidate.latitude, longitude: candidate.longitude });
       break;
     }
@@ -5939,15 +5940,6 @@ export async function fixRestaurantOutliers(
       const currentName = normalizeRestaurantName(item.restaurant?.name || item.locationName || stripMealPrefix(item.title));
       const duplicateInDay = currentName.length > 0 && usedNames.has(currentName);
       const currentDistanceKm = minDistanceToAnchorsKm(item, anchors);
-      // Bug 5 fix: also check distance to PREVIOUS activity specifically for lunch/dinner.
-      // A restaurant close to the next anchor (hotel) but far from the previous activity
-      // creates a bad user experience ("why am I walking 3km backwards for dinner?").
-      const prevAnchorDistKm = (mealType !== 'breakfast' && anchors.length > 0 && hasValidCoords(item))
-        ? calculateDistance(item.latitude, item.longitude, anchors[0].latitude, anchors[0].longitude)
-        : 0;
-      const prevAnchorOutlier = mealType !== 'breakfast'
-        && Number.isFinite(prevAnchorDistKm)
-        && prevAnchorDistKm > maxDistanceKm * 1.5; // Hard cap: 2.7km from previous activity
       const breakfastToFirstActivityKm = mealType === 'breakfast' && anchors.length >= 2 && hasValidCoords(item)
         ? calculateDistance(item.latitude, item.longitude, anchors[1].latitude, anchors[1].longitude)
         : 0;
@@ -5957,8 +5949,7 @@ export async function fixRestaurantOutliers(
         && breakfastToFirstActivityKm > GEO_STRICT_LOCAL_LEG_MAX_KM;
       const isOutlier =
         (Number.isFinite(currentDistanceKm) && currentDistanceKm > maxDistanceKm)
-        || breakfastTransitionOutlier
-        || prevAnchorOutlier;
+        || breakfastTransitionOutlier;
 
       if (!duplicateInDay && !isOutlier) {
         if (currentName) usedNames.add(currentName);

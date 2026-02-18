@@ -437,4 +437,28 @@ describe('step8-validate geography checks', () => {
     expect(outbound?.qualityFlags).toContain('aviasales_fallback_link');
     expect(inbound?.omioFlightUrl).toContain('departure_date=2026-03-02');
   });
+
+  it('detects temporal overlaps between consecutive items', () => {
+    const dayItems: TripItem[] = [
+      item({ id: 'a1', type: 'activity', title: 'Museum A', startTime: '09:00', endTime: '10:30', latitude: 45.46, longitude: 9.18 }),
+      item({ id: 'a2', type: 'activity', title: 'Gallery B', startTime: '10:00', endTime: '11:00', latitude: 45.46, longitude: 9.185 }),
+    ];
+
+    const trip: Trip = {
+      id: 'trip-overlap',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      preferences: createPreferences(),
+      days: [{
+        dayNumber: 1,
+        date: new Date('2026-02-18T00:00:00.000Z'),
+        items: dayItems,
+        isDayTrip: false,
+      }],
+    };
+
+    const result = validateAndFixTrip(trip);
+    expect(result.warnings.some(w => w.includes('overlap'))).toBe(true);
+    expect(result.score).toBeLessThan(100);
+  });
 });

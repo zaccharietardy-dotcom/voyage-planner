@@ -138,6 +138,21 @@ export function validateAndFixTrip(trip: Trip): ValidationResult {
       }
     }
 
+    // 6b. Check for temporal overlaps between consecutive items
+    for (let i = 1; i < sortedItems.length; i++) {
+      const prev = sortedItems[i - 1];
+      const curr = sortedItems[i];
+      const prevEnd = timeToMinutes(prev.endTime);
+      const currStart = timeToMinutes(curr.startTime);
+      if (prevEnd > currStart) {
+        const overlapMin = prevEnd - currStart;
+        warnings.push(
+          `Day ${day.dayNumber}: ${overlapMin}min overlap between "${prev.title}" and "${curr.title}"`
+        );
+        penalties += Math.min(10, overlapMin);
+      }
+    }
+
     // 7. Auto-fix: Remove duplicate restaurants (keep the first occurrence)
     const seenRestoNames = new Set<string>();
     const itemsToRemove: number[] = [];

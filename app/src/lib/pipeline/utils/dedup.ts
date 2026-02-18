@@ -298,16 +298,17 @@ export function isIrrelevantAttraction(activity: ScoredActivity): boolean {
 
   if (irrelevantTypes.some(t => type.includes(t))) return true;
 
-  // 2. Genuine spam: wax museums, fast food chains, escape rooms
-  // NOTE: "experience museums" (WONDR, Museum of Illusions, Banksy, Ice Bar, Dungeon, etc.)
-  // are NOT blacklisted — they are handled by contextual scoring in step2-score.ts
-  // (e.g. WONDR scores +4 for family_with_kids but -3 for friends+culture).
+  // 2. Genuine spam: wax museums, fast food chains, escape rooms, commercial experience museums
   const irrelevantNames = [
     'madame tussaud', 'selfie museum', 'escape room',
     'hard rock cafe', 'starbucks', 'mcdonalds', 'mcdonald',
     'burger king', 'kfc', 'subway',
     'ripley', 'body worlds',
     'photoshoot', 'photo shoot',
+    // Commercial experience museums — franchised tourist traps with inflated pricing
+    'museum of illusions', 'trick eye museum', 'upside down museum',
+    'upside down house', 'banksy museum', 'wondr', 'wondr experience',
+    'ice bar',
   ];
 
   if (irrelevantNames.some(n => name.includes(n))) return true;

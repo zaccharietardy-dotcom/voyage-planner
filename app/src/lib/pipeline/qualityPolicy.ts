@@ -17,21 +17,21 @@ const QUALITY_PROFILES: Record<QualityCityProfileId, QualityCityProfile> = {
     hotelTargetKm: 0.8,
     hotelHardCapKm: 1.2,
     breakfastMaxKm: 0.8,
-    restaurantMaxKm: 1.2,
+    restaurantMaxKm: 0.8,
   },
   urban_standard: {
     id: 'urban_standard',
     hotelTargetKm: 1.2,
     hotelHardCapKm: 2.0,
     breakfastMaxKm: 1.0,
-    restaurantMaxKm: 1.8,
+    restaurantMaxKm: 1.0,
   },
   metro_spread: {
     id: 'metro_spread',
     hotelTargetKm: 1.8,
     hotelHardCapKm: 3.0,
     breakfastMaxKm: 1.4,
-    restaurantMaxKm: 2.5,
+    restaurantMaxKm: 1.5,
   },
 };
 
