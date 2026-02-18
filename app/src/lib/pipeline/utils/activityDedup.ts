@@ -227,6 +227,13 @@ export function isDuplicateActivityCandidate(
     return dist <= cfg.nearDistanceKm;
   }
 
+  // Check 4a: Ultra-close proximity (< 100m) → same physical location regardless of name.
+  // Catches e.g. "Madonnina" (statue on top of Duomo) vs "Duomo Milan" which share GPS
+  // coordinates but have zero token overlap and different canonical names.
+  if (dist !== null && dist < 0.1) {
+    return true;
+  }
+
   // Check 4: Proximity + shared core landmark token (catches "Terrazza del Duomo" vs "Duomo Milan")
   if (dist !== null && dist <= 0.15) {
     const tokensA = extractCoreLandmarkTokens(rawCandidateName);

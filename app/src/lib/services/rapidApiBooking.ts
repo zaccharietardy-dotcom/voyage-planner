@@ -19,6 +19,15 @@ import {
 } from './bookingLinks';
 
 function getRapidApiKey() { return process.env.RAPIDAPI_KEY?.trim(); }
+
+/**
+ * Strip ranking prefixes injected by some API responses (e.g. "3. Hotel Name" → "Hotel Name").
+ */
+function sanitizeHotelName(raw: string | undefined): string {
+  if (!raw) return 'Hotel';
+  return raw.replace(/^\d+\.\s+/, '').trim() || 'Hotel';
+}
+
 const RAPIDAPI_HOST = 'booking-com15.p.rapidapi.com';
 const RAPIDAPI_BASE_URL = `https://${RAPIDAPI_HOST}/api/v1/hotels`;
 
@@ -165,7 +174,8 @@ async function getDestinationId(city: string): Promise<{ destId: string; destTyp
 }
 
 /**
- * Récupère l'URL Booking.com directe pour un hôtel
+ * Récupère l'URL Booking.com directe pour un hôtel.
+ * Returns null (not a hotel-website fallback) if no valid Booking.com URL can be resolved.
  */
 async function getHotelBookingUrl(
   hotelId: string,
@@ -177,17 +187,6 @@ async function getHotelBookingUrl(
 ): Promise<string | null> {
   if (!getRapidApiKey()) return null;
 
-  const fallbackToDirect = () => {
-    if (!hotelName) return null;
-    return normalizeHotelBookingUrl({
-      hotelName,
-      destinationHint: countryCode,
-      checkIn,
-      checkOut,
-      adults,
-    });
-  };
-
   try {
     const url = `${RAPIDAPI_BASE_URL}/getHotelDetails?hotel_id=${encodeURIComponent(hotelId)}&arrival_date=${checkIn}&departure_date=${checkOut}&adults=${adults}&currency_code=EUR`;
 
@@ -198,12 +197,10 @@ async function getHotelBookingUrl(
       },
     });
 
-    if (!response.ok) return fallbackToDirect();
+    if (!response.ok) return null;
 
     const data = await response.json();
     const hotelData = data.data || data;
-
-    // Log pour debug - voir les champs disponibles dans la réponse
 
     // Chercher le slug dans plusieurs champs possibles
     const slug = hotelData.url
@@ -237,10 +234,11 @@ async function getHotelBookingUrl(
       }
     }
 
-    return fallbackToDirect();
+    // No valid Booking.com URL found — return null rather than a hotel-website fallback.
+    return null;
   } catch (error) {
     console.error(`[RapidAPI Booking] Erreur getHotelDetails ${hotelId}:`, error);
-    return fallbackToDirect();
+    return null;
   }
 }
 
@@ -361,7 +359,7 @@ export async function searchHotelsWithBookingApi(
 
     const hotelUrlPromises = availableHotels.slice(0, 5).map(async (p) => {
       const hotelId = p.hotel_id || p.property?.id || p.id;
-      const hotelName = p.property?.name || p.hotel_name || p.hotel_name_trans;
+      const hotelName = sanitizeHotelName(p.property?.name || p.hotel_name || p.hotel_name_trans);
       const countryCode = p.property?.countryCode || p.country_trans || p.cc1 || destinationCountryCode;
       if (hotelId) {
         return getHotelBookingUrl(hotelId.toString(), checkIn, checkOut, guests, hotelName, countryCode);
@@ -410,10 +408,12 @@ export async function searchHotelsWithBookingApi(
         || p.hotel_include_breakfast === 1
         || false;
 
+      // Sanitize the hotel name: strip leading "N. " ranking prefixes from API responses
+      const hotelName = sanitizeHotelName(p.property?.name || p.hotel_name || p.hotel_name_trans);
+
       // URL de réservation : priorité à l'URL directe obtenue via getHotelDetails
       // IMPORTANT: Valider que l'URL est bien sur booking.com (pas Facebook, blogs, etc.)
       const directUrl = index < 5 ? hotelUrls[index] : null;
-      const hotelName = p.property?.name || p.hotel_name || p.hotel_name_trans || 'Hotel';
 
       // Valider que l'URL candidate est bien une URL Booking.com
       const isValidBookingUrl = (url: string | null | undefined): boolean => {
@@ -424,16 +424,20 @@ export async function searchHotelsWithBookingApi(
         return !badDomains.some(domain => urlLower.includes(domain));
       };
 
-      // Priorité: URL directe > URL API > URL normalisée
-      let bookingUrlCandidate: string | null | undefined = directUrl;
+      // Priorité: URL directe > URL API property > URL item
+      // Do NOT fall back to the hotel's own website — if no booking.com URL is found, pass null
+      // so the normalizer generates a booking.com search URL instead.
+      let bookingUrlCandidate: string | null = null;
       const propertyUrl = p.property?.url;
       if (isValidBookingUrl(directUrl)) {
         bookingUrlCandidate = directUrl!;
       } else if (isValidBookingUrl(propertyUrl)) {
-        bookingUrlCandidate = propertyUrl;
+        bookingUrlCandidate = propertyUrl!;
       } else if (isValidBookingUrl(p.url)) {
-        bookingUrlCandidate = p.url;
+        bookingUrlCandidate = p.url!;
       }
+      // bookingUrlCandidate stays null if none of the candidates pass — the normalizer below
+      // will then generate a booking.com search URL (never the hotel's own website).
 
       const bookingUrl = normalizeHotelBookingUrl({
         url: bookingUrlCandidate,

@@ -324,16 +324,28 @@ function buildDeterministicPlan(
   };
 }
 
+/**
+ * Sort activities by importance: mustSee first, then by score descending.
+ * Returns a new array (does not mutate the original).
+ */
+function sortActivitiesByImportance(activities: ActivityCluster['activities']): ActivityCluster['activities'] {
+  return [...activities].sort((a, b) => {
+    if (a.mustSee !== b.mustSee) return a.mustSee ? -1 : 1;
+    return (b.score ?? 0) - (a.score ?? 0);
+  });
+}
+
+/**
+ * Derive a short, descriptive theme name from the top 2 most important activities.
+ * mustSee activities always rank first; ties are broken by score descending.
+ */
 function generateTheme(cluster: ActivityCluster): string {
-  const types = cluster.activities.map(a => (a.type || '').toLowerCase());
+  const sorted = sortActivitiesByImportance(cluster.activities);
+  const top = sorted.slice(0, 2).map(a => a.name).filter(Boolean);
 
-  if (types.some(t => t.includes('museum') || t.includes('gallery'))) return 'Culture & Musées';
-  if (types.some(t => t.includes('park') || t.includes('garden') || t.includes('nature'))) return 'Nature & Jardins';
-  if (types.some(t => t.includes('market') || t.includes('souk') || t.includes('bazaar'))) return 'Marchés & Shopping';
-  if (types.some(t => t.includes('palace') || t.includes('castle') || t.includes('historic'))) return 'Histoire & Patrimoine';
-  if (types.some(t => t.includes('religious') || t.includes('mosque') || t.includes('church'))) return 'Spiritualité & Architecture';
-
-  return 'Exploration & Découverte';
+  if (top.length === 0) return 'Exploration & Découverte';
+  if (top.length === 1) return top[0];
+  return `${top[0]} & ${top[1]}`;
 }
 
 /**
@@ -358,17 +370,16 @@ function validateAndFixThemes(plan: BalancedPlan, clusters: ActivityCluster[]): 
     );
 
     if (!themeMatchesContent && activityKeywords.length > 0) {
-      const mainNames = cluster.activities
-        .slice(0, 3)
-        .map(a => a.name)
-        .filter(Boolean);
+      // Use the same importance-sorted top-2 as generateTheme() for consistency.
+      const topActivities = sortActivitiesByImportance(cluster.activities).slice(0, 2);
+      const mainNames = topActivities.map(a => a.name).filter(Boolean);
 
       const oldTheme = day.theme;
       day.theme = mainNames.length > 1
-        ? `${mainNames[0]} et ${mainNames[1]}`
+        ? `${mainNames[0]} & ${mainNames[1]}`
         : mainNames[0] || 'Exploration & Découverte';
 
-      day.dayNarrative = `Journée consacrée à ${mainNames.join(', ')}. ${cluster.activities.length} activités prévues.`;
+      day.dayNarrative = `Journée consacrée à ${mainNames.join(' et ')}. ${cluster.activities.length} activités prévues.`;
 
       console.log(`[Pipeline V2] Theme mismatch fixed for day ${day.dayNumber}: "${oldTheme}" → "${day.theme}"`);
     }

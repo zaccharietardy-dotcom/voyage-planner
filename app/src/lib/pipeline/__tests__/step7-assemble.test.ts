@@ -721,7 +721,7 @@ describe('step7-assemble helpers', () => {
       date: new Date('2026-03-04T00:00:00.000Z'),
       isDayTrip: false,
       items: [
-        baseActivity('morning', '09:00', '10:00', 45.4638, 9.1883),
+        baseActivity('morning', '09:00', '10:00', 45.4638, 9.1850),
         {
           id: 'meal-2-dinner',
           dayNumber: 2,
@@ -732,7 +732,7 @@ describe('step7-assemble helpers', () => {
           description: '',
           locationName: 'Test Resto',
           latitude: 45.4647,
-          longitude: 9.1902,
+          longitude: 9.1950,
           orderIndex: 1,
           estimatedCost: 20,
           duration: 75,
@@ -741,7 +741,7 @@ describe('step7-assemble helpers', () => {
     };
 
     const candidates: ScoredActivity[] = [
-      gapFillActivity('museum-near', 'Musée de Quartier', 45.4642, 9.1894, {
+      gapFillActivity('museum-near', 'Musée de Quartier', 45.4642, 9.1900, {
         type: 'culture',
         score: 72,
       }),
@@ -795,7 +795,7 @@ describe('step7-assemble helpers', () => {
       date: new Date('2026-03-04T00:00:00.000Z'),
       isDayTrip: false,
       items: [
-        baseActivity('morning', '09:00', '10:00', 45.4638, 9.1883),
+        baseActivity('morning', '09:00', '10:00', 45.4638, 9.1850),
         {
           id: 'meal-2-dinner',
           dayNumber: 2,
@@ -806,7 +806,7 @@ describe('step7-assemble helpers', () => {
           description: '',
           locationName: 'Test Resto',
           latitude: 45.4647,
-          longitude: 9.1902,
+          longitude: 9.1950,
           orderIndex: 1,
           estimatedCost: 20,
           duration: 75,
@@ -815,12 +815,12 @@ describe('step7-assemble helpers', () => {
     };
 
     const candidates: ScoredActivity[] = [
-      gapFillActivity('tour-near', 'Segway tour city center', 45.4642, 9.1894, {
+      gapFillActivity('tour-near', 'Segway tour city center', 45.4642, 9.1900, {
         score: 95,
         reviewCount: 400,
         rating: 4.7,
       }),
-      gapFillActivity('museum-near', 'Musee d art municipal', 45.4640, 9.1890, {
+      gapFillActivity('museum-near', 'Musee d art municipal', 45.4640, 9.1905, {
         score: 72,
         reviewCount: 180,
         rating: 4.6,

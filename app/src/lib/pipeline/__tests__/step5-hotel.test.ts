@@ -25,6 +25,7 @@ function makeHotel(
     amenities: [],
     checkInTime: '15:00',
     checkOutTime: '11:00',
+    bookingUrl: `https://www.booking.com/hotel/xx/${id}.html`,
   };
 }
 

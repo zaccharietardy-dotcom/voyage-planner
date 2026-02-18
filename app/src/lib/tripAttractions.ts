@@ -61,8 +61,8 @@ export function fixAttractionCost(attraction: Attraction): Attraction {
     return { ...attraction, estimatedCost: 0 };
   }
 
-  // Lieux gratuits: parcs, jardins, places, quartiers, plages, portes, vieille ville, ports
-  if (/\b(jardin|parc|park|garden|place|square|piazza|champ|esplanade|promenade|quartier|neighborhood|district|boulevard|rue|street|vigne|vignoble|beach|plage|playa|spiaggia|gate|porte|porta|puerta|stairs|escalier|old town|vieille ville|centro storico|altstadt|harbour|harbor|port|marina|waterfront|pier|quai|boardwalk)\b/i.test(name)) {
+  // Lieux gratuits: parcs, jardins, places, quartiers, plages, portes, vieille ville, ports, canaux, promenades
+  if (/\b(jardin|parc|park|garden|place|square|piazza|champ|esplanade|promenade|quartier|neighborhood|district|boulevard|rue|street|vigne|vignoble|beach|plage|playa|spiaggia|gate|porte|porta|puerta|stairs|escalier|old town|vieille ville|centro storico|altstadt|harbour|harbor|port|marina|waterfront|pier|quai|boardwalk|canal|naviglio|walk|passeggiata|sentiero|trail|lungomare|riverwalk|towpath)\b/i.test(name)) {
     if (cost > 0) return { ...attraction, estimatedCost: 0 };
   }
 

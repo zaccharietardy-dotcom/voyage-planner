@@ -3099,7 +3099,13 @@ export async function assembleTripSchedule(
         }
 
         if (newAlts.length > currentAlts.length) {
-          item.restaurantAlternatives = newAlts.slice(0, TARGET_ALTS);
+          const assigned = newAlts.slice(0, TARGET_ALTS);
+          item.restaurantAlternatives = assigned;
+          // Mark assigned alternatives as used so they are not reused for other meal slots.
+          for (const alt of assigned) {
+            if (alt.id) globalUsedIds.add(alt.id);
+            if (alt.name) globalUsedNames.add(alt.name);
+          }
           refillCount++;
         }
       }
@@ -3376,6 +3382,125 @@ export async function assembleTripSchedule(
     } catch (error) {
       console.warn('[Pipeline V2] Section 13hb emergency gap-fill failed (non-critical):', error);
     }
+  }
+
+  // ── Must-see recovery pass ──────────────────────────────────────────────────
+  // After all gap-fill passes, ensure every must-see activity from the scored
+  // pool appears in the final schedule. For each missing must-see:
+  //   1. Find the day with the largest available gap and insert it there.
+  //   2. If no day has a gap large enough: evict the lowest-scored non-must-see
+  //      activity across all days and replace it with the must-see item.
+  // This runs after 13hb so it also backfills gaps exposed by the pruner.
+  try {
+    // Build a score lookup map from the gap-fill candidate pool (has must-see flags + scores).
+    const poolScoreById = new Map<string, number>();
+    for (const candidate of gapFillCandidatePool) {
+      if (candidate.id) poolScoreById.set(candidate.id, candidate.score || 0);
+    }
+
+    // Collect all must-see candidates from the pool.
+    const mustSeeCandidates = gapFillCandidatePool.filter((c) => c.mustSee && c.id);
+
+    // Build set of IDs that are already scheduled across all days.
+    const scheduledMustSeeIds = new Set<string>();
+    for (const day of days) {
+      for (const item of day.items) {
+        if (item.id) scheduledMustSeeIds.add(item.id);
+      }
+    }
+
+    const missingMustSees = mustSeeCandidates.filter((c) => !scheduledMustSeeIds.has(c.id));
+
+    if (missingMustSees.length > 0) {
+      console.warn(`[Pipeline V2] Must-see recovery: ${missingMustSees.length} must-see(s) missing from schedule — attempting recovery`);
+
+      for (const mustSeeCandidate of missingMustSees) {
+        const candidateDuration = mustSeeCandidate.duration || 60;
+
+        // Find the day with the largest remaining gap that can fit this candidate.
+        let bestDay: TripDay | null = null;
+        let bestDayGap = 0;
+        let bestInsertStartMin = 0;
+        let bestInsertEndMin = 0;
+
+        for (const day of days) {
+          if (day.isDayTrip) continue;
+          const sorted = sortItemsByTime(day.items);
+          for (let i = 0; i < sorted.length - 1; i++) {
+            const prev = sorted[i];
+            const next = sorted[i + 1];
+            const gapStart = parseHHMMToMinutes(prev.endTime);
+            const gapEnd = parseHHMMToMinutes(next.startTime);
+            const gapMinutes = gapEnd - gapStart;
+            if (gapMinutes >= candidateDuration + 20) {
+              // Enough room — prefer the day with the largest gap for balance.
+              if (gapMinutes > bestDayGap) {
+                bestDayGap = gapMinutes;
+                bestDay = day;
+                bestInsertStartMin = gapStart + 10;
+                bestInsertEndMin = Math.min(gapEnd - 10, gapStart + 10 + candidateDuration);
+              }
+            }
+          }
+        }
+
+        if (bestDay) {
+          const newItem = createGapFillTripItem(
+            mustSeeCandidate,
+            bestDay.dayNumber,
+            bestInsertStartMin,
+            bestInsertEndMin,
+            preferences.destination
+          );
+          bestDay.items = sortItemsByTime([...bestDay.items, newItem]).map((item, index) => ({ ...item, orderIndex: index }));
+          refreshRouteMetadataAfterMutations([bestDay], directionsCache);
+          scheduledMustSeeIds.add(mustSeeCandidate.id);
+          console.log(`[Pipeline V2] Must-see recovery: inserted "${mustSeeCandidate.name}" into day ${bestDay.dayNumber} (gap=${bestDayGap}min)`);
+        } else {
+          // No gap found — evict the lowest-scored non-must-see activity across all days.
+          let evictDay: TripDay | null = null;
+          let evictItem: TripItem | null = null;
+          let evictScore = Infinity;
+
+          for (const day of days) {
+            if (day.isDayTrip) continue;
+            for (const item of day.items) {
+              if (item.type !== 'activity') continue;
+              if (item.mustSee) continue;
+              const itemScore = poolScoreById.get(item.id) ?? 0;
+              if (itemScore < evictScore) {
+                evictScore = itemScore;
+                evictItem = item;
+                evictDay = day;
+              }
+            }
+          }
+
+          if (evictDay && evictItem) {
+            // Replace the evicted item with the must-see.
+            const startMin = parseHHMMToMinutes(evictItem.startTime);
+            const endMin = parseHHMMToMinutes(evictItem.endTime);
+            const slotDuration = Math.max(candidateDuration, endMin - startMin);
+            const newItem = createGapFillTripItem(
+              mustSeeCandidate,
+              evictDay.dayNumber,
+              startMin,
+              startMin + slotDuration,
+              preferences.destination
+            );
+            evictDay.items = evictDay.items.filter((i) => i.id !== evictItem!.id);
+            evictDay.items = sortItemsByTime([...evictDay.items, newItem]).map((item, index) => ({ ...item, orderIndex: index }));
+            refreshRouteMetadataAfterMutations([evictDay], directionsCache);
+            scheduledMustSeeIds.add(mustSeeCandidate.id);
+            console.log(`[Pipeline V2] Must-see recovery: evicted "${evictItem.title}" (score=${evictScore.toFixed(1)}) and replaced with must-see "${mustSeeCandidate.name}" on day ${evictDay.dayNumber}`);
+          } else {
+            console.warn(`[Pipeline V2] Must-see recovery: could not place "${mustSeeCandidate.name}" — no eviction candidate found`);
+          }
+        }
+      }
+    }
+  } catch (error) {
+    console.warn('[Pipeline V2] Must-see recovery pass failed (non-critical):', error);
   }
 
   // 13f. Final route metadata coherence pass after all swaps/re-orders.
@@ -5448,6 +5573,12 @@ function createGapFillTripItem(
   };
 }
 
+function getDynamicGapFillCap(largestGapMinutes: number): number {
+  if (largestGapMinutes >= 240) return 6;
+  if (largestGapMinutes >= 180) return 5;
+  return GAP_FILL_MAX_INSERTIONS_PER_DAY;
+}
+
 export function fillLargeIntraDayGapsWithNearbyActivities(
   days: TripDay[],
   candidatePool: ScoredActivity[],
@@ -5476,7 +5607,8 @@ export function fillLargeIntraDayGapsWithNearbyActivities(
     let safetyGuard = 0;
     const dayDate = day.date instanceof Date ? day.date : new Date(day.date);
 
-    while (insertedForDay < GAP_FILL_MAX_INSERTIONS_PER_DAY && safetyGuard < 5) {
+    let largestGap = computeLargestGapMinutes(day);
+    while (insertedForDay < getDynamicGapFillCap(largestGap) && safetyGuard < 8) {
       safetyGuard++;
       const sortedItems = sortItemsByTime(day.items);
       let bestPlacement: {
@@ -5585,10 +5717,15 @@ export function fillLargeIntraDayGapsWithNearbyActivities(
       insertedForDay += 1;
       totalInserted += 1;
 
+      // Recompute the largest gap after insertion; stop early if gaps are now small enough.
+      largestGap = computeLargestGapMinutes(day);
+
       console.log(
         `[Pipeline V2] Gap fill: Day ${day.dayNumber} inserted "${bestPlacement.candidate.name}" `
-        + `(${bestPlacement.endMin - bestPlacement.startMin}min, detour=${bestPlacement.detourKm.toFixed(2)}km)`
+        + `(${bestPlacement.endMin - bestPlacement.startMin}min, detour=${bestPlacement.detourKm.toFixed(2)}km, remainingGap=${largestGap}min)`
       );
+
+      if (largestGap < GAP_FILL_MIN_GAP_MIN) break;
     }
   }
 

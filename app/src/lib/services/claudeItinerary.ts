@@ -54,6 +54,7 @@ const DURATION_FLOORS: [RegExp, number][] = [
   [/\b(metropolitan|met museum)\b/i, 120],
   [/\b(musée d'orsay|orsay)\b/i, 90],
   [/\b(colosseum|colisée|colosseo|coliseum|colisee)\b/i, 90],
+  [/\bduomo\b/i, 90],
 ];
 
 /**
@@ -72,20 +73,33 @@ export function getMinimumDurationOverrides(): [RegExp, number][] {
  * Utilisable pour les attractions du pool ET les additionalSuggestions.
  *
  * Ordre d'application:
- * 1. MINIMUM_DURATION_OVERRIDES (grands musées: Vatican ≥ 180min, Louvre ≥ 180min, etc.)
+ * 1. MINIMUM_DURATION_OVERRIDES + DURATION_FLOORS — si un floor correspond, floorApplied = true
  * 2. Hard cap 4h (sauf grands musées)
- * 3. Type-based caps (piazza → 30min, pont → 45min, église → 60min, etc.)
- * 4. Duration floors (Vatican ≥ 120min, Colisée ≥ 90min, etc.)
+ * 3. Type-based caps — UNIQUEMENT si floorApplied === false (évite que la cap église écrase le floor duomo)
+ * 4. DURATION_FLOORS (second passage — garantit que les floors gagnent toujours)
  * 5. Minimum absolu: 15 minutes
  */
 export function applyDurationRules(name: string, duration: number): number {
   let result = duration;
+  let floorApplied = false;
 
   // 1. Apply MINIMUM_DURATION_OVERRIDES (from destinationData)
   for (const [pattern, minDuration] of MINIMUM_DURATION_OVERRIDES) {
     if (pattern.test(name) && result < minDuration) {
       result = minDuration;
+      floorApplied = true;
       break;
+    }
+  }
+
+  // 1b. Apply DURATION_FLOORS (first pass — detect whether a named-place floor matched)
+  if (!floorApplied) {
+    for (const [pattern, minMin] of DURATION_FLOORS) {
+      if (pattern.test(name) && result < minMin) {
+        result = minMin;
+        floorApplied = true;
+        break;
+      }
     }
   }
 
@@ -94,15 +108,19 @@ export function applyDurationRules(name: string, duration: number): number {
     result = 120;
   }
 
-  // 3. Type-based duration caps (apply if duration exceeds max)
-  for (const [pattern, maxMin] of DURATION_CAPS) {
-    if (pattern.test(name) && result > maxMin) {
-      result = maxMin;
-      break;
+  // 3. Type-based duration caps — skip if a specific floor was already applied.
+  // This prevents generic caps (e.g., "cathedral → 60 min") from overriding
+  // named-place floors (e.g., "duomo → 90 min").
+  if (!floorApplied) {
+    for (const [pattern, maxMin] of DURATION_CAPS) {
+      if (pattern.test(name) && result > maxMin) {
+        result = maxMin;
+        break;
+      }
     }
   }
 
-  // 4. Duration floors for major museums
+  // 4. Duration floors — second pass to guarantee floors always win
   for (const [pattern, minMin] of DURATION_FLOORS) {
     if (pattern.test(name) && result < minMin) {
       result = minMin;

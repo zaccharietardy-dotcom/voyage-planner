@@ -24,6 +24,25 @@ const DISTINCTIVE_VIATOR_EXPERIENCE_KEYWORDS = [
   'tea ceremony', 'ceremonie du the', 'craft', 'artisan',
 ];
 
+/**
+ * Keywords that disqualify an activity from auto-detection as must-see.
+ * Experiences, guided tours, walks, and activities are NOT incontournables —
+ * only iconic places/monuments should be auto-flagged.
+ */
+const MUST_SEE_EXCLUDED_KEYWORDS = [
+  'cooking', 'cuisine', 'culinary', 'food tour', 'food tasting',
+  'workshop', 'atelier', 'class', 'cours', 'lesson', 'lecon',
+  'wine tasting', 'degustation', 'oenologie',
+  'bike tour', 'velo tour', 'cycling tour', 'e-bike',
+  'segway', 'pub crawl', 'bar crawl',
+  'escape', 'escape game', 'escape room',
+  'photo shoot', 'seance photo',
+  'spa', 'hammam', 'massage',
+  'transfer', 'shuttle',
+  'walk', 'promenade', 'passeggiata', 'balade', 'stroll',
+  'canal walk', 'river walk', 'lakeside walk',
+];
+
 /** Keywords that indicate an activity includes a meal (cooking class, food tour, etc.) */
 const MEAL_INCLUSIVE_KEYWORDS = [
   'cooking class', 'cours de cuisine', 'atelier cuisine', 'atelier culinaire',
@@ -251,13 +270,21 @@ export function scoreAndSelectActivities(
   // 4b. Auto-detect must-sees from popularity data (no arbitrary threshold or cap)
   // Top N non-Viator activities by popularity score are flagged as must-see.
   // N scales with trip duration — longer trips get more incontournables.
+  // Activities matching MUST_SEE_EXCLUDED_KEYWORDS (experiences, walks, tours…)
+  // are excluded — only iconic places/monuments should be auto-flagged.
   const autoMustSeeCount = Math.ceil(preferences.durationDays * 1.5);
   const existingMustSeeCount = filtered.filter(a => a.mustSee).length;
   const autoDetectSlots = Math.max(0, autoMustSeeCount - existingMustSeeCount);
 
   if (autoDetectSlots > 0) {
     const autoDetectCandidates = filtered
-      .filter(a => !a.mustSee && a.source !== 'viator')
+      .filter(a => {
+        if (a.mustSee) return false;
+        if (a.source === 'viator') return false;
+        // Exclude experiences, walks, tours — only places can be auto must-see
+        const text = `${(a.name || '').toLowerCase()} ${((a as any).description || '').toLowerCase()}`;
+        return !MUST_SEE_EXCLUDED_KEYWORDS.some(kw => text.includes(kw));
+      })
       .map(a => ({
         activity: a,
         popScore: computePopularityScore(a.rating || 0, a.reviewCount || 0),

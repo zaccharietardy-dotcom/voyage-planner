@@ -94,6 +94,46 @@ const DINNER_EXCLUDED_KEYWORDS = [
 
 const LUNCH_EXCLUDED_KEYWORDS = [
   'brunch', 'breakfast', 'petit-déjeuner', 'petit dejeuner',
+  'cafe', 'café', 'caffe', 'caffè', 'coffee shop', 'coffee house',
+  'patisserie', 'pâtisserie', 'pasticceria', 'boulangerie', 'bakery',
+  'salon de thé', 'salon de the', 'tea room', 'tea house',
+  'glacier', 'gelateria', 'gelato', 'ice cream', 'glace',
+  'confiserie', 'chocolaterie', 'chocolate shop',
+  'juice bar', 'smoothie', 'frozen yogurt', 'froyo',
+  'dolceria', 'cake shop', 'dessert shop',
+];
+
+const LUNCH_POSITIVE_SIGNALS = [
+  'restaurant', 'ristorante', 'trattoria', 'osteria', 'brasserie',
+  'bistro', 'bistrot', 'taverna', 'pizzeria', 'gastropub',
+  'cuisine', 'cucina', 'grill', 'grillades',
+  'seafood', 'fruits de mer', 'tapas', 'ramen', 'sushi',
+  'italien', 'italian', 'francais', 'french', 'japonais', 'japanese',
+  'chinois', 'chinese', 'indien', 'indian', 'thai', 'mexicain', 'mexican',
+  'coreen', 'korean', 'vietnamien', 'vietnamese', 'libanais', 'lebanese',
+  'turc', 'turkish', 'grec', 'greek', 'marocain', 'moroccan',
+];
+
+const BAR_DINNER_EXCEPTIONS = [
+  'wine bar', 'cocktail bar', 'gastro bar', 'gastrobar',
+  'bar restaurant', 'restaurant bar', 'bar ristorante',
+  'tapas bar', 'oyster bar', 'sushi bar', 'raw bar',
+  'bar à vin', 'bar à tapas', 'bar à huîtres',
+];
+
+const DINNER_POSITIVE_SIGNALS = [
+  'restaurant', 'ristorante', 'trattoria', 'osteria', 'brasserie',
+  'bistro', 'bistrot', 'taverna', 'steakhouse', 'grill', 'grillades',
+  'pizzeria', 'gastropub', 'gastro pub',
+  'seafood', 'fruits de mer', 'tapas', 'ramen', 'sushi', 'izakaya',
+  'cuisine', 'cucina',
+  'viande', 'meat', 'poisson', 'fish',
+  'italien', 'italian', 'francais', 'french', 'japonais', 'japanese',
+  'chinois', 'chinese', 'indien', 'indian', 'thai', 'mexicain', 'mexican',
+  'mediterraneen', 'mediterranean', 'coreen', 'korean', 'vietnamien', 'vietnamese',
+  'libanais', 'lebanese', 'turc', 'turkish', 'grec', 'greek',
+  'marocain', 'moroccan', 'peruvien', 'peruvian',
+  'lombardie', 'lombard', 'toscane', 'toscan',
 ];
 
 const LOCAL_CUISINE_KEYWORDS: Record<string, string[]> = {
@@ -311,6 +351,38 @@ function hasValidCoordinates(restaurant: Restaurant): boolean {
 }
 
 /**
+ * Return true if the name contains a bare "bar" or "cafe" word WITHOUT
+ * any qualifier that makes it a legitimate dinner venue.
+ */
+function isBareBarOrCafe(name: string, allText: string): boolean {
+  if (BAR_DINNER_EXCEPTIONS.some(ex => allText.includes(ex))) return false;
+  const bareBarRe = /\bbar\b/i;
+  const bareCafeRe = /\bcaf[eéè]\b/i;
+  return bareBarRe.test(name) || bareCafeRe.test(name);
+}
+
+/**
+ * B4: Return the earliest hour a restaurant opens based on its openingHours field.
+ * Returns null when the field is absent or unparseable.
+ */
+function getEarliestOpenHour(restaurant: Restaurant): number | null {
+  const hours = (restaurant as any).openingHours;
+  if (!Array.isArray(hours) || hours.length === 0) return null;
+  let earliest: number | null = null;
+  for (const entry of hours) {
+    if (typeof entry !== 'string') continue;
+    const match = entry.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+    if (!match) continue;
+    let hour = parseInt(match[1], 10);
+    const meridiem = match[3].toUpperCase();
+    if (meridiem === 'PM' && hour !== 12) hour += 12;
+    if (meridiem === 'AM' && hour === 12) hour = 0;
+    if (earliest === null || hour < earliest) earliest = hour;
+  }
+  return earliest;
+}
+
+/**
  * Check if a restaurant is appropriate for a given meal type.
  */
 export function isAppropriateForMeal(restaurant: Restaurant, mealType: MealType): boolean {
@@ -327,28 +399,24 @@ export function isAppropriateForMeal(restaurant: Restaurant, mealType: MealType)
     for (const excluded of BREAKFAST_EXCLUDED_CUISINES) {
       if (allText.includes(excluded)) return false;
     }
+    // B4: Reject breakfast venues that open before 5 AM (data artifact).
+    const earliestHour = getEarliestOpenHour(restaurant);
+    if (earliestHour !== null && earliestHour < 5) return false;
     return true;
   }
 
   if (mealType === 'dinner') {
+    // B2: Reject bare bars / cafes that have no qualifying restaurant signal.
+    if (isBareBarOrCafe(name, allText)) {
+      const hasRestaurantSignal = DINNER_POSITIVE_SIGNALS.some(s => allText.includes(s));
+      if (!hasRestaurantSignal) return false;
+    }
+
     for (const excluded of DINNER_EXCLUDED_KEYWORDS) {
       if (allText.includes(excluded)) return false;
     }
-    // Positive signal: require at least one "real restaurant" indicator for dinner
-    const DINNER_POSITIVE_SIGNALS = [
-      'restaurant', 'ristorante', 'trattoria', 'osteria', 'brasserie',
-      'bistro', 'bistrot', 'taverna', 'steakhouse', 'grill', 'grillades',
-      'pizzeria', 'gastropub', 'gastro pub',
-      'seafood', 'fruits de mer', 'tapas', 'ramen', 'sushi', 'izakaya',
-      'cuisine', 'cucina', 'ristorante',
-      'viande', 'meat', 'poisson', 'fish',
-      'italien', 'italian', 'francais', 'french', 'japonais', 'japanese',
-      'chinois', 'chinese', 'indien', 'indian', 'thai', 'mexicain', 'mexican',
-      'mediterraneen', 'mediterranean', 'coreen', 'korean', 'vietnamien', 'vietnamese',
-      'libanais', 'lebanese', 'turc', 'turkish', 'grec', 'greek',
-      'marocain', 'moroccan', 'peruvien', 'peruvian',
-      'lombardie', 'lombard', 'toscane', 'toscan',
-    ];
+
+    // Positive signal: require at least one "real restaurant" indicator for dinner.
     const hasPositiveSignal = DINNER_POSITIVE_SIGNALS.some(s => allText.includes(s));
     const hasStrongProfile = (restaurant.priceLevel || 0) >= 2
       || ((restaurant.rating || 0) >= 4.5 && (restaurant.reviewCount || 0) >= 100);
@@ -358,7 +426,16 @@ export function isAppropriateForMeal(restaurant: Restaurant, mealType: MealType)
 
   if (mealType === 'lunch') {
     for (const excluded of LUNCH_EXCLUDED_KEYWORDS) {
-      if (allText.includes(excluded)) return false;
+      if (allText.includes(excluded)) {
+        // B1: A place that matches an excluded keyword can still be a lunch venue
+        // if it has a clear positive restaurant signal OR a decent price level
+        // OR strong crowd-sourced quality signals.
+        const hasPositiveSignal = LUNCH_POSITIVE_SIGNALS.some(s => allText.includes(s));
+        const hasStrongProfile =
+          (restaurant.priceLevel || 0) >= 2 ||
+          ((restaurant.rating || 0) >= 4.3 && (restaurant.reviewCount || 0) >= 80);
+        if (!hasPositiveSignal && !hasStrongProfile) return false;
+      }
     }
     return true;
   }

@@ -15,6 +15,40 @@ type SelectHotelOptions = {
 };
 
 /**
+ * Returns true when a hotel has a real price AND a bookingUrl that resolves to
+ * booking.com (not the hotel's own website or another third-party domain).
+ *
+ * Used to reject hotels with price=0 or bad URLs before selection so the
+ * pipeline picks a hotel that the user can actually book.
+ */
+function hasValidPriceAndBookingUrl(hotel: Accommodation): boolean {
+  if (!hotel.pricePerNight || hotel.pricePerNight <= 0) return false;
+  const url = hotel.bookingUrl;
+  if (!url) return false;
+  return url.toLowerCase().includes('booking.com');
+}
+
+/**
+ * Build a last-resort Accommodation that has an estimated price and a
+ * Booking.com search URL. Only used when NO hotel in the pool passes the
+ * hasValidPriceAndBookingUrl() filter.
+ */
+function buildLastResortHotel(
+  hotel: Accommodation,
+  budgetLevel: BudgetLevel,
+  destination?: string
+): Accommodation {
+  const estimatedPrice = estimatePriceFromBudget(budgetLevel);
+  const searchUrl = destination
+    ? `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(destination)}&group_adults=2&no_rooms=1`
+    : 'https://www.booking.com/searchresults.html?group_adults=2&no_rooms=1';
+  return appendHotelQualityFlag(
+    { ...hotel, pricePerNight: estimatedPrice, bookingUrl: searchUrl },
+    'hotel_price_estimated'
+  );
+}
+
+/**
  * Select the best hotel near the weighted activity center.
  */
 export function selectHotelByBarycenter(
@@ -40,32 +74,32 @@ export function selectHotelByBarycenter(
       .sort((a, b) => (b.rating || 0) - (a.rating || 0))[0] || null;
   }
 
-  // 2. Filter by budget (with 30% tolerance)
+  // 2. Filter by budget (with 30% tolerance), price > 0, and valid Booking.com URL
   const budgetMax = maxPerNight || getBudgetMaxPerNight(budgetLevel);
   const tolerance = budgetMax * 1.3;
 
+  // Primary filter: requires valid price AND valid booking.com URL
   let candidates = hotels.filter(h =>
-    h.pricePerNight > 0 && h.pricePerNight <= tolerance &&
+    hasValidPriceAndBookingUrl(h) && h.pricePerNight <= tolerance &&
     h.latitude && h.longitude
   );
 
-  // If too few candidates, relax constraint
+  // Relax budget constraint — still require valid price + URL
   if (candidates.length < 3) {
     candidates = hotels
-      .filter(h => h.latitude && h.longitude && h.pricePerNight > 0)
+      .filter(h => hasValidPriceAndBookingUrl(h) && h.latitude && h.longitude)
       .sort((a, b) => a.pricePerNight - b.pricePerNight)
       .slice(0, 10);
   }
 
   if (candidates.length === 0) {
+    // LAST RESORT: no hotel passes the price+URL filter.
+    // Pick the best available hotel and synthesize an estimated price + booking.com search URL.
     const fallback = hotels.find(h => h.latitude && h.longitude) || hotels[0] || null;
-    if (fallback && (!fallback.pricePerNight || fallback.pricePerNight <= 0)) {
-      return appendHotelQualityFlag(
-        { ...fallback, pricePerNight: estimatePriceFromBudget(budgetLevel) },
-        'hotel_price_estimated'
-      );
+    if (fallback) {
+      return buildLastResortHotel(fallback, budgetLevel, options?.destination);
     }
-    return fallback;
+    return null;
   }
 
   // 2b. Distance hard-filter with controlled relaxations (+0.4km, max 2 passes).
@@ -161,7 +195,7 @@ export function selectTopHotelsByBarycenter(
   const weightedCenter = computeWeightedActivityCenter(clusters);
   if (!weightedCenter) {
     return hotels
-      .filter(h => Number.isFinite(h.latitude) && Number.isFinite(h.longitude) && h.pricePerNight > 0)
+      .filter(h => Number.isFinite(h.latitude) && Number.isFinite(h.longitude) && hasValidPriceAndBookingUrl(h))
       .sort((a, b) => (b.rating || 0) - (a.rating || 0))
       .slice(0, count);
   }
@@ -169,19 +203,21 @@ export function selectTopHotelsByBarycenter(
   const budgetMax = maxPerNight || getBudgetMaxPerNight(budgetLevel);
   const tolerance = budgetMax * 1.5;
 
+  // Require valid price AND valid booking.com URL for all alternatives
   let candidates = hotels.filter(h =>
-    h.pricePerNight > 0 && h.pricePerNight <= tolerance &&
+    hasValidPriceAndBookingUrl(h) && h.pricePerNight <= tolerance &&
     h.latitude && h.longitude
   );
 
   if (candidates.length < count) {
     candidates = hotels
-      .filter(h => h.latitude && h.longitude && h.pricePerNight > 0)
+      .filter(h => hasValidPriceAndBookingUrl(h) && h.latitude && h.longitude)
       .sort((a, b) => a.pricePerNight - b.pricePerNight)
       .slice(0, Math.max(count * 3, 10));
   }
 
   if (candidates.length === 0) {
+    // Last resort: return hotels that at least have a price (URL may be missing)
     return hotels.filter(h => h.pricePerNight > 0).slice(0, count);
   }
 

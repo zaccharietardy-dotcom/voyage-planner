@@ -2410,6 +2410,125 @@ function rebalanceClustersForFlights(
     console.log('[Pipeline V2] Phase 9: reordered middle days by nearest-neighbor centroids');
   }
 
+  // Phase 10: Last-day proximity filter
+  // On the departure day, far-from-center activities are problematic: the traveler
+  // needs to be near the hotel/station to catch their transport.
+  // Move activities > 4km from the city center to earlier days when possible.
+  // Skip this phase if we have no city-center anchor.
+  if (destCoords && numDays >= 2) {
+    const LAST_DAY_MAX_KM = 4;
+    const lastDayIdx = clusters.findIndex(c => c.dayNumber === numDays);
+
+    if (lastDayIdx !== -1 && !isDayTrip[lastDayIdx]) {
+      const lastCluster = clusters[lastDayIdx];
+      // Iterate in reverse so splice indices stay valid
+      for (let ai = lastCluster.activities.length - 1; ai >= 0; ai--) {
+        const activity = lastCluster.activities[ai];
+        const distFromCenter = calculateDistance(
+          activity.latitude,
+          activity.longitude,
+          destCoords.lat,
+          destCoords.lng
+        );
+
+        if (distFromCenter <= LAST_DAY_MAX_KM) continue; // Close enough — keep on last day
+
+        // Activity is too far from center for the departure day.
+        // Attempt 1: find an earlier non-last, non-day-trip day to SWAP with a closer activity.
+        let swapped = false;
+        let bestSwapSource = -1;
+        let bestSwapIdx = -1;
+        let bestSwapDist = Infinity; // distance from center of the replacement activity
+
+        for (let ti = 0; ti < clusters.length; ti++) {
+          if (ti === lastDayIdx || isDayTrip[ti]) continue;
+          if (clusters[ti].dayNumber >= numDays) continue; // Only earlier days
+
+          for (let bi = 0; bi < clusters[ti].activities.length; bi++) {
+            const candidate = clusters[ti].activities[bi];
+            if (candidate.mustSee) continue; // Never swap a must-see in here
+
+            // The candidate would replace the far activity on the last day.
+            // It should be closer to the city center than the current activity.
+            const candidateDist = calculateDistance(
+              candidate.latitude,
+              candidate.longitude,
+              destCoords.lat,
+              destCoords.lng
+            );
+            if (candidateDist >= distFromCenter) continue; // Not an improvement
+
+            // Duration compatibility: the swap should not overload either day.
+            const lastDayRemaining = dayRemainingMinutes(lastDayIdx);
+            const sourceDayRemaining = dayRemainingMinutes(ti);
+            const durationDelta = (candidate.duration || 60) - (activity.duration || 60);
+            // If swapping would make last day overflow or source day underflow badly, skip.
+            if (lastDayRemaining - durationDelta < 0) continue;
+            if (sourceDayRemaining + durationDelta < 0) continue;
+
+            if (candidateDist < bestSwapDist) {
+              bestSwapDist = candidateDist;
+              bestSwapSource = ti;
+              bestSwapIdx = bi;
+            }
+          }
+        }
+
+        if (bestSwapSource !== -1 && bestSwapIdx !== -1) {
+          // Execute the swap
+          const [farActivity] = lastCluster.activities.splice(ai, 1);
+          const [nearActivity] = clusters[bestSwapSource].activities.splice(bestSwapIdx, 1);
+          lastCluster.activities.push(nearActivity);
+          clusters[bestSwapSource].activities.push(farActivity);
+          computeClusterGeo(lastCluster);
+          computeClusterGeo(clusters[bestSwapSource]);
+          swapped = true;
+          console.log(
+            `[Pipeline V2] Phase 10: swapped far activity "${farActivity.name}" ` +
+            `(${distFromCenter.toFixed(1)}km from center) off last day ` +
+            `with "${nearActivity.name}" (${bestSwapDist.toFixed(1)}km from center) ` +
+            `from Day ${clusters[bestSwapSource].dayNumber}`
+          );
+        }
+
+        if (swapped) continue;
+
+        // Attempt 2: no swap found — move the far activity to the earlier day with the most gap.
+        let bestTargetIdx = -1;
+        let bestTargetRemaining = -Infinity;
+
+        for (let ti = 0; ti < clusters.length; ti++) {
+          if (ti === lastDayIdx || isDayTrip[ti]) continue;
+          if (clusters[ti].dayNumber >= numDays) continue; // Only earlier days
+
+          const remaining = dayRemainingMinutes(ti);
+          const neededMin = (activity.duration || 60) + 20;
+          if (remaining >= neededMin && remaining > bestTargetRemaining) {
+            bestTargetRemaining = remaining;
+            bestTargetIdx = ti;
+          }
+        }
+
+        if (bestTargetIdx !== -1) {
+          const [moved] = lastCluster.activities.splice(ai, 1);
+          clusters[bestTargetIdx].activities.push(moved);
+          computeClusterGeo(lastCluster);
+          computeClusterGeo(clusters[bestTargetIdx]);
+          console.log(
+            `[Pipeline V2] Phase 10: moved far activity "${moved.name}" ` +
+            `(${distFromCenter.toFixed(1)}km from center) off last day ` +
+            `→ Day ${clusters[bestTargetIdx].dayNumber} (${Math.round(bestTargetRemaining)}min gap)`
+          );
+        } else {
+          console.log(
+            `[Pipeline V2] Phase 10: could not relocate "${activity.name}" ` +
+            `(${distFromCenter.toFixed(1)}km from center) — no earlier day with capacity`
+          );
+        }
+      }
+    }
+  }
+
   // Log rebalancing result with must-see details
   console.log(`[Pipeline V2] Rebalanced clusters: ${clusters.map((c, i) =>
     `Day ${c.dayNumber}: ${c.activities.length} activities [${c.activities.filter(a => a.mustSee).length} must-sees] (${hoursPerDay[i].toFixed(1)}h avail, max ${maxPerDay[i]})`
