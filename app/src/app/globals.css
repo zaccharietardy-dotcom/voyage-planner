@@ -149,7 +149,7 @@
   html,
   body {
     max-width: 100%;
-    overflow-x: clip;
+    overflow-x: hidden;
   }
 
   body {
