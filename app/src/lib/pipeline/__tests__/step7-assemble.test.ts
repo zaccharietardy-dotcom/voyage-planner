@@ -569,7 +569,9 @@ describe('step7-assemble helpers', () => {
     expect(breakfastItem?.selectionSource).toBe('pool');
   });
 
-  it('replaces breakfast that is close to hotel but too far from first activity', async () => {
+  it('keeps breakfast near hotel even if first activity is far away', async () => {
+    // With hotel-only anchor strategy, breakfast near the hotel is kept
+    // regardless of the distance to the first activity.
     const breakfastNearHotelButFarActivity: Restaurant = {
       id: 'r-near-hotel',
       name: 'Hotel Corner Cafe',
@@ -642,9 +644,11 @@ describe('step7-assemble helpers', () => {
       }
     );
 
-    expect(stats.replaced).toBe(1);
+    // Breakfast is near hotel (0.02km), so it should NOT be replaced
+    expect(stats.replaced).toBe(0);
     const breakfastItem = day.items.find((item) => item.id === 'meal-1-breakfast');
-    expect(breakfastItem?.restaurant?.name).toBe('Canal Morning Cafe');
+    // Original breakfast is kept because it's close to the hotel
+    expect(breakfastItem?.restaurant?.name).toBe('Loin du programme');
   });
 
   it('rejects optional gap move when local geo cost increases', () => {

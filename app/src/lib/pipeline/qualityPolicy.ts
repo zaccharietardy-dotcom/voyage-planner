@@ -144,3 +144,10 @@ export function getRestaurantMaxDistanceKmForProfile(profile: QualityCityProfile
   return profile.restaurantMaxKm;
 }
 
+/**
+ * Absolute hard cap on restaurant distance from the nearest activity/anchor.
+ * Any restaurant beyond this is rejected regardless of city profile.
+ * This prevents extreme outliers like a restaurant 16km away in another city.
+ */
+export const RESTAURANT_ABSOLUTE_MAX_KM = 5.0;
+

@@ -71,6 +71,22 @@ const WIKIDATA_DESCRIPTION_EXCLUDES = [
   /\b(newspaper|magazine|television|radio station|political party|company|corporation|brand)\b/i,
   // Fictional entities
   /\b(fictional|character in|novel by|film by|song by|album by)\b/i,
+  // Units and systems of measurement (catches "metre", "kilogram", etc.)
+  /\b(unit of length|unit of mass|unit of time|unit of area|unit of volume|unit of energy|unit of force)\b/i,
+  /\b(base unit|derived unit|système international|international system)\b/i,
+  // Science concepts
+  /\b(chemical element|chemical compound|mineral species|alloy|isotope)\b/i,
+  /\b(theorem|algorithm|equation|conjecture|proof|axiom)\b/i,
+  // Calendar, time periods
+  /\b(month of the|day of the week|calendar|time zone|epoch|era in)\b/i,
+  // Colors, materials
+  /\b(^color$|^colour$|pigment|dye|textile|fabric)\b/i,
+  // Food items (not restaurants)
+  /\b(^dish$|^food$|^beverage$|^drink$|recipe|ingredient|cuisine type)\b/i,
+  // Sports, games
+  /\b(sport$|ball game|card game|board game|video game|Olympic)\b/i,
+  // Musical genres, instruments
+  /\b(music genre|musical instrument|musical form|dance style)\b/i,
 ];
 
 // Mapping OSM tourism/historic types → ActivityType
@@ -308,6 +324,19 @@ function shouldExcludeByWikidata(description: string): boolean {
 }
 
 /**
+ * Positive gate: Wikidata description must contain a tourism-relevant keyword
+ * OR the OSM tags must indicate a physical place.
+ * Items that pass exclusion but fail this gate are rejected.
+ * This catches edge cases like "metre" that may not match any exclusion pattern.
+ */
+const VISITABLE_DESCRIPTION_KEYWORDS = /\b(building|museum|monument|park|garden|church|cathedral|basilica|palace|castle|fortress|fort|bridge|tower|square|plaza|piazza|platz|gate|fountain|statue|sculpture|temple|mosque|synagogue|shrine|theater|theatre|opera|stadium|arena|zoo|aquarium|cemetery|mausoleum|tomb of|library|university|market|bazaar|hall|quarter|neighborhood|district|island|lake|river|waterfall|mountain|hill|beach|cliff|cave|gorge|valley|viewpoint|lighthouse|pier|harbor|port|station|observatory|planetarium|gallery|chapel|abbey|monastery|convent|citadel|rampart|wall of|arch|column|obelisk|triumphal|memorial|pavilion|greenhouse|botanical|archaeological|ruins|remains of|site of|national park|nature reserve|protected area)\b/i;
+
+function isLikelyVisitableByDescription(description: string): boolean {
+  if (!description) return false;
+  return VISITABLE_DESCRIPTION_KEYWORDS.test(description);
+}
+
+/**
  * Check if OSM tags suggest a physically visitable place.
  * Used to gate mustSee: only physical places should be must-sees,
  * not abstract entities that happen to have many Wikipedia articles.
@@ -405,6 +434,13 @@ export async function searchAttractionsOverpass(
     const wdDescription = wd?.description || '';
     if (shouldExcludeByWikidata(wdDescription)) {
       console.log(`[Overpass] Excluded "${wd?.name || poi.name}" by Wikidata description: "${wdDescription}"`);
+      continue;
+    }
+
+    // Positive gate: description must mention a visitable place type
+    // OR the OSM tags must confirm it's a physical tourist place
+    if (!isLikelyVisitableByDescription(wdDescription) && !isVisitablePlace(poi.tags)) {
+      console.log(`[Overpass] Excluded "${wd?.name || poi.name}" — not visitable by description or OSM tags: "${wdDescription}"`);
       continue;
     }
 

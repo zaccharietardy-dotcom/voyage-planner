@@ -8,7 +8,7 @@
 import type { Trip, TripDay, TripItem } from '../types';
 import { calculateDistance } from '../services/geocoding';
 import { formatDateForUrl, generateFlightLink, generateFlightOmioLink } from '../services/linkGenerator';
-import { getHotelHardCapKmForProfile, resolveQualityCityProfile } from './qualityPolicy';
+import { getHotelHardCapKmForProfile, resolveQualityCityProfile, RESTAURANT_ABSOLUTE_MAX_KM } from './qualityPolicy';
 
 const LONG_LEG_TARGET_KM = 2.5;
 const LONG_LEG_HARD_KM = 4;
@@ -336,6 +336,93 @@ export function validateAndFixTrip(trip: Trip): ValidationResult {
         warnings.push(
           `Hotel "${hotelItem.title}" is ${hotelDist.toFixed(1)}km from activities centroid (cap=${hotelHardCap.toFixed(1)}km, profile=${profile.id})`
         );
+        penalties += 5;
+      }
+    }
+  }
+
+  // ============================================
+  // Additional coherence checks
+  // ============================================
+
+  for (const day of trip.days) {
+    const sortedItems = [...day.items].sort((a, b) => a.startTime.localeCompare(b.startTime));
+    const activities = day.items.filter(i => i.type === 'activity');
+    const restaurants = day.items.filter(i => i.type === 'restaurant' && !isHotelMeal(i));
+    const isBoundaryDay = day.dayNumber === 1 || day.dayNumber === trip.days.length;
+
+    // A. Restaurant absolute distance check (hard cap 5km)
+    for (const resto of restaurants) {
+      if (!resto.latitude || !resto.longitude || resto.latitude === 0) continue;
+      const nearestDist = activities.length > 0
+        ? Math.min(...activities
+            .filter(a => a.latitude && a.longitude && a.latitude !== 0)
+            .map(a => calculateDistance(resto.latitude, resto.longitude, a.latitude, a.longitude)))
+        : Infinity;
+      if (nearestDist > RESTAURANT_ABSOLUTE_MAX_KM && nearestDist !== Infinity) {
+        warnings.push(`Day ${day.dayNumber}: Restaurant "${resto.title}" is ${nearestDist.toFixed(1)}km from nearest activity (absolute cap=${RESTAURANT_ABSOLUTE_MAX_KM}km)`);
+        penalties += 15; // Heavy penalty — this should never happen
+      }
+    }
+
+    // B. Post-transport buffer check
+    for (let i = 1; i < sortedItems.length; i++) {
+      const prev = sortedItems[i - 1];
+      const curr = sortedItems[i];
+      if (prev.type !== 'transport' && prev.type !== 'flight') continue;
+      if (prev.transportRole !== 'longhaul') continue;
+      if (curr.type === 'checkin' || curr.type === 'checkout' || curr.type === 'transport' || curr.type === 'flight') continue;
+
+      const prevEnd = timeToMinutes(prev.endTime);
+      const currStart = timeToMinutes(curr.startTime);
+      const buffer = currStart - prevEnd;
+      if (buffer < 20) {
+        warnings.push(`Day ${day.dayNumber}: Only ${buffer}min between longhaul "${prev.title}" and "${curr.title}" (min 20min buffer)`);
+        penalties += 8;
+      }
+    }
+
+    // C. Day without any restaurant (non-boundary days should have at least lunch)
+    if (!isBoundaryDay && restaurants.length === 0 && activities.length > 0) {
+      warnings.push(`Day ${day.dayNumber}: No restaurant scheduled despite having ${activities.length} activities`);
+      penalties += 5;
+    }
+    // Boundary day: at least one meal if there are activities
+    if (isBoundaryDay && restaurants.length === 0 && activities.length >= 2) {
+      warnings.push(`Day ${day.dayNumber}: No restaurant scheduled despite having ${activities.length} activities (boundary day)`);
+      penalties += 3;
+    }
+
+    // D. Gap check lowered to 2h for non-boundary days
+    if (!isBoundaryDay) {
+      for (let i = 1; i < sortedItems.length; i++) {
+        const prev = sortedItems[i - 1];
+        const curr = sortedItems[i];
+        const prevEnd = timeToMinutes(prev.endTime);
+        const currStart = timeToMinutes(curr.startTime);
+        const gap = currStart - prevEnd;
+        if (gap > 120 && gap <= 180) { // 2-3h range (>3h already caught above)
+          if (isIntentionalGapAnchor(prev) || isIntentionalGapAnchor(curr)) continue;
+          warnings.push(`Day ${day.dayNumber}: ${gap}min gap between "${prev.title}" and "${curr.title}" (mid-day, non-boundary)`);
+          penalties += 2;
+        }
+      }
+    }
+
+    // E. Impossible tight sequence: >3km distance with <10min gap
+    for (let i = 1; i < sortedItems.length; i++) {
+      const prev = sortedItems[i - 1];
+      const curr = sortedItems[i];
+      if (!prev.latitude || !prev.longitude || !curr.latitude || !curr.longitude) continue;
+      if (prev.latitude === 0 || curr.latitude === 0) continue;
+      if (isLogisticsItem(prev) || isLogisticsItem(curr)) continue;
+
+      const dist = calculateDistance(prev.latitude, prev.longitude, curr.latitude, curr.longitude);
+      const prevEnd = timeToMinutes(prev.endTime);
+      const currStart = timeToMinutes(curr.startTime);
+      const gap = currStart - prevEnd;
+      if (dist > 3 && gap >= 0 && gap < 10) {
+        warnings.push(`Day ${day.dayNumber}: Tight sequence "${prev.title}" → "${curr.title}" (${dist.toFixed(1)}km in ${gap}min)`);
         penalties += 5;
       }
     }

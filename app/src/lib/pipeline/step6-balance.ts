@@ -10,7 +10,7 @@ import type { TripPreferences, TransportOptionSummary, Accommodation } from '../
 import type { ActivityCluster, MealAssignment, BalancedPlan, BalancedDay, FetchedData } from './types';
 import { calculateDistance } from '../services/geocoding';
 
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 
 interface GeminiResponse {
   candidates?: Array<{
@@ -187,6 +187,9 @@ RÈGLES STRICTES:
 7. Pas 2 musées longs le même jour
 8. Optimise l'ordre géographique : utilise les coordonnées GPS pour minimiser les déplacements intra-journée
 9. RESPECTE les horaires d'ouverture : évite de programmer des lieux fermés (marqués [FERMÉ ce jour])
+- Jour d'arrivée : la première activité doit être MINIMUM 30min après l'arrivée du transport
+- Ne programme JAMAIS un musée ou monument de 2h+ après 16h00 — préfère promenade, quartier, point de vue
+- Après le check-in (16h+), privilégie les activités légères : promenades, quartiers, vues panoramiques
 10. ADAPTE selon la météo : privilégie les activités intérieures (musées, monuments couverts) les jours de pluie, et les activités extérieures (parcs, jardins, marchés) les jours ensoleillés
 11. JAMAIS 2 activités expérientielles similaires (cours de cuisine, dégustation, food tour) le même jour — les répartir sur des jours différents
 12. Respecte les budgets journaliers: charge globale équilibrée (durées + déplacements + activités lourdes)

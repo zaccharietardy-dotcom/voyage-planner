@@ -21,7 +21,7 @@ import { normalizeHotelBookingUrl } from '../services/bookingLinks';
 import { generateFlightLink, generateFlightOmioLink, formatDateForUrl } from '../services/linkGenerator';
 import { sanitizeApiKeyLeaksInString, sanitizeGoogleMapsUrl } from '../services/googlePlacePhoto';
 import { dedupeActivitiesBySimilarity, isDuplicateActivityCandidate } from './utils/activityDedup';
-import { getRestaurantMaxDistanceKmForProfile, resolveQualityCityProfile } from './qualityPolicy';
+import { getRestaurantMaxDistanceKmForProfile, resolveQualityCityProfile, RESTAURANT_ABSOLUTE_MAX_KM } from './qualityPolicy';
 import { isMonumentLikeActivityName, resolveOfficialTicketing } from '../services/officialTicketing';
 import { scoreViatorPlusValue } from '../services/viator';
 import { buildAirportParkingBookingUrl, calculateParkingTime, selectBestParking } from '../services/parking';
@@ -1056,8 +1056,10 @@ export async function assembleTripSchedule(
       const arrivalMinutes = getLocalTimeMinutes(outboundFlight.arrivalTimeDisplay, outboundFlight.arrivalTime);
       dayStartMinutes = Math.max(dayStartMinutes, arrivalMinutes + 60); // +1h transfer
     } else if (hasOutboundTransport && groundArrivalMinutes !== null) {
-      // Ground transport: activities start after arrival
-      dayStartMinutes = Math.max(dayStartMinutes, groundArrivalMinutes + 60);
+      // Ground transport: activities start after arrival + settling buffer
+      // 60min for station-to-city transfer + 30min to settle in / drop bags
+      dayStartMinutes = Math.max(dayStartMinutes, groundArrivalMinutes + 90);
+      console.log(`[Pipeline V2] Day ${balancedDay.dayNumber}: ground transport arrival buffer — first activity no earlier than ${minutesToHHMM(dayStartMinutes)}`);
     }
 
     if (isLastDay && returnFlight) {
@@ -1594,6 +1596,58 @@ export async function assembleTripSchedule(
       }
     }
 
+    // 4a-bis. Post-check-in activity fitness reordering
+    // When the scheduler cursor is past 16:00 (late arrival / post-check-in),
+    // re-sort remaining activities by time-of-day fitness instead of pure geo order.
+    // This prevents scheduling a 2h museum visit at 17:00 when a promenade would be better.
+    if (isFirstDay && prioritizedActivities.length > 1) {
+      const cursorAfterCheckin = scheduler.getCurrentTime();
+      const cursorHourAfterCheckin = cursorAfterCheckin.getHours() + cursorAfterCheckin.getMinutes() / 60;
+      if (cursorHourAfterCheckin >= 16) {
+        // Separate must-sees (they keep priority) from non-must-sees
+        const mustSees = prioritizedActivities.filter(a => a.mustSee);
+        const nonMustSees = prioritizedActivities.filter(a => !a.mustSee);
+
+        // Sort non-must-sees by late-afternoon fitness (descending)
+        nonMustSees.sort((a, b) => {
+          const fitnessA = getTimeOfDayFitness(a, cursorHourAfterCheckin);
+          const fitnessB = getTimeOfDayFitness(b, cursorHourAfterCheckin);
+          return fitnessB - fitnessA;
+        });
+
+        // Also sort must-sees by fitness (they all get scheduled, but in better order)
+        mustSees.sort((a, b) => {
+          const fitnessA = getTimeOfDayFitness(a, cursorHourAfterCheckin);
+          const fitnessB = getTimeOfDayFitness(b, cursorHourAfterCheckin);
+          return fitnessB - fitnessA;
+        });
+
+        // Rebuild: interleave must-sees first, then non-must-sees
+        prioritizedActivities.length = 0;
+        prioritizedActivities.push(...mustSees, ...nonMustSees);
+        console.log(`[Pipeline V2] Day ${balancedDay.dayNumber}: post-check-in fitness reorder (cursor=${cursorHourAfterCheckin.toFixed(1)}h): ${prioritizedActivities.map(a => `"${a.name}"(${getTimeOfDayFitness(a, cursorHourAfterCheckin).toFixed(2)})`).join(', ')}`);
+      }
+    }
+
+    // 4a-ter. Last-day convergence toward departure station
+    // On the last day with return transport, sort activities so the itinerary converges
+    // toward the departure point (station/airport). Activities furthest from the station
+    // are scheduled first, closest ones last. This creates a natural flow toward departure.
+    if (isLastDay && (hasReturnTransport || returnFlight) && prioritizedActivities.length > 1) {
+      // Use destination city center as proxy for departure station (stations are typically central)
+      const departureLat = data.destCoords.lat;
+      const departureLng = data.destCoords.lng;
+      if (departureLat && departureLng) {
+        // Sort: furthest from station first → closest last (converge toward station)
+        prioritizedActivities.sort((a, b) => {
+          const distA = calculateDistance(a.latitude || 0, a.longitude || 0, departureLat, departureLng);
+          const distB = calculateDistance(b.latitude || 0, b.longitude || 0, departureLat, departureLng);
+          return distB - distA; // descending = furthest first
+        });
+        console.log(`[Pipeline V2] Day ${balancedDay.dayNumber}: last-day convergence sort toward (${departureLat.toFixed(4)}, ${departureLng.toFixed(4)}): ${prioritizedActivities.map(a => `"${a.name}"(${calculateDistance(a.latitude || 0, a.longitude || 0, departureLat, departureLng).toFixed(2)}km)`).join(' → ')}`);
+      }
+    }
+
     // 4b. Restaurant re-optimization after geoOptimize
     // After activity reordering, a restaurant assigned near the old cluster centroid
     // may now be far from the nearest activity. Search the FULL restaurant pool
@@ -1645,6 +1699,7 @@ export async function assembleTripSchedule(
               r.latitude, r.longitude
             );
             if (dist > radius) continue;
+            if (dist > RESTAURANT_ABSOLUTE_MAX_KM) continue;
             // If we have a current restaurant, only accept closer options
             if (maxCurrentDist !== undefined && dist >= maxCurrentDist) continue;
 
@@ -5490,6 +5545,75 @@ function containsAnyKeyword(text: string, keywords: string[]): boolean {
   return keywords.some((keyword) => text.includes(keyword));
 }
 
+/**
+ * Returns a 0-1 fitness score for scheduling an activity at a given hour.
+ * Generalizable: based on activity keywords/type, not specific places.
+ * Higher = better fit for that time of day.
+ */
+function getTimeOfDayFitness(activity: ScoredActivity, hourOfDay: number): number {
+  const name = (activity.name || '').toLowerCase();
+  const desc = (activity.description || '').toLowerCase();
+  const text = `${name} ${desc}`;
+  const actType = (activity.type || '').toLowerCase();
+
+  // Classify activity by keywords
+  const isMuseum = actType === 'culture' && /\b(mus[eé]|museum|gallery|galerie|exposition|exhibit)\b/i.test(text);
+  const isOutdoorWalk = /\b(promenade|walk|quartier|neighborhood|quarter|march[eé]|stroll|flâner|balade)\b/i.test(text)
+    || actType === 'neighborhood';
+  const isParkOrViewpoint = /\b(park|parc|jardin|garden|viewpoint|vue|panoram|belv[eé]d[èe]re|esplanade|champ)\b/i.test(text)
+    || actType === 'nature';
+  const isMarket = /\b(march[eé]|market|flea|brocante|puces)\b/i.test(text);
+  const isReligious = /\b(church|[eé]glise|cath[eé]dral|basilique|basilica|chapel|chapelle|mosqu[eé]|synagogue|temple|abbaye|abbey)\b/i.test(text);
+  const isMonument = /\b(tower|tour|arc|monument|palace|palais|château|castle|fort)\b/i.test(text);
+
+  if (isMuseum) {
+    // Museums: best in morning, acceptable early afternoon, poor after 17h
+    if (hourOfDay >= 9 && hourOfDay < 13) return 0.95;
+    if (hourOfDay >= 13 && hourOfDay < 15) return 0.8;
+    if (hourOfDay >= 15 && hourOfDay < 17) return 0.6;
+    if (hourOfDay >= 17) return 0.25;
+    return 0.5;
+  }
+
+  if (isMarket) {
+    // Markets: morning only
+    if (hourOfDay >= 8 && hourOfDay < 13) return 0.95;
+    if (hourOfDay >= 13 && hourOfDay < 14) return 0.5;
+    return 0.2;
+  }
+
+  if (isParkOrViewpoint) {
+    // Parks/viewpoints: great in late afternoon (golden hour)
+    if (hourOfDay >= 16 && hourOfDay < 20) return 0.95;
+    if (hourOfDay >= 10 && hourOfDay < 16) return 0.7;
+    return 0.4;
+  }
+
+  if (isOutdoorWalk) {
+    // Walking/neighborhood exploration: good anytime but best in afternoon
+    if (hourOfDay >= 15 && hourOfDay < 20) return 0.9;
+    if (hourOfDay >= 10 && hourOfDay < 15) return 0.7;
+    return 0.5;
+  }
+
+  if (isReligious) {
+    // Religious sites: best in morning
+    if (hourOfDay >= 9 && hourOfDay < 12) return 0.9;
+    if (hourOfDay >= 12 && hourOfDay < 17) return 0.65;
+    return 0.35;
+  }
+
+  if (isMonument) {
+    // Monuments/towers: flexible, slightly better in afternoon for views
+    if (hourOfDay >= 14 && hourOfDay < 20) return 0.85;
+    if (hourOfDay >= 9 && hourOfDay < 14) return 0.75;
+    return 0.5;
+  }
+
+  // Default: neutral fitness
+  return 0.6;
+}
+
 function isWorthwhileGapFillActivity(activity: ScoredActivity): boolean {
   // Block food/drink/shopping/nightlife by ActivityType
   const actType = (activity.type || '').toLowerCase();
@@ -5537,6 +5661,16 @@ function passesGapFillReliabilityGate(activity: ScoredActivity): boolean {
 
 function isGapFillCandidateEligible(activity: ScoredActivity): boolean {
   if (!activity.latitude || !activity.longitude || activity.latitude === 0 || activity.longitude === 0) return false;
+
+  // Reject activities with absurdly short names (e.g. "mètre", "eau", "air")
+  // or names that match known non-POI patterns
+  const actName = (activity.name || '').trim();
+  if (actName.length > 0 && actName.length < 4 && !activity.mustSee) return false;
+
+  // Reject single common words that are clearly not places
+  const NON_POI_NAME_PATTERN = /^(m[eè]tre|kilogram|second|litre|watt|volt|amp[eè]re|newton|pascal|joule|hertz|kelvin|mole|candela|euro|dollar|franc|pound|yen|bitcoin)$/i;
+  if (NON_POI_NAME_PATTERN.test(actName) && !activity.mustSee) return false;
+
   if (!passesGapFillReliabilityGate(activity)) return false;
   if (activity.mustSee) return true;
   return isWorthwhileGapFillActivity(activity);
@@ -5856,12 +5990,12 @@ function restaurantAnchorPoints(
   const firstActivity = sorted.find((item) => item.type === 'activity' && hasValidCoords(item));
 
   if (mealType === 'breakfast') {
-    // Breakfast uses a dual-anchor strategy:
-    // 1) hotel/check-in area, 2) first activity of the day.
-    // This avoids selecting breakfast spots that are close to hotel but create
-    // a hard long-leg into the first visit.
+    // Breakfast anchored on hotel ONLY — the breakfast spot must be near where you wake up.
+    // The previous dual-anchor (hotel + first activity) could pick a breakfast far from the hotel
+    // if the first activity was in a different area (e.g. hotel Montparnasse, breakfast Montmartre).
     if (hotelAnchor) points.push({ latitude: hotelAnchor.latitude, longitude: hotelAnchor.longitude });
-    if (firstActivity && hasValidCoords(firstActivity)) {
+    // Fallback: if no hotel anchor, use first activity (better than nothing)
+    if (points.length === 0 && firstActivity && hasValidCoords(firstActivity)) {
       points.push({ latitude: firstActivity.latitude, longitude: firstActivity.longitude });
     }
     return points;
@@ -5946,12 +6080,8 @@ function rankRestaurantCandidate(
   const distance = distances.length > 0 ? Math.min(...distances) : Infinity;
   if (!Number.isFinite(distance) || distance > maxDistanceKm) return null;
 
-  if (mealType === 'breakfast' && anchors.length >= 2) {
-    const firstActivityDistance = distances[1];
-    if (Number.isFinite(firstActivityDistance) && firstActivityDistance > GEO_STRICT_LOCAL_LEG_MAX_KM) {
-      return null;
-    }
-  }
+  // Absolute hard cap: no restaurant beyond 5km regardless of profile
+  if (distance > RESTAURANT_ABSOLUTE_MAX_KM) return null;
 
   return { restaurant: candidate, distance };
 }
@@ -5995,16 +6125,10 @@ export async function fixRestaurantOutliers(
       const currentName = normalizeRestaurantName(item.restaurant?.name || item.locationName || stripMealPrefix(item.title));
       const duplicateInDay = currentName.length > 0 && usedNames.has(currentName);
       const currentDistanceKm = minDistanceToAnchorsKm(item, anchors);
-      const breakfastToFirstActivityKm = mealType === 'breakfast' && anchors.length >= 2 && hasValidCoords(item)
-        ? calculateDistance(item.latitude, item.longitude, anchors[1].latitude, anchors[1].longitude)
-        : 0;
-      const breakfastTransitionOutlier =
-        mealType === 'breakfast'
-        && Number.isFinite(breakfastToFirstActivityKm)
-        && breakfastToFirstActivityKm > GEO_STRICT_LOCAL_LEG_MAX_KM;
+      const absoluteDistanceOutlier = Number.isFinite(currentDistanceKm) && currentDistanceKm > RESTAURANT_ABSOLUTE_MAX_KM;
       const isOutlier =
         (Number.isFinite(currentDistanceKm) && currentDistanceKm > maxDistanceKm)
-        || breakfastTransitionOutlier;
+        || absoluteDistanceOutlier;
 
       if (!duplicateInDay && !isOutlier) {
         if (currentName) usedNames.add(currentName);
