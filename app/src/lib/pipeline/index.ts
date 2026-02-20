@@ -14,7 +14,7 @@ import { fetchAllData } from './step1-fetch';
 import { scoreAndSelectActivities } from './step2-score';
 import { clusterActivities, computeCityDensityProfile } from './step3-cluster';
 import { assignRestaurants } from './step4-restaurants';
-import { selectHotelByBarycenter } from './step5-hotel';
+import { selectHotelByBarycenter, selectTieredHotels } from './step5-hotel';
 import { balanceDays, balanceDaysWithClaude } from './step6-balance';
 import { assembleTripSchedule } from './step7-assemble';
 import { validateAndFixTrip } from './step8-validate';
@@ -122,17 +122,20 @@ async function generateTripV2LLM(
     totalIntraDistance: 0,
   };
 
-  const hotel = selectHotelByBarycenter(
+  const tieredHotels = selectTieredHotels(
     [minimalCluster],
     data.bookingHotels,
     preferences.budgetLevel,
     undefined,
     preferences.durationDays,
-    { destination: preferences.destination }
+    { destination: preferences.destination, destCoords: data.destCoords }
   );
 
+  const hotel = tieredHotels.length > 0 ? tieredHotels[0] : null; // Tier 1 = most central
+
   if (hotel) {
-    console.log(`[Pipeline V2 LLM] Hotel selected: "${hotel.name}" (${hotel.rating}★, €${hotel.pricePerNight}/night)`);
+    console.log(`[Pipeline V2 LLM] Hotel selected: "${hotel.name}" (${hotel.rating}★, €${hotel.pricePerNight}/night, ${hotel.distanceToCenter}km, tier: ${hotel.distanceTier})`);
+    console.log(`[Pipeline V2 LLM] ${tieredHotels.length} tiered hotels: ${tieredHotels.map(h => `${h.distanceTier}="${h.name}" (${h.distanceToCenter}km)`).join(', ')}`);
   } else {
     console.warn('[Pipeline V2 LLM] No hotel selected from pool');
   }

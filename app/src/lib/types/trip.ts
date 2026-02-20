@@ -241,6 +241,7 @@ export interface Accommodation {
   checkOutTime: string;
   bookingUrl?: string;
   distanceToCenter?: number;
+  distanceTier?: 'central' | 'comfortable' | 'value';
   distanceToActivities?: { activityId: string; distance: number }[];
   breakfastIncluded?: boolean; // true si petit-déjeuner inclus dans le prix
   description?: string;

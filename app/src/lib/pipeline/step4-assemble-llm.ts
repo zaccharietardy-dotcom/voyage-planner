@@ -32,7 +32,7 @@ import { getMinDuration, getMaxDuration, estimateActivityCost } from './utils/co
 import { generateFlightLink, generateFlightOmioLink, formatDateForUrl } from '../services/linkGenerator';
 import { sanitizeApiKeyLeaksInString, sanitizeGoogleMapsUrl } from '../services/googlePlacePhoto';
 import { resolveOfficialTicketing } from '../services/officialTicketing';
-import { selectTopHotelsByBarycenter } from './step5-hotel';
+import { selectTieredHotels } from './step5-hotel';
 import { getAirportPreDepartureLeadMinutes } from './step7-assemble';
 
 // ============================================
@@ -1285,22 +1285,24 @@ export async function assembleFromLLMPlan(
     preferences
   );
 
-  // 8. Build accommodation options
+  // 8. Build accommodation options (3 tiered hotels: central, comfortable, value)
   const accommodationOptions: Accommodation[] = [];
   if (data.bookingHotels && data.bookingHotels.length > 0) {
     try {
-      const topHotels = selectTopHotelsByBarycenter(
-        [], // clusters not available in LLM flow
+      const tieredHotels = selectTieredHotels(
+        [], // clusters not available in LLM flow — uses destCoords fallback
         data.bookingHotels,
         preferences.budgetLevel,
         undefined,
-        preferences.durationDays
+        preferences.durationDays,
+        { destCoords: data.destCoords }
       );
-      if (topHotels) {
-        accommodationOptions.push(...topHotels.slice(0, 5));
+      if (tieredHotels.length > 0) {
+        accommodationOptions.push(...tieredHotels);
+        console.log(`[Pipeline V2 LLM] Tiered hotel options: ${tieredHotels.map(h => `${h.distanceTier}="${h.name}" (${h.distanceToCenter}km)`).join(', ')}`);
       }
     } catch (err) {
-      console.warn('[Pipeline V2 LLM] Failed to select top hotels:', err);
+      console.warn('[Pipeline V2 LLM] Failed to select tiered hotels:', err);
     }
   }
 

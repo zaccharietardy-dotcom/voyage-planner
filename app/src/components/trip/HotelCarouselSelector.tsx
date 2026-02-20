@@ -17,6 +17,12 @@ interface HotelCarouselSelectorProps {
   };
 }
 
+const TIER_CONFIG: Record<string, { label: string; className: string }> = {
+  central: { label: 'Central', className: 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' },
+  comfortable: { label: 'Confort', className: 'bg-blue-500/20 text-blue-400 border border-blue-500/30' },
+  value: { label: 'Bon plan', className: 'bg-amber-500/20 text-amber-400 border border-amber-500/30' },
+};
+
 export function HotelCarouselSelector({
   hotels,
   selectedId,
@@ -148,8 +154,14 @@ export function HotelCarouselSelector({
               </div>
             )}
 
-            {/* Badge position (si premier = recommandé) */}
-            {index === 0 && selectedId !== hotel.id && (
+            {/* Badge tier (si disponible) */}
+            {hotel.distanceTier && TIER_CONFIG[hotel.distanceTier] && (
+              <div className={`absolute -top-2 -left-2 z-10 text-xs px-2 py-0.5 rounded-full shadow-md font-medium ${TIER_CONFIG[hotel.distanceTier].className}`}>
+                {TIER_CONFIG[hotel.distanceTier].label}
+              </div>
+            )}
+            {/* Fallback: Recommandé si pas de tier */}
+            {!hotel.distanceTier && index === 0 && selectedId !== hotel.id && (
               <div className="absolute -top-2 -left-2 z-10 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full shadow-md">
                 Recommandé
               </div>
@@ -206,6 +218,16 @@ export function HotelCarouselSelector({
                     : 'Centre-ville'}
                 </p>
               </div>
+
+              {/* Distance au centre */}
+              {hotel.distanceToCenter != null && hotel.distanceToCenter > 0 && (
+                <p className="text-xs text-muted-foreground/70 mt-1 ml-4">
+                  {hotel.distanceToCenter < 1
+                    ? `${Math.round(hotel.distanceToCenter * 1000)}m du centre`
+                    : `${hotel.distanceToCenter.toFixed(1)} km du centre`
+                  }
+                </p>
+              )}
 
               {/* Petit-déjeuner */}
               {hotel.breakfastIncluded && (
