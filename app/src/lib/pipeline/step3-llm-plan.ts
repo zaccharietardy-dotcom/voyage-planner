@@ -583,9 +583,10 @@ function sanitizeLLMPlan(plan: LLMPlannerOutput, input: LLMPlannerInput): LLMPla
  * Tourne APRÈS sanitization, AVANT validation — modifie le LLMPlannerOutput directement.
  *
  * Cas traités :
+ * 0. Overlap jour 1 : supprime items planifiés avant l'heure d'arrivée estimée
  * 1. Dernier jour vide (0 activité) → injecte 1 activité avant checkout
  * 2. Jour plein sparse (< 3 activités) → injecte dans le plus grand gap
- * 3. Gros trous (> 150min) → injecte 1 activité dans le gap
+ * 3. Gros trous (> 90min) → injecte 1 activité dans le gap
  */
 function enrichSparseDays(
   plan: LLMPlannerOutput,
@@ -613,6 +614,46 @@ function enrichSparseDays(
       const scoreB = b.rating * Math.log2(b.reviewCount + 2);
       return scoreB - scoreA;
     });
+
+  // CAS 0: Fix arrival-day overlaps — shift items that start before estimated arrival
+  // Transport is injected later in step8 (150min before first item), so if the LLM
+  // scheduled items early in the morning on day 1, they'll overlap with the transport.
+  // Solution: if we know arrivalTime, remove items that would conflict.
+  if (input.trip.arrivalTime) {
+    const arrivalMin = parseHHMMLocal(input.trip.arrivalTime);
+    const firstDay = plan.days[0];
+    if (firstDay) {
+      const checkinBuffer = 30; // 30min to get from station/airport to first activity
+      const earliestActivityMin = arrivalMin + checkinBuffer;
+      const itemsBefore = (firstDay.items || []).filter((item) => {
+        if (item.type !== 'activity' && item.type !== 'restaurant') return false;
+        const itemStart = parseHHMMLocal(item.startTime);
+        return itemStart < earliestActivityMin;
+      });
+      if (itemsBefore.length > 0) {
+        // Remove items that start before arrival — they'll conflict with transport
+        firstDay.items = (firstDay.items || []).filter((item) => {
+          if (item.type !== 'activity' && item.type !== 'restaurant') return true;
+          const itemStart = parseHHMMLocal(item.startTime);
+          if (itemStart < earliestActivityMin) {
+            // Return activity to unused pool if it's an activity
+            if (item.type === 'activity' && item.activityId) {
+              const act = activityMap.get(item.activityId);
+              if (act) {
+                unusedPool.push(act);
+                scheduledIds.delete(item.activityId);
+              }
+            }
+            console.log(
+              `[Pipeline V2 LLM] Enrichment: removed pre-arrival item "${item.activityId || item.restaurantId}" at ${item.startTime} (arrival: ${input.trip.arrivalTime})`
+            );
+            return false;
+          }
+          return true;
+        });
+      }
+    }
+  }
 
   if (unusedPool.length === 0) return plan;
 
@@ -686,10 +727,11 @@ function enrichSparseDays(
       }
     }
 
-    // CAS 3: Gros trous (> 150min) — max 1 insertion par jour
+    // CAS 3: Gros trous (> 90min) — max 1 insertion par jour
+    // 90min threshold catches 1h30+ gaps while preserving natural break time
     if (unusedPool.length > 0) {
       const gaps = findLargestGaps(day);
-      const bigGap = gaps.find((g) => g.gapMinutes >= 150);
+      const bigGap = gaps.find((g) => g.gapMinutes >= 90);
       if (bigGap) {
         const activity = unusedPool.shift()!;
         const duration = Math.min(activity.duration, bigGap.gapMinutes - 30);
