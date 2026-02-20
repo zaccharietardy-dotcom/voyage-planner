@@ -1,8 +1,15 @@
 /**
- * Pipeline V2 — Step 3: LLM Planning avec Claude
+ * Pipeline V2 — Step 3: LLM Planning (Claude / Gemini)
  *
- * Ce module utilise Claude Sonnet pour créer un itinéraire jour par jour intelligent
- * basé sur les activités scorées, les restaurants disponibles, et les contraintes du voyage.
+ * Ce module utilise un LLM (Claude Sonnet ou Gemini Flash) pour créer un itinéraire
+ * jour par jour intelligent basé sur les activités scorées, les restaurants disponibles,
+ * et les contraintes du voyage.
+ *
+ * Modèles supportés:
+ * - claude-sonnet-4-6   (~$0.14/gen, 50-60s)
+ * - gemini-2.5-flash    (~$0.017/gen, 20-40s)
+ *
+ * Configurable via env: LLM_PLANNER_MODEL=gemini-2.5-flash (default: claude-sonnet-4-6)
  */
 
 import Anthropic from '@anthropic-ai/sdk';
@@ -12,6 +19,31 @@ import type {
   LLMDayPlan,
   LLMDayItem,
 } from './types';
+
+// ============================================
+// Gemini API types
+// ============================================
+
+const GEMINI_API_URL =
+  'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+
+interface GeminiResponse {
+  candidates?: Array<{
+    content?: {
+      parts?: Array<{ text?: string }>;
+    };
+    finishReason?: string;
+  }>;
+  usageMetadata?: {
+    promptTokenCount?: number;
+    candidatesTokenCount?: number;
+    totalTokenCount?: number;
+  };
+  error?: {
+    message?: string;
+    code?: number;
+  };
+}
 
 // ============================================
 // Constants
@@ -117,10 +149,11 @@ export async function planWithClaude(input: LLMPlannerInput): Promise<LLMPlanner
 
     const responseText = textBlock.text;
 
-    // Parse response
-    const plan = parseLLMResponse(responseText, input);
+    // Parse and sanitize response
+    const rawPlan = parseLLMResponse(responseText, input);
+    const plan = sanitizeLLMPlan(rawPlan, input);
 
-    // Validate plan
+    // Validate plan (only hard errors after sanitization)
     const validation = validateLLMPlan(plan, input);
 
     if (!validation.valid) {
@@ -135,10 +168,11 @@ export async function planWithClaude(input: LLMPlannerInput): Promise<LLMPlanner
       );
 
       if (correctedPlan) {
-        const revalidation = validateLLMPlan(correctedPlan, input);
+        const sanitizedRetry = sanitizeLLMPlan(correctedPlan, input);
+        const revalidation = validateLLMPlan(sanitizedRetry, input);
         if (revalidation.valid) {
-          logPlanSummary(correctedPlan);
-          return correctedPlan;
+          logPlanSummary(sanitizedRetry);
+          return sanitizedRetry;
         }
         console.warn('[Pipeline V2 LLM] Retry still has errors — falling back');
       }
@@ -154,6 +188,211 @@ export async function planWithClaude(input: LLMPlannerInput): Promise<LLMPlanner
     console.error('[Pipeline V2 LLM] Claude API error:', error);
     console.warn('[Pipeline V2 LLM] Falling back to deterministic planner');
     return buildFallbackPlan(input);
+  }
+}
+
+// ============================================
+// Gemini Flash Planning
+// ============================================
+
+/**
+ * Planifie un itinéraire complet en utilisant Gemini 2.5 Flash.
+ * Même prompt que Claude, ~8x moins cher.
+ */
+export async function planWithGemini(input: LLMPlannerInput): Promise<LLMPlannerOutput> {
+  const apiKey = process.env.GOOGLE_AI_API_KEY;
+  if (!apiKey) {
+    console.warn('[Pipeline V2 LLM] No GOOGLE_AI_API_KEY — falling back to deterministic planner');
+    return buildFallbackPlan(input);
+  }
+
+  try {
+    const userPrompt = buildUserPrompt(input);
+    const fullPrompt = `${SYSTEM_PROMPT}\n\n${userPrompt}`;
+
+    console.log('[Pipeline V2 LLM] Calling Gemini 2.5 Flash for trip planning...');
+    const startTime = Date.now();
+
+    const response = await Promise.race([
+      fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: fullPrompt }] }],
+          generationConfig: {
+            temperature: 0.3,
+            maxOutputTokens: 16000,
+            responseMimeType: 'application/json',
+            // Disable thinking to maximize output tokens for JSON content
+            // (thinking tokens eat into maxOutputTokens budget on 2.5 Flash)
+            thinkingConfig: { thinkingBudget: 0 },
+          },
+        }),
+      }),
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Gemini planning timeout (120s)')), 120000)
+      ),
+    ]);
+
+    const durationMs = Date.now() - startTime;
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`[Pipeline V2 LLM] Gemini API error: ${response.status} — ${errorText}`);
+      return buildFallbackPlan(input);
+    }
+
+    const geminiData: GeminiResponse = await response.json();
+
+    if (geminiData.error) {
+      console.error(`[Pipeline V2 LLM] Gemini error: ${geminiData.error.message}`);
+      return buildFallbackPlan(input);
+    }
+
+    // Log token usage and cost
+    const usage = geminiData.usageMetadata;
+    if (usage) {
+      const inputTokens = usage.promptTokenCount || 0;
+      const outputTokens = usage.candidatesTokenCount || 0;
+      // Gemini 2.5 Flash pricing: $0.15/1M input, $0.60/1M output (thinking tokens billed at input rate)
+      const costUsd = (inputTokens * 0.15 + outputTokens * 0.60) / 1_000_000;
+      console.log(
+        `[Pipeline V2 LLM] Gemini Flash: ${inputTokens} in + ${outputTokens} out, ~$${costUsd.toFixed(4)}, ${durationMs}ms`
+      );
+    } else {
+      console.log(`[Pipeline V2 LLM] Gemini Flash: ${durationMs}ms (no usage metadata)`);
+    }
+
+    // Extract text
+    const text = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!text) {
+      console.warn('[Pipeline V2 LLM] Gemini returned no text — falling back');
+      console.warn('[Pipeline V2 LLM] Gemini raw response:', JSON.stringify(geminiData).slice(0, 500));
+      return buildFallbackPlan(input);
+    }
+
+    // Log first 200 chars of response for debugging
+    console.log(`[Pipeline V2 LLM] Gemini response preview: ${text.slice(0, 200)}...`);
+
+    // Parse and sanitize response
+    const rawPlan = parseLLMResponse(text, input);
+    const plan = sanitizeLLMPlan(rawPlan, input);
+
+    // Validate plan (only hard errors after sanitization)
+    const validation = validateLLMPlan(plan, input);
+
+    if (!validation.valid) {
+      console.warn('[Pipeline V2 LLM] Gemini plan has errors:', validation.errors);
+
+      // Try one retry with correction prompt
+      const correctedPlan = await retryGeminiWithCorrections(
+        apiKey,
+        fullPrompt,
+        text,
+        validation.errors,
+        input
+      );
+
+      if (correctedPlan) {
+        const sanitizedRetry = sanitizeLLMPlan(correctedPlan, input);
+        const revalidation = validateLLMPlan(sanitizedRetry, input);
+        if (revalidation.valid) {
+          logPlanSummary(sanitizedRetry);
+          return sanitizedRetry;
+        }
+        console.warn('[Pipeline V2 LLM] Gemini retry still has errors — falling back');
+      }
+
+      return buildFallbackPlan(input);
+    }
+
+    // Success
+    logPlanSummary(plan);
+    return plan;
+  } catch (error) {
+    console.error('[Pipeline V2 LLM] Gemini API error:', error);
+    console.warn('[Pipeline V2 LLM] Falling back to deterministic planner');
+    return buildFallbackPlan(input);
+  }
+}
+
+/**
+ * Retry Gemini with correction prompt.
+ */
+async function retryGeminiWithCorrections(
+  apiKey: string,
+  originalPrompt: string,
+  originalResponse: string,
+  errors: string[],
+  input: LLMPlannerInput
+): Promise<LLMPlannerOutput | null> {
+  try {
+    const correctionPrompt = `Your plan has the following errors:\n${errors.map((e, i) => `${i + 1}. ${e}`).join('\n')}\n\nPlease fix these errors and return the corrected JSON plan.`;
+
+    console.log('[Pipeline V2 LLM] Retrying Gemini with corrections...');
+
+    const response = await Promise.race([
+      fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [
+            { role: 'user', parts: [{ text: originalPrompt }] },
+            { role: 'model', parts: [{ text: originalResponse }] },
+            { role: 'user', parts: [{ text: correctionPrompt }] },
+          ],
+          generationConfig: {
+            temperature: 0.3,
+            maxOutputTokens: 16000,
+            responseMimeType: 'application/json',
+            thinkingConfig: { thinkingBudget: 0 },
+          },
+        }),
+      }),
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Gemini retry timeout (90s)')), 90000)
+      ),
+    ]);
+
+    if (!response.ok) {
+      console.warn(`[Pipeline V2 LLM] Gemini retry HTTP error: ${response.status}`);
+      return null;
+    }
+
+    const geminiData: GeminiResponse = await response.json();
+    const text = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!text) return null;
+
+    const correctedPlan = parseLLMResponse(text, input);
+    console.log('[Pipeline V2 LLM] Gemini retry completed');
+    return correctedPlan;
+  } catch (error) {
+    console.error('[Pipeline V2 LLM] Gemini retry failed:', error);
+    return null;
+  }
+}
+
+// ============================================
+// LLM Router
+// ============================================
+
+export type LLMPlannerModel = 'claude-sonnet-4-6' | 'gemini-2.5-flash';
+
+/**
+ * Routes to the appropriate LLM planner based on LLM_PLANNER_MODEL env var.
+ * Default: claude-sonnet-4-6
+ */
+export async function planWithLLM(input: LLMPlannerInput): Promise<LLMPlannerOutput> {
+  const model = (process.env.LLM_PLANNER_MODEL || 'claude-sonnet-4-6') as LLMPlannerModel;
+
+  console.log(`[Pipeline V2 LLM] Using model: ${model}`);
+
+  switch (model) {
+    case 'gemini-2.5-flash':
+      return planWithGemini(input);
+    case 'claude-sonnet-4-6':
+    default:
+      return planWithClaude(input);
   }
 }
 
@@ -195,8 +434,44 @@ function parseLLMResponse(text: string, input: LLMPlannerInput): LLMPlannerOutpu
     cleanText = cleanText.replace(/^```\s*/, '').replace(/\s*```$/, '');
   }
 
-  // Parse JSON
-  const parsed = JSON.parse(cleanText);
+  // Try parsing directly first
+  let parsed: LLMPlannerOutput;
+  try {
+    parsed = JSON.parse(cleanText);
+  } catch (firstError) {
+    // Attempt JSON repair for common LLM quirks:
+    // 1. Single quotes → double quotes (careful with apostrophes inside values)
+    // 2. Trailing commas before ] or }
+    // 3. Unescaped newlines in strings
+    console.warn('[Pipeline V2 LLM] JSON parse failed, attempting repair...');
+    let repaired = cleanText
+      // Fix trailing commas: ,] or ,}
+      .replace(/,\s*([\]}])/g, '$1')
+      // Fix single-quoted keys: 'key': → "key":
+      .replace(/'([^']+)'(\s*:)/g, '"$1"$2')
+      // Fix single-quoted string values: : 'value' → : "value"
+      // This regex is careful to not break apostrophes inside double-quoted strings
+      .replace(/:\s*'([^']*)'/g, ': "$1"');
+
+    try {
+      parsed = JSON.parse(repaired);
+      console.log('[Pipeline V2 LLM] JSON repair succeeded');
+    } catch (secondError) {
+      // Last resort: try to extract JSON object from text
+      const jsonMatch = cleanText.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        try {
+          parsed = JSON.parse(jsonMatch[0]);
+          console.log('[Pipeline V2 LLM] JSON extraction from text succeeded');
+        } catch {
+          // Re-throw original error for clarity
+          throw firstError;
+        }
+      } else {
+        throw firstError;
+      }
+    }
+  }
 
   // Validate basic structure
   if (!parsed.days || !Array.isArray(parsed.days)) {
@@ -208,7 +483,80 @@ function parseLLMResponse(text: string, input: LLMPlannerInput): LLMPlannerOutpu
 }
 
 // ============================================
-// Validation
+// Sanitization — Remove invalid items before validation
+// ============================================
+
+/**
+ * Removes invalid items from the plan (unknown IDs, duplicates) instead of
+ * failing validation entirely. This is important for Gemini which sometimes
+ * hallucinates 1-2 IDs but produces an otherwise good plan.
+ */
+function sanitizeLLMPlan(plan: LLMPlannerOutput, input: LLMPlannerInput): LLMPlannerOutput {
+  const activityIds = new Set(input.activities.map((a) => a.id));
+  const restaurantIds = new Set(input.restaurants.map((r) => r.id));
+  const scheduledActivities = new Set<string>();
+  let removedCount = 0;
+
+  const sanitizedDays = plan.days.map((day) => {
+    if (!day.items || !Array.isArray(day.items)) {
+      return { ...day, items: [] };
+    }
+
+    const validItems = day.items.filter((item) => {
+      // Check type
+      if (item.type !== 'activity' && item.type !== 'restaurant') {
+        removedCount++;
+        return false;
+      }
+
+      // Check activity reference
+      if (item.type === 'activity') {
+        if (!item.activityId || !activityIds.has(item.activityId)) {
+          console.warn(`[Pipeline V2 LLM] Sanitize: removed unknown activity "${item.activityId}" from day ${day.dayNumber}`);
+          removedCount++;
+          return false;
+        }
+        if (scheduledActivities.has(item.activityId)) {
+          console.warn(`[Pipeline V2 LLM] Sanitize: removed duplicate activity "${item.activityId}" from day ${day.dayNumber}`);
+          removedCount++;
+          return false;
+        }
+        scheduledActivities.add(item.activityId);
+      }
+
+      // Check restaurant reference
+      if (item.type === 'restaurant') {
+        if (!item.restaurantId || !restaurantIds.has(item.restaurantId)) {
+          console.warn(`[Pipeline V2 LLM] Sanitize: removed unknown restaurant "${item.restaurantId}" from day ${day.dayNumber}`);
+          removedCount++;
+          return false;
+        }
+      }
+
+      // Check times
+      if (!isValidTime(item.startTime) || !isValidTime(item.endTime)) {
+        removedCount++;
+        return false;
+      }
+
+      return true;
+    });
+
+    return { ...day, items: validItems };
+  });
+
+  if (removedCount > 0) {
+    console.log(`[Pipeline V2 LLM] Sanitized plan: removed ${removedCount} invalid items`);
+  }
+
+  return {
+    ...plan,
+    days: sanitizedDays,
+  };
+}
+
+// ============================================
+// Validation (post-sanitization — only hard errors)
 // ============================================
 
 interface ValidationResult {
@@ -216,85 +564,41 @@ interface ValidationResult {
   errors: string[];
 }
 
+/**
+ * Validates the plan after sanitization. Only checks for hard errors:
+ * - Missing must-see activities
+ * - Empty days
+ * - Structural issues
+ */
 function validateLLMPlan(plan: LLMPlannerOutput, input: LLMPlannerInput): ValidationResult {
   const errors: string[] = [];
 
-  // Build lookup maps
-  const activityIds = new Set(input.activities.map((a) => a.id));
-  const restaurantIds = new Set(input.restaurants.map((r) => r.id));
   const mustSeeIds = input.activities.filter((a) => a.mustSee).map((a) => a.id);
-
-  // Track scheduled activities
   const scheduledActivities = new Set<string>();
-  const scheduledMustSees = new Set<string>();
 
-  // Validate each day
+  // Check each day has items
   for (const day of plan.days) {
-    if (!day.items || !Array.isArray(day.items)) {
-      errors.push(`Day ${day.dayNumber} has no items array`);
-      continue;
+    if (!day.items || day.items.length === 0) {
+      errors.push(`Day ${day.dayNumber} has no items`);
     }
-
-    for (let i = 0; i < day.items.length; i++) {
-      const item = day.items[i];
-
-      // Check type
-      if (item.type !== 'activity' && item.type !== 'restaurant') {
-        errors.push(`Day ${day.dayNumber} item ${i}: invalid type "${item.type}"`);
-        continue;
-      }
-
-      // Check activity reference
-      if (item.type === 'activity') {
-        if (!item.activityId) {
-          errors.push(`Day ${day.dayNumber} item ${i}: missing activityId`);
-        } else if (!activityIds.has(item.activityId)) {
-          errors.push(`Day ${day.dayNumber} item ${i}: unknown activityId "${item.activityId}"`);
-        } else {
-          // Check for duplicates
-          if (scheduledActivities.has(item.activityId)) {
-            errors.push(
-              `Day ${day.dayNumber} item ${i}: activity "${item.activityId}" scheduled twice`
-            );
-          }
-          scheduledActivities.add(item.activityId);
-
-          // Track must-sees
-          if (mustSeeIds.includes(item.activityId)) {
-            scheduledMustSees.add(item.activityId);
-          }
-        }
-      }
-
-      // Check restaurant reference
-      if (item.type === 'restaurant') {
-        if (!item.restaurantId) {
-          errors.push(`Day ${day.dayNumber} item ${i}: missing restaurantId`);
-        } else if (!restaurantIds.has(item.restaurantId)) {
-          errors.push(
-            `Day ${day.dayNumber} item ${i}: unknown restaurantId "${item.restaurantId}"`
-          );
-        }
-
-        if (item.mealType && !['breakfast', 'lunch', 'dinner'].includes(item.mealType)) {
-          errors.push(`Day ${day.dayNumber} item ${i}: invalid mealType "${item.mealType}"`);
-        }
-      }
-
-      // Check times
-      if (!isValidTime(item.startTime)) {
-        errors.push(`Day ${day.dayNumber} item ${i}: invalid startTime "${item.startTime}"`);
-      }
-      if (!isValidTime(item.endTime)) {
-        errors.push(`Day ${day.dayNumber} item ${i}: invalid endTime "${item.endTime}"`);
+    for (const item of (day.items || [])) {
+      if (item.type === 'activity' && item.activityId) {
+        scheduledActivities.add(item.activityId);
       }
     }
   }
 
   // Check all must-sees are scheduled
-  const missingMustSees = mustSeeIds.filter((id) => !scheduledMustSees.has(id));
+  const missingMustSees = mustSeeIds.filter((id) => !scheduledActivities.has(id));
   if (missingMustSees.length > 0) {
     errors.push(`Missing must-see activities: ${missingMustSees.join(', ')}`);
+  }
+
+  // Check plan has at least 60% of expected items
+  const totalItems = plan.days.reduce((s, d) => s + (d.items?.length || 0), 0);
+  const minExpectedItems = input.trip.durationDays * 4; // ~4 items/day minimum
+  if (totalItems < minExpectedItems) {
+    errors.push(`Plan too sparse: only ${totalItems} items for ${input.trip.durationDays} days (expected ≥${minExpectedItems})`);
   }
 
   return {

@@ -33,7 +33,7 @@ import { isDuplicateActivityCandidate } from './utils/activityDedup';
 // Pipeline V2 LLM — New imports
 // ---------------------------------------------------------------------------
 import { prepareDataForLLM } from './step2-prepare-llm';
-import { planWithClaude } from './step3-llm-plan';
+import { planWithLLM } from './step3-llm-plan';
 import { assembleFromLLMPlan } from './step4-assemble-llm';
 import { fixRestaurantOutliers } from './step7-assemble';
 import { isAppropriateForMeal, isBreakfastSpecialized, getCuisineFamily } from './step4-restaurants';
@@ -94,8 +94,8 @@ async function generateTripV2LLM(
   }
 
   // Step 2: Select hotel + prepare data for LLM
-  console.log('[Pipeline V2 LLM] === Step 2: Preparing data for Claude... ===');
-  emit(onEvent, { type: 'step_start', step: 2, stepName: 'Preparing data for Claude' });
+  console.log('[Pipeline V2 LLM] === Step 2: Preparing data for LLM... ===');
+  emit(onEvent, { type: 'step_start', step: 2, stepName: 'Preparing data for LLM' });
   const T2 = Date.now();
 
   // Select hotel using existing barycenter logic (need minimal clusters for hotel selection)
@@ -139,17 +139,18 @@ async function generateTripV2LLM(
 
   const llmInput = prepareDataForLLM(data, preferences, hotel, bestTransport, data.outboundFlight, data.returnFlight);
   console.log(`[Pipeline V2 LLM] Step 2 done in ${Date.now() - T2}ms`);
-  emit(onEvent, { type: 'step_done', step: 2, stepName: 'Preparing data for Claude', durationMs: Date.now() - T2,
+  emit(onEvent, { type: 'step_done', step: 2, stepName: 'Preparing data for LLM', durationMs: Date.now() - T2,
     detail: `${llmInput.activities.length} activities, ${llmInput.restaurants.length} restaurants, ${Object.keys(llmInput.distances).length} distance pairs` });
 
-  // Step 3: Claude planning
-  console.log('[Pipeline V2 LLM] === Step 3: Claude planning... ===');
-  emit(onEvent, { type: 'step_start', step: 3, stepName: 'Claude planning' });
+  // Step 3: LLM planning (Claude or Gemini based on LLM_PLANNER_MODEL env)
+  const plannerModel = process.env.LLM_PLANNER_MODEL || 'claude-sonnet-4-6';
+  console.log(`[Pipeline V2 LLM] === Step 3: LLM planning (${plannerModel})... ===`);
+  emit(onEvent, { type: 'step_start', step: 3, stepName: `LLM planning (${plannerModel})` });
   const T3 = Date.now();
-  const llmPlan = await planWithClaude(llmInput);
+  const llmPlan = await planWithLLM(llmInput);
   const step3Ms = Date.now() - T3;
   console.log(`[Pipeline V2 LLM] Step 3 done in ${step3Ms}ms — ${llmPlan.days.length} days planned`);
-  emit(onEvent, { type: 'step_done', step: 3, stepName: 'Claude planning', durationMs: step3Ms,
+  emit(onEvent, { type: 'step_done', step: 3, stepName: `LLM planning (${plannerModel})`, durationMs: step3Ms,
     detail: `${llmPlan.days.length} days, ${llmPlan.days.reduce((s, d) => s + d.items.length, 0)} items` });
 
   // Step 4: Assemble Trip from LLM plan
