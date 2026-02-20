@@ -6565,6 +6565,9 @@ function applyRestaurantCandidateToItem(
   item.bookingUrl = baseRestaurant.googleMapsUrl || baseRestaurant.website || item.bookingUrl;
   item.googleMapsPlaceUrl = baseRestaurant.googleMapsUrl
     || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${baseRestaurant.name}, ${destination}`)}`;
+  if (baseRestaurant.latitude && baseRestaurant.longitude) {
+    item.googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${baseRestaurant.latitude},${baseRestaurant.longitude}`;
+  }
   item.restaurant = baseRestaurant;
   item.imageUrl = baseRestaurant.photos?.[0];
   item.selectionSource = source;

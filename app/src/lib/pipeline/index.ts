@@ -34,7 +34,7 @@ import { isDuplicateActivityCandidate } from './utils/activityDedup';
 // ---------------------------------------------------------------------------
 import { prepareDataForLLM } from './step2-prepare-llm';
 import { planWithLLM } from './step3-llm-plan';
-import { assembleFromLLMPlan } from './step4-assemble-llm';
+import { assembleFromLLMPlan, computeDistancesForDay } from './step4-assemble-llm';
 import { fixRestaurantOutliers } from './step7-assemble';
 import { isAppropriateForMeal, isBreakfastSpecialized, getCuisineFamily } from './step4-restaurants';
 import { searchRestaurantsNearby } from '../services/serpApiPlaces';
@@ -211,6 +211,11 @@ async function generateTripV2LLM(
         }
       );
     }
+  }
+
+  // Recalculate distances after restaurant swaps (coordinates may have changed)
+  for (const day of trip.days) {
+    computeDistancesForDay(day);
   }
 
   console.log(`[Pipeline V2 LLM] Step 4b: ${fixStats.replaced} restaurants swapped, ${fixStats.flaggedFallback} kept as fallback (${Date.now() - T4b}ms)`);

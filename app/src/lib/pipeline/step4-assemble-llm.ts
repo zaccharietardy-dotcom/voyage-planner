@@ -768,7 +768,130 @@ function resolveScheduleConflicts(
       }
     }
 
+    // Ensure breakfast comes before all non-infrastructure items
+    const breakfast = day.items.find(item =>
+      item.type === 'restaurant' &&
+      (item.title.toLowerCase().includes('petit-déjeuner') ||
+       item.title.toLowerCase().includes('breakfast') ||
+       item.id.startsWith('breakfast-'))
+    );
+
+    if (breakfast) {
+      const bkfEndMin = parseHHMM(breakfast.endTime);
+      const pushableBeforeBreakfast = day.items
+        .filter(item => {
+          if (item === breakfast) return false;
+          if (['transport', 'flight', 'checkin', 'checkout'].includes(item.type)) return false;
+          return parseHHMM(item.startTime) < bkfEndMin;
+        })
+        .sort((a, b) => parseHHMM(a.startTime) - parseHHMM(b.startTime));
+
+      if (pushableBeforeBreakfast.length > 0) {
+        let cursor = bkfEndMin + 15; // 15min after breakfast
+        for (const item of pushableBeforeBreakfast) {
+          const duration = parseHHMM(item.endTime) - parseHHMM(item.startTime);
+          item.startTime = minutesToHHMM(cursor);
+          item.endTime = minutesToHHMM(cursor + Math.max(duration, 15));
+          cursor = cursor + Math.max(duration, 15) + 15;
+          console.log(`[Breakfast Fix] Pushed "${item.title}" after breakfast to ${item.startTime}`);
+        }
+      }
+    }
+
     // Re-sort after adjustments
+    day.items.sort((a, b) => parseHHMM(a.startTime) - parseHHMM(b.startTime));
+    day.items.forEach((item, idx) => { item.orderIndex = idx; });
+  }
+}
+
+// ============================================
+// Check if item has valid GPS coordinates
+// ============================================
+
+function hasValidCoords(item: TripItem): boolean {
+  return (
+    item.latitude !== undefined &&
+    item.longitude !== undefined &&
+    item.latitude !== 0 &&
+    item.longitude !== 0 &&
+    !isNaN(item.latitude) &&
+    !isNaN(item.longitude)
+  );
+}
+
+// ============================================
+// Enforce minimum travel gaps between consecutive items
+// ============================================
+
+function enforceMinTravelGaps(days: TripDay[]): void {
+  for (const day of days) {
+    // Sort items by startTime first
+    day.items.sort((a, b) => parseHHMM(a.startTime) - parseHHMM(b.startTime));
+
+    for (let i = 1; i < day.items.length; i++) {
+      const prev = day.items[i - 1];
+      const curr = day.items[i];
+
+      // Skip if curr is immovable (transport, flight)
+      if (curr.type === 'transport' || curr.type === 'flight') continue;
+
+      const prevEndMin = parseHHMM(prev.endTime);
+      const currStartMin = parseHHMM(curr.startTime);
+
+      // If either item has no valid coords, just enforce no overlap
+      if (!hasValidCoords(prev) || !hasValidCoords(curr)) {
+        if (currStartMin < prevEndMin) {
+          const duration = parseHHMM(curr.endTime) - currStartMin;
+          curr.startTime = minutesToHHMM(prevEndMin);
+          curr.endTime = minutesToHHMM(prevEndMin + Math.max(duration, 15));
+        }
+        continue;
+      }
+
+      // Compute distance
+      const dist = calculateDistance(prev.latitude!, prev.longitude!, curr.latitude!, curr.longitude!);
+
+      // Compute required travel gap
+      let requiredGapMin: number;
+      if (dist < 0.3) {
+        requiredGapMin = 0; // Same location
+      } else if (dist <= 3.0) {
+        requiredGapMin = Math.ceil(dist * 1000 / 80) + 5; // Walking 80m/min + 5min buffer
+      } else {
+        requiredGapMin = Math.ceil((dist / 15) * 60) + 10; // Public transport 15km/h + 10min buffer
+        requiredGapMin = Math.max(requiredGapMin, 20); // Minimum 20min for any PT trip
+      }
+
+      const availableGap = currStartMin - prevEndMin;
+
+      if (availableGap < requiredGapMin) {
+        const oldStart = curr.startTime;
+        const duration = parseHHMM(curr.endTime) - currStartMin;
+        const newStart = prevEndMin + requiredGapMin;
+        curr.startTime = minutesToHHMM(newStart);
+        curr.endTime = minutesToHHMM(newStart + Math.max(duration, 15));
+        console.log(`[Travel Gap] Pushed "${curr.title}" from ${oldStart} to ${curr.startTime} (${dist.toFixed(1)}km, need ${requiredGapMin}min gap, had ${availableGap}min)`);
+      }
+    }
+
+    // Remove items pushed past 23:30 (except transport/flight)
+    day.items = day.items.filter(item => {
+      if (item.type === 'transport' || item.type === 'flight') return true;
+      if (parseHHMM(item.startTime) >= 23 * 60 + 30) {
+        console.log(`[Travel Gap] REMOVED "${item.title}" — pushed past 23:30`);
+        return false;
+      }
+      return true;
+    });
+
+    // Truncate items ending after 23:45
+    for (const item of day.items) {
+      if (parseHHMM(item.endTime) > 23 * 60 + 45) {
+        item.endTime = '23:45';
+      }
+    }
+
+    // Re-sort and re-index
     day.items.sort((a, b) => parseHHMM(a.startTime) - parseHHMM(b.startTime));
     day.items.forEach((item, idx) => { item.orderIndex = idx; });
   }
@@ -778,7 +901,7 @@ function resolveScheduleConflicts(
 // Compute distances between consecutive items
 // ============================================
 
-function computeDistancesForDay(day: TripDay): void {
+export function computeDistancesForDay(day: TripDay): void {
   for (let i = 1; i < day.items.length; i++) {
     const prev = day.items[i - 1];
     const curr = day.items[i];
@@ -795,8 +918,14 @@ function computeDistancesForDay(day: TripDay): void {
     ) {
       const dist = calculateDistance(prev.latitude, prev.longitude, curr.latitude, curr.longitude);
       curr.distanceFromPrevious = Math.round(dist * 100) / 100;
-      curr.timeFromPrevious = Math.ceil(dist * 1000 / 80); // 80m/min walking speed
-      curr.transportToPrevious = dist > 3 ? 'public' : 'walk';
+
+      if (dist > 3) {
+        curr.timeFromPrevious = Math.ceil((dist / 15) * 60); // Public transport ~15km/h
+        curr.transportToPrevious = 'public';
+      } else {
+        curr.timeFromPrevious = Math.ceil(dist * 1000 / 80); // Walking 80m/min
+        curr.transportToPrevious = 'walk';
+      }
     }
   }
 }
@@ -1127,6 +1256,9 @@ export async function assembleFromLLMPlan(
 
   // 4c. Resolve schedule conflicts (arrival buffer, checkout ordering, overlaps)
   resolveScheduleConflicts(tripDays, transport, hotel);
+
+  // 4d. Enforce minimum travel gaps between consecutive items
+  enforceMinTravelGaps(tripDays);
 
   // 5. Sort items by time within each day and compute distances
   for (const day of tripDays) {

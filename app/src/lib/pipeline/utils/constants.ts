@@ -81,6 +81,9 @@ export function getMinDuration(name: string, type: string): number {
  * Applied AFTER min-duration; only caps activities matching these patterns.
  */
 const MAX_DURATION_RULES: [RegExp, number][] = [
+  // Famous arches and gates: larger landmarks deserve more time
+  [/\b(arc\s+de\s+triomphe|arco\s+d[ie]\s+triun?fo|brandenburg|brandenburger|india\s?gate|gateway\s+of\s+india|puerta\s+del?\s+sol)\b/i, 60],
+  // Generic monuments/statues: quick visits
   [/\b(statue|sculpture|fountain|fontaine|fontana|monument|memorial|m[eé]morial)\b/i, 30],
   [/\b(viewpoint|belvedere|belv[eé]d[eè]re|mirador|panorama)\b/i, 45],
 ];
