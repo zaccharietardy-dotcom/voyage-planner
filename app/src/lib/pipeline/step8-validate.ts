@@ -13,7 +13,7 @@
  */
 
 import type { Trip, TripDay, TripItem } from '../types';
-import { calculateDistance } from '../services/geocoding';
+import { calculateDistance, getCityCenterCoords } from '../services/geocoding';
 import { formatDateForUrl, generateFlightLink, generateFlightOmioLink } from '../services/linkGenerator';
 import { getHotelHardCapKmForProfile, resolveQualityCityProfile, RESTAURANT_ABSOLUTE_MAX_KM } from './qualityPolicy';
 
@@ -911,6 +911,31 @@ function normalizeFallbackBookingDate(rawUrl: string | undefined, date: Date): s
   }
 }
 
+/**
+ * Estimate realistic flight duration (minutes) based on great-circle distance.
+ * Uses city center coordinates + distance bands with typical flight speeds.
+ * Includes ~60min buffer for taxi/takeoff/landing/immigration.
+ */
+function estimateFlightDuration(from: string, to: string): number {
+  const fromCoords = getCityCenterCoords(from);
+  const toCoords = getCityCenterCoords(to);
+
+  if (!fromCoords || !toCoords) {
+    // Can't estimate — return a conservative default (medium-haul)
+    return 300; // 5h
+  }
+
+  const distKm = calculateDistance(fromCoords.lat, fromCoords.lng, toCoords.lat, toCoords.lng);
+
+  // Distance bands → estimated flight duration (including ground time)
+  if (distKm < 500) return 120;        // Short-haul: ~2h total
+  if (distKm < 1500) return 180;       // Medium-short: ~3h
+  if (distKm < 3000) return 300;       // Medium: ~5h (e.g., Paris→Istanbul)
+  if (distKm < 5000) return 480;       // Medium-long: ~8h (e.g., Paris→Dubai)
+  if (distKm < 8000) return 660;       // Long-haul: ~11h (e.g., Paris→Tokyo)
+  return 780;                           // Ultra long-haul: ~13h (e.g., Paris→Sydney)
+}
+
 function insertFallbackLonghaulItem(
   day: TripDay,
   direction: 'outbound' | 'return',
@@ -922,11 +947,12 @@ function insertFallbackLonghaulItem(
     date: Date;
   }
 ): void {
+  const estimatedDuration = estimateFlightDuration(from, to);
   const sorted = [...day.items].sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
   const fallbackStartMinutes = direction === 'outbound'
-    ? Math.max(6 * 60, (sorted[0] ? timeToMinutes(sorted[0].startTime) - 150 : 8 * 60))
+    ? Math.max(6 * 60, (sorted[0] ? timeToMinutes(sorted[0].startTime) - estimatedDuration : 8 * 60))
     : Math.min(22 * 60, (sorted[sorted.length - 1] ? timeToMinutes(sorted[sorted.length - 1].endTime) + 30 : 15 * 60));
-  const fallbackEndMinutes = Math.min(23 * 60 + 59, fallbackStartMinutes + 150);
+  const fallbackEndMinutes = Math.min(23 * 60 + 59, fallbackStartMinutes + estimatedDuration);
   const fallbackIdPrefix = direction === 'outbound' ? 'transport-out' : 'transport-ret';
   const fallbackStartDate = new Date(context.date);
   const fallbackHour = Math.floor(fallbackStartMinutes / 60);

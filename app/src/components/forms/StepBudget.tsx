@@ -84,10 +84,20 @@ export function StepBudget({ data, onChange }: StepBudgetProps) {
             id="custom-budget"
             type="number"
             placeholder="2000"
+            min="0"
             value={data.budgetCustom || ''}
             onChange={(e) => {
-              const value = e.target.value ? parseInt(e.target.value) : undefined;
-              onChange({ budgetCustom: value, budgetLevel: undefined });
+              const rawValue = e.target.value;
+              if (rawValue === '') {
+                onChange({ budgetCustom: undefined, budgetLevel: undefined });
+                return;
+              }
+              const parsedValue = parseInt(rawValue);
+              if (isNaN(parsedValue) || parsedValue < 0) {
+                // Invalid input - don't update
+                return;
+              }
+              onChange({ budgetCustom: parsedValue, budgetLevel: undefined });
             }}
             className="h-12 text-base pr-12"
           />

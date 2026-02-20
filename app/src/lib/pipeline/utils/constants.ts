@@ -43,6 +43,12 @@ export const INDOOR_ACTIVITY_KEYWORDS = [
  * First match wins — order from most specific to least specific.
  */
 const MIN_DURATION_RULES: [RegExp, number][] = [
+  // Theme parks: full-day experiences
+  [/\b(disneyland|disney\s?sea|disney\s?world|universal\s?studios|universal\s?resort|legoland|europa[- ]?park|port\s?aventura|six\s?flags|fuji[- ]?q|everland|lotte\s?world)\b/i, 300],
+  // Immersive/digital art experiences
+  [/\b(teamlab|team\s?lab|atelier\s+des\s+lumi[eè]res|bassins?\s+de\s+lumi[eè]res|art[eé]chouse|mori\s+building\s+digital)\b/i, 90],
+  // Major observation decks / towers with observation
+  [/\b(skytree|sky\s?tree|shibuya\s?sky|tokyo\s?tower|burj\s?khalifa|cn\s?tower|empire\s?state|one\s?world\s?observatory|top\s?of\s?the\s?rock|shard|eiffel|montparnasse|edge\s?observation)\b/i, 60],
   // Major museums and landmark complexes: realistic minimum visit windows
   [/\b(vatican|vaticano|mus[eé]es? du vatican|vatican museum|chapelle sixtine|sistine)\b/i, 180],
   [/\b(louvre|mus[eé]e du louvre)\b/i, 150],
@@ -67,6 +73,67 @@ export function getMinDuration(name: string, type: string): number {
     if (pattern.test(text)) return minDur;
   }
   return 30; // Default minimum
+}
+
+/**
+ * Maximum reasonable durations for quick activities (minutes).
+ * Prevents LLM from assigning 60min to a statue or fountain.
+ * Applied AFTER min-duration; only caps activities matching these patterns.
+ */
+const MAX_DURATION_RULES: [RegExp, number][] = [
+  [/\b(statue|sculpture|fountain|fontaine|fontana|monument|memorial|m[eé]morial)\b/i, 30],
+  [/\b(viewpoint|belvedere|belv[eé]d[eè]re|mirador|panorama)\b/i, 45],
+];
+
+/** Cap duration for quick activities. Returns null if no cap applies. */
+export function getMaxDuration(name: string, type: string): number | null {
+  const text = `${name} ${type}`.toLowerCase();
+  for (const [pattern, maxDur] of MAX_DURATION_RULES) {
+    if (pattern.test(text)) return maxDur;
+  }
+  return null;
+}
+
+/**
+ * Estimate a reasonable entrance cost (EUR) for activities where APIs return 0.
+ * These are FALLBACK values — only used when the real cost is unknown (0 or undefined).
+ * Not meant to be exact, but to give a rough order of magnitude so the
+ * budget summary isn't wildly off (e.g. Disneyland showing as "free").
+ *
+ * Returns 0 for genuinely free activities (parks, statues, churches).
+ * Patterns tested against `${name} ${type}` (lowercase). First match wins.
+ */
+const COST_ESTIMATION_RULES: [RegExp, number][] = [
+  // Theme parks: ~80 EUR entry
+  [/\b(disneyland|disney\s?sea|disney\s?world|universal\s?studios|universal\s?resort|legoland|europa[- ]?park|port\s?aventura|six\s?flags|fuji[- ]?q|everland|lotte\s?world)\b/i, 80],
+  // Immersive / digital art
+  [/\b(teamlab|team\s?lab|atelier\s+des\s+lumi[eè]res|bassins?\s+de\s+lumi[eè]res|art[eé]chouse|mori\s+building\s+digital)\b/i, 25],
+  // Named major museums
+  [/\b(louvre|vatican|vaticano|uffizi|offices|prado|rijksmuseum|hermitage|ermitage|british museum|met museum|metropolitan|mus[eé]e d'orsay|orsay)\b/i, 20],
+  // Observation decks
+  [/\b(skytree|sky\s?tree|shibuya\s?sky|tokyo\s?tower|burj\s?khalifa|cn\s?tower|empire\s?state|one\s?world\s?observatory|top\s?of\s?the\s?rock|shard|eiffel|montparnasse|edge\s?observation)\b/i, 18],
+  // Generic museums, galleries
+  [/\b(museum|mus[eé][eo]|gallery|galerie|galleria)\b/i, 12],
+  // Palaces, castles, historical sites
+  [/\b(palace|palais|palazzo|castle|ch[aâ]teau|fort|fortress|forteresse|colosseum|colosseo|colis[eé]e)\b/i, 10],
+  // Aquariums, zoos, planetariums
+  [/\b(aquarium|zoo|planetarium)\b/i, 15],
+  // Cathedrals (often have paid entry in some countries)
+  [/\b(cathedral|cath[eé]drale|basilica|basilique)\b/i, 5],
+  // Free activities: parks, churches, statues, viewpoints, squares
+  [/\b(park|parc|garden|jardin|church|[eé]glise|chiesa|mosque|mosqu[eé]e|temple|synagogue|chapel|chapelle|statue|monument|memorial|viewpoint|belvedere|square|place|plaza|piazza|promenade|beach|plage|cemetery|cimeti[eè]re|trail|sentier)\b/i, 0],
+];
+
+/**
+ * Estimate entrance cost for an activity based on its name/type.
+ * ONLY used as fallback when the real cost is 0 or undefined.
+ */
+export function estimateActivityCost(name: string, type?: string): number {
+  const text = `${name} ${type || ''}`.toLowerCase();
+  for (const [pattern, cost] of COST_ESTIMATION_RULES) {
+    if (pattern.test(text)) return cost;
+  }
+  return 0; // Default: assume free
 }
 
 /**

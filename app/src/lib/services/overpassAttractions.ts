@@ -192,6 +192,7 @@ out center body;`;
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: body.toString(),
+    signal: AbortSignal.timeout(10000),
   });
 
   if (!response.ok) {
@@ -220,6 +221,7 @@ async function enrichWithWikidata(qids: string[]): Promise<Map<string, WikidataE
 
       const response = await fetch(url, {
         headers: { 'User-Agent': 'VoyageApp/1.0 (travel planner)' },
+        signal: AbortSignal.timeout(10000),
       });
 
       if (!response.ok) continue;
@@ -572,6 +574,7 @@ export async function resolveAttractionByName(
         'x-rapidapi-key': RAPIDAPI_KEY,
       },
       body: query,
+      signal: AbortSignal.timeout(10000),
     });
 
     if (!response.ok) return null;

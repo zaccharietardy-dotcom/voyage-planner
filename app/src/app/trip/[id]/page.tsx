@@ -42,6 +42,7 @@ import { ProposalsList } from '@/components/trip/ProposalsList';
 import { CreateProposalDialog } from '@/components/trip/CreateProposalDialog';
 import { DraggableTimeline } from '@/components/trip/DraggableTimeline';
 import { ShareTripDialog } from '@/components/trip/ShareTripDialog';
+import { TripErrorBoundary } from '@/components/trip/TripErrorBoundary';
 import { TripVisibilitySelector, VisibilityBadge } from '@/components/trip/TripVisibilitySelector';
 import { CloneTripModal } from '@/components/social/CloneTripModal';
 import { ActivityEditModal } from '@/components/trip/ActivityEditModal';
@@ -76,6 +77,24 @@ import { LiveTripDashboard } from '@/components/trip/LiveTripDashboard';
 import { useConnectivity } from '@/hooks/useConnectivity';
 import { cacheTripById, readCachedTripById } from '@/lib/mobile/offline-cache';
 import { generateTripStream } from '@/lib/generateTrip';
+
+// Safe localStorage helpers
+function safeGetItem(key: string): string | null {
+  try {
+    return localStorage.getItem(key);
+  } catch (error) {
+    console.warn('[localStorage] getItem failed:', error);
+    return null;
+  }
+}
+
+function safeSetItem(key: string, value: string): void {
+  try {
+    localStorage.setItem(key, value);
+  } catch (error) {
+    console.warn('[localStorage] setItem failed:', error);
+  }
+}
 
 function updateTripWithNewHotel(trip: Trip, newHotel: Accommodation): Trip {
   const oldHotelName = trip.accommodation?.name || '';
@@ -367,7 +386,7 @@ export default function TripPage() {
       return true;
     };
 
-    const stored = localStorage.getItem('currentTrip');
+    const stored = safeGetItem('currentTrip');
     if (stored) {
       try {
         const parsed = JSON.parse(stored) as Trip;
@@ -414,7 +433,7 @@ export default function TripPage() {
           const tripData = hydrateTrip(data.data);
           tripData.id = tripId;
           setLocalTrip(tripData);
-          localStorage.setItem('currentTrip', JSON.stringify(tripData));
+          safeSetItem('currentTrip', JSON.stringify(tripData));
           cacheTripById(tripId, tripData);
         }
       }
@@ -439,7 +458,7 @@ export default function TripPage() {
       updateDays(updatedTrip.days);
     } else {
       setLocalTrip(updatedTrip);
-      localStorage.setItem('currentTrip', JSON.stringify(updatedTrip));
+      safeSetItem('currentTrip', JSON.stringify(updatedTrip));
     }
   }, [useCollaborativeMode, canOwnerEdit, updateDays]);
 
@@ -1002,7 +1021,7 @@ export default function TripPage() {
     };
 
     setLocalTrip(updatedTrip);
-    localStorage.setItem('currentTrip', JSON.stringify(updatedTrip));
+    safeSetItem('currentTrip', JSON.stringify(updatedTrip));
 
     // Si mode collaboratif, sauvegarder en DB
     if (useCollaborativeMode && tripId) {
@@ -1119,9 +1138,10 @@ export default function TripPage() {
       : [];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-background to-[#1e3a5f]/5">
-      {/* Live Trip Banner */}
-      {liveState && trip && (
+    <TripErrorBoundary>
+      <div className="min-h-screen bg-gradient-to-b from-background via-background to-[#1e3a5f]/5">
+        {/* Live Trip Banner */}
+        {liveState && trip && (
         <LiveTripBanner
           liveState={liveState}
           trip={trip}
@@ -1977,6 +1997,7 @@ export default function TripPage() {
 
       {/* Tour guidé pour les nouveaux utilisateurs */}
       {trip && <TripOnboarding />}
-    </div>
+      </div>
+    </TripErrorBoundary>
   );
 }

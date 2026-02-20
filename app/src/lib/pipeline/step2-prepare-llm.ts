@@ -29,6 +29,7 @@ import type {
 import type { Attraction } from '../services/attractions';
 import { calculateDistance } from '../services/geocoding';
 import { dedupeActivitiesBySimilarity } from './utils/activityDedup';
+import { getMinDuration, estimateActivityCost } from './utils/constants';
 
 // ============================================
 // 1. Merge and deduplicate activities
@@ -421,17 +422,22 @@ function resolveDepartureTime(
  * Maps a ScoredActivity to LLMActivityInput.
  */
 function formatActivityForLLM(activity: ScoredActivity): LLMActivityInput {
+  const name = activity.name || '';
+  const type = activity.type || '';
+  const rawDuration = activity.duration || 60;
+  const minDur = getMinDuration(name, type);
+
   return {
     id: activity.id,
     name: activity.name,
     type: activity.type,
     lat: Math.round(activity.latitude * 10000) / 10000,
     lng: Math.round(activity.longitude * 10000) / 10000,
-    duration: activity.duration || 60,
+    duration: Math.max(rawDuration, minDur),
     rating: activity.rating || 0,
     reviewCount: activity.reviewCount || 0,
     mustSee: activity.mustSee || false,
-    estimatedCost: activity.estimatedCost || 0,
+    estimatedCost: activity.estimatedCost || estimateActivityCost(name, type),
     bookingRequired: activity.bookingRequired || false,
     openingHours: activity.openingHoursByDay || undefined,
     viatorAvailable: !!activity.viatorUrl,

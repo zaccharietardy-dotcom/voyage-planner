@@ -18,7 +18,7 @@ import { selectTopHotelsByBarycenter } from './step5-hotel';
 import { searchRestaurantsNearby } from '../services/serpApiPlaces';
 import { batchFetchWikipediaSummaries, getWikiLanguageForDestination } from '../services/wikipedia';
 import { normalizeHotelBookingUrl } from '../services/bookingLinks';
-import { generateFlightLink, generateFlightOmioLink, formatDateForUrl } from '../services/linkGenerator';
+import { generateFlightLink, generateFlightOmioLink, formatDateForUrl, generateGoogleFlightsLink, buildDirectionsUrl, generateHotelSearchLinks } from '../services/linkGenerator';
 import { sanitizeApiKeyLeaksInString, sanitizeGoogleMapsUrl } from '../services/googlePlacePhoto';
 import { dedupeActivitiesBySimilarity, isDuplicateActivityCandidate } from './utils/activityDedup';
 import { getRestaurantMaxDistanceKmForProfile, resolveQualityCityProfile, RESTAURANT_ABSOLUTE_MAX_KM } from './qualityPolicy';
@@ -405,6 +405,7 @@ export function buildInterCityFallbackTransportPayload(params: {
       ? generateFlightOmioLink(from, to, dateStr)
       : (transport.omioFlightUrl || generateFlightOmioLink(from, to, dateStr));
     const aviasalesUrl = bookingUrl?.includes('aviasales.com') ? bookingUrl : computedAviasalesUrl;
+    const googleFlightsUrl = generateGoogleFlightsLink(from, to, dateStr, undefined, passengers);
     const qualityFlags = ['longhaul_fallback_injected', 'plane_transport_fallback'];
     if (aviasalesUrl.includes('aviasales.com')) qualityFlags.push('aviasales_fallback_link');
 
@@ -419,6 +420,7 @@ export function buildInterCityFallbackTransportPayload(params: {
         bookingUrl,
         aviasalesUrl,
         omioFlightUrl,
+        googleFlightsUrl,
         dataReliability: 'estimated',
         qualityFlags,
       },
@@ -1532,12 +1534,14 @@ export async function assembleTripSchedule(
       };
     }
 
-    // Last day breakfast: DEFERRED to after reoptMealFromPool runs (see section 4c below).
-    // This allows the rescue logic to find a real restaurant before we insert the scheduler item.
-    // We still insert checkout here since it's a fixed-time item.
-
+    // Last day breakfast + checkout: BOTH DEFERRED to section 4c below.
+    // Breakfast is inserted first (insertFixedItem), then checkout is inserted
+    // AFTER breakfast ends. This ensures the sequence: breakfast → checkout → activities.
+    // Previously, checkout was inserted here (before breakfast) which caused the scheduler
+    // cursor to advance past breakfast's maxEndTime (10:00), breaking breakfast placement.
+    let lastDayLatestCheckoutTime: Date | null = null;
     if (isLastDay && hotel) {
-      let latestCheckoutTime = parseTime(dayDate, hotel.checkOutTime || '11:00');
+      lastDayLatestCheckoutTime = parseTime(dayDate, hotel.checkOutTime || '11:00');
       // If there's a return flight, check-out must be well before departure
       if (returnFlight) {
         const departureMinutes = getLocalTimeMinutes(returnFlight.departureTimeDisplay, returnFlight.departureTime);
@@ -1545,21 +1549,11 @@ export async function assembleTripSchedule(
         // Latest checkout aligns with airport transfer/security buffer.
         const latestCheckoutMinutes = Math.max(7 * 60, departureMinutes - airportLeadMinutes);
         const latestCheckout = parseTime(dayDate, minutesToHHMM(latestCheckoutMinutes));
-        if (latestCheckout < latestCheckoutTime) {
-          latestCheckoutTime = latestCheckout;
+        if (latestCheckout < lastDayLatestCheckoutTime) {
+          lastDayLatestCheckoutTime = latestCheckout;
         }
       }
-      // Make checkout flexible: anytime between 07:00 and the hotel's checkout time
-      // This allows checkout to fit naturally in the schedule flow
-      scheduler.addItem({
-        id: `checkout-${balancedDay.dayNumber}`,
-        title: `Check-out ${hotel.name}`,
-        type: 'checkout',
-        duration: 15, // Checkout is quick (reduced from 30)
-        minStartTime: parseTime(dayDate, '07:00'),
-        maxEndTime: latestCheckoutTime,
-        data: hotel,
-      });
+      // Checkout will be inserted in section 4c, AFTER breakfast
     }
 
     // 4. Get activities from pre-pass (already geo-optimized + re-optimized with real times)
@@ -1997,6 +1991,26 @@ export async function assembleTripSchedule(
           startTime: bkfStart,
           endTime: new Date(bkfStart.getTime() + 30 * 60 * 1000),
           data: bkfData,
+        });
+      }
+
+      // 4d. Insert checkout AFTER breakfast on last day
+      // This guarantees the sequence: breakfast → checkout → activities
+      if (hotel && lastDayLatestCheckoutTime) {
+        const bkfEndMs = bkfStart.getTime() + 45 * 60 * 1000; // breakfast ~45min
+        const checkoutStart = new Date(bkfEndMs + 15 * 60 * 1000); // 15min buffer after breakfast
+        // Cap checkout start to not exceed the latest allowed checkout
+        const cappedCheckoutStart = checkoutStart > lastDayLatestCheckoutTime
+          ? new Date(lastDayLatestCheckoutTime.getTime() - 15 * 60 * 1000)
+          : checkoutStart;
+        const checkoutEnd = new Date(cappedCheckoutStart.getTime() + 15 * 60 * 1000);
+        scheduler.insertFixedItem({
+          id: `checkout-${balancedDay.dayNumber}`,
+          title: `Check-out ${hotel.name}`,
+          type: 'checkout',
+          startTime: cappedCheckoutStart,
+          endTime: checkoutEnd > lastDayLatestCheckoutTime ? lastDayLatestCheckoutTime : checkoutEnd,
+          data: hotel,
         });
       }
     }
@@ -2751,7 +2765,17 @@ export async function assembleTripSchedule(
       const keepViator = !candidateViatorUrl
         ? false
         : (!monumentLikeActivity || (viatorAssessment?.score || 0) >= viatorScoreThreshold);
-      const resolvedViatorUrl = keepViator ? candidateViatorUrl : undefined;
+      let resolvedViatorUrl = keepViator ? candidateViatorUrl : undefined;
+
+      // B1: Append date to Viator URL
+      if (resolvedViatorUrl && dayDate) {
+        const dateStr = formatDateForUrl(dayDate);
+        if (dateStr) {
+          const separator = resolvedViatorUrl.includes('?') ? '&' : '?';
+          resolvedViatorUrl = `${resolvedViatorUrl}${separator}date=${dateStr}`;
+        }
+      }
+
       const mergedQualityFlags = Array.from(new Set([
         ...((itemData.qualityFlags || []) as string[]),
         ...(candidateViatorUrl && !keepViator ? ['viator_filtered_low_plus_value'] : []),
@@ -2791,7 +2815,39 @@ export async function assembleTripSchedule(
           : undefined,
         parking: item.type === 'parking' ? itemData : undefined,
         accommodation: (item.type === 'checkin' || item.type === 'checkout') ? itemData : undefined,
+        // B3: Add hotel search links on check-in items
+        hotelSearchLinks: item.type === 'checkin'
+          ? generateHotelSearchLinks(
+              preferences.destination,
+              preferences.startDate,
+              new Date(preferences.startDate.getTime() + preferences.durationDays * 24 * 60 * 60 * 1000),
+              preferences.groupSize || 2
+            )
+          : undefined,
         flight: item.type === 'flight' ? itemData : undefined,
+        // Flight-specific links (aviasalesUrl and googleFlightsUrl)
+        aviasalesUrl: item.type === 'flight' && itemData.departureCity && itemData.arrivalCity
+          ? generateFlightLink(
+              { origin: itemData.departureCity, destination: itemData.arrivalCity },
+              { date: formatDateForUrl(itemData.departureTime), passengers: preferences.groupSize || 1 }
+            )
+          : (item.type === 'transport' && itemData.aviasalesUrl) || undefined,
+        omioFlightUrl: item.type === 'flight' && itemData.departureCity && itemData.arrivalCity
+          ? generateFlightOmioLink(
+              itemData.departureCity,
+              itemData.arrivalCity,
+              formatDateForUrl(itemData.departureTime)
+            )
+          : (item.type === 'transport' && itemData.omioFlightUrl) || undefined,
+        googleFlightsUrl: item.type === 'flight' && itemData.departureCity && itemData.arrivalCity
+          ? generateGoogleFlightsLink(
+              itemData.departureCity,
+              itemData.arrivalCity,
+              formatDateForUrl(itemData.departureTime),
+              undefined,
+              preferences.groupSize || 1
+            )
+          : (item.type === 'transport' && itemData.googleFlightsUrl) || undefined,
         // Transport-specific fields (train/bus legs, price range)
         transitLegs: itemData.transitLegs,
         transitDataSource: itemData.transitDataSource,
@@ -4589,6 +4645,12 @@ async function enrichWithDirections(days: TripDay[], cache?: DirectionsCache): P
       const travelTime = estimateTravel(hotelItem, firstMovableItem, cache);
       firstMovableItem.timeFromPrevious = travelTime;
       firstMovableItem.transportToPrevious = inferInterItemTransportMode(dist, travelTime);
+      // B2: Add directions link from hotel to first activity
+      firstMovableItem.directionsFromPrevious = buildDirectionsUrl(
+        hotelItem.latitude, hotelItem.longitude,
+        firstMovableItem.latitude, firstMovableItem.longitude,
+        firstMovableItem.transportToPrevious || 'transit'
+      );
     }
 
     for (let i = 1; i < day.items.length; i++) {
@@ -4621,6 +4683,12 @@ async function enrichWithDirections(days: TripDay[], cache?: DirectionsCache): P
 
       curr.timeFromPrevious = travelTime;
       curr.transportToPrevious = inferInterItemTransportMode(dist, travelTime);
+      // B2: Add directions link between consecutive items
+      curr.directionsFromPrevious = buildDirectionsUrl(
+        prev.latitude, prev.longitude,
+        curr.latitude, curr.longitude,
+        curr.transportToPrevious || 'transit'
+      );
     }
   }
 

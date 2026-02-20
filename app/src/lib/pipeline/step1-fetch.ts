@@ -11,6 +11,7 @@ import type { FetchedData } from './types';
 import { getCityCenterCoordsAsync, findNearbyAirportsAsync } from '../services/geocoding';
 import { compareTransportOptions } from '../services/transport';
 import { searchAttractionsMultiQuery, searchMustSeeAttractions, searchRestaurantsWithSerpApi } from '../services/serpApiPlaces';
+import { canUseSerpApi, isSerpApiCriticalMode } from '../services/apiUsageTracker';
 import { suggestDayTrips, generateDayTripsWithAI, type DayTripSuggestion } from '../services/dayTripSuggestions';
 import { searchAttractionsOverpass } from '../services/overpassAttractions';
 import { searchViatorActivities, getViatorProductCoordinates } from '../services/viator';
@@ -156,11 +157,13 @@ export async function fetchAllData(preferences: TripPreferences, onEvent?: OnPip
   const results = await Promise.allSettled([
     // 0: Google Places Text Search — attractions with popularity (with retry)
     tracked('Google Places', withRetry(() => searchGooglePlacesAttractions(destination, destCoords))),
-    // 1: SerpAPI — attractions with GPS + rating (with retry)
-    tracked('SerpAPI attractions', withRetry(() => searchAttractionsMultiQuery(destination, destCoords, {
-      types: activityTypes,
-      limit: 40,
-    }))),
+    // 1: SerpAPI — attractions with GPS + rating (with retry + quota guard)
+    tracked('SerpAPI attractions', canUseSerpApi(4)
+      ? withRetry(() => searchAttractionsMultiQuery(destination, destCoords, {
+          types: activityTypes,
+          limit: 40,
+        }))
+      : (console.log('[Pipeline V2] Skipping SerpAPI attractions due to low quota, using Google Places + Overpass fallback'), Promise.resolve([]))),
     // 2: Overpass — free OSM POIs
     tracked('OpenStreetMap', searchAttractionsOverpass(destination, destCoords)),
     // 3: Viator — bookable experiences
@@ -168,18 +171,22 @@ export async function fetchAllData(preferences: TripPreferences, onEvent?: OnPip
       types: activityTypes,
       limit: 20,
     })),
-    // 4: Must-see attractions (user-specified)
+    // 4: Must-see attractions (user-specified + quota guard)
     tracked('Must-sees', preferences.mustSee?.trim()
-      ? searchMustSeeAttractions(preferences.mustSee, destination, destCoords)
+      ? (canUseSerpApi(2)
+          ? searchMustSeeAttractions(preferences.mustSee, destination, destCoords)
+          : (console.log('[Pipeline V2] Skipping SerpAPI must-see search due to low quota, using curated database + Google Places fallback'), Promise.resolve([])))
       : Promise.resolve([])),
     // 5: TripAdvisor restaurants
     tracked('TripAdvisor', searchTripAdvisorRestaurants(destination, { limit: 30 })),
-    // 6: SerpAPI restaurants (for GPS)
-    tracked('SerpAPI restaurants', searchRestaurantsWithSerpApi(destination, {
-      latitude: destCoords.lat,
-      longitude: destCoords.lng,
-      limit: 20,
-    })),
+    // 6: SerpAPI restaurants (for GPS + quota guard)
+    tracked('SerpAPI restaurants', canUseSerpApi(2)
+      ? searchRestaurantsWithSerpApi(destination, {
+          latitude: destCoords.lat,
+          longitude: destCoords.lng,
+          limit: 20,
+        })
+      : (console.log('[Pipeline V2] Skipping SerpAPI restaurants due to low quota, using TripAdvisor fallback'), Promise.resolve([]))),
     // 7: Booking.com hotels
     tracked('Booking.com', searchHotels(destination, {
       budgetLevel: preferences.budgetLevel,
@@ -343,11 +350,13 @@ export async function fetchAllData(preferences: TripPreferences, onEvent?: OnPip
       try {
         const [acts, restos] = await Promise.allSettled([
           searchGooglePlacesAttractions(dtName, dtCoords),
-          searchRestaurantsWithSerpApi(dtName, {
-            latitude: dtCoords.lat,
-            longitude: dtCoords.lng,
-            limit: 8,
-          }),
+          canUseSerpApi(1)
+            ? searchRestaurantsWithSerpApi(dtName, {
+                latitude: dtCoords.lat,
+                longitude: dtCoords.lng,
+                limit: 8,
+              })
+            : (console.log(`[Pipeline V2] Skipping SerpAPI restaurants for day trip "${dtName}" due to low quota`), Promise.resolve([])),
         ]);
 
         const activities = acts.status === 'fulfilled' ? acts.value.slice(0, 10) : [];

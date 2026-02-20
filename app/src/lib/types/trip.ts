@@ -380,6 +380,9 @@ export interface TripItem {
   priceRange?: [number, number]; // [min, max] pour affichage "de X€ à Y€"
   googleMapsUrl?: string; // Lien pour ouvrir l'itinéraire dans Google Maps
   googleMapsPlaceUrl?: string; // Lien de recherche Google Maps par nom (plus fiable que GPS!)
+  directionsFromPrevious?: string; // Google Maps directions link from previous item
+  hotelSearchLinks?: { googleHotels: string; booking: string; airbnb: string }; // Hotel comparison links
+  googleFlightsUrl?: string; // Google Flights search link (alternative to Aviasales)
   dataReliability?: 'verified' | 'estimated' | 'generated'; // Fiabilité des données
   geoSource?: 'place' | 'known_product' | 'geocode' | 'city_fallback'; // Origine de la coordonnée
   geoConfidence?: 'high' | 'medium' | 'low'; // Confiance de géolocalisation

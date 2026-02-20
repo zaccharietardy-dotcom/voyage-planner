@@ -12,6 +12,108 @@
 import { buildDirectBookingHotelUrl } from './bookingLinks';
 
 /**
+ * Mapping ville → code IATA principal.
+ * Utilisé par generateFlightLink() pour construire des URLs Aviasales valides.
+ * Aviasales exige des codes IATA 3 lettres, pas des noms de ville.
+ */
+const CITY_TO_IATA: Record<string, string> = {
+  // France
+  paris: 'CDG', lyon: 'LYS', marseille: 'MRS', nice: 'NCE', toulouse: 'TLS',
+  bordeaux: 'BOD', nantes: 'NTE', strasbourg: 'SXB', lille: 'LIL', montpellier: 'MPL',
+  // Europe West
+  london: 'LHR', londres: 'LHR', manchester: 'MAN', edinburgh: 'EDI', edimbourg: 'EDI',
+  dublin: 'DUB', amsterdam: 'AMS', rotterdam: 'RTM', brussels: 'BRU', bruxelles: 'BRU',
+  luxembourg: 'LUX', geneva: 'GVA', geneve: 'GVA', zurich: 'ZRH', bern: 'BRN', berne: 'BRN',
+  // Europe South
+  barcelona: 'BCN', barcelone: 'BCN', madrid: 'MAD', malaga: 'AGP', seville: 'SVQ', sevilla: 'SVQ',
+  valencia: 'VLC', valence: 'VLC', palma: 'PMI', ibiza: 'IBZ', tenerife: 'TFS',
+  lisbon: 'LIS', lisbonne: 'LIS', porto: 'OPO', faro: 'FAO',
+  rome: 'FCO', roma: 'FCO', milan: 'MXP', milano: 'MXP', venice: 'VCE', venise: 'VCE',
+  florence: 'FLR', firenze: 'FLR', naples: 'NAP', napoli: 'NAP', turin: 'TRN', torino: 'TRN',
+  palermo: 'PMO', catania: 'CTA', bologna: 'BLQ',
+  athens: 'ATH', athenes: 'ATH', thessaloniki: 'SKG', heraklion: 'HER', santorini: 'JTR',
+  malta: 'MLA', 'la valette': 'MLA', valletta: 'MLA',
+  // Europe Central & East
+  berlin: 'BER', munich: 'MUC', frankfurt: 'FRA', hamburg: 'HAM', dusseldorf: 'DUS', cologne: 'CGN',
+  vienna: 'VIE', vienne: 'VIE', prague: 'PRG', warsaw: 'WAW', varsovie: 'WAW',
+  budapest: 'BUD', bucharest: 'OTP', bucarest: 'OTP', sofia: 'SOF',
+  zagreb: 'ZAG', belgrade: 'BEG', ljubljana: 'LJU',
+  // Europe North
+  copenhagen: 'CPH', copenhague: 'CPH', stockholm: 'ARN', oslo: 'OSL',
+  helsinki: 'HEL', reykjavik: 'KEF', tallinn: 'TLL', riga: 'RIX', vilnius: 'VNO',
+  // Turkey & Middle East
+  istanbul: 'IST', ankara: 'ESB', antalya: 'AYT',
+  dubai: 'DXB', 'abu dhabi': 'AUH', doha: 'DOH', riyadh: 'RUH', jeddah: 'JED',
+  'tel aviv': 'TLV',
+  // North Africa
+  marrakech: 'RAK', casablanca: 'CMN', tunis: 'TUN', algiers: 'ALG', alger: 'ALG',
+  cairo: 'CAI', 'le caire': 'CAI',
+  // Sub-Saharan Africa
+  cape: 'CPT', capetown: 'CPT', johannesburg: 'JNB', nairobi: 'NBO', lagos: 'LOS',
+  // Asia East
+  tokyo: 'HND', osaka: 'KIX', kyoto: 'KIX', seoul: 'ICN',
+  beijing: 'PEK', pekin: 'PEK', shanghai: 'PVG', guangzhou: 'CAN', shenzhen: 'SZX',
+  'hong kong': 'HKG', hongkong: 'HKG', taipei: 'TPE',
+  // Southeast Asia
+  bangkok: 'BKK', singapore: 'SIN', singapour: 'SIN',
+  'kuala lumpur': 'KUL', jakarta: 'CGK', manila: 'MNL',
+  'ho chi minh': 'SGN', hanoi: 'HAN', 'ha noi': 'HAN',
+  bali: 'DPS', denpasar: 'DPS', phuket: 'HKT', 'chiang mai': 'CNX',
+  // South Asia
+  delhi: 'DEL', 'new delhi': 'DEL', mumbai: 'BOM', bombay: 'BOM',
+  bangalore: 'BLR', colombo: 'CMB', kathmandu: 'KTM',
+  // Americas
+  'new york': 'JFK', 'los angeles': 'LAX', chicago: 'ORD', miami: 'MIA',
+  'san francisco': 'SFO', boston: 'BOS', washington: 'IAD', seattle: 'SEA',
+  'las vegas': 'LAS', houston: 'IAH', atlanta: 'ATL', denver: 'DEN',
+  toronto: 'YYZ', montreal: 'YUL', vancouver: 'YVR',
+  'mexico city': 'MEX', mexico: 'MEX', cancun: 'CUN',
+  'buenos aires': 'EZE', 'sao paulo': 'GRU', rio: 'GIG', 'rio de janeiro': 'GIG',
+  bogota: 'BOG', lima: 'LIM', santiago: 'SCL',
+  // Oceania
+  sydney: 'SYD', melbourne: 'MEL', auckland: 'AKL',
+  // Russia / Central Asia
+  moscow: 'SVO', moscou: 'SVO', 'saint petersburg': 'LED', 'saint-petersbourg': 'LED',
+};
+
+/**
+ * Convert a city name or IATA code to a valid 3-letter IATA code.
+ * - If already a valid 3-letter uppercase code → return as-is
+ * - Normalize accents, lookup in CITY_TO_IATA map
+ * - Fallback: first 3 chars uppercased (better than full city name)
+ */
+export function cityToIata(cityOrCode: string): string {
+  const trimmed = cityOrCode.trim();
+
+  // Already an IATA code? (exactly 3 uppercase letters)
+  if (/^[A-Z]{3}$/.test(trimmed)) {
+    return trimmed;
+  }
+
+  // Normalize: remove accents, lowercase
+  const normalized = trimmed
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+
+  // Direct lookup
+  if (CITY_TO_IATA[normalized]) {
+    return CITY_TO_IATA[normalized];
+  }
+
+  // Try partial match (e.g., "Ho Chi Minh City" → "ho chi minh city" contains "ho chi minh")
+  for (const [city, iata] of Object.entries(CITY_TO_IATA)) {
+    if (normalized.includes(city) || city.includes(normalized)) {
+      return iata;
+    }
+  }
+
+  // Fallback: first 3 characters uppercased
+  return trimmed.substring(0, 3).toUpperCase();
+}
+
+/**
  * Types d'éléments pour la génération de liens
  */
 export interface RestaurantForLink {
@@ -162,14 +264,14 @@ export function generateFlightLink(
   const returnDateStr = returnDate ? formatDateForUrl(returnDate) : '';
 
   // Construire l'URL Aviasales
-  // Format: /search/{ORIGIN}{DDMM}{DESTINATION}{DDMM_RETOUR}{PASSENGERS}
-  let searchPath = `${origin.toUpperCase()}`;
+  // Format: /search/{ORIGIN_IATA}{DDMM}{DEST_IATA}{DDMM_RETOUR}{PASSENGERS}
+  let searchPath = `${cityToIata(origin)}`;
 
   if (dateStr) {
     searchPath += formatDateForAviasales(dateStr);
   }
 
-  searchPath += destination.toUpperCase();
+  searchPath += cityToIata(destination);
 
   if (returnDateStr) {
     searchPath += formatDateForAviasales(returnDateStr);
@@ -196,6 +298,60 @@ export function generateFlightOmioLink(
 }
 
 /**
+ * Generates a Google Flights search URL for a given origin/destination/date.
+ * Used as an alternative to Aviasales/Omio.
+ */
+export function generateGoogleFlightsLink(
+  origin: string,
+  destination: string,
+  date?: string,
+  returnDate?: string,
+  passengers: number = 1
+): string {
+  const originIata = cityToIata(origin);
+  const destIata = cityToIata(destination);
+
+  let url = `https://www.google.com/travel/flights?hl=fr&curr=EUR`;
+
+  // Build the search query
+  const parts: string[] = [];
+  parts.push(`from ${originIata}`);
+  parts.push(`to ${destIata}`);
+
+  if (date) {
+    const dateStr = formatDateForUrl(date);
+    if (dateStr) parts.push(`depart ${dateStr}`);
+  }
+  if (returnDate) {
+    const returnStr = formatDateForUrl(returnDate);
+    if (returnStr) parts.push(`return ${returnStr}`);
+  }
+  if (passengers > 1) {
+    parts.push(`${passengers} passengers`);
+  }
+
+  url += `&q=${encodeURIComponent(parts.join(' '))}`;
+
+  return url;
+}
+
+/**
+ * Build a Google Maps directions URL between two coordinates
+ */
+export function buildDirectionsUrl(
+  fromLat: number,
+  fromLng: number,
+  toLat: number,
+  toLng: number,
+  mode: string = 'transit'
+): string {
+  const travelMode = mode === 'walk' || mode === 'walking' ? 'walking'
+    : mode === 'car' || mode === 'taxi' ? 'driving'
+    : 'transit';
+  return `https://www.google.com/maps/dir/?api=1&origin=${fromLat},${fromLng}&destination=${toLat},${toLng}&travelmode=${travelMode}`;
+}
+
+/**
  * Normalise un lieu en slug Omio robuste.
  * Gère accents, apostrophes et ponctuation pour éviter les liens cassés.
  */
@@ -205,7 +361,7 @@ export function toOmioLocationSlug(location: string): string {
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
-    .replace(/['’`]/g, '')
+    .replace(/[''`]/g, '')
     .replace(/&/g, ' and ')
     .replace(/[^\p{L}\p{N}]+/gu, '-')
     .replace(/^-+|-+$/g, '');

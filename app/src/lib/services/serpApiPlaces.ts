@@ -30,7 +30,20 @@ async function trackedSerpApiFetch(input: string, init?: RequestInit): Promise<R
     // noop
   }
   trackSerpApiRequest(engine);
-  return fetch(input, init);
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 12000);
+  try {
+    const response = await fetch(input, { ...init, signal: controller.signal });
+    return response;
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      throw new Error(`SerpAPI timeout after 12s (engine: ${engine})`);
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }
 
 // ============================================

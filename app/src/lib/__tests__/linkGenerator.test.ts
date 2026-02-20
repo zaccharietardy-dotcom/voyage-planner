@@ -19,6 +19,7 @@ import {
   generateReservationLink,
   formatDateForUrl,
   formatDateForBooking,
+  cityToIata,
 } from '../services/linkGenerator';
 
 describe('Link Generator (Bug #10)', () => {
@@ -171,7 +172,7 @@ describe('Link Generator (Bug #10)', () => {
       expect(link).toContain('3101');
     });
 
-    it('handles city names as well as airport codes', () => {
+    it('converts city names to IATA codes for valid Aviasales URLs', () => {
       const flight = {
         origin: 'Paris',
         destination: 'Barcelona',
@@ -183,8 +184,63 @@ describe('Link Generator (Bug #10)', () => {
 
       const link = generateFlightLink(flight, context);
 
-      expect(link).toContain('PARIS');
-      expect(link).toContain('BARCELONA');
+      // Should use IATA codes, not city names
+      expect(link).toContain('CDG');
+      expect(link).toContain('BCN');
+      expect(link).not.toContain('PARIS');
+      expect(link).not.toContain('BARCELONA');
+    });
+
+    it('converts Tokyo to HND IATA code', () => {
+      const link = generateFlightLink(
+        { origin: 'Paris', destination: 'Tokyo' },
+        { date: '2026-06-04' }
+      );
+
+      expect(link).toContain('CDG');
+      expect(link).toContain('HND');
+      expect(link).not.toContain('PARIS');
+      expect(link).not.toContain('TOKYO');
+    });
+
+    it('keeps existing IATA codes unchanged', () => {
+      const link = generateFlightLink(
+        { origin: 'CDG', destination: 'BCN' },
+        { date: '2026-01-28' }
+      );
+
+      expect(link).toContain('CDG');
+      expect(link).toContain('BCN');
+    });
+  });
+
+  describe('cityToIata', () => {
+    it('converts common city names to IATA codes', () => {
+      expect(cityToIata('Paris')).toBe('CDG');
+      expect(cityToIata('Tokyo')).toBe('HND');
+      expect(cityToIata('London')).toBe('LHR');
+      expect(cityToIata('New York')).toBe('JFK');
+      expect(cityToIata('Barcelona')).toBe('BCN');
+    });
+
+    it('handles accented city names', () => {
+      expect(cityToIata('Montréal')).toBe('YUL');
+      expect(cityToIata('São Paulo')).toBe('GRU');
+    });
+
+    it('passes through valid IATA codes', () => {
+      expect(cityToIata('CDG')).toBe('CDG');
+      expect(cityToIata('HND')).toBe('HND');
+      expect(cityToIata('LAX')).toBe('LAX');
+    });
+
+    it('falls back to first 3 chars for unknown cities', () => {
+      expect(cityToIata('Timbuktu')).toBe('TIM');
+    });
+
+    it('handles French city names', () => {
+      expect(cityToIata('Londres')).toBe('LHR');
+      expect(cityToIata('Barcelone')).toBe('BCN');
     });
   });
 

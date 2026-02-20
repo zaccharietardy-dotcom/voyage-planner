@@ -420,6 +420,115 @@ describe('step8-validate geography checks', () => {
     expect(inbound?.omioFlightUrl).toContain('departure_date=2026-03-02');
   });
 
+  it('injects fallback longhaul with realistic intercontinental duration (>400min)', () => {
+    const preferences = createPreferences();
+    preferences.origin = 'Paris';
+    preferences.destination = 'Tokyo';
+    preferences.transport = 'plane';
+
+    const selectedTransport: TransportOptionSummary = {
+      id: 'plane',
+      mode: 'plane',
+      totalDuration: 780,
+      totalPrice: 800,
+      totalCO2: 500,
+      score: 7.5,
+      scoreDetails: { priceScore: 6, timeScore: 8, co2Score: 4 },
+      segments: [],
+      bookingUrl: 'https://www.aviasales.com/search/CDG0604HND1?currency=eur&locale=fr',
+    };
+
+    const trip: Trip = {
+      id: 'trip-intercontinental',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      preferences,
+      selectedTransport,
+      days: [
+        {
+          dayNumber: 1,
+          date: new Date('2026-06-04T00:00:00.000Z'),
+          items: [
+            item({ id: 'a1', type: 'activity', title: 'Senso-ji', startTime: '14:00', endTime: '15:30', latitude: 35.7148, longitude: 139.7967 }),
+          ],
+          isDayTrip: false,
+        },
+        {
+          dayNumber: 2,
+          date: new Date('2026-06-05T00:00:00.000Z'),
+          items: [
+            item({ id: 'a2', type: 'activity', title: 'Meiji Shrine', startTime: '10:00', endTime: '11:00', latitude: 35.6764, longitude: 139.6993 }),
+          ],
+          isDayTrip: false,
+        },
+      ],
+    };
+
+    validateAndFixTrip(trip);
+
+    const outbound = trip.days[0].items.find(entry => entry.id.startsWith('transport-out-'));
+    expect(outbound).toBeDefined();
+    // Paris→Tokyo should have a fallback duration > 400min (not the old hardcoded 150min)
+    expect(outbound!.duration).toBeGreaterThan(400);
+  });
+
+  it('generates IATA codes in fallback Aviasales URLs, not city names', () => {
+    const preferences = createPreferences();
+    preferences.origin = 'Paris';
+    preferences.destination = 'Tokyo';
+    preferences.transport = 'plane';
+
+    const selectedTransport: TransportOptionSummary = {
+      id: 'plane',
+      mode: 'plane',
+      totalDuration: 780,
+      totalPrice: 800,
+      totalCO2: 500,
+      score: 7.5,
+      scoreDetails: { priceScore: 6, timeScore: 8, co2Score: 4 },
+      segments: [],
+    };
+
+    const trip: Trip = {
+      id: 'trip-iata-urls',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      preferences,
+      selectedTransport,
+      days: [
+        {
+          dayNumber: 1,
+          date: new Date('2026-06-04T00:00:00.000Z'),
+          items: [
+            item({ id: 'a1', type: 'activity', title: 'Tokyo Tower', startTime: '14:00', endTime: '15:30', latitude: 35.6586, longitude: 139.7454 }),
+          ],
+          isDayTrip: false,
+        },
+        {
+          dayNumber: 2,
+          date: new Date('2026-06-05T00:00:00.000Z'),
+          items: [
+            item({ id: 'a2', type: 'activity', title: 'Shibuya', startTime: '10:00', endTime: '11:00', latitude: 35.6595, longitude: 139.7004 }),
+          ],
+          isDayTrip: false,
+        },
+      ],
+    };
+
+    validateAndFixTrip(trip);
+
+    const outbound = trip.days[0].items.find(entry => entry.id.startsWith('transport-out-'));
+    expect(outbound).toBeDefined();
+
+    // Aviasales URL should contain IATA codes not city names
+    if (outbound?.aviasalesUrl) {
+      expect(outbound.aviasalesUrl).toContain('CDG');
+      expect(outbound.aviasalesUrl).toContain('HND');
+      expect(outbound.aviasalesUrl).not.toContain('PARIS');
+      expect(outbound.aviasalesUrl).not.toContain('TOKYO');
+    }
+  });
+
   it('detects temporal overlaps and penalizes in rythme score', () => {
     const dayItems: TripItem[] = [
       item({ id: 'a1', type: 'activity', title: 'Museum A', startTime: '09:00', endTime: '10:30', latitude: 45.46, longitude: 9.18 }),

@@ -303,6 +303,7 @@ async function fetchProductsBulk(productCodes: string[]): Promise<Map<string, un
         method: 'POST',
         headers,
         body: JSON.stringify(call.body),
+        signal: AbortSignal.timeout(8000),
       });
       if (!response.ok) continue;
       const data = await response.json();
@@ -323,6 +324,7 @@ async function fetchProductsBulk(productCodes: string[]): Promise<Map<string, un
         const response = await fetch(`${VIATOR_BASE_URL}/products/${encodeURIComponent(code)}`, {
           method: 'GET',
           headers,
+          signal: AbortSignal.timeout(6000),
         });
         if (!response.ok) return;
         const data = await response.json();
@@ -352,6 +354,7 @@ async function fetchScheduleLocationReferences(
       const response = await fetch(url, {
         method: 'GET',
         headers,
+        signal: AbortSignal.timeout(6000),
       });
       if (!response.ok) return { code, refs: [] as string[], direct: null as ViatorProductCoordinates | null };
       const data = await response.json();
@@ -408,6 +411,7 @@ async function fetchLocationsBulk(
         method: 'POST',
         headers,
         body: JSON.stringify(call.body),
+        signal: AbortSignal.timeout(8000),
       });
       if (!response.ok) continue;
       data = await response.json();
@@ -752,6 +756,7 @@ async function findDestinationId(destination: string): Promise<string | null> {
         }],
         currency: 'EUR',
       }),
+      signal: AbortSignal.timeout(8000),
     });
 
     if (!response.ok) {
@@ -837,6 +842,7 @@ export async function searchViatorActivities(
         'Accept': 'application/json;version=2.0',
       },
       body: JSON.stringify(searchBody),
+      signal: AbortSignal.timeout(8000),
     });
 
     if (!response.ok) {
@@ -852,6 +858,7 @@ export async function searchViatorActivities(
             'Accept': 'application/json;version=2.0',
           },
           body: JSON.stringify(searchBody),
+          signal: AbortSignal.timeout(8000),
         });
         if (!retryResponse.ok) {
           console.warn(`[Viator] Search failed: ${retryResponse.status}`);
@@ -926,6 +933,7 @@ export async function findViatorProduct(
         }],
         currency: 'EUR',
       }),
+      signal: AbortSignal.timeout(8000),
     });
 
     if (!response.ok) return null;

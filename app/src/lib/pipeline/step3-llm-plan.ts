@@ -852,7 +852,11 @@ interface ValidationResult {
  * Validates the plan after sanitization. Only checks for hard errors:
  * - Missing must-see activities
  * - Empty days
- * - Structural issues
+ * - Plan density (minimum 4 items/day)
+ * - Invalid activity/restaurant IDs (not in input data)
+ * - Chronological violations (startTime >= endTime)
+ * - Overlapping items within same day
+ * - Minimum activity duration (15min)
  */
 function validateLLMPlan(plan: LLMPlannerOutput, input: LLMPlannerInput): ValidationResult {
   const errors: string[] = [];
@@ -885,6 +889,73 @@ function validateLLMPlan(plan: LLMPlannerOutput, input: LLMPlannerInput): Valida
     errors.push(`Plan too sparse: only ${totalItems} items for ${input.trip.durationDays} days (expected ≥${minExpectedItems})`);
   }
 
+  // ---- NEW VALIDATIONS ----
+
+  // 1. Validate all activityIds exist in input
+  const validActivityIds = new Set(input.activities.map((a) => a.id));
+  const validRestaurantIds = new Set(input.restaurants.map((r) => r.id));
+
+  for (const day of plan.days) {
+    for (const item of (day.items || [])) {
+      if (item.type === 'activity' && item.activityId && !validActivityIds.has(item.activityId)) {
+        errors.push(`Day ${day.dayNumber}: Unknown activityId "${item.activityId}" (not in input data)`);
+      }
+      if (item.type === 'restaurant' && item.restaurantId && !validRestaurantIds.has(item.restaurantId)) {
+        errors.push(`Day ${day.dayNumber}: Unknown restaurantId "${item.restaurantId}" (not in input data)`);
+      }
+    }
+  }
+
+  // 2. Validate chronological order (startTime < endTime for each item)
+  for (const day of plan.days) {
+    for (const item of (day.items || [])) {
+      if (item.startTime && item.endTime) {
+        const start = timeToMinutes(item.startTime);
+        const end = timeToMinutes(item.endTime);
+        if (start !== null && end !== null && start >= end) {
+          const itemDesc = item.activityId || item.restaurantId || 'unknown item';
+          errors.push(`Day ${day.dayNumber}: Item "${itemDesc}" has startTime (${item.startTime}) >= endTime (${item.endTime})`);
+        }
+      }
+    }
+  }
+
+  // 3. Check for overlapping items
+  for (const day of plan.days) {
+    const sortedItems = [...(day.items || [])]
+      .filter(i => i.startTime && i.endTime)
+      .sort((a, b) => (timeToMinutes(a.startTime!) || 0) - (timeToMinutes(b.startTime!) || 0));
+
+    for (let i = 0; i < sortedItems.length - 1; i++) {
+      const current = sortedItems[i];
+      const next = sortedItems[i + 1];
+      const currentEnd = timeToMinutes(current.endTime!);
+      const nextStart = timeToMinutes(next.startTime!);
+      if (currentEnd !== null && nextStart !== null && currentEnd > nextStart) {
+        const currentDesc = current.activityId || current.restaurantId || 'unknown item';
+        const nextDesc = next.activityId || next.restaurantId || 'unknown item';
+        errors.push(`Day ${day.dayNumber}: Overlap - "${currentDesc}" ends at ${current.endTime} but "${nextDesc}" starts at ${next.startTime}`);
+      }
+    }
+  }
+
+  // 4. Check minimum duration (each activity should be at least 15 min)
+  for (const day of plan.days) {
+    for (const item of (day.items || [])) {
+      if (item.startTime && item.endTime && item.type === 'activity') {
+        const start = timeToMinutes(item.startTime);
+        const end = timeToMinutes(item.endTime);
+        if (start !== null && end !== null) {
+          const duration = end - start;
+          if (duration < 15) {
+            const itemDesc = item.activityId || 'unknown activity';
+            errors.push(`Day ${day.dayNumber}: Activity "${itemDesc}" is only ${duration}min (minimum 15min)`);
+          }
+        }
+      }
+    }
+  }
+
   return {
     valid: errors.length === 0,
     errors,
@@ -895,6 +966,16 @@ function isValidTime(time: string): boolean {
   if (!time) return false;
   const match = /^([0-1]?[0-9]|2[0-3]):([0-5][0-9])$/.test(time);
   return match;
+}
+
+/** Parse "HH:MM" to total minutes, or null if invalid */
+function timeToMinutes(time: string): number | null {
+  const match = time.match(/^(\d{1,2}):(\d{2})$/);
+  if (!match) return null;
+  const h = parseInt(match[1], 10);
+  const m = parseInt(match[2], 10);
+  if (h < 0 || h > 23 || m < 0 || m > 59) return null;
+  return h * 60 + m;
 }
 
 // ============================================

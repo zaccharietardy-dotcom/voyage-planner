@@ -139,7 +139,8 @@ async function searchWithGoogle(
   }
 
   const response = await fetch(
-    `https://maps.googleapis.com/maps/api/directions/json?${params}`
+    `https://maps.googleapis.com/maps/api/directions/json?${params}`,
+    { signal: AbortSignal.timeout(5000) }
   );
 
   if (!response.ok) {
@@ -212,6 +213,7 @@ async function searchWithOpenRouteService(
       headers: {
         'Accept': 'application/json, application/geo+json',
       },
+      signal: AbortSignal.timeout(5000),
     }
   );
 

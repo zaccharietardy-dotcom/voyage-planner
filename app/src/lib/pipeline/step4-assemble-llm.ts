@@ -28,6 +28,7 @@ import { calculateDistance } from '../services/geocoding';
 import { fetchPlaceImage, fetchRestaurantPhotoByPlaceId } from './services/wikimediaImages';
 import { batchFetchWikipediaSummaries, getWikiLanguageForDestination } from '../services/wikipedia';
 import { normalizeHotelBookingUrl } from '../services/bookingLinks';
+import { getMinDuration, getMaxDuration, estimateActivityCost } from './utils/constants';
 import { generateFlightLink, generateFlightOmioLink, formatDateForUrl } from '../services/linkGenerator';
 import { sanitizeApiKeyLeaksInString, sanitizeGoogleMapsUrl } from '../services/googlePlacePhoto';
 import { resolveOfficialTicketing } from '../services/officialTicketing';
@@ -149,11 +150,31 @@ function buildTripItemsFromDayPlan(
         continue;
       }
 
+      // Safety net: enforce min/max duration and fallback cost
+      const actName = activity.name || '';
+      const actType = activity.type || '';
+      const minDur = getMinDuration(actName, actType);
+      const maxDur = getMaxDuration(actName, actType);
+      let safeDuration = Math.max(item.duration, minDur);
+      if (maxDur !== null) safeDuration = Math.min(safeDuration, maxDur);
+
+      // Recompute endTime if duration was adjusted
+      const safeStartTime = ceilToNearest15(item.startTime);
+      let safeEndTime = ceilToNearest15(item.endTime);
+      if (safeDuration !== item.duration) {
+        const [sh, sm] = safeStartTime.split(':').map(Number);
+        const startMin = sh * 60 + sm;
+        const endMin = startMin + safeDuration;
+        const eh = Math.floor(endMin / 60);
+        const em = endMin % 60;
+        safeEndTime = `${String(eh).padStart(2, '0')}:${String(em).padStart(2, '0')}`;
+      }
+
       const tripItem: TripItem = {
         id: uuidv4(),
         dayNumber: dayPlan.dayNumber,
-        startTime: ceilToNearest15(item.startTime),
-        endTime: ceilToNearest15(item.endTime),
+        startTime: safeStartTime,
+        endTime: safeEndTime,
         type: 'activity',
         title: activity.name,
         description: activity.description || '',
@@ -161,8 +182,8 @@ function buildTripItemsFromDayPlan(
         latitude: activity.latitude,
         longitude: activity.longitude,
         orderIndex: orderIdx++,
-        estimatedCost: activity.estimatedCost || 0,
-        duration: item.duration,
+        estimatedCost: activity.estimatedCost || estimateActivityCost(actName, actType),
+        duration: safeDuration,
         rating: activity.rating,
         bookingUrl: activity.bookingUrl,
         officialBookingUrl: activity.officialBookingUrl,

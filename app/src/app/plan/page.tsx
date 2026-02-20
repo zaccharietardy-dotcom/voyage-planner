@@ -23,6 +23,24 @@ import { useAuth } from '@/components/auth';
 import { useUserPreferences, preferenceOptions } from '@/hooks/useUserPreferences';
 import { toast } from 'sonner';
 
+// Safe localStorage helpers
+function safeGetItem(key: string): string | null {
+  try {
+    return localStorage.getItem(key);
+  } catch (error) {
+    console.warn('[localStorage] getItem failed:', error);
+    return null;
+  }
+}
+
+function safeSetItem(key: string, value: string): void {
+  try {
+    localStorage.setItem(key, value);
+  } catch (error) {
+    console.warn('[localStorage] setItem failed:', error);
+  }
+}
+
 const STEPS = [
   { id: 1, title: 'Destination', icon: '📍' },
   { id: 2, title: 'Transport', icon: '✈️' },
@@ -210,7 +228,7 @@ export default function PlanPage() {
           if (saveResponse.ok) {
             const savedTrip = await saveResponse.json();
             // Utiliser l'ID de la base de données
-            localStorage.setItem('currentTrip', JSON.stringify({ ...generatedTrip, id: savedTrip.id }));
+            safeSetItem('currentTrip', JSON.stringify({ ...generatedTrip, id: savedTrip.id }));
             router.push(`/trip/${savedTrip.id}`);
             return;
           }
@@ -230,7 +248,7 @@ export default function PlanPage() {
       if (!generatedTrip.id) {
         throw new Error('Voyage généré sans identifiant');
       }
-      localStorage.setItem('currentTrip', JSON.stringify(generatedTrip));
+      safeSetItem('currentTrip', JSON.stringify(generatedTrip));
       router.push(`/trip/${generatedTrip.id}`);
     } catch (error) {
       console.error('Erreur génération:', error);

@@ -50,6 +50,16 @@ const ROUTE_COLORS = ['#6366F1', '#06B6D4', '#F59E0B', '#EF4444', '#8B5CF6', '#1
 
 // ─── Helpers ────────────────────────────────────────────────
 
+function escapeHtml(str: string): string {
+  if (!str) return '';
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 function parseSortableTime(time?: string): number {
   if (!time) return Number.MAX_SAFE_INTEGER;
   const [h, m] = time.split(':').map(Number);
@@ -115,14 +125,14 @@ function getPopupContent(item: TripItem, index: number): string {
       ${imageHtml}
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
         <div style="width:24px;height:24px;border-radius:50%;background:${color};color:white;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${index}</div>
-        <div style="font-size:14px;font-weight:600;line-height:1.2;">${item.title}</div>
+        <div style="font-size:14px;font-weight:600;line-height:1.2;">${escapeHtml(item.title)}</div>
       </div>
-      <div style="font-size:12px;color:var(--color-muted-foreground);margin-bottom:4px;">${item.startTime} - ${item.endTime}</div>
-      ${item.description ? `<div style="font-size:12px;color:var(--color-muted-foreground);margin-bottom:6px;line-height:1.3;">${item.description.slice(0, 120)}${item.description.length > 120 ? '...' : ''}</div>` : ''}
+      <div style="font-size:12px;color:var(--color-muted-foreground);margin-bottom:4px;">${escapeHtml(item.startTime)} - ${escapeHtml(item.endTime)}</div>
+      ${item.description ? `<div style="font-size:12px;color:var(--color-muted-foreground);margin-bottom:6px;line-height:1.3;">${escapeHtml(item.description.slice(0, 120))}${item.description.length > 120 ? '...' : ''}</div>` : ''}
       ${details ? `<div style="margin-bottom:6px;">${details}</div>` : ''}
       <div style="display:flex;gap:8px;padding-top:6px;border-top:1px solid var(--color-border);">
-        <a href="${googleMapsUrl}" target="_blank" style="color:var(--color-primary);font-size:12px;text-decoration:none;font-weight:500;">Google Maps</a>
-        ${item.bookingUrl ? `<a href="${item.bookingUrl}" target="_blank" style="color:#34a853;font-size:12px;text-decoration:none;font-weight:500;">Réserver</a>` : ''}
+        <a href="${escapeHtml(googleMapsUrl)}" target="_blank" style="color:var(--color-primary);font-size:12px;text-decoration:none;font-weight:500;">Google Maps</a>
+        ${item.bookingUrl ? `<a href="${escapeHtml(item.bookingUrl)}" target="_blank" style="color:#34a853;font-size:12px;text-decoration:none;font-weight:500;">Réserver</a>` : ''}
       </div>
     </div>
   `;
@@ -488,7 +498,7 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
       const originMarker = L.marker(
         [flightInfo.departureCoords.lat, flightInfo.departureCoords.lng],
         { icon: originIcon }
-      ).bindPopup(`<b>Ville de départ</b><br/>${flightInfo.departureCity || 'Origine'}`);
+      ).bindPopup(`<b>Ville de départ</b><br/>${escapeHtml(flightInfo.departureCity || 'Origine')}`);
       markerLayer.addLayer(originMarker);
 
       const firstDestItem = displayItems.find(i => i.type !== 'flight' && i.latitude && i.longitude);
@@ -560,17 +570,17 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
           popupAnchor: [0, -14],
         });
 
-        const categoryLabel = place.category || 'autre';
+        const categoryLabel = escapeHtml(place.category || 'autre');
         const popupHtml = `
           <div style="min-width:160px;padding:4px;">
-            <div style="font-weight:600;font-size:13px;margin-bottom:4px;">${place.name}</div>
-            ${place.address ? `<div style="font-size:11px;color:#666;margin-bottom:4px;">${place.address}</div>` : ''}
+            <div style="font-weight:600;font-size:13px;margin-bottom:4px;">${escapeHtml(place.name)}</div>
+            ${place.address ? `<div style="font-size:11px;color:#666;margin-bottom:4px;">${escapeHtml(place.address)}</div>` : ''}
             <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:6px;">
               <span style="background:#FBBF24;color:white;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:600;">Lieu importé</span>
               <span style="background:#E5E7EB;color:#374151;padding:2px 6px;border-radius:4px;font-size:10px;">${categoryLabel}</span>
             </div>
-            ${place.notes ? `<div style="font-size:11px;color:#666;margin-top:6px;font-style:italic;">${place.notes}</div>` : ''}
-            ${place.sourceUrl ? `<a href="${place.sourceUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-block;margin-top:6px;color:#3B82F6;font-size:11px;text-decoration:underline;">Voir sur Maps</a>` : ''}
+            ${place.notes ? `<div style="font-size:11px;color:#666;margin-top:6px;font-style:italic;">${escapeHtml(place.notes)}</div>` : ''}
+            ${place.sourceUrl ? `<a href="${escapeHtml(place.sourceUrl)}" target="_blank" rel="noopener noreferrer" style="display:inline-block;margin-top:6px;color:#3B82F6;font-size:11px;text-decoration:underline;">Voir sur Maps</a>` : ''}
           </div>
         `;
 
