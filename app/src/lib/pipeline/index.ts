@@ -27,6 +27,7 @@ import {
   sanitizeBudgetStrategyForKitchen,
   stripSelfCateredFallbacks,
 } from './utils/accommodation';
+import { isDuplicateActivityCandidate } from './utils/activityDedup';
 
 // ---------------------------------------------------------------------------
 // Pipeline Event System — emit helper
@@ -337,7 +338,21 @@ export async function generateTripV2(
   // Final must-see audit: check which must-sees made it into the schedule
   const poolMustSees = (trip.attractionPool || []).filter(a => a.mustSee);
   const scheduledActivityIds = new Set(trip.days.flatMap(d => d.items.filter(i => i.type === 'activity').map(i => i.id)));
-  const missingMustSees = poolMustSees.filter(a => !scheduledActivityIds.has(a.id));
+  const scheduledActivityList = trip.days.flatMap(d =>
+    d.items.filter((i: any) => i.type === 'activity').map((i: any) => ({
+      id: i.id, name: i.title || '', latitude: i.latitude || 0, longitude: i.longitude || 0,
+    }))
+  );
+  const missingMustSees = poolMustSees.filter(a => {
+    if (scheduledActivityIds.has(a.id)) return false;
+    // Also check name-similarity dedup: e.g. "La Cène" (osm) vs "La Cène de Léonard de Vinci" (mustsee)
+    const candidate = { id: a.id, name: a.name || '', latitude: a.latitude || 0, longitude: a.longitude || 0 };
+    const isSimilarToScheduled = scheduledActivityList.some(existing =>
+      isDuplicateActivityCandidate(candidate, existing)
+    );
+    if (isSimilarToScheduled) return false;
+    return true;
+  });
 
   if (missingMustSees.length > 0) {
     console.warn(`[Pipeline V2] ⚠️ MUST-SEES MISSING FROM SCHEDULE: ${missingMustSees.map(a => `"${a.name}"`).join(', ')}`);
@@ -439,6 +454,26 @@ export async function generateTripV2(
             }
           }
         }
+      }
+    }
+
+    // Final cross-day dedup safety net after must-see recovery
+    const globalDedup: Array<{ id: string; name: string; latitude: number; longitude: number }> = [];
+    for (const day of trip.days) {
+      const before = day.items.length;
+      day.items = day.items.filter((item: any) => {
+        if (item.type !== 'activity') return true;
+        const candidate = { id: item.id, name: item.title || '', latitude: item.latitude || 0, longitude: item.longitude || 0 };
+        const isDup = globalDedup.some(existing => isDuplicateActivityCandidate(candidate, existing));
+        if (isDup) {
+          console.log(`[Pipeline V2] Final safety dedup: removed "${item.title}" from Day ${day.dayNumber}`);
+          return false;
+        }
+        globalDedup.push(candidate);
+        return true;
+      });
+      if (day.items.length < before) {
+        day.items.forEach((item: any, idx: number) => { item.orderIndex = idx; });
       }
     }
 
