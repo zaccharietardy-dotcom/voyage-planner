@@ -3518,6 +3518,144 @@ export async function assembleTripSchedule(
     }
   }
 
+  // 13hc. Sparse Day Rescue — safety net for days with < 3 activities (non-boundary).
+  // This runs after standard + emergency gap-fill. If a full day STILL has too few activities,
+  // build an aggressive ad-hoc pool from ALL data sources and insert up to 3 activities.
+  try {
+    const sparseDays = days.filter((day) => {
+      if (day.isDayTrip) return false;
+      const isArrivalOrDeparture = day.dayNumber === 1 || day.dayNumber === days.length;
+      if (isArrivalOrDeparture) return false;
+      const activityCount = day.items.filter((i) => i.type === 'activity').length;
+      return activityCount < 3;
+    });
+
+    if (sparseDays.length > 0) {
+      console.warn(`[Pipeline V2] ⚠ ${sparseDays.length} full day(s) have < 3 activities. Running Sparse Day Rescue...`);
+
+      // Build aggressive pool from ALL raw sources (relaxed eligibility)
+      const rescuePool = buildRelaxedGapFillActivityPool(clusters, data);
+
+      // Global dedup: track all currently scheduled activities (name+GPS)
+      const globalScheduledForRescue: Array<{ id: string; name: string; latitude: number; longitude: number }> =
+        days.flatMap((day) =>
+          day.items
+            .filter((item) => item.type === 'activity')
+            .map((item) => ({ id: item.id, name: item.title, latitude: item.latitude, longitude: item.longitude }))
+        );
+      const globalInsertedRescueIds = new Set<string>();
+
+      for (const day of sparseDays) {
+        const activityCount = () => day.items.filter((i) => i.type === 'activity').length;
+        const MAX_RESCUE_INSERTIONS = 4;
+        let rescueInserted = 0;
+
+        // Compute the centroid of existing activities on this day
+        const dayActivities = day.items.filter((i) => i.type === 'activity' && i.latitude && i.longitude);
+        const centroidLat = dayActivities.length > 0
+          ? dayActivities.reduce((s, a) => s + a.latitude, 0) / dayActivities.length
+          : 0;
+        const centroidLng = dayActivities.length > 0
+          ? dayActivities.reduce((s, a) => s + a.longitude, 0) / dayActivities.length
+          : 0;
+
+        const dayDate = day.date instanceof Date ? day.date : new Date(day.date);
+        const dayScheduledIds = new Set(day.items.filter((i) => i.type === 'activity').map((i) => i.id));
+
+        // Score candidates: prefer high-scored, close to centroid, not duplicate
+        const scoredCandidates = rescuePool
+          .filter((c) => {
+            if (dayScheduledIds.has(c.id)) return false;
+            if (globalInsertedRescueIds.has(c.id)) return false;
+            if (!c.latitude || !c.longitude) return false;
+            // Skip food/nightlife/shopping
+            const actType = (c.type || '').toLowerCase();
+            if (['gastronomy', 'nightlife', 'shopping'].includes(actType)) return false;
+            // Distance from centroid <= 4km
+            if (centroidLat !== 0 && centroidLng !== 0) {
+              const dist = calculateDistance(c.latitude, c.longitude, centroidLat, centroidLng);
+              if (dist > 4) return false;
+            }
+            // Dedup check
+            if (globalScheduledForRescue.some((existing) =>
+              isDuplicateActivityCandidate(c, existing)
+            )) return false;
+            // Opening hours check
+            if (!isActivityOpenOnDay(c, dayDate)) return false;
+            return true;
+          })
+          .map((c) => {
+            const dist = centroidLat !== 0 && centroidLng !== 0
+              ? calculateDistance(c.latitude, c.longitude, centroidLat, centroidLng)
+              : 0;
+            return { candidate: c, dist, rescueScore: (c.score || 0) - dist * 15 };
+          })
+          .sort((a, b) => b.rescueScore - a.rescueScore)
+          .slice(0, 20);
+
+        for (const { candidate, dist } of scoredCandidates) {
+          if (activityCount() >= 3 || rescueInserted >= MAX_RESCUE_INSERTIONS) break;
+
+          // Find the largest gap in the day and try to insert
+          const sorted = sortItemsByTime(day.items);
+          let bestGapStart = 0;
+          let bestGapEnd = 0;
+          let bestGapSize = 0;
+
+          for (let i = 0; i < sorted.length - 1; i++) {
+            const gStart = parseHHMMToMinutes(sorted[i].endTime);
+            const gEnd = parseHHMMToMinutes(sorted[i + 1].startTime);
+            if (gEnd - gStart > bestGapSize) {
+              bestGapSize = gEnd - gStart;
+              bestGapStart = gStart;
+              bestGapEnd = gEnd;
+            }
+          }
+
+          const candidateDuration = Math.min(120, Math.max(45, candidate.duration || 60));
+          if (bestGapSize < candidateDuration + 20) continue;
+
+          const startMin = ceilToNearest15Minutes(bestGapStart + 10);
+          const endMin = ceilToNearest15Minutes(Math.min(bestGapEnd - 10, startMin + candidateDuration));
+          if (endMin - startMin < 45) continue;
+
+          // Verify opening hours at the chosen time
+          const startLabel = formatMinutesToHHMM(startMin);
+          const endLabel = formatMinutesToHHMM(endMin);
+          if (!isOpenAtTime(candidate, dayDate, startLabel, endLabel)) continue;
+
+          const newItem = createGapFillTripItem(candidate, day.dayNumber, startMin, endMin, preferences.destination);
+          // Tag as sparse_day_rescue for tracking
+          if (newItem.qualityFlags) {
+            newItem.qualityFlags = [...newItem.qualityFlags, 'sparse_day_rescue'];
+          } else {
+            (newItem as any).qualityFlags = ['gap_fill_activity', 'sparse_day_rescue'];
+          }
+
+          day.items = sortItemsByTime([...day.items, newItem]).map((item, index) => ({ ...item, orderIndex: index }));
+          refreshRouteMetadataAfterMutations([day], directionsCache);
+
+          dayScheduledIds.add(candidate.id);
+          globalInsertedRescueIds.add(candidate.id);
+          globalScheduledForRescue.push({
+            id: candidate.id || '',
+            name: candidate.name || '',
+            latitude: candidate.latitude,
+            longitude: candidate.longitude,
+          });
+          rescueInserted++;
+
+          console.log(
+            `[Pipeline V2] Sparse Day Rescue: Day ${day.dayNumber} inserted "${candidate.name}" `
+            + `(${endMin - startMin}min, dist=${dist.toFixed(2)}km from centroid, ${activityCount()} activities now)`
+          );
+        }
+      }
+    }
+  } catch (error) {
+    console.warn('[Pipeline V2] Section 13hc (Sparse Day Rescue) failed (non-critical):', error);
+  }
+
   // ── Must-see recovery pass ──────────────────────────────────────────────────
   // After all gap-fill passes, ensure every must-see activity from the scored
   // pool appears in the final schedule. For each missing must-see:
@@ -5961,9 +6099,11 @@ export function fillLargeIntraDayGapsWithNearbyActivities(
   cache?: DirectionsCache
 ): number {
   let totalInserted = 0;
-  const scheduledActivityIds = new Set(
-    days.flatMap((day) => day.items.filter((item) => item.type === 'activity').map((item) => item.id))
-  );
+
+  // Global tracking: prevents inserting the same candidate on 2 different days via gap-fill.
+  const globalInsertedIds = new Set<string>();
+
+  // Global dedup list: name+GPS similarity check across ALL days (prevents cross-day duplicates).
   const scheduledActivitiesList: Array<{ id: string; name: string; latitude: number; longitude: number }> =
     days.flatMap((day) =>
       day.items
@@ -5981,6 +6121,12 @@ export function fillLargeIntraDayGapsWithNearbyActivities(
     let insertedForDay = 0;
     let safetyGuard = 0;
     const dayDate = day.date instanceof Date ? day.date : new Date(day.date);
+
+    // Per-day scheduled IDs: only activities ALREADY on THIS day are blocked.
+    // This allows activities from other days' clusters to be considered as gap-fill candidates.
+    const dayScheduledIds = new Set(
+      day.items.filter((item) => item.type === 'activity').map((item) => item.id)
+    );
 
     let largestGap = computeLargestGapMinutes(day);
     while (insertedForDay < getDynamicGapFillCap(largestGap) && safetyGuard < 8) {
@@ -6005,7 +6151,8 @@ export function fillLargeIntraDayGapsWithNearbyActivities(
 
         for (const candidate of candidatePool) {
           if (!isGapFillCandidateEligible(candidate)) continue;
-          if (scheduledActivityIds.has(candidate.id)) continue;
+          if (dayScheduledIds.has(candidate.id)) continue;           // Already on this day
+          if (globalInsertedIds.has(candidate.id)) continue;         // Already inserted on another day by gap-fill
           if (scheduledActivitiesList.some(existing =>
             isDuplicateActivityCandidate(candidate, existing))) continue;
           if (!isActivityOpenOnDay(candidate, dayDate)) continue;
@@ -6082,7 +6229,8 @@ export function fillLargeIntraDayGapsWithNearbyActivities(
       day.items = sortItemsByTime([...day.items, newItem]).map((item, index) => ({ ...item, orderIndex: index }));
       refreshRouteMetadataAfterMutations([day], cache);
 
-      scheduledActivityIds.add(bestPlacement.candidate.id);
+      dayScheduledIds.add(bestPlacement.candidate.id);
+      globalInsertedIds.add(bestPlacement.candidate.id);
       scheduledActivitiesList.push({
         id: bestPlacement.candidate.id || '',
         name: bestPlacement.candidate.name || '',

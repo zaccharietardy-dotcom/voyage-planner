@@ -110,6 +110,10 @@ export function clusterActivities(
   const dayTripClusterIdx = dayTripActivities.length > 0 ? clusters.length - 1 : -1;
   balanceClusterSizes(clusters, Math.ceil(activities.length / numDays) + 1, dayTripClusterIdx, maxRadius);
 
+  // Enforce minimum cluster sizes: no full day should have fewer than 3 activities
+  // (boundary days — first and last — are exempted with min=1)
+  enforceMinimumClusterSize(clusters, 3, dayTripClusterIdx, numDays);
+
   // Optimize visit order within each cluster (nearest-neighbor + 2-opt)
   for (const cluster of clusters) {
     cluster.activities = optimizeVisitOrder(cluster.activities);
@@ -448,6 +452,98 @@ function balanceClusterSizes(
         recomputeCentroid(smallest);
       }
     }
+  }
+}
+
+/**
+ * Enforce minimum cluster size: ensure no full day has fewer than `minPerCluster` activities.
+ * Boundary days (first and last) are exempted (min=1).
+ * Steals from the largest donor cluster, picking the activity closest to the target's centroid.
+ */
+function enforceMinimumClusterSize(
+  clusters: ActivityCluster[],
+  minPerCluster: number,
+  dayTripClusterIdx: number,
+  numDays: number
+): void {
+  const MAX_ITERATIONS = 30;
+  let iterations = 0;
+
+  while (iterations++ < MAX_ITERATIONS) {
+    let madeProgress = false;
+
+    for (let ci = 0; ci < clusters.length; ci++) {
+      // Skip day-trip cluster
+      if (ci === dayTripClusterIdx) continue;
+
+      // Boundary days (first/last) get a relaxed minimum of 1
+      const isBoundary = clusters[ci].dayNumber === 1 || clusters[ci].dayNumber === numDays;
+      const effectiveMin = isBoundary ? 1 : minPerCluster;
+
+      if (clusters[ci].activities.length >= effectiveMin) continue;
+
+      const deficit = effectiveMin - clusters[ci].activities.length;
+
+      for (let d = 0; d < deficit; d++) {
+        // Find the largest donor cluster (excluding day-trip and target)
+        // Donor must keep at least effectiveMin+1 activities after donation
+        let donorIdx = -1;
+        let donorSize = 0;
+        for (let di = 0; di < clusters.length; di++) {
+          if (di === ci || di === dayTripClusterIdx) continue;
+          const diIsBoundary = clusters[di].dayNumber === 1 || clusters[di].dayNumber === numDays;
+          const diMin = diIsBoundary ? 1 : minPerCluster;
+          // Donor must retain at least diMin + 1 activities (so it stays above minimum after giving)
+          if (clusters[di].activities.length > diMin && clusters[di].activities.length > donorSize) {
+            donorSize = clusters[di].activities.length;
+            donorIdx = di;
+          }
+        }
+
+        if (donorIdx === -1) break; // No valid donor found
+
+        // Among non-must-see activities in the donor, pick the one closest to target centroid
+        const targetCentroid = clusters[ci].centroid;
+        let bestMoveIdx = -1;
+        let bestMoveDist = Infinity;
+
+        for (let ai = 0; ai < clusters[donorIdx].activities.length; ai++) {
+          const a = clusters[donorIdx].activities[ai];
+          if (a.mustSee) continue; // Never steal must-sees
+          const dist = calculateDistance(a.latitude, a.longitude, targetCentroid.lat, targetCentroid.lng);
+          if (dist < bestMoveDist) {
+            bestMoveDist = dist;
+            bestMoveIdx = ai;
+          }
+        }
+
+        // If no non-must-see found, try must-sees as last resort (only if donor has many)
+        if (bestMoveIdx === -1 && clusters[donorIdx].activities.length > minPerCluster + 2) {
+          for (let ai = 0; ai < clusters[donorIdx].activities.length; ai++) {
+            const a = clusters[donorIdx].activities[ai];
+            const dist = calculateDistance(a.latitude, a.longitude, targetCentroid.lat, targetCentroid.lng);
+            if (dist < bestMoveDist) {
+              bestMoveDist = dist;
+              bestMoveIdx = ai;
+            }
+          }
+        }
+
+        if (bestMoveIdx === -1) break; // Nothing to move
+
+        const [moved] = clusters[donorIdx].activities.splice(bestMoveIdx, 1);
+        clusters[ci].activities.push(moved);
+        recomputeCentroid(clusters[ci]);
+        recomputeCentroid(clusters[donorIdx]);
+        madeProgress = true;
+
+        console.log(
+          `[Pipeline V2] enforceMinimumClusterSize: moved "${moved.name}" from Day ${clusters[donorIdx].dayNumber} (${clusters[donorIdx].activities.length} left) → Day ${clusters[ci].dayNumber} (${clusters[ci].activities.length} now), dist=${bestMoveDist.toFixed(2)}km`
+        );
+      }
+    }
+
+    if (!madeProgress) break;
   }
 }
 

@@ -1359,6 +1359,30 @@ function rebalanceClustersForFlights(
         return true;
       }
 
+      // Second tier: target is critically sparse (< 3 activities) and source has surplus (> 4)
+      const targetIsCriticallySparse = clusters[targetIdx].activities.length < 3;
+      const sourceHasSurplus = clusters[sourceIdx].activities.length > 4;
+
+      if (targetIsCriticallySparse && sourceHasSurplus) {
+        // Protect geo-coupled POIs (< 400m apart) — keep strict for those
+        const hasCloseNeighborInSource = clusters[sourceIdx].activities.some(
+          (a) =>
+            a.id !== activity.id
+            && a.latitude && a.longitude
+            && calculateDistance(activity.latitude!, activity.longitude!, a.latitude, a.longitude) < 0.4
+        );
+        if (hasCloseNeighborInSource) {
+          if (routeDeltaKm > 0.25) return false;
+          if (moveExceedsGeoCap(targetIdx, activity)) return false;
+          if (targetDist >= sourceDist - 0.01) return false;
+          return true;
+        }
+        // Moderately relaxed: 0.6km route delta (between strict 0.25 and full relax 1.0)
+        if (routeDeltaKm > 0.6) return false;
+        if (moveExceedsGeoCap(targetIdx, activity)) return false;
+        return true;
+      }
+
       // Default strict constraints
       if (routeDeltaKm > 0.25) return false;
       if (moveExceedsGeoCap(targetIdx, activity)) return false;
@@ -1697,6 +1721,65 @@ function rebalanceClustersForFlights(
       clusters[ci].activities.push(moved);
       computeClusterGeo(source);
       computeClusterGeo(clusters[ci]);
+    }
+  }
+
+  // Phase 3b: Ensure no full day has fewer than 3 activities (sparse day rescue at cluster level).
+  // Unlike Phase 3 which only targets 0-activity days, this fills days with 1-2 activities.
+  // Boundary days with limited time (< 6h) are exempted.
+  for (let ci = 0; ci < clusters.length; ci++) {
+    if (isDayTrip[ci]) continue;
+    if (clusters[ci].activities.length >= 3) continue;
+    if (maxPerDay[ci] === 0) continue;
+
+    // Skip boundary days with limited time
+    if (hoursPerDay[ci] < 6) continue;
+
+    const deficit = 3 - clusters[ci].activities.length;
+
+    for (let s = 0; s < deficit; s++) {
+      // Find best donor: largest cluster with non-must-see activities to spare
+      let bestSource = -1;
+      let bestSourceSize = 0;
+      for (let ti = 0; ti < clusters.length; ti++) {
+        if (ti === ci || isDayTrip[ti]) continue;
+        const nonMustSees = clusters[ti].activities.filter(a => !a.mustSee).length;
+        if (nonMustSees >= 1 && clusters[ti].activities.length > 3 && clusters[ti].activities.length > bestSourceSize) {
+          bestSourceSize = clusters[ti].activities.length;
+          bestSource = ti;
+        }
+      }
+
+      if (bestSource === -1) break;
+
+      // Pick the best-fitting non-must-see from donor using geo-safety check
+      const source = clusters[bestSource];
+      let bestIdx = -1;
+      let bestFitScore = -Infinity;
+
+      for (let ai = 0; ai < source.activities.length; ai++) {
+        if (source.activities[ai].mustSee) continue;
+        if (!canMoveBetweenDaysGeoSafe(bestSource, ci, source.activities[ai])) continue;
+
+        // Prefer activities closer to target centroid
+        const distToTarget = calculateDistance(
+          source.activities[ai].latitude, source.activities[ai].longitude,
+          clusters[ci].centroid.lat, clusters[ci].centroid.lng
+        );
+        const fitScore = -distToTarget; // Closer is better
+        if (fitScore > bestFitScore) {
+          bestFitScore = fitScore;
+          bestIdx = ai;
+        }
+      }
+
+      if (bestIdx === -1) break;
+
+      const [moved] = source.activities.splice(bestIdx, 1);
+      clusters[ci].activities.push(moved);
+      computeClusterGeo(source);
+      computeClusterGeo(clusters[ci]);
+      console.log(`[Pipeline V2] Phase 3b: moved "${moved.name}" from Day ${clusters[bestSource].dayNumber} (${source.activities.length} left) → sparse Day ${clusters[ci].dayNumber} (${clusters[ci].activities.length} now)`);
     }
   }
 
