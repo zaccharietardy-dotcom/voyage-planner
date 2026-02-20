@@ -2675,9 +2675,23 @@ export async function assembleTripSchedule(
       // For restaurants, always use current restaurant name (not stale item.title)
       // For transports, use actual station name from transitLegs (not emoji-prefixed title)
       let placeName: string | undefined;
-      if (item.type === 'transport' && itemData.transitLegs?.length > 0) {
-        const lastLeg = itemData.transitLegs[itemData.transitLegs.length - 1];
-        placeName = lastLeg.to; // e.g. "Milano Porta Garibaldi", "Repubblica"
+      if (item.type === 'transport') {
+        if (itemData.transitLegs?.length > 0) {
+          // Train with legs: use arrival station name
+          const lastLeg = itemData.transitLegs[itemData.transitLegs.length - 1];
+          placeName = lastLeg.to; // e.g. "Milano Porta Garibaldi"
+        } else if (itemData.locationName && !itemData.locationName.startsWith('🧭')) {
+          // Bus/car: use locationName (e.g. "Lyon → Milan")
+          // Extract destination part after "→" if present
+          const arrowIdx = itemData.locationName.indexOf('→');
+          placeName = arrowIdx >= 0
+            ? (itemData.locationName.slice(arrowIdx + 1).trim() + ' bus station')
+            : itemData.locationName;
+        } else {
+          // Fallback: use destination city with transport mode
+          const mode = getTransportModeFromItemData(itemData) || 'transit';
+          placeName = `${preferences.destination} ${mode === 'bus' ? 'bus station' : 'train station'}`;
+        }
       } else if (isRestaurant && currentRestaurantName) {
         placeName = currentRestaurantName;
       } else {
@@ -3486,9 +3500,13 @@ export async function assembleTripSchedule(
   if (catastrophicGapDays.length > 0) {
     console.warn(`[Pipeline V2] ⚠ ${catastrophicGapDays.length} full day(s) still have gaps >= 3h after gap-fill. Running emergency fill...`);
     try {
+      // Build relaxed pool with less strict filtering for large gaps
+      const relaxedGapFillPool = buildRelaxedGapFillActivityPool(clusters, data);
+      console.log(`[Pipeline V2] Section 13hb: built relaxed pool with ${relaxedGapFillPool.length} candidates (vs ${gapFillCandidatePool.length} in standard pool)`);
+
       const emergencyFilled = fillLargeIntraDayGapsWithNearbyActivities(
         catastrophicGapDays,
-        gapFillCandidatePool,
+        relaxedGapFillPool,
         preferences.destination,
         directionsCache
       );
@@ -3582,8 +3600,8 @@ export async function assembleTripSchedule(
               if (gapMinutes > bestDayGap) {
                 bestDayGap = gapMinutes;
                 bestDay = day;
-                bestInsertStartMin = gapStart + 10;
-                bestInsertEndMin = Math.min(gapEnd - 10, gapStart + 10 + candidateDuration);
+                bestInsertStartMin = ceilToNearest15Minutes(gapStart + 10);
+                bestInsertEndMin = Math.min(gapEnd - 10, bestInsertStartMin + candidateDuration);
               }
             }
           }
@@ -3626,7 +3644,7 @@ export async function assembleTripSchedule(
 
           if (evictDay && evictItem) {
             // Replace the evicted item with the must-see, but check for overlaps first.
-            const startMin = parseHHMMToMinutes(evictItem.startTime);
+            const startMin = ceilToNearest15Minutes(parseHHMMToMinutes(evictItem.startTime));
             const itemsAfterEvict = evictDay.items.filter((i) => i.id !== evictItem!.id);
             const sortedAfterEvict = sortItemsByTime(itemsAfterEvict);
 
@@ -4883,6 +4901,12 @@ function roundToNearestFive(value: number): number {
   return Math.max(5, Math.round(value / 5) * 5);
 }
 
+/** Round minutes-since-midnight UP to the nearest 15min boundary (for clean display times). */
+function ceilToNearest15Minutes(minutes: number): number {
+  const remainder = minutes % 15;
+  return remainder === 0 ? minutes : minutes + (15 - remainder);
+}
+
 function isOutsideHotel(item: TripItem, hotel: Accommodation): boolean {
   if (!item.latitude || !item.longitude || item.latitude === 0 || item.longitude === 0) return false;
   if (!hotel.latitude || !hotel.longitude) return false;
@@ -5796,6 +5820,83 @@ function buildGapFillActivityPool(
     .slice(0, 160);
 }
 
+/**
+ * Relaxed eligibility check for emergency gap-fill on large gaps (>= 180min).
+ * Skips the strict "worthwhile" keyword filter and just requires basic quality.
+ */
+function isGapFillCandidateEligibleRelaxed(activity: ScoredActivity): boolean {
+  if (!activity.latitude || !activity.longitude || activity.latitude === 0 || activity.longitude === 0) return false;
+
+  const actName = (activity.name || '').trim();
+  if (actName.length > 0 && actName.length < 4 && !activity.mustSee) return false;
+
+  const NON_POI_NAME_PATTERN = /^(m[eè]tre|kilogram|second|litre|watt|volt|amp[eè]re|newton|pascal|joule|hertz|kelvin|mole|candela|euro|dollar|franc|pound|yen|bitcoin)$/i;
+  if (NON_POI_NAME_PATTERN.test(actName) && !activity.mustSee) return false;
+
+  if (activity.businessStatus === 'CLOSED_PERMANENTLY') return false;
+  if (activity.dataReliability === 'generated') return false;
+  if (activity.geoConfidence === 'low') return false;
+
+  // For relaxed mode: just require minimum score and reject food/shopping/nightlife
+  if ((activity.score || 0) < 10) return false;
+
+  const actType = (activity.type || '').toLowerCase();
+  if (['gastronomy', 'nightlife', 'shopping'].includes(actType)) return false;
+
+  const nameNormalized = normalizeActivityCandidateName(`${activity.name || ''} ${activity.description || ''}`);
+  if (nameNormalized && containsAnyKeyword(nameNormalized, GAP_FILL_FOOD_ESTABLISHMENT_KEYWORDS)) return false;
+  if (nameNormalized && containsAnyKeyword(nameNormalized, GAP_FILL_LOW_VALUE_KEYWORDS)) return false;
+
+  return true;
+}
+
+/**
+ * Build a relaxed gap-fill pool for emergency use when standard pool is insufficient.
+ * Uses relaxed eligibility criteria (no strict keyword filter).
+ */
+function buildRelaxedGapFillActivityPool(
+  clusters: ActivityCluster[],
+  data: FetchedData
+): ScoredActivity[] {
+  const candidatesByKey = new Map<string, ScoredActivity>();
+  const register = (candidate: ScoredActivity | null) => {
+    if (!candidate) return;
+    if (!isGapFillCandidateEligibleRelaxed(candidate)) return;
+
+    const nameKey = normalizeActivityCandidateName(candidate.name || candidate.id || '');
+    if (!nameKey) return;
+    const key = `${nameKey}|${candidate.latitude.toFixed(4)}|${candidate.longitude.toFixed(4)}`;
+
+    const existing = candidatesByKey.get(key);
+    if (!existing || (candidate.score || 0) > (existing.score || 0)) {
+      candidatesByKey.set(key, candidate);
+    }
+  };
+
+  for (const cluster of clusters) {
+    for (const activity of cluster.activities) {
+      register(activity);
+    }
+  }
+
+  const rawSources: Array<{ activities: Attraction[]; source: ScoredActivity['source'] }> = [
+    { activities: data.googlePlacesAttractions || [], source: 'google_places' },
+    { activities: data.serpApiAttractions || [], source: 'serpapi' },
+    { activities: data.overpassAttractions || [], source: 'overpass' },
+    { activities: data.mustSeeAttractions || [], source: 'mustsee' },
+  ];
+
+  for (const sourceChunk of rawSources) {
+    for (const activity of sourceChunk.activities) {
+      register(toScoredGapFillCandidate(activity, sourceChunk.source, data.destCoords));
+    }
+  }
+
+  return [...candidatesByKey.values()]
+    .sort((a, b) => (b.score || 0) - (a.score || 0))
+    .slice(0, 200);
+}
+
 const WALK_ACTIVITY_KEYWORDS = [
   'walk', 'promenade', 'canal walk', 'stroll', 'passeggiata',
   'balade', 'randonnee urbaine', 'marche',
@@ -5911,7 +6012,7 @@ export function fillLargeIntraDayGapsWithNearbyActivities(
 
           const travelPrev = roundToNearestFive(estimateTravel(prev, candidate, cache));
           const travelNext = roundToNearestFive(estimateTravel(candidate, next, cache));
-          const startMin = gapStart + travelPrev;
+          const startMin = ceilToNearest15Minutes(gapStart + travelPrev);
           const availableDuration = gapEnd - travelNext - startMin;
           if (availableDuration < GAP_FILL_MIN_DURATION_MIN) continue;
 
@@ -5922,7 +6023,7 @@ export function fillLargeIntraDayGapsWithNearbyActivities(
           const baseDuration = Math.max(minDuration, Math.min(120, candidate.duration || 60));
           const chosenDuration = Math.min(baseDuration, availableDuration);
           if (chosenDuration < minDuration) continue;
-          const endMin = startMin + chosenDuration;
+          const endMin = ceilToNearest15Minutes(startMin + chosenDuration);
 
           const startLabel = formatMinutesToHHMM(startMin);
           const endLabel = formatMinutesToHHMM(endMin);
