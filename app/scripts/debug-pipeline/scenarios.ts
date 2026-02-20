@@ -153,6 +153,32 @@ export const SCENARIOS: Record<string, Scenario> = {
     },
   },
 
+  'lyon-paris-3d': {
+    id: 'lyon-paris-3d',
+    name: 'Lyon → Paris (3 jours)',
+    description: 'Scénario catastrophe — train, couple, culture + gastronomie, Versailles day-trip',
+    preferences: {
+      origin: 'Lyon',
+      destination: 'Paris',
+      startDate: (() => {
+        const d = futureDate(30);
+        d.setHours(11, 0, 0, 0); // Train départ 11h → arrivée ~14h
+        return d;
+      })(),
+      durationDays: 3,
+      transport: 'train',
+      carRental: false,
+      groupSize: 2,
+      groupType: 'couple',
+      budgetLevel: 'moderate',
+      activities: ['culture', 'gastronomy'],
+      dietary: ['none'],
+      mustSee: 'Tour Eiffel, Château de Versailles',
+      tripMode: 'precise',
+      cityPlan: [{ city: 'Paris', days: 3 }],
+    },
+  },
+
   'train-only': {
     id: 'train-only',
     name: 'Paris → Amsterdam (4 jours)',

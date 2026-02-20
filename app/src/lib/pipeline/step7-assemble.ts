@@ -1058,6 +1058,9 @@ export async function assembleTripSchedule(
     const hasOutboundTransport = isFirstDay && isGroundTransport;
     const hasReturnTransport = isLastDay && isGroundTransport;
 
+    // DIAGNOSTIC: Log transport detection
+    console.log(`[Pipeline V2] Transport debug: transport=${transport ? transport.mode : 'NULL'}, isGroundTransport=${isGroundTransport}, hasOutboundTransport=${hasOutboundTransport}, hasReturnTransport=${hasReturnTransport}`);
+
     // Compute outbound arrival hour for ground transport
     let groundArrivalMinutes: number | null = null;
     if (hasOutboundTransport && transport) {
@@ -1090,6 +1093,30 @@ export async function assembleTripSchedule(
       // 60min for station-to-city transfer + 30min to settle in / drop bags
       dayStartMinutes = Math.max(dayStartMinutes, groundArrivalMinutes + 90);
       console.log(`[Pipeline V2] Day ${balancedDay.dayNumber}: ground transport arrival buffer — first activity no earlier than ${minutesToHHMM(dayStartMinutes)}`);
+    }
+
+    // DIAGNOSTIC: Log Day 1 timing calculation
+    if (isFirstDay) {
+      console.log(`[Pipeline V2] Day 1 timing: groundArrivalMinutes=${groundArrivalMinutes}, dayStartMinutes=${dayStartMinutes} (${minutesToHHMM(dayStartMinutes)})`);
+    }
+
+    // SAFETY NET: If Day 1 and no outbound transport detected, but startDate has time > 10h,
+    // assume late arrival and push dayStart accordingly
+    if (isFirstDay && !outboundFlight && !hasOutboundTransport) {
+      const startDateObj = new Date(preferences.startDate);
+      const startHourUTC = startDateObj.getUTCHours();
+      const startMinUTC = startDateObj.getUTCMinutes();
+      // If the start date has a time component (not midnight), use it as arrival hint
+      // startDate "2026-03-06T11:00:00.000Z" → 11:00 UTC = arrival time
+      if (startHourUTC >= 8) {
+        // Assume this is the arrival time (UTC). Add 90min buffer for transfer.
+        const arrivalMinutesUTC = startHourUTC * 60 + startMinUTC;
+        const buffered = arrivalMinutesUTC + 90;
+        if (buffered > dayStartMinutes) {
+          console.log(`[Pipeline V2] Day 1 safety net: no transport detected but startDate suggests arrival at ~${startHourUTC}:${String(startMinUTC).padStart(2, '0')} UTC — pushing dayStart from ${minutesToHHMM(dayStartMinutes)} to ${minutesToHHMM(buffered)}`);
+          dayStartMinutes = buffered;
+        }
+      }
     }
 
     if (isLastDay && returnFlight) {
@@ -1445,6 +1472,9 @@ export async function assembleTripSchedule(
           transportRole: 'longhaul',
         },
       };
+
+      // DIAGNOSTIC: Log return transport construction
+      console.log(`[Pipeline V2] Day ${balancedDay.dayNumber} return transport: hasReturnTransport=${hasReturnTransport}, returnTransportData=BUILT, returnFlight=${returnFlight ? 'BUILT' : 'NULL'}`);
     } else if (isLastDay && isInterCityTrip) {
       const fallbackStart = parseTime(dayDate, '15:00');
       const fallbackEnd = new Date(fallbackStart.getTime() + fallbackInterCityTravelMin * 60 * 1000);
@@ -1469,6 +1499,26 @@ export async function assembleTripSchedule(
     const breakfast = dayMeals.find(m => m.mealType === 'breakfast');
     const lunch = dayMeals.find(m => m.mealType === 'lunch');
     const dinner = dayMeals.find(m => m.mealType === 'dinner');
+
+    // FIX 4: Distance-gate meals — reject restaurants that are too far from day center
+    // This prevents Versailles restaurants from being assigned to regular Paris days
+    const dayAnchor = hotel
+      ? { lat: hotel.latitude, lng: hotel.longitude }
+      : data.destCoords;
+    const MEAL_MAX_DISTANCE_KM = 8;
+
+    for (const meal of [breakfast, lunch, dinner]) {
+      if (meal?.restaurant?.latitude && meal?.restaurant?.longitude) {
+        const mealDist = calculateDistance(
+          dayAnchor.lat, dayAnchor.lng,
+          meal.restaurant.latitude, meal.restaurant.longitude
+        );
+        if (mealDist > MEAL_MAX_DISTANCE_KM) {
+          console.log(`[Pipeline V2] Day ${balancedDay.dayNumber}: rejecting restaurant "${meal.restaurant.name}" — ${mealDist.toFixed(1)}km from day anchor (max: ${MEAL_MAX_DISTANCE_KM}km)`);
+          meal.restaurant = undefined as any;
+        }
+      }
+    }
 
     // Determine which meals to skip based on time constraints
     const hasReturnTravel = !!(returnFlight || hasReturnTransport);
@@ -1994,6 +2044,29 @@ export async function assembleTripSchedule(
         });
       }
 
+      // FALLBACK: Ensure a breakfast exists on last day
+      const existingLastDayBreakfast = scheduler.getItems().some(i =>
+        i.id.includes('breakfast') || (i.type === 'restaurant' && i.slot && i.slot.start.getHours() < 10)
+      );
+      if (!existingLastDayBreakfast) {
+        const fallbackBkfStart = parseTime(dayDate, `${String(Math.max(7, dayStartHour)).padStart(2, '0')}:00`);
+        scheduler.insertFixedItem({
+          id: `fallback-breakfast-${balancedDay.dayNumber}`,
+          title: hotel ? `Petit-déjeuner à l'hôtel` : 'Petit-déjeuner — Café/Boulangerie',
+          type: 'restaurant',
+          startTime: fallbackBkfStart,
+          endTime: new Date(fallbackBkfStart.getTime() + 30 * 60 * 1000),
+          data: {
+            name: hotel?.name || 'Café/Boulangerie',
+            description: 'Petit-déjeuner',
+            latitude: hotel?.latitude || data.destCoords.lat,
+            longitude: hotel?.longitude || data.destCoords.lng,
+            estimatedCost: hotel ? 0 : 8,
+          },
+        });
+        console.log(`[Pipeline V2] Day ${balancedDay.dayNumber} (last): fallback breakfast inserted`);
+      }
+
       // 4d. Insert checkout AFTER breakfast on last day
       // This guarantees the sequence: breakfast → checkout → activities
       if (hotel && lastDayLatestCheckoutTime) {
@@ -2077,6 +2150,32 @@ export async function assembleTripSchedule(
         maxEndTime: parseTime(dayDate, '10:00'),
         data: bkfData,
       });
+    }
+
+    // FALLBACK: If no breakfast was inserted despite conditions being met, add a generic one
+    if (!isLastDay && !skipBreakfast && dayStartHour <= 10) {
+      const existingBreakfast = scheduler.getItems().some(i =>
+        i.id.includes('breakfast') || (i.type === 'restaurant' && i.slot && i.slot.start.getHours() < 10)
+      );
+      if (!existingBreakfast) {
+        const bkfStartTime = parseTime(dayDate, `${String(Math.max(7, dayStartHour)).padStart(2, '0')}:30`);
+        scheduler.addItem({
+          id: `fallback-breakfast-${balancedDay.dayNumber}`,
+          title: hotel ? `Petit-déjeuner à l'hôtel` : 'Petit-déjeuner — Café/Boulangerie',
+          type: 'restaurant',
+          duration: 30,
+          minStartTime: bkfStartTime,
+          maxEndTime: parseTime(dayDate, '10:00'),
+          data: {
+            name: hotel?.name || 'Café/Boulangerie',
+            description: 'Petit-déjeuner',
+            latitude: hotel?.latitude || data.destCoords.lat,
+            longitude: hotel?.longitude || data.destCoords.lng,
+            estimatedCost: hotel ? 0 : 8,
+          },
+        });
+        console.log(`[Pipeline V2] Day ${balancedDay.dayNumber}: fallback breakfast inserted (no meal assignment found)`);
+      }
     }
 
     // 5b. Check if any activity on this day includes a meal (cooking class, food tour, etc.)
@@ -2907,6 +3006,35 @@ export async function assembleTripSchedule(
     });
   }
 
+  // 11b. POST-PROCESS: Remove duplicate longhaul transport items
+  // If step7 inserted proper transport AND step4/LLM also had transport, we may have duplicates
+  for (const day of days) {
+    const longhaulItems = day.items.filter(item => item.type === 'transport' && item.transportRole === 'longhaul');
+    if (longhaulItems.length > 1) {
+      console.warn(`[Pipeline V2] Day ${day.dayNumber}: ${longhaulItems.length} longhaul transports detected — keeping only the first one`);
+      const keepId = longhaulItems[0].id;
+      day.items = day.items.filter(item => !(item.type === 'transport' && item.transportRole === 'longhaul' && item.id !== keepId));
+      day.items = day.items.map((item, idx) => ({ ...item, orderIndex: idx }));
+    }
+  }
+
+  // 11c. POST-PROCESS: Ensure last day transport goes TO origin, not FROM origin
+  const lastDay = days[days.length - 1];
+  if (lastDay) {
+    for (const item of lastDay.items) {
+      if (item.type === 'transport' && item.transportRole === 'longhaul') {
+        const title = item.title || '';
+        // If the transport title contains "→ {destination}" instead of "→ {origin}", it's wrong
+        const originNorm = preferences.origin.toLowerCase();
+        const destNorm = preferences.destination.toLowerCase();
+        if (title.toLowerCase().includes(destNorm) && !title.toLowerCase().includes(originNorm)) {
+          console.warn(`[Pipeline V2] Day ${lastDay.dayNumber}: return transport title "${title}" points to destination — fixing`);
+          item.title = title.replace(new RegExp(destNorm, 'i'), preferences.origin);
+        }
+      }
+    }
+  }
+
   // 12. Enrich items missing images (Google Places photo lookup + Wikipedia fallback)
   // Non-critical: wrapped in try/catch so pipeline never fails because of images
   onEvent?.({ type: 'api_call', step: 7, label: 'Google Places Photos', timestamp: Date.now() });
@@ -3012,6 +3140,26 @@ export async function assembleTripSchedule(
         const distPrev = validPrev ? calculateDistance(validPrev.latitude, validPrev.longitude, item.latitude, item.longitude) : Infinity;
         const distNext = validNext ? calculateDistance(validNext.latitude, validNext.longitude, item.latitude, item.longitude) : Infinity;
         const minDist = Math.min(distPrev, distNext);
+
+        // FIX 4: Hard reject — on non-day-trip days, if restaurant is >8km from hotel/destination,
+        // always flag for swap (prevents Versailles restaurants on Paris days)
+        if (!day.isDayTrip) {
+          const dayAnchorForSwap = hotel
+            ? { lat: hotel.latitude!, lng: hotel.longitude! }
+            : data.destCoords;
+          const distFromDayAnchor = calculateDistance(
+            dayAnchorForSwap.lat, dayAnchorForSwap.lng,
+            item.latitude, item.longitude
+          );
+          if (distFromDayAnchor > 8) {
+            const mealTypeGuess: 'breakfast' | 'lunch' | 'dinner' = item.startTime < '11:00' ? 'breakfast'
+              : item.startTime < '15:00' ? 'lunch'
+              : 'dinner';
+            swapCandidates.push({ day, itemIdx: i, refLat: dayAnchorForSwap.lat, refLng: dayAnchorForSwap.lng, currentDist: distFromDayAnchor, mealType: mealTypeGuess });
+            console.log(`[Pipeline V2] Restaurant "${item.title}" on day ${day.dayNumber} is ${distFromDayAnchor.toFixed(1)}km from day anchor — forced swap candidate`);
+            continue;
+          }
+        }
 
         if (minDist <= 1.5) continue; // Within 1.5km — acceptable
 

@@ -351,28 +351,65 @@ function addReturnTransportItem(
 
     lastDay.items.push(flightItem);
   } else if (transport && transport.mode === 'train' && transport.transitLegs) {
-    // Add return train transport item
-    const firstLeg = transport.transitLegs[0];
-    const lastLeg = transport.transitLegs[transport.transitLegs.length - 1];
+    // Reverse the outbound legs for return journey
+    const reversedLegs = transport.transitLegs.slice().reverse().map(leg => ({
+      ...leg,
+      from: leg.to,
+      to: leg.from,
+      // Keep duration but departure/arrival times will be estimated
+    }));
+
+    const returnFirstLeg = reversedLegs[0];
+    const returnLastLeg = reversedLegs[reversedLegs.length - 1];
+
+    // Estimate return departure: afternoon (17:00 default)
+    // Use a reasonable return time since we don't have actual return schedule
+    const returnDepartMin = 17 * 60; // 17:00
+    const returnArrivalMin = returnDepartMin + (transport.totalDuration || 120);
 
     const trainItem: TripItem = {
       id: uuidv4(),
       dayNumber: lastDay.dayNumber,
-      startTime: minutesToHHMM(parseHHMM(firstLeg.departure.split('T')[1]?.substring(0, 5) || '18:00')),
-      endTime: minutesToHHMM(parseHHMM(lastLeg.arrival.split('T')[1]?.substring(0, 5) || '22:00')),
+      startTime: minutesToHHMM(returnDepartMin),
+      endTime: minutesToHHMM(Math.min(returnArrivalMin, 23 * 60 + 59)),
       type: 'transport',
-      title: `${firstLeg.from} → ${lastLeg.to}`,
-      description: `Train ${transport.transitLegs.map(l => l.operator || 'Train').join(', ')}`,
-      locationName: firstLeg.from,
+      title: `${returnFirstLeg.from} → ${returnLastLeg.to}`,
+      description: `Train retour ${reversedLegs.map(l => l.operator || 'Train').join(', ')}`,
+      locationName: returnFirstLeg.from,
       latitude: 0,
       longitude: 0,
       orderIndex: lastDay.items.length,
       duration: transport.totalDuration,
-      transitLegs: transport.transitLegs,
+      transitLegs: reversedLegs,
       transitDataSource: 'api',
       transportMode: 'train',
       transportRole: 'longhaul',
       imageUrl: '/images/transport/train-sncf-duplex.jpg',
+      estimatedCost: transport.totalPrice,
+      bookingUrl: transport.bookingUrl,
+    };
+
+    lastDay.items.push(trainItem);
+  } else if (transport && transport.mode !== 'plane' && !transport.transitLegs) {
+    // Generic ground transport return (bus/car/combined) — estimate times
+    const returnDepartMin = 17 * 60;
+    const returnArrivalMin = returnDepartMin + (transport.totalDuration || 120);
+
+    const trainItem: TripItem = {
+      id: uuidv4(),
+      dayNumber: lastDay.dayNumber,
+      startTime: minutesToHHMM(returnDepartMin),
+      endTime: minutesToHHMM(Math.min(returnArrivalMin, 23 * 60 + 59)),
+      type: 'transport',
+      title: `${preferences.destination} → ${preferences.origin}`,
+      description: `Transport retour`,
+      locationName: preferences.destination,
+      latitude: 0,
+      longitude: 0,
+      orderIndex: lastDay.items.length,
+      duration: transport.totalDuration,
+      transportMode: transport.mode as any,
+      transportRole: 'longhaul',
       estimatedCost: transport.totalPrice,
       bookingUrl: transport.bookingUrl,
     };
@@ -454,6 +491,188 @@ function addHotelCheckOutItem(lastDay: TripDay, hotel: Accommodation | null): vo
   lastDay.items.forEach((item, idx) => {
     item.orderIndex = idx;
   });
+}
+
+// ============================================
+// Ensure breakfast exists on every day
+// ============================================
+
+function ensureBreakfastExists(
+  day: TripDay,
+  hotel: Accommodation | null,
+  isFirstDay: boolean,
+  isLastDay: boolean,
+  transport: TransportOptionSummary | null,
+  preferences: TripPreferences,
+  destCoords: { lat: number; lng: number }
+): void {
+  // Skip breakfast on day 1 if arriving after 10:00
+  if (isFirstDay && transport && transport.mode !== 'plane' && transport.transitLegs?.length) {
+    const lastLeg = transport.transitLegs[transport.transitLegs.length - 1];
+    const arrivalTime = lastLeg.arrival?.split('T')[1]?.substring(0, 5);
+    if (arrivalTime && parseHHMM(arrivalTime) >= 10 * 60) {
+      return; // Arriving too late for breakfast
+    }
+  }
+
+  // Check if breakfast already exists
+  const hasBreakfast = day.items.some(item => {
+    if (item.type !== 'restaurant') return false;
+    const startMin = parseHHMM(item.startTime);
+    return startMin < 10 * 60 && (
+      item.title.toLowerCase().includes('petit-déjeuner') ||
+      item.title.toLowerCase().includes('breakfast') ||
+      item.id.includes('breakfast')
+    );
+  });
+
+  if (hasBreakfast) return;
+
+  // Determine breakfast time
+  const bkfStartMin = 8 * 60; // 08:00
+  const bkfEndMin = bkfStartMin + 30; // 08:30
+
+  const breakfastItem: TripItem = {
+    id: `breakfast-${day.dayNumber}`,
+    dayNumber: day.dayNumber,
+    startTime: minutesToHHMM(bkfStartMin),
+    endTime: minutesToHHMM(bkfEndMin),
+    type: 'restaurant',
+    title: hotel ? `Petit-déjeuner à l'hôtel` : 'Petit-déjeuner — Café/Boulangerie',
+    description: hotel?.breakfastIncluded ? 'Petit-déjeuner inclus' : 'Petit-déjeuner',
+    locationName: hotel?.name || 'Café/Boulangerie',
+    latitude: hotel?.latitude || destCoords.lat,
+    longitude: hotel?.longitude || destCoords.lng,
+    orderIndex: 0,
+    duration: 30,
+    estimatedCost: hotel?.breakfastIncluded ? 0 : 8,
+    restaurant: {
+      name: hotel?.name || 'Café/Boulangerie',
+      latitude: hotel?.latitude || destCoords.lat,
+      longitude: hotel?.longitude || destCoords.lng,
+    } as any,
+  };
+
+  day.items.push(breakfastItem);
+  console.log(`[Pipeline V2 LLM] Day ${day.dayNumber}: fallback breakfast inserted`);
+}
+
+// ============================================
+// Resolve schedule conflicts
+// ============================================
+
+function resolveScheduleConflicts(
+  days: TripDay[],
+  transport: TransportOptionSummary | null,
+  hotel: Accommodation | null
+): void {
+  for (const day of days) {
+    // Find the longhaul transport arrival time on this day
+    const longhaulTransport = day.items.find(i => i.type === 'transport' && i.transportRole === 'longhaul');
+    const isFirstDay = day.dayNumber === 1;
+    const isLastDay = day.dayNumber === days.length;
+
+    if (isFirstDay && longhaulTransport) {
+      const arrivalMin = parseHHMM(longhaulTransport.endTime);
+      const bufferMin = arrivalMin + 60; // 60min buffer after arrival
+
+      // Push any activities/restaurants that start before arrival + buffer
+      for (const item of day.items) {
+        if (item.type === 'transport' || item.type === 'flight') continue;
+        if (item.type === 'checkin') continue; // check-in can be after
+        const startMin = parseHHMM(item.startTime);
+        if (startMin < bufferMin && item.id !== longhaulTransport.id) {
+          const duration = parseHHMM(item.endTime) - startMin;
+          item.startTime = minutesToHHMM(bufferMin);
+          item.endTime = minutesToHHMM(bufferMin + duration);
+        }
+      }
+    }
+
+    if (isLastDay && longhaulTransport) {
+      const departureMin = parseHHMM(longhaulTransport.startTime);
+
+      // Ensure checkout is BEFORE return transport departure
+      const checkout = day.items.find(i => i.type === 'checkout');
+      if (checkout) {
+        const checkoutStart = parseHHMM(checkout.startTime);
+        if (checkoutStart >= departureMin) {
+          // Move checkout to 2h before departure
+          const newCheckoutStart = Math.max(8 * 60, departureMin - 120);
+          checkout.startTime = minutesToHHMM(newCheckoutStart);
+          checkout.endTime = minutesToHHMM(newCheckoutStart + 15);
+        }
+      }
+
+      // Push activities to end before return transport
+      for (const item of day.items) {
+        if (item.type === 'transport' || item.type === 'flight' || item.type === 'checkout') continue;
+        const endMin = parseHHMM(item.endTime);
+        if (endMin > departureMin - 30) {
+          // Shrink or remove items that conflict with departure
+          const startMin = parseHHMM(item.startTime);
+          if (startMin >= departureMin - 30) {
+            // Completely overlaps departure window — move earlier or remove
+            const duration = endMin - startMin;
+            const newStart = departureMin - 30 - duration;
+            if (newStart >= 7 * 60) { // earliest 7:00
+              item.startTime = minutesToHHMM(newStart);
+              item.endTime = minutesToHHMM(newStart + duration);
+            }
+          } else {
+            // Partially overlaps — truncate
+            item.endTime = minutesToHHMM(departureMin - 30);
+          }
+        }
+      }
+    }
+
+    // Handle day-trip days: ensure breakfast ends before day-trip transport starts
+    if (day.isDayTrip) {
+      const dtOutbound = day.items.find(i => i.type === 'transport' && i.transportRole === 'daytrip_outbound');
+      if (dtOutbound) {
+        const dtDepartMin = parseHHMM(dtOutbound.startTime);
+        for (const item of day.items) {
+          if (item.type === 'transport') continue;
+          const itemEnd = parseHHMM(item.endTime);
+          const itemStart = parseHHMM(item.startTime);
+          if (itemEnd > dtDepartMin && itemStart < dtDepartMin) {
+            // Truncate item to end before transport
+            item.endTime = minutesToHHMM(dtDepartMin - 5);
+            if (parseHHMM(item.endTime) <= itemStart) {
+              // Item is too short — move it earlier
+              const duration = itemEnd - itemStart;
+              item.startTime = minutesToHHMM(dtDepartMin - 5 - duration);
+              item.endTime = minutesToHHMM(dtDepartMin - 5);
+            }
+          }
+        }
+      }
+    }
+
+    // General overlap resolution: if check-in overlaps with activities, adjust check-in
+    const checkin = day.items.find(i => i.type === 'checkin');
+    if (checkin) {
+      const checkinStart = parseHHMM(checkin.startTime);
+      const checkinEnd = parseHHMM(checkin.endTime);
+      for (const item of day.items) {
+        if (item === checkin) continue;
+        if (item.type === 'transport' && item.transportRole === 'longhaul') continue;
+        const itemStart = parseHHMM(item.startTime);
+        const itemEnd = parseHHMM(item.endTime);
+        // If check-in overlaps with an activity, move check-in after it
+        if (checkinStart < itemEnd && checkinEnd > itemStart) {
+          checkin.startTime = minutesToHHMM(itemEnd + 5);
+          checkin.endTime = minutesToHHMM(itemEnd + 20);
+          break; // Only fix first overlap
+        }
+      }
+    }
+
+    // Re-sort after adjustments
+    day.items.sort((a, b) => parseHHMM(a.startTime) - parseHHMM(b.startTime));
+    day.items.forEach((item, idx) => { item.orderIndex = idx; });
+  }
 }
 
 // ============================================
@@ -785,6 +1004,24 @@ export async function assembleFromLLMPlan(
     if (!day1.isDayTrip) addHotelCheckInItem(day1, hotel, preferences);
     if (!lastDay.isDayTrip) addHotelCheckOutItem(lastDay, hotel);
   }
+
+  // 4b. Ensure breakfast exists on every day
+  for (let i = 0; i < tripDays.length; i++) {
+    const day = tripDays[i];
+    if (day.isDayTrip) continue; // Day trips handle their own meals
+    ensureBreakfastExists(
+      day,
+      hotel,
+      i === 0,
+      i === tripDays.length - 1,
+      transport,
+      preferences,
+      data.destCoords
+    );
+  }
+
+  // 4c. Resolve schedule conflicts (arrival buffer, checkout ordering, overlaps)
+  resolveScheduleConflicts(tripDays, transport, hotel);
 
   // 5. Sort items by time within each day and compute distances
   for (const day of tripDays) {
