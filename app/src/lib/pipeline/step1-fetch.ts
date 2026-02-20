@@ -424,7 +424,7 @@ async function generateMustSeesWithAI(
   // Phase 1: Get attraction names + metadata from Haiku (fast, cheap)
   const response = await Promise.race([
     client.messages.create({
-      model: 'claude-3-5-haiku-20241022',
+      model: 'claude-haiku-4-5',
       max_tokens: 1500,
       messages: [{
         role: 'user',

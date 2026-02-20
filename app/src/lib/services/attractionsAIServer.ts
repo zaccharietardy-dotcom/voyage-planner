@@ -131,7 +131,7 @@ REGLES CRITIQUES pour ${destination}:
 Reponds UNIQUEMENT avec un tableau JSON valide, sans texte avant ou apres.`;
 
   const response = await client.messages.create({
-    model: 'claude-3-5-haiku-20241022',
+    model: 'claude-haiku-4-5',
     max_tokens: 4000,
     messages: [{ role: 'user', content: prompt }],
   });
@@ -191,7 +191,7 @@ async function estimateAttractionDurations(
     const names = needEstimate.map(a => `- ${a.name} (${a.type})`).join('\n');
 
     const response = await client.messages.create({
-      model: 'claude-3-5-haiku-20241022',
+      model: 'claude-haiku-4-5',
       max_tokens: 1000,
       messages: [{
         role: 'user',

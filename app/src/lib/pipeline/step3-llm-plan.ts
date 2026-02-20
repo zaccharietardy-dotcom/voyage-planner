@@ -86,7 +86,7 @@ export async function planWithClaude(input: LLMPlannerInput): Promise<LLMPlanner
 
     const response = await Promise.race([
       client.messages.create({
-        model: 'claude-sonnet-4-6-20250514',
+        model: 'claude-sonnet-4-6',
         max_tokens: 8000,
         temperature: 0.3,
         system: SYSTEM_PROMPT,
@@ -310,7 +310,7 @@ async function retryWithCorrections(
 
     const response = await Promise.race([
       client.messages.create({
-        model: 'claude-sonnet-4-6-20250514',
+        model: 'claude-sonnet-4-6',
         max_tokens: 8000,
         temperature: 0.3,
         system: SYSTEM_PROMPT,

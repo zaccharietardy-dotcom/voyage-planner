@@ -137,7 +137,7 @@ ${mealPreference && mealPreference !== 'auto' ? `- IMPORTANT: L'utilisateur a ex
 
   try {
     const response = await client.messages.create({
-      model: 'claude-3-5-haiku-20241022',
+      model: 'claude-haiku-4-5',
       max_tokens: 1000,
       messages: [{ role: 'user', content: prompt }],
     });

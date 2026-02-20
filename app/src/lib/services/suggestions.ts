@@ -1,7 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import type { ActivityType, BudgetLevel, GroupType, DurationSuggestion, DestinationSuggestion } from '../types';
 
-const HAIKU_MODEL = 'claude-3-5-haiku-20241022';
+const HAIKU_MODEL = 'claude-haiku-4-5';
 
 interface SuggestionContext {
   activities?: ActivityType[];
