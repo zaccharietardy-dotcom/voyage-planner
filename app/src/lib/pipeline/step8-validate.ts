@@ -1,7 +1,14 @@
 /**
  * Pipeline V2 — Step 8: Post-Generation Quality Gate
  *
- * Validates and auto-fixes the generated trip before returning it.
+ * Scores the generated trip on 5 dimensions that reflect ACTUAL traveler experience:
+ *   1. Complétude (25pts) — Does the trip have everything a traveler needs?
+ *   2. Rythme (25pts) — Is the pacing comfortable and realistic?
+ *   3. Géographie (25pts) — Are things walkable, routes logical?
+ *   4. Données (15pts) — Are coordinates, URLs, images present?
+ *   5. Cohérence (10pts) — No overlaps, duplicates, or hallucinations?
+ *
+ * Also applies auto-fixes (transport fallbacks, theme regeneration, dedup).
  * Non-blocking: logs warnings but never prevents trip delivery.
  */
 
@@ -10,188 +17,298 @@ import { calculateDistance } from '../services/geocoding';
 import { formatDateForUrl, generateFlightLink, generateFlightOmioLink } from '../services/linkGenerator';
 import { getHotelHardCapKmForProfile, resolveQualityCityProfile, RESTAURANT_ABSOLUTE_MAX_KM } from './qualityPolicy';
 
-const LONG_LEG_TARGET_KM = 2.5;
-const LONG_LEG_HARD_KM = 4;
-const IMPOSSIBLE_SPEED_KMH = 65;
-const MAX_FULL_DAY_LOAD_MIN = 600;
-const MAX_BOUNDARY_DAY_LOAD_MIN = 510;
-const MAX_NON_DAYTRIP_TRAVEL_MIN = 130;
-const MAX_HEAVY_ACTIVITIES_PER_DAY = 2;
 const LOGISTICS_TYPES: TripItem['type'][] = ['flight', 'transport', 'checkin', 'checkout', 'parking', 'luggage'];
-const GEO_STRICT_ENABLED = !['0', 'false', 'off'].includes(
-  String(process.env.PIPELINE_GEO_STRICT || 'true').toLowerCase()
-);
 
 export interface ValidationResult {
   score: number; // 0-100 quality score
   warnings: string[];
   autoFixes: string[];
+  breakdown?: ScoreBreakdown;
 }
 
-type LegMetric = {
-  fromTitle: string;
-  toTitle: string;
-  distanceKm: number;
-  travelMin: number;
-  gapMin: number;
-};
+export interface ScoreBreakdown {
+  completude: { score: number; max: 25; details: string[] };
+  rythme: { score: number; max: 25; details: string[] };
+  geo: { score: number; max: 25; details: string[] };
+  donnees: { score: number; max: 15; details: string[] };
+  coherence: { score: number; max: 10; details: string[] };
+}
 
 export function validateAndFixTrip(trip: Trip): ValidationResult {
   const warnings: string[] = [];
   const autoFixes: string[] = [];
-  let penalties = 0;
-  const tripCuisineCounts = new Map<string, number>();
-  let tripRestaurantCount = 0;
-  const interCityTrip = isInterCityTrip(trip);
 
+  // ============================================
+  // Phase 1: Auto-fixes (mutate trip before scoring)
+  // ============================================
+  applyAutoFixes(trip, warnings, autoFixes);
+
+  // ============================================
+  // Phase 2: Score across 5 dimensions
+  // ============================================
+  const completude = scoreCompletude(trip, warnings);
+  const rythme = scoreRythme(trip, warnings);
+  const geo = scoreGeo(trip, warnings);
+  const donnees = scoreDonnees(trip, warnings);
+  const coherence = scoreCoherence(trip, warnings);
+
+  const score = completude.score + rythme.score + geo.score + donnees.score + coherence.score;
+
+  const breakdown: ScoreBreakdown = { completude, rythme, geo, donnees, coherence };
+
+  // ============================================
+  // Logging
+  // ============================================
+  console.log(`[Pipeline V2] Step 8 Quality Gate: Score ${score}/100`);
+  console.log(`  📦 Complétude: ${completude.score}/${completude.max}`);
+  console.log(`  ⏱️  Rythme:     ${rythme.score}/${rythme.max}`);
+  console.log(`  🗺️  Géo:        ${geo.score}/${geo.max}`);
+  console.log(`  📊 Données:    ${donnees.score}/${donnees.max}`);
+  console.log(`  🔗 Cohérence:  ${coherence.score}/${coherence.max}`);
+  if (warnings.length > 0) {
+    warnings.forEach(w => console.log(`  ⚠️ ${w}`));
+  }
+  if (autoFixes.length > 0) {
+    autoFixes.forEach(f => console.log(`  🔧 ${f}`));
+  }
+
+  return { score, warnings, autoFixes, breakdown };
+}
+
+// ============================================
+// 1. COMPLÉTUDE (25 pts)
+// Does the trip have everything a traveler needs?
+// ============================================
+function scoreCompletude(
+  trip: Trip,
+  warnings: string[]
+): { score: number; max: 25; details: string[] } {
+  let score = 0;
+  const details: string[] = [];
+  const numDays = trip.days.length;
+  const interCity = isInterCityTrip(trip);
+
+  // 1a. Activities: every day should have at least some (5 pts)
+  // Full days: 3+ activities = 1pt, boundary days: 1+ = 1pt
+  let activityPoints = 0;
   for (const day of trip.days) {
-    // 1. Check for placeholder restaurants (no real data)
-    for (const item of day.items) {
-      if (item.type === 'restaurant' && !item.restaurant) {
-        warnings.push(`Day ${day.dayNumber}: Restaurant "${item.title}" has no restaurant data`);
-        penalties += 5;
-      }
-    }
-
-    // 2. Check restaurant distances (should be < 2km from nearest activity)
+    const isBoundary = day.dayNumber === 1 || day.dayNumber === numDays;
     const activities = day.items.filter(i => i.type === 'activity');
+    const hasTravelDay = day.items.some(i => i.type === 'flight' || (i.type === 'transport' && i.transportRole === 'longhaul'));
+    if (isBoundary || hasTravelDay) {
+      if (activities.length >= 1) activityPoints += 1;
+    } else {
+      if (activities.length >= 3) activityPoints += 1;
+      else if (activities.length >= 1) activityPoints += 0.5;
+    }
+  }
+  const actScore = Math.round(Math.min(5, (activityPoints / numDays) * 5));
+  score += actScore;
+  details.push(`Activités: ${actScore}/5`);
+
+  // 1b. Meals: every full day should have 3 meals, boundary days at least 1 (7 pts)
+  let mealPoints = 0;
+  for (const day of trip.days) {
+    const isBoundary = day.dayNumber === 1 || day.dayNumber === numDays;
     const restaurants = day.items.filter(i => i.type === 'restaurant' && !isHotelMeal(i));
-    const nonGooglePhotoRestaurants = restaurants.filter((restaurant) => hasNonGoogleRestaurantPhoto(restaurant));
-    for (const restaurant of nonGooglePhotoRestaurants) {
-      warnings.push(`Day ${day.dayNumber}: Restaurant "${restaurant.title}" has a non-Google photo source`);
-      penalties += 3;
-    }
-
-    for (const restaurant of restaurants) {
-      const cuisineFamily = inferRestaurantCuisineFamily(restaurant);
-      if (cuisineFamily) {
-        tripCuisineCounts.set(cuisineFamily, (tripCuisineCounts.get(cuisineFamily) || 0) + 1);
-        tripRestaurantCount += 1;
+    if (isBoundary) {
+      if (restaurants.length >= 1) mealPoints += 1;
+    } else {
+      if (restaurants.length >= 3) mealPoints += 1;
+      else if (restaurants.length >= 2) mealPoints += 0.7;
+      else if (restaurants.length >= 1) mealPoints += 0.3;
+      else {
+        warnings.push(`Jour ${day.dayNumber}: aucun restaurant prévu`);
       }
     }
+  }
+  const mealScore = Math.round(Math.min(7, (mealPoints / numDays) * 7));
+  score += mealScore;
+  details.push(`Repas: ${mealScore}/7`);
 
-    if (restaurants.length >= 2) {
-      const dayCuisineCounts = new Map<string, number>();
-      for (const restaurant of restaurants) {
-        const family = inferRestaurantCuisineFamily(restaurant);
-        if (!family) continue;
-        dayCuisineCounts.set(family, (dayCuisineCounts.get(family) || 0) + 1);
-      }
-      const dominant = [...dayCuisineCounts.entries()].sort((a, b) => b[1] - a[1])[0];
-      if (dominant && dominant[0] !== 'generic' && dominant[1] >= 2 && dominant[1] === restaurants.length) {
-        warnings.push(
-          `Day ${day.dayNumber}: Restaurant variety is low (${dominant[0]} repeated ${dominant[1]}x)`
-        );
-        penalties += 3;
-      }
-    }
+  // 1c. Hotel check-in/out present (3 pts)
+  const hasCheckin = trip.days[0]?.items.some(i => i.type === 'checkin');
+  const hasCheckout = trip.days[numDays - 1]?.items.some(i => i.type === 'checkout');
+  const hotelScore = (hasCheckin ? 1.5 : 0) + (hasCheckout ? 1.5 : 0);
+  score += hotelScore;
+  details.push(`Hôtel: ${hotelScore}/3`);
+  if (!hasCheckin) warnings.push('Jour 1: pas de check-in hôtel');
+  if (!hasCheckout) warnings.push(`Jour ${numDays}: pas de check-out hôtel`);
 
-    for (const resto of restaurants) {
-      if (!resto.latitude || !resto.longitude || resto.latitude === 0) continue;
-      const nearestDist = activities.length > 0
-        ? Math.min(...activities
-            .filter(a => a.latitude && a.longitude && a.latitude !== 0)
-            .map(a => calculateDistance(resto.latitude, resto.longitude, a.latitude, a.longitude)))
-        : Infinity;
-      if (nearestDist > 3 && nearestDist !== Infinity) {
-        warnings.push(`Day ${day.dayNumber}: Restaurant "${resto.title}" is ${nearestDist.toFixed(1)}km from nearest activity`);
-        penalties += 3;
-      }
-    }
+  // 1d. Inter-city transport present (5 pts, only for inter-city trips)
+  if (interCity) {
+    const hasOutbound = trip.days[0]?.items.some(i => isLonghaulItem(i));
+    const hasReturn = trip.days[numDays - 1]?.items.some(i => isLonghaulItem(i));
+    const transportScore = (hasOutbound ? 2.5 : 0) + (hasReturn ? 2.5 : 0);
+    score += transportScore;
+    details.push(`Transport inter-ville: ${transportScore}/5`);
+  } else {
+    score += 5;
+    details.push(`Transport inter-ville: 5/5 (local trip)`);
+  }
 
-    // 3. Check for duplicate restaurants within the same day
-    const restoNames = restaurants.map(r => r.title.replace(/^(Petit-déjeuner|Déjeuner|Dîner) — /, ''));
-    const dupes = restoNames.filter((name, idx) => restoNames.indexOf(name) !== idx);
-    if (dupes.length > 0) {
-      warnings.push(`Day ${day.dayNumber}: Duplicate restaurant(s): ${[...new Set(dupes)].join(', ')}`);
-      penalties += 5;
-    }
-
-    // 4. Check for days without any activity (except travel days)
-    if (activities.length === 0 && !day.items.some(i => i.type === 'flight' || i.type === 'transport')) {
-      warnings.push(`Day ${day.dayNumber}: No activities scheduled`);
-      penalties += 8;
-    }
-
-    // 5. Check for items at coordinates (0, 0)
+  // 1e. Cuisine diversity across the trip (5 pts)
+  const cuisineFamilies = new Set<string>();
+  for (const day of trip.days) {
     for (const item of day.items) {
-      if (item.latitude === 0 && item.longitude === 0 && ['activity', 'restaurant'].includes(item.type)) {
-        warnings.push(`Day ${day.dayNumber}: "${item.title}" has (0,0) coordinates`);
-        penalties += 2;
+      if (item.type === 'restaurant') {
+        const family = inferRestaurantCuisineFamily(item);
+        if (family && family !== 'generic') cuisineFamilies.add(family);
       }
     }
+  }
+  // 3+ distinct cuisine families = full marks, 2 = 3pts, 1 = 1pt, 0 = 0pts
+  const diversityScore = cuisineFamilies.size >= 3 ? 5 : cuisineFamilies.size === 2 ? 3 : cuisineFamilies.size === 1 ? 1 : 0;
+  score += diversityScore;
+  details.push(`Diversité cuisine: ${diversityScore}/5 (${cuisineFamilies.size} familles)`);
 
-    // 6. Check for unrealistic gaps between consecutive items (>3 hours with nothing)
-    const sortedItems = [...day.items].sort((a, b) => a.startTime.localeCompare(b.startTime));
-    for (let i = 1; i < sortedItems.length; i++) {
-      const prev = sortedItems[i - 1];
-      const curr = sortedItems[i];
+  return { score: Math.round(score), max: 25, details };
+}
+
+// ============================================
+// 2. RYTHME (25 pts)
+// Is the pacing comfortable for a real traveler?
+// ============================================
+function scoreRythme(
+  trip: Trip,
+  warnings: string[]
+): { score: number; max: 25; details: string[] } {
+  let score = 0;
+  const details: string[] = [];
+  const numDays = trip.days.length;
+
+  // 2a. No temporal overlaps (8 pts — overlaps are deal-breakers)
+  let overlapCount = 0;
+  for (const day of trip.days) {
+    const sorted = [...day.items].sort((a, b) => a.startTime.localeCompare(b.startTime));
+    for (let i = 1; i < sorted.length; i++) {
+      const prevEnd = timeToMinutes(sorted[i - 1].endTime);
+      const currStart = timeToMinutes(sorted[i].startTime);
+      if (prevEnd > currStart) {
+        overlapCount++;
+        warnings.push(`Jour ${day.dayNumber}: chevauchement ${sorted[i - 1].title} / ${sorted[i].title}`);
+      }
+    }
+  }
+  const overlapScore = overlapCount === 0 ? 8 : Math.max(0, 8 - overlapCount * 3);
+  score += overlapScore;
+  details.push(`Pas de chevauchements: ${overlapScore}/8`);
+
+  // 2b. Meal timing is realistic (7 pts)
+  // Breakfast 7:00-9:30, lunch 11:30-14:00, dinner 18:30-21:30
+  let goodMealTiming = 0;
+  let totalMeals = 0;
+  for (const day of trip.days) {
+    for (const item of day.items) {
+      if (item.type !== 'restaurant' || isHotelMeal(item)) continue;
+      totalMeals++;
+      const start = timeToMinutes(item.startTime);
+      const title = item.title || '';
+      if (title.includes('Petit-déjeuner')) {
+        // Breakfast: 7:00-9:30
+        if (start >= 420 && start <= 570) goodMealTiming++;
+        else warnings.push(`Jour ${day.dayNumber}: petit-déjeuner à ${item.startTime} (inhabituel)`);
+      } else if (title.includes('Déjeuner')) {
+        // Lunch: 11:30-14:00
+        if (start >= 690 && start <= 840) goodMealTiming++;
+        else warnings.push(`Jour ${day.dayNumber}: déjeuner à ${item.startTime} (inhabituel)`);
+      } else {
+        // Dinner: 18:30-21:30
+        if (start >= 1110 && start <= 1290) goodMealTiming++;
+        else warnings.push(`Jour ${day.dayNumber}: dîner à ${item.startTime} (inhabituel)`);
+      }
+    }
+  }
+  const mealTimingScore = totalMeals > 0
+    ? Math.round((goodMealTiming / totalMeals) * 7)
+    : 0;
+  score += mealTimingScore;
+  details.push(`Timing repas: ${mealTimingScore}/7`);
+
+  // 2c. Day load balance — not too packed, not too empty (5 pts)
+  // Ideal: 4-6 activities+meals per full day
+  let balancePoints = 0;
+  for (const day of trip.days) {
+    const isBoundary = day.dayNumber === 1 || day.dayNumber === numDays;
+    const meaningful = day.items.filter(i => i.type === 'activity' || i.type === 'restaurant').length;
+    if (isBoundary) {
+      // Boundary: 2-5 items is fine
+      if (meaningful >= 2 && meaningful <= 5) balancePoints += 1;
+      else if (meaningful >= 1) balancePoints += 0.5;
+    } else {
+      // Full day: 5-8 items ideal (3 meals + 3-5 activities)
+      if (meaningful >= 5 && meaningful <= 8) balancePoints += 1;
+      else if (meaningful >= 3 && meaningful <= 10) balancePoints += 0.5;
+      else {
+        warnings.push(`Jour ${day.dayNumber}: ${meaningful} items (trop ${meaningful < 3 ? 'peu' : 'chargé'})`);
+      }
+    }
+  }
+  const balanceScore = Math.round(Math.min(5, (balancePoints / numDays) * 5));
+  score += balanceScore;
+  details.push(`Équilibre journées: ${balanceScore}/5`);
+
+  // 2d. No massive dead time during the day (5 pts)
+  // Gaps > 2h between activities during active hours are dead time
+  // But gap between last activity and dinner (17:00-19:30) is FREE TIME — totally fine
+  let gapPenaltyPts = 0;
+  for (const day of trip.days) {
+    const sorted = [...day.items]
+      .filter(i => !isLogisticsItem(i) && !isHotelMeal(i))
+      .sort((a, b) => a.startTime.localeCompare(b.startTime));
+    for (let i = 1; i < sorted.length; i++) {
+      const prev = sorted[i - 1];
+      const curr = sorted[i];
       const prevEnd = timeToMinutes(prev.endTime);
       const currStart = timeToMinutes(curr.startTime);
       const gap = currStart - prevEnd;
-      if (gap > 180) { // 3 hours
-        if (isIntentionalGapAnchor(prev) || isIntentionalGapAnchor(curr)) {
-          continue;
-        }
-        warnings.push(`Day ${day.dayNumber}: ${gap}min gap between "${prev.title}" and "${curr.title}"`);
-        penalties += 2;
+
+      // Skip gaps that are intentional (before dinner, after checkout, etc.)
+      if (isIntentionalGapAnchor(prev) || isIntentionalGapAnchor(curr)) continue;
+
+      // Gap before dinner (after 17:00) is free time — not a problem
+      const isDinnerGap = currStart >= 1110 && prevEnd >= 1020; // after 17h → dinner
+      if (isDinnerGap) continue;
+
+      if (gap > 180) {
+        gapPenaltyPts += 2;
+        warnings.push(`Jour ${day.dayNumber}: trou de ${gap}min entre ${prev.title} et ${curr.title}`);
+      } else if (gap > 150) {
+        gapPenaltyPts += 1;
       }
     }
+  }
+  const gapScore = Math.max(0, 5 - gapPenaltyPts);
+  score += gapScore;
+  details.push(`Pas de temps mort: ${gapScore}/5`);
 
-    // 6b. Check for temporal overlaps between consecutive items
-    for (let i = 1; i < sortedItems.length; i++) {
-      const prev = sortedItems[i - 1];
-      const curr = sortedItems[i];
-      const prevEnd = timeToMinutes(prev.endTime);
-      const currStart = timeToMinutes(curr.startTime);
-      if (prevEnd > currStart) {
-        const overlapMin = prevEnd - currStart;
-        warnings.push(
-          `Day ${day.dayNumber}: ${overlapMin}min overlap between "${prev.title}" and "${curr.title}"`
-        );
-        penalties += Math.min(10, overlapMin);
-      }
-    }
+  return { score: Math.round(score), max: 25, details };
+}
 
-    // 7. Auto-fix: Remove duplicate restaurants (keep the first occurrence)
-    const seenRestoNames = new Set<string>();
-    const itemsToRemove: number[] = [];
-    day.items.forEach((item, idx) => {
-      if (item.type === 'restaurant') {
-        const cleanName = item.title.replace(/^(Petit-déjeuner|Déjeuner|Dîner) — /, '');
-        // Allow same restaurant for different meals (breakfast vs lunch is OK)
-        const mealType = item.title.match(/^(Petit-déjeuner|Déjeuner|Dîner)/)?.[0] || '';
-        const key = `${cleanName}-${mealType}`;
-        if (seenRestoNames.has(key)) {
-          itemsToRemove.push(idx);
-          autoFixes.push(`Day ${day.dayNumber}: Removed duplicate "${item.title}"`);
-        } else {
-          seenRestoNames.add(key);
-        }
-      }
-    });
-    for (const idx of itemsToRemove.reverse()) {
-      day.items.splice(idx, 1);
-    }
+// ============================================
+// 3. GÉOGRAPHIE (25 pts)
+// Are things walkable and routes logical?
+// ============================================
+function scoreGeo(
+  trip: Trip,
+  warnings: string[]
+): { score: number; max: 25; details: string[] } {
+  let score = 0;
+  const details: string[] = [];
 
-    // 8. Auto-fix: Re-index orderIndex after any removals
-    day.items.forEach((item, idx) => {
-      item.orderIndex = idx;
-    });
-
-    // 9. New geographic diagnostics + impossible transition checks
+  // Compute geo diagnostics for each day first
+  for (const day of trip.days) {
     const legMetrics = computeLegMetrics(day);
-    const distances = legMetrics.map((l) => l.distanceKm).sort((a, b) => a - b);
-    const totalLegKm = legMetrics.reduce((sum, leg) => sum + leg.distanceKm, 0);
+    const distances = legMetrics.map(l => l.distanceKm).sort((a, b) => a - b);
+    const totalLegKm = legMetrics.reduce((sum, l) => sum + l.distanceKm, 0);
     const maxLegKm = distances.length > 0 ? distances[distances.length - 1] : 0;
     const p95LegKm = distances.length > 0 ? percentile(distances, 0.95) : 0;
-    const totalTravelMin = legMetrics.reduce((sum, leg) => sum + leg.travelMin, 0);
+    const totalTravelMin = legMetrics.reduce((sum, l) => sum + l.travelMin, 0);
     const routePoints = computeRoutePoints(day);
     const zigzagTurns = computeZigzagTurns(routePoints);
     const mstLowerBoundKm = computeMstLowerBoundKm(routePoints);
     const routeInefficiencyRatio = mstLowerBoundKm > 0.05
-      ? totalLegKm / mstLowerBoundKm
-      : 1;
+      ? totalLegKm / mstLowerBoundKm : 1;
 
     day.geoDiagnostics = {
       maxLegKm: round2(maxLegKm),
@@ -202,240 +319,306 @@ export function validateAndFixTrip(trip: Trip): ValidationResult {
       routeInefficiencyRatio: round2(routeInefficiencyRatio),
       mstLowerBoundKm: round2(mstLowerBoundKm),
     };
+  }
 
-    const routeIsNonTrivial =
-      routePoints.length >= 4
-      && totalLegKm > 1.5
-      && mstLowerBoundKm > 0.5;
-    if (!day.isDayTrip && zigzagTurns >= 2) {
-      warnings.push(
-        `Day ${day.dayNumber}: zigzag route detected (${zigzagTurns} turnbacks)`
-      );
-      penalties += 4;
-    }
-    if (!day.isDayTrip && routeIsNonTrivial && routeInefficiencyRatio > 1.75) {
-      warnings.push(
-        `Day ${day.dayNumber}: route inefficiency is high (${routeInefficiencyRatio.toFixed(2)}x vs MST lower bound)`
-      );
-      penalties += 3;
-    }
+  // 3a. Restaurant proximity — lunch/dinner < 500m from adjacent activity (8 pts)
+  let closeRestaurants = 0;
+  let totalLunchDinners = 0;
+  for (const day of trip.days) {
+    const sorted = [...day.items].sort((a, b) => a.startTime.localeCompare(b.startTime));
+    for (let i = 0; i < sorted.length; i++) {
+      const item = sorted[i];
+      if (item.type !== 'restaurant' || isHotelMeal(item)) continue;
+      const title = item.title || '';
+      if (title.includes('Petit-déjeuner')) continue; // breakfast anchored to hotel
+      totalLunchDinners++;
 
-    const isBoundaryDay = day.dayNumber === 1 || day.dayNumber === trip.days.length;
-    const heavyActivities = activities.filter((item) => (item.duration || 60) >= 120).length;
-    if (!day.isDayTrip && heavyActivities > MAX_HEAVY_ACTIVITIES_PER_DAY) {
-      warnings.push(
-        `Day ${day.dayNumber}: ${heavyActivities} long activities scheduled (fatigue risk)`
-      );
-      penalties += (heavyActivities - MAX_HEAVY_ACTIVITIES_PER_DAY) * 3;
-    }
-
-    const activityMinutes = activities.reduce((sum, item) => sum + (item.duration || 60), 0);
-    const mealMinutes = restaurants.reduce((sum, item) => sum + Math.max(30, item.duration || 60), 0);
-    const dayLoadMinutes = activityMinutes + mealMinutes + totalTravelMin;
-    const maxLoad = isBoundaryDay ? MAX_BOUNDARY_DAY_LOAD_MIN : MAX_FULL_DAY_LOAD_MIN;
-    const mustSeeMinutes = activities.reduce((sum, item) => {
-      const isMustSee = Boolean((item as TripItem & { data?: { mustSee?: boolean } }).data?.mustSee);
-      return sum + (isMustSee ? (item.duration || 60) : 0);
-    }, 0);
-    const adaptiveMustSeeAllowance = Math.min(60, Math.max(0, mustSeeMinutes - 180) * 0.2);
-    const fatigueThreshold = maxLoad + adaptiveMustSeeAllowance;
-    if (!day.isDayTrip && dayLoadMinutes > fatigueThreshold) {
-      warnings.push(
-        `Day ${day.dayNumber}: day load is high (${Math.round(dayLoadMinutes)}min planned incl. travel)`
-      );
-      penalties += 4;
-    }
-
-    if (!day.isDayTrip && totalTravelMin > MAX_NON_DAYTRIP_TRAVEL_MIN) {
-      warnings.push(
-        `Day ${day.dayNumber}: too much travel time (${Math.round(totalTravelMin)}min)`
-      );
-      penalties += 3;
-    }
-
-    const firstActivityStart = activities.length > 0
-      ? Math.min(...activities.map((item) => timeToMinutes(item.startTime)))
-      : null;
-    if (!day.isDayTrip && !isBoundaryDay && activities.length >= 3 && firstActivityStart !== null && firstActivityStart > 9 * 60 + 30) {
-      warnings.push(
-        `Day ${day.dayNumber}: first activity starts late (${minutesToTime(firstActivityStart)})`
-      );
-      penalties += 2;
-    }
-
-    if (!day.isDayTrip && GEO_STRICT_ENABLED) {
-      const longTargetLegs = legMetrics.filter((l) => l.distanceKm > LONG_LEG_TARGET_KM);
-      const hardLongLegs = legMetrics.filter((l) => l.distanceKm > LONG_LEG_HARD_KM);
-
-      if (hardLongLegs.length > 0) {
-        penalties += hardLongLegs.length * 8;
-        for (const leg of hardLongLegs) {
-          warnings.push(
-            `Day ${day.dayNumber}: hard long leg ${leg.distanceKm.toFixed(1)}km between "${leg.fromTitle}" and "${leg.toTitle}"`
-          );
+      // Find nearest adjacent activity
+      let minDist = Infinity;
+      for (let j = i - 1; j >= 0; j--) {
+        if (sorted[j].type === 'activity' && sorted[j].latitude) {
+          minDist = Math.min(minDist, calculateDistance(item.latitude, item.longitude, sorted[j].latitude, sorted[j].longitude));
+          break;
         }
       }
-
-      if (longTargetLegs.length > 1) {
-        penalties += (longTargetLegs.length - 1) * 4;
-        warnings.push(
-          `Day ${day.dayNumber}: ${longTargetLegs.length} legs > ${LONG_LEG_TARGET_KM}km (target max = 1)`
-        );
+      for (let j = i + 1; j < sorted.length; j++) {
+        if (sorted[j].type === 'activity' && sorted[j].latitude) {
+          minDist = Math.min(minDist, calculateDistance(item.latitude, item.longitude, sorted[j].latitude, sorted[j].longitude));
+          break;
+        }
+      }
+      if (minDist <= 0.5) closeRestaurants++;
+      else if (minDist <= 1.0) closeRestaurants += 0.5;
+      else {
+        warnings.push(`Jour ${day.dayNumber}: ${item.title} est à ${(minDist * 1000).toFixed(0)}m de l'activité la plus proche`);
       }
     }
+  }
+  const restoProxScore = totalLunchDinners > 0
+    ? Math.round((closeRestaurants / totalLunchDinners) * 8)
+    : 8;
+  score += restoProxScore;
+  details.push(`Proximité restaurants: ${restoProxScore}/8`);
 
+  // 3b. No impossible transitions — can't teleport (7 pts)
+  let impossibleCount = 0;
+  for (const day of trip.days) {
+    const legMetrics = computeLegMetrics(day);
     for (const leg of legMetrics) {
       const speedKmh = leg.travelMin > 0 ? (leg.distanceKm / leg.travelMin) * 60 : 0;
-      const impossibleByGap = leg.distanceKm > LONG_LEG_HARD_KM && leg.gapMin >= 0 && leg.gapMin < 15;
-      const impossibleBySpeed = leg.distanceKm > 1.5 && speedKmh > IMPOSSIBLE_SPEED_KMH;
-
+      const impossibleByGap = leg.distanceKm > 4 && leg.gapMin >= 0 && leg.gapMin < 15;
+      const impossibleBySpeed = leg.distanceKm > 1.5 && speedKmh > 65;
       if (impossibleByGap || impossibleBySpeed) {
-        penalties += 7;
-        warnings.push(
-          `Day ${day.dayNumber}: impossible transition "${leg.fromTitle}" → "${leg.toTitle}" (${leg.distanceKm.toFixed(1)}km, ${leg.travelMin}min, gap=${leg.gapMin}min)`
-        );
+        impossibleCount++;
+        warnings.push(`Jour ${day.dayNumber}: transition impossible ${leg.fromTitle} → ${leg.toTitle} (${leg.distanceKm.toFixed(1)}km en ${leg.gapMin}min)`);
       }
     }
-
-    // Boundary transport sanity: should not be 0km when source and destination differ
-    checkBoundaryConsistency(day, warnings, (deltaPenalty) => { penalties += deltaPenalty; });
   }
+  const impossibleScore = impossibleCount === 0 ? 7 : Math.max(0, 7 - impossibleCount * 3);
+  score += impossibleScore;
+  details.push(`Transitions réalistes: ${impossibleScore}/7`);
 
-  if (interCityTrip) {
-    ensureInterCityLonghaulCoverage(trip, warnings, autoFixes, (penalty) => {
-      penalties += penalty;
-    });
+  // 3c. Average walk distance between consecutive items (5 pts)
+  // Ideal: < 1km average leg. Acceptable: < 2km. Bad: > 3km
+  const allLegs: number[] = [];
+  for (const day of trip.days) {
+    const legMetrics = computeLegMetrics(day);
+    allLegs.push(...legMetrics.map(l => l.distanceKm));
   }
+  const avgLeg = allLegs.length > 0 ? allLegs.reduce((a, b) => a + b, 0) / allLegs.length : 0;
+  let walkScore: number;
+  if (avgLeg <= 0.8) walkScore = 5;
+  else if (avgLeg <= 1.2) walkScore = 4;
+  else if (avgLeg <= 1.8) walkScore = 3;
+  else if (avgLeg <= 2.5) walkScore = 2;
+  else { walkScore = 1; warnings.push(`Distance moyenne entre items: ${avgLeg.toFixed(1)}km (élevée)`); }
+  score += walkScore;
+  details.push(`Distance marche moy: ${walkScore}/5 (${avgLeg.toFixed(1)}km)`);
 
-  if (tripRestaurantCount >= 5) {
-    const dominantTripCuisine = [...tripCuisineCounts.entries()].sort((a, b) => b[1] - a[1])[0];
-    if (dominantTripCuisine && dominantTripCuisine[0] !== 'generic' && dominantTripCuisine[1] / tripRestaurantCount >= 0.7) {
-      warnings.push(
-        `Trip-wide restaurant variety is limited (${dominantTripCuisine[0]} = ${dominantTripCuisine[1]}/${tripRestaurantCount})`
-      );
-      penalties += 4;
-    }
-  }
-
-  // 10. Check hotel distance from activities centroid (city-profile aware caps)
+  // 3d. Hotel position — within reasonable distance of activities (5 pts)
   const allActivityCoords = trip.days.flatMap(d =>
     d.items.filter(i => i.type === 'activity' && i.latitude && i.longitude && i.latitude !== 0)
   );
-  if (allActivityCoords.length > 0) {
+  const hotelItem = trip.days[0]?.items.find(i => i.type === 'checkin');
+  let hotelScore = 0;
+  if (hotelItem && hotelItem.latitude && allActivityCoords.length > 0) {
     const centroid = {
       lat: allActivityCoords.reduce((s, a) => s + a.latitude, 0) / allActivityCoords.length,
       lng: allActivityCoords.reduce((s, a) => s + a.longitude, 0) / allActivityCoords.length,
     };
-
-    const hotelItem = trip.days[0]?.items.find(i => i.type === 'checkin');
-    if (hotelItem && hotelItem.latitude && hotelItem.latitude !== 0) {
-      const hotelDist = calculateDistance(centroid.lat, centroid.lng, hotelItem.latitude, hotelItem.longitude);
-      const profile = resolveQualityCityProfile({ destination: trip.preferences.destination });
-      const hotelHardCap = getHotelHardCapKmForProfile(profile, trip.preferences.durationDays);
-      if (hotelDist > hotelHardCap) {
-        warnings.push(
-          `Hotel "${hotelItem.title}" is ${hotelDist.toFixed(1)}km from activities centroid (cap=${hotelHardCap.toFixed(1)}km, profile=${profile.id})`
-        );
-        penalties += 5;
-      }
-    }
+    const hotelDist = calculateDistance(centroid.lat, centroid.lng, hotelItem.latitude, hotelItem.longitude);
+    if (hotelDist <= 1.5) hotelScore = 5;
+    else if (hotelDist <= 2.5) hotelScore = 4;
+    else if (hotelDist <= 4.0) hotelScore = 3;
+    else { hotelScore = 1; warnings.push(`Hôtel à ${hotelDist.toFixed(1)}km du centre des activités`); }
+  } else {
+    hotelScore = 3; // Can't verify
   }
+  score += hotelScore;
+  details.push(`Position hôtel: ${hotelScore}/5`);
 
-  // ============================================
-  // Additional coherence checks
-  // ============================================
+  return { score: Math.round(score), max: 25, details };
+}
 
+// ============================================
+// 4. DONNÉES (15 pts)
+// Is the data reliable and complete?
+// ============================================
+function scoreDonnees(
+  trip: Trip,
+  warnings: string[]
+): { score: number; max: 15; details: string[] } {
+  let score = 0;
+  const details: string[] = [];
+
+  // 4a. All activities/restaurants have valid coordinates (5 pts)
+  let totalGeoItems = 0;
+  let validGeoItems = 0;
   for (const day of trip.days) {
-    const sortedItems = [...day.items].sort((a, b) => a.startTime.localeCompare(b.startTime));
-    const activities = day.items.filter(i => i.type === 'activity');
-    const restaurants = day.items.filter(i => i.type === 'restaurant' && !isHotelMeal(i));
-    const isBoundaryDay = day.dayNumber === 1 || day.dayNumber === trip.days.length;
-
-    // A. Restaurant absolute distance check (hard cap 5km)
-    for (const resto of restaurants) {
-      if (!resto.latitude || !resto.longitude || resto.latitude === 0) continue;
-      const nearestDist = activities.length > 0
-        ? Math.min(...activities
-            .filter(a => a.latitude && a.longitude && a.latitude !== 0)
-            .map(a => calculateDistance(resto.latitude, resto.longitude, a.latitude, a.longitude)))
-        : Infinity;
-      if (nearestDist > RESTAURANT_ABSOLUTE_MAX_KM && nearestDist !== Infinity) {
-        warnings.push(`Day ${day.dayNumber}: Restaurant "${resto.title}" is ${nearestDist.toFixed(1)}km from nearest activity (absolute cap=${RESTAURANT_ABSOLUTE_MAX_KM}km)`);
-        penalties += 15; // Heavy penalty — this should never happen
-      }
-    }
-
-    // B. Post-transport buffer check
-    for (let i = 1; i < sortedItems.length; i++) {
-      const prev = sortedItems[i - 1];
-      const curr = sortedItems[i];
-      if (prev.type !== 'transport' && prev.type !== 'flight') continue;
-      if (prev.transportRole !== 'longhaul') continue;
-      if (curr.type === 'checkin' || curr.type === 'checkout' || curr.type === 'transport' || curr.type === 'flight') continue;
-
-      const prevEnd = timeToMinutes(prev.endTime);
-      const currStart = timeToMinutes(curr.startTime);
-      const buffer = currStart - prevEnd;
-      if (buffer < 20) {
-        warnings.push(`Day ${day.dayNumber}: Only ${buffer}min between longhaul "${prev.title}" and "${curr.title}" (min 20min buffer)`);
-        penalties += 8;
-      }
-    }
-
-    // C. Day without any restaurant (non-boundary days should have at least lunch)
-    if (!isBoundaryDay && restaurants.length === 0 && activities.length > 0) {
-      warnings.push(`Day ${day.dayNumber}: No restaurant scheduled despite having ${activities.length} activities`);
-      penalties += 5;
-    }
-    // Boundary day: at least one meal if there are activities
-    if (isBoundaryDay && restaurants.length === 0 && activities.length >= 2) {
-      warnings.push(`Day ${day.dayNumber}: No restaurant scheduled despite having ${activities.length} activities (boundary day)`);
-      penalties += 3;
-    }
-
-    // D. Gap check lowered to 2h for non-boundary days
-    if (!isBoundaryDay) {
-      for (let i = 1; i < sortedItems.length; i++) {
-        const prev = sortedItems[i - 1];
-        const curr = sortedItems[i];
-        const prevEnd = timeToMinutes(prev.endTime);
-        const currStart = timeToMinutes(curr.startTime);
-        const gap = currStart - prevEnd;
-        if (gap > 120 && gap <= 180) { // 2-3h range (>3h already caught above)
-          if (isIntentionalGapAnchor(prev) || isIntentionalGapAnchor(curr)) continue;
-          warnings.push(`Day ${day.dayNumber}: ${gap}min gap between "${prev.title}" and "${curr.title}" (mid-day, non-boundary)`);
-          penalties += 2;
+    for (const item of day.items) {
+      if (item.type === 'activity' || item.type === 'restaurant') {
+        totalGeoItems++;
+        if (item.latitude && item.longitude && item.latitude !== 0 && item.longitude !== 0) {
+          validGeoItems++;
+        } else {
+          warnings.push(`Jour ${day.dayNumber}: "${item.title}" n'a pas de coordonnées GPS`);
         }
       }
     }
+  }
+  const coordScore = totalGeoItems > 0 ? Math.round((validGeoItems / totalGeoItems) * 5) : 0;
+  score += coordScore;
+  details.push(`Coordonnées GPS: ${coordScore}/5 (${validGeoItems}/${totalGeoItems})`);
 
-    // E. Impossible tight sequence: >3km distance with <10min gap
-    for (let i = 1; i < sortedItems.length; i++) {
-      const prev = sortedItems[i - 1];
-      const curr = sortedItems[i];
-      if (!prev.latitude || !prev.longitude || !curr.latitude || !curr.longitude) continue;
-      if (prev.latitude === 0 || curr.latitude === 0) continue;
-      if (isLogisticsItem(prev) || isLogisticsItem(curr)) continue;
-
-      const dist = calculateDistance(prev.latitude, prev.longitude, curr.latitude, curr.longitude);
-      const prevEnd = timeToMinutes(prev.endTime);
-      const currStart = timeToMinutes(curr.startTime);
-      const gap = currStart - prevEnd;
-      if (dist > 3 && gap >= 0 && gap < 10) {
-        warnings.push(`Day ${day.dayNumber}: Tight sequence "${prev.title}" → "${curr.title}" (${dist.toFixed(1)}km in ${gap}min)`);
-        penalties += 5;
+  // 4b. Activities have images (4 pts)
+  let totalActivities = 0;
+  let activitiesWithImages = 0;
+  for (const day of trip.days) {
+    for (const item of day.items) {
+      if (item.type === 'activity') {
+        totalActivities++;
+        if (item.imageUrl) activitiesWithImages++;
       }
     }
   }
+  const imageScore = totalActivities > 0
+    ? Math.round((activitiesWithImages / totalActivities) * 4)
+    : 0;
+  score += imageScore;
+  details.push(`Images activités: ${imageScore}/4 (${activitiesWithImages}/${totalActivities})`);
 
-  // ============================================
-  // Fix themes and narratives to match actual items
-  // ============================================
+  // 4c. Restaurants have real data (not placeholder) (3 pts)
+  let totalRestos = 0;
+  let restosWithData = 0;
+  for (const day of trip.days) {
+    for (const item of day.items) {
+      if (item.type === 'restaurant') {
+        totalRestos++;
+        if (item.restaurant && item.restaurant.name) restosWithData++;
+      }
+    }
+  }
+  const restoDataScore = totalRestos > 0 ? Math.round((restosWithData / totalRestos) * 3) : 0;
+  score += restoDataScore;
+  details.push(`Données restaurants: ${restoDataScore}/3 (${restosWithData}/${totalRestos})`);
+
+  // 4d. Activities have Google Maps URL (3 pts)
+  let activitiesWithMaps = 0;
+  for (const day of trip.days) {
+    for (const item of day.items) {
+      if (item.type === 'activity' && item.googleMapsUrl) activitiesWithMaps++;
+    }
+  }
+  const mapsScore = totalActivities > 0
+    ? Math.round((activitiesWithMaps / totalActivities) * 3)
+    : 0;
+  score += mapsScore;
+  details.push(`Google Maps URLs: ${mapsScore}/3 (${activitiesWithMaps}/${totalActivities})`);
+
+  return { score: Math.round(score), max: 15, details };
+}
+
+// ============================================
+// 5. COHÉRENCE (10 pts)
+// Is the itinerary internally consistent?
+// ============================================
+function scoreCoherence(
+  trip: Trip,
+  warnings: string[]
+): { score: number; max: 10; details: string[] } {
+  let score = 0;
+  const details: string[] = [];
+
+  // 5a. No duplicate activities across the trip (3 pts)
+  const activityIds = new Set<string>();
+  let dupeActivities = 0;
+  for (const day of trip.days) {
+    for (const item of day.items) {
+      if (item.type === 'activity') {
+        // Use title as dedup key since IDs might differ
+        const key = (item.title || '').toLowerCase().trim();
+        if (activityIds.has(key)) {
+          dupeActivities++;
+          warnings.push(`Jour ${day.dayNumber}: activité en double "${item.title}"`);
+        }
+        activityIds.add(key);
+      }
+    }
+  }
+  const dupeActScore = dupeActivities === 0 ? 3 : Math.max(0, 3 - dupeActivities);
+  score += dupeActScore;
+  details.push(`Pas de doublons activités: ${dupeActScore}/3`);
+
+  // 5b. No duplicate restaurants (same name + same meal) within same day (3 pts)
+  let dupeRestos = 0;
+  for (const day of trip.days) {
+    const seen = new Set<string>();
+    for (const item of day.items) {
+      if (item.type === 'restaurant') {
+        const cleanName = (item.title || '').replace(/^(Petit-déjeuner|Déjeuner|Dîner) — /, '').toLowerCase().trim();
+        const mealType = (item.title || '').match(/^(Petit-déjeuner|Déjeuner|Dîner)/)?.[0] || '';
+        const key = `${cleanName}-${mealType}`;
+        if (seen.has(key)) {
+          dupeRestos++;
+          warnings.push(`Jour ${day.dayNumber}: restaurant en double "${item.title}"`);
+        }
+        seen.add(key);
+      }
+    }
+  }
+  const dupeRestoScore = dupeRestos === 0 ? 3 : Math.max(0, 3 - dupeRestos);
+  score += dupeRestoScore;
+  details.push(`Pas de doublons restaurants: ${dupeRestoScore}/3`);
+
+  // 5c. Days are in order and complete (2 pts)
+  let orderOk = true;
+  for (let i = 0; i < trip.days.length; i++) {
+    if (trip.days[i].dayNumber !== i + 1) orderOk = false;
+  }
+  const expectedDays = trip.preferences?.durationDays || trip.days.length;
+  const daysComplete = trip.days.length === expectedDays;
+  const orderScore = (orderOk ? 1 : 0) + (daysComplete ? 1 : 0);
+  score += orderScore;
+  details.push(`Structure jours: ${orderScore}/2`);
+
+  // 5d. Themes are present and relevant (2 pts)
+  let daysWithTheme = 0;
+  for (const day of trip.days) {
+    if (day.theme && day.theme.length > 3) daysWithTheme++;
+  }
+  const themeScore = trip.days.length > 0
+    ? Math.round((daysWithTheme / trip.days.length) * 2)
+    : 0;
+  score += themeScore;
+  details.push(`Thèmes: ${themeScore}/2 (${daysWithTheme}/${trip.days.length})`);
+
+  return { score: Math.round(score), max: 10, details };
+}
+
+// ============================================
+// AUTO-FIXES (applied before scoring)
+// ============================================
+function applyAutoFixes(trip: Trip, warnings: string[], autoFixes: string[]): void {
+  const interCity = isInterCityTrip(trip);
+
+  // Fix 1: Remove duplicate restaurants within same day
+  for (const day of trip.days) {
+    const seenRestoNames = new Set<string>();
+    const itemsToRemove: number[] = [];
+    day.items.forEach((item, idx) => {
+      if (item.type === 'restaurant') {
+        const cleanName = item.title.replace(/^(Petit-déjeuner|Déjeuner|Dîner) — /, '');
+        const mealType = item.title.match(/^(Petit-déjeuner|Déjeuner|Dîner)/)?.[0] || '';
+        const key = `${cleanName}-${mealType}`;
+        if (seenRestoNames.has(key)) {
+          itemsToRemove.push(idx);
+          autoFixes.push(`Jour ${day.dayNumber}: doublon supprimé "${item.title}"`);
+        } else {
+          seenRestoNames.add(key);
+        }
+      }
+    });
+    for (const idx of itemsToRemove.reverse()) {
+      day.items.splice(idx, 1);
+    }
+    day.items.forEach((item, idx) => { item.orderIndex = idx; });
+  }
+
+  // Fix 2: Ensure inter-city transport
+  if (interCity) {
+    ensureInterCityLonghaulCoverage(trip, warnings, autoFixes);
+  }
+
+  // Fix 3: Fix themes and narratives
+  fixThemesAndNarratives(trip, autoFixes, warnings);
+}
+
+function fixThemesAndNarratives(trip: Trip, autoFixes: string[], warnings: string[]): void {
   for (const day of trip.days) {
     const actualActivities = day.items.filter(i => i.type === 'activity');
     const actualActivityNames = actualActivities.map(i => i.title);
 
-    // 1. Fix dayNarrative activity count
+    // Fix narrative activity count
     if (day.dayNarrative) {
       const countMatch = day.dayNarrative.match(/(\d+)\s+activités?\s+prévues?/);
       if (countMatch) {
@@ -443,51 +626,41 @@ export function validateAndFixTrip(trip: Trip): ValidationResult {
         if (claimedCount !== actualActivities.length) {
           if (actualActivities.length === 0) {
             day.dayNarrative = '';
-            autoFixes.push(`Day ${day.dayNumber}: Cleared narrative (no activities)`);
+            autoFixes.push(`Jour ${day.dayNumber}: narrative effacée (aucune activité)`);
           } else {
             day.dayNarrative = day.dayNarrative.replace(
               /\d+\s+activités?\s+prévues?/,
               `${actualActivities.length} activité${actualActivities.length > 1 ? 's' : ''} prévue${actualActivities.length > 1 ? 's' : ''}`
             );
-            autoFixes.push(`Day ${day.dayNumber}: Fixed activity count in narrative (${claimedCount} → ${actualActivities.length})`);
+            autoFixes.push(`Jour ${day.dayNumber}: compteur activités corrigé dans la narrative`);
           }
         }
       }
     }
 
-    // 2. Regenerate theme from ACTUAL activities if current theme mentions non-existent ones
+    // Regenerate theme if it doesn't match actual activities
     if (day.theme && actualActivities.length > 0) {
-      // Check if theme words match any actual activity
       const themeLower = day.theme.toLowerCase();
       const anyMatch = actualActivityNames.some(name => {
-        // Check if any significant word from the activity name appears in the theme
         const words = name.toLowerCase().split(/[\s,'-]+/).filter(w => w.length > 3);
         return words.some(word => themeLower.includes(word));
       });
-
       if (!anyMatch) {
-        // Theme mentions activities not in the schedule → regenerate
         const oldTheme = day.theme;
         const topActivities = actualActivities.slice(0, 2).map(a => a.title);
         day.theme = topActivities.join(' et ');
-        autoFixes.push(`Day ${day.dayNumber}: Regenerated theme (no match): "${oldTheme}" → "${day.theme}"`);
+        autoFixes.push(`Jour ${day.dayNumber}: thème régénéré "${oldTheme}" → "${day.theme}"`);
       }
     } else if (!day.theme || actualActivities.length === 0) {
-      // No activities → generic theme
       const restaurants = day.items.filter(i => i.type === 'restaurant');
       const hasTransport = day.items.some(i => i.type === 'transport' && i.transportRole === 'longhaul');
-      if (hasTransport && day.dayNumber === 1) {
-        day.theme = 'Arrivée et installation';
-      } else if (hasTransport) {
-        day.theme = 'Retour';
-      } else if (restaurants.length > 0) {
-        day.theme = 'Découverte gastronomique';
-      }
+      if (hasTransport && day.dayNumber === 1) day.theme = 'Arrivée et installation';
+      else if (hasTransport) day.theme = 'Retour';
+      else if (restaurants.length > 0) day.theme = 'Découverte gastronomique';
     }
 
-    // 3. Regenerate dayNarrative if it mentions specific attraction names not in the trip
+    // Fix hallucinated narrative
     if (day.dayNarrative && actualActivities.length > 0) {
-      // Check for well-known attraction names that might be hallucinated
       const knownAttractions = [
         'Louvre', 'Orangerie', 'Orsay', 'Versailles', 'Colosseum', 'Vatican',
         'Sagrada', 'Buckingham', 'Big Ben', 'Rialto', 'Duomo', 'Eiffel',
@@ -499,72 +672,85 @@ export function validateAndFixTrip(trip: Trip): ValidationResult {
         const inTrip = actualActivityNames.some(n => n.toLowerCase().includes(attr.toLowerCase()));
         return mentioned && !inTrip;
       });
-
       if (mentionedButMissing.length > 0) {
-        // Rebuild narrative from scratch
         const actNames = actualActivities.map(a => a.title).join(', ');
-        const oldNarrative = day.dayNarrative;
         day.dayNarrative = `Journée consacrée à ${actNames}. ${actualActivities.length} activité${actualActivities.length > 1 ? 's' : ''} prévue${actualActivities.length > 1 ? 's' : ''}.`;
-        autoFixes.push(`Day ${day.dayNumber}: Rebuilt narrative (hallucinated: ${mentionedButMissing.join(', ')})`);
-        warnings.push(`Day ${day.dayNumber}: Narrative mentioned non-existent attractions: ${mentionedButMissing.join(', ')}`);
-        penalties += 2;
+        autoFixes.push(`Jour ${day.dayNumber}: narrative reconstruite (hallucination: ${mentionedButMissing.join(', ')})`);
       }
     }
   }
-
-  const score = Math.max(0, 100 - penalties);
-
-  if (warnings.length > 0) {
-    console.log(`[Pipeline V2] Step 8 Quality Gate: Score ${score}/100`);
-    warnings.forEach(w => console.log(`  ⚠️ ${w}`));
-  }
-  if (autoFixes.length > 0) {
-    autoFixes.forEach(f => console.log(`  🔧 ${f}`));
-  }
-
-  return { score, warnings, autoFixes };
 }
+
+// ============================================
+// Inter-city transport coverage
+// ============================================
+function ensureInterCityLonghaulCoverage(
+  trip: Trip,
+  warnings: string[],
+  autoFixes: string[]
+): void {
+  const firstDay = trip.days[0];
+  const lastDay = trip.days[trip.days.length - 1];
+  if (!firstDay || !lastDay) return;
+
+  const hasOutbound = firstDay.items.some(item => isLonghaulItem(item));
+  const hasReturn = lastDay.items.some(item => isLonghaulItem(item));
+
+  if (!hasOutbound) {
+    warnings.push(`Jour ${firstDay.dayNumber}: transport aller manquant`);
+    insertFallbackLonghaulItem(firstDay, 'outbound', trip.preferences.origin, trip.preferences.destination, {
+      transport: resolveFallbackTransportOption(trip),
+      groupSize: Math.max(1, trip.preferences.groupSize || 1),
+      date: firstDay.date,
+    });
+    autoFixes.push(`Jour ${firstDay.dayNumber}: transport aller inséré (fallback)`);
+  }
+
+  if (!hasReturn) {
+    warnings.push(`Jour ${lastDay.dayNumber}: transport retour manquant`);
+    insertFallbackLonghaulItem(lastDay, 'return', trip.preferences.destination, trip.preferences.origin, {
+      transport: resolveFallbackTransportOption(trip),
+      groupSize: Math.max(1, trip.preferences.groupSize || 1),
+      date: lastDay.date,
+    });
+    autoFixes.push(`Jour ${lastDay.dayNumber}: transport retour inséré (fallback)`);
+  }
+}
+
+// ============================================
+// Helper functions (unchanged)
+// ============================================
 
 function computeLegMetrics(day: TripDay): LegMetric[] {
   const sortedItems = [...day.items].sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
-  const routeItems = sortedItems.filter((item) => !isLogisticsItem(item) && !isHotelMeal(item));
+  const routeItems = sortedItems.filter(item => !isLogisticsItem(item) && !isHotelMeal(item));
   const legs: LegMetric[] = [];
 
   for (let i = 1; i < routeItems.length; i++) {
     const from = routeItems[i - 1];
     const to = routeItems[i];
-
     if (!from.latitude || !from.longitude || !to.latitude || !to.longitude) continue;
-    if (from.latitude === 0 || from.longitude === 0 || to.latitude === 0 || to.longitude === 0) continue;
+    if (from.latitude === 0 || to.latitude === 0) continue;
 
     const directDistanceKm = calculateDistance(from.latitude, from.longitude, to.latitude, to.longitude);
     const reportedDistanceKm =
       typeof to.distanceFromPrevious === 'number' && to.distanceFromPrevious > 0
-        ? to.distanceFromPrevious
-        : null;
-    const canTrustReportedDistance =
+        ? to.distanceFromPrevious : null;
+    const canTrustReported =
       typeof reportedDistanceKm === 'number'
       && Math.abs(reportedDistanceKm - directDistanceKm) <= 0.75;
-    const distanceKm = canTrustReportedDistance ? reportedDistanceKm : directDistanceKm;
+    const distanceKm = canTrustReported ? reportedDistanceKm : directDistanceKm;
 
     const reportedTravelMin =
       typeof to.timeFromPrevious === 'number' && to.timeFromPrevious > 0
-        ? to.timeFromPrevious
-        : null;
+        ? to.timeFromPrevious : null;
     const estimatedTravelMin = Math.max(5, Math.round(distanceKm * 12));
-    const travelMin = reportedTravelMin && canTrustReportedDistance
-      ? reportedTravelMin
-      : estimatedTravelMin;
+    const travelMin = reportedTravelMin && canTrustReported
+      ? reportedTravelMin : estimatedTravelMin;
 
     const gapMin = timeToMinutes(to.startTime) - timeToMinutes(from.endTime);
 
-    legs.push({
-      fromTitle: from.title,
-      toTitle: to.title,
-      distanceKm,
-      travelMin,
-      gapMin,
-    });
+    legs.push({ fromTitle: from.title, toTitle: to.title, distanceKm, travelMin, gapMin });
   }
 
   return legs;
@@ -573,25 +759,18 @@ function computeLegMetrics(day: TripDay): LegMetric[] {
 function computeRoutePoints(day: TripDay): Array<{ latitude: number; longitude: number }> {
   return [...day.items]
     .sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime))
-    .filter((item) => !isLogisticsItem(item) && !isHotelMeal(item))
-    .filter((item) =>
-      !!item.latitude
-      && !!item.longitude
-      && item.latitude !== 0
-      && item.longitude !== 0
-    )
-    .map((item) => ({ latitude: item.latitude, longitude: item.longitude }));
+    .filter(item => !isLogisticsItem(item) && !isHotelMeal(item))
+    .filter(item => !!item.latitude && !!item.longitude && item.latitude !== 0 && item.longitude !== 0)
+    .map(item => ({ latitude: item.latitude, longitude: item.longitude }));
 }
 
 function computeZigzagTurns(points: Array<{ latitude: number; longitude: number }>): number {
   if (points.length < 3) return 0;
   let turns = 0;
-
   for (let i = 1; i < points.length - 1; i++) {
     const prev = points[i - 1];
     const current = points[i];
     const next = points[i + 1];
-
     const v1x = current.longitude - prev.longitude;
     const v1y = current.latitude - prev.latitude;
     const v2x = next.longitude - current.longitude;
@@ -599,51 +778,45 @@ function computeZigzagTurns(points: Array<{ latitude: number; longitude: number 
     const norm1 = Math.hypot(v1x, v1y);
     const norm2 = Math.hypot(v2x, v2y);
     if (norm1 < 1e-6 || norm2 < 1e-6) continue;
-
     const cosTheta = Math.max(-1, Math.min(1, (v1x * v2x + v1y * v2y) / (norm1 * norm2)));
     const angleDeg = Math.acos(cosTheta) * (180 / Math.PI);
     if (angleDeg >= 115) turns += 1;
   }
-
   return turns;
 }
 
 function computeMstLowerBoundKm(points: Array<{ latitude: number; longitude: number }>): number {
   const n = points.length;
   if (n <= 1) return 0;
-
   const visited = new Array<boolean>(n).fill(false);
   const bestEdge = new Array<number>(n).fill(Number.POSITIVE_INFINITY);
   bestEdge[0] = 0;
   let total = 0;
-
   for (let step = 0; step < n; step++) {
     let u = -1;
     let min = Number.POSITIVE_INFINITY;
     for (let i = 0; i < n; i++) {
-      if (!visited[i] && bestEdge[i] < min) {
-        min = bestEdge[i];
-        u = i;
-      }
+      if (!visited[i] && bestEdge[i] < min) { min = bestEdge[i]; u = i; }
     }
     if (u === -1) break;
     visited[u] = true;
     total += min;
-
     for (let v = 0; v < n; v++) {
       if (visited[v]) continue;
-      const dist = calculateDistance(
-        points[u].latitude,
-        points[u].longitude,
-        points[v].latitude,
-        points[v].longitude
-      );
+      const dist = calculateDistance(points[u].latitude, points[u].longitude, points[v].latitude, points[v].longitude);
       if (dist < bestEdge[v]) bestEdge[v] = dist;
     }
   }
-
   return total;
 }
+
+type LegMetric = {
+  fromTitle: string;
+  toTitle: string;
+  distanceKm: number;
+  travelMin: number;
+  gapMin: number;
+};
 
 function isLogisticsItem(item: TripItem): boolean {
   return LOGISTICS_TYPES.includes(item.type);
@@ -653,66 +826,28 @@ function isHotelMeal(item: TripItem): boolean {
   if (item.type !== 'restaurant') return false;
   const normalizedTitle = (item.title || '')
     .toLowerCase()
-    .replace(/’/g, "'")
+    .replace(/'/g, "'")
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '');
   return normalizedTitle.includes("a l'hotel") || normalizedTitle.includes('at hotel');
 }
 
 function isIntentionalGapAnchor(item: TripItem): boolean {
-  if (item.type === 'free_time' || item.type === 'checkin' || item.type === 'checkout') {
-    return true;
-  }
-  if (item.type === 'flight') {
-    return true;
-  }
+  if (item.type === 'free_time' || item.type === 'checkin' || item.type === 'checkout') return true;
+  if (item.type === 'flight') return true;
   if (item.type === 'transport' && (
     item.transportRole === 'longhaul' ||
     item.transportRole === 'hotel_depart' ||
     item.transportRole === 'hotel_return'
-  )) {
-    return true;
-  }
+  )) return true;
   return false;
 }
 
-function checkBoundaryConsistency(
-  day: TripDay,
-  warnings: string[],
-  addPenalty: (penalty: number) => void
-): void {
-  const departurePrefix = `hotel-depart-${day.dayNumber}-`;
-  const returnPrefix = `hotel-return-${day.dayNumber}-`;
-
-  for (const item of day.items) {
-    if (item.type !== 'transport') continue;
-
-    if (item.id.startsWith(departurePrefix)) {
-      const targetId = item.id.slice(departurePrefix.length);
-      const target = day.items.find((candidate) => candidate.id === targetId);
-      if (!target || !item.latitude || !item.longitude || !target.latitude || !target.longitude) continue;
-
-      const direct = calculateDistance(item.latitude, item.longitude, target.latitude, target.longitude);
-      const declared = item.distanceFromPrevious || 0;
-      if (direct > 0.2 && declared < 0.05) {
-        warnings.push(`Day ${day.dayNumber}: hotel departure "${item.title}" has incoherent 0km distance`);
-        addPenalty(6);
-      }
-    }
-
-    if (item.id.startsWith(returnPrefix)) {
-      const sourceId = item.id.slice(returnPrefix.length);
-      const source = day.items.find((candidate) => candidate.id === sourceId);
-      if (!source || !item.latitude || !item.longitude || !source.latitude || !source.longitude) continue;
-
-      const direct = calculateDistance(source.latitude, source.longitude, item.latitude, item.longitude);
-      const declared = item.distanceFromPrevious || 0;
-      if (direct > 0.2 && declared < 0.05) {
-        warnings.push(`Day ${day.dayNumber}: hotel return "${item.title}" has incoherent 0km distance`);
-        addPenalty(6);
-      }
-    }
-  }
+function isInterCityTrip(trip: Trip): boolean {
+  const origin = normalizePlaceName(trip.preferences.origin);
+  const destination = normalizePlaceName(trip.preferences.destination);
+  if (!origin || !destination) return false;
+  return origin !== destination;
 }
 
 function normalizePlaceName(value?: string): string {
@@ -724,13 +859,6 @@ function normalizePlaceName(value?: string): string {
     .trim();
 }
 
-function isInterCityTrip(trip: Trip): boolean {
-  const origin = normalizePlaceName(trip.preferences.origin);
-  const destination = normalizePlaceName(trip.preferences.destination);
-  if (!origin || !destination) return false;
-  return origin !== destination;
-}
-
 function isLonghaulItem(item: TripItem): boolean {
   if ((item.type === 'transport' || item.type === 'flight') && item.transportRole === 'longhaul') return true;
   if (item.id.startsWith('transport-out-') || item.id.startsWith('transport-ret-')) return true;
@@ -738,46 +866,10 @@ function isLonghaulItem(item: TripItem): boolean {
   return false;
 }
 
-function ensureInterCityLonghaulCoverage(
-  trip: Trip,
-  warnings: string[],
-  autoFixes: string[],
-  addPenalty: (penalty: number) => void
-): void {
-  const firstDay = trip.days[0];
-  const lastDay = trip.days[trip.days.length - 1];
-  if (!firstDay || !lastDay) return;
-
-  const hasOutbound = firstDay.items.some((item) => isLonghaulItem(item));
-  const hasReturn = lastDay.items.some((item) => isLonghaulItem(item));
-
-  if (!hasOutbound) {
-    warnings.push(`Day ${firstDay.dayNumber}: missing explicit inter-city outbound transport`);
-    addPenalty(8);
-    insertFallbackLonghaulItem(firstDay, 'outbound', trip.preferences.origin, trip.preferences.destination, {
-      transport: resolveFallbackTransportOption(trip),
-      groupSize: Math.max(1, trip.preferences.groupSize || 1),
-      date: firstDay.date,
-    });
-    autoFixes.push(`Day ${firstDay.dayNumber}: inserted fallback outbound longhaul transport`);
-  }
-
-  if (!hasReturn) {
-    warnings.push(`Day ${lastDay.dayNumber}: missing explicit inter-city return transport`);
-    addPenalty(8);
-    insertFallbackLonghaulItem(lastDay, 'return', trip.preferences.destination, trip.preferences.origin, {
-      transport: resolveFallbackTransportOption(trip),
-      groupSize: Math.max(1, trip.preferences.groupSize || 1),
-      date: lastDay.date,
-    });
-    autoFixes.push(`Day ${lastDay.dayNumber}: inserted fallback return longhaul transport`);
-  }
-}
-
 function resolveFallbackTransportOption(trip: Trip): Trip['selectedTransport'] | null {
   if (trip.selectedTransport) return trip.selectedTransport;
   if (!trip.transportOptions?.length) return null;
-  return trip.transportOptions.find((option) => option.recommended) || trip.transportOptions[0] || null;
+  return trip.transportOptions.find(option => option.recommended) || trip.transportOptions[0] || null;
 }
 
 function normalizeFallbackBookingDate(rawUrl: string | undefined, date: Date): string | undefined {
@@ -830,7 +922,6 @@ function insertFallbackLonghaulItem(
       { origin: from, destination: to },
       { date: fallbackDateStr, passengers: context.groupSize }
     );
-
     const preferredBooking = direction === 'return'
       ? (context.transport.aviasalesUrl || aviasalesUrl)
       : (context.transport.bookingUrl || context.transport.aviasalesUrl || aviasalesUrl);
@@ -906,22 +997,6 @@ function minutesToTime(totalMinutes: number): string {
   return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
 }
 
-function isGoogleRestaurantPhoto(url?: string): boolean {
-  if (!url) return false;
-  return url.includes('/api/place-photo?') || url.includes('maps.googleapis.com/maps/api/place/photo');
-}
-
-function hasNonGoogleRestaurantPhoto(item: TripItem): boolean {
-  if (item.type !== 'restaurant') return false;
-  const photoCandidates = [
-    item.imageUrl,
-    ...(item.restaurant?.photos || []),
-  ].filter((value): value is string => typeof value === 'string' && value.length > 0);
-
-  if (photoCandidates.length === 0) return false;
-  return photoCandidates.some((photo) => !isGoogleRestaurantPhoto(photo));
-}
-
 function inferRestaurantCuisineFamily(item: TripItem): string | null {
   if (item.type !== 'restaurant') return null;
   const restaurant = item.restaurant;
@@ -934,7 +1009,7 @@ function inferRestaurantCuisineFamily(item: TripItem): string | null {
 
   const families: Array<{ key: string; keywords: string[] }> = [
     { key: 'french', keywords: ['français', 'french', 'brasserie', 'bistro'] },
-    { key: 'italian', keywords: ['italien', 'italian', 'trattoria', 'pizzeria', 'osteria'] },
+    { key: 'italian', keywords: ['italien', 'italian', 'trattoria', 'pizzeria', 'osteria', 'pasta', 'carbonara'] },
     { key: 'japanese', keywords: ['japonais', 'japanese', 'sushi', 'ramen', 'izakaya'] },
     { key: 'chinese', keywords: ['chinois', 'chinese', 'dim sum', 'szechuan'] },
     { key: 'indian', keywords: ['indien', 'indian', 'curry', 'tandoori'] },
@@ -943,10 +1018,12 @@ function inferRestaurantCuisineFamily(item: TripItem): string | null {
     { key: 'middle-eastern', keywords: ['libanais', 'lebanese', 'mezze', 'shawarma'] },
     { key: 'bakery-cafe', keywords: ['boulangerie', 'bakery', 'café', 'coffee', 'brunch', 'salon de thé'] },
     { key: 'seafood', keywords: ['seafood', 'fruits de mer', 'poisson', 'fish'] },
+    { key: 'pizza', keywords: ['pizza', 'piz'] },
+    { key: 'chocolate', keywords: ['chocolat', 'chocolate', 'cocoa'] },
   ];
 
   for (const family of families) {
-    if (family.keywords.some((keyword) => text.includes(keyword))) {
+    if (family.keywords.some(keyword => text.includes(keyword))) {
       return family.key;
     }
   }

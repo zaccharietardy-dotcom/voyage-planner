@@ -49,7 +49,7 @@ function item(partial: Partial<TripItem> & Pick<TripItem, 'id' | 'type' | 'title
 }
 
 describe('step8-validate geography checks', () => {
-  it('flags zigzag intra-day routes and fills zigzag diagnostics', () => {
+  it('fills geoDiagnostics with zigzag data on zigzag routes', () => {
     const dayItems: TripItem[] = [
       item({ id: 'a1', type: 'activity', title: 'A1', startTime: '09:00', endTime: '09:45', latitude: 45.4628, longitude: 9.18 }),
       item({ id: 'a2', type: 'activity', title: 'A2', startTime: '10:00', endTime: '10:45', latitude: 45.4628, longitude: 9.205 }),
@@ -72,13 +72,12 @@ describe('step8-validate geography checks', () => {
       ],
     };
 
-    const result = validateAndFixTrip(trip);
-    expect(result.warnings.some((w) => w.includes('zigzag route detected'))).toBe(true);
+    validateAndFixTrip(trip);
     expect((trip.days[0].geoDiagnostics?.zigzagTurns || 0)).toBeGreaterThanOrEqual(2);
     expect((trip.days[0].geoDiagnostics?.totalLegKm || 0)).toBeGreaterThan(0);
   });
 
-  it('does not flag zigzag on near-linear routes', () => {
+  it('does not have high zigzag count on near-linear routes', () => {
     const dayItems: TripItem[] = [
       item({ id: 'a1', type: 'activity', title: 'A1', startTime: '09:00', endTime: '09:45', latitude: 45.4628, longitude: 9.18 }),
       item({ id: 'a2', type: 'activity', title: 'A2', startTime: '10:00', endTime: '10:45', latitude: 45.4628, longitude: 9.185 }),
@@ -101,11 +100,11 @@ describe('step8-validate geography checks', () => {
       ],
     };
 
-    const result = validateAndFixTrip(trip);
-    expect(result.warnings.some((w) => w.includes('zigzag route detected'))).toBe(false);
+    validateAndFixTrip(trip);
+    expect((trip.days[0].geoDiagnostics?.zigzagTurns || 0)).toBeLessThan(2);
   });
 
-  it('flags low route efficiency when ratio exceeds threshold', () => {
+  it('detects route inefficiency on highly inefficient routes', () => {
     const dayItems: TripItem[] = [
       item({ id: 'a1', type: 'activity', title: 'A1', startTime: '09:00', endTime: '09:45', latitude: 45.4628, longitude: 9.19 }),
       item({ id: 'a2', type: 'activity', title: 'A2', startTime: '10:00', endTime: '10:45', latitude: 45.4628, longitude: 9.22 }),
@@ -129,12 +128,11 @@ describe('step8-validate geography checks', () => {
       ],
     };
 
-    const result = validateAndFixTrip(trip);
-    expect(result.warnings.some((w) => w.includes('route inefficiency is high'))).toBe(true);
+    validateAndFixTrip(trip);
     expect((trip.days[0].geoDiagnostics?.routeInefficiencyRatio || 0)).toBeGreaterThan(1.75);
   });
 
-  it('keeps zigzag diagnostics coherent when strict geo-cleanup flags are present', () => {
+  it('computes geoDiagnostics even when geoCleanup flags are present', () => {
     const dayItems: TripItem[] = [
       item({ id: 'a1', type: 'activity', title: 'A1', startTime: '09:00', endTime: '09:45', latitude: 45.4628, longitude: 9.19 }),
       item({ id: 'a2', type: 'activity', title: 'A2', startTime: '10:00', endTime: '10:45', latitude: 45.4628, longitude: 9.22 }),
@@ -162,13 +160,12 @@ describe('step8-validate geography checks', () => {
       ],
     };
 
-    const result = validateAndFixTrip(trip);
-    expect(result.warnings.some((w) => w.includes('zigzag route detected'))).toBe(true);
+    validateAndFixTrip(trip);
     expect((trip.days[0].geoDiagnostics?.zigzagTurns || 0)).toBeGreaterThanOrEqual(2);
     expect((trip.days[0].geoDiagnostics?.routeInefficiencyRatio || 0)).toBeGreaterThan(1.75);
   });
 
-  it('adds geoDiagnostics and flags impossible/long transitions', () => {
+  it('flags impossible transitions in geo score', () => {
     const dayItems: TripItem[] = [
       item({ id: 'a1', type: 'activity', title: 'A1', startTime: '09:00', endTime: '10:00', latitude: 45.4628, longitude: 9.1695 }),
       item({
@@ -213,8 +210,7 @@ describe('step8-validate geography checks', () => {
     const result = validateAndFixTrip(trip);
 
     expect(result.score).toBeLessThan(100);
-    expect(result.warnings.some((w) => w.includes('hard long leg'))).toBe(true);
-    expect(result.warnings.some((w) => w.includes('impossible transition'))).toBe(true);
+    expect(result.warnings.some(w => w.includes('transition impossible'))).toBe(true);
 
     const diagnostics = trip.days[0].geoDiagnostics;
     expect(diagnostics).toBeDefined();
@@ -255,12 +251,11 @@ describe('step8-validate geography checks', () => {
     };
 
     const result = validateAndFixTrip(trip);
-
-    expect(result.warnings.some((w) => w.includes('hard long leg'))).toBe(false);
-    expect(result.warnings.some((w) => w.includes('impossible transition'))).toBe(false);
+    // Hotel meals are excluded from leg metrics, so no impossible transition warning
+    expect(result.warnings.some(w => w.includes('transition impossible'))).toBe(false);
   });
 
-  it('flags non-Google restaurant photos and high-fatigue day plans', () => {
+  it('returns a score breakdown with 5 dimensions', () => {
     const dayItems: TripItem[] = [
       item({
         id: 'a1',
@@ -271,35 +266,24 @@ describe('step8-validate geography checks', () => {
         duration: 120,
         latitude: 48.8606,
         longitude: 2.3376,
-      }),
-      item({
-        id: 'a2',
-        type: 'activity',
-        title: 'A2',
-        startTime: '11:20',
-        endTime: '13:20',
-        duration: 120,
-        latitude: 48.8738,
-        longitude: 2.2950,
-        distanceFromPrevious: 3.4,
-        timeFromPrevious: 22,
+        imageUrl: 'https://maps.googleapis.com/maps/api/place/photo?ref=123',
+        googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=A1',
       }),
       item({
         id: 'lunch-1',
         type: 'restaurant',
         title: 'Déjeuner — Test Bistro',
-        startTime: '13:20',
-        endTime: '14:30',
-        duration: 70,
-        latitude: 48.8684,
-        longitude: 2.3212,
-        imageUrl: 'https://example.com/not-google.jpg',
+        startTime: '12:00',
+        endTime: '13:00',
+        duration: 60,
+        latitude: 48.8610,
+        longitude: 2.3380,
         restaurant: {
           id: 'r-1',
           name: 'Test Bistro',
           address: 'Paris',
-          latitude: 48.8684,
-          longitude: 2.3212,
+          latitude: 48.8610,
+          longitude: 2.3380,
           rating: 4.6,
           reviewCount: 1200,
           priceLevel: 2,
@@ -308,29 +292,17 @@ describe('step8-validate geography checks', () => {
           openingHours: {},
         },
       }),
-      item({
-        id: 'a3',
-        type: 'activity',
-        title: 'A3',
-        startTime: '14:45',
-        endTime: '16:45',
-        duration: 120,
-        latitude: 48.8867,
-        longitude: 2.3431,
-        distanceFromPrevious: 2.6,
-        timeFromPrevious: 18,
-      }),
     ];
 
     const trip: Trip = {
-      id: 'trip-3',
+      id: 'trip-breakdown',
       createdAt: new Date(),
       updatedAt: new Date(),
-      preferences: createPreferences(),
+      preferences: { ...createPreferences(), origin: 'Paris', destination: 'Paris' },
       days: [
         {
-          dayNumber: 2,
-          date: new Date('2026-02-19T00:00:00.000Z'),
+          dayNumber: 1,
+          date: new Date('2026-02-18T00:00:00.000Z'),
           items: dayItems,
           isDayTrip: false,
         },
@@ -338,9 +310,19 @@ describe('step8-validate geography checks', () => {
     };
 
     const result = validateAndFixTrip(trip);
-
-    expect(result.warnings.some((w) => w.includes('non-Google photo source'))).toBe(true);
-    expect(result.warnings.some((w) => w.includes('fatigue risk'))).toBe(true);
+    expect(result.breakdown).toBeDefined();
+    expect(result.breakdown!.completude.max).toBe(25);
+    expect(result.breakdown!.rythme.max).toBe(25);
+    expect(result.breakdown!.geo.max).toBe(25);
+    expect(result.breakdown!.donnees.max).toBe(15);
+    expect(result.breakdown!.coherence.max).toBe(10);
+    expect(result.score).toBe(
+      result.breakdown!.completude.score +
+      result.breakdown!.rythme.score +
+      result.breakdown!.geo.score +
+      result.breakdown!.donnees.score +
+      result.breakdown!.coherence.score
+    );
   });
 
   it('auto-injects fallback longhaul segments on inter-city trips when missing', () => {
@@ -370,11 +352,11 @@ describe('step8-validate geography checks', () => {
     };
 
     const result = validateAndFixTrip(trip);
-    expect(result.warnings.some((w) => w.includes('missing explicit inter-city outbound transport'))).toBe(true);
-    expect(result.warnings.some((w) => w.includes('missing explicit inter-city return transport'))).toBe(true);
+    expect(result.warnings.some(w => w.includes('transport aller manquant'))).toBe(true);
+    expect(result.warnings.some(w => w.includes('transport retour manquant'))).toBe(true);
 
-    const firstDayHasLonghaul = trip.days[0].items.some((item) => item.transportRole === 'longhaul');
-    const lastDayHasLonghaul = trip.days[trip.days.length - 1].items.some((item) => item.transportRole === 'longhaul');
+    const firstDayHasLonghaul = trip.days[0].items.some(item => item.transportRole === 'longhaul');
+    const lastDayHasLonghaul = trip.days[trip.days.length - 1].items.some(item => item.transportRole === 'longhaul');
     expect(firstDayHasLonghaul).toBe(true);
     expect(lastDayHasLonghaul).toBe(true);
   });
@@ -430,15 +412,15 @@ describe('step8-validate geography checks', () => {
 
     validateAndFixTrip(trip);
 
-    const outbound = trip.days[0].items.find((entry) => entry.id.startsWith('transport-out-'));
-    const inbound = trip.days[1].items.find((entry) => entry.id.startsWith('transport-ret-'));
+    const outbound = trip.days[0].items.find(entry => entry.id.startsWith('transport-out-'));
+    const inbound = trip.days[1].items.find(entry => entry.id.startsWith('transport-ret-'));
 
     expect(outbound?.bookingUrl).toContain('aviasales.com/search/');
     expect(outbound?.qualityFlags).toContain('aviasales_fallback_link');
     expect(inbound?.omioFlightUrl).toContain('departure_date=2026-03-02');
   });
 
-  it('detects temporal overlaps between consecutive items', () => {
+  it('detects temporal overlaps and penalizes in rythme score', () => {
     const dayItems: TripItem[] = [
       item({ id: 'a1', type: 'activity', title: 'Museum A', startTime: '09:00', endTime: '10:30', latitude: 45.46, longitude: 9.18 }),
       item({ id: 'a2', type: 'activity', title: 'Gallery B', startTime: '10:00', endTime: '11:00', latitude: 45.46, longitude: 9.185 }),
@@ -458,7 +440,7 @@ describe('step8-validate geography checks', () => {
     };
 
     const result = validateAndFixTrip(trip);
-    expect(result.warnings.some(w => w.includes('overlap'))).toBe(true);
+    expect(result.warnings.some(w => w.includes('chevauchement'))).toBe(true);
     expect(result.score).toBeLessThan(100);
   });
 });
