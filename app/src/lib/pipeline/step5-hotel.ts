@@ -373,6 +373,20 @@ export function selectTieredHotels(
     pick3 = pickBest(expanded);
   }
 
+  // FINAL FALLBACK: If tiers are still empty (all candidates in same zone, e.g. Paris center),
+  // fill with next-best distinct candidates sorted by score (variety > distance separation)
+  const picked = new Set([pick1, pick2, pick3].filter(Boolean).map(p => p!.hotel.id));
+  const remaining = withDistance
+    .filter(c => !picked.has(c.hotel.id))
+    .sort((a, b) => scoreInTier(a.hotel, a.distance) - scoreInTier(b.hotel, b.distance));
+
+  if (!pick2 && remaining.length > 0) {
+    pick2 = remaining.shift()!;
+  }
+  if (!pick3 && remaining.length > 0) {
+    pick3 = remaining.shift()!;
+  }
+
   // Build result, removing duplicates and nulls
   const result: Accommodation[] = [];
   const seen = new Set<string>();

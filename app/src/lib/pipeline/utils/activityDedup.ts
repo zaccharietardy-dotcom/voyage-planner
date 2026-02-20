@@ -258,10 +258,14 @@ export function dedupeActivitiesBySimilarity<T extends DedupCandidate>(
   let dropped = 0;
 
   for (const activity of activities) {
-    const isDup = seen.some((existing) =>
+    const existingMatch = seen.find((existing) =>
       isDuplicateActivityCandidate(activity, existing, options)
     );
-    if (isDup) {
+    if (existingMatch) {
+      // Propagate mustSee flag from dropped duplicate to survivor (safety net)
+      if ((activity as any).mustSee && !(existingMatch as any).mustSee) {
+        (existingMatch as any).mustSee = true;
+      }
       dropped++;
       continue;
     }

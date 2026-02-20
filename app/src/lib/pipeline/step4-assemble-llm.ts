@@ -539,6 +539,11 @@ function filterDistantItems(
       );
 
       if (dist > maxDistanceKm) {
+        // Never reject must-see activities
+        if (item.mustSee) {
+          console.log(`[Pipeline V2 LLM] KEPT distant must-see "${item.title}" (${dist.toFixed(1)}km from center) on day ${day.dayNumber}`);
+          return true;
+        }
         console.log(`[Pipeline V2 LLM] REJECTED distant item "${item.title}" (${dist.toFixed(1)}km from center) on day ${day.dayNumber}`);
         return false;
       }
@@ -875,9 +880,10 @@ function enforceMinTravelGaps(days: TripDay[]): void {
       }
     }
 
-    // Remove items pushed past 23:30 (except transport/flight)
+    // Remove items pushed past 23:30 (except transport/flight/must-see)
     day.items = day.items.filter(item => {
       if (item.type === 'transport' || item.type === 'flight') return true;
+      if (item.mustSee) return true; // Never remove must-see activities
       if (parseHHMM(item.startTime) >= 23 * 60 + 30) {
         console.log(`[Travel Gap] REMOVED "${item.title}" — pushed past 23:30`);
         return false;

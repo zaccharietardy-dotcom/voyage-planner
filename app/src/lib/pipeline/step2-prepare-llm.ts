@@ -39,13 +39,13 @@ import { getMinDuration, estimateActivityCost } from './utils/constants';
  * Merges activities from all sources and removes duplicates.
  */
 function mergeAndDeduplicateActivities(data: FetchedData): Attraction[] {
-  // Concatenate all sources
+  // Concatenate all sources — MUST-SEE FIRST so they win in dedup (first-seen-wins)
   const allActivities: Attraction[] = [
+    ...data.mustSeeAttractions,        // Must-sees first: they survive dedup and keep their flag
     ...data.googlePlacesAttractions,
     ...data.serpApiAttractions,
     ...data.overpassAttractions,
     ...data.viatorActivities,
-    ...data.mustSeeAttractions,
   ];
 
   // Apply deduplication
