@@ -60,7 +60,7 @@ RÈGLES ABSOLUES :
 6. Durées réalistes : grands musées 90-120min, monuments/églises 45-75min, parcs/quartiers 45-60min, points de vue 30-45min
 7. Restaurants PROXIMITÉ STRICTE : petit-déjeuner < 1.2km de l'hôtel, déjeuner/dîner < 500m de l'activité précédente ou suivante. VÉRIFIE dans la matrice de distances que le restaurant est proche ! Si aucun restaurant n'est assez proche, choisis celui le plus proche dans la matrice.
 8. Diversité cuisine : pas 2 restaurants du même type de cuisine sur le trip
-9. Jour d'arrivée : activités légères après le check-in, surtout après 16h → balades, quartiers, points de vue panoramiques. Inclure un dîner.
+9. Jour d'arrivée : si l'heure d'arrivée est donnée, commence les activités 30min après. Si aucune heure d'arrivée n'est fournie, suppose une arrivée vers midi → NE programme RIEN avant 14h00 sur le jour 1 (pas de petit-déjeuner, pas de visite matinale). Activités légères après le check-in → balades, quartiers, points de vue. Inclure un dîner.
 10. Dernier jour : finir toutes les activités 90 minutes AVANT l'heure de départ (checkout + trajet gare/aéroport)
 11. Soirées (après 18h) : quartiers animés, balades, viewpoints, bars/aperitivo — JAMAIS de musées
 12. Météo : activités intérieures (musées, monuments couverts) les jours de pluie, extérieures (parcs, jardins, marchés, balades) les jours ensoleillés
@@ -74,6 +74,9 @@ RÈGLES ABSOLUES :
 20. DERNIER JOUR : le jour de départ DOIT inclure au moins 1 activité AVANT le checkout — jamais un jour vide
 21. GAPS MAXIMUM : jamais plus de 2h30 entre deux items consécutifs pendant les heures actives (7h-20h)
 22. VÉRIFICATION IDS : chaque activityId et restaurantId DOIT exister exactement dans les listes fournies — ne génère AUCUN ID inventé
+23. DAY TRIPS : si des day trips sont fournis dans les données, dédie UN jour complet par day trip. Structure : transport aller (hôtel → destination, mode + durée indiqués), activités sur place, déjeuner SUR PLACE (restaurants taggés pour cette destination), transport retour. Départ tôt (08:00-08:30). Toutes les activités du day trip sur le MÊME jour. Si une date est forcée (forcedDate), place le day trip exactement ce jour-là. Marque le jour avec isDayTrip: true et dayTripDestination dans le JSON.
+24. Sur les jours de day trip, NE PAS mettre d'activités de la ville principale. Seuls les restaurants et activités taggés pour cette destination.
+25. Le dîner après un day trip : si retour avant 19h, le dîner peut être en ville principale.
 
 FORMAT DE SORTIE — JSON strict, pas de texte avant ou après :
 {
@@ -82,6 +85,8 @@ FORMAT DE SORTIE — JSON strict, pas de texte avant ou après :
       "dayNumber": 1,
       "theme": "Thème court (max 6 mots)",
       "narrative": "Description de la journée (2-3 phrases max)",
+      "isDayTrip": false,
+      "dayTripDestination": null,
       "items": [
         { "type": "activity", "activityId": "exact-id-from-list", "startTime": "09:00", "endTime": "10:30", "duration": 90 },
         { "type": "restaurant", "restaurantId": "exact-id-from-list", "mealType": "lunch", "startTime": "12:30", "endTime": "13:45", "duration": 75 }
@@ -419,6 +424,21 @@ function buildUserPrompt(input: LLMPlannerInput): string {
   const lastDay = d;
   const fullDayRange = d > 2 ? `jours 2 à ${d - 1}` : 'jours pleins';
 
+  // Build day trips section for prompt
+  const dayTrips = input.trip.dayTrips || [];
+  let dayTripsSection = '';
+  if (dayTrips.length > 0) {
+    dayTripsSection = `\n\nDAY TRIPS À PLANIFIER :\n`;
+    for (const dt of dayTrips) {
+      dayTripsSection += `- ${dt.name} (excursion depuis ${input.trip.destination}): ${dt.distanceKm}km, ${dt.transportMode} ~${dt.transportDurationMin}min, ~${dt.transportCostPerPerson}€/pers\n`;
+      dayTripsSection += `  Activités sur place: [${dt.activityIds.join(', ')}]\n`;
+      dayTripsSection += `  Restaurants sur place: [${dt.restaurantIds.join(', ')}]\n`;
+      dayTripsSection += `  Journée complète: ${dt.fullDayRequired ? 'oui' : 'non'}\n`;
+      dayTripsSection += `  Date forcée: ${dt.forcedDate || 'aucune'}\n`;
+    }
+    dayTripsSection += `\nIMPORTANT: Pour chaque day trip, marque le jour avec "isDayTrip": true et "dayTripDestination": "${dayTrips[0]?.destination}" dans le JSON.`;
+  }
+
   return `DONNÉES DU VOYAGE:
 ${prettyRest}
 
@@ -430,11 +450,11 @@ CONTRAINTES CRITIQUES POUR CE VOYAGE (${d} jours):
 - ${input.restaurants.length} restaurants disponibles — utilise leurs IDs exacts
 - ${fullDayRange}: minimum 3 activités + 3 repas = 6 items par jour
 - Jour ${lastDay} (départ): minimum 1 activité AVANT le checkout
-- Aucun gap > 2h30 entre items consécutifs
+- Aucun gap > 2h30 entre items consécutifs${dayTripsSection}
 
 Planifie cet itinéraire en respectant toutes les règles. Réponds UNIQUEMENT en JSON strict selon le schéma:
 {
-  "days": [{ "dayNumber": N, "theme": "...", "narrative": "...", "items": [{ "type": "activity"|"restaurant", "activityId?": "act-N", "restaurantId?": "rest-N", "mealType?": "breakfast"|"lunch"|"dinner", "startTime": "HH:mm", "endTime": "HH:mm", "duration": N }] }],
+  "days": [{ "dayNumber": N, "theme": "...", "narrative": "...", "isDayTrip": false, "dayTripDestination": null, "items": [{ "type": "activity"|"restaurant", "activityId?": "act-N", "restaurantId?": "rest-N", "mealType?": "breakfast"|"lunch"|"dinner", "startTime": "HH:mm", "endTime": "HH:mm", "duration": N }] }],
   "unusedActivities": ["act-N", ...],
   "reasoning": "..."
 }`;
@@ -615,28 +635,29 @@ function enrichSparseDays(
       return scoreB - scoreA;
     });
 
-  // CAS 0: Fix arrival-day overlaps — shift items that start before estimated arrival
-  // Transport is injected later in step8 (150min before first item), so if the LLM
-  // scheduled items early in the morning on day 1, they'll overlap with the transport.
-  // Solution: if we know arrivalTime, remove items that would conflict.
-  if (input.trip.arrivalTime) {
-    const arrivalMin = parseHHMMLocal(input.trip.arrivalTime);
+  // CAS 0: Fix arrival-day overlaps — remove items before estimated arrival
+  // When arrivalTime is known, use it + 30min buffer.
+  // When arrivalTime is null (no flight/transport found), assume noon arrival → earliest activity at 14:00.
+  // This prevents overlaps with fallback transport injected by step8 (150min before first item).
+  {
+    const arrivalMin = input.trip.arrivalTime
+      ? parseHHMMLocal(input.trip.arrivalTime)
+      : 12 * 60; // default: noon
+    const checkinBuffer = input.trip.arrivalTime ? 30 : 120; // 30min with known arrival, 2h with assumed noon
+    const earliestActivityMin = arrivalMin + checkinBuffer;
     const firstDay = plan.days[0];
+
     if (firstDay) {
-      const checkinBuffer = 30; // 30min to get from station/airport to first activity
-      const earliestActivityMin = arrivalMin + checkinBuffer;
       const itemsBefore = (firstDay.items || []).filter((item) => {
         if (item.type !== 'activity' && item.type !== 'restaurant') return false;
         const itemStart = parseHHMMLocal(item.startTime);
         return itemStart < earliestActivityMin;
       });
       if (itemsBefore.length > 0) {
-        // Remove items that start before arrival — they'll conflict with transport
         firstDay.items = (firstDay.items || []).filter((item) => {
           if (item.type !== 'activity' && item.type !== 'restaurant') return true;
           const itemStart = parseHHMMLocal(item.startTime);
           if (itemStart < earliestActivityMin) {
-            // Return activity to unused pool if it's an activity
             if (item.type === 'activity' && item.activityId) {
               const act = activityMap.get(item.activityId);
               if (act) {
@@ -644,8 +665,9 @@ function enrichSparseDays(
                 scheduledIds.delete(item.activityId);
               }
             }
+            const arrivalLabel = input.trip.arrivalTime || 'assumed 12:00';
             console.log(
-              `[Pipeline V2 LLM] Enrichment: removed pre-arrival item "${item.activityId || item.restaurantId}" at ${item.startTime} (arrival: ${input.trip.arrivalTime})`
+              `[Pipeline V2 LLM] Enrichment: removed pre-arrival item "${item.activityId || item.restaurantId}" at ${item.startTime} (arrival: ${arrivalLabel})`
             );
             return false;
           }
@@ -665,6 +687,9 @@ function enrichSparseDays(
     const isLastDay = dayNum === numDays;
     const isFirstDay = dayNum === 1;
     const isFullDay = !isFirstDay && !isLastDay;
+
+    // Skip enrichment on day-trip days (transport takes time, gaps are normal)
+    if (day.isDayTrip) continue;
 
     const activities = (day.items || []).filter((i) => i.type === 'activity');
     const activityCount = activities.length;
@@ -727,12 +752,18 @@ function enrichSparseDays(
       }
     }
 
-    // CAS 3: Gros trous (> 90min) — max 1 insertion par jour
-    // 90min threshold catches 1h30+ gaps while preserving natural break time
+    // CAS 3: Gros trous (> 90min) — fill ALL big gaps, max 3 insertions per day
+    // After each insertion, re-compute gaps since new item splits remaining gaps
     if (unusedPool.length > 0) {
-      const gaps = findLargestGaps(day);
-      const bigGap = gaps.find((g) => g.gapMinutes >= 90);
-      if (bigGap) {
+      const MAX_GAP_FILLS_PER_DAY = 3;
+      let gapFillsThisDay = 0;
+
+      while (gapFillsThisDay < MAX_GAP_FILLS_PER_DAY && unusedPool.length > 0) {
+        day.items.sort((a, b) => a.startTime.localeCompare(b.startTime));
+        const gaps = findLargestGaps(day);
+        const bigGap = gaps.find((g) => g.gapMinutes >= 90);
+        if (!bigGap) break;
+
         const activity = unusedPool.shift()!;
         const duration = Math.min(activity.duration, bigGap.gapMinutes - 30);
         const startMin = bigGap.startMinutes + 15;
@@ -745,8 +776,9 @@ function enrichSparseDays(
         });
         scheduledIds.add(activity.id);
         enrichmentCount++;
+        gapFillsThisDay++;
         console.log(
-          `[Pipeline V2 LLM] Enrichment: filled ${bigGap.gapMinutes}min gap on day ${dayNum} with "${activity.name}"`
+          `[Pipeline V2 LLM] Enrichment: filled ${bigGap.gapMinutes}min gap on day ${dayNum} with "${activity.name}" (fill ${gapFillsThisDay}/${MAX_GAP_FILLS_PER_DAY})`
         );
       }
     }

@@ -18,6 +18,7 @@ import type {
   LLMRestaurantInput,
   LLMDistanceEntry,
 } from './types';
+import type { DayTripSuggestion } from '../services/dayTripSuggestions';
 import type {
   TripPreferences,
   Accommodation,
@@ -435,7 +436,7 @@ function formatActivityForLLM(activity: ScoredActivity): LLMActivityInput {
     openingHours: activity.openingHoursByDay || undefined,
     viatorAvailable: !!activity.viatorUrl,
     isOutdoor: activity.isOutdoor || false,
-    // description omitted to save tokens — name + type is enough for planning
+    dayTripDestination: (activity as any).dayTripDestination || undefined,
   };
 }
 
@@ -495,7 +496,80 @@ export function prepareDataForLLM(
       }
     : null;
 
-  // 9. Assemble final LLMPlannerInput
+  // 9. Merge day-trip activities and restaurants into the pools
+  const dayTripSuggestions = data.dayTripSuggestions || [];
+  const dayTripActivitiesData = data.dayTripActivities || {};
+  const dayTripRestaurantsData = data.dayTripRestaurants || {};
+
+  for (const dtName of Object.keys(dayTripActivitiesData)) {
+    const dtActivities = dayTripActivitiesData[dtName] || [];
+    // Tag and format day-trip activities, cap at 5 per destination
+    const dtScored: ScoredActivity[] = dtActivities.slice(0, 5).map((a) => ({
+      ...a,
+      score: 30, // boost to ensure selection
+      source: 'google_places' as const,
+      reviewCount: a.reviewCount || 0,
+      dayTripDestination: dtName,
+    } as any));
+    const dtFormatted = dtScored.map(formatActivityForLLM);
+    llmActivities.push(...dtFormatted);
+  }
+
+  for (const dtName of Object.keys(dayTripRestaurantsData)) {
+    const dtRestos = dayTripRestaurantsData[dtName] || [];
+    // Tag and format day-trip restaurants, cap at 4 per destination
+    const dtFormatted: LLMRestaurantInput[] = dtRestos.slice(0, 4).map((r) => ({
+      id: r.id,
+      name: r.name,
+      lat: r.latitude,
+      lng: r.longitude,
+      rating: r.rating,
+      priceLevel: r.priceLevel,
+      cuisineTypes: r.cuisineTypes || [],
+      suitableFor: classifyMealSuitability(r),
+      openingHours: r.openingHours,
+      dayTripDestination: dtName,
+    }));
+    llmRestaurants.push(...dtFormatted);
+  }
+
+  if (dayTripSuggestions.length > 0) {
+    console.log(`[Pipeline V2 LLM] Step 2: Merged day-trip data — ${Object.keys(dayTripActivitiesData).length} destinations, ${llmActivities.filter(a => a.dayTripDestination).length} DT activities, ${llmRestaurants.filter(r => r.dayTripDestination).length} DT restaurants`);
+  }
+
+  // 10. Build dayTrips array for LLM input
+  const dayTripsForLLM = dayTripSuggestions.map((dt) => {
+    const dtName = dt.destination || dt.name;
+    const dtActivityIds = llmActivities
+      .filter((a) => a.dayTripDestination === dtName)
+      .map((a) => a.id);
+    const dtRestaurantIds = llmRestaurants
+      .filter((r) => r.dayTripDestination === dtName)
+      .map((r) => r.id);
+
+    // Check if there's a forced date from pre-purchased tickets
+    const tickets = preferences.prePurchasedTickets || [];
+    const matchingTicket = tickets.find((t) => {
+      const tName = t.name.toLowerCase();
+      return tName.includes(dtName.toLowerCase()) || dtName.toLowerCase().includes(tName);
+    });
+
+    return {
+      name: dt.name,
+      destination: dtName,
+      distanceKm: dt.distanceKm,
+      transportMode: dt.transportMode,
+      transportDurationMin: dt.transportDurationMin,
+      transportCostPerPerson: dt.estimatedCostPerPerson,
+      forcedDate: matchingTicket?.date,
+      fullDayRequired: (dt as any).fullDayRequired ?? true,
+      activityIds: dtActivityIds,
+      restaurantIds: dtRestaurantIds,
+      coordinates: { lat: dt.latitude, lng: dt.longitude },
+    };
+  });
+
+  // 11. Assemble final LLMPlannerInput
   const input: LLMPlannerInput = {
     trip: {
       destination: preferences.destination,
@@ -509,6 +583,7 @@ export function prepareDataForLLM(
       departureTime,
       preferredActivities: preferences.activities,
       mustSeeRequested: preferences.mustSee || '',
+      dayTrips: dayTripsForLLM,
     },
     hotel: llmHotel,
     activities: llmActivities,

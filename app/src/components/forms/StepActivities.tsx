@@ -12,7 +12,8 @@ import {
 } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { Attraction } from '@/lib/services/attractions';
-import { Star, Clock, Ticket, Loader2 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Star, Clock, Ticket, Loader2, Plus, Trash2 } from 'lucide-react';
 
 interface StepActivitiesProps {
   data: Partial<TripPreferences>;
@@ -330,6 +331,84 @@ export function StepActivities({ data, onChange }: StepActivitiesProps) {
           onChange={(e) => onChange({ mustSee: e.target.value })}
           className="min-h-[80px] text-base resize-none"
         />
+      </div>
+
+      {/* Billets ou reservations deja achetes */}
+      <div className="space-y-4">
+        <Label className="text-base font-medium">
+          Billets ou reservations deja achetes{' '}
+          <span className="text-muted-foreground font-normal">(optionnel)</span>
+        </Label>
+        <p className="text-sm text-muted-foreground -mt-2">
+          Si vous avez deja achete des billets (Disneyland, musee, excursion...), ajoutez-les ici pour qu&apos;ils soient integres au planning.
+        </p>
+
+        {(data.prePurchasedTickets || []).map((ticket, index) => (
+          <div key={index} className="flex items-start gap-3 p-4 rounded-xl border bg-card">
+            <div className="flex-1 space-y-3">
+              <Input
+                placeholder="Nom du billet (ex: Disneyland Paris, Chateau de Versailles)"
+                value={ticket.name}
+                onChange={(e) => {
+                  const updated = [...(data.prePurchasedTickets || [])];
+                  updated[index] = { ...updated[index], name: e.target.value };
+                  onChange({ prePurchasedTickets: updated });
+                }}
+                className="text-sm"
+              />
+              <div className="flex gap-3">
+                <div className="flex-1">
+                  <Label className="text-xs text-muted-foreground mb-1 block">Date (optionnel)</Label>
+                  <Input
+                    type="date"
+                    value={ticket.date || ''}
+                    onChange={(e) => {
+                      const updated = [...(data.prePurchasedTickets || [])];
+                      updated[index] = { ...updated[index], date: e.target.value || undefined };
+                      onChange({ prePurchasedTickets: updated });
+                    }}
+                    className="text-sm"
+                  />
+                </div>
+                <div className="flex-1">
+                  <Label className="text-xs text-muted-foreground mb-1 block">Notes (optionnel)</Label>
+                  <Input
+                    placeholder="Ex: 2 adultes + 1 enfant"
+                    value={ticket.notes || ''}
+                    onChange={(e) => {
+                      const updated = [...(data.prePurchasedTickets || [])];
+                      updated[index] = { ...updated[index], notes: e.target.value || undefined };
+                      onChange({ prePurchasedTickets: updated });
+                    }}
+                    className="text-sm"
+                  />
+                </div>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                const updated = (data.prePurchasedTickets || []).filter((_, i) => i !== index);
+                onChange({ prePurchasedTickets: updated.length > 0 ? updated : undefined });
+              }}
+              className="mt-2 p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          </div>
+        ))}
+
+        <button
+          type="button"
+          onClick={() => {
+            const updated = [...(data.prePurchasedTickets || []), { name: '' }];
+            onChange({ prePurchasedTickets: updated });
+          }}
+          className="flex items-center gap-2 px-4 py-2.5 rounded-lg border-2 border-dashed border-muted-foreground/30 text-sm text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+        >
+          <Plus className="h-4 w-4" />
+          Ajouter un billet
+        </button>
       </div>
     </div>
   );

@@ -105,6 +105,13 @@ export interface TripPreferences {
   mealPreference?: 'auto' | 'mostly_cooking' | 'mostly_restaurants' | 'balanced'; // Préférence repas
   mustSee: string;
 
+  // Day trips — billets ou reservations pre-achetes
+  prePurchasedTickets?: Array<{
+    name: string;       // "Disneyland Paris", "Chateau de Versailles"
+    date?: string;      // ISO "2026-03-05" — force le jour dans le planning
+    notes?: string;     // "2 adultes + 1 enfant"
+  }>;
+
   // Multi-villes / Road trip
   tripMode?: 'precise' | 'inspired';
   cityPlan?: CityStage[];
@@ -349,8 +356,8 @@ export interface TripItem {
   timeFromPrevious?: number; // en minutes
   transportToPrevious?: 'walk' | 'car' | 'public' | 'taxi';
   // Normalized transport metadata for rendering/analytics
-  transportMode?: 'train' | 'bus' | 'car' | 'ferry' | 'walking' | 'transit';
-  transportRole?: 'longhaul' | 'hotel_depart' | 'hotel_return' | 'inter_item';
+  transportMode?: 'train' | 'bus' | 'car' | 'ferry' | 'walking' | 'transit' | 'RER' | 'metro';
+  transportRole?: 'longhaul' | 'hotel_depart' | 'hotel_return' | 'inter_item' | 'daytrip_outbound' | 'daytrip_return';
   // Informations de transport détaillées
   transitInfo?: {
     lines: { number: string; mode: 'bus' | 'metro' | 'tram' | 'train' | 'ferry'; color?: string }[];

@@ -251,8 +251,10 @@ function scoreRythme(
   // 2d. No massive dead time during the day (5 pts)
   // Gaps > 2h between activities during active hours are dead time
   // But gap between last activity and dinner (17:00-19:30) is FREE TIME — totally fine
+  // Skip gap penalty on day-trip days (transport takes time, gaps are normal)
   let gapPenaltyPts = 0;
   for (const day of trip.days) {
+    if (day.isDayTrip) continue; // Day-trip days have transport gaps — skip
     const sorted = [...day.items]
       .filter(i => !isLogisticsItem(i) && !isHotelMeal(i))
       .sort((a, b) => a.startTime.localeCompare(b.startTime));
@@ -361,8 +363,10 @@ function scoreGeo(
   details.push(`Proximité restaurants: ${restoProxScore}/8`);
 
   // 3b. No impossible transitions — can't teleport (7 pts)
+  // Skip day-trip days (transport legs are intentional long-distance moves)
   let impossibleCount = 0;
   for (const day of trip.days) {
+    if (day.isDayTrip) continue;
     const legMetrics = computeLegMetrics(day);
     for (const leg of legMetrics) {
       const speedKmh = leg.travelMin > 0 ? (leg.distanceKm / leg.travelMin) * 60 : 0;
@@ -380,12 +384,19 @@ function scoreGeo(
 
   // 3c. Average walk distance between consecutive items (5 pts)
   // Ideal: < 1km average leg. Acceptable: < 2km. Bad: > 3km
+  // Exclude excursion legs (> 10km) — these are intentional day trips
+  // (e.g., Golden Circle from Reykjavik, temple excursions in Bali) that use
+  // car/bus transport and should not penalize the walkability average.
+  const EXCURSION_THRESHOLD_KM = 10;
   const allLegs: number[] = [];
   for (const day of trip.days) {
+    if (day.isDayTrip) continue; // Exclude day-trip days from walk distance average
     const legMetrics = computeLegMetrics(day);
     allLegs.push(...legMetrics.map(l => l.distanceKm));
   }
-  const avgLeg = allLegs.length > 0 ? allLegs.reduce((a, b) => a + b, 0) / allLegs.length : 0;
+  const walkableLegs = allLegs.filter(d => d <= EXCURSION_THRESHOLD_KM);
+  const excursionLegsCount = allLegs.length - walkableLegs.length;
+  const avgLeg = walkableLegs.length > 0 ? walkableLegs.reduce((a, b) => a + b, 0) / walkableLegs.length : 0;
   let walkScore: number;
   if (avgLeg <= 0.8) walkScore = 5;
   else if (avgLeg <= 1.2) walkScore = 4;
@@ -393,19 +404,33 @@ function scoreGeo(
   else if (avgLeg <= 2.5) walkScore = 2;
   else { walkScore = 1; warnings.push(`Distance moyenne entre items: ${avgLeg.toFixed(1)}km (élevée)`); }
   score += walkScore;
-  details.push(`Distance marche moy: ${walkScore}/5 (${avgLeg.toFixed(1)}km)`);
+  const excursionNote = excursionLegsCount > 0 ? `, ${excursionLegsCount} excursions exclues` : '';
+  details.push(`Distance marche moy: ${walkScore}/5 (${avgLeg.toFixed(1)}km${excursionNote})`);
 
   // 3d. Hotel position — within reasonable distance of activities (5 pts)
+  // Exclude excursion outliers (> 10km from centroid) when computing the centroid.
+  // For destinations with day trips (Reykjavik→Golden Circle, Bali→distant temples),
+  // the centroid gets pulled far from the city, making a well-placed hotel look distant.
   const allActivityCoords = trip.days.flatMap(d =>
     d.items.filter(i => i.type === 'activity' && i.latitude && i.longitude && i.latitude !== 0)
   );
   const hotelItem = trip.days[0]?.items.find(i => i.type === 'checkin');
   let hotelScore = 0;
   if (hotelItem && hotelItem.latitude && allActivityCoords.length > 0) {
-    const centroid = {
+    const OUTLIER_THRESHOLD_KM = 10;
+    const rawCentroid = {
       lat: allActivityCoords.reduce((s, a) => s + a.latitude, 0) / allActivityCoords.length,
       lng: allActivityCoords.reduce((s, a) => s + a.longitude, 0) / allActivityCoords.length,
     };
+    const urbanActivities = allActivityCoords.filter(a =>
+      calculateDistance(rawCentroid.lat, rawCentroid.lng, a.latitude, a.longitude) <= OUTLIER_THRESHOLD_KM
+    );
+    const centroidSource = urbanActivities.length > 0 ? urbanActivities : allActivityCoords;
+    const centroid = {
+      lat: centroidSource.reduce((s, a) => s + a.latitude, 0) / centroidSource.length,
+      lng: centroidSource.reduce((s, a) => s + a.longitude, 0) / centroidSource.length,
+    };
+
     const hotelDist = calculateDistance(centroid.lat, centroid.lng, hotelItem.latitude, hotelItem.longitude);
     if (hotelDist <= 1.5) hotelScore = 5;
     else if (hotelDist <= 2.5) hotelScore = 4;

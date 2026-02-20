@@ -86,7 +86,7 @@ export function clusterActivities(
 
   for (const a of activities) {
     const dist = calculateDistance(a.latitude, a.longitude, cityCenter.lat, cityCenter.lng);
-    if (dist > 30 && allowDayTrips) {
+    if (dist > 15 && allowDayTrips) {
       dayTripActivities.push(a);
     } else {
       cityActivities.push(a);

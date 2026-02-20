@@ -11,6 +11,7 @@ import type { FetchedData } from './types';
 import { getCityCenterCoordsAsync, findNearbyAirportsAsync } from '../services/geocoding';
 import { compareTransportOptions } from '../services/transport';
 import { searchAttractionsMultiQuery, searchMustSeeAttractions, searchRestaurantsWithSerpApi } from '../services/serpApiPlaces';
+import { suggestDayTrips, generateDayTripsWithAI, type DayTripSuggestion } from '../services/dayTripSuggestions';
 import { searchAttractionsOverpass } from '../services/overpassAttractions';
 import { searchViatorActivities, getViatorProductCoordinates } from '../services/viator';
 import { findKnownViatorProduct } from '../services/viatorKnownProducts';
@@ -115,6 +116,41 @@ export async function fetchAllData(preferences: TripPreferences, onEvent?: OnPip
   endDate.setDate(endDate.getDate() + preferences.durationDays - 1);
 
   const activityTypes = preferences.activities || [];
+
+  // Phase 0b: Day-trip suggestions (curated DB + AI fallback)
+  let dayTripSuggestions: DayTripSuggestion[] = [];
+  if (preferences.durationDays >= 3) {
+    dayTripSuggestions = suggestDayTrips(destination, destCoords, {
+      durationDays: preferences.durationDays,
+      groupType: preferences.groupType,
+      budgetLevel: preferences.budgetLevel,
+      preferredActivities: activityTypes,
+      startDate,
+      prePurchasedTickets: preferences.prePurchasedTickets,
+    });
+
+    // AI fallback for uncovered destinations
+    if (dayTripSuggestions.length === 0 && preferences.durationDays >= 4) {
+      try {
+        const aiSuggestions = await generateDayTripsWithAI(destination, destCoords, {
+          durationDays: preferences.durationDays,
+          groupType: preferences.groupType,
+          budgetLevel: preferences.budgetLevel,
+          preferredActivities: activityTypes.map(String),
+        });
+        dayTripSuggestions = aiSuggestions;
+        if (aiSuggestions.length > 0) {
+          console.log(`[Pipeline V2] Phase 0b: AI generated ${aiSuggestions.length} day trip suggestions`);
+        }
+      } catch (e) {
+        console.warn('[Pipeline V2] AI day trip generation failed:', e instanceof Error ? e.message : e);
+      }
+    }
+
+    if (dayTripSuggestions.length > 0) {
+      console.log(`[Pipeline V2] Phase 0b: ${dayTripSuggestions.length} day trip(s) suggested: ${dayTripSuggestions.map(d => d.name).join(', ')}`);
+    }
+  }
 
   // Phase 1: Everything in parallel (tracked for monitoring)
   const results = await Promise.allSettled([
@@ -295,6 +331,46 @@ export async function fetchAllData(preferences: TripPreferences, onEvent?: OnPip
     console.log(`[Pipeline V2] Resolved precise Viator GPS for ${verified}/${viatorEstimated.length} activities`);
   }
 
+  // ── Fetch activities and restaurants for each day trip ──────────────────────
+  const dayTripActivities: Record<string, Attraction[]> = {};
+  const dayTripRestaurants: Record<string, import('../types').Restaurant[]> = {};
+
+  if (dayTripSuggestions.length > 0) {
+    console.log(`[Pipeline V2] Fetching data for ${dayTripSuggestions.length} day trip destination(s)...`);
+    const dayTripFetches = dayTripSuggestions.map(async (dt) => {
+      const dtCoords = { lat: dt.latitude, lng: dt.longitude };
+      const dtName = dt.destination || dt.name;
+      try {
+        const [acts, restos] = await Promise.allSettled([
+          searchGooglePlacesAttractions(dtName, dtCoords),
+          searchRestaurantsWithSerpApi(dtName, {
+            latitude: dtCoords.lat,
+            longitude: dtCoords.lng,
+            limit: 8,
+          }),
+        ]);
+
+        const activities = acts.status === 'fulfilled' ? acts.value.slice(0, 10) : [];
+        const restaurants = restos.status === 'fulfilled' ? restos.value.slice(0, 8) : [];
+
+        // Tag activities with day trip destination
+        for (const a of activities) {
+          (a as any).dayTripDestination = dtName;
+        }
+
+        dayTripActivities[dtName] = activities;
+        dayTripRestaurants[dtName] = restaurants;
+
+        console.log(`[Pipeline V2] Day trip "${dtName}": ${activities.length} activities, ${restaurants.length} restaurants`);
+      } catch (e) {
+        console.warn(`[Pipeline V2] Day trip "${dtName}" fetch failed:`, e instanceof Error ? e.message : e);
+        dayTripActivities[dtName] = [];
+        dayTripRestaurants[dtName] = [];
+      }
+    });
+    await Promise.allSettled(dayTripFetches);
+  }
+
   // ── Inject curated must-sees from hardcoded database ──────────────────────
   // When the user hasn't specified explicit must-see attractions, use our curated
   // database (attractions.ts) to inject iconic landmarks (Colisée, Vatican, etc.)
@@ -398,6 +474,9 @@ export async function fetchAllData(preferences: TripPreferences, onEvent?: OnPip
     returnFlight,
     flightAlternatives,
     weatherForecasts,
+    dayTripSuggestions,
+    dayTripActivities,
+    dayTripRestaurants,
     travelTips,
     budgetStrategy,
     resolvedBudget,

@@ -44,6 +44,8 @@ const TRANSPORT_MODE_ICONS: Record<NonNullable<TripItem['transportMode']>, React
   ferry: Ship,
   walking: Footprints,
   transit: TramFront,
+  RER: TrainFront,
+  metro: TramFront,
 };
 
 function normalizeTransportModeForUi(mode?: string): TripItem['transportMode'] | undefined {

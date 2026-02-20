@@ -90,6 +90,8 @@ const TRANSPORT_MODE_ICONS: Record<NonNullable<TripItem['transportMode']>, SvgIc
   ferry: Ship,
   walking: Footprints,
   transit: TramFront,
+  RER: TrainFront,
+  metro: TramFront,
 };
 
 const TRANSPORT_UI_V2_ENABLED = !['0', 'false', 'off'].includes(

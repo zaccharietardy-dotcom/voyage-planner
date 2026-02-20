@@ -168,18 +168,51 @@ async function generateTripV2LLM(
   const restaurantPool: Restaurant[] = [
     ...(data.tripAdvisorRestaurants || []),
     ...(data.serpApiRestaurants || []),
+    ...Object.values(data.dayTripRestaurants || {}).flat(),
   ];
+
+  // For day-trip days, fix restaurants using day-trip destination as anchor
+  // For city days, use hotel as anchor
+  const dayTripDays = trip.days.filter(d => d.isDayTrip && d.dayTripDestination);
+  const cityDays = trip.days.filter(d => !d.isDayTrip);
+
+  // Fix city days (standard behavior)
   const fixStats = await fixRestaurantOutliers(
-    trip.days,
+    cityDays,
     restaurantPool,
     preferences.destination,
     {
       allowApiFallback: true,
       breakfastMaxKm: 1.2,
-      mealMaxKm: 0.5,   // 500m max from adjacent activity
+      mealMaxKm: 0.5,
       hotelCoords: hotel ? { latitude: hotel.latitude, longitude: hotel.longitude } : undefined,
     }
   );
+
+  // Fix day-trip days using day-trip destination pool and coordinates
+  for (const dtDay of dayTripDays) {
+    const dtName = dtDay.dayTripDestination!;
+    const dtRestaurants = data.dayTripRestaurants?.[dtName] || [];
+    const dtSuggestion = data.dayTripSuggestions?.find(s => (s.destination || s.name) === dtName);
+    const dtCoords = dtSuggestion
+      ? { latitude: dtSuggestion.latitude, longitude: dtSuggestion.longitude }
+      : undefined;
+
+    if (dtRestaurants.length > 0) {
+      await fixRestaurantOutliers(
+        [dtDay],
+        dtRestaurants,
+        dtName,
+        {
+          allowApiFallback: false, // don't make extra API calls for day trips
+          breakfastMaxKm: 2.0,    // more lenient for day trips
+          mealMaxKm: 1.5,
+          hotelCoords: dtCoords,
+        }
+      );
+    }
+  }
+
   console.log(`[Pipeline V2 LLM] Step 4b: ${fixStats.replaced} restaurants swapped, ${fixStats.flaggedFallback} kept as fallback (${Date.now() - T4b}ms)`);
 
   // Step 4c: Populate restaurant alternatives (2-3 suggestions per meal)

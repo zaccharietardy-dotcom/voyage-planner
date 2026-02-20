@@ -82,13 +82,15 @@ function buildActivityMap(
 ): Map<string, ScoredActivity> {
   const activityMap = new Map<string, ScoredActivity>();
 
-  // Collect all activity sources
+  // Collect all activity sources (including day-trip activities)
   const allActivities: ScoredActivity[] = [
     ...(data.googlePlacesAttractions || []).map((a) => ({ ...a, score: 0, source: 'google_places' as const, reviewCount: a.reviewCount || 0 })),
     ...(data.serpApiAttractions || []).map((a) => ({ ...a, score: 0, source: 'serpapi' as const, reviewCount: a.reviewCount || 0 })),
     ...(data.overpassAttractions || []).map((a) => ({ ...a, score: 0, source: 'overpass' as const, reviewCount: a.reviewCount || 0 })),
     ...(data.viatorActivities || []).map((a) => ({ ...a, score: 0, source: 'viator' as const, reviewCount: a.reviewCount || 0 })),
     ...(data.mustSeeAttractions || []).map((a) => ({ ...a, score: 0, source: 'mustsee' as const, reviewCount: a.reviewCount || 0 })),
+    // Day-trip activities from all destinations
+    ...Object.values(data.dayTripActivities || {}).flat().map((a) => ({ ...a, score: 0, source: 'google_places' as const, reviewCount: a.reviewCount || 0 })),
   ];
 
   // Map each input activity ID to full data
@@ -108,10 +110,11 @@ function buildRestaurantMap(
 ): Map<string, Restaurant> {
   const restaurantMap = new Map<string, Restaurant>();
 
-  // Collect all restaurant sources
+  // Collect all restaurant sources (including day-trip restaurants)
   const allRestaurants: Restaurant[] = [
     ...(data.tripAdvisorRestaurants || []),
     ...(data.serpApiRestaurants || []),
+    ...Object.values(data.dayTripRestaurants || {}).flat(),
   ];
 
   // Map each input restaurant ID to full data
@@ -683,7 +686,66 @@ export async function assembleFromLLMPlan(
       items: buildTripItemsFromDayPlan(dayPlan, activityMap, restaurantMap, startDate),
       theme: dayPlan.theme,
       dayNarrative: dayPlan.narrative,
+      isDayTrip: dayPlan.isDayTrip || false,
+      dayTripDestination: dayPlan.dayTripDestination,
     };
+
+    // Inject day-trip transport items (outbound + return)
+    if (tripDay.isDayTrip && tripDay.dayTripDestination && input.trip.dayTrips) {
+      const dtInfo = input.trip.dayTrips.find(
+        (dt) => dt.destination === tripDay.dayTripDestination
+      );
+      if (dtInfo) {
+        const departureTime = '08:00';
+        const arrivalTime = minutesToHHMM(parseHHMM(departureTime) + dtInfo.transportDurationMin);
+
+        // Outbound transport
+        const outboundItem: TripItem = {
+          id: uuidv4(),
+          dayNumber: tripDay.dayNumber,
+          startTime: departureTime,
+          endTime: arrivalTime,
+          type: 'transport',
+          title: `${preferences.destination} → ${dtInfo.destination}`,
+          description: `${dtInfo.transportMode} (${dtInfo.transportDurationMin}min, ~${dtInfo.transportCostPerPerson}€/pers)`,
+          locationName: preferences.destination,
+          latitude: 0,
+          longitude: 0,
+          orderIndex: 0,
+          duration: dtInfo.transportDurationMin,
+          transportMode: dtInfo.transportMode as TripItem['transportMode'],
+          transportRole: 'daytrip_outbound',
+          estimatedCost: dtInfo.transportCostPerPerson * preferences.groupSize,
+        };
+        tripDay.items.unshift(outboundItem);
+
+        // Return transport — estimate return time from last item
+        const lastItem = tripDay.items[tripDay.items.length - 1];
+        const returnDepartureMin = lastItem
+          ? parseHHMM(lastItem.endTime) + 15
+          : 17 * 60; // 17:00 default
+        const returnArrivalMin = returnDepartureMin + dtInfo.transportDurationMin;
+
+        const returnItem: TripItem = {
+          id: uuidv4(),
+          dayNumber: tripDay.dayNumber,
+          startTime: minutesToHHMM(returnDepartureMin),
+          endTime: minutesToHHMM(returnArrivalMin),
+          type: 'transport',
+          title: `${dtInfo.destination} → ${preferences.destination}`,
+          description: `${dtInfo.transportMode} retour (${dtInfo.transportDurationMin}min)`,
+          locationName: dtInfo.destination,
+          latitude: dtInfo.coordinates.lat,
+          longitude: dtInfo.coordinates.lng,
+          orderIndex: tripDay.items.length,
+          duration: dtInfo.transportDurationMin,
+          transportMode: dtInfo.transportMode as TripItem['transportMode'],
+          transportRole: 'daytrip_return',
+          estimatedCost: dtInfo.transportCostPerPerson * preferences.groupSize,
+        };
+        tripDay.items.push(returnItem);
+      }
+    }
 
     tripDays.push(tripDay);
   }
@@ -698,9 +760,9 @@ export async function assembleFromLLMPlan(
     addOutboundTransportItem(day1, data.outboundFlight || null, transport, preferences);
     addReturnTransportItem(lastDay, data.returnFlight || null, transport, preferences);
 
-    // 4. Add hotel check-in/check-out
-    addHotelCheckInItem(day1, hotel, preferences);
-    addHotelCheckOutItem(lastDay, hotel);
+    // 4. Add hotel check-in/check-out (skip on day-trip days)
+    if (!day1.isDayTrip) addHotelCheckInItem(day1, hotel, preferences);
+    if (!lastDay.isDayTrip) addHotelCheckOutItem(lastDay, hotel);
   }
 
   // 5. Sort items by time within each day and compute distances

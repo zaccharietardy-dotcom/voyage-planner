@@ -3,6 +3,7 @@
  */
 
 import type { Attraction } from '../services/attractions';
+import type { DayTripSuggestion } from '../services/dayTripSuggestions';
 import type { AirportInfo } from '../services/geocoding';
 import type {
   Restaurant,
@@ -64,6 +65,11 @@ export interface FetchedData {
 
   // Weather
   weatherForecasts: { date: string; tempMin: number; tempMax: number; condition: string; icon: string; weatherCode?: number }[];
+
+  // Day Trips
+  dayTripSuggestions: DayTripSuggestion[];
+  dayTripActivities: Record<string, Attraction[]>;     // key = dayTripName (e.g. "Versailles")
+  dayTripRestaurants: Record<string, Restaurant[]>;     // key = dayTripName
 
   // Ancillary
   travelTips: any;
@@ -168,6 +174,7 @@ export interface LLMActivityInput {
   viatorAvailable: boolean;
   isOutdoor: boolean;
   description?: string;
+  dayTripDestination?: string; // non-null → activity belongs to a day trip
 }
 
 export interface LLMRestaurantInput {
@@ -180,6 +187,7 @@ export interface LLMRestaurantInput {
   cuisineTypes: string[];
   suitableFor: ('breakfast' | 'lunch' | 'dinner')[];
   openingHours?: Record<string, { open: string; close: string } | null>;
+  dayTripDestination?: string; // non-null → restaurant at day trip destination
 }
 
 export interface LLMDistanceEntry {
@@ -200,6 +208,19 @@ export interface LLMPlannerInput {
     departureTime: string | null;
     preferredActivities: string[];
     mustSeeRequested: string;
+    dayTrips: Array<{
+      name: string;
+      destination: string;           // e.g. "Versailles"
+      distanceKm: number;
+      transportMode: string;
+      transportDurationMin: number;
+      transportCostPerPerson: number;
+      forcedDate?: string;            // ISO date from prePurchasedTickets
+      fullDayRequired: boolean;
+      activityIds: string[];
+      restaurantIds: string[];
+      coordinates: { lat: number; lng: number };
+    }>;
   };
   hotel: {
     name: string;
@@ -230,6 +251,8 @@ export interface LLMDayPlan {
   theme: string;
   narrative: string;
   items: LLMDayItem[];
+  isDayTrip?: boolean;
+  dayTripDestination?: string;
 }
 
 export interface LLMPlannerOutput {

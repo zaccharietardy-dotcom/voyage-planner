@@ -61,6 +61,9 @@ function createFetchedData(activities: Attraction[]): FetchedData {
     flightAlternatives: { outbound: [], return: [] },
     weatherForecasts: [],
     travelTips: null,
+    dayTripSuggestions: [],
+    dayTripActivities: {},
+    dayTripRestaurants: {},
     budgetStrategy: {
       accommodationType: 'hotel',
       accommodationBudgetPerNight: 140,
