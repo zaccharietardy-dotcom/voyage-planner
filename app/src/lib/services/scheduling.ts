@@ -54,6 +54,29 @@ export function roundToNearestHour(date: Date): Date {
 }
 
 /**
+ * Arrondit une date au quart d'heure supérieur le plus proche.
+ * Ex: 11:13 → 11:15, 14:41 → 14:45, 10:27 → 10:30, 19:01 → 19:15, 10:00 → 10:00
+ * Arrondit toujours VERS LE HAUT (ceil) pour éviter de reculer avant le curseur.
+ */
+export function roundToNearest15Min(date: Date): Date {
+  const rounded = new Date(date);
+  rounded.setSeconds(0);
+  rounded.setMilliseconds(0);
+  const minutes = rounded.getMinutes();
+  const remainder = minutes % 15;
+  if (remainder !== 0) {
+    const roundedMinutes = minutes + (15 - remainder);
+    if (roundedMinutes === 60) {
+      rounded.setMinutes(0);
+      rounded.setHours(rounded.getHours() + 1);
+    } else {
+      rounded.setMinutes(roundedMinutes);
+    }
+  }
+  return rounded;
+}
+
+/**
  * Arrondit une date aux 5 minutes supérieures les plus proches.
  * Ex: 11:13 → 11:15, 14:41 → 14:45, 10:00 → 10:00
  * Arrondit toujours VERS LE HAUT (ceil) pour éviter de reculer avant le curseur.

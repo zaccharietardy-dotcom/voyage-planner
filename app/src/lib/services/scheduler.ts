@@ -10,7 +10,7 @@
  * @see https://en.wikipedia.org/wiki/Interval_scheduling
  */
 
-import { roundToNearestHour } from './scheduling';
+import { roundToNearest15Min } from './scheduling';
 
 export interface TimeSlot {
   start: Date;
@@ -144,15 +144,15 @@ export class DayScheduler {
       console.error(`[Scheduler] Correction appliquee: ${formatTime(startTime)}`);
     }
 
-    // Round to nearest 5 minutes for clean display times (11:15 not 11:13)
+    // Round to nearest 15 minutes for clean display times (11:15 not 11:13, 19:30 not 19:27)
     // Skip for flights and transports which have real departure times
-    if (type !== 'flight' && type !== 'transport' && type !== 'checkin') {
+    if (type !== 'flight' && type !== 'transport') {
       const minStartWithTravel = cursorTime + travelTime * 60 * 1000;
-      startTime = roundToNearestHour(startTime); // Now rounds to 5min (ceil)
+      startTime = roundToNearest15Min(startTime);
       // Ensure rounding didn't go before cursor + travel
       if (startTime.getTime() < minStartWithTravel) {
         startTime = new Date(minStartWithTravel);
-        startTime = roundToNearestHour(startTime); // Round up to next 5min
+        startTime = roundToNearest15Min(startTime);
       }
     }
 

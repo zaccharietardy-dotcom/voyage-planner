@@ -1005,6 +1005,34 @@ export async function assembleTripSchedule(
   }
 
   // ---------------------------------------------------------------------------
+  // PRE-LOOP: Enrich hotel booking URLs BEFORE items are assembled
+  // (so checkin/checkout items pick up the enriched URL via shared reference)
+  // ---------------------------------------------------------------------------
+  const checkinDate = startDate.toISOString().split('T')[0];
+  const checkoutDate = new Date(startDate);
+  checkoutDate.setDate(checkoutDate.getDate() + preferences.durationDays - 1);
+  const checkoutDateStr = checkoutDate.toISOString().split('T')[0];
+  const guests = preferences.groupSize || 2;
+
+  const enrichBookingUrl = (url: string | undefined, hotelName: string): string => normalizeHotelBookingUrl({
+    url,
+    hotelName,
+    destinationHint: preferences.destination,
+    checkIn: checkinDate,
+    checkOut: checkoutDateStr,
+    adults: guests,
+  });
+
+  if (hotel) {
+    hotel.bookingUrl = enrichBookingUrl(hotel.bookingUrl, hotel.name);
+  }
+  if (data.bookingHotels) {
+    for (const hotelOption of data.bookingHotels) {
+      hotelOption.bookingUrl = enrichBookingUrl(hotelOption.bookingUrl, hotelOption.name || '');
+    }
+  }
+
+  // ---------------------------------------------------------------------------
   // MAIN LOOP: schedule each day using pre-computed activities + directions cache
   // ---------------------------------------------------------------------------
   for (const balancedDay of plan.days) {
@@ -2645,9 +2673,16 @@ export async function assembleTripSchedule(
 
       // Generate Google Maps "search by name" URL (more reliable than GPS coordinates)
       // For restaurants, always use current restaurant name (not stale item.title)
-      const placeName = isRestaurant && currentRestaurantName
-        ? currentRestaurantName
-        : (itemData.name || item.title);
+      // For transports, use actual station name from transitLegs (not emoji-prefixed title)
+      let placeName: string | undefined;
+      if (item.type === 'transport' && itemData.transitLegs?.length > 0) {
+        const lastLeg = itemData.transitLegs[itemData.transitLegs.length - 1];
+        placeName = lastLeg.to; // e.g. "Milano Porta Garibaldi", "Repubblica"
+      } else if (isRestaurant && currentRestaurantName) {
+        placeName = currentRestaurantName;
+      } else {
+        placeName = itemData.name || item.title;
+      }
       const placeCity = preferences.destination || '';
       const googleMapsPlaceUrl = placeName
         ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(placeName + ', ' + placeCity)}`
@@ -2969,7 +3004,11 @@ export async function assembleTripSchedule(
           // Restaurant changed: clear previous image so we don't keep a stale photo.
           item.imageUrl = undefined;
           item.distanceFromPrevious = bestDist;
-          item.timeFromPrevious = Math.max(5, Math.round(bestDist * 12));
+          item.timeFromPrevious = Math.max(5, roundToNearestFive(estimateTravel(
+            { latitude: refLat, longitude: refLng },
+            { latitude: bestR.latitude, longitude: bestR.longitude },
+            directionsCache
+          )));
           item.transportToPrevious = inferInterItemTransportMode(item.distanceFromPrevious, item.timeFromPrevious);
         } else {
           // Phase 2: No pool match — queue for SerpAPI fallback
@@ -3033,7 +3072,11 @@ export async function assembleTripSchedule(
           // Restaurant changed: clear previous image so we don't keep a stale photo.
           item.imageUrl = undefined;
           item.distanceFromPrevious = bestDist;
-          item.timeFromPrevious = Math.max(5, Math.round(bestDist * 12));
+          item.timeFromPrevious = Math.max(5, roundToNearestFive(estimateTravel(
+            { latitude: c.refLat, longitude: c.refLng },
+            { latitude: bestR.latitude, longitude: bestR.longitude },
+            directionsCache
+          )));
           item.transportToPrevious = inferInterItemTransportMode(item.distanceFromPrevious, item.timeFromPrevious);
           // Also add to pool for future reference
           fullPool.push(bestR);
@@ -3626,36 +3669,39 @@ export async function assembleTripSchedule(
 
   // 13f. Final route metadata coherence pass after all swaps/re-orders.
   refreshRouteMetadataAfterMutations(days, directionsCache);
+
+  // 13g. Final cross-day dedup: catch any duplicates introduced by gap-fill or must-see recovery.
+  // Keeps the FIRST occurrence (earlier day) and removes later duplicates.
+  {
+    const globalSeenActivities: Array<{ id: string; name: string; latitude: number; longitude: number }> = [];
+    for (const day of days) {
+      const before = day.items.length;
+      day.items = day.items.filter(item => {
+        if (item.type !== 'activity') return true;
+        const candidate = { id: item.id, name: item.title, latitude: item.latitude, longitude: item.longitude };
+        const isDup = globalSeenActivities.some(existing =>
+          isDuplicateActivityCandidate(candidate, existing)
+        );
+        if (isDup) {
+          console.log(`[Pipeline V2] Final cross-day dedup: removed "${item.title}" from Day ${day.dayNumber}`);
+          return false;
+        }
+        globalSeenActivities.push(candidate);
+        return true;
+      });
+      if (day.items.length < before) {
+        day.items = day.items.map((item, idx) => ({ ...item, orderIndex: idx }));
+      }
+    }
+  }
+
   refreshScheduleDiagnostics(days);
 
   // 13. Build cost breakdown
   const costBreakdown = computeCostBreakdown(days, effectiveFlights, hotel, preferences, transport, selectedParking);
 
-  // 13b. Enrich hotel booking URLs with actual dates and guest count
-  const checkinDate = startDate.toISOString().split('T')[0];
-  const checkoutDate = new Date(startDate);
-  checkoutDate.setDate(checkoutDate.getDate() + preferences.durationDays - 1);
-  const checkoutDateStr = checkoutDate.toISOString().split('T')[0];
-  const guests = preferences.groupSize || 2;
-
-  const enrichBookingUrl = (url: string | undefined, hotelName: string): string => normalizeHotelBookingUrl({
-    url,
-    hotelName,
-    destinationHint: preferences.destination,
-    checkIn: checkinDate,
-    checkOut: checkoutDateStr,
-    adults: guests,
-  });
-
-  if (hotel) {
-    hotel.bookingUrl = enrichBookingUrl(hotel.bookingUrl, hotel.name);
-  }
-  // Also enrich alternative hotel options
-  if (data.bookingHotels) {
-    for (const hotelOption of data.bookingHotels) {
-      hotelOption.bookingUrl = enrichBookingUrl(hotelOption.bookingUrl, hotelOption.name || '');
-    }
-  }
+  // 13b. Hotel booking URL enrichment moved to PRE-LOOP section (before main loop)
+  // so checkin/checkout items pick up enriched URLs during assembly.
 
   const accommodationOptions = selectTopHotelsByBarycenter(
     clusters,

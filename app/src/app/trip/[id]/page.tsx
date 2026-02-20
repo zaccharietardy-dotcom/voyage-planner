@@ -1476,9 +1476,9 @@ export default function TripPage() {
         <div className="lg:hidden">
           {/* Mini map - always visible on planning tab, fullscreen on carte tab */}
           {mainTab !== 'carte' && !mobileMapFullscreen && (
-            <div className="mb-2">
+            <div className="sticky top-16 z-20 bg-background/95 backdrop-blur-sm">
               <div
-                className="relative rounded-2xl overflow-hidden border border-[#1e3a5f]/15 shadow-sm"
+                className="relative overflow-hidden border-b border-[#1e3a5f]/15 shadow-sm"
                 style={{ height: `${mobileMapHeight}vh` }}
               >
                 <TripMap
@@ -1507,14 +1507,14 @@ export default function TripPage() {
               </div>
               {/* Drag handle to resize */}
               <div
-                className="flex items-center justify-center py-1 cursor-row-resize touch-none select-none"
+                className="flex items-center justify-center py-0.5 cursor-row-resize touch-none select-none"
                 onPointerDown={handleDragStart}
                 onPointerMove={handleDragMove}
                 onPointerUp={handleDragEnd}
                 onPointerCancel={handleDragEnd}
               >
-                <div className="flex items-center gap-1 rounded-full bg-muted/80 px-4 py-1">
-                  <GripHorizontal className="h-4 w-4 text-muted-foreground/60" />
+                <div className="flex items-center gap-1 rounded-full bg-muted/80 px-3 py-0.5">
+                  <GripHorizontal className="h-3 w-3 text-muted-foreground/60" />
                 </div>
               </div>
             </div>
@@ -1618,21 +1618,25 @@ export default function TripPage() {
                   />
                 ) : !editMode ? (
                   <div>
-                    {/* Day pills with scroll snap */}
-                    <div className="mb-2 flex h-auto w-full flex-nowrap gap-1.5 overflow-x-auto scroll-snap-x bg-transparent p-0.5 pb-2 scrollbar-hide">
-                      {trip.days.map((day) => (
-                        <button
-                          key={day.dayNumber}
-                          onClick={() => handleDayChange(day.dayNumber.toString())}
-                          className={`relative shrink-0 rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-200 ${
-                            activeDay === day.dayNumber.toString()
-                              ? 'bg-primary text-primary-foreground shadow-md'
-                              : 'border border-[#1e3a5f]/15 bg-background/70 text-foreground hover:bg-muted/60'
-                          }`}
-                        >
-                          Jour {day.dayNumber}
-                        </button>
-                      ))}
+                    {/* Day pills - sticky below map */}
+                    <div className="sticky top-16 z-10 bg-background/95 backdrop-blur-sm border-b border-[#1e3a5f]/10 -mx-3 px-3 py-1.5"
+                      style={mainTab !== 'carte' && !mobileMapFullscreen ? { top: `calc(4rem + ${mobileMapHeight}vh + 1.5rem)` } : undefined}
+                    >
+                      <div className="flex h-auto w-full flex-nowrap gap-1.5 overflow-x-auto scroll-snap-x bg-transparent p-0.5 scrollbar-hide">
+                        {trip.days.map((day) => (
+                          <button
+                            key={day.dayNumber}
+                            onClick={() => handleDayChange(day.dayNumber.toString())}
+                            className={`relative shrink-0 rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200 ${
+                              activeDay === day.dayNumber.toString()
+                                ? 'bg-primary text-primary-foreground shadow-md'
+                                : 'border border-[#1e3a5f]/15 bg-background/70 text-foreground hover:bg-muted/60'
+                            }`}
+                          >
+                            Jour {day.dayNumber}
+                          </button>
+                        ))}
+                      </div>
                     </div>
 
                     {/* Animated day content */}

@@ -352,10 +352,9 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
       bounds.extend([item.latitude, item.longitude]);
     });
 
-    // Add flight departure coords to bounds
-    if (flightInfo?.departureCoords) {
-      bounds.extend([flightInfo.departureCoords.lat, flightInfo.departureCoords.lng]);
-    }
+    // NOTE: Departure coords intentionally NOT added to bounds.
+    // The departure marker is still displayed, but we don't want the map to zoom out
+    // to fit the departure city (e.g. Lyon) when viewing activities in the destination (e.g. Milan).
 
     // fitBounds only on first render or when items actually change
     if (bounds.isValid()) {
