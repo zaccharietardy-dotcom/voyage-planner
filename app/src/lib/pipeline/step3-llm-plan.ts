@@ -70,6 +70,10 @@ RÈGLES ABSOLUES :
 16. Horaires arrondis aux quarts d'heure : :00, :15, :30, :45
 17. Prévoir 15-20 minutes de déplacement entre items consécutifs (sauf si la matrice de distances montre plus)
 18. Le petit-déjeuner commence entre 07:30 et 09:00, le déjeuner entre 12:00 et 13:30, le dîner entre 19:00 et 21:00
+19. MINIMUM ACTIVITÉS : planifie un MINIMUM de 3 activités par jour plein et 1-2 par jour frontière (arrivée/départ)
+20. DERNIER JOUR : le jour de départ DOIT inclure au moins 1 activité AVANT le checkout — jamais un jour vide
+21. GAPS MAXIMUM : jamais plus de 2h30 entre deux items consécutifs pendant les heures actives (7h-20h)
+22. VÉRIFICATION IDS : chaque activityId et restaurantId DOIT exister exactement dans les listes fournies — ne génère AUCUN ID inventé
 
 FORMAT DE SORTIE — JSON strict, pas de texte avant ou après :
 {
@@ -149,11 +153,12 @@ export async function planWithClaude(input: LLMPlannerInput): Promise<LLMPlanner
 
     const responseText = textBlock.text;
 
-    // Parse and sanitize response
+    // Parse, sanitize, and enrich response
     const rawPlan = parseLLMResponse(responseText, input);
-    const plan = sanitizeLLMPlan(rawPlan, input);
+    const sanitized = sanitizeLLMPlan(rawPlan, input);
+    const plan = enrichSparseDays(sanitized, input);
 
-    // Validate plan (only hard errors after sanitization)
+    // Validate plan (only hard errors after sanitization + enrichment)
     const validation = validateLLMPlan(plan, input);
 
     if (!validation.valid) {
@@ -168,11 +173,11 @@ export async function planWithClaude(input: LLMPlannerInput): Promise<LLMPlanner
       );
 
       if (correctedPlan) {
-        const sanitizedRetry = sanitizeLLMPlan(correctedPlan, input);
-        const revalidation = validateLLMPlan(sanitizedRetry, input);
+        const enrichedRetry = enrichSparseDays(sanitizeLLMPlan(correctedPlan, input), input);
+        const revalidation = validateLLMPlan(enrichedRetry, input);
         if (revalidation.valid) {
-          logPlanSummary(sanitizedRetry);
-          return sanitizedRetry;
+          logPlanSummary(enrichedRetry);
+          return enrichedRetry;
         }
         console.warn('[Pipeline V2 LLM] Retry still has errors — falling back');
       }
@@ -223,9 +228,10 @@ export async function planWithGemini(input: LLMPlannerInput): Promise<LLMPlanner
             temperature: 0.3,
             maxOutputTokens: 16000,
             responseMimeType: 'application/json',
-            // Disable thinking to maximize output tokens for JSON content
-            // (thinking tokens eat into maxOutputTokens budget on 2.5 Flash)
-            thinkingConfig: { thinkingBudget: 0 },
+            // Small thinking budget: lets Gemini reason about constraints
+            // before outputting JSON. Thinking tokens billed at input rate ($0.15/1M).
+            // Cost impact: ~$0.0003 for 2048 thinking tokens.
+            thinkingConfig: { thinkingBudget: 2048 },
           },
         }),
       }),
@@ -274,11 +280,12 @@ export async function planWithGemini(input: LLMPlannerInput): Promise<LLMPlanner
     // Log first 200 chars of response for debugging
     console.log(`[Pipeline V2 LLM] Gemini response preview: ${text.slice(0, 200)}...`);
 
-    // Parse and sanitize response
+    // Parse, sanitize, and enrich response
     const rawPlan = parseLLMResponse(text, input);
-    const plan = sanitizeLLMPlan(rawPlan, input);
+    const sanitized = sanitizeLLMPlan(rawPlan, input);
+    const plan = enrichSparseDays(sanitized, input);
 
-    // Validate plan (only hard errors after sanitization)
+    // Validate plan (only hard errors after sanitization + enrichment)
     const validation = validateLLMPlan(plan, input);
 
     if (!validation.valid) {
@@ -294,11 +301,11 @@ export async function planWithGemini(input: LLMPlannerInput): Promise<LLMPlanner
       );
 
       if (correctedPlan) {
-        const sanitizedRetry = sanitizeLLMPlan(correctedPlan, input);
-        const revalidation = validateLLMPlan(sanitizedRetry, input);
+        const enrichedRetry = enrichSparseDays(sanitizeLLMPlan(correctedPlan, input), input);
+        const revalidation = validateLLMPlan(enrichedRetry, input);
         if (revalidation.valid) {
-          logPlanSummary(sanitizedRetry);
-          return sanitizedRetry;
+          logPlanSummary(enrichedRetry);
+          return enrichedRetry;
         }
         console.warn('[Pipeline V2 LLM] Gemini retry still has errors — falling back');
       }
@@ -345,7 +352,7 @@ async function retryGeminiWithCorrections(
             temperature: 0.3,
             maxOutputTokens: 16000,
             responseMimeType: 'application/json',
-            thinkingConfig: { thinkingBudget: 0 },
+            thinkingConfig: { thinkingBudget: 2048 },
           },
         }),
       }),
@@ -380,10 +387,10 @@ export type LLMPlannerModel = 'claude-sonnet-4-6' | 'gemini-2.5-flash';
 
 /**
  * Routes to the appropriate LLM planner based on LLM_PLANNER_MODEL env var.
- * Default: claude-sonnet-4-6
+ * Default: gemini-2.5-flash
  */
 export async function planWithLLM(input: LLMPlannerInput): Promise<LLMPlannerOutput> {
-  const model = (process.env.LLM_PLANNER_MODEL || 'claude-sonnet-4-6') as LLMPlannerModel;
+  const model = (process.env.LLM_PLANNER_MODEL || 'gemini-2.5-flash') as LLMPlannerModel;
 
   console.log(`[Pipeline V2 LLM] Using model: ${model}`);
 
@@ -407,11 +414,23 @@ function buildUserPrompt(input: LLMPlannerInput): string {
   const compactDistances = JSON.stringify(distances);
   const prettyRest = JSON.stringify(rest, null, 2);
 
+  const d = input.trip.durationDays;
+  const minActivities = d * 3 + 2; // 17 pour 5j
+  const lastDay = d;
+  const fullDayRange = d > 2 ? `jours 2 à ${d - 1}` : 'jours pleins';
+
   return `DONNÉES DU VOYAGE:
 ${prettyRest}
 
 MATRICE DE DISTANCES (format: "from→to": {"km":X,"walkMin":Y}):
 ${compactDistances}
+
+CONTRAINTES CRITIQUES POUR CE VOYAGE (${d} jours):
+- Minimum ${minActivities} activités au total (${input.activities.length} disponibles — utilise leurs IDs exacts)
+- ${input.restaurants.length} restaurants disponibles — utilise leurs IDs exacts
+- ${fullDayRange}: minimum 3 activités + 3 repas = 6 items par jour
+- Jour ${lastDay} (départ): minimum 1 activité AVANT le checkout
+- Aucun gap > 2h30 entre items consécutifs
 
 Planifie cet itinéraire en respectant toutes les règles. Réponds UNIQUEMENT en JSON strict selon le schéma:
 {
@@ -553,6 +572,197 @@ function sanitizeLLMPlan(plan: LLMPlannerOutput, input: LLMPlannerInput): LLMPla
     ...plan,
     days: sanitizedDays,
   };
+}
+
+// ============================================
+// Post-Sanitization Enrichment — Safety Net
+// ============================================
+
+/**
+ * Enrichit les jours creux en injectant des activités du pool inutilisé.
+ * Tourne APRÈS sanitization, AVANT validation — modifie le LLMPlannerOutput directement.
+ *
+ * Cas traités :
+ * 1. Dernier jour vide (0 activité) → injecte 1 activité avant checkout
+ * 2. Jour plein sparse (< 3 activités) → injecte dans le plus grand gap
+ * 3. Gros trous (> 150min) → injecte 1 activité dans le gap
+ */
+function enrichSparseDays(
+  plan: LLMPlannerOutput,
+  input: LLMPlannerInput
+): LLMPlannerOutput {
+  const activityMap = new Map(input.activities.map((a) => [a.id, a]));
+  const scheduledIds = new Set<string>();
+
+  // Collect scheduled IDs
+  for (const day of plan.days) {
+    for (const item of day.items || []) {
+      if (item.type === 'activity' && item.activityId) {
+        scheduledIds.add(item.activityId);
+      }
+    }
+  }
+
+  // Build unused pool sorted by quality (must-see first, then score)
+  const unusedPool = input.activities
+    .filter((a) => !scheduledIds.has(a.id))
+    .sort((a, b) => {
+      if (a.mustSee && !b.mustSee) return -1;
+      if (!a.mustSee && b.mustSee) return 1;
+      const scoreA = a.rating * Math.log2(a.reviewCount + 2);
+      const scoreB = b.rating * Math.log2(b.reviewCount + 2);
+      return scoreB - scoreA;
+    });
+
+  if (unusedPool.length === 0) return plan;
+
+  let enrichmentCount = 0;
+  const numDays = plan.days.length;
+
+  for (const day of plan.days) {
+    const dayNum = day.dayNumber;
+    const isLastDay = dayNum === numDays;
+    const isFirstDay = dayNum === 1;
+    const isFullDay = !isFirstDay && !isLastDay;
+
+    const activities = (day.items || []).filter((i) => i.type === 'activity');
+    const activityCount = activities.length;
+
+    // CAS 1: Dernier jour avec 0 activité
+    if (isLastDay && activityCount === 0 && unusedPool.length > 0) {
+      // Find time window: after breakfast, before latest departure
+      const breakfastItem = (day.items || []).find(
+        (i) => i.type === 'restaurant' && i.mealType === 'breakfast'
+      );
+      const afterBreakfast = breakfastItem ? parseHHMMLocal(breakfastItem.endTime) + 15 : 570; // 09:30
+      const departureLimit = input.trip.departureTime
+        ? parseHHMMLocal(input.trip.departureTime) - 90
+        : 660; // 11:00
+
+      const available = departureLimit - afterBreakfast;
+      if (available >= 45) {
+        const activity = unusedPool.shift()!;
+        const duration = Math.min(activity.duration, available - 15);
+        day.items.push({
+          type: 'activity',
+          activityId: activity.id,
+          startTime: minutesToHHMMLocal(afterBreakfast),
+          endTime: minutesToHHMMLocal(afterBreakfast + duration),
+          duration,
+        });
+        scheduledIds.add(activity.id);
+        enrichmentCount++;
+        console.log(
+          `[Pipeline V2 LLM] Enrichment: added "${activity.name}" to empty last day`
+        );
+      }
+    }
+
+    // CAS 2: Jour plein avec < 3 activités
+    if (isFullDay && activityCount < 3 && unusedPool.length > 0) {
+      const needed = Math.min(3 - activityCount, unusedPool.length);
+      for (let i = 0; i < needed; i++) {
+        const gaps = findLargestGaps(day);
+        const activity = unusedPool[0];
+        if (!activity) break;
+
+        const bestGap = gaps.find((g) => g.gapMinutes >= activity.duration + 30);
+        if (!bestGap) break;
+
+        unusedPool.shift();
+        const startMin = bestGap.startMinutes + 15;
+        day.items.push({
+          type: 'activity',
+          activityId: activity.id,
+          startTime: minutesToHHMMLocal(startMin),
+          endTime: minutesToHHMMLocal(startMin + activity.duration),
+          duration: activity.duration,
+        });
+        scheduledIds.add(activity.id);
+        enrichmentCount++;
+        console.log(
+          `[Pipeline V2 LLM] Enrichment: added "${activity.name}" to sparse day ${dayNum} (was ${activityCount} activities)`
+        );
+      }
+    }
+
+    // CAS 3: Gros trous (> 150min) — max 1 insertion par jour
+    if (unusedPool.length > 0) {
+      const gaps = findLargestGaps(day);
+      const bigGap = gaps.find((g) => g.gapMinutes >= 150);
+      if (bigGap) {
+        const activity = unusedPool.shift()!;
+        const duration = Math.min(activity.duration, bigGap.gapMinutes - 30);
+        const startMin = bigGap.startMinutes + 15;
+        day.items.push({
+          type: 'activity',
+          activityId: activity.id,
+          startTime: minutesToHHMMLocal(startMin),
+          endTime: minutesToHHMMLocal(startMin + duration),
+          duration,
+        });
+        scheduledIds.add(activity.id);
+        enrichmentCount++;
+        console.log(
+          `[Pipeline V2 LLM] Enrichment: filled ${bigGap.gapMinutes}min gap on day ${dayNum} with "${activity.name}"`
+        );
+      }
+    }
+
+    // Re-sort items by time
+    day.items.sort((a, b) => a.startTime.localeCompare(b.startTime));
+  }
+
+  // Update unused list
+  plan.unusedActivities = unusedPool.map((a) => a.id);
+
+  if (enrichmentCount > 0) {
+    console.log(
+      `[Pipeline V2 LLM] Enrichment complete: added ${enrichmentCount} activities`
+    );
+  }
+
+  return plan;
+}
+
+/**
+ * Find gaps between consecutive items in a day, sorted by size desc.
+ */
+function findLargestGaps(
+  day: LLMDayPlan
+): Array<{ startMinutes: number; gapMinutes: number }> {
+  if (!day.items || day.items.length < 2) return [];
+
+  const sorted = [...day.items].sort((a, b) =>
+    a.startTime.localeCompare(b.startTime)
+  );
+  const gaps: Array<{ startMinutes: number; gapMinutes: number }> = [];
+
+  for (let i = 1; i < sorted.length; i++) {
+    const prevEnd = parseHHMMLocal(sorted[i - 1].endTime);
+    const currStart = parseHHMMLocal(sorted[i].startTime);
+    const gapMinutes = currStart - prevEnd;
+    if (gapMinutes > 45) {
+      gaps.push({ startMinutes: prevEnd, gapMinutes });
+    }
+  }
+
+  return gaps.sort((a, b) => b.gapMinutes - a.gapMinutes);
+}
+
+/** Parse "HH:mm" to total minutes */
+function parseHHMMLocal(time: string): number {
+  const [h, m] = time.split(':').map(Number);
+  return (h || 0) * 60 + (m || 0);
+}
+
+/** Convert minutes to "HH:mm", rounded to :15 */
+function minutesToHHMMLocal(totalMinutes: number): string {
+  // Round to nearest 15
+  const rounded = Math.round(totalMinutes / 15) * 15;
+  const h = Math.floor(rounded / 60) % 24;
+  const m = rounded % 60;
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
 }
 
 // ============================================
