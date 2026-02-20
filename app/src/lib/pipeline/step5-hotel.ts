@@ -300,14 +300,15 @@ export function selectTieredHotels(
   const budgetMax = maxPerNight || getBudgetMaxPerNight(budgetLevel);
   const tolerance = budgetMax * 1.5;
 
+  console.log(`[Hotel Tiers] Input: ${hotels.length} hotels, budget max: ${budgetMax}/night`);
+
   // Filter candidates: valid booking URL + valid price + valid coords
   let candidates = hotels.filter(h =>
     hasValidPriceAndBookingUrl(h) &&
     h.pricePerNight <= tolerance &&
     h.latitude && h.longitude
   );
-
-  // Relax if not enough candidates
+  // Relax price tolerance if not enough candidates
   if (candidates.length < 3) {
     candidates = hotels
       .filter(h => hasValidPriceAndBookingUrl(h) && h.latitude && h.longitude)
@@ -315,8 +316,29 @@ export function selectTieredHotels(
       .slice(0, 15);
   }
 
+  // If still <3, accept hotels with valid coords + booking URL even if price is 0
+  // (API often returns price=0 for available hotels, especially central ones)
+  if (candidates.length < 3) {
+    const hasUrl = (h: Accommodation) => {
+      const url = h.bookingUrl;
+      return url && url.toLowerCase().includes('booking.com');
+    };
+    candidates = hotels
+      .filter(h => hasUrl(h) && h.latitude && h.longitude)
+      .sort((a, b) => (b.rating || 0) - (a.rating || 0))
+      .slice(0, 15);
+  }
+
+  // Last resort: any hotel with valid coords
+  if (candidates.length < 3) {
+    candidates = hotels
+      .filter(h => h.latitude && h.longitude)
+      .sort((a, b) => (b.rating || 0) - (a.rating || 0))
+      .slice(0, 15);
+  }
+
   if (candidates.length === 0) {
-    return hotels.filter(h => h.pricePerNight > 0 && h.latitude && h.longitude).slice(0, 3);
+    return [];
   }
 
   // Compute distance for each candidate
@@ -373,13 +395,16 @@ export function selectTieredHotels(
     pick3 = pickBest(expanded);
   }
 
-  // FINAL FALLBACK: If tiers are still empty (all candidates in same zone, e.g. Paris center),
-  // fill with next-best distinct candidates sorted by score (variety > distance separation)
+  // FINAL FALLBACK: If tiers are still empty (all candidates in same zone, e.g. all >5km),
+  // fill with next-best distinct candidates sorted by score
   const picked = new Set([pick1, pick2, pick3].filter(Boolean).map(p => p!.hotel.id));
   const remaining = withDistance
     .filter(c => !picked.has(c.hotel.id))
     .sort((a, b) => scoreInTier(a.hotel, a.distance) - scoreInTier(b.hotel, b.distance));
 
+  if (!pick1 && remaining.length > 0) {
+    pick1 = remaining.shift()!;
+  }
   if (!pick2 && remaining.length > 0) {
     pick2 = remaining.shift()!;
   }
