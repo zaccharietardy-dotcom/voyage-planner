@@ -138,12 +138,12 @@ export function scoreAndSelectForLLM(
   const mustSees = scored.filter((a) => a.mustSee);
   const nonMustSees = scored.filter((a) => !a.mustSee);
 
-  // Select top N non-must-sees
-  const targetNonMustSees = 8 * preferences.durationDays;
+  // Select top N non-must-sees (6 per day for variety without overwhelming the LLM)
+  const targetNonMustSees = 6 * preferences.durationDays;
   const selectedNonMustSees = nonMustSees.slice(0, targetNonMustSees);
 
-  // Combine and cap at 50
-  const selected = [...mustSees, ...selectedNonMustSees].slice(0, 50);
+  // Combine and cap at 35 (keeps prompt size manageable for Claude)
+  const selected = [...mustSees, ...selectedNonMustSees].slice(0, 35);
 
   console.log(
     `[Pipeline V2 LLM] Step 2: Selected ${selected.length} activities (${mustSees.length} must-sees, ${selected.length - mustSees.length} others)`
@@ -269,8 +269,8 @@ function selectRestaurantsForLLM(
   // Sort by score descending
   scored.sort((a, b) => b.score - a.score);
 
-  // Select top 25
-  const selected = scored.slice(0, 25).map((s) => s.restaurant);
+  // Select top 18 (enough for 3 meals/day × 5 days with some variety)
+  const selected = scored.slice(0, 18).map((s) => s.restaurant);
 
   // Map to LLMRestaurantInput
   const formatted: LLMRestaurantInput[] = selected.map((r) => ({
@@ -314,18 +314,18 @@ function buildDistanceMatrix(
 
   // Helper to add a distance entry
   function addDistance(key: string, lat1: number, lng1: number, lat2: number, lng2: number) {
-    const km = calculateDistance(lat1, lng1, lat2, lng2);
+    const km = Math.round(calculateDistance(lat1, lng1, lat2, lng2) * 100) / 100; // 2 decimal places
     const walkMin = Math.ceil((km * 1000) / 80); // 80m/min ≈ 4.8km/h
     distances[key] = { km, walkMin };
   }
 
-  // Activity to activity (if < 10km)
+  // Activity to activity (if < 5km — tighter filter to reduce token count)
   for (let i = 0; i < activities.length; i++) {
     for (let j = i + 1; j < activities.length; j++) {
       const a1 = activities[i];
       const a2 = activities[j];
       const km = calculateDistance(a1.lat, a1.lng, a2.lat, a2.lng);
-      if (km < 10) {
+      if (km < 5) {
         addDistance(`act-${i}→act-${j}`, a1.lat, a1.lng, a2.lat, a2.lng);
       }
     }
@@ -343,13 +343,13 @@ function buildDistanceMatrix(
     }
   }
 
-  // Activity to restaurant (if < 5km)
+  // Activity to restaurant (if < 3km — tighter filter to reduce token count)
   for (let i = 0; i < activities.length; i++) {
     for (let j = 0; j < restaurants.length; j++) {
       const a = activities[i];
       const r = restaurants[j];
       const km = calculateDistance(a.lat, a.lng, r.lat, r.lng);
-      if (km < 5) {
+      if (km < 3) {
         addDistance(`act-${i}→rest-${j}`, a.lat, a.lng, r.lat, r.lng);
       }
     }
@@ -424,8 +424,8 @@ function formatActivityForLLM(activity: ScoredActivity): LLMActivityInput {
     id: activity.id,
     name: activity.name,
     type: activity.type,
-    lat: activity.latitude,
-    lng: activity.longitude,
+    lat: Math.round(activity.latitude * 10000) / 10000,
+    lng: Math.round(activity.longitude * 10000) / 10000,
     duration: activity.duration || 60,
     rating: activity.rating || 0,
     reviewCount: activity.reviewCount || 0,
@@ -435,7 +435,7 @@ function formatActivityForLLM(activity: ScoredActivity): LLMActivityInput {
     openingHours: activity.openingHoursByDay || undefined,
     viatorAvailable: !!activity.viatorUrl,
     isOutdoor: activity.isOutdoor || false,
-    description: activity.description?.substring(0, 100) || undefined,
+    // description omitted to save tokens — name + type is enough for planning
   };
 }
 

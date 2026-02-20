@@ -93,7 +93,7 @@ export async function planWithClaude(input: LLMPlannerInput): Promise<LLMPlanner
         messages: [{ role: 'user', content: userPrompt }],
       }),
       new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error('Claude planning timeout (60s)')), 60000)
+        setTimeout(() => reject(new Error('Claude planning timeout (120s)')), 120000)
       ),
     ]);
 
@@ -162,8 +162,24 @@ export async function planWithClaude(input: LLMPlannerInput): Promise<LLMPlanner
 // ============================================
 
 function buildUserPrompt(input: LLMPlannerInput): string {
-  const jsonData = JSON.stringify(input, null, 2);
-  return `${jsonData}\n\nPlanifie cet itinéraire en respectant toutes les règles. Réponds UNIQUEMENT en JSON.`;
+  // Send distances in compact form (no pretty-print) to save tokens
+  // Activities and restaurants still get pretty-print for readability
+  const { distances, ...rest } = input;
+  const compactDistances = JSON.stringify(distances);
+  const prettyRest = JSON.stringify(rest, null, 2);
+
+  return `DONNÉES DU VOYAGE:
+${prettyRest}
+
+MATRICE DE DISTANCES (format: "from→to": {"km":X,"walkMin":Y}):
+${compactDistances}
+
+Planifie cet itinéraire en respectant toutes les règles. Réponds UNIQUEMENT en JSON strict selon le schéma:
+{
+  "days": [{ "dayNumber": N, "theme": "...", "narrative": "...", "items": [{ "type": "activity"|"restaurant", "activityId?": "act-N", "restaurantId?": "rest-N", "mealType?": "breakfast"|"lunch"|"dinner", "startTime": "HH:mm", "endTime": "HH:mm", "duration": N }] }],
+  "unusedActivities": ["act-N", ...],
+  "reasoning": "..."
+}`;
 }
 
 // ============================================
@@ -321,7 +337,7 @@ async function retryWithCorrections(
         ],
       }),
       new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error('Retry timeout')), 45000)
+        setTimeout(() => reject(new Error('Retry timeout (90s)')), 90000)
       ),
     ]);
 
