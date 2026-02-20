@@ -160,7 +160,7 @@ async function generateTripV2LLM(
   console.log('[Pipeline V2 LLM] === Step 4: Assembling trip... ===');
   emit(onEvent, { type: 'step_start', step: 4, stepName: 'Assembling trip' });
   const T4 = Date.now();
-  const trip = await assembleFromLLMPlan(llmPlan, llmInput, data, preferences, hotel, bestTransport, onEvent);
+  const trip = await assembleFromLLMPlan(llmPlan, llmInput, data, preferences, hotel, bestTransport, onEvent, tieredHotels);
   const step4Ms = Date.now() - T4;
   console.log(`[Pipeline V2 LLM] Step 4 done in ${step4Ms}ms`);
   emit(onEvent, { type: 'step_done', step: 4, stepName: 'Assembling trip', durationMs: step4Ms });

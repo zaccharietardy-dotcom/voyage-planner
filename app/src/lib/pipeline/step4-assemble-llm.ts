@@ -32,7 +32,6 @@ import { getMinDuration, getMaxDuration, estimateActivityCost } from './utils/co
 import { generateFlightLink, generateFlightOmioLink, formatDateForUrl } from '../services/linkGenerator';
 import { sanitizeApiKeyLeaksInString, sanitizeGoogleMapsUrl } from '../services/googlePlacePhoto';
 import { resolveOfficialTicketing } from '../services/officialTicketing';
-import { selectTieredHotels } from './step5-hotel';
 import { getAirportPreDepartureLeadMinutes } from './step7-assemble';
 
 // ============================================
@@ -48,9 +47,11 @@ function uuidv4(): string {
 }
 
 function minutesToHHMM(totalMinutes: number): string {
-  const clamped = Math.max(0, Math.min(23 * 60 + 59, Math.round(totalMinutes)));
-  const hours = Math.floor(clamped / 60);
-  const minutes = clamped % 60;
+  const clamped = Math.max(0, Math.min(23 * 60 + 55, Math.round(totalMinutes)));
+  // Round to nearest 5 minutes for clean display (no 14:56, 17:21, etc.)
+  const rounded = Math.round(clamped / 5) * 5;
+  const hours = Math.floor(rounded / 60);
+  const minutes = rounded % 60;
   return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
 }
 
@@ -1123,7 +1124,8 @@ export async function assembleFromLLMPlan(
   preferences: TripPreferences,
   hotel: Accommodation | null,
   transport: TransportOptionSummary | null,
-  onEvent?: OnPipelineEvent
+  onEvent?: OnPipelineEvent,
+  tieredHotels?: Accommodation[]
 ): Promise<Trip> {
   console.log('[Pipeline V2 LLM] Step 4: Assembling Trip from LLM plan...');
 
@@ -1285,25 +1287,11 @@ export async function assembleFromLLMPlan(
     preferences
   );
 
-  // 8. Build accommodation options (3 tiered hotels: central, comfortable, value)
+  // 8. Build accommodation options (3 tiered hotels passed from index.ts)
   const accommodationOptions: Accommodation[] = [];
-  if (data.bookingHotels && data.bookingHotels.length > 0) {
-    try {
-      const tieredHotels = selectTieredHotels(
-        [], // clusters not available in LLM flow — uses destCoords fallback
-        data.bookingHotels,
-        preferences.budgetLevel,
-        undefined,
-        preferences.durationDays,
-        { destCoords: data.destCoords }
-      );
-      if (tieredHotels.length > 0) {
-        accommodationOptions.push(...tieredHotels);
-        console.log(`[Pipeline V2 LLM] Tiered hotel options: ${tieredHotels.map(h => `${h.distanceTier}="${h.name}" (${h.distanceToCenter}km)`).join(', ')}`);
-      }
-    } catch (err) {
-      console.warn('[Pipeline V2 LLM] Failed to select tiered hotels:', err);
-    }
+  if (tieredHotels && tieredHotels.length > 0) {
+    accommodationOptions.push(...tieredHotels);
+    console.log(`[Pipeline V2 LLM] Tiered hotel options: ${tieredHotels.map(h => `${h.distanceTier}="${h.name}" (${h.distanceToCenter}km)`).join(', ')}`);
   }
 
   // 9. Build final Trip object
