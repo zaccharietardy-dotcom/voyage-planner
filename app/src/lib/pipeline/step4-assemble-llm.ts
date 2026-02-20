@@ -206,7 +206,7 @@ function buildTripItemsFromDayPlan(
         startTime: ceilToNearest15(item.startTime),
         endTime: ceilToNearest15(item.endTime),
         type: 'restaurant',
-        title: restaurant.name,
+        title: `${mealTypeLabel} — ${restaurant.name}`,
         description: restaurant.description || `${mealTypeLabel} — ${cuisineDescription}`,
         locationName: restaurant.address || restaurant.name,
         latitude: restaurant.latitude,

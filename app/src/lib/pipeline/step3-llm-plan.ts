@@ -26,7 +26,7 @@ RÈGLES ABSOLUES :
 4. Respecte les horaires d'ouverture (openingHours) — ne programme JAMAIS une visite quand c'est fermé
 5. Minimise les distances à pied entre items consécutifs — utilise la matrice de distances fournie
 6. Durées réalistes : grands musées 90-120min, monuments/églises 45-75min, parcs/quartiers 45-60min, points de vue 30-45min
-7. Restaurants : petit-déjeuner < 1.2km de l'hôtel, déjeuner/dîner < 800m de l'activité précédente ou suivante
+7. Restaurants PROXIMITÉ STRICTE : petit-déjeuner < 1.2km de l'hôtel, déjeuner/dîner < 500m de l'activité précédente ou suivante. VÉRIFIE dans la matrice de distances que le restaurant est proche ! Si aucun restaurant n'est assez proche, choisis celui le plus proche dans la matrice.
 8. Diversité cuisine : pas 2 restaurants du même type de cuisine sur le trip
 9. Jour d'arrivée : activités légères après le check-in, surtout après 16h → balades, quartiers, points de vue panoramiques. Inclure un dîner.
 10. Dernier jour : finir toutes les activités 90 minutes AVANT l'heure de départ (checkout + trajet gare/aéroport)

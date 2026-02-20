@@ -35,6 +35,9 @@ import { isDuplicateActivityCandidate } from './utils/activityDedup';
 import { prepareDataForLLM } from './step2-prepare-llm';
 import { planWithClaude } from './step3-llm-plan';
 import { assembleFromLLMPlan } from './step4-assemble-llm';
+import { fixRestaurantOutliers } from './step7-assemble';
+import { isAppropriateForMeal, isBreakfastSpecialized, getCuisineFamily } from './step4-restaurants';
+import { searchRestaurantsNearby } from '../services/serpApiPlaces';
 
 // ---------------------------------------------------------------------------
 // Pipeline Event System — emit helper
@@ -157,6 +160,32 @@ async function generateTripV2LLM(
   const step4Ms = Date.now() - T4;
   console.log(`[Pipeline V2 LLM] Step 4 done in ${step4Ms}ms`);
   emit(onEvent, { type: 'step_done', step: 4, stepName: 'Assembling trip', durationMs: step4Ms });
+
+  // Step 4b: Fix restaurant outliers (swap far restaurants for nearby ones)
+  console.log('[Pipeline V2 LLM] === Step 4b: Fixing restaurant proximity... ===');
+  const T4b = Date.now();
+  const restaurantPool: Restaurant[] = [
+    ...(data.tripAdvisorRestaurants || []),
+    ...(data.serpApiRestaurants || []),
+  ];
+  const fixStats = await fixRestaurantOutliers(
+    trip.days,
+    restaurantPool,
+    preferences.destination,
+    {
+      allowApiFallback: true,
+      breakfastMaxKm: 1.2,
+      mealMaxKm: 0.5,   // 500m max from adjacent activity
+      hotelCoords: hotel ? { latitude: hotel.latitude, longitude: hotel.longitude } : undefined,
+    }
+  );
+  console.log(`[Pipeline V2 LLM] Step 4b: ${fixStats.replaced} restaurants swapped, ${fixStats.flaggedFallback} kept as fallback (${Date.now() - T4b}ms)`);
+
+  // Step 4c: Populate restaurant alternatives (2-3 suggestions per meal)
+  console.log('[Pipeline V2 LLM] === Step 4c: Populating restaurant alternatives... ===');
+  const T4c = Date.now();
+  await populateRestaurantAlternatives(trip.days, restaurantPool, preferences.destination);
+  console.log(`[Pipeline V2 LLM] Step 4c done in ${Date.now() - T4c}ms`);
 
   // Step 5: Light validation
   console.log('[Pipeline V2 LLM] === Step 5: Validating... ===');
@@ -2900,4 +2929,126 @@ function rebalanceClustersForFlights(
       console.log(`[Pipeline V2]   Day ${c.dayNumber}: ${ms.map(a => a.name).join(', ')}`);
     }
   }
+}
+
+// ---------------------------------------------------------------------------
+// LLM Pipeline: Populate restaurant alternatives (2 diverse suggestions per meal)
+// Reuses logic from step7-assemble section 13c but as a standalone function.
+// ---------------------------------------------------------------------------
+import type { TripDay } from '../types';
+
+const ALT_SEARCH_RADIUS_KM = 1.5;
+const TARGET_ALTS = 2;
+
+async function populateRestaurantAlternatives(
+  days: TripDay[],
+  pool: Restaurant[],
+  destination: string
+): Promise<void> {
+  // Build global used set (avoid suggesting a restaurant that's already used elsewhere)
+  const globalUsedIds = new Set<string>();
+  const globalUsedNames = new Set<string>();
+  for (const day of days) {
+    for (const item of day.items) {
+      if (item.type === 'restaurant' && item.restaurant) {
+        globalUsedIds.add(item.restaurant.id || item.id);
+        if (item.restaurant.name) globalUsedNames.add(item.restaurant.name);
+      }
+    }
+  }
+
+  let totalAltsAdded = 0;
+  let apiCallCount = 0;
+
+  for (const day of days) {
+    for (const item of day.items) {
+      if (item.type !== 'restaurant') continue;
+      if (!item.restaurant) continue;
+      if (!item.latitude || !item.longitude || item.latitude === 0) continue;
+
+      const currentAlts = item.restaurantAlternatives || [];
+      if (currentAlts.length >= TARGET_ALTS) continue;
+
+      // Determine meal type from title (consistent with fixRestaurantOutliers)
+      const title = item.title || '';
+      const mealType: 'breakfast' | 'lunch' | 'dinner' =
+        title.includes('Petit-déjeuner') ? 'breakfast' :
+        title.includes('Déjeuner') ? 'lunch' : 'dinner';
+
+      const refLat = item.latitude;
+      const refLng = item.longitude;
+      const primaryFamily = getCuisineFamily(item.restaurant);
+      const currentAltIds = new Set(currentAlts.map((a: Restaurant) => a.id));
+      const usedFamilies = new Set<string>([primaryFamily, ...currentAlts.map((a: Restaurant) => getCuisineFamily(a))]);
+
+      // Search pool for candidates within radius
+      const candidates: { r: Restaurant; dist: number; family: string }[] = [];
+      for (const r of pool) {
+        if (r.id === (item.restaurant.id || item.id)) continue;
+        if (currentAltIds.has(r.id)) continue;
+        if (globalUsedIds.has(r.id) || globalUsedNames.has(r.name)) continue;
+        if (!r.latitude || !r.longitude) continue;
+        if (!isAppropriateForMeal(r, mealType)) continue;
+        if (mealType === 'breakfast' && !isBreakfastSpecialized(r)) continue;
+        const dist = calculateDistance(refLat, refLng, r.latitude, r.longitude);
+        if (dist <= ALT_SEARCH_RADIUS_KM) {
+          candidates.push({ r, dist, family: getCuisineFamily(r) });
+        }
+      }
+      candidates.sort((a, b) => a.dist - b.dist);
+
+      const newAlts: Restaurant[] = [...currentAlts];
+
+      // Pass 1: pick diverse cuisines first
+      for (const c of candidates) {
+        if (newAlts.length >= TARGET_ALTS) break;
+        if (!usedFamilies.has(c.family)) {
+          newAlts.push(c.r);
+          usedFamilies.add(c.family);
+        }
+      }
+      // Pass 2: fill remaining with closest
+      for (const c of candidates) {
+        if (newAlts.length >= TARGET_ALTS) break;
+        if (!newAlts.some((a: Restaurant) => a.id === c.r.id)) {
+          newAlts.push(c.r);
+        }
+      }
+
+      // If pool didn't have enough, try SerpAPI (max 3 API calls total)
+      if (newAlts.length < TARGET_ALTS && apiCallCount < 3) {
+        try {
+          apiCallCount++;
+          const apiResults = await searchRestaurantsNearby(
+            { lat: refLat, lng: refLng },
+            destination,
+            { mealType, maxDistance: 1500, limit: 5 }
+          );
+          if (apiResults.length > 0) pool.push(...apiResults);
+          for (const r of apiResults) {
+            if (newAlts.length >= TARGET_ALTS) break;
+            if (r.id === (item.restaurant.id || item.id)) continue;
+            if (newAlts.some((a: Restaurant) => a.id === r.id)) continue;
+            if (globalUsedNames.has(r.name)) continue;
+            if (!r.latitude || !r.longitude) continue;
+            if (!isAppropriateForMeal(r, mealType)) continue;
+            if (mealType === 'breakfast' && !isBreakfastSpecialized(r)) continue;
+            const dist = calculateDistance(refLat, refLng, r.latitude, r.longitude);
+            if (dist <= ALT_SEARCH_RADIUS_KM) {
+              newAlts.push(r);
+            }
+          }
+        } catch {
+          // Non-blocking: keep what we have
+        }
+      }
+
+      if (newAlts.length > currentAlts.length) {
+        item.restaurantAlternatives = newAlts.slice(0, TARGET_ALTS);
+        totalAltsAdded += newAlts.length - currentAlts.length;
+      }
+    }
+  }
+
+  console.log(`[Pipeline V2 LLM] Restaurant alternatives: ${totalAltsAdded} alternatives added`);
 }
