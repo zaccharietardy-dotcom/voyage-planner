@@ -30,6 +30,13 @@ import {
 import { isDuplicateActivityCandidate } from './utils/activityDedup';
 
 // ---------------------------------------------------------------------------
+// Pipeline V2 LLM — New imports
+// ---------------------------------------------------------------------------
+import { prepareDataForLLM } from './step2-prepare-llm';
+import { planWithClaude } from './step3-llm-plan';
+import { assembleFromLLMPlan } from './step4-assemble-llm';
+
+// ---------------------------------------------------------------------------
 // Pipeline Event System — emit helper
 // ---------------------------------------------------------------------------
 function emit(onEvent: OnPipelineEvent | undefined, partial: Omit<import('./types').PipelineEvent, 'timestamp'>) {
@@ -37,9 +44,140 @@ function emit(onEvent: OnPipelineEvent | undefined, partial: Omit<import('./type
 }
 
 /**
- * Generate a trip using Pipeline V2.
+ * Generate a trip — routes to LLM or Algorithmic pipeline based on PIPELINE_VERSION env var.
  */
 export async function generateTripV2(
+  preferences: TripPreferences,
+  onEvent?: OnPipelineEvent
+): Promise<Trip> {
+  const version = process.env.PIPELINE_VERSION || 'v2-llm';
+
+  if (version === 'v2-llm') {
+    console.log('[Pipeline V2] Using LLM pipeline (Claude as primary planner)');
+    return generateTripV2LLM(preferences, onEvent);
+  }
+
+  console.log('[Pipeline V2] Using algorithmic pipeline (legacy)');
+  return generateTripV2Algorithmic(preferences, onEvent);
+}
+
+/**
+ * Pipeline V2 LLM — Claude Sonnet as primary trip planner.
+ * Steps: fetchData → prepareForLLM → planWithClaude → assembleTrip → validate
+ */
+async function generateTripV2LLM(
+  preferences: TripPreferences,
+  onEvent?: OnPipelineEvent
+): Promise<Trip> {
+  const T0 = Date.now();
+
+  // Step 1: Fetch all data in parallel (UNCHANGED from algorithmic pipeline)
+  console.log('[Pipeline V2 LLM] === Step 1: Fetching data... ===');
+  emit(onEvent, { type: 'step_start', step: 1, stepName: 'Fetching data' });
+  const data = await fetchAllData(preferences, onEvent);
+  const step1Ms = Date.now() - T0;
+  console.log(`[Pipeline V2 LLM] Step 1 done in ${step1Ms}ms`);
+  emit(onEvent, { type: 'step_done', step: 1, stepName: 'Fetching data', durationMs: step1Ms });
+
+  // Resolve transport (same logic as algorithmic pipeline)
+  let bestTransport: TransportOptionSummary | null = null;
+  if (preferences.transport && preferences.transport !== 'optimal' && data.transportOptions?.length) {
+    bestTransport = data.transportOptions.find(t => t.mode === preferences.transport) || null;
+    if (!bestTransport) {
+      bestTransport = data.transportOptions.find(t => t.recommended) || data.transportOptions[0] || null;
+    }
+  } else {
+    bestTransport = data.transportOptions?.find(t => t.recommended) || data.transportOptions?.[0] || null;
+  }
+
+  // Step 2: Select hotel + prepare data for LLM
+  console.log('[Pipeline V2 LLM] === Step 2: Preparing data for Claude... ===');
+  emit(onEvent, { type: 'step_start', step: 2, stepName: 'Preparing data for Claude' });
+  const T2 = Date.now();
+
+  // Select hotel using existing barycenter logic (need minimal clusters for hotel selection)
+  // We'll use a simple approach: compute centroid from all activities
+  const allAttractions = [
+    ...data.googlePlacesAttractions,
+    ...data.serpApiAttractions,
+    ...data.viatorActivities,
+    ...data.mustSeeAttractions,
+  ].filter(a => a.latitude && a.longitude);
+
+  // Build minimal single-cluster for hotel selection
+  const centroid = allAttractions.length > 0
+    ? {
+        lat: allAttractions.reduce((s, a) => s + a.latitude, 0) / allAttractions.length,
+        lng: allAttractions.reduce((s, a) => s + a.longitude, 0) / allAttractions.length,
+      }
+    : data.destCoords;
+
+  const minimalCluster: ActivityCluster = {
+    dayNumber: 1,
+    activities: [],
+    centroid,
+    totalIntraDistance: 0,
+  };
+
+  const hotel = selectHotelByBarycenter(
+    [minimalCluster],
+    data.bookingHotels,
+    preferences.budgetLevel,
+    undefined,
+    preferences.durationDays,
+    { destination: preferences.destination }
+  );
+
+  if (hotel) {
+    console.log(`[Pipeline V2 LLM] Hotel selected: "${hotel.name}" (${hotel.rating}★, €${hotel.pricePerNight}/night)`);
+  } else {
+    console.warn('[Pipeline V2 LLM] No hotel selected from pool');
+  }
+
+  const llmInput = prepareDataForLLM(data, preferences, hotel, bestTransport, data.outboundFlight, data.returnFlight);
+  console.log(`[Pipeline V2 LLM] Step 2 done in ${Date.now() - T2}ms`);
+  emit(onEvent, { type: 'step_done', step: 2, stepName: 'Preparing data for Claude', durationMs: Date.now() - T2,
+    detail: `${llmInput.activities.length} activities, ${llmInput.restaurants.length} restaurants, ${Object.keys(llmInput.distances).length} distance pairs` });
+
+  // Step 3: Claude planning
+  console.log('[Pipeline V2 LLM] === Step 3: Claude planning... ===');
+  emit(onEvent, { type: 'step_start', step: 3, stepName: 'Claude planning' });
+  const T3 = Date.now();
+  const llmPlan = await planWithClaude(llmInput);
+  const step3Ms = Date.now() - T3;
+  console.log(`[Pipeline V2 LLM] Step 3 done in ${step3Ms}ms — ${llmPlan.days.length} days planned`);
+  emit(onEvent, { type: 'step_done', step: 3, stepName: 'Claude planning', durationMs: step3Ms,
+    detail: `${llmPlan.days.length} days, ${llmPlan.days.reduce((s, d) => s + d.items.length, 0)} items` });
+
+  // Step 4: Assemble Trip from LLM plan
+  console.log('[Pipeline V2 LLM] === Step 4: Assembling trip... ===');
+  emit(onEvent, { type: 'step_start', step: 4, stepName: 'Assembling trip' });
+  const T4 = Date.now();
+  const trip = await assembleFromLLMPlan(llmPlan, llmInput, data, preferences, hotel, bestTransport, onEvent);
+  const step4Ms = Date.now() - T4;
+  console.log(`[Pipeline V2 LLM] Step 4 done in ${step4Ms}ms`);
+  emit(onEvent, { type: 'step_done', step: 4, stepName: 'Assembling trip', durationMs: step4Ms });
+
+  // Step 5: Light validation
+  console.log('[Pipeline V2 LLM] === Step 5: Validating... ===');
+  emit(onEvent, { type: 'step_start', step: 5, stepName: 'Validating trip' });
+  const T5 = Date.now();
+  const validated = validateAndFixTrip(trip);
+  console.log(`[Pipeline V2 LLM] Step 5 done in ${Date.now() - T5}ms — score: ${validated.score}/100`);
+  emit(onEvent, { type: 'step_done', step: 5, stepName: 'Validating trip', durationMs: Date.now() - T5,
+    detail: `Score: ${validated.score}/100, warnings: ${validated.warnings.length}` });
+
+  const totalMs = Date.now() - T0;
+  console.log(`[Pipeline V2 LLM] === Total pipeline time: ${totalMs}ms ===`);
+
+  // validateAndFixTrip modifies trip in-place, just return it
+  return trip;
+}
+
+/**
+ * Pipeline V2 Algorithmic — Original 8-step pipeline (archived, still functional).
+ */
+async function generateTripV2Algorithmic(
   preferences: TripPreferences,
   onEvent?: OnPipelineEvent
 ): Promise<Trip> {

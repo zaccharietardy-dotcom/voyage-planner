@@ -147,3 +147,93 @@ export interface BalancedPlan {
   days: BalancedDay[];
   dayOrderReason: string;
 }
+
+// ============================================
+// Pipeline V2 LLM — Types
+// ============================================
+
+export interface LLMActivityInput {
+  id: string;
+  name: string;
+  type: string;
+  lat: number;
+  lng: number;
+  duration: number;
+  rating: number;
+  reviewCount: number;
+  mustSee: boolean;
+  estimatedCost: number;
+  bookingRequired: boolean;
+  openingHours?: Record<string, { open: string; close: string } | null>;
+  viatorAvailable: boolean;
+  isOutdoor: boolean;
+  description?: string;
+}
+
+export interface LLMRestaurantInput {
+  id: string;
+  name: string;
+  lat: number;
+  lng: number;
+  rating: number;
+  priceLevel: number;
+  cuisineTypes: string[];
+  suitableFor: ('breakfast' | 'lunch' | 'dinner')[];
+  openingHours?: Record<string, { open: string; close: string } | null>;
+}
+
+export interface LLMDistanceEntry {
+  km: number;
+  walkMin: number;
+}
+
+export interface LLMPlannerInput {
+  trip: {
+    destination: string;
+    origin: string;
+    startDate: string;
+    durationDays: number;
+    groupType: string;
+    groupSize: number;
+    budgetLevel: string;
+    arrivalTime: string | null;
+    departureTime: string | null;
+    preferredActivities: string[];
+    mustSeeRequested: string;
+  };
+  hotel: {
+    name: string;
+    lat: number;
+    lng: number;
+    checkIn: string;
+    checkOut: string;
+  } | null;
+  activities: LLMActivityInput[];
+  restaurants: LLMRestaurantInput[];
+  distances: Record<string, LLMDistanceEntry>;
+  weather: { day: number; condition: string; tempMin: number; tempMax: number }[];
+}
+
+// Output de Claude
+export interface LLMDayItem {
+  type: 'activity' | 'restaurant';
+  activityId?: string;
+  restaurantId?: string;
+  mealType?: 'breakfast' | 'lunch' | 'dinner';
+  startTime: string;
+  endTime: string;
+  duration: number;
+}
+
+export interface LLMDayPlan {
+  dayNumber: number;
+  theme: string;
+  narrative: string;
+  items: LLMDayItem[];
+}
+
+export interface LLMPlannerOutput {
+  days: LLMDayPlan[];
+  unusedActivities: string[];
+  reasoning: string;
+}
