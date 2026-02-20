@@ -359,6 +359,25 @@ function addReturnTransportItem(
       // Keep duration but departure/arrival times will be estimated
     }));
 
+    // Update dates to last day
+    const lastDayDate = lastDay.date;
+    if (lastDayDate) {
+      const dateStr = lastDayDate instanceof Date
+        ? lastDayDate.toISOString().split('T')[0]
+        : String(lastDayDate).split('T')[0];
+
+      for (const leg of reversedLegs) {
+        if (leg.departure) {
+          const timepart = leg.departure.split('T')[1] || '17:00:00';
+          leg.departure = `${dateStr}T${timepart}`;
+        }
+        if (leg.arrival) {
+          const timepart = leg.arrival.split('T')[1] || '19:00:00';
+          leg.arrival = `${dateStr}T${timepart}`;
+        }
+      }
+    }
+
     const returnFirstLeg = reversedLegs[0];
     const returnLastLeg = reversedLegs[reversedLegs.length - 1];
 
@@ -494,6 +513,81 @@ function addHotelCheckOutItem(lastDay: TripDay, hotel: Accommodation | null): vo
 }
 
 // ============================================
+// Filter items too far from destination center
+// ============================================
+
+function filterDistantItems(
+  days: TripDay[],
+  destCoords: { lat: number; lng: number },
+  maxDistanceKm: number = 10
+): void {
+  for (const day of days) {
+    if (day.isDayTrip) continue; // Day trips can be far
+
+    const beforeCount = day.items.length;
+    day.items = day.items.filter(item => {
+      // Keep transport, checkin, checkout, flights
+      if (['transport', 'flight', 'checkin', 'checkout'].includes(item.type)) return true;
+
+      // Keep items without coords
+      if (!item.latitude || !item.longitude) return true;
+
+      const dist = calculateDistance(
+        destCoords.lat, destCoords.lng,
+        item.latitude, item.longitude
+      );
+
+      if (dist > maxDistanceKm) {
+        console.log(`[Pipeline V2 LLM] REJECTED distant item "${item.title}" (${dist.toFixed(1)}km from center) on day ${day.dayNumber}`);
+        return false;
+      }
+      return true;
+    });
+
+    if (day.items.length !== beforeCount) {
+      // Re-index
+      day.items.forEach((item, idx) => { item.orderIndex = idx; });
+    }
+  }
+}
+
+// ============================================
+// Remove cross-day duplicate activities and restaurants
+// ============================================
+
+function removeCrossDayDuplicates(days: TripDay[]): void {
+  const seenActivities = new Set<string>();
+  const seenRestaurants = new Set<string>();
+
+  for (const day of days) {
+    day.items = day.items.filter(item => {
+      if (item.type === 'activity') {
+        // Deduplicate by title (normalized)
+        const key = item.title.toLowerCase().trim();
+        if (seenActivities.has(key)) {
+          console.log(`[Pipeline V2 LLM] REMOVED duplicate activity "${item.title}" on day ${day.dayNumber}`);
+          return false;
+        }
+        seenActivities.add(key);
+      }
+      if (item.type === 'restaurant') {
+        // Deduplicate by restaurant name (not meal type — same restaurant shouldn't appear twice across days)
+        const restaurantName = item.restaurant?.name?.toLowerCase().trim();
+        if (restaurantName && seenRestaurants.has(restaurantName)) {
+          console.log(`[Pipeline V2 LLM] REMOVED duplicate restaurant "${item.title}" on day ${day.dayNumber}`);
+          return false;
+        }
+        if (restaurantName) seenRestaurants.add(restaurantName);
+      }
+      return true;
+    });
+
+    // Re-index
+    day.items.forEach((it, idx) => { it.orderIndex = idx; });
+  }
+}
+
+// ============================================
 // Ensure breakfast exists on every day
 // ============================================
 
@@ -574,18 +668,23 @@ function resolveScheduleConflicts(
 
     if (isFirstDay && longhaulTransport) {
       const arrivalMin = parseHHMM(longhaulTransport.endTime);
-      const bufferMin = arrivalMin + 60; // 60min buffer after arrival
+      let cursor = arrivalMin + 60; // 60min buffer after arrival
 
-      // Push any activities/restaurants that start before arrival + buffer
-      for (const item of day.items) {
-        if (item.type === 'transport' || item.type === 'flight') continue;
-        if (item.type === 'checkin') continue; // check-in can be after
-        const startMin = parseHHMM(item.startTime);
-        if (startMin < bufferMin && item.id !== longhaulTransport.id) {
-          const duration = parseHHMM(item.endTime) - startMin;
-          item.startTime = minutesToHHMM(bufferMin);
-          item.endTime = minutesToHHMM(bufferMin + duration);
-        }
+      // Sort items that need pushing by their original startTime
+      const pushableItems = day.items
+        .filter(item => {
+          if (item.type === 'transport' || item.type === 'flight') return false;
+          if (item.type === 'checkin') return false;
+          if (item.id === longhaulTransport.id) return false;
+          return parseHHMM(item.startTime) < cursor;
+        })
+        .sort((a, b) => parseHHMM(a.startTime) - parseHHMM(b.startTime));
+
+      for (const item of pushableItems) {
+        const duration = parseHHMM(item.endTime) - parseHHMM(item.startTime);
+        item.startTime = minutesToHHMM(cursor);
+        item.endTime = minutesToHHMM(cursor + Math.max(duration, 15));
+        cursor = cursor + Math.max(duration, 15) + 15; // 15min gap between items
       }
     }
 
@@ -1005,6 +1104,9 @@ export async function assembleFromLLMPlan(
     if (!lastDay.isDayTrip) addHotelCheckOutItem(lastDay, hotel);
   }
 
+  // 4a. Remove cross-day duplicate activities and restaurants
+  removeCrossDayDuplicates(tripDays);
+
   // 4b. Ensure breakfast exists on every day
   for (let i = 0; i < tripDays.length; i++) {
     const day = tripDays[i];
@@ -1019,6 +1121,9 @@ export async function assembleFromLLMPlan(
       data.destCoords
     );
   }
+
+  // 4b2. Filter items too far from destination center on non-day-trip days
+  filterDistantItems(tripDays, data.destCoords);
 
   // 4c. Resolve schedule conflicts (arrival buffer, checkout ordering, overlaps)
   resolveScheduleConflicts(tripDays, transport, hotel);
