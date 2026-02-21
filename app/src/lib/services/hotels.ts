@@ -365,47 +365,16 @@ export async function searchHotels(
   if (isRapidApiBookingConfigured()) {
     try {
 
+      // Single call with popularity sort, no price constraint
+      // Price filtering happens later in selectTieredHotels — here we want diversity
+      // (review_score + price filters were biased towards peripheral studios)
       let bookingHotels = await searchHotelsWithBookingApi(destination, checkInStr, checkOutStr, {
         guests: options.guests,
         rooms: 1,
-        minPrice: priceRange.min,
-        maxPrice: priceRange.max,
-        minStars: targetStars,
-        sortBy: options.budgetLevel === 'economic' ? 'price' : 'review_score',
+        minStars: Math.max(1, targetStars - 1),
+        sortBy: 'popularity',
         limit: 15,
       });
-
-      // If strict filters return very few results, run a relaxed pass.
-      // This avoids ending up with a single, often excentré, option.
-      if (bookingHotels.length > 0 && bookingHotels.length < 4) {
-        const strictCount = bookingHotels.length;
-        const relaxedHotels = await searchHotelsWithBookingApi(destination, checkInStr, checkOutStr, {
-          guests: options.guests,
-          rooms: 1,
-          maxPrice: Math.round(Math.max(priceRange.max * 1.6, priceRange.hardMax)),
-          minStars: Math.max(1, targetStars - 1),
-          sortBy: 'review_score',
-          limit: 30,
-        });
-
-        if (relaxedHotels.length > bookingHotels.length) {
-          const merged = new Map<string, BookingHotel>();
-          for (const hotel of [...bookingHotels, ...relaxedHotels]) {
-            const idKey = hotel.id?.trim();
-            const nameKey = normalizeHotelNameForAvailability(hotel.name || '');
-            const key = idKey || nameKey;
-            if (!key) continue;
-            if (!merged.has(key)) {
-              merged.set(key, hotel);
-            }
-          }
-          bookingHotels = Array.from(merged.values());
-          console.log(
-            `[Hotels] Booking pass relax: ${bookingHotels.length} options retained ` +
-            `(strict=${strictCount}, relaxed=${relaxedHotels.length})`
-          );
-        }
-      }
 
       if (bookingHotels.length > 0) {
         const hotels: Accommodation[] = bookingHotels.map((h: BookingHotel) => {

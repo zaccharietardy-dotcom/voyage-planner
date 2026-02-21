@@ -347,70 +347,43 @@ export function selectTieredHotels(
     distance: calculateDistance(center.lat, center.lng, h.latitude, h.longitude),
   }));
 
-  // Define tier boundaries
-  const TIER_1_MAX = 2.0;  // km
-  const TIER_2_MAX = 5.0;  // km
-  const TIER_3_MAX = 8.0;  // km
+  // Simple approach: cheapest hotel within each distance radius
+  // Tier 1 "Central": cheapest within 2km
+  // Tier 2 "Comfortable": cheapest within 5km (different from pick1)
+  // Tier 3 "Value": cheapest within 8km (different from pick1 & pick2)
+  const TIER_RADII = [2.0, 5.0, 8.0] as const;
 
-  // Partition into tiers
-  const tier1 = withDistance.filter(c => c.distance <= TIER_1_MAX);
-  const tier2 = withDistance.filter(c => c.distance > TIER_1_MAX && c.distance <= TIER_2_MAX);
-  const tier3 = withDistance.filter(c => c.distance > TIER_2_MAX && c.distance <= TIER_3_MAX);
+  // Sort by price first (cheapest wins), then by rating as tiebreaker
+  const sortedByPrice = [...withDistance].sort((a, b) => {
+    const priceA = a.hotel.pricePerNight || 9999;
+    const priceB = b.hotel.pricePerNight || 9999;
+    if (priceA !== priceB) return priceA - priceB;
+    return (b.hotel.rating || 0) - (a.hotel.rating || 0); // Higher rating wins tiebreaker
+  });
 
-  // Score function: within each tier, prioritize rating and price
-  const scoreInTier = (h: Accommodation, dist: number): number => {
-    const ratingNorm = Math.max(0, Math.min(1, normalizeHotelRating(h) / 10));
-    const ratingBoost = 0.5 + ratingNorm * 0.5; // Stronger rating weight within tier
-    const overBudgetPenalty = h.pricePerNight > budgetMax
-      ? ((h.pricePerNight - budgetMax) / Math.max(1, budgetMax)) * 3
-      : 0;
-    const distanceScore = dist * 0.3; // Reduced weight — tier already constrains distance
-    return (distanceScore + overBudgetPenalty) / ratingBoost; // Lower = better
+  const pickCheapestWithin = (
+    maxDist: number,
+    exclude: Set<string>
+  ): typeof withDistance[0] | null => {
+    return sortedByPrice.find(c => c.distance <= maxDist && !exclude.has(c.hotel.id)) || null;
   };
 
-  const pickBest = (bucket: typeof withDistance): typeof withDistance[0] | null => {
-    if (bucket.length === 0) return null;
-    return bucket.sort((a, b) => scoreInTier(a.hotel, a.distance) - scoreInTier(b.hotel, b.distance))[0];
-  };
+  const usedIds = new Set<string>();
 
-  let pick1 = pickBest(tier1);
-  let pick2 = pickBest(tier2);
-  let pick3 = pickBest(tier3);
+  let pick1 = pickCheapestWithin(TIER_RADII[0], usedIds);
+  if (pick1) usedIds.add(pick1.hotel.id);
 
-  // Fallback: if tier 1 is empty, expand to 3km
-  if (!pick1) {
-    const expanded = withDistance.filter(c => c.distance <= 3.0);
-    pick1 = pickBest(expanded);
-  }
+  let pick2 = pickCheapestWithin(TIER_RADII[1], usedIds);
+  if (pick2) usedIds.add(pick2.hotel.id);
 
-  // Fallback: if tier 2 is empty, expand range
-  if (!pick2) {
-    const expanded = withDistance.filter(c => c.distance > 1.5 && c.distance <= 6.0 && c !== pick1);
-    pick2 = pickBest(expanded);
-  }
+  let pick3 = pickCheapestWithin(TIER_RADII[2], usedIds);
+  if (pick3) usedIds.add(pick3.hotel.id);
 
-  // Fallback: if tier 3 is empty, expand to 10km
-  if (!pick3) {
-    const expanded = withDistance.filter(c => c.distance > 4.0 && c.distance <= 10.0 && c !== pick1 && c !== pick2);
-    pick3 = pickBest(expanded);
-  }
-
-  // FINAL FALLBACK: If tiers are still empty (all candidates in same zone, e.g. all >5km),
-  // fill with next-best distinct candidates sorted by score
-  const picked = new Set([pick1, pick2, pick3].filter(Boolean).map(p => p!.hotel.id));
-  const remaining = withDistance
-    .filter(c => !picked.has(c.hotel.id))
-    .sort((a, b) => scoreInTier(a.hotel, a.distance) - scoreInTier(b.hotel, b.distance));
-
-  if (!pick1 && remaining.length > 0) {
-    pick1 = remaining.shift()!;
-  }
-  if (!pick2 && remaining.length > 0) {
-    pick2 = remaining.shift()!;
-  }
-  if (!pick3 && remaining.length > 0) {
-    pick3 = remaining.shift()!;
-  }
+  // Fallback: if any tier is empty, fill from remaining candidates (any distance)
+  const remaining = sortedByPrice.filter(c => !usedIds.has(c.hotel.id));
+  if (!pick1 && remaining.length > 0) { pick1 = remaining.shift()!; usedIds.add(pick1.hotel.id); }
+  if (!pick2 && remaining.length > 0) { pick2 = remaining.shift()!; usedIds.add(pick2.hotel.id); }
+  if (!pick3 && remaining.length > 0) { pick3 = remaining.shift()!; usedIds.add(pick3.hotel.id); }
 
   // Build result, removing duplicates and nulls
   const result: Accommodation[] = [];
