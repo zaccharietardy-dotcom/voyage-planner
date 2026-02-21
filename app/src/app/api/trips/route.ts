@@ -38,10 +38,10 @@ export async function GET() {
 
     const serviceClient = getServiceClient();
 
-    // Voyages propriétaires
+    // Voyages propriétaires (exclure generator_ip de la réponse)
     const { data: ownedTrips, error: ownedTripsError } = await serviceClient
       .from('trips')
-      .select('*')
+      .select('id, owner_id, name, title, destination, start_date, end_date, duration_days, preferences, data, share_code, visibility, created_at, updated_at')
       .eq('owner_id', user.id)
       .order('created_at', { ascending: false });
 
@@ -70,12 +70,14 @@ export async function GET() {
       });
     }
 
-    let invitedTrips: Database['public']['Tables']['trips']['Row'][] = [];
+    // Type partiel pour les trips sans champs sensibles
+    type TripWithoutSensitive = Omit<Database['public']['Tables']['trips']['Row'], 'generator_ip' | 'cloned_from' | 'clone_count'>;
+    let invitedTrips: TripWithoutSensitive[] = [];
     const invitedTripIds = Array.from(membershipByTripId.keys());
     if (invitedTripIds.length > 0) {
       const { data: invitedRows, error: invitedTripsError } = await serviceClient
         .from('trips')
-        .select('*')
+        .select('id, owner_id, name, title, destination, start_date, end_date, duration_days, preferences, data, share_code, visibility, created_at, updated_at')
         .in('id', invitedTripIds);
 
       if (invitedTripsError) {
@@ -149,6 +151,10 @@ export async function POST(request: Request) {
     endDateObj.setDate(endDateObj.getDate() + (durationDays || 7) - 1);
     const endDateStr = endDateObj.toISOString().split('T')[0];
 
+    // Capturer l'IP pour l'anti-abus multi-comptes
+    const forwarded = request.headers.get('x-forwarded-for');
+    const generatorIp = forwarded?.split(',')[0]?.trim() || request.headers.get('x-real-ip') || null;
+
     const insertData = {
       owner_id: user.id,
       name: tripName,
@@ -160,6 +166,7 @@ export async function POST(request: Request) {
       preferences: tripData.preferences || {},
       data: tripData || {},
       share_code: shareCode,
+      ...(generatorIp && { generator_ip: generatorIp }),
     };
 
     // Créer le voyage
@@ -171,12 +178,10 @@ export async function POST(request: Request) {
 
     if (tripError) {
       console.error('[API/trips] Error creating trip:', tripError);
-      return NextResponse.json({
-        error: tripError.message,
-        code: tripError.code,
-        details: tripError.details,
-        hint: tripError.hint,
-      }, { status: 500 });
+      return NextResponse.json(
+        { error: 'Erreur lors de la création du voyage' },
+        { status: 500 }
+      );
     }
 
     // Ajouter le créateur comme membre owner
@@ -196,7 +201,9 @@ export async function POST(request: Request) {
       });
     } catch { /* ignore */ }
 
-    return NextResponse.json({ ...trip, userRole: 'owner' });
+    // Exclure generator_ip de la réponse (donnée sensible pour anti-abus)
+    const { generator_ip, ...tripWithoutIp } = trip;
+    return NextResponse.json({ ...tripWithoutIp, userRole: 'owner' });
   } catch (error) {
     console.error('Error creating trip:', error);
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });

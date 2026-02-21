@@ -1,6 +1,7 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { createClient } from '@supabase/supabase-js';
+import { checkRateLimit } from '@/lib/server/rateLimit';
 
 function getResend() {
   const key = process.env.RESEND_API_KEY;
@@ -15,7 +16,22 @@ const supabaseAdmin = createClient(
   { auth: { autoRefreshToken: false, persistSession: false } }
 );
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  // Rate limiting: 3 req/hour (expensive email sending)
+  const forwarded = request.headers.get('x-forwarded-for');
+  const ip = forwarded?.split(',')[0]?.trim() || request.headers.get('x-real-ip') || 'unknown';
+
+  const rateLimit = checkRateLimit(ip, { windowMs: 3600_000, maxRequests: 3 });
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { error: 'Too many requests' },
+      {
+        status: 429,
+        headers: { 'Retry-After': String(Math.ceil((rateLimit.resetAt - Date.now()) / 1000)) }
+      }
+    );
+  }
+
   try {
     const { email, firstName } = await request.json();
 

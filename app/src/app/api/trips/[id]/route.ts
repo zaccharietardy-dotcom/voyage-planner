@@ -55,9 +55,10 @@ export async function GET(
     const serviceClient = getServiceClient();
     const { data: { user } } = await supabase.auth.getUser();
 
+    // Exclure generator_ip de la réponse (donnée sensible pour anti-abus)
     const { data: trip, error: tripError } = await serviceClient
       .from('trips')
-      .select('*')
+      .select('id, owner_id, name, title, destination, start_date, end_date, duration_days, preferences, data, share_code, visibility, created_at, updated_at')
       .eq('id', id)
       .maybeSingle();
 
@@ -188,7 +189,8 @@ export async function GET(
           profile: {
             displayName: profile?.display_name || 'Utilisateur',
             avatarUrl: profile?.avatar_url ?? null,
-            email: profile?.email || '',
+            // Ne pas exposer les emails des autres membres (privacy)
+            email: member.user_id === user?.id ? (profile?.email || '') : '',
           },
         };
       });

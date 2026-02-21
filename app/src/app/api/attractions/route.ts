@@ -11,6 +11,7 @@ import { ActivityType } from '@/lib/types';
 import { tokenTracker } from '@/lib/services/tokenTracker';
 import { searchAttractionsWithSerpApi, isSerpApiPlacesConfigured } from '@/lib/services/serpApiPlaces';
 import { getCityCenterCoords } from '@/lib/services/geocoding';
+import { checkRateLimit } from '@/lib/server/rateLimit';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -157,6 +158,21 @@ Réponds UNIQUEMENT avec un tableau JSON valide, sans texte avant ou après.`;
 }
 
 export async function GET(request: NextRequest) {
+  // Rate limiting: 5 req/min, 20 req/hour (expensive Claude AI calls)
+  const forwarded = request.headers.get('x-forwarded-for');
+  const ip = forwarded?.split(',')[0]?.trim() || request.headers.get('x-real-ip') || 'unknown';
+
+  const rateLimit = checkRateLimit(ip, { windowMs: 60_000, maxRequests: 5 });
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { error: 'Too many requests' },
+      {
+        status: 429,
+        headers: { 'Retry-After': String(Math.ceil((rateLimit.resetAt - Date.now()) / 1000)) }
+      }
+    );
+  }
+
   const { searchParams } = new URL(request.url);
   const destination = searchParams.get('destination') || searchParams.get('city');
   const forceRefresh = searchParams.get('forceRefresh') === 'true';
@@ -272,6 +288,21 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  // Rate limiting: 5 req/min (same as GET)
+  const forwarded = request.headers.get('x-forwarded-for');
+  const ip = forwarded?.split(',')[0]?.trim() || request.headers.get('x-real-ip') || 'unknown';
+
+  const rateLimit = checkRateLimit(ip, { windowMs: 60_000, maxRequests: 5 });
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { error: 'Too many requests' },
+      {
+        status: 429,
+        headers: { 'Retry-After': String(Math.ceil((rateLimit.resetAt - Date.now()) / 1000)) }
+      }
+    );
+  }
+
   // Permet aussi de rechercher via POST avec body
   const body = await request.json();
   const { destination, forceRefresh, types } = body;

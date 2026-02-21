@@ -6,8 +6,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAttractions } from '@/lib/services/attractions';
 import { searchAttractionsWithSerpApi, isSerpApiPlacesConfigured } from '@/lib/services/serpApiPlaces';
+import { checkRateLimit } from '@/lib/server/rateLimit';
 
 export async function GET(request: NextRequest) {
+  // Rate limiting: 20 req/min
+  const forwarded = request.headers.get('x-forwarded-for');
+  const ip = forwarded?.split(',')[0]?.trim() || request.headers.get('x-real-ip') || 'unknown';
+
+  const rateLimit = checkRateLimit(ip, { windowMs: 60_000, maxRequests: 20 });
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { error: 'Too many requests' },
+      {
+        status: 429,
+        headers: { 'Retry-After': String(Math.ceil((rateLimit.resetAt - Date.now()) / 1000)) }
+      }
+    );
+  }
+
   try {
     const { searchParams } = new URL(request.url);
     const query = searchParams.get('q') || '';
