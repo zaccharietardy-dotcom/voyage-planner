@@ -52,6 +52,7 @@ export async function GET(request: Request) {
       return NextResponse.json(data || []);
     } else {
       // List accepted close friends
+      // Note: user.id comes from Supabase auth (line 36), so it's safe from injection
       const { data } = await supabase
         .from('close_friends')
         .select(`

@@ -8,6 +8,13 @@ export async function PATCH(
 ) {
   try {
     const { id } = await params;
+
+    // Validate UUID format to prevent PostgREST injection via .or()
+    const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!UUID_REGEX.test(id)) {
+      return NextResponse.json({ error: 'ID invalide' }, { status: 400 });
+    }
+
     const supabase = await createRouteHandlerClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
@@ -41,10 +48,18 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
+
+    // Validate UUID format to prevent PostgREST injection via .or()
+    const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!UUID_REGEX.test(id)) {
+      return NextResponse.json({ error: 'ID invalide' }, { status: 400 });
+    }
+
     const supabase = await createRouteHandlerClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
 
+    // Note: user.id is from Supabase auth, safe for .or()
     const { error } = await supabase
       .from('close_friends')
       .delete()

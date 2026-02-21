@@ -10,7 +10,14 @@ export async function GET(request: NextRequest) {
     return NextResponse.json([]);
   }
 
-  const searchTerm = `%${query}%`;
+  // Sanitize query to prevent PostgREST injection via .or()
+  // Remove special PostgREST syntax characters: commas, parentheses, periods, semicolons
+  const sanitized = query.replace(/[,().;]/g, '').trim();
+  if (!sanitized) {
+    return NextResponse.json([]);
+  }
+
+  const searchTerm = `%${sanitized}%`;
 
   const { data: profiles, error } = await (supabase
     .from('profiles') as any)

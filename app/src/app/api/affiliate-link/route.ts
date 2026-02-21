@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { checkRateLimit } from '@/lib/server/rateLimit';
 
 /**
  * API Route: Génération de liens affiliés via Travelpayouts Partner Links API
@@ -31,6 +32,21 @@ interface TravelpayoutsResponse {
 }
 
 export async function POST(request: NextRequest) {
+  // Rate limiting: 10 req/min
+  const forwarded = request.headers.get('x-forwarded-for');
+  const ip = forwarded?.split(',')[0]?.trim() || request.headers.get('x-real-ip') || 'unknown';
+
+  const rateLimit = checkRateLimit(ip, { windowMs: 60_000, maxRequests: 10 });
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { error: 'Too many requests' },
+      {
+        status: 429,
+        headers: { 'Retry-After': String(Math.ceil((rateLimit.resetAt - Date.now()) / 1000)) }
+      }
+    );
+  }
+
   try {
     const body = await request.json();
 

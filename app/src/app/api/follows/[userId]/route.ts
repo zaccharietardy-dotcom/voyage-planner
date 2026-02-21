@@ -8,6 +8,13 @@ export async function DELETE(
 ) {
   try {
     const { userId } = await params;
+
+    // Validate UUID format to prevent PostgREST injection via .or()
+    const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!UUID_REGEX.test(userId)) {
+      return NextResponse.json({ error: 'ID invalide' }, { status: 400 });
+    }
+
     const supabase = await createRouteHandlerClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
@@ -32,6 +39,13 @@ export async function GET(
 ) {
   try {
     const { userId } = await params;
+
+    // Validate UUID format to prevent PostgREST injection via .or()
+    const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!UUID_REGEX.test(userId)) {
+      return NextResponse.json({ error: 'ID invalide' }, { status: 400 });
+    }
+
     const supabase = await createRouteHandlerClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
@@ -43,6 +57,7 @@ export async function GET(
       .eq('following_id', userId)
       .single();
 
+    // Note: user.id is from Supabase auth, userId is validated as UUID above, safe for .or()
     const { data: closeFriend } = await supabase
       .from('close_friends')
       .select('id, status')

@@ -42,11 +42,12 @@ export async function POST(request: NextRequest) {
     const billingState = deriveBillingState(profile, entitlements);
 
     if (billingState.status !== 'pro') {
+      // --- Quota par compte : max FREE_MONTHLY_LIMIT trips/mois ---
       const startOfMonth = new Date();
       startOfMonth.setDate(1);
       startOfMonth.setHours(0, 0, 0, 0);
 
-      const { count } = await supabase
+      const { count: userCount } = await supabase
         .from('trips')
         .select('*', { count: 'exact', head: true })
         .eq('owner_id', user.id)
@@ -54,11 +55,31 @@ export async function POST(request: NextRequest) {
 
       const totalAllowed = FREE_MONTHLY_LIMIT + (profile?.extra_trips || 0);
 
-      if (count !== null && count >= totalAllowed) {
+      if (userCount !== null && userCount >= totalAllowed) {
         return NextResponse.json(
           { error: 'Limite de voyages gratuits atteinte. Passez à Pro pour des voyages illimités.', code: 'QUOTA_EXCEEDED' },
           { status: 403 }
         );
+      }
+
+      // --- Anti-abus : 1 seule génération gratuite par IP (permanent) ---
+      // Empêche de créer plusieurs comptes gratuits depuis la même IP
+      const forwarded = request.headers.get('x-forwarded-for');
+      const ip = forwarded?.split(',')[0]?.trim() || request.headers.get('x-real-ip') || 'unknown';
+
+      if (ip !== 'unknown') {
+        const { count: ipCount } = await supabase
+          .from('trips')
+          .select('*', { count: 'exact', head: true })
+          .eq('generator_ip', ip);
+
+        if (ipCount !== null && ipCount >= 1) {
+          console.log(`[Generate] IP ${ip} bloquée — ${ipCount} trip(s) déjà généré(s) depuis cette IP`);
+          return NextResponse.json(
+            { error: 'Limite de voyages gratuits atteinte. Passez à Pro pour des voyages illimités.', code: 'QUOTA_EXCEEDED' },
+            { status: 403 }
+          );
+        }
       }
     }
 
