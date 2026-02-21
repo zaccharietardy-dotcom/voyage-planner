@@ -9,21 +9,24 @@ import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { UserMenu } from '@/components/auth/UserMenu';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { cn } from '@/lib/utils';
-
-const navLinks = [
-  { href: '/plan', label: 'Créer un voyage', icon: PlusCircle },
-  { href: '/explore', label: 'Explorer', icon: Compass },
-  { href: '/globe', label: 'Globe', icon: Globe },
-  { href: '/mes-voyages', label: 'Mes voyages', icon: Map },
-  { href: '/community', label: 'Communauté', icon: Users },
-  { href: '/messages', label: 'Messages', icon: MessageCircle },
-];
+import { useTranslation } from '@/lib/i18n';
 
 export function Header() {
+  const { t } = useTranslation();
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const navLinks = [
+    { href: '/plan', label: t('nav.createTrip'), icon: PlusCircle },
+    { href: '/explore', label: t('nav.explore'), icon: Compass },
+    { href: '/globe', label: t('nav.globe'), icon: Globe },
+    { href: '/mes-voyages', label: t('nav.myTrips'), icon: Map },
+    { href: '/community', label: t('nav.community'), icon: Users },
+    { href: '/messages', label: t('nav.messages'), icon: MessageCircle },
+  ];
 
   useEffect(() => {
     const handleScroll = () => {
@@ -110,6 +113,7 @@ export function Header() {
               <div className="hidden md:block">
                 <UserMenu />
               </div>
+              <LanguageSwitcher />
               <ThemeToggle />
 
               <Button
@@ -117,7 +121,7 @@ export function Header() {
                 size="icon"
                 className="md:hidden"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                aria-label={isMobileMenuOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
+                aria-label={isMobileMenuOpen ? t('nav.closeMenu') : t('nav.openMenu')}
               >
                 {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
               </Button>
@@ -126,12 +130,13 @@ export function Header() {
         </div>
       </header>
 
-      {isMobileMenuOpen && (
-        <div
-          className="fixed inset-0 z-[80] bg-black/45 backdrop-blur-[1px] md:hidden"
-          onClick={closeMobileMenu}
-        />
-      )}
+      <div
+        className={cn(
+          'fixed inset-0 z-[80] bg-black/45 backdrop-blur-[1px] transition-opacity duration-300 md:hidden',
+          isMobileMenuOpen ? 'opacity-100' : 'pointer-events-none opacity-0'
+        )}
+        onClick={closeMobileMenu}
+      />
 
       <div
         className={cn(

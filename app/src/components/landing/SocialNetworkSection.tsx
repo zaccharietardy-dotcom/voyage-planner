@@ -1,40 +1,43 @@
 'use client';
 
+import { useMemo } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { BadgeCheck, Heart, MessageCircle, Rocket, Share2, UserPlus, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-
-const socialPillars = [
-  {
-    icon: UserPlus,
-    title: 'Suivre des voyageurs',
-    description: 'Découvre les profils qui partagent ton style et construis ton réseau.',
-    color: 'from-[#1e3a5f]/20 to-[#1e3a5f]/5 text-[#1e3a5f] dark:text-[#9bc4f4]',
-  },
-  {
-    icon: Share2,
-    title: 'Publier tes itinéraires',
-    description: 'Expose tes meilleurs voyages et inspire la communauté avec du concret.',
-    color: 'from-[#b8923d]/20 to-[#b8923d]/5 text-[#b8923d] dark:text-[#f4d03f]',
-  },
-  {
-    icon: MessageCircle,
-    title: 'Échanger en direct',
-    description: 'Passe de l’inspiration à la discussion en quelques secondes.',
-    color: 'from-[#0f7a6a]/20 to-[#0f7a6a]/5 text-[#0f7a6a] dark:text-[#78d6c3]',
-  },
-];
-
-const socialFlow = [
-  { icon: Users, label: 'Créer ton cercle' },
-  { icon: Heart, label: 'Aimer et suivre' },
-  { icon: BadgeCheck, label: 'Proposer et voter' },
-  { icon: Rocket, label: 'Partir ensemble' },
-];
+import { useTranslation } from '@/lib/i18n';
 
 export function SocialNetworkSection() {
+  const { t } = useTranslation();
+
+  const socialPillars = useMemo(() => [
+    {
+      icon: UserPlus,
+      title: t('social.followTitle'),
+      description: t('social.followDesc'),
+      color: 'from-[#1e3a5f]/20 to-[#1e3a5f]/5 text-[#1e3a5f] dark:text-[#9bc4f4]',
+    },
+    {
+      icon: Share2,
+      title: t('social.publishTitle'),
+      description: t('social.publishDesc'),
+      color: 'from-[#b8923d]/20 to-[#b8923d]/5 text-[#b8923d] dark:text-[#f4d03f]',
+    },
+    {
+      icon: MessageCircle,
+      title: t('social.chatTitle'),
+      description: t('social.chatDesc'),
+      color: 'from-[#0f7a6a]/20 to-[#0f7a6a]/5 text-[#0f7a6a] dark:text-[#78d6c3]',
+    },
+  ], [t]);
+
+  const socialFlow = useMemo(() => [
+    { icon: Users, label: t('social.flowCircle') },
+    { icon: Heart, label: t('social.flowLike') },
+    { icon: BadgeCheck, label: t('social.flowVote') },
+    { icon: Rocket, label: t('social.flowTravel') },
+  ], [t]);
   return (
     <section className="relative py-20 md:py-24">
       <div className="absolute inset-0 -z-10 bg-gradient-to-b from-[#0f2744]/5 via-transparent to-[#0f7a6a]/5" />
@@ -46,12 +49,12 @@ export function SocialNetworkSection() {
           transition={{ duration: 0.5 }}
           className="mb-12 text-center"
         >
-          <p className="mb-3 text-xs uppercase tracking-[0.22em] text-[#b8923d]">Réseau social voyage</p>
+          <p className="mb-3 text-xs uppercase tracking-[0.22em] text-[#b8923d]">{t('social.badge')}</p>
           <h2 className="font-display mb-4 text-4xl font-semibold md:text-5xl">
-            Narae n’est pas qu’un planificateur
+            {t('social.title')}
           </h2>
           <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
-            Tu peux suivre, discuter, proposer et co-construire des voyages avec une logique claire.
+            {t('social.subtitle')}
           </p>
         </motion.div>
 
@@ -99,10 +102,10 @@ export function SocialNetworkSection() {
 
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
               <Button asChild className="h-11 rounded-xl bg-[#102a45] text-white hover:bg-[#173a5f] dark:bg-[#d4a853] dark:text-[#102a45] dark:hover:bg-[#e8c068]">
-                <Link href="/community">Voir la communauté</Link>
+                <Link href="/community">{t('social.ctaCommunity')}</Link>
               </Button>
               <Button asChild variant="outline" className="h-11 rounded-xl border-[#1e3a5f]/20 bg-background/60 hover:bg-[#1e3a5f]/5">
-                <Link href="/messages">Ouvrir les messages</Link>
+                <Link href="/messages">{t('social.ctaMessages')}</Link>
               </Button>
             </div>
           </motion.div>

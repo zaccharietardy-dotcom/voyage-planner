@@ -8,6 +8,8 @@ import { Header } from "@/components/layout";
 import { Toaster } from "sonner";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { SITE_NAME, SITE_URL, SITE_DESCRIPTION, OG_IMAGE_DEFAULT, LOCALE } from "@/lib/seo";
+import { AnalyticsProvider } from "@/components/AnalyticsProvider";
+import { I18nProvider } from "@/lib/i18n";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -229,22 +231,26 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${playfairDisplay.variable} antialiased`}
       >
         <ThemeProvider defaultTheme="system" storageKey="voyage-theme">
-          <AuthProvider>
-            <Header />
-            <main className="pt-16">
-              {children}
-            </main>
-            <Toaster
-              position="bottom-right"
-              toastOptions={{
-                classNames: {
-                  toast: 'bg-background border-border',
-                  title: 'text-foreground',
-                  description: 'text-muted-foreground',
-                },
-              }}
-            />
-          </AuthProvider>
+          <I18nProvider>
+            <AuthProvider>
+              <AnalyticsProvider>
+                <Header />
+                <main className="pt-16">
+                  {children}
+                </main>
+                <Toaster
+                  position="bottom-right"
+                  toastOptions={{
+                    classNames: {
+                      toast: 'bg-background border-border',
+                      title: 'text-foreground',
+                      description: 'text-muted-foreground',
+                    },
+                  }}
+                />
+              </AnalyticsProvider>
+            </AuthProvider>
+          </I18nProvider>
         </ThemeProvider>
       </body>
     </html>

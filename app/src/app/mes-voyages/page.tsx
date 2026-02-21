@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/components/auth';
 import { Trip } from '@/lib/supabase';
@@ -16,11 +16,12 @@ import {
 import { Plus, MapPin, Calendar, Users, Plane, Loader2, Globe, Lock, Users2, ChevronDown, Camera } from 'lucide-react';
 import Link from 'next/link';
 import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { fr, enUS, es, de, it, pt } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useConnectivity } from '@/hooks/useConnectivity';
 import { cacheTripsList, readCachedTripsList } from '@/lib/mobile/offline-cache';
+import { useTranslation } from '@/lib/i18n';
 
 type TripVisibility = 'public' | 'friends' | 'private';
 type MemberRole = 'owner' | 'editor' | 'viewer';
@@ -31,11 +32,7 @@ interface TripListItem extends Trip {
   member_joined_at?: string | null;
 }
 
-const VISIBILITY_OPTIONS: { value: TripVisibility; label: string; icon: React.ReactNode; description: string }[] = [
-  { value: 'public', label: 'Public', icon: <Globe className="h-4 w-4" />, description: 'Visible par tous' },
-  { value: 'friends', label: 'Amis', icon: <Users2 className="h-4 w-4" />, description: 'Visible par mes amis' },
-  { value: 'private', label: 'Privé', icon: <Lock className="h-4 w-4" />, description: 'Visible par moi seul' },
-];
+const dateFnsLocales = { fr, en: enUS, es, de, it, pt };
 
 export default function MesVoyagesPage() {
   const router = useRouter();
@@ -43,6 +40,13 @@ export default function MesVoyagesPage() {
   const [trips, setTrips] = useState<TripListItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { isOffline } = useConnectivity();
+  const { t, locale } = useTranslation();
+
+  const VISIBILITY_OPTIONS = useMemo(() => [
+    { value: 'public' as TripVisibility, label: t('myTrips.public'), icon: <Globe className="h-4 w-4" />, description: t('myTrips.visibleAll') },
+    { value: 'friends' as TripVisibility, label: t('myTrips.friends'), icon: <Users2 className="h-4 w-4" />, description: t('myTrips.visibleFriends') },
+    { value: 'private' as TripVisibility, label: t('myTrips.private'), icon: <Lock className="h-4 w-4" />, description: t('myTrips.visibleMe') },
+  ], [t]);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -107,10 +111,10 @@ export default function MesVoyagesPage() {
       );
 
       const option = VISIBILITY_OPTIONS.find(o => o.value === visibility);
-      toast.success(`Voyage maintenant ${option?.label.toLowerCase()}`);
+      toast.success(`${t('myTrips.nowVisibility')} ${option?.label.toLowerCase()}`);
     } catch (error) {
       console.error('Error updating visibility:', error);
-      toast.error('Erreur lors de la mise à jour de la visibilité');
+      toast.error(t('myTrips.visibilityError'));
     }
   };
 
@@ -138,13 +142,13 @@ export default function MesVoyagesPage() {
       <div className="container max-w-4xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-bold">Mes voyages</h1>
+            <h1 className="text-2xl font-bold">{t('myTrips.title')}</h1>
             <p className="text-muted-foreground">
-              Retrouvez tous vos voyages planifiés
+              {t('myTrips.subtitle')}
             </p>
             {isOffline && (
               <p className="text-xs text-amber-600 mt-2">
-                Mode hors ligne: affichage des derniers voyages en cache.
+                {t('myTrips.offlineNotice')}
               </p>
             )}
           </div>
@@ -152,13 +156,13 @@ export default function MesVoyagesPage() {
             <Button variant="outline" asChild>
               <Link href="/journal/new">
                 <Camera className="h-4 w-4 mr-2" />
-                Voyage passé
+                {t('myTrips.pastTrip')}
               </Link>
             </Button>
             <Button asChild>
               <Link href="/plan">
                 <Plus className="h-4 w-4 mr-2" />
-                Nouveau voyage
+                {t('myTrips.newTrip')}
               </Link>
             </Button>
           </div>
@@ -182,14 +186,14 @@ export default function MesVoyagesPage() {
           <Card className="text-center py-12">
             <CardContent>
               <Plane className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Aucun voyage</h3>
+              <h3 className="text-lg font-semibold mb-2">{t('myTrips.empty')}</h3>
               <p className="text-muted-foreground mb-4">
-                Vous n&apos;avez pas encore planifié de voyage.
+                {t('myTrips.emptyDesc')}
               </p>
               <Button asChild>
                 <Link href="/plan">
                   <Plus className="h-4 w-4 mr-2" />
-                  Planifier mon premier voyage
+                  {t('myTrips.planFirst')}
                 </Link>
               </Button>
             </CardContent>
@@ -216,13 +220,13 @@ export default function MesVoyagesPage() {
                           </CardTitle>
                           {isInvitedTrip && (
                             <Badge variant="outline" className="text-xs">
-                              Invité {userRole === 'editor' ? '· éditeur' : '· lecteur'}
+                              {t('myTrips.invited')} {userRole === 'editor' ? `· ${t('myTrips.editor')}` : `· ${t('myTrips.reader')}`}
                             </Badge>
                           )}
                           {isPastTrip && (
                             <Badge variant="secondary" className="text-xs">
                               <Camera className="h-3 w-3 mr-1" />
-                              Journal
+                              {t('myTrips.journal')}
                             </Badge>
                           )}
                         </div>
@@ -270,20 +274,20 @@ export default function MesVoyagesPage() {
                       <div className="flex items-center gap-4 text-sm text-muted-foreground">
                         <span className="flex items-center gap-1">
                           <Calendar className="h-4 w-4" />
-                          {format(new Date(trip.start_date), 'd MMM yyyy', { locale: fr })}
+                          {format(new Date(trip.start_date), 'd MMM yyyy', { locale: dateFnsLocales[locale as keyof typeof dateFnsLocales] || fr })}
                         </span>
                         <span>
-                          {trip.duration_days} jour{trip.duration_days > 1 ? 's' : ''}
+                          {trip.duration_days} {trip.duration_days > 1 ? t('common.days') : t('common.day')}
                         </span>
                         {!isPastTrip && prefs.groupSize ? (
                           <span className="flex items-center gap-1">
                             <Users className="h-4 w-4" />
-                            {String(prefs.groupSize)} pers.
+                            {String(prefs.groupSize)} {t('common.persons')}
                           </span>
                         ) : null}
                         {!isPastTrip && prefs.budgetLevel ? (
                           <Badge variant="outline" className="ml-auto">
-                            {prefs.budgetLevel === 'budget' ? 'Économique' : prefs.budgetLevel === 'moderate' ? 'Modéré' : prefs.budgetLevel === 'comfort' ? 'Confort' : 'Luxe'}
+                            {prefs.budgetLevel === 'budget' ? t('plan.budgetLevels.budget') : prefs.budgetLevel === 'moderate' ? t('plan.budgetLevels.moderate') : prefs.budgetLevel === 'comfort' ? t('plan.budgetLevels.comfort') : t('plan.budgetLevels.luxury')}
                           </Badge>
                         ) : null}
                       </div>
