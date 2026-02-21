@@ -10,9 +10,18 @@ import { Trip, TripPreferences } from './types';
  * complet et on ne tente le parse qu'après un `\n\n` terminateur ou quand le
  * stream se ferme.
  */
+export interface PipelineProgressEvent {
+  type: 'step_start' | 'step_done' | 'api_call' | 'api_done' | 'info' | 'warning' | 'error';
+  step?: number;
+  stepName?: string;
+  label?: string;
+  durationMs?: number;
+  detail?: string;
+}
+
 export async function generateTripStream(
   preferences: Partial<TripPreferences> & Record<string, unknown>,
-  onProgress?: (status: string) => void,
+  onProgress?: (status: string, event?: PipelineProgressEvent) => void,
 ): Promise<Trip> {
   const res = await fetch('/api/generate', {
     method: 'POST',
@@ -76,7 +85,7 @@ export async function generateTripStream(
  */
 function processSSEBuffer(
   buffer: string,
-  onProgress?: (status: string) => void,
+  onProgress?: (status: string, event?: PipelineProgressEvent) => void,
 ): { trip?: Trip; error?: string; remaining: string } {
   // Séparer les événements SSE par \n\n (double newline = fin d'événement)
   const parts = buffer.split('\n\n');
@@ -100,7 +109,12 @@ function processSSEBuffer(
       const msg = JSON.parse(jsonStr);
 
       if (msg.status === 'generating') {
-        onProgress?.(msg.status);
+        onProgress?.('generating');
+        continue;
+      }
+
+      if (msg.status === 'progress' && msg.event) {
+        onProgress?.('progress', msg.event as PipelineProgressEvent);
         continue;
       }
 

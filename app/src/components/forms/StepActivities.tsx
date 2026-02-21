@@ -196,6 +196,7 @@ export function StepActivities({ data, onChange }: StepActivitiesProps) {
               className={cn(
                 'px-4 py-2.5 rounded-full border-2 transition-all text-sm font-medium',
                 'hover:border-primary hover:bg-primary/5',
+                'focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none',
                 activities.includes(activity)
                   ? 'border-primary bg-primary text-primary-foreground'
                   : 'border-border bg-card'
@@ -234,9 +235,12 @@ export function StepActivities({ data, onChange }: StepActivitiesProps) {
                   key={attraction.id}
                   type="button"
                   onClick={() => toggleAttraction(attraction)}
+                  role="checkbox"
+                  aria-checked={selectedAttractions.has(attraction.id)}
                   className={cn(
                     'flex items-start gap-3 p-4 rounded-xl border-2 text-left transition-all',
                     'hover:border-primary/50 hover:bg-primary/5',
+                    'focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none',
                     selectedAttractions.has(attraction.id)
                       ? 'border-primary bg-primary/10'
                       : 'border-border bg-card'
@@ -307,6 +311,7 @@ export function StepActivities({ data, onChange }: StepActivitiesProps) {
               className={cn(
                 'px-4 py-2.5 rounded-full border-2 transition-all text-sm font-medium',
                 'hover:border-primary hover:bg-primary/5',
+                'focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none',
                 dietary.includes(diet)
                   ? 'border-primary bg-primary text-primary-foreground'
                   : 'border-border bg-card'
@@ -391,7 +396,7 @@ export function StepActivities({ data, onChange }: StepActivitiesProps) {
                 const updated = (data.prePurchasedTickets || []).filter((_, i) => i !== index);
                 onChange({ prePurchasedTickets: updated.length > 0 ? updated : undefined });
               }}
-              className="mt-2 p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+              className="mt-2 p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none"
             >
               <Trash2 className="h-4 w-4" />
             </button>
@@ -404,7 +409,7 @@ export function StepActivities({ data, onChange }: StepActivitiesProps) {
             const updated = [...(data.prePurchasedTickets || []), { name: '' }];
             onChange({ prePurchasedTickets: updated });
           }}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-lg border-2 border-dashed border-muted-foreground/30 text-sm text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-lg border-2 border-dashed border-muted-foreground/30 text-sm text-muted-foreground hover:border-primary hover:text-primary transition-colors focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none"
         >
           <Plus className="h-4 w-4" />
           Ajouter un billet

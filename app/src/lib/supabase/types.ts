@@ -119,6 +119,7 @@ export interface Database {
           visibility: 'public' | 'friends' | 'private';
           cloned_from: string | null;
           clone_count: number;
+          generator_ip: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -137,6 +138,7 @@ export interface Database {
           visibility?: 'public' | 'friends' | 'private';
           cloned_from?: string | null;
           clone_count?: number;
+          generator_ip?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -155,6 +157,7 @@ export interface Database {
           visibility?: 'public' | 'friends' | 'private';
           cloned_from?: string | null;
           clone_count?: number;
+          generator_ip?: string | null;
           created_at?: string;
           updated_at?: string;
         };

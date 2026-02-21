@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import { TripDay, TripItem, Accommodation } from '@/lib/types';
 import { ActivityCard } from './ActivityCard';
 import { HotelCarouselSelector } from './HotelCarouselSelector';
@@ -115,7 +116,7 @@ function HotelBoundaryMiniConnector({
   );
 }
 
-export function DayTimeline({
+export const DayTimeline = memo(function DayTimeline({
   day,
   selectedItemId,
   globalIndexOffset = 0,
@@ -343,4 +344,4 @@ export function DayTimeline({
       </motion.div>
     </div>
   );
-}
+});
