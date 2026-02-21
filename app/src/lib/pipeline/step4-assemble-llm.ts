@@ -33,6 +33,7 @@ import { generateFlightLink, generateFlightOmioLink, formatDateForUrl } from '..
 import { sanitizeApiKeyLeaksInString, sanitizeGoogleMapsUrl } from '../services/googlePlacePhoto';
 import { resolveOfficialTicketing } from '../services/officialTicketing';
 import { getAirportPreDepartureLeadMinutes } from './step7-assemble';
+import { scheduleDayItems, buildDayWindow, buildMealSlots, buildCandidates } from './scheduler';
 
 // ============================================
 // Local helper functions
@@ -563,7 +564,21 @@ function filterDistantItems(
 
 function removeCrossDayDuplicates(days: TripDay[]): void {
   const seenActivities = new Set<string>();
-  const seenRestaurants = new Set<string>();
+  const seenRestaurants = new Map<string, number>(); // restaurantName → count of appearances
+
+  // First pass: count how many times each restaurant appears across all days
+  const restaurantCountByDay = new Map<string, Map<number, number>>(); // name → dayNumber → count
+  for (const day of days) {
+    for (const item of day.items) {
+      if (item.type === 'restaurant') {
+        const name = item.restaurant?.name?.toLowerCase().trim();
+        if (!name) continue;
+        if (!restaurantCountByDay.has(name)) restaurantCountByDay.set(name, new Map());
+        const dayMap = restaurantCountByDay.get(name)!;
+        dayMap.set(day.dayNumber, (dayMap.get(day.dayNumber) || 0) + 1);
+      }
+    }
+  }
 
   for (const day of days) {
     day.items = day.items.filter(item => {
@@ -577,330 +592,48 @@ function removeCrossDayDuplicates(days: TripDay[]): void {
         seenActivities.add(key);
       }
       if (item.type === 'restaurant') {
-        // Deduplicate by restaurant name (not meal type — same restaurant shouldn't appear twice across days)
         const restaurantName = item.restaurant?.name?.toLowerCase().trim();
         if (restaurantName && seenRestaurants.has(restaurantName)) {
+          // Before removing: check if this day would lose all meals of this type
+          // Count how many OTHER restaurant items remain on this day (excluding this one)
+          const otherMealsOnDay = day.items.filter(i =>
+            i !== item &&
+            i.type === 'restaurant'
+          );
+
+          // Determine meal slot from time
+          const startMin = parseHHMM(item.startTime);
+          const mealSlot = startMin < 10 * 60 + 30 ? 'breakfast'
+            : startMin < 15 * 60 ? 'lunch'
+            : startMin >= 18 * 60 ? 'dinner'
+            : 'snack';
+
+          // Check if another meal covers this same slot
+          const slotCovered = otherMealsOnDay.some(m => {
+            const mStart = parseHHMM(m.startTime);
+            const mSlot = mStart < 10 * 60 + 30 ? 'breakfast'
+              : mStart < 15 * 60 ? 'lunch'
+              : mStart >= 18 * 60 ? 'dinner'
+              : 'snack';
+            return mSlot === mealSlot;
+          });
+
+          if (!slotCovered) {
+            // Keeping this duplicate because removing it leaves no meal for this slot
+            console.log(`[Pipeline V2 LLM] KEPT duplicate restaurant "${item.title}" on day ${day.dayNumber} (only ${mealSlot} on this day)`);
+            return true;
+          }
+
           console.log(`[Pipeline V2 LLM] REMOVED duplicate restaurant "${item.title}" on day ${day.dayNumber}`);
           return false;
         }
-        if (restaurantName) seenRestaurants.add(restaurantName);
+        if (restaurantName) seenRestaurants.set(restaurantName, (seenRestaurants.get(restaurantName) || 0) + 1);
       }
       return true;
     });
 
     // Re-index
     day.items.forEach((it, idx) => { it.orderIndex = idx; });
-  }
-}
-
-// ============================================
-// Ensure breakfast exists on every day
-// ============================================
-
-function ensureBreakfastExists(
-  day: TripDay,
-  hotel: Accommodation | null,
-  isFirstDay: boolean,
-  isLastDay: boolean,
-  transport: TransportOptionSummary | null,
-  preferences: TripPreferences,
-  destCoords: { lat: number; lng: number }
-): void {
-  // Skip breakfast on day 1 if arriving after 10:00
-  if (isFirstDay && transport && transport.mode !== 'plane' && transport.transitLegs?.length) {
-    const lastLeg = transport.transitLegs[transport.transitLegs.length - 1];
-    const arrivalTime = lastLeg.arrival?.split('T')[1]?.substring(0, 5);
-    if (arrivalTime && parseHHMM(arrivalTime) >= 10 * 60) {
-      return; // Arriving too late for breakfast
-    }
-  }
-
-  // Check if breakfast already exists
-  const hasBreakfast = day.items.some(item => {
-    if (item.type !== 'restaurant') return false;
-    const startMin = parseHHMM(item.startTime);
-    return startMin < 10 * 60 && (
-      item.title.toLowerCase().includes('petit-déjeuner') ||
-      item.title.toLowerCase().includes('breakfast') ||
-      item.id.includes('breakfast')
-    );
-  });
-
-  if (hasBreakfast) return;
-
-  // Determine breakfast time
-  const bkfStartMin = 8 * 60; // 08:00
-  const bkfEndMin = bkfStartMin + 30; // 08:30
-
-  const breakfastItem: TripItem = {
-    id: `breakfast-${day.dayNumber}`,
-    dayNumber: day.dayNumber,
-    startTime: minutesToHHMM(bkfStartMin),
-    endTime: minutesToHHMM(bkfEndMin),
-    type: 'restaurant',
-    title: hotel ? `Petit-déjeuner à l'hôtel` : 'Petit-déjeuner — Café/Boulangerie',
-    description: hotel?.breakfastIncluded ? 'Petit-déjeuner inclus' : 'Petit-déjeuner',
-    locationName: hotel?.name || 'Café/Boulangerie',
-    latitude: hotel?.latitude || destCoords.lat,
-    longitude: hotel?.longitude || destCoords.lng,
-    orderIndex: 0,
-    duration: 30,
-    estimatedCost: hotel?.breakfastIncluded ? 0 : 8,
-    restaurant: {
-      name: hotel?.name || 'Café/Boulangerie',
-      latitude: hotel?.latitude || destCoords.lat,
-      longitude: hotel?.longitude || destCoords.lng,
-    } as any,
-  };
-
-  day.items.push(breakfastItem);
-  console.log(`[Pipeline V2 LLM] Day ${day.dayNumber}: fallback breakfast inserted`);
-}
-
-// ============================================
-// Resolve schedule conflicts
-// ============================================
-
-function resolveScheduleConflicts(
-  days: TripDay[],
-  transport: TransportOptionSummary | null,
-  hotel: Accommodation | null
-): void {
-  for (const day of days) {
-    // Find the longhaul transport arrival time on this day
-    const longhaulTransport = day.items.find(i => i.type === 'transport' && i.transportRole === 'longhaul');
-    const isFirstDay = day.dayNumber === 1;
-    const isLastDay = day.dayNumber === days.length;
-
-    if (isFirstDay && longhaulTransport) {
-      const arrivalMin = parseHHMM(longhaulTransport.endTime);
-      let cursor = arrivalMin + 60; // 60min buffer after arrival
-
-      // Sort items that need pushing by their original startTime
-      const pushableItems = day.items
-        .filter(item => {
-          if (item.type === 'transport' || item.type === 'flight') return false;
-          if (item.type === 'checkin') return false;
-          if (item.id === longhaulTransport.id) return false;
-          return parseHHMM(item.startTime) < cursor;
-        })
-        .sort((a, b) => parseHHMM(a.startTime) - parseHHMM(b.startTime));
-
-      for (const item of pushableItems) {
-        const duration = parseHHMM(item.endTime) - parseHHMM(item.startTime);
-        item.startTime = minutesToHHMM(cursor);
-        item.endTime = minutesToHHMM(cursor + Math.max(duration, 15));
-        cursor = cursor + Math.max(duration, 15) + 15; // 15min gap between items
-      }
-    }
-
-    if (isLastDay && longhaulTransport) {
-      const departureMin = parseHHMM(longhaulTransport.startTime);
-
-      // Ensure checkout is BEFORE return transport departure
-      const checkout = day.items.find(i => i.type === 'checkout');
-      if (checkout) {
-        const checkoutStart = parseHHMM(checkout.startTime);
-        if (checkoutStart >= departureMin) {
-          // Move checkout to 2h before departure
-          const newCheckoutStart = Math.max(8 * 60, departureMin - 120);
-          checkout.startTime = minutesToHHMM(newCheckoutStart);
-          checkout.endTime = minutesToHHMM(newCheckoutStart + 15);
-        }
-      }
-
-      // Push activities to end before return transport
-      for (const item of day.items) {
-        if (item.type === 'transport' || item.type === 'flight' || item.type === 'checkout') continue;
-        const endMin = parseHHMM(item.endTime);
-        if (endMin > departureMin - 30) {
-          // Shrink or remove items that conflict with departure
-          const startMin = parseHHMM(item.startTime);
-          if (startMin >= departureMin - 30) {
-            // Completely overlaps departure window — move earlier or remove
-            const duration = endMin - startMin;
-            const newStart = departureMin - 30 - duration;
-            if (newStart >= 7 * 60) { // earliest 7:00
-              item.startTime = minutesToHHMM(newStart);
-              item.endTime = minutesToHHMM(newStart + duration);
-            }
-          } else {
-            // Partially overlaps — truncate
-            item.endTime = minutesToHHMM(departureMin - 30);
-          }
-        }
-      }
-    }
-
-    // Handle day-trip days: ensure breakfast ends before day-trip transport starts
-    if (day.isDayTrip) {
-      const dtOutbound = day.items.find(i => i.type === 'transport' && i.transportRole === 'daytrip_outbound');
-      if (dtOutbound) {
-        const dtDepartMin = parseHHMM(dtOutbound.startTime);
-        for (const item of day.items) {
-          if (item.type === 'transport') continue;
-          const itemEnd = parseHHMM(item.endTime);
-          const itemStart = parseHHMM(item.startTime);
-          if (itemEnd > dtDepartMin && itemStart < dtDepartMin) {
-            // Truncate item to end before transport
-            item.endTime = minutesToHHMM(dtDepartMin - 5);
-            if (parseHHMM(item.endTime) <= itemStart) {
-              // Item is too short — move it earlier
-              const duration = itemEnd - itemStart;
-              item.startTime = minutesToHHMM(dtDepartMin - 5 - duration);
-              item.endTime = minutesToHHMM(dtDepartMin - 5);
-            }
-          }
-        }
-      }
-    }
-
-    // General overlap resolution: if check-in overlaps with activities, adjust check-in
-    const checkin = day.items.find(i => i.type === 'checkin');
-    if (checkin) {
-      const checkinStart = parseHHMM(checkin.startTime);
-      const checkinEnd = parseHHMM(checkin.endTime);
-      for (const item of day.items) {
-        if (item === checkin) continue;
-        if (item.type === 'transport' && item.transportRole === 'longhaul') continue;
-        const itemStart = parseHHMM(item.startTime);
-        const itemEnd = parseHHMM(item.endTime);
-        // If check-in overlaps with an activity, move check-in after it
-        if (checkinStart < itemEnd && checkinEnd > itemStart) {
-          checkin.startTime = minutesToHHMM(itemEnd + 5);
-          checkin.endTime = minutesToHHMM(itemEnd + 20);
-          break; // Only fix first overlap
-        }
-      }
-    }
-
-    // Ensure breakfast comes before all non-infrastructure items
-    const breakfast = day.items.find(item =>
-      item.type === 'restaurant' &&
-      (item.title.toLowerCase().includes('petit-déjeuner') ||
-       item.title.toLowerCase().includes('breakfast') ||
-       item.id.startsWith('breakfast-'))
-    );
-
-    if (breakfast) {
-      const bkfEndMin = parseHHMM(breakfast.endTime);
-      const pushableBeforeBreakfast = day.items
-        .filter(item => {
-          if (item === breakfast) return false;
-          if (['transport', 'flight', 'checkin', 'checkout'].includes(item.type)) return false;
-          return parseHHMM(item.startTime) < bkfEndMin;
-        })
-        .sort((a, b) => parseHHMM(a.startTime) - parseHHMM(b.startTime));
-
-      if (pushableBeforeBreakfast.length > 0) {
-        let cursor = bkfEndMin + 15; // 15min after breakfast
-        for (const item of pushableBeforeBreakfast) {
-          const duration = parseHHMM(item.endTime) - parseHHMM(item.startTime);
-          item.startTime = minutesToHHMM(cursor);
-          item.endTime = minutesToHHMM(cursor + Math.max(duration, 15));
-          cursor = cursor + Math.max(duration, 15) + 15;
-          console.log(`[Breakfast Fix] Pushed "${item.title}" after breakfast to ${item.startTime}`);
-        }
-      }
-    }
-
-    // Re-sort after adjustments
-    day.items.sort((a, b) => parseHHMM(a.startTime) - parseHHMM(b.startTime));
-    day.items.forEach((item, idx) => { item.orderIndex = idx; });
-  }
-}
-
-// ============================================
-// Check if item has valid GPS coordinates
-// ============================================
-
-function hasValidCoords(item: TripItem): boolean {
-  return (
-    item.latitude !== undefined &&
-    item.longitude !== undefined &&
-    item.latitude !== 0 &&
-    item.longitude !== 0 &&
-    !isNaN(item.latitude) &&
-    !isNaN(item.longitude)
-  );
-}
-
-// ============================================
-// Enforce minimum travel gaps between consecutive items
-// ============================================
-
-function enforceMinTravelGaps(days: TripDay[]): void {
-  for (const day of days) {
-    // Sort items by startTime first
-    day.items.sort((a, b) => parseHHMM(a.startTime) - parseHHMM(b.startTime));
-
-    for (let i = 1; i < day.items.length; i++) {
-      const prev = day.items[i - 1];
-      const curr = day.items[i];
-
-      // Skip if curr is immovable (transport, flight)
-      if (curr.type === 'transport' || curr.type === 'flight') continue;
-
-      const prevEndMin = parseHHMM(prev.endTime);
-      const currStartMin = parseHHMM(curr.startTime);
-
-      // If either item has no valid coords, just enforce no overlap
-      if (!hasValidCoords(prev) || !hasValidCoords(curr)) {
-        if (currStartMin < prevEndMin) {
-          const duration = parseHHMM(curr.endTime) - currStartMin;
-          curr.startTime = minutesToHHMM(prevEndMin);
-          curr.endTime = minutesToHHMM(prevEndMin + Math.max(duration, 15));
-        }
-        continue;
-      }
-
-      // Compute distance
-      const dist = calculateDistance(prev.latitude!, prev.longitude!, curr.latitude!, curr.longitude!);
-
-      // Compute required travel gap
-      let requiredGapMin: number;
-      if (dist < 0.3) {
-        requiredGapMin = 0; // Same location
-      } else if (dist <= 3.0) {
-        requiredGapMin = Math.ceil(dist * 1000 / 80) + 5; // Walking 80m/min + 5min buffer
-      } else {
-        requiredGapMin = Math.ceil((dist / 15) * 60) + 10; // Public transport 15km/h + 10min buffer
-        requiredGapMin = Math.max(requiredGapMin, 20); // Minimum 20min for any PT trip
-      }
-
-      const availableGap = currStartMin - prevEndMin;
-
-      if (availableGap < requiredGapMin) {
-        const oldStart = curr.startTime;
-        const duration = parseHHMM(curr.endTime) - currStartMin;
-        const newStart = prevEndMin + requiredGapMin;
-        curr.startTime = minutesToHHMM(newStart);
-        curr.endTime = minutesToHHMM(newStart + Math.max(duration, 15));
-        console.log(`[Travel Gap] Pushed "${curr.title}" from ${oldStart} to ${curr.startTime} (${dist.toFixed(1)}km, need ${requiredGapMin}min gap, had ${availableGap}min)`);
-      }
-    }
-
-    // Remove items pushed past 23:30 (except transport/flight/must-see)
-    day.items = day.items.filter(item => {
-      if (item.type === 'transport' || item.type === 'flight') return true;
-      if (item.mustSee) return true; // Never remove must-see activities
-      if (parseHHMM(item.startTime) >= 23 * 60 + 30) {
-        console.log(`[Travel Gap] REMOVED "${item.title}" — pushed past 23:30`);
-        return false;
-      }
-      return true;
-    });
-
-    // Truncate items ending after 23:45
-    for (const item of day.items) {
-      if (parseHHMM(item.endTime) > 23 * 60 + 45) {
-        item.endTime = '23:45';
-      }
-    }
-
-    // Re-sort and re-index
-    day.items.sort((a, b) => parseHHMM(a.startTime) - parseHHMM(b.startTime));
-    day.items.forEach((item, idx) => { item.orderIndex = idx; });
   }
 }
 
@@ -927,10 +660,10 @@ export function computeDistancesForDay(day: TripDay): void {
       curr.distanceFromPrevious = Math.round(dist * 100) / 100;
 
       if (dist > 3) {
-        curr.timeFromPrevious = Math.ceil((dist / 15) * 60); // Public transport ~15km/h
+        curr.timeFromPrevious = Math.ceil(Math.ceil((dist / 15) * 60) / 5) * 5; // Public transport ~15km/h, rounded up to 5min
         curr.transportToPrevious = 'public';
       } else {
-        curr.timeFromPrevious = Math.ceil(dist * 1000 / 80); // Walking 80m/min
+        curr.timeFromPrevious = Math.ceil(Math.ceil(dist * 1000 / 80) / 5) * 5; // Walking 80m/min, rounded up to 5min
         curr.transportToPrevious = 'walk';
       }
     }
@@ -1244,29 +977,25 @@ export async function assembleFromLLMPlan(
   // 4a. Remove cross-day duplicate activities and restaurants
   removeCrossDayDuplicates(tripDays);
 
-  // 4b. Ensure breakfast exists on every day
-  for (let i = 0; i < tripDays.length; i++) {
-    const day = tripDays[i];
-    if (day.isDayTrip) continue; // Day trips handle their own meals
-    ensureBreakfastExists(
-      day,
-      hotel,
-      i === 0,
-      i === tripDays.length - 1,
-      transport,
-      preferences,
-      data.destCoords
-    );
-  }
-
-  // 4b2. Filter items too far from destination center on non-day-trip days
+  // 4b. Filter items too far from destination center on non-day-trip days
   filterDistantItems(tripDays, data.destCoords);
 
-  // 4c. Resolve schedule conflicts (arrival buffer, checkout ordering, overlaps)
-  resolveScheduleConflicts(tripDays, transport, hotel);
+  // 4c. Schedule each day using the single-pass scheduler
+  // This replaces: ensureBreakfastExists, resolveScheduleConflicts, ensureLunchBreak,
+  // enforceMinTravelGaps, fixMealLabels, ensureLunchAndDinner, removeDuplicateMeals,
+  // removeItemsOverlappingDeparture — all in one clean pass per day.
+  const restaurantPool: Restaurant[] = [
+    ...(data.tripAdvisorRestaurants || []),
+    ...(data.serpApiRestaurants || []),
+  ];
+  const usedRestaurantNames = new Set<string>();
 
-  // 4d. Enforce minimum travel gaps between consecutive items
-  enforceMinTravelGaps(tripDays);
+  for (const day of tripDays) {
+    const dayWindow = buildDayWindow(day, tripDays.length, transport, hotel, data.destCoords);
+    const mealSlots = buildMealSlots(dayWindow);
+    const candidates = buildCandidates(day.items);
+    day.items = scheduleDayItems(candidates, mealSlots, dayWindow, restaurantPool, usedRestaurantNames);
+  }
 
   // 5. Sort items by time within each day and compute distances
   for (const day of tripDays) {

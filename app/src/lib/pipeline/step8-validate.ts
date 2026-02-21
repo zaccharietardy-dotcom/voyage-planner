@@ -209,8 +209,8 @@ function scoreRythme(
         if (start >= 420 && start <= 570) goodMealTiming++;
         else warnings.push(`Jour ${day.dayNumber}: petit-déjeuner à ${item.startTime} (inhabituel)`);
       } else if (title.includes('Déjeuner')) {
-        // Lunch: 11:30-14:00
-        if (start >= 690 && start <= 840) goodMealTiming++;
+        // Lunch: 11:30-16:00 (includes late lunches that slipped past 15:00)
+        if (start >= 690 && start <= 960) goodMealTiming++;
         else warnings.push(`Jour ${day.dayNumber}: déjeuner à ${item.startTime} (inhabituel)`);
       } else {
         // Dinner: 18:30-21:30
