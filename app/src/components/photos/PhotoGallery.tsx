@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { MapPin, Eye, EyeOff, X } from 'lucide-react';
+import { MapPin, Eye, EyeOff, X, Camera } from 'lucide-react';
 import { getSupabaseClient } from '@/lib/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -78,7 +78,19 @@ export function PhotoGallery({ tripId, isOwner = false }: PhotoGalleryProps) {
     );
   }
 
-  if (photos.length === 0) return null;
+  if (photos.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+        <Camera className="h-12 w-12 text-muted-foreground/40 mb-3" />
+        <p className="text-sm font-medium text-muted-foreground mb-1">
+          Aucune photo pour l&apos;instant
+        </p>
+        <p className="text-xs text-muted-foreground/70">
+          Ajoutez des photos pour illustrer votre voyage
+        </p>
+      </div>
+    );
+  }
 
   const byDay = photos.reduce<Record<number, Photo[]>>((acc, p) => {
     const day = p.day_number || 0;

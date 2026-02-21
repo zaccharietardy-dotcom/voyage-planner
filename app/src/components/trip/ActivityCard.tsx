@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { TripItem, TripItemType, Flight, Restaurant, Accommodation, TRIP_ITEM_COLORS } from '@/lib/types';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -240,7 +240,7 @@ const TYPE_GRADIENTS: Record<string, string> = {
   transport: 'from-slate-700 to-slate-900',
 };
 
-export function ActivityCard({
+export const ActivityCard = memo(function ActivityCard({
   item,
   orderNumber,
   isSelected,
@@ -284,7 +284,7 @@ export function ActivityCard({
     <Card
       className={cn(
         'relative group transition-all duration-200 cursor-pointer overflow-hidden active:scale-[0.98]',
-        'border-border/60 hover:border-primary/40 hover:shadow-lg',
+        'border-border/60 hover:border-primary/40 hover:shadow-lg hover:scale-[1.01] hover:-translate-y-0.5',
         isSelected && 'ring-2 ring-primary/80 border-primary shadow-lg',
         isDragging && 'shadow-xl rotate-1 scale-[1.03]',
         item.type === 'free_time' && 'bg-emerald-50/40 border-emerald-200/50 dark:bg-emerald-950/15 dark:border-emerald-800/30',
@@ -734,7 +734,7 @@ export function ActivityCard({
       )}
     </Card>
   );
-}
+});
 
 function formatDuration(minutes: number): string {
   const h = Math.floor(minutes / 60);

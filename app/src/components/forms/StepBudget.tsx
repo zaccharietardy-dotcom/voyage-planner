@@ -40,6 +40,7 @@ export function StepBudget({ data, onChange }: StepBudgetProps) {
               className={cn(
                 'flex flex-col items-center justify-center p-6 rounded-xl border-2 transition-all',
                 'hover:border-primary hover:bg-primary/5',
+                'focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none',
                 data.budgetLevel === budget && !data.budgetCustom
                   ? 'border-primary bg-primary/10'
                   : 'border-border bg-card'
@@ -113,6 +114,7 @@ export function StepBudget({ data, onChange }: StepBudgetProps) {
             onClick={() => onChange({ budgetIsPerPerson: false })}
             className={cn(
               'px-3 py-1.5 rounded-md text-sm font-medium transition-all',
+              'focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none',
               !data.budgetIsPerPerson
                 ? 'bg-background shadow-sm text-foreground'
                 : 'text-muted-foreground hover:text-foreground'
@@ -125,6 +127,7 @@ export function StepBudget({ data, onChange }: StepBudgetProps) {
             onClick={() => onChange({ budgetIsPerPerson: true })}
             className={cn(
               'px-3 py-1.5 rounded-md text-sm font-medium transition-all',
+              'focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none',
               data.budgetIsPerPerson
                 ? 'bg-background shadow-sm text-foreground'
                 : 'text-muted-foreground hover:text-foreground'
@@ -166,6 +169,7 @@ export function StepBudget({ data, onChange }: StepBudgetProps) {
               className={cn(
                 'flex items-center gap-3 p-4 rounded-xl border-2 transition-all text-left',
                 'hover:border-primary hover:bg-primary/5',
+                'focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none',
                 (data.mealPreference || 'auto') === option.value
                   ? 'border-primary bg-primary/10'
                   : 'border-border bg-card'

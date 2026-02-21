@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -15,31 +15,16 @@ import {
   StepActivities,
 } from '@/components/forms';
 import { TripPreferences } from '@/lib/types';
-import { ArrowLeft, ArrowRight, Sparkles, Loader2, UserCog, Check, Shuffle, ChevronsLeftRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Sparkles, Loader2, UserCog, Check, Shuffle, ChevronsLeftRight, AlertCircle } from 'lucide-react';
 import { generateRandomPreferences } from '@/lib/randomExample';
-import { generateTripStream } from '@/lib/generateTrip';
+import { generateTripStream, PipelineProgressEvent } from '@/lib/generateTrip';
 import { cn } from '@/lib/utils';
+import { safeGetItem, safeSetItem } from '@/lib/storage';
 import { useAuth } from '@/components/auth';
 import { useUserPreferences, preferenceOptions } from '@/hooks/useUserPreferences';
 import { toast } from 'sonner';
-
-// Safe localStorage helpers
-function safeGetItem(key: string): string | null {
-  try {
-    return localStorage.getItem(key);
-  } catch (error) {
-    console.warn('[localStorage] getItem failed:', error);
-    return null;
-  }
-}
-
-function safeSetItem(key: string, value: string): void {
-  try {
-    localStorage.setItem(key, value);
-  } catch (error) {
-    console.warn('[localStorage] setItem failed:', error);
-  }
-}
+import { GeneratingScreen } from '@/components/trip/GeneratingScreen';
+import { trackEvent } from '@/lib/analytics';
 
 const STEPS = [
   { id: 1, title: 'Destination', icon: '📍' },
@@ -70,6 +55,8 @@ export default function PlanPage() {
   const [preferences, setPreferences] = useState<Partial<TripPreferences>>(DEFAULT_PREFERENCES);
   const [preferencesApplied, setPreferencesApplied] = useState(false);
   const directionRef = useRef(1); // 1 = forward, -1 = backward
+  const [showErrors, setShowErrors] = useState(false);
+  const [pipelineStep, setPipelineStep] = useState<string | undefined>(undefined);
 
   // Animation variants for step transitions
   const stepVariants = {
@@ -152,31 +139,57 @@ export default function PlanPage() {
     setPreferences((prev) => ({ ...prev, ...data }));
   }, []);
 
-  const canProceed = () => {
+  const getValidationErrors = (): string[] => {
     switch (currentStep) {
       case 1: {
-        const hasOrigin = !!preferences.origin;
-        const hasDate = !!preferences.startDate;
+        const errors: string[] = [];
+        if (!preferences.origin) errors.push('Indiquez votre ville de départ');
         const stages = preferences.cityPlan || [];
-        const hasDestination = stages.length > 0 && stages.every(s => s.city.trim().length > 0);
-        return hasOrigin && hasDate && hasDestination;
+        if (stages.length === 0 || !stages.every(s => s.city.trim().length > 0)) {
+          errors.push('Renseignez au moins une destination');
+        }
+        if (!preferences.startDate) errors.push('Choisissez une date de départ');
+        return errors;
       }
       case 2:
-        return preferences.transport;
-      case 3:
-        return preferences.groupSize && preferences.groupType;
+        return preferences.transport ? [] : ['Sélectionnez un mode de transport'];
+      case 3: {
+        const errors: string[] = [];
+        if (!preferences.groupSize) errors.push('Indiquez le nombre de voyageurs');
+        if (!preferences.groupType) errors.push('Choisissez un type de voyage');
+        return errors;
+      }
       case 4:
-        return preferences.budgetLevel || preferences.budgetCustom;
+        return (preferences.budgetLevel || preferences.budgetCustom)
+          ? []
+          : ['Sélectionnez un niveau de budget'];
       case 5:
-        return preferences.activities && preferences.activities.length > 0;
+        return (preferences.activities && preferences.activities.length > 0)
+          ? []
+          : ['Sélectionnez au moins une activité'];
       default:
-        return false;
+        return ['Étape invalide'];
     }
   };
 
+  const canProceed = () => getValidationErrors().length === 0;
+
+  // Auto-dismiss errors when the user fixes the fields
+  useEffect(() => {
+    if (showErrors && canProceed()) {
+      setShowErrors(false);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [preferences, currentStep]);
+
   const handleNext = () => {
+    if (!canProceed()) {
+      setShowErrors(true);
+      return;
+    }
     if (currentStep < 5) {
       directionRef.current = 1;
+      setShowErrors(false);
       setCurrentStep(currentStep + 1);
     }
   };
@@ -184,12 +197,14 @@ export default function PlanPage() {
   const handleBack = () => {
     if (currentStep > 1) {
       directionRef.current = -1;
+      setShowErrors(false);
       setCurrentStep(currentStep - 1);
     }
   };
 
   const handleGenerate = async () => {
     setIsGenerating(true);
+    setPipelineStep(undefined);
     try {
       // Sync cityPlan → destination + durationDays for pipeline compatibility
       const finalPreferences = { ...preferences };
@@ -210,8 +225,41 @@ export default function PlanPage() {
         }
       }
 
+      // Track trip generation start
+      trackEvent('trip_generation_started', {
+        destination: finalPreferences.destination || '',
+        duration: finalPreferences.durationDays || 0,
+        budget: finalPreferences.budgetLevel || '',
+        transport: finalPreferences.transport || '',
+        group_size: finalPreferences.groupSize || 0,
+      });
+
+      // SSE progress callback — updates the GeneratingScreen with real pipeline step labels
+      const onProgress = (status: string, event?: PipelineProgressEvent) => {
+        if (status === 'progress' && event) {
+          // Build a human-readable step label
+          if (event.type === 'step_start' && event.stepName) {
+            const label = event.step
+              ? `${event.step}/8 — ${event.stepName}`
+              : event.stepName;
+            setPipelineStep(label);
+          } else if (event.type === 'api_call' && event.label) {
+            setPipelineStep(event.label);
+          }
+        }
+      };
+
       // 1. Générer le voyage avec l'IA (streaming pour éviter timeout 504)
-      const generatedTrip = await generateTripStream(finalPreferences);
+      const generatedTrip = await generateTripStream(finalPreferences, onProgress);
+
+      // Track trip generation completion
+      trackEvent('trip_generation_completed', {
+        destination: finalPreferences.destination || '',
+        duration: finalPreferences.durationDays || 0,
+        has_accommodation: !!generatedTrip.accommodation,
+        has_flights: !!(generatedTrip.outboundFlight || generatedTrip.returnFlight),
+        total_activities: generatedTrip.days?.reduce((sum, day) => sum + day.items.length, 0) || 0,
+      });
 
       // 2. Si l'utilisateur est connecté, sauvegarder en base de données
       if (user) {
@@ -278,8 +326,25 @@ export default function PlanPage() {
 
   const progress = (currentStep / STEPS.length) * 100;
 
+  // Compute destination name for the generating screen
+  const generatingDestination = preferences.cityPlan?.[0]?.city
+    || preferences.destination
+    || '';
+  const generatingDuration = preferences.cityPlan
+    ? preferences.cityPlan.reduce((sum, s) => sum + s.days, 0)
+    : preferences.durationDays;
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
+      {/* Full-screen generating overlay with destination fun facts */}
+      {isGenerating && (
+        <GeneratingScreen
+          destination={generatingDestination}
+          durationDays={generatingDuration}
+          pipelineStep={pipelineStep}
+        />
+      )}
+
       <div className="container max-w-2xl mx-auto px-4 py-8">
         {/* User Preferences Banner */}
         {user && !prefsLoading && (
@@ -421,41 +486,71 @@ export default function PlanPage() {
         </Card>
 
         {/* Navigation buttons */}
-        <div className="flex justify-between mt-6">
-          <Button
-            variant="outline"
-            onClick={handleBack}
-            disabled={currentStep === 1}
-            className="gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Retour
-          </Button>
-
-          {currentStep < 5 ? (
-            <Button onClick={handleNext} disabled={!canProceed()} className="gap-2">
-              Suivant
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          ) : (
+        <div className="mt-6 space-y-3">
+          <div className="flex justify-between">
             <Button
-              onClick={handleGenerate}
-              disabled={!canProceed() || isGenerating}
-              className="gap-2 bg-gradient-to-r from-primary to-primary/80"
+              variant="outline"
+              onClick={handleBack}
+              disabled={currentStep === 1}
+              className="gap-2"
             >
-              {isGenerating ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Génération en cours...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="h-4 w-4" />
-                  Générer mon voyage
-                </>
-              )}
+              <ArrowLeft className="h-4 w-4" />
+              Retour
             </Button>
-          )}
+
+            {currentStep < 5 ? (
+              <Button onClick={handleNext} className="gap-2">
+                Suivant
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            ) : (
+              <Button
+                onClick={() => {
+                  if (!canProceed()) {
+                    setShowErrors(true);
+                    return;
+                  }
+                  handleGenerate();
+                }}
+                disabled={isGenerating}
+                className="gap-2 bg-gradient-to-r from-primary to-primary/80"
+              >
+                {isGenerating ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Génération en cours...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-4 w-4" />
+                    Générer mon voyage
+                  </>
+                )}
+              </Button>
+            )}
+          </div>
+
+          {/* Validation errors */}
+          <AnimatePresence>
+            {showErrors && getValidationErrors().length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: -6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.2 }}
+                className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 dark:border-amber-900/50 dark:bg-amber-950/30"
+              >
+                <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
+                <div className="space-y-0.5">
+                  {getValidationErrors().map((error) => (
+                    <p key={error} className="text-sm text-amber-700 dark:text-amber-300">
+                      {error}
+                    </p>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </div>

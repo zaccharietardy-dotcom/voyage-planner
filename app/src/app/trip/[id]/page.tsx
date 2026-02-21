@@ -40,7 +40,17 @@ import { useRealtimeTrip } from '@/hooks/useRealtimeTrip';
 import { SharePanel } from '@/components/trip/SharePanel';
 import { ProposalsList } from '@/components/trip/ProposalsList';
 import { CreateProposalDialog } from '@/components/trip/CreateProposalDialog';
-import { DraggableTimeline } from '@/components/trip/DraggableTimeline';
+const DraggableTimeline = dynamic(
+  () => import('@/components/trip/DraggableTimeline').then((mod) => mod.DraggableTimeline),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full min-h-[200px] bg-muted animate-pulse rounded-lg flex items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    ),
+  }
+);
 import { ShareTripDialog } from '@/components/trip/ShareTripDialog';
 import { TripErrorBoundary } from '@/components/trip/TripErrorBoundary';
 import { TripVisibilitySelector, VisibilityBadge } from '@/components/trip/TripVisibilitySelector';
@@ -70,31 +80,14 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
-import { exportTripPdf } from '@/lib/exportPdf';
+// exportTripPdf is dynamically imported on-demand (~650KB jsPDF + autotable)
 import { useLiveTrip } from '@/hooks/useLiveTrip';
 import { LiveTripBanner } from '@/components/trip/LiveTripBanner';
 import { LiveTripDashboard } from '@/components/trip/LiveTripDashboard';
 import { useConnectivity } from '@/hooks/useConnectivity';
 import { cacheTripById, readCachedTripById } from '@/lib/mobile/offline-cache';
 import { generateTripStream } from '@/lib/generateTrip';
-
-// Safe localStorage helpers
-function safeGetItem(key: string): string | null {
-  try {
-    return localStorage.getItem(key);
-  } catch (error) {
-    console.warn('[localStorage] getItem failed:', error);
-    return null;
-  }
-}
-
-function safeSetItem(key: string, value: string): void {
-  try {
-    localStorage.setItem(key, value);
-  } catch (error) {
-    console.warn('[localStorage] setItem failed:', error);
-  }
-}
+import { safeGetItem, safeSetItem } from '@/lib/storage';
 
 function updateTripWithNewHotel(trip: Trip, newHotel: Accommodation): Trip {
   const oldHotelName = trip.accommodation?.name || '';
@@ -535,12 +528,12 @@ export default function TripPage() {
     setSelectedItemId(item.id);
   }, []);
 
-  const handleEditItem = (item: TripItem) => {
+  const handleEditItem = useCallback((item: TripItem) => {
     setEditingItem(item);
     setShowEditModal(true);
-  };
+  }, []);
 
-  const handleSaveItem = (updatedItem: TripItem) => {
+  const handleSaveItem = useCallback((updatedItem: TripItem) => {
     if (!trip) return;
     const updatedDays = trip.days.map((day) => ({
       ...day,
@@ -549,9 +542,9 @@ export default function TripPage() {
     const updatedTrip = { ...trip, days: updatedDays, updatedAt: new Date() };
     saveTrip(updatedTrip);
     toast.success('Activité modifiée');
-  };
+  }, [trip, saveTrip]);
 
-  const handleDeleteItem = (item: TripItem) => {
+  const handleDeleteItem = useCallback((item: TripItem) => {
     if (!trip) return;
     if (!confirm('Supprimer cette activité ?')) return;
     const updatedDays = trip.days.map((day) => ({
@@ -561,7 +554,7 @@ export default function TripPage() {
     const updatedTrip = { ...trip, days: updatedDays, updatedAt: new Date() };
     saveTrip(updatedTrip);
     toast.success('Activité supprimée');
-  };
+  }, [trip, saveTrip]);
 
   const handleSwapActivity = useCallback((oldItem: TripItem, newAttraction: Attraction) => {
     if (!trip) return;
@@ -756,7 +749,7 @@ export default function TripPage() {
     toast.success(`Jour ${afterDayNumber + 1} ajouté ! Votre voyage passe à ${newDays.length} jours.`);
   };
 
-  const handleAddNewItem = (newItem: TripItem) => {
+  const handleAddNewItem = useCallback((newItem: TripItem) => {
     if (!trip) return;
     const dayIndex = trip.days.findIndex((d) => d.dayNumber === newItem.dayNumber);
     if (dayIndex === -1) return;
@@ -768,9 +761,9 @@ export default function TripPage() {
     saveTrip(updatedTrip);
     setShowAddActivityModal(false);
     toast.success(`"${newItem.title}" ajouté au Jour ${newItem.dayNumber}`);
-  };
+  }, [trip, saveTrip]);
 
-  const handleCalendarUpdateItem = (updatedItem: TripItem) => {
+  const handleCalendarUpdateItem = useCallback((updatedItem: TripItem) => {
     if (!trip) return;
     const updatedDays = trip.days.map((day) => ({
       ...day,
@@ -778,7 +771,7 @@ export default function TripPage() {
     }));
     const updatedTrip = { ...trip, days: updatedDays, updatedAt: new Date() };
     saveTrip(updatedTrip);
-  };
+  }, [trip, saveTrip]);
 
   const handleCalendarSlotClick = (dayNumber: number, time: string) => {
     setAddActivityDay(dayNumber);
@@ -833,7 +826,7 @@ export default function TripPage() {
     return hours < 6 ? totalMinutes + 1440 : totalMinutes;
   };
 
-  const handleMoveItem = (item: TripItem, direction: 'up' | 'down') => {
+  const handleMoveItem = useCallback((item: TripItem, direction: 'up' | 'down') => {
     if (!trip) return;
     const dayIndex = trip.days.findIndex((d) => d.items.some((i) => i.id === item.id));
     if (dayIndex === -1) return;
@@ -860,7 +853,7 @@ export default function TripPage() {
     const updatedTrip = { ...trip, days: updatedDays, updatedAt: new Date() };
     saveTrip(updatedTrip);
     toast.success('Activité déplacée');
-  };
+  }, [trip, saveTrip]);
 
   const handleRegenerateDay = async (dayNumber: number) => {
     if (!trip) return;
@@ -997,9 +990,10 @@ export default function TripPage() {
     URL.revokeObjectURL(url);
   };
 
-  const handleExportPdf = () => {
+  const handleExportPdf = async () => {
     if (!trip) return;
     try {
+      const { exportTripPdf } = await import('@/lib/exportPdf');
       exportTripPdf(trip);
       toast.success('PDF téléchargé avec succès');
     } catch (error) {
@@ -1074,8 +1068,64 @@ export default function TripPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
+      <div className="min-h-screen bg-background">
+        {/* Sticky Header Skeleton */}
+        <div className="sticky top-0 z-50 w-full border-b border-[#1e3a5f]/10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div className="container flex h-16 items-center justify-between px-4 md:px-8">
+            <div className="h-6 w-48 md:w-64 rounded bg-muted animate-pulse" />
+            <div className="flex items-center gap-2">
+              <div className="h-9 w-24 rounded-md bg-muted animate-pulse" />
+              <div className="h-9 w-9 rounded-md bg-muted animate-pulse" />
+            </div>
+          </div>
+        </div>
+
+        <div className="container mx-auto px-4 md:px-8 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Main Content Area */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Mini Map Placeholder */}
+              <div className="w-full h-64 md:h-80 rounded-lg bg-muted animate-pulse" />
+
+              {/* Activity Cards Skeleton */}
+              <div className="space-y-4">
+                {[1, 2, 3, 4].map((i) => (
+                  <div
+                    key={i}
+                    className="flex flex-col sm:flex-row gap-4 p-4 rounded-lg border border-[#1e3a5f]/10 bg-background"
+                  >
+                    {/* Image placeholder */}
+                    <div className="w-full sm:w-32 h-32 rounded-md bg-muted animate-pulse flex-shrink-0" />
+
+                    {/* Text content */}
+                    <div className="flex-1 space-y-3">
+                      <div className="h-5 w-3/4 rounded bg-muted animate-pulse" />
+                      <div className="h-4 w-full rounded bg-muted animate-pulse" />
+                      <div className="h-4 w-5/6 rounded bg-muted animate-pulse" />
+                      <div className="flex items-center gap-3 mt-3">
+                        <div className="h-4 w-16 rounded bg-muted animate-pulse" />
+                        <div className="h-4 w-20 rounded bg-muted animate-pulse" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Sidebar Skeleton */}
+            <div className="hidden lg:block space-y-4">
+              <div className="rounded-lg border border-[#1e3a5f]/10 p-6 space-y-4">
+                <div className="h-5 w-32 rounded bg-muted animate-pulse" />
+                <div className="h-4 w-full rounded bg-muted animate-pulse" />
+                <div className="h-4 w-4/5 rounded bg-muted animate-pulse" />
+              </div>
+              <div className="rounded-lg border border-[#1e3a5f]/10 p-6 space-y-4">
+                <div className="h-5 w-24 rounded bg-muted animate-pulse" />
+                <div className="h-32 w-full rounded bg-muted animate-pulse" />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
