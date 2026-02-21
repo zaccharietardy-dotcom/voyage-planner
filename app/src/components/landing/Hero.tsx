@@ -2,34 +2,34 @@
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { ArrowRight, Clock3, ShieldCheck, Sparkles, Users2 } from 'lucide-react';
+import { ArrowRight, Clock3, MapPin, ShieldCheck, Sparkles, Star, Utensils, Users2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useTranslation } from '@/lib/i18n';
 
-const trustPoints = [
-  { icon: Clock3, label: 'Plan en 2 min' },
-  { icon: Users2, label: 'Réseau social intégré' },
-  { icon: ShieldCheck, label: 'Liens fiables' },
+// Mini timeline items for the product preview mockup
+const mockTimeline = [
+  { time: '09:00', label: 'Petit-déjeuner', place: 'Café de Flore', type: 'meal' as const, rating: 4.5 },
+  { time: '10:30', label: 'Visite', place: 'Musée du Louvre', type: 'activity' as const, rating: 4.8 },
+  { time: '13:00', label: 'Déjeuner', place: 'Le Bouillon Chartier', type: 'meal' as const, rating: 4.3 },
+  { time: '14:45', label: 'Promenade', place: 'Jardin des Tuileries', type: 'activity' as const, rating: 4.6 },
+  { time: '16:30', label: 'Visite', place: 'Tour Eiffel', type: 'activity' as const, rating: 4.7 },
+  { time: '19:30', label: 'Dîner', place: 'Le Comptoir du Panthéon', type: 'meal' as const, rating: 4.4 },
 ];
 
-const experienceHighlights = [
-  {
-    icon: Clock3,
-    title: 'Timeline claire',
-    detail: 'Horaires réalistes et enchaînement logique de la journée.',
-  },
-  {
-    icon: Users2,
-    title: 'Collaboration cadrée',
-    detail: 'Propositions, votes et décision propriétaire côté serveur.',
-  },
-  {
-    icon: ShieldCheck,
-    title: 'Réservation prête',
-    detail: 'Liens de booking normalisés et actions directes en un clic.',
-  },
-];
+const typeStyles = {
+  meal: 'bg-[#d4a853]/15 text-[#b8923d] dark:bg-[#d4a853]/20',
+  activity: 'bg-[#1e3a5f]/10 text-[#1e3a5f] dark:bg-[#1e3a5f]/25 dark:text-[#9bc4f4]',
+};
 
 export function Hero() {
+  const { t } = useTranslation();
+
+  const trustPoints = [
+    { icon: Clock3, label: t('hero.trustPlan') },
+    { icon: Users2, label: t('hero.trustSocial') },
+    { icon: ShieldCheck, label: t('hero.trustLinks') },
+  ];
+
   return (
     <section className="relative overflow-hidden pt-12 md:pt-16">
       <div className="absolute inset-0 bg-gradient-to-b from-[#0f2744]/5 via-transparent to-[#c9a227]/10" />
@@ -69,30 +69,29 @@ export function Hero() {
           >
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#c9a227]/35 bg-background/75 px-4 py-2 text-sm text-[#1e3a5f] shadow-sm backdrop-blur dark:text-[#f4d03f]">
               <Sparkles className="h-4 w-4" />
-              Planification IA haut de gamme, en français
+              {t('hero.badge')}
             </div>
 
             <h1 className="font-display text-5xl font-semibold leading-[1.06] tracking-tight md:text-6xl lg:text-7xl">
-              Ton agence de voyage
+              {t('hero.title1')}
               <span className="block bg-gradient-to-r from-[#d4a853] via-[#f4d03f] to-[#c08f32] bg-clip-text text-transparent">
-                personnelle et premium
+                {t('hero.title2')}
               </span>
             </h1>
 
             <p className="mt-6 max-w-xl text-lg text-muted-foreground md:text-xl">
-              Narae compose un itinéraire précis, élégant et collaboratif:
-              horaires réalistes, adresses de qualité, réseau social voyageur et réservations prêtes à ouvrir.
+              {t('hero.subtitle')}
             </p>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Button asChild size="lg" className="h-14 rounded-xl bg-[#102a45] px-8 text-base text-white hover:bg-[#173a5f] dark:bg-[#d4a853] dark:text-[#102a45] dark:hover:bg-[#e8c068]">
                 <Link href="/plan">
-                  Créer mon voyage
+                  {t('hero.cta')}
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="h-14 rounded-xl border-[#1e3a5f]/25 bg-background/70 px-8 text-base hover:bg-[#1e3a5f]/5">
-                <Link href="/explore">Voir des exemples</Link>
+                <Link href="/explore">{t('hero.ctaSecondary')}</Link>
               </Button>
             </div>
 
@@ -106,47 +105,80 @@ export function Hero() {
             </div>
           </motion.div>
 
+          {/* Product preview mockup — mini trip timeline */}
           <motion.div
             initial={{ opacity: 0, y: 22 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.55, delay: 0.12 }}
-            className="premium-surface premium-ring rounded-3xl p-6 md:p-8"
+            className="premium-surface premium-ring rounded-3xl p-5 md:p-6"
           >
-            <div className="mb-6 flex items-center justify-between">
-              <p className="text-sm uppercase tracking-[0.18em] text-muted-foreground">
-                Expérience Premium
-              </p>
-              <div className="rounded-full border border-[#c9a227]/40 bg-[#c9a227]/10 px-3 py-1 text-xs font-medium text-[#b8923d]">
-                Version V2
+            {/* Header bar */}
+            <div className="mb-4 flex items-center justify-between">
+              <div>
+                <p className="text-sm font-semibold text-foreground">Paris &mdash; {t('hero.previewDay')}</p>
+                <p className="text-xs text-muted-foreground">3 {t('hero.previewActivities')} &middot; 3 {t('hero.previewRestaurants')}</p>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <MapPin className="h-3.5 w-3.5 text-[#d4a853]" />
+                <span className="text-xs font-medium text-[#b8923d]">6 {t('hero.previewSteps')}</span>
               </div>
             </div>
 
-            <div className="space-y-3">
-              {experienceHighlights.map((highlight, index) => (
+            {/* Mini timeline */}
+            <div className="relative space-y-1.5">
+              {/* Timeline line */}
+              <div className="absolute bottom-3 left-[29px] top-3 w-px bg-gradient-to-b from-[#d4a853]/40 via-[#1e3a5f]/20 to-[#d4a853]/40" />
+
+              {mockTimeline.map((item, index) => (
                 <motion.div
-                  key={highlight.title}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.35, delay: 0.2 + index * 0.08 }}
-                  className="rounded-2xl border border-white/40 bg-background/70 p-4 dark:border-white/10"
+                  key={item.time}
+                  initial={{ opacity: 0, x: -8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3, delay: 0.25 + index * 0.07 }}
+                  className="relative flex items-center gap-3 rounded-xl border border-transparent px-2 py-2 transition-colors hover:border-[#1e3a5f]/10 hover:bg-background/80"
                 >
-                  <div className="flex items-start gap-3">
-                    <span className="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#102a45] text-white dark:bg-[#d4a853] dark:text-[#102a45]">
-                      <highlight.icon className="h-4 w-4" />
-                    </span>
-                    <div className="text-left">
-                      <p className="text-sm font-semibold text-[#102a45] dark:text-[#f4d03f]">
-                        {highlight.title}
-                      </p>
-                      <p className="mt-1 text-xs text-muted-foreground">{highlight.detail}</p>
+                  {/* Time */}
+                  <span className="w-10 shrink-0 text-right text-xs font-medium tabular-nums text-muted-foreground">
+                    {item.time}
+                  </span>
+
+                  {/* Dot */}
+                  <span className={`relative z-10 h-2.5 w-2.5 shrink-0 rounded-full ${item.type === 'meal' ? 'bg-[#d4a853]' : 'bg-[#1e3a5f] dark:bg-[#5b9bd5]'}`} />
+
+                  {/* Content */}
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className={`inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-medium ${typeStyles[item.type]}`}>
+                        {item.type === 'meal' ? <Utensils className="h-2.5 w-2.5" /> : <MapPin className="h-2.5 w-2.5" />}
+                        {item.label}
+                      </span>
+                      <div className="flex items-center gap-0.5">
+                        <Star className="h-2.5 w-2.5 fill-[#d4a853] text-[#d4a853]" />
+                        <span className="text-[10px] font-medium text-muted-foreground">{item.rating}</span>
+                      </div>
                     </div>
+                    <p className="mt-0.5 truncate text-xs font-medium text-foreground">{item.place}</p>
                   </div>
                 </motion.div>
               ))}
             </div>
 
-            <div className="mt-5 rounded-2xl border border-[#1e3a5f]/20 bg-gradient-to-r from-[#1e3a5f]/10 to-[#d4a853]/10 p-4 text-sm text-muted-foreground">
-              Chaque itinéraire inclut activités, restaurants, transports, budget et partage collaboratif.
+            {/* Footer stats */}
+            <div className="mt-4 flex items-center justify-between rounded-xl border border-[#1e3a5f]/10 bg-gradient-to-r from-[#1e3a5f]/5 to-[#d4a853]/5 px-4 py-2.5">
+              <div className="text-center">
+                <p className="text-xs font-semibold text-foreground">4.2 km</p>
+                <p className="text-[10px] text-muted-foreground">Distance</p>
+              </div>
+              <div className="h-6 w-px bg-border" />
+              <div className="text-center">
+                <p className="text-xs font-semibold text-foreground">~85 &euro;</p>
+                <p className="text-[10px] text-muted-foreground">Budget</p>
+              </div>
+              <div className="h-6 w-px bg-border" />
+              <div className="text-center">
+                <p className="text-xs font-semibold text-foreground">10h30</p>
+                <p className="text-[10px] text-muted-foreground">Durée</p>
+              </div>
             </div>
           </motion.div>
         </div>

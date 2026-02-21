@@ -30,6 +30,8 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
 import { TripVisibilitySelector } from '@/components/trip/TripVisibilitySelector';
+import { trackEvent } from '@/lib/analytics';
+import { useTranslation } from '@/lib/i18n';
 
 interface ShareTripDialogProps {
   open: boolean;
@@ -50,6 +52,7 @@ export function ShareTripDialog({
   currentVisibility = 'private',
   onTripSaved,
 }: ShareTripDialogProps) {
+  const { t } = useTranslation();
   const { user, isLoading: authLoading } = useAuth();
   const [shareCode, setShareCode] = useState<string | null>(null);
   const [savedTripId, setSavedTripId] = useState<string | null>(null);
@@ -144,7 +147,7 @@ export function ShareTripDialog({
   // Sauvegarder le voyage en Supabase pour obtenir un code de partage
   const saveTrip = async () => {
     if (!user) {
-      setError('Vous devez être connecté pour partager ce voyage');
+      setError(t('share.loginToShare'));
       return;
     }
 
@@ -184,7 +187,7 @@ export function ShareTripDialog({
       onTripSaved?.(savedTrip.id, savedTrip.share_code);
     } catch (err) {
       console.error('Error saving trip:', err);
-      setError(err instanceof Error ? err.message : 'Erreur inconnue');
+      setError(err instanceof Error ? err.message : t('common.error'));
     } finally {
       setIsLoading(false);
     }
@@ -196,6 +199,7 @@ export function ShareTripDialog({
     await navigator.clipboard.writeText(shareUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+    trackEvent('trip_shared', { method: 'copy_link' });
   };
 
   // Partage natif (Web Share API)
@@ -208,6 +212,7 @@ export function ShareTripDialog({
         text: `Rejoins mon voyage à ${trip.preferences.destination} !`,
         url: shareUrl,
       });
+      trackEvent('trip_shared', { method: 'native' });
     } catch (err) {
       // L'utilisateur a annulé ou erreur
       // Share cancelled or failed
@@ -220,6 +225,7 @@ export function ShareTripDialog({
       `Hey ! Rejoins mon voyage à ${trip.preferences.destination} 🌍✈️\n${shareUrl}`
     );
     window.open(`https://wa.me/?text=${text}`, '_blank');
+    trackEvent('trip_shared', { method: 'whatsapp' });
   };
 
   // Partage Email
@@ -229,6 +235,22 @@ export function ShareTripDialog({
       `Salut !\n\nJe t'invite à rejoindre mon voyage à ${trip.preferences.destination}.\n\nClique sur ce lien pour voir l'itinéraire et collaborer :\n${shareUrl}\n\nÀ bientôt !`
     );
     window.open(`mailto:?subject=${subject}&body=${body}`, '_blank');
+    trackEvent('trip_shared', { method: 'email' });
+  };
+
+  // Partage Twitter/X
+  const handleTwitterShare = () => {
+    const text = encodeURIComponent(
+      `Je viens de planifier mon voyage à ${trip.preferences.destination} ! 🌍✈️`
+    );
+    const url = encodeURIComponent(shareUrl);
+    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank', 'width=550,height=420');
+  };
+
+  // Partage Facebook
+  const handleFacebookShare = () => {
+    const url = encodeURIComponent(shareUrl);
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank', 'width=550,height=420');
   };
 
   // Non connecté
@@ -239,10 +261,10 @@ export function ShareTripDialog({
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Share2 className="h-5 w-5" />
-              Partager le voyage
+              {t('share.title')}
             </DialogTitle>
             <DialogDescription>
-              Connectez-vous pour partager ce voyage avec vos amis
+              {t('share.loginRequired')}
             </DialogDescription>
           </DialogHeader>
 
@@ -251,11 +273,11 @@ export function ShareTripDialog({
               <LogIn className="h-8 w-8 text-primary" />
             </div>
             <p className="text-center text-muted-foreground">
-              Pour partager ce voyage et collaborer avec vos amis, vous devez être connecté.
+              {t('share.loginToShare')}
             </p>
             <Button asChild className="w-full">
               <Link href={`/login?redirect=/trip/${tripId}`}>
-                Se connecter
+                {t('share.signIn')}
               </Link>
             </Button>
           </div>
@@ -283,10 +305,10 @@ export function ShareTripDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Share2 className="h-5 w-5" />
-            Partager le voyage
+            {t('share.title')}
           </DialogTitle>
           <DialogDescription>
-            Invitez vos amis à voir et modifier ce voyage ensemble
+            {t('share.subtitle')}
           </DialogDescription>
         </DialogHeader>
 
@@ -296,9 +318,9 @@ export function ShareTripDialog({
             <div className="flex flex-col items-center gap-4 p-6 bg-muted/50 rounded-lg">
               <Users className="h-12 w-12 text-primary" />
               <div className="text-center">
-                <h3 className="font-medium">Voyagez ensemble</h3>
+                <h3 className="font-medium">{t('share.travelTogether')}</h3>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Partagez ce voyage pour que vos amis puissent le voir et proposer des modifications
+                  {t('share.travelTogetherDesc')}
                 </p>
               </div>
             </div>
@@ -318,12 +340,12 @@ export function ShareTripDialog({
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Préparation du partage...
+                  {t('share.preparing')}
                 </>
               ) : (
                 <>
                   <Share2 className="mr-2 h-4 w-4" />
-                  Créer le lien de partage
+                  {t('share.createLink')}
                 </>
               )}
             </Button>
@@ -336,7 +358,7 @@ export function ShareTripDialog({
             {/* Visibilité */}
             {isOwner && savedTripId && (
               <div className="space-y-2">
-                <label className="text-sm font-medium">Visibilité du voyage</label>
+                <label className="text-sm font-medium">{t('share.tripVisibility')}</label>
                 <TripVisibilitySelector
                   tripId={savedTripId}
                   currentVisibility={currentVisibility}
@@ -348,7 +370,7 @@ export function ShareTripDialog({
             <div className="space-y-2">
               <label className="text-sm font-medium flex items-center gap-2">
                 <LinkIcon className="h-4 w-4" />
-                Lien lecture seule
+                {t('share.readOnlyLink')}
               </label>
               <div className="flex gap-2">
                 <Input
@@ -366,7 +388,7 @@ export function ShareTripDialog({
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground">
-                Les personnes qui rejoignent via ce lien auront un accès lecture seule.
+                {t('share.readOnlyDesc')}
               </p>
             </div>
 
@@ -378,7 +400,7 @@ export function ShareTripDialog({
                 onClick={() => setShowQR(!showQR)}
               >
                 <QrCode className="h-4 w-4" />
-                {showQR ? 'Masquer' : 'Afficher'} le QR Code
+                {showQR ? t('share.hideQR') : t('share.showQR')}
               </Button>
 
               {showQR && (
@@ -393,7 +415,7 @@ export function ShareTripDialog({
             </div>
 
             {/* Boutons de partage */}
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {/* Partage natif (si disponible sur mobile) */}
               {typeof navigator !== 'undefined' && typeof navigator.share === 'function' && (
                 <Button
@@ -402,7 +424,7 @@ export function ShareTripDialog({
                   onClick={handleNativeShare}
                 >
                   <Share2 className="h-5 w-5" />
-                  <span className="text-xs">Partager</span>
+                  <span className="text-xs">{t('share.native')}</span>
                 </Button>
               )}
 
@@ -413,7 +435,7 @@ export function ShareTripDialog({
                 onClick={handleWhatsAppShare}
               >
                 <MessageCircle className="h-5 w-5 text-green-500" />
-                <span className="text-xs">WhatsApp</span>
+                <span className="text-xs">{t('share.whatsapp')}</span>
               </Button>
 
               {/* Email */}
@@ -423,7 +445,31 @@ export function ShareTripDialog({
                 onClick={handleEmailShare}
               >
                 <Mail className="h-5 w-5 text-blue-500" />
-                <span className="text-xs">Email</span>
+                <span className="text-xs">{t('share.email')}</span>
+              </Button>
+
+              {/* Twitter/X */}
+              <Button
+                variant="outline"
+                className="flex flex-col items-center gap-1 h-auto py-3"
+                onClick={handleTwitterShare}
+              >
+                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                </svg>
+                <span className="text-xs">{t('share.twitter')}</span>
+              </Button>
+
+              {/* Facebook */}
+              <Button
+                variant="outline"
+                className="flex flex-col items-center gap-1 h-auto py-3"
+                onClick={handleFacebookShare}
+              >
+                <svg className="h-5 w-5 text-[#1877F2]" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                </svg>
+                <span className="text-xs">{t('share.facebook')}</span>
               </Button>
             </div>
 
@@ -432,7 +478,7 @@ export function ShareTripDialog({
               <div className="space-y-2 pt-2 border-t">
                 <label className="text-sm font-medium flex items-center gap-2">
                   <UserPlus className="h-4 w-4" />
-                  Inviter un ami
+                  {t('share.inviteFriend')}
                 </label>
                 <div className="max-h-40 overflow-y-auto space-y-1">
                   {friends.map((friend: any) => (
@@ -459,14 +505,14 @@ export function ShareTripDialog({
                         {sentTo.has(friend.id) ? (
                           <>
                             <Check className="h-3 w-3 text-green-500" />
-                            <span className="text-xs">Invité</span>
+                            <span className="text-xs">{t('share.invited')}</span>
                           </>
                         ) : sendingTo === friend.id ? (
                           <Loader2 className="h-3 w-3 animate-spin" />
                         ) : (
                           <>
                             <UserPlus className="h-3 w-3" />
-                            <span className="text-xs">Inviter</span>
+                            <span className="text-xs">{t('share.invite')}</span>
                           </>
                         )}
                       </Button>
@@ -491,7 +537,7 @@ export function ShareTripDialog({
                 <div className="space-y-2 pt-2 border-t">
                   <label className="text-sm font-medium flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
-                    Calendrier
+                    {t('share.calendar')}
                   </label>
                   <div className="grid grid-cols-2 gap-2">
                     <Button
@@ -542,7 +588,7 @@ export function ShareTripDialog({
                     }}
                   >
                     <Download className="h-4 w-4" />
-                    Télécharger .ics
+                    {t('share.downloadIcs')}
                   </Button>
                 </div>
               );

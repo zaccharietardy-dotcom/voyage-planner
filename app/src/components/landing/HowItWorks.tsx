@@ -1,30 +1,33 @@
 'use client';
 
+import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Wand2, Share2 } from 'lucide-react';
-
-const steps = [
-  {
-    icon: MapPin,
-    title: '1. Cadrez votre voyage',
-    description: 'Destination, dates, style de séjour et budget. Narae comprend votre intention en quelques champs.',
-    accent: 'from-[#1e3a5f] to-[#2f6db3]',
-  },
-  {
-    icon: Wand2,
-    title: '2. Génération intelligente',
-    description: 'Le moteur V2 crée un planning réaliste avec horaires cohérents, restaurants crédibles et trajets utiles.',
-    accent: 'from-[#b8923d] to-[#e8c068]',
-  },
-  {
-    icon: Share2,
-    title: '3. Finalisez en équipe',
-    description: 'Partage, propositions et validation owner. Votre voyage avance sans chaos ni modifications sauvages.',
-    accent: 'from-[#0f7a6a] to-[#2db6a0]',
-  },
-];
+import { useTranslation } from '@/lib/i18n';
 
 export function HowItWorks() {
+  const { t } = useTranslation();
+
+  const steps = useMemo(() => [
+    {
+      icon: MapPin,
+      title: t('howItWorks.step1Title'),
+      description: t('howItWorks.step1Desc'),
+      accent: 'from-[#1e3a5f] to-[#2f6db3]',
+    },
+    {
+      icon: Wand2,
+      title: t('howItWorks.step2Title'),
+      description: t('howItWorks.step2Desc'),
+      accent: 'from-[#b8923d] to-[#e8c068]',
+    },
+    {
+      icon: Share2,
+      title: t('howItWorks.step3Title'),
+      description: t('howItWorks.step3Desc'),
+      accent: 'from-[#0f7a6a] to-[#2db6a0]',
+    },
+  ], [t]);
   return (
     <section className="relative py-20 md:py-24">
       <div className="absolute inset-0 -z-10 bg-gradient-to-b from-[#1e3a5f]/5 via-transparent to-[#d4a853]/5" />
@@ -36,10 +39,10 @@ export function HowItWorks() {
           transition={{ duration: 0.5 }}
           className="mb-16 text-center"
         >
-          <p className="mb-3 text-xs uppercase tracking-[0.22em] text-[#b8923d]">Méthode</p>
-          <h2 className="font-display mb-4 text-4xl font-semibold md:text-5xl">Un workflow clair, sans friction</h2>
+          <p className="mb-3 text-xs uppercase tracking-[0.22em] text-[#b8923d]">{t('howItWorks.badge')}</p>
+          <h2 className="font-display mb-4 text-4xl font-semibold md:text-5xl">{t('howItWorks.title')}</h2>
           <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
-            Une expérience premium doit être simple: moins de clics, plus de valeur à chaque étape.
+            {t('howItWorks.subtitle')}
           </p>
         </motion.div>
 

@@ -1,38 +1,12 @@
 'use client';
 
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Loader2, Send, Check, Twitter, Instagram, Facebook, Youtube } from 'lucide-react';
-
-const footerLinks = {
-  product: {
-    title: 'Produit',
-    links: [
-      { label: 'Créer un voyage', href: '/plan' },
-      { label: 'Explorer', href: '/explore' },
-      { label: 'Mes voyages', href: '/mes-voyages' },
-      { label: 'Fonctionnalités', href: '/#features' },
-    ],
-  },
-  company: {
-    title: 'Entreprise',
-    links: [
-      { label: 'À propos', href: '/about' },
-      { label: 'Contact', href: '/contact' },
-      { label: 'FAQ', href: '/faq' },
-    ],
-  },
-  legal: {
-    title: 'Légal',
-    links: [
-      { label: 'CGU', href: '/cgu' },
-      { label: 'Confidentialité', href: '/privacy' },
-    ],
-  },
-};
+import { useTranslation } from '@/lib/i18n';
 
 const socialLinks = [
   { icon: Twitter, href: 'https://twitter.com/naraevoyage', label: 'Twitter' },
@@ -42,9 +16,37 @@ const socialLinks = [
 ];
 
 export function Footer() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
+
+  const footerLinks = useMemo(() => ({
+    product: {
+      title: t('footer.productTitle'),
+      links: [
+        { label: t('footer.createTrip'), href: '/plan' },
+        { label: t('footer.explore'), href: '/explore' },
+        { label: t('footer.myTrips'), href: '/mes-voyages' },
+        { label: t('footer.features'), href: '/#features' },
+      ],
+    },
+    company: {
+      title: t('footer.companyTitle'),
+      links: [
+        { label: t('footer.about'), href: '/about' },
+        { label: t('footer.contact'), href: '/contact' },
+        { label: t('footer.faq'), href: '/faq' },
+      ],
+    },
+    legal: {
+      title: t('footer.legalTitle'),
+      links: [
+        { label: t('footer.terms'), href: '/cgu' },
+        { label: t('footer.privacy'), href: '/privacy' },
+      ],
+    },
+  }), [t]);
 
   const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,16 +76,15 @@ export function Footer() {
                 <span className="font-display text-2xl font-semibold tracking-tight">Narae Voyage</span>
               </Link>
               <p className="mb-6 max-w-sm text-sm leading-relaxed text-muted-foreground">
-                Planifie, collabore et partage des voyages de qualité avec une expérience pensée pour aller vite,
-                sans perdre la précision.
+                {t('footer.tagline')}
               </p>
 
               <div className="space-y-2">
-                <p className="text-xs uppercase tracking-[0.2em] text-[#b8923d]">Newsletter</p>
+                <p className="text-xs uppercase tracking-[0.2em] text-[#b8923d]">{t('footer.newsletter')}</p>
                 {isSubscribed ? (
                   <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
                     <Check className="h-4 w-4" />
-                    Merci pour votre inscription.
+                    {t('footer.newsletterThanks')}
                   </div>
                 ) : (
                   <form onSubmit={handleNewsletterSubmit} className="flex gap-2">
@@ -100,7 +101,7 @@ export function Footer() {
                     </Button>
                   </form>
                 )}
-                <p className="text-xs text-muted-foreground">Conseils pratiques, nouveautés produit, idées d&apos;itinéraires.</p>
+                <p className="text-xs text-muted-foreground">{t('footer.newsletterHint')}</p>
               </div>
             </div>
 
@@ -121,7 +122,7 @@ export function Footer() {
           </div>
 
           <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-[#1e3a5f]/10 pt-6 md:flex-row">
-            <p className="text-sm text-muted-foreground">© {new Date().getFullYear()} Narae Voyage. Tous droits réservés.</p>
+            <p className="text-sm text-muted-foreground">© {new Date().getFullYear()} Narae Voyage. {t('footer.allRights')}</p>
 
             <div className="flex items-center gap-3">
               {socialLinks.map((social) => (
@@ -138,7 +139,7 @@ export function Footer() {
               ))}
             </div>
 
-            <p className="text-sm text-muted-foreground">Conçu en France</p>
+            <p className="text-sm text-muted-foreground">{t('footer.madeIn')}</p>
           </div>
         </div>
       </div>
