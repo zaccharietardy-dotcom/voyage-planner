@@ -694,8 +694,8 @@ function enrichSparseDays(
     const activities = (day.items || []).filter((i) => i.type === 'activity');
     const activityCount = activities.length;
 
-    // CAS 1: Dernier jour avec 0 activité
-    if (isLastDay && activityCount === 0 && unusedPool.length > 0) {
+    // CAS 1: Dernier jour avec < 2 activités (departure day should have at least 1-2 activities)
+    if (isLastDay && activityCount < 2 && unusedPool.length > 0) {
       // Find time window: after breakfast, before latest departure
       const breakfastItem = (day.items || []).find(
         (i) => i.type === 'restaurant' && i.mealType === 'breakfast'
@@ -1074,6 +1074,7 @@ export function buildFallbackPlan(input: LLMPlannerInput): LLMPlannerOutput {
   // Build days
   const days: LLMDayPlan[] = [];
   let activityIndex = 0;
+  const usedRestaurantIds = new Set<string>(); // Track used restaurants to vary across days
 
   for (let dayNum = 1; dayNum <= durationDays; dayNum++) {
     const numActivities = activitiesPerDay[dayNum - 1] || 0;
@@ -1083,14 +1084,20 @@ export function buildFallbackPlan(input: LLMPlannerInput): LLMPlannerOutput {
     // Calculate day centroid for restaurant selection
     const centroid = calculateCentroid(dayActivities);
 
-    // Select restaurants
+    // Select restaurants — avoid reusing same restaurant across days
     const breakfast = selectClosestRestaurant(
       restaurants,
       hotel ? { lat: hotel.lat, lng: hotel.lng } : centroid,
-      'breakfast'
+      'breakfast',
+      usedRestaurantIds
     );
-    const lunch = selectClosestRestaurant(restaurants, centroid, 'lunch');
-    const dinner = selectClosestRestaurant(restaurants, centroid, 'dinner');
+    if (breakfast) usedRestaurantIds.add(breakfast.id);
+
+    const lunch = selectClosestRestaurant(restaurants, centroid, 'lunch', usedRestaurantIds);
+    if (lunch) usedRestaurantIds.add(lunch.id);
+
+    const dinner = selectClosestRestaurant(restaurants, centroid, 'dinner', usedRestaurantIds);
+    if (dinner) usedRestaurantIds.add(dinner.id);
 
     // Build items with simple timing
     const items: LLMDayItem[] = [];
@@ -1213,20 +1220,29 @@ function calculateCentroid(
 function selectClosestRestaurant(
   restaurants: { id: string; lat: number; lng: number; suitableFor: string[] }[],
   coords: { lat: number; lng: number },
-  mealType: string
+  mealType: string,
+  usedIds?: Set<string>
 ): { id: string } | null {
-  const suitable = restaurants.filter((r) => r.suitableFor.includes(mealType));
-  if (suitable.length === 0) return null;
+  const suitable = restaurants.filter((r) =>
+    r.suitableFor.includes(mealType) && (!usedIds || !usedIds.has(r.id))
+  );
+
+  // If all suitable restaurants are used, allow reuse (better than no meal)
+  const candidates = suitable.length > 0
+    ? suitable
+    : restaurants.filter((r) => r.suitableFor.includes(mealType));
+
+  if (candidates.length === 0) return null;
 
   // Find closest
-  let closest = suitable[0];
+  let closest = candidates[0];
   let minDist = haversineDistance(coords, closest);
 
-  for (let i = 1; i < suitable.length; i++) {
-    const dist = haversineDistance(coords, suitable[i]);
+  for (let i = 1; i < candidates.length; i++) {
+    const dist = haversineDistance(coords, candidates[i]);
     if (dist < minDist) {
       minDist = dist;
-      closest = suitable[i];
+      closest = candidates[i];
     }
   }
 

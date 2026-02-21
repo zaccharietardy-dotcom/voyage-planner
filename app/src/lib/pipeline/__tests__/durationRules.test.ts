@@ -65,8 +65,28 @@ describe('pipeline minimum duration rules', () => {
     expect(getMaxDuration('Viewpoint Montmartre', 'attraction')).toBe(45);
   });
 
-  it('returns null for no cap on museums', () => {
-    expect(getMaxDuration('Musée du Louvre', 'museum')).toBeNull();
+  it('caps museums at 150 minutes max', () => {
+    expect(getMaxDuration('Musée du Louvre', 'museum')).toBe(150);
+  });
+
+  it('caps towers at 90 minutes for observation towers', () => {
+    expect(getMaxDuration('Tour Eiffel', 'attraction')).toBe(90);
+  });
+
+  it('caps basilicas at 60 minutes', () => {
+    expect(getMaxDuration('Basilique du Sacré-Cœur', 'church')).toBe(60);
+  });
+
+  it('caps cathedrals at 75 minutes', () => {
+    expect(getMaxDuration('Cathédrale Notre-Dame', 'church')).toBe(75);
+  });
+
+  it('caps palaces at 120 minutes', () => {
+    expect(getMaxDuration('Palais de Versailles', 'palace')).toBe(120);
+  });
+
+  it('caps parks at 90 minutes', () => {
+    expect(getMaxDuration('Jardin du Luxembourg', 'park')).toBe(90);
   });
 });
 

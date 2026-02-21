@@ -83,6 +83,20 @@ export function getMinDuration(name: string, type: string): number {
 const MAX_DURATION_RULES: [RegExp, number][] = [
   // Famous arches and gates: larger landmarks deserve more time
   [/\b(arc\s+de\s+triomphe|arco\s+d[ie]\s+triun?fo|brandenburg|brandenburger|india\s?gate|gateway\s+of\s+india|puerta\s+del?\s+sol)\b/i, 60],
+  // Observation towers and decks: 60-90min max (includes ascent + view + descent)
+  [/\b(eiffel|skytree|sky\s?tree|tokyo\s?tower|cn\s?tower|empire\s?state|burj\s?khalifa|montparnasse|shard|one\s?world\s?observatory|top\s?of\s?the\s?rock|edge\s?observation|shibuya\s?sky)\b/i, 90],
+  // Generic towers (non-observation): 45min
+  [/\b(tower|tour|torre)\b/i, 45],
+  // Cathedrals: slightly longer than churches (75min)
+  [/\b(cathedral|cath[eé]drale|duomo|dom)\b/i, 75],
+  // Basilicas, churches: 60min max
+  [/\b(basilica|basilique|sacr[eé][\s-]?c(?:oeur|œur)|church|[eé]glise|chiesa|chapel|chapelle)\b/i, 60],
+  // Generic museums/galleries: 150min cap (major ones have higher min, but never 3h for small ones)
+  [/\b(museum|mus[eé][eo]|gallery|galerie|galleria)\b/i, 150],
+  // Palaces, castles: 120min cap
+  [/\b(palace|palais|palazzo|castle|ch[aâ]teau)\b/i, 120],
+  // Parks, gardens: 90min cap
+  [/\b(park|parc|garden|jardin|botanical|botanique)\b/i, 90],
   // Generic monuments/statues: quick visits
   [/\b(statue|sculpture|fountain|fontaine|fontana|monument|memorial|m[eé]morial)\b/i, 30],
   [/\b(viewpoint|belvedere|belv[eé]d[eè]re|mirador|panorama)\b/i, 45],
