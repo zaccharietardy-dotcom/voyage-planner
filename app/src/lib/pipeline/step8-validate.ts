@@ -16,6 +16,12 @@ import type { Trip, TripDay, TripItem } from '../types';
 import { calculateDistance, getCityCenterCoords } from '../services/geocoding';
 import { formatDateForUrl, generateFlightLink, generateFlightOmioLink } from '../services/linkGenerator';
 import { getHotelHardCapKmForProfile, resolveQualityCityProfile, RESTAURANT_ABSOLUTE_MAX_KM } from './qualityPolicy';
+import {
+  buildTrainDescription,
+  inferLonghaulDirectionFromItem,
+  normalizeReturnTransportBookingUrl,
+  rebaseTransitLegsToTimeline,
+} from './utils/longhaulConsistency';
 
 const LOGISTICS_TYPES: TripItem['type'][] = ['flight', 'transport', 'checkin', 'checkout', 'parking', 'luggage'];
 
@@ -71,8 +77,164 @@ export function validateAndFixTrip(trip: Trip): ValidationResult {
   if (autoFixes.length > 0) {
     autoFixes.forEach(f => console.log(`  🔧 ${f}`));
   }
+  const qualityMetrics = buildQualityHardeningMetrics(trip, autoFixes);
+  console.log(`[Pipeline V2] Quality hardening metrics: ${JSON.stringify(qualityMetrics)}`);
 
   return { score, warnings, autoFixes, breakdown };
+}
+
+function buildQualityHardeningMetrics(trip: Trip, autoFixes: string[]): {
+  meal_label_autofix_count: number;
+  longhaul_leg_rebased_count: number;
+  narrative_hallucination_fix_count: number;
+  longhaul_zero_coords_count: number;
+} {
+  let longhaulRebasedCount = 0;
+  let longhaulZeroCoordsCount = 0;
+
+  for (const day of trip.days) {
+    for (const item of day.items) {
+      if (item.type !== 'transport' || item.transportRole !== 'longhaul') continue;
+      if (item.transitLegs?.length && item.transportTimeSource === 'rebased') {
+        longhaulRebasedCount += 1;
+      }
+      if (Number(item.latitude) === 0 && Number(item.longitude) === 0) {
+        longhaulZeroCoordsCount += 1;
+      }
+    }
+  }
+
+  const mealLabelAutofixCount = autoFixes.filter((fix) => fix.includes('mealType corrigé')).length;
+  const narrativeHallucinationFixCount = autoFixes.filter((fix) => fix.toLowerCase().includes('narrative')).length;
+
+  return {
+    meal_label_autofix_count: mealLabelAutofixCount,
+    longhaul_leg_rebased_count: longhaulRebasedCount,
+    narrative_hallucination_fix_count: narrativeHallucinationFixCount,
+    longhaul_zero_coords_count: longhaulZeroCoordsCount,
+  };
+}
+
+function mealTypeFromStartMinutes(startMinutes: number): TripItem['mealType'] {
+  if (startMinutes < 10 * 60 + 30) return 'breakfast';
+  if (startMinutes < 18 * 60) return 'lunch';
+  return 'dinner';
+}
+
+function mealLabelFromType(mealType: TripItem['mealType']): string {
+  if (mealType === 'breakfast') return 'Petit-déjeuner';
+  if (mealType === 'lunch') return 'Déjeuner';
+  return 'Dîner';
+}
+
+function toDayDateTime(dayDate: Date, hhmm: string): Date {
+  const [h, m] = hhmm.split(':').map(Number);
+  const date = new Date(dayDate);
+  date.setHours(h || 0, m || 0, 0, 0);
+  return date;
+}
+
+function normalizeMealSemantics(day: TripDay, autoFixes: string[]): void {
+  const sorted = [...day.items].sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
+  const seenMealSlots = new Set<TripItem['mealType']>();
+  const kept: TripItem[] = [];
+
+  for (const item of sorted) {
+    if (item.type !== 'restaurant') {
+      kept.push(item);
+      continue;
+    }
+
+    const startMin = timeToMinutes(item.startTime);
+    const mealType = mealTypeFromStartMinutes(startMin);
+    const mealLabel = mealLabelFromType(mealType);
+    const normalizedTitle = (item.title || '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
+    const isHotelMeal = normalizedTitle.includes("a l'hotel") || normalizedTitle.includes('at hotel');
+    const restaurantName = item.restaurant?.name
+      || item.title.replace(/^(Petit-déjeuner|Déjeuner|Dîner)\s*(—)?\s*/i, '').trim()
+      || 'Restaurant local';
+    const previousLabel = item.mealType || mealTypeFromStartMinutes(timeToMinutes(item.startTime));
+
+    item.mealType = mealType;
+    item.title = isHotelMeal ? `${mealLabel} à l'hôtel` : `${mealLabel} — ${restaurantName}`;
+    if (item.description) {
+      item.description = item.description.replace(/^(Petit-déjeuner|Déjeuner|Dîner)/, mealLabel);
+    }
+
+    if (previousLabel !== mealType) {
+      autoFixes.push(`Jour ${day.dayNumber}: mealType corrigé (${previousLabel} -> ${mealType})`);
+    }
+
+    if (seenMealSlots.has(mealType)) {
+      autoFixes.push(`Jour ${day.dayNumber}: doublon repas supprimé (${mealType})`);
+      continue;
+    }
+    seenMealSlots.add(mealType);
+    kept.push(item);
+  }
+
+  day.items = kept.sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
+  day.items.forEach((item, idx) => {
+    item.orderIndex = idx;
+  });
+}
+
+function enforceLonghaulConsistency(day: TripDay, autoFixes: string[]): void {
+  for (const item of day.items) {
+    if (item.type !== 'transport' || item.transportRole !== 'longhaul' || !item.transitLegs?.length) continue;
+
+    const itemStart = toDayDateTime(day.date, item.startTime);
+    let itemEnd = toDayDateTime(day.date, item.endTime);
+    if (itemEnd.getTime() < itemStart.getTime()) {
+      itemEnd = new Date(itemEnd.getTime() + 24 * 60 * 60 * 1000);
+    }
+
+    const direction = inferLonghaulDirectionFromItem(item);
+    item.transportDirection = direction;
+
+    const rebased = rebaseTransitLegsToTimeline({
+      transitLegs: item.transitLegs,
+      startTime: itemStart,
+      direction,
+    });
+    if (!rebased?.length) continue;
+
+    const firstDep = new Date(rebased[0].departure);
+    const lastArr = new Date(rebased[rebased.length - 1].arrival);
+    const mismatchMinutes = Math.max(
+      Math.abs(firstDep.getTime() - itemStart.getTime()) / 60000,
+      Math.abs(lastArr.getTime() - itemEnd.getTime()) / 60000
+    );
+
+    let finalLegs = rebased;
+    if (mismatchMinutes > 15) {
+      finalLegs = rebaseTransitLegsToTimeline({
+        transitLegs: item.transitLegs,
+        startTime: itemStart,
+        direction,
+        windowEndTime: itemEnd,
+        fitToWindow: true,
+      }) || rebased;
+      autoFixes.push(`Jour ${day.dayNumber}: transitLegs ${item.id} réalignés sur le créneau item`);
+    }
+
+    item.transitLegs = finalLegs;
+    item.transportTimeSource = 'rebased';
+
+    if (item.transportMode === 'train') {
+      item.description = buildTrainDescription(
+        direction === 'return' ? 'Train retour' : 'Train',
+        finalLegs.map((leg) => leg.operator)
+      );
+    }
+
+    if (direction === 'return') {
+      item.bookingUrl = normalizeReturnTransportBookingUrl(item.bookingUrl, itemStart, { swapOmioDirection: true });
+    }
+  }
 }
 
 // ============================================
@@ -204,11 +366,14 @@ function scoreRythme(
       totalMeals++;
       const start = timeToMinutes(item.startTime);
       const title = item.title || '';
-      if (title.includes('Petit-déjeuner')) {
+      const mealType: TripItem['mealType'] =
+        item.mealType
+        || (title.includes('Petit-déjeuner') ? 'breakfast' : title.includes('Déjeuner') ? 'lunch' : title.includes('Dîner') ? 'dinner' : mealTypeFromStartMinutes(start));
+      if (mealType === 'breakfast') {
         // Breakfast: 7:00-9:30
         if (start >= 420 && start <= 570) goodMealTiming++;
         else warnings.push(`Jour ${day.dayNumber}: petit-déjeuner à ${item.startTime} (inhabituel)`);
-      } else if (title.includes('Déjeuner')) {
+      } else if (mealType === 'lunch') {
         // Lunch: 11:30-16:00 (includes late lunches that slipped past 15:00)
         if (start >= 690 && start <= 960) goodMealTiming++;
         else warnings.push(`Jour ${day.dayNumber}: déjeuner à ${item.startTime} (inhabituel)`);
@@ -331,8 +496,8 @@ function scoreGeo(
     for (let i = 0; i < sorted.length; i++) {
       const item = sorted[i];
       if (item.type !== 'restaurant' || isHotelMeal(item)) continue;
-      const title = item.title || '';
-      if (title.includes('Petit-déjeuner')) continue; // breakfast anchored to hotel
+      const mealType = item.mealType || mealTypeFromStartMinutes(timeToMinutes(item.startTime));
+      if (mealType === 'breakfast') continue; // breakfast anchored to hotel
       totalLunchDinners++;
 
       // Find nearest adjacent activity
@@ -561,7 +726,7 @@ function scoreCoherence(
     for (const item of day.items) {
       if (item.type === 'restaurant') {
         const cleanName = (item.title || '').replace(/^(Petit-déjeuner|Déjeuner|Dîner) — /, '').toLowerCase().trim();
-        const mealType = (item.title || '').match(/^(Petit-déjeuner|Déjeuner|Dîner)/)?.[0] || '';
+        const mealType = item.mealType || mealTypeFromStartMinutes(timeToMinutes(item.startTime));
         const key = `${cleanName}-${mealType}`;
         if (seen.has(key)) {
           dupeRestos++;
@@ -606,14 +771,17 @@ function scoreCoherence(
 function applyAutoFixes(trip: Trip, warnings: string[], autoFixes: string[]): void {
   const interCity = isInterCityTrip(trip);
 
-  // Fix 1: Remove duplicate restaurants within same day
+  // Fix 1: Canonicalize meal semantics + remove duplicates within the same meal slot
   for (const day of trip.days) {
+    normalizeMealSemantics(day, autoFixes);
+    enforceLonghaulConsistency(day, autoFixes);
+
     const seenRestoNames = new Set<string>();
     const itemsToRemove: number[] = [];
     day.items.forEach((item, idx) => {
       if (item.type === 'restaurant') {
         const cleanName = item.title.replace(/^(Petit-déjeuner|Déjeuner|Dîner) — /, '');
-        const mealType = item.title.match(/^(Petit-déjeuner|Déjeuner|Dîner)/)?.[0] || '';
+        const mealType = item.mealType || mealTypeFromStartMinutes(timeToMinutes(item.startTime));
         const key = `${cleanName}-${mealType}`;
         if (seenRestoNames.has(key)) {
           itemsToRemove.push(idx);
@@ -639,9 +807,48 @@ function applyAutoFixes(trip: Trip, warnings: string[], autoFixes: string[]): vo
 }
 
 function fixThemesAndNarratives(trip: Trip, autoFixes: string[], warnings: string[]): void {
+  const lastDayNumber = trip.days[trip.days.length - 1]?.dayNumber || 0;
+
   for (const day of trip.days) {
     const actualActivities = day.items.filter(i => i.type === 'activity');
     const actualActivityNames = actualActivities.map(i => i.title);
+    const hasLonghaul = day.items.some((item) => item.type === 'transport' && item.transportRole === 'longhaul');
+    const isReturnDay = day.dayNumber === lastDayNumber && hasLonghaul;
+
+    if (isReturnDay) {
+      if (day.theme !== 'Retour') {
+        const oldTheme = day.theme;
+        day.theme = 'Retour';
+        autoFixes.push(`Jour ${day.dayNumber}: thème forcé "${oldTheme || '∅'}" -> "Retour"`);
+      }
+      const returnNarrative = 'Journée de retour et logistique de départ.';
+      if (day.dayNarrative !== returnNarrative) {
+        day.dayNarrative = returnNarrative;
+        autoFixes.push(`Jour ${day.dayNumber}: narrative logistique de retour appliquée`);
+      }
+      continue;
+    }
+
+    if (actualActivities.length === 0) {
+      const restaurants = day.items.filter(i => i.type === 'restaurant');
+      const isArrivalDay = hasLonghaul && day.dayNumber === 1;
+
+      if (isArrivalDay) {
+        day.theme = 'Arrivée et installation';
+        day.dayNarrative = 'Journée logistique d’arrivée et installation.';
+      } else if (hasLonghaul) {
+        day.theme = 'Retour';
+        day.dayNarrative = 'Journée logistique de départ.';
+      } else if (restaurants.length > 0) {
+        day.theme = day.theme || 'Découverte gastronomique';
+        day.dayNarrative = 'Journée centrée sur les repas et la découverte locale.';
+      } else {
+        day.theme = day.theme || 'Journée libre';
+        day.dayNarrative = 'Journée libre sans activité planifiée.';
+      }
+      autoFixes.push(`Jour ${day.dayNumber}: thème/narrative recalculés (aucune activité)`);
+      continue;
+    }
 
     // Fix narrative activity count
     if (day.dayNarrative) {
@@ -697,10 +904,15 @@ function fixThemesAndNarratives(trip: Trip, autoFixes: string[], warnings: strin
         const inTrip = actualActivityNames.some(n => n.toLowerCase().includes(attr.toLowerCase()));
         return mentioned && !inTrip;
       });
-      if (mentionedButMissing.length > 0) {
+      const noActualMention = !actualActivityNames.some((name) => narrativeLower.includes(name.toLowerCase()));
+      const suspiciousTemplate = /journee\s*\d+\s*:/i.test(day.dayNarrative) || day.dayNarrative.includes('&');
+
+      if (mentionedButMissing.length > 0 || (noActualMention && suspiciousTemplate)) {
         const actNames = actualActivities.map(a => a.title).join(', ');
         day.dayNarrative = `Journée consacrée à ${actNames}. ${actualActivities.length} activité${actualActivities.length > 1 ? 's' : ''} prévue${actualActivities.length > 1 ? 's' : ''}.`;
-        autoFixes.push(`Jour ${day.dayNumber}: narrative reconstruite (hallucination: ${mentionedButMissing.join(', ')})`);
+        autoFixes.push(
+          `Jour ${day.dayNumber}: narrative reconstruite (hallucination: ${mentionedButMissing.join(', ') || 'template incohérent'})`
+        );
       }
     }
   }

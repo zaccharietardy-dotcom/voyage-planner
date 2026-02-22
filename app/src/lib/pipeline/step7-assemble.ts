@@ -26,6 +26,11 @@ import { isMonumentLikeActivityName, resolveOfficialTicketing } from '../service
 import { scoreViatorPlusValue } from '../services/viator';
 import { buildAirportParkingBookingUrl, calculateParkingTime, selectBestParking } from '../services/parking';
 import { accommodationHasKitchen } from './utils/accommodation';
+import {
+  normalizeReturnTransportBookingUrl as normalizeReturnTransportBookingUrlShared,
+  rebaseTransitLegsToTimeline,
+  getTransitLegsDurationMinutes,
+} from './utils/longhaulConsistency';
 import type { Attraction } from '../services/attractions';
 // ---------------------------------------------------------------------------
 // Directions cache — used to store pre-fetched real travel times
@@ -63,6 +68,13 @@ function extractMealLabel(title: string): string {
   if (title.startsWith('Déjeuner')) return 'Déjeuner';
   if (title.startsWith('Dîner')) return 'Dîner';
   return title.split(' — ')[0] || title;
+}
+
+function inferMealTypeFromTitle(title: string): TripItem['mealType'] | undefined {
+  if (title.startsWith('Petit-déjeuner')) return 'breakfast';
+  if (title.startsWith('Déjeuner')) return 'lunch';
+  if (title.startsWith('Dîner')) return 'dinner';
+  return undefined;
 }
 
 const MODE_LABELS: Record<string, string> = {
@@ -333,47 +345,12 @@ function getRestaurantPrimaryGooglePhoto(itemData: any): string | undefined {
   return normalizeRestaurantGooglePhotoUrl(itemData?.imageUrl) || normalizeRestaurantGooglePhotoUrl(itemData?.photoUrl);
 }
 
-function swapOmioRouteDirection(pathname: string): string {
-  const segments = pathname.split('/').filter(Boolean);
-  if (segments.length < 3) return pathname;
-
-  const supportedModes = new Set(['trains', 'bus', 'vols']);
-  let modeIndex = 0;
-
-  // Support locale-prefixed Omio routes: /fr/trains/paris/rome
-  const maybeLocale = segments[0];
-  if (!supportedModes.has(maybeLocale) && segments.length >= 4 && /^[a-z]{2}(?:-[a-z]{2})?$/i.test(maybeLocale) && supportedModes.has(segments[1])) {
-    modeIndex = 1;
-  }
-
-  if (!supportedModes.has(segments[modeIndex])) return pathname;
-  const fromIndex = modeIndex + 1;
-  const toIndex = modeIndex + 2;
-  if (!segments[fromIndex] || !segments[toIndex]) return pathname;
-
-  [segments[fromIndex], segments[toIndex]] = [segments[toIndex], segments[fromIndex]];
-  return `/${segments.join('/')}`;
-}
-
 export function normalizeReturnTransportBookingUrl(
   rawUrl: string | undefined,
   returnDate: Date,
   options: { swapOmioDirection?: boolean } = {}
 ): string | undefined {
-  if (!rawUrl) return rawUrl;
-  try {
-    const url = new URL(rawUrl);
-    const returnDateStr = returnDate.toISOString().split('T')[0];
-    if (options.swapOmioDirection) {
-      url.pathname = swapOmioRouteDirection(url.pathname);
-    }
-    if (url.searchParams.has('departure_date')) {
-      url.searchParams.set('departure_date', returnDateStr);
-    }
-    return url.toString();
-  } catch {
-    return rawUrl;
-  }
+  return normalizeReturnTransportBookingUrlShared(rawUrl, returnDate, options);
 }
 
 type InterCityFallbackDirection = 'outbound' | 'return';
@@ -416,6 +393,8 @@ export function buildInterCityFallbackTransportPayload(params: {
         locationName: `${from} → ${to}`,
         transportMode: 'transit',
         transportRole: 'longhaul',
+        transportDirection: direction,
+        transportTimeSource: 'estimated',
         estimatedCost: transport.totalPrice || 0,
         bookingUrl,
         aviasalesUrl,
@@ -438,6 +417,8 @@ export function buildInterCityFallbackTransportPayload(params: {
       locationName: `${from} → ${to}`,
       transportMode: 'transit',
       transportRole: 'longhaul',
+      transportDirection: direction,
+      transportTimeSource: 'estimated',
       estimatedCost: transport?.totalPrice || 0,
       bookingUrl,
       dataReliability: 'estimated',
@@ -447,9 +428,8 @@ export function buildInterCityFallbackTransportPayload(params: {
 }
 
 function inferInterItemTransportMode(distanceKm: number, travelMinutes: number): TripItem['transportToPrevious'] {
-  if (distanceKm <= 1.2) return 'walk';
-  if (distanceKm >= 6) return 'car';
-  if (distanceKm >= 3.5 && travelMinutes <= 20) return 'car';
+  if (distanceKm <= 2.2) return 'walk';
+  if (distanceKm >= 12 && travelMinutes <= 25) return 'car';
   return 'public';
 }
 
@@ -1359,6 +1339,8 @@ export async function assembleTripSchedule(
           bookingUrl: transport.bookingUrl,
           transportMode: normalizeTransportMode(transport.mode),
           transportRole: 'longhaul',
+          transportDirection: 'outbound',
+          transportTimeSource: transport.transitLegs?.length ? (transport.dataSource || 'estimated') : 'estimated',
         },
       });
     } else if (isFirstDay && isInterCityTrip) {
@@ -1428,37 +1410,23 @@ export async function assembleTripSchedule(
     } else if (hasReturnTransport && transport) {
       const { start: tStart, end: tEnd } = getGroundTransportTimes(transport, dayDate, 'return');
 
-      // Build return transit legs with CORRECT dates (not outbound dates)
-      let returnTransitLegs: typeof transport.transitLegs = undefined;
-      if (transport.transitLegs?.length) {
-        const reversedLegs = transport.transitLegs.slice().reverse();
-        let cumulativeMs = tStart.getTime();
-
-        returnTransitLegs = reversedLegs.map((leg) => {
-          const legDep = new Date(cumulativeMs);
-          const legDurMs = (leg.duration || 30) * 60 * 1000;
-          const legArr = new Date(cumulativeMs + legDurMs);
-          cumulativeMs = legArr.getTime();
-
-          return {
-            mode: leg.mode,
-            from: leg.to,
-            to: leg.from,
-            departure: legDep.toISOString(),
-            arrival: legArr.toISOString(),
-            duration: leg.duration,
-            operator: leg.operator,
-            line: leg.line,
-          };
-        });
-      }
+      // Rebase return transit legs on the return-day timeline.
+      const returnTransitLegs = rebaseTransitLegsToTimeline({
+        transitLegs: transport.transitLegs as TripItem['transitLegs'],
+        startTime: tStart,
+        direction: 'return',
+      });
+      const rebasedDurationMinutes = getTransitLegsDurationMinutes(returnTransitLegs);
+      const returnEnd = rebasedDurationMinutes > 0
+        ? new Date(tStart.getTime() + rebasedDurationMinutes * 60 * 1000)
+        : tEnd;
 
       returnTransportData = {
         id: `transport-ret-${balancedDay.dayNumber}`,
         title: `${MODE_LABELS[transport.mode] || '🚊 Transport'} → ${preferences.origin}`,
         type: 'transport',
         startTime: tStart,
-        endTime: tEnd,
+        endTime: returnEnd,
         data: {
           ...transport,
           description: transport.segments?.map(s => `${s.to} → ${s.from}`).join(' | '),
@@ -1470,6 +1438,8 @@ export async function assembleTripSchedule(
           bookingUrl: normalizeReturnTransportBookingUrl(transport.bookingUrl, tStart, { swapOmioDirection: true }),
           transportMode: normalizeTransportMode(transport.mode),
           transportRole: 'longhaul',
+          transportDirection: 'return',
+          transportTimeSource: returnTransitLegs?.length ? 'rebased' : 'estimated',
         },
       };
 
@@ -2948,11 +2918,16 @@ export async function assembleTripSchedule(
             )
           : (item.type === 'transport' && itemData.googleFlightsUrl) || undefined,
         // Transport-specific fields (train/bus legs, price range)
+        mealType: item.type === 'restaurant'
+          ? (itemData.mealType || inferMealTypeFromTitle(rebuiltTitle))
+          : undefined,
         transitLegs: itemData.transitLegs,
         transitDataSource: itemData.transitDataSource,
         priceRange: itemData.priceRange,
         transportMode: resolvedTransportMode,
         transportRole: resolvedTransportRole,
+        transportDirection: itemData.transportDirection,
+        transportTimeSource: itemData.transportTimeSource,
         dataReliability: itemData.dataReliability || 'verified',
         geoSource: itemData.geoSource,
         geoConfidence: itemData.geoConfidence,
@@ -4055,6 +4030,8 @@ export async function assembleTripSchedule(
     }
   }
 
+  // Recompute inter-item route metadata after the last cross-day dedup pass.
+  refreshRouteMetadataAfterMutations(days, directionsCache);
   refreshScheduleDiagnostics(days);
 
   // 13. Build cost breakdown
@@ -5416,7 +5393,8 @@ function swapTripItemPayload(source: TripItem, target: TripItem): void {
     'omioFlightUrl', 'googleMapsUrl', 'googleMapsPlaceUrl', 'restaurant',
     'restaurantAlternatives', 'accommodation', 'flight', 'flightAlternatives',
     'transitInfo', 'transitLegs', 'transitDataSource', 'priceRange',
-    'transportMode', 'transportRole', 'dataReliability', 'geoSource', 'geoConfidence', 'qualityFlags', 'imageUrl',
+    'transportMode', 'transportRole', 'transportDirection', 'transportTimeSource',
+    'mealType', 'dataReliability', 'geoSource', 'geoConfidence', 'qualityFlags', 'imageUrl',
     'freeCancellation', 'instantConfirmation', 'distanceFromPrevious',
     'timeFromPrevious', 'transportToPrevious',
   ];

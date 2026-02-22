@@ -599,6 +599,31 @@ describe('scheduleDayItems', () => {
     });
   });
 
+  it('relabels restaurant title/mealType when final slot drifts to dinner', () => {
+    const mislabeledRestaurant = mockTripItem({
+      id: 'rest-drift',
+      type: 'restaurant',
+      title: 'Déjeuner — Drift Bistro',
+      startTime: '19:10',
+      endTime: '20:10',
+      duration: 60,
+      latitude: 48.8615,
+      longitude: 2.3387,
+      restaurant: mockRestaurant({ id: 'rest-drift', name: 'Drift Bistro' }) as any,
+    });
+
+    const day = mockTripDay(1, []);
+    const window = buildDayWindow(day, 3, null, hotel, destCoords);
+    const mealSlots = buildMealSlots(window);
+    const candidates = buildCandidates([mislabeledRestaurant]);
+    const result = scheduleDayItems(candidates, mealSlots, window, [], new Set());
+
+    const placed = result.find((item) => item.id === 'rest-drift');
+    expect(placed).toBeDefined();
+    expect(placed?.mealType).toBe('dinner');
+    expect(placed?.title.startsWith('Dîner')).toBe(true);
+  });
+
   it('fills lunch slot when restaurant candidate is in lunch window', () => {
     const restaurantItem = mockTripItem({
       id: 'rest-1',

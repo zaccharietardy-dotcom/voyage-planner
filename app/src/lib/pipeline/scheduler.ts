@@ -56,6 +56,18 @@ function buildGoogleMapsUrl(lat: number, lng: number): string {
   return `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
 }
 
+function mealTypeFromMinutes(startMin: number): TripItem['mealType'] {
+  if (startMin < 10 * 60 + 30) return 'breakfast';
+  if (startMin < 18 * 60) return 'lunch';
+  return 'dinner';
+}
+
+function mealLabelFromType(mealType: TripItem['mealType']): string {
+  if (mealType === 'breakfast') return 'Petit-déjeuner';
+  if (mealType === 'lunch') return 'Déjeuner';
+  return 'Dîner';
+}
+
 // ============================================
 // Interfaces
 // ============================================
@@ -529,6 +541,7 @@ function buildMealItem(
       orderIndex: 0,
       duration: slot.durationMin,
       estimatedCost: hotel.breakfastIncluded ? 0 : 8,
+      mealType: 'breakfast',
       restaurant: {
         name: hotel.name || 'Hôtel',
         latitude: hotel.latitude || destCoords.lat,
@@ -559,6 +572,7 @@ function buildMealItem(
       : (slot.type === 'dinner' ? 25 : 15),
     rating: restaurant?.rating,
     googleMapsUrl: sanitizeGoogleMapsUrl(buildGoogleMapsUrl(lat, lng)),
+    mealType: slot.type,
     restaurant: restaurant || { name, latitude: lat, longitude: lng } as any,
   };
 }
@@ -571,36 +585,25 @@ function fixMealLabel(item: TripItem): void {
   if (item.type !== 'restaurant') return;
 
   const startMin = parseHHMM(item.startTime);
+  const normalizedMealType = mealTypeFromMinutes(startMin);
+  const correctLabel = mealLabelFromType(normalizedMealType);
+  item.mealType = normalizedMealType;
 
-  let correctLabel: string;
-  if (startMin < 10 * 60 + 30) {
-    correctLabel = 'Petit-déjeuner';
-  } else if (startMin < 15 * 60) {
-    correctLabel = 'Déjeuner';
-  } else if (startMin < 18 * 60) {
-    // 15:00-18:00: label as late lunch rather than "Goûter".
-    // The scheduler filters out goûter restaurants, so this case
-    // should rarely occur — but if it does, "Déjeuner" is safer.
-    correctLabel = 'Déjeuner';
-  } else {
-    correctLabel = 'Dîner';
-  }
+  const restaurantName = item.restaurant?.name
+    || item.title.replace(/^(Petit-déjeuner|Déjeuner|Dîner)\s*(—)?\s*/i, '').trim();
+  const isHotelMeal = /a l'hotel|à l'hôtel|at hotel/i.test(
+    (item.title || '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+  );
 
-  // Extract restaurant name from title (format: "Label — RestaurantName")
-  const dashIdx = item.title.indexOf('—');
-  const restaurantName = dashIdx >= 0
-    ? item.title.substring(dashIdx + 1).trim()
-    : (item.restaurant?.name || item.title);
+  item.title = isHotelMeal
+    ? `${correctLabel} à l'hôtel`
+    : `${correctLabel} — ${restaurantName || 'Restaurant local'}`;
 
-  const currentLabel = dashIdx >= 0
-    ? item.title.substring(0, dashIdx).trim()
-    : '';
-
-  if (currentLabel && currentLabel !== correctLabel) {
-    item.title = `${correctLabel} — ${restaurantName}`;
-    if (item.description && item.description.startsWith(currentLabel)) {
-      item.description = item.description.replace(currentLabel, correctLabel);
-    }
+  if (item.description) {
+    item.description = item.description.replace(/^(Petit-déjeuner|Déjeuner|Dîner)/, correctLabel);
   }
 }
 
@@ -833,11 +836,7 @@ export function scheduleDayItems(
   const usedMealWindows = new Set<string>();
   const deduped = result.filter(item => {
     if (item.type !== 'restaurant') return true;
-    const startMin = parseHHMM(item.startTime);
-    let mealWindow: string;
-    if (startMin < 10 * 60 + 30) mealWindow = 'breakfast';
-    else if (startMin < 18 * 60) mealWindow = 'lunch';
-    else mealWindow = 'dinner';
+    const mealWindow = item.mealType || mealTypeFromMinutes(parseHHMM(item.startTime));
     if (usedMealWindows.has(mealWindow)) {
       console.log(`[Scheduler] Day ${window.dayNumber}: removed duplicate ${mealWindow} "${item.title}"`);
       return false;
