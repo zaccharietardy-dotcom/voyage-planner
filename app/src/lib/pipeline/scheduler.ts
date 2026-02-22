@@ -833,10 +833,11 @@ export function scheduleDayItems(
   // 4b. Deduplicate: max 1 restaurant per meal window (keep first).
   //     Only 3 windows: breakfast (<10:30), lunch (10:30-18:00), dinner (>=18:00).
   //     No separate goûter window — we only want 3 meals per day.
-  const usedMealWindows = new Set<string>();
+  const usedMealWindows = new Set<'breakfast' | 'lunch' | 'dinner'>();
   const deduped = result.filter(item => {
     if (item.type !== 'restaurant') return true;
-    const mealWindow = item.mealType || mealTypeFromMinutes(parseHHMM(item.startTime));
+    const mealWindow: 'breakfast' | 'lunch' | 'dinner' =
+      item.mealType ?? mealTypeFromMinutes(parseHHMM(item.startTime)) ?? 'lunch';
     if (usedMealWindows.has(mealWindow)) {
       console.log(`[Scheduler] Day ${window.dayNumber}: removed duplicate ${mealWindow} "${item.title}"`);
       return false;
