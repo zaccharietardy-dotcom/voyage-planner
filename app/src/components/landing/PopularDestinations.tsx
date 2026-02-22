@@ -109,7 +109,7 @@ export function PopularDestinations() {
         >
           <div>
             <p className="mb-3 text-xs uppercase tracking-[0.22em] text-[#b8923d]">{t('destinations.badge')}</p>
-            <h2 className="font-display mb-3 text-4xl font-semibold md:text-5xl">{t('destinations.title')}</h2>
+            <h2 className="font-display mb-3 text-3xl font-semibold md:text-4xl">{t('destinations.title')}</h2>
             <p className="text-lg text-muted-foreground">{t('destinations.subtitle')}</p>
           </div>
           <div className="hidden gap-2 md:flex">
@@ -118,6 +118,7 @@ export function PopularDestinations() {
               size="icon"
               onClick={() => scroll('left')}
               className="h-10 w-10 rounded-full border-[#1e3a5f]/25 bg-background/70 hover:bg-[#1e3a5f]/5"
+              aria-label="Destinations précédentes"
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
@@ -126,6 +127,7 @@ export function PopularDestinations() {
               size="icon"
               onClick={() => scroll('right')}
               className="h-10 w-10 rounded-full border-[#1e3a5f]/25 bg-background/70 hover:bg-[#1e3a5f]/5"
+              aria-label="Destinations suivantes"
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
@@ -147,7 +149,7 @@ export function PopularDestinations() {
               className="shrink-0 snap-start"
             >
               <Link href={`/plan?destination=${encodeURIComponent(destination.name)}`}>
-                <Card className="group premium-ring w-[300px] overflow-hidden border border-[#1e3a5f]/10 p-0 shadow-lg transition-all hover:-translate-y-1 hover:shadow-2xl">
+                <Card className="group premium-ring w-[300px] overflow-hidden border border-[#1e3a5f]/10 p-0 shadow-lg transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_20px_40px_rgba(10,22,40,0.15)] hover:border-[#d4a853]/20">
                   <CardContent className="relative p-0">
                     <div className="relative h-[220px] overflow-hidden">
                       <Image

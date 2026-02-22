@@ -71,6 +71,7 @@ import { CommentsSection } from '@/components/trip/CommentsSection';
 import { ChatPanel, ChatButton } from '@/components/trip/ChatPanel';
 import { TripOnboarding } from '@/components/trip/TripOnboarding';
 import { ImportPlaces } from '@/components/trip/ImportPlaces';
+import { AddToCalendarDropdown } from '@/components/trip/AddToCalendarDropdown';
 import { ImportedPlace } from '@/lib/types';
 import {
   DropdownMenu,
@@ -1375,6 +1376,12 @@ export default function TripPage() {
                 <Download className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline text-xs">PDF</span>
               </Button>
+
+              <AddToCalendarDropdown
+                savedTripId={dbTrip?.id}
+                shareCode={shareCode}
+                trip={trip}
+              />
 
               {canOwnerEdit && (
                 <Button

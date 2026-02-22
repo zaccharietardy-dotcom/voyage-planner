@@ -39,6 +39,8 @@ export default function MesVoyagesPage() {
   const { user, isLoading: authLoading } = useAuth();
   const [trips, setTrips] = useState<TripListItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
   const { isOffline } = useConnectivity();
   const { t, locale } = useTranslation();
 
@@ -61,11 +63,13 @@ export default function MesVoyagesPage() {
         return;
       }
 
+      setError(null);
       try {
         // Use API route (server-side) to avoid RLS issues
         const res = await fetch('/api/trips');
         if (!res.ok) {
           console.error('Error fetching trips:', res.status, await res.text());
+          setError('Impossible de charger vos voyages. V\u00e9rifiez votre connexion.');
           const cached = readCachedTripsList<TripListItem>();
           setTrips(cached);
           return;
@@ -73,8 +77,9 @@ export default function MesVoyagesPage() {
         const tripsData = await res.json() as TripListItem[];
         setTrips(tripsData || []);
         cacheTripsList<TripListItem>(tripsData || []);
-      } catch (error) {
-        console.error('Error fetching trips:', error);
+      } catch (err) {
+        console.error('Error fetching trips:', err);
+        setError('Impossible de charger vos voyages. V\u00e9rifiez votre connexion.');
         const cached = readCachedTripsList<TripListItem>();
         if (cached.length > 0) {
           setTrips(cached);
@@ -88,7 +93,7 @@ export default function MesVoyagesPage() {
     if (!authLoading) {
       fetchTrips();
     }
-  }, [user, authLoading]);
+  }, [user, authLoading, retryCount]);
 
   const updateVisibility = async (tripId: string, visibility: TripVisibility) => {
     try {
@@ -167,6 +172,15 @@ export default function MesVoyagesPage() {
             </Button>
           </div>
         </div>
+
+        {error && (
+          <div className="mb-6 flex items-center justify-between rounded-lg border border-destructive/30 bg-destructive/5 p-4">
+            <p className="text-sm text-destructive">{error}</p>
+            <Button variant="outline" size="sm" onClick={() => { setError(null); setIsLoading(true); setRetryCount(c => c + 1); }} className="ml-4 shrink-0">
+              R&eacute;essayer
+            </Button>
+          </div>
+        )}
 
         {isLoading ? (
           <div className="grid gap-4">

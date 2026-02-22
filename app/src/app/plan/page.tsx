@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -307,7 +307,7 @@ export default function PlanPage() {
     }
   };
 
-  const renderStep = () => {
+  const renderedStep = useMemo(() => {
     switch (currentStep) {
       case 1:
         return <StepDestination data={preferences} onChange={updatePreferences} />;
@@ -322,7 +322,7 @@ export default function PlanPage() {
       default:
         return null;
     }
-  };
+  }, [currentStep, preferences, updatePreferences]);
 
   const progress = (currentStep / STEPS.length) * 100;
 
@@ -445,7 +445,7 @@ export default function PlanPage() {
                 }}
                 disabled={step.id > currentStep}
                 className={cn(
-                  'relative flex min-w-[86px] flex-col items-center gap-1 rounded-xl border border-transparent px-2 py-1.5 transition-all',
+                  'relative flex min-w-[86px] flex-col items-center gap-1 rounded-xl border border-transparent px-2 py-1.5 transition-all focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1',
                   step.id === currentStep && 'border-primary/30 bg-primary/5',
                   step.id < currentStep && 'cursor-pointer opacity-70 hover:opacity-100',
                   step.id > currentStep && 'opacity-40 cursor-not-allowed'
@@ -479,7 +479,7 @@ export default function PlanPage() {
                 exit="exit"
                 transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
               >
-                {renderStep()}
+                {renderedStep}
               </motion.div>
             </AnimatePresence>
           </CardContent>

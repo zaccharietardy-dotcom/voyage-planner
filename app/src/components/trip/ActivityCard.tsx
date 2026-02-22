@@ -734,6 +734,20 @@ export const ActivityCard = memo(function ActivityCard({
       )}
     </Card>
   );
+}, (prev, next) => {
+  return (
+    prev.item.id === next.item.id &&
+    prev.item.startTime === next.item.startTime &&
+    prev.item.endTime === next.item.endTime &&
+    prev.item.title === next.item.title &&
+    prev.item.type === next.item.type &&
+    prev.isSelected === next.isSelected &&
+    prev.isDragging === next.isDragging &&
+    prev.orderNumber === next.orderNumber &&
+    prev.canMoveUp === next.canMoveUp &&
+    prev.canMoveDown === next.canMoveDown &&
+    prev.showPriceComparison === next.showPriceComparison
+  );
 });
 
 function formatDuration(minutes: number): string {

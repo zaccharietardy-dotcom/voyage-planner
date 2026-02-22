@@ -47,7 +47,7 @@ export function Testimonials() {
           className="mb-14 text-center"
         >
           <p className="mb-3 text-xs uppercase tracking-[0.22em] text-[#b8923d]">{t('testimonials.badge')}</p>
-          <h2 className="font-display mb-4 text-4xl font-semibold md:text-5xl">{t('testimonials.title')}</h2>
+          <h2 className="font-display mb-4 text-3xl font-semibold md:text-4xl">{t('testimonials.title')}</h2>
           <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
             {t('testimonials.subtitle')}
           </p>

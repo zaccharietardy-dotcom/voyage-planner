@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { Compass, Minus, Plus } from 'lucide-react';
 import { GlobeWaypoint, Traveler, TripArc } from '@/lib/globe/types';
+import type { PhotoCluster } from '@/lib/globe/types';
+import { renderClusterCanvas } from '@/lib/globe/photoClusterCanvas';
 
 const colors = { arcColor: '#d4a853' };
 const INITIAL_CAMERA = { lng: 2.3522, lat: 48.8566, height: 20000000 };
@@ -286,6 +288,9 @@ export interface CesiumGlobeProps {
   selectedTripPoints?: GlobeWaypoint[];
   selectedWaypointId?: string | null;
   className?: string;
+  photoClusters?: PhotoCluster[];
+  onClusterClick?: (cluster: PhotoCluster) => void;
+  onCameraHeightChange?: (height: number) => void;
 }
 
 export function CesiumGlobe({
@@ -297,6 +302,9 @@ export function CesiumGlobe({
   selectedTripPoints = [],
   selectedWaypointId = null,
   className = '',
+  photoClusters = [],
+  onClusterClick,
+  onCameraHeightChange,
 }: CesiumGlobeProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<any>(null);
@@ -305,6 +313,7 @@ export function CesiumGlobe({
   const [error, setError] = useState<string | null>(null);
   const markersRef = useRef<Map<string, any>>(new Map());
   const waypointRef = useRef<Map<string, any>>(new Map());
+  const clusterRef = useRef<Map<string, any>>(new Map());
 
   // Initialize Cesium
   useEffect(() => {
@@ -759,6 +768,14 @@ export function CesiumGlobe({
     const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
     handler.setInputAction((click: any) => {
       const pickedObject = viewer.scene.pick(click.position);
+
+      // Check for cluster click first
+      if (Cesium.defined(pickedObject) && pickedObject.id?.properties?.cluster) {
+        const cluster = pickedObject.id.properties.cluster.getValue();
+        onClusterClick?.(cluster);
+        return;
+      }
+
       if (Cesium.defined(pickedObject) && pickedObject.id?.properties?.waypoint) {
         const waypoint = pickedObject.id.properties.waypoint.getValue();
         onWaypointSelect?.(waypoint);
@@ -778,7 +795,90 @@ export function CesiumGlobe({
     return () => {
       handler.destroy();
     };
-  }, [isLoaded, travelers, selectedTraveler, onTravelerSelect, onWaypointSelect]);
+  }, [isLoaded, travelers, selectedTraveler, onTravelerSelect, onWaypointSelect, onClusterClick]);
+
+  // Emit camera height changes for cluster zoom-level tracking
+  useEffect(() => {
+    const Cesium = cesiumRef.current;
+    if (!isLoaded || !viewerRef.current || !Cesium || !onCameraHeightChange) return;
+
+    const viewer = viewerRef.current;
+    let lastEmittedHeight = 0;
+
+    const onCameraChange = () => {
+      const height = viewer.camera.positionCartographic.height;
+      if (Math.abs(height - lastEmittedHeight) / Math.max(lastEmittedHeight, 1) > 0.1) {
+        lastEmittedHeight = height;
+        onCameraHeightChange(height);
+      }
+    };
+
+    viewer.camera.changed.addEventListener(onCameraChange);
+    onCameraChange();
+
+    return () => {
+      try { viewer.camera.changed.removeEventListener(onCameraChange); } catch { /* noop */ }
+    };
+  }, [isLoaded, onCameraHeightChange]);
+
+  // Render photo clusters as billboard entities
+  useEffect(() => {
+    const Cesium = cesiumRef.current;
+    if (!isLoaded || !viewerRef.current || !Cesium) return;
+
+    const viewer = viewerRef.current;
+
+    // Clear existing cluster entities
+    clusterRef.current.forEach((entity: any) => {
+      viewer.entities.remove(entity);
+    });
+    clusterRef.current.clear();
+
+    if (photoClusters.length === 0) return;
+
+    // Render each cluster
+    photoClusters.forEach(async (cluster) => {
+      try {
+        const canvas = await renderClusterCanvas(
+          cluster.photoUrls,
+          cluster.activityCount,
+          cluster.level === 'monument' ? 64 : cluster.level === 'trip' ? 72 : 80
+        );
+
+        if (!viewerRef.current || viewerRef.current.isDestroyed?.()) return;
+
+        const entity = viewer.entities.add({
+          id: `cluster-${cluster.id}`,
+          position: Cesium.Cartesian3.fromDegrees(cluster.lng, cluster.lat, 200),
+          billboard: {
+            image: canvas,
+            scale: cluster.level === 'continent' ? 1.2 : cluster.level === 'country' ? 1.0 : 0.85,
+            verticalOrigin: Cesium.VerticalOrigin.CENTER,
+            heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND,
+            disableDepthTestDistance: Number.POSITIVE_INFINITY,
+          },
+          label: {
+            text: cluster.label + (cluster.tripCount > 1 ? ` (${cluster.tripCount})` : ''),
+            font: '600 12px -apple-system, BlinkMacSystemFont, sans-serif',
+            fillColor: Cesium.Color.WHITE,
+            outlineColor: Cesium.Color.BLACK.withAlpha(0.85),
+            outlineWidth: 3,
+            style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+            verticalOrigin: Cesium.VerticalOrigin.TOP,
+            pixelOffset: new Cesium.Cartesian2(0, cluster.level === 'monument' ? 36 : 44),
+            disableDepthTestDistance: Number.POSITIVE_INFINITY,
+          },
+          properties: {
+            cluster,
+          },
+        });
+
+        clusterRef.current.set(cluster.id, entity);
+      } catch (err) {
+        console.warn('[CesiumGlobe] Cluster render failed:', cluster.id, err);
+      }
+    });
+  }, [isLoaded, photoClusters]);
 
   // Add selected trip waypoints (clickable points of interest)
   useEffect(() => {

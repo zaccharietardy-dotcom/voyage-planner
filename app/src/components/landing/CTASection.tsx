@@ -43,7 +43,7 @@ export function CTASection() {
                 {t('cta.badge')}
               </div>
 
-              <h2 className="font-display text-4xl font-semibold leading-tight md:text-5xl">
+              <h2 className="font-display text-3xl font-semibold leading-tight md:text-4xl">
                 {t('cta.title1')}
                 <span className="block text-[#f4d03f]">{t('cta.title2')}</span>
               </h2>
