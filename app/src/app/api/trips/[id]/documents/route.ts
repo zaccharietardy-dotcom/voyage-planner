@@ -139,55 +139,32 @@ export async function POST(
     const tripData = trip.data as any;
     const documents = tripData?.documents?.items || [];
 
-    let fileUrl: string | undefined;
-    let storageMethod: 'supabase' | 'base64' = 'supabase';
+    const storagePath = `${id}/${Date.now()}-${file.name}`;
+    const fileBuffer = await file.arrayBuffer();
 
-    // Try Supabase Storage first
-    try {
-      // Note: You need to create a 'trip-documents' bucket in Supabase Storage
-      // 1. Go to Supabase Dashboard > Storage
-      // 2. Create new bucket: 'trip-documents'
-      // 3. Set policies:
-      //    - INSERT: authenticated users can upload if they own/are member of the trip
-      //    - SELECT: authenticated users can download if they own/are member of the trip
-      //    - DELETE: authenticated users can delete if they own/are editor of the trip
+    const { error: uploadError } = await supabase.storage
+      .from('trip-documents')
+      .upload(storagePath, fileBuffer, {
+        contentType: file.type,
+        upsert: false,
+      });
 
-      const fileName = `${id}/${Date.now()}-${file.name}`;
-      const fileBuffer = await file.arrayBuffer();
-
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('trip-documents')
-        .upload(fileName, fileBuffer, {
-          contentType: file.type,
-          upsert: false,
-        });
-
-      if (uploadError) {
-        console.warn('Supabase Storage upload failed, falling back to base64:', uploadError);
-        throw uploadError;
-      }
-
-      // Get public URL
-      const { data: urlData } = supabase.storage
-        .from('trip-documents')
-        .getPublicUrl(fileName);
-
-      fileUrl = urlData.publicUrl;
-    } catch (storageError) {
-      console.warn('Supabase Storage not available, using base64 fallback:', storageError);
-
-      // Fallback: store as base64 in JSONB (warning: size limits)
-      if (file.size > 2 * 1024 * 1024) {
-        return NextResponse.json({
-          error: 'Supabase Storage non configuré. Taille limite en mode fallback: 2MB. Veuillez créer le bucket "trip-documents" dans Supabase Storage.'
-        }, { status: 400 });
-      }
-
-      const arrayBuffer = await file.arrayBuffer();
-      const base64 = Buffer.from(arrayBuffer).toString('base64');
-      fileUrl = `data:${file.type};base64,${base64}`;
-      storageMethod = 'base64';
+    if (uploadError) {
+      console.error('Supabase Storage upload failed:', uploadError);
+      return NextResponse.json(
+        {
+          error: 'Service de stockage temporairement indisponible',
+          code: 'STORAGE_UNAVAILABLE',
+        },
+        { status: 503 }
+      );
     }
+
+    const { data: urlData } = supabase.storage
+      .from('trip-documents')
+      .getPublicUrl(storagePath);
+
+    const fileUrl = urlData.publicUrl;
 
     // Create document metadata
     const newDocument = {
@@ -223,20 +200,11 @@ export async function POST(
 
     if (updateError) {
       // Cleanup uploaded file if update fails
-      if (storageMethod === 'supabase' && fileUrl) {
-        const fileName = fileUrl.split('/').pop();
-        if (fileName) {
-          await supabase.storage.from('trip-documents').remove([`${id}/${fileName}`]);
-        }
-      }
+      await supabase.storage.from('trip-documents').remove([storagePath]);
       return NextResponse.json({ error: updateError.message }, { status: 500 });
     }
 
-    return NextResponse.json({
-      document: newDocument,
-      storageMethod,
-      warning: storageMethod === 'base64' ? 'Document stocké en base64 (Supabase Storage non configuré)' : undefined,
-    });
+    return NextResponse.json({ document: newDocument });
   } catch (error) {
     console.error('Error uploading document:', error);
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });

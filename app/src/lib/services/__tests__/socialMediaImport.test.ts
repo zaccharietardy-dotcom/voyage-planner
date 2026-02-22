@@ -24,7 +24,7 @@ describe('socialMediaImport', () => {
     it('détecte les blogs', () => {
       expect(detectPlatform('https://medium.com/@user/article-123')).toBe('blog');
       expect(detectPlatform('https://travelblog.wordpress.com/2024/paris')).toBe('blog');
-      expect(detectPlatform('https://myblog.com/post')).toBe('blog');
+      expect(detectPlatform('https://example.com/post')).toBe('unknown');
     });
 
     it('retourne unknown pour les URLs inconnues', () => {

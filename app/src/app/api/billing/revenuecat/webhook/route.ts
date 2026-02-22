@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { upsertBillingEntitlement } from '@/lib/server/billingEntitlements';
 import type { Database, Json } from '@/lib/supabase/types';
+import { timingSafeEqual } from 'node:crypto';
 
 function getAdminClient() {
   return createClient<Database>(
@@ -27,10 +28,18 @@ interface RevenueCatWebhookPayload {
 
 function isAuthorized(request: NextRequest): boolean {
   const expected = process.env.REVENUECAT_WEBHOOK_SECRET;
-  if (!expected) return true;
+  if (!expected) return false;
 
   const header = request.headers.get('authorization') || '';
-  return header === expected || header === `Bearer ${expected}`;
+  const bearerMatch = header.match(/^Bearer\s+(.+)$/i);
+  if (!bearerMatch) return false;
+
+  const provided = bearerMatch[1];
+  const expectedBuffer = Buffer.from(expected, 'utf8');
+  const providedBuffer = Buffer.from(provided, 'utf8');
+
+  if (expectedBuffer.length !== providedBuffer.length) return false;
+  return timingSafeEqual(expectedBuffer, providedBuffer);
 }
 
 function mapRevenueCatSource(store: string | undefined): 'app_store' | 'play_store' | null {
@@ -55,7 +64,13 @@ function mapRevenueCatStatus(eventType: string | undefined): 'active' | 'grace' 
 }
 
 export async function POST(request: NextRequest) {
+  if (!process.env.REVENUECAT_WEBHOOK_SECRET) {
+    console.error('[RevenueCat webhook] rejected request', { reason: 'missing_webhook_secret' });
+    return NextResponse.json({ error: 'Service temporarily unavailable' }, { status: 503 });
+  }
+
   if (!isAuthorized(request)) {
+    console.warn('[RevenueCat webhook] rejected request', { reason: 'unauthorized' });
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

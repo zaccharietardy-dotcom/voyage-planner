@@ -4,10 +4,14 @@
  * DELETE /api/stats - Réinitialise les statistiques
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { tokenTracker } from '@/lib/services/tokenTracker';
+import { requireAdmin } from '@/lib/server/adminAuth';
 
 export async function GET() {
+  const auth = await requireAdmin();
+  if (!auth.ok) return auth.response;
+
   const stats = tokenTracker.getStats();
 
   // Formater pour l'affichage
@@ -57,6 +61,9 @@ export async function GET() {
 }
 
 export async function DELETE() {
+  const auth = await requireAdmin();
+  if (!auth.ok) return auth.response;
+
   tokenTracker.reset();
 
   return NextResponse.json({

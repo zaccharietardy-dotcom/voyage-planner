@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { extractPlacesFromSocialMedia, detectPlatform } from '@/lib/services/socialMediaImport';
+import { extractPlacesFromSocialMedia, detectPlatform, validateSocialImportUrl } from '@/lib/services/socialMediaImport';
 
 // Rate limiting simple (en mémoire - perdu au redémarrage)
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
@@ -48,6 +48,15 @@ export async function POST(req: NextRequest) {
         { error: 'Veuillez fournir une URL ou du texte' },
         { status: 400 }
       );
+    }
+
+    if (url) {
+      try {
+        await validateSocialImportUrl(url);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'URL non autorisée';
+        return NextResponse.json({ error: message }, { status: 400 });
+      }
     }
 
     const input = url || text || '';

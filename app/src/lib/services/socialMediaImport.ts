@@ -44,6 +44,9 @@
 
 import type { ImportedPlace } from '../types';
 import { detectCategory } from './googleMapsImport';
+import dns from 'node:dns/promises';
+import net from 'node:net';
+import type { LookupAddress } from 'node:dns';
 
 export type SocialPlatform = 'instagram' | 'tiktok' | 'youtube' | 'blog' | 'unknown';
 
@@ -65,9 +68,166 @@ interface ExtractedPlaceRaw {
 }
 
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+const SOCIAL_FETCH_TIMEOUT_MS = 10000;
+const SOCIAL_FETCH_REDIRECT_LIMIT = 3;
+const SOCIAL_USER_AGENT = 'Mozilla/5.0 (compatible; NaraeVoyage/1.0; +https://naraevoyage.com)';
+
+const ALLOWED_SOCIAL_HOST_PATTERNS = [
+  /(^|\.)instagram\.com$/i,
+  /(^|\.)tiktok\.com$/i,
+  /(^|\.)youtube\.com$/i,
+  /(^|\.)youtu\.be$/i,
+  /(^|\.)medium\.com$/i,
+  /(^|\.)wordpress\.com$/i,
+  /(^|\.)blogger\.com$/i,
+  /(^|\.)substack\.com$/i,
+  /(^|\.)ghost\.io$/i,
+];
 
 function getGeminiApiKey(): string | undefined {
   return process.env.GOOGLE_AI_API_KEY;
+}
+
+function normalizeHostname(hostname: string): string {
+  return hostname.trim().toLowerCase().replace(/\.$/, '');
+}
+
+function isPrivateOrReservedIPv4(address: string): boolean {
+  const octets = address.split('.').map((part) => Number.parseInt(part, 10));
+  if (octets.length !== 4 || octets.some((part) => !Number.isInteger(part) || part < 0 || part > 255)) {
+    return true;
+  }
+
+  const [a, b, c] = octets;
+
+  if (a === 10) return true; // RFC1918
+  if (a === 127) return true; // Loopback
+  if (a === 169 && b === 254) return true; // Link-local
+  if (a === 172 && b >= 16 && b <= 31) return true; // RFC1918
+  if (a === 192 && b === 168) return true; // RFC1918
+  if (a === 100 && b >= 64 && b <= 127) return true; // CGNAT
+  if (a === 0) return true; // "This network"
+  if (a === 192 && b === 0 && c === 0) return true; // IETF protocol assignments
+  if (a === 192 && b === 0 && c === 2) return true; // TEST-NET-1
+  if (a === 198 && b === 18) return true; // Benchmarking
+  if (a === 198 && b === 19) return true; // Benchmarking
+  if (a === 198 && b === 51 && c === 100) return true; // TEST-NET-2
+  if (a === 203 && b === 0 && c === 113) return true; // TEST-NET-3
+  if (a >= 224) return true; // Multicast + reserved
+
+  return false;
+}
+
+function isPrivateOrReservedIPv6(address: string): boolean {
+  const normalized = address.toLowerCase();
+  if (normalized === '::' || normalized === '::1') return true; // Unspecified + loopback
+  if (normalized.startsWith('fc') || normalized.startsWith('fd')) return true; // ULA
+  if (
+    normalized.startsWith('fe8')
+    || normalized.startsWith('fe9')
+    || normalized.startsWith('fea')
+    || normalized.startsWith('feb')
+  ) return true; // Link-local
+  if (normalized.startsWith('ff')) return true; // Multicast
+  if (normalized.startsWith('2001:db8')) return true; // Documentation range
+
+  const mappedV4 = normalized.match(/^::ffff:(\d+\.\d+\.\d+\.\d+)$/i)?.[1];
+  if (mappedV4) return isPrivateOrReservedIPv4(mappedV4);
+
+  return false;
+}
+
+export function isBlockedIpAddress(address: string): boolean {
+  const ipVersion = net.isIP(address);
+  if (ipVersion === 4) return isPrivateOrReservedIPv4(address);
+  if (ipVersion === 6) return isPrivateOrReservedIPv6(address);
+  return true;
+}
+
+export function isAllowedSocialHostname(hostname: string): boolean {
+  const normalized = normalizeHostname(hostname);
+  return ALLOWED_SOCIAL_HOST_PATTERNS.some((pattern) => pattern.test(normalized));
+}
+
+async function assertHostIsPublic(hostname: string): Promise<void> {
+  const normalized = normalizeHostname(hostname);
+  const ipVersion = net.isIP(normalized);
+  if (ipVersion > 0) {
+    if (isBlockedIpAddress(normalized)) {
+      throw new Error('Hôte non autorisé');
+    }
+    return;
+  }
+
+  let records: LookupAddress[];
+  try {
+    records = await dns.lookup(normalized, { all: true, verbatim: true });
+  } catch {
+    throw new Error('Hôte non résolu');
+  }
+  if (records.length === 0) {
+    throw new Error('Hôte non résolu');
+  }
+
+  for (const record of records) {
+    if (isBlockedIpAddress(record.address)) {
+      throw new Error('Hôte non autorisé');
+    }
+  }
+}
+
+export async function validateSocialImportUrl(inputUrl: string): Promise<URL> {
+  let parsed: URL;
+  try {
+    parsed = new URL(inputUrl);
+  } catch {
+    throw new Error('URL invalide');
+  }
+
+  if (parsed.protocol !== 'https:') {
+    throw new Error('Seules les URLs HTTPS sont autorisées');
+  }
+
+  const normalizedHost = normalizeHostname(parsed.hostname);
+  if (!isAllowedSocialHostname(normalizedHost)) {
+    throw new Error('Domaine non autorisé pour l\'import social');
+  }
+
+  await assertHostIsPublic(normalizedHost);
+  return parsed;
+}
+
+export async function fetchUrlWithSafeRedirects(inputUrl: string): Promise<Response> {
+  let current = await validateSocialImportUrl(inputUrl);
+
+  for (let redirects = 0; redirects <= SOCIAL_FETCH_REDIRECT_LIMIT; redirects += 1) {
+    const response = await fetch(current.toString(), {
+      headers: {
+        'User-Agent': SOCIAL_USER_AGENT,
+      },
+      signal: AbortSignal.timeout(SOCIAL_FETCH_TIMEOUT_MS),
+      redirect: 'manual',
+    });
+
+    const isRedirect = response.status >= 300 && response.status < 400;
+    if (!isRedirect) {
+      return response;
+    }
+
+    const location = response.headers.get('location');
+    if (!location) {
+      throw new Error('Redirection invalide');
+    }
+
+    if (redirects >= SOCIAL_FETCH_REDIRECT_LIMIT) {
+      throw new Error('Trop de redirections');
+    }
+
+    const nextUrl = new URL(location, current);
+    current = await validateSocialImportUrl(nextUrl.toString());
+  }
+
+  throw new Error('Trop de redirections');
 }
 
 /**
@@ -76,7 +236,7 @@ function getGeminiApiKey(): string | undefined {
 export function detectPlatform(url: string): SocialPlatform {
   try {
     const urlObj = new URL(url);
-    const hostname = urlObj.hostname.toLowerCase();
+    const hostname = normalizeHostname(urlObj.hostname);
 
     if (hostname.includes('instagram.com')) return 'instagram';
     if (hostname.includes('tiktok.com')) return 'tiktok';
@@ -88,7 +248,7 @@ export function detectPlatform(url: string): SocialPlatform {
       hostname.includes('wordpress.com') ||
       hostname.includes('blogger.com') ||
       hostname.includes('substack.com') ||
-      hostname.includes('blog')
+      hostname.includes('ghost.io')
     ) {
       return 'blog';
     }
@@ -105,12 +265,7 @@ export function detectPlatform(url: string): SocialPlatform {
  */
 async function fetchOpenGraphMetadata(url: string): Promise<string | null> {
   try {
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; NaraeVoyage/1.0; +https://naraevoyage.com)',
-      },
-      signal: AbortSignal.timeout(10000), // 10s timeout
-    });
+    const response = await fetchUrlWithSafeRedirects(url);
 
     if (!response.ok) {
       return null;
@@ -439,20 +594,23 @@ export async function extractPlacesFromSocialMedia(input: string): Promise<Impor
 
   // Si c'est une URL, essayer d'extraire via la plateforme
   if (isUrl) {
+    const validatedUrl = await validateSocialImportUrl(trimmed);
+    const safeUrl = validatedUrl.toString();
+
     switch (platform) {
       case 'instagram':
-        return extractFromInstagramUrl(trimmed);
+        return extractFromInstagramUrl(safeUrl);
       case 'tiktok':
-        return extractFromTikTokUrl(trimmed);
+        return extractFromTikTokUrl(safeUrl);
       case 'youtube':
-        return extractFromYouTubeUrl(trimmed);
+        return extractFromYouTubeUrl(safeUrl);
       case 'blog':
-        return extractFromBlogUrl(trimmed);
+        return extractFromBlogUrl(safeUrl);
       default:
         // URL inconnue, essayer quand même de fetch les métadonnées
-        const metadata = await fetchOpenGraphMetadata(trimmed);
+        const metadata = await fetchOpenGraphMetadata(safeUrl);
         if (metadata) {
-          return extractFromText(metadata, 'unknown', trimmed);
+          return extractFromText(metadata, 'unknown', safeUrl);
         }
         throw new Error('Plateforme non reconnue. Essayez de coller directement le texte.');
     }
