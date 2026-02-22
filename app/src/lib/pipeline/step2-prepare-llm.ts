@@ -17,7 +17,9 @@ import type {
   LLMActivityInput,
   LLMRestaurantInput,
   LLMDistanceEntry,
+  PreparedLLMData,
 } from './types';
+import { buildDayTripDays } from './utils/day-trip-builder';
 import type { DayTripSuggestion } from '../services/dayTripSuggestions';
 import type {
   TripPreferences,
@@ -462,7 +464,7 @@ export function prepareDataForLLM(
   transport: TransportOptionSummary | null,
   outboundFlight: Flight | null,
   returnFlight: Flight | null
-): LLMPlannerInput {
+): PreparedLLMData {
   // 1. Merge and deduplicate activities
   const mergedActivities = mergeAndDeduplicateActivities(data);
 
@@ -476,22 +478,7 @@ export function prepareDataForLLM(
   const hotelCoords = hotel ? { lat: hotel.latitude, lng: hotel.longitude } : null;
   const llmRestaurants = selectRestaurantsForLLM(data, hotelCoords);
 
-  // 5. Build distance matrix
-  const distances = buildDistanceMatrix(llmActivities, llmRestaurants, hotelCoords);
-
-  // 6. Format weather
-  const weather = data.weatherForecasts.map((w, idx) => ({
-    day: idx + 1,
-    condition: w.condition,
-    tempMin: w.tempMin,
-    tempMax: w.tempMax,
-  }));
-
-  // 7. Resolve arrival/departure times
-  const arrivalTime = resolveArrivalTime(outboundFlight, transport);
-  const departureTime = resolveDepartureTime(returnFlight, transport);
-
-  // 8. Build hotel object
+  // 5. Build hotel object
   const llmHotel = hotel
     ? {
         name: hotel.name,
@@ -502,58 +489,13 @@ export function prepareDataForLLM(
       }
     : null;
 
-  // 9. Merge day-trip activities and restaurants into the pools
+  // 6. Build day-trip days deterministically (NOT sent to LLM — merged after LLM planning)
   const dayTripSuggestions = data.dayTripSuggestions || [];
-  const dayTripActivitiesData = data.dayTripActivities || {};
-  const dayTripRestaurantsData = data.dayTripRestaurants || {};
 
-  for (const dtName of Object.keys(dayTripActivitiesData)) {
-    const dtActivities = dayTripActivitiesData[dtName] || [];
-    // Tag and format day-trip activities, cap at 5 per destination
-    const dtScored: ScoredActivity[] = dtActivities.slice(0, 5).map((a) => ({
-      ...a,
-      score: 30, // boost to ensure selection
-      source: 'google_places' as const,
-      reviewCount: a.reviewCount || 0,
-      dayTripDestination: dtName,
-    } as any));
-    const dtFormatted = dtScored.map(formatActivityForLLM);
-    llmActivities.push(...dtFormatted);
-  }
+  const llmHotelForBuilder = llmHotel;
 
-  for (const dtName of Object.keys(dayTripRestaurantsData)) {
-    const dtRestos = dayTripRestaurantsData[dtName] || [];
-    // Tag and format day-trip restaurants, cap at 4 per destination
-    const dtFormatted: LLMRestaurantInput[] = dtRestos.slice(0, 4).map((r) => ({
-      id: r.id,
-      name: r.name,
-      lat: r.latitude,
-      lng: r.longitude,
-      rating: r.rating,
-      priceLevel: r.priceLevel,
-      cuisineTypes: r.cuisineTypes || [],
-      suitableFor: classifyMealSuitability(r),
-      openingHours: r.openingHours,
-      dayTripDestination: dtName,
-    }));
-    llmRestaurants.push(...dtFormatted);
-  }
-
-  if (dayTripSuggestions.length > 0) {
-    console.log(`[Pipeline V2 LLM] Step 2: Merged day-trip data — ${Object.keys(dayTripActivitiesData).length} destinations, ${llmActivities.filter(a => a.dayTripDestination).length} DT activities, ${llmRestaurants.filter(r => r.dayTripDestination).length} DT restaurants`);
-  }
-
-  // 10. Build dayTrips array for LLM input
-  const dayTripsForLLM = dayTripSuggestions.map((dt) => {
+  const dayTripsForBuilder = dayTripSuggestions.map((dt) => {
     const dtName = dt.destination || dt.name;
-    const dtActivityIds = llmActivities
-      .filter((a) => a.dayTripDestination === dtName)
-      .map((a) => a.id);
-    const dtRestaurantIds = llmRestaurants
-      .filter((r) => r.dayTripDestination === dtName)
-      .map((r) => r.id);
-
-    // Check if there's a forced date from pre-purchased tickets
     const tickets = preferences.prePurchasedTickets || [];
     const matchingTicket = tickets.find((t) => {
       const tName = t.name.toLowerCase();
@@ -569,13 +511,82 @@ export function prepareDataForLLM(
       transportCostPerPerson: dt.estimatedCostPerPerson,
       forcedDate: matchingTicket?.date,
       fullDayRequired: (dt as any).fullDayRequired ?? true,
-      activityIds: dtActivityIds,
-      restaurantIds: dtRestaurantIds,
+      activityIds: [] as string[],  // built from raw data, not LLM pools
+      restaurantIds: [] as string[],
       coordinates: { lat: dt.latitude, lng: dt.longitude },
     };
   });
 
-  // 11. Assemble final LLMPlannerInput
+  const { dayTripDays: prePlannedDayTripDays, reservedDayNumbers } = buildDayTripDays(
+    dayTripsForBuilder,
+    data,
+    llmHotelForBuilder,
+    llmRestaurants,
+    preferences.durationDays,
+    preferences.startDate.toISOString().split('T')[0]
+  );
+
+  // 7. Filter out day-trip activities from LLM pool (they're handled by the pre-planned days)
+  if (dayTripSuggestions.length > 0) {
+    const dayTripCoords = dayTripSuggestions.map(dt => ({
+      name: dt.destination || dt.name,
+      lat: dt.latitude,
+      lng: dt.longitude,
+    }));
+
+    const beforeCount = llmActivities.length;
+    const dayTripActivityIds = new Set(
+      prePlannedDayTripDays.flatMap(d => d.items.filter(i => i.activityId).map(i => i.activityId!))
+    );
+
+    // Remove activities that belong to a day-trip destination (by proximity or exact ID match)
+    for (let i = llmActivities.length - 1; i >= 0; i--) {
+      const act = llmActivities[i];
+      // Check if this activity is in a pre-planned day-trip
+      if (dayTripActivityIds.has(act.id)) {
+        llmActivities.splice(i, 1);
+        continue;
+      }
+      // Check proximity to any day-trip destination (within 5km = likely a day-trip activity)
+      for (const dtCoord of dayTripCoords) {
+        const dist = calculateDistance(act.lat, act.lng, dtCoord.lat, dtCoord.lng);
+        if (dist < 5) {
+          console.log(`[Pipeline V2 LLM] Step 2: Filtered "${act.name}" from LLM pool (${dist.toFixed(1)}km from ${dtCoord.name})`);
+          llmActivities.splice(i, 1);
+          break;
+        }
+      }
+    }
+
+    if (llmActivities.length < beforeCount) {
+      console.log(`[Pipeline V2 LLM] Step 2: Removed ${beforeCount - llmActivities.length} day-trip activities from LLM pool`);
+    }
+  }
+
+  if (prePlannedDayTripDays.length > 0) {
+    console.log(`[Pipeline V2 LLM] Step 2: Day-trip days pre-planned — ${prePlannedDayTripDays.length} day(s) reserved (${reservedDayNumbers.join(', ')}), ${llmActivities.length} city activities sent to LLM`);
+  }
+
+  // 8. Build distance matrix (AFTER day-trip filtering to exclude day-trip activities)
+  const distances = buildDistanceMatrix(llmActivities, llmRestaurants, hotelCoords);
+
+  // 9. Format weather
+  const weather = data.weatherForecasts.map((w, idx) => ({
+    day: idx + 1,
+    condition: w.condition,
+    tempMin: w.tempMin,
+    tempMax: w.tempMax,
+  }));
+
+  // 10. Resolve arrival/departure times
+  const arrivalTime = resolveArrivalTime(outboundFlight, transport);
+  const departureTime = resolveDepartureTime(returnFlight, transport);
+
+  // 11. Build dayTrips metadata for step4-assemble (transport injection).
+  //     Activities/restaurants are NOT in LLM pools — they're in prePlannedDayTripDays.
+  const dayTripsForLLM = dayTripsForBuilder;
+
+  // 12. Assemble final LLMPlannerInput
   const input: LLMPlannerInput = {
     trip: {
       destination: preferences.destination,
@@ -596,12 +607,17 @@ export function prepareDataForLLM(
     restaurants: llmRestaurants,
     distances,
     weather,
+    prePlannedDayTripDays: prePlannedDayTripDays.length > 0 ? prePlannedDayTripDays : undefined,
   };
 
   // Log summary
   console.log(
-    `[Pipeline V2 LLM] Step 2: ${llmActivities.length} activities, ${llmRestaurants.length} restaurants, ${Object.keys(distances).length} distance pairs`
+    `[Pipeline V2 LLM] Step 2: ${llmActivities.length} city activities, ${llmRestaurants.length} restaurants, ${Object.keys(distances).length} distance pairs`
   );
 
-  return input;
+  return {
+    llmInput: input,
+    prePlannedDayTripDays,
+    reservedDayNumbers,
+  };
 }

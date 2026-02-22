@@ -35,6 +35,7 @@ import { isDuplicateActivityCandidate } from './utils/activityDedup';
 import { prepareDataForLLM } from './step2-prepare-llm';
 import { planWithLLM } from './step3-llm-plan';
 import { assembleFromLLMPlan, computeDistancesForDay } from './step4-assemble-llm';
+import { mergeDayTripDaysWithLLMPlan } from './utils/day-trip-builder';
 import { fixRestaurantOutliers } from './step7-assemble';
 import { isAppropriateForMeal, isBreakfastSpecialized, getCuisineFamily } from './step4-restaurants';
 import { searchRestaurantsNearbyWithFallback } from '../services/serpApiPlaces';
@@ -140,10 +141,10 @@ async function generateTripV2LLM(
     console.warn('[Pipeline V2 LLM] No hotel selected from pool');
   }
 
-  const llmInput = prepareDataForLLM(data, preferences, hotel, bestTransport, data.outboundFlight, data.returnFlight);
+  const { llmInput, prePlannedDayTripDays, reservedDayNumbers } = prepareDataForLLM(data, preferences, hotel, bestTransport, data.outboundFlight, data.returnFlight);
   console.log(`[Pipeline V2 LLM] Step 2 done in ${Date.now() - T2}ms`);
   emit(onEvent, { type: 'step_done', step: 2, stepName: 'Preparing data for LLM', durationMs: Date.now() - T2,
-    detail: `${llmInput.activities.length} activities, ${llmInput.restaurants.length} restaurants, ${Object.keys(llmInput.distances).length} distance pairs` });
+    detail: `${llmInput.activities.length} activities, ${llmInput.restaurants.length} restaurants, ${prePlannedDayTripDays.length} day-trip day(s) pre-planned` });
 
   // Step 3: LLM planning (Claude or Gemini based on LLM_PLANNER_MODEL env)
   const plannerModel = process.env.LLM_PLANNER_MODEL || 'claude-sonnet-4-6';
@@ -155,6 +156,12 @@ async function generateTripV2LLM(
   console.log(`[Pipeline V2 LLM] Step 3 done in ${step3Ms}ms — ${llmPlan.days.length} days planned`);
   emit(onEvent, { type: 'step_done', step: 3, stepName: `LLM planning (${plannerModel})`, durationMs: step3Ms,
     detail: `${llmPlan.days.length} days, ${llmPlan.days.reduce((s, d) => s + d.items.length, 0)} items` });
+
+  // Step 3b: Merge pre-planned day-trip days with LLM plan
+  if (prePlannedDayTripDays.length > 0) {
+    llmPlan.days = mergeDayTripDaysWithLLMPlan(llmPlan, prePlannedDayTripDays, reservedDayNumbers, preferences.durationDays);
+    console.log(`[Pipeline V2 LLM] Step 3b: Merged ${prePlannedDayTripDays.length} pre-planned day-trip day(s) — total ${llmPlan.days.length} days`);
+  }
 
   // Step 4: Assemble Trip from LLM plan
   console.log('[Pipeline V2 LLM] === Step 4: Assembling trip... ===');

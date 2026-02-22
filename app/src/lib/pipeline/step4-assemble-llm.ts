@@ -102,7 +102,8 @@ function mealLabelFromType(mealType: TripItem['mealType']): string {
 
 function buildActivityMap(
   data: FetchedData,
-  inputActivities: LLMPlannerInput['activities']
+  inputActivities: LLMPlannerInput['activities'],
+  additionalActivityIds?: string[]
 ): Map<string, ScoredActivity> {
   const activityMap = new Map<string, ScoredActivity>();
 
@@ -125,12 +126,25 @@ function buildActivityMap(
     }
   }
 
+  // Also resolve additional IDs (e.g., from pre-planned day-trip days)
+  if (additionalActivityIds) {
+    for (const id of additionalActivityIds) {
+      if (!activityMap.has(id)) {
+        const found = allActivities.find((a) => a.id === id);
+        if (found) {
+          activityMap.set(id, found);
+        }
+      }
+    }
+  }
+
   return activityMap;
 }
 
 function buildRestaurantMap(
   data: FetchedData,
-  inputRestaurants: LLMPlannerInput['restaurants']
+  inputRestaurants: LLMPlannerInput['restaurants'],
+  additionalRestaurantIds?: string[]
 ): Map<string, Restaurant> {
   const restaurantMap = new Map<string, Restaurant>();
 
@@ -146,6 +160,18 @@ function buildRestaurantMap(
     const found = allRestaurants.find((r) => r.id === inputRestaurant.id);
     if (found) {
       restaurantMap.set(inputRestaurant.id, found);
+    }
+  }
+
+  // Also resolve additional IDs (e.g., from pre-planned day-trip days)
+  if (additionalRestaurantIds) {
+    for (const id of additionalRestaurantIds) {
+      if (!restaurantMap.has(id)) {
+        const found = allRestaurants.find((r) => r.id === id);
+        if (found) {
+          restaurantMap.set(id, found);
+        }
+      }
     }
   }
 
@@ -932,9 +958,19 @@ export async function assembleFromLLMPlan(
 
   const startTime = Date.now();
 
-  // 1. Build lookup maps
-  const activityMap = buildActivityMap(data, input.activities);
-  const restaurantMap = buildRestaurantMap(data, input.restaurants);
+  // 1. Build lookup maps (include day-trip activity/restaurant IDs from the plan)
+  const dayTripItemIds = plan.days
+    .filter(d => d.isDayTrip)
+    .flatMap(d => d.items || []);
+  const additionalActivityIds = dayTripItemIds
+    .filter(i => i.type === 'activity' && i.activityId)
+    .map(i => i.activityId!);
+  const additionalRestaurantIds = dayTripItemIds
+    .filter(i => i.type === 'restaurant' && i.restaurantId)
+    .map(i => i.restaurantId!);
+
+  const activityMap = buildActivityMap(data, input.activities, additionalActivityIds);
+  const restaurantMap = buildRestaurantMap(data, input.restaurants, additionalRestaurantIds);
 
   console.log(`[Pipeline V2 LLM] Built maps: ${activityMap.size} activities, ${restaurantMap.size} restaurants`);
 

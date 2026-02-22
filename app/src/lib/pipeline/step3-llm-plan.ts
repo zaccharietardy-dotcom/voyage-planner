@@ -81,9 +81,7 @@ RÈGLES ABSOLUES :
 20. DERNIER JOUR : le jour de départ DOIT inclure au moins 1 activité AVANT le checkout — jamais un jour vide
 21. GAPS MAXIMUM : jamais plus de 2h30 entre deux items consécutifs pendant les heures actives (7h-20h)
 22. VÉRIFICATION IDS : chaque activityId et restaurantId DOIT exister exactement dans les listes fournies — ne génère AUCUN ID inventé
-23. DAY TRIPS : si des day trips sont fournis dans les données, dédie UN jour complet par day trip. Structure : transport aller (hôtel → destination, mode + durée indiqués), activités sur place, déjeuner SUR PLACE (restaurants taggés pour cette destination), transport retour. Départ tôt (08:00-08:30). Toutes les activités du day trip sur le MÊME jour. Si une date est forcée (forcedDate), place le day trip exactement ce jour-là. Marque le jour avec isDayTrip: true et dayTripDestination dans le JSON.
-24. Sur les jours de day trip, NE PAS mettre d'activités de la ville principale. Seuls les restaurants et activités taggés pour cette destination.
-25. Le dîner après un day trip : si retour avant 19h, le dîner peut être en ville principale.
+23. JOURS RÉSERVÉS : certains jours sont pré-planifiés (excursions hors-ville). Planifie UNIQUEMENT les jours indiqués dans les contraintes. Ne planifie RIEN pour les jours réservés.
 
 FORMAT DE SORTIE — JSON strict, pas de texte avant ou après :
 {
@@ -431,19 +429,21 @@ function buildUserPrompt(input: LLMPlannerInput): string {
   const lastDay = d;
   const fullDayRange = d > 2 ? `jours 2 à ${d - 1}` : 'jours pleins';
 
-  // Build day trips section for prompt
-  const dayTrips = input.trip.dayTrips || [];
-  let dayTripsSection = '';
-  if (dayTrips.length > 0) {
-    dayTripsSection = `\n\nDAY TRIPS À PLANIFIER :\n`;
-    for (const dt of dayTrips) {
-      dayTripsSection += `- ${dt.name} (excursion depuis ${input.trip.destination}): ${dt.distanceKm}km, ${dt.transportMode} ~${dt.transportDurationMin}min, ~${dt.transportCostPerPerson}€/pers\n`;
-      dayTripsSection += `  Activités sur place: [${dt.activityIds.join(', ')}]\n`;
-      dayTripsSection += `  Restaurants sur place: [${dt.restaurantIds.join(', ')}]\n`;
-      dayTripsSection += `  Journée complète: ${dt.fullDayRequired ? 'oui' : 'non'}\n`;
-      dayTripsSection += `  Date forcée: ${dt.forcedDate || 'aucune'}\n`;
+  // Build reserved days section for prompt (day trips are pre-planned, not sent to LLM)
+  const reservedDayNumbers = input.prePlannedDayTripDays
+    ? input.prePlannedDayTripDays.map(d => d.dayNumber)
+    : [];
+  let reservedDaysSection = '';
+  if (reservedDayNumbers.length > 0) {
+    reservedDaysSection = `\n\nJOURS RÉSERVÉS (NE PAS PLANIFIER) :\n`;
+    for (const dtDay of input.prePlannedDayTripDays || []) {
+      reservedDaysSection += `- Jour ${dtDay.dayNumber} : excursion ${dtDay.dayTripDestination || dtDay.theme} (pré-planifié)\n`;
     }
-    dayTripsSection += `\nIMPORTANT: Pour chaque day trip, marque le jour avec "isDayTrip": true et "dayTripDestination": "${dayTrips[0]?.destination}" dans le JSON.`;
+    const daysToplan = [];
+    for (let d = 1; d <= input.trip.durationDays; d++) {
+      if (!reservedDayNumbers.includes(d)) daysToplan.push(d);
+    }
+    reservedDaysSection += `\nPlanifie UNIQUEMENT les jours : ${daysToplan.join(', ')}`;
   }
 
   return `DONNÉES DU VOYAGE:
@@ -457,7 +457,7 @@ CONTRAINTES CRITIQUES POUR CE VOYAGE (${d} jours):
 - ${input.restaurants.length} restaurants disponibles — utilise leurs IDs exacts
 - ${fullDayRange}: minimum 3 activités + 3 repas = 6 items par jour
 - Jour ${lastDay} (départ): minimum 1 activité AVANT le checkout
-- Aucun gap > 2h30 entre items consécutifs${dayTripsSection}
+- Aucun gap > 2h30 entre items consécutifs${reservedDaysSection}
 
 Planifie cet itinéraire en respectant toutes les règles. Réponds UNIQUEMENT en JSON strict selon le schéma:
 {
@@ -1106,16 +1106,12 @@ export function buildFallbackPlan(input: LLMPlannerInput): LLMPlannerOutput {
   const { trip, hotel, activities, restaurants } = input;
   const durationDays = trip.durationDays;
 
-  // Separate day-trip activities from city activities
+  // Use pre-planned day-trip days if available (from step2 extraction)
+  const prePlannedDayTripDays = input.prePlannedDayTripDays || [];
+  const dayTripDayNumbers = new Set<number>(prePlannedDayTripDays.map(d => d.dayNumber));
+
+  // All activities in LLM input are now city-only (day trips extracted in step2)
   const cityActivities = activities.filter(a => !a.dayTripDestination);
-  const dayTripActivitiesByDest = new Map<string, typeof activities>();
-  for (const a of activities) {
-    if (a.dayTripDestination) {
-      const list = dayTripActivitiesByDest.get(a.dayTripDestination) || [];
-      list.push(a);
-      dayTripActivitiesByDest.set(a.dayTripDestination, list);
-    }
-  }
 
   // Sort city activities by priority: must-see first, then by quality score
   const sortedActivities = [...cityActivities].sort((a, b) => {
@@ -1128,15 +1124,6 @@ export function buildFallbackPlan(input: LLMPlannerInput): LLMPlannerOutput {
 
   // Geo-cluster city activities using nearest-neighbor grouping
   const geoClustered = geoClusterActivities(sortedActivities, hotel);
-
-  // Reserve day slots for day trips (middle days preferred)
-  const dayTripDests = [...dayTripActivitiesByDest.keys()];
-  const dayTripDayNumbers = new Set<number>();
-  // Place day trips on middle days (day 2 for 3-day trips, etc.)
-  for (let i = 0; i < dayTripDests.length && i < durationDays - 1; i++) {
-    const dayNum = Math.min(2 + i, durationDays - 1); // avoid first and last day
-    dayTripDayNumbers.add(dayNum);
-  }
 
   // Determine city day slots (excluding day-trip days)
   const cityDayNumbers: number[] = [];
@@ -1168,95 +1155,22 @@ export function buildFallbackPlan(input: LLMPlannerInput): LLMPlannerOutput {
   // Build all days
   const days: LLMDayPlan[] = [];
   let cityActivityIndex = 0;
-  let dayTripIdx = 0;
   const usedRestaurantIds = new Set<string>();
 
-  // Separate day-trip restaurants from city restaurants
+  // City restaurants only (day-trip restaurants are in prePlannedDayTripDays)
   const cityRestaurants = restaurants.filter(r => !r.dayTripDestination);
-  const dayTripRestaurants = new Map<string, typeof restaurants>();
-  for (const r of restaurants) {
-    if (r.dayTripDestination) {
-      const list = dayTripRestaurants.get(r.dayTripDestination) || [];
-      list.push(r);
-      dayTripRestaurants.set(r.dayTripDestination, list);
+
+  // Mark day-trip restaurant IDs as used (to avoid duplicates in city days)
+  for (const dtDay of prePlannedDayTripDays) {
+    for (const item of dtDay.items) {
+      if (item.restaurantId) usedRestaurantIds.add(item.restaurantId);
     }
   }
 
   for (let dayNum = 1; dayNum <= durationDays; dayNum++) {
-    if (dayTripDayNumbers.has(dayNum) && dayTripIdx < dayTripDests.length) {
-      // === Day Trip Day ===
-      const dest = dayTripDests[dayTripIdx++];
-      const dtActivities = (dayTripActivitiesByDest.get(dest) || [])
-        .sort((a, b) => (b.rating || 0) - (a.rating || 0))
-        .slice(0, 4);
-      const dtRestaurants = dayTripRestaurants.get(dest) || [];
-
-      const items: LLMDayItem[] = [];
-      let currentTime = '08:30';
-
-      // Breakfast near hotel before departure
-      const breakfast = selectClosestRestaurant(
-        cityRestaurants,
-        hotel ? { lat: hotel.lat, lng: hotel.lng } : { lat: 0, lng: 0 },
-        'breakfast',
-        usedRestaurantIds
-      );
-      if (breakfast) {
-        usedRestaurantIds.add(breakfast.id);
-        items.push({
-          type: 'restaurant', restaurantId: breakfast.id, mealType: 'breakfast',
-          startTime: currentTime, endTime: addMinutes(currentTime, 45), duration: 45,
-        });
-        currentTime = addMinutes(currentTime, 60);
-      }
-
-      // Day trip activities
-      for (const act of dtActivities) {
-        items.push({
-          type: 'activity', activityId: act.id,
-          startTime: currentTime, endTime: addMinutes(currentTime, act.duration), duration: act.duration,
-        });
-        currentTime = addMinutes(currentTime, act.duration + 20);
-      }
-
-      // Lunch at day trip destination
-      const dtCentroid = calculateCentroid(dtActivities);
-      const lunch = selectClosestRestaurant(
-        dtRestaurants.length > 0 ? dtRestaurants : cityRestaurants,
-        dtCentroid, 'lunch', usedRestaurantIds
-      );
-      if (lunch) {
-        usedRestaurantIds.add(lunch.id);
-        currentTime = ensureTimeAfter(currentTime, '12:15');
-        items.push({
-          type: 'restaurant', restaurantId: lunch.id, mealType: 'lunch',
-          startTime: currentTime, endTime: addMinutes(currentTime, 75), duration: 75,
-        });
-      }
-
-      // Dinner back in city
-      const dinner = selectClosestRestaurant(
-        cityRestaurants,
-        hotel ? { lat: hotel.lat, lng: hotel.lng } : dtCentroid,
-        'dinner', usedRestaurantIds
-      );
-      if (dinner) {
-        usedRestaurantIds.add(dinner.id);
-        currentTime = ensureTimeAfter(currentTime, '19:00');
-        items.push({
-          type: 'restaurant', restaurantId: dinner.id, mealType: 'dinner',
-          startTime: currentTime, endTime: addMinutes(currentTime, 90), duration: 90,
-        });
-      }
-
-      days.push({
-        dayNumber: dayNum,
-        theme: dest,
-        narrative: `Excursion à ${dest}`,
-        isDayTrip: true,
-        dayTripDestination: dest,
-        items,
-      });
+    if (dayTripDayNumbers.has(dayNum)) {
+      // === Day Trip Day — skip, will be merged by index.ts step3b ===
+      continue;
     } else {
       // === City Day ===
       const cityDayIdx = cityDayNumbers.indexOf(dayNum);

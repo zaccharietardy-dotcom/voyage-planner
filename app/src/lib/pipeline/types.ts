@@ -233,6 +233,8 @@ export interface LLMPlannerInput {
   restaurants: LLMRestaurantInput[];
   distances: Record<string, LLMDistanceEntry>;
   weather: { day: number; condition: string; tempMin: number; tempMax: number }[];
+  /** Pre-planned day-trip days (injected by step2, used by buildUserPrompt + buildFallbackPlan) */
+  prePlannedDayTripDays?: LLMDayPlan[];
 }
 
 // Output de Claude
@@ -259,4 +261,14 @@ export interface LLMPlannerOutput {
   days: LLMDayPlan[];
   unusedActivities: string[];
   reasoning: string;
+}
+
+/**
+ * Return type of prepareDataForLLM() — includes both the LLM input
+ * and pre-planned day-trip days that bypass the LLM.
+ */
+export interface PreparedLLMData {
+  llmInput: LLMPlannerInput;
+  prePlannedDayTripDays: LLMDayPlan[];
+  reservedDayNumbers: number[];
 }
