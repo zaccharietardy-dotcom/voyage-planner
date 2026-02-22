@@ -18,6 +18,7 @@ import type {
   LLMPlannerOutput,
   LLMDayPlan,
   LLMDayItem,
+  LLMActivityInput,
 } from './types';
 import { isGarbageActivity } from './utils/garbage-filter';
 
@@ -57,9 +58,14 @@ RÈGLES ABSOLUES :
 2. N'invente AUCUNE activité, restaurant, ou lieu — utilise uniquement les IDs fournis
 3. Tous les must-see (mustSee: true) DOIVENT être planifiés — c'est non-négociable
 4. Respecte les horaires d'ouverture (openingHours) — ne programme JAMAIS une visite quand c'est fermé
-5. Minimise les distances à pied entre items consécutifs — utilise la matrice de distances fournie
+5. CLUSTERING GÉOGRAPHIQUE PAR JOUR — C'EST LA RÈGLE LA PLUS IMPORTANTE :
+   - Regroupe les activités par ZONE GÉOGRAPHIQUE sur chaque journée (utilise les coordonnées lat/lng)
+   - Chaque jour = UN quartier ou UNE zone compacte. JAMAIS de zigzag nord→sud→nord
+   - Entre deux activités consécutives : MAXIMUM 1.5km (vérifie avec la matrice de distances)
+   - Si une activité est à >2km de la précédente, elle va sur un AUTRE jour
+   - Pense en "route linéaire" : hôtel → zone A → zone B voisine → retour. Pas d'allers-retours
 6. Durées réalistes : grands musées 90-120min, monuments/églises 45-75min, parcs/quartiers 45-60min, points de vue 30-45min
-7. Restaurants PROXIMITÉ STRICTE : petit-déjeuner < 1.2km de l'hôtel, déjeuner/dîner < 500m de l'activité précédente ou suivante. VÉRIFIE dans la matrice de distances que le restaurant est proche ! Si aucun restaurant n'est assez proche, choisis celui le plus proche dans la matrice.
+7. Restaurants PROXIMITÉ ULTRA-STRICTE : petit-déjeuner < 500m de l'hôtel, déjeuner/dîner < 300m de l'activité précédente ou suivante. VÉRIFIE dans la matrice de distances ! Il y a des restaurants partout — choisis TOUJOURS le plus proche géographiquement.
 8. Diversité cuisine : pas 2 restaurants du même type de cuisine sur le trip
 9. Jour d'arrivée : si l'heure d'arrivée est donnée, commence les activités 30min après. Si aucune heure d'arrivée n'est fournie, suppose une arrivée vers midi → NE programme RIEN avant 14h00 sur le jour 1 (pas de petit-déjeuner, pas de visite matinale). Activités légères après le check-in → balades, quartiers, points de vue. Inclure un dîner.
 10. Dernier jour : finir toutes les activités 90 minutes AVANT l'heure de départ (checkout + trajet gare/aéroport)
@@ -340,7 +346,7 @@ async function retryGeminiWithCorrections(
   input: LLMPlannerInput
 ): Promise<LLMPlannerOutput | null> {
   try {
-    const correctionPrompt = `Your plan has the following errors:\n${errors.map((e, i) => `${i + 1}. ${e}`).join('\n')}\n\nPlease fix these errors and return the corrected JSON plan.`;
+    const correctionPrompt = buildCorrectionPrompt(errors);
 
     console.log('[Pipeline V2 LLM] Retrying Gemini with corrections...');
 
@@ -964,6 +970,52 @@ function validateLLMPlan(plan: LLMPlannerOutput, input: LLMPlannerInput): Valida
     }
   }
 
+  // 5. Check geographic clustering — consecutive items should be < 3km apart
+  //    Hard error at >3km triggers retry, which forces LLM to cluster better.
+  const activityLookup = new Map(input.activities.map(a => [a.id, a]));
+  const restaurantLookup = new Map(input.restaurants.map(r => [r.id, r]));
+  let longLegsCount = 0;
+  for (const day of plan.days) {
+    // Skip day trips — inter-city distances are expected
+    if (day.isDayTrip) continue;
+    const items = (day.items || []).filter(i => i.activityId || i.restaurantId);
+    for (let i = 1; i < items.length; i++) {
+      const prevItem = items[i - 1];
+      const currItem = items[i];
+      const prevCoords = prevItem.activityId
+        ? activityLookup.get(prevItem.activityId)
+        : restaurantLookup.get(prevItem.restaurantId || '');
+      const currCoords = currItem.activityId
+        ? activityLookup.get(currItem.activityId)
+        : restaurantLookup.get(currItem.restaurantId || '');
+
+      if (prevCoords && currCoords && prevCoords.lat && currCoords.lat) {
+        // Quick haversine approximation for validation
+        const dLat = (currCoords.lat - prevCoords.lat) * 111.32;
+        const dLng = (currCoords.lng - prevCoords.lng) * 111.32 * Math.cos(prevCoords.lat * Math.PI / 180);
+        const distKm = Math.sqrt(dLat * dLat + dLng * dLng);
+
+        if (distKm > 3) {
+          const prevDesc = prevItem.activityId || prevItem.restaurantId || '?';
+          const currDesc = currItem.activityId || currItem.restaurantId || '?';
+          errors.push(`Day ${day.dayNumber}: ${prevDesc} → ${currDesc} = ${distKm.toFixed(1)}km (max 3km — regroupe les activités par zone géographique)`);
+          longLegsCount++;
+        }
+      }
+    }
+  }
+  // Cap distance errors to 3 to avoid overwhelming the retry prompt
+  if (longLegsCount > 3) {
+    const excess = errors.filter(e => e.includes('max 3km'));
+    const kept = excess.slice(0, 3);
+    const removed = excess.slice(3);
+    for (const r of removed) {
+      const idx = errors.indexOf(r);
+      if (idx >= 0) errors.splice(idx, 1);
+    }
+    errors.push(`... and ${removed.length} more distance violations. Cluster activities by neighborhood!`);
+  }
+
   return {
     valid: errors.length === 0,
     errors,
@@ -990,6 +1042,14 @@ function timeToMinutes(time: string): number | null {
 // Retry Logic
 // ============================================
 
+function buildCorrectionPrompt(errors: string[]): string {
+  const hasDistanceErrors = errors.some(e => e.includes('km'));
+  const distanceGuidance = hasDistanceErrors
+    ? `\n\nRAPPEL DISTANCE CRITIQUE : Chaque jour doit couvrir UN SEUL quartier/zone. Activités consécutives = MAX 1.5km. Si une activité est trop loin du cluster du jour, déplace-la sur un autre jour et remplace-la par une activité plus proche. Les restaurants doivent être à <300m de l'activité précédente/suivante.`
+    : '';
+  return `Ton plan contient ces erreurs :\n${errors.map((e, i) => `${i + 1}. ${e}`).join('\n')}${distanceGuidance}\n\nCorrige ces erreurs et renvoie le JSON corrigé complet.`;
+}
+
 async function retryWithCorrections(
   client: Anthropic,
   originalResponse: string,
@@ -997,7 +1057,7 @@ async function retryWithCorrections(
   input: LLMPlannerInput
 ): Promise<LLMPlannerOutput | null> {
   try {
-    const correctionPrompt = `Your plan has the following errors:\n${errors.map((e, i) => `${i + 1}. ${e}`).join('\n')}\n\nPlease fix these errors and return the corrected JSON plan.`;
+    const correctionPrompt = buildCorrectionPrompt(errors);
 
     console.log('[Pipeline V2 LLM] Retrying with corrections...');
 
@@ -1046,8 +1106,19 @@ export function buildFallbackPlan(input: LLMPlannerInput): LLMPlannerOutput {
   const { trip, hotel, activities, restaurants } = input;
   const durationDays = trip.durationDays;
 
-  // Sort activities by priority: must-see first, then by quality score
-  const sortedActivities = [...activities].sort((a, b) => {
+  // Separate day-trip activities from city activities
+  const cityActivities = activities.filter(a => !a.dayTripDestination);
+  const dayTripActivitiesByDest = new Map<string, typeof activities>();
+  for (const a of activities) {
+    if (a.dayTripDestination) {
+      const list = dayTripActivitiesByDest.get(a.dayTripDestination) || [];
+      list.push(a);
+      dayTripActivitiesByDest.set(a.dayTripDestination, list);
+    }
+  }
+
+  // Sort city activities by priority: must-see first, then by quality score
+  const sortedActivities = [...cityActivities].sort((a, b) => {
     if (a.mustSee && !b.mustSee) return -1;
     if (!a.mustSee && b.mustSee) return 1;
     const scoreA = a.rating * Math.log2(a.reviewCount + 2);
@@ -1055,152 +1126,292 @@ export function buildFallbackPlan(input: LLMPlannerInput): LLMPlannerOutput {
     return scoreB - scoreA;
   });
 
-  // Determine activities per day
-  const totalActivities = Math.min(sortedActivities.length, durationDays * 4);
-  const activitiesPerDay: number[] = [];
+  // Geo-cluster city activities using nearest-neighbor grouping
+  const geoClustered = geoClusterActivities(sortedActivities, hotel);
 
-  if (durationDays === 1) {
-    activitiesPerDay.push(Math.min(totalActivities, 3));
-  } else if (durationDays === 2) {
-    activitiesPerDay.push(2, Math.min(totalActivities - 2, 4));
-  } else {
-    // First day: 2 activities (arrival)
-    activitiesPerDay.push(2);
-    // Last day: 2 activities (departure)
-    const lastDayActivities = 2;
-    // Middle days: distribute remaining
-    const remaining = totalActivities - 2 - lastDayActivities;
-    const fullDays = durationDays - 2;
-    const perFullDay = Math.min(Math.ceil(remaining / fullDays), 5);
-
-    for (let i = 0; i < fullDays; i++) {
-      activitiesPerDay.push(perFullDay);
-    }
-    activitiesPerDay.push(lastDayActivities);
+  // Reserve day slots for day trips (middle days preferred)
+  const dayTripDests = [...dayTripActivitiesByDest.keys()];
+  const dayTripDayNumbers = new Set<number>();
+  // Place day trips on middle days (day 2 for 3-day trips, etc.)
+  for (let i = 0; i < dayTripDests.length && i < durationDays - 1; i++) {
+    const dayNum = Math.min(2 + i, durationDays - 1); // avoid first and last day
+    dayTripDayNumbers.add(dayNum);
   }
 
-  // Build days
+  // Determine city day slots (excluding day-trip days)
+  const cityDayNumbers: number[] = [];
+  for (let d = 1; d <= durationDays; d++) {
+    if (!dayTripDayNumbers.has(d)) cityDayNumbers.push(d);
+  }
+
+  // Determine activities per city day
+  const activitiesPerCityDay: number[] = [];
+  const totalCityActivities = Math.min(geoClustered.length, cityDayNumbers.length * 4);
+  if (cityDayNumbers.length === 1) {
+    activitiesPerCityDay.push(Math.min(totalCityActivities, 3));
+  } else {
+    // First city day (arrival): 2 activities
+    activitiesPerCityDay.push(2);
+    // Last city day (departure): 2 activities
+    const lastDayCount = 2;
+    const remaining = totalCityActivities - 2 - lastDayCount;
+    const fullDays = cityDayNumbers.length - 2;
+    if (fullDays > 0) {
+      const perFullDay = Math.min(Math.ceil(remaining / fullDays), 5);
+      for (let i = 0; i < fullDays; i++) {
+        activitiesPerCityDay.push(perFullDay);
+      }
+    }
+    activitiesPerCityDay.push(lastDayCount);
+  }
+
+  // Build all days
   const days: LLMDayPlan[] = [];
-  let activityIndex = 0;
-  const usedRestaurantIds = new Set<string>(); // Track used restaurants to vary across days
+  let cityActivityIndex = 0;
+  let dayTripIdx = 0;
+  const usedRestaurantIds = new Set<string>();
+
+  // Separate day-trip restaurants from city restaurants
+  const cityRestaurants = restaurants.filter(r => !r.dayTripDestination);
+  const dayTripRestaurants = new Map<string, typeof restaurants>();
+  for (const r of restaurants) {
+    if (r.dayTripDestination) {
+      const list = dayTripRestaurants.get(r.dayTripDestination) || [];
+      list.push(r);
+      dayTripRestaurants.set(r.dayTripDestination, list);
+    }
+  }
 
   for (let dayNum = 1; dayNum <= durationDays; dayNum++) {
-    const numActivities = activitiesPerDay[dayNum - 1] || 0;
-    const dayActivities = sortedActivities.slice(activityIndex, activityIndex + numActivities);
-    activityIndex += numActivities;
+    if (dayTripDayNumbers.has(dayNum) && dayTripIdx < dayTripDests.length) {
+      // === Day Trip Day ===
+      const dest = dayTripDests[dayTripIdx++];
+      const dtActivities = (dayTripActivitiesByDest.get(dest) || [])
+        .sort((a, b) => (b.rating || 0) - (a.rating || 0))
+        .slice(0, 4);
+      const dtRestaurants = dayTripRestaurants.get(dest) || [];
 
-    // Calculate day centroid for restaurant selection
-    const centroid = calculateCentroid(dayActivities);
+      const items: LLMDayItem[] = [];
+      let currentTime = '08:30';
 
-    // Select restaurants — avoid reusing same restaurant across days
-    const breakfast = selectClosestRestaurant(
-      restaurants,
-      hotel ? { lat: hotel.lat, lng: hotel.lng } : centroid,
-      'breakfast',
-      usedRestaurantIds
-    );
-    if (breakfast) usedRestaurantIds.add(breakfast.id);
+      // Breakfast near hotel before departure
+      const breakfast = selectClosestRestaurant(
+        cityRestaurants,
+        hotel ? { lat: hotel.lat, lng: hotel.lng } : { lat: 0, lng: 0 },
+        'breakfast',
+        usedRestaurantIds
+      );
+      if (breakfast) {
+        usedRestaurantIds.add(breakfast.id);
+        items.push({
+          type: 'restaurant', restaurantId: breakfast.id, mealType: 'breakfast',
+          startTime: currentTime, endTime: addMinutes(currentTime, 45), duration: 45,
+        });
+        currentTime = addMinutes(currentTime, 60);
+      }
 
-    const lunch = selectClosestRestaurant(restaurants, centroid, 'lunch', usedRestaurantIds);
-    if (lunch) usedRestaurantIds.add(lunch.id);
+      // Day trip activities
+      for (const act of dtActivities) {
+        items.push({
+          type: 'activity', activityId: act.id,
+          startTime: currentTime, endTime: addMinutes(currentTime, act.duration), duration: act.duration,
+        });
+        currentTime = addMinutes(currentTime, act.duration + 20);
+      }
 
-    const dinner = selectClosestRestaurant(restaurants, centroid, 'dinner', usedRestaurantIds);
-    if (dinner) usedRestaurantIds.add(dinner.id);
+      // Lunch at day trip destination
+      const dtCentroid = calculateCentroid(dtActivities);
+      const lunch = selectClosestRestaurant(
+        dtRestaurants.length > 0 ? dtRestaurants : cityRestaurants,
+        dtCentroid, 'lunch', usedRestaurantIds
+      );
+      if (lunch) {
+        usedRestaurantIds.add(lunch.id);
+        currentTime = ensureTimeAfter(currentTime, '12:15');
+        items.push({
+          type: 'restaurant', restaurantId: lunch.id, mealType: 'lunch',
+          startTime: currentTime, endTime: addMinutes(currentTime, 75), duration: 75,
+        });
+      }
 
-    // Build items with simple timing
-    const items: LLMDayItem[] = [];
-    let currentTime = dayNum === 1 ? '10:00' : '08:30';
+      // Dinner back in city
+      const dinner = selectClosestRestaurant(
+        cityRestaurants,
+        hotel ? { lat: hotel.lat, lng: hotel.lng } : dtCentroid,
+        'dinner', usedRestaurantIds
+      );
+      if (dinner) {
+        usedRestaurantIds.add(dinner.id);
+        currentTime = ensureTimeAfter(currentTime, '19:00');
+        items.push({
+          type: 'restaurant', restaurantId: dinner.id, mealType: 'dinner',
+          startTime: currentTime, endTime: addMinutes(currentTime, 90), duration: 90,
+        });
+      }
 
-    // Breakfast
-    if (breakfast) {
-      items.push({
-        type: 'restaurant',
-        restaurantId: breakfast.id,
-        mealType: 'breakfast',
-        startTime: currentTime,
-        endTime: addMinutes(currentTime, 45),
-        duration: 45,
+      days.push({
+        dayNumber: dayNum,
+        theme: dest,
+        narrative: `Excursion à ${dest}`,
+        isDayTrip: true,
+        dayTripDestination: dest,
+        items,
       });
-      currentTime = addMinutes(currentTime, 60);
-    }
+    } else {
+      // === City Day ===
+      const cityDayIdx = cityDayNumbers.indexOf(dayNum);
+      const numActivities = activitiesPerCityDay[cityDayIdx] || 0;
+      const dayActivities = geoClustered.slice(cityActivityIndex, cityActivityIndex + numActivities);
+      cityActivityIndex += numActivities;
 
-    // Morning activities
-    const morningCount = Math.ceil(dayActivities.length / 2);
-    for (let i = 0; i < morningCount && i < dayActivities.length; i++) {
-      const activity = dayActivities[i];
-      items.push({
-        type: 'activity',
-        activityId: activity.id,
-        startTime: currentTime,
-        endTime: addMinutes(currentTime, activity.duration),
-        duration: activity.duration,
+      const centroid = calculateCentroid(dayActivities);
+
+      const breakfast = selectClosestRestaurant(
+        cityRestaurants,
+        hotel ? { lat: hotel.lat, lng: hotel.lng } : centroid,
+        'breakfast', usedRestaurantIds
+      );
+      if (breakfast) usedRestaurantIds.add(breakfast.id);
+
+      const lunch = selectClosestRestaurant(cityRestaurants, centroid, 'lunch', usedRestaurantIds);
+      if (lunch) usedRestaurantIds.add(lunch.id);
+
+      const dinner = selectClosestRestaurant(cityRestaurants, centroid, 'dinner', usedRestaurantIds);
+      if (dinner) usedRestaurantIds.add(dinner.id);
+
+      const items: LLMDayItem[] = [];
+      const isArrival = dayNum === 1;
+      let currentTime = isArrival ? '14:00' : '08:30';
+
+      // Breakfast (skip on arrival day)
+      if (!isArrival && breakfast) {
+        items.push({
+          type: 'restaurant', restaurantId: breakfast.id, mealType: 'breakfast',
+          startTime: currentTime, endTime: addMinutes(currentTime, 45), duration: 45,
+        });
+        currentTime = addMinutes(currentTime, 60);
+      }
+
+      // Morning activities
+      const morningCount = Math.ceil(dayActivities.length / 2);
+      for (let i = 0; i < morningCount && i < dayActivities.length; i++) {
+        const activity = dayActivities[i];
+        items.push({
+          type: 'activity', activityId: activity.id,
+          startTime: currentTime, endTime: addMinutes(currentTime, activity.duration), duration: activity.duration,
+        });
+        currentTime = addMinutes(currentTime, activity.duration + 20);
+      }
+
+      // Lunch
+      if (lunch) {
+        currentTime = ensureTimeAfter(currentTime, '12:15');
+        items.push({
+          type: 'restaurant', restaurantId: lunch.id, mealType: 'lunch',
+          startTime: currentTime, endTime: addMinutes(currentTime, 75), duration: 75,
+        });
+        currentTime = addMinutes(currentTime, 90);
+      }
+
+      // Afternoon activities
+      for (let i = morningCount; i < dayActivities.length; i++) {
+        const activity = dayActivities[i];
+        items.push({
+          type: 'activity', activityId: activity.id,
+          startTime: currentTime, endTime: addMinutes(currentTime, activity.duration), duration: activity.duration,
+        });
+        currentTime = addMinutes(currentTime, activity.duration + 20);
+      }
+
+      // Dinner
+      if (dinner) {
+        currentTime = ensureTimeAfter(currentTime, '19:00');
+        items.push({
+          type: 'restaurant', restaurantId: dinner.id, mealType: 'dinner',
+          startTime: currentTime, endTime: addMinutes(currentTime, 90), duration: 90,
+        });
+      }
+
+      const topActivities = dayActivities.slice(0, 2).map((a) => a.name);
+      const theme = topActivities.join(' & ') || `Jour ${dayNum}`;
+
+      days.push({
+        dayNumber: dayNum,
+        theme,
+        narrative: `Journée ${dayNum}: ${theme}`,
+        items,
       });
-      currentTime = addMinutes(currentTime, activity.duration + 20);
     }
-
-    // Lunch
-    if (lunch) {
-      currentTime = ensureTimeAfter(currentTime, '12:15');
-      items.push({
-        type: 'restaurant',
-        restaurantId: lunch.id,
-        mealType: 'lunch',
-        startTime: currentTime,
-        endTime: addMinutes(currentTime, 75),
-        duration: 75,
-      });
-      currentTime = addMinutes(currentTime, 90);
-    }
-
-    // Afternoon activities
-    for (let i = morningCount; i < dayActivities.length; i++) {
-      const activity = dayActivities[i];
-      items.push({
-        type: 'activity',
-        activityId: activity.id,
-        startTime: currentTime,
-        endTime: addMinutes(currentTime, activity.duration),
-        duration: activity.duration,
-      });
-      currentTime = addMinutes(currentTime, activity.duration + 20);
-    }
-
-    // Dinner
-    if (dinner) {
-      currentTime = ensureTimeAfter(currentTime, '19:00');
-      items.push({
-        type: 'restaurant',
-        restaurantId: dinner.id,
-        mealType: 'dinner',
-        startTime: currentTime,
-        endTime: addMinutes(currentTime, 90),
-        duration: 90,
-      });
-    }
-
-    // Create day theme from top activities
-    const topActivities = dayActivities.slice(0, 2).map((a) => a.name);
-    const theme = topActivities.join(' & ') || `Jour ${dayNum}`;
-
-    days.push({
-      dayNumber: dayNum,
-      theme,
-      narrative: `Journée ${dayNum}: ${theme}`,
-      items,
-    });
   }
 
   // Collect unused activities
-  const unusedActivities = sortedActivities.slice(activityIndex).map((a) => a.id);
+  const allScheduledIds = new Set(
+    days.flatMap(d => d.items.filter(i => i.activityId).map(i => i.activityId!))
+  );
+  const unusedActivities = activities
+    .filter(a => !allScheduledIds.has(a.id))
+    .map(a => a.id);
 
   const plan: LLMPlannerOutput = {
     days,
     unusedActivities,
-    reasoning: 'Plan déterministe généré automatiquement (fallback mode)',
+    reasoning: 'Plan déterministe généré automatiquement (fallback mode) avec clustering géographique',
   };
 
   logPlanSummary(plan);
   return plan;
+}
+
+/**
+ * Geo-cluster activities using greedy nearest-neighbor from hotel.
+ * Returns activities sorted so that geographically close ones are adjacent.
+ * Must-see activities are woven in at their nearest position.
+ */
+function geoClusterActivities(
+  sortedByPriority: LLMActivityInput[],
+  hotel: { lat: number; lng: number } | null
+): LLMActivityInput[] {
+  if (sortedByPriority.length <= 2) return sortedByPriority;
+
+  const mustSees = sortedByPriority.filter(a => a.mustSee);
+  const others = sortedByPriority.filter(a => !a.mustSee);
+
+  // Start from hotel or first must-see
+  let curLat = hotel?.lat || mustSees[0]?.lat || sortedByPriority[0].lat;
+  let curLng = hotel?.lng || mustSees[0]?.lng || sortedByPriority[0].lng;
+
+  const allPool = [...mustSees, ...others];
+  const remaining = new Set(allPool.map((_, i) => i));
+  const ordered: LLMActivityInput[] = [];
+
+  while (remaining.size > 0) {
+    let nearestIdx = -1;
+    let nearestDist = Infinity;
+
+    for (const idx of remaining) {
+      const a = allPool[idx];
+      const dLat = (a.lat - curLat) * 111.32;
+      const dLng = (a.lng - curLng) * 111.32 * Math.cos(curLat * Math.PI / 180);
+      const dist = Math.sqrt(dLat * dLat + dLng * dLng);
+
+      // Must-sees get a distance bonus (prefer picking them sooner)
+      const effective = a.mustSee ? dist * 0.6 : dist;
+      if (effective < nearestDist) {
+        nearestDist = effective;
+        nearestIdx = idx;
+      }
+    }
+
+    if (nearestIdx >= 0) {
+      remaining.delete(nearestIdx);
+      const picked = allPool[nearestIdx];
+      ordered.push(picked);
+      curLat = picked.lat;
+      curLng = picked.lng;
+    }
+  }
+
+  return ordered;
 }
 
 // ============================================

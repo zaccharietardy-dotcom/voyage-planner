@@ -1094,8 +1094,10 @@ export async function assembleFromLLMPlan(
     ...(data.overpassAttractions || []).map((a) => toScored(a, 'overpass', (a.rating || 0) * 8)),
     ...(data.viatorActivities || []).map((a) => toScored(a, 'viator')),
     ...(data.mustSeeAttractions || []).map((a) => toScored(a, 'mustsee', 80)),
-    // Day-trip activities (e.g. Versailles attractions) — essential for gap-filling day trips
-    ...Object.values(data.dayTripActivities || {}).flat().map((a) => toScored(a, 'google_places')),
+    // Day-trip activities (e.g. Versailles attractions) — tagged with _dayTripDest for gap-fill filtering
+    ...Object.entries(data.dayTripActivities || {}).flatMap(([dest, acts]) =>
+      acts.map((a) => ({ ...toScored(a, 'google_places'), _dayTripDest: dest }))
+    ),
   ];
 
   // Deduplicate by name (case-insensitive), keep highest-scored version
@@ -1161,10 +1163,22 @@ export async function assembleFromLLMPlan(
         }
 
         // Find best unused activity near the gap
+        // Day-trip days: only consider day-trip activities (same destination)
+        // City days: exclude day-trip activities
+        const isDayTripDay = day.isDayTrip && day.dayTripDestination;
         let bestCandidate: ScoredActivity | null = null;
         let bestScore = -Infinity;
         for (const act of unusedActivities) {
           if (scheduledNames.has((act.name || '').toLowerCase())) continue;
+          const actDayTripDest = (act as any)._dayTripDest as string | undefined;
+          // Filter by day-trip context: strict separation between city and day-trip activities
+          if (isDayTripDay) {
+            // On day-trip days, ONLY allow activities tagged for this same destination
+            if (!actDayTripDest || actDayTripDest !== day.dayTripDestination) continue;
+          } else {
+            // On city days, skip activities tagged for a day-trip destination
+            if (actDayTripDest) continue;
+          }
           const dist = calculateDistance(anchorLat, anchorLng, act.latitude, act.longitude);
           if (dist > 5.0) continue; // max 5km from gap anchor
           const actDur = Math.min(act.duration || 60, gap - 30); // leave 30min buffer

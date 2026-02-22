@@ -19,11 +19,11 @@ type MealType = 'breakfast' | 'lunch' | 'dinner';
 
 const DEFAULT_MEAL_DISTANCE_LIMITS: Record<MealType, { idealKm: number; hardKm: number; absoluteKm: number }> = {
   // Breakfast should stay very close to the hotel.
-  breakfast: { idealKm: 0.4, hardKm: 0.8, absoluteKm: 1.2 },
-  // Lunch/dinner: allow up to 1.5km in step4 (cluster centroids can differ from final activity positions).
-  // Step7 re-optimization will tighten to quality profile's restaurantMaxKm (0.8-1.5km) after activity reordering.
-  lunch: { idealKm: 0.5, hardKm: 1.0, absoluteKm: 1.5 },
-  dinner: { idealKm: 0.5, hardKm: 1.0, absoluteKm: 1.5 },
+  breakfast: { idealKm: 0.3, hardKm: 0.5, absoluteKm: 0.8 },
+  // Lunch/dinner: prefer <300m, tolerate up to 800m in step4 (centroids can differ from final positions).
+  // Step7 re-optimization (fixRestaurantOutliers) further tightens with pool/API fallback.
+  lunch: { idealKm: 0.3, hardKm: 0.6, absoluteKm: 0.8 },
+  dinner: { idealKm: 0.3, hardKm: 0.6, absoluteKm: 0.8 },
 };
 
 function getMealDistanceLimits(

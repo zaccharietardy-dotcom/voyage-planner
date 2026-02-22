@@ -186,8 +186,8 @@ async function generateTripV2LLM(
     preferences.destination,
     {
       allowApiFallback: true,
-      breakfastMaxKm: 1.2,
-      mealMaxKm: 0.5,
+      breakfastMaxKm: 0.5,
+      mealMaxKm: 0.3,
       hotelCoords: hotel ? { latitude: hotel.latitude, longitude: hotel.longitude } : undefined,
     }
   );
