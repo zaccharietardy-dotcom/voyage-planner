@@ -10,6 +10,7 @@ import {
   getEditorUserIds,
   type ProposalSelectRow,
 } from '@/lib/server/collaboration';
+import { redactTripDataForLimitedViewer } from '@/lib/server/tripRedaction';
 
 interface ProfileRow {
   id?: string;
@@ -42,6 +43,14 @@ function getServiceClient() {
   return createClient<Database>(supabaseUrl, serviceKey, {
     auth: { autoRefreshToken: false, persistSession: false },
   });
+}
+
+function buildLimitedViewerTripPayload<T extends { data: unknown; share_code: string | null }>(trip: T): T {
+  return {
+    ...trip,
+    share_code: '',
+    data: redactTripDataForLimitedViewer(trip.data),
+  };
 }
 
 // GET /api/trips/[id] - Récupérer un voyage avec ses membres et propositions
@@ -196,10 +205,7 @@ export async function GET(
 
     const tripPayload = hasCollaborationAccess
       ? trip
-      : {
-          ...trip,
-          share_code: '',
-        };
+      : buildLimitedViewerTripPayload(trip);
 
     return NextResponse.json({
       ...tripPayload,

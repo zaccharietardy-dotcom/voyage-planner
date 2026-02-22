@@ -2,6 +2,7 @@ import { createRouteHandlerClient } from '@/lib/supabase/server';
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 import { getAcceptedCloseFriendIds } from '@/lib/server/closeFriends';
+import { toFeedTripPublicPayload, type FeedTripBase } from '@/lib/server/feedTripSanitizer';
 
 // Service role client to bypass RLS for reading public trips
 function getServiceClient() {
@@ -11,20 +12,7 @@ function getServiceClient() {
   );
 }
 
-interface FeedTripRow {
-  id: string;
-  title: string | null;
-  name: string | null;
-  destination: string | null;
-  start_date: string | null;
-  end_date: string | null;
-  duration_days: number | null;
-  visibility: 'public' | 'friends' | 'private' | null;
-  created_at: string;
-  preferences: unknown;
-  data?: unknown;
-  owner_id: string;
-}
+interface FeedTripRow extends FeedTripBase {}
 
 interface FeedProfileRow {
   id: string;
@@ -81,7 +69,7 @@ export async function GET(request: Request) {
       // Fetch trips from followed users (use service client to bypass RLS)
       let followingQuery = serviceClient
         .from('trips')
-        .select('id, title, name, destination, start_date, end_date, duration_days, visibility, created_at, preferences, data, owner_id')
+        .select('id, title, name, destination, start_date, end_date, duration_days, visibility, created_at, preferences, owner_id')
         .in('owner_id', followingIds)
         .in('visibility', ['public', 'friends'])
         .order('created_at', { ascending: false });
@@ -136,7 +124,7 @@ export async function GET(request: Request) {
         if (trip.visibility === 'friends' && closeFriendIds.has(trip.owner_id)) return true;
         return false;
       }).map((t) => ({
-        ...t,
+        ...toFeedTripPublicPayload(t),
         owner: fOwnerMap[t.owner_id] || { id: t.owner_id, display_name: null, avatar_url: null, username: null },
         cover_url: fPhotoMap[t.id] || null,
       }));
@@ -220,7 +208,7 @@ export async function GET(request: Request) {
     }
 
     const tripsWithOwner = typedTrips.map((t) => ({
-      ...t,
+      ...toFeedTripPublicPayload(t),
       owner: ownerMap[t.owner_id] || { id: t.owner_id, display_name: null, avatar_url: null, username: null },
       cover_url: photoMap[t.id] || null,
     }));
