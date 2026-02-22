@@ -310,7 +310,6 @@ function addOutboundTransportItem(
     const firstLeg = transport.transitLegs[0];
     const lastLeg = transport.transitLegs[transport.transitLegs.length - 1];
     const outboundDuration = getTransitLegsDurationMinutes(transport.transitLegs as TripItem['transitLegs']) || transport.totalDuration;
-    const segmentDestCoords = transport.segments?.[0]?.toCoords;
 
     const trainItem: TripItem = {
       id: uuidv4(),
@@ -321,8 +320,8 @@ function addOutboundTransportItem(
       title: `${firstLeg.from} → ${lastLeg.to}`,
       description: buildTrainDescription('Train', transport.transitLegs.map((leg) => leg.operator)),
       locationName: firstLeg.from,
-      latitude: segmentDestCoords?.lat || fallbackCoords.lat,
-      longitude: segmentDestCoords?.lng || fallbackCoords.lng,
+      latitude: fallbackCoords.lat,
+      longitude: fallbackCoords.lng,
       orderIndex: 0,
       duration: outboundDuration,
       transitLegs: transport.transitLegs,
@@ -389,7 +388,6 @@ function addReturnTransportItem(
     const returnArrivalMin = returnDepartMin + rebasedReturnDuration;
     const returnFirstLeg = rebasedReturnLegs?.[0];
     const returnLastLeg = rebasedReturnLegs?.[rebasedReturnLegs.length - 1];
-    const segmentReturnCoords = transport.segments?.[0]?.toCoords;
 
     const trainItem: TripItem = {
       id: uuidv4(),
@@ -400,8 +398,8 @@ function addReturnTransportItem(
       title: `${returnFirstLeg?.from || preferences.destination} → ${returnLastLeg?.to || preferences.origin}`,
       description: buildTrainDescription('Train retour', (rebasedReturnLegs || []).map((leg) => leg.operator)),
       locationName: returnFirstLeg?.from || preferences.destination,
-      latitude: segmentReturnCoords?.lat || fallbackCoords.lat,
-      longitude: segmentReturnCoords?.lng || fallbackCoords.lng,
+      latitude: fallbackCoords.lat,
+      longitude: fallbackCoords.lng,
       orderIndex: lastDay.items.length,
       duration: rebasedReturnDuration,
       transitLegs: rebasedReturnLegs,
@@ -430,8 +428,8 @@ function addReturnTransportItem(
       title: `${preferences.destination} → ${preferences.origin}`,
       description: `Transport retour`,
       locationName: preferences.destination,
-      latitude: transport.segments?.[0]?.toCoords?.lat || fallbackCoords.lat,
-      longitude: transport.segments?.[0]?.toCoords?.lng || fallbackCoords.lng,
+      latitude: fallbackCoords.lat,
+      longitude: fallbackCoords.lng,
       orderIndex: lastDay.items.length,
       duration: transport.totalDuration,
       transportMode: transport.mode as any,
