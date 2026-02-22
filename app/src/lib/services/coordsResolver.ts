@@ -2,20 +2,21 @@
  * Service centralisé de résolution GPS — 100% précision
  *
  * Chaîne exhaustive de résolution (du moins cher au plus cher) :
- * 1. Pool SerpAPI existant (cache gratuit)
+ * 1. Cache mémoire (gratuit)
  * 2. Travel Places API (gratuit, RapidAPI)
  * 3. Nominatim/OSM (gratuit, 500ms throttle)
  * 4. Gemini 2.5 Flash + Google Search (gratuit)
- * 5. SerpAPI Google Maps (payant, ~$0.01/call)
+ * 5. Google Places API (New) (gratuit dans $200/mois de crédit)
+ * 6. SerpAPI Google Maps (payant, ~$0.01/call, dernier recours)
  *
- * Si les 5 échouent → retourne null → l'item sera remplacé ou supprimé
+ * Si toutes échouent → retourne null → l'item sera remplacé ou supprimé
  * JAMAIS de coordonnées inventées.
  */
 
 import { resolveAttractionByName } from './overpassAttractions';
 import { geocodeAddress, calculateDistance } from './geocoding';
 import { geocodeWithGemini } from './geminiSearch';
-import { geocodeViaSerpApi } from './serpApiPlaces';
+import { geocodeWithFallback } from './serpApiPlaces';
 
 // Distance maximale acceptée entre le résultat API et le centre de destination
 const MAX_RESOLUTION_DISTANCE_KM = 30;
@@ -41,7 +42,7 @@ function isResultNearDestination(
 export interface ResolutionResult {
   lat: number;
   lng: number;
-  source: 'cache' | 'travel_places' | 'nominatim' | 'gemini' | 'serpapi';
+  source: 'cache' | 'travel_places' | 'nominatim' | 'gemini' | 'google_places' | 'serpapi';
   address?: string;
   operatingHours?: Record<string, string>;
 }
@@ -55,7 +56,7 @@ const resolutionCache = new Map<string, ResolutionResult | null>();
 let totalResolutionAttempts = 0;
 let totalResolved = 0;
 let resolutionsBySource: Record<string, number> = {
-  cache: 0, travel_places: 0, nominatim: 0, gemini: 0, serpapi: 0,
+  cache: 0, travel_places: 0, nominatim: 0, gemini: 0, google_places: 0, serpapi: 0,
 };
 
 /**
@@ -65,7 +66,7 @@ export function resetResolutionStats(): void {
   resolutionCache.clear();
   totalResolutionAttempts = 0;
   totalResolved = 0;
-  resolutionsBySource = { cache: 0, travel_places: 0, nominatim: 0, gemini: 0, serpapi: 0 };
+  resolutionsBySource = { cache: 0, travel_places: 0, nominatim: 0, gemini: 0, google_places: 0, serpapi: 0 };
 }
 
 /**
@@ -177,28 +178,28 @@ export async function resolveCoordinates(
     console.warn(`[CoordsResolver] Gemini échoué pour "${name}":`, e);
   }
 
-  // Step 4: SerpAPI Google Maps (payant, dernier recours)
+  // Step 4: Google Places (New) → SerpAPI fallback (geocodeWithFallback tries Google first, then SerpAPI)
   if (allowPaidFallback) {
     try {
-      const serpResult = await geocodeViaSerpApi(name, city, nearbyCoords);
-      if (serpResult && serpResult.lat && serpResult.lng) {
-        if (isResultNearDestination(serpResult, nearbyCoords, name, 'SerpAPI')) {
+      const placesResult = await geocodeWithFallback(name, city, nearbyCoords);
+      if (placesResult && placesResult.lat && placesResult.lng) {
+        if (isResultNearDestination(placesResult, nearbyCoords, name, 'Google Places/SerpAPI')) {
           const result: ResolutionResult = {
-            lat: serpResult.lat,
-            lng: serpResult.lng,
-            source: 'serpapi',
-            address: serpResult.address,
-            operatingHours: serpResult.operatingHours,
+            lat: placesResult.lat,
+            lng: placesResult.lng,
+            source: 'google_places', // Could be Google Places or SerpAPI internally
+            address: placesResult.address,
+            operatingHours: placesResult.operatingHours,
           };
           resolutionCache.set(cacheKey, result);
-          resolutionsBySource.serpapi++;
+          resolutionsBySource.google_places++;
           totalResolved++;
           return result;
         }
         // Result too far from destination, try next API
       }
     } catch (e) {
-      console.warn(`[CoordsResolver] SerpAPI échoué pour "${name}":`, e);
+      console.warn(`[CoordsResolver] Google Places/SerpAPI échoué pour "${name}":`, e);
     }
   }
 

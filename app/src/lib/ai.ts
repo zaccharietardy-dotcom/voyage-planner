@@ -38,7 +38,7 @@ import { searchLuggageStorage, selectBestStorage, needsLuggageStorage, LuggageSt
 import { calculateFlightScore, EARLY_MORNING_PENALTY } from './services/flightScoring';
 import { createLocationTracker, TravelerLocation } from './services/locationTracker';
 import { generateFlightLink, generateFlightOmioLink, generateHotelLink, formatDateForUrl } from './services/linkGenerator';
-import { searchAttractionsMultiQuery, searchMustSeeAttractions, searchGroceryStores, parseSimpleOpeningHours, type GroceryStore } from './services/serpApiPlaces';
+import { searchAttractionsMultiQueryWithFallback, searchMustSeeWithFallback, searchGroceryStores, parseSimpleOpeningHours, type GroceryStore } from './services/serpApiPlaces';
 import { resolveAttractionByName } from './services/overpassAttractions';
 import { resolveCoordinates, resetResolutionStats, getResolutionStats } from './services/coordsResolver';
 import { generateClaudeItinerary, summarizeAttractions, mapItineraryToAttractions, areNamesSimilar } from './services/claudeItinerary';
@@ -154,7 +154,7 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
   );
 
   // Lancer attractions + hôtels en parallèle avec le transport
-  const attractionsPromise = searchAttractionsMultiQuery(
+  const attractionsPromise = searchAttractionsMultiQueryWithFallback(
     preferences.destination,
     destCoords,
     { types: preferences.activities, activities: preferences.activities, limit: preferences.durationDays >= 5 ? 80 : 50 }
@@ -182,7 +182,7 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
 
   // Lancer must-see + Viator en parallèle (ne dépendent que de destCoords + preferences)
   const mustSeePromise = preferences.mustSee?.trim()
-    ? searchMustSeeAttractions(preferences.mustSee, preferences.destination, destCoords)
+    ? searchMustSeeWithFallback(preferences.mustSee, preferences.destination, destCoords)
     : Promise.resolve([] as Attraction[]);
 
   const viatorMixPromise = isViatorConfigured()
@@ -644,7 +644,7 @@ export async function generateTripWithAI(preferences: TripPreferences): Promise<
       }
 
       // Fallback 4: SerpAPI (paid, last resort — only if free APIs failed)
-      const found = await searchMustSeeAttractions(suggestionName, geoContext, geoCenter || cityCenter);
+      const found = await searchMustSeeWithFallback(suggestionName, geoContext, geoCenter || cityCenter);
       if (found.length > 0) {
         attractionsByDay[dayIndex][genIndex] = { ...found[0], mustSee: true };
         return;

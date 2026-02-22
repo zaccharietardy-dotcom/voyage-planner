@@ -15,7 +15,7 @@ import { fetchPlaceImage, fetchRestaurantPhotoByPlaceId } from './services/wikim
 import type { OnPipelineEvent } from './types';
 import { isAppropriateForMeal, getCuisineFamily, isBreakfastSpecialized } from './step4-restaurants';
 import { selectTopHotelsByBarycenter } from './step5-hotel';
-import { searchRestaurantsNearby } from '../services/serpApiPlaces';
+import { searchRestaurantsNearbyWithFallback } from '../services/serpApiPlaces';
 import { batchFetchWikipediaSummaries, getWikiLanguageForDestination } from '../services/wikipedia';
 import { normalizeHotelBookingUrl } from '../services/bookingLinks';
 import { generateFlightLink, generateFlightOmioLink, formatDateForUrl, generateGoogleFlightsLink, buildDirectionsUrl, generateHotelSearchLinks } from '../services/linkGenerator';
@@ -1788,7 +1788,7 @@ export async function assembleTripSchedule(
       // Helper: fetch restaurants from API near neighborActivity
       const fetchNearbyFromAPI = async (): Promise<Restaurant[]> => {
         try {
-          const nearbyResults = await searchRestaurantsNearby(
+          const nearbyResults = await searchRestaurantsNearbyWithFallback(
             { lat: neighborActivity.latitude!, lng: neighborActivity.longitude! },
             preferences.destination,
             { mealType, maxDistance: 800, limit: 5 }
@@ -3240,7 +3240,7 @@ export async function assembleTripSchedule(
       console.log(`[Pipeline V2] Post-schedule: ${swapCandidates.length} restaurant(s) still far — trying SerpAPI nearby search`);
       const apiResults = await Promise.allSettled(
         swapCandidates.map(c =>
-          searchRestaurantsNearby(
+          searchRestaurantsNearbyWithFallback(
             { lat: c.refLat, lng: c.refLng },
             preferences.destination,
             { mealType: c.mealType, maxDistance: 1500, limit: 5 }
@@ -3401,7 +3401,7 @@ export async function assembleTripSchedule(
         if (newAlts.length < TARGET_ALTS && apiCallCount < 2) {
           try {
             apiCallCount++;
-            const apiResults = await searchRestaurantsNearby(
+            const apiResults = await searchRestaurantsNearbyWithFallback(
               { lat: refLat, lng: refLng },
               preferences.destination,
               { mealType, maxDistance: 1500, limit: 5 }
@@ -6678,7 +6678,7 @@ export async function fixRestaurantOutliers(
         apiCalls++;
         try {
           const anchor = anchors[0];
-          const apiCandidates = await searchRestaurantsNearby(
+          const apiCandidates = await searchRestaurantsNearbyWithFallback(
             { lat: anchor.latitude, lng: anchor.longitude },
             destination,
             { mealType, maxDistance: Math.round(maxDistanceKm * 1000), limit: 8 }

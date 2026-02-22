@@ -18,7 +18,7 @@ import { Restaurant, DietaryType } from '../types';
 import { calculateDistance, estimateTravelTime } from './geocoding';
 import { validateRestaurantCuisine, filterRestaurantsByCuisine, getCountryFromDestination } from './cuisineValidator';
 import { searchRestaurants as searchFoursquareRestaurants, foursquareToRestaurant, isFoursquareConfigured } from './foursquare';
-import { searchRestaurantsWithSerpApi, searchRestaurantsNearby, isSerpApiPlacesConfigured, QUALITY_THRESHOLDS } from './serpApiPlaces';
+import { searchRestaurantsWithFallback, searchRestaurantsNearbyWithFallback, isSerpApiPlacesConfigured, QUALITY_THRESHOLDS } from './serpApiPlaces';
 import { searchPlacesFromDB, savePlacesToDB, isDataFresh, type PlaceData } from './placeDatabase';
 import { searchTripAdvisorRestaurants, isTripAdvisorConfigured } from './tripadvisor';
 import { searchRestaurantsWithGemini } from './geminiSearch';
@@ -225,7 +225,7 @@ export async function searchRestaurants(params: RestaurantSearchParams): Promise
   if (destination && isSerpApiPlacesConfigured()) {
     try {
       console.log(`[Restaurants] SerpAPI: recherche "${destination}" (${latitude}, ${longitude})`);
-      const serpRestaurants = await searchRestaurantsWithSerpApi(destination, {
+      const serpRestaurants = await searchRestaurantsWithFallback(destination, {
         mealType,
         limit: limit + 10,
         latitude,
@@ -330,7 +330,7 @@ export async function searchRestaurantsNearActivity(
   // 2. Fallback: SerpAPI avec recherche GPS
   if (isSerpApiPlacesConfigured()) {
     try {
-      const nearbyRestaurants = await searchRestaurantsNearby(activityCoords, destination, {
+      const nearbyRestaurants = await searchRestaurantsNearbyWithFallback(activityCoords, destination, {
         mealType,
         maxDistance: QUALITY_THRESHOLDS.restaurants.maxDistanceMeters,
         minRating: QUALITY_THRESHOLDS.restaurants.minRating,

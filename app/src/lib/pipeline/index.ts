@@ -19,7 +19,7 @@ import { balanceDays, balanceDaysWithClaude } from './step6-balance';
 import { assembleTripSchedule } from './step7-assemble';
 import { validateAndFixTrip } from './step8-validate';
 import { calculateDistance } from '../services/geocoding';
-import { searchRestaurantsWithSerpApi } from '../services/serpApiPlaces';
+import { searchRestaurantsWithFallback } from '../services/serpApiPlaces';
 import { diffSerpApiUsage, getSerpApiUsageSnapshot } from '../services/apiUsageTracker';
 import {
   accommodationHasKitchen,
@@ -37,7 +37,7 @@ import { planWithLLM } from './step3-llm-plan';
 import { assembleFromLLMPlan, computeDistancesForDay } from './step4-assemble-llm';
 import { fixRestaurantOutliers } from './step7-assemble';
 import { isAppropriateForMeal, isBreakfastSpecialized, getCuisineFamily } from './step4-restaurants';
-import { searchRestaurantsNearby } from '../services/serpApiPlaces';
+import { searchRestaurantsNearbyWithFallback } from '../services/serpApiPlaces';
 
 // ---------------------------------------------------------------------------
 // Pipeline Event System — emit helper
@@ -1244,7 +1244,7 @@ async function fetchTargetedRestaurantsForMissingMeals(
 
   const results = await Promise.allSettled(
     targets.map(target =>
-      searchRestaurantsWithSerpApi(destination, {
+      searchRestaurantsWithFallback(destination, {
         latitude: target.lat,
         longitude: target.lng,
         mealType: target.mealType,
@@ -1290,7 +1290,7 @@ async function fetchSupplementalRestaurantsForSparseAreas(
 
   const responses = await Promise.allSettled(
     targets.map(anchor =>
-      searchRestaurantsWithSerpApi(destination, {
+      searchRestaurantsWithFallback(destination, {
         latitude: anchor.lat,
         longitude: anchor.lng,
         limit: 25,
@@ -3061,7 +3061,7 @@ async function populateRestaurantAlternatives(
       if (newAlts.length < TARGET_ALTS && apiCallCount < 3) {
         try {
           apiCallCount++;
-          const apiResults = await searchRestaurantsNearby(
+          const apiResults = await searchRestaurantsNearbyWithFallback(
             { lat: refLat, lng: refLng },
             destination,
             { mealType, maxDistance: 1500, limit: 5 }
