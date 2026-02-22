@@ -424,7 +424,6 @@ function scoreRythme(
   // Skip gap penalty on day-trip days (transport takes time, gaps are normal).
   let gapPenaltyPts = 0;
   for (const day of trip.days) {
-    if (day.isDayTrip) continue;
     const sorted = [...day.items]
       .filter(i => (!isLogisticsItem(i) || i.type === 'checkin' || i.type === 'checkout') && !isHotelMeal(i))
       .sort((a, b) => a.startTime.localeCompare(b.startTime));

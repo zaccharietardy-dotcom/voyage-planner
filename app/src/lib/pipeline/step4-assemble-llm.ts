@@ -1071,12 +1071,20 @@ export async function assembleFromLLMPlan(
   // Build FULL activity pool from ALL data sources (not just LLM-selected subset)
   // The activityMap only contains activities the LLM chose — very few are unused.
   // We need the complete pool from step1 fetch data for gap-filling.
+  const toScored = (a: typeof data.googlePlacesAttractions[0], source: ScoredActivity['source'], scoreOverride?: number): ScoredActivity => ({
+    ...a,
+    score: scoreOverride ?? ((a.rating || 0) * 10 + Math.min(a.reviewCount || 0, 100) / 10),
+    source,
+    reviewCount: a.reviewCount || 0,
+  });
   const allFetchedActivities: ScoredActivity[] = [
-    ...(data.googlePlacesAttractions || []).map((a) => ({ ...a, score: (a.rating || 0) * 10 + Math.min(a.reviewCount || 0, 100) / 10, source: 'google_places' as const, reviewCount: a.reviewCount || 0 })),
-    ...(data.serpApiAttractions || []).map((a) => ({ ...a, score: (a.rating || 0) * 10 + Math.min(a.reviewCount || 0, 100) / 10, source: 'serpapi' as const, reviewCount: a.reviewCount || 0 })),
-    ...(data.overpassAttractions || []).map((a) => ({ ...a, score: (a.rating || 0) * 8, source: 'overpass' as const, reviewCount: a.reviewCount || 0 })),
-    ...(data.viatorActivities || []).map((a) => ({ ...a, score: (a.rating || 0) * 10 + Math.min(a.reviewCount || 0, 100) / 10, source: 'viator' as const, reviewCount: a.reviewCount || 0 })),
-    ...(data.mustSeeAttractions || []).map((a) => ({ ...a, score: 80, source: 'mustsee' as const, reviewCount: a.reviewCount || 0 })),
+    ...(data.googlePlacesAttractions || []).map((a) => toScored(a, 'google_places')),
+    ...(data.serpApiAttractions || []).map((a) => toScored(a, 'serpapi')),
+    ...(data.overpassAttractions || []).map((a) => toScored(a, 'overpass', (a.rating || 0) * 8)),
+    ...(data.viatorActivities || []).map((a) => toScored(a, 'viator')),
+    ...(data.mustSeeAttractions || []).map((a) => toScored(a, 'mustsee', 80)),
+    // Day-trip activities (e.g. Versailles attractions) — essential for gap-filling day trips
+    ...Object.values(data.dayTripActivities || {}).flat().map((a) => toScored(a, 'google_places')),
   ];
 
   // Deduplicate by name (case-insensitive), keep highest-scored version
@@ -1105,7 +1113,6 @@ export async function assembleFromLLMPlan(
   {
     let totalInserted = 0;
     for (const day of tripDays) {
-      if (day.isDayTrip) continue;
       const sorted = [...day.items].sort((a, b) => parseHHMM(a.startTime) - parseHHMM(b.startTime));
       let insertedThisDay = 0;
 
@@ -1114,8 +1121,8 @@ export async function assembleFromLLMPlan(
         const prevEnd = parseHHMM(sorted[i - 1].endTime);
         const currStart = parseHHMM(sorted[i].startTime);
         const gap = currStart - prevEnd;
-        if (gap >= 90) {
-          console.log(`[Pipeline V2 LLM] Gap-fill: Day ${day.dayNumber} gap ${gap}min between "${sorted[i - 1].title}" (end ${sorted[i - 1].endTime}) and "${sorted[i].title}" (start ${sorted[i].startTime})`);
+        if (gap >= 75) {
+          console.log(`[Pipeline V2 LLM] Gap-fill: Day ${day.dayNumber}${day.isDayTrip ? ' (day-trip)' : ''} gap ${gap}min between "${sorted[i - 1].title}" (end ${sorted[i - 1].endTime}) and "${sorted[i].title}" (start ${sorted[i].startTime})`);
         }
       }
 
@@ -1123,7 +1130,7 @@ export async function assembleFromLLMPlan(
         const prevEnd = parseHHMM(sorted[i - 1].endTime);
         const currStart = parseHHMM(sorted[i].startTime);
         const gap = currStart - prevEnd;
-        if (gap < 90) continue;
+        if (gap < 75) continue;
         // Don't fill gaps before dinner if gap is < 150min (normal free time)
         if (sorted[i].type === 'restaurant' && gap < 150 && currStart >= 1080) continue;
 
