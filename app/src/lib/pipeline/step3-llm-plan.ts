@@ -19,6 +19,7 @@ import type {
   LLMDayPlan,
   LLMDayItem,
 } from './types';
+import { isGarbageActivity } from './utils/garbage-filter';
 
 // ============================================
 // Gemini API types
@@ -626,7 +627,14 @@ function enrichSparseDays(
 
   // Build unused pool sorted by quality (must-see first, then score)
   const unusedPool = input.activities
-    .filter((a) => !scheduledIds.has(a.id))
+    .filter((a) => {
+      if (scheduledIds.has(a.id)) return false;
+      if (isGarbageActivity(a as any)) {
+        console.log(`[Pipeline V2 LLM] Enrichment: rejected garbage "${a.name}"`);
+        return false;
+      }
+      return true;
+    })
     .sort((a, b) => {
       if (a.mustSee && !b.mustSee) return -1;
       if (!a.mustSee && b.mustSee) return 1;

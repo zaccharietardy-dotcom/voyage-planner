@@ -31,6 +31,7 @@ import { normalizeHotelBookingUrl } from '../services/bookingLinks';
 import { getMinDuration, getMaxDuration, estimateActivityCost } from './utils/constants';
 import { generateFlightLink, generateFlightOmioLink, formatDateForUrl } from '../services/linkGenerator';
 import { sanitizeApiKeyLeaksInString, sanitizeGoogleMapsUrl } from '../services/googlePlacePhoto';
+import { isGarbageActivity } from './utils/garbage-filter';
 import { resolveOfficialTicketing } from '../services/officialTicketing';
 import { getAirportPreDepartureLeadMinutes } from './step7-assemble';
 import { scheduleDayItems, buildDayWindow, buildMealSlots, buildCandidates } from './scheduler';
@@ -168,6 +169,12 @@ function buildTripItemsFromDayPlan(
       const activity = activityMap.get(item.activityId);
       if (!activity) {
         console.warn(`[Pipeline V2 LLM] Activity not found: ${item.activityId}`);
+        continue;
+      }
+
+      // Filter garbage non-POI entries (e.g. "mètre" = unit of measurement)
+      if (isGarbageActivity(activity)) {
+        console.warn(`[Pipeline V2 LLM] Garbage activity filtered: "${activity.name}"`);
         continue;
       }
 

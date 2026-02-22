@@ -9,6 +9,10 @@ export interface QualityCityProfile {
   hotelHardCapKm: number;
   breakfastMaxKm: number;
   restaurantMaxKm: number;
+  /** Distance threshold for full proximity credit in scoring */
+  restaurantCloseKm: number;
+  /** Distance threshold for partial proximity credit in scoring */
+  restaurantPartialKm: number;
 }
 
 const QUALITY_PROFILES: Record<QualityCityProfileId, QualityCityProfile> = {
@@ -18,6 +22,8 @@ const QUALITY_PROFILES: Record<QualityCityProfileId, QualityCityProfile> = {
     hotelHardCapKm: 1.2,
     breakfastMaxKm: 0.8,
     restaurantMaxKm: 0.8,
+    restaurantCloseKm: 0.4,
+    restaurantPartialKm: 0.8,
   },
   urban_standard: {
     id: 'urban_standard',
@@ -25,6 +31,8 @@ const QUALITY_PROFILES: Record<QualityCityProfileId, QualityCityProfile> = {
     hotelHardCapKm: 2.0,
     breakfastMaxKm: 1.0,
     restaurantMaxKm: 1.0,
+    restaurantCloseKm: 0.5,
+    restaurantPartialKm: 1.0,
   },
   metro_spread: {
     id: 'metro_spread',
@@ -32,6 +40,8 @@ const QUALITY_PROFILES: Record<QualityCityProfileId, QualityCityProfile> = {
     hotelHardCapKm: 3.0,
     breakfastMaxKm: 1.4,
     restaurantMaxKm: 1.5,
+    restaurantCloseKm: 0.7,
+    restaurantPartialKm: 1.2,
   },
 };
 

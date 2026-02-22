@@ -22,6 +22,8 @@ import {
   normalizeReturnTransportBookingUrl,
   rebaseTransitLegsToTimeline,
 } from './utils/longhaulConsistency';
+import { getCuisineFamilyFromItem } from './utils/cuisine';
+import { nearestNonRestaurantDistKm } from './utils/restaurant-proximity';
 
 const LOGISTICS_TYPES: TripItem['type'][] = ['flight', 'transport', 'checkin', 'checkout', 'parking', 'luggage'];
 
@@ -269,10 +271,12 @@ function scoreCompletude(
   details.push(`Activités: ${actScore}/5`);
 
   // 1b. Meals: every full day should have 3 meals, boundary days at least 1 (7 pts)
+  // NOTE: Hotel breakfast counts as a valid meal for completeness — traveler does eat breakfast.
+  // (But hotel meals are still excluded from meal timing scoring since they have no restaurant data)
   let mealPoints = 0;
   for (const day of trip.days) {
     const isBoundary = day.dayNumber === 1 || day.dayNumber === numDays;
-    const restaurants = day.items.filter(i => i.type === 'restaurant' && !isHotelMeal(i));
+    const restaurants = day.items.filter(i => i.type === 'restaurant');
     if (isBoundary) {
       if (restaurants.length >= 1) mealPoints += 1;
     } else {
@@ -314,8 +318,8 @@ function scoreCompletude(
   for (const day of trip.days) {
     for (const item of day.items) {
       if (item.type === 'restaurant') {
-        const family = inferRestaurantCuisineFamily(item);
-        if (family && family !== 'generic') cuisineFamilies.add(family);
+        const family = getCuisineFamilyFromItem(item);
+        if (family !== 'generic') cuisineFamilies.add(family);
       }
     }
   }
@@ -421,7 +425,7 @@ function scoreRythme(
   for (const day of trip.days) {
     if (day.isDayTrip) continue; // Day-trip days have transport gaps — skip
     const sorted = [...day.items]
-      .filter(i => !isLogisticsItem(i) && !isHotelMeal(i))
+      .filter(i => (!isLogisticsItem(i) || i.type === 'checkin' || i.type === 'checkout') && !isHotelMeal(i))
       .sort((a, b) => a.startTime.localeCompare(b.startTime));
     for (let i = 1; i < sorted.length; i++) {
       const prev = sorted[i - 1];
@@ -488,7 +492,10 @@ function scoreGeo(
     };
   }
 
-  // 3a. Restaurant proximity — lunch/dinner < 500m from adjacent activity (8 pts)
+  // 3a. Restaurant proximity — lunch/dinner within profile thresholds (8 pts)
+  const cityProfile = resolveQualityCityProfile({ destination: trip.preferences?.destination });
+  const closeKm = cityProfile.restaurantCloseKm;
+  const partialKm = cityProfile.restaurantPartialKm;
   let closeRestaurants = 0;
   let totalLunchDinners = 0;
   for (const day of trip.days) {
@@ -500,22 +507,9 @@ function scoreGeo(
       if (mealType === 'breakfast') continue; // breakfast anchored to hotel
       totalLunchDinners++;
 
-      // Find nearest adjacent activity
-      let minDist = Infinity;
-      for (let j = i - 1; j >= 0; j--) {
-        if (sorted[j].type === 'activity' && sorted[j].latitude) {
-          minDist = Math.min(minDist, calculateDistance(item.latitude, item.longitude, sorted[j].latitude, sorted[j].longitude));
-          break;
-        }
-      }
-      for (let j = i + 1; j < sorted.length; j++) {
-        if (sorted[j].type === 'activity' && sorted[j].latitude) {
-          minDist = Math.min(minDist, calculateDistance(item.latitude, item.longitude, sorted[j].latitude, sorted[j].longitude));
-          break;
-        }
-      }
-      if (minDist <= 0.5) closeRestaurants++;
-      else if (minDist <= 1.0) closeRestaurants += 0.5;
+      const minDist = nearestNonRestaurantDistKm(item, sorted, i, trip.accommodation);
+      if (minDist <= closeKm) closeRestaurants++;
+      else if (minDist <= partialKm) closeRestaurants += 0.5;
       else {
         warnings.push(`Jour ${day.dayNumber}: ${item.title} est à ${(minDist * 1000).toFixed(0)}m de l'activité la plus proche`);
       }
@@ -1260,36 +1254,4 @@ function minutesToTime(totalMinutes: number): string {
   return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
 }
 
-function inferRestaurantCuisineFamily(item: TripItem): string | null {
-  if (item.type !== 'restaurant') return null;
-  const restaurant = item.restaurant;
-  const text = [
-    restaurant?.name || '',
-    ...(restaurant?.cuisineTypes || []),
-    restaurant?.description || '',
-    item.title || '',
-  ].join(' ').toLowerCase();
-
-  const families: Array<{ key: string; keywords: string[] }> = [
-    { key: 'french', keywords: ['français', 'french', 'brasserie', 'bistro'] },
-    { key: 'italian', keywords: ['italien', 'italian', 'trattoria', 'pizzeria', 'osteria', 'pasta', 'carbonara'] },
-    { key: 'japanese', keywords: ['japonais', 'japanese', 'sushi', 'ramen', 'izakaya'] },
-    { key: 'chinese', keywords: ['chinois', 'chinese', 'dim sum', 'szechuan'] },
-    { key: 'indian', keywords: ['indien', 'indian', 'curry', 'tandoori'] },
-    { key: 'thai', keywords: ['thai', 'thaï', 'thaïlandais'] },
-    { key: 'mexican', keywords: ['mexicain', 'mexican', 'taco', 'taqueria'] },
-    { key: 'middle-eastern', keywords: ['libanais', 'lebanese', 'mezze', 'shawarma'] },
-    { key: 'bakery-cafe', keywords: ['boulangerie', 'bakery', 'café', 'coffee', 'brunch', 'salon de thé'] },
-    { key: 'seafood', keywords: ['seafood', 'fruits de mer', 'poisson', 'fish'] },
-    { key: 'pizza', keywords: ['pizza', 'piz'] },
-    { key: 'chocolate', keywords: ['chocolat', 'chocolate', 'cocoa'] },
-  ];
-
-  for (const family of families) {
-    if (family.keywords.some(keyword => text.includes(keyword))) {
-      return family.key;
-    }
-  }
-
-  return 'generic';
-}
+// inferRestaurantCuisineFamily removed — now using getCuisineFamilyFromItem from utils/cuisine

@@ -16,6 +16,7 @@ import { calculateDistance } from '../services/geocoding';
 import { classifyOutdoorIndoor } from './utils/constants';
 import { isViatorGenericPrivateTourCandidate, scoreViatorPlusValue } from '../services/viator';
 import { isMonumentLikeActivityName } from '../services/officialTicketing';
+import { isGarbageActivity } from './utils/garbage-filter';
 
 const MAX_GENERIC_PRIVATE_VIATOR = 1;
 const DISTINCTIVE_VIATOR_EXPERIENCE_KEYWORDS = [
@@ -195,8 +196,17 @@ export function scoreAndSelectActivities(
     return true;
   });
 
+  // 2c. Filter garbage non-POI entries (e.g. "mètre" = unit of measurement from Overpass)
+  const gpsClean = gpsFiltered.filter(a => {
+    if (isGarbageActivity(a as any)) {
+      console.log(`[Pipeline V2] ❌ Non-POI filtered: "${a.name}" (garbage activity)`);
+      return false;
+    }
+    return true;
+  });
+
   // 3. Deduplicate by proximity (100m)
-  const gpsDeduped = deduplicateByProximity(gpsFiltered, 0.1);
+  const gpsDeduped = deduplicateByProximity(gpsClean, 0.1);
 
   // 3a. Deduplicate same GPS location + same activity type (e.g., two kayak tours at same beach)
   const locationTypeDeduped = deduplicateSameLocationSameType(gpsDeduped);

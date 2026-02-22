@@ -13,6 +13,7 @@ import type { ActivityCluster, MealAssignment, RestaurantAssignmentResult } from
 import { calculateDistance } from '../services/geocoding';
 import { mergeRestaurantSources } from './utils/dedup';
 import { getRestaurantMaxDistanceKmForProfile, resolveQualityCityProfile } from './qualityPolicy';
+import { getCuisineFamily, isLocalCuisine } from './utils/cuisine';
 
 type MealType = 'breakfast' | 'lunch' | 'dinner';
 
@@ -139,28 +140,6 @@ const DINNER_POSITIVE_SIGNALS = [
   'marocain', 'moroccan', 'peruvien', 'peruvian',
   'lombardie', 'lombard', 'toscane', 'toscan',
 ];
-
-const LOCAL_CUISINE_KEYWORDS: Record<string, string[]> = {
-  france: ['français', 'francais', 'french', 'bistro', 'brasserie', 'provençal', 'lyonnais', 'normand', 'breton', 'alsacien', 'savoyard', 'gascon', 'basque'],
-  italy: ['italien', 'italian', 'pizzeria', 'trattoria', 'osteria', 'ristorante'],
-  spain: ['espagnol', 'spanish', 'tapas', 'paella', 'catalan', 'andalou'],
-  germany: ['allemand', 'german', 'biergarten', 'brauhaus'],
-  japan: ['japonais', 'japanese', 'sushi', 'ramen', 'izakaya'],
-  greece: ['grec', 'greek', 'taverna'],
-  morocco: ['marocain', 'moroccan', 'tagine', 'couscous'],
-  usa: ['american', 'américain', 'diner', 'bbq', 'burger'],
-  uk: ['british', 'anglais', 'pub', 'fish and chips'],
-  portugal: ['portugais', 'portuguese'],
-  thailand: ['thaï', 'thai', 'thaïlandais'],
-  india: ['indien', 'indian', 'curry'],
-  china: ['chinois', 'chinese', 'dim sum', 'cantonais'],
-  lebanon: ['libanais', 'lebanese', 'mezze'],
-  mexico: ['mexicain', 'mexican', 'tacos', 'taqueria'],
-  vietnam: ['vietnamien', 'vietnamese', 'pho'],
-  korea: ['coréen', 'korean', 'bibimbap'],
-  turkey: ['turc', 'turkish', 'kebab'],
-  peru: ['péruvien', 'peruvian', 'ceviche'],
-};
 
 /**
  * Assign restaurants to meal slots across all days.
@@ -501,56 +480,9 @@ function detectDestinationCountry(destination: string): string {
  * instead of just a country code, so the diversity algorithm can distinguish
  * between e.g. a brasserie and a boulangerie (both "france").
  */
-export function getCuisineFamily(restaurant: Restaurant): string {
-  const text = `${restaurant.name || ''} ${(restaurant.cuisineTypes || []).join(' ')}`.toLowerCase();
-
-  // Check fine-grained categories first (more specific = earlier match)
-  const FINE_CUISINE_MAP: Record<string, string[]> = {
-    'japanese': ['sushi', 'ramen', 'izakaya', 'japonais', 'japanese', 'yakitori', 'tempura', 'udon', 'sashimi', 'maki'],
-    'italian': ['italien', 'italian', 'pizza', 'pizzeria', 'trattoria', 'osteria', 'ristorante', 'pasta', 'risotto'],
-    'chinese': ['chinois', 'chinese', 'dim sum', 'cantonais', 'szechuan', 'wok'],
-    'indian': ['indien', 'indian', 'curry', 'tandoori', 'naan', 'masala'],
-    'thai': ['thaï', 'thai', 'thaïlandais', 'pad thai'],
-    'vietnamese': ['vietnamien', 'vietnamese', 'pho', 'banh mi', 'bo bun'],
-    'korean': ['coréen', 'korean', 'bibimbap', 'kimchi'],
-    'mexican': ['mexicain', 'mexican', 'tacos', 'taqueria', 'burrito', 'guacamole'],
-    'lebanese': ['libanais', 'lebanese', 'mezze', 'falafel', 'shawarma'],
-    'moroccan': ['marocain', 'moroccan', 'tagine', 'couscous'],
-    'greek': ['grec', 'greek', 'taverna', 'gyros', 'souvlaki'],
-    'turkish': ['turc', 'turkish', 'kebab', 'döner'],
-    'spanish': ['espagnol', 'spanish', 'tapas', 'paella'],
-    'peruvian': ['péruvien', 'peruvian', 'ceviche'],
-    'american': ['american', 'américain', 'burger', 'diner', 'bbq', 'barbecue'],
-    'brasserie': ['brasserie'],
-    'bistro': ['bistro', 'bistrot'],
-    'french-gastro': ['gastronomique', 'étoilé', 'michelin', 'gastro'],
-    'bakery': ['boulangerie', 'bakery', 'pain', 'bread'],
-    'patisserie': ['pâtisserie', 'patisserie'],
-    'seafood': ['fruits de mer', 'seafood', 'poisson', 'fish', 'crustacé', 'huître', 'oyster'],
-    'steakhouse': ['steakhouse', 'steak', 'grill', 'viande', 'boucherie'],
-    'french': ['français', 'francais', 'french', 'provençal', 'lyonnais', 'normand', 'breton', 'alsacien', 'savoyard'],
-  };
-
-  for (const [family, keywords] of Object.entries(FINE_CUISINE_MAP)) {
-    for (const kw of keywords) {
-      if (text.includes(kw)) return family;
-    }
-  }
-
-  // Fallback to country-level detection
-  for (const [country, keywords] of Object.entries(LOCAL_CUISINE_KEYWORDS)) {
-    for (const kw of keywords) {
-      if (text.includes(kw)) return country;
-    }
-  }
-  return 'generic';
-}
-
-function isLocalCuisine(restaurant: Restaurant, country: string): boolean {
-  const keywords = LOCAL_CUISINE_KEYWORDS[country] || [];
-  const text = `${restaurant.name || ''} ${(restaurant.cuisineTypes || []).join(' ')}`.toLowerCase();
-  return keywords.some(kw => text.includes(kw));
-}
+// getCuisineFamily and isLocalCuisine are imported from ./utils/cuisine
+// Re-export them for backward compatibility (step7, index.ts import from here)
+export { getCuisineFamily, isLocalCuisine };
 
 /**
  * Score candidates with strong distance penalties.

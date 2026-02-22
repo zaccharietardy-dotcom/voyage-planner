@@ -32,6 +32,13 @@ import {
   getTransitLegsDurationMinutes,
 } from './utils/longhaulConsistency';
 import type { Attraction } from '../services/attractions';
+import { isGarbageActivity } from './utils/garbage-filter';
+import {
+  type AnchorPoint,
+  hasValidCoords,
+  restaurantAnchorPoints as restaurantAnchorPointsFromSorted,
+  minDistanceToAnchorsKm,
+} from './utils/restaurant-proximity';
 // ---------------------------------------------------------------------------
 // Directions cache — used to store pre-fetched real travel times
 // ---------------------------------------------------------------------------
@@ -6070,8 +6077,7 @@ function isGapFillCandidateEligible(activity: ScoredActivity): boolean {
   if (actName.length > 0 && actName.length < 4 && !activity.mustSee) return false;
 
   // Reject single common words that are clearly not places
-  const NON_POI_NAME_PATTERN = /^(m[eè]tre|kilogram|second|litre|watt|volt|amp[eè]re|newton|pascal|joule|hertz|kelvin|mole|candela|euro|dollar|franc|pound|yen|bitcoin)$/i;
-  if (NON_POI_NAME_PATTERN.test(actName) && !activity.mustSee) return false;
+  if (isGarbageActivity(activity)) return false;
 
   if (!passesGapFillReliabilityGate(activity)) return false;
   if (activity.mustSee) return true;
@@ -6162,8 +6168,7 @@ function isGapFillCandidateEligibleRelaxed(activity: ScoredActivity): boolean {
   const actName = (activity.name || '').trim();
   if (actName.length > 0 && actName.length < 4 && !activity.mustSee) return false;
 
-  const NON_POI_NAME_PATTERN = /^(m[eè]tre|kilogram|second|litre|watt|volt|amp[eè]re|newton|pascal|joule|hertz|kelvin|mole|candela|euro|dollar|franc|pound|yen|bitcoin)$/i;
-  if (NON_POI_NAME_PATTERN.test(actName) && !activity.mustSee) return false;
+  if (isGarbageActivity(activity)) return false;
 
   if (activity.businessStatus === 'CLOSED_PERMANENTLY') return false;
   if (activity.dataReliability === 'generated') return false;
@@ -6456,73 +6461,8 @@ function getRestaurantMealType(item: TripItem): 'breakfast' | 'lunch' | 'dinner'
   return 'dinner';
 }
 
-type AnchorPoint = { latitude: number; longitude: number };
-
-function hasValidCoords(point?: { latitude?: number; longitude?: number }): point is AnchorPoint {
-  if (!point) return false;
-  if (typeof point.latitude !== 'number' || typeof point.longitude !== 'number') return false;
-  return point.latitude !== 0 && point.longitude !== 0;
-}
-
-function restaurantAnchorPoints(
-  day: TripDay,
-  restaurantIndex: number,
-  mealType: 'breakfast' | 'lunch' | 'dinner',
-  defaultHotelAnchor?: AnchorPoint
-): AnchorPoint[] {
-  const points: AnchorPoint[] = [];
-  const sorted = sortItemsByTime(day.items);
-  const hotelAnchorItem = sorted.find((item) => (item.type === 'checkin' || item.type === 'checkout') && hasValidCoords(item));
-  const hotelAnchor = hotelAnchorItem && hasValidCoords(hotelAnchorItem)
-    ? { latitude: hotelAnchorItem.latitude, longitude: hotelAnchorItem.longitude }
-    : defaultHotelAnchor;
-  const firstActivity = sorted.find((item) => item.type === 'activity' && hasValidCoords(item));
-
-  if (mealType === 'breakfast') {
-    // Breakfast anchored on hotel ONLY — the breakfast spot must be near where you wake up.
-    // The previous dual-anchor (hotel + first activity) could pick a breakfast far from the hotel
-    // if the first activity was in a different area (e.g. hotel Montparnasse, breakfast Montmartre).
-    if (hotelAnchor) points.push({ latitude: hotelAnchor.latitude, longitude: hotelAnchor.longitude });
-    // Fallback: if no hotel anchor, use first activity (better than nothing)
-    if (points.length === 0 && firstActivity && hasValidCoords(firstActivity)) {
-      points.push({ latitude: firstActivity.latitude, longitude: firstActivity.longitude });
-    }
-    return points;
-  }
-
-  for (let i = restaurantIndex - 1; i >= 0; i--) {
-    const candidate = sorted[i];
-    if (candidate.type === 'activity' && hasValidCoords(candidate)) {
-      points.push({ latitude: candidate.latitude, longitude: candidate.longitude });
-      break;
-    }
-  }
-  for (let i = restaurantIndex + 1; i < sorted.length; i++) {
-    const candidate = sorted[i];
-    // Include checkin/checkout as valid forward anchors (hotel counts for end-of-day dinners)
-    if ((candidate.type === 'activity' || candidate.type === 'checkin' || candidate.type === 'checkout') && hasValidCoords(candidate)) {
-      points.push({ latitude: candidate.latitude, longitude: candidate.longitude });
-      break;
-    }
-  }
-
-  if (points.length === 0) {
-    if (hotelAnchor) points.push({ latitude: hotelAnchor.latitude, longitude: hotelAnchor.longitude });
-    if (firstActivity && hasValidCoords(firstActivity)) points.push({ latitude: firstActivity.latitude, longitude: firstActivity.longitude });
-  }
-
-  return points;
-}
-
-function minDistanceToAnchorsKm(restaurant: TripItem, anchors: AnchorPoint[]): number {
-  if (!hasValidCoords(restaurant) || anchors.length === 0) return Infinity;
-  let minDistance = Infinity;
-  for (const anchor of anchors) {
-    const dist = calculateDistance(restaurant.latitude, restaurant.longitude, anchor.latitude, anchor.longitude);
-    if (dist < minDistance) minDistance = dist;
-  }
-  return minDistance;
-}
+// AnchorPoint, hasValidCoords, restaurantAnchorPoints, minDistanceToAnchorsKm
+// are now imported from ./utils/restaurant-proximity
 
 function applyRestaurantCandidateToItem(
   item: TripItem,
@@ -6580,6 +6520,42 @@ function rankRestaurantCandidate(
 
 type RestaurantFixStats = { replaced: number; flaggedFallback: number };
 
+/**
+ * Extract normalized cuisine types from a restaurant.
+ * Used for cuisine diversity tracking in restaurant selection.
+ */
+function extractCuisineTypes(restaurant: Restaurant | undefined): Set<string> {
+  const cuisines = new Set<string>();
+  if (!restaurant?.cuisineTypes) return cuisines;
+  for (const ct of restaurant.cuisineTypes) {
+    cuisines.add(ct.toLowerCase().trim());
+  }
+  return cuisines;
+}
+
+/**
+ * Check if a restaurant has any cuisine that's NOT in the existing cuisines set.
+ * Returns true if the restaurant introduces at least one new cuisine family.
+ */
+function hasNewCuisineFamily(restaurant: Restaurant | undefined, existingCuisines: Set<string>): boolean {
+  if (!restaurant?.cuisineTypes || restaurant.cuisineTypes.length === 0) return false;
+  for (const ct of restaurant.cuisineTypes) {
+    const normalized = ct.toLowerCase().trim();
+    if (!existingCuisines.has(normalized)) return true;
+  }
+  return false;
+}
+
+/**
+ * Add all cuisines from a restaurant to the existing cuisines set (mutates the set).
+ */
+function addCuisinesToSet(restaurant: Restaurant | undefined, cuisinesSet: Set<string>): void {
+  if (!restaurant?.cuisineTypes) return;
+  for (const ct of restaurant.cuisineTypes) {
+    cuisinesSet.add(ct.toLowerCase().trim());
+  }
+}
+
 export async function fixRestaurantOutliers(
   days: TripDay[],
   altPool: Restaurant[],
@@ -6601,6 +6577,17 @@ export async function fixRestaurantOutliers(
   let apiCalls = 0;
   const MAX_API_CALLS = 8;
 
+  // Collect existing cuisine types across all trip days for diversity tracking
+  const existingCuisines = new Set<string>();
+  for (const day of days) {
+    for (const item of day.items) {
+      if (item.type === 'restaurant' && item.restaurant) {
+        const cuisines = extractCuisineTypes(item.restaurant);
+        cuisines.forEach(c => existingCuisines.add(c));
+      }
+    }
+  }
+
   for (const day of days) {
     const sorted = sortItemsByTime(day.items);
     const usedNames = new Set<string>();
@@ -6613,7 +6600,7 @@ export async function fixRestaurantOutliers(
 
       const mealType = getRestaurantMealType(item);
       const maxDistanceKm = mealType === 'breakfast' ? breakfastMaxKm : mealMaxKm;
-      const anchors = restaurantAnchorPoints(day, idx, mealType, defaultHotelAnchor);
+      const anchors = restaurantAnchorPointsFromSorted(sorted, idx, mealType, defaultHotelAnchor);
       const currentName = normalizeRestaurantName(item.restaurant?.name || item.locationName || stripMealPrefix(item.title));
       const duplicateInDay = currentName.length > 0 && usedNames.has(currentName);
       const currentDistanceKm = minDistanceToAnchorsKm(item, anchors);
@@ -6644,11 +6631,27 @@ export async function fixRestaurantOutliers(
           maxDistanceKm
         );
         if (!ranked) continue;
-        if (!best
-          || ranked.distance < best.distance
-          || (Math.abs(ranked.distance - best.distance) < 0.1 && (ranked.restaurant.rating || 0) > (best.restaurant.rating || 0))
-        ) {
+
+        // Check if this candidate introduces a new cuisine family (diversity bonus)
+        const candidateHasNewCuisine = hasNewCuisineFamily(ranked.restaurant, existingCuisines);
+
+        if (!best) {
           best = { ...ranked, source: 'pool' };
+        } else {
+          const bestRestaurantHasNewCuisine = hasNewCuisineFamily(best.restaurant, existingCuisines);
+          const distanceSimilar = Math.abs(ranked.distance - best.distance) < 0.2; // within 200m
+
+          // Prefer candidate if:
+          // 1. It's closer by more than 200m, OR
+          // 2. Similar distance and has new cuisine (diversity bonus), OR
+          // 3. Similar distance, same cuisine novelty, but better rating
+          if (ranked.distance < best.distance - 0.2) {
+            best = { ...ranked, source: 'pool' };
+          } else if (distanceSimilar && candidateHasNewCuisine && !bestRestaurantHasNewCuisine) {
+            best = { ...ranked, source: 'pool' };
+          } else if (distanceSimilar && candidateHasNewCuisine === bestRestaurantHasNewCuisine && (ranked.restaurant.rating || 0) > (best.restaurant.rating || 0)) {
+            best = { ...ranked, source: 'pool' };
+          }
         }
       }
 
@@ -6671,11 +6674,24 @@ export async function fixRestaurantOutliers(
               maxDistanceKm
             );
             if (!ranked) continue;
-            if (!best
-              || ranked.distance < best.distance
-              || (Math.abs(ranked.distance - best.distance) < 0.1 && (ranked.restaurant.rating || 0) > (best.restaurant.rating || 0))
-            ) {
+
+            // Check if this candidate introduces a new cuisine family (diversity bonus)
+            const candidateHasNewCuisine = hasNewCuisineFamily(ranked.restaurant, existingCuisines);
+
+            if (!best) {
               best = { ...ranked, source: 'api' };
+            } else {
+              const bestRestaurantHasNewCuisine = hasNewCuisineFamily(best.restaurant, existingCuisines);
+              const distanceSimilar = Math.abs(ranked.distance - best.distance) < 0.2; // within 200m
+
+              // Same logic as pool selection: prefer closer, then diversity, then rating
+              if (ranked.distance < best.distance - 0.2) {
+                best = { ...ranked, source: 'api' };
+              } else if (distanceSimilar && candidateHasNewCuisine && !bestRestaurantHasNewCuisine) {
+                best = { ...ranked, source: 'api' };
+              } else if (distanceSimilar && candidateHasNewCuisine === bestRestaurantHasNewCuisine && (ranked.restaurant.rating || 0) > (best.restaurant.rating || 0)) {
+                best = { ...ranked, source: 'api' };
+              }
             }
           }
           if (apiCandidates.length > 0) {
@@ -6689,6 +6705,8 @@ export async function fixRestaurantOutliers(
       if (best) {
         applyRestaurantCandidateToItem(item, best.restaurant, best.source, destination);
         usedNames.add(normalizeRestaurantName(best.restaurant.name || item.locationName || ''));
+        // Track newly added cuisines for ongoing diversity scoring
+        addCuisinesToSet(best.restaurant, existingCuisines);
         stats.replaced++;
         continue;
       }
