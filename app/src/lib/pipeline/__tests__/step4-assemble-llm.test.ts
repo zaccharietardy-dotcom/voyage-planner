@@ -44,13 +44,9 @@ function buildTransport(): TransportOptionSummary {
         mode: 'train',
         from: 'Lyon',
         to: 'Paris',
-        fromCoords: { lat: 45.7603, lng: 4.8282 },
-        toCoords: { lat: 48.8566, lng: 2.3522 },
         duration: 132,
         price: 60,
-        co2: 45,
         operator: 'SNCF',
-        frequency: 'Plusieurs par jour',
       },
     ],
     transitLegs: [
@@ -101,6 +97,7 @@ describe('step4-assemble-llm', () => {
         },
       ],
       unusedActivities: [],
+      reasoning: 'Test plan',
     };
 
     const input: LLMPlannerInput = {

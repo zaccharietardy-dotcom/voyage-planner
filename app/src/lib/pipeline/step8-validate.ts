@@ -418,12 +418,13 @@ function scoreRythme(
   details.push(`Équilibre journées: ${balanceScore}/5`);
 
   // 2d. No massive dead time during the day (5 pts)
-  // Gaps > 2h between activities during active hours are dead time
-  // But gap between last activity and dinner (17:00-19:30) is FREE TIME — totally fine
-  // Skip gap penalty on day-trip days (transport takes time, gaps are normal)
+  // Gaps between activities during active hours penalized on a sliding scale.
+  // Reasonable gap ≤ 90min (walking, rest, coffee) — no penalty.
+  // 90-120min = mild penalty, 120-180min = medium, >180min = severe.
+  // Skip gap penalty on day-trip days (transport takes time, gaps are normal).
   let gapPenaltyPts = 0;
   for (const day of trip.days) {
-    if (day.isDayTrip) continue; // Day-trip days have transport gaps — skip
+    if (day.isDayTrip) continue;
     const sorted = [...day.items]
       .filter(i => (!isLogisticsItem(i) || i.type === 'checkin' || i.type === 'checkout') && !isHotelMeal(i))
       .sort((a, b) => a.startTime.localeCompare(b.startTime));
@@ -434,18 +435,39 @@ function scoreRythme(
       const currStart = timeToMinutes(curr.startTime);
       const gap = currStart - prevEnd;
 
-      // Skip gaps that are intentional (before dinner, after checkout, etc.)
-      if (isIntentionalGapAnchor(prev) || isIntentionalGapAnchor(curr)) continue;
+      // Gaps ≤ 90min are totally normal (walking, metro, coffee break)
+      if (gap <= 90) continue;
 
-      // Gap before dinner (after 17:00) is free time — not a problem
-      const isDinnerGap = currStart >= 1110 && prevEnd >= 1020; // after 17h → dinner
-      if (isDinnerGap) continue;
+      // Gap just before dinner (prev ends after 17:30 AND curr is dinner) is free time
+      const isDinnerGap = curr.type === 'restaurant'
+        && (curr.mealType === 'dinner' || currStart >= 1140) // dinner or starts after 19:00
+        && prevEnd >= 1050; // prev ends after 17:30
+      if (isDinnerGap && gap <= 150) continue; // max 2.5h free time before dinner
 
+      // Gap before longhaul departure on last day: allow up to 2h buffer
+      const isLastDayDeparture = day.dayNumber === trip.days.length
+        && curr.type === 'transport'
+        && (curr.transportRole === 'longhaul' || curr.transportRole === 'hotel_depart');
+      if (isLastDayDeparture && gap <= 120) continue;
+
+      // Flights always have buffer time — allow generous gap
+      if (curr.type === 'flight' || prev.type === 'flight') continue;
+
+      // Arrival day: gap after checkin is ok if ≤ 90min (already handled above)
+      // But larger gaps after checkin still get penalized proportionally.
+      // Free_time items always exempt their side of the gap
+      if (prev.type === 'free_time' || curr.type === 'free_time') continue;
+
+      // Sliding scale penalty
       if (gap > 180) {
         gapPenaltyPts += 2;
         warnings.push(`Jour ${day.dayNumber}: trou de ${gap}min entre ${prev.title} et ${curr.title}`);
-      } else if (gap > 150) {
+      } else if (gap >= 120) {
         gapPenaltyPts += 1;
+        warnings.push(`Jour ${day.dayNumber}: trou de ${gap}min entre ${prev.title} et ${curr.title}`);
+      } else {
+        // 90-119min: half penalty
+        gapPenaltyPts += 0.5;
       }
     }
   }
@@ -1064,13 +1086,11 @@ function isHotelMeal(item: TripItem): boolean {
 }
 
 function isIntentionalGapAnchor(item: TripItem): boolean {
-  if (item.type === 'free_time' || item.type === 'checkin' || item.type === 'checkout') return true;
-  if (item.type === 'flight') return true;
-  if (item.type === 'transport' && (
-    item.transportRole === 'longhaul' ||
-    item.transportRole === 'hotel_depart' ||
-    item.transportRole === 'hotel_return'
-  )) return true;
+  // free_time items are always intentional (user chose to rest)
+  if (item.type === 'free_time') return true;
+  // Note: checkin/checkout are NOT intentional anchors — gaps after them
+  // should still be penalized if they're too long (the main gap loop handles
+  // reasonable post-checkin gaps via the ≤90min threshold).
   return false;
 }
 

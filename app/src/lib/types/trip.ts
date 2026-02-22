@@ -349,7 +349,7 @@ export interface TripItem {
   parking?: ParkingOption;
   restaurant?: Restaurant;
   restaurantAlternatives?: Restaurant[]; // Top 2-3 restaurants alternatifs classés par qualité/distance
-  selectionSource?: 'pool' | 'api' | 'fallback'; // Source de sélection du restaurant (post-optimisation)
+  selectionSource?: 'pool' | 'api' | 'fallback' | 'gap_fill'; // Source de sélection du restaurant/activité (post-optimisation)
   mealType?: 'breakfast' | 'lunch' | 'dinner'; // Canonical meal slot (title is derived for display)
   accommodation?: Accommodation;
   localTransport?: LocalTransport;

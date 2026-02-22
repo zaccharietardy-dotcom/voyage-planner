@@ -1058,6 +1058,145 @@ export async function assembleFromLLMPlan(
     normalizeMealSemantics(day);
   }
 
+  // 4d. Gap-fill pass: detect gaps > 90min and insert unused nearby activities
+  // Build set of already-scheduled activity names (TripItem has no activityId field)
+  const scheduledNames = new Set<string>();
+  for (const day of tripDays) {
+    for (const item of day.items) {
+      if (item.type === 'activity' && item.locationName) scheduledNames.add(item.locationName.toLowerCase());
+      if (item.restaurant?.id) scheduledNames.add(item.restaurant.id);
+    }
+  }
+
+  // Build FULL activity pool from ALL data sources (not just LLM-selected subset)
+  // The activityMap only contains activities the LLM chose — very few are unused.
+  // We need the complete pool from step1 fetch data for gap-filling.
+  const allFetchedActivities: ScoredActivity[] = [
+    ...(data.googlePlacesAttractions || []).map((a) => ({ ...a, score: (a.rating || 0) * 10 + Math.min(a.reviewCount || 0, 100) / 10, source: 'google_places' as const, reviewCount: a.reviewCount || 0 })),
+    ...(data.serpApiAttractions || []).map((a) => ({ ...a, score: (a.rating || 0) * 10 + Math.min(a.reviewCount || 0, 100) / 10, source: 'serpapi' as const, reviewCount: a.reviewCount || 0 })),
+    ...(data.overpassAttractions || []).map((a) => ({ ...a, score: (a.rating || 0) * 8, source: 'overpass' as const, reviewCount: a.reviewCount || 0 })),
+    ...(data.viatorActivities || []).map((a) => ({ ...a, score: (a.rating || 0) * 10 + Math.min(a.reviewCount || 0, 100) / 10, source: 'viator' as const, reviewCount: a.reviewCount || 0 })),
+    ...(data.mustSeeAttractions || []).map((a) => ({ ...a, score: 80, source: 'mustsee' as const, reviewCount: a.reviewCount || 0 })),
+  ];
+
+  // Deduplicate by name (case-insensitive), keep highest-scored version
+  const deduped = new Map<string, ScoredActivity>();
+  for (const act of allFetchedActivities) {
+    const key = (act.name || '').toLowerCase();
+    if (!key) continue;
+    const existing = deduped.get(key);
+    if (!existing || act.score > existing.score) {
+      deduped.set(key, act);
+    }
+  }
+
+  const unusedActivities = [...deduped.values()]
+    .filter(a =>
+      !scheduledNames.has((a.name || '').toLowerCase()) &&
+      a.latitude && a.longitude &&
+      a.latitude !== 0 && a.longitude !== 0 &&
+      !isGarbageActivity(a) &&
+      (a.rating || 0) >= 3.0 // minimum 3-star rating
+    )
+    .sort((a, b) => b.score - a.score);
+
+  console.log(`[Pipeline V2 LLM] Gap-fill pool: ${unusedActivities.length} unused activities (from ${allFetchedActivities.length} total fetched, ${scheduledNames.size} scheduled)`);
+
+  {
+    let totalInserted = 0;
+    for (const day of tripDays) {
+      if (day.isDayTrip) continue;
+      const sorted = [...day.items].sort((a, b) => parseHHMM(a.startTime) - parseHHMM(b.startTime));
+      let insertedThisDay = 0;
+
+      // Log gaps for debugging
+      for (let i = 1; i < sorted.length; i++) {
+        const prevEnd = parseHHMM(sorted[i - 1].endTime);
+        const currStart = parseHHMM(sorted[i].startTime);
+        const gap = currStart - prevEnd;
+        if (gap >= 90) {
+          console.log(`[Pipeline V2 LLM] Gap-fill: Day ${day.dayNumber} gap ${gap}min between "${sorted[i - 1].title}" (end ${sorted[i - 1].endTime}) and "${sorted[i].title}" (start ${sorted[i].startTime})`);
+        }
+      }
+
+      for (let i = 1; i < sorted.length && insertedThisDay < 3; i++) {
+        const prevEnd = parseHHMM(sorted[i - 1].endTime);
+        const currStart = parseHHMM(sorted[i].startTime);
+        const gap = currStart - prevEnd;
+        if (gap < 90) continue;
+        // Don't fill gaps before dinner if gap is < 150min (normal free time)
+        if (sorted[i].type === 'restaurant' && gap < 150 && currStart >= 1080) continue;
+
+        // Find anchor point for proximity: midpoint between gap neighbors
+        const prev = sorted[i - 1];
+        const curr = sorted[i];
+        let anchorLat: number, anchorLng: number;
+        if (prev.latitude && prev.longitude && curr.latitude && curr.longitude) {
+          anchorLat = (prev.latitude + curr.latitude) / 2;
+          anchorLng = (prev.longitude + curr.longitude) / 2;
+        } else {
+          // Fallback to day centroid
+          const dayActivities = sorted.filter(it => it.latitude && it.longitude && it.type !== 'restaurant');
+          if (dayActivities.length === 0) continue;
+          anchorLat = dayActivities.reduce((s, it) => s + it.latitude, 0) / dayActivities.length;
+          anchorLng = dayActivities.reduce((s, it) => s + it.longitude, 0) / dayActivities.length;
+        }
+
+        // Find best unused activity near the gap
+        let bestCandidate: ScoredActivity | null = null;
+        let bestScore = -Infinity;
+        for (const act of unusedActivities) {
+          if (scheduledNames.has((act.name || '').toLowerCase())) continue;
+          const dist = calculateDistance(anchorLat, anchorLng, act.latitude, act.longitude);
+          if (dist > 5.0) continue; // max 5km from gap anchor
+          const actDur = Math.min(act.duration || 60, gap - 30); // leave 30min buffer
+          if (actDur < 30) continue;
+          const compositeScore = act.score - dist * 5; // penalize distance but less aggressively
+          if (compositeScore > bestScore) {
+            bestScore = compositeScore;
+            bestCandidate = act;
+          }
+        }
+
+        if (bestCandidate) {
+          const actDur = Math.min(bestCandidate.duration || 60, gap - 30);
+          const startMin = prevEnd + 15; // 15min travel buffer
+          const endMin = startMin + actDur;
+          const newItem: TripItem = {
+            id: uuidv4(),
+            type: 'activity',
+            title: bestCandidate.name || 'Activité',
+            locationName: bestCandidate.name || '',
+            latitude: bestCandidate.latitude,
+            longitude: bestCandidate.longitude,
+            startTime: minutesToHHMM(startMin),
+            endTime: minutesToHHMM(endMin),
+            duration: actDur,
+            description: bestCandidate.description || '',
+            orderIndex: 0,
+            dayNumber: day.dayNumber,
+            estimatedCost: estimateActivityCost(bestCandidate.name || '', bestCandidate.type || ''),
+            rating: bestCandidate.rating,
+            selectionSource: 'gap_fill',
+            qualityFlags: ['gap_fill_activity'],
+          };
+          day.items.push(newItem);
+          scheduledNames.add((bestCandidate.name || '').toLowerCase());
+          insertedThisDay++;
+          totalInserted++;
+          console.log(`[Pipeline V2 LLM] Gap-fill: Day ${day.dayNumber} inserted "${bestCandidate.name}" (${gap}min gap, rating ${bestCandidate.rating}, score ${bestCandidate.score.toFixed(1)})`);
+        } else {
+          console.log(`[Pipeline V2 LLM] Gap-fill: Day ${day.dayNumber} no candidate for ${gap}min gap between "${prev.title}" and "${curr.title}"`);
+        }
+      }
+    }
+    if (totalInserted > 0) {
+      console.log(`[Pipeline V2 LLM] Gap-fill: inserted ${totalInserted} activities total`);
+    } else {
+      console.log(`[Pipeline V2 LLM] Gap-fill: no activities inserted (pool size: ${unusedActivities.length})`);
+    }
+  }
+
   // 5. Sort items by time within each day and compute distances
   for (const day of tripDays) {
     day.items.sort((a, b) => parseHHMM(a.startTime) - parseHHMM(b.startTime));
