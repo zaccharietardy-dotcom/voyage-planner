@@ -32,6 +32,7 @@ import { getMinDuration, getMaxDuration, estimateActivityCost } from './utils/co
 import { generateFlightLink, generateFlightOmioLink, formatDateForUrl } from '../services/linkGenerator';
 import { sanitizeApiKeyLeaksInString, sanitizeGoogleMapsUrl } from '../services/googlePlacePhoto';
 import { isGarbageActivity } from './utils/garbage-filter';
+import { geoReorderDayItems } from './utils/geo-reorder';
 import { resolveOfficialTicketing } from '../services/officialTicketing';
 import { getAirportPreDepartureLeadMinutes } from './step7-assemble';
 import { scheduleDayItems, buildDayWindow, buildMealSlots, buildCandidates } from './scheduler';
@@ -1039,6 +1040,16 @@ export async function assembleFromLLMPlan(
 
   // 4b. Filter items too far from destination center on non-day-trip days
   filterDistantItems(tripDays, data.destCoords);
+
+  // 4b2. Geographic reordering: apply 2-opt to minimize walking distance
+  // The LLM orders activities by theme/narrative, not geography.
+  // This pass reorders activities within each day using nearest-neighbor + 2-opt
+  // to minimize total travel distance while keeping anchors (transport, checkin, checkout) fixed.
+  if (hotel) {
+    for (const day of tripDays) {
+      day.items = geoReorderDayItems(day.items, hotel.latitude, hotel.longitude);
+    }
+  }
 
   // 4c. Schedule each day using the single-pass scheduler
   // This replaces: ensureBreakfastExists, resolveScheduleConflicts, ensureLunchBreak,
