@@ -61,7 +61,7 @@ export function Features() {
           <p className="mb-3 text-xs uppercase tracking-[0.22em] text-[#b8923d]">
             {t('features.badge')}
           </p>
-          <h2 className="font-display mb-4 text-4xl font-semibold md:text-5xl">
+          <h2 className="font-display mb-4 text-3xl font-semibold md:text-4xl">
             {t('features.title')}
           </h2>
           <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
@@ -78,7 +78,7 @@ export function Features() {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
             >
-              <Card className="premium-surface premium-ring h-full border-0 p-0 transition-all hover:-translate-y-1 hover:shadow-2xl">
+              <Card className="premium-surface premium-ring h-full border-0 p-0 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_20px_40px_rgba(10,22,40,0.15)] hover:border-[#d4a853]/20">
                 <CardContent className="p-6">
                   <div className="mb-5 flex items-center justify-between">
                     <div className={`flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${feature.color}`}>

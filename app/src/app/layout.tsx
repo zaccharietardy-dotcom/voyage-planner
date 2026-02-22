@@ -10,6 +10,7 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { SITE_NAME, SITE_URL, SITE_DESCRIPTION, OG_IMAGE_DEFAULT, LOCALE } from "@/lib/seo";
 import { AnalyticsProvider } from "@/components/AnalyticsProvider";
 import { I18nProvider } from "@/lib/i18n";
+import { PageTransition } from "@/components/layout/PageTransition";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -236,7 +237,7 @@ export default function RootLayout({
               <AnalyticsProvider>
                 <Header />
                 <main className="pt-16">
-                  {children}
+                  <PageTransition>{children}</PageTransition>
                 </main>
                 <Toaster
                   position="bottom-right"

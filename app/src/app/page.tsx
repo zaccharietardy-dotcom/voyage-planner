@@ -278,10 +278,10 @@ const MORE_PRESETS: PresetTrip[] = [
 ];
 
 const BUDGET_COLORS: Record<string, string> = {
-  economic: 'bg-green-100 text-green-700',
-  moderate: 'bg-blue-100 text-blue-700',
-  comfort: 'bg-sky-100 text-sky-700',
-  luxury: 'bg-amber-100 text-amber-700',
+  economic: 'bg-green-50 text-green-800',
+  moderate: 'bg-blue-50 text-blue-800',
+  comfort: 'bg-sky-50 text-sky-800',
+  luxury: 'bg-amber-50 text-amber-800',
 };
 
 function PresetTripCard({

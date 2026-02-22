@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useCallback, useRef, useState, useEffect } from 'react';
+import { useMemo, useCallback, useRef, useState, useEffect, memo } from 'react';
 import { TripDay, TripItem } from '@/lib/types';
 import { CalendarActivityBlock } from './CalendarActivityBlock';
 import { format, isSameDay } from 'date-fns';
@@ -138,7 +138,7 @@ function CurrentTimeIndicator({ slotHeight, dayDate }: { slotHeight: number; day
 
 // ── Main component ───────────────────────────────────────────────────
 
-export function CalendarDayColumn({
+export const CalendarDayColumn = memo(function CalendarDayColumn({
   day,
   slotHeight,
   isEditable,
@@ -383,7 +383,16 @@ export function CalendarDayColumn({
       </div>
     </div>
   );
-}
+}, (prev, next) => {
+  return (
+    prev.day.dayNumber === next.day.dayNumber &&
+    prev.day.items === next.day.items &&
+    prev.slotHeight === next.slotHeight &&
+    prev.isEditable === next.isEditable &&
+    prev.showHeader === next.showHeader &&
+    prev.dayColumnWidth === next.dayColumnWidth
+  );
+});
 
 // Time gutter component (shared, rendered once on the left)
 export function TimeGutter({ slotHeight }: { slotHeight: number }) {

@@ -106,11 +106,23 @@ export async function GET() {
       .in('owner_id', followingIds)
       .in('visibility', ['public', 'friends']);
 
-    if (!followedTrips?.length) {
+    // Also fetch user's own trips
+    const { data: ownTrips } = await sc
+      .from('trips')
+      .select('id, title, destination, start_date, duration_days, data, preferences, owner_id, visibility')
+      .eq('owner_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(20);
+
+    const allTrips = [...(followedTrips || []), ...(ownTrips || [])];
+
+    if (!allTrips.length) {
       return NextResponse.json({ trips: [] });
     }
 
-    const visibleTrips = (followedTrips as GlobeTripRow[]).filter((trip) => {
+    const visibleTrips = (allTrips as GlobeTripRow[]).filter((trip) => {
+      // Always show user's own trips
+      if (trip.owner_id === user.id) return true;
       if (trip.visibility === 'public') return true;
       if (trip.visibility === 'friends') return closeFriendIds.has(trip.owner_id);
       return false;

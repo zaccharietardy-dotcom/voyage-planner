@@ -270,6 +270,7 @@ export function CalendarView({
               className="h-7 w-7"
               onClick={handlePrevDay}
               disabled={selectedDay === 0}
+              aria-label="Jour précédent"
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
@@ -287,6 +288,7 @@ export function CalendarView({
               className="h-7 w-7"
               onClick={handleNextDay}
               disabled={selectedDay === days.length - 1}
+              aria-label="Jour suivant"
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
@@ -305,7 +307,7 @@ export function CalendarView({
                 key={day.dayNumber}
                 variant={idx === selectedDay ? 'default' : 'outline'}
                 className={cn(
-                  'cursor-pointer text-xs flex-shrink-0 transition-all',
+                  'cursor-pointer text-xs flex-shrink-0 transition-all h-9 px-4',
                   idx === selectedDay && 'ring-2 ring-primary/30 scale-105',
                 )}
                 style={{ scrollSnapAlign: 'center' }}

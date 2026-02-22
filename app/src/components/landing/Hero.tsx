@@ -45,6 +45,7 @@ export function Hero() {
             repeat: Infinity,
             ease: 'easeInOut',
           }}
+          style={{ willChange: 'transform, opacity' }}
         />
         <motion.div
           className="absolute -bottom-24 left-[6%] h-80 w-80 rounded-full bg-[#1e3a5f]/20 blur-3xl"
@@ -57,6 +58,7 @@ export function Hero() {
             repeat: Infinity,
             ease: 'easeInOut',
           }}
+          style={{ willChange: 'transform, opacity' }}
         />
       </div>
 

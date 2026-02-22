@@ -30,6 +30,32 @@ export interface Traveler {
   imageUrl?: string;
 }
 
+export type ClusterLevel = 'continent' | 'country' | 'city' | 'trip' | 'monument';
+
+export interface PhotoCluster {
+  id: string;
+  level: ClusterLevel;
+  lat: number;
+  lng: number;
+  label: string;
+  photoUrls: string[];
+  tripCount: number;
+  activityCount: number;
+  children: PhotoCluster[];
+  tripIds: string[];
+}
+
+export interface GlobePhotoPoint {
+  id: string;
+  lat: number;
+  lng: number;
+  name: string;
+  imageUrl: string;
+  tripId: string;
+  dayNumber?: number;
+  type: string;
+}
+
 export interface TripArc {
   id: string;
   travelerId: string;

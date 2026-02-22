@@ -8,6 +8,9 @@ import { ArrowLeft, Camera, Loader2, MapPin, Route } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/components/auth';
 import { GlobeWaypoint, Traveler, TripArc } from '@/lib/globe/types';
+import type { PhotoCluster } from '@/lib/globe/types';
+import { Switch } from '@/components/ui/switch';
+import { buildClusterHierarchy, getVisibleClusters, getZoomHeightForLevel } from '@/lib/globe/clusterEngine';
 
 const CesiumGlobe = dynamic(
   () => import('@/components/globe/CesiumGlobe').then((mod) => mod.CesiumGlobe),
@@ -76,6 +79,9 @@ export default function GlobePage() {
   const [selectedTraveler, setSelectedTraveler] = useState<Traveler | null>(null);
   const [selectedWaypoint, setSelectedWaypoint] = useState<GlobeWaypoint | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showMode, setShowMode] = useState<'my_trips' | 'all_trips'>('all_trips');
+  const [cameraHeight, setCameraHeight] = useState(20_000_000);
+  const [clusterHierarchy, setClusterHierarchy] = useState<PhotoCluster[]>([]);
 
   useEffect(() => {
     const link = document.createElement('link');
@@ -207,6 +213,53 @@ export default function GlobePage() {
       .reduce((sum, arc) => sum + (arc.distanceKm || 0), 0);
   }, [arcs, selectedTrip]);
 
+  const filteredTrips = useMemo(() => {
+    if (showMode === 'all_trips') return globeTrips;
+    return globeTrips.filter((trip) => trip.ownerId === user?.id);
+  }, [globeTrips, showMode, user?.id]);
+
+  // Build cluster hierarchy from filtered trips
+  useEffect(() => {
+    const tripData = filteredTrips.map((trip) => ({
+      id: trip.id,
+      destination: trip.destination,
+      ownerId: trip.ownerId,
+      points: trip.points.map((p) => ({
+        id: p.id,
+        lat: p.lat,
+        lng: p.lng,
+        name: p.name,
+        imageUrl: p.imageUrl || '',
+        tripId: trip.id,
+        dayNumber: p.dayNumber,
+        type: p.type,
+      })),
+    }));
+    setClusterHierarchy(buildClusterHierarchy(tripData));
+  }, [filteredTrips]);
+
+  const visibleClusters = useMemo(() => {
+    return getVisibleClusters(clusterHierarchy, cameraHeight);
+  }, [clusterHierarchy, cameraHeight]);
+
+  const handleClusterClick = useCallback((cluster: PhotoCluster) => {
+    const nextHeight = getZoomHeightForLevel(cluster.level);
+    setCameraHeight(nextHeight);
+    setSelectedTraveler({
+      id: `cluster-${cluster.id}`,
+      name: cluster.label,
+      avatar: '',
+      location: { lat: cluster.lat, lng: cluster.lng, name: cluster.label, country: '' },
+      tripDates: '',
+      rating: 0,
+      itinerary: [],
+    });
+  }, []);
+
+  const handleCameraHeightChange = useCallback((height: number) => {
+    setCameraHeight(height);
+  }, []);
+
   return (
     <div className="flex h-[calc(100dvh-4rem)] flex-col bg-background">
       <div className="flex items-center gap-4 px-4 py-3 border-b bg-background/95 backdrop-blur z-20">
@@ -215,11 +268,19 @@ export default function GlobePage() {
             <ArrowLeft className="h-5 w-5" />
           </Link>
         </Button>
-        <div>
+        <div className="flex-1">
           <h1 className="text-lg font-semibold">Globe</h1>
           <p className="text-xs text-muted-foreground">
-            {globeTrips.length} voyage{globeTrips.length > 1 ? 's' : ''} et leurs itinéraires
+            {filteredTrips.length} voyage{filteredTrips.length > 1 ? 's' : ''} et leurs itin\u00e9raires
           </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-muted-foreground">Mes voyages</span>
+          <Switch
+            checked={showMode === 'all_trips'}
+            onCheckedChange={(checked) => setShowMode(checked ? 'all_trips' : 'my_trips')}
+          />
+          <span className="text-xs text-muted-foreground">+ Amis</span>
         </div>
       </div>
 
@@ -240,6 +301,9 @@ export default function GlobePage() {
               selectedWaypointId={selectedWaypoint?.id || null}
               onTravelerSelect={handleTravelerSelect}
               onWaypointSelect={setSelectedWaypoint}
+              photoClusters={visibleClusters}
+              onClusterClick={handleClusterClick}
+              onCameraHeightChange={handleCameraHeightChange}
             />
           </Suspense>
         )}
@@ -248,11 +312,11 @@ export default function GlobePage() {
           <>
             <div className="hidden md:block absolute left-4 top-4 z-20 w-[330px] max-h-[calc(100%-2rem)] overflow-hidden rounded-2xl border bg-background/92 backdrop-blur-xl shadow-xl">
               <div className="p-3 border-b">
-                <p className="text-sm font-semibold">Voyages de tes amis</p>
+                <p className="text-sm font-semibold">{showMode === 'my_trips' ? 'Mes voyages' : 'Voyages'}</p>
                 <p className="text-xs text-muted-foreground">Clique pour centrer le globe et afficher la route</p>
               </div>
               <div className="max-h-[420px] overflow-y-auto p-2 space-y-2">
-                {globeTrips.map((trip) => {
+                {filteredTrips.map((trip) => {
                   const isActive = trip.id === selectedTrip?.id;
                   const stopCount = trip.points.length;
                   const owner = trip.owner?.display_name || trip.owner?.username || 'Voyageur';
@@ -290,7 +354,7 @@ export default function GlobePage() {
 
             <div className="md:hidden absolute top-4 left-4 right-16 z-20 overflow-x-auto">
               <div className="flex gap-2 w-max">
-                {globeTrips.map((trip) => (
+                {filteredTrips.map((trip) => (
                   <button
                     key={trip.id}
                     type="button"

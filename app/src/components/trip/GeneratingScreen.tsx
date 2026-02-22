@@ -520,7 +520,7 @@ export function GeneratingScreen({ destination, durationDays, pipelineStep }: Ge
         </div>
 
         {/* Fun fact card */}
-        <div className="relative overflow-hidden rounded-2xl border border-[#1e3a5f]/15 bg-background p-5 shadow-sm">
+        <div className="relative overflow-hidden rounded-2xl border border-[#1e3a5f]/15 bg-background p-5 shadow-sm dark:border-[#1e3a5f] dark:bg-[#0d1f35]/80">
           <AnimatePresence mode="wait">
             <motion.div
               key={factIndex}
@@ -530,7 +530,7 @@ export function GeneratingScreen({ destination, durationDays, pipelineStep }: Ge
               transition={{ duration: 0.35 }}
             >
               <div className="mb-3 flex items-center gap-2">
-                <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-[#1e3a5f]/10 text-[#1e3a5f] dark:bg-[#d4a853]/15 dark:text-[#d4a853]">
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-[#1e3a5f]/10 text-[#1e3a5f] dark:bg-[#d4a853]/20 dark:text-[#d4a853]">
                   <FactIcon className="h-4 w-4" />
                 </span>
                 <span className="text-xs font-semibold uppercase tracking-wider text-[#b8923d]">
