@@ -13,7 +13,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { Attraction } from './attractions';
 import { ActivityType } from '../types';
 import { tokenTracker } from './tokenTracker';
-import { searchAttractionsWithSerpApi, searchAttractionsMultiQuery, isSerpApiPlacesConfigured } from './serpApiPlaces';
+import { searchAttractionsWithSerpApi, searchAttractionsMultiQueryWithFallback, isSerpApiPlacesConfigured } from './serpApiPlaces';
 import { searchAttractionsOverpass, isOverpassConfigured } from './overpassAttractions';
 
 import { searchViatorActivities, isViatorConfigured } from './viator';
@@ -298,7 +298,7 @@ export async function searchAttractionsFromCache(
 
       // Si on a les coordonnées du centre-ville, utiliser la recherche multi-requêtes améliorée
       if (options?.cityCenter) {
-        attractions = await searchAttractionsMultiQuery(destination, options.cityCenter, {
+        attractions = await searchAttractionsMultiQueryWithFallback(destination, options.cityCenter, {
           types: options.types,
           limit: (options.maxResults || 15) + 5,
         });

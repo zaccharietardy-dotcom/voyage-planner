@@ -1740,3 +1740,162 @@ function parseOpeningHours(hours?: Record<string, string>): Record<string, { ope
 
   return Object.keys(result).length > 0 ? result : undefined;
 }
+
+// ============================================
+// Wrapper functions: Google Places (New) → SerpAPI fallback
+// ============================================
+// These are the PUBLIC API used by the rest of the codebase.
+// They try Google Places API (New) first, and fallback to SerpAPI
+// if Google Places fails or is not configured.
+
+import {
+  isGooglePlacesNewConfigured,
+  searchRestaurantsGooglePlaces,
+  searchRestaurantsNearbyGooglePlaces,
+  searchAttractionsGooglePlacesNew,
+  searchMustSeeGooglePlaces,
+  geocodeViaGooglePlaces,
+} from './googlePlacesNew';
+
+/**
+ * Search restaurants — Google Places (New) first, SerpAPI fallback.
+ * Drop-in replacement: same signature as searchRestaurantsWithSerpApi.
+ */
+export async function searchRestaurantsWithFallback(
+  destination: string,
+  options: {
+    mealType?: 'breakfast' | 'lunch' | 'dinner';
+    cuisineType?: string;
+    limit?: number;
+    latitude?: number;
+    longitude?: number;
+  } = {}
+): Promise<Restaurant[]> {
+  // Try Google Places (New) first
+  if (isGooglePlacesNewConfigured()) {
+    try {
+      const results = await searchRestaurantsGooglePlaces(destination, options);
+      if (results.length > 0) {
+        console.log(`[Places Wrapper] ✅ Google Places returned ${results.length} restaurants for "${destination}"`);
+        return results;
+      }
+    } catch (error) {
+      console.warn(`[Places Wrapper] Google Places restaurants failed, falling back to SerpAPI:`, error);
+    }
+  }
+
+  // Fallback to SerpAPI
+  console.log(`[Places Wrapper] ⚠️ Falling back to SerpAPI for restaurants "${destination}"`);
+  return searchRestaurantsWithSerpApi(destination, options);
+}
+
+/**
+ * Search nearby restaurants — Google Places (New) first, SerpAPI fallback.
+ * Drop-in replacement: same signature as searchRestaurantsNearby.
+ */
+export async function searchRestaurantsNearbyWithFallback(
+  activityCoords: { lat: number; lng: number },
+  destination: string,
+  options: {
+    mealType?: 'breakfast' | 'lunch' | 'dinner';
+    maxDistance?: number;
+    minRating?: number;
+    minReviews?: number;
+    limit?: number;
+  } = {}
+): Promise<Restaurant[]> {
+  if (isGooglePlacesNewConfigured()) {
+    try {
+      const results = await searchRestaurantsNearbyGooglePlaces(activityCoords, destination, options);
+      if (results.length > 0) {
+        console.log(`[Places Wrapper] ✅ Google Places returned ${results.length} nearby restaurants`);
+        return results;
+      }
+    } catch (error) {
+      console.warn(`[Places Wrapper] Google Places nearby restaurants failed, falling back to SerpAPI:`, error);
+    }
+  }
+
+  console.log(`[Places Wrapper] ⚠️ Falling back to SerpAPI for nearby restaurants`);
+  return searchRestaurantsNearby(activityCoords, destination, options);
+}
+
+/**
+ * Search attractions multi-query — Google Places (New) first, SerpAPI fallback.
+ * Drop-in replacement: same signature as searchAttractionsMultiQuery.
+ */
+export async function searchAttractionsMultiQueryWithFallback(
+  destination: string,
+  cityCenter: { lat: number; lng: number },
+  options: {
+    types?: ActivityType[];
+    activities?: ActivityType[];
+    limit?: number;
+  } = {}
+): Promise<Attraction[]> {
+  if (isGooglePlacesNewConfigured()) {
+    try {
+      const results = await searchAttractionsGooglePlacesNew(destination, cityCenter, {
+        activities: options.activities || options.types,
+        limit: options.limit,
+      });
+      if (results.length > 0) {
+        console.log(`[Places Wrapper] ✅ Google Places returned ${results.length} attractions for "${destination}"`);
+        return results;
+      }
+    } catch (error) {
+      console.warn(`[Places Wrapper] Google Places attractions failed, falling back to SerpAPI:`, error);
+    }
+  }
+
+  console.log(`[Places Wrapper] ⚠️ Falling back to SerpAPI for attractions "${destination}"`);
+  return searchAttractionsMultiQuery(destination, cityCenter, options);
+}
+
+/**
+ * Search must-see attractions — Google Places (New) first, SerpAPI fallback.
+ * Drop-in replacement: same signature as searchMustSeeAttractions.
+ */
+export async function searchMustSeeWithFallback(
+  mustSee: string,
+  destination: string,
+  cityCenter: { lat: number; lng: number },
+): Promise<Attraction[]> {
+  if (isGooglePlacesNewConfigured()) {
+    try {
+      const results = await searchMustSeeGooglePlaces(mustSee, destination, cityCenter);
+      if (results.length > 0) {
+        console.log(`[Places Wrapper] ✅ Google Places returned ${results.length} must-see attractions`);
+        return results;
+      }
+    } catch (error) {
+      console.warn(`[Places Wrapper] Google Places must-see failed, falling back to SerpAPI:`, error);
+    }
+  }
+
+  console.log(`[Places Wrapper] ⚠️ Falling back to SerpAPI for must-see attractions`);
+  return searchMustSeeAttractions(mustSee, destination, cityCenter);
+}
+
+/**
+ * Geocode via Google Places (New) first, SerpAPI fallback.
+ * Drop-in replacement: same signature as geocodeViaSerpApi.
+ */
+export async function geocodeWithFallback(
+  placeName: string,
+  city: string,
+  nearbyCoords?: { lat: number; lng: number },
+): Promise<{ lat: number; lng: number; address?: string; operatingHours?: Record<string, string> } | null> {
+  if (isGooglePlacesNewConfigured()) {
+    try {
+      const result = await geocodeViaGooglePlaces(placeName, city, nearbyCoords);
+      if (result) {
+        return result;
+      }
+    } catch (error) {
+      console.warn(`[Places Wrapper] Google Places geocode failed, falling back to SerpAPI:`, error);
+    }
+  }
+
+  return geocodeViaSerpApi(placeName, city, nearbyCoords);
+}

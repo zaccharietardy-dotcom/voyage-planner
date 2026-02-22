@@ -17,7 +17,7 @@
 
 import { TripPreferences, TripItem } from '../types';
 import { calculateDistance, getCityCenterCoordsAsync } from './geocoding';
-import { searchRestaurantsWithSerpApi } from './serpApiPlaces';
+import { searchRestaurantsWithFallback } from './serpApiPlaces';
 import { generateGoogleMapsDirectionsUrl, generateGoogleMapsSearchUrl } from './directions';
 
 export interface Coordinates {
@@ -127,7 +127,7 @@ export async function findDayTripRestaurant(
   preferences: TripPreferences
 ): Promise<DayTripRestaurant | null> {
   try {
-    const restaurants = await searchRestaurantsWithSerpApi(dayTripDestination, {
+    const restaurants = await searchRestaurantsWithFallback(dayTripDestination, {
       mealType: 'lunch',
       limit: 5,
     });
