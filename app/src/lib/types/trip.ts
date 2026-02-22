@@ -350,6 +350,7 @@ export interface TripItem {
   restaurant?: Restaurant;
   restaurantAlternatives?: Restaurant[]; // Top 2-3 restaurants alternatifs classés par qualité/distance
   selectionSource?: 'pool' | 'api' | 'fallback'; // Source de sélection du restaurant (post-optimisation)
+  mealType?: 'breakfast' | 'lunch' | 'dinner'; // Canonical meal slot (title is derived for display)
   accommodation?: Accommodation;
   localTransport?: LocalTransport;
   // Distance/temps par rapport à l'item précédent
@@ -359,6 +360,8 @@ export interface TripItem {
   // Normalized transport metadata for rendering/analytics
   transportMode?: 'train' | 'bus' | 'car' | 'ferry' | 'walking' | 'transit' | 'RER' | 'metro';
   transportRole?: 'longhaul' | 'hotel_depart' | 'hotel_return' | 'inter_item' | 'daytrip_outbound' | 'daytrip_return';
+  transportDirection?: 'outbound' | 'return' | 'daytrip_outbound' | 'daytrip_return';
+  transportTimeSource?: 'api' | 'rebased' | 'estimated';
   // Informations de transport détaillées
   transitInfo?: {
     lines: { number: string; mode: 'bus' | 'metro' | 'tram' | 'train' | 'ferry'; color?: string }[];

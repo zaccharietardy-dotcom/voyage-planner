@@ -34,6 +34,12 @@ import { sanitizeApiKeyLeaksInString, sanitizeGoogleMapsUrl } from '../services/
 import { resolveOfficialTicketing } from '../services/officialTicketing';
 import { getAirportPreDepartureLeadMinutes } from './step7-assemble';
 import { scheduleDayItems, buildDayWindow, buildMealSlots, buildCandidates } from './scheduler';
+import {
+  buildTrainDescription,
+  getTransitLegsDurationMinutes,
+  normalizeReturnTransportBookingUrl,
+  rebaseTransitLegsToTimeline,
+} from './utils/longhaulConsistency';
 
 // ============================================
 // Local helper functions
@@ -72,7 +78,20 @@ function buildGoogleMapsUrl(lat: number, lng: number): string {
 }
 
 function buildGoogleMapsPlaceUrl(name: string, lat: number, lng: number): string {
-  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name)}&query_place_id=&center=${lat},${lng}`;
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name)}&center=${lat},${lng}`;
+}
+
+function mealTypeFromStartTime(startTime: string): TripItem['mealType'] {
+  const startMin = parseHHMM(startTime);
+  if (startMin < 10 * 60 + 30) return 'breakfast';
+  if (startMin < 18 * 60) return 'lunch';
+  return 'dinner';
+}
+
+function mealLabelFromType(mealType: TripItem['mealType']): string {
+  if (mealType === 'breakfast') return 'Petit-déjeuner';
+  if (mealType === 'lunch') return 'Déjeuner';
+  return 'Dîner';
 }
 
 // ============================================
@@ -215,12 +234,8 @@ function buildTripItemsFromDayPlan(
         continue;
       }
 
-      const mealTypeLabel =
-        item.mealType === 'breakfast'
-          ? 'Petit-déjeuner'
-          : item.mealType === 'lunch'
-          ? 'Déjeuner'
-          : 'Dîner';
+      const normalizedMealType = item.mealType || mealTypeFromStartTime(item.startTime);
+      const mealTypeLabel = mealLabelFromType(normalizedMealType);
 
       const cuisineDescription = (restaurant.cuisineTypes || []).length > 0
         ? (restaurant.cuisineTypes || []).join(', ')
@@ -242,8 +257,10 @@ function buildTripItemsFromDayPlan(
         duration: item.duration,
         rating: restaurant.rating,
         googleMapsUrl: sanitizeGoogleMapsUrl(buildGoogleMapsUrl(restaurant.latitude, restaurant.longitude)),
+        googleMapsPlaceUrl: buildGoogleMapsPlaceUrl(restaurant.name, restaurant.latitude, restaurant.longitude),
         restaurant: restaurant,
         restaurantAlternatives: [],
+        mealType: normalizedMealType,
         dataReliability: restaurant.dataReliability || 'verified',
       };
 
@@ -262,7 +279,8 @@ function addOutboundTransportItem(
   day1: TripDay,
   flight: Flight | null,
   transport: TransportOptionSummary | null,
-  preferences: TripPreferences
+  preferences: TripPreferences,
+  fallbackCoords: { lat: number; lng: number }
 ): void {
   if (!flight && !transport) return;
 
@@ -276,8 +294,8 @@ function addOutboundTransportItem(
       title: `${flight.departureCity} → ${flight.arrivalCity}`,
       description: `Vol ${flight.airline} ${flight.flightNumber || ''}`.trim(),
       locationName: flight.departureAirport,
-      latitude: 0,
-      longitude: 0,
+      latitude: fallbackCoords.lat,
+      longitude: fallbackCoords.lng,
       orderIndex: 0,
       duration: flight.duration,
       flight: flight,
@@ -291,6 +309,8 @@ function addOutboundTransportItem(
     // Add train transport item
     const firstLeg = transport.transitLegs[0];
     const lastLeg = transport.transitLegs[transport.transitLegs.length - 1];
+    const outboundDuration = getTransitLegsDurationMinutes(transport.transitLegs as TripItem['transitLegs']) || transport.totalDuration;
+    const segmentDestCoords = transport.segments?.[0]?.toCoords;
 
     const trainItem: TripItem = {
       id: uuidv4(),
@@ -299,16 +319,18 @@ function addOutboundTransportItem(
       endTime: minutesToHHMM(parseHHMM(lastLeg.arrival.split('T')[1]?.substring(0, 5) || '12:00')),
       type: 'transport',
       title: `${firstLeg.from} → ${lastLeg.to}`,
-      description: `Train ${transport.transitLegs.map(l => l.operator || 'Train').join(', ')}`,
+      description: buildTrainDescription('Train', transport.transitLegs.map((leg) => leg.operator)),
       locationName: firstLeg.from,
-      latitude: 0,
-      longitude: 0,
+      latitude: segmentDestCoords?.lat || fallbackCoords.lat,
+      longitude: segmentDestCoords?.lng || fallbackCoords.lng,
       orderIndex: 0,
-      duration: transport.totalDuration,
+      duration: outboundDuration,
       transitLegs: transport.transitLegs,
-      transitDataSource: 'api',
+      transitDataSource: transport.dataSource || 'api',
       transportMode: 'train',
       transportRole: 'longhaul',
+      transportDirection: 'outbound',
+      transportTimeSource: transport.dataSource || 'api',
       imageUrl: '/images/transport/train-sncf-duplex.jpg',
       estimatedCost: transport.totalPrice,
       bookingUrl: transport.bookingUrl,
@@ -327,7 +349,8 @@ function addReturnTransportItem(
   lastDay: TripDay,
   returnFlight: Flight | null,
   transport: TransportOptionSummary | null,
-  preferences: TripPreferences
+  preferences: TripPreferences,
+  fallbackCoords: { lat: number; lng: number }
 ): void {
   if (!returnFlight && !transport) return;
 
@@ -341,8 +364,8 @@ function addReturnTransportItem(
       title: `${returnFlight.departureCity} → ${returnFlight.arrivalCity}`,
       description: `Vol ${returnFlight.airline} ${returnFlight.flightNumber || ''}`.trim(),
       locationName: returnFlight.departureAirport,
-      latitude: 0,
-      longitude: 0,
+      latitude: fallbackCoords.lat,
+      longitude: fallbackCoords.lng,
       orderIndex: lastDay.items.length,
       duration: returnFlight.duration,
       flight: returnFlight,
@@ -353,40 +376,20 @@ function addReturnTransportItem(
 
     lastDay.items.push(flightItem);
   } else if (transport && transport.mode === 'train' && transport.transitLegs) {
-    // Reverse the outbound legs for return journey
-    const reversedLegs = transport.transitLegs.slice().reverse().map(leg => ({
-      ...leg,
-      from: leg.to,
-      to: leg.from,
-      // Keep duration but departure/arrival times will be estimated
-    }));
-
-    // Update dates to last day
-    const lastDayDate = lastDay.date;
-    if (lastDayDate) {
-      const dateStr = lastDayDate instanceof Date
-        ? lastDayDate.toISOString().split('T')[0]
-        : String(lastDayDate).split('T')[0];
-
-      for (const leg of reversedLegs) {
-        if (leg.departure) {
-          const timepart = leg.departure.split('T')[1] || '17:00:00';
-          leg.departure = `${dateStr}T${timepart}`;
-        }
-        if (leg.arrival) {
-          const timepart = leg.arrival.split('T')[1] || '19:00:00';
-          leg.arrival = `${dateStr}T${timepart}`;
-        }
-      }
-    }
-
-    const returnFirstLeg = reversedLegs[0];
-    const returnLastLeg = reversedLegs[reversedLegs.length - 1];
-
-    // Estimate return departure: afternoon (17:00 default)
-    // Use a reasonable return time since we don't have actual return schedule
+    // Estimate return departure: afternoon (17:00 default), then rebase legs.
     const returnDepartMin = 17 * 60; // 17:00
-    const returnArrivalMin = returnDepartMin + (transport.totalDuration || 120);
+    const returnStart = new Date(lastDay.date);
+    returnStart.setHours(Math.floor(returnDepartMin / 60), returnDepartMin % 60, 0, 0);
+    const rebasedReturnLegs = rebaseTransitLegsToTimeline({
+      transitLegs: transport.transitLegs as TripItem['transitLegs'],
+      startTime: returnStart,
+      direction: 'return',
+    });
+    const rebasedReturnDuration = getTransitLegsDurationMinutes(rebasedReturnLegs) || transport.totalDuration || 120;
+    const returnArrivalMin = returnDepartMin + rebasedReturnDuration;
+    const returnFirstLeg = rebasedReturnLegs?.[0];
+    const returnLastLeg = rebasedReturnLegs?.[rebasedReturnLegs.length - 1];
+    const segmentReturnCoords = transport.segments?.[0]?.toCoords;
 
     const trainItem: TripItem = {
       id: uuidv4(),
@@ -394,20 +397,22 @@ function addReturnTransportItem(
       startTime: minutesToHHMM(returnDepartMin),
       endTime: minutesToHHMM(Math.min(returnArrivalMin, 23 * 60 + 59)),
       type: 'transport',
-      title: `${returnFirstLeg.from} → ${returnLastLeg.to}`,
-      description: `Train retour ${reversedLegs.map(l => l.operator || 'Train').join(', ')}`,
-      locationName: returnFirstLeg.from,
-      latitude: 0,
-      longitude: 0,
+      title: `${returnFirstLeg?.from || preferences.destination} → ${returnLastLeg?.to || preferences.origin}`,
+      description: buildTrainDescription('Train retour', (rebasedReturnLegs || []).map((leg) => leg.operator)),
+      locationName: returnFirstLeg?.from || preferences.destination,
+      latitude: segmentReturnCoords?.lat || fallbackCoords.lat,
+      longitude: segmentReturnCoords?.lng || fallbackCoords.lng,
       orderIndex: lastDay.items.length,
-      duration: transport.totalDuration,
-      transitLegs: reversedLegs,
-      transitDataSource: 'api',
+      duration: rebasedReturnDuration,
+      transitLegs: rebasedReturnLegs,
+      transitDataSource: transport.dataSource || 'api',
       transportMode: 'train',
       transportRole: 'longhaul',
+      transportDirection: 'return',
+      transportTimeSource: rebasedReturnLegs?.length ? 'rebased' : 'estimated',
       imageUrl: '/images/transport/train-sncf-duplex.jpg',
       estimatedCost: transport.totalPrice,
-      bookingUrl: transport.bookingUrl,
+      bookingUrl: normalizeReturnTransportBookingUrl(transport.bookingUrl, returnStart, { swapOmioDirection: true }),
     };
 
     lastDay.items.push(trainItem);
@@ -425,14 +430,16 @@ function addReturnTransportItem(
       title: `${preferences.destination} → ${preferences.origin}`,
       description: `Transport retour`,
       locationName: preferences.destination,
-      latitude: 0,
-      longitude: 0,
+      latitude: transport.segments?.[0]?.toCoords?.lat || fallbackCoords.lat,
+      longitude: transport.segments?.[0]?.toCoords?.lng || fallbackCoords.lng,
       orderIndex: lastDay.items.length,
       duration: transport.totalDuration,
       transportMode: transport.mode as any,
       transportRole: 'longhaul',
+      transportDirection: 'return',
+      transportTimeSource: 'estimated',
       estimatedCost: transport.totalPrice,
-      bookingUrl: transport.bookingUrl,
+      bookingUrl: normalizeReturnTransportBookingUrl(transport.bookingUrl, lastDay.date, { swapOmioDirection: true }),
     };
 
     lastDay.items.push(trainItem);
@@ -710,6 +717,47 @@ function computeScheduleDiagnostics(items: TripItem[]): TripDay['scheduleDiagnos
   return { largestGapMin };
 }
 
+function normalizeMealSemantics(day: TripDay): void {
+  const sorted = [...day.items].sort((a, b) => parseHHMM(a.startTime) - parseHHMM(b.startTime));
+  const seenMealTypes = new Set<TripItem['mealType']>();
+  const normalized: TripItem[] = [];
+
+  for (const item of sorted) {
+    if (item.type !== 'restaurant') {
+      normalized.push(item);
+      continue;
+    }
+
+    const mealType = mealTypeFromStartTime(item.startTime);
+    const mealLabel = mealLabelFromType(mealType);
+    const normalizedTitle = (item.title || '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
+    const isHotelMeal = normalizedTitle.includes("a l'hotel") || normalizedTitle.includes('at hotel');
+    const restaurantName = item.restaurant?.name
+      || item.title.replace(/^(Petit-déjeuner|Déjeuner|Dîner)\s*(—)?\s*/i, '').trim()
+      || 'Restaurant local';
+
+    item.mealType = mealType;
+    item.title = isHotelMeal ? `${mealLabel} à l'hôtel` : `${mealLabel} — ${restaurantName}`;
+    if (item.description) {
+      item.description = item.description.replace(/^(Petit-déjeuner|Déjeuner|Dîner)/, mealLabel);
+    }
+
+    if (seenMealTypes.has(mealType)) {
+      continue;
+    }
+    seenMealTypes.add(mealType);
+    normalized.push(item);
+  }
+
+  day.items = normalized.sort((a, b) => parseHHMM(a.startTime) - parseHHMM(b.startTime));
+  day.items.forEach((item, idx) => {
+    item.orderIndex = idx;
+  });
+}
+
 // ============================================
 // Cost breakdown
 // ============================================
@@ -924,6 +972,8 @@ export async function assembleFromLLMPlan(
           duration: dtInfo.transportDurationMin,
           transportMode: dtInfo.transportMode as TripItem['transportMode'],
           transportRole: 'daytrip_outbound',
+          transportDirection: 'daytrip_outbound',
+          transportTimeSource: 'estimated',
           estimatedCost: dtInfo.transportCostPerPerson * preferences.groupSize,
         };
         tripDay.items.unshift(outboundItem);
@@ -950,6 +1000,8 @@ export async function assembleFromLLMPlan(
           duration: dtInfo.transportDurationMin,
           transportMode: dtInfo.transportMode as TripItem['transportMode'],
           transportRole: 'daytrip_return',
+          transportDirection: 'daytrip_return',
+          transportTimeSource: 'estimated',
           estimatedCost: dtInfo.transportCostPerPerson * preferences.groupSize,
         };
         tripDay.items.push(returnItem);
@@ -965,9 +1017,12 @@ export async function assembleFromLLMPlan(
   if (tripDays.length > 0) {
     const day1 = tripDays[0];
     const lastDay = tripDays[tripDays.length - 1];
+    const transportFallbackCoords = hotel
+      ? { lat: hotel.latitude, lng: hotel.longitude }
+      : data.destCoords;
 
-    addOutboundTransportItem(day1, data.outboundFlight || null, transport, preferences);
-    addReturnTransportItem(lastDay, data.returnFlight || null, transport, preferences);
+    addOutboundTransportItem(day1, data.outboundFlight || null, transport, preferences, transportFallbackCoords);
+    addReturnTransportItem(lastDay, data.returnFlight || null, transport, preferences, transportFallbackCoords);
 
     // 4. Add hotel check-in/check-out (skip on day-trip days)
     if (!day1.isDayTrip) addHotelCheckInItem(day1, hotel, preferences);
@@ -995,6 +1050,7 @@ export async function assembleFromLLMPlan(
     const mealSlots = buildMealSlots(dayWindow);
     const candidates = buildCandidates(day.items);
     day.items = scheduleDayItems(candidates, mealSlots, dayWindow, restaurantPool, usedRestaurantNames);
+    normalizeMealSemantics(day);
   }
 
   // 5. Sort items by time within each day and compute distances

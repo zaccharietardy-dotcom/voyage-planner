@@ -686,6 +686,33 @@ describe('step7-assemble helpers', () => {
     }
   });
 
+  it('recomputes route metadata after geo-prune mutations', () => {
+    const day: TripDay = {
+      dayNumber: 1,
+      date: new Date('2026-03-03T00:00:00.000Z'),
+      isDayTrip: false,
+      items: [
+        baseActivity('a1', '09:00', '10:00', 45.4628, 9.1800),
+        baseActivity('a2', '10:15', '11:00', 45.4628, 9.2200),
+        baseActivity('a3', '11:15', '12:00', 45.4628, 9.1800),
+        baseActivity('a4', '12:15', '13:00', 45.4628, 9.2300),
+      ],
+    };
+
+    const removed = pruneIntraDayZigzagsStrict([day]);
+    if (removed === 0) {
+      // No mutation performed, nothing to assert about refreshed metadata.
+      return;
+    }
+
+    const sorted = [...day.items].sort((a, b) => a.startTime.localeCompare(b.startTime));
+    for (let idx = 1; idx < sorted.length; idx++) {
+      expect(typeof sorted[idx].distanceFromPrevious).toBe('number');
+      expect(typeof sorted[idx].timeFromPrevious).toBe('number');
+      expect(sorted[idx].transportToPrevious === 'walk' || sorted[idx].transportToPrevious === 'public' || sorted[idx].transportToPrevious === 'car').toBe(true);
+    }
+  });
+
   it('keeps dinner within evening window during intra-day gap compression', () => {
     const day: TripDay = {
       dayNumber: 1,

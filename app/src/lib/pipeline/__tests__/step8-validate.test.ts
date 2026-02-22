@@ -552,4 +552,135 @@ describe('step8-validate geography checks', () => {
     expect(result.warnings.some(w => w.includes('chevauchement'))).toBe(true);
     expect(result.score).toBeLessThan(100);
   });
+
+  it('fixes regression fixture anomalies (meal labels, return narrative, return legs/url)', () => {
+    const preferences = createPreferences();
+    preferences.origin = 'Lyon';
+    preferences.destination = 'Paris';
+    preferences.durationDays = 3;
+
+    const trip: Trip = {
+      id: 'trip-regression-lyon-paris',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      preferences,
+      days: [
+        {
+          dayNumber: 1,
+          date: new Date('2026-03-08T00:00:00.000Z'),
+          theme: 'Musée',
+          dayNarrative: 'Journée 1',
+          items: [
+            item({
+              id: 'meal-wrong-1',
+              type: 'restaurant',
+              title: 'Petit-déjeuner — Emma',
+              startTime: '14:55',
+              endTime: '15:40',
+              latitude: 48.857,
+              longitude: 2.3746,
+            }),
+          ],
+          isDayTrip: false,
+        },
+        {
+          dayNumber: 2,
+          date: new Date('2026-03-09T00:00:00.000Z'),
+          theme: 'Culture',
+          dayNarrative: 'Journée 2',
+          items: [
+            item({ id: 'a2', type: 'activity', title: 'Tour Eiffel', startTime: '10:00', endTime: '11:30', latitude: 48.8584, longitude: 2.2945 }),
+          ],
+          isDayTrip: false,
+        },
+        {
+          dayNumber: 3,
+          date: new Date('2026-03-10T00:00:00.000Z'),
+          theme: 'Retour',
+          dayNarrative: 'Journée 3: Château de Versailles & Château de Versailles',
+          items: [
+            item({
+              id: 'transport-ret-3',
+              type: 'transport',
+              title: 'Gare de Lyon → Lyon-Perrache',
+              startTime: '17:00',
+              endTime: '19:50',
+              latitude: 48.8566,
+              longitude: 2.3522,
+              transportRole: 'longhaul',
+              transportMode: 'train',
+              bookingUrl: 'https://www.omio.fr/trains/lyon/paris?departure_date=2026-03-08',
+              transitLegs: [
+                {
+                  mode: 'train',
+                  from: 'Lyon-Perrache',
+                  to: 'Gare de Lyon',
+                  departure: '2026-03-08T11:44:00.000Z',
+                  arrival: '2026-03-08T13:56:00.000Z',
+                  duration: 132,
+                  operator: 'SNCF',
+                  line: 'FR',
+                },
+              ],
+            }),
+          ],
+          isDayTrip: false,
+        },
+      ],
+    };
+
+    validateAndFixTrip(trip);
+
+    const fixedMeal = trip.days[0].items.find((entry) => entry.id === 'meal-wrong-1');
+    expect(fixedMeal?.mealType).toBe('lunch');
+    expect(fixedMeal?.title.startsWith('Déjeuner')).toBe(true);
+
+    const returnDay = trip.days[2];
+    expect(returnDay.theme).toBe('Retour');
+    expect(returnDay.dayNarrative?.toLowerCase()).not.toContain('versailles');
+    expect(returnDay.dayNarrative?.toLowerCase()).toContain('retour');
+
+    const returnItem = returnDay.items.find((entry) => entry.id === 'transport-ret-3');
+    expect(returnItem?.transportDirection).toBe('return');
+    expect(returnItem?.transportTimeSource).toBe('rebased');
+    expect(returnItem?.bookingUrl).toContain('/trains/paris/lyon');
+    expect(returnItem?.bookingUrl).toContain('departure_date=2026-03-10');
+    expect(returnItem?.transitLegs?.[0]?.from).toBe('Gare de Lyon');
+    expect(returnItem?.transitLegs?.[0]?.to).toBe('Lyon-Perrache');
+
+    const itemStart = new Date(returnDay.date);
+    itemStart.setHours(17, 0, 0, 0);
+    const itemEnd = new Date(returnDay.date);
+    itemEnd.setHours(19, 50, 0, 0);
+    const firstDep = new Date(returnItem!.transitLegs![0].departure);
+    const lastArr = new Date(returnItem!.transitLegs![returnItem!.transitLegs!.length - 1].arrival);
+    const startDelta = Math.abs(firstDep.getTime() - itemStart.getTime()) / 60000;
+    const endDelta = Math.abs(lastArr.getTime() - itemEnd.getTime()) / 60000;
+    expect(startDelta).toBeLessThanOrEqual(15);
+    expect(endDelta).toBeLessThanOrEqual(15);
+  });
+
+  it('replaces hallucinated narrative on no-activity day with non-touristic text', () => {
+    const trip: Trip = {
+      id: 'trip-no-activity-hallucination',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      preferences: createPreferences(),
+      days: [
+        {
+          dayNumber: 1,
+          date: new Date('2026-02-18T00:00:00.000Z'),
+          theme: 'Louvre et Versailles',
+          dayNarrative: 'Journée autour du Louvre et de Versailles',
+          items: [],
+          isDayTrip: false,
+        },
+      ],
+    };
+
+    validateAndFixTrip(trip);
+
+    expect(trip.days[0].dayNarrative?.toLowerCase()).not.toContain('versailles');
+    expect(trip.days[0].dayNarrative?.toLowerCase()).toContain('journée');
+  });
 });
