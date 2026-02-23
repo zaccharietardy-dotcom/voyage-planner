@@ -9,6 +9,7 @@
 
 import type { ScoredActivity, ActivityCluster, CityDensityProfile } from './types';
 import { calculateDistance } from '../services/geocoding';
+import { isActivityOpenOnDay, DAY_NAMES_EN } from './utils/opening-hours';
 
 /**
  * Compute a density profile for the city based on the spread of activities.
@@ -24,7 +25,7 @@ export function computeCityDensityProfile(
 ): CityDensityProfile {
   const valid = activities.filter(a => a.latitude && a.longitude);
   if (valid.length < 2) {
-    return { p75PairwiseDistance: 2, medianPairwiseDistance: 1, maxClusterRadius: 2, densityCategory: 'medium' };
+    return { p75PairwiseDistance: 2, medianPairwiseDistance: 1, maxClusterRadius: 2, densityCategory: 'medium', hardRadiusCap: 5 };
   }
 
   // Compute all pairwise distances
@@ -44,19 +45,30 @@ export function computeCityDensityProfile(
   const p75 = pairwise[p75Idx] || 2;
   const median = pairwise[medianIdx] || 1;
 
+  // Detect spread cities: p75 > 10km means activities are spread far apart
+  // (e.g. Tokyo ~60km diameter, LA ~80km, Bangkok ~30km)
+  const isSpreadCity = p75 > 10;
+
+  // Adaptive hard cap: compact cities keep 5km, spread cities get up to 15km
+  // Formula for spread: p75 / numDays, capped at 15km
+  const hardRadiusCap = isSpreadCity
+    ? Math.max(5, Math.min(p75 / Math.max(1, numDays), 15))
+    : 5.0;
+
   // Derive max cluster radius: spread divided by days, capped by travel time
   const baseRadius = p75 / Math.max(1, numDays);
-  const travelTimeRadius = 2.0; // ~15 min mixed walk/transit
-  const maxClusterRadius = Math.max(0.5, Math.min(baseRadius, travelTimeRadius, 5.0));
+  // For spread cities, allow a larger travel-time radius (~30min transit)
+  const travelTimeRadius = isSpreadCity ? 5.0 : 2.0;
+  const maxClusterRadius = Math.max(0.5, Math.min(baseRadius, travelTimeRadius, hardRadiusCap));
 
   const densityCategory: CityDensityProfile['densityCategory'] =
     maxClusterRadius <= 0.8 ? 'dense' :
     maxClusterRadius <= 2.0 ? 'medium' :
     'spread';
 
-  console.log(`[Pipeline V2] City density profile: category=${densityCategory}, p75=${p75.toFixed(2)}km, median=${median.toFixed(2)}km, maxClusterRadius=${maxClusterRadius.toFixed(2)}km`);
+  console.log(`[Pipeline V2] City density profile: category=${densityCategory}, p75=${p75.toFixed(2)}km, median=${median.toFixed(2)}km, maxClusterRadius=${maxClusterRadius.toFixed(2)}km, hardRadiusCap=${hardRadiusCap.toFixed(2)}km${isSpreadCity ? ' (spread city)' : ''}`);
 
-  return { p75PairwiseDistance: p75, medianPairwiseDistance: median, maxClusterRadius, densityCategory };
+  return { p75PairwiseDistance: p75, medianPairwiseDistance: median, maxClusterRadius, densityCategory, hardRadiusCap };
 }
 
 /**
@@ -68,7 +80,8 @@ export function clusterActivities(
   activities: ScoredActivity[],
   numDays: number,
   cityCenter: { lat: number; lng: number },
-  densityProfile?: CityDensityProfile
+  densityProfile?: CityDensityProfile,
+  startDate?: string
 ): ActivityCluster[] {
   if (activities.length === 0) return [];
   if (numDays <= 1 || activities.length <= 4) {
@@ -93,26 +106,80 @@ export function clusterActivities(
     }
   }
 
-  // How many days for city vs day-trips?
-  const dayTripDays = dayTripActivities.length > 0 ? 1 : 0;
-  const cityDays = Math.max(1, numDays - dayTripDays);
+  // Isolate full-day activities (duration >= 240min / 4h) into their own clusters.
+  // Activities like "Tokyo Disneyland" (5h), "Desert Excursion" (8h) should not be
+  // mixed with regular 30-60min city visits — they consume the entire day.
+  const FULL_DAY_THRESHOLD_MIN = 240;
+  const fullDayActivities: ScoredActivity[] = [];
+  const regularActivities: ScoredActivity[] = [];
 
-  // Hierarchical clustering on city activities (with radius constraint if available)
+  for (const a of cityActivities) {
+    if ((a.duration || 60) >= FULL_DAY_THRESHOLD_MIN) {
+      fullDayActivities.push(a);
+    } else {
+      regularActivities.push(a);
+    }
+  }
+
+  // Each full-day activity gets its own cluster day, but cap at (numDays - dayTripDays - 1)
+  // so at least 1 day remains for regular city activities
+  const dayTripDays = dayTripActivities.length > 0 ? 1 : 0;
+  const maxFullDaySlots = Math.max(0, numDays - dayTripDays - 1);
+  // If more full-day activities than available slots, keep only the highest-scored ones;
+  // demote the rest back to regular activities.
+  if (fullDayActivities.length > maxFullDaySlots) {
+    fullDayActivities.sort((a, b) => b.score - a.score);
+    const demoted = fullDayActivities.splice(maxFullDaySlots);
+    regularActivities.push(...demoted);
+    console.log(`[Pipeline V2] Too many full-day activities (${fullDayActivities.length + demoted.length}) for ${numDays} days — demoted ${demoted.length} back to regular: ${demoted.map(a => `"${a.name}"`).join(', ')}`);
+  }
+
+  const fullDayClusters: ActivityCluster[] = fullDayActivities.map((a, i) => {
+    const cluster = buildCluster(i + 1, [a]);
+    cluster.isFullDay = true;
+    return cluster;
+  });
+
+  if (fullDayClusters.length > 0) {
+    console.log(`[Pipeline V2] Isolated ${fullDayClusters.length} full-day activities (>=${FULL_DAY_THRESHOLD_MIN}min): ${fullDayActivities.map(a => `"${a.name}" (${a.duration}min)`).join(', ')}`);
+  }
+
+  // How many days for city vs day-trips vs full-day?
+  const fullDayDays = fullDayClusters.length;
+  const cityDays = Math.max(1, numDays - dayTripDays - fullDayDays);
+
+  // Hierarchical clustering on regular city activities (with radius constraint if available)
   const maxRadius = densityProfile?.maxClusterRadius;
-  const clusters = hierarchicalClustering(cityActivities, cityDays, maxRadius);
+  const hardRadiusCap = densityProfile?.hardRadiusCap ?? 5.0;
+  const clusters = hierarchicalClustering(regularActivities, cityDays, maxRadius, hardRadiusCap);
+
+  // Add full-day clusters
+  for (const fdc of fullDayClusters) {
+    fdc.dayNumber = clusters.length + 1;
+    clusters.push(fdc);
+  }
 
   // Add day-trip cluster if needed
   if (dayTripActivities.length > 0) {
     clusters.push(buildCluster(clusters.length + 1, dayTripActivities));
   }
 
-  // Balance cluster sizes (but protect day-trip clusters from receiving city activities)
+  // Collect indices of protected clusters (full-day and day-trip) that should not
+  // receive extra activities during balancing or minimum-size enforcement.
   const dayTripClusterIdx = dayTripActivities.length > 0 ? clusters.length - 1 : -1;
-  balanceClusterSizes(clusters, Math.ceil(activities.length / numDays) + 1, dayTripClusterIdx, maxRadius);
+  const protectedIndices = new Set<number>();
+  if (dayTripClusterIdx >= 0) protectedIndices.add(dayTripClusterIdx);
+  for (let ci = 0; ci < clusters.length; ci++) {
+    if (clusters[ci].isFullDay) protectedIndices.add(ci);
+  }
+
+  // Balance cluster sizes (but protect day-trip and full-day clusters)
+  balanceClusterSizes(clusters, Math.ceil(activities.length / numDays) + 1, dayTripClusterIdx, maxRadius, protectedIndices);
 
   // Enforce minimum cluster sizes: no full day should have fewer than 3 activities
   // (boundary days — first and last — are exempted with min=1)
-  enforceMinimumClusterSize(clusters, 3, dayTripClusterIdx, numDays);
+  // Full-day clusters are also exempted (they intentionally have 1 activity)
+  enforceMinimumClusterSize(clusters, 3, dayTripClusterIdx, numDays, protectedIndices);
 
   // Optimize visit order within each cluster (nearest-neighbor + 2-opt)
   for (const cluster of clusters) {
@@ -125,6 +192,14 @@ export function clusterActivities(
 
   // Renumber days after reordering
   clusters.forEach((c, i) => { c.dayNumber = i + 1; });
+
+  // Handle day-of-week closures if startDate is provided
+  if (startDate) {
+    handleDayClosures(clusters, startDate, numDays);
+  }
+
+  // Inter-cluster swap optimization (2-opt between days)
+  interClusterSwap(clusters);
 
   // Log cluster quality metrics
   for (const c of clusters) {
@@ -158,7 +233,8 @@ export function clusterActivities(
 function hierarchicalClustering(
   activities: ScoredActivity[],
   K: number,
-  maxClusterRadius?: number
+  maxClusterRadius?: number,
+  hardRadiusCap: number = 5.0
 ): ActivityCluster[] {
   if (activities.length === 0) return [];
   if (K <= 1) return [buildCluster(1, activities)];
@@ -199,12 +275,20 @@ function hierarchicalClustering(
       for (let j = i + 1; j < clusterMembers.length; j++) {
         const d = averageLinkageDistance(clusterMembers[i], clusterMembers[j], distMatrix);
         if (d < bestDist) {
-          // Check radius constraint: would the merged cluster exceed maxClusterRadius?
+          // Check time-capacity constraint: merged cluster should fit in a day
+          const mergedMembers = [...clusterMembers[i], ...clusterMembers[j]];
+          const mergedDuration = mergedMembers.reduce((s, idx) => s + (activities[idx].duration || 60), 0);
+          const estimatedTravel = (mergedMembers.length - 1) * 15; // 15min per activity transition
+          const dayCapacityMinutes = 10 * 60; // 10h of activities per day max
+
+          if (mergedDuration + estimatedTravel > dayCapacityMinutes) continue; // Reject merge: too much content
+
+          // Check radius constraint: softer than before, with adaptive hard cap
           if (maxClusterRadius !== undefined) {
-            const mergedRadius = computeMergedRadius(
-              [...clusterMembers[i], ...clusterMembers[j]], activities
-            );
-            if (mergedRadius > maxClusterRadius) continue; // Skip this merge
+            const mergedRadius = computeMergedRadius(mergedMembers, activities);
+            // Soft radius: allow merge up to 2.5x maxClusterRadius, hard cap is adaptive
+            // (5km for compact cities like Paris/Rome, up to 15km for spread cities like Tokyo/LA)
+            if (mergedRadius > maxClusterRadius * 2.5 || mergedRadius > hardRadiusCap) continue;
           }
           bestDist = d;
           bestI = i;
@@ -252,24 +336,59 @@ function hierarchicalClustering(
     }
   }
 
-  // Last resort: if still > K clusters, merge unconditionally (original behavior)
+  // Last resort: if still > K clusters, merge smallest-first (to avoid monster clusters)
+  // With time-capacity safeguard: never create a cluster > 8 hours (480min)
   while (clusterMembers.length > K) {
-    let bestI = 0, bestJ = 1;
-    let bestDist = Infinity;
+    // Sort cluster indices by size ascending, try to merge the two smallest
+    const sizeIndices = clusterMembers
+      .map((members, idx) => ({ idx, size: members.length, duration: members.reduce((s, i) => s + (activities[i].duration || 60), 0) }))
+      .sort((a, b) => a.size - b.size);
 
-    for (let i = 0; i < clusterMembers.length; i++) {
-      for (let j = i + 1; j < clusterMembers.length; j++) {
-        const d = averageLinkageDistance(clusterMembers[i], clusterMembers[j], distMatrix);
+    let merged = false;
+    // Try to merge the smallest cluster with its nearest neighbor that fits capacity
+    for (let si = 0; si < sizeIndices.length && !merged; si++) {
+      const smallIdx = sizeIndices[si].idx;
+      let bestTarget = -1;
+      let bestDist = Infinity;
+
+      for (let j = 0; j < clusterMembers.length; j++) {
+        if (j === smallIdx) continue;
+        const d = averageLinkageDistance(clusterMembers[smallIdx], clusterMembers[j], distMatrix);
+        const mergedDuration = [...clusterMembers[smallIdx], ...clusterMembers[j]]
+          .reduce((s, idx) => s + (activities[idx].duration || 60), 0);
+        const estimatedTravel = (clusterMembers[smallIdx].length + clusterMembers[j].length - 1) * 15;
+        // Allow up to 8h (480min) total activity time + travel
+        if (mergedDuration + estimatedTravel > 8 * 60) continue;
         if (d < bestDist) {
           bestDist = d;
-          bestI = i;
-          bestJ = j;
+          bestTarget = j;
         }
+      }
+
+      if (bestTarget !== -1) {
+        clusterMembers[bestTarget] = [...clusterMembers[bestTarget], ...clusterMembers[smallIdx]];
+        clusterMembers.splice(smallIdx, 1);
+        merged = true;
       }
     }
 
-    clusterMembers[bestI] = [...clusterMembers[bestI], ...clusterMembers[bestJ]];
-    clusterMembers.splice(bestJ, 1);
+    // If no merge was possible with capacity constraint, do one unconditional merge (absolute last resort)
+    if (!merged) {
+      let bestI = 0, bestJ = 1;
+      let bestDist = Infinity;
+      for (let i = 0; i < clusterMembers.length; i++) {
+        for (let j = i + 1; j < clusterMembers.length; j++) {
+          const d = averageLinkageDistance(clusterMembers[i], clusterMembers[j], distMatrix);
+          if (d < bestDist) {
+            bestDist = d;
+            bestI = i;
+            bestJ = j;
+          }
+        }
+      }
+      clusterMembers[bestI] = [...clusterMembers[bestI], ...clusterMembers[bestJ]];
+      clusterMembers.splice(bestJ, 1);
+    }
   }
 
   // 4. Build ActivityCluster[] from result
@@ -395,7 +514,8 @@ function balanceClusterSizes(
   clusters: ActivityCluster[],
   maxPerCluster: number,
   dayTripClusterIdx: number = -1,
-  maxClusterRadius?: number
+  maxClusterRadius?: number,
+  protectedIndices?: Set<number>
 ): void {
   let changed = true;
   let iterations = 0;
@@ -405,6 +525,9 @@ function balanceClusterSizes(
     iterations++;
 
     for (let ci = 0; ci < clusters.length; ci++) {
+      // Skip protected clusters (full-day, day-trip) — they should not donate or receive
+      if (protectedIndices?.has(ci)) continue;
+
       const cluster = clusters[ci];
       while (cluster.activities.length > maxPerCluster) {
         // Find the activity farthest from this cluster's centroid
@@ -425,10 +548,10 @@ function balanceClusterSizes(
         const activityToMove = cluster.activities[farthestIdx];
 
         // Find the smallest cluster to receive it
-        // Never move city activities INTO the day-trip cluster
+        // Never move city activities INTO protected clusters (day-trip, full-day)
         // With radius constraint: only move if the activity is within radius of the target cluster
         const candidates = clusters
-          .filter((c, idx) => c !== cluster && idx !== dayTripClusterIdx)
+          .filter((c, idx) => c !== cluster && !protectedIndices?.has(idx))
           .filter(c => {
             if (!maxClusterRadius || !activityToMove) return true;
             const distToTarget = calculateDistance(
@@ -453,6 +576,57 @@ function balanceClusterSizes(
       }
     }
   }
+
+  // Second pass: forced redistribution for severely unbalanced clusters
+  // If any cluster has more than avg+2 (or 7, whichever is larger), force-move to smallest (ignore radius)
+  const totalActivities = clusters.reduce((s, c) => s + c.activities.length, 0);
+  const avgSize = Math.round(totalActivities / clusters.length);
+  const hardMax = Math.max(avgSize + 2, 7); // Never more than avg+2 or 7, whichever is larger
+
+  for (let pass = 0; pass < 5; pass++) {
+    let didMove = false;
+    for (let ci = 0; ci < clusters.length; ci++) {
+      // Skip protected clusters
+      if (protectedIndices?.has(ci)) continue;
+      const cluster = clusters[ci];
+
+      while (cluster.activities.length > hardMax) {
+        // Find farthest non-must-see activity from centroid
+        let farthestIdx = -1;
+        let farthestDist = 0;
+        for (let i = 0; i < cluster.activities.length; i++) {
+          if (cluster.activities[i].mustSee) continue;
+          const d = calculateDistance(
+            cluster.activities[i].latitude, cluster.activities[i].longitude,
+            cluster.centroid.lat, cluster.centroid.lng
+          );
+          if (d > farthestDist) {
+            farthestDist = d;
+            farthestIdx = i;
+          }
+        }
+        if (farthestIdx === -1) break; // Only must-sees left
+
+        // Find smallest non-protected cluster (ignore radius constraint)
+        const target = clusters
+          .filter((c, idx) => c !== cluster && !protectedIndices?.has(idx))
+          .sort((a, b) => a.activities.length - b.activities.length)[0];
+
+        if (!target || target.activities.length >= hardMax) break;
+
+        const [moved] = cluster.activities.splice(farthestIdx, 1);
+        target.activities.push(moved);
+        recomputeCentroid(cluster);
+        recomputeCentroid(target);
+        didMove = true;
+
+        console.log(
+          `[Pipeline V2] balanceClusterSizes forced redistribution: moved "${moved.name}" from cluster with ${cluster.activities.length + 1} → ${cluster.activities.length} activities to cluster with ${target.activities.length} activities`
+        );
+      }
+    }
+    if (!didMove) break;
+  }
 }
 
 /**
@@ -464,7 +638,8 @@ function enforceMinimumClusterSize(
   clusters: ActivityCluster[],
   minPerCluster: number,
   dayTripClusterIdx: number,
-  numDays: number
+  numDays: number,
+  protectedIndices?: Set<number>
 ): void {
   const MAX_ITERATIONS = 30;
   let iterations = 0;
@@ -473,8 +648,8 @@ function enforceMinimumClusterSize(
     let madeProgress = false;
 
     for (let ci = 0; ci < clusters.length; ci++) {
-      // Skip day-trip cluster
-      if (ci === dayTripClusterIdx) continue;
+      // Skip protected clusters (day-trip, full-day) — they have their own size rules
+      if (protectedIndices?.has(ci)) continue;
 
       // Boundary days (first/last) get a relaxed minimum of 1
       const isBoundary = clusters[ci].dayNumber === 1 || clusters[ci].dayNumber === numDays;
@@ -485,12 +660,12 @@ function enforceMinimumClusterSize(
       const deficit = effectiveMin - clusters[ci].activities.length;
 
       for (let d = 0; d < deficit; d++) {
-        // Find the largest donor cluster (excluding day-trip and target)
+        // Find the largest donor cluster (excluding protected and target)
         // Donor must keep at least effectiveMin+1 activities after donation
         let donorIdx = -1;
         let donorSize = 0;
         for (let di = 0; di < clusters.length; di++) {
-          if (di === ci || di === dayTripClusterIdx) continue;
+          if (di === ci || protectedIndices?.has(di)) continue;
           const diIsBoundary = clusters[di].dayNumber === 1 || clusters[di].dayNumber === numDays;
           const diMin = diIsBoundary ? 1 : minPerCluster;
           // Donor must retain at least diMin + 1 activities (so it stays above minimum after giving)
@@ -544,6 +719,138 @@ function enforceMinimumClusterSize(
     }
 
     if (!madeProgress) break;
+  }
+}
+
+/**
+ * Proactive closure avoidance: move activities closed on their assigned day
+ * to other clusters where they're open.
+ */
+function handleDayClosures(
+  clusters: ActivityCluster[],
+  startDate: string,
+  durationDays: number
+): void {
+  for (const cluster of clusters) {
+    const dayDate = new Date(startDate);
+    dayDate.setDate(dayDate.getDate() + cluster.dayNumber - 1);
+
+    const closedActivities: ScoredActivity[] = [];
+    cluster.activities = cluster.activities.filter(act => {
+      if (!isActivityOpenOnDay(act, dayDate)) {
+        console.log(`[Cluster] "${act.name}" closed on Day ${cluster.dayNumber} (${DAY_NAMES_EN[dayDate.getDay()]}) — will try to swap`);
+        closedActivities.push(act);
+        return false;
+      }
+      return true;
+    });
+
+    // Try to place closed activities in other clusters where they're open
+    for (const closedAct of closedActivities) {
+      let placed = false;
+      for (const otherCluster of clusters) {
+        if (otherCluster === cluster) continue;
+        const otherDate = new Date(startDate);
+        otherDate.setDate(otherDate.getDate() + otherCluster.dayNumber - 1);
+        if (isActivityOpenOnDay(closedAct, otherDate)) {
+          otherCluster.activities.push(closedAct);
+          placed = true;
+          console.log(`[Cluster] Moved "${closedAct.name}" to Day ${otherCluster.dayNumber}`);
+          break;
+        }
+      }
+      if (!placed && closedAct.mustSee) {
+        // Must-see that can't be placed — put it back and log warning
+        cluster.activities.push(closedAct);
+        console.warn(`[Cluster] WARNING: Must-see "${closedAct.name}" closed on Day ${cluster.dayNumber} but no alternative day found`);
+      }
+    }
+
+    // Recompute centroid after moving activities
+    if (cluster.activities.length > 0) {
+      recomputeCentroid(cluster);
+    }
+  }
+}
+
+/**
+ * Inter-cluster 2-opt: try swapping non-must-see activities between days
+ * to reduce total intra-cluster distance.
+ */
+function interClusterSwap(clusters: ActivityCluster[]): void {
+  const routeCost = (cluster: ActivityCluster): number => {
+    let cost = 0;
+    for (let i = 1; i < cluster.activities.length; i++) {
+      cost += calculateDistance(
+        cluster.activities[i - 1].latitude,
+        cluster.activities[i - 1].longitude,
+        cluster.activities[i].latitude,
+        cluster.activities[i].longitude
+      );
+    }
+    return cost;
+  };
+
+  let improvements = 0;
+  const MAX_PASSES = 5;
+
+  for (let pass = 0; pass < MAX_PASSES; pass++) {
+    let passImprovements = 0;
+
+    for (let i = 0; i < clusters.length; i++) {
+      for (let j = i + 1; j < clusters.length; j++) {
+        // Rebuild swappable lists fresh each pair to avoid stale references
+        let madeSwap = true;
+        while (madeSwap) {
+          madeSwap = false;
+          const swappableA = clusters[i].activities.filter(a => !a.mustSee);
+          const swappableB = clusters[j].activities.filter(a => !a.mustSee);
+
+          for (const actA of swappableA) {
+            if (madeSwap) break;
+            for (const actB of swappableB) {
+              if (madeSwap) break;
+              const idxA = clusters[i].activities.indexOf(actA);
+              const idxB = clusters[j].activities.indexOf(actB);
+              if (idxA === -1 || idxB === -1) continue; // Safety check
+
+              const costBefore = routeCost(clusters[i]) + routeCost(clusters[j]);
+
+              // Swap
+              clusters[i].activities[idxA] = actB;
+              clusters[j].activities[idxB] = actA;
+
+              const costAfter = routeCost(clusters[i]) + routeCost(clusters[j]);
+
+              if (costAfter < costBefore - 0.1) {
+                passImprovements++;
+                madeSwap = true; // Restart with fresh swappable lists
+              } else {
+                // Revert
+                clusters[i].activities[idxA] = actA;
+                clusters[j].activities[idxB] = actB;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    improvements += passImprovements;
+    if (passImprovements === 0) break; // No more improvements possible
+  }
+
+  if (improvements > 0) {
+    console.log(`[Cluster] Inter-cluster swap: ${improvements} improvements`);
+    // Recalculate centroids after swaps
+    for (const cluster of clusters) {
+      if (cluster.activities.length > 0) {
+        cluster.centroid = {
+          lat: cluster.activities.reduce((s, a) => s + a.latitude, 0) / cluster.activities.length,
+          lng: cluster.activities.reduce((s, a) => s + a.longitude, 0) / cluster.activities.length,
+        };
+      }
+    }
   }
 }
 

@@ -13,10 +13,11 @@ import { classifyExperienceCategory } from './utils/activityDedup';
 import { fixAttractionDuration, fixAttractionCost } from '../tripAttractions';
 import { findKnownViatorProduct } from '../services/viatorKnownProducts';
 import { calculateDistance } from '../services/geocoding';
-import { classifyOutdoorIndoor } from './utils/constants';
+import { classifyOutdoorIndoor, getMinDuration, getMaxDuration } from './utils/constants';
 import { isViatorGenericPrivateTourCandidate, scoreViatorPlusValue } from '../services/viator';
 import { isMonumentLikeActivityName } from '../services/officialTicketing';
 import { isGarbageActivity } from './utils/garbage-filter';
+import { validateCoordinate, isPlausibleCoordinate } from './utils/coordinate-validator';
 
 const MAX_GENERIC_PRIVATE_VIATOR = 1;
 const DISTINCTIVE_VIATOR_EXPERIENCE_KEYWORDS = [
@@ -53,6 +54,14 @@ const MEAL_INCLUSIVE_KEYWORDS = [
   'includes lunch', 'includes dinner', 'déjeuner inclus', 'dîner inclus',
   'repas inclus', 'meal included', 'menu dégustation',
 ];
+
+// ─── Additional keyword patterns for reinforced personalization ─────────────
+
+const ROMANTIC_KEYWORDS = /sunset|viewpoint|cruise|jardin|garden|spa|wine|rooftop/i;
+const KID_FRIENDLY_KEYWORDS = /zoo|aquarium|park|playground|amusement|disney|lego/i;
+const NIGHTLIFE_KEYWORDS = /bar|club|pub|jazz|cabaret|flamenco|opera|show|concert/i;
+const FOOD_TOUR_KEYWORDS = /food tour|cooking class|market tour|wine tasting|gastronom/i;
+const ADVENTURE_KEYWORDS = /hike|kayak|surf|climb|zip.?line|rafting|diving|paraglid/i;
 
 // ─── Contextual scoring dictionaries ────────────────────────────────────────
 
@@ -184,11 +193,26 @@ export function scoreAndSelectActivities(
     a => a.latitude && a.longitude && a.latitude !== 0 && a.longitude !== 0
   );
 
-  // 2b. Reject GPS outliers: activities >50km from destination center
-  // Catches cross-city contamination (e.g., "Palais de Tokyo" in Paris appearing in a Tokyo trip)
+  // 2b. Reject GPS outliers: activities >50km from destination center.
+  // Catches cross-city contamination (e.g., "Palais de Tokyo" in Paris appearing in a Tokyo trip).
+  //
+  // Must-see activities use a wider threshold:
+  //   - ≤150km  → accepted (covers day-trip landmarks like Mont Fuji from Tokyo at 91km)
+  //   - >150km  → kept but tagged as a day-trip candidate with a warning log
+  //     (e.g., "Fushimi Inari-taisha" specified while planning Tokyo)
+  // Non-must-see activities keep the strict 50km cap.
   const MAX_ACTIVITY_DIST_KM = 50;
+  const MAX_MUST_SEE_DIST_KM = 150;
   const gpsFiltered = withGPS.filter(a => {
     const dist = calculateDistance(a.latitude, a.longitude, data.destCoords.lat, data.destCoords.lng);
+    if (a.mustSee || a.source === 'mustsee') {
+      if (dist > MAX_MUST_SEE_DIST_KM) {
+        console.warn(`[Pipeline V2] ⚠️ Must-see far from destination: "${a.name}" (${dist.toFixed(0)}km > ${MAX_MUST_SEE_DIST_KM}km) — keeping as day-trip candidate`);
+        (a as any).dayTripCandidate = true;
+        return true;
+      }
+      return true;
+    }
     if (dist > MAX_ACTIVITY_DIST_KM) {
       console.log(`[Pipeline V2] ❌ GPS outlier rejected: "${a.name}" (${dist.toFixed(0)}km from destination, max ${MAX_ACTIVITY_DIST_KM}km)`);
       return false;
@@ -361,6 +385,30 @@ export function scoreAndSelectActivities(
     console.log(`[Pipeline V2] Excluded ${beforeViatorGpsFilter - scored.length} Viator activities with unreliable GPS (city-center fallback)`);
   }
 
+  // 5c. Validate and filter coordinates using coordinate-validator.
+  // Filters out invalid coordinates and auto-corrects swapped lat/lng.
+  // Must-see activities use a wider distance cap (500km) to avoid re-rejecting
+  // far day-trip landmarks that were deliberately kept by the outlier filter above.
+  const destCoords = data.destCoords;
+  scored = scored.filter(act => {
+    if (!isPlausibleCoordinate(act.latitude, act.longitude)) {
+      console.log(`[Score] Dropping "${act.name}" — invalid coordinates (${act.latitude}, ${act.longitude})`);
+      return false;
+    }
+    const maxDistKm = (act.mustSee || act.source === 'mustsee') ? 500 : 100;
+    const validation = validateCoordinate(act.latitude, act.longitude, destCoords, maxDistKm);
+    if (!validation.valid) {
+      console.log(`[Score] Dropping "${act.name}" — ${validation.reason}`);
+      return false;
+    }
+    if (validation.corrected) {
+      console.log(`[Score] Correcting "${act.name}" coords: ${validation.reason}`);
+      act.latitude = validation.corrected.lat;
+      act.longitude = validation.corrected.lng;
+    }
+    return true;
+  });
+
   // 6. Sort by score descending
   scored.sort((a, b) => b.score - a.score);
 
@@ -432,6 +480,14 @@ export function scoreAndSelectActivities(
       if (viatorData.openingHours) {
         fixed = { ...fixed, openingHours: viatorData.openingHours };
       }
+    }
+
+    // Clamp duration to min/max rules from constants.ts
+    const minDur = getMinDuration(fixed.name || '', fixed.type || '');
+    const maxDur = getMaxDuration(fixed.name || '', fixed.type || '');
+    fixed.duration = Math.max(minDur, fixed.duration || minDur);
+    if (maxDur !== null) {
+      fixed.duration = Math.min(maxDur, fixed.duration);
     }
 
     return fixed;
@@ -760,6 +816,33 @@ function computeScore(
   // Factor 9: Preference depth — reward tags that reinforce selected preferences, penalize contradictions
   const preferenceDepthBonus = computePreferenceDepth(tags, preferences.activities || []);
 
+  // Factor 9b: Reinforced personalization — keyword-based scoring by groupType and user preferences
+  let personalizationBonus = 0;
+  const actText = `${activity.name || ''} ${(activity as any).description || ''}`;
+
+  // Group type modifiers
+  if (preferences.groupType === 'couple') {
+    if (ROMANTIC_KEYWORDS.test(actText)) personalizationBonus += 15;
+    if (KID_FRIENDLY_KEYWORDS.test(actText)) personalizationBonus -= 5;
+  } else if (preferences.groupType === 'family_with_kids') {
+    if (KID_FRIENDLY_KEYWORDS.test(actText)) personalizationBonus += 15;
+    if (NIGHTLIFE_KEYWORDS.test(actText)) personalizationBonus -= 20;
+  } else if (preferences.groupType === 'friends') {
+    if (NIGHTLIFE_KEYWORDS.test(actText)) personalizationBonus += 10;
+  }
+
+  // User activity preferences modifiers
+  const userActivities = preferences.activities || [];
+  if (userActivities.includes('gastronomy')) {
+    if (FOOD_TOUR_KEYWORDS.test(actText)) personalizationBonus += 10;
+  }
+  if (userActivities.includes('adventure')) {
+    if (ADVENTURE_KEYWORDS.test(actText)) personalizationBonus += 15;
+  }
+  if (userActivities.includes('culture')) {
+    if (/museum|gallery|cathedral/i.test(actText)) personalizationBonus += 5;
+  }
+
   // Factor 10: Proximity penalty — soft penalty for activities far from the activity centroid
   // Favors selecting geographically grouped activities, reducing cross-city zigzag
   let proximityPenalty = 0;
@@ -797,7 +880,7 @@ function computeScore(
   }
 
   return mustSeeBonus + popularityScore + ratingScore + typeMatchBonus + viatorBonus
-    + reliabilityBonus + distancePenalty + contextFitBonus + preferenceDepthBonus + proximityPenalty + budgetPenalty + stadiumPenalty;
+    + reliabilityBonus + distancePenalty + contextFitBonus + preferenceDepthBonus + personalizationBonus + proximityPenalty + budgetPenalty + stadiumPenalty;
 }
 
 // ─── Contextual scoring helpers ─────────────────────────────────────────────

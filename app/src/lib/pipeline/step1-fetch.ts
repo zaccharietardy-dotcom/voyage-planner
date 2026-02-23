@@ -102,8 +102,14 @@ export async function fetchAllData(preferences: TripPreferences, onEvent?: OnPip
   // Phase 0: Geocoding (needed by subsequent calls)
   onEvent?.({ type: 'api_call', step: 1, label: 'Geocoding', timestamp: Date.now() });
   const [originCoords, destCoords, originAirports, destAirports] = await Promise.all([
-    getCityCenterCoordsAsync(origin).then(c => c || { lat: 48.8566, lng: 2.3522 }),
-    getCityCenterCoordsAsync(destination).then(c => c || { lat: 48.8566, lng: 2.3522 }),
+    getCityCenterCoordsAsync(origin).then(c => {
+      if (!c) throw new Error(`[Pipeline] Geocoding failed for origin: ${origin}. Cannot proceed without valid coordinates.`);
+      return c;
+    }),
+    getCityCenterCoordsAsync(destination).then(c => {
+      if (!c) throw new Error(`[Pipeline] Geocoding failed for destination: ${destination}. Cannot proceed without valid coordinates.`);
+      return c;
+    }),
     findNearbyAirportsAsync(origin),
     findNearbyAirportsAsync(destination),
   ]);

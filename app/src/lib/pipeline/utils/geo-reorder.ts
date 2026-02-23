@@ -11,6 +11,53 @@
 
 import type { TripItem } from '../../types';
 import { calculateDistance } from '../../services/geocoding';
+import { getActivityMaxEndTime, getActivityMinStartTime } from './opening-hours';
+import type { ScoredActivity } from '../types';
+
+/**
+ * Compute opening hours penalty for a route order.
+ * Activities that close early should be visited earlier in the route.
+ * Activities that open late should be visited later.
+ *
+ * Returns a penalty in "equivalent km" (0-2km range) to be added to route cost.
+ */
+function openingHoursPenalty(
+  activities: TripItem[],
+  dayDate: Date
+): number {
+  let penalty = 0;
+  const n = activities.length;
+  if (n <= 1) return 0;
+
+  for (let i = 0; i < n; i++) {
+    const position = i / (n - 1); // 0 = first, 1 = last
+
+    // Cast to ScoredActivity to access opening hours data
+    const activity = activities[i] as unknown as ScoredActivity;
+
+    // Penalty for early-closing venues placed late in the route
+    const maxEnd = getActivityMaxEndTime(activity, dayDate);
+    if (maxEnd) {
+      const closeHour = maxEnd.getHours() + maxEnd.getMinutes() / 60;
+      if (closeHour <= 17 && position > 0.6) {
+        // Venue closes at 17h or earlier but is placed in the last 40% of the route
+        penalty += (position - 0.4) * 1.5; // Up to ~0.9km equivalent penalty
+      }
+    }
+
+    // Penalty for late-opening venues placed first in the route
+    const minStart = getActivityMinStartTime(activity, dayDate);
+    if (minStart) {
+      const openHour = minStart.getHours() + minStart.getMinutes() / 60;
+      if (openHour >= 10 && position < 0.3) {
+        // Venue opens at 10h or later but is placed in the first 30% of the route
+        penalty += (0.3 - position) * 1.0; // Up to ~0.3km equivalent penalty
+      }
+    }
+  }
+
+  return penalty;
+}
 
 /**
  * Reorders activity items in a day to minimize total travel distance.
@@ -18,13 +65,17 @@ import { calculateDistance } from '../../services/geocoding';
  * @param items - All items for the day (activities, restaurants, transport, etc.)
  * @param hotelLat - Hotel latitude (start/end point for the route)
  * @param hotelLng - Hotel longitude
+ * @param dayDate - Optional day date for opening hours penalty (defaults to neutral Monday)
  * @returns New array with activities reordered; non-activity items unchanged
  */
 export function geoReorderDayItems(
   items: TripItem[],
   hotelLat: number,
-  hotelLng: number
+  hotelLng: number,
+  dayDate?: Date
 ): TripItem[] {
+  // Default to neutral Monday if no date provided
+  const effectiveDate = dayDate || new Date(2026, 0, 5); // Monday, Jan 5, 2026
   // Separate activities (reorderable) from anchors (fixed)
   const activities = items.filter(
     (it) =>
@@ -41,7 +92,7 @@ export function geoReorderDayItems(
     return items;
   }
 
-  // Cost function: total distance of the route (hotel → activities → hotel)
+  // Cost function: total distance of the route (hotel → activities → hotel) + opening hours penalty
   const routeCost = (route: TripItem[]): number => {
     if (route.length === 0) return 0;
     let total = 0;
@@ -72,7 +123,11 @@ export function geoReorderDayItems(
 
     // Penalize any single leg > 4km heavily
     const maxLegPenalty = Math.max(0, maxLeg - 4) * 2.5;
-    return total + longLegPenalty + maxLegPenalty;
+
+    // Add opening hours penalty (activities with early closing should come earlier in route)
+    const hoursPenalty = openingHoursPenalty(route, effectiveDate);
+
+    return total + longLegPenalty + maxLegPenalty + hoursPenalty;
   };
 
   // Phase 1: Greedy nearest-neighbor from each possible starting activity

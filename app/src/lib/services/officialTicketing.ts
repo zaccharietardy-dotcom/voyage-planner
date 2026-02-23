@@ -223,3 +223,73 @@ export function resolveOfficialTicketing(activity: {
   return null;
 }
 
+/**
+ * Check if activity is likely a paid attraction (museum, monument, etc.)
+ * that would benefit from ticketing links (Viator, Tiqets).
+ */
+export function isPaidAttraction(name?: string): boolean {
+  if (!name) return false;
+  const normalized = normalize(name);
+  return /museum|musee|museo|gallery|galerie|galleria|palace|palais|palazzo|castle|chateau|cathedral|cathedrale|basilica|tower|tour(?!ism)|torre|monument|colosseum|colisee|aquarium|zoo|opera|theater|theatre/.test(normalized);
+}
+
+/**
+ * Generate Viator search URL for an activity.
+ * Viator specializes in guided tours and skip-the-line tickets.
+ */
+export function getViatorSearchUrl(activityName: string, city: string): string {
+  const query = encodeURIComponent(`${activityName} ${city}`);
+  return `https://www.viator.com/searchResults/all?text=${query}`;
+}
+
+/**
+ * Generate Tiqets search URL for an activity.
+ * Tiqets specializes in museum and attraction tickets.
+ */
+export function getTiqetsSearchUrl(activityName: string, city: string): string {
+  const query = encodeURIComponent(`${activityName} ${city}`);
+  return `https://www.tiqets.com/en/search?query=${query}`;
+}
+
+/**
+ * Enrich TripItems with ticketing links (official + Viator + Tiqets).
+ * Mutates the items array in place.
+ */
+export function enrichWithTicketingLinks(
+  items: Array<{
+    type: string;
+    title?: string;
+    locationName?: string;
+    officialBookingUrl?: string;
+    viatorUrl?: string;
+    tiqetsUrl?: string;
+  }>,
+  city: string
+): void {
+  for (const item of items) {
+    if (item.type !== 'activity') continue;
+    const activityName = item.title || item.locationName;
+    if (!activityName) continue;
+
+    const titleLower = activityName.toLowerCase();
+
+    // Official booking URL (from known table)
+    if (!item.officialBookingUrl) {
+      const match = resolveOfficialTicketing({ name: activityName }, city);
+      if (match) {
+        item.officialBookingUrl = match.officialUrl;
+      }
+    }
+
+    // Only add Viator/Tiqets links for paid attractions (museums, monuments, etc.)
+    if (isPaidAttraction(titleLower)) {
+      if (!item.viatorUrl) {
+        item.viatorUrl = getViatorSearchUrl(activityName, city);
+      }
+      if (!item.tiqetsUrl) {
+        item.tiqetsUrl = getTiqetsSearchUrl(activityName, city);
+      }
+    }
+  }
+}
+

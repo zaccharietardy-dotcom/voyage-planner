@@ -32,6 +32,8 @@ import type { Attraction } from '../services/attractions';
 import { calculateDistance } from '../services/geocoding';
 import { dedupeActivitiesBySimilarity } from './utils/activityDedup';
 import { getMinDuration, estimateActivityCost } from './utils/constants';
+import { searchGooglePlacesAttractions } from './services/googlePlacesAttractions';
+import { searchRestaurantsWithFallback } from '../services/serpApiPlaces';
 
 // ============================================
 // 1. Merge and deduplicate activities
@@ -449,7 +451,178 @@ function formatActivityForLLM(activity: ScoredActivity): LLMActivityInput {
 }
 
 // ============================================
-// 7. Main function: Prepare data for LLM
+// 7. Detect far must-sees as implicit day trips
+// ============================================
+
+/**
+ * Detects must-see activities that are far from the destination (>10km)
+ * and should be promoted to dedicated day-trip days instead of being
+ * mixed into the city activity pool.
+ *
+ * Example: Pompei (25km from Naples), Kamakura (50km from Tokyo)
+ */
+function detectFarMustSees(
+  llmActivities: LLMActivityInput[],
+  destCoords: { lat: number; lng: number },
+  hotelCoords: { lat: number; lng: number } | null,
+  existingDayTrips: DayTripSuggestion[],
+  durationDays: number
+): LLMActivityInput[] {
+  // No day trip possible for 1-day trips
+  if (durationDays <= 1) return [];
+
+  const FAR_THRESHOLD_KM = 10;
+
+  // Max implicit day trips: keep at least 50% of days for city
+  // For 2-day trip: max 1 implicit day trip
+  // For 3-day trip: max 1
+  // For 5-day trip: max 2
+  const maxImplicit = Math.max(1, Math.floor((durationDays - 1) / 2));
+
+  // Existing day-trip coords for dedup check
+  const existingDtCoords = existingDayTrips.map(dt => ({
+    lat: dt.latitude,
+    lng: dt.longitude,
+  }));
+
+  const candidates: { activity: LLMActivityInput; distFromDest: number }[] = [];
+
+  for (const act of llmActivities) {
+    // Only consider must-sees or high-scoring activities (avoid promoting minor POIs)
+    if (!act.mustSee) continue;
+
+    const distFromDest = calculateDistance(act.lat, act.lng, destCoords.lat, destCoords.lng);
+
+    // Must be far from destination
+    if (distFromDest <= FAR_THRESHOLD_KM) continue;
+
+    // Must also be far from hotel (if hotel is outside city center, don't flag nearby activities)
+    if (hotelCoords) {
+      const distFromHotel = calculateDistance(act.lat, act.lng, hotelCoords.lat, hotelCoords.lng);
+      if (distFromHotel <= FAR_THRESHOLD_KM) continue;
+    }
+
+    // Check if there's already a curated day trip near this location (within 5km)
+    const alreadyCovered = existingDtCoords.some(
+      dt => calculateDistance(act.lat, act.lng, dt.lat, dt.lng) < 5
+    );
+    if (alreadyCovered) continue;
+
+    candidates.push({ activity: act, distFromDest });
+  }
+
+  // Sort by distance (farthest first — they benefit most from dedicated days)
+  candidates.sort((a, b) => b.distFromDest - a.distFromDest);
+
+  // Also limit by remaining day budget (existing curated day trips count against total)
+  const existingDayTripCount = existingDayTrips.length;
+  const remainingSlots = Math.max(0, maxImplicit - existingDayTripCount);
+
+  return candidates.slice(0, remainingSlots).map(c => c.activity);
+}
+
+/**
+ * Fetches activities and restaurants near far must-sees to build
+ * synthetic day-trip data (parallel fetches for all destinations).
+ */
+async function fetchImplicitDayTripData(
+  farActivities: LLMActivityInput[],
+  destCoords: { lat: number; lng: number }
+): Promise<{
+  syntheticDayTrips: {
+    name: string;
+    destination: string;
+    distanceKm: number;
+    transportMode: 'train' | 'bus' | 'car' | 'ferry' | 'RER' | 'metro';
+    transportDurationMin: number;
+    transportCostPerPerson: number;
+    forcedDate: string | undefined;
+    fullDayRequired: boolean;
+    activityIds: string[];
+    restaurantIds: string[];
+    coordinates: { lat: number; lng: number };
+  }[];
+  additionalDayTripActivities: Record<string, Attraction[]>;
+  additionalDayTripRestaurants: Record<string, Restaurant[]>;
+}> {
+  const syntheticDayTrips: {
+    name: string;
+    destination: string;
+    distanceKm: number;
+    transportMode: 'train' | 'bus' | 'car' | 'ferry' | 'RER' | 'metro';
+    transportDurationMin: number;
+    transportCostPerPerson: number;
+    forcedDate: string | undefined;
+    fullDayRequired: boolean;
+    activityIds: string[];
+    restaurantIds: string[];
+    coordinates: { lat: number; lng: number };
+  }[] = [];
+  const additionalDayTripActivities: Record<string, Attraction[]> = {};
+  const additionalDayTripRestaurants: Record<string, Restaurant[]> = {};
+
+  // Fetch data for all far must-sees in parallel
+  const fetches = farActivities.map(async (act) => {
+    const dtName = act.name;
+    const dtCoords = { lat: act.lat, lng: act.lng };
+    const distFromDest = calculateDistance(act.lat, act.lng, destCoords.lat, destCoords.lng);
+
+    try {
+      const [actsResult, restosResult] = await Promise.allSettled([
+        searchGooglePlacesAttractions(dtName, dtCoords, { limit: 10 }),
+        searchRestaurantsWithFallback(dtName, {
+          latitude: dtCoords.lat,
+          longitude: dtCoords.lng,
+          limit: 6,
+        }),
+      ]);
+
+      const activities = actsResult.status === 'fulfilled' ? actsResult.value.slice(0, 10) : [];
+      const restaurants = restosResult.status === 'fulfilled' ? restosResult.value.slice(0, 8) : [];
+
+      // Tag activities with day trip destination
+      for (const a of activities) {
+        (a as any).dayTripDestination = dtName;
+      }
+
+      additionalDayTripActivities[dtName] = activities;
+      additionalDayTripRestaurants[dtName] = restaurants;
+
+      console.log(
+        `[Pipeline V2 LLM] Step 2: Fetched implicit day-trip data for "${dtName}": ${activities.length} activities, ${restaurants.length} restaurants`
+      );
+    } catch (e) {
+      console.warn(
+        `[Pipeline V2 LLM] Step 2: Failed to fetch implicit day-trip data for "${dtName}":`,
+        e instanceof Error ? e.message : e
+      );
+      additionalDayTripActivities[dtName] = [];
+      additionalDayTripRestaurants[dtName] = [];
+    }
+
+    // Build synthetic day-trip object
+    syntheticDayTrips.push({
+      name: dtName,
+      destination: dtName,
+      distanceKm: Math.round(distFromDest),
+      transportMode: distFromDest > 50 ? 'train' : 'bus',
+      transportDurationMin: Math.round(distFromDest * 1.5),
+      transportCostPerPerson: 0,
+      forcedDate: undefined,
+      fullDayRequired: true,
+      activityIds: [],
+      restaurantIds: [],
+      coordinates: dtCoords,
+    });
+  });
+
+  await Promise.allSettled(fetches);
+
+  return { syntheticDayTrips, additionalDayTripActivities, additionalDayTripRestaurants };
+}
+
+// ============================================
+// 8. Main function: Prepare data for LLM
 // ============================================
 
 /**
@@ -457,14 +630,14 @@ function formatActivityForLLM(activity: ScoredActivity): LLMActivityInput {
  *
  * This is the main entry point for step 2.
  */
-export function prepareDataForLLM(
+export async function prepareDataForLLM(
   data: FetchedData,
   preferences: TripPreferences,
   hotel: Accommodation | null,
   transport: TransportOptionSummary | null,
   outboundFlight: Flight | null,
   returnFlight: Flight | null
-): PreparedLLMData {
+): Promise<PreparedLLMData> {
   // 1. Merge and deduplicate activities
   const mergedActivities = mergeAndDeduplicateActivities(data);
 
@@ -517,8 +690,33 @@ export function prepareDataForLLM(
     };
   });
 
+  // 6b. Detect far must-sees and promote to implicit day trips
+  const farMustSees = detectFarMustSees(
+    llmActivities, data.destCoords, hotelCoords, dayTripSuggestions, preferences.durationDays
+  );
+
+  let allDayTripsForBuilder = dayTripsForBuilder;
+  if (farMustSees.length > 0) {
+    const { syntheticDayTrips, additionalDayTripActivities, additionalDayTripRestaurants } =
+      await fetchImplicitDayTripData(farMustSees, data.destCoords);
+
+    // Merge fetched data into FetchedData records so buildDayTripDays can find them
+    for (const [dest, acts] of Object.entries(additionalDayTripActivities)) {
+      data.dayTripActivities[dest] = acts;
+    }
+    for (const [dest, restos] of Object.entries(additionalDayTripRestaurants)) {
+      data.dayTripRestaurants[dest] = restos;
+    }
+
+    allDayTripsForBuilder = [...dayTripsForBuilder, ...syntheticDayTrips];
+
+    console.log(
+      `[Pipeline V2 LLM] Step 2: Detected ${farMustSees.length} implicit day trip(s): ${farMustSees.map(a => a.name).join(', ')}`
+    );
+  }
+
   const { dayTripDays: prePlannedDayTripDays, reservedDayNumbers } = buildDayTripDays(
-    dayTripsForBuilder,
+    allDayTripsForBuilder,
     data,
     llmHotelForBuilder,
     llmRestaurants,
@@ -527,11 +725,11 @@ export function prepareDataForLLM(
   );
 
   // 7. Filter out day-trip activities from LLM pool (they're handled by the pre-planned days)
-  if (dayTripSuggestions.length > 0) {
-    const dayTripCoords = dayTripSuggestions.map(dt => ({
+  if (allDayTripsForBuilder.length > 0) {
+    const dayTripCoords = allDayTripsForBuilder.map(dt => ({
       name: dt.destination || dt.name,
-      lat: dt.latitude,
-      lng: dt.longitude,
+      lat: dt.coordinates.lat,
+      lng: dt.coordinates.lng,
     }));
 
     const beforeCount = llmActivities.length;
@@ -584,7 +782,7 @@ export function prepareDataForLLM(
 
   // 11. Build dayTrips metadata for step4-assemble (transport injection).
   //     Activities/restaurants are NOT in LLM pools — they're in prePlannedDayTripDays.
-  const dayTripsForLLM = dayTripsForBuilder;
+  const dayTripsForLLM = allDayTripsForBuilder;
 
   // 12. Assemble final LLMPlannerInput
   const input: LLMPlannerInput = {

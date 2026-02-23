@@ -1,140 +1,148 @@
-# Voyage Planner - Pipeline V2 Architecture
+# Voyage Planner — Documentation Pipeline
 
-> Derniere mise a jour : Fevrier 2026
+> Dernière mise à jour : Février 2026
 
-## Quick Commands
+## Aperçu
+
+Application de planification de voyages. Génère des itinéraires détaillés et optimisés avec activités, restaurants, hôtel et transport.
+
+**Stack** : Next.js 15, React 19, TypeScript, Tailwind CSS, Supabase, Leaflet
+**Pipeline** : V3 déterministe (V2-LLM en legacy)
+
+## Architecture Pipeline V3
+
+```
+Step 1:  fetchAllData()            — Fetch parallel (Google Places, Viator, SerpAPI, Booking, Weather)
+Step 2:  scoreAndRank()            — Score Bayésien + clamp durées + validation coords + perso groupType
+Step 3:  selectHotel()             — 3 tiers (budget/mid/premium) par barycentre activités
+Step 4:  anchorTransport()         — Fenêtres temporelles par jour (arrivée/départ)
+Step 5:  extractDayTrips()         — Day trips + détection implicite must-sees >10km
+Step 6:  clusterByDay()            — Clustering hiérarchique + capacité temporelle + fermetures jour
+Step 7:  routeWithinDays()         — 2-opt intra-jour + pénalité horaires d'ouverture
+Step 7b: computeTravelTimes()      — Google Directions API sélective (>1km only)
+Step 8:  placeRestaurants()        — Placement exact repas, 3 alternatives, dietary filter, 800m hard cap
+Step 9:  scheduleTimeline()        — Scheduler single-pass + gap-fill progressif + opening hours
+Step 10: repairPass()              — Swap cross-day, remplacement, extension, must-see injection
+Step 11: validateContracts()       — 8 invariants P0 + score qualité 0-100
+Step 12: decorateWithLLM()         — Thèmes/narratifs optionnels (OFF par défaut)
+```
+
+## Invariants P0 (Contract Layer)
+
+| # | Invariant | Auto-fix |
+|---|-----------|----------|
+| P0.1 | Aucune activité hors horaires d'ouverture | Swap cross-day |
+| P0.2 | Aucun restaurant à >800m de son ancre repas | Re-search |
+| P0.3 | Pas de jour plein sans déjeuner ni dîner | Inject closest |
+| P0.4 | Pas de fallback géo silencieux | Hard error |
+| P0.5 | Pas de coordonnées (0,0) ou hors zone | Drop activité |
+| P0.6 | Pas de POI cross-country | Drop activité |
+| P0.7 | Durées activités dans bornes min/max | Clamp |
+| P0.8 | Must-sees tous présents | Re-inject + éviction |
+
+## APIs Utilisées
+
+| API | Service | Usage |
+|-----|---------|-------|
+| Google Places (New) | `googlePlacesAttractions.ts` | Attractions + horaires + photos |
+| Google Directions | `directions.ts` | Temps de trajet réels (sélectif) |
+| SerpAPI (Google Maps) | `serpApiPlaces.ts` | Restaurants |
+| Booking.com (RapidAPI) | `bookingHotels.ts` | Hôtels |
+| Viator Partner | `viatorActivities.ts` | Activités + durées + liens |
+| Open-Meteo | `weather.ts` | Météo 7 jours |
+| Overpass/OSM | `overpassAttractions.ts` | POI complémentaires |
+| Nominatim | `geocoding.ts` | Géocodage (gratuit) |
+| Wikipedia | `wikipedia.ts` | Descriptions enrichies |
+| Claude/Gemini | `llm.ts` | Décoration optionnelle |
+
+## Fichiers Pipeline Principaux
+
+```
+pipeline/
+├── index.ts                    — Orchestrateur V3 + multi-city + V2 legacy
+├── step1-fetch.ts              — Fetch parallel toutes APIs
+├── step2-score.ts              — Score Bayésien + clamp + coords + perso
+├── step3-cluster.ts            — Clustering hiérarchique + capacité + closures + 2-opt inter
+├── step4-anchor-transport.ts   — Fenêtres temporelles transport
+├── step4-restaurants.ts        — Helpers restaurant (meal suitability, cuisine family)
+├── step5-hotel.ts              — Sélection hôtel 3 tiers
+├── step7-assemble.ts           — Assemblage V2 (legacy, 6000+ lignes)
+├── step7b-travel-times.ts      — Directions API sélective
+├── step8-place-restaurants.ts  — Placement restaurant exact + dietary
+├── step10-repair.ts            — Repair pass (swap, replace, extend)
+├── step11-contracts.ts         — Contract Layer (8 invariants P0)
+├── step12-decorate.ts          — Décoration LLM optionnelle
+├── scheduler.ts                — Scheduler single-pass + gap-fill progressif
+├── qualityPolicy.ts            — Politique qualité restaurants
+├── types.ts                    — Types pipeline internes
+└── utils/
+    ├── opening-hours.ts        — Validation horaires d'ouverture
+    ├── coordinate-validator.ts — Validation GPS + auto-correction lat/lng
+    ├── constants.ts            — Durées min/max, coûts estimés, keywords
+    ├── geo-reorder.ts          — 2-opt intra-jour + pénalité horaires
+    ├── day-trip-builder.ts     — Construction jour day-trip déterministe
+    ├── activityDedup.ts        — Déduplication activités similaires
+    ├── accommodation.ts        — Helpers hébergement
+    └── cuisine.ts              — Classification cuisines
+```
+
+## Environment Variables
 
 ```bash
-npm run dev          # Dev server (localhost:3000)
-npm run build        # Production build
-npm test             # Jest tests
-npm run lint         # ESLint
-npx tsx test-pipeline.ts rome   # Test pipeline on a city (rome/barcelona/tokyo/marrakech/all)
+# Pipeline
+PIPELINE_VERSION=v3              # v3 | v2-llm | v2-algorithmic (default: v2-llm)
+PIPELINE_DIRECTIONS_MODE=selective  # selective | all | off (default: selective)
+PIPELINE_LLM_DECOR=off           # on | off (default: off)
+
+# APIs
+GOOGLE_MAPS_API_KEY=             # Google Places + Directions
+SERPAPI_API_KEY=                  # SerpAPI (restaurants)
+RAPIDAPI_KEY=                    # Booking.com
+VIATOR_API_KEY=                  # Viator Partner
+ANTHROPIC_API_KEY=               # Claude (décoration optionnelle)
 ```
 
-## Stack
+## Scoring Activités
 
-- **Next.js 16** (App Router) + **React 19** + **TypeScript 5.9**
-- **Supabase** (auth + DB) + **Stripe** (billing)
-- **Tailwind CSS 4** + **Radix UI** + **Framer Motion**
-- **Leaflet** (2D map) + **Cesium/Resium** (3D globe)
-- **Claude API** (`@anthropic-ai/sdk`) for day balancing (step 6) and chatbot modifications
+Score = `(bayesianRating/5)² × log₁₀(reviews+1) × 10 + contextBonus + mustSeeBonus`
 
-## Runtime Policy
+- **bayesianRating** : `(R × v + C × m) / (v + m)` (R=rating, v=votes, C=3.5, m=10)
+- **contextBonus** : ±15 selon groupType (couple/family/friends) + activités préférées
+- **mustSeeBonus** : +1000 pour les must-sees utilisateur
 
-- `/api/generate` runs **Pipeline V2 only**.
-- `src/lib/ai.ts` is retained temporarily for legacy/debug reference but is not used for new trip generation.
+Durées clampées : `clamp(viatorDuration || googleDuration || defaultByType, minRule, maxRule)`
 
-## Booking URL Policy (Hotels)
+## Restaurants
 
-- Primary hotel links must be direct Booking paths: `https://www.booking.com/hotel/{country}/{slug}.html`.
-- Date/guest params are always normalized (`checkin`, `checkout`, `group_adults`, `no_rooms`).
-- For hotel main booking links, fallback is direct slug generation, not `searchresults.html`.
-- Search links are allowed only as explicit UI actions (`Recherche Booking`, `Recherche Airbnb`).
+- 3 alternatives par repas, cuisines différentes
+- Score : `rating × log₂(reviews + 2) - distance × 10`
+- Hard cap 800m du point d'ancrage repas
+- Filtrage dietary : vegan, halal, gluten-free, vegetarian, kosher
+- Petit-déj < 500m hôtel, déjeuner < 500m activité mid-day, dîner < 500m dernière activité
 
-## Pipeline V2 - Trip Generation (20-40s target)
+## Multi-City
 
-The trip generation uses a **7-step pipeline** in `src/lib/pipeline/`. This is the ONLY active generation path. The old `src/lib/ai.ts` is legacy and NOT used for new trips.
+Quand `preferences.cityPlan` contient N villes :
+1. Run V3 indépendamment pour chaque ville
+2. Merge les segments avec offset jours
+3. Qualité = moyenne des scores segments
 
+## Performance
+
+| Étape | V2-LLM | V3 |
+|-------|--------|-----|
+| Total | 20-75s | 6-16s |
+| Coût | $0.10/trip | ~$0.06/trip |
+
+## Commandes
+
+```bash
+cd app
+npm run dev          # Dev server (port 3000)
+npm run build        # Build production
+npx tsc --noEmit     # Type check
+npm test             # Tests unitaires
 ```
-Step 1: fetchAllData()          — Parallel API calls (~5-15s)
-   Google Places + SerpAPI + Overpass + Viator + Hotels + Transport + Flights
-        |
-Step 2: scoreAndSelectActivities()  — Score, dedup, select top N (~0ms)
-   Quality filters, must-see boosting, brand loyalty
-        |
-Step 3: clusterActivities()    — Geographic clustering per day (~0ms)
-   Density profiling, radius-constrained clusters, 8-phase rebalancing
-        |
-Step 4: assignRestaurants()    — Proximity-first meal assignment (~0ms)
-   Pool from TripAdvisor + SerpAPI, distance-scored, cuisine diversity
-   Limits: breakfast <1.2km from hotel, lunch/dinner <2km from cluster ref
-        |
-Step 5: selectHotelByBarycenter()  — Hotel near activity centroid (~0ms)
-        |
-Step 6: balanceDaysWithClaude()    — Single Claude call (~10-15s)
-   Day themes, activity order, rest breaks, narrative
-   Falls back to deterministic order if no ANTHROPIC_API_KEY
-        |
-Step 7: assembleTripSchedule()     — Timed schedule + re-optimization (~2-5s)
-   Geographic route optimization (2-opt), restaurant re-opt near actual
-   activities, scheduler with priority queue, directions enrichment
-```
-
-### Pipeline Files
-
-| File | Role |
-|------|------|
-| `pipeline/index.ts` | Main orchestrator, supplemental restaurant fetching, cluster rebalancing |
-| `pipeline/step1-fetch.ts` | Parallel data fetching from all APIs |
-| `pipeline/step2-score.ts` | Activity scoring, dedup, must-see detection |
-| `pipeline/step3-cluster.ts` | K-means-like geographic clustering with density profiling |
-| `pipeline/step4-restaurants.ts` | Meal assignment with proximity + cuisine diversity |
-| `pipeline/step5-hotel.ts` | Hotel selection by weighted barycenter |
-| `pipeline/step6-balance.ts` | Claude-powered day ordering and theming |
-| `pipeline/step7-assemble.ts` | Schedule builder, restaurant re-optimization, directions |
-| `pipeline/types.ts` | ScoredActivity, ActivityCluster, MealAssignment, BalancedDay |
-| `pipeline/utils/dedup.ts` | Activity and restaurant deduplication |
-| `pipeline/utils/constants.ts` | Outdoor keywords, quality thresholds |
-
-### Restaurant Assignment (step4 + step7)
-
-**Step 4** assigns from a merged pool (TripAdvisor + SerpAPI):
-- Scores by distance + rating + review count
-- Cuisine diversity: 1 local + 2 different international per meal slot
-- Fine-grained cuisine families (23 types: japanese, italian, brasserie, bistro, etc.)
-- If pool is sparse near anchors, fetches supplemental SerpAPI data
-
-**Step 7** re-optimizes after geographic reordering:
-- CASE A (null restaurant): searches pool + API call via `searchRestaurantsNearby()`
-- CASE B (far restaurant): swaps with closer option from pool or API
-- Target: <500m from neighbor activity
-- Also refills alternatives within 1.2km
-
-### Cluster Rebalancing (8 phases in index.ts)
-
-The rebalancing in `rebalanceClustersForFlights()` runs 8 phases:
-1. Empty days — merge into nearest
-2. Duration-aware — move from overcrowded to underfull
-3. Ensure no empty days — steal from neighbors
-4. Must-see distribution — protect must-sees from eviction
-5. Final must-see guarantee — last resort eviction
-6. Fatigue balancing — max 2 heavy (>90min) per day
-7. Type diversity — max 2 same category per day
-7b. Must-see zone consolidation — group nearby must-sees
-8. Geographic KNN smoothing — move outliers to closer day
-8b. Cohesion enforcement — per-day radius limit
-8c. City-zone angle ordering — coherent geographic flow
-
-## Key Services
-
-| Service | File | API |
-|---------|------|-----|
-| Hotels | `services/rapidApiBooking.ts` | booking-com15.p.rapidapi.com |
-| Activities | `services/viator.ts` | api.viator.com/partner |
-| Attractions | `services/serpApiPlaces.ts` | serpapi.com (Google Maps) |
-| Attractions | `services/googlePlacesAttractions.ts` | Google Places API |
-| Attractions | `services/overpassAttractions.ts` | Overpass (OpenStreetMap) |
-| Restaurants | `services/serpApiPlaces.ts` | serpapi.com + Google Maps zoom |
-| Restaurants | `services/geminiSearch.ts` | Gemini + Google Search |
-| Flights | `services/flights.ts` | SerpAPI Google Flights |
-| Transport | `services/transport.ts` | Google Directions + DB HAFAS |
-| Geocoding | `services/geocoding.ts` | Google Geocoding |
-| Directions | `services/directions.ts` | Google Directions API |
-| AI (balance) | `services/claudeItinerary.ts` | Claude API |
-| AI (chatbot) | `services/chatbotModifier.ts` | Claude API |
-
-## API Routes
-
-| Route | Method | Purpose |
-|-------|--------|---------|
-| `/api/generate` | POST | Generate trip via Pipeline V2 |
-| `/api/trips` | GET/POST | List/create trips |
-| `/api/trips/[id]` | GET/PUT/DELETE | Trip CRUD |
-| `/api/trips/[id]/chat` | POST | Chatbot message |
-| `/api/trips/[id]/chat/apply` | POST | Apply chatbot changes |
-| `/api/attractions` | GET | Get attraction pool |
-| `/api/billing/checkout` | POST | Stripe checkout |
 
 ## Key Types (src/lib/types.ts)
 
@@ -142,7 +150,8 @@ The rebalancing in `rebalanceClustersForFlights()` runs 8 phases:
 TripPreferences {
   origin, destination, startDate: Date, durationDays,
   groupSize, groupType, transport, carRental,
-  budgetLevel, activities[], dietary[], mustSee?: string
+  budgetLevel, activities[], dietary[], mustSee?: string,
+  cityPlan?: { city: string; days: number }[]
 }
 
 Trip {
@@ -180,18 +189,8 @@ TripItem {
 | Type | Min Rating | Min Reviews | Max Distance |
 |------|-----------|-------------|--------------|
 | Attractions | 4.0 | 100 | — |
-| Restaurants | 3.7 | 50 | 2.0km (step4), 0.5km (step7) |
+| Restaurants | 3.5 | 50 | 0.8km |
 | Hotels | 7.0/10 | — | — |
-
-## Known Issues / Areas to Improve
-
-1. **Hotel distance**: Hotel can be far from activity zones (seen 4-15km in tests). The barycenter algorithm doesn't always pick central locations.
-2. **Hotel daily route**: The schedule doesn't explicitly show hotel departure/return each day. Activities start directly without "walk from hotel" context.
-3. **Restaurant breakfast on last day**: Falls back to "Petit-dejeuner a l'hotel" even when hotel doesn't include breakfast. The last-day path in step7 bypasses rescue logic.
-4. **Viator GPS resolution**: Many Viator activities lack precise coordinates. The coordsResolver sometimes picks wrong locations (e.g., "Palais de Tokyo" in Paris instead of Tokyo museum).
-5. **Must-see cramming on short trips**: 2-day trips can lose must-sees when too many are scheduled on day 1 with limited hours.
-6. **No ANTHROPIC_API_KEY in test**: Step 6 falls back to deterministic ordering, which doesn't produce optimal day themes or narratives.
-7. **TripAdvisor hotel parser**: `parsePrice` crashes on non-string price values (TypeError: priceStr.replace is not a function).
 
 ## Code Conventions
 
@@ -200,3 +199,11 @@ TripItem {
 - **Commits**: `feat:`, `fix:`, `refactor:` conventional format
 - **Imports**: relative paths within pipeline, absolute for services
 - Always `npm run build` before push
+
+## Known Issues / Areas to Improve
+
+1. **Hotel distance**: Hotel can be far from activity zones (4-15km in some tests). Barycenter doesn't always pick central locations.
+2. **Must-see cramming on short trips**: 2-day trips can lose must-sees when too many are scheduled on day 1.
+3. **Gap-fill aggressiveness**: Scheduler sometimes creates very dense days without enough rest breaks.
+4. **Viator GPS resolution**: Many Viator activities lack precise coordinates, requiring fallback resolution.
+5. **Restaurant alternatives**: Sometimes alternatives are from same cuisine family despite diversity rules.

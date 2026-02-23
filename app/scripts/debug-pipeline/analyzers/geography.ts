@@ -187,14 +187,18 @@ export function analyzeGeography(trip: Trip): AnalysisIssue[] {
         });
       }
 
-      // Trajet impossible : grande distance avec peu de temps
-      if (dist > 5 && gapMinutes < 15) {
+      // Estimate reasonable travel speed: ~30km/h urban (metro/taxi), ~60km/h intercity
+      const estimatedTravelMin = dist < 10 ? (dist / 30) * 60 : (dist / 50) * 60;
+      const hasEnoughTime = gapMinutes >= estimatedTravelMin;
+
+      // Trajet impossible : grande distance with not enough gap time
+      if (dist > 5 && !hasEnoughTime) {
         issues.push({
           severity: 'critical',
           category: 'geography',
-          message: `Jour ${day.dayNumber}: ${dist.toFixed(1)}km entre "${current.title}" et "${next.title}" avec seulement ${gapMinutes}min de battement`,
+          message: `Jour ${day.dayNumber}: ${dist.toFixed(1)}km entre "${current.title}" et "${next.title}" avec seulement ${gapMinutes}min de battement (besoin ~${Math.ceil(estimatedTravelMin)}min)`,
           dayNumber: day.dayNumber,
-          details: { distanceKm: dist.toFixed(1), gapMinutes },
+          details: { distanceKm: dist.toFixed(1), gapMinutes, estimatedTravelMin: Math.ceil(estimatedTravelMin) },
           code: 'GEO_IMPOSSIBLE_TRANSITION',
           component: 'pipeline/step8-validate',
           frequencyWeight: 2,
@@ -202,19 +206,34 @@ export function analyzeGeography(trip: Trip): AnalysisIssue[] {
         });
       }
 
-      // Règle urbaine non day-trip: 0 legs >4km
+      // Règle urbaine non day-trip: segments >4km are only critical if gap is too short
+      // Long distances with sufficient travel time are normal (excursions, parks, etc.)
       if (!day.isDayTrip && dist > URBAN_LONG_LEG_HARD_KM) {
-        issues.push({
-          severity: 'critical',
-          category: 'geography',
-          message: `Jour ${day.dayNumber}: segment urbain dur ${dist.toFixed(1)}km entre "${current.title}" et "${next.title}" (> ${URBAN_LONG_LEG_HARD_KM}km)`,
-          dayNumber: day.dayNumber,
-          details: { distanceKm: Number(dist.toFixed(2)), thresholdKm: URBAN_LONG_LEG_HARD_KM },
-          code: 'GEO_URBAN_HARD_LONG_LEG',
-          component: 'pipeline/step8-validate',
-          frequencyWeight: 2.2,
-          autofixCandidate: true,
-        });
+        if (!hasEnoughTime) {
+          issues.push({
+            severity: 'critical',
+            category: 'geography',
+            message: `Jour ${day.dayNumber}: segment ${dist.toFixed(1)}km entre "${current.title}" et "${next.title}" sans assez de temps (${gapMinutes}min, besoin ~${Math.ceil(estimatedTravelMin)}min)`,
+            dayNumber: day.dayNumber,
+            details: { distanceKm: Number(dist.toFixed(2)), thresholdKm: URBAN_LONG_LEG_HARD_KM, gapMinutes, estimatedTravelMin: Math.ceil(estimatedTravelMin) },
+            code: 'GEO_URBAN_HARD_LONG_LEG',
+            component: 'pipeline/step8-validate',
+            frequencyWeight: 2.2,
+            autofixCandidate: true,
+          });
+        } else if (dist > 15) {
+          // Long distance but feasible — just a warning for very long legs
+          issues.push({
+            severity: 'warning',
+            category: 'geography',
+            message: `Jour ${day.dayNumber}: segment long ${dist.toFixed(1)}km entre "${current.title}" et "${next.title}" (${gapMinutes}min de battement)`,
+            dayNumber: day.dayNumber,
+            details: { distanceKm: Number(dist.toFixed(2)), gapMinutes },
+            code: 'GEO_LONG_LEG_OK',
+            component: 'pipeline/step8-validate',
+            frequencyWeight: 0.5,
+          });
+        }
       }
     }
 

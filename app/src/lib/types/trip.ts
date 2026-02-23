@@ -405,6 +405,9 @@ export interface TripItem {
   instantConfirmation?: boolean;
   // Preserve must-see protection in post-assembly passes
   mustSee?: boolean;
+  // Opening hours data for scheduling validation
+  openingHours?: { open: string; close: string };
+  openingHoursByDay?: { [day: string]: { open: string; close: string } | null };
 }
 
 export interface TripDay {
@@ -578,6 +581,17 @@ export interface Trip {
     };
     tips: string[];
   };
+  // V3 Pipeline Metadata
+  pipelineVersion?: string;
+  stageDurationsMs?: Record<string, number>;
+  qualityMetrics?: {
+    score: number;
+    invariantsPassed: boolean;
+    violations: string[];
+  };
+  qualityWarnings?: string[];
+  contractViolations?: string[];
+
   // État des réservations
   bookedItems?: Record<string, {
     booked: boolean;

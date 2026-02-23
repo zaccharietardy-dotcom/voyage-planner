@@ -166,7 +166,7 @@ describe('BUG 1: Lunch pre-placement — lunch NOT pushed past 18:00', () => {
     ];
 
     // Schedule the day
-    const result = scheduleDayItems(candidates, mealSlots, window, restaurantPool, new Set());
+    const result = scheduleDayItems(candidates, mealSlots, window, restaurantPool, new Set(), new Date('2026-06-15'));
 
     // Verify lunch exists and is in the correct time range
     const lunch = result.find(item => item.type === 'restaurant' && item.mealType === 'lunch');
@@ -233,7 +233,7 @@ describe('BUG 4: Opening hours validation — Notre-Dame on Monday', () => {
     const mealSlots = buildMealSlots(window);
 
     // Schedule
-    const result = scheduleDayItems(candidates, mealSlots, window, [], new Set());
+    const result = scheduleDayItems(candidates, mealSlots, window, [], new Set(), new Date('2026-06-15'));
 
     // The scheduler does not enforce opening hours (removed from API).
     // The activity should be placed at its requested time or rescheduled within the window.
@@ -431,7 +431,7 @@ describe('Full Paris 3-day trip integration', () => {
       );
 
       const candidates = buildCandidates(itemsToSchedule);
-      const scheduled = scheduleDayItems(candidates, mealSlots, window, restaurantPool, usedRestaurantNames);
+      const scheduled = scheduleDayItems(candidates, mealSlots, window, restaurantPool, usedRestaurantNames, new Date('2026-06-15'));
 
       tripItemsByDay.push(scheduled);
     }

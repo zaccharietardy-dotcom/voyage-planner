@@ -433,6 +433,16 @@ function normalizeName(name: string): string {
 }
 
 /**
+ * Normalize a name for accent-insensitive, case-insensitive matching.
+ * Strips diacritics and lowercases, but KEEPS spaces so substring inclusion
+ * checks work correctly (e.g. "buckingham palace" still matches within longer names).
+ * Used by step10-repair and step11-contracts for must-see fuzzy matching.
+ */
+export function normalizeForMatching(s: string): string {
+  return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+}
+
+/**
  * Score an image URL by source reliability.
  * Higher = more likely to be an accurate photo of the attraction.
  * Google Places photos are tied to a place_id → highest reliability.

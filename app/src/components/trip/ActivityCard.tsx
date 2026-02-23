@@ -812,6 +812,7 @@ function BookingButtons({ item }: { item: TripItem }) {
   if (item.type === 'activity') {
     const officialBookingUrl = item.officialBookingUrl || (bookingUrl && !bookingUrl.includes('viator.com') ? bookingUrl : '');
     const viatorBookingUrl = item.viatorUrl || (bookingUrl.includes('viator.com') ? bookingUrl : '');
+    const tiqetsBookingUrl = item.tiqetsUrl;
 
     if (officialBookingUrl) {
       buttons.push({
@@ -827,6 +828,15 @@ function BookingButtons({ item }: { item: TripItem }) {
         label: 'Option guidée Viator',
         url: viatorBookingUrl,
         variant: officialBookingUrl ? 'secondary' : 'primary',
+        icon: <Ticket className="h-3 w-3" />,
+      });
+    }
+
+    if (tiqetsBookingUrl) {
+      buttons.push({
+        label: 'Billets Tiqets',
+        url: tiqetsBookingUrl,
+        variant: 'secondary',
         icon: <Ticket className="h-3 w-3" />,
       });
     }

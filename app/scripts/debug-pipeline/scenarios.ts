@@ -314,6 +314,28 @@ export const SCENARIOS: Record<string, Scenario> = {
       cityPlan: [{ city: 'Rome', days: 5 }],
     },
   },
+
+  'naples-pompei-3d': {
+    id: 'naples-pompei-3d',
+    name: 'Lyon → Naples (3 jours)',
+    description: 'Implicit day trip — Pompei à 25km doit devenir day trip automatique',
+    preferences: {
+      origin: 'Lyon',
+      destination: 'Naples',
+      startDate: futureDate(40),
+      durationDays: 3,
+      transport: 'plane',
+      carRental: false,
+      groupSize: 2,
+      groupType: 'couple',
+      budgetLevel: 'moderate',
+      activities: ['culture', 'gastronomy'],
+      dietary: ['none'],
+      mustSee: 'Pompei, Spaccanapoli',
+      tripMode: 'precise',
+      cityPlan: [{ city: 'Naples', days: 3 }],
+    },
+  },
 };
 
 export function getScenario(id: string): Scenario | undefined {

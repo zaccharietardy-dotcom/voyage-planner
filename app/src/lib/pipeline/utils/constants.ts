@@ -1,7 +1,17 @@
 /**
- * Shared constants for Pipeline V2.
+ * Shared constants for Pipeline V2/V3.
  * Single source of truth for keyword lists used across multiple pipeline steps.
  */
+
+// ============================================
+// Meal & Schedule Timing
+// ============================================
+
+export const BREAKFAST_DURATION_MIN = 45;
+export const LUNCH_DURATION_MIN = 75;
+export const DINNER_DURATION_MIN = 90;
+export const ACTIVITY_BUFFER_MIN = 10;
+export const FULL_DAY_THRESHOLD_MIN = 240;
 
 /** Keywords indicating outdoor activities (parks, gardens, beaches, viewpoints...) */
 export const OUTDOOR_ACTIVITY_KEYWORDS = [

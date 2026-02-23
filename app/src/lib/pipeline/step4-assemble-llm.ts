@@ -1081,9 +1081,10 @@ export async function assembleFromLLMPlan(
   // The LLM orders activities by theme/narrative, not geography.
   // This pass reorders activities within each day using nearest-neighbor + 2-opt
   // to minimize total travel distance while keeping anchors (transport, checkin, checkout) fixed.
+  // Now also considers opening hours: early-closing venues are prioritized earlier in the route.
   if (hotel) {
     for (const day of tripDays) {
-      day.items = geoReorderDayItems(day.items, hotel.latitude, hotel.longitude);
+      day.items = geoReorderDayItems(day.items, hotel.latitude, hotel.longitude, day.date);
     }
   }
 
@@ -1101,7 +1102,7 @@ export async function assembleFromLLMPlan(
     const dayWindow = buildDayWindow(day, tripDays.length, transport, hotel, data.destCoords);
     const mealSlots = buildMealSlots(dayWindow);
     const candidates = buildCandidates(day.items);
-    day.items = scheduleDayItems(candidates, mealSlots, dayWindow, restaurantPool, usedRestaurantNames);
+    day.items = scheduleDayItems(candidates, mealSlots, dayWindow, restaurantPool, usedRestaurantNames, day.date);
     normalizeMealSemantics(day);
   }
 
@@ -1344,6 +1345,12 @@ export async function assembleFromLLMPlan(
   sanitizeTrip(trip);
 
   console.log('[Pipeline V2 LLM] Sanitized URLs');
+
+  // Enrich all activity items with ticketing links (official + Viator + Tiqets)
+  const { enrichWithTicketingLinks } = require('../services/officialTicketing');
+  for (const day of trip.days) {
+    enrichWithTicketingLinks(day.items, preferences.destination || '');
+  }
 
   const duration = Date.now() - startTime;
   onEvent?.({

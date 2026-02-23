@@ -476,7 +476,7 @@ describe('scheduleDayItems', () => {
     ];
     const usedRestaurantNames = new Set<string>();
 
-    const result = scheduleDayItems(candidates, mealSlots, window, restaurantPool, usedRestaurantNames);
+    const result = scheduleDayItems(candidates, mealSlots, window, restaurantPool, usedRestaurantNames, new Date('2026-06-15'));
 
     // Should have: breakfast + activities + lunch/dinner
     expect(result.length).toBeGreaterThanOrEqual(3);
@@ -514,7 +514,7 @@ describe('scheduleDayItems', () => {
     const restaurantPool: Restaurant[] = [];
     const usedRestaurantNames = new Set<string>();
 
-    const result = scheduleDayItems(candidates, mealSlots, window, restaurantPool, usedRestaurantNames);
+    const result = scheduleDayItems(candidates, mealSlots, window, restaurantPool, usedRestaurantNames, new Date('2026-06-15'));
 
     const breakfast = result.find(item => item.type === 'restaurant' && item.startTime < '10:30');
     expect(breakfast).toBeDefined();
@@ -543,7 +543,7 @@ describe('scheduleDayItems', () => {
 
     const mealSlots = buildMealSlots(window);
     const candidates = buildCandidates(activities);
-    const result = scheduleDayItems(candidates, mealSlots, window, [], new Set());
+    const result = scheduleDayItems(candidates, mealSlots, window, [], new Set(), new Date('2026-06-15'));
 
     // Only 1 activity should fit
     const placedActivities = result.filter(item => item.type === 'activity');
@@ -562,7 +562,7 @@ describe('scheduleDayItems', () => {
       mockRestaurant({ id: 'rest-3', latitude: 48.8580, longitude: 2.3380 }),
     ];
 
-    const result = scheduleDayItems(candidates, mealSlots, window, restaurantPool, new Set());
+    const result = scheduleDayItems(candidates, mealSlots, window, restaurantPool, new Set(), new Date('2026-06-15'));
 
     // Should have 3 meals (breakfast, lunch, dinner)
     const meals = result.filter(item => item.type === 'restaurant');
@@ -579,7 +579,7 @@ describe('scheduleDayItems', () => {
       mockRestaurant({ id: 'rest-1' }),
     ];
 
-    const result = scheduleDayItems(candidates, mealSlots, window, restaurantPool, new Set());
+    const result = scheduleDayItems(candidates, mealSlots, window, restaurantPool, new Set(), new Date('2026-06-15'));
 
     // Check meal labels
     result.forEach(item => {
@@ -616,7 +616,7 @@ describe('scheduleDayItems', () => {
     const window = buildDayWindow(day, 3, null, hotel, destCoords);
     const mealSlots = buildMealSlots(window);
     const candidates = buildCandidates([mislabeledRestaurant]);
-    const result = scheduleDayItems(candidates, mealSlots, window, [], new Set());
+    const result = scheduleDayItems(candidates, mealSlots, window, [], new Set(), new Date('2026-06-15'));
 
     const placed = result.find((item) => item.id === 'rest-drift');
     expect(placed).toBeDefined();
@@ -640,7 +640,7 @@ describe('scheduleDayItems', () => {
     const mealSlots = buildMealSlots(window);
     const candidates = buildCandidates([restaurantItem]);
 
-    const result = scheduleDayItems(candidates, mealSlots, window, [], new Set());
+    const result = scheduleDayItems(candidates, mealSlots, window, [], new Set(), new Date('2026-06-15'));
 
     // The restaurant should be placed and fill the lunch slot
     const lunch = result.find(item => item.type === 'restaurant' && item.id === 'rest-1');
@@ -660,7 +660,7 @@ describe('scheduleDayItems', () => {
     const mealSlots = buildMealSlots(window);
     const candidates = buildCandidates([activity1, activity2]);
 
-    const result = scheduleDayItems(candidates, mealSlots, window, [], new Set());
+    const result = scheduleDayItems(candidates, mealSlots, window, [], new Set(), new Date('2026-06-15'));
 
     // Items should be sorted by time
     for (let i = 0; i < result.length - 1; i++) {

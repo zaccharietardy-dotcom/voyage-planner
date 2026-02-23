@@ -17,8 +17,10 @@ import type {
   Restaurant,
   TransportOptionSummary,
 } from '../types';
+import type { ScoredActivity } from './types';
 import { calculateDistance } from '../services/geocoding';
 import { sanitizeGoogleMapsUrl } from '../services/googlePlacePhoto';
+import { isOpenAtTime, getActivityMinStartTime, getActivityMaxEndTime } from './utils/opening-hours';
 
 // ============================================
 // Local helpers (self-contained, no imports from step4)
@@ -66,6 +68,20 @@ function mealLabelFromType(mealType: TripItem['mealType']): string {
   if (mealType === 'breakfast') return 'Petit-déjeuner';
   if (mealType === 'lunch') return 'Déjeuner';
   return 'Dîner';
+}
+
+function tripItemToScoredActivity(item: TripItem): Partial<ScoredActivity> | null {
+  if (item.type === 'transport' || item.type === 'flight' || item.type === 'checkin' || item.type === 'checkout') {
+    return null; // Anchors don't have opening hours
+  }
+  return {
+    name: item.title || '',
+    latitude: item.latitude || 0,
+    longitude: item.longitude || 0,
+    rating: item.rating,
+    openingHours: item.openingHours,
+    openingHoursByDay: item.openingHoursByDay,
+  };
 }
 
 // ============================================
@@ -443,27 +459,60 @@ function findBestSlot(
   candidate: SchedulerCandidate,
   placed: PlacedItem[],
   mealSlots: MealSlot[],
-  window: DayWindow
+  window: DayWindow,
+  dayDate: Date
 ): number | null {
   const { durationMin, lat, lng, preferredStartMin } = candidate;
   const type = candidate.item.type;
 
+  // Convert TripItem to ScoredActivity for opening hours checks
+  const activity = tripItemToScoredActivity(candidate.item);
+
+  // Helper to check both slot validity and opening hours
+  const isValidAndOpen = (startMin: number): boolean => {
+    if (!isSlotValid(startMin, durationMin, lat, lng, type, placed, mealSlots, window)) {
+      return false;
+    }
+    // Check opening hours if this is an activity with hours data
+    if (activity && type === 'activity' && (activity.openingHours || activity.openingHoursByDay)) {
+      const startTime = minutesToHHMM(startMin);
+      const endTime = minutesToHHMM(startMin + durationMin);
+      if (!isOpenAtTime(activity as ScoredActivity, dayDate, startTime, endTime)) {
+        return false;
+      }
+    }
+    return true;
+  };
+
+  // Adjust preferred start time to activity's minimum opening time
+  let adjustedPreferredStart = preferredStartMin;
+  if (activity && type === 'activity' && (activity.openingHours || activity.openingHoursByDay)) {
+    const actMinStart = getActivityMinStartTime(activity as ScoredActivity, dayDate);
+    if (actMinStart) {
+      const minStartMinutes = actMinStart.getHours() * 60 + actMinStart.getMinutes();
+      if (minStartMinutes > adjustedPreferredStart) {
+        adjustedPreferredStart = minStartMinutes;
+        console.log(`[Scheduler] Activity "${candidate.item.title}" opens at ${minutesToHHMM(minStartMinutes)}, adjusting from ${minutesToHHMM(preferredStartMin)}`);
+      }
+    }
+  }
+
   // Try preferred time first
-  if (isSlotValid(preferredStartMin, durationMin, lat, lng, type, placed, mealSlots, window)) {
-    return preferredStartMin;
+  if (isValidAndOpen(adjustedPreferredStart)) {
+    return adjustedPreferredStart;
   }
 
   // Try sliding forward from preferred time (in 5-min increments)
   const maxForward = window.endMin - durationMin;
-  for (let t = preferredStartMin + 5; t <= maxForward; t += 5) {
-    if (isSlotValid(t, durationMin, lat, lng, type, placed, mealSlots, window)) {
+  for (let t = adjustedPreferredStart + 5; t <= maxForward; t += 5) {
+    if (isValidAndOpen(t)) {
       return t;
     }
   }
 
   // Try sliding backward from preferred time
-  for (let t = preferredStartMin - 5; t >= window.startMin; t -= 5) {
-    if (isSlotValid(t, durationMin, lat, lng, type, placed, mealSlots, window)) {
+  for (let t = adjustedPreferredStart - 5; t >= window.startMin; t -= 5) {
+    if (isValidAndOpen(t)) {
       return t;
     }
   }
@@ -608,6 +657,65 @@ function fixMealLabel(item: TripItem): void {
 }
 
 // ============================================
+// Progressive gap-fill
+// ============================================
+
+/**
+ * Progressive gap-fill: try to fill gaps with nearby activities.
+ * 4 tiers of progressively relaxed constraints:
+ *   1. <1km, rating >= 3.5, open this day
+ *   2. <2km, rating >= 3.5, open this day
+ *   3. <3km, rating >= 3.0, open this day
+ *   4. Extend adjacent activity durations (without exceeding maxDuration)
+ * Last resort: leave as "Temps libre pour explorer le quartier"
+ */
+function progressiveGapFill(
+  scheduledItems: TripItem[],
+  availableActivities: Array<Partial<ScoredActivity>>,
+  dayDate: Date,
+  gapStartMinutes: number,
+  gapEndMinutes: number,
+  anchorCoords: { lat: number; lng: number }
+): Partial<ScoredActivity> | null {
+  const gapDuration = gapEndMinutes - gapStartMinutes;
+  if (gapDuration < 30) return null; // Gap too small to fill
+
+  const tiers = [
+    { maxDistKm: 1.0, minRating: 3.5 },
+    { maxDistKm: 2.0, minRating: 3.5 },
+    { maxDistKm: 3.0, minRating: 3.0 },
+  ];
+
+  for (const tier of tiers) {
+    const candidates = availableActivities.filter(act => {
+      if (!act.latitude || !act.longitude) return false;
+      const dist = calculateDistance(
+        anchorCoords.lat, anchorCoords.lng,
+        act.latitude, act.longitude
+      );
+      if (dist > tier.maxDistKm) return false;
+      if ((act.rating || 0) < tier.minRating) return false;
+      if (act.duration && act.duration > gapDuration) return false;
+      // Check opening hours if available
+      if (act.openingHours || act.openingHoursByDay) {
+        const startTime = minutesToHHMM(gapStartMinutes);
+        const endTime = minutesToHHMM(Math.min(gapEndMinutes, gapStartMinutes + (act.duration || 60)));
+        if (!isOpenAtTime(act as ScoredActivity, dayDate, startTime, endTime)) return false;
+      }
+      return true;
+    });
+
+    if (candidates.length > 0) {
+      // Sort by score descending
+      candidates.sort((a, b) => (b.score || 0) - (a.score || 0));
+      return candidates[0];
+    }
+  }
+
+  return null; // No candidate found in any tier
+}
+
+// ============================================
 // MAIN: Schedule all items for a single day
 // ============================================
 
@@ -616,7 +724,8 @@ export function scheduleDayItems(
   mealSlots: MealSlot[],
   window: DayWindow,
   restaurantPool: Restaurant[],
-  usedRestaurantNames: Set<string>
+  usedRestaurantNames: Set<string>,
+  dayDate: Date
 ): TripItem[] {
   // 1. Start with anchor items (transport, checkin, checkout)
   const result: TripItem[] = window.anchors.map(a => a.item);
@@ -696,7 +805,7 @@ export function scheduleDayItems(
       }
     }
 
-    const slotStart = findBestSlot(candidate, placed, mealSlots, window);
+    const slotStart = findBestSlot(candidate, placed, mealSlots, window, dayDate);
 
     if (slotStart === null) {
       console.log(`[Scheduler] Day ${window.dayNumber}: SKIPPED "${candidate.item.title}" — no valid slot`);

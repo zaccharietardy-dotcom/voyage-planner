@@ -97,6 +97,7 @@ export interface ActivityCluster {
   centroid: { lat: number; lng: number };
   totalIntraDistance: number; // km, within cluster
   maxRadius?: number; // km, max distance from centroid to any member
+  isFullDay?: boolean; // true if cluster contains a single full-day activity (>=4h)
 }
 
 // ============================================
@@ -112,6 +113,8 @@ export interface CityDensityProfile {
   maxClusterRadius: number;
   /** Density category for logging */
   densityCategory: 'dense' | 'medium' | 'spread';
+  /** Hard cap on cluster radius (km). Adaptive: 5km for compact cities, up to 15km for spread cities. */
+  hardRadiusCap: number;
 }
 
 // ============================================
