@@ -724,7 +724,7 @@ function calculateBusOption(params: TransportSearchParams, distance: number): Tr
   const destSlug = toOmioLocationSlug(resolveOmioCityLabel(params.destination, params.destCoords));
   const omioDate = params.date ? formatDateForUrl(params.date) : '';
   const dateParam = omioDate ? `?departure_date=${omioDate}` : '';
-  const bookingUrl = `https://www.omio.fr/bus/${encodeURIComponent(originSlug)}/${encodeURIComponent(destSlug)}${dateParam}`;
+  const bookingUrl = `https://www.omio.fr/bus/${originSlug}/${destSlug}${dateParam}`;
 
   return {
     id: 'bus',
@@ -771,7 +771,7 @@ function calculateCarOption(params: TransportSearchParams, distance: number): Tr
   // CO2 (divisé par nombre de passagers)
   const co2PerPerson = Math.round((distance * CO2_PER_KM.car) / Math.max(params.passengers, 2));
 
-  const bookingUrl = `https://www.google.com/maps/dir/${encodeURIComponent(params.origin)}/${encodeURIComponent(params.destination)}`;
+  const bookingUrl = `https://www.google.com/maps/dir/${encodeURIComponent(params.origin.trim())}/${encodeURIComponent(params.destination.trim())}`;
 
   return {
     id: 'car',
@@ -1029,7 +1029,7 @@ export function getTrainBookingUrl(
   const destSlug = toOmioLocationSlug(resolvedDestination);
   const dateStr = date ? formatDateForUrl(date) : '';
   const dateParam = dateStr ? `?departure_date=${dateStr}` : '';
-  return `https://www.omio.fr/trains/${encodeURIComponent(originSlug)}/${encodeURIComponent(destSlug)}${dateParam}`;
+  return `https://www.omio.fr/trains/${originSlug}/${destSlug}${dateParam}`;
 }
 
 /**

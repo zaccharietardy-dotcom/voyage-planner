@@ -172,24 +172,29 @@ export function validateContracts(
 
       if (item.type === 'restaurant') {
         metrics.totalRestaurants++;
+        const isSelfMealFallback = item.qualityFlags?.includes('self_meal_fallback') === true;
 
         // Check meal type from mealType field or title
         const mealType = item.mealType;
         const titleLower = (item.title || '').toLowerCase();
+        const isLunchMeal = mealType === 'lunch' || titleLower.includes('lunch') || titleLower.includes('déjeuner');
+        const isDinnerMeal = mealType === 'dinner' || titleLower.includes('dinner') || titleLower.includes('dîner') || titleLower.includes('diner');
 
-        if (mealType === 'lunch' || titleLower.includes('lunch') || titleLower.includes('déjeuner')) {
+        if (isLunchMeal) {
           hasLunch = true;
         }
-        if (mealType === 'dinner' || titleLower.includes('dinner') || titleLower.includes('dîner') || titleLower.includes('diner')) {
+        if (isDinnerMeal) {
           hasDinner = true;
         }
 
-        // P0.2: Restaurant distance from anchor
-        // Breakfast is anchored to hotel (not activity), so use relaxed 2km threshold
-        // Lunch/dinner are anchored to nearby activities, strict 800m
-        if (item.latitude && item.longitude) {
-          const isBreakfast = mealType === 'breakfast';
-          const maxDistKm = isBreakfast ? 2.0 : 0.8; // Breakfast near hotel, others near activities
+        if (!isSelfMealFallback && !isRestaurantOpenAtTime(item, dayDate, item.startTime, item.endTime)) {
+          violations.push(`P0.1: Day ${day.dayNumber} "${item.title}" outside opening hours (${item.startTime}-${item.endTime})`);
+          metrics.activitiesOutsideHours++;
+        }
+
+        // P0.2: Lunch/dinner only, strict 800m, and self-meal fallback is excluded.
+        if (!isSelfMealFallback && (isLunchMeal || isDinnerMeal) && item.latitude && item.longitude) {
+          const maxDistKm = 0.8;
 
           const nearestActivity = day.items
             .filter(i => i.type === 'activity' && i.latitude && i.longitude)
@@ -293,4 +298,43 @@ function getDayDate(startDate: string, dayNumber: number): Date {
   const date = new Date(startDate);
   date.setDate(date.getDate() + dayNumber - 1);
   return date;
+}
+
+function isRestaurantOpenAtTime(
+  item: TripItem,
+  dayDate: Date,
+  startTime: string,
+  endTime: string
+): boolean {
+  const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'] as const;
+  const dayName = dayNames[dayDate.getDay()];
+
+  const dayHoursFromItem = item.openingHoursByDay?.[dayName];
+  const dayHoursFromRestaurant = item.restaurant?.openingHours?.[dayName];
+  const simpleHours = item.openingHours;
+  const dayHours = dayHoursFromItem ?? dayHoursFromRestaurant ?? simpleHours;
+
+  if (dayHours === null) return false;
+  if (!dayHours || !dayHours.open || !dayHours.close) return true; // Unknown hours -> do not block
+
+  const toleranceMin = 15;
+  const openMin = toMinutes(dayHours.open);
+  let closeMin = toMinutes(dayHours.close);
+  let slotStart = toMinutes(startTime);
+  let slotEnd = toMinutes(endTime);
+
+  if (closeMin <= openMin) {
+    closeMin += 24 * 60;
+    if (slotStart < openMin) {
+      slotStart += 24 * 60;
+      slotEnd += 24 * 60;
+    }
+  }
+
+  return slotStart >= openMin - toleranceMin && slotEnd <= closeMin + toleranceMin;
+}
+
+function toMinutes(hhmm: string): number {
+  const [h, m] = (hhmm || '00:00').split(':').map(Number);
+  return (h || 0) * 60 + (m || 0);
 }

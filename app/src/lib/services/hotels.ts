@@ -501,7 +501,9 @@ export async function searchHotels(
                     checkInTime: validateCheckInTime(h.checkIn),
                     checkOutTime: validateCheckOutTime(h.checkOut),
                     bookingUrl: h.bookingUrl,
-                    distanceToCenter: 0,
+                    distanceToCenter: (h.latitude && h.longitude)
+                      ? Math.round(calculateDistance(h.latitude, h.longitude, options.cityCenter.lat, options.cityCenter.lng) * 10) / 10
+                      : 0,
                     description: 'Disponibilité confirmée',
                     breakfastIncluded,
                     dataReliability: (h.latitude && h.longitude) ? 'verified' as const : 'estimated' as const,
@@ -569,7 +571,9 @@ export async function searchHotels(
             checkInTime: validateCheckInTime(h.checkIn),
             checkOutTime: validateCheckOutTime(h.checkOut),
             bookingUrl: h.bookingUrl,
-            distanceToCenter: 0,
+            distanceToCenter: (h.latitude && h.longitude)
+              ? Math.round(calculateDistance(h.latitude, h.longitude, options.cityCenter.lat, options.cityCenter.lng) * 10) / 10
+              : 0,
             description: '',
             breakfastIncluded,
             dataReliability: (h.latitude && h.longitude) ? 'verified' as const : 'estimated' as const,
@@ -979,7 +983,9 @@ function placeToAccommodation(
     checkInTime: validateCheckInTime('15:00'),
     checkOutTime: validateCheckOutTime('11:00'),
     bookingUrl: place.bookingUrl,
-    distanceToCenter: 0,
+    distanceToCenter: (place.latitude && place.longitude)
+      ? Math.round(calculateDistance(place.latitude, place.longitude, options.cityCenter.lat, options.cityCenter.lng) * 10) / 10
+      : 0,
   };
 }
 

@@ -2748,8 +2748,8 @@ export async function assembleTripSchedule(
       const resolvedTransportMode = item.type === 'transport'
         ? (getTransportModeFromItemData(itemData) || 'transit')
         : undefined;
-      const resolvedTransportRole = item.type === 'transport'
-        ? (itemData.transportRole === 'longhaul' ? 'longhaul' : 'inter_item')
+      const resolvedTransportRole = (item.type === 'transport' || item.type === 'flight')
+        ? ((itemData.transportRole === 'longhaul' || item.type === 'flight') ? 'longhaul' : 'inter_item')
         : undefined;
       const normalizedCoords = normalizeItemCoordinates(item.title, itemData, item.type, preferences.destination);
 
@@ -2989,15 +2989,68 @@ export async function assembleTripSchedule(
   }
 
   // 11b. POST-PROCESS: Remove duplicate longhaul transport items
-  // If step7 inserted proper transport AND step4/LLM also had transport, we may have duplicates
+  // If a real outbound/return flight exists on the same day, drop fallback longhaul transports.
+  // Then keep at most one longhaul transport per day as a final guardrail.
+  const normalizeDirection = (value?: string): 'outbound' | 'return' | null => {
+    if (!value) return null;
+    const lower = value.toLowerCase();
+    if (lower === 'outbound' || lower.includes('aller') || lower.includes('out')) return 'outbound';
+    if (lower === 'return' || lower.includes('retour') || lower.includes('ret')) return 'return';
+    return null;
+  };
+
+  const inferLonghaulDirection = (item: TripItem, dayNumber: number): 'outbound' | 'return' | null => {
+    const explicit = normalizeDirection(item.transportDirection);
+    if (explicit) return explicit;
+
+    const id = (item.id || '').toLowerCase();
+    if (id.includes('flight-out') || id.includes('transport-out')) return 'outbound';
+    if (id.includes('flight-ret') || id.includes('transport-ret')) return 'return';
+
+    const title = (item.title || '').toLowerCase();
+    if (title.includes('aller') || title.includes('outbound')) return 'outbound';
+    if (title.includes('retour') || title.includes('return')) return 'return';
+
+    if (dayNumber === 1) return 'outbound';
+    if (dayNumber === preferences.durationDays) return 'return';
+    return null;
+  };
+
+  const hasDirectionalFlight = (items: TripItem[], dayNumber: number, direction: 'outbound' | 'return'): boolean => {
+    return items.some((item) => {
+      if (item.type !== 'flight') return false;
+      const inferred = inferLonghaulDirection(item, dayNumber);
+      return inferred === direction || (inferred === null && (dayNumber === 1 || dayNumber === preferences.durationDays));
+    });
+  };
+
   for (const day of days) {
+    const hasOutboundFlight = hasDirectionalFlight(day.items, day.dayNumber, 'outbound');
+    const hasReturnFlight = hasDirectionalFlight(day.items, day.dayNumber, 'return');
+
+    if (hasOutboundFlight || hasReturnFlight) {
+      const beforeCount = day.items.length;
+      day.items = day.items.filter((item) => {
+        if (!(item.type === 'transport' && item.transportRole === 'longhaul')) return true;
+        const direction = inferLonghaulDirection(item, day.dayNumber);
+        if (direction === 'outbound' && hasOutboundFlight) return false;
+        if (direction === 'return' && hasReturnFlight) return false;
+        if (direction === null && (hasOutboundFlight || hasReturnFlight)) return false;
+        return true;
+      });
+      const removed = beforeCount - day.items.length;
+      if (removed > 0) {
+        console.warn(`[Pipeline V2] Day ${day.dayNumber}: removed ${removed} fallback longhaul transport item(s) because a real flight is present`);
+      }
+    }
+
     const longhaulItems = day.items.filter(item => item.type === 'transport' && item.transportRole === 'longhaul');
     if (longhaulItems.length > 1) {
       console.warn(`[Pipeline V2] Day ${day.dayNumber}: ${longhaulItems.length} longhaul transports detected — keeping only the first one`);
       const keepId = longhaulItems[0].id;
       day.items = day.items.filter(item => !(item.type === 'transport' && item.transportRole === 'longhaul' && item.id !== keepId));
-      day.items = day.items.map((item, idx) => ({ ...item, orderIndex: idx }));
     }
+    day.items = day.items.map((item, idx) => ({ ...item, orderIndex: idx }));
   }
 
   // 11c. POST-PROCESS: Ensure last day transport goes TO origin, not FROM origin

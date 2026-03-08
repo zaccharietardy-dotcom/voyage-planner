@@ -368,6 +368,14 @@ function getEarliestOpenHour(restaurant: Restaurant): number | null {
 /**
  * Check if a restaurant is appropriate for a given meal type.
  */
+// Dessert/ice cream places that should NEVER be used as a main meal (lunch or dinner).
+// This exclusion is absolute and cannot be overridden by positive signals.
+const HARD_EXCLUDED_FOR_MEALS = [
+  'glacier', 'gelateria', 'gelato', 'ice cream', 'glace',
+  'frozen yogurt', 'froyo', 'sorbet',
+  'candy store', 'sweet shop', 'confiserie', 'bonbons',
+];
+
 export function isAppropriateForMeal(restaurant: Restaurant, mealType: MealType): boolean {
   const name = (restaurant.name || '').toLowerCase();
   const cuisineTypesArr = (restaurant as any).cuisineTypes || [];
@@ -379,6 +387,7 @@ export function isAppropriateForMeal(restaurant: Restaurant, mealType: MealType)
   const allText = `${name} ${cuisineStr} ${cuisineSingular} ${type}`;
 
   if (mealType === 'breakfast') {
+    // Check both cuisineTypes AND the restaurant name for excluded cuisines
     for (const excluded of BREAKFAST_EXCLUDED_CUISINES) {
       if (allText.includes(excluded)) return false;
     }
@@ -388,10 +397,16 @@ export function isAppropriateForMeal(restaurant: Restaurant, mealType: MealType)
     return true;
   }
 
+  // Hard exclusion for lunch/dinner: ice cream, glaciers, dessert shops
+  // This is ABSOLUTE and cannot be overridden by ratings or positive signals.
+  if (mealType === 'lunch' || mealType === 'dinner') {
+    for (const excluded of HARD_EXCLUDED_FOR_MEALS) {
+      if (allText.includes(excluded)) return false;
+    }
+  }
+
   if (mealType === 'dinner') {
     // B2: Reject bare bars / cafes unless they have STRONG restaurant evidence.
-    // Generic cuisine nationality keywords ("italian", "french") are too common for
-    // cafés — we require explicit restaurant-type words to override.
     if (isBareBarOrCafe(name, allText)) {
       const STRONG_RESTAURANT_SIGNALS = [
         'restaurant', 'ristorante', 'trattoria', 'osteria', 'brasserie',
@@ -401,7 +416,6 @@ export function isAppropriateForMeal(restaurant: Restaurant, mealType: MealType)
         'cuisine', 'cucina',
       ];
       const strongSignalCount = STRONG_RESTAURANT_SIGNALS.filter(s => allText.includes(s)).length;
-      // Require at least 1 strong restaurant-type signal (not just "italian" or "french")
       if (strongSignalCount === 0) return false;
     }
 
@@ -409,7 +423,6 @@ export function isAppropriateForMeal(restaurant: Restaurant, mealType: MealType)
       if (allText.includes(excluded)) return false;
     }
 
-    // Positive signal: require at least one "real restaurant" indicator for dinner.
     const hasPositiveSignal = DINNER_POSITIVE_SIGNALS.some(s => allText.includes(s));
     const hasStrongProfile = (restaurant.priceLevel || 0) >= 2
       || ((restaurant.rating || 0) >= 4.5 && (restaurant.reviewCount || 0) >= 100);
@@ -420,9 +433,6 @@ export function isAppropriateForMeal(restaurant: Restaurant, mealType: MealType)
   if (mealType === 'lunch') {
     for (const excluded of LUNCH_EXCLUDED_KEYWORDS) {
       if (allText.includes(excluded)) {
-        // B1: A place that matches an excluded keyword can still be a lunch venue
-        // if it has a clear positive restaurant signal OR a decent price level
-        // OR strong crowd-sourced quality signals.
         const hasPositiveSignal = LUNCH_POSITIVE_SIGNALS.some(s => allText.includes(s));
         const hasStrongProfile =
           (restaurant.priceLevel || 0) >= 2 ||

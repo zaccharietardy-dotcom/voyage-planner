@@ -90,7 +90,7 @@ pipeline/
 
 ```bash
 # Pipeline
-PIPELINE_VERSION=v3              # v3 | v2-llm | v2-algorithmic (default: v2-llm)
+PIPELINE_VERSION=v3              # v3 | v2-llm | v2-algorithmic (default: v3)
 PIPELINE_DIRECTIONS_MODE=selective  # selective | all | off (default: selective)
 PIPELINE_LLM_DECOR=off           # on | off (default: off)
 

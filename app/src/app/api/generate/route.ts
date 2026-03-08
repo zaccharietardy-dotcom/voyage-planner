@@ -116,7 +116,8 @@ export async function POST(request: NextRequest) {
             setTimeout(() => reject(new Error('Timeout: génération trop longue (> 4min45)')), 285_000);
           });
 
-          console.log('[Generate] Using pipeline V2');
+          const configuredPipeline = process.env.PIPELINE_VERSION || 'v3';
+          console.log(`[Generate] Using pipeline ${configuredPipeline}`);
 
           // Stream pipeline events to the client for real-time monitoring
           const onEvent = (event: PipelineEvent) => {

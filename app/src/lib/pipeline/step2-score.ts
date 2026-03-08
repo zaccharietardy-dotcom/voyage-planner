@@ -148,12 +148,14 @@ const PREFERENCE_AFFINITIES: Partial<Record<ActivityType, ProfileTag[]>> = {
   adventure: ['active'],
 };
 
-/** Conflicts: preference → tags that contradict it (-2 each) */
+/** Conflicts: preference → tags that contradict it (-4 each) */
 const PREFERENCE_CONFLICTS: Partial<Record<ActivityType, ProfileTag[]>> = {
-  culture: ['instagram', 'party'],
+  culture: ['instagram', 'party', 'active'],
   nature: ['instagram', 'party'],
   adventure: ['relaxing', 'instagram'],
   nightlife: ['kid_friendly'],
+  beach: ['deep_culture'],
+  wellness: ['party', 'active'],
 };
 
 export function scoreAndSelectActivities(
@@ -370,7 +372,8 @@ export function scoreAndSelectActivities(
       preferences,
       cityCenter,
       activityCentroid,
-      data.budgetStrategy?.maxPricePerActivity
+      data.budgetStrategy?.maxPricePerActivity,
+      data.weatherForecasts
     ),
   }));
 
@@ -724,12 +727,54 @@ function computePopularityScore(rating: number, reviewCount: number): number {
   return ratingFactor * reviewFactor * 10;
 }
 
+// Outdoor activity types that are weather-sensitive
+const OUTDOOR_ACTIVITY_TYPES = /\b(beach|park|garden|viewpoint|trail|hiking|outdoor|coast|seaside|water_park|playground|promenade|walk|cycling|kayak|sailing|surf|snorkel|diving)\b/i;
+const BEACH_ACTIVITY_TYPES = /\b(beach|plage|coast|seaside|water_park|surf|snorkel)\b/i;
+
+function computeWeatherPenalty(
+  activity: ScoredActivity,
+  weatherForecasts: Array<{ tempMin: number; tempMax: number; weatherCode?: number }>
+): number {
+  if (!weatherForecasts || weatherForecasts.length === 0) return 0;
+
+  const actText = `${activity.name || ''} ${activity.type || ''}`.toLowerCase();
+  const isOutdoor = OUTDOOR_ACTIVITY_TYPES.test(actText);
+  const isBeach = BEACH_ACTIVITY_TYPES.test(actText);
+  if (!isOutdoor && !isBeach) return 0;
+
+  // Average weather across trip days
+  const avgTempMax = weatherForecasts.reduce((s, w) => s + w.tempMax, 0) / weatherForecasts.length;
+  const hasBadWeather = weatherForecasts.some(w => w.weatherCode && w.weatherCode >= 61 && w.weatherCode <= 86);
+
+  let penalty = 0;
+
+  // Beach in cold weather
+  if (isBeach && avgTempMax < 18) {
+    penalty -= 15; // Beach is not enjoyable under 18°C
+  } else if (isBeach && avgTempMax < 22) {
+    penalty -= 5;
+  }
+
+  // Outdoor activities in cold weather
+  if (isOutdoor && avgTempMax < 10) {
+    penalty -= 5;
+  }
+
+  // Outdoor in rain/snow
+  if (isOutdoor && hasBadWeather) {
+    penalty -= 8;
+  }
+
+  return penalty;
+}
+
 function computeScore(
   activity: ScoredActivity,
   preferences: TripPreferences,
   cityCenter: { lat: number; lng: number },
   activityCentroid: { lat: number; lng: number },
-  maxPricePerActivity?: number
+  maxPricePerActivity?: number,
+  weatherForecasts?: Array<{ tempMin: number; tempMax: number; weatherCode?: number }>
 ): number {
   // Must-see bonus: user-specified get full +100, OSM auto-detected get +50
   // This ensures user must-sees always rank above OSM auto-detected ones
@@ -741,19 +786,35 @@ function computeScore(
   const popularityScore = computePopularityScore(activity.rating || 0, activity.reviewCount || 0);
   const ratingScore = 0; // Absorbed into popularityScore
 
-  // Type match: bonus if activity type matches user preferences
+  // Type match: bonus if activity type matches user preferences, penalty if contradictory
   const activityType = (activity.type || '').toLowerCase();
-  const typeMatchBonus = (preferences.activities || []).some(pref => {
-    if (pref === 'culture') return ['museum', 'gallery', 'monument', 'historic', 'church', 'palace', 'castle', 'temple', 'cultural'].some(t => activityType.includes(t));
-    if (pref === 'nature') return ['park', 'garden', 'nature', 'viewpoint', 'mountain', 'lake', 'beach', 'trail'].some(t => activityType.includes(t));
-    if (pref === 'adventure') return ['adventure', 'sport', 'outdoor', 'hiking', 'diving', 'climbing'].some(t => activityType.includes(t));
-    if (pref === 'shopping') return ['market', 'shopping', 'bazaar', 'souk'].some(t => activityType.includes(t));
-    if (pref === 'gastronomy') return ['food_tour', 'cooking_class', 'wine', 'tasting'].some(t => activityType.includes(t));
-    if (pref === 'nightlife') return ['nightlife', 'club', 'bar', 'show', 'entertainment'].some(t => activityType.includes(t));
-    if (pref === 'wellness') return ['spa', 'hammam', 'wellness', 'yoga', 'thermal'].some(t => activityType.includes(t));
-    if (pref === 'beach') return ['beach', 'coast', 'seaside', 'water_park'].some(t => activityType.includes(t));
-    return activityType.includes(pref);
-  }) ? 3 : 0;
+  const TYPE_KEYWORDS: Record<string, string[]> = {
+    culture: ['museum', 'gallery', 'monument', 'historic', 'church', 'palace', 'castle', 'temple', 'cultural'],
+    nature: ['park', 'garden', 'nature', 'viewpoint', 'mountain', 'lake', 'beach', 'trail'],
+    adventure: ['adventure', 'sport', 'outdoor', 'hiking', 'diving', 'climbing'],
+    shopping: ['market', 'shopping', 'bazaar', 'souk'],
+    gastronomy: ['food_tour', 'cooking_class', 'wine', 'tasting'],
+    nightlife: ['nightlife', 'club', 'bar', 'show', 'entertainment'],
+    wellness: ['spa', 'hammam', 'wellness', 'yoga', 'thermal'],
+    beach: ['beach', 'coast', 'seaside', 'water_park'],
+  };
+  // Contradictions: activity types that clash with a given preference
+  const TYPE_CONTRADICTIONS: Record<string, string[]> = {
+    culture: ['sport', 'stadium', 'shopping', 'beach', 'nightlife', 'club', 'water_park'],
+    nature: ['shopping', 'nightlife', 'club', 'stadium'],
+    wellness: ['sport', 'nightlife', 'club', 'adventure'],
+    beach: ['museum', 'gallery'],
+  };
+  const userPrefs = preferences.activities || [];
+  const matchesAnyPref = userPrefs.some(pref => {
+    const kws = TYPE_KEYWORDS[pref];
+    return kws ? kws.some(t => activityType.includes(t)) : activityType.includes(pref);
+  });
+  const contradictsAnyPref = userPrefs.some(pref => {
+    const contras = TYPE_CONTRADICTIONS[pref];
+    return contras ? contras.some(t => activityType.includes(t)) : false;
+  });
+  const typeMatchBonus = matchesAnyPref ? 5 : (contradictsAnyPref ? -5 : 0);
 
   // Viator bonus: experiences (cruises, food tours, guided tours) add variety
   // Higher bonus for experiential activities that aren't just monument visits
@@ -879,8 +940,11 @@ function computeScore(
     stadiumPenalty = -8;
   }
 
+  // Weather penalty: outdoor activities in bad weather, beach in cold weather
+  const weatherPenalty = computeWeatherPenalty(activity, weatherForecasts || []);
+
   return mustSeeBonus + popularityScore + ratingScore + typeMatchBonus + viatorBonus
-    + reliabilityBonus + distancePenalty + contextFitBonus + preferenceDepthBonus + personalizationBonus + proximityPenalty + budgetPenalty + stadiumPenalty;
+    + reliabilityBonus + distancePenalty + contextFitBonus + preferenceDepthBonus + personalizationBonus + proximityPenalty + budgetPenalty + stadiumPenalty + weatherPenalty;
 }
 
 // ─── Contextual scoring helpers ─────────────────────────────────────────────
@@ -944,14 +1008,14 @@ function computePreferenceDepth(tags: Set<ProfileTag>, preferences: ActivityType
       }
     }
 
-    // Conflicts: tags that contradict this preference
+    // Conflicts: tags that contradict this preference (-4 each, stronger than before)
     const conflicts = PREFERENCE_CONFLICTS[pref];
     if (conflicts) {
       for (const confTag of conflicts) {
-        if (tags.has(confTag)) score -= 2;
+        if (tags.has(confTag)) score -= 4;
       }
     }
   }
 
-  return Math.max(-4, Math.min(4, score));
+  return Math.max(-8, Math.min(8, score));
 }

@@ -194,6 +194,7 @@ function validateRestaurantDistances(
   for (const day of days) {
     for (const item of day.items) {
       if (item.type !== 'restaurant') continue;
+      if (item.qualityFlags?.includes('self_meal_fallback')) continue;
       if (!item.latitude || !item.longitude) continue;
 
       // Find the nearest activity (anchor point for this meal)

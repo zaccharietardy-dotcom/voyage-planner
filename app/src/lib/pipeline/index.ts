@@ -59,7 +59,7 @@ export async function generateTripV2(
   preferences: TripPreferences,
   onEvent?: OnPipelineEvent
 ): Promise<Trip> {
-  const version = process.env.PIPELINE_VERSION || 'v2-llm';
+  const version = process.env.PIPELINE_VERSION || 'v3';
 
   if (version === 'v3') {
     console.log('[Pipeline V3] Using V3 pipeline (deterministic 12-step)');
@@ -503,6 +503,7 @@ export async function generateTripV3(
       maxDistanceKm: 0.8,
       minRating: 3.5,
       alternativeCount: 2,
+      startDate: preferences.startDate,
     }
   );
   stageTimes['restaurants'] = Date.now() - t;
@@ -552,6 +553,19 @@ export async function generateTripV3(
   );
   stageTimes['contracts'] = Date.now() - t;
   console.log(`[Pipeline V3] Step 10: Quality score ${contractResult.score}/100, Invariants: ${contractResult.invariantsPassed ? 'PASSED' : 'FAILED'}`);
+
+  const contractsModeRaw = (process.env.PIPELINE_CONTRACTS_MODE || 'strict').toLowerCase();
+  const contractsMode: 'strict' | 'warn' = contractsModeRaw === 'warn' ? 'warn' : 'strict';
+  const unresolvedRepairViolations = repairResult.unresolvedViolations.map(v => `REPAIR: ${v}`);
+  const combinedContractViolations = [...unresolvedRepairViolations, ...contractResult.violations];
+  if (contractsMode === 'strict' && combinedContractViolations.length > 0) {
+    const violationPreview = combinedContractViolations.slice(0, 5).join(' | ');
+    throw new Error(
+      `[Pipeline V3] Contract validation failed with ${combinedContractViolations.length} violation(s). ` +
+      `Set PIPELINE_CONTRACTS_MODE=warn to return degraded output. ` +
+      `Preview: ${violationPreview}`
+    );
+  }
 
   // Step 11: Decorate (optional)
   t = Date.now();
@@ -623,10 +637,13 @@ export async function generateTripV3(
   trip.qualityMetrics = {
     score: contractResult.score,
     invariantsPassed: contractResult.invariantsPassed,
-    violations: contractResult.violations,
+    violations: combinedContractViolations,
   };
-  trip.qualityWarnings = contractResult.qualityWarnings;
-  trip.contractViolations = contractResult.violations;
+  trip.qualityWarnings = [
+    ...contractResult.qualityWarnings,
+    ...repairResult.unresolvedViolations.map(v => `Repair unresolved: ${v}`),
+  ];
+  trip.contractViolations = combinedContractViolations;
 
   const totalTime = Date.now() - startTime;
   console.log(`[Pipeline V3] Trip generated in ${totalTime}ms`);

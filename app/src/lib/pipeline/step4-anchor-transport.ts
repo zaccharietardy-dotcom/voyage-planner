@@ -115,8 +115,17 @@ export function anchorTransport(
       if (inboundFlight?.arrivalTime) {
         const arrivalTime = extractTimeFromDateString(inboundFlight.arrivalTime);
         if (arrivalTime) {
-          startTime = roundUpTo5Min(addMinutes(arrivalTime, ARRIVAL_BUFFER_MIN));
-          hasArrival = true;
+          const arrivalMin = timeToMin(arrivalTime);
+          const rawStartMin = arrivalMin + ARRIVAL_BUFFER_MIN;
+          // Late arrival (after 21:00): Day 1 is transit-only, no activities
+          if (arrivalMin >= 21 * 60 || rawStartMin >= 23 * 60) {
+            startTime = '23:59';
+            endTime = '23:59';
+            hasArrival = true;
+          } else {
+            startTime = roundUpTo5Min(addMinutes(arrivalTime, ARRIVAL_BUFFER_MIN));
+            hasArrival = true;
+          }
         }
       }
       // Check inbound train/bus (from last leg if present)
@@ -125,16 +134,26 @@ export function anchorTransport(
         if (lastLeg.arrival) {
           const arrivalTime = extractTimeFromDateString(lastLeg.arrival);
           if (arrivalTime) {
-            const trainStart = roundUpTo5Min(addMinutes(arrivalTime, 45)); // 45min buffer for trains
-            if (!hasArrival || timeToMin(trainStart) > timeToMin(startTime)) {
-              startTime = trainStart;
+            const arrivalMin = timeToMin(arrivalTime);
+            // Late arrival by train (after 21:00): transit-only day
+            if (arrivalMin >= 21 * 60) {
+              startTime = '23:59';
+              endTime = '23:59';
+              hasArrival = true;
+            } else {
+              const trainStart = roundUpTo5Min(addMinutes(arrivalTime, 45)); // 45min buffer for trains
+              if (!hasArrival || timeToMin(trainStart) > timeToMin(startTime)) {
+                startTime = trainStart;
+              }
+              hasArrival = true;
             }
-            hasArrival = true;
           }
         }
       }
-      // Ensure reasonable bounds
-      startTime = clampTime(startTime, '07:00', '18:00');
+      // Ensure reasonable bounds (skip if transit-only day)
+      if (startTime !== '23:59') {
+        startTime = clampTime(startTime, '07:00', '18:00');
+      }
     }
 
     // Last day: Constrain by departure transport

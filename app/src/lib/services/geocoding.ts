@@ -727,14 +727,40 @@ export async function getCityCenterCoordsAsync(city: string): Promise<{ lat: num
   // 2. Fallback Nominatim (gratuit)
   const result = await geocodeAddress(city);
   if (result && result.lat && result.lng) {
-    const coords = { lat: result.lat, lng: result.lng };
+    let coords = { lat: result.lat, lng: result.lng };
+
+    // 3. Vérifier que Nominatim n'a pas retourné des coords d'aéroport
+    const nearbyAirport = findNearbyAirportByCoords(coords.lat, coords.lng);
+    if (nearbyAirport) {
+      console.warn(`[Geocoding] Nominatim returned coords near ${nearbyAirport.name} airport for "${city}", using city center fallback`);
+      // Chercher le vrai centre-ville via le nom de la ville de l'aéroport
+      const airportCityCenter = getCityCenterCoords(nearbyAirport.city);
+      if (airportCityCenter) {
+        coords = airportCityCenter;
+      }
+    }
+
     // Stocker pour le reste de la session
     const normalizedCity = city.toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     CITY_CENTERS[normalizedCity] = coords;
     return coords;
   }
 
-  console.warn(`[Geocoding] ❌ Nominatim: aucun résultat pour "${city}"`);
+  console.warn(`[Geocoding] Nominatim: aucun résultat pour "${city}"`);
+  return null;
+}
+
+/**
+ * Vérifie si des coordonnées sont proches d'un aéroport connu (< 3km).
+ * Retourne l'aéroport si trouvé, null sinon.
+ */
+export function findNearbyAirportByCoords(lat: number, lng: number, radiusKm: number = 3): AirportInfo | null {
+  for (const airport of Object.values(AIRPORTS)) {
+    const dist = calculateDistance(lat, lng, airport.latitude, airport.longitude);
+    if (dist < radiusKm) {
+      return airport;
+    }
+  }
   return null;
 }
 

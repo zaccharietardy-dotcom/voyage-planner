@@ -4,7 +4,7 @@
  * and coordinates too far from the trip destination.
  */
 
-import { calculateDistance } from '../../services/geocoding';
+import { calculateDistance, findNearbyAirportByCoords } from '../../services/geocoding';
 
 // ============================================
 // Types
@@ -29,8 +29,9 @@ export interface CoordinateValidationResult {
  * 1. Not null/undefined/NaN
  * 2. Not (0, 0) — common API default for missing data
  * 3. lat in [-90, 90], lng in [-180, 180]
- * 4. Not too far from destination (default 100km) — catches cross-country errors (Naples FL vs Naples IT)
- * 5. Auto-corrects swapped lat/lng if the swap brings it closer to destination
+ * 4. Not at a known airport (geocoding error) — returns city center coords instead
+ * 5. Not too far from destination (default 100km) — catches cross-country errors (Naples FL vs Naples IT)
+ * 6. Auto-corrects swapped lat/lng if the swap brings it closer to destination
  *
  * @param lat - Latitude to validate
  * @param lng - Longitude to validate
@@ -61,11 +62,25 @@ export function validateCoordinate(
     return { valid: false, reason: `Longitude ${lng} out of range [-180, 180]` };
   }
 
-  // Check 4: Distance from destination
+  // Check 4: Airport proximity — activities at airports are likely geocoding errors
+  const nearbyAirport = findNearbyAirportByCoords(lat, lng, 2);
+  if (nearbyAirport) {
+    // Only flag if the destination itself is NOT at the airport (i.e., destCoords is far from this airport)
+    const destToAirport = calculateDistance(destCoords.lat, destCoords.lng, nearbyAirport.latitude, nearbyAirport.longitude);
+    if (destToAirport > 3) {
+      return {
+        valid: false,
+        corrected: { lat: destCoords.lat, lng: destCoords.lng },
+        reason: `Coordinates (${lat.toFixed(4)}, ${lng.toFixed(4)}) are at ${nearbyAirport.name} airport — using city center instead`,
+      };
+    }
+  }
+
+  // Check 5: Distance from destination
   const distance = calculateDistance(lat, lng, destCoords.lat, destCoords.lng);
 
   if (distance > maxDistanceKm) {
-    // Check 5: Try swapping lat/lng — sometimes APIs return (lng, lat) instead of (lat, lng)
+    // Check 6: Try swapping lat/lng — sometimes APIs return (lng, lat) instead of (lat, lng)
     if (lng >= -90 && lng <= 90) {
       const swappedDistance = calculateDistance(lng, lat, destCoords.lat, destCoords.lng);
       if (swappedDistance <= maxDistanceKm) {

@@ -294,7 +294,7 @@ export function generateFlightOmioLink(
   const originSlug = toOmioLocationSlug(origin);
   const destSlug = toOmioLocationSlug(destination);
   const dateParam = date ? `?departure_date=${date}` : '';
-  return `https://www.omio.fr/vols/${encodeURIComponent(originSlug)}/${encodeURIComponent(destSlug)}${dateParam}`;
+  return `https://www.omio.fr/vols/${originSlug}/${destSlug}${dateParam}`;
 }
 
 /**
@@ -526,6 +526,6 @@ export function generateHotelSearchLinks(
   return {
     googleHotels: `https://www.google.com/travel/hotels?${googleParams.toString()}`,
     booking: `https://www.booking.com/searchresults.html?${bookingParams.toString()}`,
-    airbnb: `https://www.airbnb.fr/s/${encodeURIComponent(destination)}/homes?${airbnbParams.toString()}`,
+    airbnb: `https://www.airbnb.fr/s/${encodeURIComponent(destination.trim())}/homes?${airbnbParams.toString()}`,
   };
 }

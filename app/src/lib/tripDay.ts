@@ -1049,7 +1049,7 @@ export async function generateDayWithScheduler(params: {
 
               items.push(schedulerItemToTripItem(lunchItem, dayNumber, orderIndex++, {
                 title: restaurant?.name || 'Déjeuner',
-                description: restaurant ? `${restaurant.cuisineTypes.join(', ')} | ⭐ ${restaurant.rating?.toFixed(1)}/5` : 'Découvrez la cuisine locale',
+                description: restaurant ? `${restaurant.cuisineTypes?.length ? restaurant.cuisineTypes.join(', ') + ' | ' : ''}⭐ ${restaurant.rating?.toFixed(1) || '?'}/5` : 'Découvrez la cuisine locale',
                 locationName: restaurant?.address || `Centre-ville, ${preferences.destination}`,
                 latitude: restaurantCoords.lat,
                 longitude: restaurantCoords.lng,
@@ -1442,7 +1442,7 @@ export async function generateDayWithScheduler(params: {
 
         items.push(schedulerItemToTripItem(breakfastItem, dayNumber, orderIndex++, {
           title: restaurant?.name || 'Petit-déjeuner',
-          description: restaurant ? `${restaurant.cuisineTypes.join(', ')} | ⭐ ${restaurant.rating?.toFixed(1)}/5` : 'Petit-déjeuner local',
+          description: restaurant ? `${restaurant.cuisineTypes?.length ? restaurant.cuisineTypes.join(', ') + ' | ' : ''}⭐ ${restaurant.rating?.toFixed(1) || '?'}/5` : 'Petit-déjeuner local',
           locationName: restaurant ? `${restaurant.name}, ${preferences.destination}` : `Centre-ville, ${preferences.destination}`,
           latitude: restaurantCoords.lat,
           longitude: restaurantCoords.lng,
@@ -1742,7 +1742,7 @@ export async function generateDayWithScheduler(params: {
 
           items.push(schedulerItemToTripItem(lunchItem, dayNumber, orderIndex++, {
             title: restaurant?.name || 'Déjeuner',
-            description: restaurant ? `${restaurant.cuisineTypes.join(', ')} | ⭐ ${restaurant.rating?.toFixed(1)}/5` : 'Déjeuner local',
+            description: restaurant ? `${restaurant.cuisineTypes?.length ? restaurant.cuisineTypes.join(', ') + ' | ' : ''}⭐ ${restaurant.rating?.toFixed(1) || '?'}/5` : 'Déjeuner local',
             locationName: restaurant ? `${restaurant.name}, ${preferences.destination}` : `Centre-ville, ${preferences.destination}`,
             latitude: restaurantCoords.lat,
             longitude: restaurantCoords.lng,
@@ -1795,7 +1795,7 @@ export async function generateDayWithScheduler(params: {
                 getReliableGoogleMapsPlaceUrl(restaurant, preferences.destination);
               items.push(schedulerItemToTripItem(fallbackItem, dayNumber, orderIndex++, {
                 title: restaurant?.name || 'Déjeuner',
-                description: restaurant ? `${restaurant.cuisineTypes.join(', ')} | ⭐ ${restaurant.rating?.toFixed(1)}/5` : 'Déjeuner local',
+                description: restaurant ? `${restaurant.cuisineTypes?.length ? restaurant.cuisineTypes.join(', ') + ' | ' : ''}⭐ ${restaurant.rating?.toFixed(1) || '?'}/5` : 'Déjeuner local',
                 locationName: restaurant ? `${restaurant.name}, ${preferences.destination}` : `Centre-ville, ${preferences.destination}`,
                 latitude: restaurantCoords.lat,
                 longitude: restaurantCoords.lng,
@@ -1850,7 +1850,7 @@ export async function generateDayWithScheduler(params: {
                   getReliableGoogleMapsPlaceUrl(restaurant, preferences.destination);
                 items.push(schedulerItemToTripItem(cursorLunchItem, dayNumber, orderIndex++, {
                   title: restaurant?.name || 'Déjeuner',
-                  description: restaurant ? `${restaurant.cuisineTypes.join(', ')} | ⭐ ${restaurant.rating?.toFixed(1)}/5` : 'Déjeuner local',
+                  description: restaurant ? `${restaurant.cuisineTypes?.length ? restaurant.cuisineTypes.join(', ') + ' | ' : ''}⭐ ${restaurant.rating?.toFixed(1) || '?'}/5` : 'Déjeuner local',
                   locationName: restaurant ? `${restaurant.name}, ${preferences.destination}` : `Centre-ville, ${preferences.destination}`,
                   latitude: restaurantCoords.lat,
                   longitude: restaurantCoords.lng,
@@ -1915,7 +1915,7 @@ export async function generateDayWithScheduler(params: {
             getReliableGoogleMapsPlaceUrl(restaurant, preferences.destination);
           items.push(schedulerItemToTripItem(lastResortLunch, dayNumber, orderIndex++, {
             title: restaurant?.name || 'Déjeuner',
-            description: restaurant ? `${restaurant.cuisineTypes.join(', ')} | ⭐ ${restaurant.rating?.toFixed(1)}/5` : 'Déjeuner local',
+            description: restaurant ? `${restaurant.cuisineTypes?.length ? restaurant.cuisineTypes.join(', ') + ' | ' : ''}⭐ ${restaurant.rating?.toFixed(1) || '?'}/5` : 'Déjeuner local',
             locationName: restaurant ? `${restaurant.name}, ${preferences.destination}` : `Centre-ville, ${preferences.destination}`,
             latitude: restaurantCoords.lat,
             longitude: restaurantCoords.lng,
@@ -1993,7 +1993,7 @@ export async function generateDayWithScheduler(params: {
         id: generateId(), dayNumber, orderIndex: orderIndex++,
         startTime: forcedStart, endTime: forcedEnd, type: 'restaurant',
         title: restaurant?.name || 'Déjeuner',
-        description: restaurant ? `${restaurant.cuisineTypes.join(', ')} | ⭐ ${restaurant.rating?.toFixed(1)}/5` : 'Déjeuner local',
+        description: restaurant ? `${restaurant.cuisineTypes?.length ? restaurant.cuisineTypes.join(', ') + ' | ' : ''}⭐ ${restaurant.rating?.toFixed(1) || '?'}/5` : 'Déjeuner local',
         locationName: restaurant ? `${restaurant.name}, ${preferences.destination}` : `Centre-ville, ${preferences.destination}`,
         latitude: restaurantCoords.lat,
         longitude: restaurantCoords.lng,
@@ -2303,7 +2303,7 @@ export async function generateDayWithScheduler(params: {
 
         items.push(schedulerItemToTripItem(dinnerItem, dayNumber, orderIndex++, {
           title: restaurant?.name || 'Dîner',
-          description: restaurant ? `${restaurant.cuisineTypes.join(', ')} | ⭐ ${restaurant.rating?.toFixed(1)}/5` : 'Dîner local',
+          description: restaurant ? `${restaurant.cuisineTypes?.length ? restaurant.cuisineTypes.join(', ') + ' | ' : ''}⭐ ${restaurant.rating?.toFixed(1) || '?'}/5` : 'Dîner local',
           locationName: restaurant ? `${restaurant.name}, ${preferences.destination}` : `Centre-ville, ${preferences.destination}`,
           latitude: restaurantCoords.lat,
           longitude: restaurantCoords.lng,

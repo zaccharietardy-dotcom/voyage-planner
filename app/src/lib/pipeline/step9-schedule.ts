@@ -22,6 +22,7 @@ import type { DayTravelTimes } from './step7b-travel-times';
 import type { DayTimeWindow } from './step4-anchor-transport';
 import { timeToMin, minToTime, addMinutes, isPastEnd, ensureAfter } from './utils/time';
 import { getClusterCentroid, findMidDayActivity } from './utils/geo';
+import { isDuplicateActivityCandidate } from './utils/activityDedup';
 
 // ---------------------------------------------------------------------------
 // Public API
@@ -43,80 +44,6 @@ export function assembleV3Days(
   const days: TripDay[] = [];
   const startDate = preferences.startDate || new Date();
 
-  // Build a flat global restaurant pool once for fallback meal injection.
-  // Sorted by distance to each anchor on demand below.
-  const globalRestaurantPool: Restaurant[] = [
-    ...(data.tripAdvisorRestaurants || []),
-    ...(data.serpApiRestaurants || []),
-  ];
-
-  /**
-   * Returns the closest restaurant from the global pool to a given point.
-   * Prefers restaurants within 5km; only falls back to unlimited distance when
-   * no restaurant exists within that radius.
-   * Used as a last-resort fallback when step8 returned no placement for a meal.
-   */
-  function pickClosestRestaurant(
-    anchor: { lat: number; lng: number },
-    excludeIds: Set<string>
-  ): MealPlacement['primary'] | null {
-    // Degree-based approximation for 5km (~0.045°). Exact haversine check follows.
-    const MAX_PREFERRED_KM = 5.0;
-    const KM_PER_DEG = 111.0; // approximate degrees-per-km for rough pre-filter
-
-    let bestWithin5km: Restaurant | null = null;
-    let bestWithin5kmDist = Infinity;
-    let bestUnlimited: Restaurant | null = null;
-    let bestUnlimitedDist = Infinity;
-
-    for (const r of globalRestaurantPool) {
-      if (excludeIds.has(r.id)) continue;
-      // Use Euclidean degrees as a cheap pre-screen to avoid slow Math.hypot on large pools
-      const dLat = r.latitude - anchor.lat;
-      const dLng = r.longitude - anchor.lng;
-      const dKmApprox = Math.sqrt(dLat * dLat + dLng * dLng) * KM_PER_DEG;
-
-      if (dKmApprox < bestUnlimitedDist) {
-        bestUnlimitedDist = dKmApprox;
-        bestUnlimited = r;
-      }
-      if (dKmApprox <= MAX_PREFERRED_KM && dKmApprox < bestWithin5kmDist) {
-        bestWithin5kmDist = dKmApprox;
-        bestWithin5km = r;
-      }
-    }
-
-    if (bestWithin5km) return bestWithin5km;
-
-    // Nothing within 5km — log a strong warning and return the global closest
-    if (bestUnlimited) {
-      console.error(`[assembleV3Days] pickClosestRestaurant: no restaurant within 5km — forced to use "${bestUnlimited.name}" (~${(bestUnlimitedDist).toFixed(1)}km away). Consider enriching the restaurant pool.`);
-    }
-    return bestUnlimited;
-  }
-
-  /**
-   * Builds a synthetic MealPlacement for use when step8 returned no result.
-   */
-  function buildFallbackMealPlacement(
-    mealType: 'breakfast' | 'lunch' | 'dinner',
-    anchor: { lat: number; lng: number },
-    anchorName: string,
-    excludeIds: Set<string>
-  ): MealPlacement | null {
-    const restaurant = pickClosestRestaurant(anchor, excludeIds);
-    if (!restaurant) return null;
-    console.warn(`[assembleV3Days] Fallback meal injection: ${mealType} — using "${restaurant.name}" (global closest)`);
-    return {
-      mealType,
-      anchorPoint: anchor,
-      anchorName,
-      primary: restaurant,
-      alternatives: [],
-      distanceFromAnchor: Math.hypot(restaurant.latitude - anchor.lat, restaurant.longitude - anchor.lng),
-    };
-  }
-
   // Global dedup: track activity IDs already placed across all days
   const globalPlacedIds = new Set<string>();
 
@@ -124,15 +51,23 @@ export function assembleV3Days(
     const dayDate = new Date(startDate);
     dayDate.setDate(dayDate.getDate() + cluster.dayNumber - 1);
 
-    // Dedup activities within this cluster (same ID should not appear twice)
-    const seenIds = new Set<string>();
+    // Dedup activities within this cluster: by ID + by similarity (name/proximity)
+    const seenInDay: Array<{ id?: string; name?: string; latitude?: number; longitude?: number }> = [];
     cluster.activities = cluster.activities.filter(act => {
       const id = act.id || act.name;
-      if (seenIds.has(id) || globalPlacedIds.has(id)) {
-        console.log(`[assembleV3Days] Dedup: removing duplicate "${act.name}" from Day ${cluster.dayNumber}`);
+      // ID-based global dedup
+      if (globalPlacedIds.has(id)) {
+        console.log(`[assembleV3Days] Dedup: removing globally placed "${act.name}" from Day ${cluster.dayNumber}`);
         return false;
       }
-      seenIds.add(id);
+      // Similarity-based per-day dedup (catches "Parc Guell" vs "Park Guell Tour" at same location)
+      const candidate = { id: act.id, name: act.name, latitude: act.latitude, longitude: act.longitude };
+      const duplicateOf = seenInDay.find(existing => isDuplicateActivityCandidate(candidate, existing));
+      if (duplicateOf) {
+        console.log(`[assembleV3Days] Dedup: removing similar "${act.name}" (duplicate of "${duplicateOf.name}") from Day ${cluster.dayNumber}`);
+        return false;
+      }
+      seenInDay.push(candidate);
       return true;
     });
 
@@ -148,36 +83,38 @@ export function assembleV3Days(
     let orderIndex = 0;
     let lunchPlaced = false;
     let activitiesPlaced = 0;
+    const isLastDay = cluster.dayNumber === clusters.length;
 
     // isPastEnd and timeToMin are imported from ./utils/time
 
-    // Track meal IDs already placed this day for fallback dedup
-    const dayUsedMealIds = new Set<string>();
+    // Inject checkout item on the last day
+    if (isLastDay && hotel) {
+      const checkoutTime = hotel.checkOutTime || '11:00';
+      items.push(createCheckoutItem(hotel, checkoutTime, cluster.dayNumber, orderIndex++));
+      // If checkout is after current activity start, push activities to after checkout
+      if (timeToMin(checkoutTime) > timeToMin(currentTime)) {
+        currentTime = addMinutes(checkoutTime, 15); // 15min buffer after checkout
+      }
+    }
 
-    // Breakfast — use step8 result or inject global-closest fallback
+    // Meal anchors used for Repas libre fallback when no valid restaurant can be placed.
     const hotelLatLng = hotel ? { lat: hotel.latitude, lng: hotel.longitude } : null;
     const breakfastAnchor = hotelLatLng || getClusterCentroid(cluster.activities);
-    const breakfast: MealPlacement | undefined =
-      mealPlan?.meals.find(m => m.mealType === 'breakfast') ??
-      (breakfastAnchor
-        ? buildFallbackMealPlacement('breakfast', breakfastAnchor, 'Hotel', dayUsedMealIds) ?? undefined
-        : undefined);
-    if (breakfast) {
-      dayUsedMealIds.add(breakfast.primary.id);
-      items.push(createRestaurantItem(breakfast, 'breakfast', currentTime, 45, cluster.dayNumber, orderIndex++));
-      currentTime = addMinutes(currentTime, 60); // 45min eat + 15min travel
+    const breakfast = mealPlan?.meals.find(m => m.mealType === 'breakfast');
+    const breakfastResolved = resolveMealPlacementForSlot(breakfast, dayDate, currentTime, 45);
+    if (breakfastResolved) {
+      items.push(createRestaurantItem(breakfastResolved, 'breakfast', currentTime, 45, cluster.dayNumber, orderIndex++));
+    } else {
+      items.push(createSelfMealFallbackItem('breakfast', currentTime, 45, cluster.dayNumber, orderIndex++, breakfastAnchor));
     }
+    currentTime = addMinutes(currentTime, 60); // 45min eat + 15min travel
 
     // Activities with travel times between them
     const lunchAnchorAct = findMidDayActivity(cluster.activities);
     const lunchAnchor = lunchAnchorAct
       ? { lat: lunchAnchorAct.latitude, lng: lunchAnchorAct.longitude }
       : getClusterCentroid(cluster.activities);
-    const lunch: MealPlacement | undefined =
-      mealPlan?.meals.find(m => m.mealType === 'lunch') ??
-      (lunchAnchor
-        ? buildFallbackMealPlacement('lunch', lunchAnchor, lunchAnchorAct?.name || 'Mid-day point', dayUsedMealIds) ?? undefined
-        : undefined);
+    const lunch = mealPlan?.meals.find(m => m.mealType === 'lunch');
 
     for (let i = 0; i < cluster.activities.length; i++) {
       // Check if we have enough time left for this activity
@@ -197,9 +134,14 @@ export function assembleV3Days(
         }
       }
 
-      // Place lunch before this activity if it's past 12:15 and we haven't placed it yet
-      if (!lunchPlaced && lunch && activitiesPlaced >= 2 && timeToMin(currentTime) >= 12 * 60 + 15) {
-        items.push(createRestaurantItem(lunch, 'lunch', currentTime, 75, cluster.dayNumber, orderIndex++));
+      // Place lunch before this activity if it's past 12:15 and we haven't placed it yet.
+      if (!lunchPlaced && activitiesPlaced >= 2 && timeToMin(currentTime) >= 12 * 60 + 15) {
+        const resolvedLunch = resolveMealPlacementForSlot(lunch, dayDate, currentTime, 75);
+        if (resolvedLunch) {
+          items.push(createRestaurantItem(resolvedLunch, 'lunch', currentTime, 75, cluster.dayNumber, orderIndex++));
+        } else {
+          items.push(createSelfMealFallbackItem('lunch', currentTime, 75, cluster.dayNumber, orderIndex++, lunchAnchor));
+        }
         currentTime = addMinutes(currentTime, 90); // 75min eat + 15min travel
         lunchPlaced = true;
 
@@ -307,35 +249,38 @@ export function assembleV3Days(
       items.forEach((item, idx) => { item.orderIndex = idx; });
     }
 
-    // Place lunch if not yet placed (early days or few activities) — includes fallback
-    if (!lunchPlaced && lunch && activitiesPlaced > 0) {
+    // Place lunch if not yet placed (early days or few activities).
+    if (!lunchPlaced && activitiesPlaced > 0) {
       const lunchTime = ensureAfter(currentTime, '12:15');
       if (!isPastEnd(lunchTime, addMinutes(dayEndTime, 30))) {
-        items.push(createRestaurantItem(lunch, 'lunch', lunchTime, 75, cluster.dayNumber, orderIndex++));
+        const resolvedLunch = resolveMealPlacementForSlot(lunch, dayDate, lunchTime, 75);
+        if (resolvedLunch) {
+          items.push(createRestaurantItem(resolvedLunch, 'lunch', lunchTime, 75, cluster.dayNumber, orderIndex++));
+        } else {
+          items.push(createSelfMealFallbackItem('lunch', lunchTime, 75, cluster.dayNumber, orderIndex++, lunchAnchor));
+        }
         currentTime = addMinutes(lunchTime, 90);
         lunchPlaced = true;
       }
     }
 
-    // Dinner — use step8 result or inject global-closest fallback
-    if (lunch) dayUsedMealIds.add(lunch.primary.id);
+    // Dinner
     const lastAct = cluster.activities[cluster.activities.length - 1];
     const dinnerAnchor = lastAct
       ? { lat: lastAct.latitude, lng: lastAct.longitude }
       : hotelLatLng || getClusterCentroid(cluster.activities);
-    const dinner: MealPlacement | undefined =
-      mealPlan?.meals.find(m => m.mealType === 'dinner') ??
-      (dinnerAnchor
-        ? buildFallbackMealPlacement('dinner', dinnerAnchor, lastAct?.name || 'Hotel', dayUsedMealIds) ?? undefined
-        : undefined);
-    if (dinner) {
-      // Dinner between 19:00 and 21:30
-      let dinnerTime = ensureAfter(currentTime, '19:00');
-      // Cap dinner start at 21:30 max
-      if (isPastEnd(dinnerTime, '21:30')) {
-        dinnerTime = '21:00';
-      }
-      items.push(createRestaurantItem(dinner, 'dinner', dinnerTime, 90, cluster.dayNumber, orderIndex++));
+    const dinner = mealPlan?.meals.find(m => m.mealType === 'dinner');
+    // Dinner between 19:00 and 21:30
+    let dinnerTime = ensureAfter(currentTime, '19:00');
+    // Cap dinner start at 21:30 max
+    if (isPastEnd(dinnerTime, '21:30')) {
+      dinnerTime = '21:00';
+    }
+    const resolvedDinner = resolveMealPlacementForSlot(dinner, dayDate, dinnerTime, 90);
+    if (resolvedDinner) {
+      items.push(createRestaurantItem(resolvedDinner, 'dinner', dinnerTime, 90, cluster.dayNumber, orderIndex++));
+    } else {
+      items.push(createSelfMealFallbackItem('dinner', dinnerTime, 90, cluster.dayNumber, orderIndex++, dinnerAnchor));
     }
 
     days.push({
@@ -395,6 +340,12 @@ export function assembleV3Days(
     day.items.forEach((item, idx) => { item.orderIndex = idx; });
   }
 
+  // Final guardrail after overlap shifts: ensure restaurants are still valid.
+  for (const day of days) {
+    enforceRestaurantSafetyForDay(day);
+    day.items.forEach((item, idx) => { item.orderIndex = idx; });
+  }
+
   // Enrich all activity items with ticketing links (official + Viator + Tiqets)
   const destination = preferences.destination || '';
   for (const day of days) {
@@ -408,6 +359,239 @@ export function assembleV3Days(
 // ---------------------------------------------------------------------------
 // Internal helpers
 // ---------------------------------------------------------------------------
+
+function resolveMealPlacementForSlot(
+  meal: MealPlacement | undefined,
+  dayDate: Date,
+  startTime: string,
+  durationMin: number
+): MealPlacement | null {
+  if (!meal) return null;
+  const endTime = addMinutes(startTime, durationMin);
+  const candidates: Restaurant[] = [meal.primary, ...(meal.alternatives || [])];
+  const openCandidate = candidates.find((restaurant) => isRestaurantOpenForSlot(restaurant, dayDate, startTime, endTime));
+  if (!openCandidate) return null;
+  if (openCandidate.id === meal.primary.id) return meal;
+
+  const remainingAlternatives = candidates.filter((candidate) => candidate.id !== openCandidate.id);
+  return {
+    ...meal,
+    primary: openCandidate,
+    alternatives: remainingAlternatives,
+  };
+}
+
+function isRestaurantOpenForSlot(
+  restaurant: Restaurant,
+  dayDate: Date,
+  startTime: string,
+  endTime: string
+): boolean {
+  const dayHours = getRestaurantHoursForDay(restaurant, dayDate);
+  if (dayHours === null) return false; // explicitly closed on this day
+  if (!dayHours?.open || !dayHours?.close) return true; // unknown -> do not block scheduling
+
+  const tolerance = 15;
+  const openMin = timeToMin(dayHours.open);
+  let closeMin = timeToMin(dayHours.close);
+  let slotStart = timeToMin(startTime);
+  let slotEnd = timeToMin(endTime);
+
+  if (closeMin <= openMin) {
+    closeMin += 24 * 60;
+    if (slotStart < openMin) {
+      slotStart += 24 * 60;
+      slotEnd += 24 * 60;
+    }
+  }
+
+  return slotStart >= openMin - tolerance && slotEnd <= closeMin + tolerance;
+}
+
+function getRestaurantHoursForDay(
+  restaurant: Restaurant,
+  dayDate: Date
+): { open: string; close: string } | null | undefined {
+  const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'] as const;
+  const dayName = dayNames[dayDate.getDay()];
+  const dayHours = restaurant.openingHours?.[dayName];
+  if (dayHours === null) return null;
+  if (dayHours && dayHours.open && dayHours.close) return dayHours;
+  return undefined;
+}
+
+function createSelfMealFallbackItem(
+  mealType: 'breakfast' | 'lunch' | 'dinner',
+  startTime: string,
+  duration: number,
+  dayNumber: number,
+  orderIndex: number,
+  anchor: { lat: number; lng: number } | null
+): TripItem {
+  const mealLabel = getMealLabel(mealType);
+  const latitude = anchor?.lat ?? 0;
+  const longitude = anchor?.lng ?? 0;
+
+  return {
+    id: `meal-self-${dayNumber}-${mealType}`,
+    dayNumber,
+    startTime,
+    endTime: addMinutes(startTime, duration),
+    type: 'restaurant',
+    title: `${mealLabel} — Repas libre`,
+    description: 'Pique-nique / courses / repas maison',
+    locationName: 'Repas libre',
+    latitude,
+    longitude,
+    orderIndex,
+    duration,
+    mealType,
+    estimatedCost: 0,
+    restaurant: undefined,
+    restaurantAlternatives: undefined,
+    qualityFlags: ['self_meal_fallback'],
+  };
+}
+
+function getMealLabel(mealType: 'breakfast' | 'lunch' | 'dinner'): string {
+  if (mealType === 'breakfast') return 'Petit-déjeuner';
+  if (mealType === 'lunch') return 'Déjeuner';
+  return 'Dîner';
+}
+
+function enforceRestaurantSafetyForDay(day: TripDay): void {
+  const activityPoints = day.items
+    .filter((item) => item.type === 'activity' && item.latitude && item.longitude)
+    .map((item) => ({ lat: item.latitude as number, lng: item.longitude as number }));
+
+  for (let i = 0; i < day.items.length; i++) {
+    const item = day.items[i];
+    if (item.type !== 'restaurant') continue;
+    if (item.qualityFlags?.includes('self_meal_fallback')) continue;
+
+    const mealType = item.mealType;
+    if (!mealType) continue;
+
+    const isLunchOrDinner = mealType === 'lunch' || mealType === 'dinner';
+    const currentRestaurant = item.restaurant;
+    const currentOpen = currentRestaurant
+      ? isRestaurantOpenForSlot(currentRestaurant, day.date, item.startTime, item.endTime)
+      : true;
+    const currentDist = (currentRestaurant && isLunchOrDinner)
+      ? nearestActivityDistanceKm(currentRestaurant.latitude, currentRestaurant.longitude, activityPoints)
+      : 0;
+    const currentDistanceOk = !isLunchOrDinner || currentDist <= 0.8;
+
+    if (currentOpen && currentDistanceOk) continue;
+
+    const replacement = findRestaurantReplacementForSlot(
+      mealType,
+      day.date,
+      item.startTime,
+      item.endTime,
+      [item.restaurant, ...(item.restaurantAlternatives || [])].filter(Boolean) as Restaurant[],
+      activityPoints
+    );
+
+    if (replacement) {
+      const mealLabel = getMealLabel(mealType);
+      day.items[i] = {
+        ...item,
+        title: `${mealLabel} — ${replacement.restaurant.name}`,
+        description: `${mealLabel} à ${replacement.restaurant.name}`,
+        locationName: replacement.restaurant.address || replacement.restaurant.name,
+        latitude: replacement.restaurant.latitude,
+        longitude: replacement.restaurant.longitude,
+        rating: replacement.restaurant.rating,
+        bookingUrl: replacement.restaurant.reservationUrl || replacement.restaurant.googleMapsUrl,
+        restaurant: replacement.restaurant,
+        restaurantAlternatives: replacement.alternatives.length > 0 ? replacement.alternatives : undefined,
+        openingHoursByDay: replacement.restaurant.openingHours,
+      };
+      continue;
+    }
+
+    day.items[i] = {
+      ...item,
+      title: `${getMealLabel(mealType)} — Repas libre`,
+      description: 'Pique-nique / courses / repas maison',
+      locationName: 'Repas libre',
+      estimatedCost: 0,
+      bookingUrl: undefined,
+      restaurant: undefined,
+      restaurantAlternatives: undefined,
+      qualityFlags: Array.from(new Set([...(item.qualityFlags || []), 'self_meal_fallback'])),
+    };
+  }
+}
+
+function findRestaurantReplacementForSlot(
+  mealType: 'breakfast' | 'lunch' | 'dinner',
+  dayDate: Date,
+  startTime: string,
+  endTime: string,
+  candidates: Restaurant[],
+  activityPoints: Array<{ lat: number; lng: number }>
+): { restaurant: Restaurant; alternatives: Restaurant[] } | null {
+  const isLunchOrDinner = mealType === 'lunch' || mealType === 'dinner';
+  const uniqueById = new Map<string, Restaurant>();
+  for (const candidate of candidates) {
+    if (!candidate?.id) continue;
+    if (!uniqueById.has(candidate.id)) uniqueById.set(candidate.id, candidate);
+  }
+  const uniqueCandidates = [...uniqueById.values()];
+
+  const valid = uniqueCandidates.filter((candidate) => {
+    if (!isRestaurantOpenForSlot(candidate, dayDate, startTime, endTime)) return false;
+    if (!isLunchOrDinner) return true;
+    return nearestActivityDistanceKm(candidate.latitude, candidate.longitude, activityPoints) <= 0.8;
+  });
+
+  if (valid.length === 0) return null;
+  const selected = valid[0];
+  const alternatives = valid.slice(1);
+  return { restaurant: selected, alternatives };
+}
+
+function nearestActivityDistanceKm(
+  lat: number,
+  lng: number,
+  activityPoints: Array<{ lat: number; lng: number }>
+): number {
+  if (activityPoints.length === 0) return Infinity;
+  let minDist = Infinity;
+  for (const point of activityPoints) {
+    const dist = Math.hypot(lat - point.lat, lng - point.lng) * 111;
+    if (dist < minDist) minDist = dist;
+  }
+  return minDist;
+}
+
+/**
+ * Helper: Create a TripItem for hotel checkout
+ */
+function createCheckoutItem(
+  hotel: Accommodation,
+  checkoutTime: string,
+  dayNumber: number,
+  orderIndex: number
+): TripItem {
+  return {
+    id: `checkout-${dayNumber}`,
+    dayNumber,
+    startTime: addMinutes(checkoutTime, -30),
+    endTime: checkoutTime,
+    type: 'checkout',
+    title: `Check-out — ${hotel.name}`,
+    description: `Libérer la chambre avant ${checkoutTime}`,
+    locationName: hotel.name || '',
+    latitude: hotel.latitude || 0,
+    longitude: hotel.longitude || 0,
+    orderIndex,
+    duration: 30,
+    estimatedCost: 0,
+  };
+}
 
 /**
  * Helper: Create a TripItem for an activity
@@ -472,6 +656,8 @@ function createRestaurantItem(
     restaurantAlternatives: meal.alternatives,
     rating: restaurant.rating,
     estimatedCost: restaurant.priceLevel ? restaurant.priceLevel * 15 : undefined,
+    bookingUrl: restaurant.reservationUrl || restaurant.googleMapsUrl,
+    openingHoursByDay: restaurant.openingHours,
   };
 }
 

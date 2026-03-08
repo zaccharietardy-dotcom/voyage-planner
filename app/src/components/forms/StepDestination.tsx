@@ -354,7 +354,7 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
                   homeAddress: value,
                   homeCoords: undefined,
                   ...(!trimmed ? { origin: '' } : {}),
-                  ...(!isAddressLike ? { origin: value } : {}),
+                  ...(!isAddressLike ? { origin: trimmed } : {}),
                 });
               }}
               onFocus={() => {

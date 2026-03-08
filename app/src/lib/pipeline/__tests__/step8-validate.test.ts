@@ -361,6 +361,56 @@ describe('step8-validate geography checks', () => {
     expect(lastDayHasLonghaul).toBe(true);
   });
 
+  it('treats UUID flight items as longhaul coverage and does not inject fallback transports', () => {
+    const trip: Trip = {
+      id: 'trip-flight-uuid-coverage',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      preferences: createPreferences(),
+      days: [
+        {
+          dayNumber: 1,
+          date: new Date('2026-02-18T00:00:00.000Z'),
+          items: [
+            item({
+              id: 'b19de3bd-bc17-44e1-9bde-d80ec93aa38e',
+              type: 'flight',
+              title: 'ORY → MXP',
+              startTime: '06:40',
+              endTime: '08:20',
+              latitude: 45.4637,
+              longitude: 9.1885,
+            }),
+          ],
+          isDayTrip: false,
+        },
+        {
+          dayNumber: 2,
+          date: new Date('2026-02-19T00:00:00.000Z'),
+          items: [
+            item({
+              id: 'a82f2cf2-074e-460c-a395-bd6a3527db12',
+              type: 'flight',
+              title: 'MXP → ORY',
+              startTime: '20:45',
+              endTime: '22:30',
+              latitude: 45.4637,
+              longitude: 9.1885,
+            }),
+          ],
+          isDayTrip: false,
+        },
+      ],
+    };
+
+    const result = validateAndFixTrip(trip);
+
+    expect(result.warnings.some(w => w.includes('transport aller manquant'))).toBe(false);
+    expect(result.warnings.some(w => w.includes('transport retour manquant'))).toBe(false);
+    expect(trip.days[0].items.some(entry => entry.id.startsWith('transport-out-'))).toBe(false);
+    expect(trip.days[1].items.some(entry => entry.id.startsWith('transport-ret-'))).toBe(false);
+  });
+
   it('injects plane fallback longhaul with Aviasales/Omio links when selected transport is plane', () => {
     const preferences = createPreferences();
     preferences.origin = 'Tokyo';

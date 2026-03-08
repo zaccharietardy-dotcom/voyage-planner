@@ -41,6 +41,8 @@ export interface PlaceRestaurantsOptions {
   minRating?: number;
   /** Number of alternatives per meal (default: 2) */
   alternativeCount?: number;
+  /** Trip start date (used to filter closed restaurants by day) */
+  startDate?: Date | string;
 }
 
 // ============================================
@@ -92,13 +94,14 @@ export function placeRestaurants(
     const usedRestaurantIds = new Set<string>();
     const meals: MealPlacement[] = [];
     const activities = cluster.activities;
+    const dayDate = getDayDateForCluster(options.startDate, cluster.dayNumber);
 
     // ---- BREAKFAST ----
     const breakfastAnchor = hotelCoords || getClusterCentroid(activities);
     if (breakfastAnchor) {
       const breakfastPlacement = findBestRestaurant(
         restaurants, breakfastAnchor, 'breakfast',
-        maxDist, minRating, altCount, dietary, usedRestaurantIds
+        maxDist, minRating, altCount, dietary, usedRestaurantIds, dayDate
       );
       if (breakfastPlacement) {
         meals.push({
@@ -118,7 +121,7 @@ export function placeRestaurants(
     if (lunchAnchor) {
       const lunchPlacement = findBestRestaurant(
         restaurants, lunchAnchor, 'lunch',
-        maxDist, minRating, altCount, dietary, usedRestaurantIds
+        maxDist, minRating, altCount, dietary, usedRestaurantIds, dayDate
       );
       if (lunchPlacement) {
         meals.push({
@@ -138,7 +141,7 @@ export function placeRestaurants(
     if (dinnerAnchor) {
       const dinnerPlacement = findBestRestaurant(
         restaurants, dinnerAnchor, 'dinner',
-        maxDist, minRating, altCount, dietary, usedRestaurantIds
+        maxDist, minRating, altCount, dietary, usedRestaurantIds, dayDate
       );
       if (dinnerPlacement) {
         meals.push({
@@ -176,9 +179,10 @@ function findBestRestaurant(
   minRating: number,
   altCount: number,
   dietary: string[],
-  usedIds: Set<string>
+  usedIds: Set<string>,
+  dayDate: Date | null
 ): Omit<MealPlacement, 'anchorName'> | null {
-  // Step 1: Filter by distance, meal type, and dietary
+  // Step 1: Filter by distance, meal type, dietary, day opening, and rating
   const candidates = allRestaurants
     .filter(r => {
       if (usedIds.has(r.id)) return false;
@@ -187,6 +191,7 @@ function findBestRestaurant(
       if (!isAppropriateForMeal(r, mealType)) return false;
       if (mealType === 'breakfast' && !isBreakfastCandidate(r)) return false;
       if (!matchesDietary(r, dietary)) return false;
+      if (!isRestaurantOpenForMealSlot(r, mealType, dayDate)) return false;
       if ((r.rating || 0) < minRating) return false;
       return true;
     })
@@ -198,14 +203,16 @@ function findBestRestaurant(
     }));
 
   if (candidates.length === 0) {
-    // Fallback: relax rating constraint, widen to 1.2km
-    const relaxed = allRestaurants
+    // Only relax rating, never distance.
+    const relaxedRating = allRestaurants
       .filter(r => {
         if (usedIds.has(r.id)) return false;
         const dist = calculateDistance(anchor.lat, anchor.lng, r.latitude, r.longitude);
-        if (dist > maxDistKm * 1.5) return false;
+        if (dist > maxDistKm) return false;
         if (!isAppropriateForMeal(r, mealType)) return false;
         if (mealType === 'breakfast' && !isBreakfastCandidate(r)) return false;
+        if (!matchesDietary(r, dietary)) return false;
+        if (!isRestaurantOpenForMealSlot(r, mealType, dayDate)) return false;
         return true;
       })
       .map(r => ({
@@ -215,98 +222,12 @@ function findBestRestaurant(
         score: 0,
       }));
 
-    if (relaxed.length === 0) {
-      // FIX 2: Last resort — 2km with no rating filter, just meal type
-      const lastResort = allRestaurants
-        .filter(r => {
-          if (usedIds.has(r.id)) return false;
-          const dist = calculateDistance(anchor.lat, anchor.lng, r.latitude, r.longitude);
-          if (dist > 2.0) return false;
-          if (!isAppropriateForMeal(r, mealType)) return false;
-          // Still apply breakfast candidate check for breakfast
-          if (mealType === 'breakfast' && !isBreakfastCandidate(r)) return false;
-          return true;
-        })
-        .map(r => ({
-          restaurant: r,
-          distance: calculateDistance(anchor.lat, anchor.lng, r.latitude, r.longitude),
-          cuisineFamily: getCuisineFamily(r),
-          score: 0,
-        }));
-
-      if (lastResort.length > 0) {
-        console.warn(`[Place Restaurants] No ${mealType} within 1.2km, last-resort at 2km: ${lastResort.length} candidates`);
-        return scoreAndSelect(lastResort, anchor, mealType, altCount);
-      }
-
-      // Ultra-relaxed fallback: drop type-specific filters (isBreakfastCandidate for breakfast,
-      // isAppropriateForMeal for lunch/dinner) but stay within 2km
-      const ultraRelaxed = allRestaurants
-        .filter(r => {
-          if (usedIds.has(r.id)) return false;
-          const dist = calculateDistance(anchor.lat, anchor.lng, r.latitude, r.longitude);
-          if (dist > 2.0) return false;
-          // For breakfast: drop isBreakfastCandidate but keep isAppropriateForMeal
-          if (mealType === 'breakfast') {
-            if (!isAppropriateForMeal(r, mealType)) return false;
-          }
-          // For lunch/dinner: drop isAppropriateForMeal entirely — any restaurant qualifies
-          return true;
-        })
-        .map(r => ({
-          restaurant: r,
-          distance: calculateDistance(anchor.lat, anchor.lng, r.latitude, r.longitude),
-          cuisineFamily: getCuisineFamily(r),
-          score: 0,
-        }));
-
-      if (ultraRelaxed.length > 0) {
-        console.warn(`[Place Restaurants] No ${mealType} candidates within 2km, ultra-relaxed (no meal-type filter): ${ultraRelaxed.length} candidates`);
-        return scoreAndSelect(ultraRelaxed, anchor, mealType, altCount);
-      }
-
-      // Ultimate fallback: cap at 5km first; only go unlimited if truly nothing exists nearby
-      const GLOBAL_FALLBACK_CAP_KM = 5.0;
-      const globalFallbackCapped = allRestaurants
-        .filter(r => {
-          if (usedIds.has(r.id)) return false;
-          const dist = calculateDistance(anchor.lat, anchor.lng, r.latitude, r.longitude);
-          return dist <= GLOBAL_FALLBACK_CAP_KM;
-        })
-        .map(r => ({
-          restaurant: r,
-          distance: calculateDistance(anchor.lat, anchor.lng, r.latitude, r.longitude),
-          cuisineFamily: getCuisineFamily(r),
-          score: 0,
-        }))
-        .sort((a, b) => a.distance - b.distance);
-
-      if (globalFallbackCapped.length > 0) {
-        console.warn(`[Place Restaurants] No ${mealType} within 2km — global fallback (≤5km): using "${globalFallbackCapped[0].restaurant.name}" (${(globalFallbackCapped[0].distance * 1000).toFixed(0)}m away)`);
-        return scoreAndSelect(globalFallbackCapped.slice(0, altCount + 1), anchor, mealType, altCount);
-      }
-
-      // Beyond 5km: truly no nearby restaurants — log a strong warning and pick the absolute closest
-      const globalFallbackUnlimited = allRestaurants
-        .filter(r => !usedIds.has(r.id))
-        .map(r => ({
-          restaurant: r,
-          distance: calculateDistance(anchor.lat, anchor.lng, r.latitude, r.longitude),
-          cuisineFamily: getCuisineFamily(r),
-          score: 0,
-        }))
-        .sort((a, b) => a.distance - b.distance);
-
-      if (globalFallbackUnlimited.length > 0) {
-        console.error(`[Place Restaurants] WARNING: No ${mealType} within 5km — forced to use restaurant ${(globalFallbackUnlimited[0].distance * 1000).toFixed(0)}m away ("${globalFallbackUnlimited[0].restaurant.name}"). Consider adding more restaurants to the pool.`);
-        return scoreAndSelect(globalFallbackUnlimited.slice(0, altCount + 1), anchor, mealType, altCount);
-      }
-
-      return null;
+    if (relaxedRating.length > 0) {
+      console.warn(`[Place Restaurants] No ${mealType} candidate above rating ${minRating} within ${(maxDistKm * 1000).toFixed(0)}m — relaxing rating only`);
+      return scoreAndSelect(relaxedRating, anchor, mealType, altCount);
     }
 
-    console.warn(`[Place Restaurants] No ${mealType} within ${maxDistKm * 1000}m, relaxed to ${maxDistKm * 1.5 * 1000}m: ${relaxed.length} candidates`);
-    return scoreAndSelect(relaxed, anchor, mealType, altCount);
+    return null;
   }
 
   return scoreAndSelect(candidates, anchor, mealType, altCount);
@@ -388,4 +309,55 @@ function matchesDietary(r: Restaurant, dietary: string[]): boolean {
     if (!pattern) return true; // Unknown dietary preference — don't filter
     return pattern.test(text);
   });
+}
+
+function getDayDateForCluster(startDate: Date | string | undefined, dayNumber: number): Date | null {
+  if (!startDate) return null;
+  const base = new Date(startDate);
+  if (!Number.isFinite(base.getTime())) return null;
+  base.setDate(base.getDate() + dayNumber - 1);
+  return base;
+}
+
+function isRestaurantOpenForMealSlot(
+  restaurant: Restaurant,
+  mealType: 'breakfast' | 'lunch' | 'dinner',
+  dayDate: Date | null
+): boolean {
+  if (!dayDate) return true;
+  const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+  const dayName = dayNames[dayDate.getDay()];
+
+  const dayHours = restaurant.openingHours?.[dayName];
+  if (dayHours === null) return false;
+  if (!dayHours?.open || !dayHours?.close) return true; // unknown hours -> do not exclude
+
+  const openMin = timeToMinutes(dayHours.open);
+  let closeMin = timeToMinutes(dayHours.close);
+
+  const mealWindow = getMealWindowMinutes(mealType);
+  let slotStart = mealWindow.start;
+  let slotEnd = mealWindow.end;
+
+  if (closeMin <= openMin) {
+    closeMin += 24 * 60;
+    if (slotStart < openMin) {
+      slotStart += 24 * 60;
+      slotEnd += 24 * 60;
+    }
+  }
+
+  const toleranceMin = 15;
+  return slotStart >= openMin - toleranceMin && slotEnd <= closeMin + toleranceMin;
+}
+
+function getMealWindowMinutes(mealType: 'breakfast' | 'lunch' | 'dinner'): { start: number; end: number } {
+  if (mealType === 'breakfast') return { start: 8 * 60, end: 10 * 60 + 30 };
+  if (mealType === 'lunch') return { start: 12 * 60, end: 14 * 60 + 30 };
+  return { start: 19 * 60, end: 21 * 60 + 30 };
+}
+
+function timeToMinutes(hhmm: string): number {
+  const [h, m] = (hhmm || '00:00').split(':').map(Number);
+  return (h || 0) * 60 + (m || 0);
 }

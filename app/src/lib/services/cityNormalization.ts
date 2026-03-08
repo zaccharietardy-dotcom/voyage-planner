@@ -13,6 +13,7 @@ export interface NormalizedCity {
   original: string;        // Input original
   coords?: { lat: number; lng: number };
   confidence: 'high' | 'medium' | 'low';
+  suggestion?: string;     // Suggestion de correction pour les typos (ex: "Madrid" pour "MAdrid")
 }
 
 // Index inversé: toutes les variantes pointent vers la clé anglaise
@@ -728,6 +729,48 @@ function buildIndex(): void {
 buildIndex();
 
 /**
+ * Levenshtein distance between two strings
+ */
+function levenshteinDistance(a: string, b: string): number {
+  const m = a.length;
+  const n = b.length;
+  const dp: number[][] = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+  for (let i = 0; i <= m; i++) dp[i][0] = i;
+  for (let j = 0; j <= n; j++) dp[0][j] = j;
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      dp[i][j] = a[i - 1] === b[j - 1]
+        ? dp[i - 1][j - 1]
+        : 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
+    }
+  }
+  return dp[m][n];
+}
+
+/**
+ * Find the closest city match using Levenshtein distance.
+ * Max distance scales with input length: allows 1 edit for 3-5 chars, 2 for 6-8, 3 for 9+.
+ */
+function findFuzzyMatch(normalizedInput: string): { key: string; variant: string; distance: number } | null {
+  if (normalizedInput.length < 3) return null;
+
+  const maxDist = normalizedInput.length <= 5 ? 1 : normalizedInput.length <= 8 ? 2 : 3;
+  let bestMatch: { key: string; variant: string; distance: number } | null = null;
+
+  for (const [variant, key] of Object.entries(CITY_INDEX)) {
+    // Quick length filter to avoid computing Levenshtein for very different strings
+    if (Math.abs(variant.length - normalizedInput.length) > maxDist) continue;
+
+    const dist = levenshteinDistance(normalizedInput, variant);
+    if (dist <= maxDist && dist > 0 && (!bestMatch || dist < bestMatch.distance)) {
+      bestMatch = { key, variant, distance: dist };
+    }
+  }
+
+  return bestMatch;
+}
+
+/**
  * Normalise un nom de ville en utilisant le dictionnaire local
  * Retourne le nom anglais standardisé
  */
@@ -758,6 +801,19 @@ export function normalizeCitySync(input: string): NormalizedCity {
       original: input,
       coords: CITY_DATA[key].coords,
       confidence: 'high',
+    };
+  }
+
+  // Fuzzy match: trouver la ville la plus proche par distance de Levenshtein
+  const fuzzyMatch = findFuzzyMatch(normalized);
+  if (fuzzyMatch) {
+    return {
+      normalized: fuzzyMatch.key,
+      displayName: CITY_DATA[fuzzyMatch.key].displayName,
+      original: input,
+      coords: CITY_DATA[fuzzyMatch.key].coords,
+      confidence: 'medium',
+      suggestion: CITY_DATA[fuzzyMatch.key].displayName,
     };
   }
 

@@ -947,8 +947,10 @@ function ensureInterCityLonghaulCoverage(
 
   const hasOutbound = firstDay.items.some(item => isLonghaulItem(item));
   const hasReturn = lastDay.items.some(item => isLonghaulItem(item));
+  const hasOutboundFlight = firstDay.items.some(item => isExplicitFlightItem(item));
+  const hasReturnFlight = lastDay.items.some(item => isExplicitFlightItem(item));
 
-  if (!hasOutbound) {
+  if (!hasOutbound && !hasOutboundFlight) {
     warnings.push(`Jour ${firstDay.dayNumber}: transport aller manquant`);
     insertFallbackLonghaulItem(firstDay, 'outbound', trip.preferences.origin, trip.preferences.destination, {
       transport: resolveFallbackTransportOption(trip),
@@ -958,7 +960,7 @@ function ensureInterCityLonghaulCoverage(
     autoFixes.push(`Jour ${firstDay.dayNumber}: transport aller inséré (fallback)`);
   }
 
-  if (!hasReturn) {
+  if (!hasReturn && !hasReturnFlight) {
     warnings.push(`Jour ${lastDay.dayNumber}: transport retour manquant`);
     insertFallbackLonghaulItem(lastDay, 'return', trip.preferences.destination, trip.preferences.origin, {
       transport: resolveFallbackTransportOption(trip),
@@ -1109,7 +1111,15 @@ function normalizePlaceName(value?: string): string {
     .trim();
 }
 
+function isExplicitFlightItem(item: TripItem): boolean {
+  if (item.type !== 'flight') return false;
+  if (item.flight) return true;
+  if (item.id.startsWith('flight-')) return true;
+  return true;
+}
+
 function isLonghaulItem(item: TripItem): boolean {
+  if (isExplicitFlightItem(item)) return true;
   if ((item.type === 'transport' || item.type === 'flight') && item.transportRole === 'longhaul') return true;
   if (item.id.startsWith('transport-out-') || item.id.startsWith('transport-ret-')) return true;
   if (item.id.startsWith('flight-out-') || item.id.startsWith('flight-ret-')) return true;

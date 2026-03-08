@@ -390,7 +390,7 @@ const GENERIC_FACTS: DestinationFact[] = [
   { icon: Info, category: 'Le saviez-vous ?', text: 'Le meilleur jour pour réserver un vol est souvent le mardi, 6 à 8 semaines avant le départ.' },
   { icon: Utensils, category: 'Gastronomie', text: 'Mangez là où mangent les locaux. Évitez les restaurants avec des menus traduits en 6 langues.' },
   { icon: Languages, category: 'Culture', text: 'Apprenez au moins "bonjour", "merci" et "s\'il vous plaît" dans la langue locale. Ça change tout.' },
-  { icon: Sun, category: 'Organisation', text: 'Gardez toujours une journée libre dans votre planning. Les meilleures découvertes sont spontanées.' },
+  { icon: Sun, category: 'Organisation', text: 'Votre itinéraire inclut du temps libre entre les activités pour les découvertes spontanées.' },
   { icon: Landmark, category: 'Conseil', text: 'Visitez les attractions populaires tôt le matin ou en fin de journée pour éviter la foule.' },
 ];
 
