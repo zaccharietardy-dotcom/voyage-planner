@@ -579,6 +579,31 @@ function selectTopNearbyRestaurants(
     }
   }
 
+  // Pass 2b: if still 0 for breakfast, accept any restaurant open in the morning
+  // (only exclude absolute non-food venues like nightclub/bar)
+  // This handles non-European cities (Marrakech, Bangkok...) where BREAKFAST_EXCLUDED_CUISINES
+  // filters out too many local cuisines
+  if (scored.length === 0 && mealType === 'breakfast') {
+    const BREAKFAST_ABSOLUTE_EXCLUSIONS = /\b(nightclub|disco|bar|pub|cocktail)\b/i;
+    for (const r of pool) {
+      if (usedIds.has(r.id)) continue;
+      if (!hasValidCoordinates(r)) continue;
+      const name = (r.name || '').toLowerCase();
+      const type = ((r as any).type || '').toLowerCase();
+      if (BREAKFAST_ABSOLUTE_EXCLUSIONS.test(`${name} ${type}`)) continue;
+      const distanceKm = calculateDistance(refCoords.lat, refCoords.lng, r.latitude, r.longitude);
+      if (distanceKm > limits.absoluteKm) continue;
+      scored.push({
+        restaurant: r,
+        score: scoreCandidate(r, mealType, distanceKm, distanceLimits) * 0.85,
+        distanceKm,
+      });
+    }
+    if (scored.length > 0) {
+      console.log(`[Pipeline V2] Restaurant pass 2b (any morning restaurant): found ${scored.length} candidates for ${mealType}`);
+    }
+  }
+
   // Pass 3: if still 0, double distance cap (max 3km) and drop meal-type filter
   if (scored.length === 0) {
     const relaxedAbsoluteKm = Math.min(limits.absoluteKm * 2, 3.0);

@@ -177,9 +177,82 @@ export function clusterActivities(
   balanceClusterSizes(clusters, Math.ceil(activities.length / numDays) + 1, dayTripClusterIdx, maxRadius, protectedIndices);
 
   // Enforce minimum cluster sizes: no full day should have fewer than 3 activities
-  // (boundary days — first and last — are exempted with min=1)
+  // (boundary days — first and last — are exempted with min=1, last day min=2)
   // Full-day clusters are also exempted (they intentionally have 1 activity)
   enforceMinimumClusterSize(clusters, 3, dayTripClusterIdx, numDays, protectedIndices);
+
+  // Fix lonely remote activities: if a non-protected cluster has exactly 1 activity
+  // that is >10km from city center, try to move it to a cluster that has activities
+  // nearby (within 5km of the lonely activity), instead of leaving a near-empty day.
+  for (let ci = 0; ci < clusters.length; ci++) {
+    if (protectedIndices.has(ci)) continue;
+    const c = clusters[ci];
+    if (c.activities.length !== 1) continue;
+    const act = c.activities[0];
+    const distFromCenter = calculateDistance(act.latitude, act.longitude, cityCenter.lat, cityCenter.lng);
+    if (distFromCenter <= 10) continue;
+
+    // Find a non-protected cluster that has an activity within 5km of this lonely activity
+    let bestTarget = -1;
+    let bestDist = Infinity;
+    for (let ti = 0; ti < clusters.length; ti++) {
+      if (ti === ci || protectedIndices.has(ti)) continue;
+      for (const tAct of clusters[ti].activities) {
+        const d = calculateDistance(act.latitude, act.longitude, tAct.latitude, tAct.longitude);
+        if (d < bestDist) {
+          bestDist = d;
+          bestTarget = ti;
+        }
+      }
+    }
+
+    if (bestTarget !== -1 && bestDist <= 10) {
+      // Move the lonely activity to the target cluster
+      const [moved] = c.activities.splice(0, 1);
+      clusters[bestTarget].activities.push(moved);
+      recomputeCentroid(clusters[bestTarget]);
+      console.log(`[Pipeline V2] Moved lonely remote activity "${moved.name}" (${distFromCenter.toFixed(1)}km from center) to Day ${clusters[bestTarget].dayNumber} (nearest activity ${bestDist.toFixed(1)}km away)`);
+
+      // Redistribute: steal activities from the largest donor to fill this now-empty cluster
+      const donorIdx = clusters
+        .map((cl, idx) => ({ idx, size: cl.activities.length }))
+        .filter(x => !protectedIndices.has(x.idx) && x.idx !== ci)
+        .sort((a, b) => b.size - a.size)[0]?.idx;
+
+      if (donorIdx !== undefined && clusters[donorIdx].activities.length >= 4) {
+        // Move 2 activities closest to city center from the donor to the empty cluster
+        const toMove = 2;
+        for (let m = 0; m < toMove && clusters[donorIdx].activities.length > 3; m++) {
+          let closestIdx = -1;
+          let closestDist = Infinity;
+          for (let ai = 0; ai < clusters[donorIdx].activities.length; ai++) {
+            const a = clusters[donorIdx].activities[ai];
+            if (a.mustSee) continue;
+            const d = calculateDistance(a.latitude, a.longitude, cityCenter.lat, cityCenter.lng);
+            if (d < closestDist) {
+              closestDist = d;
+              closestIdx = ai;
+            }
+          }
+          if (closestIdx !== -1) {
+            const [stolen] = clusters[donorIdx].activities.splice(closestIdx, 1);
+            c.activities.push(stolen);
+          }
+        }
+        recomputeCentroid(c);
+        recomputeCentroid(clusters[donorIdx]);
+      }
+    }
+  }
+
+  // Remove empty clusters after lonely-activity redistribution
+  for (let ci = clusters.length - 1; ci >= 0; ci--) {
+    if (clusters[ci].activities.length === 0 && !protectedIndices.has(ci)) {
+      clusters.splice(ci, 1);
+    }
+  }
+  // Re-number days
+  clusters.forEach((c, i) => { c.dayNumber = i + 1; });
 
   // Optimize visit order within each cluster (nearest-neighbor + 2-opt)
   for (const cluster of clusters) {
@@ -651,9 +724,10 @@ function enforceMinimumClusterSize(
       // Skip protected clusters (day-trip, full-day) — they have their own size rules
       if (protectedIndices?.has(ci)) continue;
 
-      // Boundary days (first/last) get a relaxed minimum of 1
-      const isBoundary = clusters[ci].dayNumber === 1 || clusters[ci].dayNumber === numDays;
-      const effectiveMin = isBoundary ? 1 : minPerCluster;
+      // Boundary days get a relaxed minimum: first day = 1, last day = 2 (at least some activities before departure)
+      const isFirstDay = clusters[ci].dayNumber === 1;
+      const isLastDay = clusters[ci].dayNumber === numDays;
+      const effectiveMin = isFirstDay ? 1 : isLastDay ? Math.min(2, minPerCluster) : minPerCluster;
 
       if (clusters[ci].activities.length >= effectiveMin) continue;
 

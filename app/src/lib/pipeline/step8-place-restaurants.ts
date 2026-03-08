@@ -89,9 +89,10 @@ export function placeRestaurants(
 
   const dayPlans: DayMealPlan[] = [];
 
+  // Track used restaurants across ALL days to avoid the same restaurant on multiple days
+  const usedRestaurantIds = new Set<string>();
+
   for (const cluster of clusters) {
-    // FIX 1: Allow restaurant reuse across different days (reset per day)
-    const usedRestaurantIds = new Set<string>();
     const meals: MealPlacement[] = [];
     const activities = cluster.activities;
     const dayDate = getDayDateForCluster(options.startDate, cluster.dayNumber);
@@ -119,10 +120,21 @@ export function placeRestaurants(
       ? { lat: lunchAnchorActivity.latitude, lng: lunchAnchorActivity.longitude }
       : getClusterCentroid(activities);
     if (lunchAnchor) {
-      const lunchPlacement = findBestRestaurant(
+      let lunchPlacement = findBestRestaurant(
         restaurants, lunchAnchor, 'lunch',
         maxDist, minRating, altCount, dietary, usedRestaurantIds, dayDate
       );
+      // Fallback: if anchor is >5km from hotel/center and no restaurants found, retry with hotel coords
+      if (!lunchPlacement && hotelCoords) {
+        const anchorToHotel = calculateDistance(lunchAnchor.lat, lunchAnchor.lng, hotelCoords.lat, hotelCoords.lng);
+        if (anchorToHotel > 5) {
+          console.warn(`[Place Restaurants] Lunch anchor ${anchorToHotel.toFixed(1)}km from hotel — retrying with hotel coords`);
+          lunchPlacement = findBestRestaurant(
+            restaurants, hotelCoords, 'lunch',
+            maxDist, minRating, altCount, dietary, usedRestaurantIds, dayDate
+          );
+        }
+      }
       if (lunchPlacement) {
         meals.push({
           ...lunchPlacement,
@@ -139,10 +151,21 @@ export function placeRestaurants(
       ? { lat: lastActivity.latitude, lng: lastActivity.longitude }
       : hotelCoords || getClusterCentroid(activities);
     if (dinnerAnchor) {
-      const dinnerPlacement = findBestRestaurant(
+      let dinnerPlacement = findBestRestaurant(
         restaurants, dinnerAnchor, 'dinner',
         maxDist, minRating, altCount, dietary, usedRestaurantIds, dayDate
       );
+      // Fallback: if anchor is >5km from hotel/center and no restaurants found, retry with hotel coords
+      if (!dinnerPlacement && hotelCoords) {
+        const anchorToHotel = calculateDistance(dinnerAnchor.lat, dinnerAnchor.lng, hotelCoords.lat, hotelCoords.lng);
+        if (anchorToHotel > 5) {
+          console.warn(`[Place Restaurants] Dinner anchor ${anchorToHotel.toFixed(1)}km from hotel — retrying with hotel coords`);
+          dinnerPlacement = findBestRestaurant(
+            restaurants, hotelCoords, 'dinner',
+            maxDist, minRating, altCount, dietary, usedRestaurantIds, dayDate
+          );
+        }
+      }
       if (dinnerPlacement) {
         meals.push({
           ...dinnerPlacement,
@@ -225,6 +248,54 @@ function findBestRestaurant(
     if (relaxedRating.length > 0) {
       console.warn(`[Place Restaurants] No ${mealType} candidate above rating ${minRating} within ${(maxDistKm * 1000).toFixed(0)}m — relaxing rating only`);
       return scoreAndSelect(relaxedRating, anchor, mealType, altCount);
+    }
+
+    // Pass 2: Relax distance to 1.5km, keep meal-type filters
+    const pass2Dist = 1.5;
+    const pass2Candidates = allRestaurants
+      .filter(r => {
+        if (usedIds.has(r.id)) return false;
+        const dist = calculateDistance(anchor.lat, anchor.lng, r.latitude, r.longitude);
+        if (dist > pass2Dist) return false;
+        if (!isAppropriateForMeal(r, mealType)) return false;
+        if (mealType === 'breakfast' && !isBreakfastCandidate(r)) return false;
+        if (!matchesDietary(r, dietary)) return false;
+        if (!isRestaurantOpenForMealSlot(r, mealType, dayDate)) return false;
+        return true;
+      })
+      .map(r => ({
+        restaurant: r,
+        distance: calculateDistance(anchor.lat, anchor.lng, r.latitude, r.longitude),
+        cuisineFamily: getCuisineFamily(r),
+        score: 0,
+      }));
+
+    if (pass2Candidates.length > 0) {
+      console.warn(`[Place Restaurants] Pass 2 (${pass2Dist}km): found ${pass2Candidates.length} candidates for ${mealType}`);
+      return scoreAndSelect(pass2Candidates, anchor, mealType, altCount);
+    }
+
+    // Pass 3: Relax distance to 3km AND relax meal-type filters
+    const pass3Dist = 3.0;
+    const pass3Candidates = allRestaurants
+      .filter(r => {
+        if (usedIds.has(r.id)) return false;
+        const dist = calculateDistance(anchor.lat, anchor.lng, r.latitude, r.longitude);
+        if (dist > pass3Dist) return false;
+        if (!matchesDietary(r, dietary)) return false;
+        if (!isRestaurantOpenForMealSlot(r, mealType, dayDate)) return false;
+        return true;
+      })
+      .map(r => ({
+        restaurant: r,
+        distance: calculateDistance(anchor.lat, anchor.lng, r.latitude, r.longitude),
+        cuisineFamily: getCuisineFamily(r),
+        score: 0,
+      }));
+
+    if (pass3Candidates.length > 0) {
+      console.warn(`[Place Restaurants] Pass 3 (${pass3Dist}km, relaxed filters): found ${pass3Candidates.length} candidates for ${mealType}`);
+      return scoreAndSelect(pass3Candidates, anchor, mealType, altCount);
     }
 
     return null;

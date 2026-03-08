@@ -43,6 +43,7 @@ export function assembleV3Days(
 ): TripDay[] {
   const days: TripDay[] = [];
   const startDate = preferences.startDate || new Date();
+  const destination = preferences.destination || '';
 
   // Global dedup: track activity IDs already placed across all days
   const globalPlacedIds = new Set<string>();
@@ -87,19 +88,11 @@ export function assembleV3Days(
 
     // isPastEnd and timeToMin are imported from ./utils/time
 
-    // Inject checkout item on the last day
-    if (isLastDay && hotel) {
-      const checkoutTime = hotel.checkOutTime || '11:00';
-      items.push(createCheckoutItem(hotel, checkoutTime, cluster.dayNumber, orderIndex++));
-      // If checkout is after current activity start, push activities to after checkout
-      if (timeToMin(checkoutTime) > timeToMin(currentTime)) {
-        currentTime = addMinutes(checkoutTime, 15); // 15min buffer after checkout
-      }
-    }
-
     // Meal anchors used for Repas libre fallback when no valid restaurant can be placed.
     const hotelLatLng = hotel ? { lat: hotel.latitude, lng: hotel.longitude } : null;
     const breakfastAnchor = hotelLatLng || getClusterCentroid(cluster.activities);
+
+    // Place breakfast BEFORE checkout so the last day isn't: checkout 10:30 → breakfast 12:15
     const breakfast = mealPlan?.meals.find(m => m.mealType === 'breakfast');
     const breakfastResolved = resolveMealPlacementForSlot(breakfast, dayDate, currentTime, 45);
     if (breakfastResolved) {
@@ -108,6 +101,16 @@ export function assembleV3Days(
       items.push(createSelfMealFallbackItem('breakfast', currentTime, 45, cluster.dayNumber, orderIndex++, breakfastAnchor));
     }
     currentTime = addMinutes(currentTime, 60); // 45min eat + 15min travel
+
+    // Inject checkout item on the last day (AFTER breakfast)
+    if (isLastDay && hotel) {
+      const checkoutTime = hotel.checkOutTime || '11:00';
+      // Place checkout at max(currentTime, checkoutTime - 30min)
+      const checkoutStart = minToTime(Math.max(timeToMin(currentTime), timeToMin(checkoutTime) - 30));
+      items.push(createCheckoutItem(hotel, checkoutTime, cluster.dayNumber, orderIndex++));
+      // Push currentTime to after checkout
+      currentTime = addMinutes(checkoutTime, 15); // 15min buffer after checkout
+    }
 
     // Activities with travel times between them
     const lunchAnchorAct = findMidDayActivity(cluster.activities);
@@ -206,7 +209,7 @@ export function assembleV3Days(
         currentTime = actOpenTime;
       }
 
-      items.push(createActivityItem(act, currentTime, duration, cluster.dayNumber, orderIndex++));
+      items.push(createActivityItem(act, currentTime, duration, cluster.dayNumber, orderIndex++, destination));
       globalPlacedIds.add(act.id || act.name);
       currentTime = addMinutes(currentTime, duration + 10); // 10min buffer between activities
       activitiesPlaced++;
@@ -233,7 +236,7 @@ export function assembleV3Days(
 
         const replaceDuration = missing.duration || 60;
         const replaceStart = victim.item.startTime;
-        const replaceItem = createActivityItem(missing, replaceStart, replaceDuration, cluster.dayNumber, victim.item.orderIndex);
+        const replaceItem = createActivityItem(missing, replaceStart, replaceDuration, cluster.dayNumber, victim.item.orderIndex, destination);
 
         console.warn(
           `[assembleV3Days] Day ${cluster.dayNumber}: must-see "${missing.name}" was not placed — ` +
@@ -347,7 +350,6 @@ export function assembleV3Days(
   }
 
   // Enrich all activity items with ticketing links (official + Viator + Tiqets)
-  const destination = preferences.destination || '';
   for (const day of days) {
     const { enrichWithTicketingLinks } = require('../services/officialTicketing');
     enrichWithTicketingLinks(day.items, destination);
@@ -596,21 +598,62 @@ function createCheckoutItem(
 /**
  * Helper: Create a TripItem for an activity
  */
+/**
+ * Normalize activity titles: convert all-caps or all-lowercase to Title Case.
+ * Preserves mixed-case titles that are already correct.
+ */
+function normalizeActivityTitle(title: string): string {
+  if (!title) return 'Activity';
+  const trimmed = title.trim();
+  if (!trimmed) return 'Activity';
+
+  // Detect all-uppercase or all-lowercase (ignoring non-letter chars)
+  const letters = trimmed.replace(/[^a-zA-ZÀ-ÿ]/g, '');
+  if (letters.length === 0) return trimmed;
+
+  const isAllUpper = letters === letters.toUpperCase() && letters.length > 3;
+  const isAllLower = letters === letters.toLowerCase() && letters.length > 3;
+
+  if (!isAllUpper && !isAllLower) return trimmed; // Already mixed case
+
+  // Articles/prepositions to keep lowercase (FR + EN)
+  const smallWords = new Set([
+    'de', 'du', 'des', 'le', 'la', 'les', 'l', 'un', 'une', 'et', 'ou', 'à', 'au', 'aux', 'en',
+    'the', 'a', 'an', 'of', 'in', 'on', 'at', 'to', 'for', 'and', 'or', 'but', 'with', 'by',
+  ]);
+
+  return trimmed
+    .toLowerCase()
+    .split(/(\s+|-|'|')/)
+    .map((part, index) => {
+      if (/^\s+$/.test(part) || part === '-' || part === "'" || part === '\u2019') return part;
+      // Always capitalize first word
+      if (index === 0) return part.charAt(0).toUpperCase() + part.slice(1);
+      // Keep small words lowercase (unless first)
+      if (smallWords.has(part)) return part;
+      return part.charAt(0).toUpperCase() + part.slice(1);
+    })
+    .join('');
+}
+
 function createActivityItem(
   activity: ScoredActivity,
   startTime: string,
   duration: number,
   dayNumber: number,
-  orderIndex: number
+  orderIndex: number,
+  destination?: string
 ): TripItem {
+  const title = normalizeActivityTitle(activity.name || 'Activity');
+  const description = activity.description || (destination ? `${title} à ${destination}` : title);
   return {
     id: activity.id || `activity-${Date.now()}-${Math.random()}`,
     dayNumber,
     startTime,
     endTime: addMinutes(startTime, duration),
     type: 'activity',
-    title: activity.name || 'Activity',
-    description: activity.description || '',
+    title,
+    description,
     locationName: activity.name || '',
     latitude: activity.latitude,
     longitude: activity.longitude,
@@ -669,8 +712,12 @@ function getActivityCloseTime(activity: ScoredActivity, dayDate: Date): string |
   const dayName = dayNames[dayDate.getDay()];
 
   // Always-open public spaces (piazzas, parks, streets) — no closing time
-  const alwaysOpenKeywords = /piazza|plaza|place|park|jardin|garden|fontaine|fountain|bridge|pont|quartier|street|via|campo|square/i;
-  if (alwaysOpenKeywords.test(activity.name || '')) return null;
+  // BUT only if no explicit opening hours are provided (e.g. "Le Jardin Secret" has hours)
+  const hasExplicitHours = activity.openingHoursByDay || activity.openingHours;
+  if (!hasExplicitHours) {
+    const alwaysOpenKeywords = /piazza|plaza|place|park|jardin|garden|fontaine|fountain|bridge|pont|quartier|street|via|campo|square/i;
+    if (alwaysOpenKeywords.test(activity.name || '')) return null;
+  }
 
   // Check day-specific hours first
   if (activity.openingHoursByDay) {
