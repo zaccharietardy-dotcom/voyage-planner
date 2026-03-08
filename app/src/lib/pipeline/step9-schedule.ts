@@ -105,11 +105,15 @@ export function assembleV3Days(
     // Inject checkout item on the last day (AFTER breakfast)
     if (isLastDay && hotel) {
       const checkoutTime = hotel.checkOutTime || '11:00';
-      // Place checkout at max(currentTime, checkoutTime - 30min)
-      const checkoutStart = minToTime(Math.max(timeToMin(currentTime), timeToMin(checkoutTime) - 30));
       items.push(createCheckoutItem(hotel, checkoutTime, cluster.dayNumber, orderIndex++));
-      // Push currentTime to after checkout
-      currentTime = addMinutes(checkoutTime, 15); // 15min buffer after checkout
+      // Only push currentTime if checkout fits before day end
+      // On departure days with early flights, checkout may be after dayEndTime — don't block activities
+      const afterCheckout = addMinutes(checkoutTime, 15);
+      if (!isPastEnd(afterCheckout, dayEndTime)) {
+        currentTime = afterCheckout;
+      }
+      // If checkout is past dayEndTime, keep currentTime as-is (after breakfast)
+      // so any remaining activities between breakfast and dayEnd can still be placed
     }
 
     // Activities with travel times between them

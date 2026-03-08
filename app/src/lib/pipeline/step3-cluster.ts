@@ -254,6 +254,44 @@ export function clusterActivities(
   // Re-number days
   clusters.forEach((c, i) => { c.dayNumber = i + 1; });
 
+  // Cap boundary days (first/last): arrival and departure days have shorter time windows
+  // so they should have fewer activities. Max ~3 for boundary, redistribute excess to full days.
+  if (clusters.length >= 3) {
+    const BOUNDARY_MAX = 3;
+    const boundaryIndices = [0, clusters.length - 1];
+    for (const bi of boundaryIndices) {
+      if (protectedIndices.has(bi)) continue;
+      const c = clusters[bi];
+      while (c.activities.length > BOUNDARY_MAX) {
+        // Find the lowest-scored non-must-see activity to move
+        let worstIdx = -1;
+        let worstScore = Infinity;
+        for (let ai = 0; ai < c.activities.length; ai++) {
+          if (c.activities[ai].mustSee) continue;
+          if (c.activities[ai].score < worstScore) {
+            worstScore = c.activities[ai].score;
+            worstIdx = ai;
+          }
+        }
+        if (worstIdx === -1) break; // Only must-sees left
+
+        // Find the smallest non-boundary, non-protected cluster to receive it
+        const targetIdx = clusters
+          .map((cl, idx) => ({ idx, size: cl.activities.length }))
+          .filter(x => !protectedIndices.has(x.idx) && !boundaryIndices.includes(x.idx))
+          .sort((a, b) => a.size - b.size)[0]?.idx;
+
+        if (targetIdx === undefined) break;
+
+        const [moved] = c.activities.splice(worstIdx, 1);
+        clusters[targetIdx].activities.push(moved);
+        recomputeCentroid(c);
+        recomputeCentroid(clusters[targetIdx]);
+        console.log(`[Pipeline V2] Boundary cap: moved "${moved.name}" from boundary Day ${c.dayNumber} → Day ${clusters[targetIdx].dayNumber}`);
+      }
+    }
+  }
+
   // Optimize visit order within each cluster (nearest-neighbor + 2-opt)
   for (const cluster of clusters) {
     cluster.activities = optimizeVisitOrder(cluster.activities);

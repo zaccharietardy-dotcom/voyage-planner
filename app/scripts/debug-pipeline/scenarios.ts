@@ -43,6 +43,28 @@ export const SCENARIOS: Record<string, Scenario> = {
     },
   },
 
+  'paris-barcelona-6d': {
+    id: 'paris-barcelona-6d',
+    name: 'Paris → Barcelone (6 jours)',
+    description: 'Régression Barcelone — vol A/R, qualité restaurants et contrats V3 strict',
+    preferences: {
+      origin: 'Paris',
+      destination: 'Barcelona',
+      startDate: new Date('2026-03-16T11:00:00.000Z'),
+      durationDays: 6,
+      transport: 'plane',
+      carRental: false,
+      groupSize: 4,
+      groupType: 'friends',
+      budgetLevel: 'moderate',
+      activities: ['culture', 'gastronomy', 'beach'],
+      dietary: ['none'],
+      mustSee: 'Sagrada Família, Park Güell, Barri Gòtic',
+      tripMode: 'precise',
+      cityPlan: [{ city: 'Barcelona', days: 6 }],
+    },
+  },
+
   '1day-express': {
     id: '1day-express',
     name: 'Paris → Barcelone (1 jour)',
@@ -84,6 +106,28 @@ export const SCENARIOS: Record<string, Scenario> = {
       mustSee: 'Mont Fuji, Sanctuaire Fushimi Inari, Akihabara',
       tripMode: 'precise',
       cityPlan: [{ city: 'Tokyo', days: 14 }],
+    },
+  },
+
+  'paris-marrakech-4d': {
+    id: 'paris-marrakech-4d',
+    name: 'Paris → Marrakech (4 jours)',
+    description: 'Régression Marrakech — checkout/breakfast, Jardin Secret, restaurants, journée vide',
+    preferences: {
+      origin: 'Paris',
+      destination: 'Marrakech',
+      startDate: new Date('2026-04-02T10:00:00.000Z'),
+      durationDays: 4,
+      transport: 'plane',
+      carRental: false,
+      groupSize: 2,
+      groupType: 'couple',
+      budgetLevel: 'moderate',
+      activities: ['culture', 'gastronomy', 'wellness'],
+      dietary: ['none'],
+      mustSee: 'Place Jemaa el-Fna, Jardin Majorelle, Medersa Ben Youssef',
+      tripMode: 'precise',
+      cityPlan: [{ city: 'Marrakech', days: 4 }],
     },
   },
 
