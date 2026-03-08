@@ -219,7 +219,8 @@ export function validateContracts(
     const isFirstDay = day.dayNumber === 1;
     const isLastDay = day.dayNumber === days.length;
 
-    if (!hasLunch && !isFirstDay) {
+    // Skip lunch check for first and last day (arrival/departure — constrained time windows)
+    if (!hasLunch && !isFirstDay && !isLastDay) {
       violations.push(`P0.3: Day ${day.dayNumber} has no lunch`);
       metrics.daysWithoutLunch++;
     }

@@ -271,23 +271,25 @@ export function assembleV3Days(
       }
     }
 
-    // Dinner
-    const lastAct = cluster.activities[cluster.activities.length - 1];
-    const dinnerAnchor = lastAct
-      ? { lat: lastAct.latitude, lng: lastAct.longitude }
-      : hotelLatLng || getClusterCentroid(cluster.activities);
-    const dinner = mealPlan?.meals.find(m => m.mealType === 'dinner');
-    // Dinner between 19:00 and 21:30
-    let dinnerTime = ensureAfter(currentTime, '19:00');
-    // Cap dinner start at 21:30 max
-    if (isPastEnd(dinnerTime, '21:30')) {
-      dinnerTime = '21:00';
-    }
-    const resolvedDinner = resolveMealPlacementForSlot(dinner, dayDate, dinnerTime, 90);
-    if (resolvedDinner) {
-      items.push(createRestaurantItem(resolvedDinner, 'dinner', dinnerTime, 90, cluster.dayNumber, orderIndex++));
-    } else {
-      items.push(createSelfMealFallbackItem('dinner', dinnerTime, 90, cluster.dayNumber, orderIndex++, dinnerAnchor));
+    // Dinner — skip on departure days with early end time (before 18:00)
+    if (!isLastDay || timeToMin(dayEndTime) >= 18 * 60) {
+      const lastAct = cluster.activities[cluster.activities.length - 1];
+      const dinnerAnchor = lastAct
+        ? { lat: lastAct.latitude, lng: lastAct.longitude }
+        : hotelLatLng || getClusterCentroid(cluster.activities);
+      const dinner = mealPlan?.meals.find(m => m.mealType === 'dinner');
+      // Dinner between 19:00 and 21:30
+      let dinnerTime = ensureAfter(currentTime, '19:00');
+      // Cap dinner start at 21:30 max
+      if (isPastEnd(dinnerTime, '21:30')) {
+        dinnerTime = '21:00';
+      }
+      const resolvedDinner = resolveMealPlacementForSlot(dinner, dayDate, dinnerTime, 90);
+      if (resolvedDinner) {
+        items.push(createRestaurantItem(resolvedDinner, 'dinner', dinnerTime, 90, cluster.dayNumber, orderIndex++));
+      } else {
+        items.push(createSelfMealFallbackItem('dinner', dinnerTime, 90, cluster.dayNumber, orderIndex++, dinnerAnchor));
+      }
     }
 
     days.push({
