@@ -340,6 +340,22 @@ export function assembleV3Days(
           continue;
         }
 
+        // If shifting an activity past its closing time, drop it instead of creating a violation
+        if (next.type === 'activity' && next.openingHoursByDay) {
+          const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'] as const;
+          const dayName = dayNames[day.date.getDay()];
+          const dayHours = (next.openingHoursByDay as Record<string, { open: string; close: string } | null>)?.[dayName];
+          if (dayHours?.close && dayHours.close !== '23:59' && dayHours.close !== '00:00') {
+            const closeMin = timeToMin(dayHours.close);
+            if (shiftedEnd > closeMin) {
+              console.log(`[assembleV3Days] Overlap fix: dropping "${next.title}" on Day ${day.dayNumber} (shifted end ${minToTime(shiftedEnd)} past close ${dayHours.close})`);
+              day.items.splice(i + 1, 1);
+              i--;
+              continue;
+            }
+          }
+        }
+
         next.startTime = minToTime(shiftedStart);
         next.endTime = minToTime(shiftedEnd);
       }
