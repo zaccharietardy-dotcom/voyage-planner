@@ -138,15 +138,22 @@ export function unifiedScheduleV3Days(
       return true;
     });
 
-    // Late arrival detection: skip breakfast & lunch on afternoon arrivals
-    const isAfternoonArrival = cluster.dayNumber === 1 && timeToMin(dayStartTime) >= 12 * 60;
-    if (isAfternoonArrival) {
-      console.log(`[Unified] Day ${cluster.dayNumber}: afternoon arrival (${dayStartTime}) — skipping breakfast & lunch`);
-      lunchPlaced = true; // prevent lunch from being placed later
+    // Meal eligibility: derived from time window, not ad-hoc heuristics
+    const dayStartMin = timeToMin(dayStartTime);
+    const dayEndMin = timeToMin(dayEndTime);
+    const canHaveBreakfast = dayStartMin < 10 * 60;   // start before 10:00
+    const canHaveLunch = dayStartMin < 13 * 60 && dayEndMin > 12 * 60; // window spans lunch hours
+    const canHaveDinner = dayEndMin >= 19 * 60;        // day extends past 19:00
+
+    if (!canHaveLunch) {
+      lunchPlaced = true; // prevent lunch trigger
+    }
+    if (!canHaveBreakfast || !canHaveLunch) {
+      console.log(`[Unified] Day ${cluster.dayNumber}: constrained window (${dayStartTime}–${dayEndTime}) — breakfast:${canHaveBreakfast} lunch:${canHaveLunch} dinner:${canHaveDinner}`);
     }
 
-    // 2. BREAKFAST (anchor = hotel or cluster centroid) — skip on afternoon arrivals
-    if (!isAfternoonArrival) {
+    // 2. BREAKFAST (anchor = hotel or cluster centroid) — only if day starts early enough
+    if (canHaveBreakfast) {
       const breakfastAnchor = hotelLatLng || getClusterCentroid(cluster.activities);
       if (breakfastAnchor) {
         const breakfastPlacement = findBestRestaurant(
@@ -358,7 +365,7 @@ export function unifiedScheduleV3Days(
     }
 
     // 7. DINNER (anchor = last activity position; remote clusters → hotel)
-    if (!isLastDay || timeToMin(dayEndTime) >= 18 * 60) {
+    if (canHaveDinner) {
       // Remote day trip: dine near hotel after returning
       const dinnerAnchor = isRemoteCluster && hotelLatLng
         ? hotelLatLng
@@ -446,7 +453,9 @@ export function unifiedScheduleV3Days(
   for (const day of days) {
     const timeWindow = timeWindows.find(w => w.dayNumber === day.dayNumber);
     const dayEndStr = timeWindow?.activityEndTime || '21:00';
-    const hardEndMin = timeToMin(addMinutes(dayEndStr, 120));
+    const hasDeparture = timeWindow?.hasDepartureTransport ?? false;
+    const cascadeBuffer = hasDeparture ? 30 : 120;
+    const hardEndMin = timeToMin(addMinutes(dayEndStr, cascadeBuffer));
 
     for (let i = 0; i < day.items.length - 1; i++) {
       const curr = day.items[i];
@@ -511,14 +520,19 @@ export function unifiedScheduleV3Days(
     day.items.forEach((item, idx) => { item.orderIndex = idx; });
   }
 
-  // 11. Hard stop: drop activities after 22:00
+  // 11. Hard stop: drop activities after dayEndTime (departure days) or 22:00
   for (const day of days) {
+    const timeWindow = timeWindows.find(w => w.dayNumber === day.dayNumber);
+    const hasDeparture = timeWindow?.hasDepartureTransport ?? false;
+    const dayEndForHardStop = hasDeparture
+      ? timeToMin(timeWindow?.activityEndTime || '22:00')
+      : 22 * 60;
     const beforeCount = day.items.length;
     day.items = day.items.filter(item => {
       if (item.type !== 'activity') return true;
       const startMin = timeToMin(item.startTime || '00:00');
-      if (startMin >= 22 * 60) {
-        console.log(`[Unified] Hard stop: dropping "${item.title}" on Day ${day.dayNumber} (past 22:00)`);
+      if (startMin >= dayEndForHardStop) {
+        console.log(`[Unified] Hard stop: dropping "${item.title}" on Day ${day.dayNumber} (past ${minToTime(dayEndForHardStop)})`);
         return false;
       }
       return true;

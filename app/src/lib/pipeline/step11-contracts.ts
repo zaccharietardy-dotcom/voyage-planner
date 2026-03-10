@@ -18,6 +18,7 @@
 
 import type { TripDay, TripItem } from '../types';
 import type { ScoredActivity } from './types';
+import type { DayTimeWindow } from './step4-anchor-transport';
 import { isOpenAtTime, isActivityOpenOnDay } from './utils/opening-hours';
 import { isPlausibleCoordinate } from './utils/coordinate-validator';
 import { calculateDistance } from '../services/geocoding';
@@ -74,7 +75,8 @@ export function validateContracts(
   startDate: string,
   mustSeeIds: Set<string>,
   destCoords: { lat: number; lng: number },
-  mustSeeActivities?: Array<{ id: string; name: string }>
+  mustSeeActivities?: Array<{ id: string; name: string }>,
+  timeWindows?: DayTimeWindow[]
 ): ContractResult {
   const violations: string[] = [];
   const qualityWarnings: string[] = [];
@@ -219,17 +221,18 @@ export function validateContracts(
       }
     }
 
-    // P0.3: Missing meals check (skip first/last day if transport-constrained)
-    const isFirstDay = day.dayNumber === 1;
-    const isLastDay = day.dayNumber === days.length;
+    // P0.3: Missing meals — use time-window-derived eligibility (not blanket day exemptions)
+    const tw = timeWindows?.find(w => w.dayNumber === day.dayNumber);
+    const twStartMin = tw ? toMinutes(tw.activityStartTime) : 0;
+    const twEndMin = tw ? toMinutes(tw.activityEndTime) : 22 * 60;
+    const expectLunch = twStartMin < 13 * 60 && twEndMin > 12 * 60;
+    const expectDinner = twEndMin >= 19 * 60;
 
-    // Skip lunch check for first and last day (arrival/departure — constrained time windows)
-    if (!hasLunch && !isFirstDay && !isLastDay) {
+    if (!hasLunch && expectLunch) {
       violations.push(`P0.3: Day ${day.dayNumber} has no lunch`);
       metrics.daysWithoutLunch++;
     }
-    // Skip dinner check for last day (departure) AND first day (late arrival → no dinner expected)
-    if (!hasDinner && !isLastDay && !isFirstDay) {
+    if (!hasDinner && expectDinner) {
       violations.push(`P0.3: Day ${day.dayNumber} has no dinner`);
       metrics.daysWithoutDinner++;
     }
