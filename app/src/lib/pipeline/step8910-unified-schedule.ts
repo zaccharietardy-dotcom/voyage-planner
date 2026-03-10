@@ -138,32 +138,41 @@ export function unifiedScheduleV3Days(
       return true;
     });
 
-    // 2. BREAKFAST (anchor = hotel or cluster centroid)
-    const breakfastAnchor = hotelLatLng || getClusterCentroid(cluster.activities);
-    if (breakfastAnchor) {
-      const breakfastPlacement = findBestRestaurant(
-        restaurants, breakfastAnchor, 'breakfast',
-        0.8, 3.5, 2, dietary, usedRestaurantIds, dayDateForRestaurant
-      );
-      if (breakfastPlacement && breakfastPlacement.distanceFromAnchor <= 0.8) {
-        items.push(createRestaurantItem(
-          { ...breakfastPlacement, anchorName: 'Hotel' },
-          'breakfast', currentTime, 45, cluster.dayNumber, orderIndex++
-        ));
-        usedRestaurantIds.add(breakfastPlacement.primary.id);
-      } else if (hotelLatLng && hotel) {
-        // Hotel breakfast fallback
-        const hotelBreakfast = createHotelBreakfastRestaurant(hotelLatLng, hotel.name || 'Hôtel');
-        items.push(createRestaurantItem(
-          { mealType: 'breakfast', anchorPoint: hotelLatLng, anchorName: 'Hotel', primary: hotelBreakfast, alternatives: [], distanceFromAnchor: 0 },
-          'breakfast', currentTime, 45, cluster.dayNumber, orderIndex++
-        ));
-      } else {
-        // No hotel — "Repas libre"
-        items.push(createSelfMealFallbackItem('breakfast', currentTime, 45, cluster.dayNumber, orderIndex++, breakfastAnchor));
-      }
+    // Late arrival detection: skip breakfast & lunch on afternoon arrivals
+    const isAfternoonArrival = cluster.dayNumber === 1 && timeToMin(dayStartTime) >= 12 * 60;
+    if (isAfternoonArrival) {
+      console.log(`[Unified] Day ${cluster.dayNumber}: afternoon arrival (${dayStartTime}) — skipping breakfast & lunch`);
+      lunchPlaced = true; // prevent lunch from being placed later
     }
-    currentTime = addMinutes(currentTime, 60); // 45min eat + 15min travel
+
+    // 2. BREAKFAST (anchor = hotel or cluster centroid) — skip on afternoon arrivals
+    if (!isAfternoonArrival) {
+      const breakfastAnchor = hotelLatLng || getClusterCentroid(cluster.activities);
+      if (breakfastAnchor) {
+        const breakfastPlacement = findBestRestaurant(
+          restaurants, breakfastAnchor, 'breakfast',
+          0.8, 3.5, 2, dietary, usedRestaurantIds, dayDateForRestaurant
+        );
+        if (breakfastPlacement && breakfastPlacement.distanceFromAnchor <= 0.8) {
+          items.push(createRestaurantItem(
+            { ...breakfastPlacement, anchorName: 'Hotel' },
+            'breakfast', currentTime, 45, cluster.dayNumber, orderIndex++
+          ));
+          usedRestaurantIds.add(breakfastPlacement.primary.id);
+        } else if (hotelLatLng && hotel) {
+          // Hotel breakfast fallback
+          const hotelBreakfast = createHotelBreakfastRestaurant(hotelLatLng, hotel.name || 'Hôtel');
+          items.push(createRestaurantItem(
+            { mealType: 'breakfast', anchorPoint: hotelLatLng, anchorName: 'Hotel', primary: hotelBreakfast, alternatives: [], distanceFromAnchor: 0 },
+            'breakfast', currentTime, 45, cluster.dayNumber, orderIndex++
+          ));
+        } else {
+          // No hotel — "Repas libre"
+          items.push(createSelfMealFallbackItem('breakfast', currentTime, 45, cluster.dayNumber, orderIndex++, breakfastAnchor));
+        }
+      }
+      currentTime = addMinutes(currentTime, 60); // 45min eat + 15min travel
+    }
 
     // 2b. CHECKIN (Day 1, after breakfast — before activities)
     if (cluster.dayNumber === 1 && hotel) {

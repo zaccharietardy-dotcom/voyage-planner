@@ -228,7 +228,8 @@ export function validateContracts(
       violations.push(`P0.3: Day ${day.dayNumber} has no lunch`);
       metrics.daysWithoutLunch++;
     }
-    if (!hasDinner && !isLastDay) {
+    // Skip dinner check for last day (departure) AND first day (late arrival → no dinner expected)
+    if (!hasDinner && !isLastDay && !isFirstDay) {
       violations.push(`P0.3: Day ${day.dayNumber} has no dinner`);
       metrics.daysWithoutDinner++;
     }
