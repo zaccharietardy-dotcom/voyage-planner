@@ -374,6 +374,11 @@ const HARD_EXCLUDED_FOR_MEALS = [
   'glacier', 'gelateria', 'gelato', 'ice cream', 'glace',
   'frozen yogurt', 'froyo', 'sorbet',
   'candy store', 'sweet shop', 'confiserie', 'bonbons',
+  // Non-restaurants: supermarkets, convenience stores, etc.
+  'carrefour', 'monoprix', 'franprix', 'auchan', 'leclerc', 'lidl', 'aldi',
+  'supermarket', 'supermarché', 'supermercado', 'grocery', 'épicerie',
+  'convenience store', 'minimarket', 'mini market', 'supérette',
+  'hypermarket', 'hypermarché',
 ];
 
 export function isAppropriateForMeal(restaurant: Restaurant, mealType: MealType): boolean {

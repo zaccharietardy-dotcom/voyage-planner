@@ -33,6 +33,9 @@ export function loadEnvLocal(explicitPath?: string): void {
 
 // Chargement eager par défaut pour la CLI
 loadEnvLocal();
+if (!process.env.PIPELINE_VERSION) {
+  process.env.PIPELINE_VERSION = 'v3';
+}
 
 // Imports après dotenv
 import { generateTripV2 } from '../../src/lib/pipeline';
@@ -204,6 +207,7 @@ Options:
   --random             Générer un voyage avec des préférences aléatoires
   --all                Lancer tous les scénarios séquentiellement
   --all-and-analyze    Lancer tous les scénarios + analyser les résultats
+  --pipeline <version> Version pipeline: v3 | v2-llm | v2-algorithmic (défaut: v3)
   --list               Lister tous les scénarios disponibles
 
 Scénarios disponibles:`);
@@ -253,8 +257,28 @@ export function assertRequiredEnv(requiredEnvs: string[] = ['ANTHROPIC_API_KEY']
   }
 }
 
+type PipelineVersion = 'v3' | 'v2-llm' | 'v2-algorithmic';
+const VALID_PIPELINES: PipelineVersion[] = ['v3', 'v2-llm', 'v2-algorithmic'];
+
+function parsePipelineArg(args: string[]): PipelineVersion | null {
+  const idx = args.indexOf('--pipeline');
+  if (idx === -1) return null;
+  const raw = args[idx + 1] as PipelineVersion | undefined;
+  if (!raw || !VALID_PIPELINES.includes(raw)) return null;
+  return raw;
+}
+
 async function main() {
   const args = process.argv.slice(2);
+  const pipelineFromArgs = parsePipelineArg(args);
+  if (args.includes('--pipeline') && !pipelineFromArgs) {
+    console.error(`❌ Valeur invalide pour --pipeline. Valeurs supportées: ${VALID_PIPELINES.join(', ')}`);
+    printUsage();
+    process.exit(1);
+  }
+  if (pipelineFromArgs) {
+    process.env.PIPELINE_VERSION = pipelineFromArgs;
+  }
 
   // Check env
   try {
@@ -266,6 +290,7 @@ async function main() {
   }
 
   console.log('🔑 ENV check:', getEnvHealth());
+  console.log(`🧪 PIPELINE_VERSION=${process.env.PIPELINE_VERSION}`);
 
   if (args.includes('--list') || args.length === 0) {
     printUsage();

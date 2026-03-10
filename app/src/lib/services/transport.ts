@@ -500,7 +500,7 @@ function calculatePlaneOption(params: TransportSearchParams, distance: number): 
     { origin: params.origin, destination: params.destination },
     { date: dateStr, passengers: params.passengers || 1 }
   );
-  const omioFlightUrl = generateFlightOmioLink(params.origin, params.destination, dateStr);
+  const omioFlightUrl = generateFlightOmioLink(params.origin, params.destination, dateStr, params.passengers || 1);
 
   return {
     id: 'plane',
@@ -724,7 +724,10 @@ function calculateBusOption(params: TransportSearchParams, distance: number): Tr
   const destSlug = toOmioLocationSlug(resolveOmioCityLabel(params.destination, params.destCoords));
   const omioDate = params.date ? formatDateForUrl(params.date) : '';
   const dateParam = omioDate ? `?departure_date=${omioDate}` : '';
-  const bookingUrl = `https://www.omio.fr/bus/${originSlug}/${destSlug}${dateParam}`;
+  const busPassengerParams = params.passengers > 1
+    ? `${dateParam ? '&' : '?'}${Array.from({ length: params.passengers }, () => 'passengers%5B%5D=adult').join('&')}`
+    : '';
+  const bookingUrl = `https://www.omio.fr/bus/${originSlug}/${destSlug}${dateParam}${busPassengerParams}`;
 
   return {
     id: 'bus',
@@ -1029,7 +1032,10 @@ export function getTrainBookingUrl(
   const destSlug = toOmioLocationSlug(resolvedDestination);
   const dateStr = date ? formatDateForUrl(date) : '';
   const dateParam = dateStr ? `?departure_date=${dateStr}` : '';
-  return `https://www.omio.fr/trains/${originSlug}/${destSlug}${dateParam}`;
+  const passengerParams = passengers > 1
+    ? `${dateParam ? '&' : '?'}${Array.from({ length: passengers }, () => 'passengers%5B%5D=adult').join('&')}`
+    : '';
+  return `https://www.omio.fr/trains/${originSlug}/${destSlug}${dateParam}${passengerParams}`;
 }
 
 /**

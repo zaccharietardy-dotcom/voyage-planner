@@ -93,12 +93,16 @@ export function isAlwaysOpenPublicSpace(activity: ScoredActivity): boolean {
     'promenade', 'boulevard', 'esplanade', 'paseo',
     'viewpoint', 'belvedere', 'mirador', 'belvédère',
     'quai', 'waterfront', 'lungomare', 'boardwalk',
-    'wall', 'mur ', 'muralla', 'mauer',
-    'gate', 'porte', 'porta', 'tor ', 'puerta',
+    'wall', 'mur', 'muralla', 'mauer',
+    'gate', 'porte', 'porta', 'tor', 'puerta',
     'column', 'colonne', 'obelisk', 'obélisque',
     'statue', 'monument',
   ];
-  return ALWAYS_OPEN_KEYWORDS.some(kw => name.includes(kw));
+  const ALWAYS_OPEN_RE = new RegExp(
+    '\\b(' + ALWAYS_OPEN_KEYWORDS.map(kw => kw.trim().replace(/\s+/g, '\\s+')).join('|') + ')\\b',
+    'i'
+  );
+  return ALWAYS_OPEN_RE.test(name);
 }
 
 /**
@@ -152,16 +156,24 @@ export function isOpenAtTime(
   const slotStart = parseTime(dayDate, startTime);
   const slotEnd = parseTime(dayDate, endTime);
 
-  // Handle venues open 24h (00:00-23:59)
+  // Handle venues open 24h (00:00-23:59 or 00:00-00:00)
   if (dayHours.open === '00:00' && (dayHours.close === '23:59' || dayHours.close === '00:00')) {
     return true;
+  }
+
+  // Handle midnight wrap: close "00:00" with non-midnight open means "closes at midnight"
+  // e.g. open 09:00, close 00:00 → venue is open 09:00-24:00
+  let adjustedVenueClose = venueClose;
+  if (dayHours.close === '00:00' && dayHours.open !== '00:00') {
+    // Add 24 hours to represent end-of-day midnight
+    adjustedVenueClose = new Date(venueClose.getTime() + 24 * 60 * 60 * 1000);
   }
 
   // The activity must start at or after venue opens, and end at or before venue closes
   // Allow 15 min tolerance: venue might let you in slightly before opening
   const TOLERANCE_MS = 15 * 60 * 1000;
   const opensEarlyEnough = slotStart.getTime() >= venueOpen.getTime() - TOLERANCE_MS;
-  const closesLateEnough = slotEnd.getTime() <= venueClose.getTime() + TOLERANCE_MS;
+  const closesLateEnough = slotEnd.getTime() <= adjustedVenueClose.getTime() + TOLERANCE_MS;
 
   return opensEarlyEnough && closesLateEnough;
 }

@@ -6,13 +6,14 @@
 /** Convert "HH:MM" to total minutes since midnight */
 export function timeToMin(time: string): number {
   const [h, m] = (time || '00:00').split(':').map(Number);
-  return (h || 0) * 60 + (m || 0);
+  return (Math.min(h || 0, 23)) * 60 + (Math.min(m || 0, 59));
 }
 
 /** Convert total minutes since midnight to "HH:MM" */
 export function minToTime(minutes: number): string {
-  const h = Math.floor(minutes / 60);
-  const m = minutes % 60;
+  const clamped = Math.max(0, Math.min(minutes, 23 * 60 + 59));
+  const h = Math.floor(clamped / 60);
+  const m = clamped % 60;
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
 }
 
@@ -29,4 +30,10 @@ export function isPastEnd(time: string, endTime: string): boolean {
 /** Returns the later of time and minTime (both "HH:MM") */
 export function ensureAfter(time: string, minTime: string): string {
   return timeToMin(time) >= timeToMin(minTime) ? time : minTime;
+}
+
+/** Sort items by startTime and re-assign orderIndex */
+export function sortAndReindexItems(items: { startTime?: string; orderIndex: number }[]): void {
+  items.sort((a, b) => timeToMin(a.startTime || '00:00') - timeToMin(b.startTime || '00:00'));
+  items.forEach((item, idx) => { item.orderIndex = idx; });
 }

@@ -177,7 +177,8 @@ export function validateContracts(
         // Check meal type from mealType field or title
         const mealType = item.mealType;
         const titleLower = (item.title || '').toLowerCase();
-        const isLunchMeal = mealType === 'lunch' || titleLower.includes('lunch') || titleLower.includes('déjeuner');
+        // "déjeuner" matches lunch but NOT "petit-déjeuner" (breakfast)
+        const isLunchMeal = mealType === 'lunch' || titleLower.includes('lunch') || (titleLower.includes('déjeuner') && !titleLower.includes('petit-déjeuner'));
         const isDinnerMeal = mealType === 'dinner' || titleLower.includes('dinner') || titleLower.includes('dîner') || titleLower.includes('diner');
 
         if (isLunchMeal) {
@@ -245,9 +246,14 @@ export function validateContracts(
     const mustSeeActivity = mustSeeActivities?.find(a => a.id === mustSeeId);
     if (mustSeeActivity) {
       const mustSeeNorm = normalizeForMatching(mustSeeActivity.name);
-      const foundByName = mustSeeNorm.length >= 5 && plannedActivityNamesNorm.some(
-        plannedNorm => plannedNorm.includes(mustSeeNorm) || mustSeeNorm.includes(plannedNorm)
-      );
+      const foundByName = mustSeeNorm.length >= 5 && plannedActivityNamesNorm.some(plannedNorm => {
+        if (plannedNorm.includes(mustSeeNorm) || mustSeeNorm.includes(plannedNorm)) {
+          const shorter = Math.min(plannedNorm.length, mustSeeNorm.length);
+          const longer = Math.max(plannedNorm.length, mustSeeNorm.length);
+          return shorter / longer >= 0.3;
+        }
+        return false;
+      });
       if (foundByName) {
         metrics.mustSeesPlanned++;
         console.log(`[Contracts] P0.8 must-see "${mustSeeActivity.name}" matched by name (ID mismatch — accent/language variant)`);

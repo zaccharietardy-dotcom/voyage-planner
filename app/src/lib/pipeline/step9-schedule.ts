@@ -18,11 +18,13 @@ import type { TripPreferences, Restaurant, Accommodation } from '../types';
 import type { TripDay, TripItem } from '../types/trip';
 import type { ActivityCluster, ScoredActivity, FetchedData } from './types';
 import type { DayMealPlan, MealPlacement } from './step8-place-restaurants';
-import type { DayTravelTimes } from './step7b-travel-times';
+import type { DayTravelTimes, TravelLeg } from './step7b-travel-times';
 import type { DayTimeWindow } from './step4-anchor-transport';
 import { timeToMin, minToTime, addMinutes, isPastEnd, ensureAfter } from './utils/time';
 import { getClusterCentroid, findMidDayActivity } from './utils/geo';
 import { isDuplicateActivityCandidate } from './utils/activityDedup';
+import { isOpenAtTime } from './utils/opening-hours';
+import { enrichWithTicketingLinks } from '../services/officialTicketing';
 
 // ---------------------------------------------------------------------------
 // Public API
@@ -83,7 +85,6 @@ export function assembleV3Days(
     let currentTime = dayStartTime;
     let orderIndex = 0;
     let lunchPlaced = false;
-    let activitiesPlaced = 0;
     const isLastDay = cluster.dayNumber === clusters.length;
 
     // isPastEnd and timeToMin are imported from ./utils/time
@@ -133,23 +134,38 @@ export function assembleV3Days(
       const act = cluster.activities[i];
       const travelLeg = dayTravel?.legs.find(l => l.toId === act.id);
 
-      // Add travel time (but don't exceed day end)
+      // Compute travel time but DON'T create the item yet — we need to confirm the activity will be placed first
+      let pendingTravelTime = 0;
       if (travelLeg && travelLeg.durationMinutes > 5) {
         const afterTravel = addMinutes(currentTime, travelLeg.durationMinutes);
         if (!isPastEnd(afterTravel, dayEndTime)) {
-          currentTime = afterTravel;
+          pendingTravelTime = travelLeg.durationMinutes;
         }
       }
+      const timeAfterTravel = pendingTravelTime > 0 ? addMinutes(currentTime, pendingTravelTime) : currentTime;
 
-      // Place lunch before this activity if it's past 12:15 and we haven't placed it yet.
-      if (!lunchPlaced && activitiesPlaced >= 2 && timeToMin(currentTime) >= 12 * 60 + 15) {
-        const resolvedLunch = resolveMealPlacementForSlot(lunch, dayDate, currentTime, 75);
+      // Place lunch when entering the lunch window (12:00-14:30) — purely temporal, no activity count check
+      if (!lunchPlaced && timeToMin(timeAfterTravel) >= 12 * 60) {
+        // Commit any pending travel before lunch
+        if (pendingTravelTime > 0 && travelLeg) {
+          items.push(createTravelItem(travelLeg, currentTime, pendingTravelTime, cluster.dayNumber, orderIndex++, act));
+          currentTime = timeAfterTravel;
+          pendingTravelTime = 0;
+        }
+        // Try multiple slots for lunch to avoid "Repas libre"
+        const lunchSlots = [currentTime, '12:30', '13:00', '13:30'];
+        let resolvedLunch: MealPlacement | null = null;
+        let finalLunchTime = currentTime;
+        for (const slot of lunchSlots) {
+          resolvedLunch = resolveMealPlacementForSlot(lunch, dayDate, slot, 75);
+          if (resolvedLunch) { finalLunchTime = slot; break; }
+        }
         if (resolvedLunch) {
-          items.push(createRestaurantItem(resolvedLunch, 'lunch', currentTime, 75, cluster.dayNumber, orderIndex++));
+          items.push(createRestaurantItem(resolvedLunch, 'lunch', finalLunchTime, 75, cluster.dayNumber, orderIndex++));
         } else {
           items.push(createSelfMealFallbackItem('lunch', currentTime, 75, cluster.dayNumber, orderIndex++, lunchAnchor));
         }
-        currentTime = addMinutes(currentTime, 90); // 75min eat + 15min travel
+        currentTime = addMinutes(finalLunchTime, 90); // 75min eat + 15min travel
         lunchPlaced = true;
 
         // Check time again after lunch
@@ -160,63 +176,64 @@ export function assembleV3Days(
       }
 
       const duration = act.duration || 60;
+      // Use timeAfterTravel for placement checks (activity would start after travel)
+      const checkTime = pendingTravelTime > 0 ? timeAfterTravel : currentTime;
 
       // Check if this activity fits within the day
       const hardEndTime = addMinutes(dayEndTime, 30);
-      if (isPastEnd(currentTime, hardEndTime)) {
-        console.log(`[assembleV3Days] Day ${cluster.dayNumber}: skipping "${act.name}" (${currentTime} past hard end ${hardEndTime})`);
+      if (isPastEnd(checkTime, hardEndTime)) {
+        console.log(`[assembleV3Days] Day ${cluster.dayNumber}: skipping "${act.name}" (${checkTime} past hard end ${hardEndTime})`);
         break;
       }
 
       // Check opening hours: skip if the activity would start/end outside opening hours
+      let placementTime = checkTime;
       const actCloseTime = getActivityCloseTime(act, dayDate);
       if (actCloseTime) {
-        const actEnd = addMinutes(currentTime, duration);
+        const actEnd = addMinutes(placementTime, duration);
         if (isPastEnd(actEnd, actCloseTime)) {
           if (act.mustSee) {
-            // Fix 1: For must-sees, try to move the start time earlier so the visit
-            // finishes within closing time instead of silently skipping it.
             const closeMin = timeToMin(actCloseTime);
             const dayStartMin = timeToMin(dayStartTime);
             const candidateStartMin = closeMin - duration;
             if (candidateStartMin >= dayStartMin) {
-              // There is room earlier in the day — pull start time back to fit
               const candidateStart = minToTime(candidateStartMin);
               console.warn(
                 `[assembleV3Days] Day ${cluster.dayNumber}: must-see "${act.name}" ends ${actEnd} past close ${actCloseTime}` +
                 ` — shifting start to ${candidateStart} to fit within hours`
               );
-              currentTime = candidateStart;
-              // Re-derive actEnd with the adjusted start — it will fit, fall through
+              placementTime = candidateStart;
             } else {
-              // The window before closing is shorter than the activity duration.
-              // Place it at the closest possible start and let it run a bit past close;
-              // a truncated visit is better than no visit for a must-see.
               const earliestFitStart = minToTime(Math.max(dayStartMin, closeMin - duration));
               console.warn(
                 `[assembleV3Days] Day ${cluster.dayNumber}: must-see "${act.name}" cannot fully fit before close ${actCloseTime}` +
                 ` — placing at ${earliestFitStart} (truncated visit, must-see priority)`
               );
-              currentTime = earliestFitStart;
-              // Fall through and place it anyway
+              placementTime = earliestFitStart;
             }
           } else {
-            // Normal activity: skip and try the next one
+            // Normal activity: skip — do NOT emit travel item
             console.log(`[assembleV3Days] Day ${cluster.dayNumber}: skipping "${act.name}" (ends ${actEnd} past close ${actCloseTime})`);
             continue;
           }
         }
       }
       const actOpenTime = getActivityOpenTime(act, dayDate);
-      if (actOpenTime && !isPastEnd(currentTime, actOpenTime)) {
-        // Activity hasn't opened yet — push currentTime to opening time
-        currentTime = actOpenTime;
+      if (actOpenTime && !isPastEnd(placementTime, actOpenTime)) {
+        placementTime = actOpenTime;
       }
+
+      // Activity confirmed — now commit the travel item if pending
+      if (pendingTravelTime > 0 && travelLeg) {
+        items.push(createTravelItem(travelLeg, currentTime, pendingTravelTime, cluster.dayNumber, orderIndex++, act));
+        currentTime = timeAfterTravel;
+      }
+      // If placement was shifted earlier (must-see), use that time instead
+      currentTime = placementTime;
 
       items.push(createActivityItem(act, currentTime, duration, cluster.dayNumber, orderIndex++, destination));
       globalPlacedIds.add(act.id || act.name);
       currentTime = addMinutes(currentTime, duration + 10); // 10min buffer between activities
-      activitiesPlaced++;
     }
 
     // Fix 2: Final must-see verification pass.
@@ -256,9 +273,11 @@ export function assembleV3Days(
       items.forEach((item, idx) => { item.orderIndex = idx; });
     }
 
-    // Place lunch if not yet placed (early days or few activities).
-    if (!lunchPlaced && activitiesPlaced > 0) {
-      const lunchTime = ensureAfter(currentTime, '12:15');
+    // Place lunch if not yet placed — hard cap at 14:30 (never lunch after 14:30)
+    if (!lunchPlaced) {
+      // Use 12:00 as earliest, cap at 14:30
+      const idealLunch = ensureAfter(currentTime, '12:00');
+      const lunchTime = isPastEnd(idealLunch, '14:30') ? '14:30' : idealLunch;
       if (!isPastEnd(lunchTime, addMinutes(dayEndTime, 30))) {
         const resolvedLunch = resolveMealPlacementForSlot(lunch, dayDate, lunchTime, 75);
         if (resolvedLunch) {
@@ -278,15 +297,22 @@ export function assembleV3Days(
         ? { lat: lastAct.latitude, lng: lastAct.longitude }
         : hotelLatLng || getClusterCentroid(cluster.activities);
       const dinner = mealPlan?.meals.find(m => m.mealType === 'dinner');
-      // Dinner between 19:00 and 21:30
+      // Dinner between 19:00 and 21:30 — try multiple slots to avoid "Repas libre"
       let dinnerTime = ensureAfter(currentTime, '19:00');
       // Cap dinner start at 21:30 max
       if (isPastEnd(dinnerTime, '21:30')) {
         dinnerTime = '21:00';
       }
-      const resolvedDinner = resolveMealPlacementForSlot(dinner, dayDate, dinnerTime, 90);
+      // Try the primary slot first, then alternate slots
+      const dinnerSlots = [dinnerTime, '19:30', '20:00', '20:30'];
+      let resolvedDinner: MealPlacement | null = null;
+      let finalDinnerTime = dinnerTime;
+      for (const slot of dinnerSlots) {
+        resolvedDinner = resolveMealPlacementForSlot(dinner, dayDate, slot, 90);
+        if (resolvedDinner) { finalDinnerTime = slot; break; }
+      }
       if (resolvedDinner) {
-        items.push(createRestaurantItem(resolvedDinner, 'dinner', dinnerTime, 90, cluster.dayNumber, orderIndex++));
+        items.push(createRestaurantItem(resolvedDinner, 'dinner', finalDinnerTime, 90, cluster.dayNumber, orderIndex++));
       } else {
         items.push(createSelfMealFallbackItem('dinner', dinnerTime, 90, cluster.dayNumber, orderIndex++, dinnerAnchor));
       }
@@ -329,7 +355,9 @@ export function assembleV3Days(
       if (currEndMin > nextStartMin) {
         // Overlap detected: shift next item to currEnd + 5min buffer
         const shiftedStart = currEndMin + 5;
-        const itemDuration = timeToMin(next.endTime || '00:00') - nextStartMin;
+        const itemDuration = next.duration
+          ? next.duration
+          : Math.max(0, timeToMin(next.endTime || '00:00') - nextStartMin);
         const shiftedEnd = shiftedStart + Math.max(itemDuration, 0);
 
         // If the shifted item would push past hard end, drop it
@@ -341,28 +369,50 @@ export function assembleV3Days(
         }
 
         // If shifting an activity past its closing time, drop it instead of creating a violation
-        if (next.type === 'activity' && next.openingHoursByDay) {
-          const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'] as const;
-          const dayName = dayNames[day.date.getDay()];
-          const dayHours = (next.openingHoursByDay as Record<string, { open: string; close: string } | null>)?.[dayName];
-          if (dayHours?.close && dayHours.close !== '23:59' && dayHours.close !== '00:00') {
-            const closeMin = timeToMin(dayHours.close);
-            if (shiftedEnd > closeMin) {
-              console.log(`[assembleV3Days] Overlap fix: dropping "${next.title}" on Day ${day.dayNumber} (shifted end ${minToTime(shiftedEnd)} past close ${dayHours.close})`);
-              day.items.splice(i + 1, 1);
-              i--;
-              continue;
-            }
+        if (next.type === 'activity') {
+          // Check using isOpenAtTime (covers both openingHours and openingHoursByDay)
+          const mockAct = {
+            name: next.title || '',
+            openingHours: next.openingHours as { open: string; close: string } | undefined,
+            openingHoursByDay: next.openingHoursByDay as Record<string, { open: string; close: string } | null> | undefined,
+          } as ScoredActivity;
+          if (!isOpenAtTime(mockAct, day.date, minToTime(shiftedStart), minToTime(shiftedEnd))) {
+            console.log(`[assembleV3Days] Overlap fix: dropping "${next.title}" on Day ${day.dayNumber} (shifted ${minToTime(shiftedStart)}-${minToTime(shiftedEnd)} outside opening hours)`);
+            day.items.splice(i + 1, 1);
+            i--;
+            continue;
           }
         }
 
         next.startTime = minToTime(shiftedStart);
-        next.endTime = minToTime(shiftedEnd);
+        // For activities, always derive endTime from the duration field to prevent mismatches
+        if (next.type === 'activity' && next.duration) {
+          next.endTime = addMinutes(next.startTime, next.duration);
+        } else {
+          next.endTime = minToTime(shiftedEnd);
+        }
       }
     }
 
     // Re-assign orderIndex after potential removals
     day.items.forEach((item, idx) => { item.orderIndex = idx; });
+  }
+
+  // Hard stop: drop activities starting after 22:00 (parks at midnight = nonsensical)
+  for (const day of days) {
+    const beforeCount = day.items.length;
+    day.items = day.items.filter(item => {
+      if (item.type !== 'activity') return true; // keep restaurants, transport
+      const startMin = timeToMin(item.startTime || '00:00');
+      if (startMin >= 22 * 60) {
+        console.log(`[assembleV3Days] Hard stop: dropping "${item.title}" on Day ${day.dayNumber} (starts at ${item.startTime}, past 22:00)`);
+        return false;
+      }
+      return true;
+    });
+    if (day.items.length < beforeCount) {
+      day.items.forEach((item, idx) => { item.orderIndex = idx; });
+    }
   }
 
   // Final guardrail after overlap shifts: ensure restaurants are still valid.
@@ -373,8 +423,97 @@ export function assembleV3Days(
 
   // Enrich all activity items with ticketing links (official + Viator + Tiqets)
   for (const day of days) {
-    const { enrichWithTicketingLinks } = require('../services/officialTicketing');
     enrichWithTicketingLinks(day.items, destination);
+  }
+
+  // Consolidate bookingUrl: copy enriched ticketing links into main bookingUrl if empty
+  for (const day of days) {
+    for (const item of day.items) {
+      if (item.type === 'activity' && !item.bookingUrl) {
+        const enriched = item as any;
+        item.bookingUrl = enriched.officialBookingUrl || enriched.viatorUrl || enriched.tiqetsUrl || undefined;
+      }
+    }
+  }
+
+  // Empty day rescue: if a day has 0 activities, steal from the busiest day
+  for (const day of days) {
+    const activityCount = day.items.filter(i => i.type === 'activity').length;
+    if (activityCount > 0) continue;
+
+    // Find the busiest day (most activities)
+    let busiestDay: TripDay | null = null;
+    let busiestCount = 0;
+    for (const other of days) {
+      if (other.dayNumber === day.dayNumber) continue;
+      const otherCount = other.items.filter(i => i.type === 'activity').length;
+      if (otherCount > busiestCount) {
+        busiestCount = otherCount;
+        busiestDay = other;
+      }
+    }
+    if (!busiestDay || busiestCount < 2) continue; // Can't steal if donor has ≤1
+
+    // Steal the lowest-scored non-must-see activity
+    const donorActivities = busiestDay.items
+      .map((item, idx) => ({ item, idx }))
+      .filter(({ item }) => item.type === 'activity' && !item.mustSee)
+      .sort((a, b) => (a.item.rating ?? 0) - (b.item.rating ?? 0));
+
+    const toSteal = Math.min(2, donorActivities.length, Math.floor(busiestCount / 2));
+    for (let s = 0; s < toSteal; s++) {
+      const victim = donorActivities[s];
+      const stolenItem = { ...victim.item, dayNumber: day.dayNumber };
+      day.items.push(stolenItem);
+      busiestDay.items.splice(victim.idx - s, 1); // adjust index for prior removals
+      console.log(`[assembleV3Days] Empty day rescue: moved "${stolenItem.title}" from Day ${busiestDay.dayNumber} → Day ${day.dayNumber}`);
+    }
+
+    // Remove orphan transport items (pointing to removed activities)
+    busiestDay.items = busiestDay.items.filter((item, i) => {
+      if (item.type !== 'transport') return true;
+      const next = busiestDay!.items[i + 1];
+      const prev = busiestDay!.items[i - 1];
+      // Keep transport only if it connects two real items
+      return next && prev;
+    });
+
+    // Re-sort and re-index both days
+    for (const d of [day, busiestDay]) {
+      d.items.sort((a, b) => timeToMin(a.startTime || '00:00') - timeToMin(b.startTime || '00:00'));
+      d.items.forEach((item, idx) => { item.orderIndex = idx; });
+    }
+  }
+
+  // Remove orphan transport items from all days (transport with no adjacent activity)
+  for (const day of days) {
+    day.items = day.items.filter((item, i) => {
+      if (item.type !== 'transport') return true;
+      const prev = day.items[i - 1];
+      const next = day.items[i + 1];
+      // Drop transport that has no activity neighbor
+      const hasActivityNeighbor = (prev && prev.type === 'activity') || (next && next.type === 'activity');
+      if (!hasActivityNeighbor) {
+        console.log(`[assembleV3Days] Removing orphan transport "${item.description}" on Day ${day.dayNumber}`);
+        return false;
+      }
+      return true;
+    });
+    day.items.forEach((item, idx) => { item.orderIndex = idx; });
+  }
+
+  // Fix transport labels: update description to reference actual adjacent items
+  // (repair/swap may have changed which activities are adjacent)
+  for (const day of days) {
+    for (let i = 0; i < day.items.length; i++) {
+      const item = day.items[i];
+      if (item.type !== 'transport') continue;
+      const prev = day.items[i - 1];
+      const next = day.items[i + 1];
+      const fromName = prev ? (prev.locationName || prev.title || '?') : 'Hôtel';
+      const toName = next ? (next.locationName || next.title || '?') : '?';
+      item.description = `${fromName} → ${toName}`;
+    }
   }
 
   return days;
@@ -394,7 +533,11 @@ function resolveMealPlacementForSlot(
   const endTime = addMinutes(startTime, durationMin);
   const candidates: Restaurant[] = [meal.primary, ...(meal.alternatives || [])];
   const openCandidate = candidates.find((restaurant) => isRestaurantOpenForSlot(restaurant, dayDate, startTime, endTime));
-  if (!openCandidate) return null;
+  if (!openCandidate) {
+    // No candidate confirmed open, but returning the primary is better than "Repas libre"
+    console.warn(`[Schedule] No open restaurant for ${meal.mealType} at ${startTime} — using primary "${meal.primary.name}" anyway`);
+    return meal;
+  }
   if (openCandidate.id === meal.primary.id) return meal;
 
   const remainingAlternatives = candidates.filter((candidate) => candidate.id !== openCandidate.id);
@@ -405,7 +548,7 @@ function resolveMealPlacementForSlot(
   };
 }
 
-function isRestaurantOpenForSlot(
+export function isRestaurantOpenForSlot(
   restaurant: Restaurant,
   dayDate: Date,
   startTime: string,
@@ -444,7 +587,7 @@ function getRestaurantHoursForDay(
   return undefined;
 }
 
-function createSelfMealFallbackItem(
+export function createSelfMealFallbackItem(
   mealType: 'breakfast' | 'lunch' | 'dinner',
   startTime: string,
   duration: number,
@@ -483,7 +626,7 @@ function getMealLabel(mealType: 'breakfast' | 'lunch' | 'dinner'): string {
   return 'Dîner';
 }
 
-function enforceRestaurantSafetyForDay(day: TripDay): void {
+export function enforceRestaurantSafetyForDay(day: TripDay): void {
   const activityPoints = day.items
     .filter((item) => item.type === 'activity' && item.latitude && item.longitude)
     .map((item) => ({ lat: item.latitude as number, lng: item.longitude as number }));
@@ -535,17 +678,9 @@ function enforceRestaurantSafetyForDay(day: TripDay): void {
       continue;
     }
 
-    day.items[i] = {
-      ...item,
-      title: `${getMealLabel(mealType)} — Repas libre`,
-      description: 'Pique-nique / courses / repas maison',
-      locationName: 'Repas libre',
-      estimatedCost: 0,
-      bookingUrl: undefined,
-      restaurant: undefined,
-      restaurantAlternatives: undefined,
-      qualityFlags: Array.from(new Set([...(item.qualityFlags || []), 'self_meal_fallback'])),
-    };
+    // Keep the original restaurant rather than showing "Repas libre"
+    // A real restaurant with uncertain hours/distance is better than no suggestion
+    console.warn(`[Schedule Safety] Day ${day.dayNumber}: keeping "${item.title}" despite validation issue (no better alternative found)`);
   }
 }
 
@@ -594,7 +729,7 @@ function nearestActivityDistanceKm(
 /**
  * Helper: Create a TripItem for hotel checkout
  */
-function createCheckoutItem(
+export function createCheckoutItem(
   hotel: Accommodation,
   checkoutTime: string,
   dayNumber: number,
@@ -624,19 +759,42 @@ function createCheckoutItem(
  * Normalize activity titles: convert all-caps or all-lowercase to Title Case.
  * Preserves mixed-case titles that are already correct.
  */
-function normalizeActivityTitle(title: string): string {
+export function normalizeActivityTitle(title: string, destination?: string): string {
   if (!title) return 'Activity';
-  const trimmed = title.trim();
-  if (!trimmed) return 'Activity';
+  let cleaned = title.trim();
+  if (!cleaned) return 'Activity';
 
-  // Detect all-uppercase or all-lowercase (ignoring non-letter chars)
-  const letters = trimmed.replace(/[^a-zA-ZÀ-ÿ]/g, '');
-  if (letters.length === 0) return trimmed;
+  // Strip pipe/em-dash SEO suffixes: "Jardin Majorelle | Musée Berbère" → "Jardin Majorelle"
+  cleaned = cleaned.split(/\s*[|—]\s*/)[0].trim();
 
+  // Remove trailing city name ONLY when separated by delimiter: "Place Jemaa el-Fna - Marrakech" → "Place Jemaa el-Fna"
+  // But NOT "Les Bains de Marrakech" (city is part of the proper name)
+  if (destination) {
+    const destLower = destination.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const suffixPattern = new RegExp(`\\s*[-–,]\\s*${destLower}\\s*$`, 'i');
+    cleaned = cleaned.replace(suffixPattern, '').trim();
+  }
+
+  // Truncate to 60 chars at word boundary
+  if (cleaned.length > 60) {
+    const truncated = cleaned.slice(0, 60);
+    const lastSpace = truncated.lastIndexOf(' ');
+    cleaned = lastSpace > 20 ? truncated.slice(0, lastSpace) : truncated;
+  }
+
+  if (!cleaned) return title.trim().split(/\s*[|—]\s*/)[0]; // Safety fallback
+
+  // Case normalization: detect all-uppercase, all-lowercase, or mostly-uppercase
+  const letters = cleaned.replace(/[^a-zA-ZÀ-ÿ]/g, '');
+  if (letters.length === 0) return cleaned;
+
+  const upperCount = letters.replace(/[^A-ZÀ-ÖØ-Þ]/g, '').length;
   const isAllUpper = letters === letters.toUpperCase() && letters.length > 3;
   const isAllLower = letters === letters.toLowerCase() && letters.length > 3;
+  // "musée YVES SAINT LAURENT marrakech" → mostly uppercase, needs normalizing
+  const isMostlyUpper = !isAllUpper && letters.length > 5 && (upperCount / letters.length) > 0.5;
 
-  if (!isAllUpper && !isAllLower) return trimmed; // Already mixed case
+  if (!isAllUpper && !isAllLower && !isMostlyUpper) return cleaned; // Already mixed case
 
   // Articles/prepositions to keep lowercase (FR + EN)
   const smallWords = new Set([
@@ -644,7 +802,7 @@ function normalizeActivityTitle(title: string): string {
     'the', 'a', 'an', 'of', 'in', 'on', 'at', 'to', 'for', 'and', 'or', 'but', 'with', 'by',
   ]);
 
-  return trimmed
+  return cleaned
     .toLowerCase()
     .split(/(\s+|-|'|')/)
     .map((part, index) => {
@@ -658,7 +816,55 @@ function normalizeActivityTitle(title: string): string {
     .join('');
 }
 
-function createActivityItem(
+export function createTravelItem(
+  leg: TravelLeg,
+  startTime: string,
+  durationMinutes: number,
+  dayNumber: number,
+  orderIndex: number,
+  toActivity: ScoredActivity
+): TripItem {
+  const modeLabels: Record<string, string> = { walk: 'Marche', transit: 'Transport en commun', drive: 'Trajet en voiture' };
+  const modeLabel = modeLabels[leg.mode] || 'Trajet';
+  const distLabel = leg.distanceKm < 1
+    ? `${Math.round(leg.distanceKm * 1000)}m`
+    : `${leg.distanceKm.toFixed(1)}km`;
+  return {
+    id: `travel-${dayNumber}-${orderIndex}`,
+    dayNumber,
+    startTime,
+    endTime: addMinutes(startTime, durationMinutes),
+    type: 'transport',
+    title: `${modeLabel} — ${distLabel}`,
+    description: `${leg.fromName} → ${leg.toName}`,
+    locationName: '',
+    latitude: toActivity.latitude,
+    longitude: toActivity.longitude,
+    orderIndex,
+    duration: durationMinutes,
+    estimatedCost: 0,
+  };
+}
+
+function generateFallbackDescription(title: string, activityType?: string, destination?: string): string {
+  if (!destination) return title;
+  const typeLabels: Record<string, string> = {
+    culture: 'ce lieu culturel',
+    nature: 'cet espace naturel',
+    museum: 'ce musée',
+    monument: 'ce monument',
+    park: 'ce parc',
+    market: 'ce marché',
+    religious: 'ce lieu de culte',
+    viewpoint: 'ce point de vue',
+    entertainment: 'ce lieu de divertissement',
+  };
+  const label = activityType && typeLabels[activityType];
+  if (label) return `Découvrez ${label} à ${destination}`;
+  return `${title} à ${destination}`;
+}
+
+export function createActivityItem(
   activity: ScoredActivity,
   startTime: string,
   duration: number,
@@ -666,8 +872,12 @@ function createActivityItem(
   orderIndex: number,
   destination?: string
 ): TripItem {
-  const title = normalizeActivityTitle(activity.name || 'Activity');
-  const description = activity.description || (destination ? `${title} à ${destination}` : title);
+  const title = normalizeActivityTitle(activity.name || 'Activity', destination);
+  const description = activity.description || generateFallbackDescription(title, activity.type, destination);
+  // Generate Google Maps place URL for every activity
+  const googleMapsPlaceUrl = activity.googlePlaceId
+    ? `https://www.google.com/maps/place/?q=place_id:${activity.googlePlaceId}`
+    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(activity.name || title)}&query=${activity.latitude},${activity.longitude}`;
   return {
     id: activity.id || `activity-${Date.now()}-${Math.random()}`,
     dayNumber,
@@ -685,6 +895,7 @@ function createActivityItem(
     estimatedCost: activity.estimatedCost,
     imageUrl: activity.imageUrl,
     bookingUrl: activity.bookingUrl,
+    googleMapsPlaceUrl,
     mustSee: activity.mustSee,
     openingHours: activity.openingHours,
     openingHoursByDay: activity.openingHoursByDay,
@@ -694,7 +905,7 @@ function createActivityItem(
 /**
  * Helper: Create a TripItem for a restaurant
  */
-function createRestaurantItem(
+export function createRestaurantItem(
   meal: MealPlacement,
   mealType: 'breakfast' | 'lunch' | 'dinner',
   startTime: string,
@@ -703,14 +914,15 @@ function createRestaurantItem(
   orderIndex: number
 ): TripItem {
   const restaurant = meal.primary;
+  const mealLabel = getMealLabel(mealType);
   return {
     id: `meal-${dayNumber}-${mealType}`,
     dayNumber,
     startTime,
     endTime: addMinutes(startTime, duration),
     type: 'restaurant',
-    title: restaurant.name || 'Restaurant',
-    description: `${mealType.charAt(0).toUpperCase() + mealType.slice(1)} at ${restaurant.name}`,
+    title: `${mealLabel} — ${restaurant.name || 'Restaurant'}`,
+    description: `${mealLabel} à ${restaurant.name}`,
     locationName: restaurant.name || '',
     latitude: restaurant.latitude || 0,
     longitude: restaurant.longitude || 0,
@@ -722,6 +934,9 @@ function createRestaurantItem(
     rating: restaurant.rating,
     estimatedCost: restaurant.priceLevel ? restaurant.priceLevel * 15 : undefined,
     bookingUrl: restaurant.reservationUrl || restaurant.googleMapsUrl,
+    googleMapsPlaceUrl: restaurant.googlePlaceId
+      ? `https://www.google.com/maps/place/?q=place_id:${restaurant.googlePlaceId}`
+      : restaurant.googleMapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(restaurant.name || '')}`,
     openingHoursByDay: restaurant.openingHours,
   };
 }
@@ -729,7 +944,7 @@ function createRestaurantItem(
 /**
  * Helper: Get closing time for an activity on a given day
  */
-function getActivityCloseTime(activity: ScoredActivity, dayDate: Date): string | null {
+export function getActivityCloseTime(activity: ScoredActivity, dayDate: Date): string | null {
   const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
   const dayName = dayNames[dayDate.getDay()];
 
@@ -773,7 +988,7 @@ function getActivityCloseTime(activity: ScoredActivity, dayDate: Date): string |
 /**
  * Helper: Get opening time for an activity on a given day
  */
-function getActivityOpenTime(activity: ScoredActivity, dayDate: Date): string | null {
+export function getActivityOpenTime(activity: ScoredActivity, dayDate: Date): string | null {
   const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
   const dayName = dayNames[dayDate.getDay()];
 

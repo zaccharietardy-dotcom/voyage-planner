@@ -230,7 +230,7 @@ export function resolveOfficialTicketing(activity: {
 export function isPaidAttraction(name?: string): boolean {
   if (!name) return false;
   const normalized = normalize(name);
-  return /museum|musee|museo|gallery|galerie|galleria|palace|palais|palazzo|castle|chateau|cathedral|cathedrale|basilica|tower|tour(?!ism)|torre|monument|colosseum|colisee|aquarium|zoo|opera|theater|theatre/.test(normalized);
+  return /museum|musee|museo|gallery|galerie|galleria|palace|palais|palazzo|castle|chateau|cathedral|cathedrale|basilica|tower|tour(?!is)|torre|monument|colosseum|colisee|aquarium|zoo|opera|theater|theatre|spa|hammam|jardin|garden|atelier|workshop|excursion|cooking|cours/.test(normalized);
 }
 
 /**

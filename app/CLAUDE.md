@@ -20,9 +20,7 @@ Step 5:  extractDayTrips()         — Day trips + détection implicite must-see
 Step 6:  clusterByDay()            — Clustering hiérarchique + capacité temporelle + fermetures jour
 Step 7:  routeWithinDays()         — 2-opt intra-jour + pénalité horaires d'ouverture
 Step 7b: computeTravelTimes()      — Google Directions API sélective (>1km only)
-Step 8:  placeRestaurants()        — Placement exact repas, 3 alternatives, dietary filter, 800m hard cap
-Step 9:  scheduleTimeline()        — Scheduler single-pass + gap-fill progressif + opening hours
-Step 10: repairPass()              — Swap cross-day, remplacement, extension, must-see injection
+Step 8+9+10: unifiedScheduleV3Days() — Scheduler unifié : activités + restaurants in-situ + repair en une passe
 Step 11: validateContracts()       — 8 invariants P0 + score qualité 0-100
 Step 12: decorateWithLLM()         — Thèmes/narratifs optionnels (OFF par défaut)
 ```
@@ -68,8 +66,9 @@ pipeline/
 ├── step5-hotel.ts              — Sélection hôtel 3 tiers
 ├── step7-assemble.ts           — Assemblage V2 (legacy, 6000+ lignes)
 ├── step7b-travel-times.ts      — Directions API sélective
-├── step8-place-restaurants.ts  — Placement restaurant exact + dietary
-├── step10-repair.ts            — Repair pass (swap, replace, extend)
+├── step8-place-restaurants.ts  — Helpers restaurant (findBestRestaurant, enrichRestaurantPool)
+├── step8910-unified-schedule.ts — Scheduler unifié (activités + restaurants in-situ + repair)
+├── step10-repair.ts            — Helpers repair (fixOpeningHours, ensureMustSees, fillGaps)
 ├── step11-contracts.ts         — Contract Layer (8 invariants P0)
 ├── step12-decorate.ts          — Décoration LLM optionnelle
 ├── scheduler.ts                — Scheduler single-pass + gap-fill progressif
@@ -199,6 +198,37 @@ TripItem {
 - **Commits**: `feat:`, `fix:`, `refactor:` conventional format
 - **Imports**: relative paths within pipeline, absolute for services
 - Always `npm run build` before push
+
+## Workflow Rules
+
+### Plan First
+- Enter plan mode for ANY non-trivial task (3+ steps or architectural decisions)
+- If something goes sideways, STOP and re-plan — don't keep pushing
+- Write detailed specs upfront to reduce ambiguity
+
+### Subagent Strategy
+- Use subagents to keep main context window clean
+- Offload research, exploration, and parallel analysis to subagents
+- One task per subagent for focused execution
+
+### Verification Before Done
+- Never mark a task complete without proving it works (tests, type check, demo)
+- Ask: "Would a staff engineer approve this?"
+- After completing: self-audit for dead code, dead imports, missing edge cases
+
+### Demand Elegance (Balanced)
+- For non-trivial changes: pause and ask "is there a more elegant way?"
+- If a fix feels hacky, implement the elegant solution. Skip for obvious simple fixes.
+- Challenge your own work before presenting it
+
+### Autonomous Bug Fixing
+- When given a bug: just fix it. Don't ask for hand-holding.
+- Point at logs, errors, failing tests — then resolve them
+
+### Simplicity & Minimal Impact
+- Make every change as simple as possible. Impact minimal code.
+- Find root causes. No temporary fixes. Senior developer standards.
+- Changes should only touch what's necessary.
 
 ## Known Issues / Areas to Improve
 

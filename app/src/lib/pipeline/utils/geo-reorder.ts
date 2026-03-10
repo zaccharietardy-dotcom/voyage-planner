@@ -89,6 +89,7 @@ export function geoReorderDayItems(
 
   if (activities.length <= 2) {
     // No point optimizing 0-2 activities
+    items.forEach((item, idx) => { item.orderIndex = idx; });
     return items;
   }
 

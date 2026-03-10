@@ -386,8 +386,8 @@ export function buildInterCityFallbackTransportPayload(params: {
       ? normalizeReturnTransportBookingUrl(baseBookingUrl, date)
       : baseBookingUrl;
     const omioFlightUrl = direction === 'return'
-      ? generateFlightOmioLink(from, to, dateStr)
-      : (transport.omioFlightUrl || generateFlightOmioLink(from, to, dateStr));
+      ? generateFlightOmioLink(from, to, dateStr, passengers)
+      : (transport.omioFlightUrl || generateFlightOmioLink(from, to, dateStr, passengers));
     const aviasalesUrl = bookingUrl?.includes('aviasales.com') ? bookingUrl : computedAviasalesUrl;
     const googleFlightsUrl = generateGoogleFlightsLink(from, to, dateStr, undefined, passengers);
     const qualityFlags = ['longhaul_fallback_injected', 'plane_transport_fallback'];
@@ -2912,7 +2912,8 @@ export async function assembleTripSchedule(
           ? generateFlightOmioLink(
               itemData.departureCity,
               itemData.arrivalCity,
-              formatDateForUrl(itemData.departureTime)
+              formatDateForUrl(itemData.departureTime),
+              preferences.groupSize || 1
             )
           : (item.type === 'transport' && itemData.omioFlightUrl) || undefined,
         googleFlightsUrl: item.type === 'flight' && itemData.departureCity && itemData.arrivalCity

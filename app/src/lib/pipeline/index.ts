@@ -12,6 +12,7 @@ import type { ActivityCluster, OnPipelineEvent } from './types';
 export type { PipelineEvent, OnPipelineEvent } from './types';
 import { fetchAllData } from './step1-fetch';
 import { scoreAndSelectActivities } from './step2-score';
+import { batchFetchWikipediaSummaries, getWikiLanguageForDestination } from '../services/wikipedia';
 import { clusterActivities, computeCityDensityProfile } from './step3-cluster';
 import { selectTieredHotels, selectTopHotelsByBarycenter } from './step5-hotel';
 import { validateAndFixTrip } from './step8-validate';
@@ -28,7 +29,7 @@ export { selectSelfCateredMealsForBudget } from './legacy/v2-algorithmic';
 // ---------------------------------------------------------------------------
 import { prepareDataForLLM } from './step2-prepare-llm';
 import { planWithLLM } from './step3-llm-plan';
-import { assembleFromLLMPlan, computeDistancesForDay } from './step4-assemble-llm';
+import { assembleFromLLMPlan, computeDistancesForDay, addOutboundTransportItem, addReturnTransportItem } from './step4-assemble-llm';
 import { mergeDayTripDaysWithLLMPlan } from './utils/day-trip-builder';
 import { fixRestaurantOutliers } from './step7-assemble';
 import { isAppropriateForMeal, isBreakfastSpecialized, getCuisineFamily } from './step4-restaurants';
@@ -39,9 +40,8 @@ import { searchRestaurantsNearbyWithFallback } from '../services/serpApiPlaces';
 // ---------------------------------------------------------------------------
 import { anchorTransport } from './step4-anchor-transport';
 import { computeTravelTimes } from './step7b-travel-times';
-import { placeRestaurants } from './step8-place-restaurants';
-import { assembleV3Days } from './step9-schedule';
-import { repairPass } from './step10-repair';
+import { enrichRestaurantPool } from './step8-place-restaurants';
+import { unifiedScheduleV3Days } from './step8910-unified-schedule';
 import { validateContracts } from './step11-contracts';
 import { decorateTrip } from './step12-decorate';
 
@@ -50,6 +50,18 @@ import { decorateTrip } from './step12-decorate';
 // ---------------------------------------------------------------------------
 function emit(onEvent: OnPipelineEvent | undefined, partial: Omit<import('./types').PipelineEvent, 'timestamp'>) {
   onEvent?.({ ...partial, timestamp: Date.now() });
+}
+
+/** Resolve best transport option based on user preference + available options */
+function resolveBestTransport(
+  preferences: TripPreferences,
+  transportOptions?: TransportOptionSummary[]
+): TransportOptionSummary | null {
+  if (preferences.transport && preferences.transport !== 'optimal' && transportOptions?.length) {
+    const preferred = transportOptions.find(t => t.mode === preferences.transport);
+    if (preferred) return preferred;
+  }
+  return transportOptions?.find(t => t.recommended) || transportOptions?.[0] || null;
 }
 
 /**
@@ -97,16 +109,8 @@ async function generateTripV2LLM(
   console.log(`[Pipeline V2 LLM] Step 1 done in ${step1Ms}ms`);
   emit(onEvent, { type: 'step_done', step: 1, stepName: 'Fetching data', durationMs: step1Ms });
 
-  // Resolve transport (same logic as algorithmic pipeline)
-  let bestTransport: TransportOptionSummary | null = null;
-  if (preferences.transport && preferences.transport !== 'optimal' && data.transportOptions?.length) {
-    bestTransport = data.transportOptions.find(t => t.mode === preferences.transport) || null;
-    if (!bestTransport) {
-      bestTransport = data.transportOptions.find(t => t.recommended) || data.transportOptions[0] || null;
-    }
-  } else {
-    bestTransport = data.transportOptions?.find(t => t.recommended) || data.transportOptions?.[0] || null;
-  }
+  // Resolve transport
+  const bestTransport = resolveBestTransport(preferences, data.transportOptions);
 
   // Step 2: Select hotel + prepare data for LLM
   console.log('[Pipeline V2 LLM] === Step 2: Preparing data for LLM... ===');
@@ -404,9 +408,7 @@ async function populateRestaurantAlternatives(
  *   6. clusterActivities()     — Geographic clustering per day
  *   7. (routing done inside clustering with 2-opt)
  *   7b. computeTravelTimes()   — Selective Directions API calls
- *   8. placeRestaurants()      — Proximity-first meal placement
- *   9. assembleV3Days()        — Build TripDay timeline
- *   10. repairPass()           — Fix violations (opening hours, gaps, must-sees)
+ *   8+9+10. unifiedScheduleV3Days() — Unified scheduler: activities + restaurants in-situ + repair
  *   11. validateContracts()    — Quality scoring and contract validation
  *   12. decorateTrip()         — Optional LLM decoration (OFF by default)
  */
@@ -420,7 +422,13 @@ export async function generateTripV3(
   // Step 1: Fetch all data
   let t = Date.now();
   onEvent?.({ type: 'step_start', step: 1, stepName: 'Fetching data', timestamp: Date.now() });
-  const data = await fetchAllData(preferences, onEvent);
+  let data: Awaited<ReturnType<typeof fetchAllData>>;
+  try {
+    data = await fetchAllData(preferences, onEvent);
+  } catch (err) {
+    console.error('[Pipeline V3] Step 1 failed:', err);
+    throw new Error(`[Pipeline V3] Data fetch failed: ${(err as Error).message}`);
+  }
   stageTimes['fetch'] = Date.now() - t;
   onEvent?.({ type: 'step_done', step: 1, stepName: 'Fetching data', durationMs: stageTimes['fetch'], timestamp: Date.now() });
 
@@ -433,6 +441,43 @@ export async function generateTripV3(
   console.log(`[Pipeline V3] Step 2: ${selectedActivities.length} activities selected`);
   onEvent?.({ type: 'step_done', step: 2, stepName: 'Scoring activities', durationMs: stageTimes['score'], timestamp: Date.now() });
 
+  // Step 2b: Enrich descriptions with Wikipedia (async, 5s timeout, cached 30 days)
+  try {
+    const activitiesWithoutDesc = selectedActivities.filter(a => !a.description);
+    if (activitiesWithoutDesc.length > 0) {
+      const wikiLang = getWikiLanguageForDestination(preferences.destination);
+      const wikiNames = activitiesWithoutDesc.map(a => a.name);
+      const wikiResults = await Promise.race([
+        batchFetchWikipediaSummaries(wikiNames, wikiLang),
+        new Promise<Map<string, null>>((resolve) => setTimeout(() => resolve(new Map()), 5000)),
+      ]);
+      let enriched = 0;
+      for (const act of activitiesWithoutDesc) {
+        const wiki = wikiResults.get(act.name);
+        if (wiki?.extract) {
+          act.description = wiki.extract;
+          enriched++;
+        }
+      }
+      console.log(`[Pipeline V3] Step 2b: Wikipedia enriched ${enriched}/${activitiesWithoutDesc.length} descriptions`);
+    }
+  } catch (err) {
+    console.warn(`[Pipeline V3] Step 2b: Wikipedia enrichment failed (non-critical):`, err);
+  }
+
+  // Step 2c: Anchor transport (time windows) — computed BEFORE clustering so clusters
+  // know how much time is available on each day (first/last day compressed)
+  t = Date.now();
+  const timeWindows = anchorTransport(
+    preferences.durationDays,
+    data.outboundFlight || null,
+    data.returnFlight || null,
+    null,
+    null
+  );
+  stageTimes['anchor-transport'] = Date.now() - t;
+  console.log(`[Pipeline V3] Step 2c: Time windows anchored`);
+
   // Step 3: Cluster by day
   t = Date.now();
   onEvent?.({ type: 'step_start', step: 3, stepName: 'Clustering', timestamp: Date.now() });
@@ -442,7 +487,8 @@ export async function generateTripV3(
     preferences.durationDays,
     data.destCoords,
     densityProfile,
-    preferences.startDate.toISOString().split('T')[0]
+    preferences.startDate.toISOString().split('T')[0],
+    timeWindows
   );
   stageTimes['cluster'] = Date.now() - t;
   console.log(`[Pipeline V3] Step 3: ${clusters.length} clusters created`);
@@ -466,82 +512,55 @@ export async function generateTripV3(
   console.log(`[Pipeline V3] Step 4: Hotel selected: ${hotel?.name || 'none'}`);
   onEvent?.({ type: 'step_done', step: 4, stepName: 'Hotel selection', durationMs: stageTimes['hotel'], timestamp: Date.now() });
 
-  // Step 5: Anchor transport (time windows)
-  t = Date.now();
-  const timeWindows = anchorTransport(
-    preferences.durationDays,
-    data.outboundFlight || null,
-    data.returnFlight || null,
-    null, // inbound transport (not in FetchedData currently)
-    null  // outbound transport (not in FetchedData currently)
-  );
-  stageTimes['anchor-transport'] = Date.now() - t;
-  console.log(`[Pipeline V3] Step 5: Time windows anchored`);
+  // Step 5: Time windows already computed at Step 2c (before clustering)
 
   // Step 6: Compute travel times (selective Directions API)
   t = Date.now();
   const directionsMode = (process.env.PIPELINE_DIRECTIONS_MODE || 'selective') as 'selective' | 'all' | 'off';
   onEvent?.({ type: 'step_start', step: 6, stepName: 'Computing travel times', timestamp: Date.now() });
-  const travelTimes = await computeTravelTimes(clusters, hotelCoords, directionsMode);
+  let travelTimes: Awaited<ReturnType<typeof computeTravelTimes>>;
+  try {
+    travelTimes = await computeTravelTimes(clusters, hotelCoords, directionsMode);
+  } catch (err) {
+    console.error('[Pipeline V3] Step 6 failed:', err);
+    throw new Error(`[Pipeline V3] Travel times computation failed: ${(err as Error).message}`);
+  }
   stageTimes['travel-times'] = Date.now() - t;
   console.log(`[Pipeline V3] Step 6: Travel times computed (${directionsMode} mode)`);
   onEvent?.({ type: 'step_done', step: 6, stepName: 'Computing travel times', durationMs: stageTimes['travel-times'], timestamp: Date.now() });
 
-  // Step 7: Place restaurants
+  // Step 7: Enrich restaurant pool (async, extracted from step8)
   t = Date.now();
-  onEvent?.({ type: 'step_start', step: 7, stepName: 'Placing restaurants', timestamp: Date.now() });
+  onEvent?.({ type: 'step_start', step: 7, stepName: 'Enriching restaurant pool', timestamp: Date.now() });
   const allRestaurants = [
     ...(data.tripAdvisorRestaurants || []),
     ...(data.serpApiRestaurants || []),
   ];
-  const mealPlans = placeRestaurants(
-    clusters,
-    allRestaurants,
-    hotelCoords,
-    {
-      dietary: preferences.dietary || [],
-      maxDistanceKm: 0.8,
-      minRating: 3.5,
-      alternativeCount: 2,
-      startDate: preferences.startDate,
-    }
-  );
+  let enrichedRestaurants: Restaurant[];
+  try {
+    enrichedRestaurants = await enrichRestaurantPool(clusters, allRestaurants, preferences.destination);
+  } catch (err) {
+    console.error('[Pipeline V3] Step 7 failed:', err);
+    throw new Error(`[Pipeline V3] Restaurant pool enrichment failed: ${(err as Error).message}`);
+  }
   stageTimes['restaurants'] = Date.now() - t;
-  console.log(`[Pipeline V3] Step 7: Restaurants placed for ${mealPlans.length} days`);
-  onEvent?.({ type: 'step_done', step: 7, stepName: 'Placing restaurants', durationMs: stageTimes['restaurants'], timestamp: Date.now() });
+  console.log(`[Pipeline V3] Step 7: Restaurant pool enriched (${enrichedRestaurants.length} restaurants)`);
+  onEvent?.({ type: 'step_done', step: 7, stepName: 'Enriching restaurant pool', durationMs: stageTimes['restaurants'], timestamp: Date.now() });
 
-  // Step 8: Schedule timeline (assemble into TripDays)
+  // Step 8+9+10: Unified schedule (replaces placeRestaurants + assembleV3Days + repairPass)
   t = Date.now();
-  onEvent?.({ type: 'step_start', step: 8, stepName: 'Building schedule', timestamp: Date.now() });
-  const tripDays = assembleV3Days(
-    clusters, mealPlans, travelTimes, timeWindows,
-    hotel, preferences, data
+  onEvent?.({ type: 'step_start', step: 8, stepName: 'Unified scheduling', timestamp: Date.now() });
+  const repairResult = unifiedScheduleV3Days(
+    clusters, travelTimes, timeWindows, hotel, preferences, data,
+    enrichedRestaurants, allActivities, data.destCoords
   );
   stageTimes['schedule'] = Date.now() - t;
-  console.log(`[Pipeline V3] Step 8: Schedule built with ${tripDays.length} days`);
-  onEvent?.({ type: 'step_done', step: 8, stepName: 'Building schedule', durationMs: stageTimes['schedule'], timestamp: Date.now() });
-
-  // Step 9: Repair pass
-  t = Date.now();
-  onEvent?.({ type: 'step_start', step: 9, stepName: 'Repairing violations', timestamp: Date.now() });
-  const startDateStr = preferences.startDate.toISOString().split('T')[0];
-  const repairResult = repairPass(tripDays, startDateStr, allActivities, data.destCoords);
-  stageTimes['repair'] = Date.now() - t;
-  console.log(`[Pipeline V3] Step 9: ${repairResult.repairs.length} repairs performed`);
-  onEvent?.({ type: 'step_done', step: 9, stepName: 'Repairing violations', durationMs: stageTimes['repair'], timestamp: Date.now() });
-
-  // Post-repair: sort items by time within each day (repair may have shuffled order)
-  for (const day of repairResult.days) {
-    day.items.sort((a, b) => {
-      const [ha, ma] = (a.startTime || '00:00').split(':').map(Number);
-      const [hb, mb] = (b.startTime || '00:00').split(':').map(Number);
-      return (ha * 60 + ma) - (hb * 60 + mb);
-    });
-    day.items.forEach((item, idx) => { item.orderIndex = idx; });
-  }
+  console.log(`[Pipeline V3] Step 8: Unified schedule built with ${repairResult.days.length} days, ${repairResult.repairs.length} repairs`);
+  onEvent?.({ type: 'step_done', step: 8, stepName: 'Unified scheduling', durationMs: stageTimes['schedule'], timestamp: Date.now() });
 
   // Step 10: Validate contracts
   t = Date.now();
+  const startDateStr = preferences.startDate.toISOString().split('T')[0];
   const mustSeeActivitiesForContracts = selectedActivities.filter(a => a.mustSee);
   const mustSeeIds = new Set(mustSeeActivitiesForContracts.map(a => a.id));
   const contractResult = validateContracts(
@@ -578,6 +597,21 @@ export async function generateTripV3(
   stageTimes['decorate'] = Date.now() - t;
   console.log(`[Pipeline V3] Step 11: Decoration complete (LLM: ${decorResult.usedLLM})`);
 
+  // Step 11b: Inject transport items (outbound + return) into day schedule
+  const bestTransport = resolveBestTransport(preferences, data.transportOptions);
+
+  if (decorResult.days.length > 0) {
+    const day1 = decorResult.days[0];
+    const lastDay = decorResult.days[decorResult.days.length - 1];
+    const transportFallbackCoords = hotel
+      ? { lat: hotel.latitude, lng: hotel.longitude }
+      : data.destCoords;
+
+    addOutboundTransportItem(day1, data.outboundFlight || null, bestTransport, preferences, transportFallbackCoords);
+    addReturnTransportItem(lastDay, data.returnFlight || null, bestTransport, preferences, transportFallbackCoords);
+    console.log(`[Pipeline V3] Step 11b: Transport items injected (mode: ${bestTransport?.mode || 'none'})`);
+  }
+
   // Build final Trip object
   const trip: Trip = {
     id: crypto.randomUUID?.() || `trip-${Date.now()}`,
@@ -606,7 +640,7 @@ export async function generateTripV3(
       photos: hotel.photos,
       breakfastIncluded: hotel.breakfastIncluded,
     } : undefined,
-    accommodationOptions: hotels.slice(1, 3).map((h: import('../types').Accommodation) => ({
+    accommodationOptions: hotels.slice(0, 3).map((h: import('../types').Accommodation) => ({
       id: h.id || '',
       name: h.name || '',
       type: h.type || 'hotel',

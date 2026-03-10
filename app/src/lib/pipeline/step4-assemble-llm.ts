@@ -309,7 +309,7 @@ function buildTripItemsFromDayPlan(
 // Add transport items (flights/trains)
 // ============================================
 
-function addOutboundTransportItem(
+export function addOutboundTransportItem(
   day1: TripDay,
   flight: Flight | null,
   transport: TransportOptionSummary | null,
@@ -378,7 +378,7 @@ function addOutboundTransportItem(
   });
 }
 
-function addReturnTransportItem(
+export function addReturnTransportItem(
   lastDay: TripDay,
   returnFlight: Flight | null,
   transport: TransportOptionSummary | null,

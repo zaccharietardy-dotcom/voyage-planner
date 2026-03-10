@@ -81,7 +81,8 @@ export function clusterActivities(
   numDays: number,
   cityCenter: { lat: number; lng: number },
   densityProfile?: CityDensityProfile,
-  startDate?: string
+  startDate?: string,
+  timeWindows?: Array<{ dayNumber: number; activityStartTime: string; activityEndTime: string }>
 ): ActivityCluster[] {
   if (activities.length === 0) return [];
   if (numDays <= 1 || activities.length <= 4) {
@@ -95,7 +96,7 @@ export function clusterActivities(
   const dayTripActivities: ScoredActivity[] = [];
   const cityActivities: ScoredActivity[] = [];
 
-  const allowDayTrips = numDays > 3; // Only dedicate a day-trip day for 4+ day trips
+  const allowDayTrips = numDays > 5; // Only dedicate a day-trip day for 6+ day trips
 
   for (const a of activities) {
     const dist = calculateDistance(a.latitude, a.longitude, cityCenter.lat, cityCenter.lng);
@@ -254,6 +255,34 @@ export function clusterActivities(
   // Re-number days
   clusters.forEach((c, i) => { c.dayNumber = i + 1; });
 
+  // Fill missing days: if fewer clusters than requested, split the largest cluster(s)
+  // so every day has at least some activities
+  while (clusters.length < numDays) {
+    // Find the largest non-protected cluster with ≥4 activities (worth splitting)
+    let bestIdx = -1;
+    let bestSize = 0;
+    for (let ci = 0; ci < clusters.length; ci++) {
+      if (protectedIndices.has(ci)) continue;
+      if (clusters[ci].activities.length > bestSize) {
+        bestSize = clusters[ci].activities.length;
+        bestIdx = ci;
+      }
+    }
+    if (bestIdx === -1 || bestSize < 2) break; // Nothing to split
+
+    // Split: move the bottom half (lowest-scored) to a new cluster
+    const donor = clusters[bestIdx];
+    const sorted = [...donor.activities].sort((a, b) => b.score - a.score);
+    const splitAt = Math.ceil(sorted.length / 2);
+    donor.activities = sorted.slice(0, splitAt);
+    recomputeCentroid(donor);
+    const newCluster = buildCluster(clusters.length + 1, sorted.slice(splitAt));
+    clusters.push(newCluster);
+    console.log(`[Pipeline V2] Fill missing day: split Day ${donor.dayNumber} (${bestSize} acts) → ${splitAt} + ${sorted.length - splitAt} activities`);
+  }
+  // Re-number days after splits
+  clusters.forEach((c, i) => { c.dayNumber = i + 1; });
+
   // Cap boundary days (first/last): arrival and departure days have shorter time windows
   // so they should have fewer activities. Max ~3 for boundary, redistribute excess to full days.
   if (clusters.length >= 3) {
@@ -290,6 +319,11 @@ export function clusterActivities(
         console.log(`[Pipeline V2] Boundary cap: moved "${moved.name}" from boundary Day ${c.dayNumber} → Day ${clusters[targetIdx].dayNumber}`);
       }
     }
+  }
+
+  // Time-proportional rebalancing: distribute activities proportionally to available time per day
+  if (timeWindows && timeWindows.length > 0) {
+    rebalanceByTimeCapacity(clusters, timeWindows, protectedIndices);
   }
 
   // Optimize visit order within each cluster (nearest-neighbor + 2-opt)
@@ -1050,6 +1084,86 @@ function buildCluster(dayNumber: number, activities: ScoredActivity[]): Activity
     centroid,
     totalIntraDistance: computeIntraDistance(activities),
   };
+}
+
+/**
+ * Rebalance clusters so activity count is proportional to available time per day.
+ * Full days (10h) get more activities than compressed boundary days (4-6h).
+ */
+function rebalanceByTimeCapacity(
+  clusters: ActivityCluster[],
+  timeWindows: Array<{ dayNumber: number; activityStartTime: string; activityEndTime: string }>,
+  protectedIndices: Set<number>
+): void {
+  // Parse time "HH:MM" to minutes
+  const toMin = (t: string): number => {
+    const [h, m] = t.split(':').map(Number);
+    return h * 60 + (m || 0);
+  };
+
+  // Compute capacity for each cluster in minutes (available time minus meal overhead)
+  const MEAL_OVERHEAD = 195; // breakfast 60 + lunch 90 + dinner-buffer 45
+  const AVG_ACTIVITY_SLOT = 90; // 60min activity + 15min travel + 15min buffer
+
+  const capacities = clusters.map((c) => {
+    const tw = timeWindows.find(w => w.dayNumber === c.dayNumber);
+    if (!tw) return 600; // default 10h
+    const availableMin = toMin(tw.activityEndTime) - toMin(tw.activityStartTime);
+    return Math.max(0, availableMin - MEAL_OVERHEAD);
+  });
+
+  // Target activity count per cluster = proportional to capacity
+  const totalCapacity = capacities.reduce((s, c) => s + c, 0);
+  const totalActivities = clusters.reduce((s, c) => s + (protectedIndices.has(clusters.indexOf(c)) ? 0 : c.activities.length), 0);
+
+  const targets = capacities.map((cap, i) => {
+    if (protectedIndices.has(i)) return clusters[i].activities.length; // Don't touch protected
+    const raw = totalCapacity > 0 ? (cap / totalCapacity) * totalActivities : 0;
+    return Math.max(1, Math.round(raw)); // At least 1 activity per day
+  });
+
+  // Iterative rebalancing: move activities from over-target clusters to under-target
+  for (let iter = 0; iter < 10; iter++) {
+    let moved = false;
+    for (let ci = 0; ci < clusters.length; ci++) {
+      if (protectedIndices.has(ci)) continue;
+      const excess = clusters[ci].activities.length - targets[ci];
+      if (excess <= 0) continue;
+
+      // Find the most under-target cluster
+      let bestTarget = -1;
+      let bestDeficit = 0;
+      for (let ti = 0; ti < clusters.length; ti++) {
+        if (ti === ci || protectedIndices.has(ti)) continue;
+        const deficit = targets[ti] - clusters[ti].activities.length;
+        if (deficit > bestDeficit) {
+          bestDeficit = deficit;
+          bestTarget = ti;
+        }
+      }
+      if (bestTarget === -1) continue;
+
+      // Move the lowest-scored non-must-see activity
+      let worstIdx = -1;
+      let worstScore = Infinity;
+      for (let ai = 0; ai < clusters[ci].activities.length; ai++) {
+        if (clusters[ci].activities[ai].mustSee) continue;
+        if (clusters[ci].activities[ai].score < worstScore) {
+          worstScore = clusters[ci].activities[ai].score;
+          worstIdx = ai;
+        }
+      }
+      if (worstIdx === -1) continue;
+
+      const [act] = clusters[ci].activities.splice(worstIdx, 1);
+      clusters[bestTarget].activities.push(act);
+      recomputeCentroid(clusters[ci]);
+      recomputeCentroid(clusters[bestTarget]);
+      console.log(`[Pipeline V3] Time rebalance: moved "${act.name}" from Day ${clusters[ci].dayNumber} (${clusters[ci].activities.length} acts, ${capacities[ci]}min) → Day ${clusters[bestTarget].dayNumber} (${clusters[bestTarget].activities.length} acts, ${capacities[bestTarget]}min)`);
+      moved = true;
+    }
+    if (!moved) break;
+  }
 }
 
 function recomputeCentroid(cluster: ActivityCluster): void {

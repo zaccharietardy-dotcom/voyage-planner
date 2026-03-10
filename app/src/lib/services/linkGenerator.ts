@@ -289,12 +289,16 @@ export function generateFlightLink(
 export function generateFlightOmioLink(
   origin: string,
   destination: string,
-  date?: string
+  date?: string,
+  passengers: number = 1
 ): string {
   const originSlug = toOmioLocationSlug(origin);
   const destSlug = toOmioLocationSlug(destination);
   const dateParam = date ? `?departure_date=${date}` : '';
-  return `https://www.omio.fr/vols/${originSlug}/${destSlug}${dateParam}`;
+  const passengerParams = passengers > 1
+    ? `${dateParam ? '&' : '?'}${Array.from({ length: passengers }, () => 'passengers%5B%5D=adult').join('&')}`
+    : '';
+  return `https://www.omio.fr/vols/${originSlug}/${destSlug}${dateParam}${passengerParams}`;
 }
 
 /**
