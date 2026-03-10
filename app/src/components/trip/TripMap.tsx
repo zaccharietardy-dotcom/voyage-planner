@@ -283,9 +283,6 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
         const PolylineDecorator = await import('leaflet-polylinedecorator');
         polylineDecoratorRef.current = PolylineDecorator.default;
 
-        // Load marker cluster plugin
-        await import('leaflet.markercluster');
-
         // Inject Leaflet CSS
         if (!document.getElementById('leaflet-css')) {
           const link = document.createElement('link');
@@ -293,39 +290,6 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
           link.rel = 'stylesheet';
           link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
           document.head.appendChild(link);
-        }
-
-        // Inject MarkerCluster CSS (custom themed)
-        if (!document.getElementById('markercluster-css')) {
-          const style = document.createElement('style');
-          style.id = 'markercluster-css';
-          style.textContent = `
-            .marker-cluster-custom {
-              background: rgba(30, 58, 95, 0.15);
-              border-radius: 50%;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-            }
-            .marker-cluster-custom div {
-              background: linear-gradient(135deg, #102a45, #1e3a5f);
-              color: #d4a853;
-              border-radius: 50%;
-              font-weight: 700;
-              font-size: 13px;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              box-shadow: 0 2px 8px rgba(16, 42, 69, 0.4);
-              border: 2px solid rgba(212, 168, 83, 0.6);
-            }
-            .dark .marker-cluster-custom div {
-              background: linear-gradient(135deg, #d4a853, #b8923d);
-              color: #102a45;
-              border-color: rgba(16, 42, 69, 0.6);
-            }
-          `;
-          document.head.appendChild(style);
         }
 
         // Inject custom style overrides
@@ -362,24 +326,8 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
       maxZoom: 19,
     }).addTo(map);
 
-    // Create persistent layer groups (markers use clustering)
-    markerLayerRef.current = (L as any).markerClusterGroup({
-      maxClusterRadius: 45,
-      disableClusteringAtZoom: 15,
-      spiderfyOnMaxZoom: true,
-      showCoverageOnHover: false,
-      zoomToBoundsOnClick: true,
-      animate: true,
-      iconCreateFunction: (cluster: any) => {
-        const count = cluster.getChildCount();
-        const size = count < 10 ? 36 : count < 30 ? 42 : 48;
-        return L.divIcon({
-          html: `<div style="width:${size - 8}px;height:${size - 8}px;">${count}</div>`,
-          className: 'marker-cluster-custom',
-          iconSize: L.point(size, size),
-        });
-      },
-    }).addTo(map);
+    // Create persistent layer groups
+    markerLayerRef.current = L.layerGroup().addTo(map);
     routeLayerRef.current = L.layerGroup().addTo(map);
 
     mapInstanceRef.current = map;
@@ -437,9 +385,9 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
     const bounds = L.latLngBounds([]);
     let globalIndex = 1;
 
-    // Add markers
+    // Add markers (flights are represented by the arc + plane icon below)
     displayItems.forEach((item) => {
-      if (!item.latitude || !item.longitude) return;
+      if (!item.latitude || !item.longitude || item.type === 'flight') return;
       const num = mapNumbers?.get(item.id) ?? globalIndex++;
       const icon = createNumberedIcon(L, num, item.type, item.dayNumber, false);
 
