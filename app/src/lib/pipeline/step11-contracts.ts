@@ -197,8 +197,11 @@ export function validateContracts(
         if (!isSelfMealFallback && (isLunchMeal || isDinnerMeal) && item.latitude && item.longitude) {
           const maxDistKm = 1.5;
 
+          // Include hotel-related items as valid anchor points (restaurant near hotel is valid,
+          // especially on arrival/departure days with few activities)
+          const anchorTypes = new Set(['activity', 'checkin', 'checkout', 'hotel']);
           const nearestActivity = day.items
-            .filter(i => i.type === 'activity' && i.latitude && i.longitude)
+            .filter(i => anchorTypes.has(i.type) && i.latitude && i.longitude)
             .reduce((closest, act) => {
               const dist = calculateDistance(item.latitude!, item.longitude!, act.latitude!, act.longitude!);
               return dist < closest.dist ? { dist, item: act } : closest;
