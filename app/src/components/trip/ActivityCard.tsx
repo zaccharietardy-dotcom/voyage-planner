@@ -375,7 +375,7 @@ export const ActivityCard = memo(function ActivityCard({
                   </span>
                 )}
                 <span className={cn(
-                  "inline-flex items-center gap-1 font-medium",
+                  "inline-flex items-center gap-1 font-mono font-medium",
                   useHeroStyle ? "text-sm text-white/90" : "text-xs text-muted-foreground"
                 )}>
                   <Clock className={cn(useHeroStyle ? "h-3.5 w-3.5" : "h-3 w-3")} />

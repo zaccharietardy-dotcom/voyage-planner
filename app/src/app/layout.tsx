@@ -28,6 +28,12 @@ const playfairDisplay = Playfair_Display({
   weight: ["500", "600", "700"],
 });
 
+const playfair = Playfair_Display({
+  variable: "--font-playfair",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
+
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
@@ -229,7 +235,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${playfairDisplay.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${playfairDisplay.variable} ${playfair.variable} antialiased`}
       >
         <ThemeProvider defaultTheme="system" storageKey="voyage-theme">
           <I18nProvider>

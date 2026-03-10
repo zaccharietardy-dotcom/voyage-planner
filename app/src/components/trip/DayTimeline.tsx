@@ -174,11 +174,11 @@ export const DayTimeline = memo(function DayTimeline({
             {day.dayNumber}
           </div>
           <div>
-            <h3 className="font-semibold flex items-center gap-2">
+            <h3 className="font-serif font-semibold flex items-center gap-2">
               Jour {day.dayNumber}
               {day.weatherForecast && (
                 <span className="text-sm font-normal text-muted-foreground" title={day.weatherForecast.condition}>
-                  {day.weatherForecast.icon} {day.weatherForecast.tempMin}°/{day.weatherForecast.tempMax}°
+                  {day.weatherForecast.icon} {day.weatherForecast.tempMin}\u00b0/{day.weatherForecast.tempMax}\u00b0
                 </span>
               )}
             </h3>

@@ -75,7 +75,7 @@ export function GeneratingOverlay({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md"
+        className="fixed inset-0 z-50 flex items-center justify-center bg-background"
       >
         <motion.div
           initial={{ opacity: 0, y: 20, scale: 0.95 }}
@@ -83,34 +83,18 @@ export function GeneratingOverlay({
           transition={{ delay: 0.1, duration: 0.4 }}
           className="w-full max-w-md mx-4 text-center"
         >
-          {/* Animated plane icon */}
-          <motion.div
-            animate={{
-              y: [0, -8, 0],
-              rotate: [0, 3, -3, 0],
-            }}
-            transition={{
-              duration: 3,
-              repeat: Infinity,
-              ease: 'easeInOut',
-            }}
-            className="text-5xl mb-6"
-          >
-            ✈️
-          </motion.div>
-
           {/* Title */}
-          <h2 className="text-xl font-bold text-white mb-1">
+          <h2 className="text-2xl font-serif font-bold text-foreground mb-1">
             Création de votre voyage
           </h2>
-          <p className="text-white/70 mb-8">
-            à <span className="text-white font-semibold">{destination}</span>
+          <p className="text-muted-foreground mb-8">
+            à <span className="text-foreground font-semibold">{destination}</span>
           </p>
 
           {/* Progress bar */}
-          <div className="w-full bg-white/10 rounded-full h-2 mb-3 overflow-hidden">
+          <div className="w-full bg-muted rounded-full h-1 mb-3 overflow-hidden">
             <motion.div
-              className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full"
+              className="h-full bg-primary rounded-full"
               initial={{ width: '0%' }}
               animate={{ width: `${progressPercent}%` }}
               transition={{ duration: 1, ease: 'easeOut' }}
@@ -125,9 +109,9 @@ export function GeneratingOverlay({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -5 }}
               transition={{ duration: 0.3 }}
-              className="text-sm text-white/60 mb-10"
+              className="text-sm text-muted-foreground mb-10"
             >
-              {currentStep.icon} {currentStep.text}
+              {currentStep.text}
             </motion.p>
           </AnimatePresence>
 
@@ -141,15 +125,15 @@ export function GeneratingOverlay({
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -30 }}
                   transition={{ duration: 0.4 }}
-                  className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-5 text-left"
+                  className="bg-card border border-border rounded-2xl p-6 text-left"
                 >
                   <div className="flex items-center gap-2 mb-2">
                     <span className="text-lg">{currentTip.icon}</span>
-                    <span className="text-sm font-semibold text-white/90">
+                    <span className="text-sm font-semibold text-foreground">
                       {currentTip.title}
                     </span>
                   </div>
-                  <p className="text-sm text-white/70 leading-relaxed">
+                  <p className="text-sm text-muted-foreground leading-relaxed">
                     {currentTip.text}
                   </p>
                 </motion.div>
@@ -163,8 +147,8 @@ export function GeneratingOverlay({
                       key={i}
                       className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
                         i === currentTipIndex % Math.min(tips.length, 8)
-                          ? 'bg-white w-4'
-                          : 'bg-white/30'
+                          ? 'bg-primary w-4'
+                          : 'bg-muted-foreground/30'
                       }`}
                     />
                   ))}

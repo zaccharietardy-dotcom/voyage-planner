@@ -1210,7 +1210,7 @@ export default function TripPage() {
       )}
 
       {/* Header */}
-      <header className="sticky top-16 z-40 border-b border-[#1e3a5f]/10 bg-background/85 shadow-sm backdrop-blur-xl">
+      <header className="sticky top-16 z-40 border-b border-[#1e3a5f]/10 bg-background/85 shadow-sm">
         <div className="container mx-auto px-4 py-3">
           <div className="rounded-2xl border border-[#1e3a5f]/10 bg-background/75 px-3 py-2 shadow-sm">
             <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
@@ -1220,7 +1220,7 @@ export default function TripPage() {
               </Button>
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                  <h1 className="font-bold text-lg">
+                  <h1 className="font-serif font-bold text-lg">
                     {trip.preferences.origin && <span className="text-muted-foreground font-normal">{trip.preferences.origin} → </span>}
                     {trip.preferences.destination}
                   </h1>

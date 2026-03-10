@@ -15,8 +15,7 @@ import {
   StepActivities,
 } from '@/components/forms';
 import { TripPreferences } from '@/lib/types';
-import { ArrowLeft, ArrowRight, Sparkles, Loader2, UserCog, Check, Shuffle, ChevronsLeftRight, AlertCircle } from 'lucide-react';
-import { generateRandomPreferences } from '@/lib/randomExample';
+import { ArrowLeft, ArrowRight, Sparkles, Loader2, UserCog, Check, AlertCircle } from 'lucide-react';
 import { generateTripStream, PipelineProgressEvent } from '@/lib/generateTrip';
 import { cn } from '@/lib/utils';
 import { safeGetItem, safeSetItem } from '@/lib/storage';
@@ -27,11 +26,11 @@ import { GeneratingScreen } from '@/components/trip/GeneratingScreen';
 import { trackEvent } from '@/lib/analytics';
 
 const STEPS = [
-  { id: 1, title: 'Destination', icon: '📍' },
-  { id: 2, title: 'Transport', icon: '✈️' },
-  { id: 3, title: 'Groupe', icon: '👥' },
-  { id: 4, title: 'Budget', icon: '💰' },
-  { id: 5, title: 'Activités', icon: '🎯' },
+  { id: 1, title: 'Destination' },
+  { id: 2, title: 'Transport' },
+  { id: 3, title: 'Groupe' },
+  { id: 4, title: 'Budget' },
+  { id: 5, title: 'Activit\u00e9s' },
 ];
 
 const DEFAULT_PREFERENCES: Partial<TripPreferences> = {
@@ -132,7 +131,7 @@ export default function PlanPage() {
 
     setPreferences(updatedPrefs);
     setPreferencesApplied(true);
-    toast.success('Préférences appliquées !');
+    toast.success('Pr\u00e9f\u00e9rences appliqu\u00e9es !');
   };
 
   const updatePreferences = useCallback((data: Partial<TripPreferences>) => {
@@ -143,16 +142,16 @@ export default function PlanPage() {
     switch (currentStep) {
       case 1: {
         const errors: string[] = [];
-        if (!preferences.origin) errors.push('Indiquez votre ville de départ');
+        if (!preferences.origin) errors.push('Indiquez votre ville de d\u00e9part');
         const stages = preferences.cityPlan || [];
         if (stages.length === 0 || !stages.every(s => s.city.trim().length > 0)) {
           errors.push('Renseignez au moins une destination');
         }
-        if (!preferences.startDate) errors.push('Choisissez une date de départ');
+        if (!preferences.startDate) errors.push('Choisissez une date de d\u00e9part');
         return errors;
       }
       case 2:
-        return preferences.transport ? [] : ['Sélectionnez un mode de transport'];
+        return preferences.transport ? [] : ['S\u00e9lectionnez un mode de transport'];
       case 3: {
         const errors: string[] = [];
         if (!preferences.groupSize) errors.push('Indiquez le nombre de voyageurs');
@@ -162,13 +161,13 @@ export default function PlanPage() {
       case 4:
         return (preferences.budgetLevel || preferences.budgetCustom)
           ? []
-          : ['Sélectionnez un niveau de budget'];
+          : ['S\u00e9lectionnez un niveau de budget'];
       case 5:
         return (preferences.activities && preferences.activities.length > 0)
           ? []
-          : ['Sélectionnez au moins une activité'];
+          : ['S\u00e9lectionnez au moins une activit\u00e9'];
       default:
-        return ['Étape invalide'];
+        return ['\u00c9tape invalide'];
     }
   };
 
@@ -206,7 +205,7 @@ export default function PlanPage() {
     setIsGenerating(true);
     setPipelineStep(undefined);
     try {
-      // Sync cityPlan → destination + durationDays for pipeline compatibility
+      // Sync cityPlan -> destination + durationDays for pipeline compatibility
       const finalPreferences = { ...preferences };
       if (finalPreferences.cityPlan && finalPreferences.cityPlan.length > 0) {
         finalPreferences.destination = finalPreferences.cityPlan[0].city;
@@ -218,7 +217,7 @@ export default function PlanPage() {
             .slice(1)
             .map(s => `${s.city} (${s.days} jours)`)
             .join(', ');
-          const multiCityNote = `Itinéraire multi-villes : inclure ${secondaryCities} dans le voyage`;
+          const multiCityNote = `Itin\u00e9raire multi-villes : inclure ${secondaryCities} dans le voyage`;
           finalPreferences.mustSee = finalPreferences.mustSee
             ? `${finalPreferences.mustSee}. ${multiCityNote}`
             : multiCityNote;
@@ -234,13 +233,13 @@ export default function PlanPage() {
         group_size: finalPreferences.groupSize || 0,
       });
 
-      // SSE progress callback — updates the GeneratingScreen with real pipeline step labels
+      // SSE progress callback -- updates the GeneratingScreen with real pipeline step labels
       const onProgress = (status: string, event?: PipelineProgressEvent) => {
         if (status === 'progress' && event) {
           // Build a human-readable step label
           if (event.type === 'step_start' && event.stepName) {
             const label = event.step
-              ? `${event.step}/8 — ${event.stepName}`
+              ? `${event.step}/8 \u2014 ${event.stepName}`
               : event.stepName;
             setPipelineStep(label);
           } else if (event.type === 'api_call' && event.label) {
@@ -249,7 +248,7 @@ export default function PlanPage() {
         }
       };
 
-      // 1. Générer le voyage avec l'IA (streaming pour éviter timeout 504)
+      // 1. G\u00e9n\u00e9rer le voyage avec l'IA (streaming pour \u00e9viter timeout 504)
       const generatedTrip = await generateTripStream(finalPreferences, onProgress);
 
       // Track trip generation completion
@@ -261,7 +260,7 @@ export default function PlanPage() {
         total_activities: generatedTrip.days?.reduce((sum, day) => sum + day.items.length, 0) || 0,
       });
 
-      // 2. Si l'utilisateur est connecté, sauvegarder en base de données
+      // 2. Si l'utilisateur est connect\u00e9, sauvegarder en base de donn\u00e9es
       if (user) {
         try {
           const saveResponse = await fetch('/api/trips', {
@@ -275,31 +274,31 @@ export default function PlanPage() {
 
           if (saveResponse.ok) {
             const savedTrip = await saveResponse.json();
-            // Utiliser l'ID de la base de données
+            // Utiliser l'ID de la base de donn\u00e9es
             safeSetItem('currentTrip', JSON.stringify({ ...generatedTrip, id: savedTrip.id }));
             router.push(`/trip/${savedTrip.id}`);
             return;
           }
 
-          // Sauvegarde échouée - afficher l'erreur complète pour debug
+          // Sauvegarde \u00e9chou\u00e9e - afficher l'erreur compl\u00e8te pour debug
           const errorData = await saveResponse.json().catch(() => ({}));
           console.error('[Plan] Save failed:', saveResponse.status, JSON.stringify(errorData));
           const errorMsg = [errorData.error, errorData.details, errorData.hint].filter(Boolean).join(' | ');
-          toast.error(`Sauvegarde échouée: ${errorMsg || 'Erreur inconnue'}. Le voyage sera stocké localement.`);
+          toast.error(`Sauvegarde \u00e9chou\u00e9e: ${errorMsg || 'Erreur inconnue'}. Le voyage sera stock\u00e9 localement.`);
         } catch (saveError) {
           console.error('[Plan] Save exception:', saveError);
-          toast.error('Erreur lors de la sauvegarde. Le voyage sera stocké localement.');
+          toast.error('Erreur lors de la sauvegarde. Le voyage sera stock\u00e9 localement.');
         }
       }
 
-      // Fallback: localStorage pour les utilisateurs non connectés
+      // Fallback: localStorage pour les utilisateurs non connect\u00e9s
       if (!generatedTrip.id) {
-        throw new Error('Voyage généré sans identifiant');
+        throw new Error('Voyage g\u00e9n\u00e9r\u00e9 sans identifiant');
       }
       safeSetItem('currentTrip', JSON.stringify(generatedTrip));
       router.push(`/trip/${generatedTrip.id}`);
     } catch (error) {
-      console.error('Erreur génération:', error);
+      console.error('Erreur g\u00e9n\u00e9ration:', error);
       const message = error instanceof Error ? error.message : 'Erreur inconnue';
       toast.error(`Erreur: ${message}`);
     } finally {
@@ -335,7 +334,7 @@ export default function PlanPage() {
     : preferences.durationDays;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
+    <div className="min-h-screen bg-background">
       {/* Full-screen generating overlay with destination fun facts */}
       {isGenerating && (
         <GeneratingScreen
@@ -354,9 +353,9 @@ export default function PlanPage() {
                 <div className="flex items-center gap-3">
                   <UserCog className="h-5 w-5 text-primary" />
                   <div>
-                    <p className="text-sm font-medium">Vos préférences de voyage</p>
+                    <p className="text-sm font-medium">Vos pr\u00e9f\u00e9rences de voyage</p>
                     <p className="text-xs text-muted-foreground">
-                      {preferenceOptions.travelStyle.find(o => o.value === userPrefs.travel_style)?.label} · {preferenceOptions.budgetPreference.find(o => o.value === userPrefs.budget_preference)?.label}
+                      {preferenceOptions.travelStyle.find(o => o.value === userPrefs.travel_style)?.label} \u00b7 {preferenceOptions.budgetPreference.find(o => o.value === userPrefs.budget_preference)?.label}
                     </p>
                   </div>
                 </div>
@@ -364,7 +363,7 @@ export default function PlanPage() {
                   {preferencesApplied ? (
                     <span className="text-sm text-primary flex items-center gap-1">
                       <Check className="h-4 w-4" />
-                      Appliquées
+                      Appliqu\u00e9es
                     </span>
                   ) : (
                     <Button
@@ -389,9 +388,9 @@ export default function PlanPage() {
                   <div className="flex items-center gap-3">
                     <UserCog className="h-5 w-5 text-muted-foreground" />
                     <div>
-                      <p className="text-sm font-medium">Définir mes préférences</p>
+                      <p className="text-sm font-medium">D\u00e9finir mes pr\u00e9f\u00e9rences</p>
                       <p className="text-xs text-muted-foreground">
-                        Gagnez du temps en sauvegardant vos préférences
+                        Gagnez du temps en sauvegardant vos pr\u00e9f\u00e9rences
                       </p>
                     </div>
                   </div>
@@ -404,36 +403,16 @@ export default function PlanPage() {
 
         {/* Progress header */}
         <div className="mb-8">
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <h1 className="text-lg font-semibold">Planifier votre voyage</h1>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setPreferences(generateRandomPreferences());
-                  setCurrentStep(1);
-                  toast.success('Exemple aléatoire chargé !');
-                }}
-                className="gap-1 text-xs"
-              >
-                <Shuffle className="h-3 w-3" />
-                Exemple aléatoire
-              </Button>
-            </div>
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-xl font-serif font-semibold">Planifier votre voyage</h1>
             <span className="text-sm text-muted-foreground">
-              Étape {currentStep} sur {STEPS.length}
+              \u00c9tape {currentStep} sur {STEPS.length}
             </span>
           </div>
-          <Progress value={progress} className="h-2" />
+          <Progress value={progress} className="h-1" />
 
-          {/* Step indicators */}
-          <div className="mt-4">
-            <div className="mb-2 flex items-center gap-1 text-[11px] text-muted-foreground sm:hidden">
-              <ChevronsLeftRight className="h-3 w-3" />
-              Faites glisser pour naviguer entre les étapes
-            </div>
-            <div className="scrollbar-hide flex gap-2 overflow-x-auto pb-1">
+          {/* Step indicators — numbered circles */}
+          <div className="flex justify-between mt-6">
             {STEPS.map((step) => (
               <button
                 key={step.id}
@@ -445,24 +424,22 @@ export default function PlanPage() {
                 }}
                 disabled={step.id > currentStep}
                 className={cn(
-                  'relative flex min-w-[86px] flex-col items-center gap-1 rounded-xl border border-transparent px-2 py-1.5 transition-all focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1',
-                  step.id === currentStep && 'border-primary/30 bg-primary/5',
-                  step.id < currentStep && 'cursor-pointer opacity-70 hover:opacity-100',
+                  'flex flex-col items-center gap-2 transition-all',
+                  step.id < currentStep && 'cursor-pointer hover:opacity-100',
                   step.id > currentStep && 'opacity-40 cursor-not-allowed'
                 )}
               >
-                {step.id === currentStep && (
-                  <motion.div
-                    layoutId="step-active-pill"
-                    className="absolute -inset-1.5 rounded-xl bg-primary/10 border border-primary/20"
-                    transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-                  />
-                )}
-                <span className="relative text-2xl">{step.icon}</span>
-                <span className="relative text-xs font-medium">{step.title}</span>
+                <div className={cn(
+                  'w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold border-2 transition-colors',
+                  step.id === currentStep && 'bg-primary text-primary-foreground border-primary',
+                  step.id < currentStep && 'bg-primary/10 text-primary border-primary/30',
+                  step.id > currentStep && 'bg-muted text-muted-foreground border-border'
+                )}>
+                  {step.id}
+                </div>
+                <span className="text-xs font-medium hidden sm:block">{step.title}</span>
               </button>
             ))}
-            </div>
           </div>
         </div>
 
@@ -518,12 +495,12 @@ export default function PlanPage() {
                 {isGenerating ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    Génération en cours...
+                    G\u00e9n\u00e9ration en cours...
                   </>
                 ) : (
                   <>
                     <Sparkles className="h-4 w-4" />
-                    Générer mon voyage
+                    G\u00e9n\u00e9rer mon voyage
                   </>
                 )}
               </Button>

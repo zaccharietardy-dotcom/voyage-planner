@@ -34,6 +34,38 @@ interface TripListItem extends Trip {
 
 const dateFnsLocales = { fr, en: enUS, es, de, it, pt };
 
+const DESTINATION_IMAGES: Record<string, string> = {
+  'paris': 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=600&h=300&fit=crop',
+  'tokyo': 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=600&h=300&fit=crop',
+  'new york': 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=600&h=300&fit=crop',
+  'london': 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=600&h=300&fit=crop',
+  'londres': 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=600&h=300&fit=crop',
+  'rome': 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=600&h=300&fit=crop',
+  'barcelone': 'https://images.unsplash.com/photo-1583422409516-2895a77efded?w=600&h=300&fit=crop',
+  'lisbonne': 'https://images.unsplash.com/photo-1585208798174-6cedd86e019a?w=600&h=300&fit=crop',
+  'amsterdam': 'https://images.unsplash.com/photo-1534351590666-13e3e96b5017?w=600&h=300&fit=crop',
+  'marrakech': 'https://images.unsplash.com/photo-1597212618440-806262de4f6b?w=600&h=300&fit=crop',
+};
+
+function getDestinationImage(destination: string): string {
+  const normalized = destination.toLowerCase();
+  for (const [key, url] of Object.entries(DESTINATION_IMAGES)) {
+    if (normalized.includes(key)) return url;
+  }
+  return 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=600&h=300&fit=crop';
+}
+
+function getTripStatus(startDate: string, durationDays: number): { label: string; color: string } {
+  const start = new Date(startDate);
+  const end = new Date(start);
+  end.setDate(end.getDate() + durationDays);
+  const now = new Date();
+
+  if (now < start) return { label: '\u00c0 venir', color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' };
+  if (now >= start && now <= end) return { label: 'En cours', color: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' };
+  return { label: 'Pass\u00e9', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' };
+}
+
 export default function MesVoyagesPage() {
   const router = useRouter();
   const { user, isLoading: authLoading } = useAuth();
@@ -89,7 +121,7 @@ export default function MesVoyagesPage() {
       }
     }
 
-    // Ne fetch que quand authLoading est terminé
+    // Ne fetch que quand authLoading est termin\u00e9
     if (!authLoading) {
       fetchTrips();
     }
@@ -124,7 +156,7 @@ export default function MesVoyagesPage() {
   };
 
   // Afficher le loader seulement pendant le chargement initial de l'auth
-  // Une fois l'auth terminée, on affiche la page même si les trips chargent encore
+  // Une fois l'auth termin\u00e9e, on affiche la page m\u00eame si les trips chargent encore
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -133,7 +165,7 @@ export default function MesVoyagesPage() {
     );
   }
 
-  // Si pas connecté après le chargement de l'auth, ne rien afficher (la redirection va se faire)
+  // Si pas connect\u00e9 apr\u00e8s le chargement de l'auth, ne rien afficher (la redirection va se faire)
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -143,11 +175,11 @@ export default function MesVoyagesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
+    <div className="min-h-screen bg-background">
       <div className="container max-w-4xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-bold">{t('myTrips.title')}</h1>
+            <h1 className="text-3xl font-serif font-bold">{t('myTrips.title')}</h1>
             <p className="text-muted-foreground">
               {t('myTrips.subtitle')}
             </p>
@@ -177,7 +209,7 @@ export default function MesVoyagesPage() {
           <div className="mb-6 flex items-center justify-between rounded-lg border border-destructive/30 bg-destructive/5 p-4">
             <p className="text-sm text-destructive">{error}</p>
             <Button variant="outline" size="sm" onClick={() => { setError(null); setIsLoading(true); setRetryCount(c => c + 1); }} className="ml-4 shrink-0">
-              R&eacute;essayer
+              R\u00e9essayer
             </Button>
           </div>
         )}
@@ -213,7 +245,7 @@ export default function MesVoyagesPage() {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-4">
+          <div className="grid gap-6 md:grid-cols-2">
             {trips.map((trip) => {
               const tripData = trip.data as Record<string, unknown>;
               const prefs = (trip.preferences || tripData?.preferences || {}) as Record<string, unknown>;
@@ -222,41 +254,72 @@ export default function MesVoyagesPage() {
               const visibilityOption = VISIBILITY_OPTIONS.find(o => o.value === visibility) || VISIBILITY_OPTIONS[2];
               const userRole = trip.userRole || 'owner';
               const isInvitedTrip = userRole !== 'owner' || trip.isInvited === true;
+              const status = getTripStatus(trip.start_date, trip.duration_days);
 
               return (
-                <Card key={trip.id} className="hover:shadow-md transition-shadow">
-                  <CardHeader className="pb-2">
-                    <div className="flex items-start justify-between">
-                      <Link href={`/trip/${trip.id}`} className="flex-1">
+                <Card key={trip.id} className="overflow-hidden hover:shadow-lg transition-shadow group">
+                  {/* Destination photo */}
+                  <Link href={`/trip/${trip.id}`}>
+                    <div className="relative h-40 overflow-hidden">
+                      <img
+                        src={getDestinationImage(trip.destination)}
+                        alt={trip.destination}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                      <div className="absolute bottom-3 left-4 right-4 flex items-end justify-between">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h3 className="text-white font-serif text-xl font-bold">{trip.title}</h3>
+                            {isInvitedTrip && (
+                              <Badge variant="outline" className="text-xs bg-white/20 text-white border-white/30">
+                                {t('myTrips.invited')} {userRole === 'editor' ? `\u00b7 ${t('myTrips.editor')}` : `\u00b7 ${t('myTrips.reader')}`}
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-1 text-white/80 text-sm">
+                            <MapPin className="h-3.5 w-3.5" />
+                            {trip.destination}
+                          </div>
+                        </div>
                         <div className="flex items-center gap-2">
-                          <CardTitle className="text-lg hover:text-primary transition-colors">
-                            {trip.title}
-                          </CardTitle>
-                          {isInvitedTrip && (
-                            <Badge variant="outline" className="text-xs">
-                              {t('myTrips.invited')} {userRole === 'editor' ? `· ${t('myTrips.editor')}` : `· ${t('myTrips.reader')}`}
-                            </Badge>
-                          )}
                           {isPastTrip && (
                             <Badge variant="secondary" className="text-xs">
                               <Camera className="h-3 w-3 mr-1" />
                               {t('myTrips.journal')}
                             </Badge>
                           )}
+                          <span className={cn('px-2.5 py-1 rounded-full text-xs font-medium', status.color)}>
+                            {status.label}
+                          </span>
                         </div>
-                        <CardDescription className="flex items-center gap-1">
-                          <MapPin className="h-3 w-3" />
-                          {trip.destination}
-                        </CardDescription>
-                      </Link>
-                      <div className="flex items-center gap-2">
+                      </div>
+                    </div>
+                  </Link>
+
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4 text-sm">
+                        <span className="text-lg font-semibold">
+                          {format(new Date(trip.start_date), 'd MMM yyyy', { locale: dateFnsLocales[locale as keyof typeof dateFnsLocales] || fr })}
+                        </span>
+                        <span className="text-muted-foreground">
+                          {trip.duration_days} {trip.duration_days > 1 ? t('common.days') : t('common.day')}
+                        </span>
+                        {!isPastTrip && prefs.groupSize ? (
+                          <span className="flex items-center gap-1 text-muted-foreground">
+                            <Users className="h-3.5 w-3.5" />
+                            {String(prefs.groupSize)}
+                          </span>
+                        ) : null}
+                      </div>
+                      <div className="flex items-center gap-1">
                         {/* Visibility dropdown (owner only) */}
                         {userRole === 'owner' && (
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant="ghost" size="sm" className="gap-1 h-8">
                                 {visibilityOption.icon}
-                                <span className="hidden sm:inline text-xs">{visibilityOption.label}</span>
                                 <ChevronDown className="h-3 w-3" />
                               </Button>
                             </DropdownMenuTrigger>
@@ -282,31 +345,7 @@ export default function MesVoyagesPage() {
                         )}
                       </div>
                     </div>
-                  </CardHeader>
-                  <Link href={`/trip/${trip.id}`}>
-                    <CardContent className="cursor-pointer">
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <Calendar className="h-4 w-4" />
-                          {format(new Date(trip.start_date), 'd MMM yyyy', { locale: dateFnsLocales[locale as keyof typeof dateFnsLocales] || fr })}
-                        </span>
-                        <span>
-                          {trip.duration_days} {trip.duration_days > 1 ? t('common.days') : t('common.day')}
-                        </span>
-                        {!isPastTrip && prefs.groupSize ? (
-                          <span className="flex items-center gap-1">
-                            <Users className="h-4 w-4" />
-                            {String(prefs.groupSize)} {t('common.persons')}
-                          </span>
-                        ) : null}
-                        {!isPastTrip && prefs.budgetLevel ? (
-                          <Badge variant="outline" className="ml-auto">
-                            {prefs.budgetLevel === 'budget' ? t('plan.budgetLevels.budget') : prefs.budgetLevel === 'moderate' ? t('plan.budgetLevels.moderate') : prefs.budgetLevel === 'comfort' ? t('plan.budgetLevels.comfort') : t('plan.budgetLevels.luxury')}
-                          </Badge>
-                        ) : null}
-                      </div>
-                    </CardContent>
-                  </Link>
+                  </CardContent>
                 </Card>
               );
             })}

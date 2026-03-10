@@ -4,10 +4,8 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Heart,
-  MessageCircle,
   MapPin,
   Calendar,
-  Share2,
   Loader2,
   Globe,
   Users as UsersIcon,
@@ -165,208 +163,220 @@ export default function ExplorePage() {
   };
 
   return (
-    <div className="min-h-screen bg-black">
-      {/* Top tabs - fixed */}
-      <div className="fixed top-16 left-0 right-0 z-50 flex items-center justify-center gap-6 py-3 bg-gradient-to-b from-black/80 to-transparent">
-        <button
-          onClick={() => setFeedTab('discover')}
-          className={cn(
-            'text-base font-semibold transition-all',
-            feedTab === 'discover' ? 'text-white' : 'text-white/50'
-          )}
-        >
-          <Globe className="inline h-4 w-4 mr-1.5 mb-0.5" />
-          Découvrir
-        </button>
-        {user && (
+    <div className="min-h-screen bg-background">
+      {/* Header section */}
+      <div className="max-w-6xl mx-auto px-4 pt-8 pb-2">
+        <h1 className="font-serif text-3xl md:text-4xl font-bold text-foreground">
+          Explorer
+        </h1>
+        <p className="text-muted-foreground mt-1 text-base">
+          Découvrez les voyages de la communauté et trouvez votre prochaine destination.
+        </p>
+      </div>
+
+      {/* Filter tabs */}
+      <div className="sticky top-16 z-40 bg-background border-b">
+        <div className="max-w-6xl mx-auto px-4 flex items-center justify-between">
+          <div className="flex items-center gap-0">
+            <button
+              onClick={() => setFeedTab('discover')}
+              className={cn(
+                'relative px-4 py-3 text-sm font-medium transition-colors',
+                feedTab === 'discover'
+                  ? 'text-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
+              )}
+            >
+              <span className="flex items-center gap-1.5">
+                <Globe className="h-4 w-4" />
+                Découvrir
+              </span>
+              {feedTab === 'discover' && (
+                <span className="absolute bottom-0 left-4 right-4 h-0.5 bg-foreground rounded-full" />
+              )}
+            </button>
+            {user && (
+              <button
+                onClick={() => setFeedTab('following')}
+                className={cn(
+                  'relative px-4 py-3 text-sm font-medium transition-colors',
+                  feedTab === 'following'
+                    ? 'text-foreground'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                <span className="flex items-center gap-1.5">
+                  <UsersIcon className="h-4 w-4" />
+                  Abonnements
+                </span>
+                {feedTab === 'following' && (
+                  <span className="absolute bottom-0 left-4 right-4 h-0.5 bg-foreground rounded-full" />
+                )}
+              </button>
+            )}
+          </div>
+
           <button
-            onClick={() => setFeedTab('following')}
+            onClick={() => setSortMode(sortMode === 'recent' ? 'trending' : 'recent')}
             className={cn(
-              'text-base font-semibold transition-all',
-              feedTab === 'following' ? 'text-white' : 'text-white/50'
+              'flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-full border transition-colors',
+              'text-muted-foreground hover:text-foreground hover:border-foreground/30'
             )}
           >
-            <UsersIcon className="inline h-4 w-4 mr-1.5 mb-0.5" />
-            Abonnements
+            {sortMode === 'trending' ? (
+              <>
+                <Flame className="h-3.5 w-3.5 text-orange-500" />
+                Tendances
+              </>
+            ) : (
+              <>
+                <Clock className="h-3.5 w-3.5" />
+                Récents
+              </>
+            )}
           </button>
-        )}
-        <span className="text-white/20">|</span>
-        <button
-          onClick={() => setSortMode(sortMode === 'recent' ? 'trending' : 'recent')}
-          className="text-sm font-medium text-white/70 hover:text-white transition-all flex items-center gap-1"
-        >
-          {sortMode === 'trending' ? (
-            <><Flame className="h-4 w-4 text-orange-400" /> Tendances</>
-          ) : (
-            <><Clock className="h-4 w-4" /> Récents</>
-          )}
-        </button>
+        </div>
       </div>
 
       {/* Content */}
-      {isLoading ? (
-        <div className="flex items-center justify-center h-screen">
-          <Loader2 className="h-8 w-8 animate-spin text-white" />
-        </div>
-      ) : trips.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-screen text-white gap-4">
-          <MapPin className="h-16 w-16 text-white/30" />
-          <p className="text-xl font-semibold">Aucun voyage</p>
-          <p className="text-white/50 text-center px-8 mb-8">
-            {feedTab === 'following'
-              ? 'Suis des voyageurs pour voir leurs aventures ici'
-              : 'Aucun voyage public pour le moment'}
-          </p>
-          <div className="px-4">
-            <RecommendedUsers />
+      <div className="max-w-6xl mx-auto px-4 py-6" ref={containerRef}>
+        {isLoading ? (
+          <div className="flex items-center justify-center py-32">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
-        </div>
-      ) : (
-        <div ref={containerRef} className="snap-y snap-mandatory h-[calc(100vh-4rem)] overflow-y-scroll">
-          {trips.map((trip) => (
-            <div
-              key={trip.id}
-              className="snap-start h-[calc(100vh-4rem)] relative flex items-end"
-            >
-              {/* Background image */}
-              <div className="absolute inset-0">
-                <img
-                  src={trip.cover_url || getFallbackImage(trip.destination)}
-                  alt={trip.destination}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/40" />
-              </div>
-
-              {/* Right sidebar - actions (z-20 to be above tap zone) */}
-              <div className="absolute right-3 bottom-32 flex flex-col items-center gap-5 z-20">
-                {/* Profile avatar */}
-                <button
-                  onClick={() => router.push(`/user/${trip.owner?.id}`)}
-                  className="relative"
-                >
-                  <Avatar className="h-12 w-12 border-2 border-white">
-                    <AvatarImage src={trip.owner?.avatar_url || undefined} />
-                    <AvatarFallback className="bg-primary text-white text-lg">
-                      {(trip.owner?.display_name || '?')[0].toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                </button>
-
-                {/* Like */}
-                <button
-                  onClick={() => handleLike(trip.id)}
-                  disabled={likingTripId === trip.id}
-                  className="flex flex-col items-center gap-1"
-                >
-                  <div className={cn(
-                    'p-2 rounded-full transition-all',
-                    trip.user_liked ? 'bg-red-500/20' : 'bg-white/10'
-                  )}>
-                    <Heart className={cn(
-                      'h-7 w-7 transition-all',
-                      trip.user_liked ? 'fill-red-500 text-red-500' : 'text-white'
-                    )} />
-                  </div>
-                  <span className="text-white text-xs font-semibold">
-                    {trip.likes_count || 0}
-                  </span>
-                </button>
-
-                {/* Comment / View */}
-                <button
-                  onClick={() => router.push(`/trip/${trip.id}`)}
-                  className="flex flex-col items-center gap-1"
-                >
-                  <div className="p-2 rounded-full bg-white/10">
-                    <MessageCircle className="h-7 w-7 text-white" />
-                  </div>
-                  <span className="text-white text-xs">Voir</span>
-                </button>
-
-                {/* Share */}
-                <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(`${window.location.origin}/trip/${trip.id}`);
-                    toast.success('Lien copié !');
-                  }}
-                  className="flex flex-col items-center gap-1"
-                >
-                  <div className="p-2 rounded-full bg-white/10">
-                    <Share2 className="h-7 w-7 text-white" />
-                  </div>
-                  <span className="text-white text-xs">Partager</span>
-                </button>
-              </div>
-
-              {/* Bottom info overlay (z-20 to be above tap zone) */}
-              <div className="relative z-20 p-5 pb-8 w-full pr-20">
-                {/* User info */}
-                <div className="flex items-center gap-3 mb-3">
-                  <button
-                    onClick={() => router.push(`/user/${trip.owner?.id}`)}
-                    className="flex items-center gap-2"
-                  >
-                    <span className="text-white font-bold text-base">
-                      @{trip.owner?.username || trip.owner?.display_name || 'voyageur'}
-                    </span>
-                  </button>
-                  {user && trip.owner?.id !== user.id && (
-                    <FollowButton
-                      userId={trip.owner?.id}
-                      initialIsFollowing={trip.is_following || false}
-                      initialIsCloseFriend={false}
-                      size="sm"
-                    />
-                  )}
-                </div>
-
-                {/* Destination & title */}
-                <h2 className="text-white text-2xl font-bold mb-1 drop-shadow-lg">
-                  <MapPin className="inline h-5 w-5 mr-1 mb-1" />
-                  {trip.destination}
-                </h2>
-                {trip.title && trip.title !== trip.destination && (
-                  <p className="text-white/80 text-base mb-2 line-clamp-2">{trip.title}</p>
-                )}
-
-                {/* Meta tags */}
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {trip.duration_days && (
-                    <span className="inline-flex items-center gap-1 bg-white/15 backdrop-blur-sm text-white text-xs px-3 py-1.5 rounded-full">
-                      <Calendar className="h-3.5 w-3.5" />
-                      {trip.duration_days} jours
-                    </span>
-                  )}
-                  {trip.start_date && (
-                    <span className="inline-flex items-center gap-1 bg-white/15 backdrop-blur-sm text-white text-xs px-3 py-1.5 rounded-full">
-                      {format(new Date(trip.start_date), 'MMM yyyy', { locale: fr })}
-                    </span>
-                  )}
-                  {trip.preferences?.groupSize && (
-                    <span className="inline-flex items-center gap-1 bg-white/15 backdrop-blur-sm text-white text-xs px-3 py-1.5 rounded-full">
-                      <UsersIcon className="h-3.5 w-3.5" />
-                      {trip.preferences.groupSize} pers.
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* Tap to view trip */}
-              <button
-                onClick={() => router.push(`/trip/${trip.id}`)}
-                className="absolute inset-0 z-[5]"
-                aria-label="Voir le voyage"
-              />
+        ) : trips.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-32 gap-4">
+            <MapPin className="h-16 w-16 text-muted-foreground/30" />
+            <p className="text-xl font-semibold text-foreground">Aucun voyage</p>
+            <p className="text-muted-foreground text-center max-w-md">
+              {feedTab === 'following'
+                ? 'Suis des voyageurs pour voir leurs aventures ici'
+                : 'Aucun voyage public pour le moment'}
+            </p>
+            <div className="mt-4 w-full max-w-lg">
+              <RecommendedUsers />
             </div>
-          ))}
-
-          {/* Load more sentinel */}
-          <div ref={loadMoreRef} className="h-20 flex items-center justify-center">
-            {isLoadingMore && <Loader2 className="h-6 w-6 animate-spin text-white" />}
           </div>
-        </div>
-      )}
+        ) : (
+          <>
+            {/* Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {trips.map((trip) => (
+                <div
+                  key={trip.id}
+                  className="group bg-white border rounded-xl overflow-hidden transition-shadow hover:shadow-md cursor-pointer"
+                  onClick={() => router.push(`/trip/${trip.id}`)}
+                >
+                  {/* Card image */}
+                  <div className="relative h-48 overflow-hidden">
+                    <img
+                      src={trip.cover_url || getFallbackImage(trip.destination)}
+                      alt={trip.destination}
+                      className="w-full h-48 object-cover rounded-t-xl transition-transform duration-300 group-hover:scale-105"
+                    />
+                    {/* Duration badge on image */}
+                    {trip.duration_days && (
+                      <span className="absolute top-3 left-3 inline-flex items-center gap-1 bg-white/90 backdrop-blur-sm text-foreground text-xs font-medium px-2.5 py-1 rounded-full shadow-sm">
+                        <Calendar className="h-3 w-3" />
+                        {trip.duration_days} jours
+                      </span>
+                    )}
+                    {/* Like button on image */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleLike(trip.id);
+                      }}
+                      disabled={likingTripId === trip.id}
+                      className="absolute top-3 right-3 p-2 rounded-full bg-white/90 backdrop-blur-sm shadow-sm transition-colors hover:bg-white"
+                    >
+                      <Heart
+                        className={cn(
+                          'h-4 w-4 transition-colors',
+                          trip.user_liked
+                            ? 'fill-red-500 text-red-500'
+                            : 'text-muted-foreground'
+                        )}
+                      />
+                    </button>
+                  </div>
+
+                  {/* Card body */}
+                  <div className="p-4">
+                    {/* Destination */}
+                    <div className="flex items-start justify-between gap-2">
+                      <h3 className="font-semibold text-foreground text-base leading-tight">
+                        <MapPin className="inline h-4 w-4 mr-1 text-muted-foreground mb-0.5" />
+                        {trip.destination}
+                      </h3>
+                    </div>
+
+                    {/* Title (if different from destination) */}
+                    {trip.title && trip.title !== trip.destination && (
+                      <p className="text-muted-foreground text-sm mt-1 line-clamp-1">
+                        {trip.title}
+                      </p>
+                    )}
+
+                    {/* Date */}
+                    {trip.start_date && (
+                      <p className="text-muted-foreground text-xs mt-2">
+                        {format(new Date(trip.start_date), 'MMM yyyy', { locale: fr })}
+                      </p>
+                    )}
+
+                    {/* Footer: user info + likes */}
+                    <div className="flex items-center justify-between mt-3 pt-3 border-t">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          router.push(`/user/${trip.owner?.id}`);
+                        }}
+                        className="flex items-center gap-2 min-w-0"
+                      >
+                        <Avatar className="h-6 w-6 shrink-0">
+                          <AvatarImage src={trip.owner?.avatar_url || undefined} />
+                          <AvatarFallback className="bg-primary text-white text-[10px]">
+                            {(trip.owner?.display_name || '?')[0].toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="text-sm text-muted-foreground truncate">
+                          {trip.owner?.display_name || trip.owner?.username || 'Voyageur'}
+                        </span>
+                      </button>
+
+                      <div className="flex items-center gap-3 shrink-0">
+                        {user && trip.owner?.id !== user.id && (
+                          <span onClick={(e) => e.stopPropagation()}>
+                            <FollowButton
+                              userId={trip.owner?.id}
+                              initialIsFollowing={trip.is_following || false}
+                              initialIsCloseFriend={false}
+                              size="sm"
+                            />
+                          </span>
+                        )}
+                        <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <Heart className={cn(
+                            'h-3.5 w-3.5',
+                            trip.user_liked ? 'fill-red-500 text-red-500' : ''
+                          )} />
+                          {trip.likes_count || 0}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Load more sentinel */}
+            <div ref={loadMoreRef} className="h-20 flex items-center justify-center">
+              {isLoadingMore && <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />}
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }
