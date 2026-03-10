@@ -279,9 +279,9 @@ const PASSES: PassConfig[] = [
   { maxDist: 0.8, checkMealType: true,  checkDietary: true,      checkHours: true,  checkRating: true,  allowReuse: false },
   { maxDist: 0.8, checkMealType: true,  checkDietary: true,      checkHours: true,  checkRating: false, allowReuse: false },
   { maxDist: 1.5, checkMealType: true,  checkDietary: true,      checkHours: true,  checkRating: false, allowReuse: false },
-  { maxDist: 3.0, checkMealType: false, checkDietary: 'relaxed', checkHours: true,  checkRating: false, allowReuse: true  },
-  { maxDist: 5.0, checkMealType: false, checkDietary: false,     checkHours: false, checkRating: false, allowReuse: true  },
-  { maxDist: 5.0, checkMealType: false, checkDietary: false,     checkHours: false, checkRating: false, allowReuse: true  },
+  { maxDist: 1.5, checkMealType: false, checkDietary: 'relaxed', checkHours: true,  checkRating: false, allowReuse: true  },
+  { maxDist: 2.0, checkMealType: false, checkDietary: false,     checkHours: false, checkRating: false, allowReuse: true  },
+  { maxDist: 3.0, checkMealType: false, checkDietary: false,     checkHours: false, checkRating: false, allowReuse: true  },
 ];
 
 function filterAndScoreCandidates(

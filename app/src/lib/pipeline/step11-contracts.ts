@@ -193,9 +193,9 @@ export function validateContracts(
           metrics.activitiesOutsideHours++;
         }
 
-        // P0.2: Lunch/dinner only, strict 800m, and self-meal fallback is excluded.
+        // P0.2: Lunch/dinner only, 1.5km max (aligned with pass 3 search radius), self-meal fallback excluded.
         if (!isSelfMealFallback && (isLunchMeal || isDinnerMeal) && item.latitude && item.longitude) {
-          const maxDistKm = 0.8;
+          const maxDistKm = 1.5;
 
           const nearestActivity = day.items
             .filter(i => i.type === 'activity' && i.latitude && i.longitude)

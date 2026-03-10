@@ -241,17 +241,7 @@ export function unifiedScheduleV3Days(
               }
             }
           }
-          // Fallback: if anchor >5km from hotel, retry with hotel coords
-          if (!lunchPlacement && hotelLatLng) {
-            const anchorToHotel = calculateDistance(lunchAnchor.lat, lunchAnchor.lng, hotelLatLng.lat, hotelLatLng.lng);
-            if (anchorToHotel > 5) {
-              console.warn(`[Unified] Lunch anchor ${anchorToHotel.toFixed(1)}km from hotel — retrying with hotel coords`);
-              lunchPlacement = findBestRestaurant(
-                restaurants, hotelLatLng, 'lunch',
-                0.8, 3.5, 2, dietary, usedRestaurantIds, dayDateForRestaurant
-              );
-            }
-          }
+          // Skip hotel-fallback: on day trips, prefer "Repas libre" over a restaurant 16km away
           if (lunchPlacement) {
             items.push(createRestaurantItem(
               { ...lunchPlacement, anchorName: 'Position actuelle' },
@@ -381,17 +371,7 @@ export function unifiedScheduleV3Days(
             }
           }
         }
-        // Fallback: if anchor >5km from hotel, retry with hotel coords
-        if (!dinnerPlacement && hotelLatLng) {
-          const anchorToHotel = calculateDistance(dinnerAnchor.lat, dinnerAnchor.lng, hotelLatLng.lat, hotelLatLng.lng);
-          if (anchorToHotel > 5) {
-            console.warn(`[Unified] Dinner anchor ${anchorToHotel.toFixed(1)}km from hotel — retrying with hotel coords`);
-            dinnerPlacement = findBestRestaurant(
-              restaurants, hotelLatLng, 'dinner',
-              0.8, 3.5, 2, dietary, usedRestaurantIds, dayDateForRestaurant
-            );
-          }
-        }
+        // Skip hotel-fallback: on day trips, prefer "Repas libre" over a restaurant 16km away
         if (dinnerPlacement) {
           items.push(createRestaurantItem(
             { ...dinnerPlacement, anchorName: 'Position actuelle' },
