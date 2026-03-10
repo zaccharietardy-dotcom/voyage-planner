@@ -460,6 +460,18 @@ export function unifiedScheduleV3Days(
           continue;
         }
 
+        // Drop if shifting restaurant outside opening hours
+        if (next.type === 'restaurant' && next.restaurant && !next.qualityFlags?.includes('self_meal_fallback')) {
+          const newStart = minToTime(shiftedStart);
+          const newEnd = minToTime(shiftedEnd);
+          if (!isRestaurantOpenForSlot(next.restaurant, day.date, newStart, newEnd)) {
+            console.log(`[Unified] Overlap fix: dropping "${next.title}" on Day ${day.dayNumber} (restaurant closed after shift to ${newStart})`);
+            day.items.splice(i + 1, 1);
+            i--;
+            continue;
+          }
+        }
+
         // Drop if shifting activity outside opening hours
         if (next.type === 'activity') {
           const mockAct = {
