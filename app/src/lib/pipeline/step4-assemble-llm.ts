@@ -336,6 +336,18 @@ export function addOutboundTransportItem(
       flightAlternatives: [],
       imageUrl: 'https://images.unsplash.com/photo-1436491865332-7a61a109db05?w=600&h=400&fit=crop',
       estimatedCost: flight.price,
+      bookingUrl: flight.bookingUrl || generateFlightLink(
+        { origin: flight.departureCity, destination: flight.arrivalCity },
+        { date: formatDateForUrl(preferences.startDate), passengers: preferences.groupSize }
+      ),
+      aviasalesUrl: generateFlightLink(
+        { origin: flight.departureCity, destination: flight.arrivalCity },
+        { date: formatDateForUrl(preferences.startDate), passengers: preferences.groupSize }
+      ),
+      omioFlightUrl: generateFlightOmioLink(
+        flight.departureCity, flight.arrivalCity,
+        formatDateForUrl(preferences.startDate), preferences.groupSize
+      ),
     };
 
     day1.items.unshift(flightItem);
@@ -388,6 +400,10 @@ export function addReturnTransportItem(
   if (!returnFlight && !transport) return;
 
   if (returnFlight) {
+    const returnDate = new Date(preferences.startDate);
+    returnDate.setDate(returnDate.getDate() + preferences.durationDays - 1);
+    const returnDateStr = formatDateForUrl(returnDate);
+
     const flightItem: TripItem = {
       id: uuidv4(),
       dayNumber: lastDay.dayNumber,
@@ -405,6 +421,18 @@ export function addReturnTransportItem(
       flightAlternatives: [],
       imageUrl: 'https://images.unsplash.com/photo-1436491865332-7a61a109db05?w=600&h=400&fit=crop',
       estimatedCost: returnFlight.price,
+      bookingUrl: returnFlight.bookingUrl || generateFlightLink(
+        { origin: returnFlight.departureCity, destination: returnFlight.arrivalCity },
+        { date: returnDateStr, passengers: preferences.groupSize }
+      ),
+      aviasalesUrl: generateFlightLink(
+        { origin: returnFlight.departureCity, destination: returnFlight.arrivalCity },
+        { date: returnDateStr, passengers: preferences.groupSize }
+      ),
+      omioFlightUrl: generateFlightOmioLink(
+        returnFlight.departureCity, returnFlight.arrivalCity,
+        returnDateStr, preferences.groupSize
+      ),
     };
 
     lastDay.items.push(flightItem);

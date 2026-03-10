@@ -227,7 +227,7 @@ function ItemTypeIcon({
 }
 
 /** Types that can display a hero image */
-const IMAGE_TYPES: TripItemType[] = ['activity', 'restaurant', 'hotel', 'checkin', 'checkout', 'flight', 'transport'];
+const IMAGE_TYPES: TripItemType[] = ['activity', 'restaurant', 'hotel', 'checkout', 'flight', 'transport'];
 
 /** Gradient backgrounds per type (used when no image available) — dark, muted tones */
 const TYPE_GRADIENTS: Record<string, string> = {
@@ -279,6 +279,7 @@ export const ActivityCard = memo(function ActivityCard({
   const isHeroType = IMAGE_TYPES.includes(item.type) && !hasRestaurantAlternatives;
   // Hero cards always use the "image" style (white text, overlay) — either with a real image or a gradient fallback
   const useHeroStyle = isHeroType;
+  const isCompactCheckin = item.type === 'checkin';
 
   return (
     <Card
@@ -293,6 +294,39 @@ export const ActivityCard = memo(function ActivityCard({
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
+      {/* Compact checkin: slim bar instead of hero card */}
+      {isCompactCheckin && (
+        <div className="flex items-center gap-3 p-3">
+          <div className="w-1 self-stretch rounded-full" style={{ backgroundColor: color }} />
+          <div
+            className="p-2 rounded-lg shrink-0"
+            style={{ backgroundColor: `${color}15` }}
+          >
+            <LogIn className="h-4 w-4" style={{ color }} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-0.5">
+              <h4 className="text-[13px] font-semibold leading-snug truncate">{item.title}</h4>
+              <span className="inline-flex items-center gap-1 font-mono text-xs text-muted-foreground shrink-0">
+                <Clock className="h-3 w-3" />
+                {item.startTime}
+              </span>
+            </div>
+            {item.description && (
+              <p className="text-xs text-muted-foreground line-clamp-1">{item.description}</p>
+            )}
+            {item.bookingUrl && (
+              <div className="flex items-center gap-1.5 mt-1.5">
+                <BookingButtons item={item} />
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Standard card layout (hero + content) — hidden for compact checkin */}
+      {!isCompactCheckin && (
+        <>
       {/* Background: gradient base (always visible) + image on top with fade-in */}
       {isHeroType && (
         <>
@@ -649,6 +683,8 @@ export const ActivityCard = memo(function ActivityCard({
           item={item}
           onSelectRestaurantAlternative={onSelectRestaurantAlternative}
         />
+      )}
+        </>
       )}
 
       {/* Hotel alternatives carousel */}
