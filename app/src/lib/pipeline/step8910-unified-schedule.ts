@@ -460,15 +460,19 @@ export function unifiedScheduleV3Days(
           continue;
         }
 
-        // Drop if shifting restaurant outside opening hours
+        // Convert to "Repas libre" if shifting restaurant outside opening hours
         if (next.type === 'restaurant' && next.restaurant && !next.qualityFlags?.includes('self_meal_fallback')) {
           const newStart = minToTime(shiftedStart);
           const newEnd = minToTime(shiftedEnd);
           if (!isRestaurantOpenForSlot(next.restaurant, day.date, newStart, newEnd)) {
-            console.log(`[Unified] Overlap fix: dropping "${next.title}" on Day ${day.dayNumber} (restaurant closed after shift to ${newStart})`);
-            day.items.splice(i + 1, 1);
-            i--;
-            continue;
+            const mealLabel = next.mealType === 'breakfast' ? 'Petit-déjeuner' : next.mealType === 'lunch' ? 'Déjeuner' : 'Dîner';
+            console.log(`[Unified] Overlap fix: converting "${next.title}" to Repas libre on Day ${day.dayNumber} (restaurant closed after shift to ${newStart})`);
+            next.title = `${mealLabel} — Repas libre`;
+            next.description = 'Pique-nique / courses / repas maison';
+            next.locationName = 'Repas libre';
+            next.restaurant = undefined;
+            next.restaurantAlternatives = undefined;
+            next.qualityFlags = ['self_meal_fallback'];
           }
         }
 
