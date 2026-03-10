@@ -22,16 +22,36 @@ interface TripMapProps {
 
 // ─── Constants ──────────────────────────────────────────────
 
-const MARKER_COLORS: Record<string, { bg: string; border: string }> = {
-  activity: { bg: '#3B82F6', border: '#2563EB' },
-  restaurant: { bg: '#F97316', border: '#EA580C' },
-  hotel: { bg: '#8B5CF6', border: '#7C3AED' },
-  transport: { bg: '#10B981', border: '#059669' },
-  flight: { bg: '#EC4899', border: '#DB2777' },
-  parking: { bg: '#6B7280', border: '#4B5563' },
-  checkin: { bg: '#8B5CF6', border: '#7C3AED' },
-  checkout: { bg: '#8B5CF6', border: '#7C3AED' },
-  luggage: { bg: '#F59E0B', border: '#D97706' },
+const DAY_COLORS: { bg: string; border: string }[] = [
+  { bg: '#6366F1', border: '#4F46E5' }, // Indigo   — Jour 1
+  { bg: '#06B6D4', border: '#0891B2' }, // Cyan     — Jour 2
+  { bg: '#F59E0B', border: '#D97706' }, // Ambre    — Jour 3
+  { bg: '#EF4444', border: '#DC2626' }, // Rouge    — Jour 4
+  { bg: '#8B5CF6', border: '#7C3AED' }, // Violet   — Jour 5
+  { bg: '#10B981', border: '#059669' }, // Émeraude — Jour 6
+  { bg: '#F97316', border: '#EA580C' }, // Orange   — Jour 7
+  { bg: '#EC4899', border: '#DB2777' }, // Rose     — Jour 8
+  { bg: '#14B8A6', border: '#0D9488' }, // Teal     — Jour 9
+  { bg: '#A855F7', border: '#9333EA' }, // Pourpre  — Jour 10
+];
+const DEFAULT_DAY_COLOR = { bg: '#6B7280', border: '#4B5563' };
+
+function getDayColor(dayNumber: number) {
+  if (dayNumber < 1) return DEFAULT_DAY_COLOR;
+  return DAY_COLORS[(dayNumber - 1) % DAY_COLORS.length];
+}
+
+const TYPE_SHAPES: Record<string, { containerCss: string; innerCss: string }> = {
+  activity:   { containerCss: 'border-radius:50%;', innerCss: '' },
+  restaurant: { containerCss: 'border-radius:4px;', innerCss: '' },
+  transport:  { containerCss: 'border-radius:3px;transform:rotate(45deg);', innerCss: 'transform:rotate(-45deg);' },
+  flight:     { containerCss: 'border-radius:3px;transform:rotate(45deg);', innerCss: 'transform:rotate(-45deg);' },
+  hotel:      { containerCss: 'border-radius:4px 4px 50% 50%;', innerCss: '' },
+  checkin:    { containerCss: 'border-radius:4px 4px 50% 50%;', innerCss: '' },
+  checkout:   { containerCss: 'border-radius:4px 4px 50% 50%;', innerCss: '' },
+  parking:    { containerCss: 'border-radius:50%;border-style:dashed !important;', innerCss: '' },
+  luggage:    { containerCss: 'border-radius:50%;border-style:dashed !important;', innerCss: '' },
+  free_time:  { containerCss: 'border-radius:50%;border-style:dashed !important;', innerCss: '' },
 };
 
 const TYPE_LABELS: Record<string, string> = {
@@ -45,8 +65,6 @@ const TYPE_LABELS: Record<string, string> = {
   checkout: 'Check-out',
   luggage: 'Bagages',
 };
-
-const ROUTE_COLORS = ['#6366F1', '#06B6D4', '#F59E0B', '#EF4444', '#8B5CF6', '#10B981', '#F97316', '#EC4899'];
 
 // ─── Helpers ────────────────────────────────────────────────
 
@@ -78,25 +96,43 @@ function compareItemsForRoute(a: TripItem, b: TripItem): number {
   return parseSortableTime(a.startTime) - parseSortableTime(b.startTime);
 }
 
-function createNumberedIcon(L: any, num: number, type: string, isHighlighted: boolean) {
-  const colors = MARKER_COLORS[type] || { bg: '#666', border: '#444' };
+function createNumberedIcon(L: any, num: number, type: string, dayNumber: number, isHighlighted: boolean) {
+  const colors = getDayColor(dayNumber);
+  const shape = TYPE_SHAPES[type] || TYPE_SHAPES.activity;
   const size = isHighlighted ? 32 : 26;
   const fontSize = isHighlighted ? 13 : 11;
   const shadow = isHighlighted
     ? `box-shadow: 0 0 0 3px ${colors.bg}40, 0 2px 8px rgba(0,0,0,0.3);`
     : 'box-shadow: 0 1px 4px rgba(0,0,0,0.25);';
 
+  // For losange types, compose rotate(45deg) with scale when highlighted
+  const isLosange = type === 'transport' || type === 'flight';
+  let containerTransform = '';
+  if (isLosange) {
+    containerTransform = isHighlighted
+      ? 'transform:rotate(45deg) scale(1.2);z-index:1000;'
+      : 'transform:rotate(45deg);';
+  } else {
+    containerTransform = isHighlighted ? 'transform:scale(1.2);z-index:1000;' : '';
+  }
+
+  // Strip transform from containerCss since we handle it via containerTransform
+  const shapeCss = isLosange
+    ? shape.containerCss.replace('transform:rotate(45deg);', '')
+    : shape.containerCss;
+
   return L.divIcon({
     className: 'numbered-marker',
     html: `<div style="
-      width:${size}px;height:${size}px;border-radius:50%;
+      width:${size}px;height:${size}px;
+      ${shapeCss}
       background:${colors.bg};border:2px solid white;
       color:white;font-size:${fontSize}px;font-weight:700;
       display:flex;align-items:center;justify-content:center;
       ${shadow}
       transition:transform 0.15s ease;
-      ${isHighlighted ? 'transform:scale(1.2);z-index:1000;' : ''}
-    ">${num}</div>`,
+      ${containerTransform}
+    "><span style="display:flex;align-items:center;justify-content:center;${shape.innerCss}">${num}</span></div>`,
     iconSize: [size, size],
     iconAnchor: [size / 2, size / 2],
     popupAnchor: [0, -size / 2],
@@ -104,7 +140,7 @@ function createNumberedIcon(L: any, num: number, type: string, isHighlighted: bo
 }
 
 function getPopupContent(item: TripItem, index: number): string {
-  const color = MARKER_COLORS[item.type]?.bg || '#666';
+  const color = getDayColor(item.dayNumber).bg;
   const googleMapsUrl = item.googleMapsPlaceUrl ||
     item.googleMapsUrl ||
     `https://www.google.com/maps/search/?api=1&query=${item.latitude},${item.longitude}`;
@@ -197,7 +233,7 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
   const routeLayerRef = useRef<any>(null);
 
   // Marker references for hover/selection
-  const markerMapRef = useRef<Map<string, { marker: any; num: number; type: string }>>(new Map());
+  const markerMapRef = useRef<Map<string, { marker: any; num: number; type: string; dayNumber: number }>>(new Map());
 
   // Stored bounds for "fit all" button
   const storedBoundsRef = useRef<any>(null);
@@ -405,7 +441,7 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
     displayItems.forEach((item) => {
       if (!item.latitude || !item.longitude) return;
       const num = mapNumbers?.get(item.id) ?? globalIndex++;
-      const icon = createNumberedIcon(L, num, item.type, false);
+      const icon = createNumberedIcon(L, num, item.type, item.dayNumber, false);
 
       const marker = L.marker([item.latitude, item.longitude], { icon })
         .bindPopup(getPopupContent(item, num), {
@@ -416,7 +452,7 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
       marker.on('click', () => onItemClickRef.current?.(item));
 
       markerLayer.addLayer(marker);
-      markerMapRef.current.set(item.id, { marker, num, type: item.type });
+      markerMapRef.current.set(item.id, { marker, num, type: item.type, dayNumber: item.dayNumber });
       bounds.extend([item.latitude, item.longitude]);
     });
 
@@ -490,7 +526,7 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
 
       if (routeCoords.length < 2) return;
 
-      const color = filterDay === null ? ROUTE_COLORS[idx % ROUTE_COLORS.length] : '#3B82F6';
+      const color = filterDay === null ? getDayColor(dayNum).bg : getDayColor(filterDay).bg;
 
       // Halo (ombre)
       const halo = L.polyline(routeCoords, {
@@ -674,7 +710,7 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
     if (prevId && prevId !== hoveredItemId) {
       const prevEntry = markerMapRef.current.get(prevId);
       if (prevEntry) {
-        prevEntry.marker.setIcon(createNumberedIcon(L, prevEntry.num, prevEntry.type, false));
+        prevEntry.marker.setIcon(createNumberedIcon(L, prevEntry.num, prevEntry.type, prevEntry.dayNumber, false));
       }
     }
 
@@ -682,7 +718,7 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
     if (hoveredItemId) {
       const entry = markerMapRef.current.get(hoveredItemId);
       if (entry) {
-        entry.marker.setIcon(createNumberedIcon(L, entry.num, entry.type, true));
+        entry.marker.setIcon(createNumberedIcon(L, entry.num, entry.type, entry.dayNumber, true));
       }
     }
 
@@ -782,19 +818,24 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
               >
                 Tout
               </button>
-              {dayNumbers.map(d => (
-                <button
-                  key={d}
-                  onClick={() => setFilterDay(filterDay === d ? null : d)}
-                  className={`flex-shrink-0 px-2.5 py-1 rounded-full text-xs font-medium transition-colors shadow-sm border ${
-                    filterDay === d
-                      ? 'bg-primary text-primary-foreground border-primary'
-                      : 'bg-white/90 dark:bg-card/90 text-muted-foreground border-border/50 hover:bg-white dark:hover:bg-card'
-                  }`}
-                >
-                  J{d}
-                </button>
-              ))}
+              {dayNumbers.map(d => {
+                const dc = getDayColor(d);
+                return (
+                  <button
+                    key={d}
+                    onClick={() => setFilterDay(filterDay === d ? null : d)}
+                    className={`flex-shrink-0 px-2.5 py-1 rounded-full text-xs font-medium transition-colors shadow-sm border ${
+                      filterDay !== d ? 'bg-white/90 dark:bg-card/90 text-muted-foreground hover:bg-white dark:hover:bg-card' : ''
+                    }`}
+                    style={filterDay === d
+                      ? { background: dc.bg, color: 'white', borderColor: dc.border }
+                      : undefined
+                    }
+                  >
+                    J{d}
+                  </button>
+                );
+              })}
             </div>
           )}
 
@@ -869,15 +910,35 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
               </svg>
             </button>
             {showLegend && (
-              <div className="absolute bottom-10 left-0 bg-white dark:bg-card rounded-lg shadow-lg border border-border/50 p-2.5 text-xs space-y-1.5 min-w-[120px]">
-                {Object.entries(MARKER_COLORS)
-                  .filter(([type]) => !['checkin', 'checkout'].includes(type))
-                  .map(([type, colors]) => (
-                    <div key={type} className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: colors.bg }} />
-                      <span className="text-muted-foreground">{TYPE_LABELS[type] || type}</span>
+              <div className="absolute bottom-10 left-0 bg-white dark:bg-card rounded-lg shadow-lg border border-border/50 p-2.5 text-xs min-w-[130px]">
+                {/* Formes */}
+                <div className="space-y-1.5 mb-2">
+                  <div className="text-[10px] font-semibold text-muted-foreground/70 uppercase tracking-wide">Formes</div>
+                  {([
+                    ['activity', 'Activité', 'border-radius:50%;'],
+                    ['restaurant', 'Restaurant', 'border-radius:3px;'],
+                    ['transport', 'Transport', 'border-radius:2px;transform:rotate(45deg);'],
+                    ['hotel', 'Hôtel', 'border-radius:3px 3px 50% 50%;'],
+                    ['parking', 'Parking / Autre', 'border-radius:50%;border-style:dashed;'],
+                  ] as const).map(([key, label, css]) => (
+                    <div key={key} className="flex items-center gap-2">
+                      <div className="w-3 h-3 flex-shrink-0" style={{ background: '#9CA3AF', border: '1.5px solid #6B7280', ...Object.fromEntries(css.split(';').filter(Boolean).map(s => { const [k, v] = s.split(':'); return [k.trim().replace(/-([a-z])/g, (_, c) => c.toUpperCase()), v.trim()]; })) }} />
+                      <span className="text-muted-foreground">{label}</span>
                     </div>
                   ))}
+                </div>
+                {/* Jours */}
+                {dayNumbers.length > 0 && (
+                  <div className="space-y-1.5 pt-2 border-t border-border/50">
+                    <div className="text-[10px] font-semibold text-muted-foreground/70 uppercase tracking-wide">Jours</div>
+                    {dayNumbers.map(d => (
+                      <div key={d} className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: getDayColor(d).bg }} />
+                        <span className="text-muted-foreground">Jour {d}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
