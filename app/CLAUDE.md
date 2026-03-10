@@ -225,6 +225,11 @@ TripItem {
 - When given a bug: just fix it. Don't ask for hand-holding.
 - Point at logs, errors, failing tests — then resolve them
 
+### Commit & Push After Each Change
+- After each modification (fix, feature, refactor), commit and push immediately
+- Don't batch multiple unrelated changes into one commit
+- Use conventional commit format (`feat:`, `fix:`, `refactor:`)
+
 ### Simplicity & Minimal Impact
 - Make every change as simple as possible. Impact minimal code.
 - Find root causes. No temporary fixes. Senior developer standards.

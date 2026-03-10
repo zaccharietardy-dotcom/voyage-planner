@@ -440,7 +440,7 @@ export const ActivityCard = memo(function ActivityCard({
                   {item.type === 'restaurant' && item.restaurant?.badges?.map((badge, i) => (
                     <span key={i} className={cn(
                       "inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-medium",
-                      useHeroStyle ? "bg-amber-500/20 text-amber-300" : "bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400"
+                      useHeroStyle ? "bg-white/15 text-white/80" : "bg-muted text-muted-foreground"
                     )}>
                       <Award className="h-2.5 w-2.5" />
                       {badge}
@@ -457,7 +457,7 @@ export const ActivityCard = memo(function ActivityCard({
               )}>
                 {item.rating && item.rating > 0 && (
                   <span className="inline-flex items-center gap-0.5 font-medium">
-                    <Star className={cn(useHeroStyle ? "h-3.5 w-3.5" : "h-3 w-3", "fill-amber-400 text-amber-400")} />
+                    <Star className={cn(useHeroStyle ? "h-3.5 w-3.5" : "h-3 w-3", "fill-yellow-500/70 text-yellow-500/70")} />
                     {item.rating.toFixed(1)}
                   </span>
                 )}
@@ -567,7 +567,7 @@ export const ActivityCard = memo(function ActivityCard({
                     <div className="flex items-center gap-2 mt-0.5">
                       {item.viatorRating && (
                         <span className="flex items-center gap-0.5 text-[10px]">
-                          <Star className="h-2.5 w-2.5 fill-amber-400 text-amber-400" />
+                          <Star className="h-2.5 w-2.5 fill-yellow-500/70 text-yellow-500/70" />
                           {item.viatorRating.toFixed(1)}
                           {item.viatorReviewCount && <span className="text-muted-foreground">({item.viatorReviewCount})</span>}
                         </span>
@@ -1230,7 +1230,7 @@ function RestaurantSuggestionsFlat({
                     </span>
                     {/* Restaurant badges */}
                     {option.badges?.map((badge, i) => (
-                      <span key={i} className="inline-flex items-center gap-0.5 rounded-full bg-amber-500/30 backdrop-blur-sm px-2 py-0.5 text-[10px] font-medium text-amber-200">
+                      <span key={i} className="inline-flex items-center gap-0.5 rounded-full bg-white/15 backdrop-blur-sm px-2 py-0.5 text-[10px] font-medium text-white/80">
                         <Award className="h-2.5 w-2.5" />
                         {badge}
                       </span>
@@ -1246,7 +1246,7 @@ function RestaurantSuggestionsFlat({
                   <div className="flex items-center gap-2.5 mt-1 text-[11px] text-white/85">
                     {option.rating > 0 && (
                       <span className="inline-flex items-center gap-0.5 font-semibold">
-                        <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                        <Star className="h-3 w-3 fill-yellow-500/70 text-yellow-500/70" />
                         {option.rating.toFixed(1)}
                         {option.reviewCount > 0 && (
                           <span className="text-white/50 font-normal">({option.reviewCount})</span>
@@ -1348,7 +1348,7 @@ function HotelAlternativesFlat({
     return (
       <span className="inline-flex items-center gap-0.5">
         {Array.from({ length: count }).map((_, i) => (
-          <Star key={i} className="h-2.5 w-2.5 fill-amber-400 text-amber-400" />
+          <Star key={i} className="h-2.5 w-2.5 fill-yellow-500/70 text-yellow-500/70" />
         ))}
       </span>
     );
@@ -1446,7 +1446,7 @@ function HotelAlternativesFlat({
                       {renderStars(hotel.stars)}
                       {hotel.rating > 0 && (
                         <span className="inline-flex items-center gap-0.5 font-semibold">
-                          <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                          <Star className="h-3 w-3 fill-yellow-500/70 text-yellow-500/70" />
                           {hotel.rating.toFixed(1)}
                           {hotel.reviewCount > 0 && (
                             <span className="text-white/50 font-normal">({hotel.reviewCount})</span>
@@ -1662,7 +1662,7 @@ function RestaurantSuggestions({
                     </span>
                     {/* Restaurant badges */}
                     {option.badges?.map((badge, i) => (
-                      <span key={i} className="inline-flex items-center gap-0.5 rounded-full bg-amber-500/30 backdrop-blur-sm px-2 py-0.5 text-[10px] font-medium text-amber-200">
+                      <span key={i} className="inline-flex items-center gap-0.5 rounded-full bg-white/15 backdrop-blur-sm px-2 py-0.5 text-[10px] font-medium text-white/80">
                         <Award className="h-2.5 w-2.5" />
                         {badge}
                       </span>
@@ -1681,7 +1681,7 @@ function RestaurantSuggestions({
                   <div className="flex items-center gap-2.5 mt-1 text-[11px] text-white/85">
                     {option.rating > 0 && (
                       <span className="inline-flex items-center gap-0.5 font-semibold">
-                        <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                        <Star className="h-3 w-3 fill-yellow-500/70 text-yellow-500/70" />
                         {option.rating.toFixed(1)}
                         {option.reviewCount > 0 && (
                           <span className="text-white/50 font-normal">({option.reviewCount})</span>

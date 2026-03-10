@@ -753,6 +753,33 @@ export function createCheckoutItem(
 }
 
 /**
+ * Helper: Create a TripItem for hotel check-in (Day 1)
+ */
+export function createCheckinItem(
+  hotel: Accommodation,
+  checkinTime: string,
+  dayNumber: number,
+  orderIndex: number
+): TripItem {
+  return {
+    id: `checkin-${dayNumber}`,
+    dayNumber,
+    startTime: checkinTime,
+    endTime: addMinutes(checkinTime, 15),
+    type: 'checkin',
+    title: `Check-in — ${hotel.name}`,
+    description: `Arrivée et installation à l'hôtel`,
+    locationName: hotel.name || '',
+    latitude: hotel.latitude || 0,
+    longitude: hotel.longitude || 0,
+    orderIndex,
+    duration: 15,
+    estimatedCost: 0,
+    accommodation: hotel,
+  };
+}
+
+/**
  * Helper: Create a TripItem for an activity
  */
 /**

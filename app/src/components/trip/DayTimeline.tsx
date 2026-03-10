@@ -66,6 +66,28 @@ function isHotelBoundaryTransport(item: TripItem): boolean {
     (item.id.startsWith('hotel-depart-') || item.id.startsWith('hotel-return-'));
 }
 
+function isInterItemTransport(item: TripItem): boolean {
+  return item.type === 'transport' && item.id.startsWith('travel-');
+}
+
+/** Parse transport mode from travel item title (e.g. "Marche — 2.4km" → "walk") */
+function parseTravelMode(title: string): 'walk' | 'car' | 'public' | 'taxi' | undefined {
+  const lower = (title || '').toLowerCase();
+  if (lower.startsWith('marche') || lower.includes('à pied')) return 'walk';
+  if (lower.includes('transport en commun') || lower.includes('métro') || lower.includes('bus') || lower.includes('tram')) return 'public';
+  if (lower.includes('voiture') || lower.includes('trajet')) return 'car';
+  return undefined;
+}
+
+/** Parse distance in km from travel item title (e.g. "Marche — 2.4km" → 2.4) */
+function parseTravelDistance(title: string): number | undefined {
+  const kmMatch = title.match(/([\d.]+)\s*km/i);
+  if (kmMatch) return parseFloat(kmMatch[1]);
+  const mMatch = title.match(/([\d]+)\s*m\b/i);
+  if (mMatch) return parseInt(mMatch[1], 10) / 1000;
+  return undefined;
+}
+
 function formatBoundaryDistance(distanceKm?: number): string | null {
   if (!distanceKm || distanceKm <= 0.05) return null;
   if (distanceKm < 1) return `${Math.round(distanceKm * 1000)} m`;
@@ -145,7 +167,23 @@ export const DayTimeline = memo(function DayTimeline({
     .sort((a, b) => timeToSortableMinutes(a.startTime, hasLateNightItems) - timeToSortableMinutes(b.startTime, hasLateNightItems));
 
   const boundaryItems = sortedItems.filter(isHotelBoundaryTransport);
-  const visibleItems = sortedItems.filter((item) => !isHotelBoundaryTransport(item));
+
+  // Propagate travel data from travel-* items to the next visible item,
+  // so ItineraryConnector renders with proper info instead of full cards
+  const nonBoundaryItems = sortedItems.filter((item) => !isHotelBoundaryTransport(item));
+  for (let i = 0; i < nonBoundaryItems.length; i++) {
+    const item = nonBoundaryItems[i];
+    if (isInterItemTransport(item)) {
+      // Find next non-travel item and propagate travel data to it
+      const nextVisible = nonBoundaryItems.slice(i + 1).find(it => !isInterItemTransport(it));
+      if (nextVisible) {
+        nextVisible.timeFromPrevious = item.duration;
+        nextVisible.distanceFromPrevious = parseTravelDistance(item.title);
+        nextVisible.transportToPrevious = parseTravelMode(item.title);
+      }
+    }
+  }
+  const visibleItems = nonBoundaryItems.filter((item) => !isInterItemTransport(item));
 
   const departurePrefix = `hotel-depart-${day.dayNumber}-`;
   const returnPrefix = `hotel-return-${day.dayNumber}-`;
@@ -277,7 +315,7 @@ export const DayTimeline = memo(function DayTimeline({
               />
 
               {/* Sélecteur d'hôtel inline après le check-in */}
-              {item.type === 'hotel' && hotelSelectorData && hotelSelectorData.hotels.length > 0 && (
+              {(item.type === 'hotel' || item.type === 'checkin') && hotelSelectorData && hotelSelectorData.hotels.length > 0 && (
                 <div className="mt-3 mb-1">
                   <HotelCarouselSelector
                     hotels={hotelSelectorData.hotels}

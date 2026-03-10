@@ -465,15 +465,32 @@ export async function generateTripV3(
     console.warn(`[Pipeline V3] Step 2b: Wikipedia enrichment failed (non-critical):`, err);
   }
 
-  // Step 2c: Anchor transport (time windows) — computed BEFORE clustering so clusters
+  // Step 2c: Resolve transport BEFORE anchoring time windows
+  const bestTransport = resolveBestTransport(preferences, data.transportOptions);
+
+  // Synthetic return transport: 17:00 departure (matches addReturnTransportItem hardcoded departure)
+  const syntheticReturnTransport: TransportOptionSummary | null = bestTransport?.transitLegs?.length
+    ? {
+        ...bestTransport,
+        transitLegs: [{
+          ...bestTransport.transitLegs[0],
+          departure: '17:00',
+          arrival: '23:00',
+          from: preferences.destination || '',
+          to: preferences.origin || '',
+        }],
+      }
+    : null;
+
+  // Anchor transport (time windows) — computed BEFORE clustering so clusters
   // know how much time is available on each day (first/last day compressed)
   t = Date.now();
   const timeWindows = anchorTransport(
     preferences.durationDays,
     data.outboundFlight || null,
     data.returnFlight || null,
-    null,
-    null
+    bestTransport,           // inbound: Day 1 arrival constraint
+    syntheticReturnTransport // outbound: Last day departure constraint
   );
   stageTimes['anchor-transport'] = Date.now() - t;
   console.log(`[Pipeline V3] Step 2c: Time windows anchored`);
@@ -598,8 +615,6 @@ export async function generateTripV3(
   console.log(`[Pipeline V3] Step 11: Decoration complete (LLM: ${decorResult.usedLLM})`);
 
   // Step 11b: Inject transport items (outbound + return) into day schedule
-  const bestTransport = resolveBestTransport(preferences, data.transportOptions);
-
   if (decorResult.days.length > 0) {
     const day1 = decorResult.days[0];
     const lastDay = decorResult.days[decorResult.days.length - 1];

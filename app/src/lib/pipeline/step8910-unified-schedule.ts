@@ -32,6 +32,7 @@ import {
   createActivityItem,
   createRestaurantItem,
   createCheckoutItem,
+  createCheckinItem,
   createSelfMealFallbackItem,
   getActivityCloseTime,
   getActivityOpenTime,
@@ -163,6 +164,12 @@ export function unifiedScheduleV3Days(
       }
     }
     currentTime = addMinutes(currentTime, 60); // 45min eat + 15min travel
+
+    // 2b. CHECKIN (Day 1, after breakfast — before activities)
+    if (cluster.dayNumber === 1 && hotel) {
+      const checkinTime = hotel.checkInTime || '15:00';
+      items.push(createCheckinItem(hotel, checkinTime, cluster.dayNumber, orderIndex++));
+    }
 
     // 3. CHECKOUT (last day, after breakfast)
     if (isLastDay && hotel) {
