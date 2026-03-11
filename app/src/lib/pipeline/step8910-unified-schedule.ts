@@ -160,7 +160,12 @@ export function unifiedScheduleV3Days(
           restaurants, breakfastAnchor, 'breakfast',
           0.8, 3.5, 2, dietary, usedRestaurantIds, dayDateForRestaurant
         );
-        if (breakfastPlacement && breakfastPlacement.distanceFromAnchor <= 0.8) {
+        // Validate restaurant is actually open at the specific slot time (not just generic meal window)
+        const breakfastEnd = addMinutes(currentTime, 45);
+        const breakfastOpenAtSlot = breakfastPlacement && dayDateForRestaurant
+          ? isRestaurantOpenForSlot(breakfastPlacement.primary, dayDateForRestaurant, currentTime, breakfastEnd)
+          : true; // no date → skip check
+        if (breakfastPlacement && breakfastPlacement.distanceFromAnchor <= 0.8 && breakfastOpenAtSlot) {
           items.push(createRestaurantItem(
             { ...breakfastPlacement, anchorName: 'Hotel' },
             'breakfast', currentTime, 45, cluster.dayNumber, orderIndex++
