@@ -2942,7 +2942,7 @@ async function enrichItemsWithTransitData(
     const results = await Promise.all(
       batch.map(async ({ prev, next, distance }) => {
         try {
-          const mode = distance > 3 ? 'transit' : 'walking';
+          const mode = distance > 1 ? 'transit' : 'walking';
           const directions = await getDirections({
             from: { lat: prev.latitude!, lng: prev.longitude! },
             to: { lat: next.latitude!, lng: next.longitude! },

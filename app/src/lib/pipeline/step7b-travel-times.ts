@@ -111,7 +111,7 @@ export async function computeTravelTimes(
           const request: DirectionsRequest = {
             from: { lat: from.lat, lng: from.lng },
             to: { lat: to.lat, lng: to.lng },
-            mode: distance > 2 ? 'transit' : 'walking',
+            mode: distance > 1 ? 'transit' : 'walking',
           };
 
           const directions = await getDirections(request);
@@ -124,7 +124,7 @@ export async function computeTravelTimes(
               toName: to.name,
               distanceKm: directions.distance || distance,
               durationMinutes: Math.ceil(directions.duration / 5) * 5, // Round to 5min
-              mode: distance > 2 ? 'transit' : 'walk',
+              mode: distance > 1 ? 'transit' : 'walk',
               isEstimate: false,
               polyline: directions.overviewPolyline,
             });
@@ -146,7 +146,7 @@ export async function computeTravelTimes(
         toName: to.name,
         distanceKm: distance,
         durationMinutes: Math.max(5, roundedMinutes), // Minimum 5 minutes
-        mode: distance > 2 ? 'transit' : 'walk',
+        mode: distance > 1 ? 'transit' : 'walk',
         isEstimate: true,
       });
     }
@@ -200,7 +200,7 @@ function estimateAllLegs(
       toName: to.name,
       distanceKm: distance,
       durationMinutes: Math.max(5, roundedMinutes),
-      mode: distance > 2 ? 'transit' : 'walk',
+      mode: distance > 1 ? 'transit' : 'walk',
       isEstimate: true,
     });
   }
