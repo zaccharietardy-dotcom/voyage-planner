@@ -816,6 +816,7 @@ function generateFallbackHotels(
       adults: 2,
     }),
     distanceToCenter: 0.5 + Math.random() * 1,
+    dataReliability: 'generated' as const,
   }));
 }
 
