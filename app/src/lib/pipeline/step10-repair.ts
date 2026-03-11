@@ -502,6 +502,7 @@ export function fillLargeGapsWithFreeTime(days: TripDay[]): void {
             longitude: lng,
             orderIndex: 0,
             duration: freeDuration,
+            imageUrl: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=600&h=400&fit=crop',
             estimatedCost: 0,
           },
         });

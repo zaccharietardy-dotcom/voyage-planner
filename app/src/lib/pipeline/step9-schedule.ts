@@ -27,6 +27,18 @@ import { isOpenAtTime } from './utils/opening-hours';
 import { enrichWithTicketingLinks } from '../services/officialTicketing';
 
 // ---------------------------------------------------------------------------
+// Default images for items without their own photo
+// ---------------------------------------------------------------------------
+const DEFAULT_IMAGES = {
+  breakfast: 'https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=600&h=400&fit=crop',
+  lunch: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&h=400&fit=crop',
+  dinner: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&h=400&fit=crop',
+  checkin: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&h=400&fit=crop',
+  checkout: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&h=400&fit=crop',
+  free_time: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=600&h=400&fit=crop',
+} as const;
+
+// ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
 
@@ -613,6 +625,7 @@ export function createSelfMealFallbackItem(
     orderIndex,
     duration,
     mealType,
+    imageUrl: DEFAULT_IMAGES[mealType],
     estimatedCost: 0,
     restaurant: undefined,
     restaurantAlternatives: undefined,
@@ -748,6 +761,7 @@ export function createCheckoutItem(
     longitude: hotel.longitude || 0,
     orderIndex,
     duration: 30,
+    imageUrl: hotel.photos?.[0] || DEFAULT_IMAGES.checkout,
     estimatedCost: 0,
   };
 }
@@ -774,6 +788,7 @@ export function createCheckinItem(
     longitude: hotel.longitude || 0,
     orderIndex,
     duration: 15,
+    imageUrl: hotel.photos?.[0] || DEFAULT_IMAGES.checkin,
     estimatedCost: 0,
     accommodation: hotel,
   };
@@ -957,6 +972,7 @@ export function createRestaurantItem(
     orderIndex,
     duration,
     mealType,
+    imageUrl: DEFAULT_IMAGES[mealType],
     restaurant,
     restaurantAlternatives: meal.alternatives,
     rating: restaurant.rating,
