@@ -64,6 +64,7 @@ export interface DirectionsResult {
   transitLines: TransitLine[];
   googleMapsUrl: string;
   source: 'google' | 'openroute' | 'estimated';
+  overviewPolyline?: string; // Encoded polyline Google (pour afficher la vraie route sur la map)
 }
 
 export interface RideHailingEstimate {
@@ -193,6 +194,7 @@ async function searchWithGoogle(
     steps,
     transitLines,
     source: 'google',
+    overviewPolyline: route.overview_polyline?.points,
   };
 }
 

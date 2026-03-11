@@ -357,6 +357,7 @@ export interface TripItem {
   distanceFromPrevious?: number; // en km
   timeFromPrevious?: number; // en minutes
   transportToPrevious?: 'walk' | 'car' | 'public' | 'taxi';
+  routePolylineFromPrevious?: string; // Encoded polyline Google du trajet depuis l'item précédent
   // Normalized transport metadata for rendering/analytics
   transportMode?: 'train' | 'bus' | 'car' | 'ferry' | 'walking' | 'transit' | 'RER' | 'metro';
   transportRole?: 'longhaul' | 'hotel_depart' | 'hotel_return' | 'inter_item' | 'daytrip_outbound' | 'daytrip_return';

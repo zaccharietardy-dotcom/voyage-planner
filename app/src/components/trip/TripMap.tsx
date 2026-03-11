@@ -85,6 +85,51 @@ function parseSortableTime(time?: string): number {
   return h * 60 + m;
 }
 
+/**
+ * Decode Google's encoded polyline into [lat, lng] pairs.
+ * Algorithm: https://developers.google.com/maps/documentation/utilities/polylinealgorithm
+ */
+function decodePolyline(encoded: string): [number, number][] {
+  const points: [number, number][] = [];
+  let index = 0;
+  let lat = 0;
+  let lng = 0;
+
+  while (index < encoded.length) {
+    let shift = 0;
+    let result = 0;
+    let byte: number;
+
+    do {
+      byte = encoded.charCodeAt(index++) - 63;
+      result |= (byte & 0x1f) << shift;
+      shift += 5;
+    } while (byte >= 0x20);
+    lat += result & 1 ? ~(result >> 1) : result >> 1;
+
+    shift = 0;
+    result = 0;
+    do {
+      byte = encoded.charCodeAt(index++) - 63;
+      result |= (byte & 0x1f) << shift;
+      shift += 5;
+    } while (byte >= 0x20);
+    lng += result & 1 ? ~(result >> 1) : result >> 1;
+
+    points.push([lat / 1e5, lng / 1e5]);
+  }
+
+  return points;
+}
+
+/** Format minutes into compact travel time label */
+function formatTravelTime(minutes: number): string {
+  if (minutes < 60) return `${Math.round(minutes)} min`;
+  const h = Math.floor(minutes / 60);
+  const m = Math.round(minutes % 60);
+  return m > 0 ? `${h}h${String(m).padStart(2, '0')}` : `${h}h`;
+}
+
 function compareItemsForRoute(a: TripItem, b: TripItem): number {
   const dayDiff = (a.dayNumber || 0) - (b.dayNumber || 0);
   if (dayDiff !== 0) return dayDiff;
@@ -216,6 +261,10 @@ const LEAFLET_STYLE_OVERRIDES = `
 }
 .animated-route {
   animation: dashflow 1.2s linear infinite;
+}
+.route-label {
+  background: none !important;
+  border: none !important;
 }
 `;
 
@@ -420,7 +469,7 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
       }
     }
 
-    // Draw route polylines PER DAY (prevents cross-day zigzags)
+    // Draw route polylines PER DAY with real routes when available
     const routeCandidates = displayItems
       .filter((item) => item.latitude && item.longitude && item.type !== 'flight')
       .sort(compareItemsForRoute);
@@ -434,7 +483,7 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
     });
 
     const dayEntries = Array.from(byDay.entries()).sort((a, b) => a[0] - b[0]);
-    dayEntries.forEach(([dayNum, dayItems], idx) => {
+    dayEntries.forEach(([dayNum, dayItems]) => {
       // Extract hotel coordinates from checkin/checkout items
       const hotelItem = displayItems.find(
         (item) =>
@@ -447,77 +496,137 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
         ? [hotelItem.accommodation.latitude, hotelItem.accommodation.longitude] as [number, number]
         : null;
 
-      // Build route: hotel → activities → hotel (or departure transport on last day)
-      const routeCoords: [number, number][] = [];
+      // Build ordered node list: hotel → activities → hotel
+      interface RouteNode {
+        coords: [number, number];
+        item?: TripItem; // undefined for hotel nodes
+      }
+      const nodes: RouteNode[] = [];
 
-      // Start from hotel (if available)
       if (hotelCoords) {
-        routeCoords.push(hotelCoords);
+        nodes.push({ coords: hotelCoords });
       }
 
-      // Add all day items (excluding checkin/checkout which are at hotel)
       for (const item of dayItems) {
         if (item.type !== 'checkin' && item.type !== 'checkout') {
-          routeCoords.push([item.latitude, item.longitude]);
+          nodes.push({ coords: [item.latitude, item.longitude], item });
         }
       }
 
-      // End at hotel (unless last day with departure transport)
       const hasReturnTransport = dayItems.some(item =>
         (item.type === 'transport' || item.type === 'flight') &&
         item.transportRole === 'longhaul' &&
         (item.title.includes('→') || item.id.includes('ret-'))
       );
       if (hotelCoords && !hasReturnTransport) {
-        routeCoords.push(hotelCoords);
+        nodes.push({ coords: hotelCoords });
       }
 
-      if (routeCoords.length < 2) return;
+      if (nodes.length < 2) return;
 
       const color = filterDay === null ? getDayColor(dayNum).bg : getDayColor(filterDay).bg;
 
-      // Halo (ombre)
-      const halo = L.polyline(routeCoords, {
-        color,
-        weight: 7,
-        opacity: 0.15,
-        smoothFactor: 1.5,
-        lineJoin: 'round',
-        lineCap: 'round',
-      });
-      routeLayer.addLayer(halo);
+      // Draw per-segment: real polyline or straight line fallback
+      for (let i = 0; i < nodes.length - 1; i++) {
+        const fromNode = nodes[i];
+        const toNode = nodes[i + 1];
+        const nextItem = toNode.item;
 
-      // Route principale
-      const polyline = L.polyline(routeCoords, {
-        color,
-        weight: 3,
-        opacity: 0.7,
-        smoothFactor: 1.5,
-        lineJoin: 'round',
-        lineCap: 'round',
-      });
-      routeLayer.addLayer(polyline);
+        // Determine segment coords: decoded polyline or straight line
+        let segmentCoords: [number, number][];
+        if (nextItem?.routePolylineFromPrevious) {
+          try {
+            segmentCoords = decodePolyline(nextItem.routePolylineFromPrevious);
+          } catch {
+            segmentCoords = [fromNode.coords, toNode.coords];
+          }
+        } else {
+          segmentCoords = [fromNode.coords, toNode.coords];
+        }
 
-      // Decorator avec flèches directionnelles
-      if (polylineDecoratorRef.current) {
-        const decorator = L.polylineDecorator(polyline, {
-          patterns: [{
-            offset: '25%',
-            repeat: 80,
-            symbol: L.Symbol.arrowHead({
-              pixelSize: 9,
-              polygon: false,
-              pathOptions: {
-                stroke: true,
-                color,
-                weight: 2,
-                opacity: 0.8,
-                fillOpacity: 0,
-              },
-            }),
-          }],
+        // Halo
+        const halo = L.polyline(segmentCoords, {
+          color,
+          weight: 7,
+          opacity: 0.15,
+          smoothFactor: 1.5,
+          lineJoin: 'round',
+          lineCap: 'round',
         });
-        routeLayer.addLayer(decorator);
+        routeLayer.addLayer(halo);
+
+        // Main line
+        const polyline = L.polyline(segmentCoords, {
+          color,
+          weight: 3,
+          opacity: 0.7,
+          smoothFactor: 1.5,
+          lineJoin: 'round',
+          lineCap: 'round',
+        });
+        routeLayer.addLayer(polyline);
+
+        // Arrow decorators
+        if (polylineDecoratorRef.current) {
+          const decorator = L.polylineDecorator(polyline, {
+            patterns: [{
+              offset: '25%',
+              repeat: 80,
+              symbol: L.Symbol.arrowHead({
+                pixelSize: 9,
+                polygon: false,
+                pathOptions: {
+                  stroke: true,
+                  color,
+                  weight: 2,
+                  opacity: 0.8,
+                  fillOpacity: 0,
+                },
+              }),
+            }],
+          });
+          routeLayer.addLayer(decorator);
+        }
+
+        // Travel time label at segment midpoint
+        if (nextItem?.timeFromPrevious && nextItem.timeFromPrevious >= 2) {
+          const midIdx = Math.floor(segmentCoords.length / 2);
+          const midPoint = segmentCoords[midIdx];
+
+          // Build label HTML
+          let labelHtml = `<span style="
+            background:white;color:${color};
+            font-size:10px;font-weight:600;
+            padding:2px 5px;border-radius:8px;
+            box-shadow:0 1px 3px rgba(0,0,0,0.2);
+            white-space:nowrap;display:flex;align-items:center;gap:3px;
+          ">${formatTravelTime(nextItem.timeFromPrevious)}`;
+
+          // Transit badges
+          if (nextItem.transitInfo?.lines && nextItem.transitInfo.lines.length > 0) {
+            const badges = nextItem.transitInfo.lines.slice(0, 3).map(line => {
+              const modeIcon = line.mode === 'metro' ? '🚇' : line.mode === 'tram' ? '🚊' : line.mode === 'train' ? '🚆' : line.mode === 'ferry' ? '⛴️' : '🚌';
+              const bgColor = line.color || '#6B7280';
+              return `<span style="
+                background:${bgColor};color:white;
+                font-size:9px;font-weight:600;
+                padding:1px 4px;border-radius:4px;
+                display:inline-flex;align-items:center;gap:1px;
+              ">${modeIcon}${line.number}</span>`;
+            }).join('');
+            labelHtml += badges;
+          }
+          labelHtml += '</span>';
+
+          const labelIcon = L.divIcon({
+            className: 'route-label',
+            html: labelHtml,
+            iconSize: [0, 0],
+            iconAnchor: [0, 0],
+          });
+          const labelMarker = L.marker(midPoint, { icon: labelIcon, interactive: false });
+          routeLayer.addLayer(labelMarker);
+        }
       }
     });
 

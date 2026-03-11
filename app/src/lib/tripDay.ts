@@ -2986,6 +2986,26 @@ async function enrichItemsWithTransitData(
         next.googleMapsUrl = directions.googleMapsUrl;
       }
 
+      // Stocker le polyline encodé pour affichage de la vraie route sur la map
+      if (directions.overviewPolyline) {
+        next.routePolylineFromPrevious = directions.overviewPolyline;
+      }
+
+      // Remplir transitInfo (champ existant jamais peuplé)
+      if (directions.transitLines && directions.transitLines.length > 0) {
+        next.transitInfo = {
+          lines: directions.transitLines.map(tl => ({
+            number: tl.number,
+            mode: tl.mode,
+            color: tl.color,
+          })),
+          walkingDistance: directions.steps
+            .filter(s => s.mode === 'walk')
+            .reduce((sum, s) => sum + s.distance, 0),
+          source: directions.source,
+        };
+      }
+
     }
 
     // Pause entre les batches (200ms) pour ne pas surcharger les APIs
