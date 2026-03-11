@@ -870,6 +870,7 @@ export function createTravelItem(
     orderIndex,
     duration: durationMinutes,
     estimatedCost: 0,
+    routePolylineFromPrevious: leg.polyline,
   };
 }
 

@@ -144,8 +144,8 @@ function compareItemsForRoute(a: TripItem, b: TripItem): number {
 function createNumberedIcon(L: any, num: number, type: string, dayNumber: number, isHighlighted: boolean) {
   const colors = getDayColor(dayNumber);
   const shape = TYPE_SHAPES[type] || TYPE_SHAPES.activity;
-  const size = isHighlighted ? 32 : 26;
-  const fontSize = isHighlighted ? 13 : 11;
+  const size = isHighlighted ? 36 : 30;
+  const fontSize = isHighlighted ? 14 : 12;
   const shadow = isHighlighted
     ? `box-shadow: 0 0 0 3px ${colors.bg}40, 0 2px 8px rgba(0,0,0,0.3);`
     : 'box-shadow: 0 1px 4px rgba(0,0,0,0.25);';
@@ -547,8 +547,8 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
         // Halo
         const halo = L.polyline(segmentCoords, {
           color,
-          weight: 7,
-          opacity: 0.15,
+          weight: 12,
+          opacity: 0.22,
           smoothFactor: 1.5,
           lineJoin: 'round',
           lineCap: 'round',
@@ -558,8 +558,8 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
         // Main line
         const polyline = L.polyline(segmentCoords, {
           color,
-          weight: 3,
-          opacity: 0.7,
+          weight: 4,
+          opacity: 0.85,
           smoothFactor: 1.5,
           lineJoin: 'round',
           lineCap: 'round',
@@ -573,7 +573,7 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
               offset: '25%',
               repeat: 80,
               symbol: L.Symbol.arrowHead({
-                pixelSize: 9,
+                pixelSize: 10,
                 polygon: false,
                 pathOptions: {
                   stroke: true,
@@ -596,8 +596,8 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
           // Build label HTML
           let labelHtml = `<span style="
             background:white;color:${color};
-            font-size:10px;font-weight:600;
-            padding:2px 5px;border-radius:8px;
+            font-size:11px;font-weight:600;
+            padding:3px 7px;border-radius:8px;
             box-shadow:0 1px 3px rgba(0,0,0,0.2);
             white-space:nowrap;display:flex;align-items:center;gap:3px;
           ">${formatTravelTime(nextItem.timeFromPrevious)}`;
@@ -628,6 +628,39 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
           routeLayer.addLayer(labelMarker);
         }
       }
+    });
+
+    // Day summary pills — floating label at centroid of each day's activities
+    dayEntries.forEach(([dayNum, dayItems]) => {
+      const activityItems = dayItems.filter(i => i.type === 'activity' && i.latitude && i.longitude);
+      if (activityItems.length === 0) return;
+
+      // Compute centroid
+      const centroidLat = activityItems.reduce((s, i) => s + i.latitude, 0) / activityItems.length;
+      const centroidLng = activityItems.reduce((s, i) => s + i.longitude, 0) / activityItems.length;
+
+      // Compute total distance for the day (sum of all travel legs)
+      const dayTravelItems = dayItems.filter(i => i.type === 'transport' && i.distanceFromPrevious);
+      const totalKm = dayTravelItems.reduce((s, i) => s + (i.distanceFromPrevious || 0), 0);
+      const distLabel = totalKm > 0 ? ` · ${totalKm.toFixed(1)} km` : '';
+
+      const color = filterDay === null ? getDayColor(dayNum).bg : getDayColor(filterDay).bg;
+      const pillHtml = `<span style="
+        background:${color};color:white;
+        font-size:11px;font-weight:700;
+        padding:3px 8px;border-radius:10px;
+        box-shadow:0 1px 4px rgba(0,0,0,0.25);
+        white-space:nowrap;letter-spacing:0.3px;
+      ">J${dayNum}${distLabel}</span>`;
+
+      const pillIcon = L.divIcon({
+        className: 'day-label',
+        html: pillHtml,
+        iconSize: [0, 0],
+        iconAnchor: [0, -12],
+      });
+      const pillMarker = L.marker([centroidLat, centroidLng], { icon: pillIcon, interactive: false });
+      routeLayer.addLayer(pillMarker);
     });
 
     // Flight arc

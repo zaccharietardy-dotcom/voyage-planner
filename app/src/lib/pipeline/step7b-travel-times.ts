@@ -29,6 +29,8 @@ export interface TravelLeg {
   mode: 'walk' | 'transit' | 'drive';
   /** Whether this time comes from a real API call or estimation */
   isEstimate: boolean;
+  /** Encoded Google polyline for the real route on the map */
+  polyline?: string;
 }
 
 export interface DayTravelTimes {
@@ -124,6 +126,7 @@ export async function computeTravelTimes(
               durationMinutes: Math.ceil(directions.duration / 5) * 5, // Round to 5min
               mode: distance > 2 ? 'transit' : 'walk',
               isEstimate: false,
+              polyline: directions.overviewPolyline,
             });
             apiCallsUsed++;
             continue;

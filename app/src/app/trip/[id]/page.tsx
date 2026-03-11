@@ -1039,8 +1039,8 @@ export default function TripPage() {
   const itemMapNumbers = useMemo(() => {
     if (!trip) return new Map<string, number>();
     const numMap = new Map<string, number>();
-    let num = 1;
     for (const day of trip.days) {
+      let num = 1;
       // Sort items by startTime to match chronological map order
       const sorted = [...day.items].sort((a, b) => {
         const aTime = a.startTime || '00:00';
