@@ -1212,7 +1212,7 @@ export default function TripPage() {
       )}
 
       {/* Header — hidden on mobile (replaced by floating header over map) */}
-      <header className="hidden lg:block sticky top-16 z-40 border-b border-[#1e3a5f]/10 bg-background/85 shadow-sm">
+      <header className={`sticky top-16 z-40 border-b border-[#1e3a5f]/10 bg-background/85 shadow-sm ${isDesktop ? '' : 'hidden'}`}>
         <div className="container mx-auto px-4 py-3">
           <div className="rounded-2xl border border-[#1e3a5f]/10 bg-background/75 px-3 py-2 shadow-sm">
             <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
@@ -1550,7 +1550,7 @@ export default function TripPage() {
       </header>
 
       {/* Mobile layout - Fullscreen map + bottom sheet */}
-      <div className="lg:hidden fixed inset-0 z-30">
+      {!isDesktop && <div className="fixed inset-0 z-30">
           {/* Map fullscreen background */}
           <div className="absolute inset-0">
             <TripMap
@@ -1817,10 +1817,10 @@ export default function TripPage() {
               </Tabs>
             </DrawerContent>
           </Drawer>
-        </div>
+        </div>}
 
       {/* Desktop layout: planning left (60%) + sticky map right (40%) */}
-      <div className="hidden lg:flex gap-4 container mx-auto px-4 py-6">
+      {isDesktop && <div className="flex gap-4 container mx-auto px-4 py-6">
         {/* Left: Planning */}
           <div className="flex-[3] min-w-0">
             <Tabs value={mainTab} onValueChange={setMainTab}>
@@ -2006,16 +2006,16 @@ export default function TripPage() {
               />
             </div>
           </div>
-      </div>
+      </div>}
 
       {/* Comments section */}
-      <div className="hidden lg:block container mx-auto px-4 py-6 border-t">
+      {isDesktop && <div className="container mx-auto px-4 py-6 border-t">
         <Card>
           <CardContent className="p-4 sm:p-6">
             <CommentsSection tripId={tripId} />
           </CardContent>
         </Card>
-      </div>
+      </div>}
 
       {/* Dialogs */}
       <CreateProposalDialog open={showProposalDialog} onClose={() => { setShowProposalDialog(false); setPendingChanges([]); }} onSubmit={handleCreateProposal} pendingChanges={pendingChanges} />
