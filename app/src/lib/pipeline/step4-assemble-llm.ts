@@ -24,7 +24,7 @@ import type {
   LLMDayItem,
   OnPipelineEvent,
 } from './types';
-import { calculateDistance } from '../services/geocoding';
+import { calculateDistance, AIRPORTS } from '../services/geocoding';
 import { fetchPlaceImage, fetchRestaurantPhotoByPlaceId } from './services/wikimediaImages';
 import { batchFetchWikipediaSummaries, getWikiLanguageForDestination } from '../services/wikipedia';
 import { normalizeHotelBookingUrl } from '../services/bookingLinks';
@@ -328,8 +328,8 @@ export function addOutboundTransportItem(
       title: `${flight.departureCity} → ${flight.arrivalCity}`,
       description: `Vol ${flight.airline} ${flight.flightNumber || ''}`.trim(),
       locationName: flight.departureAirport,
-      latitude: fallbackCoords.lat,
-      longitude: fallbackCoords.lng,
+      latitude: AIRPORTS[flight.departureAirportCode]?.latitude ?? fallbackCoords.lat,
+      longitude: AIRPORTS[flight.departureAirportCode]?.longitude ?? fallbackCoords.lng,
       orderIndex: 0,
       duration: flight.duration,
       flight: flight,
@@ -413,8 +413,8 @@ export function addReturnTransportItem(
       title: `${returnFlight.departureCity} → ${returnFlight.arrivalCity}`,
       description: `Vol ${returnFlight.airline} ${returnFlight.flightNumber || ''}`.trim(),
       locationName: returnFlight.departureAirport,
-      latitude: fallbackCoords.lat,
-      longitude: fallbackCoords.lng,
+      latitude: AIRPORTS[returnFlight.departureAirportCode]?.latitude ?? fallbackCoords.lat,
+      longitude: AIRPORTS[returnFlight.departureAirportCode]?.longitude ?? fallbackCoords.lng,
       orderIndex: lastDay.items.length,
       duration: returnFlight.duration,
       flight: returnFlight,
