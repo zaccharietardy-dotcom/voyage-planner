@@ -537,6 +537,16 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
         if (nextItem?.routePolylineFromPrevious) {
           try {
             segmentCoords = decodePolyline(nextItem.routePolylineFromPrevious);
+            // Ensure polyline connects to actual from/to nodes — the encoded polyline
+            // may have been computed between different items (e.g. filtered-out transports)
+            if (segmentCoords.length > 0) {
+              const firstPt = segmentCoords[0];
+              const lastPt = segmentCoords[segmentCoords.length - 1];
+              const dStart = Math.abs(firstPt[0] - fromNode.coords[0]) + Math.abs(firstPt[1] - fromNode.coords[1]);
+              const dEnd = Math.abs(lastPt[0] - toNode.coords[0]) + Math.abs(lastPt[1] - toNode.coords[1]);
+              if (dStart > 0.002) segmentCoords.unshift(fromNode.coords);
+              if (dEnd > 0.002) segmentCoords.push(toNode.coords);
+            }
           } catch {
             segmentCoords = [fromNode.coords, toNode.coords];
           }
