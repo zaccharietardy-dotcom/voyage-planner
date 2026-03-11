@@ -490,9 +490,7 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
     const arrivalAirportCoords = new Map<number, [number, number]>(); // dayNumber → coords
     const departureAirportCoords = new Map<number, [number, number]>();
     for (const fi of flightItems) {
-      const flight = fi.flight;
-      const arrCode = flight?.arrivalAirportCode;
-      const depCode = flight?.departureAirportCode;
+      const arrCode = fi.flight?.arrivalAirportCode;
       if (fi.orderIndex === 0 && arrCode) {
         // Arrival flight — look up arrival airport coords
         const ap = AIRPORTS[arrCode];
@@ -510,7 +508,7 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
           const airportMarker = L.marker(coords, { icon: airportIcon, interactive: false });
           markerLayer.addLayer(airportMarker);
         }
-      } else if (fi.latitude && fi.longitude && depCode) {
+      } else if (fi.orderIndex !== 0 && fi.latitude && fi.longitude) {
         // Departure flight — item coords are already the departure airport
         const coords: [number, number] = [fi.latitude, fi.longitude];
         departureAirportCoords.set(fi.dayNumber, coords);
