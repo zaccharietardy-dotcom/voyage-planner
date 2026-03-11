@@ -558,10 +558,6 @@ export function GeneratingScreen({ destination, durationDays, pipelineStep }: Ge
           </div>
         </div>
 
-        {/* Bottom hint */}
-        <p className="mt-6 text-center text-xs text-muted-foreground">
-          {t('generating.hint')}
-        </p>
       </div>
     </motion.div>
   );
