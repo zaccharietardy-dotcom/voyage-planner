@@ -265,6 +265,12 @@ const LEAFLET_STYLE_OVERRIDES = `
 .route-label {
   background: none !important;
   border: none !important;
+  z-index: 400 !important;
+}
+.day-label {
+  background: none !important;
+  border: none !important;
+  z-index: 450 !important;
 }
 `;
 
@@ -483,6 +489,7 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
     });
 
     const dayEntries = Array.from(byDay.entries()).sort((a, b) => a[0] - b[0]);
+    const usedLabelPositions: [number, number][] = []; // Anti-collision tracking for route labels
     dayEntries.forEach(([dayNum, dayItems]) => {
       // Extract hotel coordinates from checkin/checkout items
       const hotelItem = displayItems.find(
@@ -603,6 +610,12 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
           const midIdx = Math.floor(segmentCoords.length / 2);
           const midPoint = segmentCoords[midIdx];
 
+          // Anti-collision: skip if another label is within ~100m (0.001°)
+          const tooClose = usedLabelPositions.some(
+            ([lat, lng]) => Math.abs(lat - midPoint[0]) < 0.001 && Math.abs(lng - midPoint[1]) < 0.001
+          );
+          if (tooClose) continue;
+
           // Parse day color hex to RGB for rgba() border
           const r = parseInt(color.slice(1, 3), 16);
           const g = parseInt(color.slice(3, 5), 16);
@@ -660,6 +673,7 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
           });
           const labelMarker = L.marker(midPoint, { icon: labelIcon, interactive: false });
           routeLayer.addLayer(labelMarker);
+          usedLabelPositions.push([midPoint[0], midPoint[1]]);
         }
       }
     });
