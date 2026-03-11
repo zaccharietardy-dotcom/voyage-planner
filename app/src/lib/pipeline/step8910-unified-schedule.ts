@@ -704,6 +704,72 @@ export function unifiedScheduleV3Days(
     }
   }
 
+  // 22. Final departure-day sweep: remove items past departure window
+  // Runs AFTER all repairs to catch items injected by steps 14, 17, 18, 20
+  for (const day of days) {
+    const tw = timeWindows.find(w => w.dayNumber === day.dayNumber);
+    if (!tw?.hasDepartureTransport) continue;
+
+    const cutoffMin = timeToMin(tw.activityEndTime);
+    const beforeCount = day.items.length;
+
+    day.items = day.items.filter(item => {
+      // Keep transport, restaurants, checkin/checkout, hotel — handled separately
+      if (item.type !== 'activity' && item.type !== 'free_time') return true;
+
+      const startMin = timeToMin(item.startTime || '00:00');
+      if (startMin >= cutoffMin) {
+        console.log(`[Unified] Departure sweep: dropping "${item.title}" on Day ${day.dayNumber} (starts ${item.startTime} past ${tw.activityEndTime})`);
+        return false;
+      }
+      // Also check END for activities
+      if (item.type === 'activity' && item.endTime) {
+        const endMin = timeToMin(item.endTime);
+        if (endMin > cutoffMin) {
+          console.log(`[Unified] Departure sweep: dropping "${item.title}" on Day ${day.dayNumber} (ends ${item.endTime} past ${tw.activityEndTime})`);
+          return false;
+        }
+      }
+      return true;
+    });
+
+    if (day.items.length < beforeCount) {
+      sortAndReindexItems(day.items);
+    }
+  }
+
+  // 23. Re-run orphan transport removal after all repairs + departure sweep
+  for (const day of days) {
+    const beforeLen = day.items.length;
+    day.items = day.items.filter((item, i) => {
+      if (item.type !== 'transport') return true;
+      const prev = day.items[i - 1];
+      const next = day.items[i + 1];
+      const hasActivityNeighbor = (prev && prev.type === 'activity') || (next && next.type === 'activity');
+      if (!hasActivityNeighbor) {
+        console.log(`[Unified] Post-repair orphan transport: removing "${item.description}" on Day ${day.dayNumber}`);
+        return false;
+      }
+      return true;
+    });
+    if (day.items.length < beforeLen) {
+      day.items.forEach((item, idx) => { item.orderIndex = idx; });
+    }
+  }
+
+  // 24. Re-fix transport labels
+  for (const day of days) {
+    for (let i = 0; i < day.items.length; i++) {
+      const item = day.items[i];
+      if (item.type !== 'transport') continue;
+      const prev = day.items[i - 1];
+      const next = day.items[i + 1];
+      const fromName = prev ? (prev.locationName || prev.title || '?') : 'Hôtel';
+      const toName = next ? (next.locationName || next.title || '?') : '?';
+      item.description = `${fromName} → ${toName}`;
+    }
+  }
+
   // Final sort after repairs
   for (const day of days) {
     sortAndReindexItems(day.items);
