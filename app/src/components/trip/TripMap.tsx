@@ -252,6 +252,9 @@ const LEAFLET_STYLE_OVERRIDES = `
   background: none !important;
   border: none !important;
 }
+.numbered-marker {
+  z-index: 500 !important;
+}
 .leaflet-control-attribution {
   font-size: 10px !important;
   opacity: 0.6 !important;
@@ -490,6 +493,12 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
 
     const dayEntries = Array.from(byDay.entries()).sort((a, b) => a[0] - b[0]);
     const usedLabelPositions: [number, number][] = []; // Anti-collision tracking for route labels
+
+    // Pre-populate with activity marker positions so route-labels avoid overlapping markers
+    routeCandidates.forEach((item) => {
+      usedLabelPositions.push([item.latitude, item.longitude]);
+    });
+
     dayEntries.forEach(([dayNum, dayItems]) => {
       // Extract hotel coordinates from checkin/checkout items
       const hotelItem = displayItems.find(
