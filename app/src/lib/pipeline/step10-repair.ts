@@ -355,6 +355,61 @@ export function ensureMustSees(
       if (injected) break; // break days loop
     }
 
+    // Fallback: place must-see at its own preferred time, evict lowest-rated regardless of time
+    if (!injected) {
+      for (const day of days) {
+        const dayDate = getDayDate(startDate, day.dayNumber);
+        if (!isActivityOpenOnDay(mustSee as any, dayDate)) continue;
+
+        const evictCandidates = day.items
+          .filter(i => i.type === 'activity' && !i.mustSee)
+          .sort((a, b) => (a.rating || 0) - (b.rating || 0));
+
+        if (evictCandidates.length === 0) continue;
+
+        const evicted = evictCandidates[0];
+        const idx = day.items.indexOf(evicted);
+        if (idx < 0) continue;
+
+        // Use must-see's own opening hours for start time, or early morning default
+        const preferredStart = mustSee.openingHours?.open || '09:00';
+        const mustSeeDuration = mustSee.duration || 60;
+
+        day.items[idx] = {
+          ...day.items[idx],
+          id: mustSee.id || day.items[idx].id,
+          title: normalizeActivityTitle(mustSee.name),
+          latitude: mustSee.latitude,
+          longitude: mustSee.longitude,
+          duration: mustSeeDuration,
+          startTime: preferredStart,
+          endTime: addMinutes(preferredStart, mustSeeDuration),
+          rating: mustSee.rating,
+          mustSee: true,
+          description: mustSee.description || '',
+          locationName: mustSee.name,
+          openingHours: mustSee.openingHours,
+          openingHoursByDay: mustSee.openingHoursByDay,
+          bookingUrl: mustSee.bookingUrl,
+          imageUrl: mustSee.imageUrl,
+          googleMapsPlaceUrl: (mustSee as any).googlePlaceId
+            ? `https://www.google.com/maps/place/?q=place_id:${(mustSee as any).googlePlaceId}`
+            : mustSee.latitude && mustSee.longitude
+              ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mustSee.name)}&query=${mustSee.latitude},${mustSee.longitude}`
+              : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mustSee.name)}`,
+        };
+        repairs.push({
+          type: 'replacement',
+          dayNumber: day.dayNumber,
+          itemTitle: mustSee.name,
+          description: `Injected must-see "${mustSee.name}" at ${preferredStart}, evicted "${evicted.title}" (time-unconstrained fallback)`,
+        });
+        plannedActivityNamesNorm.add(normalizeForMatching(mustSee.name));
+        injected = true;
+        break;
+      }
+    }
+
     if (!injected) {
       unresolvedViolations.push(`Must-see "${mustSee.name}" not in plan and could not be injected`);
     }
