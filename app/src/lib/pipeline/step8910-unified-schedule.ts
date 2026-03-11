@@ -141,7 +141,7 @@ export function unifiedScheduleV3Days(
     // Meal eligibility: derived from time window, not ad-hoc heuristics
     const dayStartMin = timeToMin(dayStartTime);
     const dayEndMin = timeToMin(dayEndTime);
-    const canHaveBreakfast = dayStartMin < 10 * 60;   // start before 10:00
+    const canHaveBreakfast = dayStartMin < 10 * 60 && dayStartMin < dayEndMin;   // start before 10:00 AND window exists
     const canHaveLunch = dayStartMin < 13 * 60 && dayEndMin > 12 * 60; // window spans lunch hours
     const canHaveDinner = dayEndMin >= 19 * 60;        // day extends past 19:00
 
@@ -194,7 +194,12 @@ export function unifiedScheduleV3Days(
 
     // 3. CHECKOUT (last day, after breakfast)
     if (isLastDay && hotel) {
-      const checkoutTime = hotel.checkOutTime || '11:00';
+      let checkoutTime = hotel.checkOutTime || '11:00';
+      // Cap checkout before departure cutoff (early flights need early checkout)
+      if (timeWindow?.hasDepartureTransport && timeToMin(checkoutTime) > dayEndMin) {
+        checkoutTime = minToTime(Math.max(dayEndMin - 15, dayStartMin));
+        console.log(`[Unified] Day ${cluster.dayNumber}: capping checkout to ${checkoutTime} (departure constraint)`);
+      }
       items.push(createCheckoutItem(hotel, checkoutTime, cluster.dayNumber, orderIndex++));
       const afterCheckout = addMinutes(checkoutTime, 15);
       if (!isPastEnd(afterCheckout, dayEndTime)) {

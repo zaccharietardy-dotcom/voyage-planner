@@ -180,8 +180,13 @@ export function anchorTransport(
           }
         }
       }
-      // Ensure reasonable bounds
-      endTime = clampTime(endTime, '10:00', '22:00');
+      // Ensure reasonable bounds — departure days keep their computed cutoff
+      // (early flights like 08:55 produce endTime=06:25, which is correct)
+      if (hasDeparture) {
+        endTime = clampTime(endTime, '04:00', '22:00');
+      } else {
+        endTime = clampTime(endTime, '10:00', '22:00');
+      }
     }
 
     windows.push({
