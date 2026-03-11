@@ -270,11 +270,6 @@ const LEAFLET_STYLE_OVERRIDES = `
   border: none !important;
   z-index: 400 !important;
 }
-.day-label {
-  background: none !important;
-  border: none !important;
-  z-index: 450 !important;
-}
 `;
 
 // ─── Component ──────────────────────────────────────────────
@@ -327,6 +322,31 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
     if (filterDay === null) return items;
     return items.filter(i => i.dayNumber === filterDay);
   }, [items, filterDay]);
+
+  // Per-day summary for the map legend overlay
+  const daySummaries = useMemo(() => {
+    const summaries: { dayNum: number; totalKm: number; color: string }[] = [];
+    const byDay = new Map<number, TripItem[]>();
+    displayItems.forEach((item) => {
+      const d = item.dayNumber || 0;
+      const list = byDay.get(d);
+      if (list) list.push(item);
+      else byDay.set(d, [item]);
+    });
+    Array.from(byDay.entries())
+      .sort((a, b) => a[0] - b[0])
+      .forEach(([dayNum, dayItems]) => {
+        const totalKm = dayItems
+          .filter(i => i.distanceFromPrevious)
+          .reduce((s, i) => s + (i.distanceFromPrevious || 0), 0);
+        summaries.push({
+          dayNum,
+          totalKm,
+          color: getDayColor(dayNum).bg,
+        });
+      });
+    return summaries;
+  }, [displayItems]);
 
   // ─── Load Leaflet ────────────────────────────────────────
 
@@ -687,38 +707,7 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
       }
     });
 
-    // Day summary pills — floating label at centroid of each day's activities
-    dayEntries.forEach(([dayNum, dayItems]) => {
-      const activityItems = dayItems.filter(i => i.type === 'activity' && i.latitude && i.longitude);
-      if (activityItems.length === 0) return;
-
-      // Compute centroid
-      const centroidLat = activityItems.reduce((s, i) => s + i.latitude, 0) / activityItems.length;
-      const centroidLng = activityItems.reduce((s, i) => s + i.longitude, 0) / activityItems.length;
-
-      // Compute total distance for the day (sum of all travel legs)
-      const dayTravelItems = dayItems.filter(i => i.type === 'transport' && i.distanceFromPrevious);
-      const totalKm = dayTravelItems.reduce((s, i) => s + (i.distanceFromPrevious || 0), 0);
-      const distLabel = totalKm > 0 ? ` · ${totalKm.toFixed(1)} km` : '';
-
-      const color = filterDay === null ? getDayColor(dayNum).bg : getDayColor(filterDay).bg;
-      const pillHtml = `<span style="
-        background:${color};color:white;
-        font-size:11px;font-weight:700;
-        padding:3px 8px;border-radius:10px;
-        box-shadow:0 1px 4px rgba(0,0,0,0.25);
-        white-space:nowrap;letter-spacing:0.3px;
-      ">J${dayNum}${distLabel}</span>`;
-
-      const pillIcon = L.divIcon({
-        className: 'day-label',
-        html: pillHtml,
-        iconSize: [0, 0],
-        iconAnchor: [0, -12],
-      });
-      const pillMarker = L.marker([centroidLat, centroidLng], { icon: pillIcon, interactive: false });
-      routeLayer.addLayer(pillMarker);
-    });
+    // Day summary pills are rendered as a React legend overlay (see JSX below)
 
     // Flight arc
     if (flightInfo?.departureCoords) {
@@ -983,6 +972,18 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
                   </button>
                 );
               })}
+            </div>
+          )}
+
+          {/* Day summary legend — top-left, below filter chips */}
+          {daySummaries.length > 1 && (
+            <div className="absolute top-12 left-3 z-[1000] flex flex-col gap-0.5 bg-white/90 dark:bg-card/90 backdrop-blur-sm rounded-lg shadow-md border border-border/50 px-2.5 py-1.5">
+              {daySummaries.map(({ dayNum, totalKm, color }) => (
+                <div key={dayNum} className="flex items-center gap-2 text-xs font-semibold" style={{ color }}>
+                  <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: color }} />
+                  <span>J{dayNum}{totalKm > 0 ? ` · ${totalKm.toFixed(1)} km` : ''}</span>
+                </div>
+              ))}
             </div>
           )}
 
