@@ -597,6 +597,18 @@ export function unifiedScheduleV3Days(
     const activityCount = day.items.filter(i => i.type === 'activity').length;
     if (activityCount > 0) continue;
 
+    // Skip departure days with no activity window — stealing activities that will
+    // be removed by the departure sweep is destructive (loses them from both days)
+    const twRescue = timeWindows.find(w => w.dayNumber === day.dayNumber);
+    if (twRescue?.hasDepartureTransport) {
+      const rescueStartMin = timeToMin(twRescue.activityStartTime);
+      const rescueEndMin = timeToMin(twRescue.activityEndTime);
+      if (rescueStartMin >= rescueEndMin) {
+        console.log(`[Unified] Empty day rescue: skipping Day ${day.dayNumber} (departure, no activity window)`);
+        continue;
+      }
+    }
+
     let busiestDay: TripDay | null = null;
     let busiestCount = 0;
     for (const other of days) {
