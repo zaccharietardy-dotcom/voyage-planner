@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { TripItem, TRIP_ITEM_COLORS, ImportedPlace } from '@/lib/types';
+import { AIRPORTS } from '@/lib/services/geocoding';
 
 interface TripMapProps {
   items: TripItem[];
@@ -556,6 +557,36 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
       );
       if (hotelCoords && !hasReturnTransport) {
         nodes.push({ coords: hotelCoords });
+      }
+
+      // Inject airport nodes for flights (excluded from routeCandidates)
+      const dayFlights = displayItems.filter(
+        i => i.type === 'flight' && (i.dayNumber || 0) === dayNum && i.flight
+      );
+      for (const fi of dayFlights) {
+        const flight = fi.flight!;
+        // Arrival flight (first item of day) → prepend arrival airport
+        if (fi.orderIndex === 0) {
+          const ap = AIRPORTS[flight.arrivalAirportCode];
+          if (ap) {
+            const coords: [number, number] = [ap.latitude, ap.longitude];
+            // Replace hotel start node, or prepend
+            if (nodes.length > 0 && !nodes[0].item) nodes[0] = { coords };
+            else nodes.unshift({ coords });
+          }
+        } else {
+          // Departure flight (end of day) → append departure airport
+          // Flight item coords = departure airport (Fix C)
+          if (fi.latitude && fi.longitude) {
+            const coords: [number, number] = [fi.latitude, fi.longitude];
+            // Replace hotel end node, or append
+            if (nodes.length > 0 && !nodes[nodes.length - 1].item) {
+              nodes[nodes.length - 1] = { coords };
+            } else {
+              nodes.push({ coords });
+            }
+          }
+        }
       }
 
       if (nodes.length < 2) return;
