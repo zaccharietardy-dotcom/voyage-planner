@@ -68,6 +68,8 @@ const MIN_DURATION_RULES: [RegExp, number][] = [
   [/\b(museum|mus[eé][eo]|gallery|galerie|galleria|cathedral|cath[eé]drale|basilica|basilique)\b/i, 60],
   // Palaces, castles, forts: at least 45 min
   [/\b(palace|palais|palazzo|castle|ch[aâ]teau|fort|fortress|forteresse)\b/i, 45],
+  // Generic amusement/attraction parks: minimum 180min
+  [/\b(amusement[_ ]park|parc\s+d.attraction|theme\s*park)\b/i, 180],
   // Parks, gardens, zoos, aquariums: at least 30 min
   [/\b(park|parc|garden|jardin|botanical|botanique|zoo|aquarium)\b/i, 30],
   // Churches (non-cathedral), mosques, temples: at least 20 min
@@ -105,6 +107,8 @@ const MAX_DURATION_RULES: [RegExp, number][] = [
   [/\b(museum|mus[eé][eo]|gallery|galerie|galleria)\b/i, 150],
   // Palaces, castles: 120min cap
   [/\b(palace|palais|palazzo|castle|ch[aâ]teau)\b/i, 120],
+  // Amusement/attraction parks: no aggressive cap
+  [/\b(amusement[_ ]park|parc\s+d.attraction|theme\s*park)\b/i, 300],
   // Parks, gardens: 90min cap
   [/\b(park|parc|garden|jardin|botanical|botanique)\b/i, 90],
   // Generic monuments/statues: quick visits

@@ -141,10 +141,10 @@ export async function searchGooglePlacesAttractions(
 function mapGoogleType(types: string[]): string {
   if (types.includes('museum')) return 'museum';
   if (types.includes('church') || types.includes('place_of_worship')) return 'religious';
+  if (types.includes('amusement_park')) return 'amusement_park';
   if (types.includes('park')) return 'park';
   if (types.includes('art_gallery')) return 'gallery';
   if (types.includes('zoo') || types.includes('aquarium')) return 'zoo';
-  if (types.includes('amusement_park')) return 'amusement_park';
   if (types.includes('stadium')) return 'stadium';
   if (types.includes('shopping_mall') || types.includes('market')) return 'market';
   if (types.includes('tourist_attraction')) return 'attraction';
@@ -154,10 +154,10 @@ function mapGoogleType(types: string[]): string {
 
 function estimateDuration(types: string[]): number {
   if (types.includes('museum')) return 120;
+  if (types.includes('amusement_park')) return 240;
   if (types.includes('park') || types.includes('garden')) return 60;
   if (types.includes('church') || types.includes('place_of_worship')) return 30;
   if (types.includes('zoo') || types.includes('aquarium')) return 180;
-  if (types.includes('amusement_park')) return 240;
   return 60; // Default: 1 hour
 }
 

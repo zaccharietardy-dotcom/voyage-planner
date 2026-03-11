@@ -294,6 +294,17 @@ export function unifiedScheduleV3Days(
       // 5d. CHECK opening hours BEFORE placement
       const duration = act.duration || 60;
       const checkTime = pendingTravelTime > 0 ? timeAfterTravel : currentTime;
+
+      // Departure day: skip activities that would END past the departure window
+      const hasDepartureWindow = timeWindow?.hasDepartureTransport ?? false;
+      if (hasDepartureWindow) {
+        const actEndTime = addMinutes(checkTime, duration);
+        if (isPastEnd(actEndTime, dayEndTime)) {
+          console.log(`[Unified] Day ${cluster.dayNumber}: skipping "${act.name}" (ends ${actEndTime} past departure ${dayEndTime})`);
+          continue;  // continue, pas break — une activité plus courte pourrait tenir
+        }
+      }
+
       const hardEndTime = addMinutes(dayEndTime, 30);
       if (isPastEnd(checkTime, hardEndTime)) {
         break;
@@ -539,6 +550,14 @@ export function unifiedScheduleV3Days(
       if (startMin >= dayEndForHardStop) {
         console.log(`[Unified] Hard stop: dropping "${item.title}" on Day ${day.dayNumber} (past ${minToTime(dayEndForHardStop)})`);
         return false;
+      }
+      // Departure days: also check END time
+      if (hasDeparture && item.endTime) {
+        const endMin = timeToMin(item.endTime);
+        if (endMin > dayEndForHardStop) {
+          console.log(`[Unified] Hard stop: dropping "${item.title}" on Day ${day.dayNumber} (ends past departure window)`);
+          return false;
+        }
       }
       return true;
     });
