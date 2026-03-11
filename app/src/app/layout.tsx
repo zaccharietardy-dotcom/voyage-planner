@@ -4,7 +4,7 @@ import Script from "next/script";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "@/components/auth";
-import { Header } from "@/components/layout";
+import { Header, BottomNav } from "@/components/layout";
 import { Toaster } from "sonner";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { SITE_NAME, SITE_URL, SITE_DESCRIPTION, OG_IMAGE_DEFAULT, LOCALE } from "@/lib/seo";
@@ -242,9 +242,10 @@ export default function RootLayout({
             <AuthProvider>
               <AnalyticsProvider>
                 <Header />
-                <main className="pt-16">
+                <main className="pt-16 pb-16 md:pb-0">
                   <PageTransition>{children}</PageTransition>
                 </main>
+                <BottomNav />
                 <Toaster
                   position="bottom-right"
                   toastOptions={{

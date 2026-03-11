@@ -5,20 +5,17 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { Card, CardContent } from '@/components/ui/card';
 import {
   StepDestination,
-  StepTransport,
-  StepGroup,
-  StepBudget,
-  StepActivities,
+  StepWhen,
+  StepPreferences,
+  StepSummary,
 } from '@/components/forms';
 import { TripPreferences } from '@/lib/types';
-import { ArrowLeft, ArrowRight, Sparkles, Loader2, UserCog, Check, AlertCircle } from 'lucide-react';
+import { ArrowLeft, ArrowRight, UserCog, Check, AlertCircle } from 'lucide-react';
 import { generateTripStream, PipelineProgressEvent } from '@/lib/generateTrip';
 import { cn } from '@/lib/utils';
-import { safeGetItem, safeSetItem } from '@/lib/storage';
+import { safeSetItem } from '@/lib/storage';
 import { useAuth } from '@/components/auth';
 import { useUserPreferences, preferenceOptions } from '@/hooks/useUserPreferences';
 import { toast } from 'sonner';
@@ -26,16 +23,15 @@ import { GeneratingScreen } from '@/components/trip/GeneratingScreen';
 import { trackEvent } from '@/lib/analytics';
 
 const STEPS = [
-  { id: 1, title: 'Destination' },
-  { id: 2, title: 'Transport' },
-  { id: 3, title: 'Groupe' },
-  { id: 4, title: 'Budget' },
-  { id: 5, title: 'Activit\u00e9s' },
+  { id: 1, label: 'Où' },
+  { id: 2, label: 'Quand' },
+  { id: 3, label: 'Style' },
+  { id: 4, label: 'Résumé' },
 ];
 
 const DEFAULT_PREFERENCES: Partial<TripPreferences> = {
   durationDays: 7,
-  groupSize: 1,
+  groupSize: 2,
   transport: 'optimal',
   carRental: false,
   budgetLevel: 'moderate',
@@ -53,33 +49,21 @@ export default function PlanPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [preferences, setPreferences] = useState<Partial<TripPreferences>>(DEFAULT_PREFERENCES);
   const [preferencesApplied, setPreferencesApplied] = useState(false);
-  const directionRef = useRef(1); // 1 = forward, -1 = backward
+  const directionRef = useRef(1);
   const [showErrors, setShowErrors] = useState(false);
   const [pipelineStep, setPipelineStep] = useState<string | undefined>(undefined);
 
-  // Animation variants for step transitions
   const stepVariants = {
-    enter: (dir: number) => ({
-      x: dir > 0 ? 80 : -80,
-      opacity: 0,
-    }),
-    center: {
-      x: 0,
-      opacity: 1,
-    },
-    exit: (dir: number) => ({
-      x: dir > 0 ? -80 : 80,
-      opacity: 0,
-    }),
+    enter: (dir: number) => ({ x: dir > 0 ? 80 : -80, opacity: 0 }),
+    center: { x: 0, opacity: 1 },
+    exit: (dir: number) => ({ x: dir > 0 ? -80 : 80, opacity: 0 }),
   };
 
-  // Function to apply user preferences to trip form
   const applyUserPreferences = () => {
     if (!userPrefs) return;
 
     const updatedPrefs: Partial<TripPreferences> = { ...preferences };
 
-    // Map budget preference (user prefs uses 'budget', form uses 'economic')
     if (userPrefs.budget_preference) {
       const budgetMap: Record<string, 'economic' | 'moderate' | 'comfort' | 'luxury'> = {
         'budget': 'economic',
@@ -90,35 +74,22 @@ export default function PlanPage() {
       updatedPrefs.budgetLevel = budgetMap[userPrefs.budget_preference] || 'moderate';
     }
 
-    // Map activities (filter to match available activities in the form)
     if (userPrefs.favorite_activities && userPrefs.favorite_activities.length > 0) {
-      // Map user preference activities to form ActivityType
       type ActivityType = 'beach' | 'nature' | 'culture' | 'gastronomy' | 'nightlife' | 'shopping' | 'adventure' | 'wellness';
       const activityMapping: Record<string, ActivityType> = {
-        'museums': 'culture',
-        'monuments': 'culture',
-        'nature': 'nature',
-        'beaches': 'beach',
-        'hiking': 'adventure',
-        'shopping': 'shopping',
-        'nightlife': 'nightlife',
-        'food_tours': 'gastronomy',
-        'sports': 'adventure',
-        'wellness': 'wellness',
-        'photography': 'culture',
-        'local_experiences': 'culture',
+        'museums': 'culture', 'monuments': 'culture', 'nature': 'nature',
+        'beaches': 'beach', 'hiking': 'adventure', 'shopping': 'shopping',
+        'nightlife': 'nightlife', 'food_tours': 'gastronomy', 'sports': 'adventure',
+        'wellness': 'wellness', 'photography': 'culture', 'local_experiences': 'culture',
       };
-
       const mappedActivities = userPrefs.favorite_activities
         .map(a => activityMapping[a])
         .filter((a): a is ActivityType => !!a);
-
       if (mappedActivities.length > 0) {
         updatedPrefs.activities = [...new Set(mappedActivities)] as ActivityType[];
       }
     }
 
-    // Map dietary restrictions
     if (userPrefs.dietary_restrictions && userPrefs.dietary_restrictions.length > 0) {
       type DietaryType = 'none' | 'vegetarian' | 'vegan' | 'halal' | 'kosher' | 'gluten_free';
       const validDietary: DietaryType[] = ['vegetarian', 'vegan', 'halal', 'kosher', 'gluten_free'];
@@ -131,7 +102,7 @@ export default function PlanPage() {
 
     setPreferences(updatedPrefs);
     setPreferencesApplied(true);
-    toast.success('Pr\u00e9f\u00e9rences appliqu\u00e9es !');
+    toast.success('Préférences appliquées !');
   };
 
   const updatePreferences = useCallback((data: Partial<TripPreferences>) => {
@@ -142,38 +113,31 @@ export default function PlanPage() {
     switch (currentStep) {
       case 1: {
         const errors: string[] = [];
-        if (!preferences.origin) errors.push('Indiquez votre ville de d\u00e9part');
+        if (!preferences.origin) errors.push('Indiquez votre ville de départ');
         const stages = preferences.cityPlan || [];
         if (stages.length === 0 || !stages.every(s => s.city.trim().length > 0)) {
           errors.push('Renseignez au moins une destination');
         }
-        if (!preferences.startDate) errors.push('Choisissez une date de d\u00e9part');
         return errors;
       }
-      case 2:
-        return preferences.transport ? [] : ['S\u00e9lectionnez un mode de transport'];
-      case 3: {
+      case 2: {
         const errors: string[] = [];
-        if (!preferences.groupSize) errors.push('Indiquez le nombre de voyageurs');
-        if (!preferences.groupType) errors.push('Choisissez un type de voyage');
+        if (!preferences.startDate) errors.push('Choisissez une date de départ');
         return errors;
       }
-      case 4:
-        return (preferences.budgetLevel || preferences.budgetCustom)
-          ? []
-          : ['S\u00e9lectionnez un niveau de budget'];
-      case 5:
+      case 3:
         return (preferences.activities && preferences.activities.length > 0)
           ? []
-          : ['S\u00e9lectionnez au moins une activit\u00e9'];
+          : ['Sélectionnez au moins un centre d\'intérêt'];
+      case 4:
+        return []; // Summary — always valid
       default:
-        return ['\u00c9tape invalide'];
+        return [];
     }
   };
 
   const canProceed = () => getValidationErrors().length === 0;
 
-  // Auto-dismiss errors when the user fixes the fields
   useEffect(() => {
     if (showErrors && canProceed()) {
       setShowErrors(false);
@@ -186,7 +150,7 @@ export default function PlanPage() {
       setShowErrors(true);
       return;
     }
-    if (currentStep < 5) {
+    if (currentStep < STEPS.length) {
       directionRef.current = 1;
       setShowErrors(false);
       setCurrentStep(currentStep + 1);
@@ -205,26 +169,29 @@ export default function PlanPage() {
     setIsGenerating(true);
     setPipelineStep(undefined);
     try {
-      // Sync cityPlan -> destination + durationDays for pipeline compatibility
       const finalPreferences = { ...preferences };
       if (finalPreferences.cityPlan && finalPreferences.cityPlan.length > 0) {
         finalPreferences.destination = finalPreferences.cityPlan[0].city;
         finalPreferences.durationDays = finalPreferences.cityPlan.reduce((sum, s) => sum + s.days, 0);
 
-        // For multi-city trips, enrich mustSee with secondary cities for Claude
         if (finalPreferences.cityPlan.length > 1) {
           const secondaryCities = finalPreferences.cityPlan
             .slice(1)
             .map(s => `${s.city} (${s.days} jours)`)
             .join(', ');
-          const multiCityNote = `Itin\u00e9raire multi-villes : inclure ${secondaryCities} dans le voyage`;
+          const multiCityNote = `Itinéraire multi-villes : inclure ${secondaryCities} dans le voyage`;
           finalPreferences.mustSee = finalPreferences.mustSee
             ? `${finalPreferences.mustSee}. ${multiCityNote}`
             : multiCityNote;
         }
       }
 
-      // Track trip generation start
+      // Ensure defaults for fields not in simplified flow
+      if (!finalPreferences.groupType) finalPreferences.groupType = 'couple';
+      if (!finalPreferences.groupSize) finalPreferences.groupSize = 2;
+      if (!finalPreferences.transport) finalPreferences.transport = 'optimal';
+      if (!finalPreferences.budgetLevel) finalPreferences.budgetLevel = 'moderate';
+
       trackEvent('trip_generation_started', {
         destination: finalPreferences.destination || '',
         duration: finalPreferences.durationDays || 0,
@@ -233,13 +200,11 @@ export default function PlanPage() {
         group_size: finalPreferences.groupSize || 0,
       });
 
-      // SSE progress callback -- updates the GeneratingScreen with real pipeline step labels
       const onProgress = (status: string, event?: PipelineProgressEvent) => {
         if (status === 'progress' && event) {
-          // Build a human-readable step label
           if (event.type === 'step_start' && event.stepName) {
             const label = event.step
-              ? `${event.step}/8 \u2014 ${event.stepName}`
+              ? `${event.step}/8 — ${event.stepName}`
               : event.stepName;
             setPipelineStep(label);
           } else if (event.type === 'api_call' && event.label) {
@@ -248,10 +213,8 @@ export default function PlanPage() {
         }
       };
 
-      // 1. G\u00e9n\u00e9rer le voyage avec l'IA (streaming pour \u00e9viter timeout 504)
       const generatedTrip = await generateTripStream(finalPreferences, onProgress);
 
-      // Track trip generation completion
       trackEvent('trip_generation_completed', {
         destination: finalPreferences.destination || '',
         duration: finalPreferences.durationDays || 0,
@@ -260,45 +223,37 @@ export default function PlanPage() {
         total_activities: generatedTrip.days?.reduce((sum, day) => sum + day.items.length, 0) || 0,
       });
 
-      // 2. Si l'utilisateur est connect\u00e9, sauvegarder en base de donn\u00e9es
       if (user) {
         try {
           const saveResponse = await fetch('/api/trips', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              ...generatedTrip,
-              preferences: finalPreferences,
-            }),
+            body: JSON.stringify({ ...generatedTrip, preferences: finalPreferences }),
           });
 
           if (saveResponse.ok) {
             const savedTrip = await saveResponse.json();
-            // Utiliser l'ID de la base de donn\u00e9es
             safeSetItem('currentTrip', JSON.stringify({ ...generatedTrip, id: savedTrip.id }));
             router.push(`/trip/${savedTrip.id}`);
             return;
           }
 
-          // Sauvegarde \u00e9chou\u00e9e - afficher l'erreur compl\u00e8te pour debug
           const errorData = await saveResponse.json().catch(() => ({}));
           console.error('[Plan] Save failed:', saveResponse.status, JSON.stringify(errorData));
-          const errorMsg = [errorData.error, errorData.details, errorData.hint].filter(Boolean).join(' | ');
-          toast.error(`Sauvegarde \u00e9chou\u00e9e: ${errorMsg || 'Erreur inconnue'}. Le voyage sera stock\u00e9 localement.`);
+          toast.error('Sauvegarde échouée. Voyage stocké localement.');
         } catch (saveError) {
           console.error('[Plan] Save exception:', saveError);
-          toast.error('Erreur lors de la sauvegarde. Le voyage sera stock\u00e9 localement.');
+          toast.error('Erreur sauvegarde. Voyage stocké localement.');
         }
       }
 
-      // Fallback: localStorage pour les utilisateurs non connect\u00e9s
       if (!generatedTrip.id) {
-        throw new Error('Voyage g\u00e9n\u00e9r\u00e9 sans identifiant');
+        throw new Error('Voyage généré sans identifiant');
       }
       safeSetItem('currentTrip', JSON.stringify(generatedTrip));
       router.push(`/trip/${generatedTrip.id}`);
     } catch (error) {
-      console.error('Erreur g\u00e9n\u00e9ration:', error);
+      console.error('Erreur génération:', error);
       const message = error instanceof Error ? error.message : 'Erreur inconnue';
       toast.error(`Erreur: ${message}`);
     } finally {
@@ -311,31 +266,31 @@ export default function PlanPage() {
       case 1:
         return <StepDestination data={preferences} onChange={updatePreferences} />;
       case 2:
-        return <StepTransport data={preferences} onChange={updatePreferences} />;
+        return <StepWhen data={preferences} onChange={updatePreferences} />;
       case 3:
-        return <StepGroup data={preferences} onChange={updatePreferences} />;
+        return <StepPreferences data={preferences} onChange={updatePreferences} />;
       case 4:
-        return <StepBudget data={preferences} onChange={updatePreferences} />;
-      case 5:
-        return <StepActivities data={preferences} onChange={updatePreferences} />;
+        return (
+          <StepSummary
+            data={preferences}
+            onChange={updatePreferences}
+            onGenerate={handleGenerate}
+            isGenerating={isGenerating}
+          />
+        );
       default:
         return null;
     }
-  }, [currentStep, preferences, updatePreferences]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentStep, preferences, updatePreferences, isGenerating]);
 
-  const progress = (currentStep / STEPS.length) * 100;
-
-  // Compute destination name for the generating screen
-  const generatingDestination = preferences.cityPlan?.[0]?.city
-    || preferences.destination
-    || '';
+  const generatingDestination = preferences.cityPlan?.[0]?.city || preferences.destination || '';
   const generatingDuration = preferences.cityPlan
     ? preferences.cityPlan.reduce((sum, s) => sum + s.days, 0)
     : preferences.durationDays;
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Full-screen generating overlay with destination fun facts */}
       {isGenerating && (
         <GeneratingScreen
           destination={generatingDestination}
@@ -344,191 +299,130 @@ export default function PlanPage() {
         />
       )}
 
-      <div className="container max-w-2xl mx-auto px-4 py-8">
+      <div className="container max-w-xl mx-auto px-4 py-8">
         {/* User Preferences Banner */}
-        {user && !prefsLoading && (
+        {user && !prefsLoading && userPrefs && !preferencesApplied && (
           <div className="mb-6">
-            {userPrefs ? (
-              <div className="flex items-center justify-between p-4 rounded-xl bg-primary/5 border border-primary/20">
-                <div className="flex items-center gap-3">
-                  <UserCog className="h-5 w-5 text-primary" />
-                  <div>
-                    <p className="text-sm font-medium">Vos pr\u00e9f\u00e9rences de voyage</p>
-                    <p className="text-xs text-muted-foreground">
-                      {preferenceOptions.travelStyle.find(o => o.value === userPrefs.travel_style)?.label} \u00b7 {preferenceOptions.budgetPreference.find(o => o.value === userPrefs.budget_preference)?.label}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  {preferencesApplied ? (
-                    <span className="text-sm text-primary flex items-center gap-1">
-                      <Check className="h-4 w-4" />
-                      Appliqu\u00e9es
-                    </span>
-                  ) : (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={applyUserPreferences}
-                      className="text-primary border-primary/30 hover:bg-primary/10"
-                    >
-                      Charger
-                    </Button>
-                  )}
-                  <Link href="/preferences">
-                    <Button variant="ghost" size="sm">
-                      Modifier
-                    </Button>
-                  </Link>
-                </div>
+            <div className="flex items-center justify-between p-3 rounded-xl bg-primary/5 border border-primary/20">
+              <div className="flex items-center gap-2">
+                <UserCog className="h-4 w-4 text-primary" />
+                <p className="text-sm">Charger mes préférences</p>
               </div>
-            ) : (
-              <Link href="/preferences" className="block">
-                <div className="flex items-center justify-between p-4 rounded-xl bg-muted/50 border border-border hover:bg-muted/80 transition-colors cursor-pointer">
-                  <div className="flex items-center gap-3">
-                    <UserCog className="h-5 w-5 text-muted-foreground" />
-                    <div>
-                      <p className="text-sm font-medium">D\u00e9finir mes pr\u00e9f\u00e9rences</p>
-                      <p className="text-xs text-muted-foreground">
-                        Gagnez du temps en sauvegardant vos pr\u00e9f\u00e9rences
-                      </p>
-                    </div>
-                  </div>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                </div>
-              </Link>
-            )}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={applyUserPreferences}
+                className="text-primary border-primary/30 hover:bg-primary/10 h-7 text-xs"
+              >
+                Appliquer
+              </Button>
+            </div>
           </div>
         )}
 
-        {/* Progress header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-xl font-serif font-semibold">Planifier votre voyage</h1>
-            <span className="text-sm text-muted-foreground">
-              \u00c9tape {currentStep} sur {STEPS.length}
-            </span>
-          </div>
-          <Progress value={progress} className="h-1" />
-
-          {/* Step indicators — numbered circles */}
-          <div className="flex justify-between mt-6">
-            {STEPS.map((step) => (
-              <button
-                key={step.id}
-                onClick={() => {
-                  if (step.id < currentStep) {
-                    directionRef.current = -1;
-                    setCurrentStep(step.id);
-                  }
-                }}
-                disabled={step.id > currentStep}
-                className={cn(
-                  'flex flex-col items-center gap-2 transition-all',
-                  step.id < currentStep && 'cursor-pointer hover:opacity-100',
-                  step.id > currentStep && 'opacity-40 cursor-not-allowed'
-                )}
-              >
-                <div className={cn(
-                  'w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold border-2 transition-colors',
-                  step.id === currentStep && 'bg-primary text-primary-foreground border-primary',
-                  step.id < currentStep && 'bg-primary/10 text-primary border-primary/30',
-                  step.id > currentStep && 'bg-muted text-muted-foreground border-border'
-                )}>
-                  {step.id}
-                </div>
-                <span className="text-xs font-medium hidden sm:block">{step.title}</span>
-              </button>
-            ))}
-          </div>
+        {/* Step dots */}
+        <div className="flex items-center justify-center gap-3 mb-8">
+          {STEPS.map((step) => (
+            <button
+              key={step.id}
+              onClick={() => {
+                if (step.id < currentStep) {
+                  directionRef.current = -1;
+                  setCurrentStep(step.id);
+                }
+              }}
+              disabled={step.id > currentStep}
+              className="flex flex-col items-center gap-1.5"
+            >
+              <div className={cn(
+                'w-2.5 h-2.5 rounded-full transition-all',
+                step.id === currentStep && 'w-8 bg-primary',
+                step.id < currentStep && 'bg-primary/40 cursor-pointer',
+                step.id > currentStep && 'bg-muted-foreground/20'
+              )} />
+              <span className={cn(
+                'text-[10px] font-medium',
+                step.id === currentStep ? 'text-primary' : 'text-muted-foreground/60'
+              )}>
+                {step.label}
+              </span>
+            </button>
+          ))}
         </div>
 
-        {/* Form card */}
-        <Card className="shadow-lg overflow-hidden">
-          <CardContent className="p-6 sm:p-8">
-            <AnimatePresence mode="wait" custom={directionRef.current}>
-              <motion.div
-                key={currentStep}
-                custom={directionRef.current}
-                variants={stepVariants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
-              >
-                {renderedStep}
-              </motion.div>
-            </AnimatePresence>
-          </CardContent>
-        </Card>
+        {/* Step content */}
+        <div className="rounded-2xl border border-border/50 bg-card/80 p-5 sm:p-7 shadow-soft">
+          <AnimatePresence mode="wait" custom={directionRef.current}>
+            <motion.div
+              key={currentStep}
+              custom={directionRef.current}
+              variants={stepVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
+            >
+              {renderedStep}
+            </motion.div>
+          </AnimatePresence>
+        </div>
 
-        {/* Navigation buttons */}
-        <div className="mt-6 space-y-3">
-          <div className="flex justify-between">
+        {/* Navigation */}
+        {currentStep < 4 && (
+          <div className="mt-5 space-y-3">
+            <div className="flex justify-between">
+              <Button
+                variant="ghost"
+                onClick={handleBack}
+                disabled={currentStep === 1}
+                className="gap-1.5 text-muted-foreground"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Retour
+              </Button>
+
+              <Button onClick={handleNext} className="gap-1.5 rounded-xl">
+                Suivant
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {/* Validation errors */}
+            <AnimatePresence>
+              {showErrors && getValidationErrors().length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: -6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.2 }}
+                  className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 dark:border-amber-900/50 dark:bg-amber-950/30"
+                >
+                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
+                  <div className="space-y-0.5">
+                    {getValidationErrors().map((error) => (
+                      <p key={error} className="text-sm text-amber-700 dark:text-amber-300">
+                        {error}
+                      </p>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        )}
+
+        {currentStep === 4 && (
+          <div className="mt-4">
             <Button
-              variant="outline"
+              variant="ghost"
               onClick={handleBack}
-              disabled={currentStep === 1}
-              className="gap-2"
+              className="gap-1.5 text-muted-foreground"
             >
               <ArrowLeft className="h-4 w-4" />
               Retour
             </Button>
-
-            {currentStep < 5 ? (
-              <Button onClick={handleNext} className="gap-2">
-                Suivant
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            ) : (
-              <Button
-                onClick={() => {
-                  if (!canProceed()) {
-                    setShowErrors(true);
-                    return;
-                  }
-                  handleGenerate();
-                }}
-                disabled={isGenerating}
-                className="gap-2 bg-gradient-to-r from-primary to-primary/80"
-              >
-                {isGenerating ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    G\u00e9n\u00e9ration en cours...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="h-4 w-4" />
-                    G\u00e9n\u00e9rer mon voyage
-                  </>
-                )}
-              </Button>
-            )}
           </div>
-
-          {/* Validation errors */}
-          <AnimatePresence>
-            {showErrors && getValidationErrors().length > 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: -6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                transition={{ duration: 0.2 }}
-                className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 dark:border-amber-900/50 dark:bg-amber-950/30"
-              >
-                <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
-                <div className="space-y-0.5">
-                  {getValidationErrors().map((error) => (
-                    <p key={error} className="text-sm text-amber-700 dark:text-amber-300">
-                      {error}
-                    </p>
-                  ))}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+        )}
       </div>
     </div>
   );
