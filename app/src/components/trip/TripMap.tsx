@@ -483,9 +483,48 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
       bounds.extend([item.latitude, item.longitude]);
     });
 
-    // NOTE: Departure coords intentionally NOT added to bounds.
-    // The departure marker is still displayed, but we don't want the map to zoom out
-    // to fit the departure city (e.g. Lyon) when viewing activities in the destination (e.g. Milan).
+    // NOTE: Departure (origin) coords intentionally NOT added to bounds.
+    // But ARRIVAL airport at destination IS added — the user wants to see the route
+    // from the airport to the first activity.
+    const flightItems = displayItems.filter(i => i.type === 'flight');
+    const arrivalAirportCoords = new Map<number, [number, number]>(); // dayNumber → coords
+    const departureAirportCoords = new Map<number, [number, number]>();
+    for (const fi of flightItems) {
+      const flight = fi.flight;
+      const arrCode = flight?.arrivalAirportCode;
+      const depCode = flight?.departureAirportCode;
+      if (fi.orderIndex === 0 && arrCode) {
+        // Arrival flight — look up arrival airport coords
+        const ap = AIRPORTS[arrCode];
+        if (ap) {
+          const coords: [number, number] = [ap.latitude, ap.longitude];
+          arrivalAirportCoords.set(fi.dayNumber, coords);
+          bounds.extend(coords); // Include in map view
+          // Add airport marker
+          const airportIcon = L.divIcon({
+            className: 'plane-marker',
+            html: `<div style="background:${getDayColor(fi.dayNumber).bg};width:26px;height:26px;border-radius:50%;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.25);display:flex;align-items:center;justify-content:center;font-size:13px;">✈️</div>`,
+            iconSize: [26, 26],
+            iconAnchor: [13, 13],
+          });
+          const airportMarker = L.marker(coords, { icon: airportIcon, interactive: false });
+          markerLayer.addLayer(airportMarker);
+        }
+      } else if (fi.latitude && fi.longitude && depCode) {
+        // Departure flight — item coords are already the departure airport
+        const coords: [number, number] = [fi.latitude, fi.longitude];
+        departureAirportCoords.set(fi.dayNumber, coords);
+        bounds.extend(coords);
+        const airportIcon = L.divIcon({
+          className: 'plane-marker',
+          html: `<div style="background:${getDayColor(fi.dayNumber).bg};width:26px;height:26px;border-radius:50%;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.25);display:flex;align-items:center;justify-content:center;font-size:13px;">✈️</div>`,
+          iconSize: [26, 26],
+          iconAnchor: [13, 13],
+        });
+        const airportMarker = L.marker(coords, { icon: airportIcon, interactive: false });
+        markerLayer.addLayer(airportMarker);
+      }
+    }
 
     // fitBounds only on first render or when items actually change
     if (bounds.isValid()) {
@@ -559,33 +598,20 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
         nodes.push({ coords: hotelCoords });
       }
 
-      // Inject airport nodes for flights (excluded from routeCandidates)
-      const dayFlights = displayItems.filter(
-        i => i.type === 'flight' && (i.dayNumber || 0) === dayNum && i.flight
-      );
-      for (const fi of dayFlights) {
-        const flight = fi.flight!;
-        // Arrival flight (first item of day) → prepend arrival airport
-        if (fi.orderIndex === 0) {
-          const ap = AIRPORTS[flight.arrivalAirportCode];
-          if (ap) {
-            const coords: [number, number] = [ap.latitude, ap.longitude];
-            // Replace hotel start node, or prepend
-            if (nodes.length > 0 && !nodes[0].item) nodes[0] = { coords };
-            else nodes.unshift({ coords });
-          }
+      // Inject airport nodes for flights (pre-computed above)
+      const arrCoords = arrivalAirportCoords.get(dayNum);
+      if (arrCoords) {
+        // Replace hotel start node with arrival airport, or prepend
+        if (nodes.length > 0 && !nodes[0].item) nodes[0] = { coords: arrCoords };
+        else nodes.unshift({ coords: arrCoords });
+      }
+      const depCoords = departureAirportCoords.get(dayNum);
+      if (depCoords) {
+        // Replace hotel end node with departure airport, or append
+        if (nodes.length > 0 && !nodes[nodes.length - 1].item) {
+          nodes[nodes.length - 1] = { coords: depCoords };
         } else {
-          // Departure flight (end of day) → append departure airport
-          // Flight item coords = departure airport (Fix C)
-          if (fi.latitude && fi.longitude) {
-            const coords: [number, number] = [fi.latitude, fi.longitude];
-            // Replace hotel end node, or append
-            if (nodes.length > 0 && !nodes[nodes.length - 1].item) {
-              nodes[nodes.length - 1] = { coords };
-            } else {
-              nodes.push({ coords });
-            }
-          }
+          nodes.push({ coords: depCoords });
         }
       }
 
