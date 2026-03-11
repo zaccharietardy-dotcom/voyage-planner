@@ -70,8 +70,7 @@ export function validateCoordinate(
     if (destToAirport > 3) {
       return {
         valid: false,
-        corrected: { lat: destCoords.lat, lng: destCoords.lng },
-        reason: `Coordinates (${lat.toFixed(4)}, ${lng.toFixed(4)}) are at ${nearbyAirport.name} airport — using city center instead`,
+        reason: `Coordinates (${lat.toFixed(4)}, ${lng.toFixed(4)}) are at ${nearbyAirport.name} airport — dropping item`,
       };
     }
   }
