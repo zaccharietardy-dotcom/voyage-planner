@@ -553,6 +553,34 @@ export function unifiedScheduleV3Days(
     day.items.forEach((item, idx) => { item.orderIndex = idx; });
   }
 
+  // 12b. P0.2 distance sweep: replace restaurants >1.5km from nearest activity with self-meal fallback
+  // (enforceRestaurantSafetyForDay tries alternatives but keeps the restaurant if none found)
+  const P02_MAX_KM = 1.5;
+  const anchorTypes = new Set(['activity', 'checkin', 'checkout', 'hotel']);
+  for (const day of days) {
+    for (let i = 0; i < day.items.length; i++) {
+      const item = day.items[i];
+      if (item.type !== 'restaurant') continue;
+      if (item.qualityFlags?.includes('self_meal_fallback')) continue;
+      const mealType = item.mealType;
+      if (!mealType || mealType === 'breakfast') continue;
+      if (!item.latitude || !item.longitude) continue;
+
+      const nearestDist = day.items
+        .filter(a => anchorTypes.has(a.type) && a.latitude && a.longitude)
+        .reduce((min, a) => {
+          const d = calculateDistance(item.latitude!, item.longitude!, a.latitude!, a.longitude!);
+          return d < min ? d : min;
+        }, Infinity);
+
+      if (nearestDist > P02_MAX_KM) {
+        console.warn(`[Unified P0.2] Day ${day.dayNumber}: "${item.title}" is ${(nearestDist * 1000).toFixed(0)}m from nearest activity — replacing with self-meal`);
+        const anchor = item.latitude && item.longitude ? { lat: item.latitude, lng: item.longitude } : null;
+        day.items[i] = createSelfMealFallbackItem(mealType as 'lunch' | 'dinner', item.startTime, item.duration || 75, day.dayNumber, item.orderIndex, anchor);
+      }
+    }
+  }
+
   // 13. Enrichissement ticketing (Viator, Tiqets, official)
   for (const day of days) {
     enrichWithTicketingLinks(day.items, destination);

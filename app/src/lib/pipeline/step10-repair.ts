@@ -301,10 +301,11 @@ export function ensureMustSees(
         const idx = day.items.indexOf(evicted);
         if (idx < 0) continue;
 
-        // Check that the must-see is open during the evicted slot's time
+        // Check that the must-see is open during the slot using ITS OWN duration
+        // (not the evicted activity's endTime, which could be shorter)
         const slotStart = evicted.startTime || '09:00';
         const mustSeeDuration = mustSee.duration || 60;
-        const slotEnd = evicted.endTime || addMinutes(slotStart, mustSeeDuration);
+        const slotEnd = addMinutes(slotStart, mustSeeDuration);
         const mockMustSee = {
           ...mustSee,
           openingHours: mustSee.openingHours,
