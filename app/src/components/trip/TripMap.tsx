@@ -603,34 +603,58 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
           const midIdx = Math.floor(segmentCoords.length / 2);
           const midPoint = segmentCoords[midIdx];
 
-          // Build label HTML
-          let labelHtml = `<span style="
-            background:white;color:${color};
-            font-size:11px;font-weight:600;
-            padding:3px 7px;border-radius:8px;
-            box-shadow:0 1px 3px rgba(0,0,0,0.2);
-            white-space:nowrap;display:flex;align-items:center;gap:3px;
-          ">${formatTravelTime(nextItem.timeFromPrevious)}`;
+          // Parse day color hex to RGB for rgba() border
+          const r = parseInt(color.slice(1, 3), 16);
+          const g = parseInt(color.slice(3, 5), 16);
+          const b = parseInt(color.slice(5, 7), 16);
 
-          // Transit badges
-          if (nextItem.transitInfo?.lines && nextItem.transitInfo.lines.length > 0) {
-            const badges = nextItem.transitInfo.lines.slice(0, 3).map(line => {
-              const modeIcon = line.mode === 'metro' ? '🚇' : line.mode === 'tram' ? '🚊' : line.mode === 'train' ? '🚆' : line.mode === 'ferry' ? '⛴️' : '🚌';
+          // Determine display mode
+          const hasTransitLines = nextItem.transitInfo?.lines && nextItem.transitInfo.lines.length > 0;
+          const isWalk = nextItem.transportToPrevious === 'walk' ||
+            (!hasTransitLines && (nextItem.timeFromPrevious || 0) <= 20);
+
+          // SVG icons inline (12x12)
+          const walkIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="13" cy="4" r="1.5"/><path d="M7 21l3-9 2.5 2v7M15.5 7.5L18 10l-4.5 1.5L11 8l4-1z"/></svg>';
+          const carIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17h14v-5l-2-6H7L5 12v5z"/><circle cx="7.5" cy="17" r="1.5"/><circle cx="16.5" cy="17" r="1.5"/></svg>';
+          const taxiIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17h14v-5l-2-6H7L5 12v5z"/><circle cx="7.5" cy="17" r="1.5"/><circle cx="16.5" cy="17" r="1.5"/><rect x="10" y="3" width="4" height="3"/></svg>';
+          const transitIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="14" rx="2"/><path d="M4 11h16M12 3v14M7.5 21l1.5-4M16.5 21l-1.5-4"/><circle cx="8" cy="15" r="1"/><circle cx="16" cy="15" r="1"/></svg>';
+
+          // Mode icons for transit badges (10x10, white stroke)
+          const modeIcons: Record<string, string> = {
+            metro: '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18L12 4l9 14"/><path d="M7.5 12h9"/></svg>',
+            tram: '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="5" width="12" height="13" rx="2"/><path d="M9 21l-2-3M15 21l2-3M12 2v3M8 12h8"/><circle cx="9" cy="16" r="1"/><circle cx="15" cy="16" r="1"/></svg>',
+            ferry: '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20c2-1 4-1 6 0s4 1 6 0 4-1 6 0"/><path d="M4 17l2-9h12l2 9"/><path d="M12 3v5"/></svg>',
+            train: '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="14" rx="2"/><path d="M4 11h16M12 3v14M7.5 21l1.5-4M16.5 21l-1.5-4"/><circle cx="8" cy="15" r="1"/><circle cx="16" cy="15" r="1"/></svg>',
+            bus: '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="15" rx="2"/><path d="M4 10h16M8 21v-3M16 21v-3"/><circle cx="8" cy="16" r="1"/><circle cx="16" cy="16" r="1"/></svg>',
+          };
+
+          // Pill container style
+          const pillStyle = `background:rgba(255,255,255,0.92);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);border:1px solid rgba(${r},${g},${b},0.15);color:${color};font-size:10px;font-weight:600;padding:3px 8px;border-radius:999px;box-shadow:0 1px 4px rgba(0,0,0,0.1);display:inline-flex;align-items:center;gap:3px;white-space:nowrap;`;
+
+          let labelContent = '';
+
+          if (isWalk) {
+            // Walking: pedestrian icon + time
+            labelContent = `<span style="${pillStyle}">${walkIcon} ${formatTravelTime(nextItem.timeFromPrevious)}</span>`;
+          } else if (hasTransitLines) {
+            // Transit: time + colored line badges
+            const badges = nextItem.transitInfo!.lines.slice(0, 3).map(line => {
               const bgColor = line.color || '#6B7280';
-              return `<span style="
-                background:${bgColor};color:white;
-                font-size:9px;font-weight:600;
-                padding:1px 4px;border-radius:4px;
-                display:inline-flex;align-items:center;gap:1px;
-              ">${modeIcon}${line.number}</span>`;
+              const mIcon = modeIcons[line.mode] || modeIcons.bus;
+              return `<span style="background:${bgColor};color:white;font-size:8px;font-weight:700;padding:1px 4px;border-radius:3px;display:inline-flex;align-items:center;gap:1px;line-height:1.2;">${mIcon}${line.number}</span>`;
             }).join('');
-            labelHtml += badges;
+            labelContent = `<span style="${pillStyle}">${formatTravelTime(nextItem.timeFromPrevious)} ${badges}</span>`;
+          } else {
+            // Car/taxi/generic transport
+            const icon = nextItem.transportToPrevious === 'taxi' ? taxiIcon
+              : nextItem.transportToPrevious === 'car' ? carIcon
+              : transitIcon;
+            labelContent = `<span style="${pillStyle}">${icon} ${formatTravelTime(nextItem.timeFromPrevious)}</span>`;
           }
-          labelHtml += '</span>';
 
           const labelIcon = L.divIcon({
             className: 'route-label',
-            html: labelHtml,
+            html: `<div style="transform:translate(-50%,-50%);position:absolute;">${labelContent}</div>`,
             iconSize: [0, 0],
             iconAnchor: [0, 0],
           });
