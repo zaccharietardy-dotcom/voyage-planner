@@ -106,6 +106,20 @@ export function unifiedScheduleV3Days(
     const dayStartTime = timeWindow?.activityStartTime || '08:30';
     const dayEndTime = timeWindow?.activityEndTime || '21:00';
 
+    // Transit-only day: no activities possible (e.g., late arrival after 21:00)
+    const isTransitOnly = dayStartTime === dayEndTime;
+    if (isTransitOnly) {
+      console.log(`[Unified] Day ${cluster.dayNumber}: transit-only (${dayStartTime} == ${dayEndTime}), skipping all scheduling`);
+      days.push({
+        dayNumber: cluster.dayNumber,
+        date: dayDate,
+        items: [],
+        theme: '',
+        dayNarrative: '',
+      });
+      continue;
+    }
+
     const items: TripItem[] = [];
     let currentTime = dayStartTime;
     let currentPosition = hotelLatLng || getClusterCentroid(cluster.activities);
@@ -231,7 +245,24 @@ export function unifiedScheduleV3Days(
       }
 
       const act = cluster.activities[i];
-      const travelLeg = dayTravel?.legs.find(l => l.toId === act.id);
+      const prevId = items.length > 0 ? (items[items.length - 1].id || '') : (hotel?.id || 'hotel');
+      let travelLeg = dayTravel?.legs.find(l => l.toId === act.id && l.fromId === prevId);
+      if (!travelLeg && currentPosition) {
+        // Fallback: estimate from haversine distance
+        const dist = calculateDistance(currentPosition.lat, currentPosition.lng, act.latitude, act.longitude);
+        const walkSpeed = 4.5; // km/h
+        const duration = dist <= 1 ? Math.ceil((dist / walkSpeed) * 60) : Math.ceil(dist * 4);
+        travelLeg = {
+          fromId: prevId || 'current',
+          toId: act.id || act.name,
+          fromName: '',
+          toName: act.name,
+          distanceKm: dist,
+          durationMinutes: Math.max(duration, 5),
+          mode: dist <= 1 ? 'walk' : 'transit',
+          isEstimate: true,
+        };
+      }
 
       // Compute travel time
       let pendingTravelTime = 0;
@@ -541,6 +572,28 @@ export function unifiedScheduleV3Days(
     day.items.forEach((item, idx) => { item.orderIndex = idx; });
   }
 
+  // 10b. Re-label meals shifted outside their natural window
+  for (const day of days) {
+    for (const item of day.items) {
+      if (item.type !== 'restaurant' || !item.mealType) continue;
+      const startMin = timeToMin(item.startTime || '00:00');
+
+      const actualMealType =
+        startMin < 11 * 60 ? 'breakfast' :
+        startMin < 15 * 60 ? 'lunch' : 'dinner';
+
+      if (actualMealType !== item.mealType && item.mealType !== 'breakfast') {
+        const oldLabel = item.mealType === 'lunch' ? 'Déjeuner' : 'Dîner';
+        const newLabel = actualMealType === 'lunch' ? 'Déjeuner' : 'Dîner';
+        if (item.title) {
+          item.title = item.title.replace(oldLabel, newLabel);
+        }
+        item.mealType = actualMealType;
+        console.log(`[Unified] Meal relabel: ${oldLabel} → ${newLabel} at ${item.startTime} on Day ${day.dayNumber}`);
+      }
+    }
+  }
+
   // 11. Hard stop: drop activities after dayEndTime (departure days) or 22:00
   for (const day of days) {
     const timeWindow = timeWindows.find(w => w.dayNumber === day.dayNumber);
@@ -550,7 +603,7 @@ export function unifiedScheduleV3Days(
       : 22 * 60;
     const beforeCount = day.items.length;
     day.items = day.items.filter(item => {
-      if (item.type !== 'activity') return true;
+      if (item.type === 'flight' || item.type === 'checkout') return true;
       const startMin = timeToMin(item.startTime || '00:00');
       if (startMin >= dayEndForHardStop) {
         console.log(`[Unified] Hard stop: dropping "${item.title}" on Day ${day.dayNumber} (past ${minToTime(dayEndForHardStop)})`);
@@ -685,7 +738,7 @@ export function unifiedScheduleV3Days(
   fixOpeningHoursViolations(days, startDateStr, repairs, unresolvedViolations);
 
   // 18. Must-see injection from the full pool
-  ensureMustSees(days, allActivities, startDateStr, repairs, unresolvedViolations);
+  ensureMustSees(days, allActivities, startDateStr, repairs, unresolvedViolations, globalPlacedIds);
 
   // 19. Extension gaps 30-90min
   fillGapsByExtension(days, startDateStr, repairs);
@@ -731,21 +784,19 @@ export function unifiedScheduleV3Days(
     const beforeCount = day.items.length;
 
     day.items = day.items.filter(item => {
-      // Keep transport, restaurants, checkin/checkout, hotel — handled separately
-      if (item.type !== 'activity' && item.type !== 'free_time') return true;
+      // Keep flights (departure flight is past cutoff by definition)
+      if (item.type === 'flight') return true;
+      // Keep checkout (already capped by pass 3)
+      if (item.type === 'checkout') return true;
 
       const startMin = timeToMin(item.startTime || '00:00');
       if (startMin >= cutoffMin) {
         console.log(`[Unified] Departure sweep: dropping "${item.title}" on Day ${day.dayNumber} (starts ${item.startTime} past ${tw.activityEndTime})`);
         return false;
       }
-      // Also check END for activities
-      if (item.type === 'activity' && item.endTime) {
-        const endMin = timeToMin(item.endTime);
-        if (endMin > cutoffMin) {
-          console.log(`[Unified] Departure sweep: dropping "${item.title}" on Day ${day.dayNumber} (ends ${item.endTime} past ${tw.activityEndTime})`);
-          return false;
-        }
+      if (item.endTime && timeToMin(item.endTime) > cutoffMin) {
+        console.log(`[Unified] Departure sweep: dropping "${item.title}" on Day ${day.dayNumber} (ends ${item.endTime} past ${tw.activityEndTime})`);
+        return false;
       }
       return true;
     });

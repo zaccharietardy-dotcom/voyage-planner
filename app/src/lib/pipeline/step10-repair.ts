@@ -244,7 +244,8 @@ export function ensureMustSees(
   activityPool: ScoredActivity[],
   startDate: string,
   repairs: RepairAction[],
-  unresolvedViolations: string[]
+  unresolvedViolations: string[],
+  globalPlacedIds?: Set<string>
 ): void {
   const mustSees = activityPool.filter(a => a.mustSee);
 
@@ -265,8 +266,18 @@ export function ensureMustSees(
    * Fallback: substring inclusion in either direction (handles cross-language names
    * like "Buckingham Palace" vs "Palais de Buckingham" sharing "buckingham").
    */
-  function isMustSeeAlreadyPlanned(mustSeeName: string): boolean {
-    const mustSeeNorm = normalizeForMatching(mustSeeName);
+  function isMustSeeAlreadyPlanned(mustSee: ScoredActivity): boolean {
+    // Check by ID first (most reliable)
+    const id = mustSee.id || mustSee.name;
+    if (globalPlacedIds?.has(id)) return true;
+    // Check all item IDs in the plan
+    for (const day of days) {
+      for (const item of day.items) {
+        if (item.type === 'activity' && item.id === mustSee.id) return true;
+      }
+    }
+    // Fuzzy name check
+    const mustSeeNorm = normalizeForMatching(mustSee.name);
     if (plannedActivityNamesNorm.has(mustSeeNorm)) return true;
     // Substring fallback — require at least 5 chars to avoid false positives
     if (mustSeeNorm.length >= 5) {
@@ -282,7 +293,7 @@ export function ensureMustSees(
   }
 
   for (const mustSee of mustSees) {
-    if (isMustSeeAlreadyPlanned(mustSee.name)) continue;
+    if (isMustSeeAlreadyPlanned(mustSee)) continue;
 
     // Must-see not in plan — try to inject
     let injected = false;
@@ -350,6 +361,7 @@ export function ensureMustSees(
         });
         // Mark as planned so duplicate must-see pool entries don't re-inject
         plannedActivityNamesNorm.add(normalizeForMatching(mustSee.name));
+        globalPlacedIds?.add(mustSee.id || mustSee.name);
         injected = true;
         break; // break evictCandidates loop
       }
@@ -406,6 +418,7 @@ export function ensureMustSees(
           description: `Injected must-see "${mustSee.name}" at ${preferredStart}, evicted "${evicted.title}" (time-unconstrained fallback)`,
         });
         plannedActivityNamesNorm.add(normalizeForMatching(mustSee.name));
+        globalPlacedIds?.add(mustSee.id || mustSee.name);
         injected = true;
         break;
       }

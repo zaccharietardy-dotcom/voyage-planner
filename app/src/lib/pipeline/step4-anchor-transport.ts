@@ -111,6 +111,15 @@ export function anchorTransport(
 
     // Day 1: Constrain by arrival transport
     if (day === 1) {
+      // Fallback: compute arrivalTime from departureTime + duration if missing
+      if (inboundFlight && !inboundFlight.arrivalTime && inboundFlight.departureTime && inboundFlight.duration) {
+        const depTime = extractTimeFromDateString(inboundFlight.departureTime);
+        if (depTime) {
+          const estimatedArrival = addMinutes(depTime, inboundFlight.duration);
+          inboundFlight = { ...inboundFlight, arrivalTime: estimatedArrival };
+          console.log(`[Anchor Transport] Computed fallback arrivalTime: ${estimatedArrival} from departureTime + ${inboundFlight.duration}min`);
+        }
+      }
       // Check inbound flight
       if (inboundFlight?.arrivalTime) {
         const arrivalTime = extractTimeFromDateString(inboundFlight.arrivalTime);
