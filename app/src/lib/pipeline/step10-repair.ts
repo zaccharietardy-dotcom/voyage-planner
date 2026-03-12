@@ -443,6 +443,17 @@ export function fillGapsByExtension(
         if (maxDur && currentDuration < maxDur) {
           const extension = Math.min(gapMinutes, maxDur - currentDuration);
           if (extension >= 15) {
+            // Check close time before extending
+            if (current.openingHours || current.openingHoursByDay) {
+              const mockAct = itemToScoredActivity(current);
+              if (mockAct) {
+                const dayDate = getDayDate(startDate, day.dayNumber);
+                const newEnd = addMinutes(current.endTime, extension);
+                if (!isOpenAtTime(mockAct, dayDate, current.startTime!, newEnd)) {
+                  continue; // Don't extend past closing time
+                }
+              }
+            }
             const newDuration = currentDuration + extension;
             const newEndTime = addMinutes(current.endTime, extension);
             day.items[i] = { ...current, duration: newDuration, endTime: newEndTime };

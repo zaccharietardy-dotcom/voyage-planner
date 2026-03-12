@@ -102,9 +102,18 @@ export function isAlwaysOpenPublicSpace(activity: ScoredActivity): boolean {
     'tower', 'tour', 'torre', 'turm',
     'ruins', 'ruines', 'ruinas',
     'stairway', 'stairs', 'escalier',
+    // Japanese
+    'kōen', 'koen',           // 公園 park
+    'dōri', 'dori',           // 通り street/avenue
+    'jinja', 'jingū', 'jingu', // 神社/神宮 shrine grounds
+    'bashi', 'hashi',         // 橋 bridge
+    // Nightlife districts / neighborhoods
+    'gai',                    // 街 district (Golden Gai, etc.)
+    'quartier', 'barrio', 'viertel', 'neighborhood',
   ];
+  // Use boundary pattern that supports diacritics (ō, é, etc.) instead of \b
   const ALWAYS_OPEN_RE = new RegExp(
-    '\\b(' + ALWAYS_OPEN_KEYWORDS.map(kw => kw.trim().replace(/\s+/g, '\\s+')).join('|') + ')\\b',
+    '(?:^|[\\s\\-,])(' + ALWAYS_OPEN_KEYWORDS.map(kw => kw.trim().replace(/\s+/g, '\\s+')).join('|') + ')(?:[\\s\\-,]|$)',
     'i'
   );
   return ALWAYS_OPEN_RE.test(name);
@@ -152,6 +161,12 @@ export function isOpenAtTime(
   if (dayHours === null) {
     // Distinguish (a) vs (b) using isActivityOpenOnDay
     return isActivityOpenOnDay(activity, dayDate);
+  }
+
+  // If hours came from simple defaults (no per-day data) and match the
+  // hard-coded fallback 09:00-18:00, treat as unknown — don't enforce
+  if (!activity.openingHoursByDay && dayHours.close === '18:00' && dayHours.open === '09:00') {
+    return true;
   }
 
   // Step 2: We have hours — check if the scheduled slot overlaps

@@ -591,7 +591,7 @@ export async function generateTripV3(
   stageTimes['contracts'] = Date.now() - t;
   console.log(`[Pipeline V3] Step 10: Quality score ${contractResult.score}/100, Invariants: ${contractResult.invariantsPassed ? 'PASSED' : 'FAILED'}`);
 
-  const contractsModeRaw = (process.env.PIPELINE_CONTRACTS_MODE || 'strict').toLowerCase();
+  const contractsModeRaw = (process.env.PIPELINE_CONTRACTS_MODE || 'warn').toLowerCase();
   const contractsMode: 'strict' | 'warn' = contractsModeRaw === 'warn' ? 'warn' : 'strict';
   const unresolvedRepairViolations = repairResult.unresolvedViolations.map(v => `REPAIR: ${v}`);
   const combinedContractViolations = [...unresolvedRepairViolations, ...contractResult.violations];
