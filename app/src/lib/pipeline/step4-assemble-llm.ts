@@ -382,6 +382,42 @@ export function addOutboundTransportItem(
     };
 
     day1.items.unshift(trainItem);
+  } else if (transport && transport.mode === 'plane') {
+    // Fallback: plane recommended but no flight data (API timeout/failure/no results)
+    const departMin = parseHHMM('08:00');
+    const arrivalMin = departMin + (transport.totalDuration || 180);
+    const outboundDateStr = formatDateForUrl(preferences.startDate);
+
+    const flightFallbackItem: TripItem = {
+      id: uuidv4(),
+      dayNumber: 1,
+      startTime: '08:00',
+      endTime: minutesToHHMM(arrivalMin),
+      type: 'flight',
+      title: `Vol ${preferences.origin} → ${preferences.destination}`,
+      description: 'Réservez votre vol',
+      locationName: preferences.origin,
+      latitude: fallbackCoords.lat,
+      longitude: fallbackCoords.lng,
+      orderIndex: 0,
+      duration: transport.totalDuration || 180,
+      imageUrl: 'https://images.unsplash.com/photo-1436491865332-7a61a109db05?w=600&h=400&fit=crop',
+      estimatedCost: transport.totalPrice,
+      bookingUrl: generateFlightLink(
+        { origin: preferences.origin, destination: preferences.destination },
+        { date: outboundDateStr, passengers: preferences.groupSize }
+      ),
+      aviasalesUrl: generateFlightLink(
+        { origin: preferences.origin, destination: preferences.destination },
+        { date: outboundDateStr, passengers: preferences.groupSize }
+      ),
+      omioFlightUrl: generateFlightOmioLink(
+        preferences.origin, preferences.destination,
+        outboundDateStr, preferences.groupSize
+      ),
+    };
+
+    day1.items.unshift(flightFallbackItem);
   }
 
   // Re-index order
@@ -476,6 +512,44 @@ export function addReturnTransportItem(
     };
 
     lastDay.items.push(trainItem);
+  } else if (transport && transport.mode === 'plane') {
+    // Fallback: plane recommended but no return flight data
+    const returnDepartMin = 17 * 60;
+    const returnArrivalMin = returnDepartMin + (transport.totalDuration || 180);
+    const returnDate = new Date(preferences.startDate);
+    returnDate.setDate(returnDate.getDate() + preferences.durationDays - 1);
+    const returnDateStr = formatDateForUrl(returnDate);
+
+    const flightFallbackItem: TripItem = {
+      id: uuidv4(),
+      dayNumber: lastDay.dayNumber,
+      startTime: minutesToHHMM(returnDepartMin),
+      endTime: minutesToHHMM(Math.min(returnArrivalMin, 23 * 60 + 59)),
+      type: 'flight',
+      title: `Vol ${preferences.destination} → ${preferences.origin}`,
+      description: 'Réservez votre vol retour',
+      locationName: preferences.destination,
+      latitude: fallbackCoords.lat,
+      longitude: fallbackCoords.lng,
+      orderIndex: lastDay.items.length,
+      duration: transport.totalDuration || 180,
+      imageUrl: 'https://images.unsplash.com/photo-1436491865332-7a61a109db05?w=600&h=400&fit=crop',
+      estimatedCost: transport.totalPrice,
+      bookingUrl: generateFlightLink(
+        { origin: preferences.destination, destination: preferences.origin },
+        { date: returnDateStr, passengers: preferences.groupSize }
+      ),
+      aviasalesUrl: generateFlightLink(
+        { origin: preferences.destination, destination: preferences.origin },
+        { date: returnDateStr, passengers: preferences.groupSize }
+      ),
+      omioFlightUrl: generateFlightOmioLink(
+        preferences.destination, preferences.origin,
+        returnDateStr, preferences.groupSize
+      ),
+    };
+
+    lastDay.items.push(flightFallbackItem);
   } else if (transport && transport.mode !== 'plane' && !transport.transitLegs) {
     // Generic ground transport return (bus/car/combined) — estimate times
     const returnDepartMin = 17 * 60;
