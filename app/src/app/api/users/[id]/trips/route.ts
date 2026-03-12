@@ -1,9 +1,11 @@
 import { createRouteHandlerClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
+import { isAcceptedCloseFriend } from '@/lib/server/closeFriends';
+import { canViewTrip } from '@/lib/server/tripAccess';
 
 // GET /api/users/[id]/trips - Get user's visible trips
 export async function GET(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -21,30 +23,21 @@ export async function GET(
       return NextResponse.json(data || []);
     }
 
-    // Check if follower (following this user)
-    let isFollowing = false;
-    if (user) {
-      const { data: follow } = await supabase
-        .from('follows')
-        .select('id')
-        .eq('follower_id', user.id)
-        .eq('following_id', id)
-        .single();
-      isFollowing = !!follow;
-    }
-
-    // Build visibility filter - followers can see 'friends' trips
-    const visibilities: ('public' | 'friends' | 'private')[] = ['public'];
-    if (isFollowing) visibilities.push('friends');
+    const isCloseFriend = user
+      ? await isAcceptedCloseFriend(supabase, user.id, id)
+      : false;
 
     const { data } = await supabase
       .from('trips')
       .select('id, title, name, destination, start_date, end_date, duration_days, visibility, created_at, preferences')
       .eq('owner_id', id)
-      .in('visibility', visibilities)
       .order('created_at', { ascending: false });
 
-    return NextResponse.json(data || []);
+    const visibleTrips = (data || []).filter((trip) =>
+      canViewTrip(user?.id ?? null, id, trip.visibility, isCloseFriend, false)
+    );
+
+    return NextResponse.json(visibleTrips);
   } catch (error) {
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
   }

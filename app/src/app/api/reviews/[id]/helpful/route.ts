@@ -11,7 +11,7 @@ function getServiceClient() {
 
 // POST /api/reviews/[id]/helpful - Mark review as helpful
 export async function POST(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -27,51 +27,23 @@ export async function POST(
 
     const serviceClient = getServiceClient();
 
-    // Check if review exists
-    const { data: review, error: reviewError } = await serviceClient
-      .from('place_reviews')
-      .select('id, helpful_count')
-      .eq('id', reviewId)
-      .maybeSingle();
+    const { data, error } = await serviceClient
+      .rpc('toggle_review_helpful_atomic', { p_review_id: reviewId, p_user_id: user.id });
 
-    if (reviewError || !review) {
-      return NextResponse.json({ error: 'Avis non trouvé' }, { status: 404 });
+    if (error) {
+      if (error.message?.includes('REVIEW_NOT_FOUND')) {
+        return NextResponse.json({ error: 'Avis non trouvé' }, { status: 404 });
+      }
+      console.error('Error in helpful toggle RPC:', error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    // Check if user already marked as helpful
-    const { data: existing } = await serviceClient
-      .from('review_helpful')
-      .select('id')
-      .eq('review_id', reviewId)
-      .eq('user_id', user.id)
-      .maybeSingle();
-
-    if (existing) {
-      // Toggle off - remove helpful vote
-      await serviceClient
-        .from('review_helpful')
-        .delete()
-        .eq('id', existing.id);
-
-      await serviceClient
-        .from('place_reviews')
-        .update({ helpful_count: Math.max(0, review.helpful_count - 1) })
-        .eq('id', reviewId);
-
-      return NextResponse.json({ helpful: false, count: Math.max(0, review.helpful_count - 1) });
-    } else {
-      // Add helpful vote
-      await serviceClient
-        .from('review_helpful')
-        .insert({ review_id: reviewId, user_id: user.id });
-
-      await serviceClient
-        .from('place_reviews')
-        .update({ helpful_count: review.helpful_count + 1 })
-        .eq('id', reviewId);
-
-      return NextResponse.json({ helpful: true, count: review.helpful_count + 1 });
+    const result = (data as { helpful: boolean; helpful_count: number }[] | null)?.[0];
+    if (!result) {
+      return NextResponse.json({ error: 'Réponse invalide du serveur' }, { status: 500 });
     }
+
+    return NextResponse.json({ helpful: result.helpful, count: result.helpful_count });
   } catch (error) {
     console.error('Error in POST /api/reviews/[id]/helpful:', error);
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });

@@ -202,13 +202,48 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    let verifiedTripId: string | null = null;
+    if (tripId) {
+      const { data: trip } = await serviceClient
+        .from('trips')
+        .select('id, owner_id')
+        .eq('id', tripId)
+        .maybeSingle();
+
+      if (!trip) {
+        return NextResponse.json(
+          { error: 'tripId invalide ou non accessible' },
+          { status: 403 }
+        );
+      }
+
+      const isOwner = trip.owner_id === user.id;
+      if (!isOwner) {
+        const { data: member } = await serviceClient
+          .from('trip_members')
+          .select('id')
+          .eq('trip_id', tripId)
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (!member) {
+          return NextResponse.json(
+            { error: 'tripId invalide ou non accessible' },
+            { status: 403 }
+          );
+        }
+      }
+
+      verifiedTripId = tripId;
+    }
+
     // Create review
     const { data: review, error } = await serviceClient
       .from('place_reviews')
       .insert({
         user_id: user.id,
         place_id: finalPlaceId,
-        trip_id: tripId || null,
+        trip_id: verifiedTripId,
         activity_title: activityTitle,
         city,
         rating,
@@ -238,7 +273,7 @@ export async function POST(request: NextRequest) {
       ...review,
       userName: profile?.display_name || 'Voyageur',
       userAvatar: profile?.avatar_url || null,
-      isVerifiedVisit: !!tripId,
+      isVerifiedVisit: !!verifiedTripId,
     });
   } catch (error) {
     console.error('Error in POST /api/reviews:', error);

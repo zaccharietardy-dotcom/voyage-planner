@@ -2,6 +2,7 @@ import { createRouteHandlerClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { isAcceptedCloseFriend } from '@/lib/server/closeFriends';
+import { canManageTrip, canViewTrip } from '@/lib/server/tripAccess';
 import type { Json } from '@/lib/supabase/types';
 import type { Database } from '@/lib/supabase/types';
 import type { MemberRole } from '@/lib/types/collaboration';
@@ -95,16 +96,16 @@ export async function GET(
         if (member && (member.role === 'owner' || member.role === 'editor' || member.role === 'viewer')) {
           userRole = member.role;
           hasCollaborationAccess = true;
-        } else if (trip.visibility === 'public') {
-          userRole = 'viewer';
-        } else if (trip.visibility === 'friends') {
-          const isCloseFriend = await isAcceptedCloseFriend(supabase, user.id, trip.owner_id);
-          if (isCloseFriend) {
+        } else {
+          const isCloseFriend = trip.visibility === 'friends'
+            ? await isAcceptedCloseFriend(supabase, user.id, trip.owner_id)
+            : false;
+          if (canViewTrip(user.id, trip.owner_id, trip.visibility, isCloseFriend, false)) {
             userRole = 'viewer';
           }
         }
       }
-    } else if (trip.visibility === 'public') {
+    } else if (canViewTrip(null, trip.owner_id, trip.visibility, false, false)) {
       // Unauthenticated: only allow public trips
       userRole = 'viewer';
     }
@@ -247,7 +248,8 @@ export async function PATCH(
       return NextResponse.json({ error: 'Voyage non trouvé' }, { status: 404 });
     }
 
-    if (trip.owner_id !== user.id) {
+    const userRole: MemberRole | null = trip.owner_id === user.id ? 'owner' : null;
+    if (!canManageTrip(userRole)) {
       return NextResponse.json({ error: 'Seul le propriétaire peut modifier directement le voyage' }, { status: 403 });
     }
 
@@ -328,7 +330,8 @@ export async function DELETE(
       return NextResponse.json({ error: 'Voyage non trouvé' }, { status: 404 });
     }
 
-    if (trip.owner_id !== user.id) {
+    const userRole: MemberRole | null = trip.owner_id === user.id ? 'owner' : null;
+    if (!canManageTrip(userRole)) {
       return NextResponse.json({ error: 'Seul le propriétaire peut supprimer le voyage' }, { status: 403 });
     }
 

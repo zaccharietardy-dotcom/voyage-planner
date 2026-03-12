@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Trip } from '@/lib/types';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -73,6 +73,29 @@ export function TripDocuments({ trip, isOwner, onUpdate }: TripDocumentsProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const canEdit = isOwner; // Can extend to include editors later
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadDocuments = async () => {
+      try {
+        const response = await fetch(`/api/trips/${trip.id}/documents`);
+        if (!response.ok) return;
+
+        const payload = await response.json();
+        if (!cancelled && Array.isArray(payload.documents)) {
+          setDocuments(payload.documents);
+        }
+      } catch (error) {
+        console.error('Failed to load signed documents:', error);
+      }
+    };
+
+    void loadDocuments();
+    return () => {
+      cancelled = true;
+    };
+  }, [trip.id]);
 
   // Group documents by type and sort by date
   const documentsByType = documents.reduce((acc, doc) => {

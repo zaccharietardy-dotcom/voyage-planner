@@ -14,6 +14,10 @@ jest.mock('@/lib/server/closeFriends', () => ({
   getAcceptedCloseFriendIds: jest.fn().mockResolvedValue(new Set<string>()),
 }));
 
+jest.mock('@/lib/server/mediaUrl', () => ({
+  signManyObjectUrls: jest.fn().mockResolvedValue({}),
+}));
+
 const createRouteHandlerClientMock = createRouteHandlerClient as jest.Mock;
 const createClientMock = createClient as jest.Mock;
 
@@ -58,12 +62,11 @@ function buildServiceClient() {
     range: jest.fn().mockResolvedValue({ data: tripRows, error: null }),
   };
 
+  const tripPhotosEqMock = jest.fn().mockReturnValue({
+    order: jest.fn().mockResolvedValue({ data: [] }),
+  });
+
   return {
-    storage: {
-      from: jest.fn(() => ({
-        getPublicUrl: jest.fn(() => ({ data: { publicUrl: 'https://cdn.example.com/photo.jpg' } })),
-      })),
-    },
     from: jest.fn((table: string) => {
       if (table === 'trips') {
         return tripsQuery;
@@ -83,7 +86,7 @@ function buildServiceClient() {
         return {
           select: jest.fn().mockReturnValue({
             in: jest.fn().mockReturnValue({
-              order: jest.fn().mockResolvedValue({ data: [] }),
+              eq: tripPhotosEqMock,
             }),
           }),
         };
@@ -99,6 +102,7 @@ function buildServiceClient() {
 
       throw new Error(`Unexpected table ${table}`);
     }),
+    __tripPhotosEqMock: tripPhotosEqMock,
   };
 }
 
@@ -109,7 +113,8 @@ describe('/api/feed payload sanitization', () => {
 
   it('does not expose trips.data in discover feed items', async () => {
     createRouteHandlerClientMock.mockResolvedValue(buildRouteClient(null));
-    createClientMock.mockReturnValue(buildServiceClient());
+    const serviceClient = buildServiceClient();
+    createClientMock.mockReturnValue(serviceClient);
 
     const response = await GET(new Request('http://localhost/api/feed?tab=discover&page=1&limit=20'));
 
@@ -118,5 +123,6 @@ describe('/api/feed payload sanitization', () => {
     expect(payload.trips).toHaveLength(1);
     expect(payload.trips[0].data).toBeUndefined();
     expect(payload.trips[0].destination).toBe('Paris');
+    expect(serviceClient.__tripPhotosEqMock).toHaveBeenCalledWith('visibility', 'public');
   });
 });

@@ -1,16 +1,13 @@
 import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@/lib/supabase/server';
 
-const DEFAULT_ADMIN_EMAILS = ['zaccharietardy@gmail.com'];
-
 function getAdminEmails(): Set<string> {
   const fromEnv = (process.env.ADMIN_EMAILS || '')
     .split(',')
     .map((email) => email.trim().toLowerCase())
     .filter(Boolean);
 
-  const emails = fromEnv.length > 0 ? fromEnv : DEFAULT_ADMIN_EMAILS;
-  return new Set(emails);
+  return new Set(fromEnv);
 }
 
 export interface AdminUser {
@@ -20,6 +17,18 @@ export interface AdminUser {
 
 export async function requireAdmin():
   Promise<{ ok: true; user: AdminUser } | { ok: false; response: NextResponse }> {
+  const adminEmails = getAdminEmails();
+  if (adminEmails.size === 0) {
+    console.error('[AdminAuth] ADMIN_EMAILS is not configured; refusing admin access');
+    return {
+      ok: false,
+      response: NextResponse.json(
+        { error: 'Service administrateur indisponible: ADMIN_EMAILS non configuré' },
+        { status: 503 }
+      ),
+    };
+  }
+
   const supabase = await createRouteHandlerClient();
   const { data: { user }, error } = await supabase.auth.getUser();
 
@@ -31,7 +40,7 @@ export async function requireAdmin():
   }
 
   const email = (user.email || '').toLowerCase();
-  if (!email || !getAdminEmails().has(email)) {
+  if (!email || !adminEmails.has(email)) {
     return {
       ok: false,
       response: NextResponse.json({ error: 'Accès administrateur requis' }, { status: 403 }),

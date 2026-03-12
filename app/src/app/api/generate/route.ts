@@ -4,6 +4,7 @@ import { TripPreferences } from '@/lib/types';
 import { normalizeCity } from '@/lib/services/cityNormalization';
 import { createRouteHandlerClient } from '@/lib/supabase/server';
 import { deriveBillingState, fetchEntitlementsForUser } from '@/lib/server/billingEntitlements';
+import { checkAndIncrementRateLimit } from '@/lib/server/dbRateLimit';
 
 export const maxDuration = 300; // 5 minutes max
 
@@ -41,6 +42,31 @@ export async function POST(request: NextRequest) {
     const entitlements = await fetchEntitlementsForUser(supabase, user.id);
     const billingState = deriveBillingState(profile, entitlements);
 
+    // Persistent per-user+IP rate limit (DB-backed)
+    const forwarded = request.headers.get('x-forwarded-for');
+    const ip = forwarded?.split(',')[0]?.trim() || request.headers.get('x-real-ip') || 'unknown';
+    const hourlyLimit = billingState.status === 'pro' ? 10 : 2;
+    const rateLimitKey = `generate:${user.id}:${ip}`;
+
+    const rateLimit = await checkAndIncrementRateLimit(
+      supabase as any,
+      rateLimitKey,
+      hourlyLimit,
+      3600
+    );
+
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: 'Trop de générations récentes. Réessayez plus tard.', code: 'RATE_LIMIT_EXCEEDED' },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': String(rateLimit.retryAfterSeconds),
+          },
+        }
+      );
+    }
+
     if (billingState.status !== 'pro') {
       // --- Quota par compte : max FREE_MONTHLY_LIMIT trips/mois ---
       const startOfMonth = new Date();
@@ -60,26 +86,6 @@ export async function POST(request: NextRequest) {
           { error: 'Limite de voyages gratuits atteinte. Passez à Pro pour des voyages illimités.', code: 'QUOTA_EXCEEDED' },
           { status: 403 }
         );
-      }
-
-      // --- Anti-abus : 1 seule génération gratuite par IP (permanent) ---
-      // Empêche de créer plusieurs comptes gratuits depuis la même IP
-      const forwarded = request.headers.get('x-forwarded-for');
-      const ip = forwarded?.split(',')[0]?.trim() || request.headers.get('x-real-ip') || 'unknown';
-
-      if (ip !== 'unknown') {
-        const { count: ipCount } = await supabase
-          .from('trips')
-          .select('*', { count: 'exact', head: true })
-          .eq('generator_ip', ip);
-
-        if (ipCount !== null && ipCount >= 1) {
-          console.log(`[Generate] IP ${ip} bloquée — ${ipCount} trip(s) déjà généré(s) depuis cette IP`);
-          return NextResponse.json(
-            { error: 'Limite de voyages gratuits atteinte. Passez à Pro pour des voyages illimités.', code: 'QUOTA_EXCEEDED' },
-            { status: 403 }
-          );
-        }
       }
     }
 

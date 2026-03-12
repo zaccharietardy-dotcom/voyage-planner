@@ -2,6 +2,9 @@ import { createRouteHandlerClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@/lib/supabase/types';
+import type { MemberRole } from '@/lib/types/collaboration';
+import { signManyObjectUrls } from '@/lib/server/mediaUrl';
+import { canEditTrip } from '@/lib/server/tripAccess';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_MIME_TYPES = [
@@ -11,6 +14,33 @@ const ALLOWED_MIME_TYPES = [
   'image/jpg',
   'text/plain',
 ];
+
+const DOCUMENT_TYPES = [
+  'flight_ticket',
+  'hotel_booking',
+  'activity_ticket',
+  'insurance',
+  'visa',
+  'passport',
+  'other',
+] as const;
+
+type DocumentType = (typeof DOCUMENT_TYPES)[number];
+
+interface StoredDocument {
+  id: string;
+  name: string;
+  type: DocumentType;
+  fileUrl?: string;
+  storagePath?: string;
+  fileSize?: number;
+  mimeType?: string;
+  uploadedAt: string;
+  uploadedBy?: string;
+  notes?: string;
+  linkedActivityId?: string;
+  urlExpiresAt?: string;
+}
 
 function getServiceClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -23,6 +53,114 @@ function getServiceClient() {
   return createClient<Database>(supabaseUrl, serviceKey, {
     auth: { autoRefreshToken: false, persistSession: false },
   });
+}
+
+async function ensureDocumentsBucket(serviceClient: ReturnType<typeof getServiceClient>) {
+  const { data: buckets } = await serviceClient.storage.listBuckets();
+  const exists = buckets?.some((bucket) => bucket.name === 'trip-documents');
+  if (!exists) {
+    await serviceClient.storage.createBucket('trip-documents', {
+      public: false,
+      fileSizeLimit: MAX_FILE_SIZE,
+      allowedMimeTypes: ALLOWED_MIME_TYPES,
+    });
+  }
+}
+
+function normalizeDocumentType(type: string | null): DocumentType {
+  if (type && DOCUMENT_TYPES.includes(type as DocumentType)) {
+    return type as DocumentType;
+  }
+  return 'other';
+}
+
+function extractStoragePathFromUrl(fileUrl: string, bucket: string): string | null {
+  if (!fileUrl || fileUrl.startsWith('data:')) {
+    return null;
+  }
+
+  try {
+    const parsed = new URL(fileUrl);
+    const marker = `/${bucket}/`;
+    const markerIndex = parsed.pathname.indexOf(marker);
+    if (markerIndex === -1) {
+      return null;
+    }
+    const extracted = decodeURIComponent(parsed.pathname.slice(markerIndex + marker.length));
+    return extracted || null;
+  } catch {
+    return null;
+  }
+}
+
+function getCanonicalStoragePath(doc: StoredDocument): string | null {
+  if (doc.storagePath) {
+    return doc.storagePath;
+  }
+
+  if (doc.fileUrl) {
+    return extractStoragePathFromUrl(doc.fileUrl, 'trip-documents');
+  }
+
+  return null;
+}
+
+function getDocumentsFromTripData(tripData: unknown): StoredDocument[] {
+  const data = (tripData || {}) as { documents?: { items?: StoredDocument[] } };
+  return data.documents?.items || [];
+}
+
+function buildStoredDocumentPayload(doc: StoredDocument): StoredDocument {
+  const storagePath = getCanonicalStoragePath(doc);
+
+  return {
+    id: doc.id,
+    name: doc.name,
+    type: normalizeDocumentType(doc.type),
+    storagePath: storagePath || undefined,
+    // Keep legacy URLs only when no canonical path can be recovered.
+    fileUrl: storagePath ? undefined : doc.fileUrl,
+    fileSize: doc.fileSize,
+    mimeType: doc.mimeType,
+    uploadedAt: doc.uploadedAt,
+    uploadedBy: doc.uploadedBy,
+    notes: doc.notes,
+    linkedActivityId: doc.linkedActivityId,
+  };
+}
+
+function toApiDocument(
+  doc: StoredDocument,
+  signedByPath: Record<string, { signedUrl: string; expiresAt: string }>
+): StoredDocument {
+  const storagePath = getCanonicalStoragePath(doc);
+  const signed = storagePath ? signedByPath[storagePath] : null;
+
+  return {
+    ...doc,
+    storagePath: storagePath || undefined,
+    fileUrl: signed?.signedUrl || doc.fileUrl,
+    urlExpiresAt: signed?.expiresAt ?? undefined,
+  };
+}
+
+async function getMemberRole(
+  serviceClient: ReturnType<typeof getServiceClient>,
+  tripId: string,
+  userId: string
+): Promise<MemberRole | null> {
+  const { data: member } = await serviceClient
+    .from('trip_members')
+    .select('role')
+    .eq('trip_id', tripId)
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (!member) return null;
+  if (member.role === 'owner' || member.role === 'editor' || member.role === 'viewer') {
+    return member.role;
+  }
+  return null;
 }
 
 // GET /api/trips/[id]/documents - List documents
@@ -40,7 +178,6 @@ export async function GET(
       return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
     }
 
-    // Check access
     const { data: trip, error: tripError } = await serviceClient
       .from('trips')
       .select('owner_id, data')
@@ -51,25 +188,22 @@ export async function GET(
       return NextResponse.json({ error: 'Voyage non trouvé' }, { status: 404 });
     }
 
-    // Check if user is owner or member
     const isOwner = trip.owner_id === user.id;
-    if (!isOwner) {
-      const { data: member } = await serviceClient
-        .from('trip_members')
-        .select('role')
-        .eq('trip_id', id)
-        .eq('user_id', user.id)
-        .maybeSingle();
+    const memberRole = isOwner ? 'owner' : await getMemberRole(serviceClient, id, user.id);
 
-      if (!member) {
-        return NextResponse.json({ error: 'Accès refusé' }, { status: 403 });
-      }
+    if (!memberRole) {
+      return NextResponse.json({ error: 'Accès refusé' }, { status: 403 });
     }
 
-    const tripData = trip.data as any;
-    const documents = tripData?.documents?.items || [];
+    const documents = getDocumentsFromTripData(trip.data);
+    const storagePaths = documents
+      .map((doc) => getCanonicalStoragePath(doc))
+      .filter((path): path is string => Boolean(path));
 
-    return NextResponse.json({ documents });
+    const signedByPath = await signManyObjectUrls('trip-documents', storagePaths);
+    const apiDocuments = documents.map((doc) => toApiDocument(doc, signedByPath));
+
+    return NextResponse.json({ documents: apiDocuments });
   } catch (error) {
     console.error('Error fetching documents:', error);
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
@@ -91,7 +225,6 @@ export async function POST(
       return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
     }
 
-    // Check access
     const { data: trip, error: tripError } = await serviceClient
       .from('trips')
       .select('owner_id, data')
@@ -102,26 +235,21 @@ export async function POST(
       return NextResponse.json({ error: 'Voyage non trouvé' }, { status: 404 });
     }
 
-    // Only owner or editors can upload
     const isOwner = trip.owner_id === user.id;
-    if (!isOwner) {
-      const { data: member } = await serviceClient
-        .from('trip_members')
-        .select('role')
-        .eq('trip_id', id)
-        .eq('user_id', user.id)
-        .maybeSingle();
+    const memberRole = isOwner ? 'owner' : await getMemberRole(serviceClient, id, user.id);
 
-      if (!member || member.role === 'viewer') {
-        return NextResponse.json({ error: 'Seuls les propriétaires et éditeurs peuvent ajouter des documents' }, { status: 403 });
-      }
+    if (!canEditTrip(memberRole)) {
+      return NextResponse.json(
+        { error: 'Seuls les propriétaires et éditeurs peuvent ajouter des documents' },
+        { status: 403 }
+      );
     }
 
     const formData = await request.formData();
     const file = formData.get('file') as File | null;
-    const documentType = formData.get('type') as string;
-    const notes = formData.get('notes') as string | null;
-    const linkedActivityId = formData.get('linkedActivityId') as string | null;
+    const documentType = normalizeDocumentType((formData.get('type') as string) || null);
+    const notes = (formData.get('notes') as string) || null;
+    const linkedActivityId = (formData.get('linkedActivityId') as string) || null;
 
     if (!file) {
       return NextResponse.json({ error: 'Fichier manquant' }, { status: 400 });
@@ -133,16 +261,22 @@ export async function POST(
     }
 
     if (!ALLOWED_MIME_TYPES.includes(file.type)) {
-      return NextResponse.json({ error: 'Type de fichier non autorisé (PDF, JPG, PNG, TXT uniquement)' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Type de fichier non autorisé (PDF, JPG, PNG, TXT uniquement)' },
+        { status: 400 }
+      );
     }
 
-    const tripData = trip.data as any;
-    const documents = tripData?.documents?.items || [];
+    const tripData = trip.data as unknown;
+    const existingDocuments = getDocumentsFromTripData(tripData).map((doc) => buildStoredDocumentPayload(doc));
 
-    const storagePath = `${id}/${Date.now()}-${file.name}`;
+    await ensureDocumentsBucket(serviceClient);
+
+    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const storagePath = `${id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${safeName}`;
     const fileBuffer = await file.arrayBuffer();
 
-    const { error: uploadError } = await supabase.storage
+    const { error: uploadError } = await serviceClient.storage
       .from('trip-documents')
       .upload(storagePath, fileBuffer, {
         contentType: file.type,
@@ -160,18 +294,12 @@ export async function POST(
       );
     }
 
-    const { data: urlData } = supabase.storage
-      .from('trip-documents')
-      .getPublicUrl(storagePath);
-
-    const fileUrl = urlData.publicUrl;
-
-    // Create document metadata
-    const newDocument = {
-      id: `doc-${Date.now()}-${Math.random().toString(36).substring(7)}`,
+    // Persist canonical storage path only (signed URL is generated per request)
+    const newStoredDocument: StoredDocument = {
+      id: `doc-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`,
       name: file.name,
       type: documentType,
-      fileUrl,
+      storagePath,
       fileSize: file.size,
       mimeType: file.type,
       uploadedAt: new Date().toISOString(),
@@ -180,31 +308,32 @@ export async function POST(
       linkedActivityId: linkedActivityId || undefined,
     };
 
-    documents.push(newDocument);
+    const documentsToPersist = [...existingDocuments, newStoredDocument];
 
-    // Update trip data
     const newData = {
-      ...tripData,
+      ...(tripData as Record<string, unknown>),
       documents: {
-        items: documents,
+        items: documentsToPersist,
       },
     };
 
-    const { error: updateError } = await supabase
+    const { error: updateError } = await serviceClient
       .from('trips')
       .update({
-        data: newData as any,
+        data: newData as unknown as Database['public']['Tables']['trips']['Update']['data'],
         updated_at: new Date().toISOString(),
       })
       .eq('id', id);
 
     if (updateError) {
-      // Cleanup uploaded file if update fails
-      await supabase.storage.from('trip-documents').remove([storagePath]);
+      await serviceClient.storage.from('trip-documents').remove([storagePath]);
       return NextResponse.json({ error: updateError.message }, { status: 500 });
     }
 
-    return NextResponse.json({ document: newDocument });
+    const signedByPath = await signManyObjectUrls('trip-documents', [storagePath]);
+    const apiDocument = toApiDocument(newStoredDocument, signedByPath);
+
+    return NextResponse.json({ document: apiDocument });
   } catch (error) {
     console.error('Error uploading document:', error);
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
@@ -233,7 +362,6 @@ export async function DELETE(
       return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
     }
 
-    // Check access
     const { data: trip, error: tripError } = await serviceClient
       .from('trips')
       .select('owner_id, data')
@@ -244,56 +372,46 @@ export async function DELETE(
       return NextResponse.json({ error: 'Voyage non trouvé' }, { status: 404 });
     }
 
-    // Only owner or editors can delete
     const isOwner = trip.owner_id === user.id;
-    if (!isOwner) {
-      const { data: member } = await serviceClient
-        .from('trip_members')
-        .select('role')
-        .eq('trip_id', id)
-        .eq('user_id', user.id)
-        .maybeSingle();
+    const memberRole = isOwner ? 'owner' : await getMemberRole(serviceClient, id, user.id);
 
-      if (!member || member.role === 'viewer') {
-        return NextResponse.json({ error: 'Seuls les propriétaires et éditeurs peuvent supprimer des documents' }, { status: 403 });
-      }
+    if (!canEditTrip(memberRole)) {
+      return NextResponse.json(
+        { error: 'Seuls les propriétaires et éditeurs peuvent supprimer des documents' },
+        { status: 403 }
+      );
     }
 
-    const tripData = trip.data as any;
-    const documents = tripData?.documents?.items || [];
-    const document = documents.find((d: any) => d.id === documentId);
+    const tripData = trip.data as unknown;
+    const documents = getDocumentsFromTripData(tripData).map((doc) => buildStoredDocumentPayload(doc));
+    const document = documents.find((doc) => doc.id === documentId);
 
     if (!document) {
       return NextResponse.json({ error: 'Document non trouvé' }, { status: 404 });
     }
 
-    // Delete from storage if it's a Supabase URL (not base64)
-    if (document.fileUrl && !document.fileUrl.startsWith('data:')) {
+    const storagePath = getCanonicalStoragePath(document);
+    if (storagePath) {
       try {
-        const fileName = document.fileUrl.split('/').pop();
-        if (fileName) {
-          await supabase.storage.from('trip-documents').remove([`${id}/${fileName}`]);
-        }
+        await serviceClient.storage.from('trip-documents').remove([storagePath]);
       } catch (storageError) {
         console.warn('Failed to delete file from storage:', storageError);
-        // Continue anyway to remove metadata
       }
     }
 
-    // Remove from documents array
-    const updatedDocuments = documents.filter((d: any) => d.id !== documentId);
+    const updatedDocuments = documents.filter((doc) => doc.id !== documentId);
 
     const newData = {
-      ...tripData,
+      ...(tripData as Record<string, unknown>),
       documents: {
         items: updatedDocuments,
       },
     };
 
-    const { error: updateError } = await supabase
+    const { error: updateError } = await serviceClient
       .from('trips')
       .update({
-        data: newData as any,
+        data: newData as unknown as Database['public']['Tables']['trips']['Update']['data'],
         updated_at: new Date().toISOString(),
       })
       .eq('id', id);

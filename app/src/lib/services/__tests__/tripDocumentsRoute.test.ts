@@ -10,13 +10,17 @@ jest.mock('@supabase/supabase-js', () => ({
   createClient: jest.fn(),
 }));
 
+jest.mock('@/lib/server/mediaUrl', () => ({
+  signManyObjectUrls: jest.fn().mockResolvedValue({}),
+}));
+
 const createRouteHandlerClientMock = createRouteHandlerClient as jest.Mock;
 const createClientMock = createClient as jest.Mock;
 
 function createMultipartRequest(file: File): Request {
   const formData = new FormData();
   formData.set('file', file);
-  formData.set('type', 'receipt');
+  formData.set('type', 'other');
   formData.set('notes', 'Security test');
 
   return new Request('http://localhost/api/trips/trip-1/documents', {
@@ -25,9 +29,14 @@ function createMultipartRequest(file: File): Request {
   });
 }
 
-function buildServiceClient(ownerId: string) {
-  const tripQuery = {
-    select: jest.fn().mockReturnThis(),
+function buildServiceClient(options: { ownerId: string; uploadError: { message: string } | null }) {
+  const { ownerId, uploadError } = options;
+
+  const updateEqMock = jest.fn().mockResolvedValue({ error: null });
+  const updateMock = jest.fn(() => ({ eq: updateEqMock }));
+  const uploadMock = jest.fn().mockResolvedValue({ error: uploadError });
+
+  const tripSelectQuery = {
     eq: jest.fn().mockReturnThis(),
     maybeSingle: jest.fn().mockResolvedValue({
       data: { owner_id: ownerId, data: {} },
@@ -35,49 +44,35 @@ function buildServiceClient(ownerId: string) {
     }),
   };
 
-  const memberQuery = {
-    select: jest.fn().mockReturnThis(),
-    eq: jest.fn().mockReturnThis(),
-    maybeSingle: jest.fn().mockResolvedValue({ data: null }),
-  };
-
-  return {
-    from: jest.fn((table: string) => {
-      if (table === 'trips') return tripQuery;
-      if (table === 'trip_members') return memberQuery;
-      throw new Error(`Unexpected table ${table}`);
-    }),
-  };
-}
-
-function buildSupabaseRouteClient(uploadResult: { error: any }) {
-  const updateEqMock = jest.fn().mockResolvedValue({ error: null });
-  const updateMock = jest.fn(() => ({ eq: updateEqMock }));
-  const removeMock = jest.fn().mockResolvedValue({});
-  const getPublicUrlMock = jest.fn(() => ({
-    data: { publicUrl: 'https://cdn.example.com/trip-documents/trip-1/test.txt' },
-  }));
-  const uploadMock = jest.fn().mockResolvedValue(uploadResult);
-
   const client = {
-    auth: {
-      getUser: jest.fn().mockResolvedValue({
-        data: { user: { id: 'user-1' } },
-      }),
-    },
     storage: {
+      listBuckets: jest.fn().mockResolvedValue({ data: [{ name: 'trip-documents' }] }),
+      createBucket: jest.fn().mockResolvedValue({}),
       from: jest.fn(() => ({
         upload: uploadMock,
-        getPublicUrl: getPublicUrlMock,
-        remove: removeMock,
+        remove: jest.fn().mockResolvedValue({}),
       })),
     },
     from: jest.fn((table: string) => {
       if (table === 'trips') {
         return {
+          select: jest.fn().mockReturnValue(tripSelectQuery),
           update: updateMock,
         };
       }
+
+      if (table === 'trip_members') {
+        return {
+          select: jest.fn().mockReturnValue({
+            eq: jest.fn().mockReturnValue({
+              eq: jest.fn().mockReturnValue({
+                maybeSingle: jest.fn().mockResolvedValue({ data: null }),
+              }),
+            }),
+          }),
+        };
+      }
+
       throw new Error(`Unexpected table ${table}`);
     }),
   };
@@ -85,8 +80,15 @@ function buildSupabaseRouteClient(uploadResult: { error: any }) {
   return {
     client,
     updateMock,
-    updateEqMock,
     uploadMock,
+  };
+}
+
+function buildRouteClient() {
+  return {
+    auth: {
+      getUser: jest.fn().mockResolvedValue({ data: { user: { id: 'user-1' } } }),
+    },
   };
 }
 
@@ -105,12 +107,11 @@ describe('/api/trips/[id]/documents POST hardening', () => {
     process.env.SUPABASE_SERVICE_ROLE_KEY = originalServiceKey;
   });
 
-  it('uploads via storage and never persists base64 data URLs', async () => {
-    const serviceClient = buildServiceClient('user-1');
-    const routeClient = buildSupabaseRouteClient({ error: null });
+  it('uploads via storage and persists canonical storagePath (not data URL)', async () => {
+    const serviceClient = buildServiceClient({ ownerId: 'user-1', uploadError: null });
 
-    createClientMock.mockReturnValue(serviceClient);
-    createRouteHandlerClientMock.mockResolvedValue(routeClient.client);
+    createClientMock.mockReturnValue(serviceClient.client);
+    createRouteHandlerClientMock.mockResolvedValue(buildRouteClient());
 
     const request = createMultipartRequest(
       new File(['hello world'], 'test.txt', { type: 'text/plain' })
@@ -121,21 +122,24 @@ describe('/api/trips/[id]/documents POST hardening', () => {
     } as any);
 
     expect(response.status).toBe(200);
-    expect(routeClient.updateMock).toHaveBeenCalledTimes(1);
-    const updatedPayload = (routeClient.updateMock.mock.calls as any[][])[0][0];
-    const persistedFileUrl = updatedPayload?.data?.documents?.items?.[0]?.fileUrl;
-    expect(typeof persistedFileUrl).toBe('string');
-    expect(persistedFileUrl.startsWith('data:')).toBe(false);
+    expect(serviceClient.updateMock).toHaveBeenCalledTimes(1);
+
+    const updatedPayload = (serviceClient.updateMock.mock.calls as any[][])[0][0];
+    const persistedDoc = updatedPayload?.data?.documents?.items?.[0];
+
+    expect(typeof persistedDoc?.storagePath).toBe('string');
+    expect(persistedDoc.storagePath.startsWith('trip-1/')).toBe(true);
+    expect(persistedDoc?.fileUrl).toBeUndefined();
   });
 
   it('returns 503 and code STORAGE_UNAVAILABLE when storage upload fails', async () => {
-    const serviceClient = buildServiceClient('user-1');
-    const routeClient = buildSupabaseRouteClient({
-      error: { message: 'bucket not found' },
+    const serviceClient = buildServiceClient({
+      ownerId: 'user-1',
+      uploadError: { message: 'bucket not found' },
     });
 
-    createClientMock.mockReturnValue(serviceClient);
-    createRouteHandlerClientMock.mockResolvedValue(routeClient.client);
+    createClientMock.mockReturnValue(serviceClient.client);
+    createRouteHandlerClientMock.mockResolvedValue(buildRouteClient());
 
     const request = createMultipartRequest(
       new File(['hello world'], 'test.txt', { type: 'text/plain' })
@@ -146,7 +150,7 @@ describe('/api/trips/[id]/documents POST hardening', () => {
     } as any);
 
     expect(response.status).toBe(503);
-    expect(routeClient.updateMock).not.toHaveBeenCalled();
+    expect(serviceClient.updateMock).not.toHaveBeenCalled();
     const body = await response.json();
     expect(body.code).toBe('STORAGE_UNAVAILABLE');
   });

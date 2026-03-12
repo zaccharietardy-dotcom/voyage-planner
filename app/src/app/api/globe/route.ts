@@ -3,6 +3,8 @@ import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 import { getAcceptedCloseFriendIds } from '@/lib/server/closeFriends';
 import { calculateDistance } from '@/lib/services/geocoding';
+import { signManyObjectUrls } from '@/lib/server/mediaUrl';
+import { canViewTrip } from '@/lib/server/tripAccess';
 
 function getServiceClient() {
   return createClient(
@@ -33,6 +35,7 @@ interface GlobePhotoRow {
   trip_id: string;
   storage_path: string | null;
   thumbnail_path: string | null;
+  visibility: 'public' | 'private' | null;
   latitude: number | null;
   longitude: number | null;
   location_name: string | null;
@@ -120,13 +123,9 @@ export async function GET() {
       return NextResponse.json({ trips: [] });
     }
 
-    const visibleTrips = (allTrips as GlobeTripRow[]).filter((trip) => {
-      // Always show user's own trips
-      if (trip.owner_id === user.id) return true;
-      if (trip.visibility === 'public') return true;
-      if (trip.visibility === 'friends') return closeFriendIds.has(trip.owner_id);
-      return false;
-    });
+    const visibleTrips = (allTrips as GlobeTripRow[]).filter((trip) =>
+      canViewTrip(user.id, trip.owner_id, trip.visibility, closeFriendIds.has(trip.owner_id), false)
+    );
 
     if (visibleTrips.length === 0) {
       return NextResponse.json({ trips: [] });
@@ -145,29 +144,36 @@ export async function GET() {
     const tripIds = visibleTrips.map((t) => t.id);
     const { data: photos } = await sc
       .from('trip_photos')
-      .select('id, trip_id, storage_path, thumbnail_path, latitude, longitude, location_name')
-      .in('trip_id', tripIds);
+      .select('id, trip_id, storage_path, thumbnail_path, visibility, latitude, longitude, location_name')
+      .in('trip_id', tripIds)
+      .eq('visibility', 'public');
 
     // Build cover map and per-trip photo geo points
     const coverMap: Record<string, string> = {};
     const photoPointsByTrip: Record<string, TripPhotoPoint[]> = {};
     const typedPhotos: GlobePhotoRow[] = photos || [];
-    if (typedPhotos.length > 0) {
-      const seen = new Set<string>();
-      for (const p of typedPhotos) {
-        const path = p.thumbnail_path || p.storage_path;
-        let imageUrl: string | undefined;
-        if (path) {
-          const { data: urlData } = sc.storage.from('trip-photos').getPublicUrl(path);
-          imageUrl = urlData?.publicUrl || undefined;
-        }
+    const photoPathByPhotoId: Record<string, string> = {};
+    const coverPathByTrip: Record<string, string> = {};
 
-        if (!seen.has(p.trip_id)) {
-          seen.add(p.trip_id);
-          if (imageUrl) {
-            coverMap[p.trip_id] = imageUrl;
-          }
+    for (const p of typedPhotos) {
+      const path = p.thumbnail_path || p.storage_path;
+      if (path) {
+        photoPathByPhotoId[p.id] = path;
+        if (!coverPathByTrip[p.trip_id]) {
+          coverPathByTrip[p.trip_id] = path;
         }
+      }
+    }
+
+    const signedPhotoUrls = await signManyObjectUrls('trip-photos', Object.values(photoPathByPhotoId));
+
+    if (typedPhotos.length > 0) {
+      for (const p of typedPhotos) {
+        const path = photoPathByPhotoId[p.id];
+        const imageUrl = path ? signedPhotoUrls[path]?.signedUrl : undefined;
+        const coverPath = coverPathByTrip[p.trip_id];
+        const coverUrl = coverPath ? signedPhotoUrls[coverPath]?.signedUrl : undefined;
+        if (coverUrl) coverMap[p.trip_id] = coverUrl;
 
         if (isValidCoord(p.latitude ?? undefined, p.longitude ?? undefined)) {
           photoPointsByTrip[p.trip_id] ??= [];

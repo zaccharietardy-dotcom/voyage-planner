@@ -2,13 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import { MapPin, Eye, EyeOff, X, Camera } from 'lucide-react';
-import { getSupabaseClient } from '@/lib/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface Photo {
   id: string;
   storage_path: string;
   thumbnail_path: string | null;
+  signed_url: string | null;
+  signed_thumbnail_url: string | null;
+  url_expires_at: string | null;
   caption: string | null;
   latitude: number | null;
   longitude: number | null;
@@ -44,12 +46,6 @@ export function PhotoGallery({ tripId, isOwner = false }: PhotoGalleryProps) {
     } finally {
       setLoading(false);
     }
-  };
-
-  const getPhotoUrl = (path: string) => {
-    const supabase = getSupabaseClient();
-    const { data } = supabase.storage.from('trip-photos').getPublicUrl(path);
-    return data.publicUrl;
   };
 
   const toggleVisibility = async (photo: Photo) => {
@@ -115,7 +111,7 @@ export function PhotoGallery({ tripId, isOwner = false }: PhotoGalleryProps) {
                   className="relative aspect-square rounded-lg overflow-hidden group"
                 >
                   <img
-                    src={getPhotoUrl(photo.thumbnail_path || photo.storage_path)}
+                    src={photo.signed_thumbnail_url || photo.signed_url || ''}
                     alt={photo.caption || ''}
                     className="w-full h-full object-cover"
                   />
@@ -155,7 +151,7 @@ export function PhotoGallery({ tripId, isOwner = false }: PhotoGalleryProps) {
             </div>
             <div className="flex-1 flex items-center justify-center p-4">
               <img
-                src={getPhotoUrl(selectedPhoto.storage_path)}
+                src={selectedPhoto.signed_url || ''}
                 alt={selectedPhoto.caption || ''}
                 className="max-w-full max-h-full object-contain"
               />

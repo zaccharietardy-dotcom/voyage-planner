@@ -3,6 +3,8 @@ import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 import { getAcceptedCloseFriendIds } from '@/lib/server/closeFriends';
 import { toFeedTripPublicPayload, type FeedTripBase } from '@/lib/server/feedTripSanitizer';
+import { signManyObjectUrls } from '@/lib/server/mediaUrl';
+import { canViewTrip } from '@/lib/server/tripAccess';
 
 // Service role client to bypass RLS for reading public trips
 function getServiceClient() {
@@ -12,7 +14,7 @@ function getServiceClient() {
   );
 }
 
-interface FeedTripRow extends FeedTripBase {}
+type FeedTripRow = FeedTripBase;
 
 interface FeedProfileRow {
   id: string;
@@ -24,6 +26,7 @@ interface FeedProfileRow {
 interface FeedPhotoRow {
   trip_id: string;
   storage_path: string | null;
+  thumbnail_path: string | null;
 }
 
 interface FeedLikeRow {
@@ -102,28 +105,38 @@ export async function GET(request: Request) {
 
       // Fetch first photo for each trip (cover image)
       const fPhotoMap: Record<string, string> = {};
+      const fCoverPathByTrip: Record<string, string> = {};
       const fAllTripIds = typedTrips.map((t) => t.id);
       if (fAllTripIds.length > 0) {
         const { data: photos } = await serviceClient
           .from('trip_photos')
-          .select('trip_id, storage_path')
+          .select('trip_id, storage_path, thumbnail_path')
           .in('trip_id', fAllTripIds)
+          .eq('visibility', 'public')
           .order('created_at', { ascending: true });
         const typedPhotos: FeedPhotoRow[] = photos || [];
         typedPhotos.forEach((p) => {
-          if (!fPhotoMap[p.trip_id] && p.storage_path) {
-            const { data: urlData } = serviceClient.storage.from('trip-photos').getPublicUrl(p.storage_path);
-            fPhotoMap[p.trip_id] = urlData?.publicUrl || '';
+          if (!fCoverPathByTrip[p.trip_id]) {
+            const path = p.thumbnail_path || p.storage_path;
+            if (path) {
+              fCoverPathByTrip[p.trip_id] = path;
+            }
+          }
+        });
+
+        const signedCovers = await signManyObjectUrls('trip-photos', Object.values(fCoverPathByTrip));
+        Object.entries(fCoverPathByTrip).forEach(([tripId, path]) => {
+          const signed = signedCovers[path];
+          if (signed?.signedUrl) {
+            fPhotoMap[tripId] = signed.signedUrl;
           }
         });
       }
 
       // Filter: public trips for everyone, friends trips for accepted close friends only
-      const filteredTrips = typedTrips.filter((trip) => {
-        if (trip.visibility === 'public') return true;
-        if (trip.visibility === 'friends' && closeFriendIds.has(trip.owner_id)) return true;
-        return false;
-      }).map((t) => ({
+      const filteredTrips = typedTrips.filter((trip) =>
+        canViewTrip(user.id, trip.owner_id, trip.visibility, closeFriendIds.has(trip.owner_id), false)
+      ).map((t) => ({
         ...toFeedTripPublicPayload(t),
         owner: fOwnerMap[t.owner_id] || { id: t.owner_id, display_name: null, avatar_url: null, username: null },
         cover_url: fPhotoMap[t.id] || null,
@@ -190,19 +203,31 @@ export async function GET(request: Request) {
 
     // Fetch first photo for each trip (cover image)
     const photoMap: Record<string, string> = {};
+    const coverPathByTrip: Record<string, string> = {};
     const allTripIds = typedTrips.map((t) => t.id);
     if (allTripIds.length > 0) {
       const { data: photos } = await serviceClient
         .from('trip_photos')
-        .select('trip_id, storage_path')
+        .select('trip_id, storage_path, thumbnail_path')
         .in('trip_id', allTripIds)
+        .eq('visibility', 'public')
         .order('created_at', { ascending: true });
       // Keep only the first photo per trip
       const typedPhotos: FeedPhotoRow[] = photos || [];
       typedPhotos.forEach((p) => {
-        if (!photoMap[p.trip_id] && p.storage_path) {
-          const { data: urlData } = serviceClient.storage.from('trip-photos').getPublicUrl(p.storage_path);
-          photoMap[p.trip_id] = urlData?.publicUrl || '';
+        if (!coverPathByTrip[p.trip_id]) {
+          const path = p.thumbnail_path || p.storage_path;
+          if (path) {
+            coverPathByTrip[p.trip_id] = path;
+          }
+        }
+      });
+
+      const signedCovers = await signManyObjectUrls('trip-photos', Object.values(coverPathByTrip));
+      Object.entries(coverPathByTrip).forEach(([tripId, path]) => {
+        const signed = signedCovers[path];
+        if (signed?.signedUrl) {
+          photoMap[tripId] = signed.signedUrl;
         }
       });
     }
