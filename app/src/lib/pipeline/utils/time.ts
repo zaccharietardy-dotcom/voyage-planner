@@ -22,6 +22,13 @@ export function addMinutes(time: string, minutes: number): string {
   return minToTime(timeToMin(time) + minutes);
 }
 
+/** Round "HH:MM" up to the next 5-minute boundary (e.g. "14:51" → "14:55") */
+export function roundUpTo5(time: string): string {
+  const total = timeToMin(time);
+  const rounded = Math.ceil(total / 5) * 5;
+  return minToTime(rounded);
+}
+
 /** Returns true if time >= endTime (both "HH:MM") */
 export function isPastEnd(time: string, endTime: string): boolean {
   return timeToMin(time) >= timeToMin(endTime);

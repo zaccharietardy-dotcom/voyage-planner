@@ -49,7 +49,7 @@ import {
 } from './step10-repair';
 
 // Utils
-import { timeToMin, minToTime, addMinutes, isPastEnd, ensureAfter, sortAndReindexItems } from './utils/time';
+import { timeToMin, minToTime, addMinutes, isPastEnd, ensureAfter, sortAndReindexItems, roundUpTo5 } from './utils/time';
 import { getClusterCentroid } from './utils/geo';
 import { isDuplicateActivityCandidate } from './utils/activityDedup';
 import { isOpenAtTime } from './utils/opening-hours';
@@ -272,7 +272,7 @@ export function unifiedScheduleV3Days(
           pendingTravelTime = travelLeg.durationMinutes;
         }
       }
-      const timeAfterTravel = pendingTravelTime > 0 ? addMinutes(currentTime, pendingTravelTime) : currentTime;
+      const timeAfterTravel = pendingTravelTime > 0 ? roundUpTo5(addMinutes(currentTime, pendingTravelTime)) : currentTime;
 
       // 5c. LUNCH WINDOW — place lunch IN-SITU at real position
       if (!lunchPlaced && timeToMin(timeAfterTravel) >= 12 * 60) {
@@ -387,7 +387,7 @@ export function unifiedScheduleV3Days(
       items.push(createActivityItem(act, currentTime, duration, cluster.dayNumber, orderIndex++, destination));
       globalPlacedIds.add(act.id || act.name);
       currentPosition = { lat: act.latitude, lng: act.longitude };
-      currentTime = addMinutes(currentTime, duration + 10); // 10min buffer
+      currentTime = roundUpTo5(addMinutes(currentTime, duration + 10)); // 10min buffer, rounded to 5min
     }
 
     // 6. LUNCH FALLBACK if not placed (cap at 14:30)
