@@ -433,7 +433,8 @@ export async function fetchAllData(preferences: TripPreferences, onEvent?: OnPip
   const bestTransport = transportOptions.find((t: any) => t.recommended) || transportOptions[0];
   const selectedTransportMode = (bestTransport as any)?.mode || preferences.transport;
   const shouldSearchFlights = selectedTransportMode === 'plane'
-    || preferences.transport === 'plane';
+    || preferences.transport === 'plane'
+    || transportOptions.some((t: any) => t.mode === 'plane');
   if (shouldSearchFlights) {
     const FLIGHT_TIMEOUT = 20_000; // 20s max for flight search
     const T_FLIGHTS = Date.now();
