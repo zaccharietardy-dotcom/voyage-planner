@@ -20,7 +20,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container-narrow py-6 space-y-8">
+      <div className="container-wide py-6 space-y-8">
         {/* Greeting */}
         <div>
           <h1 className="text-2xl font-serif font-bold">
