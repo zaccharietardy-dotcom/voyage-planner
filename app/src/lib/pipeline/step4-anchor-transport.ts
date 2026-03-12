@@ -103,38 +103,45 @@ export function anchorTransport(
 ): DayTimeWindow[] {
   const windows: DayTimeWindow[] = [];
 
+  // Detect cross-day arrival (long-haul flights arriving on Day 2+)
+  let arrivalDayNumber = 1;
+  if (inboundFlight?.departureTimeDisplay && inboundFlight.duration) {
+    const depMin = timeToMin(inboundFlight.departureTimeDisplay);
+    if (depMin + inboundFlight.duration >= 24 * 60) {
+      arrivalDayNumber = 2;
+      console.log(`[Anchor Transport] Cross-day arrival: departure ${inboundFlight.departureTimeDisplay} + ${inboundFlight.duration}min → arrival Day ${arrivalDayNumber}`);
+    }
+  }
+
   for (let day = 1; day <= durationDays; day++) {
     let startTime = DEFAULT_START;
     let endTime = DEFAULT_END;
     let hasArrival = false;
     let hasDeparture = false;
 
-    // Day 1: Constrain by arrival transport
-    if (day === 1) {
-      // Fallback: compute arrivalTime from departureTime + duration if missing
-      if (inboundFlight && !inboundFlight.arrivalTime && inboundFlight.departureTime && inboundFlight.duration) {
-        const depTime = extractTimeFromDateString(inboundFlight.departureTime);
-        if (depTime) {
-          const estimatedArrival = addMinutes(depTime, inboundFlight.duration);
-          inboundFlight = { ...inboundFlight, arrivalTime: estimatedArrival };
-          console.log(`[Anchor Transport] Computed fallback arrivalTime: ${estimatedArrival} from departureTime + ${inboundFlight.duration}min`);
-        }
-      }
-      // Check inbound flight
-      if (inboundFlight?.arrivalTime) {
-        const arrivalTime = extractTimeFromDateString(inboundFlight.arrivalTime);
-        if (arrivalTime) {
-          const arrivalMin = timeToMin(arrivalTime);
-          const rawStartMin = arrivalMin + ARRIVAL_BUFFER_MIN;
-          // Late arrival (after 21:00): Day 1 is transit-only, no activities
-          if (arrivalMin >= 21 * 60 || rawStartMin >= 23 * 60) {
-            startTime = '23:59';
-            endTime = '23:59';
-            hasArrival = true;
-          } else {
-            startTime = roundUpTo5Min(addMinutes(arrivalTime, ARRIVAL_BUFFER_MIN));
-            hasArrival = true;
-          }
+    // Pre-arrival transit days: traveler not yet at destination
+    if (day < arrivalDayNumber) {
+      startTime = '23:59';
+      endTime = '23:59';
+      hasArrival = true;
+    }
+
+    // Arrival day: constrain by arrival transport
+    if (day === arrivalDayNumber) {
+      // Prefer arrivalTimeDisplay (timezone-safe HH:MM in local airport time)
+      const arrivalTimeStr = inboundFlight?.arrivalTimeDisplay
+        || (inboundFlight?.arrivalTime ? extractTimeFromDateString(inboundFlight.arrivalTime) : null);
+      if (arrivalTimeStr) {
+        const arrivalMin = timeToMin(arrivalTimeStr);
+        const rawStartMin = arrivalMin + ARRIVAL_BUFFER_MIN;
+        // Late arrival (after 21:00): transit-only day
+        if (arrivalMin >= 21 * 60 || rawStartMin >= 23 * 60) {
+          startTime = '23:59';
+          endTime = '23:59';
+          hasArrival = true;
+        } else {
+          startTime = roundUpTo5Min(addMinutes(arrivalTimeStr, ARRIVAL_BUFFER_MIN));
+          hasArrival = true;
         }
       }
       // Check inbound train/bus (from last leg if present)
@@ -167,13 +174,12 @@ export function anchorTransport(
 
     // Last day: Constrain by departure transport
     if (day === durationDays) {
-      // Check outbound flight
-      if (outboundFlight?.departureTime) {
-        const departureTime = extractTimeFromDateString(outboundFlight.departureTime);
-        if (departureTime) {
-          endTime = roundDownTo5Min(subtractMinutesFromTime(departureTime, DEPARTURE_BUFFER_MIN));
-          hasDeparture = true;
-        }
+      // Check outbound flight — prefer departureTimeDisplay (timezone-safe)
+      const departureTimeStr = outboundFlight?.departureTimeDisplay
+        || (outboundFlight?.departureTime ? extractTimeFromDateString(outboundFlight.departureTime) : null);
+      if (departureTimeStr) {
+        endTime = roundDownTo5Min(subtractMinutesFromTime(departureTimeStr, DEPARTURE_BUFFER_MIN));
+        hasDeparture = true;
       }
       // Check outbound train/bus (from first leg if present)
       if (outboundTransport?.transitLegs && outboundTransport.transitLegs.length > 0) {
