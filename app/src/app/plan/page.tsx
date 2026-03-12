@@ -234,6 +234,9 @@ export default function PlanPage() {
           if (saveResponse.ok) {
             const savedTrip = await saveResponse.json();
             safeSetItem('currentTrip', JSON.stringify({ ...generatedTrip, id: savedTrip.id }));
+            if (generatedTrip.contractViolations?.length) {
+              toast.warning(`Itinéraire généré avec ${generatedTrip.contractViolations.length} avertissement${generatedTrip.contractViolations.length > 1 ? 's' : ''}`);
+            }
             router.push(`/trip/${savedTrip.id}`);
             return;
           }
@@ -251,6 +254,9 @@ export default function PlanPage() {
         throw new Error('Voyage généré sans identifiant');
       }
       safeSetItem('currentTrip', JSON.stringify(generatedTrip));
+      if (generatedTrip.contractViolations?.length) {
+        toast.warning(`Itinéraire généré avec ${generatedTrip.contractViolations.length} avertissement${generatedTrip.contractViolations.length > 1 ? 's' : ''}`);
+      }
       router.push(`/trip/${generatedTrip.id}`);
     } catch (error) {
       console.error('Erreur génération:', error);

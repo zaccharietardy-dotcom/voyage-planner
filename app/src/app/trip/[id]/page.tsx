@@ -32,6 +32,8 @@ import {
   Maximize2,
   Minimize2,
   GripHorizontal,
+  AlertTriangle,
+  X,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format } from 'date-fns';
@@ -293,6 +295,7 @@ export default function TripPage() {
   const [showLiveDashboard, setShowLiveDashboard] = useState(false);
   const [showMobileActions, setShowMobileActions] = useState(false);
   const [mobileMapHeight, setMobileMapHeight] = useState(30); // vh percentage for mobile split view
+  const [dismissedViolations, setDismissedViolations] = useState(false);
   const [mobileMapFullscreen, setMobileMapFullscreen] = useState(false);
   const prevDayRef = useRef('1');
   const dayDirection = useRef(0);
@@ -1207,6 +1210,32 @@ export default function TripPage() {
         <div className="container mx-auto px-4 pt-3">
           <div className="rounded-xl border border-amber-300/50 bg-amber-50 px-3 py-2 text-xs text-amber-700 dark:border-amber-900/40 dark:bg-amber-900/20 dark:text-amber-300">
             Mode hors ligne: certaines actions (IA, collaboration, paiements) sont indisponibles.
+          </div>
+        </div>
+      )}
+
+      {/* Contract violations banner */}
+      {!dismissedViolations && trip.contractViolations && trip.contractViolations.length > 0 && (
+        <div className="container mx-auto px-4 pt-3">
+          <div className="relative flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 dark:border-red-900/40 dark:bg-red-900/20">
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-red-600 dark:text-red-400" />
+            <div className="flex-1 space-y-0.5">
+              <p className="text-sm font-medium text-red-800 dark:text-red-300">Itinéraire dégradé</p>
+              {trip.contractViolations.slice(0, 5).map((v, i) => (
+                <p key={i} className="text-xs text-red-700 dark:text-red-400">{v}</p>
+              ))}
+              {trip.contractViolations.length > 5 && (
+                <p className="text-xs text-red-500 dark:text-red-500">
+                  +{trip.contractViolations.length - 5} autre{trip.contractViolations.length - 5 > 1 ? 's' : ''} violation{trip.contractViolations.length - 5 > 1 ? 's' : ''}
+                </p>
+              )}
+            </div>
+            <button
+              onClick={() => setDismissedViolations(true)}
+              className="shrink-0 rounded-md p-1 text-red-400 hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-900/40"
+            >
+              <X className="h-4 w-4" />
+            </button>
           </div>
         </div>
       )}
