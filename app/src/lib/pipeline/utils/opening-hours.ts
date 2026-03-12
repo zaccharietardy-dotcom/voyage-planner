@@ -96,7 +96,12 @@ export function isAlwaysOpenPublicSpace(activity: ScoredActivity): boolean {
     'wall', 'mur', 'muralla', 'mauer',
     'gate', 'porte', 'porta', 'tor', 'puerta',
     'column', 'colonne', 'obelisk', 'obélisque',
-    'statue', 'monument',
+    'statue', 'monument', 'memorial', 'mémorial',
+    'pyramid', 'pyramide', 'mausoleum', 'mausolée',
+    'arch', 'arc', 'arco', 'triomphe',
+    'tower', 'tour', 'torre', 'turm',
+    'ruins', 'ruines', 'ruinas',
+    'stairway', 'stairs', 'escalier',
   ];
   const ALWAYS_OPEN_RE = new RegExp(
     '\\b(' + ALWAYS_OPEN_KEYWORDS.map(kw => kw.trim().replace(/\s+/g, '\\s+')).join('|') + ')\\b',
