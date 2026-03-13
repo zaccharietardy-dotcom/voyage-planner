@@ -507,17 +507,32 @@ export function unifiedScheduleV3Days(
     const isEligibleForNightlife = hasNightlifePref && !isDepartureDay && !nextDayIsDeparture && !isTransitOnly;
 
     if (isEligibleForNightlife) {
+      // Arrival day: cap at 1 nightlife activity (traveler just arrived)
+      const MAX_NIGHTLIFE = isArrivalDay ? 1 : 2;
+      const MAX_NIGHTLIFE_DIST_KM = 2;
+      const nightlifeAnchor = currentPosition || hotelLatLng || getClusterCentroid(cluster.activities);
+
       const nightlifeCandidates = allActivities
         .filter(act => isNightlifeActivity(act))
         .filter(act => !globalPlacedIds.has(act.id || act.name))
+        // Proximity filter: only venues within 2km of current position
+        .filter(act => {
+          if (!nightlifeAnchor) return true;
+          const dist = calculateDistance(act.latitude, act.longitude, nightlifeAnchor.lat, nightlifeAnchor.lng);
+          return dist <= MAX_NIGHTLIFE_DIST_KM;
+        })
         .sort((a, b) => b.score - a.score);
 
-      const MAX_NIGHTLIFE = 2;
       let nightlifeTime = '22:00';
       let nightlifePlaced = 0;
+      const placedNightlifeTypes = new Set<string>();
 
       for (const act of nightlifeCandidates) {
         if (nightlifePlaced >= MAX_NIGHTLIFE) break;
+
+        // Variety guard: classify nightlife sub-type, skip if already placed
+        const nightlifeType = classifyNightlifeType(act.name || '');
+        if (nightlifeType && placedNightlifeTypes.has(nightlifeType)) continue;
 
         const duration = Math.min(act.duration || 90, 120);
         const endMin = timeToMin(nightlifeTime) + duration;
@@ -528,8 +543,9 @@ export function unifiedScheduleV3Days(
         currentPosition = { lat: act.latitude, lng: act.longitude };
         nightlifeTime = roundUpTo5(addMinutes(nightlifeTime, duration + 10));
         nightlifePlaced++;
+        if (nightlifeType) placedNightlifeTypes.add(nightlifeType);
 
-        console.log(`[Unified] Day ${cluster.dayNumber}: nightlife "${act.name}" placed at ${nightlifeTime}`);
+        console.log(`[Unified] Day ${cluster.dayNumber}: nightlife "${act.name}" placed at ${nightlifeTime} (type=${nightlifeType || 'other'})`);
       }
     }
 
@@ -933,4 +949,20 @@ export function unifiedScheduleV3Days(
   }
 
   return { days, repairs, unresolvedViolations };
+}
+
+// ── Nightlife sub-type classification ───────────────────────────────────────
+
+const NIGHTLIFE_TYPE_RULES: Array<{ type: string; keywords: RegExp }> = [
+  { type: 'bar', keywords: /\b(bar|pub|brewery|brasserie|cocktail|rooftop bar|speakeasy|tavern)\b/i },
+  { type: 'club', keywords: /\b(club|disco|discoteca|discotheque|nightclub)\b/i },
+  { type: 'live_music', keywords: /\b(jazz|concert|live music|musique live|blues|fado|flamenco)\b/i },
+  { type: 'show', keywords: /\b(show|cabaret|opera|ballet|spectacle|burlesque|comedy|stand.?up)\b/i },
+];
+
+function classifyNightlifeType(name: string): string | null {
+  for (const rule of NIGHTLIFE_TYPE_RULES) {
+    if (rule.keywords.test(name)) return rule.type;
+  }
+  return null;
 }
