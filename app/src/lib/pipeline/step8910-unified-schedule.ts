@@ -54,6 +54,7 @@ import { getClusterCentroid } from './utils/geo';
 import { isDuplicateActivityCandidate } from './utils/activityDedup';
 import { isOpenAtTime } from './utils/opening-hours';
 import { enrichWithTicketingLinks } from '../services/officialTicketing';
+import { isNightlifeActivity } from './step2-score';
 
 // ============================================
 // Public API
@@ -498,6 +499,40 @@ export function unifiedScheduleV3Days(
       }
     }
 
+    // 7b. NIGHTLIFE — place 1-2 nightlife activities after dinner (22:00–23:59)
+    const hasNightlifePref = preferences.activities?.includes('nightlife');
+    const isArrivalDay = timeWindow?.hasArrivalTransport ?? false;
+    const isDepartureDay = timeWindow?.hasDepartureTransport ?? false;
+    const nextDayIsDeparture = timeWindows.find(w => w.dayNumber === cluster.dayNumber + 1)?.hasDepartureTransport ?? false;
+    const isEligibleForNightlife = hasNightlifePref && !isDepartureDay && !nextDayIsDeparture && !isTransitOnly;
+
+    if (isEligibleForNightlife) {
+      const nightlifeCandidates = allActivities
+        .filter(act => isNightlifeActivity(act))
+        .filter(act => !globalPlacedIds.has(act.id || act.name))
+        .sort((a, b) => b.score - a.score);
+
+      const MAX_NIGHTLIFE = 2;
+      let nightlifeTime = '22:00';
+      let nightlifePlaced = 0;
+
+      for (const act of nightlifeCandidates) {
+        if (nightlifePlaced >= MAX_NIGHTLIFE) break;
+
+        const duration = Math.min(act.duration || 90, 120);
+        const endMin = timeToMin(nightlifeTime) + duration;
+        if (endMin > 23 * 60 + 59) break;
+
+        items.push(createActivityItem(act, nightlifeTime, duration, cluster.dayNumber, orderIndex++, destination));
+        globalPlacedIds.add(act.id || act.name);
+        currentPosition = { lat: act.latitude, lng: act.longitude };
+        nightlifeTime = roundUpTo5(addMinutes(nightlifeTime, duration + 10));
+        nightlifePlaced++;
+
+        console.log(`[Unified] Day ${cluster.dayNumber}: nightlife "${act.name}" placed at ${nightlifeTime}`);
+      }
+    }
+
     // 8. MUST-SEE FORCE-INJECTION: evict weakest if must-see missing
     const missingMustSees = cluster.activities.filter(
       act => act.mustSee && !globalPlacedIds.has(act.id || act.name)
@@ -634,6 +669,7 @@ export function unifiedScheduleV3Days(
   }
 
   // 11. Hard stop: drop activities after dayEndTime (departure days) or 22:00
+  const hasNightlifePrefGlobal = preferences.activities?.includes('nightlife');
   for (const day of days) {
     const timeWindow = timeWindows.find(w => w.dayNumber === day.dayNumber);
     const hasDeparture = timeWindow?.hasDepartureTransport ?? false;
@@ -645,6 +681,11 @@ export function unifiedScheduleV3Days(
       if (item.type === 'flight' || item.type === 'checkout') return true;
       const startMin = timeToMin(item.startTime || '00:00');
       if (startMin >= dayEndForHardStop) {
+        // Exempt nightlife items on non-departure days
+        if (hasNightlifePrefGlobal && !hasDeparture && startMin < 24 * 60
+            && item.type === 'activity' && isNightlifeActivity({ name: item.title })) {
+          return true;
+        }
         console.log(`[Unified] Hard stop: dropping "${item.title}" on Day ${day.dayNumber} (past ${minToTime(dayEndForHardStop)})`);
         return false;
       }
@@ -715,7 +756,7 @@ export function unifiedScheduleV3Days(
 
     const donorActivities = busiestDay.items
       .map((item, idx) => ({ item, idx }))
-      .filter(({ item }) => item.type === 'activity' && !item.mustSee)
+      .filter(({ item }) => item.type === 'activity' && !item.mustSee && timeToMin(item.startTime || '00:00') < 22 * 60)
       .sort((a, b) => (a.item.rating ?? 0) - (b.item.rating ?? 0));
 
     const toSteal = Math.min(2, donorActivities.length, Math.floor(busiestCount / 2));

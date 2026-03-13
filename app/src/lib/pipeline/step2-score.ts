@@ -59,7 +59,11 @@ const MEAL_INCLUSIVE_KEYWORDS = [
 
 const ROMANTIC_KEYWORDS = /sunset|viewpoint|cruise|jardin|garden|spa|wine|rooftop/i;
 const KID_FRIENDLY_KEYWORDS = /zoo|aquarium|park|playground|amusement|disney|lego/i;
-const NIGHTLIFE_KEYWORDS = /bar|club|pub|jazz|cabaret|flamenco|opera|show|concert/i;
+export const NIGHTLIFE_KEYWORDS = /bar|club|pub|jazz|cabaret|flamenco|opera|show|concert/i;
+
+export function isNightlifeActivity(act: { name?: string; type?: string }): boolean {
+  return NIGHTLIFE_KEYWORDS.test(`${act.name || ''} ${act.type || ''}`);
+}
 const FOOD_TOUR_KEYWORDS = /food tour|cooking class|market tour|wine tasting|gastronom/i;
 const ADVENTURE_KEYWORDS = /hike|kayak|surf|climb|zip.?line|rafting|diving|paraglid/i;
 
