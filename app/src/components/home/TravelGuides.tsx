@@ -11,6 +11,14 @@ import { generateTripStream } from '@/lib/generateTrip';
 import { GeneratingScreen } from '@/components/trip/GeneratingScreen';
 import { TripPreferences } from '@/lib/types';
 
+const GROUP_TYPE_LABELS_SHORT: Record<string, string> = {
+  solo: 'Solo',
+  couple: 'Couple',
+  friends: 'Entre amis',
+  family_with_kids: 'Famille',
+  family_without_kids: 'Famille',
+};
+
 function blurPlaceholder(hex: string): string {
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
     `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 3'><rect fill='${hex}' width='4' height='3'/></svg>`
@@ -157,6 +165,9 @@ export function TravelGuides() {
                       {dest.flag} {dest.name}
                     </p>
                     <p className="text-white/85 text-sm">{dest.country}</p>
+                    <p className="text-white/70 text-xs mt-0.5">
+                      {dest.preferences.durationDays} jours · {GROUP_TYPE_LABELS_SHORT[dest.preferences.groupType!]}
+                    </p>
                   </div>
                   {isGenerating && (
                     <div className="absolute inset-0 bg-black/50 flex items-center justify-center">

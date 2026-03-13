@@ -1614,7 +1614,7 @@ export default function TripPage() {
                   {trip.preferences.destination}
                 </h1>
                 <p className="text-[11px] text-white/80 drop-shadow-sm">
-                  {trip.days.length} jours · {format(new Date(trip.preferences.startDate), 'd MMM', { locale: fr })}
+                  {trip.days.length} jours · {trip.preferences.groupSize || 1} voyageur{(trip.preferences.groupSize || 1) > 1 ? 's' : ''} · {format(new Date(trip.preferences.startDate), 'd MMM', { locale: fr })}
                 </p>
               </div>
             </div>
