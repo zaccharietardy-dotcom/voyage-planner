@@ -125,6 +125,7 @@ export function unifiedScheduleV3Days(
     let currentPosition = hotelLatLng || getClusterCentroid(cluster.activities);
     let orderIndex = 0;
     let lunchPlaced = false;
+    let dinnerPlaced = false;
     const isLastDay = cluster.dayNumber === clusters.length;
 
     // Detect remote clusters: ≤1 activity far from hotel → use hotel as dinner anchor
@@ -161,6 +162,9 @@ export function unifiedScheduleV3Days(
 
     if (!canHaveLunch) {
       lunchPlaced = true; // prevent lunch trigger
+    }
+    if (!canHaveDinner) {
+      dinnerPlaced = true; // no dinner possible, skip
     }
     if (!canHaveBreakfast || !canHaveLunch) {
       console.log(`[Unified] Day ${cluster.dayNumber}: constrained window (${dayStartTime}–${dayEndTime}) — breakfast:${canHaveBreakfast} lunch:${canHaveLunch} dinner:${canHaveDinner}`);
@@ -388,6 +392,41 @@ export function unifiedScheduleV3Days(
       globalPlacedIds.add(act.id || act.name);
       currentPosition = { lat: act.latitude, lng: act.longitude };
       currentTime = roundUpTo5(addMinutes(currentTime, duration + 10)); // 10min buffer, rounded to 5min
+
+      // 5g. DINNER WINDOW — place dinner IN-SITU when time >= 19:00
+      if (!dinnerPlaced && timeToMin(currentTime) >= 19 * 60) {
+        const dinnerAnchorInSitu = currentPosition || hotelLatLng || getClusterCentroid(cluster.activities);
+        if (dinnerAnchorInSitu) {
+          const dinnerSlots = [currentTime, '19:30', '20:00', '20:30'];
+          let dinnerPlacement: ReturnType<typeof findBestRestaurant> = null;
+          let finalDinnerTime = currentTime;
+          const candidateDinner = findBestRestaurant(
+            restaurants, dinnerAnchorInSitu, 'dinner',
+            0.8, 3.5, 2, dietary, usedRestaurantIds, dayDateForRestaurant
+          );
+          if (candidateDinner) {
+            for (const slot of dinnerSlots) {
+              const slotEnd = addMinutes(slot, 90);
+              if (isRestaurantOpenForSlot(candidateDinner.primary, dayDate, slot, slotEnd)) {
+                dinnerPlacement = candidateDinner;
+                finalDinnerTime = slot;
+                break;
+              }
+            }
+          }
+          if (dinnerPlacement) {
+            items.push(createRestaurantItem(
+              { ...dinnerPlacement, anchorName: 'Position actuelle' },
+              'dinner', finalDinnerTime, 90, cluster.dayNumber, orderIndex++
+            ));
+            usedRestaurantIds.add(dinnerPlacement.primary.id);
+          } else {
+            items.push(createSelfMealFallbackItem('dinner', currentTime, 90, cluster.dayNumber, orderIndex++, dinnerAnchorInSitu));
+          }
+          currentTime = addMinutes(finalDinnerTime, 100); // 90min dinner + 10min buffer
+          dinnerPlaced = true;
+        }
+      }
     }
 
     // 6. LUNCH FALLBACK if not placed (cap at 14:30)
@@ -417,7 +456,7 @@ export function unifiedScheduleV3Days(
     }
 
     // 7. DINNER (anchor = last activity position; remote clusters → hotel)
-    if (canHaveDinner) {
+    if (canHaveDinner && !dinnerPlaced) {
       // Remote day trip: dine near hotel after returning
       const dinnerAnchor = isRemoteCluster && hotelLatLng
         ? hotelLatLng
