@@ -33,6 +33,40 @@ interface FeedLikeRow {
   trip_id: string;
 }
 
+interface ParsedPositiveInt {
+  value: number;
+  error?: string;
+}
+
+function parsePositiveInt(rawValue: string | null, field: string, defaultValue: number): ParsedPositiveInt {
+  if (rawValue === null || rawValue.trim() === '') {
+    return { value: defaultValue };
+  }
+
+  if (!/^-?\d+$/.test(rawValue.trim())) {
+    return { value: defaultValue, error: `${field} invalide` };
+  }
+
+  const parsed = Number.parseInt(rawValue, 10);
+  if (!Number.isFinite(parsed)) {
+    return { value: defaultValue, error: `${field} invalide` };
+  }
+
+  return { value: parsed };
+}
+
+function parseOptionalPositiveInt(rawValue: string | null, field: string): { value?: number; error?: string } {
+  if (rawValue === null || rawValue.trim() === '') return {};
+  if (!/^-?\d+$/.test(rawValue.trim())) {
+    return { error: `${field} invalide` };
+  }
+  const parsed = Number.parseInt(rawValue, 10);
+  if (!Number.isFinite(parsed) || parsed < 1) {
+    return { error: `${field} invalide` };
+  }
+  return { value: parsed };
+}
+
 // GET /api/feed?tab=following|discover&page=1&limit=20
 export async function GET(request: Request) {
   try {
@@ -42,13 +76,36 @@ export async function GET(request: Request) {
 
     const { searchParams } = new URL(request.url);
     const tab = searchParams.get('tab') || 'discover';
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '20');
+    const pageParsed = parsePositiveInt(searchParams.get('page'), 'page', 1);
+    const limitParsed = parsePositiveInt(searchParams.get('limit'), 'limit', 20);
+    if (pageParsed.error || limitParsed.error) {
+      return NextResponse.json(
+        { error: pageParsed.error || limitParsed.error },
+        { status: 400 }
+      );
+    }
+
+    const page = Math.max(1, pageParsed.value);
+    const limit = Math.max(1, Math.min(50, limitParsed.value));
     const offset = (page - 1) * limit;
 
     const destination = searchParams.get('destination');
-    const minDays = searchParams.get('minDays');
-    const maxDays = searchParams.get('maxDays');
+    const minDaysParsed = parseOptionalPositiveInt(searchParams.get('minDays'), 'minDays');
+    const maxDaysParsed = parseOptionalPositiveInt(searchParams.get('maxDays'), 'maxDays');
+    if (minDaysParsed.error || maxDaysParsed.error) {
+      return NextResponse.json(
+        { error: minDaysParsed.error || maxDaysParsed.error },
+        { status: 400 }
+      );
+    }
+    const minDays = minDaysParsed.value;
+    const maxDays = maxDaysParsed.value;
+    if (minDays !== undefined && maxDays !== undefined && minDays > maxDays) {
+      return NextResponse.json(
+        { error: 'minDays doit être inférieur ou égal à maxDays' },
+        { status: 400 }
+      );
+    }
     const sort = searchParams.get('sort') || 'recent'; // 'recent' or 'trending'
 
     if (tab === 'following' && !user) {
@@ -78,8 +135,8 @@ export async function GET(request: Request) {
         .order('created_at', { ascending: false });
 
       if (destination) followingQuery = followingQuery.ilike('destination', `%${destination}%`);
-      if (minDays) followingQuery = followingQuery.gte('duration_days', parseInt(minDays));
-      if (maxDays) followingQuery = followingQuery.lte('duration_days', parseInt(maxDays));
+      if (minDays !== undefined) followingQuery = followingQuery.gte('duration_days', minDays);
+      if (maxDays !== undefined) followingQuery = followingQuery.lte('duration_days', maxDays);
 
       followingQuery = followingQuery.range(offset, offset + limit - 1);
       const { data: trips, error } = await followingQuery;
@@ -177,8 +234,8 @@ export async function GET(request: Request) {
 
     if (user) discoverQuery = discoverQuery.neq('owner_id', user.id);
     if (destination) discoverQuery = discoverQuery.ilike('destination', `%${destination}%`);
-    if (minDays) discoverQuery = discoverQuery.gte('duration_days', parseInt(minDays));
-    if (maxDays) discoverQuery = discoverQuery.lte('duration_days', parseInt(maxDays));
+    if (minDays !== undefined) discoverQuery = discoverQuery.gte('duration_days', minDays);
+    if (maxDays !== undefined) discoverQuery = discoverQuery.lte('duration_days', maxDays);
 
     discoverQuery = discoverQuery.range(offset, offset + limit - 1);
     const { data: trips, error } = await discoverQuery;

@@ -62,6 +62,11 @@ export function TripOverviewTab({ days, onDayClick }: TripOverviewTabProps) {
                       Day Trip
                     </span>
                   )}
+                  {day.weatherForecast && (
+                    <span className="ml-2 text-xs text-muted-foreground">
+                      {day.weatherForecast.icon} {day.weatherForecast.tempMin}°/{day.weatherForecast.tempMax}°
+                    </span>
+                  )}
                 </div>
                 <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/40 group-hover:text-primary transition-colors" />
               </div>

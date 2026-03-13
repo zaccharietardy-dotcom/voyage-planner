@@ -942,6 +942,7 @@ export function createActivityItem(
     mustSee: activity.mustSee,
     openingHours: activity.openingHours,
     openingHoursByDay: activity.openingHoursByDay,
+    website: activity.website,
   };
 }
 

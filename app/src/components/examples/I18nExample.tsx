@@ -47,25 +47,25 @@ export function I18nExample() {
           <ul className="space-y-2 text-sm">
             <li>
               <code className="bg-muted px-2 py-1 rounded text-xs mr-2">
-                t('common.loading')
+                {`t('common.loading')`}
               </code>
               → {t('common.loading')}
             </li>
             <li>
               <code className="bg-muted px-2 py-1 rounded text-xs mr-2">
-                t('myTrips.title')
+                {`t('myTrips.title')`}
               </code>
               → {t('myTrips.title')}
             </li>
             <li>
               <code className="bg-muted px-2 py-1 rounded text-xs mr-2">
-                t('trip.dayN', {'{'}n: 3{'}'})
+                {`t('trip.dayN', {n: 3})`}
               </code>
               → {t('trip.dayN', { n: 3 })}
             </li>
             <li>
               <code className="bg-muted px-2 py-1 rounded text-xs mr-2">
-                t('plan.budgetLevels.luxury')
+                {`t('plan.budgetLevels.luxury')`}
               </code>
               → {t('plan.budgetLevels.luxury')}
             </li>

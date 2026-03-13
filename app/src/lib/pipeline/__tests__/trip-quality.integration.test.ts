@@ -665,7 +665,7 @@ describe('Trip quality integration', () => {
       }
 
       // --- No big gaps: max 1 trou >2h (hors post-breakfast) sur tout le trip ---
-      let bigGaps: string[] = [];
+      const bigGaps: string[] = [];
       for (const day of trip.days) {
         const scheduled = day.items
           .filter(i => ['activity', 'restaurant'].includes(i.type))
@@ -683,7 +683,7 @@ describe('Trip quality integration', () => {
       expect(bigGaps.length).toBeLessThanOrEqual(1);
 
       // --- Proximité géo : restaurants proches des activités, pas de sauts énormes ---
-      let geoViolations: string[] = [];
+      const geoViolations: string[] = [];
       for (const day of trip.days) {
         const geoItems = day.items
           .filter(i => ['activity', 'restaurant'].includes(i.type) && i.latitude && i.longitude)

@@ -62,6 +62,7 @@ import { CloneTripModal } from '@/components/social/CloneTripModal';
 import { ActivityEditModal } from '@/components/trip/ActivityEditModal';
 import { ExpensesPanel } from '@/components/trip/expenses/ExpensesPanel';
 import { TravelTips } from '@/components/trip/TravelTips';
+import { TripBudgetComparator } from '@/components/trip/TripBudgetComparator';
 import { PhotoGallery } from '@/components/photos/PhotoGallery';
 import { PhotoUploader } from '@/components/photos/PhotoUploader';
 import { PastTripView } from '@/components/trip/PastTripView';
@@ -1615,6 +1616,11 @@ export default function TripPage() {
                 </h1>
                 <p className="text-[11px] text-white/80 drop-shadow-sm">
                   {trip.days.length} jours · {trip.preferences.groupSize || 1} voyageur{(trip.preferences.groupSize || 1) > 1 ? 's' : ''} · {format(new Date(trip.preferences.startDate), 'd MMM', { locale: fr })}
+                  {trip.totalEstimatedCost != null && (
+                    <span className="ml-1.5 inline-flex items-center rounded-full bg-white/20 px-1.5 py-px text-[10px] font-medium text-white backdrop-blur-sm">
+                      ~{trip.totalEstimatedCost}€
+                    </span>
+                  )}
                 </p>
               </div>
             </div>
@@ -1816,6 +1822,7 @@ export default function TripPage() {
 
                   <TabsContent value="infos" className="mt-0">
                     <div className="space-y-6">
+                      <TripBudgetComparator trip={trip} />
                       {trip.carbonFootprint && <CarbonFootprint data={trip.carbonFootprint} />}
                       {trip.travelTips && <TravelTips data={trip.travelTips} />}
                       {user && (
@@ -1983,6 +1990,7 @@ export default function TripPage() {
 
               <TabsContent value="infos">
                 <div className="space-y-6">
+                  <TripBudgetComparator trip={trip} />
                   {trip.carbonFootprint && <CarbonFootprint data={trip.carbonFootprint} />}
                   {trip.travelTips && <TravelTips data={trip.travelTips} />}
                 </div>

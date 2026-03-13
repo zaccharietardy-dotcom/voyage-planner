@@ -66,7 +66,7 @@ const LANDMARK_PREFIXES: RegExp[] = [
  * E.g. "Cathédrale de Milan (Duomo)" → Set {"cathedrale", "milan", "duomo"}
  */
 function extractCoreLandmarkTokens(name: string): Set<string> {
-  let normalized = normalizeText(name);
+  const normalized = normalizeText(name);
   // Also strip text in parentheses for a secondary set
   const withoutParens = normalized.replace(/\([^)]*\)/g, '').trim();
   const inParens = (normalized.match(/\(([^)]+)\)/g) || [])

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { createRouteHandlerClient } from '@/lib/supabase/server';
 import type { Database } from '@/lib/supabase/types';
+import { checkRateLimit } from '@/lib/server/rateLimit';
 
 interface JoinByCodeRequest {
   code: string;
@@ -30,11 +31,43 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
     }
 
-    const body = await request.json() as JoinByCodeRequest;
+    const forwarded = request.headers.get('x-forwarded-for');
+    const ip = forwarded?.split(',')[0]?.trim() || request.headers.get('x-real-ip') || 'unknown';
+
+    const userRateLimit = checkRateLimit(`join-user:${user.id}`, { windowMs: 3600_000, maxRequests: 20 });
+    if (!userRateLimit.allowed) {
+      return NextResponse.json(
+        { error: 'Too many requests' },
+        {
+          status: 429,
+          headers: { 'Retry-After': String(Math.ceil((userRateLimit.resetAt - Date.now()) / 1000)) },
+        }
+      );
+    }
+
+    const ipRateLimit = checkRateLimit(`join-ip:${ip}`, { windowMs: 3600_000, maxRequests: 60 });
+    if (!ipRateLimit.allowed) {
+      return NextResponse.json(
+        { error: 'Too many requests' },
+        {
+          status: 429,
+          headers: { 'Retry-After': String(Math.ceil((ipRateLimit.resetAt - Date.now()) / 1000)) },
+        }
+      );
+    }
+
+    const body = await request.json().catch(() => null) as JoinByCodeRequest | null;
+    if (!body || typeof body.code !== 'string') {
+      return NextResponse.json({ error: 'Code de partage requis' }, { status: 400 });
+    }
+
     const code = body.code?.trim().toUpperCase();
 
     if (!code) {
       return NextResponse.json({ error: 'Code de partage requis' }, { status: 400 });
+    }
+    if (!/^[A-Z0-9]{6}$/.test(code)) {
+      return NextResponse.json({ error: 'Code de partage invalide' }, { status: 400 });
     }
 
     const serviceClient = getServiceClient();

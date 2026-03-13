@@ -33,7 +33,7 @@ import { generateFlightLink, generateFlightOmioLink, formatDateForUrl } from '..
 import { sanitizeApiKeyLeaksInString, sanitizeGoogleMapsUrl } from '../services/googlePlacePhoto';
 import { isGarbageActivity } from './utils/garbage-filter';
 import { geoReorderDayItems } from './utils/geo-reorder';
-import { resolveOfficialTicketing } from '../services/officialTicketing';
+import { enrichWithTicketingLinks, resolveOfficialTicketing } from '../services/officialTicketing';
 import { getAirportPreDepartureLeadMinutes } from './step7-assemble';
 import { scheduleDayItems, buildDayWindow, buildMealSlots, buildCandidates } from './scheduler';
 import {
@@ -318,6 +318,10 @@ export function addOutboundTransportItem(
 ): void {
   if (!flight && !transport) return;
 
+  // Compute return date for round-trip Aviasales links
+  const returnDate = new Date(preferences.startDate);
+  returnDate.setDate(returnDate.getDate() + preferences.durationDays - 1);
+
   if (flight) {
     const flightItem: TripItem = {
       id: uuidv4(),
@@ -338,11 +342,11 @@ export function addOutboundTransportItem(
       estimatedCost: flight.price,
       bookingUrl: flight.bookingUrl || generateFlightLink(
         { origin: flight.departureCity, destination: flight.arrivalCity },
-        { date: formatDateForUrl(preferences.startDate), passengers: preferences.groupSize }
+        { date: formatDateForUrl(preferences.startDate), returnDate: formatDateForUrl(returnDate), passengers: preferences.groupSize }
       ),
       aviasalesUrl: generateFlightLink(
         { origin: flight.departureCity, destination: flight.arrivalCity },
-        { date: formatDateForUrl(preferences.startDate), passengers: preferences.groupSize }
+        { date: formatDateForUrl(preferences.startDate), returnDate: formatDateForUrl(returnDate), passengers: preferences.groupSize }
       ),
       omioFlightUrl: generateFlightOmioLink(
         flight.departureCity, flight.arrivalCity,
@@ -405,11 +409,11 @@ export function addOutboundTransportItem(
       estimatedCost: transport.totalPrice,
       bookingUrl: generateFlightLink(
         { origin: preferences.origin, destination: preferences.destination },
-        { date: outboundDateStr, passengers: preferences.groupSize }
+        { date: outboundDateStr, returnDate: formatDateForUrl(returnDate), passengers: preferences.groupSize }
       ),
       aviasalesUrl: generateFlightLink(
         { origin: preferences.origin, destination: preferences.destination },
-        { date: outboundDateStr, passengers: preferences.groupSize }
+        { date: outboundDateStr, returnDate: formatDateForUrl(returnDate), passengers: preferences.groupSize }
       ),
       omioFlightUrl: generateFlightOmioLink(
         preferences.origin, preferences.destination,
@@ -1449,7 +1453,6 @@ export async function assembleFromLLMPlan(
   console.log('[Pipeline V2 LLM] Sanitized URLs');
 
   // Enrich all activity items with ticketing links (official + Viator + Tiqets)
-  const { enrichWithTicketingLinks } = require('../services/officialTicketing');
   for (const day of trip.days) {
     enrichWithTicketingLinks(day.items, preferences.destination || '');
   }

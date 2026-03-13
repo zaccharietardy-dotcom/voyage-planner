@@ -20,6 +20,8 @@ export type DietaryType = 'none' | 'vegetarian' | 'vegan' | 'halal' | 'kosher' |
 
 export type BudgetLevel = 'economic' | 'moderate' | 'comfort' | 'luxury';
 
+export type PaceLevel = 'relaxed' | 'moderate' | 'intensive';
+
 export type MealStrategy = 'self_catered' | 'restaurant' | 'mixed';
 
 // ============================================
@@ -111,6 +113,9 @@ export interface TripPreferences {
     date?: string;      // ISO "2026-03-05" — force le jour dans le planning
     notes?: string;     // "2 adultes + 1 enfant"
   }>;
+
+  // Rythme du voyage
+  pace?: PaceLevel;
 
   // Multi-villes / Road trip
   tripMode?: 'precise' | 'inspired';
@@ -409,6 +414,7 @@ export interface TripItem {
   // Opening hours data for scheduling validation
   openingHours?: { open: string; close: string };
   openingHoursByDay?: { [day: string]: { open: string; close: string } | null };
+  website?: string; // Site officiel Google Places (fallback billetterie)
 }
 
 export interface TripDay {
@@ -615,7 +621,9 @@ export interface Trip {
       id: string;
       name: string;
       type: 'flight_ticket' | 'hotel_booking' | 'activity_ticket' | 'insurance' | 'visa' | 'passport' | 'other';
-      fileUrl?: string; // Supabase Storage URL
+      fileUrl?: string; // Signed URL (short-lived)
+      storagePath?: string; // Canonical storage path (server-side reference)
+      urlExpiresAt?: string; // ISO expiration for signed URL
       fileSize?: number;
       mimeType?: string;
       uploadedAt: string;

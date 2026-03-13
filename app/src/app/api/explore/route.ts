@@ -1,16 +1,70 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@/lib/supabase/server';
 
+interface ParsedPositiveInt {
+  value: number;
+  error?: string;
+}
+
+function parsePositiveInt(rawValue: string | null, field: string, defaultValue: number): ParsedPositiveInt {
+  if (rawValue === null || rawValue.trim() === '') {
+    return { value: defaultValue };
+  }
+  if (!/^-?\d+$/.test(rawValue.trim())) {
+    return { value: defaultValue, error: `${field} invalide` };
+  }
+  const parsed = Number.parseInt(rawValue, 10);
+  if (!Number.isFinite(parsed)) {
+    return { value: defaultValue, error: `${field} invalide` };
+  }
+  return { value: parsed };
+}
+
+function parseOptionalPositiveInt(rawValue: string | null, field: string): { value?: number; error?: string } {
+  if (rawValue === null || rawValue.trim() === '') return {};
+  if (!/^-?\d+$/.test(rawValue.trim())) {
+    return { error: `${field} invalide` };
+  }
+  const parsed = Number.parseInt(rawValue, 10);
+  if (!Number.isFinite(parsed) || parsed < 1) {
+    return { error: `${field} invalide` };
+  }
+  return { value: parsed };
+}
+
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createRouteHandlerClient();
     const { searchParams } = new URL(request.url);
 
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '10');
+    const pageParsed = parsePositiveInt(searchParams.get('page'), 'page', 1);
+    const limitParsed = parsePositiveInt(searchParams.get('limit'), 'limit', 10);
+    if (pageParsed.error || limitParsed.error) {
+      return NextResponse.json(
+        { error: pageParsed.error || limitParsed.error },
+        { status: 400 }
+      );
+    }
+    const page = Math.max(1, pageParsed.value);
+    const limit = Math.max(1, Math.min(50, limitParsed.value));
+
     const destination = searchParams.get('destination');
-    const minDays = searchParams.get('minDays');
-    const maxDays = searchParams.get('maxDays');
+    const minDaysParsed = parseOptionalPositiveInt(searchParams.get('minDays'), 'minDays');
+    const maxDaysParsed = parseOptionalPositiveInt(searchParams.get('maxDays'), 'maxDays');
+    if (minDaysParsed.error || maxDaysParsed.error) {
+      return NextResponse.json(
+        { error: minDaysParsed.error || maxDaysParsed.error },
+        { status: 400 }
+      );
+    }
+    const minDays = minDaysParsed.value;
+    const maxDays = maxDaysParsed.value;
+    if (minDays !== undefined && maxDays !== undefined && minDays > maxDays) {
+      return NextResponse.json(
+        { error: 'minDays doit être inférieur ou égal à maxDays' },
+        { status: 400 }
+      );
+    }
 
     const offset = (page - 1) * limit;
 
@@ -42,11 +96,11 @@ export async function GET(request: NextRequest) {
     if (destination) {
       query = query.ilike('destination', `%${destination}%`);
     }
-    if (minDays) {
-      query = query.gte('duration_days', parseInt(minDays));
+    if (minDays !== undefined) {
+      query = query.gte('duration_days', minDays);
     }
-    if (maxDays) {
-      query = query.lte('duration_days', parseInt(maxDays));
+    if (maxDays !== undefined) {
+      query = query.lte('duration_days', maxDays);
     }
 
     const { data: trips, error } = await query;

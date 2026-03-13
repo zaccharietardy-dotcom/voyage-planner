@@ -368,7 +368,7 @@ export async function searchHotels(
       // Single call with popularity sort, no price constraint
       // Price filtering happens later in selectTieredHotels — here we want diversity
       // (review_score + price filters were biased towards peripheral studios)
-      let bookingHotels = await searchHotelsWithBookingApi(destination, checkInStr, checkOutStr, {
+      const bookingHotels = await searchHotelsWithBookingApi(destination, checkInStr, checkOutStr, {
         guests: options.guests,
         rooms: 1,
         minStars: Math.max(1, targetStars - 1),

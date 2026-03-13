@@ -731,7 +731,7 @@ export function scheduleDayItems(
   const result: TripItem[] = window.anchors.map(a => a.item);
 
   // Build placed items tracker
-  let placed = getPlacedItems(result);
+  const placed = getPlacedItems(result);
 
   // 1b. Pre-place breakfast for full/last days to prevent activities from crowding it out.
   //     On these days the window starts early (07:30) and high-priority mustSee activities

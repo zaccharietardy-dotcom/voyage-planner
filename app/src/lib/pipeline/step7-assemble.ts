@@ -22,7 +22,7 @@ import { generateFlightLink, generateFlightOmioLink, formatDateForUrl, generateG
 import { sanitizeApiKeyLeaksInString, sanitizeGoogleMapsUrl } from '../services/googlePlacePhoto';
 import { dedupeActivitiesBySimilarity, isDuplicateActivityCandidate } from './utils/activityDedup';
 import { getRestaurantMaxDistanceKmForProfile, resolveQualityCityProfile, RESTAURANT_ABSOLUTE_MAX_KM } from './qualityPolicy';
-import { isMonumentLikeActivityName, resolveOfficialTicketing } from '../services/officialTicketing';
+import { enrichWithTicketingLinks, isMonumentLikeActivityName, resolveOfficialTicketing } from '../services/officialTicketing';
 import { scoreViatorPlusValue } from '../services/viator';
 import { buildAirportParkingBookingUrl, calculateParkingTime, selectBestParking } from '../services/parking';
 import { accommodationHasKitchen } from './utils/accommodation';
@@ -4153,7 +4153,6 @@ export async function assembleTripSchedule(
   sanitizeTripMediaAndSecrets(trip);
 
   // Enrich all activity items with ticketing links (official + Viator + Tiqets)
-  const { enrichWithTicketingLinks } = require('../services/officialTicketing');
   for (const day of trip.days) {
     enrichWithTicketingLinks(day.items, preferences.destination || '');
   }

@@ -82,7 +82,8 @@ export function clusterActivities(
   cityCenter: { lat: number; lng: number },
   densityProfile?: CityDensityProfile,
   startDate?: string,
-  timeWindows?: Array<{ dayNumber: number; activityStartTime: string; activityEndTime: string }>
+  timeWindows?: Array<{ dayNumber: number; activityStartTime: string; activityEndTime: string }>,
+  paceFactor?: number
 ): ActivityCluster[] {
   if (activities.length === 0) return [];
   if (numDays <= 1 || activities.length <= 4) {
@@ -323,7 +324,7 @@ export function clusterActivities(
 
   // Time-proportional rebalancing: distribute activities proportionally to available time per day
   if (timeWindows && timeWindows.length > 0) {
-    rebalanceByTimeCapacity(clusters, timeWindows, protectedIndices);
+    rebalanceByTimeCapacity(clusters, timeWindows, protectedIndices, paceFactor);
   }
 
   // Optimize visit order within each cluster (nearest-neighbor + 2-opt)
@@ -1093,7 +1094,8 @@ function buildCluster(dayNumber: number, activities: ScoredActivity[]): Activity
 function rebalanceByTimeCapacity(
   clusters: ActivityCluster[],
   timeWindows: Array<{ dayNumber: number; activityStartTime: string; activityEndTime: string }>,
-  protectedIndices: Set<number>
+  protectedIndices: Set<number>,
+  paceFactor?: number
 ): void {
   // Parse time "HH:MM" to minutes
   const toMin = (t: string): number => {
@@ -1112,13 +1114,14 @@ function rebalanceByTimeCapacity(
     return Math.max(0, availableMin - MEAL_OVERHEAD);
   });
 
-  // Target activity count per cluster = proportional to capacity
+  // Target activity count per cluster = proportional to capacity, adjusted by pace
   const totalCapacity = capacities.reduce((s, c) => s + c, 0);
   const totalActivities = clusters.reduce((s, c) => s + (protectedIndices.has(clusters.indexOf(c)) ? 0 : c.activities.length), 0);
+  const factor = paceFactor ?? 1.0;
 
   const targets = capacities.map((cap, i) => {
     if (protectedIndices.has(i)) return clusters[i].activities.length; // Don't touch protected
-    const raw = totalCapacity > 0 ? (cap / totalCapacity) * totalActivities : 0;
+    const raw = totalCapacity > 0 ? (cap / totalCapacity) * totalActivities * factor : 0;
     return Math.max(1, Math.round(raw)); // At least 1 activity per day
   });
 

@@ -500,13 +500,21 @@ export async function generateTripV3(
   t = Date.now();
   onEvent?.({ type: 'step_start', step: 3, stepName: 'Clustering', timestamp: Date.now() });
   const densityProfile = computeCityDensityProfile(selectedActivities, preferences.durationDays);
+  const PACE_FACTOR: Record<string, number> = {
+    relaxed: 0.65,
+    moderate: 1.0,
+    intensive: 1.3,
+  };
+  const paceFactor = PACE_FACTOR[preferences.pace || 'moderate'] || 1.0;
+
   const clusters = clusterActivities(
     selectedActivities,
     preferences.durationDays,
     data.destCoords,
     densityProfile,
     preferences.startDate.toISOString().split('T')[0],
-    timeWindows
+    timeWindows,
+    paceFactor
   );
   stageTimes['cluster'] = Date.now() - t;
   console.log(`[Pipeline V3] Step 3: ${clusters.length} clusters created`);

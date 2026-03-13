@@ -103,6 +103,7 @@ function buildServiceClient() {
       throw new Error(`Unexpected table ${table}`);
     }),
     __tripPhotosEqMock: tripPhotosEqMock,
+    __tripsRangeMock: tripsQuery.range,
   };
 }
 
@@ -124,5 +125,24 @@ describe('/api/feed payload sanitization', () => {
     expect(payload.trips[0].data).toBeUndefined();
     expect(payload.trips[0].destination).toBe('Paris');
     expect(serviceClient.__tripPhotosEqMock).toHaveBeenCalledWith('visibility', 'public');
+  });
+
+  it('returns 400 when page format is invalid', async () => {
+    createRouteHandlerClientMock.mockResolvedValue(buildRouteClient(null));
+    const serviceClient = buildServiceClient();
+    createClientMock.mockReturnValue(serviceClient);
+
+    const response = await GET(new Request('http://localhost/api/feed?tab=discover&page=abc&limit=20'));
+    expect(response.status).toBe(400);
+  });
+
+  it('clamps limit to 50 for discover feed', async () => {
+    createRouteHandlerClientMock.mockResolvedValue(buildRouteClient(null));
+    const serviceClient = buildServiceClient();
+    createClientMock.mockReturnValue(serviceClient);
+
+    const response = await GET(new Request('http://localhost/api/feed?tab=discover&page=1&limit=500'));
+    expect(response.status).toBe(200);
+    expect(serviceClient.__tripsRangeMock).toHaveBeenCalledWith(0, 49);
   });
 });

@@ -490,7 +490,7 @@ function parseLLMResponse(text: string, input: LLMPlannerInput): LLMPlannerOutpu
     // 2. Trailing commas before ] or }
     // 3. Unescaped newlines in strings
     console.warn('[Pipeline V2 LLM] JSON parse failed, attempting repair...');
-    let repaired = cleanText
+    const repaired = cleanText
       // Fix trailing commas: ,] or ,}
       .replace(/,\s*([\]}])/g, '$1')
       // Fix single-quoted keys: 'key': → "key":

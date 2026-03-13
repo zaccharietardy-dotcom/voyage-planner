@@ -263,6 +263,7 @@ export function enrichWithTicketingLinks(
     officialBookingUrl?: string;
     viatorUrl?: string;
     tiqetsUrl?: string;
+    website?: string;
   }>,
   city: string
 ): void {
@@ -281,13 +282,15 @@ export function enrichWithTicketingLinks(
       }
     }
 
-    // Only add Viator/Tiqets links for paid attractions (museums, monuments, etc.)
+    // Fallback: use Google Places website as official booking URL for paid attractions
+    if (!item.officialBookingUrl && item.website && isPaidAttraction(titleLower)) {
+      item.officialBookingUrl = item.website;
+    }
+
+    // Only add Viator links for paid attractions (museums, monuments, etc.)
     if (isPaidAttraction(titleLower)) {
       if (!item.viatorUrl) {
         item.viatorUrl = getViatorSearchUrl(activityName, city);
-      }
-      if (!item.tiqetsUrl) {
-        item.tiqetsUrl = getTiqetsSearchUrl(activityName, city);
       }
     }
   }
