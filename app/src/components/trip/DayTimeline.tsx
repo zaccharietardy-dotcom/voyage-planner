@@ -41,6 +41,7 @@ interface DayTimelineProps {
   onSelectRestaurantAlternative?: (item: TripItem, restaurant: NonNullable<TripItem['restaurant']>) => void;
   onSelectSelfMeal?: (item: TripItem) => void;
   onDurationChange?: (item: TripItem, newDuration: number) => void;
+  onTransportModeChange?: (item: TripItem, newMode: string) => void;
   onOptimizeDay?: (dayNumber: number) => void;
   getVoteData?: (itemId: string) => { wantCount: number; skipCount: number; userVote: 'want' | 'skip' | null };
   onVote?: (itemId: string, vote: 'want' | 'skip' | null) => void;
@@ -159,6 +160,7 @@ export const DayTimeline = memo(function DayTimeline({
   onSelectRestaurantAlternative,
   onSelectSelfMeal,
   onDurationChange,
+  onTransportModeChange,
   onOptimizeDay,
   getVoteData,
   onVote,
@@ -380,6 +382,8 @@ export const DayTimeline = memo(function DayTimeline({
                   duration={nextItem.timeFromPrevious}
                   distance={nextItem.distanceFromPrevious}
                   mode={nextItem.transportToPrevious}
+                  isEditable={!!onTransportModeChange}
+                  onModeChange={onTransportModeChange ? (newMode) => onTransportModeChange(nextItem, newMode) : undefined}
                 />
               )}
 

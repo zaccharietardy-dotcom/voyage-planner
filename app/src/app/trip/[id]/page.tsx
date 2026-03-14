@@ -720,6 +720,25 @@ export default function TripPage() {
     toast.success(`Durée mise à jour: ${newDuration} min`);
   }, [trip, saveTrip]);
 
+  const handleTransportModeChange = useCallback((item: TripItem, newMode: string) => {
+    if (!trip) return;
+    // Speed estimates (km/h) per transport mode
+    const speeds: Record<string, number> = { walk: 4.5, transit: 25, public: 25, bike: 15, car: 35, driving: 35, taxi: 30 };
+    const speed = speeds[newMode] || 4.5;
+    const distance = item.distanceFromPrevious || 0;
+    const newTime = distance > 0 ? Math.max(2, Math.round((distance / speed) * 60)) : item.timeFromPrevious;
+
+    const updatedDays = trip.days.map((day) => ({
+      ...day,
+      items: day.items.map((i) =>
+        i.id === item.id ? { ...i, transportToPrevious: newMode as TripItem['transportToPrevious'], timeFromPrevious: newTime } : i
+      ),
+    }));
+    const recalculated = cascadeRecalculate(updatedDays, item.id, 'move');
+    const updatedTrip = { ...trip, days: recalculated, updatedAt: new Date() };
+    saveTrip(updatedTrip);
+  }, [trip, saveTrip]);
+
   // Render swap button pour les ActivityCards (si pool disponible)
   const renderSwapButton = useCallback((item: TripItem) => {
     if (!trip?.attractionPool || trip.attractionPool.length === 0 || !canOwnerEdit) return null;
@@ -1896,6 +1915,7 @@ export default function TripPage() {
                                     onSelectRestaurantAlternative={canOwnerEdit ? handleSelectRestaurantAlternative : undefined}
                                     onSelectSelfMeal={canOwnerEdit ? handleSelectSelfMeal : undefined}
                                     onDurationChange={canOwnerEdit ? handleDurationChange : undefined}
+                          onTransportModeChange={canOwnerEdit ? handleTransportModeChange : undefined}
                                     onOptimizeDay={canOwnerEdit ? handleOptimizeDay : undefined}
                                     getVoteData={useCollaborativeMode ? getVoteData : undefined}
                                     onVote={useCollaborativeMode ? castVote : undefined}
@@ -2081,6 +2101,7 @@ export default function TripPage() {
                           onSelectRestaurantAlternative={canOwnerEdit ? handleSelectRestaurantAlternative : undefined}
                           onSelectSelfMeal={canOwnerEdit ? handleSelectSelfMeal : undefined}
                           onDurationChange={canOwnerEdit ? handleDurationChange : undefined}
+                          onTransportModeChange={canOwnerEdit ? handleTransportModeChange : undefined}
                           onOptimizeDay={canOwnerEdit ? handleOptimizeDay : undefined}
                           getVoteData={useCollaborativeMode ? getVoteData : undefined}
                           onVote={useCollaborativeMode ? castVote : undefined}
