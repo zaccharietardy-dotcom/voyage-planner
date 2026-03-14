@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { Trip, TripItem, TripDay, Accommodation, GROUP_TYPE_LABELS, ACTIVITY_LABELS } from '@/lib/types';
 import { DayTimeline, CarbonFootprint, TransportOptions, BookingChecklist } from '@/components/trip';
+import { FlightDatePicker } from '@/components/trip/FlightDatePicker';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -39,7 +40,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { generateHotelSearchLinks } from '@/lib/services/linkGenerator';
+import { clusterAccommodationsByArea } from '@/lib/services/neighbourhoodPricing';
 import { useAuth } from '@/components/auth';
+import { usePresence } from '@/hooks/usePresence';
+import { PresenceAvatars } from '@/components/trip/PresenceAvatars';
 import { useRealtimeTrip } from '@/hooks/useRealtimeTrip';
 import { SharePanel } from '@/components/trip/SharePanel';
 import { ProposalsList } from '@/components/trip/ProposalsList';
@@ -62,20 +66,26 @@ import { CloneTripModal } from '@/components/social/CloneTripModal';
 import { ActivityEditModal } from '@/components/trip/ActivityEditModal';
 import { ExpensesPanel } from '@/components/trip/expenses/ExpensesPanel';
 import { TravelTips } from '@/components/trip/TravelTips';
-import { TripBudgetComparator } from '@/components/trip/TripBudgetComparator';
+import { buildTravelIntelligence } from '@/lib/services/travelIntelligence';
+import { TripBudgetComparator, TripBudgetBreakdown } from '@/components/trip/TripBudgetComparator';
 import { PhotoGallery } from '@/components/photos/PhotoGallery';
 import { PhotoUploader } from '@/components/photos/PhotoUploader';
 import { PastTripView } from '@/components/trip/PastTripView';
 import { ProposedChange } from '@/lib/types/collaboration';
-import { recalculateTimes, insertDay } from '@/lib/services/itineraryCalculator';
+import { recalculateTimes, cascadeRecalculate, insertDay } from '@/lib/services/itineraryCalculator';
+import { optimizeDay } from '@/lib/services/routeOptimizer';
 import { Attraction } from '@/lib/services/attractions';
 import { ActivitySwapButton } from '@/components/trip/ActivitySwapButton';
 import { AddActivityModal } from '@/components/trip/AddActivityModal';
 import { CalendarView } from '@/components/trip/CalendarView';
+import { CategoryChips } from '@/components/trip/CategoryChips';
+import { classifyActivityCategory } from '@/lib/utils/activityClassifier';
 import { CommentsSection } from '@/components/trip/CommentsSection';
 import { ChatPanel, ChatButton } from '@/components/trip/ChatPanel';
 import { TripOnboarding } from '@/components/trip/TripOnboarding';
 import { ImportPlaces } from '@/components/trip/ImportPlaces';
+import { ImportBooking } from '@/components/trip/ImportBooking';
+import type { ParsedBooking } from '@/lib/services/bookingParser';
 import { AddToCalendarDropdown } from '@/components/trip/AddToCalendarDropdown';
 import { ImportedPlace } from '@/lib/types';
 import {
@@ -91,6 +101,7 @@ import { useLiveTrip } from '@/hooks/useLiveTrip';
 import { LiveTripBanner } from '@/components/trip/LiveTripBanner';
 import { LiveTripDashboard } from '@/components/trip/LiveTripDashboard';
 import { useConnectivity } from '@/hooks/useConnectivity';
+import { useActivityVotes } from '@/hooks/useActivityVotes';
 import { cacheTripById, readCachedTripById } from '@/lib/mobile/offline-cache';
 import { generateTripStream } from '@/lib/generateTrip';
 import { safeGetItem, safeSetItem } from '@/lib/storage';
@@ -252,6 +263,10 @@ export default function TripPage() {
   const tripId = params.id as string;
   const { user } = useAuth();
   const { isOffline } = useConnectivity();
+  const { presenceUsers, updateView } = usePresence(
+    tripId,
+    user ? { id: user.id, displayName: user.user_metadata?.full_name || user.email?.split('@')[0], avatarUrl: user.user_metadata?.avatar_url } : undefined
+  );
 
   const [useCollaborativeMode, setUseCollaborativeMode] = useState(false);
   const [localTrip, setLocalTrip] = useState<Trip | null>(null);
@@ -290,6 +305,7 @@ export default function TripPage() {
   const [addActivityDefaultTime, setAddActivityDefaultTime] = useState<string | undefined>();
   const [addActivityDefaultEndTime, setAddActivityDefaultEndTime] = useState<string | undefined>();
   const [planningView, setPlanningView] = useState<'timeline' | 'calendar'>('timeline');
+  const [categoryFilter, setCategoryFilter] = useState<string[]>([]);
   const [showChatPanel, setShowChatPanel] = useState(false);
   const [showFlythrough, setShowFlythrough] = useState(false);
   const [showImportPlaces, setShowImportPlaces] = useState(false);
@@ -309,6 +325,11 @@ export default function TripPage() {
     mql.addEventListener('change', handler);
     return () => mql.removeEventListener('change', handler);
   }, []);
+
+  // Track presence view changes
+  useEffect(() => {
+    updateView(mainTab);
+  }, [mainTab, updateView]);
 
   // Track day direction for slide animations
   const handleDayChange = useCallback((newDay: string) => {
@@ -344,6 +365,9 @@ export default function TripPage() {
 
   // Live Trip Mode
   const liveState = useLiveTrip(trip || null);
+
+  // Activity voting (collaborative mode)
+  const { getVoteData, castVote } = useActivityVotes(tripId);
 
   const members = useMemo(() => collaborativeTrip?.members || [], [collaborativeTrip?.members]);
   const proposals = useMemo(() => collaborativeTrip?.proposals || [], [collaborativeTrip?.proposals]);
@@ -554,10 +578,14 @@ export default function TripPage() {
   const handleDeleteItem = useCallback((item: TripItem) => {
     if (!trip) return;
     if (!confirm('Supprimer cette activité ?')) return;
-    const updatedDays = trip.days.map((day) => ({
-      ...day,
-      items: day.items.filter((i) => i.id !== item.id),
-    }));
+    const updatedDays = cascadeRecalculate(
+      trip.days.map((day) => ({
+        ...day,
+        items: day.items.filter((i) => i.id !== item.id),
+      })),
+      item.id,
+      'delete'
+    );
     const updatedTrip = { ...trip, days: updatedDays, updatedAt: new Date() };
     saveTrip(updatedTrip);
     toast.success('Activité supprimée');
@@ -677,6 +705,24 @@ export default function TripPage() {
     toast.success('Repas passé en mode libre');
   }, [trip, saveTrip]);
 
+  const handleDurationChange = useCallback((item: TripItem, newDuration: number) => {
+    if (!trip) return;
+    const updatedDays = trip.days.map((day) => ({
+      ...day,
+      items: day.items.map((i) => {
+        if (i.id !== item.id) return i;
+        const startMin = parseInt(i.startTime.split(':')[0]) * 60 + parseInt(i.startTime.split(':')[1]);
+        const endMin = startMin + newDuration;
+        const newEndTime = `${Math.floor(endMin / 60) % 24}`.padStart(2, '0') + ':' + `${endMin % 60}`.padStart(2, '0');
+        return { ...i, duration: newDuration, endTime: newEndTime };
+      }),
+    }));
+    const recalculated = cascadeRecalculate(updatedDays, item.id, 'duration');
+    const updatedTrip = { ...trip, days: recalculated, updatedAt: new Date() };
+    saveTrip(updatedTrip);
+    toast.success(`Durée mise à jour: ${newDuration} min`);
+  }, [trip, saveTrip]);
+
   // Render swap button pour les ActivityCards (si pool disponible)
   const renderSwapButton = useCallback((item: TripItem) => {
     if (!trip?.attractionPool || trip.attractionPool.length === 0 || !canOwnerEdit) return null;
@@ -756,6 +802,20 @@ export default function TripPage() {
     toast.success(`Jour ${afterDayNumber + 1} ajouté ! Votre voyage passe à ${newDays.length} jours.`);
   };
 
+  const handleOptimizeDay = useCallback((dayNumber: number) => {
+    if (!trip) return;
+    const hotelLat = trip.accommodation?.latitude;
+    const hotelLng = trip.accommodation?.longitude;
+    if (!hotelLat || !hotelLng) {
+      toast.error('Pas de coordonnées hôtel pour optimiser');
+      return;
+    }
+    const optimizedDays = optimizeDay(trip.days, dayNumber, hotelLat, hotelLng);
+    const updatedTrip = { ...trip, days: optimizedDays, updatedAt: new Date() };
+    saveTrip(updatedTrip);
+    toast.success(`Jour ${dayNumber} optimisé !`);
+  }, [trip, saveTrip]);
+
   const handleAddNewItem = useCallback((newItem: TripItem) => {
     if (!trip) return;
     const dayIndex = trip.days.findIndex((d) => d.dayNumber === newItem.dayNumber);
@@ -769,6 +829,39 @@ export default function TripPage() {
     setShowAddActivityModal(false);
     toast.success(`"${newItem.title}" ajouté au Jour ${newItem.dayNumber}`);
   }, [trip, saveTrip]);
+
+  const handleImportBooking = useCallback((booking: ParsedBooking) => {
+    if (!trip) return;
+    const newItem: TripItem = {
+      id: crypto.randomUUID(),
+      dayNumber: 1,
+      startTime: booking.startTime || '10:00',
+      endTime: booking.endTime || '11:00',
+      type: booking.type === 'flight' ? 'flight' : booking.type === 'hotel' ? 'checkin' : 'activity',
+      title: booking.name,
+      description: booking.confirmationCode ? `Réf: ${booking.confirmationCode}` : '',
+      locationName: booking.address || booking.name,
+      latitude: 0,
+      longitude: 0,
+      orderIndex: 0,
+      estimatedCost: booking.price,
+      duration: 60,
+      dataReliability: 'verified',
+    };
+
+    // Find the right day based on date
+    if (booking.date) {
+      const bookingDate = new Date(booking.date);
+      const matchingDay = trip.days.find(d => {
+        const dayDate = new Date(d.date);
+        return dayDate.toDateString() === bookingDate.toDateString();
+      });
+      if (matchingDay) newItem.dayNumber = matchingDay.dayNumber;
+    }
+
+    handleAddNewItem(newItem);
+    toast.success(`Réservation importée: ${booking.name}`);
+  }, [trip, handleAddNewItem]);
 
   const handleCalendarUpdateItem = useCallback((updatedItem: TripItem) => {
     if (!trip) return;
@@ -857,7 +950,8 @@ export default function TripPage() {
       return i;
     });
     const updatedDays = trip.days.map((d, idx) => idx === dayIndex ? { ...d, items: newItems } : d);
-    const updatedTrip = { ...trip, days: updatedDays, updatedAt: new Date() };
+    const recalculatedDays = cascadeRecalculate(updatedDays, item.id, 'move');
+    const updatedTrip = { ...trip, days: recalculatedDays, updatedAt: new Date() };
     saveTrip(updatedTrip);
     toast.success('Activité déplacée');
   }, [trip, saveTrip]);
@@ -1062,6 +1156,12 @@ export default function TripPage() {
     return numMap;
   }, [trip]);
 
+  // Neighbourhood pricing cells for "Where to Stay" map overlay
+  const neighbourhoodCells = useMemo(() => {
+    if (!trip?.accommodationOptions || trip.accommodationOptions.length === 0) return undefined;
+    return clusterAccommodationsByArea(trip.accommodationOptions);
+  }, [trip?.accommodationOptions]);
+
   // Legacy offset function kept for backward compatibility but uses map numbers
   const getDayIndexOffset = (dayNumber: number): number => {
     if (!trip) return 0;
@@ -1072,6 +1172,20 @@ export default function TripPage() {
     }
     return offset;
   };
+
+  // Filtered days for category chip filtering (display only)
+  const filteredDays = useMemo(() => {
+    if (!trip || categoryFilter.length === 0) return trip?.days || [];
+    return trip.days.map(day => ({
+      ...day,
+      items: day.items.filter(item => {
+        // Always show non-activity items (transport, restaurant, checkin, checkout, etc.)
+        if (item.type !== 'activity' && item.type !== 'free_time') return true;
+        const categories = classifyActivityCategory(item);
+        return categories.some(cat => categoryFilter.includes(cat));
+      }),
+    }));
+  }, [trip?.days, categoryFilter]);
 
   if (loading) {
     return (
@@ -1282,6 +1396,7 @@ export default function TripPage() {
                       {ACTIVITY_LABELS[act]}
                     </span>
                   ))}
+                  <PresenceAvatars users={presenceUsers} className="ml-2" />
                 </div>
               </div>
             </div>
@@ -1598,6 +1713,7 @@ export default function TripPage() {
                 arrivalCoords: trip.preferences.destinationCoords,
                 stopoverCities: trip.outboundFlight?.stopCities,
               }}
+              neighbourhoodCells={neighbourhoodCells}
             />
           </div>
 
@@ -1690,6 +1806,7 @@ export default function TripPage() {
                   <TabsContent value="overview" className="mt-0">
                     <TripOverviewTab
                       days={trip.days}
+                      trip={trip}
                       onDayClick={(dayNumber) => {
                         handleDayChange(dayNumber);
                         setMainTab('planning');
@@ -1794,6 +1911,10 @@ export default function TripPage() {
                                     hotelSelectorData={hotelSelectorData}
                                     onSelectRestaurantAlternative={canOwnerEdit ? handleSelectRestaurantAlternative : undefined}
                                     onSelectSelfMeal={canOwnerEdit ? handleSelectSelfMeal : undefined}
+                                    onDurationChange={canOwnerEdit ? handleDurationChange : undefined}
+                                    onOptimizeDay={canOwnerEdit ? handleOptimizeDay : undefined}
+                                    getVoteData={useCollaborativeMode ? getVoteData : undefined}
+                                    onVote={useCollaborativeMode ? castVote : undefined}
                                   />
                                   {canOwnerEdit && idx > 0 && idx < trip.days.length - 1 && (
                                     <div className="flex items-center justify-center py-3 mt-3">
@@ -1817,14 +1938,27 @@ export default function TripPage() {
                   </TabsContent>
 
                   <TabsContent value="reserver" className="mt-0">
+                    <div className="mb-4">
+                      <ImportBooking onImport={handleImportBooking} />
+                    </div>
+                    {trip.outboundFlight && (
+                      <FlightDatePicker
+                        origin={trip.preferences.origin}
+                        destination={trip.preferences.destination}
+                        selectedDate={new Date(trip.preferences.startDate)}
+                        basePrice={trip.outboundFlight.price || 150}
+                        className="mb-4"
+                      />
+                    )}
                     <BookingChecklist trip={trip} />
                   </TabsContent>
 
                   <TabsContent value="infos" className="mt-0">
                     <div className="space-y-6">
+                      <TripBudgetBreakdown trip={trip} />
                       <TripBudgetComparator trip={trip} />
                       {trip.carbonFootprint && <CarbonFootprint data={trip.carbonFootprint} />}
-                      {trip.travelTips && <TravelTips data={trip.travelTips} />}
+                      {trip.travelTips && <TravelTips data={trip.travelTips} intelligence={buildTravelIntelligence(trip)} />}
                       {user && (
                         <Card>
                           <CardHeader>
@@ -1889,6 +2023,7 @@ export default function TripPage() {
               <TabsContent value="overview">
                 <TripOverviewTab
                   days={trip.days}
+                  trip={trip}
                   onDayClick={(dayNumber) => {
                     handleDayChange(dayNumber);
                     setMainTab('planning');
@@ -1913,6 +2048,11 @@ export default function TripPage() {
                   </div>
                 </div>
 
+                {/* Category filter chips */}
+                {planningView === 'timeline' && (
+                  <CategoryChips onFilterChange={setCategoryFilter} className="mb-3" />
+                )}
+
                 {planningView === 'calendar' ? (
                   <div className="h-[75vh]">
                     <CalendarView
@@ -1927,7 +2067,7 @@ export default function TripPage() {
                   </div>
                 ) : editMode && isDesktop ? (
                   <DraggableTimeline
-                    days={trip.days}
+                    days={filteredDays}
                     isEditable={canPropose}
                     isOwner={isOwner}
                     onDirectUpdate={canOwnerEdit ? handleDirectUpdate : undefined}
@@ -1943,7 +2083,7 @@ export default function TripPage() {
                   />
                 ) : !editMode ? (
                   <div className="space-y-6">
-                    {trip.days.map((day, idx) => (
+                    {filteredDays.map((day, idx) => (
                       <div key={day.dayNumber}>
                         <DayTimeline
                           day={day}
@@ -1961,9 +2101,13 @@ export default function TripPage() {
                           hotelSelectorData={hotelSelectorData}
                           onSelectRestaurantAlternative={canOwnerEdit ? handleSelectRestaurantAlternative : undefined}
                           onSelectSelfMeal={canOwnerEdit ? handleSelectSelfMeal : undefined}
+                          onDurationChange={canOwnerEdit ? handleDurationChange : undefined}
+                          onOptimizeDay={canOwnerEdit ? handleOptimizeDay : undefined}
+                          getVoteData={useCollaborativeMode ? getVoteData : undefined}
+                          onVote={useCollaborativeMode ? castVote : undefined}
                         />
                         {/* Bouton "Ajouter un jour" entre les jours (sauf après le dernier) */}
-                        {canOwnerEdit && idx < trip.days.length - 1 && idx > 0 && (
+                        {canOwnerEdit && idx < filteredDays.length - 1 && idx > 0 && (
                           <div className="flex items-center justify-center py-2 group">
                             <div className="flex-1 h-px bg-border group-hover:bg-primary/30 transition-colors" />
                             <Button
@@ -1985,14 +2129,27 @@ export default function TripPage() {
               </TabsContent>
 
               <TabsContent value="reserver">
+                <div className="mb-4">
+                  <ImportBooking onImport={handleImportBooking} />
+                </div>
+                {trip.outboundFlight && (
+                  <FlightDatePicker
+                    origin={trip.preferences.origin}
+                    destination={trip.preferences.destination}
+                    selectedDate={new Date(trip.preferences.startDate)}
+                    basePrice={trip.outboundFlight.price || 150}
+                    className="mb-4"
+                  />
+                )}
                 <BookingChecklist trip={trip} />
               </TabsContent>
 
               <TabsContent value="infos">
                 <div className="space-y-6">
+                  <TripBudgetBreakdown trip={trip} />
                   <TripBudgetComparator trip={trip} />
                   {trip.carbonFootprint && <CarbonFootprint data={trip.carbonFootprint} />}
-                  {trip.travelTips && <TravelTips data={trip.travelTips} />}
+                  {trip.travelTips && <TravelTips data={trip.travelTips} intelligence={buildTravelIntelligence(trip)} />}
                 </div>
               </TabsContent>
 
@@ -2040,6 +2197,7 @@ export default function TripPage() {
                   arrivalCoords: trip.preferences.destinationCoords,
                   stopoverCities: trip.outboundFlight?.stopCities,
                 }}
+                neighbourhoodCells={neighbourhoodCells}
               />
             </div>
           </div>

@@ -346,6 +346,7 @@ export function ensureMustSees(
           openingHoursByDay: mustSee.openingHoursByDay,
           bookingUrl: mustSee.bookingUrl,
           imageUrl: mustSee.imageUrl,
+          photoGallery: mustSee.photoGallery,
           // Update Google Maps URL to the must-see's actual location
           googleMapsPlaceUrl: (mustSee as any).googlePlaceId
             ? `https://www.google.com/maps/place/?q=place_id:${(mustSee as any).googlePlaceId}`
@@ -405,6 +406,7 @@ export function ensureMustSees(
           openingHoursByDay: mustSee.openingHoursByDay,
           bookingUrl: mustSee.bookingUrl,
           imageUrl: mustSee.imageUrl,
+          photoGallery: mustSee.photoGallery,
           googleMapsPlaceUrl: (mustSee as any).googlePlaceId
             ? `https://www.google.com/maps/place/?q=place_id:${(mustSee as any).googlePlaceId}`
             : mustSee.latitude && mustSee.longitude

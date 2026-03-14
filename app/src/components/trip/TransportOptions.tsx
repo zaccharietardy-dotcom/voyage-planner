@@ -80,6 +80,11 @@ export function TransportOptions({
   if (options.length === 0) return null;
 
   const sortedOptions = [...options].sort((a, b) => b.score - a.score);
+
+  // Compute badge targets
+  const cheapestId = options.reduce((best, o) => o.totalPrice < best.totalPrice ? o : best, options[0]).id;
+  const fastestId = options.reduce((best, o) => o.totalDuration < best.totalDuration ? o : best, options[0]).id;
+
   const selected = options.find(o => o.id === selectedId) || sortedOptions[0];
   const SelectedIcon = MODE_ICONS[selected.mode] || Plane;
   const selectedColor = MODE_COLORS[selected.mode] || '#666';
@@ -136,8 +141,18 @@ export function TransportOptions({
                   <div className="flex items-center gap-2">
                     <span className="font-medium text-sm">{MODE_LABELS[option.mode]}</span>
                     {option.recommended && (
+                      <Badge variant="secondary" className="bg-amber-100 text-amber-700 text-[10px] px-1.5 py-0">
+                        Best
+                      </Badge>
+                    )}
+                    {option.id === cheapestId && (
                       <Badge variant="secondary" className="bg-green-100 text-green-700 text-[10px] px-1.5 py-0">
-                        Recommandé
+                        Cheapest
+                      </Badge>
+                    )}
+                    {option.id === fastestId && (
+                      <Badge variant="secondary" className="bg-blue-100 text-blue-700 text-[10px] px-1.5 py-0">
+                        Fastest
                       </Badge>
                     )}
                     {option.dataSource === 'api' && (

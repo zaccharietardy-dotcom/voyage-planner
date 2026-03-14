@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -15,10 +15,191 @@ import {
   DollarSign,
   Loader2,
   AlertCircle,
+  PieChart,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Trip, TripCostSummary } from '@/lib/types';
 import { motion } from 'framer-motion';
+
+// ---------------------------------------------------------------------------
+// TripBudgetBreakdown — standalone visual breakdown (no API call)
+// ---------------------------------------------------------------------------
+
+interface TripBudgetBreakdownProps {
+  trip: Trip;
+}
+
+export function TripBudgetBreakdown({ trip }: TripBudgetBreakdownProps) {
+  const breakdown = trip.costBreakdown || {
+    flights: 0,
+    accommodation: 0,
+    food: 0,
+    activities: 0,
+    transport: 0,
+    parking: 0,
+    other: 0,
+  };
+
+  const categories = useMemo(
+    () =>
+      [
+        { label: 'Vols', value: breakdown.flights, color: '#EC4899', icon: Plane },
+        { label: 'Hébergement', value: breakdown.accommodation, color: '#8B5CF6', icon: Bed },
+        { label: 'Activités', value: breakdown.activities, color: '#3B82F6', icon: MapPin },
+        { label: 'Repas', value: breakdown.food, color: '#F97316', icon: Utensils },
+        { label: 'Transport local', value: breakdown.transport, color: '#10B981', icon: Bus },
+      ].filter((c) => c.value > 0),
+    [breakdown]
+  );
+
+  const total = useMemo(
+    () => categories.reduce((sum, c) => sum + c.value, 0) || trip.totalEstimatedCost || 0,
+    [categories, trip.totalEstimatedCost]
+  );
+
+  const perPerson = trip.preferences.groupSize
+    ? Math.round(total / trip.preferences.groupSize)
+    : total;
+  const perDay = trip.days.length > 0 ? Math.round(total / trip.days.length) : total;
+
+  // SVG donut segments
+  const donutSegments = useMemo(() => {
+    let cumulative = 0;
+    return categories.map((cat) => {
+      const percentage = total > 0 ? cat.value / total : 0;
+      const start = cumulative;
+      cumulative += percentage;
+      return { ...cat, start, percentage };
+    });
+  }, [categories, total]);
+
+  // Per-day costs
+  const dailyCosts = useMemo(
+    () =>
+      trip.days.map((day) => ({
+        dayNumber: day.dayNumber,
+        total:
+          day.dailyBudget?.total ||
+          day.items.reduce((sum, item) => sum + (item.estimatedCost || 0), 0),
+      })),
+    [trip.days]
+  );
+  const maxDailyCost = Math.max(...dailyCosts.map((d) => d.total), 1);
+
+  if (total === 0) return null;
+
+  return (
+    <Card className="p-6">
+      <div className="space-y-5">
+        {/* Header */}
+        <div className="flex items-center gap-2 mb-1">
+          <div className="p-1.5 rounded-lg bg-primary/10">
+            <PieChart className="h-4 w-4 text-primary" />
+          </div>
+          <h3 className="font-semibold">Budget estimé</h3>
+        </div>
+
+        {/* Total */}
+        <div className="text-center">
+          <p className="text-3xl font-bold">{total.toLocaleString('fr-FR')}&euro;</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            {perPerson.toLocaleString('fr-FR')}&euro;/pers.
+            {' · '}
+            {perDay.toLocaleString('fr-FR')}&euro;/jour
+          </p>
+        </div>
+
+        {/* Donut chart */}
+        {categories.length > 1 && (
+          <div className="flex justify-center">
+            <svg viewBox="0 0 100 100" className="w-32 h-32">
+              {donutSegments.map((seg, i) => {
+                const r = 40;
+                const circumference = 2 * Math.PI * r;
+                const rotation = seg.start * 360 - 90;
+                return (
+                  <circle
+                    key={i}
+                    cx="50"
+                    cy="50"
+                    r={r}
+                    fill="none"
+                    stroke={seg.color}
+                    strokeWidth="12"
+                    strokeDasharray={`${circumference * seg.percentage} ${circumference}`}
+                    transform={`rotate(${rotation} 50 50)`}
+                    className="transition-all duration-500"
+                  />
+                );
+              })}
+            </svg>
+          </div>
+        )}
+
+        {/* Category bars */}
+        <div className="space-y-2.5">
+          {categories.map((cat, idx) => {
+            const Icon = cat.icon;
+            return (
+              <motion.div
+                key={cat.label}
+                initial={{ opacity: 0, x: -12 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: idx * 0.07 }}
+                className="flex items-center gap-2"
+              >
+                <div
+                  className="p-1 rounded"
+                  style={{ backgroundColor: `${cat.color}20`, color: cat.color }}
+                >
+                  <Icon className="h-3.5 w-3.5" />
+                </div>
+                <span className="text-xs font-medium w-28 truncate">{cat.label}</span>
+                <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${total > 0 ? (cat.value / total) * 100 : 0}%` }}
+                    transition={{ delay: idx * 0.07 + 0.15, duration: 0.45 }}
+                    className="h-full rounded-full"
+                    style={{ backgroundColor: cat.color }}
+                  />
+                </div>
+                <span className="text-xs font-medium w-16 text-right tabular-nums">
+                  {cat.value.toLocaleString('fr-FR')}&euro;
+                </span>
+              </motion.div>
+            );
+          })}
+        </div>
+
+        {/* Per-day cost bars */}
+        {dailyCosts.length > 1 && (
+          <div>
+            <p className="text-xs font-medium mb-2 text-muted-foreground">Coût par jour</p>
+            <div className="flex items-end gap-1 h-16">
+              {dailyCosts.map((day) => (
+                <div
+                  key={day.dayNumber}
+                  className="flex-1 flex flex-col items-center gap-0.5"
+                >
+                  <div
+                    className="w-full bg-primary/20 rounded-t transition-all duration-500"
+                    style={{ height: `${(day.total / maxDailyCost) * 100}%` }}
+                  />
+                  <span className="text-[9px] text-muted-foreground">J{day.dayNumber}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </Card>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// TripBudgetComparator — API-based price comparison (existing)
+// ---------------------------------------------------------------------------
 
 interface TripBudgetComparatorProps {
   trip: Trip;

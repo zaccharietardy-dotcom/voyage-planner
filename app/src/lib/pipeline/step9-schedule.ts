@@ -937,6 +937,7 @@ export function createActivityItem(
     rating: activity.rating,
     estimatedCost: activity.estimatedCost,
     imageUrl: activity.imageUrl,
+    photoGallery: activity.photoGallery,
     bookingUrl: activity.bookingUrl,
     googleMapsPlaceUrl,
     mustSee: activity.mustSee,

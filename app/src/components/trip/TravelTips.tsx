@@ -12,8 +12,12 @@ import {
   AlertTriangle,
   Plug,
   Zap,
+  Banknote,
+  Thermometer,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+import type { TravelIntelligenceData } from '@/lib/services/travelIntelligence';
 
 interface TravelTipsProps {
   data: {
@@ -40,6 +44,7 @@ interface TravelTipsProps {
       otherNumbers?: { label: string; number: string }[];
     };
   };
+  intelligence?: TravelIntelligenceData;
   className?: string;
 }
 
@@ -79,10 +84,50 @@ function Section({
   );
 }
 
-export function TravelTips({ data, className }: TravelTipsProps) {
+export function TravelTips({ data, intelligence, className }: TravelTipsProps) {
   return (
     <Card className={cn('p-4', className)}>
       <h3 className="font-semibold mb-2">Infos pratiques</h3>
+
+      {/* Devise */}
+      {intelligence?.currency && (
+        <Section icon={Banknote} title={`Devise — ${intelligence.currency.code}`} iconColor="text-emerald-500">
+          <div className="bg-emerald-50 dark:bg-emerald-950/30 rounded-lg p-3">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl font-bold text-emerald-600">{intelligence.currency.symbol}</span>
+              <div>
+                <p className="text-sm font-medium">{intelligence.currency.name}</p>
+                <p className="text-xs text-muted-foreground">{intelligence.currency.code}</p>
+                {intelligence.currency.exchangeRate && (
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    1 EUR = {intelligence.currency.exchangeRate} {intelligence.currency.code}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        </Section>
+      )}
+
+      {/* Climat */}
+      {intelligence?.weatherSummary && (
+        <Section icon={Thermometer} title="Climat moyen du séjour" iconColor="text-blue-500">
+          <div className="bg-blue-50 dark:bg-blue-950/30 rounded-lg p-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium capitalize">{intelligence.weatherSummary.mainCondition}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Condition dominante sur le séjour</p>
+              </div>
+              <div className="text-right">
+                <p className="text-lg font-bold text-blue-600">
+                  {intelligence.weatherSummary.avgTempMin}° / {intelligence.weatherSummary.avgTempMax}°
+                </p>
+                <p className="text-[10px] text-muted-foreground">min / max moyen</p>
+              </div>
+            </div>
+          </div>
+        </Section>
+      )}
 
       {/* Vocabulaire */}
       <Section icon={Languages} title={`Vocabulaire (${data.vocabulary.language})`} defaultOpen iconColor="text-blue-500">

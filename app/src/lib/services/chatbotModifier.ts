@@ -5,7 +5,6 @@
  * Prend une intention classifiée et génère les modifications à appliquer.
  */
 
-import Anthropic from '@anthropic-ai/sdk';
 import {
   ModificationIntent,
   ModificationResult,
@@ -167,6 +166,15 @@ async function generateModifications(
 
     case 'report_issue':
       return handleIssueReport(intent, days, constraints, rollbackData, tripContext);
+
+    case 'change_pace':
+      return changePace(intent, days, constraints, rollbackData, tripContext);
+
+    case 'swap_category':
+      return swapCategory(intent, days, constraints, rollbackData, tripContext);
+
+    case 'rebalance':
+      return rebalanceDays(intent, days, constraints, rollbackData);
 
     default:
       return {
@@ -926,7 +934,7 @@ function reorderDay(
 }
 
 // ============================================
-// Add Activity (uses Claude)
+// Add Activity
 // ============================================
 
 async function addActivity(
@@ -1240,7 +1248,7 @@ async function handleIssueReport(
     };
   }
 
-  // Génère des suggestions intelligentes via Claude
+  // Génère des suggestions intelligentes via Gemini
   const suggestions = await generateIssueSuggestions(
     targetItem,
     targetDay,
@@ -1386,9 +1394,9 @@ async function generateIssueSuggestions(
   latitude?: number;
   longitude?: number;
 }> | null> {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = process.env.GOOGLE_AI_API_KEY;
   if (!apiKey) {
-    console.warn('[IssueReport] ANTHROPIC_API_KEY non configurée');
+    console.warn('[IssueReport] GOOGLE_AI_API_KEY non configurée');
     return null;
   }
 
@@ -1400,7 +1408,7 @@ async function generateIssueSuggestions(
     .map(i => i.title)
     .join(', ');
 
-  // Construit le contexte pour Claude
+  // Construit le contexte pour Gemini
   const issueContext = {
     closed: `L'activité est fermée définitivement ou temporairement. Proposer des alternatives similaires dans la même zone.`,
     weather: `La météo est défavorable (pluie, vent). Proposer des activités INTÉRIEURES (musées, galeries, marchés couverts, shopping, spa, cinéma, cuisine, ateliers).`,
@@ -1456,15 +1464,29 @@ Réponds UNIQUEMENT en JSON valide:
 ]`;
 
   try {
-    const client = new Anthropic({ apiKey });
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ role: 'user', parts: [{ text: prompt }] }],
+          generationConfig: {
+            temperature: 0.2,
+            maxOutputTokens: 600,
+            responseMimeType: 'application/json',
+          },
+        }),
+      }
+    );
 
-    const response = await client.messages.create({
-      model: 'claude-haiku-4-5',
-      max_tokens: 600,
-      messages: [{ role: 'user', content: prompt }],
-    });
+    if (!response.ok) {
+      console.error('[IssueReport] Gemini API error:', response.status);
+      return null;
+    }
 
-    const text = response.content[0].type === 'text' ? response.content[0].text : '';
+    const data = await response.json();
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
     const jsonMatch = text.match(/\[[\s\S]*\]/);
 
     if (!jsonMatch) {
@@ -1624,9 +1646,9 @@ async function generateGeneralResponse(
   conversationHistory?: ConversationContext
 ): Promise<string> {
   // Pour les questions générales, on peut répondre directement
-  // ou utiliser Claude pour une réponse plus élaborée
+  // ou utiliser Gemini pour une réponse plus élaborée
 
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = process.env.GOOGLE_AI_API_KEY;
   if (!apiKey) {
     return "Je peux vous aider à modifier votre itinéraire. Dites-moi ce que vous souhaitez changer !";
   }
@@ -1641,28 +1663,568 @@ async function generateGeneralResponse(
     historySection = `\nHistorique récent:\n${exchanges}\n`;
   }
 
-  try {
-    const client = new Anthropic({ apiKey });
-
-    const response = await client.messages.create({
-      model: 'claude-haiku-4-5',
-      max_tokens: 300,
-      messages: [{
-        role: 'user',
-        content: `Tu es un assistant de voyage amical. L'utilisateur planifie un voyage à ${destination} de ${days.length} jours.
+  const prompt = `Tu es un assistant de voyage amical. L'utilisateur planifie un voyage à ${destination} de ${days.length} jours.
 ${historySection}
 Question de l'utilisateur: "${message}"
 
-Réponds de manière concise et utile en français (max 2-3 phrases). Si c'est une question sur l'itinéraire, propose de l'aider à le modifier. Tiens compte de l'historique de conversation si présent.`,
-      }],
-    });
+Réponds de manière concise et utile en français (max 2-3 phrases). Si c'est une question sur l'itinéraire, propose de l'aider à le modifier. Tiens compte de l'historique de conversation si présent.`;
 
-    return response.content[0].type === 'text'
-      ? response.content[0].text
-      : "Comment puis-je vous aider avec votre itinéraire ?";
+  try {
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ role: 'user', parts: [{ text: prompt }] }],
+          generationConfig: {
+            temperature: 0.2,
+            maxOutputTokens: 300,
+          },
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      return "Comment puis-je vous aider avec votre itinéraire ?";
+    }
+
+    const data = await response.json();
+    return data.candidates?.[0]?.content?.parts?.[0]?.text
+      || "Comment puis-je vous aider avec votre itinéraire ?";
   } catch {
     return "Comment puis-je vous aider avec votre itinéraire ?";
   }
+}
+
+// ============================================
+// Change Pace
+// ============================================
+
+function changePace(
+  intent: ModificationIntent,
+  days: TripDay[],
+  constraints: ReturnType<typeof getConstraints>,
+  rollbackData: TripDay[],
+  tripContext?: TripModificationContext
+): ModificationResult {
+  const { dayNumbers = [], paceDirection = 'relax' } = intent.parameters;
+
+  const changes: TripChange[] = [];
+  const newDays = JSON.parse(JSON.stringify(days)) as TripDay[];
+  const warnings: string[] = [];
+
+  const constrainedIds = new Set(
+    constraints
+      .filter(c => c.type === 'immutable' || c.type === 'time_locked')
+      .map(c => c.itemId)
+  );
+
+  // Si aucun jour spécifié, on prend tous les jours
+  const targetDays = dayNumbers.length > 0
+    ? dayNumbers
+    : days.map(d => d.dayNumber);
+
+  if (paceDirection === 'relax') {
+    // Relax : supprimer l'activité avec le plus faible score/rating sur chaque jour ciblé
+    for (const day of newDays) {
+      if (!targetDays.includes(day.dayNumber)) continue;
+
+      const modifiableActivities = day.items.filter(item =>
+        item.type === 'activity' && !constrainedIds.has(item.id)
+      );
+
+      if (modifiableActivities.length <= 1) {
+        warnings.push(`Jour ${day.dayNumber} n'a qu'une seule activité, impossible de la supprimer.`);
+        continue;
+      }
+
+      // Trouver l'activité la moins bien notée
+      const lowestScored = modifiableActivities.reduce((worst, item) => {
+        const itemRating = item.rating || 0;
+        const worstRating = worst.rating || 0;
+        return itemRating < worstRating ? item : worst;
+      }, modifiableActivities[0]);
+
+      const itemIndex = day.items.findIndex(i => i.id === lowestScored.id);
+      if (itemIndex !== -1) {
+        day.items.splice(itemIndex, 1);
+        changes.push({
+          type: 'remove',
+          dayNumber: day.dayNumber,
+          itemId: lowestScored.id,
+          before: { title: lowestScored.title, startTime: lowestScored.startTime, endTime: lowestScored.endTime },
+          description: `Suppression de "${lowestScored.title}" pour alléger le jour ${day.dayNumber}`,
+        });
+      }
+    }
+  } else {
+    // Intense : suggérer d'ajouter une activité depuis le pool
+    const pool = tripContext?.attractionPool;
+    if (!pool || pool.length === 0) {
+      return {
+        success: false,
+        changes: [],
+        explanation: "Je n'ai pas de pool d'activités disponible pour intensifier la journée. Essayez d'ajouter une activité spécifique.",
+        warnings: [],
+        newDays: days,
+        rollbackData,
+        errorInfo: {
+          type: 'no_slot_available',
+          message: "Pas de pool d'activités disponible pour ajouter une activité supplémentaire.",
+          alternativeSuggestion: {
+            label: 'Ajouter une activité',
+            prompt: 'Ajoute une activité culturelle',
+          },
+        },
+      };
+    }
+
+    for (const day of newDays) {
+      if (!targetDays.includes(day.dayNumber)) continue;
+
+      // Trouver les IDs déjà utilisés dans l'itinéraire
+      const usedIds = new Set(newDays.flatMap(d => d.items.map(i => i.id)));
+
+      // Trouver une activité du pool non encore dans l'itinéraire
+      const candidate = pool
+        .filter(a => !usedIds.has(a.id))
+        .sort((a, b) => (b.rating || 0) - (a.rating || 0))[0];
+
+      if (!candidate) {
+        warnings.push(`Jour ${day.dayNumber} : aucune activité supplémentaire disponible dans le pool.`);
+        continue;
+      }
+
+      // Trouver un créneau libre (après la dernière activité avant le dîner)
+      const activities = day.items.filter(i => i.type === 'activity');
+      const lastActivity = activities.length > 0
+        ? activities.reduce((latest, i) => timeToMinutes(i.endTime) > timeToMinutes(latest.endTime) ? i : latest)
+        : null;
+
+      const startMinutes = lastActivity ? timeToMinutes(lastActivity.endTime) + 15 : 600;
+      const duration = candidate.duration || 90;
+      const endMinutes = startMinutes + duration;
+
+      if (endMinutes > 1200) { // 20:00
+        warnings.push(`Jour ${day.dayNumber} : pas assez de temps pour ajouter une activité supplémentaire.`);
+        continue;
+      }
+
+      const newItem: TripItem = {
+        id: candidate.id,
+        dayNumber: day.dayNumber,
+        type: 'activity',
+        title: candidate.name,
+        startTime: minutesToTime(startMinutes),
+        endTime: minutesToTime(endMinutes),
+        duration,
+        latitude: candidate.latitude,
+        longitude: candidate.longitude,
+        locationName: candidate.name,
+        orderIndex: day.items.length,
+        rating: candidate.rating,
+        description: candidate.description || '',
+        dataReliability: 'estimated',
+      };
+
+      day.items.push(newItem);
+      day.items.sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
+
+      changes.push({
+        type: 'add',
+        dayNumber: day.dayNumber,
+        newItem,
+        description: `Ajout de "${candidate.name}" au jour ${day.dayNumber}`,
+      });
+    }
+  }
+
+  if (changes.length === 0) {
+    return {
+      success: false,
+      changes: [],
+      explanation: paceDirection === 'relax'
+        ? "Impossible d'alléger la journée : il n'y a pas assez d'activités modifiables."
+        : "Impossible d'intensifier la journée : pas de créneau libre ou pas d'activités disponibles.",
+      warnings,
+      newDays: days,
+      rollbackData,
+      errorInfo: {
+        type: 'constraint_violation',
+        message: paceDirection === 'relax'
+          ? "Les journées ciblées n'ont pas assez d'activités supprimables."
+          : "Pas de créneau libre disponible pour ajouter une activité.",
+      },
+    };
+  }
+
+  const daysText = targetDays.length === days.length
+    ? 'tous les jours'
+    : `jour${targetDays.length > 1 ? 's' : ''} ${targetDays.join(', ')}`;
+
+  return {
+    success: true,
+    changes,
+    explanation: paceDirection === 'relax'
+      ? `J'ai allégé le ${daysText} en supprimant ${changes.length} activité${changes.length > 1 ? 's' : ''} moins prioritaire${changes.length > 1 ? 's' : ''}.`
+      : `J'ai intensifié le ${daysText} en ajoutant ${changes.length} activité${changes.length > 1 ? 's' : ''}.`,
+    warnings,
+    newDays,
+    rollbackData,
+  };
+}
+
+// ============================================
+// Swap Category
+// ============================================
+
+function swapCategory(
+  intent: ModificationIntent,
+  days: TripDay[],
+  constraints: ReturnType<typeof getConstraints>,
+  rollbackData: TripDay[],
+  tripContext?: TripModificationContext
+): ModificationResult {
+  const { dayNumbers = [], targetActivity, newCategory } = intent.parameters;
+
+  if (!newCategory) {
+    return {
+      success: false,
+      changes: [],
+      explanation: "Précisez la catégorie souhaitée (outdoor, culture, nature, adventure, shopping, etc.).",
+      warnings: [],
+      newDays: days,
+      rollbackData,
+      errorInfo: {
+        type: 'item_not_found',
+        message: "Précisez la catégorie souhaitée pour le remplacement.",
+      },
+    };
+  }
+
+  const pool = tripContext?.attractionPool;
+  if (!pool || pool.length === 0) {
+    return {
+      success: false,
+      changes: [],
+      explanation: "Je n'ai pas de pool d'activités pour trouver une alternative. Essayez de préciser directement l'activité souhaitée.",
+      warnings: [],
+      newDays: days,
+      rollbackData,
+      errorInfo: {
+        type: 'no_slot_available',
+        message: "Pas de pool d'activités disponible pour chercher des alternatives.",
+        alternativeSuggestion: {
+          label: 'Remplacer directement',
+          prompt: `Remplace ${targetActivity || 'cette activité'} par une activité spécifique`,
+        },
+      },
+    };
+  }
+
+  const changes: TripChange[] = [];
+  const newDays = JSON.parse(JSON.stringify(days)) as TripDay[];
+  const warnings: string[] = [];
+
+  const constrainedIds = new Set(
+    constraints
+      .filter(c => c.type === 'immutable' || c.type === 'time_locked')
+      .map(c => c.itemId)
+  );
+
+  // Mapper la catégorie utilisateur vers les ActivityType du pool
+  const categoryMapping: Record<string, string[]> = {
+    outdoor: ['nature', 'adventure', 'beach'],
+    nature: ['nature'],
+    culture: ['culture'],
+    adventure: ['adventure'],
+    beach: ['beach'],
+    shopping: ['shopping'],
+    wellness: ['wellness'],
+    nightlife: ['nightlife'],
+    gastronomy: ['gastronomy'],
+  };
+
+  const normalizedCategory = normalizeString(newCategory);
+  const matchingTypes = categoryMapping[normalizedCategory] || [normalizedCategory];
+
+  // Trouver les activités du pool qui correspondent à la catégorie demandée
+  const usedIds = new Set(newDays.flatMap(d => d.items.map(i => i.id)));
+  const poolCandidates = pool
+    .filter(a => matchingTypes.includes(a.type) && !usedIds.has(a.id))
+    .sort((a, b) => (b.rating || 0) - (a.rating || 0));
+
+  if (poolCandidates.length === 0) {
+    return {
+      success: false,
+      changes: [],
+      explanation: `Je n'ai pas trouvé d'activité de type « ${newCategory} » dans le pool disponible.`,
+      warnings: [],
+      newDays: days,
+      rollbackData,
+      errorInfo: {
+        type: 'item_not_found',
+        message: `Aucune activité de type « ${newCategory} » disponible dans le pool.`,
+        alternativeSuggestion: {
+          label: 'Essayer une autre catégorie',
+          prompt: 'Remplace une activité par quelque chose de nature',
+        },
+      },
+    };
+  }
+
+  const targetDays = dayNumbers.length > 0
+    ? dayNumbers
+    : days.map(d => d.dayNumber);
+
+  let candidateIndex = 0;
+
+  for (const day of newDays) {
+    if (!targetDays.includes(day.dayNumber)) continue;
+    if (candidateIndex >= poolCandidates.length) break;
+
+    // Trouver l'activité à remplacer
+    let itemToReplace: TripItem | undefined;
+
+    if (targetActivity) {
+      // Si une activité cible est spécifiée, la chercher
+      itemToReplace = day.items.find(i => {
+        if (constrainedIds.has(i.id)) return false;
+        if (i.type !== 'activity') return false;
+        const normalizedTarget = normalizeString(targetActivity);
+        const normalizedTitle = normalizeString(i.title);
+        return normalizedTitle.includes(normalizedTarget) || normalizedTarget.includes(normalizedTitle);
+      });
+    } else {
+      // Sinon, trouver une activité dont le type ne correspond PAS à la catégorie demandée
+      // (on ne remplace pas outdoor par outdoor)
+      itemToReplace = day.items.find(i => {
+        if (constrainedIds.has(i.id)) return false;
+        if (i.type !== 'activity') return false;
+        // Chercher dans le pool original pour retrouver le type de l'activité
+        const poolEntry = pool.find(p => normalizeString(p.name) === normalizeString(i.title));
+        if (poolEntry) {
+          return !matchingTypes.includes(poolEntry.type);
+        }
+        // Fallback : utiliser des heuristiques sur le nom
+        return true;
+      });
+    }
+
+    if (!itemToReplace) continue;
+
+    const candidate = poolCandidates[candidateIndex++];
+    const oldTitle = itemToReplace.title;
+
+    // Remplacer les données de l'item
+    itemToReplace.title = candidate.name;
+    itemToReplace.latitude = candidate.latitude;
+    itemToReplace.longitude = candidate.longitude;
+    itemToReplace.rating = candidate.rating;
+    itemToReplace.description = candidate.description;
+    itemToReplace.duration = candidate.duration || itemToReplace.duration;
+    itemToReplace.dataReliability = 'estimated';
+
+    // Ajuster endTime si la durée change
+    if (candidate.duration) {
+      const startMin = timeToMinutes(itemToReplace.startTime);
+      itemToReplace.endTime = minutesToTime(startMin + candidate.duration);
+    }
+
+    changes.push({
+      type: 'update',
+      dayNumber: day.dayNumber,
+      itemId: itemToReplace.id,
+      before: { title: oldTitle },
+      after: { title: candidate.name },
+      description: `"${oldTitle}" → "${candidate.name}" (${newCategory})`,
+    });
+  }
+
+  if (changes.length === 0) {
+    return {
+      success: false,
+      changes: [],
+      explanation: `Je n'ai pas trouvé d'activité à remplacer par du « ${newCategory} » dans les jours ciblés.`,
+      warnings: [],
+      newDays: days,
+      rollbackData,
+      errorInfo: {
+        type: 'item_not_found',
+        message: targetActivity
+          ? `Je n'ai pas trouvé « ${targetActivity} » dans votre itinéraire.`
+          : `Aucune activité remplaçable trouvée dans les jours ciblés.`,
+      },
+    };
+  }
+
+  return {
+    success: true,
+    changes,
+    explanation: `J'ai remplacé ${changes.length} activité${changes.length > 1 ? 's' : ''} par ${changes.length > 1 ? 'des activités' : 'une activité'} de type « ${newCategory} ».`,
+    warnings,
+    newDays,
+    rollbackData,
+  };
+}
+
+// ============================================
+// Rebalance Days
+// ============================================
+
+function rebalanceDays(
+  intent: ModificationIntent,
+  days: TripDay[],
+  constraints: ReturnType<typeof getConstraints>,
+  rollbackData: TripDay[]
+): ModificationResult {
+  const changes: TripChange[] = [];
+  const newDays = JSON.parse(JSON.stringify(days)) as TripDay[];
+  const warnings: string[] = [];
+
+  const constrainedIds = new Set(
+    constraints
+      .filter(c => c.type === 'immutable' || c.type === 'time_locked')
+      .map(c => c.itemId)
+  );
+
+  // Compter les activités modifiables par jour
+  const dayCounts = newDays.map(day => ({
+    dayNumber: day.dayNumber,
+    activities: day.items.filter(i => i.type === 'activity' && !constrainedIds.has(i.id)),
+    totalActivities: day.items.filter(i => i.type === 'activity').length,
+  }));
+
+  // Calculer la moyenne et l'écart-type
+  const counts = dayCounts.map(d => d.totalActivities);
+  const mean = counts.reduce((a, b) => a + b, 0) / counts.length;
+  const variance = counts.reduce((sum, c) => sum + (c - mean) ** 2, 0) / counts.length;
+  const stdDev = Math.sqrt(variance);
+
+  if (stdDev <= 1) {
+    return {
+      success: false,
+      changes: [],
+      explanation: `Votre itinéraire est déjà bien équilibré (${counts.join(', ')} activités par jour). L'écart est faible.`,
+      warnings: [],
+      newDays: days,
+      rollbackData,
+      errorInfo: {
+        type: 'constraint_violation',
+        message: "L'itinéraire est déjà bien équilibré, pas de redistribution nécessaire.",
+        alternativeSuggestion: {
+          label: 'Alléger un jour',
+          prompt: 'Rends le jour le plus chargé plus relax',
+        },
+      },
+    };
+  }
+
+  // Identifier les jours lourds (> mean) et légers (< mean)
+  const heavyDays = dayCounts.filter(d => d.totalActivities > Math.ceil(mean));
+  const lightDays = dayCounts.filter(d => d.totalActivities < Math.floor(mean));
+
+  // Déplacer des activités des jours lourds vers les jours légers
+  for (const heavy of heavyDays) {
+    const excess = heavy.totalActivities - Math.ceil(mean);
+    if (excess <= 0) continue;
+
+    // Trouver les activités déplaçables (les moins bien notées)
+    const moveable = heavy.activities
+      .sort((a, b) => (a.rating || 0) - (b.rating || 0))
+      .slice(0, excess);
+
+    for (const item of moveable) {
+      // Trouver le jour le plus léger qui peut accueillir l'activité
+      const targetLight = lightDays
+        .filter(l => {
+          const currentCount = newDays.find(d => d.dayNumber === l.dayNumber)!
+            .items.filter(i => i.type === 'activity').length;
+          return currentCount < Math.ceil(mean);
+        })
+        .sort((a, b) => {
+          const aCount = newDays.find(d => d.dayNumber === a.dayNumber)!
+            .items.filter(i => i.type === 'activity').length;
+          const bCount = newDays.find(d => d.dayNumber === b.dayNumber)!
+            .items.filter(i => i.type === 'activity').length;
+          return aCount - bCount;
+        })[0];
+
+      if (!targetLight) continue;
+
+      const sourceDay = newDays.find(d => d.dayNumber === heavy.dayNumber)!;
+      const destDay = newDays.find(d => d.dayNumber === targetLight.dayNumber)!;
+
+      // Retirer de la source
+      const removeIndex = sourceDay.items.findIndex(i => i.id === item.id);
+      if (removeIndex === -1) continue;
+      const [movedItem] = sourceDay.items.splice(removeIndex, 1);
+
+      // Trouver un créneau dans le jour de destination
+      const destActivities = destDay.items.filter(i => i.type === 'activity');
+      const lastDestActivity = destActivities.length > 0
+        ? destActivities.reduce((latest, i) => timeToMinutes(i.endTime) > timeToMinutes(latest.endTime) ? i : latest)
+        : null;
+
+      const newStart = lastDestActivity ? timeToMinutes(lastDestActivity.endTime) + 15 : 600;
+      const itemDuration = movedItem.duration || (timeToMinutes(movedItem.endTime) - timeToMinutes(movedItem.startTime));
+      const newEnd = newStart + itemDuration;
+
+      if (newEnd > 1200) { // 20:00
+        // Remettre l'item à sa place si pas de créneau
+        sourceDay.items.splice(removeIndex, 0, movedItem);
+        warnings.push(`"${movedItem.title}" ne peut pas être déplacée au jour ${destDay.dayNumber} (pas assez de place).`);
+        continue;
+      }
+
+      movedItem.startTime = minutesToTime(newStart);
+      movedItem.endTime = minutesToTime(newEnd);
+
+      destDay.items.push(movedItem);
+      destDay.items.sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
+
+      changes.push({
+        type: 'move',
+        dayNumber: heavy.dayNumber,
+        itemId: movedItem.id,
+        before: { title: movedItem.title },
+        after: { title: movedItem.title },
+        description: `"${movedItem.title}" : jour ${heavy.dayNumber} → jour ${targetLight.dayNumber}`,
+      });
+    }
+  }
+
+  if (changes.length === 0) {
+    return {
+      success: false,
+      changes: [],
+      explanation: "Je n'ai pas pu rééquilibrer l'itinéraire. Les contraintes empêchent de déplacer les activités.",
+      warnings,
+      newDays: days,
+      rollbackData,
+      errorInfo: {
+        type: 'constraint_violation',
+        message: "Impossible de redistribuer les activités entre les jours avec les contraintes actuelles.",
+        alternativeSuggestion: {
+          label: 'Alléger le jour le plus chargé',
+          prompt: 'Rends le jour le plus chargé plus relax',
+        },
+      },
+    };
+  }
+
+  // Recalculer les stats après rééquilibrage
+  const newCounts = newDays.map(d => d.items.filter(i => i.type === 'activity').length);
+
+  return {
+    success: true,
+    changes,
+    explanation: `J'ai rééquilibré l'itinéraire en déplaçant ${changes.length} activité${changes.length > 1 ? 's' : ''}. Répartition : ${newCounts.join(', ')} activités par jour.`,
+    warnings,
+    newDays,
+    rollbackData,
+  };
 }
 
 // ============================================

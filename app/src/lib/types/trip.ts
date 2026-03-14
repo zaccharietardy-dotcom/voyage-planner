@@ -340,6 +340,8 @@ export interface TripItem {
   estimatedCost?: number;
   duration?: number; // en minutes
   imageUrl?: string;
+  photoGallery?: string[];
+  reviewCount?: number;
   bookingUrl?: string;
   officialBookingUrl?: string; // Billetterie officielle (monuments/attractions)
   viatorUrl?: string;  // Lien Viator (activités/tours)

@@ -35,3 +35,5 @@ export { TravelTips } from './TravelTips';
 export { PastTripView } from './PastTripView';
 export { TripOnboarding } from './TripOnboarding';
 export { UndoToast } from './UndoToast';
+export { FlightDatePicker } from './FlightDatePicker';
+export { ActivityVote } from './ActivityVote';

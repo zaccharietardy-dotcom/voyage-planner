@@ -1,9 +1,11 @@
 'use client';
 
-import { TripDay } from '@/lib/types';
+import { useMemo } from 'react';
+import { Trip, TripDay } from '@/lib/types';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { MapPin, ChevronRight } from 'lucide-react';
+import { MapPin, ChevronRight, Banknote, Thermometer, Shield, Scale } from 'lucide-react';
+import { buildTravelIntelligence } from '@/lib/services/travelIntelligence';
 
 const DAY_COLORS = [
   'bg-blue-500',
@@ -18,12 +20,74 @@ const DAY_COLORS = [
 
 interface TripOverviewTabProps {
   days: TripDay[];
+  trip?: Trip;
   onDayClick?: (dayNumber: string) => void;
 }
 
-export function TripOverviewTab({ days, onDayClick }: TripOverviewTabProps) {
+export function TripOverviewTab({ days, trip, onDayClick }: TripOverviewTabProps) {
+  const intelligence = useMemo(() => trip ? buildTravelIntelligence(trip) : null, [trip]);
+
+  const visaInfo = trip?.travelTips?.legal?.visaInfo?.[0]?.requirement;
+
+  const hasQuickInfo = intelligence && (
+    intelligence.currency || intelligence.weatherSummary || intelligence.emergencyNumbers || visaInfo
+  );
+
   return (
     <div className="space-y-2.5 py-1">
+      {/* Quick Info Cards */}
+      {hasQuickInfo && (
+        <div className="grid grid-cols-2 gap-2 mb-3">
+          {visaInfo && (
+            <div className="flex items-start gap-2 rounded-xl border border-border/60 bg-purple-50/50 dark:bg-purple-950/20 p-2.5">
+              <Scale className="h-4 w-4 text-purple-500 shrink-0 mt-0.5" />
+              <div className="min-w-0">
+                <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">Visa</p>
+                <p className="text-xs text-foreground leading-snug line-clamp-2">{visaInfo}</p>
+              </div>
+            </div>
+          )}
+
+          {intelligence.currency && (
+            <div className="flex items-start gap-2 rounded-xl border border-border/60 bg-emerald-50/50 dark:bg-emerald-950/20 p-2.5">
+              <Banknote className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
+              <div className="min-w-0">
+                <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">Devise</p>
+                <p className="text-xs font-semibold">{intelligence.currency.symbol} {intelligence.currency.code}</p>
+                <p className="text-[10px] text-muted-foreground">{intelligence.currency.name}</p>
+              </div>
+            </div>
+          )}
+
+          {intelligence.weatherSummary && (
+            <div className="flex items-start gap-2 rounded-xl border border-border/60 bg-blue-50/50 dark:bg-blue-950/20 p-2.5">
+              <Thermometer className="h-4 w-4 text-blue-500 shrink-0 mt-0.5" />
+              <div className="min-w-0">
+                <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">Climat</p>
+                <p className="text-xs font-semibold">{intelligence.weatherSummary.avgTempMin}° / {intelligence.weatherSummary.avgTempMax}°</p>
+                <p className="text-[10px] text-muted-foreground capitalize">{intelligence.weatherSummary.mainCondition}</p>
+              </div>
+            </div>
+          )}
+
+          {intelligence.emergencyNumbers && (
+            <div className="flex items-start gap-2 rounded-xl border border-border/60 bg-red-50/50 dark:bg-red-950/20 p-2.5">
+              <Shield className="h-4 w-4 text-red-500 shrink-0 mt-0.5" />
+              <div className="min-w-0">
+                <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">Urgences</p>
+                <p className="text-xs">
+                  <span className="font-semibold">{intelligence.emergencyNumbers.police}</span>
+                  <span className="text-muted-foreground"> police</span>
+                </p>
+                <p className="text-[10px] text-muted-foreground">
+                  {intelligence.emergencyNumbers.ambulance} amb. / {intelligence.emergencyNumbers.fire} pomp.
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {days.map((day) => {
         const activities = day.items.filter(
           (item) => item.type === 'activity' || item.type === 'restaurant'

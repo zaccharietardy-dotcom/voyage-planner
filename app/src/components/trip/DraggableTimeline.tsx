@@ -25,6 +25,7 @@ import type { HotelSelectorData } from './DayTimeline';
 import { DraggableActivity, ActivityOverlay } from './DraggableActivity';
 import {
   recalculateTimes,
+  cascadeRecalculate,
   moveItem,
   moveItemInDay,
   removeItem,
@@ -374,7 +375,7 @@ export function DraggableTimeline({
         const { dayIndex: toDayIndex, itemIndex: toItemIndex } = overPosition;
 
         const newDays = moveItem(localDays, fromDayIndex, fromItemIndex, toDayIndex, toItemIndex);
-        const recalculatedDays = recalculateTimes(newDays);
+        const recalculatedDays = cascadeRecalculate(newDays, active.id as string, 'move');
 
         if (isOwner && onDirectUpdate) {
           onDirectUpdate(recalculatedDays);

@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { TripItem, TRIP_ITEM_COLORS, ImportedPlace } from '@/lib/types';
 import { AIRPORTS } from '@/lib/services/geocoding';
+import type { PriceCell } from '@/lib/services/neighbourhoodPricing';
+import { renderNeighbourhoodOverlay } from './NeighbourhoodMap';
 
 interface TripMapProps {
   items: TripItem[];
@@ -19,6 +21,7 @@ interface TripMapProps {
     arrivalCoords?: { lat: number; lng: number };
     stopoverCities?: string[];
   };
+  neighbourhoodCells?: PriceCell[];
 }
 
 // ─── Constants ──────────────────────────────────────────────
@@ -275,7 +278,7 @@ const LEAFLET_STYLE_OVERRIDES = `
 
 // ─── Component ──────────────────────────────────────────────
 
-export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, mapNumbers, isVisible = true, importedPlaces, flightInfo }: TripMapProps) {
+export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, mapNumbers, isVisible = true, importedPlaces, flightInfo, neighbourhoodCells }: TripMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
@@ -307,6 +310,7 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showLegend, setShowLegend] = useState(false);
   const [filterDay, setFilterDay] = useState<number | null>(null);
+  const [showNeighbourhoods, setShowNeighbourhoods] = useState(false);
 
   // Compute stable items key to detect real changes
   const itemsKey = useMemo(() => items.map(i => i.id).sort().join(','), [items]);
@@ -960,6 +964,17 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
     };
   }, []);
 
+  // ─── Neighbourhood overlay ─────────────────────────────
+
+  useEffect(() => {
+    const L = leafletRef.current;
+    const map = mapInstanceRef.current;
+    if (!L || !map || !showNeighbourhoods || !neighbourhoodCells || neighbourhoodCells.length === 0) return;
+
+    const cleanup = renderNeighbourhoodOverlay(L, map, neighbourhoodCells);
+    return cleanup;
+  }, [showNeighbourhoods, neighbourhoodCells]);
+
   // ─── Control handlers ────────────────────────────────────
 
   const handleFitAll = useCallback(() => {
@@ -1098,8 +1113,23 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
             </button>
           </div>
 
-          {/* Bottom-left: Legend toggle */}
-          <div className="absolute bottom-6 left-3 z-[1000]">
+          {/* Bottom-left: Legend toggle + Neighbourhood toggle */}
+          <div className="absolute bottom-6 left-3 z-[1000] flex gap-1.5">
+            {neighbourhoodCells && neighbourhoodCells.length > 0 && (
+              <button
+                onClick={() => setShowNeighbourhoods(!showNeighbourhoods)}
+                title={showNeighbourhoods ? 'Masquer les quartiers' : 'Quartiers & prix'}
+                aria-label={showNeighbourhoods ? 'Masquer la carte des quartiers' : 'Afficher la carte des quartiers'}
+                className={`w-8 h-8 rounded-md shadow-md border border-border/50 flex items-center justify-center transition-colors ${
+                  showNeighbourhoods ? 'bg-amber-500 text-white' : 'bg-white dark:bg-card text-muted-foreground hover:text-foreground hover:bg-accent'
+                }`}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" />
+                  <rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" />
+                </svg>
+              </button>
+            )}
             <button
               onClick={() => setShowLegend(!showLegend)}
               title="Légende"

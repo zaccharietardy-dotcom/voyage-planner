@@ -1,13 +1,10 @@
 /**
  * Intent Classifier Service
  *
- * Utilise Claude Haiku pour classifier rapidement l'intention
+ * Utilise Gemini 2.5 Flash pour classifier rapidement l'intention
  * de modification de l'utilisateur dans le chatbot.
- *
- * Coût estimé: ~$0.001 par classification
  */
 
-import Anthropic from '@anthropic-ai/sdk';
 import {
   ModificationIntent,
   ModificationIntentType,
@@ -118,8 +115,11 @@ TYPES D'INTENTIONS POSSIBLES:
 8. adjust_duration: Modifier la durée d'une activité ("plus de temps au Louvre", "moins de temps au musée")
 9. add_day: Ajouter un jour au voyage ("ajoute un jour", "insère une journée libre entre le jour 2 et 3", "rajoute un jour")
 10. report_issue: Signaler un problème avec une activité ("le musée est fermé", "il pleut on peut pas faire la rando", "le restaurant a fermé définitivement", "les horaires ont changé", "cette activité n'est plus disponible") - l'utilisateur a BESOIN de suggestions d'alternatives
-11. clarification: La demande n'est pas claire, besoin de plus d'informations
-12. general_question: Question générale qui ne nécessite pas de modification
+11. change_pace: Changer l'intensité d'un jour spécifique (plus relax = réduire les activités, ajouter du temps libre ; plus intense = rajouter une activité). Paramètres: dayNumbers, paceDirection ('relax' | 'intense')
+12. swap_category: Remplacer une activité par une catégorie différente ("remplace le musée par un truc outdoor", "quelque chose de plus nature"). Paramètres: dayNumbers, targetActivity, newCategory (outdoor/nature/culture/adventure/beach/shopping/wellness/nightlife/gastronomy)
+13. rebalance: Redistribuer les activités plus équitablement entre les jours ("répartis mieux", "équilibre les journées"). Pas de paramètres spécifiques.
+14. clarification: La demande n'est pas claire, besoin de plus d'informations
+15. general_question: Question générale qui ne nécessite pas de modification
 
 RÈGLES IMPORTANTES:
 - Si l'utilisateur mentionne "matin", "me lever", "grasse matinée", "dormir plus" → c'est shift_times avec scope "morning_only". Ne PAS décaler toute la journée !
@@ -127,6 +127,10 @@ RÈGLES IMPORTANTES:
 - Par défaut pour shift_times, utilise scope "morning_only" sauf si l'utilisateur dit clairement de tout décaler
 - Si l'utilisateur mentionne un restaurant ou repas spécifique → change_restaurant
 - Si l'utilisateur veut "ajouter un jour", "insérer une journée", "rajouter un jour" → add_day. Identifie insertAfterDay
+- Si l'utilisateur veut "plus relax", "moins chargé", "plus tranquille" pour un jour → change_pace avec paceDirection "relax"
+- Si l'utilisateur veut "plus intense", "plus rempli", "ajouter des choses" pour un jour → change_pace avec paceDirection "intense"
+- Si l'utilisateur veut remplacer par une CATÉGORIE ("outdoor", "nature", "culture") et pas un lieu précis → swap_category
+- Si l'utilisateur veut "répartir mieux", "équilibrer", "trop chargé vs trop vide" → rebalance
 - **DISTINCTION CRITIQUE entre swap_activity et report_issue**:
   * swap_activity = l'utilisateur sait EXACTEMENT ce qu'il veut ("remplace X par Y", "je préfère le Louvre au lieu du musée d'Orsay")
   * report_issue = l'utilisateur signale un PROBLÈME et a BESOIN de suggestions ("le musée est fermé", "il pleut", "ce restaurant a fermé", "l'activité n'est plus disponible")
@@ -161,7 +165,9 @@ Réponds UNIQUEMENT en JSON valide (pas de texte avant ou après):
     "cuisineType": "type de cuisine ou null",
     "duration": null,
     "insertAfterDay": null,
-    "issueType": "closed/weather/unavailable/schedule_change ou null"
+    "issueType": "closed/weather/unavailable/schedule_change ou null",
+    "paceDirection": "relax ou intense ou null",
+    "newCategory": "outdoor/nature/culture/adventure/beach/shopping/wellness/nightlife/gastronomy ou null"
   },
   "explanation": "Explication courte de ce que l'utilisateur veut"
 }`;
@@ -176,10 +182,10 @@ export async function classifyIntent(
   tripContext: TripContext,
   conversationHistory?: ConversationContext
 ): Promise<ModificationIntent> {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = process.env.GOOGLE_AI_API_KEY;
 
   if (!apiKey) {
-    console.warn('[IntentClassifier] ANTHROPIC_API_KEY non configurée');
+    console.warn('[IntentClassifier] GOOGLE_AI_API_KEY non configurée');
     return {
       type: 'clarification',
       confidence: 0,
@@ -188,17 +194,38 @@ export async function classifyIntent(
     };
   }
 
-  const client = new Anthropic({ apiKey });
   const prompt = buildClassificationPrompt(message, tripContext, conversationHistory);
 
   try {
-    const response = await client.messages.create({
-      model: 'claude-haiku-4-5',
-      max_tokens: 500,
-      messages: [{ role: 'user', content: prompt }],
-    });
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ role: 'user', parts: [{ text: prompt }] }],
+          generationConfig: {
+            temperature: 0.2,
+            maxOutputTokens: 500,
+            responseMimeType: 'application/json',
+          },
+        }),
+      }
+    );
 
-    const text = response.content[0].type === 'text' ? response.content[0].text : '';
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('[IntentClassifier] Gemini API error:', response.status, errorText);
+      return {
+        type: 'clarification',
+        confidence: 0,
+        parameters: {},
+        explanation: 'Une erreur est survenue. Veuillez réessayer.',
+      };
+    }
+
+    const data = await response.json();
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
     // Parse JSON response
     const jsonMatch = text.match(/\{[\s\S]*\}/);
@@ -218,7 +245,8 @@ export async function classifyIntent(
     const validTypes: ModificationIntentType[] = [
       'shift_times', 'swap_activity', 'add_activity', 'remove_activity',
       'extend_free_time', 'reorder_day', 'change_restaurant', 'adjust_duration',
-      'add_day', 'report_issue', 'clarification', 'general_question'
+      'add_day', 'report_issue', 'change_pace', 'swap_category', 'rebalance',
+      'clarification', 'general_question'
     ];
 
     if (!validTypes.includes(parsed.type)) {
@@ -241,6 +269,8 @@ export async function classifyIntent(
         duration: parsed.parameters?.duration || undefined,
         insertAfterDay: parsed.parameters?.insertAfterDay || undefined,
         issueType: parsed.parameters?.issueType || undefined,
+        paceDirection: parsed.parameters?.paceDirection || undefined,
+        newCategory: parsed.parameters?.newCategory || undefined,
       },
       explanation: parsed.explanation || '',
     };
@@ -271,6 +301,7 @@ export function shouldUseSonnet(intent: ModificationIntent): boolean {
   if (intent.confidence < 0.7) return true;
   if (intent.type === 'reorder_day') return true;
   if (intent.type === 'add_activity') return true;
+  if (intent.type === 'rebalance') return true;
 
   return false;
 }
@@ -288,7 +319,7 @@ export async function generateContextualSuggestions(
   destination: string,
   days: TripDay[],
 ): Promise<ContextualSuggestion[]> {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = process.env.GOOGLE_AI_API_KEY;
 
   if (!apiKey || days.length === 0) {
     return getStaticSuggestionsFallback();
@@ -326,15 +357,29 @@ Réponds UNIQUEMENT en JSON valide:
 ]`;
 
   try {
-    const client = new Anthropic({ apiKey });
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ role: 'user', parts: [{ text: prompt }] }],
+          generationConfig: {
+            temperature: 0.2,
+            maxOutputTokens: 400,
+            responseMimeType: 'application/json',
+          },
+        }),
+      }
+    );
 
-    const response = await client.messages.create({
-      model: 'claude-haiku-4-5',
-      max_tokens: 400,
-      messages: [{ role: 'user', content: prompt }],
-    });
+    if (!response.ok) {
+      console.warn('[Suggestions] Gemini API error:', response.status);
+      return getStaticSuggestionsFallback();
+    }
 
-    const text = response.content[0].type === 'text' ? response.content[0].text : '';
+    const data = await response.json();
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
     const jsonMatch = text.match(/\[[\s\S]*\]/);
 
     if (!jsonMatch) {

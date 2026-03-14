@@ -15,6 +15,9 @@ export type ModificationIntentType =
   | 'adjust_duration'  // Modifier la durée d'une activité
   | 'add_day'          // Ajouter un jour au voyage
   | 'report_issue'     // Signaler un problème (activité fermée, météo, etc.)
+  | 'change_pace'      // Changer l'intensité d'un jour (plus relax ou plus intense)
+  | 'swap_category'    // Remplacer une activité par une catégorie différente
+  | 'rebalance'        // Redistribuer les activités entre les jours
   | 'clarification'    // Besoin de clarification
   | 'general_question';// Question générale (pas de modification)
 
@@ -34,6 +37,8 @@ export interface ModificationIntent {
     duration?: number;          // Durée souhaitée en minutes
     insertAfterDay?: number;    // Insérer un jour APRÈS ce numéro de jour
     issueType?: 'closed' | 'weather' | 'unavailable' | 'schedule_change'; // Type de problème signalé
+    paceDirection?: 'relax' | 'intense'; // Direction pour change_pace
+    newCategory?: string; // Catégorie souhaitée pour swap_category (outdoor, culture, etc.)
   };
   explanation: string; // Explication de ce que l'utilisateur veut
 }
@@ -138,4 +143,7 @@ export const SUGGESTED_CHAT_PROMPTS = [
   { label: 'Supprimer une visite', prompt: 'Supprime ' },
   { label: 'Réorganiser la journée', prompt: 'Réorganise le jour ' },
   { label: 'Ajouter un jour', prompt: 'Ajoute un jour libre entre le jour ' },
+  { label: 'Rendre plus relax', prompt: 'Rends cette journée plus relax' },
+  { label: "Plus d'outdoor", prompt: "Remplace une activité par quelque chose d'outdoor" },
+  { label: 'Mieux répartir', prompt: 'Répartis mieux les activités entre les jours' },
 ] as const;

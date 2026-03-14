@@ -1028,6 +1028,46 @@ export interface Database {
           }
         ];
       };
+      activity_votes: {
+        Row: {
+          id: string;
+          trip_id: string;
+          item_id: string;
+          user_id: string;
+          vote: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          trip_id: string;
+          item_id: string;
+          user_id: string;
+          vote: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          trip_id?: string;
+          item_id?: string;
+          user_id?: string;
+          vote?: string;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "activity_votes_trip_id_fkey";
+            columns: ["trip_id"];
+            referencedRelation: "trips";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "activity_votes_user_id_fkey";
+            columns: ["user_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
     };
     Views: {
       [_ in never]: never;

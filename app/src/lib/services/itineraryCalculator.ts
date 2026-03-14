@@ -616,3 +616,117 @@ export function generateMoveDescription(
   }
   return `Déplacer "${item.title}" du jour ${fromDayNumber} au jour ${toDayNumber}`;
 }
+
+// Meal windows for quality flag detection
+const MEAL_WINDOWS: Record<string, { start: number; end: number }> = {
+  breakfast: { start: 7 * 60, end: 10 * 60 },         // 07:00 - 10:00
+  lunch:     { start: 11 * 60 + 30, end: 14 * 60 + 30 }, // 11:30 - 14:30
+  dinner:    { start: 18 * 60 + 30, end: 22 * 60 },    // 18:30 - 22:00
+};
+
+/**
+ * Détecte si un restaurant tombe en dehors de sa fenêtre repas attendue.
+ * Retourne un flag descriptif ou null.
+ */
+function checkMealWindowFlag(item: TripItem, startMinutes: number): string | null {
+  if (item.type !== 'restaurant') return null;
+
+  // Déterminer le type de repas à partir du mealType ou du titre
+  let mealType: string | undefined = item.mealType;
+  if (!mealType) {
+    const titleLower = item.title.toLowerCase();
+    if (titleLower.includes('petit-déjeuner') || titleLower.includes('breakfast') || titleLower.includes('brunch')) {
+      mealType = 'breakfast';
+    } else if (titleLower.includes('déjeuner') || titleLower.includes('lunch')) {
+      mealType = 'lunch';
+    } else if (titleLower.includes('dîner') || titleLower.includes('dinner') || titleLower.includes('souper')) {
+      mealType = 'dinner';
+    }
+  }
+
+  if (!mealType || !MEAL_WINDOWS[mealType]) return null;
+
+  const window = MEAL_WINDOWS[mealType];
+  if (startMinutes < window.start || startMinutes > window.end) {
+    return `meal_outside_window:${mealType}:${formatTime(startMinutes)}`;
+  }
+  return null;
+}
+
+/**
+ * Recalcul en cascade à partir d'un item modifié.
+ * Ne touche que les items APRÈS le point de changement dans le même jour.
+ * Propage: startTime = prevEndTime + travelTime, endTime = startTime + duration.
+ * Ajoute des qualityFlags si un restaurant tombe hors fenêtre repas.
+ */
+export function cascadeRecalculate(
+  days: TripDay[],
+  changedItemId: string,
+  changeType: 'move' | 'duration' | 'delete' | 'add'
+): TripDay[] {
+  // Trouver l'item modifié
+  const found = findItemById(days, changedItemId);
+  if (!found) return days;
+
+  const { dayIndex, itemIndex } = found;
+  const config = DEFAULT_TIME_CONFIG;
+
+  // Deep clone des jours pour immutabilité
+  const newDays: TripDay[] = days.map((day) => ({
+    ...day,
+    items: day.items.map((item) => ({ ...item, qualityFlags: item.qualityFlags ? [...item.qualityFlags] : undefined })),
+  }));
+
+  const dayItems = newDays[dayIndex].items;
+
+  // Déterminer le point de départ de la cascade
+  // Pour 'delete', on commence à itemIndex (l'item suivant a pris cette position)
+  // Pour les autres, on commence à itemIndex + 1 (l'item modifié est déjà correct)
+  const cascadeStart = changeType === 'delete' ? itemIndex : itemIndex + 1;
+
+  if (cascadeStart >= dayItems.length) return newDays;
+
+  // Calculer le temps de fin de l'item précédent la cascade
+  let prevItem: TripItem;
+  if (cascadeStart > 0) {
+    prevItem = dayItems[cascadeStart - 1];
+  } else {
+    // Cas delete du premier item: le suivant garde son heure
+    return newDays;
+  }
+
+  let currentTime = parseTime(prevItem.endTime);
+
+  // Propager les horaires en cascade
+  for (let i = cascadeStart; i < dayItems.length; i++) {
+    const item = dayItems[i];
+
+    // Calculer le temps de transport depuis l'item précédent
+    const prev = dayItems[i - 1];
+    const transportTime = estimateTransportTime(prev, item, config);
+
+    const startMinutes = currentTime + transportTime;
+    const duration = item.duration || config.defaultDurations[item.type] || 60;
+    const endMinutes = startMinutes + duration;
+
+    item.startTime = formatTime(startMinutes);
+    item.endTime = formatTime(endMinutes);
+
+    // Vérifier la fenêtre repas pour les restaurants
+    const mealFlag = checkMealWindowFlag(item, startMinutes);
+    if (mealFlag) {
+      if (!item.qualityFlags) item.qualityFlags = [];
+      // Retirer un ancien flag meal_outside_window s'il existe
+      item.qualityFlags = item.qualityFlags.filter((f) => !f.startsWith('meal_outside_window:'));
+      item.qualityFlags.push(mealFlag);
+    } else if (item.qualityFlags) {
+      // Nettoyer un ancien flag si le repas est maintenant dans la fenêtre
+      item.qualityFlags = item.qualityFlags.filter((f) => !f.startsWith('meal_outside_window:'));
+      if (item.qualityFlags.length === 0) item.qualityFlags = undefined;
+    }
+
+    currentTime = endMinutes;
+  }
+
+  return newDays;
+}

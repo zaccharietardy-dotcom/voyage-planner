@@ -471,5 +471,9 @@ function mergeActivities(
   if (getImageReliabilityScore(loser.imageUrl) > getImageReliabilityScore(winner.imageUrl) && loser.imageUrl) {
     winner.imageUrl = loser.imageUrl;
   }
+  // Keep the richer photo gallery
+  if ((loser.photoGallery?.length || 0) > (winner.photoGallery?.length || 0) && loser.photoGallery) {
+    winner.photoGallery = loser.photoGallery;
+  }
   result[idx] = winner;
 }

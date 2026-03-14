@@ -246,6 +246,29 @@ export function ChatPanel({
                 </button>
               ))}
             </div>
+            {/* Prompt chips pour les nouveaux intents de refinement */}
+            <div className="flex flex-wrap gap-2 mt-2">
+              {[
+                { label: 'Rendre plus relax', prompt: 'Rends cette journée plus relax' },
+                { label: "Plus d'outdoor", prompt: "Remplace une activité par quelque chose d'outdoor" },
+                { label: 'Mieux répartir', prompt: 'Répartis mieux les activités entre les jours' },
+              ].map((chip) => (
+                <button
+                  key={chip.label}
+                  onClick={() => handleSuggestionClick(chip.prompt)}
+                  disabled={isProcessing}
+                  className="text-xs px-3 py-1.5 rounded-full
+                    bg-emerald-50 dark:bg-emerald-950/30
+                    text-emerald-700 dark:text-emerald-300
+                    border border-emerald-200 dark:border-emerald-800
+                    hover:bg-emerald-100 dark:hover:bg-emerald-900/40
+                    disabled:opacity-50 disabled:cursor-not-allowed
+                    transition-colors"
+                >
+                  {chip.label}
+                </button>
+              ))}
+            </div>
           </div>
         )}
 

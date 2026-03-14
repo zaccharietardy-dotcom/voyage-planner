@@ -5,6 +5,7 @@ import { TripItem, TripItemType, Flight, Restaurant, Accommodation, TRIP_ITEM_CO
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { PriceComparisonCard } from './PriceComparisonCard';
 import {
   MapPin,
@@ -45,6 +46,8 @@ import {
   TrendingDown,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { classifyActivityCategory, getCategoryConfig } from '@/lib/utils/activityClassifier';
+import { ActivityVote } from './ActivityVote';
 
 type SvgIconComponent = React.ComponentType<React.SVGProps<SVGSVGElement>>;
 
@@ -66,8 +69,11 @@ interface ActivityCardProps {
   swapButton?: React.ReactNode;
   onSelectRestaurantAlternative?: (item: TripItem, restaurant: Restaurant) => void;
   onSelectSelfMeal?: (item: TripItem) => void;
+  onDurationChange?: (item: TripItem, newDuration: number) => void;
   showPriceComparison?: boolean;
   hotelAlternatives?: Accommodation[];
+  voteData?: { wantCount: number; skipCount: number; userVote: 'want' | 'skip' | null };
+  onVote?: (vote: 'want' | 'skip' | null) => void;
 }
 
 const TYPE_ICONS: Record<TripItemType, SvgIconComponent> = {
@@ -240,6 +246,69 @@ const TYPE_GRADIENTS: Record<string, string> = {
   transport: 'from-slate-700 to-slate-900',
 };
 
+/** Photo carousel for hero-type cards with multiple photos */
+function PhotoCarousel({
+  photos,
+  alt,
+  className,
+}: {
+  photos: string[];
+  alt: string;
+  className?: string;
+}) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [loadedIndices, setLoadedIndices] = useState<Set<number>>(new Set([0]));
+
+  const goTo = (idx: number) => {
+    const newIdx = ((idx % photos.length) + photos.length) % photos.length;
+    setCurrentIndex(newIdx);
+    setLoadedIndices(prev => new Set([...prev, newIdx]));
+  };
+
+  if (photos.length <= 1) {
+    return photos[0] ? (
+      <img src={photos[0]} alt={alt} className={className} loading="lazy" />
+    ) : null;
+  }
+
+  return (
+    <div className="relative group/carousel">
+      <img
+        src={photos[currentIndex]}
+        alt={`${alt} (${currentIndex + 1}/${photos.length})`}
+        className={cn(className, 'transition-opacity duration-300')}
+        loading="lazy"
+      />
+      {/* Navigation dots */}
+      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-10">
+        {photos.map((_, idx) => (
+          <button
+            key={idx}
+            onClick={(e) => { e.stopPropagation(); goTo(idx); }}
+            className={cn(
+              'w-1.5 h-1.5 rounded-full transition-all',
+              idx === currentIndex ? 'bg-white w-3' : 'bg-white/50'
+            )}
+          />
+        ))}
+      </div>
+      {/* Prev/Next arrows - visible on hover */}
+      <button
+        onClick={(e) => { e.stopPropagation(); goTo(currentIndex - 1); }}
+        className="absolute left-1 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-black/30 text-white flex items-center justify-center opacity-0 group-hover/carousel:opacity-100 transition-opacity text-xs z-10"
+      >
+        &#8249;
+      </button>
+      <button
+        onClick={(e) => { e.stopPropagation(); goTo(currentIndex + 1); }}
+        className="absolute right-1 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-black/30 text-white flex items-center justify-center opacity-0 group-hover/carousel:opacity-100 transition-opacity text-xs z-10"
+      >
+        &#8250;
+      </button>
+    </div>
+  );
+}
+
 export const ActivityCard = memo(function ActivityCard({
   item,
   orderNumber,
@@ -258,8 +327,11 @@ export const ActivityCard = memo(function ActivityCard({
   swapButton,
   onSelectRestaurantAlternative,
   onSelectSelfMeal,
+  onDurationChange,
   showPriceComparison = false,
   hotelAlternatives,
+  voteData,
+  onVote,
 }: ActivityCardProps) {
   const [showPriceComparisonDialog, setShowPriceComparisonDialog] = useState(false);
   const transportMode = item.type === 'transport' ? getTransportModeForItem(item) : undefined;
@@ -286,7 +358,7 @@ export const ActivityCard = memo(function ActivityCard({
       className={cn(
         'relative group transition-all duration-200 cursor-pointer overflow-hidden active:scale-[0.98]',
         'border-border/60 hover:border-primary/40 hover:shadow-lg hover:scale-[1.01] hover:-translate-y-0.5',
-        isSelected && 'ring-2 ring-primary/80 border-primary shadow-lg',
+        isSelected && 'ring-2 ring-primary/80 border-primary shadow-lg transition-shadow',
         isDragging && 'shadow-xl rotate-1 scale-[1.03]',
         item.type === 'free_time' && 'bg-emerald-50/40 border-emerald-200/50 dark:bg-emerald-950/15 dark:border-emerald-800/30',
       )}
@@ -343,17 +415,25 @@ export const ActivityCard = memo(function ActivityCard({
           {/* Image fades in over the gradient once loaded */}
           {showImage && (
             <>
-              <img
-                src={imageUrl}
-                alt={item.title}
-                className={cn(
-                  "absolute inset-0 w-full h-full object-cover transition-opacity duration-500",
-                  imgLoaded ? "opacity-100" : "opacity-0"
-                )}
-                loading="lazy"
-                onLoad={() => setImgLoaded(true)}
-                onError={() => setImgError(true)}
-              />
+              {item.photoGallery && item.photoGallery.length > 1 ? (
+                <PhotoCarousel
+                  photos={item.photoGallery}
+                  alt={item.title}
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+              ) : (
+                <img
+                  src={imageUrl}
+                  alt={item.title}
+                  className={cn(
+                    "absolute inset-0 w-full h-full object-cover transition-opacity duration-500",
+                    imgLoaded ? "opacity-100" : "opacity-0"
+                  )}
+                  loading="lazy"
+                  onLoad={() => setImgLoaded(true)}
+                  onError={() => setImgError(true)}
+                />
+              )}
               {/* Dark gradient overlay for text readability */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/30" />
             </>
@@ -425,6 +505,13 @@ export const ActivityCard = memo(function ActivityCard({
                 >
                   {TYPE_LABELS[item.type]}
                 </span>
+                {item.type === 'activity' && item.duration && onDurationChange && (
+                  <DurationBadge
+                    duration={item.duration}
+                    onDurationChange={(newDuration) => onDurationChange(item, newDuration)}
+                    isHero={useHeroStyle}
+                  />
+                )}
               </div>
 
               {/* Title — hidden for restaurant flat layout (shown in cards) */}
@@ -483,6 +570,23 @@ export const ActivityCard = memo(function ActivityCard({
                 </div>
               )}
 
+              {/* Activity category tags */}
+              {!hasRestaurantAlternatives && item.type === 'activity' && (
+                <div className="flex items-center gap-1 flex-wrap mt-1">
+                  {classifyActivityCategory(item).slice(0, 3).map(cat => {
+                    const config = getCategoryConfig(cat);
+                    return (
+                      <span key={cat} className={cn(
+                        "inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-medium",
+                        useHeroStyle ? "bg-white/15 text-white/80" : "bg-muted text-muted-foreground"
+                      )}>
+                        {config.emoji} {config.label}
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
+
               {/* Meta row: rating, cost — hidden for restaurant flat layout */}
               {!hasRestaurantAlternatives && (
               <div className={cn(
@@ -493,6 +597,11 @@ export const ActivityCard = memo(function ActivityCard({
                   <span className="inline-flex items-center gap-0.5 font-medium">
                     <Star className={cn(useHeroStyle ? "h-3.5 w-3.5" : "h-3 w-3", "fill-yellow-500/70 text-yellow-500/70")} />
                     {item.rating.toFixed(1)}
+                    {item.reviewCount && item.reviewCount > 0 && (
+                      <span className={useHeroStyle ? "text-white/50" : "text-muted-foreground/60"}>
+                        ({item.reviewCount > 1000 ? `${(item.reviewCount / 1000).toFixed(1)}k` : item.reviewCount})
+                      </span>
+                    )}
                   </span>
                 )}
                 {item.timeFromPrevious && item.timeFromPrevious > 0 && (
@@ -750,6 +859,13 @@ export const ActivityCard = memo(function ActivityCard({
         )}
       </div>
 
+      {/* Activity voting */}
+      {item.type === 'activity' && voteData && onVote && (
+        <div className="px-3 pb-2">
+          <ActivityVote {...voteData} onVote={onVote} />
+        </div>
+      )}
+
       {/* Price comparison dialog */}
       {item.type === 'activity' && (
         <Dialog open={showPriceComparisonDialog} onOpenChange={setShowPriceComparisonDialog}>
@@ -782,14 +898,84 @@ export const ActivityCard = memo(function ActivityCard({
     prev.orderNumber === next.orderNumber &&
     prev.canMoveUp === next.canMoveUp &&
     prev.canMoveDown === next.canMoveDown &&
-    prev.showPriceComparison === next.showPriceComparison
+    prev.showPriceComparison === next.showPriceComparison &&
+    prev.voteData?.wantCount === next.voteData?.wantCount &&
+    prev.voteData?.skipCount === next.voteData?.skipCount &&
+    prev.voteData?.userVote === next.voteData?.userVote
   );
 });
 
 function formatDuration(minutes: number): string {
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
+  if (h === 0) return `${m}min`;
   return m > 0 ? `${h}h${String(m).padStart(2, '0')}` : `${h}h`;
+}
+
+function DurationBadge({
+  duration,
+  onDurationChange,
+  isHero,
+}: {
+  duration: number;
+  onDurationChange: (newDuration: number) => void;
+  isHero: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState(duration);
+
+  // Sync when duration prop changes
+  const handleOpen = (isOpen: boolean) => {
+    if (isOpen) setValue(duration);
+    setOpen(isOpen);
+  };
+
+  return (
+    <Popover open={open} onOpenChange={handleOpen}>
+      <PopoverTrigger asChild>
+        <button
+          className={cn(
+            "inline-flex items-center gap-0.5 font-semibold leading-none rounded cursor-pointer transition-colors",
+            isHero
+              ? "px-2 py-1 text-xs bg-white/20 text-white/90 hover:bg-white/30"
+              : "px-1.5 py-0.5 text-[10px] bg-primary/10 text-primary hover:bg-primary/20"
+          )}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <Clock className={cn(isHero ? "h-3 w-3" : "h-2.5 w-2.5")} />
+          {formatDuration(duration)}
+        </button>
+      </PopoverTrigger>
+      <PopoverContent
+        className="w-56 p-3"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="space-y-3">
+          <label className="text-sm font-medium">Durée de visite</label>
+          <input
+            type="number"
+            min={15}
+            max={480}
+            step={15}
+            value={value}
+            onChange={(e) => setValue(Number(e.target.value))}
+            className="w-full h-9 px-3 rounded-md border border-input bg-background text-sm"
+          />
+          <Button
+            size="sm"
+            className="w-full"
+            onClick={() => {
+              const clamped = Math.max(15, Math.min(480, value));
+              onDurationChange(clamped);
+              setOpen(false);
+            }}
+          >
+            Appliquer
+          </Button>
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
 }
 
 /**

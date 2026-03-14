@@ -37,6 +37,7 @@ export interface Attraction {
   qualityFlags?: string[];
   googleMapsUrl?: string; // Lien direct vers Google Maps
   imageUrl?: string; // Photo de l'activité (Viator, etc.)
+  photoGallery?: string[]; // Up to 5 photos for carousel display
   providerName?: string; // Source: 'Viator', 'Foursquare', etc.
   reviewCount?: number; // Nombre d'avis
   freeCancellation?: boolean;

@@ -2944,6 +2944,7 @@ export async function assembleTripSchedule(
           || (item.type !== 'restaurant' ? (itemData.photos?.[0] || itemData.imageUrl || itemData.photoUrl) : undefined)
           || (item.type === 'flight' ? TRANSPORT_IMAGES.flight : undefined)
           || (item.type === 'transport' ? getTransportImage({ ...itemData, transportMode: resolvedTransportMode }) : undefined),
+        photoGallery: item.type === 'activity' ? itemData.photoGallery : undefined,
         // Viator flags (activities only)
         freeCancellation: item.type === 'activity' ? itemData.freeCancellation : undefined,
         instantConfirmation: item.type === 'activity' ? itemData.instantConfirmation : undefined,

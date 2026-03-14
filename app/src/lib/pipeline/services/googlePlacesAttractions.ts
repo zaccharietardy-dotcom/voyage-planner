@@ -110,6 +110,13 @@ export async function searchGooglePlacesAttractions(
       const imageUrl = photoRef
         ? buildPlacePhotoProxyUrl(photoRef, 400)
         : undefined;
+      // Build photo gallery (up to 5 photos) for carousel display
+      const photoGallery = r.photos && r.photos.length > 0
+        ? r.photos.slice(0, 5).map((p: any) => {
+            const ref = p.photo_reference || p.name;
+            return ref ? buildPlacePhotoProxyUrl(ref, 800) : null;
+          }).filter(Boolean) as string[]
+        : undefined;
       return {
         id: `gp-${r.place_id || idx}`,
         name: r.name || 'Unknown',
@@ -126,6 +133,7 @@ export async function searchGooglePlacesAttractions(
         bookingRequired: false,
         dataReliability: 'verified' as const,
         imageUrl,
+        photoGallery: photoGallery && photoGallery.length > 1 ? photoGallery : undefined,
         googlePlaceId: r.place_id || undefined,
       };
     });

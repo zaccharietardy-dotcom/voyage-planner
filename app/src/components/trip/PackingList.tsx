@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { generatePackingList } from '@/lib/services/packingListGenerator';
 
 interface PackingListProps {
   trip: Trip;
@@ -48,121 +49,12 @@ const CATEGORY_CONFIG = [
   { id: 'activities', label: 'Activités', icon: Mountain, color: 'text-green-500' },
 ];
 
-const BASE_ITEMS: Record<string, string[]> = {
-  essentials: [
-    'Passeport / Carte d\'identité',
-    'Billets d\'avion / train',
-    'Réservations hôtel',
-    'Carte bancaire',
-    'Assurance voyage',
-    'Photocopies documents',
-  ],
-  clothes: [
-    'T-shirts',
-    'Pantalons / Shorts',
-    'Sous-vêtements',
-    'Chaussettes',
-    'Chaussures confort',
-    'Veste / Pull',
-  ],
-  toiletries: [
-    'Brosse à dents + Dentifrice',
-    'Savon / Gel douche',
-    'Shampoing',
-    'Déodorant',
-    'Crème solaire',
-    'Serviette',
-  ],
-  electronics: [
-    'Téléphone + Chargeur',
-    'Adaptateur prise',
-    'Batterie externe',
-    'Écouteurs',
-  ],
-  health: [
-    'Médicaments personnels',
-    'Trousse de premiers soins',
-    'Anti-moustiques',
-    'Désinfectant mains',
-  ],
-  activities: [],
-};
-
-// Suggestions intelligentes basées sur le voyage
-function getSmartSuggestions(trip: Trip): Record<string, string[]> {
-  const suggestions: Record<string, string[]> = {};
-  const activities = trip.preferences.activities || [];
-  const destination = trip.preferences.destination.toLowerCase();
-  const duration = trip.preferences.durationDays;
-
-  // Vêtements selon activités
-  const clothesSuggestions: string[] = [];
-  if (activities.includes('beach')) {
-    clothesSuggestions.push('Maillot de bain', 'Tongs', 'Chapeau de soleil', 'Lunettes de soleil');
-  }
-  if (activities.includes('nature') || activities.includes('adventure')) {
-    clothesSuggestions.push('Chaussures de randonnée', 'Sac à dos léger', 'Casquette', 'Gourde');
-  }
-  if (activities.includes('nightlife')) {
-    clothesSuggestions.push('Tenue de soirée', 'Chaussures élégantes');
-  }
-  if (destination.includes('montagne') || destination.includes('islande') || destination.includes('norvege')) {
-    clothesSuggestions.push('Bonnet', 'Gants', 'Écharpe', 'Veste chaude');
-  }
-  suggestions.clothes = clothesSuggestions;
-
-  // Activités selon le type
-  const activitySuggestions: string[] = [];
-  if (activities.includes('beach')) {
-    activitySuggestions.push('Masque et tuba', 'Serviette de plage');
-  }
-  if (activities.includes('nature') || activities.includes('adventure')) {
-    activitySuggestions.push('Gourde réutilisable', 'Jumelles', 'Couteau suisse');
-  }
-  if (activities.includes('culture')) {
-    activitySuggestions.push('Guide touristique', 'Carnet de notes');
-  }
-  suggestions.activities = activitySuggestions;
-
-  // Santé selon destination
-  const healthSuggestions: string[] = [];
-  if (destination.includes('tropical') || destination.includes('asie') || destination.includes('afrique')) {
-    healthSuggestions.push('Anti-paludisme', 'Purificateur d\'eau');
-  }
-  suggestions.health = healthSuggestions;
-
-  return suggestions;
-}
-
-function generateDefaultItems(trip: Trip): PackingItem[] {
-  const smartSuggestions = getSmartSuggestions(trip);
-  const allItems: PackingItem[] = [];
-
-  CATEGORY_CONFIG.forEach(({ id }) => {
-    const baseItems = BASE_ITEMS[id] || [];
-    const suggestions = smartSuggestions[id] || [];
-    const combinedItems = [...baseItems, ...suggestions];
-
-    combinedItems.forEach((label, idx) => {
-      allItems.push({
-        id: `${id}-${idx}`,
-        label,
-        category: id,
-        checked: false,
-        isCustom: false,
-      });
-    });
-  });
-
-  return allItems;
-}
-
 export function PackingList({ trip, onUpdate, className }: PackingListProps) {
   const [items, setItems] = useState<PackingItem[]>(() => {
     if (trip.packingList?.items && trip.packingList.items.length > 0) {
       return trip.packingList.items;
     }
-    return generateDefaultItems(trip);
+    return generatePackingList(trip);
   });
 
   const [newItemLabel, setNewItemLabel] = useState('');

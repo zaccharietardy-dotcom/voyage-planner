@@ -1,12 +1,12 @@
 'use client';
 
-import { memo } from 'react';
+import { memo, useEffect, useRef } from 'react';
 import { TripDay, TripItem, Accommodation } from '@/lib/types';
 import { ActivityCard } from './ActivityCard';
 import { HotelCarouselSelector } from './HotelCarouselSelector';
 import { ItineraryConnector } from './ItineraryConnector';
 import { Button } from '@/components/ui/button';
-import { Plus, Calendar, Bed, Clock, Navigation } from 'lucide-react';
+import { Plus, Calendar, Bed, Clock, Navigation, Route } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { shouldShowItinerary } from '@/lib/services/itineraryValidator';
@@ -40,6 +40,10 @@ interface DayTimelineProps {
   hotelSelectorData?: HotelSelectorData;
   onSelectRestaurantAlternative?: (item: TripItem, restaurant: NonNullable<TripItem['restaurant']>) => void;
   onSelectSelfMeal?: (item: TripItem) => void;
+  onDurationChange?: (item: TripItem, newDuration: number) => void;
+  onOptimizeDay?: (dayNumber: number) => void;
+  getVoteData?: (itemId: string) => { wantCount: number; skipCount: number; userVote: 'want' | 'skip' | null };
+  onVote?: (itemId: string, vote: 'want' | 'skip' | null) => void;
 }
 
 /**
@@ -154,7 +158,21 @@ export const DayTimeline = memo(function DayTimeline({
   hotelSelectorData,
   onSelectRestaurantAlternative,
   onSelectSelfMeal,
+  onDurationChange,
+  onOptimizeDay,
+  getVoteData,
+  onVote,
 }: DayTimelineProps) {
+  const timelineRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!selectedItemId || !timelineRef.current) return;
+    const el = timelineRef.current.querySelector(`[data-item-id="${selectedItemId}"]`);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [selectedItemId]);
+
   // Sort by startTime with smart handling for early morning vs after-midnight times
   // Déterminer si ce jour a des items de fin de soirée (après 22h = nightlife)
   // Si oui → les items 00:00-05:59 sont "après minuit" (triés après 22h)
@@ -199,7 +217,7 @@ export const DayTimeline = memo(function DayTimeline({
   }
 
   return (
-    <div className="space-y-5">
+    <div ref={timelineRef} className="space-y-5">
       {/* Day header */}
       <motion.div
         className="flex items-center justify-between rounded-2xl border border-[#1e3a5f]/12 bg-background/75 p-3 backdrop-blur-sm"
@@ -231,16 +249,30 @@ export const DayTimeline = memo(function DayTimeline({
             </p>
           </div>
         </div>
-        {onAddItem && (
-          <Button
-            variant="outline"
-            className="gap-1.5 h-10 px-4"
-            onClick={() => onAddItem(day.dayNumber)}
-          >
-            <Plus className="h-4 w-4" />
-            Ajouter
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          {onOptimizeDay && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5 h-9 text-xs"
+              onClick={() => onOptimizeDay(day.dayNumber)}
+              title="Optimiser le parcours du jour"
+            >
+              <Route className="h-3.5 w-3.5" />
+              Optimiser
+            </Button>
+          )}
+          {onAddItem && (
+            <Button
+              variant="outline"
+              className="gap-1.5 h-10 px-4"
+              onClick={() => onAddItem(day.dayNumber)}
+            >
+              <Plus className="h-4 w-4" />
+              Ajouter
+            </Button>
+          )}
+        </div>
       </motion.div>
 
       {/* Timeline */}
@@ -270,6 +302,7 @@ export const DayTimeline = memo(function DayTimeline({
           return (
             <motion.div
               key={item.id}
+              data-item-id={item.id}
               className="relative group/item"
               variants={{
                 hidden: { opacity: 0, y: 20 },
@@ -312,6 +345,9 @@ export const DayTimeline = memo(function DayTimeline({
                 swapButton={renderSwapButton?.(item)}
                 onSelectRestaurantAlternative={onSelectRestaurantAlternative}
                 onSelectSelfMeal={onSelectSelfMeal}
+                onDurationChange={onDurationChange}
+                voteData={getVoteData ? getVoteData(item.id) : undefined}
+                onVote={onVote ? (vote) => onVote(item.id, vote) : undefined}
               />
 
               {/* Sélecteur d'hôtel inline après le check-in */}
