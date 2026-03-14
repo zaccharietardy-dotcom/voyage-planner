@@ -122,7 +122,7 @@ export function getMaxDuration(name: string, type: string): number | null {
   for (const [pattern, maxDur] of MAX_DURATION_RULES) {
     if (pattern.test(text)) return maxDur;
   }
-  return null;
+  return 180; // Global fallback: 3h max for any unmatched activity
 }
 
 /**

@@ -1031,12 +1031,10 @@ export function getActivityCloseTime(activity: ScoredActivity, dayDate: Date): s
   // Fall back to generic hours
   if (activity.openingHours?.close) {
     if (activity.openingHours.close === '23:59' || activity.openingHours.close === '00:00') return null;
-    // Skip default 18:00 when no per-day data exists (hard-coded fallback, not real)
-    if (!activity.openingHoursByDay && activity.openingHours.close === '18:00' && activity.openingHours.open === '09:00') return null;
     return activity.openingHours.close;
   }
 
-  return null; // No hours info — treat as always open
+  return '21:00'; // Sane fallback — no museum visit at 22h
 }
 
 /**

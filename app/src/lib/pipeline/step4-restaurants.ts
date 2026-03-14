@@ -374,6 +374,10 @@ const HARD_EXCLUDED_FOR_MEALS = [
   'glacier', 'gelateria', 'gelato', 'ice cream', 'glace',
   'frozen yogurt', 'froyo', 'sorbet',
   'candy store', 'sweet shop', 'confiserie', 'bonbons',
+  // International chains — prefer local restaurants for authentic experience
+  'hard rock', 'mcdonald', 'burger king', 'kfc', 'subway', 'pizza hut',
+  'domino\'s', 'starbucks', 'taco bell', 'chipotle', 'five guys',
+  'panda express', 'nando\'s', 'wagamama', 'paul', 'flunch',
   // Non-restaurants: supermarkets, convenience stores, etc.
   'carrefour', 'monoprix', 'franprix', 'auchan', 'leclerc', 'lidl', 'aldi',
   'supermarket', 'supermarché', 'supermercado', 'grocery', 'épicerie',
@@ -402,12 +406,10 @@ export function isAppropriateForMeal(restaurant: Restaurant, mealType: MealType)
     return true;
   }
 
-  // Hard exclusion for lunch/dinner: ice cream, glaciers, dessert shops
+  // Hard exclusion for all meals: chains, ice cream, supermarkets
   // This is ABSOLUTE and cannot be overridden by ratings or positive signals.
-  if (mealType === 'lunch' || mealType === 'dinner') {
-    for (const excluded of HARD_EXCLUDED_FOR_MEALS) {
-      if (allText.includes(excluded)) return false;
-    }
+  for (const excluded of HARD_EXCLUDED_FOR_MEALS) {
+    if (allText.includes(excluded)) return false;
   }
 
   if (mealType === 'dinner') {

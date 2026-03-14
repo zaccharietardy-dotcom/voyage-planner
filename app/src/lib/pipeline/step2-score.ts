@@ -162,6 +162,33 @@ const PREFERENCE_CONFLICTS: Partial<Record<ActivityType, ProfileTag[]>> = {
   wellness: ['party', 'active'],
 };
 
+/**
+ * Parse an explicit duration from a Viator activity title.
+ * Returns duration in minutes, or null if no duration indicator found.
+ */
+function parseDurationFromTitle(title: string): number | null {
+  const t = title.toLowerCase();
+
+  // "X hour(s)" / "X heure(s)" / "X-hour"
+  const hourMatch = t.match(/(\d+(?:\.\d+)?)\s*[-‑]?\s*(?:hours?|heures?|hrs?|h)\b/);
+  if (hourMatch) return Math.round(parseFloat(hourMatch[1]) * 60);
+
+  // "une heure" / "1 heure"
+  if (/\bune?\s+heure\b/.test(t)) return 60;
+
+  // "X min(utes)" / "X minutes"
+  const minMatch = t.match(/(\d+)\s*[-‑]?\s*(?:minutes?|mins?|min)\b/);
+  if (minMatch) return parseInt(minMatch[1]);
+
+  // "half day" / "demi-journée"
+  if (/\b(?:half[- ]?day|demi[- ]?journ[eé]e)\b/.test(t)) return 240;
+
+  // "full day" / "journée complète"
+  if (/\b(?:full[- ]?day|journ[eé]e\s+compl[eè]te)\b/.test(t)) return 480;
+
+  return null;
+}
+
 export function scoreAndSelectActivities(
   data: FetchedData,
   preferences: TripPreferences
@@ -486,6 +513,15 @@ export function scoreAndSelectActivities(
       // Opening hours: use real hours instead of generic 09:00-18:00
       if (viatorData.openingHours) {
         fixed = { ...fixed, openingHours: viatorData.openingHours };
+      }
+    }
+
+    // Cap Viator duration when title contains explicit duration shorter than API value
+    if (fixed.providerName === 'Viator' && fixed.name) {
+      const titleDuration = parseDurationFromTitle(fixed.name);
+      if (titleDuration && fixed.duration && fixed.duration > titleDuration) {
+        console.log(`[Score] Viator title cap: "${fixed.name}" ${fixed.duration}min → ${titleDuration}min (from title)`);
+        fixed = { ...fixed, duration: titleDuration };
       }
     }
 

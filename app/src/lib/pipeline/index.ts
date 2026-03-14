@@ -39,7 +39,7 @@ import { searchRestaurantsNearbyWithFallback } from '../services/serpApiPlaces';
 // Pipeline V3 — New imports
 // ---------------------------------------------------------------------------
 import { anchorTransport } from './step4-anchor-transport';
-import { timeToMin } from './utils/time';
+import { timeToMin, minToTime } from './utils/time';
 import { computeTravelTimes } from './step7b-travel-times';
 import { enrichRestaurantPool } from './step8-place-restaurants';
 import { unifiedScheduleV3Days } from './step8910-unified-schedule';
@@ -636,14 +636,17 @@ export async function generateTripV3(
     addReturnTransportItem(lastDay, data.returnFlight || null, bestTransport, preferences, transportFallbackCoords);
     console.log(`[Pipeline V3] Step 11b: Transport items injected (mode: ${bestTransport?.mode || 'none'})`);
 
-    // Post-injection safety: remove items past return flight on last day
-    const returnFlightItem = lastDay.items.find(i => i.type === 'flight');
+    // Post-injection safety: remove items past return transport on last day
+    const returnFlightItem = lastDay.items.find(i =>
+      i.type === 'flight' || (i.type === 'transport' && (i as any).transportDirection === 'return')
+    );
     if (returnFlightItem) {
       const flightStartMin = timeToMin(returnFlightItem.startTime || '23:59');
       const cutoffMin = flightStartMin - 150; // 2h30 before flight
       const beforeCount = lastDay.items.length;
       lastDay.items = lastDay.items.filter(item => {
         if (item.type === 'flight' || item.type === 'checkout') return true;
+        if (item.type === 'transport' && (item as any).transportRole === 'longhaul') return true;
         const startMin = timeToMin(item.startTime || '00:00');
         if (startMin >= cutoffMin) return false;
         if (item.endTime && timeToMin(item.endTime) > cutoffMin) return false;
@@ -656,15 +659,26 @@ export async function generateTripV3(
     }
 
     // Post-injection: remove items before arrival on first activity day
-    const arrivalFlightItem = day1.items.find(i => i.type === 'flight');
+    const arrivalFlightItem = day1.items.find(i =>
+      i.type === 'flight' || (i.type === 'transport' && (i as any).transportDirection === 'outbound')
+    );
     if (arrivalFlightItem && arrivalFlightItem.endTime) {
       const arrivalMin = timeToMin(arrivalFlightItem.endTime);
       const activityStartMin = arrivalMin + 90; // 90min buffer after arrival
       const beforeCount2 = day1.items.length;
       day1.items = day1.items.filter(item => {
         if (item.type === 'flight') return true;
+        if (item.type === 'transport' && (item as any).transportRole === 'longhaul') return true;
         const startMin = timeToMin(item.startTime || '00:00');
-        if (startMin < activityStartMin && item.type !== 'checkin') return false;
+        if (startMin < activityStartMin) {
+          // Reschedule checkin to after arrival instead of dropping it
+          if (item.type === 'checkin') {
+            item.startTime = minToTime(activityStartMin);
+            item.endTime = minToTime(activityStartMin + 15);
+            return true;
+          }
+          return false;
+        }
         return true;
       });
       if (day1.items.length < beforeCount2) {

@@ -383,9 +383,16 @@ export function unifiedScheduleV3Days(
       }
 
       // 5f. Commit travel + place activity
+      // Ensure placement respects travel end time (no backward jumps)
       if (pendingTravelTime > 0 && travelLeg) {
-        items.push(createTravelItem(travelLeg, currentTime, pendingTravelTime, cluster.dayNumber, orderIndex++, act));
+        // Travel cannot start before previous activity ended
+        const travelStart = currentTime;
+        items.push(createTravelItem(travelLeg, travelStart, pendingTravelTime, cluster.dayNumber, orderIndex++, act));
         currentTime = timeAfterTravel;
+      }
+      // Placement must be >= currentTime (can't start activity before arriving)
+      if (timeToMin(placementTime) < timeToMin(currentTime)) {
+        placementTime = currentTime;
       }
       currentTime = placementTime;
 
@@ -620,19 +627,45 @@ export function unifiedScheduleV3Days(
           continue;
         }
 
-        // Convert to "Repas libre" if shifting restaurant outside opening hours
+        // Re-search restaurant if shifting outside opening hours
         if (next.type === 'restaurant' && next.restaurant && !next.qualityFlags?.includes('self_meal_fallback')) {
           const newStart = minToTime(shiftedStart);
           const newEnd = minToTime(shiftedEnd);
           if (!isRestaurantOpenForSlot(next.restaurant, day.date, newStart, newEnd)) {
             const mealLabel = next.mealType === 'breakfast' ? 'Petit-déjeuner' : next.mealType === 'lunch' ? 'Déjeuner' : 'Dîner';
-            console.log(`[Unified] Overlap fix: converting "${next.title}" to Repas libre on Day ${day.dayNumber} (restaurant closed after shift to ${newStart})`);
-            next.title = `${mealLabel} — Repas libre`;
-            next.description = 'Pique-nique / courses / repas maison';
-            next.locationName = 'Repas libre';
-            next.restaurant = undefined;
-            next.restaurantAlternatives = undefined;
-            next.qualityFlags = ['self_meal_fallback'];
+            const mealType = next.mealType as 'breakfast' | 'lunch' | 'dinner';
+            // Try to find a replacement restaurant open at the new time
+            const anchor = next.latitude && next.longitude
+              ? { lat: next.latitude, lng: next.longitude }
+              : null;
+            let replaced = false;
+            if (anchor) {
+              const replacement = findBestRestaurant(
+                restaurants, anchor, mealType,
+                0.8, 3.5, 2, dietary, usedRestaurantIds,
+                day.date
+              );
+              if (replacement && isRestaurantOpenForSlot(replacement.primary, day.date, newStart, newEnd)) {
+                console.log(`[Unified] Overlap fix: replaced "${next.title}" with "${replacement.primary.name}" on Day ${day.dayNumber} (open at ${newStart})`);
+                next.title = `${mealLabel} — ${replacement.primary.name}`;
+                next.restaurant = replacement.primary;
+                next.restaurantAlternatives = replacement.alternatives;
+                next.latitude = replacement.primary.latitude;
+                next.longitude = replacement.primary.longitude;
+                next.locationName = replacement.primary.name;
+                usedRestaurantIds.add(replacement.primary.id);
+                replaced = true;
+              }
+            }
+            if (!replaced) {
+              console.log(`[Unified] Overlap fix: converting "${next.title}" to Repas libre on Day ${day.dayNumber} (no restaurant open after shift to ${newStart})`);
+              next.title = `${mealLabel} — Repas libre`;
+              next.description = 'Pique-nique / courses / repas maison';
+              next.locationName = 'Repas libre';
+              next.restaurant = undefined;
+              next.restaurantAlternatives = undefined;
+              next.qualityFlags = ['self_meal_fallback'];
+            }
           }
         }
 
@@ -841,6 +874,28 @@ export function unifiedScheduleV3Days(
 
   // 20. Insert free time for gaps >90min
   fillLargeGapsWithFreeTime(days);
+
+  // 20b. Re-cascade overlaps after repairs (must-see injection can create new overlaps)
+  for (const day of days) {
+    sortAndReindexItems(day.items);
+    for (let i = 0; i < day.items.length - 1; i++) {
+      const curr = day.items[i];
+      const next = day.items[i + 1];
+      const currEndMin = timeToMin(curr.endTime || '00:00');
+      const nextStartMin = timeToMin(next.startTime || '00:00');
+      if (currEndMin > nextStartMin) {
+        const shiftedStart = currEndMin + 5;
+        const itemDuration = next.duration
+          ? next.duration
+          : Math.max(0, timeToMin(next.endTime || '00:00') - nextStartMin);
+        next.startTime = minToTime(shiftedStart);
+        next.endTime = minToTime(shiftedStart + Math.max(itemDuration, 0));
+        if (next.type === 'activity' && next.duration) {
+          next.endTime = minToTime(shiftedStart + next.duration);
+        }
+      }
+    }
+  }
 
   // 21. P0.2 distance sweep: replace restaurants >1.5km from nearest activity with self-meal fallback
   // Runs AFTER repairs (cross-day swaps + must-see injection can change which activities are on each day)
