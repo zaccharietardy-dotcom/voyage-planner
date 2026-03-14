@@ -11,6 +11,7 @@ import {
   Users as UsersIcon,
   Flame,
   Clock,
+  Copy,
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/components/auth';
@@ -18,8 +19,8 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { FollowButton } from '@/components/social/FollowButton';
 import { RecommendedUsers } from '@/components/social/RecommendedUsers';
+import { CloneTripModal } from '@/components/social/CloneTripModal';
 
 interface FeedTrip {
   id: string;
@@ -84,6 +85,7 @@ export default function ExplorePage() {
   const [hasMore, setHasMore] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [likingTripId, setLikingTripId] = useState<string | null>(null);
+  const [cloneTrip, setCloneTrip] = useState<FeedTrip | null>(null);
   const [sortMode, setSortMode] = useState<'recent' | 'trending'>('recent');
   const containerRef = useRef<HTMLDivElement>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
@@ -260,73 +262,71 @@ export default function ExplorePage() {
         ) : (
           <>
             {/* Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {trips.map((trip) => (
                 <div
                   key={trip.id}
-                  className="group bg-white border rounded-xl overflow-hidden transition-shadow hover:shadow-md cursor-pointer"
+                  className="group relative aspect-[4/3] rounded-xl overflow-hidden cursor-pointer"
                   onClick={() => router.push(`/trip/${trip.id}`)}
                 >
-                  {/* Card image */}
-                  <div className="relative h-48 overflow-hidden">
-                    <img
-                      src={trip.cover_url || getFallbackImage(trip.destination)}
-                      alt={trip.destination}
-                      className="w-full h-48 object-cover rounded-t-xl transition-transform duration-300 group-hover:scale-105"
-                    />
-                    {/* Duration badge on image */}
-                    {trip.duration_days && (
-                      <span className="absolute top-3 left-3 inline-flex items-center gap-1 bg-white/90 backdrop-blur-sm text-foreground text-xs font-medium px-2.5 py-1 rounded-full shadow-sm">
-                        <Calendar className="h-3 w-3" />
-                        {trip.duration_days} jours
-                      </span>
-                    )}
-                    {/* Like button on image */}
+                  {/* Full-bleed image */}
+                  <img
+                    src={trip.cover_url || getFallbackImage(trip.destination)}
+                    alt={trip.destination}
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+
+                  {/* Gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+
+                  {/* Duration badge — top left */}
+                  {trip.duration_days && (
+                    <span className="absolute top-3 left-3 inline-flex items-center gap-1 bg-white/90 backdrop-blur-sm text-foreground text-xs font-medium px-2.5 py-1 rounded-full shadow-sm">
+                      <Calendar className="h-3 w-3" />
+                      {trip.duration_days} jours
+                    </span>
+                  )}
+
+                  {/* Like button + count — top right */}
+                  <div className="absolute top-3 right-3 flex items-center gap-1.5">
+                    <span className="text-xs font-medium text-white/90">
+                      {trip.likes_count || 0}
+                    </span>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         handleLike(trip.id);
                       }}
                       disabled={likingTripId === trip.id}
-                      className="absolute top-3 right-3 p-2 rounded-full bg-white/90 backdrop-blur-sm shadow-sm transition-colors hover:bg-white"
+                      className="p-2 rounded-full bg-white/20 backdrop-blur-sm transition-colors hover:bg-white/40"
                     >
                       <Heart
                         className={cn(
                           'h-4 w-4 transition-colors',
                           trip.user_liked
                             ? 'fill-red-500 text-red-500'
-                            : 'text-muted-foreground'
+                            : 'text-white'
                         )}
                       />
                     </button>
                   </div>
 
-                  {/* Card body */}
-                  <div className="p-4">
-                    {/* Destination */}
-                    <div className="flex items-start justify-between gap-2">
-                      <h3 className="font-semibold text-foreground text-base leading-tight">
-                        <MapPin className="inline h-4 w-4 mr-1 text-muted-foreground mb-0.5" />
+                  {/* Bottom overlay content */}
+                  <div className="absolute inset-x-0 bottom-0 p-4 flex flex-col gap-2">
+                    {/* Destination + date */}
+                    <div>
+                      <h3 className="text-xl font-bold text-white leading-tight">
                         {trip.destination}
                       </h3>
+                      {trip.start_date && (
+                        <p className="text-sm text-white/70 mt-0.5">
+                          {format(new Date(trip.start_date), 'MMM yyyy', { locale: fr })}
+                        </p>
+                      )}
                     </div>
 
-                    {/* Title (if different from destination) */}
-                    {trip.title && trip.title !== trip.destination && (
-                      <p className="text-muted-foreground text-sm mt-1 line-clamp-1">
-                        {trip.title}
-                      </p>
-                    )}
-
-                    {/* Date */}
-                    {trip.start_date && (
-                      <p className="text-muted-foreground text-xs mt-2">
-                        {format(new Date(trip.start_date), 'MMM yyyy', { locale: fr })}
-                      </p>
-                    )}
-
-                    {/* Footer: user info + likes */}
-                    <div className="flex items-center justify-between mt-3 pt-3 border-t">
+                    {/* Owner + Adapter button */}
+                    <div className="flex items-center justify-between">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -334,36 +334,27 @@ export default function ExplorePage() {
                         }}
                         className="flex items-center gap-2 min-w-0"
                       >
-                        <Avatar className="h-6 w-6 shrink-0">
+                        <Avatar className="h-6 w-6 shrink-0 ring-1 ring-white/30">
                           <AvatarImage src={trip.owner?.avatar_url || undefined} />
-                          <AvatarFallback className="bg-primary text-white text-[10px]">
+                          <AvatarFallback className="bg-white/20 text-white text-[10px]">
                             {(trip.owner?.display_name || '?')[0].toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
-                        <span className="text-sm text-muted-foreground truncate">
+                        <span className="text-sm text-white/90 truncate">
                           {trip.owner?.display_name || trip.owner?.username || 'Voyageur'}
                         </span>
                       </button>
 
-                      <div className="flex items-center gap-3 shrink-0">
-                        {user && trip.owner?.id !== user.id && (
-                          <span onClick={(e) => e.stopPropagation()}>
-                            <FollowButton
-                              userId={trip.owner?.id}
-                              initialIsFollowing={trip.is_following || false}
-                              initialIsCloseFriend={false}
-                              size="sm"
-                            />
-                          </span>
-                        )}
-                        <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <Heart className={cn(
-                            'h-3.5 w-3.5',
-                            trip.user_liked ? 'fill-red-500 text-red-500' : ''
-                          )} />
-                          {trip.likes_count || 0}
-                        </span>
-                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setCloneTrip(trip);
+                        }}
+                        className="inline-flex items-center gap-1.5 bg-white/90 backdrop-blur-sm text-foreground text-xs font-semibold px-3 py-1.5 rounded-full hover:bg-white transition-colors"
+                      >
+                        <Copy className="h-3 w-3" />
+                        Adapter
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -377,6 +368,16 @@ export default function ExplorePage() {
           </>
         )}
       </div>
+
+      {cloneTrip && (
+        <CloneTripModal
+          isOpen={!!cloneTrip}
+          onClose={() => setCloneTrip(null)}
+          tripId={cloneTrip.id}
+          tripTitle={cloneTrip.title || cloneTrip.destination}
+          originalDuration={cloneTrip.duration_days}
+        />
+      )}
     </div>
   );
 }

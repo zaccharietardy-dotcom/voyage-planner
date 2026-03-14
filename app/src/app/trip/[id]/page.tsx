@@ -1387,6 +1387,23 @@ export default function TripPage() {
         </div>
       )}
 
+      {/* Adapt banner for non-owners viewing a public trip */}
+      {trip && !isOwner && !showCloneModal && (
+        <div className="sticky top-16 z-50 bg-gradient-to-r from-primary/90 to-primary backdrop-blur-sm border-b border-primary/20">
+          <div className="container mx-auto px-4 py-2.5 flex items-center justify-between">
+            <span className="text-sm font-medium text-primary-foreground">
+              Ce voyage vous inspire ?
+            </span>
+            <button
+              onClick={() => setShowCloneModal(true)}
+              className="inline-flex items-center gap-1.5 bg-white text-foreground text-sm font-semibold px-4 py-1.5 rounded-full hover:bg-white/90 transition-colors shadow-sm"
+            >
+              Adapter à mes dates
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Header — hidden on mobile (replaced by floating header over map) */}
       <header className={`sticky top-16 z-40 border-b border-[#1e3a5f]/10 bg-background/85 shadow-sm ${isDesktop ? '' : 'hidden'}`}>
         <div className="container mx-auto px-4 py-3">

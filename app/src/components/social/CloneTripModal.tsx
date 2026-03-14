@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Calendar, Users, Wallet, Copy, Loader2 } from 'lucide-react';
+import { Calendar, Users, Loader2, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -26,9 +26,7 @@ interface CloneTripModalProps {
 export function CloneTripModal({ isOpen, onClose, tripId, tripTitle, originalDuration }: CloneTripModalProps) {
   const router = useRouter();
   const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
   const [groupSize, setGroupSize] = useState(2);
-  const [budgetLevel, setBudgetLevel] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -47,9 +45,7 @@ export function CloneTripModal({ isOpen, onClose, tripId, tripTitle, originalDur
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           start_date: startDate,
-          end_date: endDate || undefined,
           group_size: groupSize,
-          budget_level: budgetLevel || undefined,
         }),
       });
 
@@ -72,80 +68,42 @@ export function CloneTripModal({ isOpen, onClose, tripId, tripTitle, originalDur
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Copy className="w-5 h-5" /> Cloner ce voyage
-          </DialogTitle>
+          <DialogTitle>Adapter ce voyage à vos dates</DialogTitle>
           <DialogDescription>{tripTitle} · {originalDuration} jours</DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 mt-2">
-          {/* Dates */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label className="text-xs">Départ</Label>
-              <Input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                min={new Date().toISOString().split('T')[0]}
-              />
-            </div>
-            <div>
-              <Label className="text-xs">Retour (optionnel)</Label>
-              <Input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                min={startDate}
-              />
-            </div>
-          </div>
-
-          {/* Group size */}
+        <div className="space-y-5 mt-2">
+          {/* Date de départ */}
           <div>
             <Label className="text-xs flex items-center gap-1.5 mb-2">
-              <Users className="w-3.5 h-3.5" /> Voyageurs
+              <Calendar className="w-3.5 h-3.5" /> Date de départ
+            </Label>
+            <Input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              min={new Date().toISOString().split('T')[0]}
+            />
+          </div>
+
+          {/* Nombre de voyageurs */}
+          <div>
+            <Label className="text-xs flex items-center gap-1.5 mb-2">
+              <Users className="w-3.5 h-3.5" /> Nombre de voyageurs
             </Label>
             <div className="flex gap-2">
-              {[1, 2, 3, 4, 5, 6].map(n => (
+              {[1, 2, 3, 4, 5].map(n => (
                 <button
                   key={n}
                   onClick={() => setGroupSize(n)}
                   className={cn(
-                    'w-10 h-10 rounded-lg font-medium text-sm transition-all border',
+                    'flex-1 h-10 rounded-lg font-medium text-sm transition-all border',
                     groupSize === n
                       ? 'bg-primary text-primary-foreground border-primary'
                       : 'bg-background border-border text-muted-foreground hover:border-primary/50'
                   )}
                 >
-                  {n === 6 ? '6+' : n}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Budget */}
-          <div>
-            <Label className="text-xs flex items-center gap-1.5 mb-2">
-              <Wallet className="w-3.5 h-3.5" /> Budget (optionnel)
-            </Label>
-            <div className="flex gap-2">
-              {[
-                { id: 'economic', label: 'Eco' },
-                { id: 'moderate', label: 'Modéré' },
-                { id: 'luxury', label: 'Luxe' },
-              ].map(b => (
-                <button
-                  key={b.id}
-                  onClick={() => setBudgetLevel(budgetLevel === b.id ? '' : b.id)}
-                  className={cn(
-                    'px-4 py-2 rounded-lg text-sm transition-all border',
-                    budgetLevel === b.id
-                      ? 'bg-primary text-primary-foreground border-primary'
-                      : 'bg-background border-border text-muted-foreground hover:border-primary/50'
-                  )}
-                >
-                  {b.label}
+                  {n === 5 ? '5+' : n}
                 </button>
               ))}
             </div>
@@ -153,13 +111,18 @@ export function CloneTripModal({ isOpen, onClose, tripId, tripTitle, originalDur
 
           {error && <p className="text-destructive text-sm">{error}</p>}
 
-          <Button onClick={handleClone} disabled={loading || !startDate} className="w-full gap-2">
-            {loading ? (
-              <><Loader2 className="w-4 h-4 animate-spin" /> Clonage en cours...</>
-            ) : (
-              <><Copy className="w-4 h-4" /> Cloner le voyage</>
-            )}
-          </Button>
+          <div className="space-y-3">
+            <Button onClick={handleClone} disabled={loading || !startDate} className="w-full gap-2 h-11 text-base">
+              {loading ? (
+                <><Loader2 className="w-4 h-4 animate-spin" /> Adaptation en cours...</>
+              ) : (
+                <><Sparkles className="w-4 h-4" /> Adapter et personnaliser</>
+              )}
+            </Button>
+            <p className="text-xs text-muted-foreground text-center">
+              Vous pourrez modifier l&apos;itin&eacute;raire apr&egrave;s
+            </p>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
