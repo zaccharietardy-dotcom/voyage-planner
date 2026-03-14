@@ -21,13 +21,11 @@ import type {
   LLMActivityInput,
 } from './types';
 import { isGarbageActivity } from './utils/garbage-filter';
+import { fetchGeminiWithRetry } from '../services/geminiSearch';
 
 // ============================================
 // Gemini API types
 // ============================================
-
-const GEMINI_API_URL =
-  'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 
 interface GeminiResponse {
   candidates?: Array<{
@@ -229,21 +227,17 @@ export async function planWithGemini(input: LLMPlannerInput): Promise<LLMPlanner
     const startTime = Date.now();
 
     const response = await Promise.race([
-      fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: fullPrompt }] }],
-          generationConfig: {
-            temperature: 0.3,
-            maxOutputTokens: 16000,
-            responseMimeType: 'application/json',
-            // Small thinking budget: lets Gemini reason about constraints
-            // before outputting JSON. Thinking tokens billed at input rate ($0.15/1M).
-            // Cost impact: ~$0.0003 for 2048 thinking tokens.
-            thinkingConfig: { thinkingBudget: 2048 },
-          },
-        }),
+      fetchGeminiWithRetry({
+        contents: [{ parts: [{ text: fullPrompt }] }],
+        generationConfig: {
+          temperature: 0.3,
+          maxOutputTokens: 16000,
+          responseMimeType: 'application/json',
+          // Small thinking budget: lets Gemini reason about constraints
+          // before outputting JSON. Thinking tokens billed at input rate ($0.15/1M).
+          // Cost impact: ~$0.0003 for 2048 thinking tokens.
+          thinkingConfig: { thinkingBudget: 2048 },
+        },
       }),
       new Promise<never>((_, reject) =>
         setTimeout(() => reject(new Error('Gemini planning timeout (120s)')), 120000)
@@ -303,7 +297,6 @@ export async function planWithGemini(input: LLMPlannerInput): Promise<LLMPlanner
 
       // Try one retry with correction prompt
       const correctedPlan = await retryGeminiWithCorrections(
-        apiKey,
         fullPrompt,
         text,
         validation.errors,
@@ -337,7 +330,6 @@ export async function planWithGemini(input: LLMPlannerInput): Promise<LLMPlanner
  * Retry Gemini with correction prompt.
  */
 async function retryGeminiWithCorrections(
-  apiKey: string,
   originalPrompt: string,
   originalResponse: string,
   errors: string[],
@@ -349,22 +341,18 @@ async function retryGeminiWithCorrections(
     console.log('[Pipeline V2 LLM] Retrying Gemini with corrections...');
 
     const response = await Promise.race([
-      fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [
-            { role: 'user', parts: [{ text: originalPrompt }] },
-            { role: 'model', parts: [{ text: originalResponse }] },
-            { role: 'user', parts: [{ text: correctionPrompt }] },
-          ],
-          generationConfig: {
-            temperature: 0.3,
-            maxOutputTokens: 16000,
-            responseMimeType: 'application/json',
-            thinkingConfig: { thinkingBudget: 2048 },
-          },
-        }),
+      fetchGeminiWithRetry({
+        contents: [
+          { role: 'user', parts: [{ text: originalPrompt }] },
+          { role: 'model', parts: [{ text: originalResponse }] },
+          { role: 'user', parts: [{ text: correctionPrompt }] },
+        ],
+        generationConfig: {
+          temperature: 0.3,
+          maxOutputTokens: 16000,
+          responseMimeType: 'application/json',
+          thinkingConfig: { thinkingBudget: 2048 },
+        },
       }),
       new Promise<never>((_, reject) =>
         setTimeout(() => reject(new Error('Gemini retry timeout (90s)')), 90000)

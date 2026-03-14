@@ -13,6 +13,7 @@ import {
   ContextualSuggestion,
   SUGGESTED_CHAT_PROMPTS,
 } from '../types';
+import { fetchGeminiWithRetry } from './geminiSearch';
 
 // ============================================
 // Types
@@ -197,21 +198,14 @@ export async function classifyIntent(
   const prompt = buildClassificationPrompt(message, tripContext, conversationHistory);
 
   try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ role: 'user', parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.2,
-            maxOutputTokens: 500,
-            responseMimeType: 'application/json',
-          },
-        }),
-      }
-    );
+    const response = await fetchGeminiWithRetry({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: {
+        temperature: 0.2,
+        maxOutputTokens: 500,
+        responseMimeType: 'application/json',
+      },
+    });
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -357,21 +351,14 @@ Réponds UNIQUEMENT en JSON valide:
 ]`;
 
   try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ role: 'user', parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.2,
-            maxOutputTokens: 400,
-            responseMimeType: 'application/json',
-          },
-        }),
-      }
-    );
+    const response = await fetchGeminiWithRetry({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: {
+        temperature: 0.2,
+        maxOutputTokens: 400,
+        responseMimeType: 'application/json',
+      },
+    });
 
     if (!response.ok) {
       console.warn('[Suggestions] Gemini API error:', response.status);

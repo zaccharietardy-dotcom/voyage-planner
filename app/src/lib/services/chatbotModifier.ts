@@ -25,6 +25,7 @@ import {
 import { classifyIntent, buildTripContext, shouldUseSonnet, generateContextualSuggestions } from './intentClassifier';
 import { insertDay } from './itineraryCalculator';
 import type { Attraction } from './attractions';
+import { fetchGeminiWithRetry } from './geminiSearch';
 
 // ============================================
 // Main Chat Handler
@@ -1464,21 +1465,14 @@ Réponds UNIQUEMENT en JSON valide:
 ]`;
 
   try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ role: 'user', parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.2,
-            maxOutputTokens: 600,
-            responseMimeType: 'application/json',
-          },
-        }),
-      }
-    );
+    const response = await fetchGeminiWithRetry({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: {
+        temperature: 0.2,
+        maxOutputTokens: 600,
+        responseMimeType: 'application/json',
+      },
+    });
 
     if (!response.ok) {
       console.error('[IssueReport] Gemini API error:', response.status);
@@ -1670,20 +1664,13 @@ Question de l'utilisateur: "${message}"
 Réponds de manière concise et utile en français (max 2-3 phrases). Si c'est une question sur l'itinéraire, propose de l'aider à le modifier. Tiens compte de l'historique de conversation si présent.`;
 
   try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ role: 'user', parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.2,
-            maxOutputTokens: 300,
-          },
-        }),
-      }
-    );
+    const response = await fetchGeminiWithRetry({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: {
+        temperature: 0.2,
+        maxOutputTokens: 300,
+      },
+    });
 
     if (!response.ok) {
       return "Comment puis-je vous aider avec votre itinéraire ?";

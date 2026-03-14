@@ -110,9 +110,9 @@ export async function searchGooglePlacesAttractions(
       const imageUrl = photoRef
         ? buildPlacePhotoProxyUrl(photoRef, 400)
         : undefined;
-      // Build photo gallery (up to 5 photos) for carousel display
+      // Build photo gallery (up to 3 photos) for carousel display — limited to save API quota
       const photoGallery = r.photos && r.photos.length > 0
-        ? r.photos.slice(0, 5).map((p: any) => {
+        ? r.photos.slice(0, 3).map((p: any) => {
             const ref = p.photo_reference || p.name;
             return ref ? buildPlacePhotoProxyUrl(ref, 800) : null;
           }).filter(Boolean) as string[]

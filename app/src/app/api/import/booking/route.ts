@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { fetchGeminiWithRetry } from '@/lib/services/geminiSearch';
 
 export async function POST(req: NextRequest) {
   try {
@@ -9,11 +10,6 @@ export async function POST(req: NextRequest) {
 
     // Limit text length
     const truncated = text.slice(0, 5000);
-
-    const GEMINI_API_KEY = process.env.GOOGLE_AI_API_KEY;
-    if (!GEMINI_API_KEY) {
-      return NextResponse.json({ error: 'API key not configured' }, { status: 500 });
-    }
 
     const prompt = `Extract booking information from this confirmation text. Return a JSON object with these fields (use null for missing data):
 
@@ -42,21 +38,14 @@ Only return the JSON object, no other text.
 Confirmation text:
 ${truncated}`;
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.1,
-            maxOutputTokens: 1024,
-            responseMimeType: 'application/json',
-          },
-        }),
-      }
-    );
+    const response = await fetchGeminiWithRetry({
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: {
+        temperature: 0.1,
+        maxOutputTokens: 1024,
+        responseMimeType: 'application/json',
+      },
+    });
 
     if (!response.ok) {
       return NextResponse.json({ error: 'Gemini API error' }, { status: 500 });

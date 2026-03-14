@@ -9,8 +9,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import type { TripPreferences, TransportOptionSummary, Accommodation } from '../types';
 import type { ActivityCluster, MealAssignment, BalancedPlan, BalancedDay, FetchedData } from './types';
 import { calculateDistance } from '../services/geocoding';
-
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+import { fetchGeminiWithRetry } from '../services/geminiSearch';
 
 interface GeminiResponse {
   candidates?: Array<{
@@ -420,16 +419,12 @@ export async function balanceDaysWithGemini(
     const prompt = buildPrompt(clusters, meals, hotel, transport, preferences, data);
 
     const response = await Promise.race([
-      fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.3,
-            maxOutputTokens: 2000,
-          },
-        }),
+      fetchGeminiWithRetry({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+          temperature: 0.3,
+          maxOutputTokens: 2000,
+        },
       }),
       new Promise<never>((_, reject) =>
         setTimeout(() => reject(new Error('Gemini timeout (30s)')), 30000)

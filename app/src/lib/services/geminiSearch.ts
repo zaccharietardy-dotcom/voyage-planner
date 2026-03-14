@@ -16,6 +16,33 @@ function getGeminiApiKey() { return process.env.GOOGLE_AI_API_KEY; }
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 
 /**
+ * Fetch Gemini with automatic retry on 429 (quota exceeded).
+ * Retries up to 3 times with exponential backoff (2s, 4s, 8s).
+ */
+export async function fetchGeminiWithRetry(
+  body: Record<string, unknown>,
+  maxRetries: number = 3
+): Promise<Response> {
+  const url = `${GEMINI_API_URL}?key=${getGeminiApiKey()}`;
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    if (response.status === 429 && attempt < maxRetries) {
+      const delay = Math.pow(2, attempt + 1) * 1000; // 2s, 4s, 8s
+      console.warn(`[Gemini] Rate limited (429), retrying in ${delay / 1000}s (attempt ${attempt + 1}/${maxRetries})`);
+      await new Promise(r => setTimeout(r, delay));
+      continue;
+    }
+    return response;
+  }
+  // Should never reach here, but TypeScript needs it
+  return fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+}
+
+/**
  * Nettoie le JSON généré par un LLM (trailing commas, commentaires, guillemets typographiques, etc.)
  */
 function cleanLlmJson(raw: string): string {
@@ -190,12 +217,7 @@ Trouve 5-8 vols et réponds UNIQUEMENT avec un JSON valide:
 }`;
 
   try {
-    const response = await fetch(`${GEMINI_API_URL}?key=${getGeminiApiKey()}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
+    const response = await fetchGeminiWithRetry({
         contents: [
           {
             parts: [{ text: prompt }],
@@ -210,7 +232,6 @@ Trouve 5-8 vols et réponds UNIQUEMENT avec un JSON valide:
           temperature: 0.1, // Moins créatif = plus factuel
           maxOutputTokens: 2000,
         },
-      }),
     });
 
     if (!response.ok) {
@@ -345,14 +366,10 @@ Réponds en JSON:
 }`;
 
   try {
-    const response = await fetch(`${GEMINI_API_URL}?key=${getGeminiApiKey()}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+    const response = await fetchGeminiWithRetry({
         contents: [{ parts: [{ text: prompt }] }],
         tools: [{ googleSearch: {} }],
         generationConfig: { temperature: 0.1, maxOutputTokens: 500 },
-      }),
     });
 
     if (!response.ok) return { exists: false };
@@ -419,14 +436,10 @@ cuisineTypes: utilise le TYPE PRÉCIS de cuisine (ex: "brasserie", "italien", "j
 priceLevel: 1 (€) à 4 (€€€€). IMPORTANT: Pas de champ description, tips ou specialties.`;
 
   try {
-    const response = await fetch(`${GEMINI_API_URL}?key=${getGeminiApiKey()}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+    const response = await fetchGeminiWithRetry({
         contents: [{ parts: [{ text: prompt }] }],
         tools: [{ googleSearch: {} }],
         generationConfig: { temperature: 0.1, maxOutputTokens: 8000 },
-      }),
     });
 
     if (!response.ok) {
@@ -530,14 +543,10 @@ Réponds UNIQUEMENT en JSON (pas de markdown):
 }]`;
 
   try {
-    const response = await fetch(`${GEMINI_API_URL}?key=${getGeminiApiKey()}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+    const response = await fetchGeminiWithRetry({
         contents: [{ parts: [{ text: prompt }] }],
         tools: [{ googleSearch: {} }],
         generationConfig: { temperature: 0.1, maxOutputTokens: 3000 },
-      }),
     });
 
     if (!response.ok) return result;
@@ -603,14 +612,10 @@ Retourne UNIQUEMENT un JSON valide, sans commentaire:
 Si aucun prix trouvé, retourne: { "price": null }`;
 
   try {
-    const response = await fetch(`${GEMINI_API_URL}?key=${getGeminiApiKey()}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+    const response = await fetchGeminiWithRetry({
         contents: [{ parts: [{ text: prompt }] }],
         tools: [{ googleSearch: {} }],
         generationConfig: { temperature: 0.1, maxOutputTokens: 500 },
-      }),
     });
 
     if (!response.ok) {
@@ -680,14 +685,10 @@ Retourne UNIQUEMENT un JSON valide:
 Si aucun ferry trouvé, retourne: { "price": null }`;
 
   try {
-    const response = await fetch(`${GEMINI_API_URL}?key=${getGeminiApiKey()}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+    const response = await fetchGeminiWithRetry({
         contents: [{ parts: [{ text: prompt }] }],
         tools: [{ googleSearch: {} }],
         generationConfig: { temperature: 0.1, maxOutputTokens: 500 },
-      }),
     });
 
     if (!response.ok) {
@@ -745,14 +746,10 @@ Retourne UNIQUEMENT un JSON valide:
 Si péages gratuits (ex: Allemagne), retourne: { "toll": 0, "route": "Autobahn (gratuit)" }`;
 
   try {
-    const response = await fetch(`${GEMINI_API_URL}?key=${getGeminiApiKey()}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+    const response = await fetchGeminiWithRetry({
         contents: [{ parts: [{ text: prompt }] }],
         tools: [{ googleSearch: {} }],
         generationConfig: { temperature: 0.1, maxOutputTokens: 500 },
-      }),
     });
 
     if (!response.ok) {
@@ -835,17 +832,13 @@ Return ONLY a valid JSON object with no other text:
 If you cannot find this place, return: {"lat": null, "lng": null}`;
 
   try {
-    const response = await fetch(`${GEMINI_API_URL}?key=${getGeminiApiKey()}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+    const response = await fetchGeminiWithRetry({
         contents: [{ parts: [{ text: prompt }] }],
         tools: [{ googleSearch: {} }],
         generationConfig: {
           temperature: 0,
           maxOutputTokens: 200,
         },
-      }),
     });
 
     if (!response.ok) {
