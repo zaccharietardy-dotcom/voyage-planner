@@ -732,25 +732,31 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
           // Pill container style
           const pillStyle = `background:rgba(255,255,255,0.92);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);border:1px solid rgba(${r},${g},${b},0.15);color:${color};font-size:10px;font-weight:600;padding:3px 8px;border-radius:999px;box-shadow:0 1px 4px rgba(0,0,0,0.1);display:inline-flex;align-items:center;gap:3px;white-space:nowrap;`;
 
+          // Format distance label
+          const distKm = nextItem.distanceFromPrevious;
+          const distLabel = distKm
+            ? (distKm < 1 ? `${Math.round(distKm * 1000)}m` : `${distKm.toFixed(1)}km`)
+            : '';
+
           let labelContent = '';
 
           if (isWalk) {
-            // Walking: pedestrian icon + time
-            labelContent = `<span style="${pillStyle}">${walkIcon} ${formatTravelTime(nextItem.timeFromPrevious)}</span>`;
+            // Walking: pedestrian icon + time + distance
+            labelContent = `<span style="${pillStyle}">${walkIcon} ${formatTravelTime(nextItem.timeFromPrevious)}${distLabel ? ` · ${distLabel}` : ''}</span>`;
           } else if (hasTransitLines) {
-            // Transit: time + colored line badges
+            // Transit: time + distance + colored line badges
             const badges = nextItem.transitInfo!.lines.slice(0, 3).map(line => {
               const bgColor = line.color || '#6B7280';
               const mIcon = modeIcons[line.mode] || modeIcons.bus;
               return `<span style="background:${bgColor};color:white;font-size:8px;font-weight:700;padding:1px 4px;border-radius:3px;display:inline-flex;align-items:center;gap:1px;line-height:1.2;">${mIcon}${line.number}</span>`;
             }).join('');
-            labelContent = `<span style="${pillStyle}">${formatTravelTime(nextItem.timeFromPrevious)} ${badges}</span>`;
+            labelContent = `<span style="${pillStyle}">${formatTravelTime(nextItem.timeFromPrevious)}${distLabel ? ` · ${distLabel}` : ''} ${badges}</span>`;
           } else {
             // Car/taxi/generic transport
             const icon = nextItem.transportToPrevious === 'taxi' ? taxiIcon
               : nextItem.transportToPrevious === 'car' ? carIcon
               : transitIcon;
-            labelContent = `<span style="${pillStyle}">${icon} ${formatTravelTime(nextItem.timeFromPrevious)}</span>`;
+            labelContent = `<span style="${pillStyle}">${icon} ${formatTravelTime(nextItem.timeFromPrevious)}${distLabel ? ` · ${distLabel}` : ''}</span>`;
           }
 
           const labelIcon = L.divIcon({

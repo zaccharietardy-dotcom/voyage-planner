@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { checkRateLimit } from '@/lib/server/rateLimit';
 
 const GOOGLE_PLACE_PHOTO_URL = 'https://maps.googleapis.com/maps/api/place/photo';
-const PHOTO_REFERENCE_MAX_LENGTH = 300;
+const PHOTO_REFERENCE_MAX_LENGTH = 2000;
 
 function getGoogleApiKey(): string {
   return process.env.GOOGLE_PLACES_API_KEY || process.env.GOOGLE_MAPS_API_KEY || '';

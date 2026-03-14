@@ -62,8 +62,13 @@ export function generateFlightPriceMatrix(
       modifier *= 0.8;
     }
 
-    // Add some randomness (+/-15%)
-    const noise = 0.85 + Math.random() * 0.3;
+    // Deterministic noise based on date string (stable across re-renders)
+    const dateStr = date.toISOString().split('T')[0];
+    let hash = 0;
+    for (let j = 0; j < dateStr.length; j++) {
+      hash = ((hash << 5) - hash + dateStr.charCodeAt(j)) | 0;
+    }
+    const noise = 0.85 + (((hash & 0xffff) / 0xffff) * 0.3);
     const price = Math.round(basePrice * modifier * noise);
 
     days.push({

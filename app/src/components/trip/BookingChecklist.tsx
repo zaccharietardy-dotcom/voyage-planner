@@ -53,9 +53,12 @@ function getProviderFromUrl(url: string): { name: string; color: string } {
 function extractBookableItems(trip: Trip): BookableItem[] {
   const items: BookableItem[] = [];
 
-  // Vol aller
+  // Vol aller — prefer aviasalesUrl from TripItem (includes return date)
   if (trip.outboundFlight) {
     const f = trip.outboundFlight;
+    const flightItem = trip.days.flatMap(d => d.items).find(
+      i => i.type === 'flight' && i.aviasalesUrl && i.dayNumber === 1
+    );
     items.push({
       id: `flight-outbound-${f.id}`,
       category: 'flight',
@@ -66,7 +69,7 @@ function extractBookableItems(trip: Trip): BookableItem[] {
       time: f.departureTimeDisplay || f.departureTime?.split('T')[1]?.slice(0, 5),
       price: f.pricePerPerson || f.price,
       priceLabel: f.pricePerPerson ? '/pers.' : 'total',
-      bookingUrl: f.bookingUrl,
+      bookingUrl: flightItem?.aviasalesUrl || f.bookingUrl,
     });
   }
 
@@ -109,9 +112,13 @@ function extractBookableItems(trip: Trip): BookableItem[] {
     }
   }
 
-  // Vol retour
+  // Vol retour — prefer aviasalesUrl from TripItem (includes return date)
   if (trip.returnFlight) {
     const f = trip.returnFlight;
+    const lastDay = trip.days[trip.days.length - 1];
+    const returnFlightItem = lastDay?.items.find(
+      i => i.type === 'flight' && i.aviasalesUrl
+    );
     items.push({
       id: `flight-return-${f.id}`,
       category: 'flight',
@@ -122,7 +129,7 @@ function extractBookableItems(trip: Trip): BookableItem[] {
       time: f.departureTimeDisplay || f.departureTime?.split('T')[1]?.slice(0, 5),
       price: f.pricePerPerson || f.price,
       priceLabel: f.pricePerPerson ? '/pers.' : 'total',
-      bookingUrl: f.bookingUrl,
+      bookingUrl: returnFlightItem?.aviasalesUrl || f.bookingUrl,
     });
   }
 

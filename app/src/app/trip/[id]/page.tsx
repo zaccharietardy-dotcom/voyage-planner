@@ -78,8 +78,6 @@ import { Attraction } from '@/lib/services/attractions';
 import { ActivitySwapButton } from '@/components/trip/ActivitySwapButton';
 import { AddActivityModal } from '@/components/trip/AddActivityModal';
 import { CalendarView } from '@/components/trip/CalendarView';
-import { CategoryChips } from '@/components/trip/CategoryChips';
-import { classifyActivityCategory } from '@/lib/utils/activityClassifier';
 import { CommentsSection } from '@/components/trip/CommentsSection';
 import { ChatPanel, ChatButton } from '@/components/trip/ChatPanel';
 import { TripOnboarding } from '@/components/trip/TripOnboarding';
@@ -305,7 +303,6 @@ export default function TripPage() {
   const [addActivityDefaultTime, setAddActivityDefaultTime] = useState<string | undefined>();
   const [addActivityDefaultEndTime, setAddActivityDefaultEndTime] = useState<string | undefined>();
   const [planningView, setPlanningView] = useState<'timeline' | 'calendar'>('timeline');
-  const [categoryFilter, setCategoryFilter] = useState<string[]>([]);
   const [showChatPanel, setShowChatPanel] = useState(false);
   const [showFlythrough, setShowFlythrough] = useState(false);
   const [showImportPlaces, setShowImportPlaces] = useState(false);
@@ -1173,19 +1170,6 @@ export default function TripPage() {
     return offset;
   };
 
-  // Filtered days for category chip filtering (display only)
-  const filteredDays = useMemo(() => {
-    if (!trip || categoryFilter.length === 0) return trip?.days || [];
-    return trip.days.map(day => ({
-      ...day,
-      items: day.items.filter(item => {
-        // Always show non-activity items (transport, restaurant, checkin, checkout, etc.)
-        if (item.type !== 'activity' && item.type !== 'free_time') return true;
-        const categories = classifyActivityCategory(item);
-        return categories.some(cat => categoryFilter.includes(cat));
-      }),
-    }));
-  }, [trip?.days, categoryFilter]);
 
   if (loading) {
     return (
@@ -2048,11 +2032,6 @@ export default function TripPage() {
                   </div>
                 </div>
 
-                {/* Category filter chips */}
-                {planningView === 'timeline' && (
-                  <CategoryChips onFilterChange={setCategoryFilter} className="mb-3" />
-                )}
-
                 {planningView === 'calendar' ? (
                   <div className="h-[75vh]">
                     <CalendarView
@@ -2067,7 +2046,7 @@ export default function TripPage() {
                   </div>
                 ) : editMode && isDesktop ? (
                   <DraggableTimeline
-                    days={filteredDays}
+                    days={trip?.days || []}
                     isEditable={canPropose}
                     isOwner={isOwner}
                     onDirectUpdate={canOwnerEdit ? handleDirectUpdate : undefined}
@@ -2083,7 +2062,7 @@ export default function TripPage() {
                   />
                 ) : !editMode ? (
                   <div className="space-y-6">
-                    {filteredDays.map((day, idx) => (
+                    {(trip?.days || []).map((day, idx) => (
                       <div key={day.dayNumber}>
                         <DayTimeline
                           day={day}
@@ -2107,7 +2086,7 @@ export default function TripPage() {
                           onVote={useCollaborativeMode ? castVote : undefined}
                         />
                         {/* Bouton "Ajouter un jour" entre les jours (sauf après le dernier) */}
-                        {canOwnerEdit && idx < filteredDays.length - 1 && idx > 0 && (
+                        {canOwnerEdit && idx < (trip?.days || []).length - 1 && idx > 0 && (
                           <div className="flex items-center justify-center py-2 group">
                             <div className="flex-1 h-px bg-border group-hover:bg-primary/30 transition-colors" />
                             <Button

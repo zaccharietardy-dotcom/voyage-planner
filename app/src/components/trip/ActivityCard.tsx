@@ -941,9 +941,11 @@ function DurationBadge({
               : "px-1.5 py-0.5 text-[10px] bg-primary/10 text-primary hover:bg-primary/20"
           )}
           onClick={(e) => e.stopPropagation()}
+          title="Modifier la durée de visite"
         >
           <Clock className={cn(isHero ? "h-3 w-3" : "h-2.5 w-2.5")} />
           {formatDuration(duration)}
+          <Pencil className={cn(isHero ? "h-2.5 w-2.5 opacity-60" : "h-2 w-2 opacity-50")} />
         </button>
       </PopoverTrigger>
       <PopoverContent
@@ -996,9 +998,6 @@ function BookingButtons({ item }: { item: TripItem }) {
     });
     if (item.aviasalesUrl && item.aviasalesUrl !== bookingUrl) {
       buttons.push({ label: 'Aviasales', url: item.aviasalesUrl, variant: 'secondary', icon: <Plane className="h-3 w-3" /> });
-    }
-    if (item.omioFlightUrl) {
-      buttons.push({ label: 'Omio', url: item.omioFlightUrl, variant: 'secondary', icon: <Plane className="h-3 w-3" /> });
     }
   }
 
