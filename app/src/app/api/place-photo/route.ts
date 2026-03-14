@@ -15,7 +15,7 @@ function getClientIp(request: NextRequest): string {
 
 export async function GET(request: NextRequest) {
   const ip = getClientIp(request);
-  const rateLimit = checkRateLimit(ip, { windowMs: 60_000, maxRequests: 60 });
+  const rateLimit = checkRateLimit(ip, { windowMs: 60_000, maxRequests: 300 });
   if (!rateLimit.allowed) {
     return NextResponse.json(
       { error: 'Too many requests' },
