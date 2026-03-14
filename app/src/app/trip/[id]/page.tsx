@@ -720,23 +720,52 @@ export default function TripPage() {
     toast.success(`Durée mise à jour: ${newDuration} min`);
   }, [trip, saveTrip]);
 
-  const handleTransportModeChange = useCallback((item: TripItem, newMode: string) => {
+  const handleTransportModeChange = useCallback(async (item: TripItem, newMode: string) => {
     if (!trip) return;
-    // Speed estimates (km/h) per transport mode
+
+    // Immediately update mode with estimated time (responsive UI)
     const speeds: Record<string, number> = { walk: 4.5, transit: 25, public: 25, bike: 15, car: 35, driving: 35, taxi: 30 };
     const speed = speeds[newMode] || 4.5;
     const distance = item.distanceFromPrevious || 0;
-    const newTime = distance > 0 ? Math.max(2, Math.round((distance / speed) * 60)) : item.timeFromPrevious;
+    const estimatedTime = distance > 0 ? Math.max(2, Math.round((distance / speed) * 60)) : item.timeFromPrevious;
 
-    const updatedDays = trip.days.map((day) => ({
-      ...day,
-      items: day.items.map((i) =>
-        i.id === item.id ? { ...i, transportToPrevious: newMode as TripItem['transportToPrevious'], timeFromPrevious: newTime } : i
-      ),
-    }));
-    const recalculated = cascadeRecalculate(updatedDays, item.id, 'move');
-    const updatedTrip = { ...trip, days: recalculated, updatedAt: new Date() };
-    saveTrip(updatedTrip);
+    const applyUpdate = (time: number | undefined, transitInfo?: TripItem['transitInfo'], polyline?: string) => {
+      const updatedDays = trip.days.map((day) => ({
+        ...day,
+        items: day.items.map((i) =>
+          i.id === item.id ? {
+            ...i,
+            transportToPrevious: newMode as TripItem['transportToPrevious'],
+            timeFromPrevious: time ?? estimatedTime,
+            transitInfo: transitInfo ?? (newMode !== 'transit' && newMode !== 'public' ? undefined : i.transitInfo),
+            routePolylineFromPrevious: polyline ?? i.routePolylineFromPrevious,
+          } : i
+        ),
+      }));
+      const recalculated = cascadeRecalculate(updatedDays, item.id, 'move');
+      saveTrip({ ...trip, days: recalculated, updatedAt: new Date() });
+    };
+
+    // Apply estimated time immediately
+    applyUpdate(estimatedTime);
+
+    // Then fetch real directions from Google API (async)
+    const prevItem = trip.days
+      .flatMap(d => d.items)
+      .find((_i, idx, arr) => idx < arr.length - 1 && arr[idx + 1]?.id === item.id);
+    if (!prevItem?.latitude || !prevItem?.longitude || !item.latitude || !item.longitude) return;
+
+    const apiMode = newMode === 'walk' ? 'walking' : (newMode === 'transit' || newMode === 'public') ? 'transit' : 'driving';
+    try {
+      const res = await fetch(`/api/directions?fromLat=${prevItem.latitude}&fromLng=${prevItem.longitude}&toLat=${item.latitude}&toLng=${item.longitude}&mode=${apiMode}`);
+      if (!res.ok) return;
+      const data = await res.json();
+      applyUpdate(
+        data.duration ? Math.round(data.duration) : undefined,
+        data.transitLines?.length > 0 ? { lines: data.transitLines, walkingDistance: 0 } : undefined,
+        data.overviewPolyline || undefined,
+      );
+    } catch { /* keep estimated time */ }
   }, [trip, saveTrip]);
 
   // Render swap button pour les ActivityCards (si pool disponible)

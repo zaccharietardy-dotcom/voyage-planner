@@ -31,6 +31,7 @@ interface ItineraryConnectorProps {
   duration?: number;
   distance?: number;
   mode?: TransportMode;
+  transitLines?: Array<{ number: string; name?: string; mode: string; color?: string; departureStop?: string; arrivalStop?: string; numStops?: number }>;
   onModeChange?: (newMode: TransportMode) => void;
   isEditable?: boolean;
 }
@@ -48,6 +49,7 @@ export function ItineraryConnector({
   duration,
   distance,
   mode = 'walk',
+  transitLines,
   onModeChange,
   isEditable = false,
 }: ItineraryConnectorProps) {
@@ -120,6 +122,22 @@ export function ItineraryConnector({
             {distance && distance > 0.1 && (
               <span>{formatDistance(distance)}</span>
             )}
+          </span>
+        )}
+
+        {/* Transit line badges (metro M6, bus 42, etc.) */}
+        {transitLines && transitLines.length > 0 && (
+          <span className="flex items-center gap-1 shrink-0">
+            {transitLines.slice(0, 3).map((line, idx) => (
+              <span
+                key={idx}
+                className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-bold text-white leading-none"
+                style={{ backgroundColor: line.color || '#6B7280' }}
+                title={[line.name, line.departureStop && `de ${line.departureStop}`, line.arrivalStop && `à ${line.arrivalStop}`, line.numStops && `${line.numStops} arrêts`].filter(Boolean).join(' · ')}
+              >
+                {line.mode === 'metro' ? 'M' : line.mode === 'tram' ? 'T' : ''}{line.number}
+              </span>
+            ))}
           </span>
         )}
 

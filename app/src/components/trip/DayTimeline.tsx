@@ -382,6 +382,7 @@ export const DayTimeline = memo(function DayTimeline({
                   duration={nextItem.timeFromPrevious}
                   distance={nextItem.distanceFromPrevious}
                   mode={nextItem.transportToPrevious}
+                  transitLines={nextItem.transitInfo?.lines}
                   isEditable={!!onTransportModeChange}
                   onModeChange={onTransportModeChange ? (newMode) => onTransportModeChange(nextItem, newMode) : undefined}
                 />
