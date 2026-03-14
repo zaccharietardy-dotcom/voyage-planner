@@ -886,6 +886,12 @@ export function createTravelItem(
     duration: durationMinutes,
     estimatedCost: 0,
     routePolylineFromPrevious: leg.polyline,
+    transportToPrevious: leg.mode === 'transit' ? 'public' : leg.mode === 'drive' ? 'car' : 'walk',
+    distanceFromPrevious: leg.distanceKm,
+    timeFromPrevious: durationMinutes,
+    transitInfo: leg.transitLines && leg.transitLines.length > 0
+      ? { lines: leg.transitLines.map(l => ({ number: l.number, mode: l.mode, color: l.color })), walkingDistance: 0 }
+      : undefined,
   };
 }
 

@@ -11,7 +11,7 @@
  * Flag: PIPELINE_DIRECTIONS_MODE=selective|all|off (default: selective)
  */
 
-import { getDirections, type DirectionsRequest } from '../services/directions';
+import { getDirections, type DirectionsRequest, type TransitLine } from '../services/directions';
 import { calculateDistance } from '../services/geocoding';
 import type { ActivityCluster, ScoredActivity } from './types';
 
@@ -31,6 +31,8 @@ export interface TravelLeg {
   isEstimate: boolean;
   /** Encoded Google polyline for the real route on the map */
   polyline?: string;
+  /** Transit line details (metro M6, bus 42, etc.) from Google Directions */
+  transitLines?: TransitLine[];
 }
 
 export interface DayTravelTimes {
@@ -45,6 +47,9 @@ export interface DayTravelTimes {
 
 /** Distance threshold below which we use walking estimates */
 const WALK_ESTIMATE_THRESHOLD_KM = 1.0;
+
+/** Walking time threshold (minutes) — above this, auto-switch to transit */
+const WALK_TIME_THRESHOLD_MIN = 20;
 
 /** Walking speed for estimation (km/h) */
 const WALKING_SPEED_KMH = 4.5;
@@ -106,12 +111,17 @@ export async function computeTravelTimes(
       const shouldCallApi = mode === 'all'
         || (mode === 'selective' && distance > WALK_ESTIMATE_THRESHOLD_KM && apiCallsUsed < MAX_API_CALLS_PER_TRIP);
 
+      // Estimate walking time to decide if we should use transit
+      const walkingMinutes = Math.ceil((distance / WALKING_SPEED_KMH) * 60);
+      const shouldUseTransit = distance > WALK_ESTIMATE_THRESHOLD_KM || walkingMinutes > WALK_TIME_THRESHOLD_MIN;
+      const apiMode = shouldUseTransit ? 'transit' : 'walking';
+
       if (shouldCallApi) {
         try {
           const request: DirectionsRequest = {
             from: { lat: from.lat, lng: from.lng },
             to: { lat: to.lat, lng: to.lng },
-            mode: distance > 1 ? 'transit' : 'walking',
+            mode: apiMode,
           };
 
           const directions = await getDirections(request);
@@ -124,9 +134,10 @@ export async function computeTravelTimes(
               toName: to.name,
               distanceKm: directions.distance || distance,
               durationMinutes: Math.ceil(directions.duration / 5) * 5, // Round to 5min
-              mode: distance > 1 ? 'transit' : 'walk',
+              mode: shouldUseTransit ? 'transit' : 'walk',
               isEstimate: false,
               polyline: directions.overviewPolyline,
+              transitLines: directions.transitLines?.length > 0 ? directions.transitLines : undefined,
             });
             apiCallsUsed++;
             continue;
@@ -137,7 +148,6 @@ export async function computeTravelTimes(
       }
 
       // Fallback: walking estimate
-      const walkingMinutes = Math.ceil((distance / WALKING_SPEED_KMH) * 60);
       const roundedMinutes = Math.ceil(walkingMinutes / 5) * 5; // Round to 5min
       legs.push({
         fromId: from.id,
@@ -146,7 +156,7 @@ export async function computeTravelTimes(
         toName: to.name,
         distanceKm: distance,
         durationMinutes: Math.max(5, roundedMinutes), // Minimum 5 minutes
-        mode: distance > 1 ? 'transit' : 'walk',
+        mode: shouldUseTransit ? 'transit' : 'walk',
         isEstimate: true,
       });
     }
