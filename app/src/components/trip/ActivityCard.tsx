@@ -988,16 +988,16 @@ function BookingButtons({ item }: { item: TripItem }) {
   const bookingUrl = item.bookingUrl || '';
   const isLocalTransport = item.type === 'transport' && item.transportRole === 'inter_item';
 
-  // Flight
-  if (item.type === 'flight' && bookingUrl) {
-    buttons.push({
-      label: bookingUrl.includes('aviasales.com') ? 'Aviasales' : 'Réserver vol',
-      url: bookingUrl,
-      variant: 'primary',
-      icon: <Plane className="h-3 w-3" />,
-    });
-    if (item.aviasalesUrl && item.aviasalesUrl !== bookingUrl) {
-      buttons.push({ label: 'Aviasales', url: item.aviasalesUrl, variant: 'secondary', icon: <Plane className="h-3 w-3" /> });
+  // Flight — single Aviasales button (prefer aviasalesUrl which includes return date)
+  if (item.type === 'flight') {
+    const flightUrl = item.aviasalesUrl || bookingUrl;
+    if (flightUrl) {
+      buttons.push({
+        label: 'Aviasales',
+        url: flightUrl,
+        variant: 'primary',
+        icon: <Plane className="h-3 w-3" />,
+      });
     }
   }
 

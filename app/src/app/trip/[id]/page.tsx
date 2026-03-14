@@ -1973,10 +1973,10 @@ export default function TripPage() {
           </Drawer>
         </div>}
 
-      {/* Desktop layout: planning left (60%) + sticky map right (40%) */}
-      {isDesktop && <div className="flex gap-4 container mx-auto px-4 py-6">
-        {/* Left: Planning */}
-          <div className="flex-[3] min-w-0">
+      {/* Desktop layout: scrollable planning panel left + fixed full-height map right */}
+      {isDesktop && <div className="flex h-[calc(100vh-73px)]">
+        {/* Left: Scrollable planning panel */}
+          <div className="w-[480px] xl:w-[540px] 2xl:w-[600px] shrink-0 overflow-y-auto overscroll-contain border-r border-border/40 px-5 py-5">
             <Tabs value={mainTab} onValueChange={setMainTab}>
               <TabsList className="mb-3 rounded-xl border border-[#1e3a5f]/12 bg-background/70 p-1" data-tour="tabs">
                 {liveState && <TabsTrigger value="live" className="text-sm bg-gradient-to-r from-purple-500 to-blue-500 text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600">Live</TabsTrigger>}
@@ -2156,11 +2156,20 @@ export default function TripPage() {
               </Card>
               </TabsContent>
             </Tabs>
+
+            {/* Comments */}
+            <div className="mt-6 pt-6 border-t">
+              <Card>
+                <CardContent className="p-4">
+                  <CommentsSection tripId={tripId} />
+                </CardContent>
+              </Card>
+            </div>
           </div>
 
-          {/* Right: Sticky map */}
-          <div className="flex-[2] min-w-0" data-tour="map-panel">
-            <div className="sticky top-[73px] h-[calc(100vh-73px-2rem)] rounded-2xl overflow-hidden border shadow-soft">
+          {/* Right: Fixed full-height map */}
+          <div className="flex-1 min-w-0 relative" data-tour="map-panel">
+            <div className="absolute inset-0">
               <TripMap
                 items={allItems}
                 selectedItemId={selectedItemId}
@@ -2182,14 +2191,7 @@ export default function TripPage() {
           </div>
       </div>}
 
-      {/* Comments section */}
-      {isDesktop && <div className="container mx-auto px-4 py-6 border-t">
-        <Card>
-          <CardContent className="p-4 sm:p-6">
-            <CommentsSection tripId={tripId} />
-          </CardContent>
-        </Card>
-      </div>}
+      {/* Comments section moved inside planning panel */}
 
       {/* Dialogs */}
       <CreateProposalDialog open={showProposalDialog} onClose={() => { setShowProposalDialog(false); setPendingChanges([]); }} onSubmit={handleCreateProposal} pendingChanges={pendingChanges} />

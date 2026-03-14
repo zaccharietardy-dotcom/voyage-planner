@@ -73,45 +73,6 @@ function extractBookableItems(trip: Trip): BookableItem[] {
     });
   }
 
-  // Hebergement
-  if (trip.accommodation) {
-    const h = trip.accommodation;
-    const checkInDate = trip.days[0]?.date;
-    const checkOutDate = trip.days[trip.days.length - 1]?.date;
-    items.push({
-      id: `hotel-${h.id}`,
-      category: 'hotel',
-      title: h.name,
-      subtitle: `${h.stars ? `${h.stars}★` : ''} ${h.rating ? `${h.rating.toFixed(1)}/10` : ''} · ${h.address && h.address !== 'Adresse non disponible' ? h.address : 'Centre-ville'}`.trim(),
-      date: checkInDate ? `${format(new Date(checkInDate), 'd MMM', { locale: fr })} → ${checkOutDate ? format(new Date(checkOutDate), 'd MMM', { locale: fr }) : ''}` : undefined,
-      price: h.totalPrice || (h.pricePerNight ? h.pricePerNight * (trip.preferences.durationDays - 1) : undefined),
-      priceLabel: 'total',
-      bookingUrl: h.bookingUrl,
-    });
-  }
-
-  // Activites par jour
-  for (const day of trip.days) {
-    for (const item of day.items) {
-      if (item.type !== 'activity' && item.type !== 'restaurant') continue;
-      const url = item.bookingUrl || item.viatorUrl || item.tiqetsUrl;
-      if (!url) continue;
-
-      items.push({
-        id: `activity-${item.id}`,
-        category: 'activity',
-        title: item.title,
-        subtitle: item.locationName,
-        date: day.date ? format(new Date(day.date), 'EEEE d MMMM', { locale: fr }) : undefined,
-        time: item.startTime,
-        price: item.estimatedCost,
-        priceLabel: '/pers.',
-        bookingUrl: url,
-        dayNumber: day.dayNumber,
-      });
-    }
-  }
-
   // Vol retour — prefer aviasalesUrl from TripItem (includes return date)
   if (trip.returnFlight) {
     const f = trip.returnFlight;
@@ -131,6 +92,45 @@ function extractBookableItems(trip: Trip): BookableItem[] {
       priceLabel: f.pricePerPerson ? '/pers.' : 'total',
       bookingUrl: returnFlightItem?.aviasalesUrl || f.bookingUrl,
     });
+  }
+
+  // Hebergement
+  if (trip.accommodation) {
+    const h = trip.accommodation;
+    const checkInDate = trip.days[0]?.date;
+    const checkOutDate = trip.days[trip.days.length - 1]?.date;
+    items.push({
+      id: `hotel-${h.id}`,
+      category: 'hotel',
+      title: h.name,
+      subtitle: `${h.stars ? `${h.stars}★` : ''} ${h.rating ? `${h.rating.toFixed(1)}/10` : ''} · ${h.address && h.address !== 'Adresse non disponible' ? h.address : 'Centre-ville'}`.trim(),
+      date: checkInDate ? `${format(new Date(checkInDate), 'd MMM', { locale: fr })} → ${checkOutDate ? format(new Date(checkOutDate), 'd MMM', { locale: fr }) : ''}` : undefined,
+      price: h.totalPrice || (h.pricePerNight ? h.pricePerNight * (trip.preferences.durationDays - 1) : undefined),
+      priceLabel: 'total',
+      bookingUrl: h.bookingUrl,
+    });
+  }
+
+  // Activités par jour (pas les restaurants — réservation non obligatoire)
+  for (const day of trip.days) {
+    for (const item of day.items) {
+      if (item.type !== 'activity') continue;
+      const url = item.bookingUrl || item.viatorUrl || item.tiqetsUrl;
+      if (!url) continue;
+
+      items.push({
+        id: `activity-${item.id}`,
+        category: 'activity',
+        title: item.title,
+        subtitle: item.locationName,
+        date: day.date ? format(new Date(day.date), 'EEEE d MMMM', { locale: fr }) : undefined,
+        time: item.startTime,
+        price: item.estimatedCost,
+        priceLabel: '/pers.',
+        bookingUrl: url,
+        dayNumber: day.dayNumber,
+      });
+    }
   }
 
   return items;

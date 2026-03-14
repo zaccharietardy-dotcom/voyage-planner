@@ -73,7 +73,7 @@ export function FlightDatePicker({
         </div>
         {matrix.cheapestPrice && (
           <span className="text-xs text-green-600 font-medium">
-            Meilleur prix: {matrix.cheapestPrice}&euro;
+            ~{matrix.cheapestPrice}&euro;
           </span>
         )}
       </div>
@@ -116,7 +116,7 @@ export function FlightDatePicker({
             >
               <div className="text-[11px] font-medium">{dayNum}</div>
               {day.price !== null && (
-                <div className="text-[9px] font-medium">{day.price}&euro;</div>
+                <div className="text-[9px] font-medium">~{day.price}&euro;</div>
               )}
             </button>
           );
@@ -129,6 +129,7 @@ export function FlightDatePicker({
         <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-amber-50 dark:bg-amber-900/30" /> Moyen</span>
         <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-red-100 dark:bg-red-900/30" /> Cher</span>
       </div>
+      <p className="text-[10px] text-muted-foreground text-center italic">Prix estimés — consultez Aviasales pour les tarifs exacts</p>
     </div>
   );
 }
