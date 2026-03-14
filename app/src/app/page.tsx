@@ -1,9 +1,8 @@
 'use client';
 
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/components/auth';
-import { QuickSearch } from '@/components/home/QuickSearch';
-import { TravelGuides } from '@/components/home/TravelGuides';
-import { MyTrips } from '@/components/home/MyTrips';
 import { Footer } from '@/components/layout';
 import { Hero } from '@/components/landing/Hero';
 import { HowItWorks } from '@/components/landing/HowItWorks';
@@ -63,39 +62,16 @@ function LandingPage() {
   );
 }
 
-function Dashboard() {
-  const { user, profile } = useAuth();
-
-  const greeting = (() => {
-    const hour = new Date().getHours();
-    if (hour < 12) return 'Bonjour';
-    if (hour < 18) return 'Bon après-midi';
-    return 'Bonsoir';
-  })();
-
-  const displayName = profile?.display_name || user?.user_metadata?.full_name || '';
-
-  return (
-    <div className="min-h-screen bg-background">
-      <div className="container-wide py-6 space-y-8">
-        <div>
-          <h1 className="text-2xl font-serif font-bold">
-            {greeting}{displayName ? `, ${displayName.split(' ')[0]}` : ''} !
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Prêt pour votre prochaine aventure ?
-          </p>
-        </div>
-        <QuickSearch />
-        <TravelGuides />
-        <MyTrips />
-      </div>
-      <Footer />
-    </div>
-  );
-}
 
 export default function Home() {
   const { user } = useAuth();
-  return user ? <Dashboard /> : <LandingPage />;
+  const router = useRouter();
+
+  // Authenticated users → feed social (réseau social first)
+  useEffect(() => {
+    if (user) router.replace('/explore');
+  }, [user, router]);
+
+  if (user) return null; // Brief blank while redirecting
+  return <LandingPage />;
 }
