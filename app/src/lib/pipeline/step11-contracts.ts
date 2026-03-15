@@ -54,6 +54,21 @@ export interface QualityMetrics {
   daysWithoutDinner: number;
   invalidCoordinates: number;
   durationViolations: number;
+  // Distribution & routing quality (Phase v3.2)
+  /** Std dev of activity counts across full days — lower = better balanced */
+  dayLoadImbalance: number;
+  /** Total intra-day travel minutes across all days */
+  totalTravelMinutes: number;
+  /** Number of intra-city legs > 4km (non day-trip) */
+  longUrbanLegCount: number;
+  /** Total zigzag turns across all days */
+  zigzagTurnsTotal: number;
+  /** Number of days with 0-1 activities (excluding arrival/departure with short windows) */
+  nearEmptyDayCount: number;
+  /** Number of days with > 6 activities */
+  overloadedDayCount: number;
+  /** Number of "Repas libre" fallbacks */
+  mealFallbackCount: number;
 }
 
 // ============================================
@@ -92,6 +107,13 @@ export function validateContracts(
     daysWithoutDinner: 0,
     invalidCoordinates: 0,
     durationViolations: 0,
+    dayLoadImbalance: 0,
+    totalTravelMinutes: 0,
+    longUrbanLegCount: 0,
+    zigzagTurnsTotal: 0,
+    nearEmptyDayCount: 0,
+    overloadedDayCount: 0,
+    mealFallbackCount: 0,
   };
 
   const plannedActivityIds = new Set<string>();
@@ -282,15 +304,130 @@ export function validateContracts(
     ? totalRestaurantDist / restaurantDistCount
     : 0;
 
-  // Calculate quality score (0-100)
+  // ── Distribution & routing quality metrics ──
+  const LOGISTICS_TYPES = new Set(['flight', 'transport', 'checkin', 'checkout', 'parking', 'luggage', 'free_time']);
+  const dayActivityCounts: number[] = [];
+
+  for (const day of days) {
+    const tw = timeWindows?.find(w => w.dayNumber === day.dayNumber);
+    const twStartMin = tw ? toMinutes(tw.activityStartTime) : 0;
+    const twEndMin = tw ? toMinutes(tw.activityEndTime) : 22 * 60;
+    const windowMin = twEndMin - twStartMin;
+    const isShortWindow = windowMin < 300; // < 5h
+
+    const activities = day.items.filter(i => i.type === 'activity');
+    const actCount = activities.length;
+    dayActivityCounts.push(actCount);
+
+    // Near-empty days (skip short-window arrival/departure)
+    if (actCount <= 1 && !isShortWindow && !day.isDayTrip) {
+      metrics.nearEmptyDayCount++;
+    }
+    // Overloaded days
+    if (actCount > 6) {
+      metrics.overloadedDayCount++;
+    }
+
+    // Meal fallbacks
+    metrics.mealFallbackCount += day.items.filter(
+      i => i.type === 'restaurant' && i.qualityFlags?.includes('self_meal_fallback')
+    ).length;
+
+    // Intra-day travel and routing
+    const nonLogistics = day.items
+      .filter(i => !LOGISTICS_TYPES.has(i.type))
+      .sort((a, b) => toMinutes(a.startTime) - toMinutes(b.startTime));
+
+    for (let i = 0; i < nonLogistics.length - 1; i++) {
+      const curr = nonLogistics[i];
+      const next = nonLogistics[i + 1];
+      if (!curr.latitude || !curr.longitude || !next.latitude || !next.longitude) continue;
+      if (curr.latitude === 0 || next.latitude === 0) continue;
+
+      const dist = calculateDistance(curr.latitude, curr.longitude, next.latitude, next.longitude);
+      // Travel time estimate: 30km/h urban
+      metrics.totalTravelMinutes += Math.round((dist / 30) * 60);
+
+      // Long urban legs (non day-trip)
+      if (dist > 4 && !day.isDayTrip) {
+        metrics.longUrbanLegCount++;
+      }
+    }
+
+    // Zigzag detection
+    if (nonLogistics.length >= 3) {
+      const points = nonLogistics
+        .filter(i => i.latitude && i.longitude && i.latitude !== 0)
+        .map(i => ({ lat: i.latitude!, lng: i.longitude! }));
+
+      for (let i = 1; i < points.length - 1; i++) {
+        const prev = points[i - 1];
+        const curr = points[i];
+        const next = points[i + 1];
+        const v1x = curr.lng - prev.lng;
+        const v1y = curr.lat - prev.lat;
+        const v2x = next.lng - curr.lng;
+        const v2y = next.lat - curr.lat;
+        const norm1 = Math.hypot(v1x, v1y);
+        const norm2 = Math.hypot(v2x, v2y);
+        if (norm1 < 1e-6 || norm2 < 1e-6) continue;
+        const cosTheta = Math.max(-1, Math.min(1, (v1x * v2x + v1y * v2y) / (norm1 * norm2)));
+        const angleDeg = Math.acos(cosTheta) * (180 / Math.PI);
+        if (angleDeg >= 115) metrics.zigzagTurnsTotal++;
+      }
+    }
+  }
+
+  // Day load imbalance: std dev of activity counts across non-trivial days
+  const fullDayCounts = dayActivityCounts.filter(c => c > 0);
+  if (fullDayCounts.length >= 2) {
+    const mean = fullDayCounts.reduce((s, c) => s + c, 0) / fullDayCounts.length;
+    const variance = fullDayCounts.reduce((s, c) => s + (c - mean) ** 2, 0) / fullDayCounts.length;
+    metrics.dayLoadImbalance = Math.sqrt(variance);
+  }
+
+  // ── Quality score (0-100) — weighted across all dimensions ──
   let score = 100;
-  score -= violations.length * 5; // -5 per P0 violation
-  score -= qualityWarnings.length * 2; // -2 per warning
-  score -= metrics.activitiesOutsideHours * 10; // Extra penalty for time violations
+
+  // P0 violations: -5 each (hard failures)
+  score -= violations.length * 5;
+
+  // Warnings: -2 each
+  score -= qualityWarnings.length * 2;
+
+  // Opening hours: -10 extra per violation
+  score -= metrics.activitiesOutsideHours * 10;
+
+  // Must-sees missing: -20 scaled
   if (metrics.mustSeesTotal > 0) {
     const mustSeeRatio = metrics.mustSeesPlanned / metrics.mustSeesTotal;
     if (mustSeeRatio < 1) score -= (1 - mustSeeRatio) * 20;
   }
+
+  // Distribution penalties (NEW)
+  // Near-empty full days: -4 each (wasted day)
+  score -= metrics.nearEmptyDayCount * 4;
+
+  // Overloaded days: -3 each (exhausting)
+  score -= metrics.overloadedDayCount * 3;
+
+  // Day load imbalance: -2 per unit of std dev (1 act on day A, 6 on day B = bad)
+  score -= Math.min(8, metrics.dayLoadImbalance * 2);
+
+  // Routing penalties (NEW)
+  // Long urban legs: -2 each (inefficient routing)
+  score -= Math.min(8, metrics.longUrbanLegCount * 2);
+
+  // Zigzag: -2 per turn (backtracking wastes time)
+  score -= Math.min(6, metrics.zigzagTurnsTotal * 2);
+
+  // Excessive travel: -1 per 30min above 60min total (some travel is normal)
+  const excessTravelMin = Math.max(0, metrics.totalTravelMinutes - 60 * days.length);
+  score -= Math.min(6, Math.floor(excessTravelMin / 30));
+
+  // Meal fallbacks: -2 each (bad restaurant coverage)
+  score -= Math.min(8, metrics.mealFallbackCount * 2);
+
   score = Math.max(0, Math.min(100, Math.round(score)));
 
   const invariantsPassed = violations.length === 0;
@@ -298,6 +435,9 @@ export function validateContracts(
   console.log(`[Contracts] Score: ${score}/100, Invariants: ${invariantsPassed ? 'PASSED' : 'FAILED'}`);
   console.log(`  Activities: ${metrics.totalActivities}, Restaurants: ${metrics.totalRestaurants}`);
   console.log(`  Must-sees: ${metrics.mustSeesPlanned}/${metrics.mustSeesTotal}`);
+  console.log(`  Distribution: imbalance=${metrics.dayLoadImbalance.toFixed(1)}, empty=${metrics.nearEmptyDayCount}, overloaded=${metrics.overloadedDayCount}`);
+  console.log(`  Routing: travel=${metrics.totalTravelMinutes}min, longLegs=${metrics.longUrbanLegCount}, zigzag=${metrics.zigzagTurnsTotal}`);
+  console.log(`  Meals: fallbacks=${metrics.mealFallbackCount}`);
   if (violations.length > 0) {
     console.log(`  Violations (${violations.length}):`);
     for (const v of violations) console.log(`    - ${v}`);

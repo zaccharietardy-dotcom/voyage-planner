@@ -803,6 +803,283 @@ function greedyAssign(
 }
 
 // ============================================
+// Zone-First Assignment (v3.2+)
+// ============================================
+
+interface GeoZone {
+  id: string;
+  activities: ScoredActivity[];
+  centroid: { lat: number; lng: number };
+  totalDuration: number;
+}
+
+/**
+ * Simple agglomerative clustering for zone detection.
+ * Merges nearest zones until we have the right count or max radius is exceeded.
+ */
+function detectGeoZones(activities: ScoredActivity[], maxZones: number, maxRadiusKm: number = 3): GeoZone[] {
+  if (activities.length === 0) return [];
+
+  // Start: each activity is its own zone
+  let zones: GeoZone[] = activities.map((a, i) => ({
+    id: `zone-${i}`,
+    activities: [a],
+    centroid: { lat: a.latitude, lng: a.longitude },
+    totalDuration: a.duration || 60,
+  }));
+
+  // Merge nearest zones until we reach maxZones
+  while (zones.length > maxZones) {
+    let bestI = -1, bestJ = -1, bestDist = Infinity;
+
+    for (let i = 0; i < zones.length; i++) {
+      for (let j = i + 1; j < zones.length; j++) {
+        const dist = calculateDistance(
+          zones[i].centroid.lat, zones[i].centroid.lng,
+          zones[j].centroid.lat, zones[j].centroid.lng
+        );
+        if (dist < bestDist) {
+          bestDist = dist;
+          bestI = i;
+          bestJ = j;
+        }
+      }
+    }
+
+    if (bestI === -1 || bestDist > maxRadiusKm * 2) break;
+
+    // Merge j into i
+    const merged = [...zones[bestI].activities, ...zones[bestJ].activities];
+    zones[bestI] = {
+      id: zones[bestI].id,
+      activities: merged,
+      centroid: {
+        lat: merged.reduce((s, a) => s + a.latitude, 0) / merged.length,
+        lng: merged.reduce((s, a) => s + a.longitude, 0) / merged.length,
+      },
+      totalDuration: merged.reduce((s, a) => s + (a.duration || 60), 0),
+    };
+    zones.splice(bestJ, 1);
+  }
+
+  // Sort zones by total score (must-sees count more)
+  zones.sort((a, b) => {
+    const aScore = a.activities.reduce((s, act) => s + (act.mustSee ? 100 : act.score), 0);
+    const bScore = b.activities.reduce((s, act) => s + (act.mustSee ? 100 : act.score), 0);
+    return bScore - aScore;
+  });
+
+  return zones;
+}
+
+/**
+ * Zone-first assignment: detect geographic zones, then assign whole zones to days.
+ * This guarantees intra-day geographic coherence.
+ */
+function zoneFirstAssign(
+  activities: ScoredActivity[],
+  slots: DaySlot[],
+  cityCenter: { lat: number; lng: number },
+  rescueStage: V31RescueStage,
+  startDate?: Date,
+  plannerProfile: PlannerProfile = 'v3.2',
+  context: PlannerV32Context = {}
+): ScoredActivity[][] {
+  const assignments: ScoredActivity[][] = slots.map(() => []);
+
+  // Count available city days (non day-trip, non-zero window)
+  const citySlotIndices = slots
+    .map((s, i) => ({ slot: s, idx: i }))
+    .filter(x => x.slot.role !== 'day_trip' && x.slot.windowMin > 0);
+
+  if (citySlotIndices.length === 0 || activities.length === 0) return assignments;
+
+  // Separate boundary and full-city slots (declared early for zone detection)
+  const boundarySlots = citySlotIndices.filter(x =>
+    x.slot.role === 'arrival' || x.slot.role === 'departure'
+  );
+  const fullCitySlots = citySlotIndices.filter(x =>
+    x.slot.role === 'full_city' || x.slot.role === 'recovery'
+  );
+
+  // Detect zones — target = number of full-city days (zones map 1:1 to days)
+  const fullCityCount = fullCitySlots.length;
+  const targetZones = Math.max(fullCityCount, 2);
+  const maxRadius = fullCityCount <= 2 ? 8 : fullCityCount <= 4 ? 5 : 3;
+  const zones = detectGeoZones(activities, targetZones, maxRadius);
+
+  console.log(
+    `[Planner V3.2] Zone detection: ${zones.length} zones from ${activities.length} activities ` +
+    `(${zones.map(z => `${z.activities.length}acts/${z.totalDuration}min`).join(', ')})`
+  );
+
+  const usedZones = new Set<number>();
+
+  // 1. Assign zones to full-city days
+  for (const { slot, idx } of fullCitySlots) {
+    const budget = getSlotBudget(slot);
+    const maxActs = getSlotMaxActivities(slot, plannerProfile, context);
+    const dayDate = getSlotDate(startDate, slot.dayNumber);
+
+    // Find best unassigned zone that fits this day's budget
+    let bestZoneIdx = -1;
+    let bestFit = -Infinity;
+
+    for (let zi = 0; zi < zones.length; zi++) {
+      if (usedZones.has(zi)) continue;
+      const zone = zones[zi];
+      if (zone.totalDuration > budget * 1.2) continue; // allow slight overflow (beam will fix)
+
+      // Score: prefer zones with must-sees, then by proximity to previous day's zone
+      const mustSeeCount = zone.activities.filter(a => a.mustSee).length;
+      const proximityBonus = idx > 0 && assignments[idx - 1].length > 0
+        ? -calculateDistance(
+            zone.centroid.lat, zone.centroid.lng,
+            assignments[idx - 1].reduce((s, a) => s + a.latitude, 0) / assignments[idx - 1].length,
+            assignments[idx - 1].reduce((s, a) => s + a.longitude, 0) / assignments[idx - 1].length
+          ) * 0.5
+        : 0;
+
+      const fit = mustSeeCount * 10 + zone.activities.length + proximityBonus;
+      if (fit > bestFit) {
+        bestFit = fit;
+        bestZoneIdx = zi;
+      }
+    }
+
+    if (bestZoneIdx >= 0) {
+      const zone = zones[bestZoneIdx];
+      // Filter activities that fit this day
+      for (const act of zone.activities) {
+        if (assignments[idx].length >= maxActs) break;
+        if (dayDate && !canActivityFitDayWindow(act, slot, dayDate)) continue;
+        if (!isBoundaryFriendlyForPlanner(act, slot, cityCenter, plannerProfile, context)) continue;
+        assignments[idx].push(act);
+      }
+      usedZones.add(bestZoneIdx);
+    }
+  }
+
+  // 2. Assign remaining activities to boundary days (arrival/departure)
+  const unassigned = activities.filter(a =>
+    !assignments.some(day => day.includes(a))
+  );
+
+  for (const { slot, idx } of boundarySlots) {
+    const budget = getSlotBudget(slot);
+    const maxActs = getSlotMaxActivities(slot, plannerProfile, context);
+    const dayDate = getSlotDate(startDate, slot.dayNumber);
+
+    // Pick nearby, short, low-friction activities for boundary days
+    const candidates = unassigned
+      .filter(a => {
+        if (!isBoundaryFriendlyForPlanner(a, slot, cityCenter, plannerProfile, context)) return false;
+        if (dayDate && !canActivityFitDayWindow(a, slot, dayDate)) return false;
+        return true;
+      })
+      .sort((a, b) => {
+        // Prefer close to city center, short duration
+        const distA = calculateDistance(a.latitude, a.longitude, cityCenter.lat, cityCenter.lng);
+        const distB = calculateDistance(b.latitude, b.longitude, cityCenter.lat, cityCenter.lng);
+        return distA - distB;
+      });
+
+    let dayDur = 0;
+    for (const act of candidates) {
+      if (assignments[idx].length >= maxActs) break;
+      if (dayDur + (act.duration || 60) > budget) break;
+      if (assignments.some(day => day.includes(act))) continue;
+      assignments[idx].push(act);
+      dayDur += act.duration || 60;
+    }
+  }
+
+  // 3. Distribute remaining unassigned activities to nearest-zone day
+  const stillUnassigned = activities.filter(a =>
+    !assignments.some(day => day.includes(a))
+  );
+
+  for (const act of stillUnassigned) {
+    let bestIdx = -1;
+    let bestDist = Infinity;
+
+    for (let i = 0; i < slots.length; i++) {
+      const slot = slots[i];
+      if (slot.role === 'day_trip') continue;
+      if (slot.windowMin <= 0) continue;
+
+      const dayActs = assignments[i];
+      const maxActs = getSlotMaxActivities(slot, plannerProfile, context);
+      if (dayActs.length >= maxActs) continue;
+
+      const totalDur = dayActs.reduce((s, a) => s + (a.duration || 60), 0);
+      if (totalDur + (act.duration || 60) > getSlotBudget(slot)) continue;
+
+      if (dayActs.length === 0) {
+        const dist = calculateDistance(act.latitude, act.longitude, cityCenter.lat, cityCenter.lng);
+        if (dist < bestDist) { bestDist = dist; bestIdx = i; }
+      } else {
+        const centLat = dayActs.reduce((s, a) => s + a.latitude, 0) / dayActs.length;
+        const centLng = dayActs.reduce((s, a) => s + a.longitude, 0) / dayActs.length;
+        const dist = calculateDistance(act.latitude, act.longitude, centLat, centLng);
+        if (dist < bestDist) { bestDist = dist; bestIdx = i; }
+      }
+    }
+
+    if (bestIdx >= 0) {
+      assignments[bestIdx].push(act);
+    }
+  }
+
+  // 4. Rebalance: move activities from overloaded days to empty/light days
+  for (let pass = 0; pass < 3; pass++) {
+    const emptySlots = citySlotIndices.filter(x =>
+      assignments[x.idx].length <= 1 && x.slot.windowMin >= 300
+    );
+    if (emptySlots.length === 0) break;
+
+    const heaviestSlot = citySlotIndices
+      .filter(x => assignments[x.idx].length >= 4)
+      .sort((a, b) => assignments[b.idx].length - assignments[a.idx].length)[0];
+    if (!heaviestSlot) break;
+
+    const target = emptySlots[0];
+    const donor = assignments[heaviestSlot.idx];
+    const targetSlot = slots[target.idx];
+    const targetDate = getSlotDate(startDate, targetSlot.dayNumber);
+    const targetBudget = getSlotBudget(targetSlot);
+    const targetMaxActs = getSlotMaxActivities(targetSlot, plannerProfile, context);
+
+    // Move the farthest-from-centroid non-must-see activities
+    const donorCentroid = {
+      lat: donor.reduce((s, a) => s + a.latitude, 0) / donor.length,
+      lng: donor.reduce((s, a) => s + a.longitude, 0) / donor.length,
+    };
+
+    const movable = donor
+      .map((a, i) => ({ act: a, idx: i, dist: calculateDistance(a.latitude, a.longitude, donorCentroid.lat, donorCentroid.lng) }))
+      .filter(x => !x.act.mustSee && !x.act.protectedReason)
+      .sort((a, b) => b.dist - a.dist);
+
+    let moved = 0;
+    let targetDur = assignments[target.idx].reduce((s, a) => s + (a.duration || 60), 0);
+    for (const { act } of movable) {
+      if (moved >= 2) break;
+      if (assignments[target.idx].length >= targetMaxActs) break;
+      if (targetDur + (act.duration || 60) > targetBudget) break;
+      if (targetDate && !canActivityFitDayWindow(act, targetSlot, targetDate)) continue;
+
+      assignments[heaviestSlot.idx] = assignments[heaviestSlot.idx].filter(a => a !== act);
+      assignments[target.idx].push(act);
+      targetDur += act.duration || 60;
+      moved++;
+    }
+  }
+
+  return assignments;
+}
+
+// ============================================
 // Beam Search
 // ============================================
 
@@ -1030,8 +1307,10 @@ export function buildPlannerClustersV31(
       .map(a => a.id || a.name)
   );
 
-  // 3. Greedy baseline
-  const greedy = greedyAssign(plannerCityActivities, slots, cityCenter, rescueStage, startDate, plannerProfile, context);
+  // 3. Baseline assignment (zone-first for v3.2, greedy for v3.1)
+  const greedy = plannerProfile === 'v3.2'
+    ? zoneFirstAssign(plannerCityActivities, slots, cityCenter, rescueStage, startDate, plannerProfile, context)
+    : greedyAssign(plannerCityActivities, slots, cityCenter, rescueStage, startDate, plannerProfile, context);
 
   // 4. Beam search improvement
   const { assignments, usedBeam, fellBackToGreedy } = beamSearch(
