@@ -1201,6 +1201,15 @@ export default function TripPage() {
     return numMap;
   }, [trip]);
 
+  // Stable flightInfo for TripMap — avoid re-creating object on every render
+  const flightInfo = useMemo(() => trip ? ({
+    departureCity: trip.preferences.origin,
+    departureCoords: trip.preferences.originCoords,
+    arrivalCity: trip.preferences.destination,
+    arrivalCoords: trip.preferences.destinationCoords,
+    stopoverCities: trip.outboundFlight?.stopCities,
+  }) : undefined, [trip?.preferences.origin, trip?.preferences.originCoords, trip?.preferences.destination, trip?.preferences.destinationCoords, trip?.outboundFlight?.stopCities]);
+
   // Neighbourhood pricing cells for "Where to Stay" map overlay
   const neighbourhoodCells = useMemo(() => {
     if (!trip?.accommodationOptions || trip.accommodationOptions.length === 0) return undefined;
@@ -1755,13 +1764,7 @@ export default function TripPage() {
               mapNumbers={itemMapNumbers}
               isVisible={true}
               importedPlaces={trip.importedPlaces?.items}
-              flightInfo={{
-                departureCity: trip.preferences.origin,
-                departureCoords: trip.preferences.originCoords,
-                arrivalCity: trip.preferences.destination,
-                arrivalCoords: trip.preferences.destinationCoords,
-                stopoverCities: trip.outboundFlight?.stopCities,
-              }}
+              flightInfo={flightInfo}
               neighbourhoodCells={neighbourhoodCells}
             />
           </div>

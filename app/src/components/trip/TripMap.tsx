@@ -314,6 +314,8 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
 
   // Compute stable items key to detect real changes
   const itemsKey = useMemo(() => items.map(i => i.id).sort().join(','), [items]);
+  // Track last itemsKey that triggered fitBounds — prevents re-centering on unrelated effect re-runs
+  const lastFitItemsKeyRef = useRef<string>('');
 
   // Get unique day numbers for filter chips
   const dayNumbers = useMemo(() => {
@@ -529,15 +531,20 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
     }
 
     // fitBounds only on first render or when items actually change
+    // (not when flightInfo/mapNumbers cause effect re-run with same items)
     if (bounds.isValid()) {
       storedBoundsRef.current = bounds;
+      const itemsActuallyChanged = lastFitItemsKeyRef.current !== itemsKey;
       if (isInitialFitRef.current) {
         map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
         isInitialFitRef.current = false;
-      } else {
+        lastFitItemsKeyRef.current = itemsKey;
+      } else if (itemsActuallyChanged) {
         // Items changed (e.g. day filter) — refit
         map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14, animate: true });
+        lastFitItemsKeyRef.current = itemsKey;
       }
+      // else: effect re-ran but items didn't change — don't refit (user may be panning/zooming)
     }
 
     // Draw route polylines PER DAY with real routes when available
