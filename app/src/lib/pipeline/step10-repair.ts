@@ -18,6 +18,13 @@ import { getMinDuration, getMaxDuration } from './utils/constants';
 import { normalizeForMatching } from './utils/dedup';
 import { timeToMin, addMinutes } from './utils/time';
 import { normalizeActivityTitle } from './step9-schedule';
+import {
+  arePlannerRolesCompatible,
+  getDayPlannerRole,
+  getV31RescueStage,
+  isProtectedTripItem,
+  rescueStageAtLeast,
+} from './v31-rescue';
 
 // ============================================
 // Types
@@ -27,6 +34,12 @@ export interface RepairResult {
   days: TripDay[];
   repairs: RepairAction[];
   unresolvedViolations: string[];
+  rescueDiagnostics?: {
+    protectedBreakCount: number;
+    lateMealReplacementCount: number;
+    dayTripEvictionCount: number;
+    finalIntegrityFailures: number;
+  };
 }
 
 export interface RepairAction {
@@ -34,6 +47,11 @@ export interface RepairAction {
   dayNumber: number;
   itemTitle: string;
   description: string;
+}
+
+interface RepairGuardOptions {
+  rescueStage?: number;
+  changedDays?: Set<number>;
 }
 
 // ============================================
@@ -58,15 +76,17 @@ export function repairPass(
   const repairs: RepairAction[] = [];
   const unresolvedViolations: string[] = [];
   const repairedDays = days.map(d => ({ ...d, items: [...d.items] }));
+  const rescueStage = getV31RescueStage();
+  const changedDays = new Set<number>();
 
   // Pass 1: Fix opening hours violations (cross-day swap)
-  fixOpeningHoursViolations(repairedDays, startDate, repairs, unresolvedViolations);
+  fixOpeningHoursViolations(repairedDays, startDate, repairs, unresolvedViolations, { rescueStage, changedDays });
 
   // Pass 2: Validate restaurant distances (>800m from anchor → unresolved violation)
   validateRestaurantDistances(repairedDays, repairs, unresolvedViolations);
 
   // Pass 3: Ensure must-sees are present
-  ensureMustSees(repairedDays, activityPool, startDate, repairs, unresolvedViolations);
+  ensureMustSees(repairedDays, activityPool, startDate, repairs, unresolvedViolations, undefined, { rescueStage, changedDays });
 
   // Pass 4: Fill large gaps by extending adjacent activities
   fillGapsByExtension(repairedDays, startDate, repairs);
@@ -83,7 +103,17 @@ export function repairPass(
     console.warn(`  [UNRESOLVED] ${v}`);
   }
 
-  return { days: repairedDays, repairs, unresolvedViolations };
+  return {
+    days: repairedDays,
+    repairs,
+    unresolvedViolations,
+    rescueDiagnostics: {
+      protectedBreakCount: 0,
+      lateMealReplacementCount: 0,
+      dayTripEvictionCount: 0,
+      finalIntegrityFailures: unresolvedViolations.length,
+    },
+  };
 }
 
 // ============================================
@@ -94,10 +124,12 @@ export function fixOpeningHoursViolations(
   days: TripDay[],
   startDate: string,
   repairs: RepairAction[],
-  unresolvedViolations: string[]
+  unresolvedViolations: string[],
+  options: RepairGuardOptions = {}
 ): void {
   // Track activities that have already been involved in a swap to prevent double-swapping
   const swappedIds = new Set<string>();
+  const rescueStage = options.rescueStage ?? 0;
 
   for (const day of days) {
     const dayDate = getDayDate(startDate, day.dayNumber);
@@ -118,6 +150,12 @@ export function fixOpeningHoursViolations(
     for (const violating of violations) {
       // Skip if this activity has already been swapped
       if (swappedIds.has(violating.id || '')) continue;
+      if (rescueStageAtLeast(rescueStage, 1) && isProtectedTripItem(violating)) {
+        unresolvedViolations.push(
+          `Day ${day.dayNumber}: "${violating.title}" outside opening hours but is protected`
+        );
+        continue;
+      }
 
       const mockAct = itemToScoredActivity(violating)!;
       let swapped = false;
@@ -125,6 +163,10 @@ export function fixOpeningHoursViolations(
       // Try to swap with an activity from another day
       for (const otherDay of days) {
         if (otherDay.dayNumber === day.dayNumber) continue;
+        if (rescueStageAtLeast(rescueStage, 1)
+          && !arePlannerRolesCompatible(getDayPlannerRole(day), getDayPlannerRole(otherDay))) {
+          continue;
+        }
         const otherDate = getDayDate(startDate, otherDay.dayNumber);
 
         // Check if the violating activity is open on the other day
@@ -133,6 +175,7 @@ export function fixOpeningHoursViolations(
         // Find an activity in the other day that could work here
         for (const otherItem of otherDay.items) {
           if (otherItem.type !== 'activity') continue;
+          if (rescueStageAtLeast(rescueStage, 1) && isProtectedTripItem(otherItem)) continue;
 
           // Skip if this activity has already been swapped
           if (swappedIds.has(otherItem.id || '')) continue;
@@ -166,6 +209,8 @@ export function fixOpeningHoursViolations(
               // Mark both activities as swapped
               if (violating.id) swappedIds.add(violating.id);
               if (otherItem.id) swappedIds.add(otherItem.id);
+              options.changedDays?.add(day.dayNumber);
+              options.changedDays?.add(otherDay.dayNumber);
 
               repairs.push({
                 type: 'cross-day-swap',
@@ -245,9 +290,11 @@ export function ensureMustSees(
   startDate: string,
   repairs: RepairAction[],
   unresolvedViolations: string[],
-  globalPlacedIds?: Set<string>
+  globalPlacedIds?: Set<string>,
+  options: RepairGuardOptions = {}
 ): void {
   const mustSees = activityPool.filter(a => a.mustSee);
+  const rescueStage = options.rescueStage ?? 0;
 
   // Collect normalized planned activity names for fuzzy must-see matching.
   // Uses accent-insensitive normalization so "Sagrada Família" matches "Sagrada Familia".
@@ -299,6 +346,10 @@ export function ensureMustSees(
     let injected = false;
 
     for (const day of days) {
+      if (rescueStageAtLeast(rescueStage, 1)) {
+        const role = getDayPlannerRole(day);
+        if (role === 'day_trip' || role === 'arrival' || role === 'departure') continue;
+      }
       const dayDate = getDayDate(startDate, day.dayNumber);
       if (!isActivityOpenOnDay(mustSee as any, dayDate)) continue;
 
@@ -306,6 +357,7 @@ export function ensureMustSees(
       // must-see's opening hours cover the evicted activity's time slot.
       const evictCandidates = day.items
         .filter(i => i.type === 'activity' && !i.mustSee)
+        .filter(i => !rescueStageAtLeast(rescueStage, 1) || !isProtectedTripItem(i))
         .sort((a, b) => (a.rating || 0) - (b.rating || 0));
 
       for (const evicted of evictCandidates) {
@@ -353,6 +405,13 @@ export function ensureMustSees(
             : mustSee.latitude && mustSee.longitude
               ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mustSee.name)}&query=${mustSee.latitude},${mustSee.longitude}`
               : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mustSee.name)}`,
+          planningMeta: {
+            planningToken: mustSee.planningToken || `mustsee:${mustSee.id || mustSee.name}:${day.dayNumber}`,
+            protectedReason: 'must_see',
+            sourcePackId: mustSee.sourcePackId,
+            plannerRole: getDayPlannerRole(day),
+            originalDayNumber: day.dayNumber,
+          },
         };
         repairs.push({
           type: 'replacement',
@@ -363,6 +422,7 @@ export function ensureMustSees(
         // Mark as planned so duplicate must-see pool entries don't re-inject
         plannedActivityNamesNorm.add(normalizeForMatching(mustSee.name));
         globalPlacedIds?.add(mustSee.id || mustSee.name);
+        options.changedDays?.add(day.dayNumber);
         injected = true;
         break; // break evictCandidates loop
       }
@@ -370,13 +430,15 @@ export function ensureMustSees(
     }
 
     // Fallback: place must-see at its own preferred time, evict lowest-rated regardless of time
-    if (!injected) {
+    if (!injected && !rescueStageAtLeast(rescueStage, 1)) {
       for (const day of days) {
+        if (rescueStageAtLeast(rescueStage, 1) && getDayPlannerRole(day) === 'day_trip') continue;
         const dayDate = getDayDate(startDate, day.dayNumber);
         if (!isActivityOpenOnDay(mustSee as any, dayDate)) continue;
 
         const evictCandidates = day.items
           .filter(i => i.type === 'activity' && !i.mustSee)
+          .filter(i => !rescueStageAtLeast(rescueStage, 1) || !isProtectedTripItem(i))
           .sort((a, b) => (a.rating || 0) - (b.rating || 0));
 
         if (evictCandidates.length === 0) continue;
@@ -412,6 +474,13 @@ export function ensureMustSees(
             : mustSee.latitude && mustSee.longitude
               ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mustSee.name)}&query=${mustSee.latitude},${mustSee.longitude}`
               : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mustSee.name)}`,
+          planningMeta: {
+            planningToken: mustSee.planningToken || `mustsee:${mustSee.id || mustSee.name}:${day.dayNumber}`,
+            protectedReason: 'must_see',
+            sourcePackId: mustSee.sourcePackId,
+            plannerRole: getDayPlannerRole(day),
+            originalDayNumber: day.dayNumber,
+          },
         };
         repairs.push({
           type: 'replacement',
@@ -421,6 +490,7 @@ export function ensureMustSees(
         });
         plannedActivityNamesNorm.add(normalizeForMatching(mustSee.name));
         globalPlacedIds?.add(mustSee.id || mustSee.name);
+        options.changedDays?.add(day.dayNumber);
         injected = true;
         break;
       }
@@ -571,5 +641,10 @@ function itemToScoredActivity(item: TripItem): ScoredActivity | null {
     score: item.rating || 0,
     source: 'google_places' as const,
     reviewCount: 0,
+    protectedReason: item.planningMeta?.protectedReason,
+    sourcePackId: item.planningMeta?.sourcePackId,
+    plannerRole: item.planningMeta?.plannerRole,
+    originalDayNumber: item.planningMeta?.originalDayNumber,
+    planningToken: item.planningMeta?.planningToken,
   } as ScoredActivity;
 }

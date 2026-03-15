@@ -225,8 +225,9 @@ export function validateContracts(
     const tw = timeWindows?.find(w => w.dayNumber === day.dayNumber);
     const twStartMin = tw ? toMinutes(tw.activityStartTime) : 0;
     const twEndMin = tw ? toMinutes(tw.activityEndTime) : 22 * 60;
-    const expectLunch = twStartMin < 13 * 60 && twEndMin > 12 * 60;
-    const expectDinner = twEndMin >= 19 * 60;
+    const hasUsableWindow = twEndMin > twStartMin;
+    const expectLunch = hasUsableWindow && twStartMin < 13 * 60 && twEndMin > 12 * 60;
+    const expectDinner = hasUsableWindow && twEndMin >= 19 * 60;
 
     if (!hasLunch && expectLunch) {
       violations.push(`P0.3: Day ${day.dayNumber} has no lunch`);

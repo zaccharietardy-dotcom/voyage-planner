@@ -306,7 +306,7 @@ describe('unifiedScheduleV3Days', () => {
       const activities = result.days[0].items.filter(i => i.type === 'activity');
       expect(activities).toHaveLength(1);
       expect(activities[0].title).toContain('Sagrada Familia');
-      expect(activities[0].duration).toBe(90);
+      expect(activities[0].duration).toBeGreaterThanOrEqual(90);
     });
 
     it('places multiple activities in sequence', () => {

@@ -49,6 +49,7 @@ import { applyTrustLayer } from './trust-layer';
 import { buildDayTripPacks } from './day-trip-pack';
 import { buildPlannerClustersV31 } from './planner-v31';
 import { optimizeClusterRouting } from './intra-day-router';
+import { getV31RescueStage, stripPlanningMetaFromDays } from './v31-rescue';
 
 // ---------------------------------------------------------------------------
 // Pipeline Event System — emit helper
@@ -488,6 +489,7 @@ export async function generateTripV3(
   const startTime = Date.now();
   const stageTimes: Record<string, number> = {};
   const plannerVersion = (process.env.PLANNER_VERSION || 'v3.0') as 'v3.0' | 'v3.1';
+  const rescueStage = plannerVersion === 'v3.1' ? getV31RescueStage() : 0;
 
   // Step 1: Fetch all data (or use fixture)
   let t = Date.now();
@@ -588,6 +590,7 @@ export async function generateTripV3(
   let clusters: ActivityCluster[];
   let beamUsed = false;
   let beamFallbackUsed = false;
+  let dayNumberMismatchCount = 0;
 
   if (plannerVersion === 'v3.1') {
     // V3.1: role-aware beam search planner
@@ -597,11 +600,13 @@ export async function generateTripV3(
       timeWindows,
       preferences.durationDays,
       data.destCoords,
-      densityProfile
+      densityProfile,
+      { rescueStage, startDate: preferences.startDate }
     );
     clusters = plannerResult.clusters;
     beamUsed = plannerResult.beamUsed;
     beamFallbackUsed = plannerResult.beamFallbackUsed;
+    dayNumberMismatchCount = plannerResult.dayNumberMismatchCount;
   } else {
     // V3.0: hierarchical clustering (existing behavior)
     const PACE_FACTOR: Record<string, number> = {
@@ -710,7 +715,8 @@ export async function generateTripV3(
   onEvent?.({ type: 'step_start', step: 8, stepName: 'Unified scheduling', timestamp: Date.now() });
   const repairResult = unifiedScheduleV3Days(
     clusters, travelTimes, timeWindows, hotel, preferences, data,
-    enrichedRestaurants, allActivities, data.destCoords
+    enrichedRestaurants, allActivities, data.destCoords,
+    { plannerVersion, rescueStage }
   );
   stageTimes['schedule'] = Date.now() - t;
   console.log(`[Pipeline V3] Step 8: Unified schedule built with ${repairResult.days.length} days, ${repairResult.repairs.length} repairs`);
@@ -821,12 +827,13 @@ export async function generateTripV3(
   }
 
   // Build final Trip object
+  const publicDays = stripPlanningMetaFromDays(decorResult.days);
   const trip: Trip = {
     id: crypto.randomUUID?.() || `trip-${Date.now()}`,
     createdAt: new Date(),
     updatedAt: new Date(),
     preferences,
-    days: decorResult.days.map((day, idx) => ({
+    days: publicDays.map((day, idx) => ({
       ...day,
       date: new Date(new Date(preferences.startDate).getTime() + idx * 86400000),
     })),
@@ -908,6 +915,12 @@ export async function generateTripV3(
     routeInefficiencyTotal: Number(routeInefficiencyTotal.toFixed(2)),
     criticalGeoCount,
     contractsPassed: contractResult.invariantsPassed,
+    rescueStage,
+    protectedBreakCount: repairResult.rescueDiagnostics?.protectedBreakCount ?? 0,
+    lateMealReplacementCount: repairResult.rescueDiagnostics?.lateMealReplacementCount ?? 0,
+    dayNumberMismatchCount,
+    dayTripEvictionCount: repairResult.rescueDiagnostics?.dayTripEvictionCount ?? 0,
+    finalIntegrityFailures: repairResult.rescueDiagnostics?.finalIntegrityFailures ?? 0,
   };
 
   const totalTime = Date.now() - startTime;

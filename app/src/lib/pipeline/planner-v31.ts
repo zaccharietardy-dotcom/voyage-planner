@@ -13,6 +13,8 @@ import type { ScoredActivity, ActivityCluster, CityDensityProfile, DayTripPack }
 import type { DayTimeWindow } from './step4-anchor-transport';
 import { calculateDistance } from '../services/geocoding';
 import { timeToMin } from './utils/time';
+import type { V31RescueStage } from './v31-rescue';
+import { getActivityHoursForDay } from './utils/opening-hours';
 
 // ============================================
 // DayRole
@@ -52,9 +54,9 @@ export function assignDayRoles(
 
     let role: DayRole;
 
-    if (tw.hasArrivalTransport && windowMin < 360) {
+    if (tw.hasArrivalTransport && (windowMin < 360 || startMin >= 12 * 60)) {
       role = 'arrival';
-    } else if (tw.hasDepartureTransport && windowMin < 300) {
+    } else if (tw.hasDepartureTransport && (windowMin < 300 || endMin <= 18 * 60)) {
       role = 'departure';
     } else {
       role = 'full_city';
@@ -165,6 +167,10 @@ function emptyPenalties(): BeamPenalties {
  * Returns negative if a is better, positive if b is better, 0 if equal.
  */
 function compareStates(a: BeamState, b: BeamState): number {
+  return compareStatesWithStage(a, b, 0);
+}
+
+function compareStatesWithStage(a: BeamState, b: BeamState, rescueStage: V31RescueStage): number {
   const pa = a.penalties;
   const pb = b.penalties;
 
@@ -183,13 +189,17 @@ function compareStates(a: BeamState, b: BeamState): number {
   // 7. zigzagTurnsTotal
   if (pa.zigzagTurnsTotal !== pb.zigzagTurnsTotal) return pa.zigzagTurnsTotal - pb.zigzagTurnsTotal;
   // 8. routeInefficiencyPenalty
-  if (pa.routeInefficiencyPenalty !== pb.routeInefficiencyPenalty) return pa.routeInefficiencyPenalty - pb.routeInefficiencyPenalty;
+  if (rescueStage < 3 && pa.routeInefficiencyPenalty !== pb.routeInefficiencyPenalty) {
+    return pa.routeInefficiencyPenalty - pb.routeInefficiencyPenalty;
+  }
   // 9. rhythmPenalty
   if (pa.rhythmPenalty !== pb.rhythmPenalty) return pa.rhythmPenalty - pb.rhythmPenalty;
   // 10. diversityPenalty
-  if (pa.diversityPenalty !== pb.diversityPenalty) return pa.diversityPenalty - pb.diversityPenalty;
+  if (rescueStage < 3 && pa.diversityPenalty !== pb.diversityPenalty) {
+    return pa.diversityPenalty - pb.diversityPenalty;
+  }
   // 11. fillerPenalty
-  if (pa.fillerPenalty !== pb.fillerPenalty) return pa.fillerPenalty - pb.fillerPenalty;
+  if (rescueStage < 3 && pa.fillerPenalty !== pb.fillerPenalty) return pa.fillerPenalty - pb.fillerPenalty;
   // 12. totalTravelMinutes
   if (pa.totalTravelMinutes !== pb.totalTravelMinutes) return pa.totalTravelMinutes - pb.totalTravelMinutes;
   // 13. stableTieBreakKey (lexicographic on sorted activity IDs)
@@ -226,19 +236,72 @@ function getSlotMaxActivities(slot: DaySlot): number {
   return Math.max(1, Math.floor(budget / 75));
 }
 
+function getSlotDate(startDate: Date | undefined, dayNumber: number): Date | undefined {
+  if (!startDate) return undefined;
+  const slotDate = new Date(startDate);
+  slotDate.setDate(slotDate.getDate() + dayNumber - 1);
+  return slotDate;
+}
+
+function getActivityCloseMinForDate(activity: ScoredActivity, dayDate: Date | undefined): number | null {
+  if (!dayDate) return null;
+  const dayHours = getActivityHoursForDay(activity, dayDate);
+  if (!dayHours?.close) return null;
+  return timeToMin(dayHours.close);
+}
+
+function canActivityFitDayWindow(activity: ScoredActivity, slot: DaySlot, dayDate: Date | undefined): boolean {
+  if (!dayDate) return true;
+  const dayHours = getActivityHoursForDay(activity, dayDate);
+  if (dayHours === null) return false;
+  if (!dayHours) return true;
+
+  const slotStart = timeToMin(slot.timeWindow.activityStartTime);
+  const slotEnd = timeToMin(slot.timeWindow.activityEndTime);
+  const openMin = timeToMin(dayHours.open);
+  let closeMin = timeToMin(dayHours.close);
+  if (dayHours.close === '00:00' && dayHours.open !== '00:00') {
+    closeMin = 24 * 60;
+  }
+  const earliestStart = Math.max(slotStart, openMin);
+  const latestEnd = Math.min(slotEnd, closeMin);
+  return earliestStart + (activity.duration || 60) <= latestEnd;
+}
+
+function isShortConstrainedSlot(slot: DaySlot): boolean {
+  return slot.role === 'arrival' || slot.role === 'departure' || slot.windowMin < 360;
+}
+
+function countEarlyCloseActivities(
+  activities: ScoredActivity[],
+  dayDate: Date | undefined
+): number {
+  return activities.filter((activity) => {
+    const closeMin = getActivityCloseMinForDate(activity, dayDate);
+    return closeMin !== null && closeMin <= 19 * 60;
+  }).length;
+}
+
+function isLongDurationActivity(activity: ScoredActivity): boolean {
+  return (activity.duration || 60) >= 180;
+}
+
 function computePenalties(
   state: BeamState,
   slots: DaySlot[],
   allMustSeeIds: Set<string>,
+  allProtectedIds: Set<string>,
   cityCenter: { lat: number; lng: number },
-  densityProfile?: CityDensityProfile
+  densityProfile?: CityDensityProfile,
+  rescueStage: V31RescueStage = 0,
+  startDate?: Date
 ): BeamPenalties {
   const p = emptyPenalties();
   const urbanBudgetKm = densityProfile?.urbanLegBudgetKm ?? 3.5;
 
   const assignedIds = new Set<string>();
   for (const dayActs of state.assignments) {
-    for (const a of dayActs) assignedIds.add(a.id);
+    for (const a of dayActs) assignedIds.add(a.id || a.name);
   }
 
   // Missing must-sees
@@ -251,6 +314,7 @@ function computePenalties(
     const acts = state.assignments[i] || [];
     const budget = getSlotBudget(slot);
     const maxActs = getSlotMaxActivities(slot);
+    const dayDate = getSlotDate(startDate, slot.dayNumber);
 
     // Duration overrun
     const totalDuration = acts.reduce((s, a) => s + (a.duration || 60), 0);
@@ -284,8 +348,22 @@ function computePenalties(
       }
     }
 
+    if (dayDate) {
+      for (const act of acts) {
+        if (!canActivityFitDayWindow(act, slot, dayDate)) {
+          p.hardViolations++;
+        }
+      }
+      if (rescueStage >= 1 && isShortConstrainedSlot(slot)) {
+        const earlyCloseCount = countEarlyCloseActivities(acts, dayDate);
+        if (earlyCloseCount > 1) {
+          p.hardViolations += earlyCloseCount - 1;
+        }
+      }
+    }
+
     // Type diversity: count excess same-type activities
-    if (acts.length >= 3) {
+    if (rescueStage < 3 && acts.length >= 3) {
       const typeCounts = new Map<string, number>();
       for (const a of acts) {
         typeCounts.set(a.type, (typeCounts.get(a.type) || 0) + 1);
@@ -303,12 +381,8 @@ function computePenalties(
   }
 
   // Protected violations: protected activities not assigned
-  for (const dayActs of state.assignments) {
-    for (const a of dayActs) {
-      if (a.protectedReason && !assignedIds.has(a.id)) {
-        p.protectedViolations++;
-      }
-    }
+  for (const protectedId of allProtectedIds) {
+    if (!assignedIds.has(protectedId)) p.protectedViolations++;
   }
 
   return p;
@@ -316,7 +390,7 @@ function computePenalties(
 
 function computeStableTieBreakKey(assignments: ScoredActivity[][]): string {
   return assignments
-    .map(dayActs => dayActs.map(a => a.id).sort().join(','))
+    .map(dayActs => dayActs.map(a => a.id || a.name).sort().join(','))
     .join('|');
 }
 
@@ -331,7 +405,9 @@ function computeStableTieBreakKey(assignments: ScoredActivity[][]): string {
 function greedyAssign(
   activities: ScoredActivity[],
   slots: DaySlot[],
-  cityCenter: { lat: number; lng: number }
+  cityCenter: { lat: number; lng: number },
+  rescueStage: V31RescueStage,
+  startDate?: Date
 ): ScoredActivity[][] {
   const assignments: ScoredActivity[][] = slots.map(() => []);
 
@@ -348,6 +424,7 @@ function greedyAssign(
 
     for (let i = 0; i < slots.length; i++) {
       const slot = slots[i];
+      const dayDate = getSlotDate(startDate, slot.dayNumber);
       if (slot.role === 'day_trip') continue; // day trips handled separately
       if (slot.role === 'recovery') continue; // recovery days are minimal
 
@@ -355,8 +432,20 @@ function greedyAssign(
       const maxActs = getSlotMaxActivities(slot);
       if (dayActs.length >= maxActs) continue;
 
+      if (!canActivityFitDayWindow(activity, slot, dayDate)) continue;
+
       const totalDur = dayActs.reduce((s, a) => s + (a.duration || 60), 0);
       if (totalDur + (activity.duration || 60) > getSlotBudget(slot)) continue;
+      if (rescueStage >= 1 && isLongDurationActivity(activity) && totalDur > 120) continue;
+
+      if (
+        rescueStage >= 1
+        && isShortConstrainedSlot(slot)
+        && (getActivityCloseMinForDate(activity, dayDate) ?? Infinity) <= 19 * 60
+        && countEarlyCloseActivities(dayActs, dayDate) >= 1
+      ) {
+        continue;
+      }
 
       // Score: prefer days where this activity is geographically close to existing
       let geoScore = 0;
@@ -373,8 +462,10 @@ function greedyAssign(
 
       // Prefer arrival day for close-to-hotel activities, departure for wrap-up
       let roleBonus = 0;
-      if (slot.role === 'arrival' && dayActs.length < 2) roleBonus = 1;
-      if (slot.role === 'departure' && dayActs.length < 2) roleBonus = 1;
+      if (rescueStage < 1) {
+        if (slot.role === 'arrival' && dayActs.length < 2) roleBonus = 1;
+        if (slot.role === 'departure' && dayActs.length < 2) roleBonus = 1;
+      }
 
       const score = geoScore + roleBonus;
       if (score > bestScore) {
@@ -408,8 +499,11 @@ function beamSearch(
   baseline: ScoredActivity[][],
   slots: DaySlot[],
   allMustSeeIds: Set<string>,
+  allProtectedIds: Set<string>,
   cityCenter: { lat: number; lng: number },
-  densityProfile?: CityDensityProfile
+  densityProfile?: CityDensityProfile,
+  rescueStage: V31RescueStage = 0,
+  startDate?: Date
 ): { assignments: ScoredActivity[][]; usedBeam: boolean; fellBackToGreedy: boolean } {
   const t0 = Date.now();
 
@@ -417,7 +511,7 @@ function beamSearch(
     assignments,
     penalties: computePenalties(
       { assignments, penalties: emptyPenalties(), stableTieBreakKey: '' },
-      slots, allMustSeeIds, cityCenter, densityProfile
+      slots, allMustSeeIds, allProtectedIds, cityCenter, densityProfile, rescueStage, startDate
     ),
     stableTieBreakKey: computeStableTieBreakKey(assignments),
   });
@@ -444,21 +538,32 @@ function beamSearch(
 
         for (let actIdx = 0; actIdx < state.assignments[fromDay].length && expansions < MAX_EXPANSIONS_PER_STATE; actIdx++) {
           const activity = state.assignments[fromDay][actIdx];
-          if (activity.protectedReason === 'day_trip_anchor') continue;
+          if (activity.protectedReason === 'day_trip_anchor' || activity.protectedReason === 'day_trip') continue;
 
           for (let toDay = 0; toDay < slots.length; toDay++) {
             if (toDay === fromDay) continue;
             if (Date.now() - t0 > BEAM_BUDGET_MS) break;
 
             const toSlot = slots[toDay];
+            const toDayDate = getSlotDate(startDate, toSlot.dayNumber);
             if (toSlot.role === 'day_trip') continue;
             if (!isRoleCompatible(fromSlot.role, toSlot.role)) continue;
+            if (!canActivityFitDayWindow(activity, toSlot, toDayDate)) continue;
 
             // Check capacity
             const toDayActs = state.assignments[toDay];
             if (toDayActs.length >= getSlotMaxActivities(toSlot)) continue;
             const toDur = toDayActs.reduce((s, a) => s + (a.duration || 60), 0);
             if (toDur + (activity.duration || 60) > getSlotBudget(toSlot)) continue;
+            if (rescueStage >= 1 && isLongDurationActivity(activity) && toDur > 120) continue;
+            if (
+              rescueStage >= 1
+              && isShortConstrainedSlot(toSlot)
+              && (getActivityCloseMinForDate(activity, toDayDate) ?? Infinity) <= 19 * 60
+              && countEarlyCloseActivities(toDayActs, toDayDate) >= 1
+            ) {
+              continue;
+            }
 
             // Create new state with this move
             const newAssignments = state.assignments.map(day => [...day]);
@@ -466,7 +571,7 @@ function beamSearch(
             newAssignments[toDay] = [...newAssignments[toDay], activity];
 
             const newState = makeState(newAssignments);
-            if (compareStates(newState, state) < 0) {
+            if (compareStatesWithStage(newState, state, rescueStage) < 0) {
               candidates.push(newState);
               expansions++;
             }
@@ -478,13 +583,13 @@ function beamSearch(
     if (candidates.length === 0) break;
 
     // Merge beam + candidates, keep top BEAM_WIDTH
-    const merged = [...beam, ...candidates].sort(compareStates);
+    const merged = [...beam, ...candidates].sort((left, right) => compareStatesWithStage(left, right, rescueStage));
     beam = merged.slice(0, BEAM_WIDTH);
     improved = true;
   }
 
   const best = beam[0];
-  const wasImproved = improved && compareStates(best, baselineState) < 0;
+  const wasImproved = improved && compareStatesWithStage(best, baselineState, rescueStage) < 0;
   const elapsed = Date.now() - t0;
 
   console.log(
@@ -508,6 +613,7 @@ export interface PlannerV31Result {
   beamUsed: boolean;
   beamFallbackUsed: boolean;
   dayRoles: DaySlot[];
+  dayNumberMismatchCount: number;
 }
 
 /**
@@ -524,8 +630,11 @@ export function buildPlannerClustersV31(
   timeWindows: DayTimeWindow[],
   numDays: number,
   cityCenter: { lat: number; lng: number },
-  densityProfile?: CityDensityProfile
+  densityProfile?: CityDensityProfile,
+  options: { rescueStage?: V31RescueStage; startDate?: Date } = {}
 ): PlannerV31Result {
+  const rescueStage = options.rescueStage ?? 0;
+  const startDate = options.startDate;
   // 1. Assign day roles
   const slots = assignDayRoles(numDays, timeWindows, dayTripPacks);
   console.log(
@@ -534,22 +643,31 @@ export function buildPlannerClustersV31(
 
   // 2. Must-see IDs for penalty computation
   const allMustSeeIds = new Set(
-    cityActivities.filter(a => a.mustSee).map(a => a.id)
+    cityActivities.filter(a => a.mustSee).map(a => a.id || a.name)
+  );
+  const allProtectedIds = new Set(
+    cityActivities
+      .filter(a => a.protectedReason || a.mustSee)
+      .map(a => a.id || a.name)
   );
 
   // 3. Greedy baseline
-  const greedy = greedyAssign(cityActivities, slots, cityCenter);
+  const greedy = greedyAssign(cityActivities, slots, cityCenter, rescueStage, startDate);
 
   // 4. Beam search improvement
   const { assignments, usedBeam, fellBackToGreedy } = beamSearch(
-    greedy, slots, allMustSeeIds, cityCenter, densityProfile
+    greedy, slots, allMustSeeIds, allProtectedIds, cityCenter, densityProfile, rescueStage, startDate
   );
 
   // 5. Convert to ActivityCluster[]
   const clusters: ActivityCluster[] = [];
+  let dayNumberMismatchCount = 0;
 
   for (let i = 0; i < slots.length; i++) {
     const slot = slots[i];
+    if (!timeWindows.some(w => w.dayNumber === slot.dayNumber)) {
+      dayNumberMismatchCount++;
+    }
 
     if (slot.role === 'day_trip') {
       // Find the corresponding DayTripPack
@@ -559,7 +677,14 @@ export function buildPlannerClustersV31(
         const packActs = pack.activities;
         clusters.push({
           dayNumber: slot.dayNumber,
-          activities: packActs,
+          activities: packActs.map((act, actIdx) => ({
+            ...act,
+            plannerRole: slot.role,
+            originalDayNumber: slot.dayNumber,
+            planningToken: act.planningToken || `${pack.id}:${act.id || act.name}:${slot.dayNumber}:${actIdx}`,
+            protectedReason: act.protectedReason || (act.id === pack.anchor.id ? 'day_trip_anchor' : 'day_trip'),
+            sourcePackId: act.sourcePackId || pack.id,
+          })),
           centroid: {
             lat: packActs.reduce((s, a) => s + a.latitude, 0) / packActs.length,
             lng: packActs.reduce((s, a) => s + a.longitude, 0) / packActs.length,
@@ -568,14 +693,13 @@ export function buildPlannerClustersV31(
           isFullDay: true,
           isDayTrip: true,
           dayTripDestination: pack.destination,
+          plannerRole: slot.role,
         });
       }
       continue;
     }
 
     const dayActs = assignments[i] || [];
-    if (dayActs.length === 0 && slot.role !== 'recovery') continue;
-
     const centroid = dayActs.length > 0
       ? {
           lat: dayActs.reduce((s, a) => s + a.latitude, 0) / dayActs.length,
@@ -585,19 +709,24 @@ export function buildPlannerClustersV31(
 
     clusters.push({
       dayNumber: slot.dayNumber,
-      activities: dayActs,
+      activities: dayActs.map((act, actIdx) => ({
+        ...act,
+        plannerRole: slot.role,
+        originalDayNumber: slot.dayNumber,
+        protectedReason: act.protectedReason || (act.mustSee ? 'must_see' : undefined),
+        planningToken: act.planningToken || `${act.id || act.name}:${slot.dayNumber}:${actIdx}`,
+      })),
       centroid,
       totalIntraDistance: 0,
+      plannerRole: slot.role,
     });
   }
-
-  // Re-number days sequentially (remove gaps from empty days)
-  clusters.forEach((c, i) => { c.dayNumber = i + 1; });
 
   return {
     clusters,
     beamUsed: usedBeam,
     beamFallbackUsed: fellBackToGreedy,
     dayRoles: slots,
+    dayNumberMismatchCount,
   };
 }

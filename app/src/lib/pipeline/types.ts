@@ -96,9 +96,17 @@ export interface ScoredActivity extends Attraction {
   /** Affinity to a day trip destination (0 = city, 1 = strongly associated with a day trip) */
   dayTripAffinity?: number;
   /** Why this activity is protected from swaps/eviction */
-  protectedReason?: 'must_see' | 'day_trip_anchor' | 'user_requested';
+  protectedReason?: 'must_see' | 'day_trip_anchor' | 'day_trip' | 'user_forced';
   /** Inferred geographic zone hint for clustering */
   zoneHint?: string;
+  /** Stable internal token for planner/scheduler repair coordination */
+  planningToken?: string;
+  /** Day trip pack source for protected atomic units */
+  sourcePackId?: string;
+  /** Planner role assigned to the activity's day */
+  plannerRole?: 'arrival' | 'full_city' | 'day_trip' | 'recovery' | 'departure';
+  /** Original day number from the planner before any repair pass */
+  originalDayNumber?: number;
 }
 
 // ============================================
@@ -114,6 +122,7 @@ export interface ActivityCluster {
   isFullDay?: boolean; // true if cluster contains a single full-day activity (>=4h)
   isDayTrip?: boolean; // true if cluster is a day trip to a distant destination
   dayTripDestination?: string; // e.g. "Pompei"
+  plannerRole?: 'arrival' | 'full_city' | 'day_trip' | 'recovery' | 'departure';
 }
 
 // ============================================
@@ -121,6 +130,8 @@ export interface ActivityCluster {
 // ============================================
 
 export interface DayTripPack {
+  /** Stable internal pack ID */
+  id: string;
   /** The primary must-see or anchor activity that triggers the day trip */
   anchor: ScoredActivity;
   /** All activities at the day trip destination (anchor + enrichment) */
@@ -137,6 +148,8 @@ export interface DayTripPack {
   transportConfidence: 'high' | 'medium' | 'low';
   /** Transport mode */
   transportMode: string;
+  /** Original scored activities that created this pack (for safe demotion) */
+  originalCandidates?: ScoredActivity[];
 }
 
 // ============================================
@@ -346,4 +359,16 @@ export interface PlannerDiagnostics {
   criticalGeoCount: number;
   /** Whether contracts passed */
   contractsPassed: boolean;
+  /** Active rescue stage for v3.1 */
+  rescueStage?: number;
+  /** Protected items broken by late passes */
+  protectedBreakCount?: number;
+  /** Meals replaced only at final integrity / late safety */
+  lateMealReplacementCount?: number;
+  /** Cluster day numbers without matching time windows */
+  dayNumberMismatchCount?: number;
+  /** Day trip items evicted or moved out of their original day */
+  dayTripEvictionCount?: number;
+  /** Final integrity issues left unresolved */
+  finalIntegrityFailures?: number;
 }

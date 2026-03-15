@@ -56,6 +56,48 @@ import { isDuplicateActivityCandidate } from './utils/activityDedup';
 import { isOpenAtTime } from './utils/opening-hours';
 import { enrichWithTicketingLinks } from '../services/officialTicketing';
 import { isNightlifeActivity } from './step2-score';
+import {
+  getV31RescueStage,
+  isProtectedTripItem,
+  rescueStageAtLeast,
+  type PlannerRole,
+} from './v31-rescue';
+
+function strictMealPlacement(
+  placement: ReturnType<typeof findBestRestaurant>,
+  dayDate: Date,
+  startTime: string,
+  duration: number,
+  maxDistKm: number
+): boolean {
+  if (!placement) return false;
+  if (placement.distanceFromAnchor > maxDistKm) return false;
+  return isRestaurantOpenForSlot(
+    placement.primary,
+    dayDate,
+    startTime,
+    addMinutes(startTime, duration)
+  );
+}
+
+function stampDayPlanningMeta(day: TripDay, role?: PlannerRole): void {
+  for (const item of day.items) {
+    item.planningMeta = {
+      planningToken: item.planningMeta?.planningToken || `${item.id}:${day.dayNumber}:${item.orderIndex}`,
+      protectedReason: item.planningMeta?.protectedReason,
+      sourcePackId: item.planningMeta?.sourcePackId,
+      plannerRole: item.planningMeta?.plannerRole || role,
+      originalDayNumber: item.planningMeta?.originalDayNumber ?? day.dayNumber,
+    };
+  }
+}
+
+function findDayRole(day: TripDay): PlannerRole | undefined {
+  for (const item of day.items) {
+    if (item.planningMeta?.plannerRole) return item.planningMeta.plannerRole;
+  }
+  return undefined;
+}
 
 // ============================================
 // Public API
@@ -76,10 +118,21 @@ export function unifiedScheduleV3Days(
   data: FetchedData,
   restaurants: Restaurant[],
   allActivities: ScoredActivity[],
-  destCoords: { lat: number; lng: number }
+  destCoords: { lat: number; lng: number },
+  options: { plannerVersion?: 'v3.0' | 'v3.1'; rescueStage?: number } = {}
 ): RepairResult {
   const repairs: RepairAction[] = [];
   const unresolvedViolations: string[] = [];
+  const plannerVersion = options.plannerVersion || 'v3.0';
+  const rescueStage = plannerVersion === 'v3.1'
+    ? (options.rescueStage ?? getV31RescueStage())
+    : 0;
+  const rescueDiagnostics = {
+    protectedBreakCount: 0,
+    lateMealReplacementCount: 0,
+    dayTripEvictionCount: 0,
+    finalIntegrityFailures: 0,
+  };
 
   const startDate = preferences.startDate || new Date();
   const startDateStr = (startDate instanceof Date ? startDate : new Date(startDate)).toISOString().split('T')[0];
@@ -91,6 +144,8 @@ export function unifiedScheduleV3Days(
   const usedRestaurantIds = new Set<string>();
   // Global dedup: track activity IDs already placed across all days
   const globalPlacedIds = new Set<string>();
+  const dayRestaurantPools = new Map<number, Restaurant[]>();
+  const expectedProtectedItems = new Map<string, { dayNumber: number; reason?: string }>();
 
   const days: TripDay[] = [];
 
@@ -160,9 +215,25 @@ export function unifiedScheduleV3Days(
     // Meal eligibility: derived from time window, not ad-hoc heuristics
     const dayStartMin = timeToMin(dayStartTime);
     const dayEndMin = timeToMin(dayEndTime);
-    const canHaveBreakfast = dayStartMin < 10 * 60 && dayStartMin < dayEndMin;   // start before 10:00 AND window exists
+    let canHaveBreakfast = dayStartMin < 10 * 60 && dayStartMin < dayEndMin;   // start before 10:00 AND window exists
     const canHaveLunch = dayStartMin < 13 * 60 && dayEndMin > 12 * 60; // window spans lunch hours
     const canHaveDinner = dayEndMin >= 19 * 60;        // day extends past 19:00
+
+    if (rescueStageAtLeast(rescueStage, 3) && canHaveBreakfast) {
+      const breakfastConsumesUntil = dayStartMin + 60;
+      const breakfastBlockingActivity = cluster.activities.find((activity) => {
+        const closeTime = getActivityCloseTime(activity, dayDate);
+        if (!closeTime) return false;
+        const latestStart = timeToMin(closeTime) - (activity.duration || 60);
+        return latestStart <= breakfastConsumesUntil;
+      });
+      if (breakfastBlockingActivity) {
+        canHaveBreakfast = false;
+        console.log(
+          `[Unified] Day ${cluster.dayNumber}: skipping breakfast to protect early-closing "${breakfastBlockingActivity.name}"`
+        );
+      }
+    }
 
     if (!canHaveLunch) {
       lunchPlaced = true; // prevent lunch trigger
@@ -249,6 +320,7 @@ export function unifiedScheduleV3Days(
         console.log(`[Unified] Day ${cluster.dayNumber}: added ${dtRestaurants.length} restaurants from "${cluster.dayTripDestination}"`);
       }
     }
+    dayRestaurantPools.set(cluster.dayNumber, dayRestaurants);
 
     // 4. SORT activities: must-sees that close early go first
     cluster.activities.sort((a, b) => {
@@ -350,8 +422,7 @@ export function unifiedScheduleV3Days(
           if (candidatePlacement) {
             // Verify restaurant is actually open at the specific slot time
             for (const slot of lunchSlots) {
-              const slotEnd = addMinutes(slot, 75);
-              if (isRestaurantOpenForSlot(candidatePlacement.primary, dayDate, slot, slotEnd)) {
+              if (strictMealPlacement(candidatePlacement, dayDate, slot, 75, 0.8)) {
                 lunchPlacement = candidatePlacement;
                 finalLunchTime = slot;
                 break;
@@ -462,8 +533,7 @@ export function unifiedScheduleV3Days(
           );
           if (candidateDinner) {
             for (const slot of dinnerSlots) {
-              const slotEnd = addMinutes(slot, 90);
-              if (isRestaurantOpenForSlot(candidateDinner.primary, dayDate, slot, slotEnd)) {
+              if (strictMealPlacement(candidateDinner, dayDate, slot, 90, 0.8)) {
                 dinnerPlacement = candidateDinner;
                 finalDinnerTime = slot;
                 break;
@@ -496,7 +566,7 @@ export function unifiedScheduleV3Days(
             dayRestaurants, lunchAnchor, 'lunch',
             0.8, 3.5, 2, dietary, usedRestaurantIds, dayDateForRestaurant
           );
-          if (lunchPlacement) {
+          if (lunchPlacement && strictMealPlacement(lunchPlacement, dayDate, lunchTime, 75, 0.8)) {
             items.push(createRestaurantItem(
               { ...lunchPlacement, anchorName: 'Position actuelle' },
               'lunch', lunchTime, 75, cluster.dayNumber, orderIndex++
@@ -533,8 +603,7 @@ export function unifiedScheduleV3Days(
         if (candidateDinner) {
           // Verify restaurant is actually open at the specific slot time
           for (const slot of dinnerSlots) {
-            const slotEnd = addMinutes(slot, 90);
-            if (isRestaurantOpenForSlot(candidateDinner.primary, dayDate, slot, slotEnd)) {
+            if (strictMealPlacement(candidateDinner, dayDate, slot, 90, 0.8)) {
               dinnerPlacement = candidateDinner;
               finalDinnerTime = slot;
               break;
@@ -542,7 +611,7 @@ export function unifiedScheduleV3Days(
           }
         }
         // Skip hotel-fallback: on day trips, prefer "Repas libre" over a restaurant 16km away
-        if (dinnerPlacement) {
+        if (dinnerPlacement && strictMealPlacement(dinnerPlacement, dayDate, finalDinnerTime, 90, 0.8)) {
           items.push(createRestaurantItem(
             { ...dinnerPlacement, anchorName: 'Position actuelle' },
             'dinner', finalDinnerTime, 90, cluster.dayNumber, orderIndex++
@@ -706,6 +775,14 @@ export function unifiedScheduleV3Days(
       }
     }
 
+    stampDayPlanningMeta(dayEntry, cluster.plannerRole);
+    for (const item of dayEntry.items) {
+      if (!item.planningMeta?.planningToken || !item.planningMeta?.protectedReason) continue;
+      expectedProtectedItems.set(item.planningMeta.planningToken, {
+        dayNumber: item.planningMeta.originalDayNumber ?? dayEntry.dayNumber,
+        reason: item.planningMeta.protectedReason,
+      });
+    }
     days.push(dayEntry);
   }
 
@@ -761,11 +838,11 @@ export function unifiedScheduleV3Days(
             let replaced = false;
             if (anchor) {
               const replacement = findBestRestaurant(
-                restaurants, anchor, mealType,
+                dayRestaurantPools.get(day.dayNumber) || restaurants, anchor, mealType,
                 0.8, 3.5, 2, dietary, usedRestaurantIds,
                 day.date
               );
-              if (replacement && isRestaurantOpenForSlot(replacement.primary, day.date, newStart, newEnd)) {
+              if (replacement && strictMealPlacement(replacement, day.date, newStart, itemDuration || 75, 0.8)) {
                 console.log(`[Unified] Overlap fix: replaced "${next.title}" with "${replacement.primary.name}" on Day ${day.dayNumber} (open at ${newStart})`);
                 next.title = `${mealLabel} — ${replacement.primary.name}`;
                 next.restaurant = replacement.primary;
@@ -875,7 +952,12 @@ export function unifiedScheduleV3Days(
 
   // 12. Restaurant safety: revalidate after shifts
   for (const day of days) {
-    enforceRestaurantSafetyForDay(day);
+    rescueDiagnostics.lateMealReplacementCount += enforceRestaurantSafetyForDay(day, {
+      strictLunchDinner: rescueStageAtLeast(rescueStage, 2),
+      dayRestaurants: dayRestaurantPools.get(day.dayNumber),
+      dietary,
+      usedRestaurantIds,
+    });
     day.items.forEach((item, idx) => { item.orderIndex = idx; });
   }
 
@@ -898,6 +980,17 @@ export function unifiedScheduleV3Days(
   for (const day of days) {
     const activityCount = day.items.filter(i => i.type === 'activity').length;
     if (activityCount > 0) continue;
+
+    if (rescueStageAtLeast(rescueStage, 1)) {
+      const dayRole = findDayRole(day);
+      const twRescue = timeWindows.find(w => w.dayNumber === day.dayNumber);
+      const rescueStartMin = timeToMin(twRescue?.activityStartTime || '00:00');
+      const rescueEndMin = timeToMin(twRescue?.activityEndTime || '00:00');
+      if (dayRole === 'arrival' || dayRole === 'departure' || rescueStartMin >= rescueEndMin) {
+        console.log(`[Unified] Empty day rescue: skipping Day ${day.dayNumber} (${dayRole || 'constrained'}, no safe rescue window)`);
+        continue;
+      }
+    }
 
     // Skip departure days with no activity window — stealing activities that will
     // be removed by the departure sweep is destructive (loses them from both days)
@@ -984,12 +1077,13 @@ export function unifiedScheduleV3Days(
   // ----------------------------------------------------------------
   // REPAIR CROSS-DAY (step10 simplified — no validateRestaurantDistances)
   // ----------------------------------------------------------------
+  const changedDays = new Set<number>();
 
   // 17. Cross-day swap for opening hours violations
-  fixOpeningHoursViolations(days, startDateStr, repairs, unresolvedViolations);
+  fixOpeningHoursViolations(days, startDateStr, repairs, unresolvedViolations, { rescueStage, changedDays });
 
   // 18. Must-see injection from the full pool
-  ensureMustSees(days, allActivities, startDateStr, repairs, unresolvedViolations, globalPlacedIds);
+  ensureMustSees(days, allActivities, startDateStr, repairs, unresolvedViolations, globalPlacedIds, { rescueStage, changedDays });
 
   // 19. Extension gaps 30-90min
   fillGapsByExtension(days, startDateStr, repairs);
@@ -1019,6 +1113,19 @@ export function unifiedScheduleV3Days(
     }
   }
 
+  if (rescueStageAtLeast(rescueStage, 2)) {
+    for (const day of days) {
+      rescueDiagnostics.lateMealReplacementCount += enforceRestaurantSafetyForDay(day, {
+        strictLunchDinner: true,
+        dayRestaurants: dayRestaurantPools.get(day.dayNumber),
+        dietary,
+        usedRestaurantIds,
+      });
+      stampDayPlanningMeta(day, findDayRole(day));
+      sortAndReindexItems(day.items);
+    }
+  }
+
   // 21. P0.2 distance sweep: replace restaurants >1.5km from nearest activity with self-meal fallback
   // Runs AFTER repairs (cross-day swaps + must-see injection can change which activities are on each day)
   const P02_MAX_KM = 1.5;
@@ -1042,6 +1149,7 @@ export function unifiedScheduleV3Days(
       if (nearestDist > P02_MAX_KM) {
         console.warn(`[Unified P0.2] Day ${day.dayNumber}: "${item.title}" is ${(nearestDist * 1000).toFixed(0)}m from nearest activity — replacing with self-meal`);
         const anchor = item.latitude && item.longitude ? { lat: item.latitude, lng: item.longitude } : null;
+        rescueDiagnostics.lateMealReplacementCount++;
         day.items[i] = createSelfMealFallbackItem(mealType as 'lunch' | 'dinner', item.startTime, item.duration || 75, day.dayNumber, item.orderIndex, anchor);
       }
     }
@@ -1064,10 +1172,22 @@ export function unifiedScheduleV3Days(
 
       const startMin = timeToMin(item.startTime || '00:00');
       if (startMin >= cutoffMin) {
+        if (rescueStageAtLeast(rescueStage, 3) && isProtectedTripItem(item)) {
+          unresolvedViolations.push(`Day ${day.dayNumber}: protected "${item.title}" exceeds departure cutoff`);
+          rescueDiagnostics.protectedBreakCount++;
+          rescueDiagnostics.finalIntegrityFailures++;
+          return true;
+        }
         console.log(`[Unified] Departure sweep: dropping "${item.title}" on Day ${day.dayNumber} (starts ${item.startTime} past ${tw.activityEndTime})`);
         return false;
       }
       if (item.endTime && timeToMin(item.endTime) > cutoffMin) {
+        if (rescueStageAtLeast(rescueStage, 3) && isProtectedTripItem(item)) {
+          unresolvedViolations.push(`Day ${day.dayNumber}: protected "${item.title}" ends past departure cutoff`);
+          rescueDiagnostics.protectedBreakCount++;
+          rescueDiagnostics.finalIntegrityFailures++;
+          return true;
+        }
         console.log(`[Unified] Departure sweep: dropping "${item.title}" on Day ${day.dayNumber} (ends ${item.endTime} past ${tw.activityEndTime})`);
         return false;
       }
@@ -1115,6 +1235,74 @@ export function unifiedScheduleV3Days(
   // Final sort after repairs
   for (const day of days) {
     sortAndReindexItems(day.items);
+    stampDayPlanningMeta(day, findDayRole(day));
+  }
+
+  if (rescueStageAtLeast(rescueStage, 3)) {
+    for (const day of days) {
+      rescueDiagnostics.lateMealReplacementCount += enforceRestaurantSafetyForDay(day, {
+        strictLunchDinner: true,
+        dayRestaurants: dayRestaurantPools.get(day.dayNumber),
+        dietary,
+        usedRestaurantIds,
+      });
+
+      const filteredItems: TripItem[] = [];
+      for (const item of day.items) {
+        if (
+          item.type === 'activity'
+          && (item.openingHours || item.openingHoursByDay)
+          && !isOpenAtTime(item as unknown as ScoredActivity, day.date, item.startTime, item.endTime)
+        ) {
+          if (isProtectedTripItem(item)) {
+            unresolvedViolations.push(`Day ${day.dayNumber}: protected "${item.title}" outside opening hours (${item.startTime}-${item.endTime})`);
+            rescueDiagnostics.protectedBreakCount++;
+            rescueDiagnostics.finalIntegrityFailures++;
+            filteredItems.push(item);
+          } else {
+            console.log(`[Unified Integrity] Dropping optional "${item.title}" on Day ${day.dayNumber} (outside opening hours)`);
+          }
+          continue;
+        }
+        filteredItems.push(item);
+      }
+
+      day.items = filteredItems;
+      sortAndReindexItems(day.items);
+      stampDayPlanningMeta(day, findDayRole(day));
+    }
+
+    const finalProtectedTokens = new Map<string, { dayNumber: number; reason?: string }>();
+    for (const day of days) {
+      for (const item of day.items) {
+        if (!item.planningMeta?.planningToken || !item.planningMeta?.protectedReason) continue;
+        finalProtectedTokens.set(item.planningMeta.planningToken, {
+          dayNumber: day.dayNumber,
+          reason: item.planningMeta.protectedReason,
+        });
+      }
+    }
+
+    for (const [token, expected] of expectedProtectedItems.entries()) {
+      const current = finalProtectedTokens.get(token);
+      if (!current) {
+        rescueDiagnostics.protectedBreakCount++;
+        rescueDiagnostics.finalIntegrityFailures++;
+        if (expected.reason === 'day_trip' || expected.reason === 'day_trip_anchor') {
+          rescueDiagnostics.dayTripEvictionCount++;
+        }
+        unresolvedViolations.push(`Protected planner item "${token}" missing after repairs`);
+        continue;
+      }
+      if (current.dayNumber !== expected.dayNumber) {
+        rescueDiagnostics.protectedBreakCount++;
+        rescueDiagnostics.finalIntegrityFailures++;
+        if (expected.reason === 'day_trip' || expected.reason === 'day_trip_anchor') {
+          rescueDiagnostics.dayTripEvictionCount++;
+        }
+        unresolvedViolations.push(`Protected planner item "${token}" moved from Day ${expected.dayNumber} to Day ${current.dayNumber}`);
+      }
+    }
   }
 
   // Log summary
@@ -1126,7 +1314,7 @@ export function unifiedScheduleV3Days(
     console.warn(`  [UNRESOLVED] ${v}`);
   }
 
-  return { days, repairs, unresolvedViolations };
+  return { days, repairs, unresolvedViolations, rescueDiagnostics };
 }
 
 // ── Nightlife sub-type classification ───────────────────────────────────────

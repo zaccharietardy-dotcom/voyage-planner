@@ -18,6 +18,7 @@ import type { TripPreferences, Restaurant, Accommodation } from '../types';
 import type { TripDay, TripItem } from '../types/trip';
 import type { ActivityCluster, ScoredActivity, FetchedData } from './types';
 import type { DayMealPlan, MealPlacement } from './step8-place-restaurants';
+import { findBestRestaurant } from './step8-place-restaurants';
 import type { DayTravelTimes, TravelLeg } from './step7b-travel-times';
 import type { DayTimeWindow } from './step4-anchor-transport';
 import { timeToMin, minToTime, addMinutes, isPastEnd, ensureAfter } from './utils/time';
@@ -25,6 +26,7 @@ import { getClusterCentroid, findMidDayActivity } from './utils/geo';
 import { isDuplicateActivityCandidate } from './utils/activityDedup';
 import { isOpenAtTime } from './utils/opening-hours';
 import { enrichWithTicketingLinks } from '../services/officialTicketing';
+import { calculateDistance } from '../services/geocoding';
 
 // ---------------------------------------------------------------------------
 // Default images for items without their own photo
@@ -639,10 +641,19 @@ function getMealLabel(mealType: 'breakfast' | 'lunch' | 'dinner'): string {
   return 'Dîner';
 }
 
-export function enforceRestaurantSafetyForDay(day: TripDay): void {
+export function enforceRestaurantSafetyForDay(
+  day: TripDay,
+  options: {
+    strictLunchDinner?: boolean;
+    dayRestaurants?: Restaurant[];
+    dietary?: string[];
+    usedRestaurantIds?: Set<string>;
+  } = {}
+): number {
   const activityPoints = day.items
     .filter((item) => item.type === 'activity' && item.latitude && item.longitude)
     .map((item) => ({ lat: item.latitude as number, lng: item.longitude as number }));
+  let replacementsToFallback = 0;
 
   for (let i = 0; i < day.items.length; i++) {
     const item = day.items[i];
@@ -691,10 +702,68 @@ export function enforceRestaurantSafetyForDay(day: TripDay): void {
       continue;
     }
 
+    if (options.strictLunchDinner && isLunchOrDinner) {
+      const anchor = activityPoints[0]
+        ? activityPoints.reduce((closest, point) => {
+            const dist = calculateDistance(item.latitude, item.longitude, point.lat, point.lng);
+            return dist < closest.dist ? { dist, point } : closest;
+          }, { dist: Infinity, point: null as { lat: number; lng: number } | null }).point
+        : (item.latitude && item.longitude ? { lat: item.latitude, lng: item.longitude } : null);
+      const replacementFromDayPool = anchor && options.dayRestaurants
+        ? findBestRestaurant(
+            options.dayRestaurants,
+            anchor,
+            mealType,
+            0.8,
+            3.5,
+            2,
+            options.dietary || [],
+            options.usedRestaurantIds || new Set<string>(),
+            day.date
+          )
+        : null;
+
+      if (
+        replacementFromDayPool
+        && replacementFromDayPool.distanceFromAnchor <= 0.8
+        && isRestaurantOpenForSlot(replacementFromDayPool.primary, day.date, item.startTime, item.endTime)
+      ) {
+        const mealLabel = getMealLabel(mealType);
+        day.items[i] = {
+          ...item,
+          title: `${mealLabel} — ${replacementFromDayPool.primary.name}`,
+          description: `${mealLabel} à ${replacementFromDayPool.primary.name}`,
+          locationName: replacementFromDayPool.primary.address || replacementFromDayPool.primary.name,
+          latitude: replacementFromDayPool.primary.latitude,
+          longitude: replacementFromDayPool.primary.longitude,
+          rating: replacementFromDayPool.primary.rating,
+          bookingUrl: replacementFromDayPool.primary.reservationUrl || replacementFromDayPool.primary.googleMapsUrl,
+          restaurant: replacementFromDayPool.primary,
+          restaurantAlternatives: replacementFromDayPool.alternatives.length > 0 ? replacementFromDayPool.alternatives : undefined,
+          openingHoursByDay: replacementFromDayPool.primary.openingHours,
+        };
+        options.usedRestaurantIds?.add(replacementFromDayPool.primary.id);
+        continue;
+      }
+
+      replacementsToFallback++;
+      day.items[i] = createSelfMealFallbackItem(
+        mealType,
+        item.startTime,
+        item.duration || Math.max(0, timeToMin(item.endTime) - timeToMin(item.startTime)),
+        day.dayNumber,
+        item.orderIndex,
+        anchor
+      );
+      continue;
+    }
+
     // Keep the original restaurant rather than showing "Repas libre"
     // A real restaurant with uncertain hours/distance is better than no suggestion
     console.warn(`[Schedule Safety] Day ${day.dayNumber}: keeping "${item.title}" despite validation issue (no better alternative found)`);
   }
+
+  return replacementsToFallback;
 }
 
 function findRestaurantReplacementForSlot(
@@ -947,6 +1016,13 @@ export function createActivityItem(
     bookingUrl: activity.bookingUrl,
     googleMapsPlaceUrl,
     mustSee: activity.mustSee,
+    planningMeta: {
+      planningToken: activity.planningToken,
+      protectedReason: activity.protectedReason,
+      sourcePackId: activity.sourcePackId,
+      plannerRole: activity.plannerRole,
+      originalDayNumber: activity.originalDayNumber ?? dayNumber,
+    },
     openingHours: activity.openingHours,
     openingHoursByDay: activity.openingHoursByDay,
     website: activity.website,

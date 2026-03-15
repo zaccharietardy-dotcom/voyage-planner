@@ -413,6 +413,14 @@ export interface TripItem {
   instantConfirmation?: boolean;
   // Preserve must-see protection in post-assembly passes
   mustSee?: boolean;
+  // Internal planner metadata used during v3.1 rescue. Stripped before API return.
+  planningMeta?: {
+    planningToken?: string;
+    protectedReason?: 'must_see' | 'day_trip_anchor' | 'day_trip' | 'user_forced';
+    sourcePackId?: string;
+    plannerRole?: 'arrival' | 'full_city' | 'day_trip' | 'recovery' | 'departure';
+    originalDayNumber?: number;
+  };
   // Opening hours data for scheduling validation
   openingHours?: { open: string; close: string };
   openingHoursByDay?: { [day: string]: { open: string; close: string } | null };
@@ -610,6 +618,12 @@ export interface Trip {
     routeInefficiencyTotal: number;
     criticalGeoCount: number;
     contractsPassed: boolean;
+    rescueStage?: number;
+    protectedBreakCount?: number;
+    lateMealReplacementCount?: number;
+    dayNumberMismatchCount?: number;
+    dayTripEvictionCount?: number;
+    finalIntegrityFailures?: number;
   };
 
   // État des réservations

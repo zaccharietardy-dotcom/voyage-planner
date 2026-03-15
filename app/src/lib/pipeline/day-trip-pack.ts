@@ -125,7 +125,8 @@ function isDayTripFeasible(
 function enrichWithLocalActivities(
   anchor: ScoredActivity,
   destName: string,
-  dayTripActivities: Record<string, Attraction[]>
+  dayTripActivities: Record<string, Attraction[]>,
+  sourcePackId: string
 ): ScoredActivity[] {
   const enriched: ScoredActivity[] = [anchor];
   const localActivities = dayTripActivities[destName];
@@ -143,8 +144,10 @@ function enrichWithLocalActivities(
       reviewCount: da.reviewCount || 0,
       latitude: da.latitude || anchor.latitude,
       longitude: da.longitude || anchor.longitude,
-      protectedReason: 'day_trip_anchor',
+      protectedReason: 'day_trip',
       dayTripAffinity: 1.0,
+      sourcePackId,
+      planningToken: `${sourcePackId}:${da.id || da.name}`,
     };
     enriched.push(scored);
     added++;
@@ -229,6 +232,7 @@ export function buildDayTripPacks(
   const candidatePacks: (DayTripPack & { score: number; distKm: number })[] = [];
 
   for (const [destName, group] of destinationGroups) {
+    const packId = `daytrip:${destName.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
     // Pick the best anchor (must-see first, then highest score)
     const sortedCandidates = [...group.candidates].sort((a, b) => {
       if (a.mustSee !== b.mustSee) return a.mustSee ? -1 : 1;
@@ -239,11 +243,17 @@ export function buildDayTripPacks(
     const transport = resolveTransportDuration(group.suggestion, group.distKm);
 
     // Build activities: anchor + other candidates in same destination + enrichment
-    const packActivities = enrichWithLocalActivities(anchor, destName, dayTripActivitiesMap);
+    const packActivities = enrichWithLocalActivities(anchor, destName, dayTripActivitiesMap, packId);
     // Add other candidates from the same destination group (if not already included)
     for (const other of sortedCandidates.slice(1)) {
       if (!packActivities.some(a => a.id === other.id || a.name === other.name)) {
-        packActivities.push(other);
+        packActivities.push({
+          ...other,
+          protectedReason: other === anchor ? 'day_trip_anchor' : 'day_trip',
+          dayTripAffinity: 1.0,
+          sourcePackId: packId,
+          planningToken: `${packId}:${other.id || other.name}`,
+        });
       }
     }
 
@@ -271,11 +281,14 @@ export function buildDayTripPacks(
 
     // Mark all activities in pack as protected
     for (const a of packActivities) {
-      a.protectedReason = 'day_trip_anchor';
+      a.protectedReason = a.id === anchor.id ? 'day_trip_anchor' : 'day_trip';
       a.dayTripAffinity = 1.0;
+      a.sourcePackId = packId;
+      a.planningToken = a.planningToken || `${packId}:${a.id || a.name}`;
     }
 
     candidatePacks.push({
+      id: packId,
       anchor,
       activities: packActivities,
       destination: destName,
@@ -286,6 +299,7 @@ export function buildDayTripPacks(
       transportMode: transport.mode,
       score: anchor.score,
       distKm: group.distKm,
+      originalCandidates: sortedCandidates,
     });
   }
 
@@ -307,12 +321,25 @@ export function buildDayTripPacks(
 
     const demoted = candidatePacks.splice(maxDayTrips);
     for (const pack of demoted) {
-      // Push back only original candidates (not enrichment activities from dayTripActivitiesMap)
       for (const a of pack.activities) {
         a.protectedReason = undefined;
         a.dayTripAffinity = 0;
+        a.sourcePackId = undefined;
+        a.planningToken = undefined;
       }
-      cityActivities.push(pack.anchor);
+      const seen = new Set<string>();
+      for (const candidate of pack.originalCandidates || [pack.anchor]) {
+        const key = candidate.id || candidate.name;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        cityActivities.push({
+          ...candidate,
+          protectedReason: candidate.mustSee ? 'must_see' : undefined,
+          dayTripAffinity: 0,
+          sourcePackId: undefined,
+          planningToken: undefined,
+        });
+      }
       console.log(`[DayTripPack] Demoted "${pack.destination}" (over max ${maxDayTrips} day trips)`);
     }
   }
