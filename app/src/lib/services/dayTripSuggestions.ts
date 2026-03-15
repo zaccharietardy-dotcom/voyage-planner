@@ -1162,7 +1162,7 @@ export const DAY_TRIP_DATABASE: DayTripSuggestion[] = [
     tags: ['culture'],
     suitableFor: ['solo', 'couple', 'friends', 'family_with_kids', 'family_without_kids'],
     minBudgetLevel: 'economic',
-    minDays: 4,
+    minDays: 3,
     fullDayRequired: true,
     fromCity: 'naples'
   },

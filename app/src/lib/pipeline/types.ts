@@ -98,6 +98,8 @@ export interface ActivityCluster {
   totalIntraDistance: number; // km, within cluster
   maxRadius?: number; // km, max distance from centroid to any member
   isFullDay?: boolean; // true if cluster contains a single full-day activity (>=4h)
+  isDayTrip?: boolean; // true if cluster is a day trip to a distant destination
+  dayTripDestination?: string; // e.g. "Pompei"
 }
 
 // ============================================

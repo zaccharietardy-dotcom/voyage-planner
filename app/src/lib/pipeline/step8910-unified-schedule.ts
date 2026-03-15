@@ -18,6 +18,7 @@ import type { DayTimeWindow } from './step4-anchor-transport';
 import type { RepairResult, RepairAction } from './step10-repair';
 
 import { calculateDistance } from '../services/geocoding';
+import { generateTrainOmioLink, buildDirectionsUrl } from '../services/linkGenerator';
 
 // Helpers from step8 (restaurant selection)
 import {
@@ -128,6 +129,8 @@ export function unifiedScheduleV3Days(
     let lunchPlaced = false;
     let dinnerPlaced = false;
     const isLastDay = cluster.dayNumber === clusters.length;
+    // Per-day restaurant pool (may be enriched for day trip clusters)
+    let dayRestaurants = restaurants;
 
     // Detect remote clusters: ≤1 activity far from hotel → use hotel as dinner anchor
     const isRemoteCluster = cluster.activities.length <= 1 && hotelLatLng && cluster.activities[0] &&
@@ -176,7 +179,7 @@ export function unifiedScheduleV3Days(
       const breakfastAnchor = hotelLatLng || getClusterCentroid(cluster.activities);
       if (breakfastAnchor) {
         const breakfastPlacement = findBestRestaurant(
-          restaurants, breakfastAnchor, 'breakfast',
+          dayRestaurants, breakfastAnchor, 'breakfast',
           0.8, 3.5, 2, dietary, usedRestaurantIds, dayDateForRestaurant
         );
         // Validate restaurant is actually open at the specific slot time (not just generic meal window)
@@ -226,6 +229,27 @@ export function unifiedScheduleV3Days(
       }
     }
 
+    // 3b. DAY TRIP: override outbound travel time using curated suggestion data
+    // The haversine fallback gives dist*4 min which is wildly wrong for long distances
+    // (e.g. 90km → 360min instead of the real 120min bus). Use the suggestion's transport duration.
+    let dayTripOutboundMin: number | undefined;
+    let dayTripSuggestion: typeof data.dayTripSuggestions[number] | undefined;
+    if (cluster.isDayTrip && cluster.dayTripDestination && data.dayTripSuggestions) {
+      dayTripSuggestion = data.dayTripSuggestions.find(s =>
+        s.destination === cluster.dayTripDestination || s.name?.includes(cluster.dayTripDestination!)
+      );
+      if (dayTripSuggestion) {
+        dayTripOutboundMin = dayTripSuggestion.transportDurationMin;
+        console.log(`[Unified] Day ${cluster.dayNumber}: day trip "${cluster.dayTripDestination}" — outbound ${dayTripOutboundMin}min (${dayTripSuggestion.transportMode})`);
+      }
+      // Merge day trip destination restaurants into pool for this day
+      const dtRestaurants = data.dayTripRestaurants?.[cluster.dayTripDestination!];
+      if (dtRestaurants?.length) {
+        dayRestaurants = [...restaurants, ...dtRestaurants];
+        console.log(`[Unified] Day ${cluster.dayNumber}: added ${dtRestaurants.length} restaurants from "${cluster.dayTripDestination}"`);
+      }
+    }
+
     // 4. SORT activities: must-sees that close early go first
     cluster.activities.sort((a, b) => {
       if (a.mustSee && !b.mustSee) return -1;
@@ -256,7 +280,13 @@ export function unifiedScheduleV3Days(
         // Fallback: estimate from haversine distance
         const dist = calculateDistance(currentPosition.lat, currentPosition.lng, act.latitude, act.longitude);
         const walkSpeed = 4.5; // km/h
-        const duration = dist <= 1 ? Math.ceil((dist / walkSpeed) * 60) : Math.ceil(dist * 4);
+        let duration = dist <= 1 ? Math.ceil((dist / walkSpeed) * 60) : Math.ceil(dist * 4);
+
+        // Day trip override: use curated transport duration for the first long leg (hotel → destination)
+        if (dayTripOutboundMin && i === 0 && dist > 10) {
+          duration = dayTripOutboundMin;
+        }
+
         travelLeg = {
           fromId: prevId || 'current',
           toId: act.id || act.name,
@@ -269,12 +299,27 @@ export function unifiedScheduleV3Days(
         };
       }
 
-      // Compute travel time
+      // Compute travel time (cap with day trip suggestion if available)
       let pendingTravelTime = 0;
       if (travelLeg && travelLeg.durationMinutes > 5) {
-        const afterTravel = addMinutes(currentTime, travelLeg.durationMinutes);
+        let legDuration = travelLeg.durationMinutes;
+        if (cluster.isDayTrip) {
+          if (dayTripOutboundMin && i === 0 && travelLeg.distanceKm > 10) {
+            // First leg (hotel → destination): cap with curated duration
+            legDuration = Math.min(legDuration, dayTripOutboundMin);
+          } else if (i > 0 && travelLeg.distanceKm <= 20) {
+            // Intra-destination legs: cap at reasonable local transit (Directions API
+            // often routes back through origin city for remote areas like Kawaguchiko)
+            const maxLocalMin = Math.max(15, Math.ceil(travelLeg.distanceKm * 3));
+            if (legDuration > maxLocalMin) {
+              console.log(`[Unified] Day ${cluster.dayNumber}: capping intra-day-trip travel ${travelLeg.fromName}→${travelLeg.toName} from ${legDuration}min to ${maxLocalMin}min (local estimate)`);
+              legDuration = maxLocalMin;
+            }
+          }
+        }
+        const afterTravel = addMinutes(currentTime, legDuration);
         if (!isPastEnd(afterTravel, dayEndTime)) {
-          pendingTravelTime = travelLeg.durationMinutes;
+          pendingTravelTime = legDuration;
         }
       }
       const timeAfterTravel = pendingTravelTime > 0 ? roundUpTo5(addMinutes(currentTime, pendingTravelTime)) : currentTime;
@@ -296,7 +341,7 @@ export function unifiedScheduleV3Days(
           let lunchPlacement: ReturnType<typeof findBestRestaurant> = null;
           let finalLunchTime = currentTime;
           const candidatePlacement = findBestRestaurant(
-            restaurants, lunchAnchor, 'lunch',
+            dayRestaurants, lunchAnchor, 'lunch',
             0.8, 3.5, 2, dietary, usedRestaurantIds, dayDateForRestaurant
           );
           if (candidatePlacement) {
@@ -409,7 +454,7 @@ export function unifiedScheduleV3Days(
           let dinnerPlacement: ReturnType<typeof findBestRestaurant> = null;
           let finalDinnerTime = currentTime;
           const candidateDinner = findBestRestaurant(
-            restaurants, dinnerAnchorInSitu, 'dinner',
+            dayRestaurants, dinnerAnchorInSitu, 'dinner',
             0.8, 3.5, 2, dietary, usedRestaurantIds, dayDateForRestaurant
           );
           if (candidateDinner) {
@@ -445,7 +490,7 @@ export function unifiedScheduleV3Days(
         const lunchAnchor = currentPosition || getClusterCentroid(cluster.activities);
         if (lunchAnchor) {
           const lunchPlacement = findBestRestaurant(
-            restaurants, lunchAnchor, 'lunch',
+            dayRestaurants, lunchAnchor, 'lunch',
             0.8, 3.5, 2, dietary, usedRestaurantIds, dayDateForRestaurant
           );
           if (lunchPlacement) {
@@ -479,7 +524,7 @@ export function unifiedScheduleV3Days(
         let dinnerPlacement: ReturnType<typeof findBestRestaurant> = null;
         let finalDinnerTime = dinnerTime;
         const candidateDinner = findBestRestaurant(
-          restaurants, dinnerAnchor, 'dinner',
+          dayRestaurants, dinnerAnchor, 'dinner',
           0.8, 3.5, 2, dietary, usedRestaurantIds, dayDateForRestaurant
         );
         if (candidateDinner) {
@@ -580,13 +625,85 @@ export function unifiedScheduleV3Days(
       sortAndReindexItems(items);
     }
 
-    days.push({
+    const dayEntry: TripDay = {
       dayNumber: cluster.dayNumber,
       date: dayDate,
       items,
       theme: '',
       dayNarrative: '',
-    });
+      ...(cluster.isDayTrip ? {
+        isDayTrip: true,
+        dayTripDestination: cluster.dayTripDestination,
+      } : {}),
+    };
+
+    // Enrich day trip transport items with Omio booking link
+    if (cluster.isDayTrip && cluster.dayTripDestination) {
+      const suggestion = data.dayTripSuggestions?.find(s =>
+        s.destination === cluster.dayTripDestination || s.name?.includes(cluster.dayTripDestination!)
+      );
+      const dayDateStr = dayDate instanceof Date
+        ? dayDate.toISOString().split('T')[0]
+        : String(dayDate).split('T')[0];
+
+      // Find the first long transport item (>5km = going to day trip destination)
+      const outboundTransport = dayEntry.items.find(item =>
+        item.type === 'transport' && (item.distanceFromPrevious ?? 0) > 5
+      );
+      if (outboundTransport) {
+        const dest = cluster.dayTripDestination;
+        const origin = preferences.destination;
+        const mode = suggestion?.transportMode || 'train';
+
+        if (mode === 'train' || mode === 'bus') {
+          outboundTransport.bookingUrl = generateTrainOmioLink(
+            origin, dest, dayDateStr, preferences.groupSize || 2
+          );
+          outboundTransport.title = `${mode === 'train' ? 'Train' : 'Bus'} → ${dest} — ${outboundTransport.title.split('—').pop()?.trim() || ''}`;
+        }
+        if (suggestion) {
+          outboundTransport.description = `${origin} → ${dest} (${suggestion.transportMode}, ~${suggestion.transportDurationMin}min, ~${suggestion.estimatedCostPerPerson}€/pers)`;
+        }
+      }
+
+      // Add return transport item after the last activity/restaurant
+      const returnDurationMin = dayTripSuggestion?.transportDurationMin || dayTripOutboundMin || 60;
+      const lastItem = dayEntry.items[dayEntry.items.length - 1];
+      if (lastItem) {
+        const returnStartTime = lastItem.endTime || '20:00';
+        const returnEndTime = addMinutes(returnStartTime, returnDurationMin);
+        const dest = cluster.dayTripDestination!;
+        const origin = preferences.destination;
+        const mode = suggestion?.transportMode || 'train';
+        const modeLabel = mode === 'train' ? 'Train' : mode === 'bus' ? 'Bus' : 'Transport';
+        const distKm = suggestion?.distanceKm || 0;
+
+        const returnItem: TripItem = {
+          id: `travel-return-${cluster.dayNumber}`,
+          dayNumber: cluster.dayNumber,
+          startTime: returnStartTime,
+          endTime: returnEndTime,
+          type: 'transport',
+          title: `${modeLabel} retour → ${origin} — ${distKm ? distKm + 'km' : ''}`,
+          description: `${dest} → ${origin} (~${returnDurationMin}min)`,
+          locationName: '',
+          latitude: hotelLatLng?.lat || destCoords.lat,
+          longitude: hotelLatLng?.lng || destCoords.lng,
+          orderIndex: dayEntry.items.length,
+          duration: returnDurationMin,
+          estimatedCost: suggestion?.estimatedCostPerPerson || 0,
+          transportToPrevious: 'public',
+          distanceFromPrevious: distKm,
+          timeFromPrevious: returnDurationMin,
+          bookingUrl: (mode === 'train' || mode === 'bus')
+            ? generateTrainOmioLink(dest, origin, dayDateStr, preferences.groupSize || 2)
+            : undefined,
+        };
+        dayEntry.items.push(returnItem);
+      }
+    }
+
+    days.push(dayEntry);
   }
 
   // ----------------------------------------------------------------
@@ -817,9 +934,10 @@ export function unifiedScheduleV3Days(
       console.log(`[Unified] Empty day rescue: moved "${stolenItem.title}" from Day ${busiestDay.dayNumber} → Day ${day.dayNumber}`);
     }
 
-    // Remove orphan transport items
+    // Remove orphan transport items (but keep day trip return transport)
     busiestDay.items = busiestDay.items.filter((item, i) => {
       if (item.type !== 'transport') return true;
+      if (item.id?.startsWith('travel-return-')) return true;
       const next = busiestDay!.items[i + 1];
       const prev = busiestDay!.items[i - 1];
       return next && prev;
@@ -830,10 +948,11 @@ export function unifiedScheduleV3Days(
     }
   }
 
-  // 15. Remove orphan transport items
+  // 15. Remove orphan transport items (but keep day trip return transport)
   for (const day of days) {
     day.items = day.items.filter((item, i) => {
       if (item.type !== 'transport') return true;
+      if (item.id?.startsWith('travel-return-')) return true; // day trip return transport
       const prev = day.items[i - 1];
       const next = day.items[i + 1];
       const hasActivityNeighbor = (prev && prev.type === 'activity') || (next && next.type === 'activity');
@@ -962,6 +1081,7 @@ export function unifiedScheduleV3Days(
     const beforeLen = day.items.length;
     day.items = day.items.filter((item, i) => {
       if (item.type !== 'transport') return true;
+      if (item.id?.startsWith('travel-return-')) return true; // day trip return transport
       const prev = day.items[i - 1];
       const next = day.items[i + 1];
       const hasActivityNeighbor = (prev && prev.type === 'activity') || (next && next.type === 'activity');

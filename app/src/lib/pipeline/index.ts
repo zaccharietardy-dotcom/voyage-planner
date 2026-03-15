@@ -514,7 +514,11 @@ export async function generateTripV3(
     densityProfile,
     preferences.startDate.toISOString().split('T')[0],
     timeWindows,
-    paceFactor
+    paceFactor,
+    {
+      dayTripActivities: data.dayTripActivities,
+      dayTripSuggestions: data.dayTripSuggestions,
+    }
   );
   stageTimes['cluster'] = Date.now() - t;
   console.log(`[Pipeline V3] Step 3: ${clusters.length} clusters created`);

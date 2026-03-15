@@ -359,6 +359,28 @@ export const SCENARIOS: Record<string, Scenario> = {
     },
   },
 
+  'tokyo-fuji-7d': {
+    id: 'tokyo-fuji-7d',
+    name: 'Paris → Tokyo (7 jours)',
+    description: 'Day trip Mont Fuji (~100km) — must-see lointain sur trip moyen',
+    preferences: {
+      origin: 'Paris',
+      destination: 'Tokyo',
+      startDate: futureDate(45),
+      durationDays: 7,
+      transport: 'plane',
+      carRental: false,
+      groupSize: 2,
+      groupType: 'couple',
+      budgetLevel: 'moderate',
+      activities: ['culture', 'nature'],
+      dietary: ['none'],
+      mustSee: 'Mont Fuji, Sanctuaire Meiji',
+      tripMode: 'precise',
+      cityPlan: [{ city: 'Tokyo', days: 4 }],
+    },
+  },
+
   'naples-pompei-3d': {
     id: 'naples-pompei-3d',
     name: 'Lyon → Naples (3 jours)',

@@ -83,7 +83,11 @@ export function clusterActivities(
   densityProfile?: CityDensityProfile,
   startDate?: string,
   timeWindows?: Array<{ dayNumber: number; activityStartTime: string; activityEndTime: string }>,
-  paceFactor?: number
+  paceFactor?: number,
+  dayTripData?: {
+    dayTripActivities?: Record<string, import('../services/attractions').Attraction[]>;
+    dayTripSuggestions?: import('../services/dayTripSuggestions').DayTripSuggestion[];
+  }
 ): ActivityCluster[] {
   if (activities.length === 0) return [];
   if (numDays <= 1 || activities.length <= 4) {
@@ -91,21 +95,73 @@ export function clusterActivities(
     return [buildCluster(1, activities)];
   }
 
-  // Separate day-trip activities (>30km from center)
-  // But for SHORT trips (≤3 days), don't allocate a day-trip day — it would steal the only full day.
-  // Instead, far activities compete on score and likely get dropped.
-  const dayTripActivities: ScoredActivity[] = [];
+  // Separate day-trip activities from city activities.
+  // Must-see activities >10km from center get a day trip IF they match a known day trip suggestion
+  // or are >30km away (clearly a different destination). 10-30km range without suggestion match
+  // is treated as a suburban attraction (e.g. Disneyland) and stays in city pool.
+  // Non-must-see activities >15km only get day trips for longer trips (>5 days).
+  const dayTripMustSees: ScoredActivity[] = [];
+  const dayTripOther: ScoredActivity[] = [];
   const cityActivities: ScoredActivity[] = [];
 
-  const allowDayTrips = numDays > 5; // Only dedicate a day-trip day for 6+ day trips
+  // Pre-compute suggestion match helper
+  const hasDayTripSuggestionMatch = (a: ScoredActivity): boolean => {
+    if (!dayTripData?.dayTripSuggestions) return false;
+    const aNameLower = a.name.toLowerCase();
+    return dayTripData.dayTripSuggestions.some(s => {
+      const d = calculateDistance(a.latitude, a.longitude, s.latitude, s.longitude);
+      if (d < 5) return true;
+      const sNameLower = (s.name || '').toLowerCase();
+      const sDestLower = (s.destination || '').toLowerCase();
+      const keyAttrs = (s.keyAttractions || []).map(k => k.toLowerCase());
+      return sNameLower.includes(aNameLower) || aNameLower.includes(sDestLower) ||
+        keyAttrs.some(k => k.includes(aNameLower) || aNameLower.includes(k));
+    });
+  };
 
   for (const a of activities) {
     const dist = calculateDistance(a.latitude, a.longitude, cityCenter.lat, cityCenter.lng);
-    if (dist > 15 && allowDayTrips) {
-      dayTripActivities.push(a);
+    if (a.mustSee && dist > 30) {
+      // Clearly a different destination (>30km) — always day trip
+      dayTripMustSees.push(a);
+    } else if (a.mustSee && dist > 10 && hasDayTripSuggestionMatch(a)) {
+      // 10-30km must-see that matches a known day trip suggestion
+      dayTripMustSees.push(a);
+    } else if (dist > 15 && numDays > 5) {
+      dayTripOther.push(a);
     } else {
       cityActivities.push(a);
     }
+  }
+
+  // Limit day trips based on trip length
+  const maxDayTrips = numDays <= 5 ? 1 : Math.floor((numDays - 1) / 3);
+
+  // If more must-see day trips than allowed, keep the FARTHEST ones (they need a dedicated day
+  // the most — closer must-sees can survive in city clusters). Demote the rest.
+  if (dayTripMustSees.length > maxDayTrips) {
+    dayTripMustSees.sort((a, b) => {
+      const distA = calculateDistance(a.latitude, a.longitude, cityCenter.lat, cityCenter.lng);
+      const distB = calculateDistance(b.latitude, b.longitude, cityCenter.lat, cityCenter.lng);
+      return distB - distA; // farthest first
+    });
+    const demoted = dayTripMustSees.splice(maxDayTrips);
+    cityActivities.push(...demoted);
+    console.log(`[Pipeline V3] Day trips: too many must-see day trips (${dayTripMustSees.length + demoted.length}) for ${numDays} days — demoted ${demoted.length} back to city: ${demoted.map(a => `"${a.name}"`).join(', ')}`);
+  }
+
+  // Merge remaining non-must-see day trip activities (capped)
+  const remainingSlots = maxDayTrips - dayTripMustSees.length;
+  if (dayTripOther.length > remainingSlots) {
+    dayTripOther.sort((a, b) => b.score - a.score);
+    const demoted = dayTripOther.splice(remainingSlots);
+    cityActivities.push(...demoted);
+  }
+
+  const dayTripActivities = [...dayTripMustSees, ...dayTripOther];
+
+  if (dayTripMustSees.length > 0) {
+    console.log(`[Pipeline V3] Day trips: ${dayTripMustSees.length} must-see day trip(s) detected: ${dayTripMustSees.map(a => `"${a.name}" (${calculateDistance(a.latitude, a.longitude, cityCenter.lat, cityCenter.lng).toFixed(1)}km)`).join(', ')}`);
   }
 
   // Isolate full-day activities (duration >= 240min / 4h) into their own clusters.
@@ -125,7 +181,7 @@ export function clusterActivities(
 
   // Each full-day activity gets its own cluster day, but cap at (numDays - dayTripDays - 1)
   // so at least 1 day remains for regular city activities
-  const dayTripDays = dayTripActivities.length > 0 ? 1 : 0;
+  const dayTripDays = dayTripActivities.length;
   const maxFullDaySlots = Math.max(0, numDays - dayTripDays - 1);
   // If more full-day activities than available slots, keep only the highest-scored ones;
   // demote the rest back to regular activities.
@@ -161,19 +217,79 @@ export function clusterActivities(
     clusters.push(fdc);
   }
 
-  // Add day-trip cluster if needed
-  if (dayTripActivities.length > 0) {
-    clusters.push(buildCluster(clusters.length + 1, dayTripActivities));
+  // Add day-trip cluster(s) — one per day trip destination, enriched with local activities
+  for (const dtAct of dayTripActivities) {
+    const clusterActs: ScoredActivity[] = [dtAct];
+
+    // Try to find the day trip destination name from suggestions.
+    // Match strategies (in order): proximity <5km, name match, then wider proximity <50km.
+    let destName: string | undefined;
+    if (dayTripData?.dayTripSuggestions) {
+      const actNameLower = dtAct.name.toLowerCase();
+      const matchingSuggestion =
+        // 1. Close proximity match (<5km from suggestion coords)
+        dayTripData.dayTripSuggestions.find(s => {
+          const d = calculateDistance(dtAct.latitude, dtAct.longitude, s.latitude, s.longitude);
+          return d < 5;
+        }) ||
+        // 2. Name match (suggestion name/keyAttractions mentions the activity name, or vice versa)
+        dayTripData.dayTripSuggestions.find(s => {
+          const sNameLower = (s.name || '').toLowerCase();
+          const sDestLower = (s.destination || '').toLowerCase();
+          const keyAttrs = (s.keyAttractions || []).map(k => k.toLowerCase());
+          return sNameLower.includes(actNameLower) || actNameLower.includes(sDestLower) ||
+            keyAttrs.some(k => k.includes(actNameLower) || actNameLower.includes(k));
+        }) ||
+        // 3. Wider proximity (<50km — for cases like Mont Fuji activity vs Kawaguchiko base)
+        dayTripData.dayTripSuggestions.find(s => {
+          const d = calculateDistance(dtAct.latitude, dtAct.longitude, s.latitude, s.longitude);
+          return d < 50;
+        });
+      destName = matchingSuggestion?.destination || matchingSuggestion?.name;
+    }
+
+    // Enrich cluster with activities from the day trip destination
+    if (destName && dayTripData?.dayTripActivities?.[destName]) {
+      const destActivities = dayTripData.dayTripActivities[destName];
+      let added = 0;
+      for (const da of destActivities) {
+        if (added >= 3) break; // max 3 extra activities
+        if (clusterActs.some(a => a.name === da.name || a.id === da.id)) continue;
+        // Convert Attraction to ScoredActivity
+        const scored: ScoredActivity = {
+          ...da,
+          score: da.rating ? da.rating * 10 : 30,
+          source: 'serpapi' as const,
+          reviewCount: da.reviewCount || 0,
+          // Use day trip coords as fallback if activity has no coords
+          latitude: da.latitude || dtAct.latitude,
+          longitude: da.longitude || dtAct.longitude,
+        };
+        clusterActs.push(scored);
+        added++;
+      }
+      if (added > 0) {
+        console.log(`[Pipeline V3] Day trip "${destName}": enriched with ${added} local activities`);
+      }
+    }
+
+    const cluster = buildCluster(clusters.length + 1, clusterActs);
+    cluster.isFullDay = true;
+    cluster.isDayTrip = true;
+    cluster.dayTripDestination = destName || dtAct.name;
+    clusters.push(cluster);
   }
 
   // Collect indices of protected clusters (full-day and day-trip) that should not
   // receive extra activities during balancing or minimum-size enforcement.
-  const dayTripClusterIdx = dayTripActivities.length > 0 ? clusters.length - 1 : -1;
   const protectedIndices = new Set<number>();
-  if (dayTripClusterIdx >= 0) protectedIndices.add(dayTripClusterIdx);
   for (let ci = 0; ci < clusters.length; ci++) {
-    if (clusters[ci].isFullDay) protectedIndices.add(ci);
+    if (clusters[ci].isFullDay || clusters[ci].isDayTrip) protectedIndices.add(ci);
   }
+  // Legacy compat: dayTripClusterIdx used by balance/enforce functions
+  const dayTripClusterIdx = dayTripActivities.length > 0
+    ? clusters.findIndex(c => c.isDayTrip)
+    : -1;
 
   // Balance cluster sizes (but protect day-trip and full-day clusters)
   balanceClusterSizes(clusters, Math.ceil(activities.length / numDays) + 1, dayTripClusterIdx, maxRadius, protectedIndices);
@@ -325,6 +441,40 @@ export function clusterActivities(
   // Time-proportional rebalancing: distribute activities proportionally to available time per day
   if (timeWindows && timeWindows.length > 0) {
     rebalanceByTimeCapacity(clusters, timeWindows, protectedIndices, paceFactor);
+
+    // Remove empty clusters created by rebalancing
+    for (let ci = clusters.length - 1; ci >= 0; ci--) {
+      if (clusters[ci].activities.length === 0 && !protectedIndices.has(ci)) {
+        clusters.splice(ci, 1);
+      }
+    }
+    clusters.forEach((c, i) => { c.dayNumber = i + 1; });
+
+    // Re-split if rebalancing reduced cluster count below numDays
+    while (clusters.length < numDays) {
+      let bestIdx = -1;
+      let bestSize = 0;
+      for (let ci = 0; ci < clusters.length; ci++) {
+        if (protectedIndices.has(ci)) continue;
+        if (clusters[ci].activities.length > bestSize) {
+          bestSize = clusters[ci].activities.length;
+          bestIdx = ci;
+        }
+      }
+      if (bestIdx === -1 || bestSize < 4) break;
+      const half = Math.ceil(bestSize / 2);
+      const newCluster: ActivityCluster = {
+        dayNumber: clusters.length + 1,
+        activities: clusters[bestIdx].activities.splice(half),
+        centroid: { lat: 0, lng: 0 },
+        totalIntraDistance: 0,
+      };
+      recomputeCentroid(clusters[bestIdx]);
+      recomputeCentroid(newCluster);
+      clusters.push(newCluster);
+      clusters.forEach((c, i) => { c.dayNumber = i + 1; });
+      console.log(`[Cluster] Re-split after rebalance: Day ${bestIdx + 1} (${bestSize} acts) → 2 clusters (${clusters[bestIdx].activities.length} + ${newCluster.activities.length})`);
+    }
   }
 
   // Optimize visit order within each cluster (nearest-neighbor + 2-opt)
@@ -585,28 +735,24 @@ function averageLinkageDistance(
 function reorderClustersByProximity(
   clusters: ActivityCluster[],
   startCoords: { lat: number; lng: number },
-  dayTripClusterIdx: number
+  _dayTripClusterIdx: number
 ): void {
   if (clusters.length <= 2) return;
 
-  // Separate day-trip cluster (if any) — it gets placed in the middle later
-  const dayTripCluster = dayTripClusterIdx >= 0 ? clusters[dayTripClusterIdx] : null;
-  const cityClusterIndices = clusters
-    .map((_, i) => i)
-    .filter(i => i !== dayTripClusterIdx);
-
-  if (cityClusterIndices.length <= 2) {
-    // Not enough city clusters to reorder, but still handle day-trip placement
-    if (dayTripCluster && clusters.length >= 3) {
-      const dtIdx = clusters.indexOf(dayTripCluster);
-      clusters.splice(dtIdx, 1);
-      const middleIdx = Math.floor(clusters.length / 2);
-      clusters.splice(middleIdx, 0, dayTripCluster);
+  // Separate ALL day-trip and full-day clusters — they get placed on non-boundary days later
+  const dayTripClusters: ActivityCluster[] = [];
+  const cityClusterIndices: number[] = [];
+  for (let i = 0; i < clusters.length; i++) {
+    if (clusters[i].isDayTrip) {
+      dayTripClusters.push(clusters[i]);
+    } else {
+      cityClusterIndices.push(i);
     }
-    return;
   }
 
-  // Nearest-neighbor from startCoords
+  if (cityClusterIndices.length <= 1 && dayTripClusters.length === 0) return;
+
+  // Nearest-neighbor ordering on city clusters from startCoords
   const remaining = new Set(cityClusterIndices);
   const order: number[] = [];
   let curLat = startCoords.lat;
@@ -633,13 +779,21 @@ function reorderClustersByProximity(
     curLng = clusters[nearestIdx].centroid.lng;
   }
 
-  // Rebuild clusters array in the new order
+  // Rebuild with city clusters in proximity order
   const reordered: ActivityCluster[] = order.map(i => clusters[i]);
 
-  // Re-insert day-trip cluster in the middle
-  if (dayTripCluster) {
-    const middleIdx = Math.floor(reordered.length / 2);
-    reordered.splice(middleIdx, 0, dayTripCluster);
+  // Insert day-trip clusters on non-boundary positions (never first or last day).
+  // Distribute evenly across middle days.
+  for (let dt = 0; dt < dayTripClusters.length; dt++) {
+    if (reordered.length <= 1) {
+      // Only 1 city day — insert day trips after it
+      reordered.push(dayTripClusters[dt]);
+    } else {
+      // Place at evenly spaced middle positions (avoid index 0 and last)
+      const spacing = Math.floor(reordered.length / (dayTripClusters.length + 1));
+      const insertIdx = Math.max(1, Math.min(reordered.length - 1, spacing * (dt + 1)));
+      reordered.splice(insertIdx, 0, dayTripClusters[dt]);
+    }
   }
 
   // Replace clusters array contents in-place

@@ -359,6 +359,25 @@ export function buildDirectionsUrl(
  * Normalise un lieu en slug Omio robuste.
  * Gère accents, apostrophes et ponctuation pour éviter les liens cassés.
  */
+/**
+ * Generates an Omio train search URL for a given origin/destination/date.
+ * Format: /trains/{origin}/{destination}?departure_date=YYYY-MM-DD
+ */
+export function generateTrainOmioLink(
+  origin: string,
+  destination: string,
+  date?: string,
+  passengers: number = 1
+): string {
+  const originSlug = toOmioLocationSlug(origin);
+  const destSlug = toOmioLocationSlug(destination);
+  const dateParam = date ? `?departure_date=${date}` : '';
+  const passengerParams = passengers > 1
+    ? `${dateParam ? '&' : '?'}${Array.from({ length: passengers }, () => 'passengers%5B%5D=adult').join('&')}`
+    : '';
+  return `https://www.omio.fr/trains/${originSlug}/${destSlug}${dateParam}${passengerParams}`;
+}
+
 export function toOmioLocationSlug(location: string): string {
   return location
     .trim()
