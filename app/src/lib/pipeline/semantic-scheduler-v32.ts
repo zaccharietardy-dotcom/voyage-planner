@@ -41,6 +41,9 @@ export type V32Diagnostics = NonNullable<RepairResult['rescueDiagnostics']> & {
   routeRebuildCount: number;
   restaurantRefetchMissCount: number;
   temporalImpossibleItemCount?: number;
+  openingHourInsertionRejectCount?: number;
+  routeOrderRollbackCount?: number;
+  shortFullDayCount?: number;
 };
 
 const EXPERIENTIAL_VIATOR_RE = /segway|photoshoot|photo shoot|workshop|atelier|cours|cooking|culinary|tour|excursion|cruise|vespa|class/i;
@@ -49,6 +52,7 @@ const FREE_TIME_GAP_BY_ROLE: Record<NonNullable<PlannerRole>, number> = {
   arrival: 120,
   departure: 120,
   full_city: 90,
+  short_full_day: 90,
   recovery: 150,
   day_trip: 9999,
 };
@@ -57,6 +61,7 @@ const FREE_TIME_LIMIT_BY_ROLE: Record<NonNullable<PlannerRole>, number> = {
   arrival: 1,
   departure: 1,
   full_city: 1,
+  short_full_day: 1,
   recovery: 2,
   day_trip: 0,
 };
@@ -319,8 +324,53 @@ function scheduleActivitiesForDay(
       const endMin = startMin + (activity.duration || 60);
       const closeTime = getActivityCloseTime(activity, dayDate);
       const closeMin = closeTime && closeTime !== '00:00' ? timeToMin(closeTime) : null;
+
       if ((closeMin != null && endMin > closeMin) || endMin > dayEndMin) {
+        // Opening hours or day-end conflict — try local swap with previous non-protected activity
+        const prevActivityIdx = scheduled.findLastIndex(s => s.kind === 'activity' && !s.protectedReason);
+        if (prevActivityIdx >= 0 && closeMin != null) {
+          // Simulate swapping: put this activity where the previous one was
+          const prevStop = scheduled[prevActivityIdx];
+          const prevStartMin = timeToMin(prevStop.startTime);
+          const swapEndMin = prevStartMin + (activity.duration || 60);
+          if (swapEndMin <= closeMin && swapEndMin <= dayEndMin) {
+            // Swap succeeds — replace previous with current, re-place previous after
+            scheduled.splice(prevActivityIdx, 1);
+            scheduled.push({
+              id: activity.id || makeStopId('activity', cluster.dayNumber, scheduled.length),
+              dayNumber: cluster.dayNumber,
+              kind: 'activity',
+              title: activity.name || 'Activity',
+              startTime: minToTime(prevStartMin),
+              endTime: minToTime(swapEndMin),
+              latitude: activity.latitude,
+              longitude: activity.longitude,
+              activity,
+              protectedReason: activity.protectedReason,
+            });
+            // Re-place the evicted activity at current time
+            const prevAct = prevStop.activity;
+            if (prevAct) {
+              const reStartMin = swapEndMin + 10;
+              const reEndMin = reStartMin + (prevAct.duration || 60);
+              if (reEndMin <= dayEndMin) {
+                scheduled.push({
+                  ...prevStop,
+                  startTime: minToTime(reStartMin),
+                  endTime: minToTime(reEndMin),
+                });
+                currentTimeMin = reEndMin + 10;
+                currentAnchor = { id: prevStop.id, name: prevStop.title, lat: prevStop.latitude, lng: prevStop.longitude };
+              }
+              // else the evicted activity doesn't fit — it's dropped (it was non-protected)
+            }
+            diagnostics.openingHourInsertionRejectCount = (diagnostics.openingHourInsertionRejectCount || 0);
+            continue;
+          }
+        }
+        // Swap failed — skip activity
         if (isProtectedActivity(activity)) missingProtected.push(activity);
+        diagnostics.openingHourInsertionRejectCount = (diagnostics.openingHourInsertionRejectCount || 0) + 1;
         continue;
       }
 

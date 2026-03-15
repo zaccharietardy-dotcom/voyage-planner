@@ -418,7 +418,7 @@ export interface TripItem {
     planningToken?: string;
     protectedReason?: 'must_see' | 'day_trip_anchor' | 'day_trip' | 'user_forced';
     sourcePackId?: string;
-    plannerRole?: 'arrival' | 'full_city' | 'day_trip' | 'recovery' | 'departure';
+    plannerRole?: 'arrival' | 'full_city' | 'day_trip' | 'recovery' | 'departure' | 'short_full_day';
     originalDayNumber?: number;
   };
   // Opening hours data for scheduling validation

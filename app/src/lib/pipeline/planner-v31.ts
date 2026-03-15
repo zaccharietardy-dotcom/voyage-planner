@@ -20,7 +20,7 @@ import { getActivityHoursForDay } from './utils/opening-hours';
 // DayRole
 // ============================================
 
-export type DayRole = 'arrival' | 'full_city' | 'day_trip' | 'recovery' | 'departure';
+export type DayRole = 'arrival' | 'full_city' | 'day_trip' | 'recovery' | 'departure' | 'short_full_day';
 type PlannerProfile = 'v3.1' | 'v3.2';
 type ArrivalFatigueRole = 'standard' | 'long_haul';
 const MIN_DAY_TRIP_WINDOW_MIN = 420;
@@ -71,10 +71,28 @@ export function assignDayRoles(
   if (numDays >= 6) {
     const cityDaysCount = slots.filter(s => s.role === 'full_city').length;
     if (cityDaysCount >= 5) {
-      // Check if there's overload: more than 6 activities per city day on average
-      // This is a heuristic — actual overload detection happens during beam search
-      // For now, just mark the slot. Recovery will only be used if beam search needs it.
       // Don't assign automatically per plan: "Jamais automatique"
+    }
+  }
+
+  // Promote boundary days to short_full_day when there aren't enough full_city days
+  // This fixes short trips (e.g. Naples 3d: arrival + day_trip + departure = 0 full_city)
+  const fullCityCount = slots.filter(s => s.role === 'full_city').length;
+  const SHORT_FULL_DAY_THRESHOLD_MIN = 300; // 5h minimum
+  if (fullCityCount === 0) {
+    // No full city days at all — promote all eligible boundary days
+    for (const slot of slots) {
+      if ((slot.role === 'arrival' || slot.role === 'departure') && slot.windowMin >= SHORT_FULL_DAY_THRESHOLD_MIN) {
+        slot.role = 'short_full_day';
+      }
+    }
+  } else if (fullCityCount <= 1) {
+    // Only 1 full city day — promote the longest boundary day
+    const bestBoundary = slots
+      .filter(s => (s.role === 'arrival' || s.role === 'departure') && s.windowMin >= SHORT_FULL_DAY_THRESHOLD_MIN)
+      .sort((a, b) => b.windowMin - a.windowMin)[0];
+    if (bestBoundary) {
+      bestBoundary.role = 'short_full_day';
     }
   }
 
@@ -86,11 +104,12 @@ export function assignDayRoles(
 // ============================================
 
 const ROLE_COMPAT: Record<DayRole, DayRole[]> = {
-  arrival: ['arrival', 'full_city'],
-  departure: ['departure', 'full_city'],
+  arrival: ['arrival', 'full_city', 'short_full_day'],
+  departure: ['departure', 'full_city', 'short_full_day'],
   recovery: ['recovery', 'full_city'],
-  full_city: ['full_city', 'recovery'],
-  day_trip: [], // never move items out of day trips
+  full_city: ['full_city', 'recovery', 'short_full_day'],
+  short_full_day: ['short_full_day', 'full_city'],
+  day_trip: [],
 };
 
 function isRoleCompatible(from: DayRole, to: DayRole): boolean {
@@ -424,6 +443,7 @@ function computeApproxRouteMetrics(
 const ROLE_BUDGET_FALLBACKS: Record<DayRole, number> = {
   arrival: 300,
   full_city: 600,
+  short_full_day: 400,
   day_trip: 600,
   recovery: 240,
   departure: 240,
@@ -608,9 +628,11 @@ function computePenalties(
     }
 
     // Rhythm: penalize very dense or very light days
-    if (slot.role === 'full_city') {
-      if (acts.length <= 1) p.rhythmPenalty += plannerProfile === 'v3.2' ? 5 : 2;
-      if (acts.length >= 7) p.rhythmPenalty += acts.length - 6; // too dense
+    if (slot.role === 'full_city' || slot.role === 'short_full_day') {
+      const minExpected = slot.role === 'short_full_day' ? 2 : 2;
+      const maxExpected = slot.role === 'short_full_day' ? 4 : 7;
+      if (acts.length < minExpected) p.rhythmPenalty += plannerProfile === 'v3.2' ? 5 : 2;
+      if (acts.length > maxExpected) p.rhythmPenalty += acts.length - maxExpected;
     }
   }
 
@@ -899,7 +921,7 @@ function zoneFirstAssign(
     x.slot.role === 'arrival' || x.slot.role === 'departure'
   );
   const fullCitySlots = citySlotIndices.filter(x =>
-    x.slot.role === 'full_city' || x.slot.role === 'recovery'
+    x.slot.role === 'full_city' || x.slot.role === 'recovery' || x.slot.role === 'short_full_day'
   );
 
   // Detect zones — target = number of full-city days (zones map 1:1 to days)

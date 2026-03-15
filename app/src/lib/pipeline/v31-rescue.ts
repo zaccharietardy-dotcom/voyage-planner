@@ -6,7 +6,7 @@ export type PlanningProtectedReason =
   | 'day_trip_anchor'
   | 'day_trip'
   | 'user_forced';
-export type PlannerRole = 'arrival' | 'full_city' | 'day_trip' | 'recovery' | 'departure';
+export type PlannerRole = 'arrival' | 'full_city' | 'day_trip' | 'recovery' | 'departure' | 'short_full_day';
 
 export interface PlanningMeta {
   planningToken?: string;
@@ -17,10 +17,11 @@ export interface PlanningMeta {
 }
 
 const ROLE_COMPAT: Record<PlannerRole, PlannerRole[]> = {
-  arrival: ['arrival', 'full_city'],
-  departure: ['departure', 'full_city'],
+  arrival: ['arrival', 'full_city', 'short_full_day'],
+  departure: ['departure', 'full_city', 'short_full_day'],
   recovery: ['recovery', 'full_city'],
-  full_city: ['full_city', 'recovery'],
+  full_city: ['full_city', 'recovery', 'short_full_day'],
+  short_full_day: ['short_full_day', 'full_city'],
   day_trip: [],
 };
 

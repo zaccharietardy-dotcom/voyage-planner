@@ -112,7 +112,7 @@ export interface ScoredActivity extends Attraction {
   /** Day trip pack source for protected atomic units */
   sourcePackId?: string;
   /** Planner role assigned to the activity's day */
-  plannerRole?: 'arrival' | 'full_city' | 'day_trip' | 'recovery' | 'departure';
+  plannerRole?: 'arrival' | 'full_city' | 'day_trip' | 'recovery' | 'departure' | 'short_full_day';
   /** Original day number from the planner before any repair pass */
   originalDayNumber?: number;
 }
@@ -130,7 +130,7 @@ export interface ActivityCluster {
   isFullDay?: boolean; // true if cluster contains a single full-day activity (>=4h)
   isDayTrip?: boolean; // true if cluster is a day trip to a distant destination
   dayTripDestination?: string; // e.g. "Pompei"
-  plannerRole?: 'arrival' | 'full_city' | 'day_trip' | 'recovery' | 'departure';
+  plannerRole?: 'arrival' | 'full_city' | 'day_trip' | 'recovery' | 'departure' | 'short_full_day';
 }
 
 // ============================================
