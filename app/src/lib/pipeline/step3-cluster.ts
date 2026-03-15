@@ -1139,7 +1139,7 @@ function diversifyClusterTypes(clusters: ActivityCluster[], protectedIndices: Se
           }
         }
 
-        if (bestSwap && bestSwap.distance < 10) { // only swap if within 10km
+        if (bestSwap) { // swap regardless of distance — clusters are already in the same city
           const candIdx = cluster.activities.indexOf(candidate);
           const swappedIn = clusters[bestSwap.targetIdx].activities[bestSwap.targetActIdx];
           cluster.activities[candIdx] = swappedIn;
