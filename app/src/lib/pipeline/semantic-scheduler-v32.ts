@@ -538,18 +538,22 @@ async function pickStrictMeal(
     return null;
   }
 
+  // Single refetch around the centroid of all anchors — no need to retry
+  // for each anchor when they're all in the same area
+  const refetchCenter = {
+    lat: anchors.reduce((s, a) => s + a.lat, 0) / anchors.length,
+    lng: anchors.reduce((s, a) => s + a.lng, 0) / anchors.length,
+  };
   const seen = new Set(restaurants.map((restaurant) => restaurant.id || `${restaurant.name}:${restaurant.latitude}:${restaurant.longitude}`));
   let refetchAdded = 0;
-  for (const anchor of anchors) {
-    const anchorPool = restaurants.filter((restaurant) =>
-      calculateDistance(anchor.lat, anchor.lng, restaurant.latitude, restaurant.longitude) <= 0.8
-    );
-    const currentCoverage = anchorPool.length;
-    const anchorHasValidPick = Boolean(tryPickForAnchor(anchorPool, anchor));
-    if (currentCoverage >= 5 && anchorHasValidPick) continue;
 
+  const localCoverage = restaurants.filter((restaurant) =>
+    calculateDistance(refetchCenter.lat, refetchCenter.lng, restaurant.latitude, restaurant.longitude) <= 0.8
+  ).length;
+
+  if (localCoverage < 5) {
     try {
-      const nearby = await searchRestaurantsNearbyWithFallback(anchor, destination, {
+      const nearby = await searchRestaurantsNearbyWithFallback(refetchCenter, destination, {
         mealType,
         maxDistance: 1000,
         limit: 8,
