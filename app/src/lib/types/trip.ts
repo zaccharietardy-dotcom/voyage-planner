@@ -632,6 +632,12 @@ export interface Trip {
     routeRebuildCount?: number;
     missingProtectedMustSeeCount?: number;
     dayTripAtomicityBreakCount?: number;
+    arrivalFatigueViolationCount?: number;
+    temporalImpossibleItemCount?: number;
+    sparseFullCityDayCount?: number;
+    restaurantRefetchMissCount?: number;
+    dayTripDestinationMismatchCount?: number;
+    sameFamilyOverloadCount?: number;
   };
 
   // État des réservations

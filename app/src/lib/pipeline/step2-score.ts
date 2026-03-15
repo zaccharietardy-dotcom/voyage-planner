@@ -15,7 +15,7 @@ import { findKnownViatorProduct } from '../services/viatorKnownProducts';
 import { calculateDistance } from '../services/geocoding';
 import { classifyOutdoorIndoor, getMinDuration, getMaxDuration } from './utils/constants';
 import { isViatorGenericPrivateTourCandidate, scoreViatorPlusValue } from '../services/viator';
-import { isMonumentLikeActivityName } from '../services/officialTicketing';
+import { isMonumentLikeActivityName, resolveOfficialTicketing } from '../services/officialTicketing';
 import { isGarbageActivity } from './utils/garbage-filter';
 import { validateCoordinate, isPlausibleCoordinate } from './utils/coordinate-validator';
 
@@ -46,6 +46,27 @@ const MUST_SEE_EXCLUDED_KEYWORDS = [
   // Stadiums: can't visit interior without event ticket — not true tourist attractions
   'stadium', 'stade', 'stadio', 'arena',
 ];
+
+const SECONDARY_AUTO_MUST_SEE_KEYWORDS = [
+  'basilica', 'basilique', 'church', 'église', 'eglise', 'cathedral', 'cathédrale', 'cathedrale',
+  'column', 'colonne', 'memorial', 'monument à', 'monument a',
+  'square', 'piazza', 'place', 'park', 'parc', 'garden', 'jardin',
+];
+
+const ICONIC_ALIASES_BY_DESTINATION: Record<string, string[]> = {
+  rome: [
+    'colossee', 'colisee', 'colisée', 'colosseum', 'forum romain', 'roman forum',
+    'pantheon', 'panthéon', 'fontaine de trevi', 'trevi fountain',
+    'vatican', 'musees du vatican', 'musee du vatican', 'musei vaticani',
+    'chapelle sixtine', 'sistine chapel', 'saint pierre', 'saint-pierre', 'st peter',
+    'piazza navona', 'castel sant angelo', 'chateau saint ange', 'espagne',
+  ],
+  tokyo: [
+    'senso ji', 'senso-ji', 'asakusa', 'meiji jingu', 'meiji-jingu',
+    'shibuya sky', 'tokyo tower', 'tour de tokyo', 'tokyo skytree',
+    'akihabara', 'teamlab', 'ueno', 'disneysea', 'disneyland',
+  ],
+};
 
 /** Keywords that indicate an activity includes a meal (cooking class, food tour, etc.) */
 const MEAL_INCLUSIVE_KEYWORDS = [
@@ -187,6 +208,41 @@ function parseDurationFromTitle(title: string): number | null {
   if (/\b(?:full[- ]?day|journ[eé]e\s+compl[eè]te)\b/.test(t)) return 480;
 
   return null;
+}
+
+function normalizePlannerText(value?: string): string {
+  return (value || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+function isSecondaryAutoMustSeeCandidate(activity: ScoredActivity): boolean {
+  const text = normalizePlannerText(`${activity.name || ''} ${(activity as any).description || ''}`);
+  return SECONDARY_AUTO_MUST_SEE_KEYWORDS.some((keyword) => text.includes(normalizePlannerText(keyword)));
+}
+
+function isCuratedIconicForDestination(activity: ScoredActivity, destination: string): boolean {
+  const normalizedDestination = normalizePlannerText(destination);
+  const aliases = ICONIC_ALIASES_BY_DESTINATION[normalizedDestination] || [];
+  if (aliases.length === 0) return false;
+  const text = normalizePlannerText(`${activity.name || ''} ${(activity as any).description || ''}`);
+  return aliases.some((alias) => text.includes(normalizePlannerText(alias)));
+}
+
+function isIconicAutoMustSeeCandidate(
+  activity: ScoredActivity,
+  destination: string,
+  popScore: number
+): boolean {
+  if (resolveOfficialTicketing(activity, destination)) return true;
+  if (isCuratedIconicForDestination(activity, destination)) return true;
+  if (isSecondaryAutoMustSeeCandidate(activity)) return false;
+  return popScore >= 16
+    && (activity.reviewCount || 0) >= 15000
+    && isMonumentLikeActivityName(activity.name);
 }
 
 export function scoreAndSelectActivities(
@@ -345,12 +401,10 @@ export function scoreAndSelectActivities(
   // 4. Filter irrelevant types
   const filtered = deduped.filter(a => !isIrrelevantAttraction(a));
 
-  // 4b. Auto-detect must-sees from popularity data (no arbitrary threshold or cap)
-  // Top N non-Viator activities by popularity score are flagged as must-see.
-  // N scales with trip duration — longer trips get more incontournables.
-  // Activities matching MUST_SEE_EXCLUDED_KEYWORDS (experiences, walks, tours…)
-  // are excluded — only iconic places/monuments should be auto-flagged.
-  const autoMustSeeCount = Math.ceil(preferences.durationDays * 1.5);
+  // 4b. Auto-detect must-sees conservatively.
+  // Only user-forced entries, official-ticketing landmarks, and a small destination-aware
+  // shortlist can become auto must-sees in v3.2. Popular but secondary POIs stay optional.
+  const autoMustSeeCount = Math.min(4, Math.max(1, Math.ceil(preferences.durationDays * 0.75)));
   const existingMustSeeCount = filtered.filter(a => a.mustSee).length;
   const autoDetectSlots = Math.max(0, autoMustSeeCount - existingMustSeeCount);
 
@@ -367,7 +421,9 @@ export function scoreAndSelectActivities(
         activity: a,
         popScore: computePopularityScore(a.rating || 0, a.reviewCount || 0),
       }))
-      .filter(({ popScore }) => popScore >= 12) // Minimum quality floor
+      .filter(({ activity, popScore }) =>
+        popScore >= 12 && isIconicAutoMustSeeCandidate(activity, preferences.destination, popScore)
+      )
       .sort((a, b) => b.popScore - a.popScore);
 
     for (const { activity, popScore } of autoDetectCandidates.slice(0, autoDetectSlots)) {

@@ -22,6 +22,7 @@ import { getActivityHoursForDay } from './utils/opening-hours';
 
 export type DayRole = 'arrival' | 'full_city' | 'day_trip' | 'recovery' | 'departure';
 type PlannerProfile = 'v3.1' | 'v3.2';
+type ArrivalFatigueRole = 'standard' | 'long_haul';
 const MIN_DAY_TRIP_WINDOW_MIN = 420;
 
 export interface DaySlot {
@@ -125,6 +126,10 @@ interface BeamPenalties {
   totalTravelMinutes: number;
 }
 
+interface PlannerV32Context {
+  arrivalFatigueRole?: ArrivalFatigueRole;
+}
+
 function emptyPenalties(): BeamPenalties {
   return {
     hardViolations: 0,
@@ -208,17 +213,109 @@ function compareStatesWithStage(
   return a.stableTieBreakKey.localeCompare(b.stableTieBreakKey);
 }
 
+function normalizePlannerText(value?: string): string {
+  return (value || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+function inferPoiFamily(activity: ScoredActivity): string {
+  const text = normalizePlannerText(`${activity.name || ''} ${(activity.description || '')} ${activity.type || ''}`);
+  if (/disney|theme park|amusement|water park|universal/.test(text)) return 'theme_park';
+  if (/basilica|basilique|church|eglise|église|cathedral|cathedrale|cathédrale|abbey|abbaye/.test(text)) return 'church_basilica';
+  if (/column|colonne|memorial|victor emmanuel|monument a|monument à/.test(text)) return 'column_memorial';
+  if (/(^| )park( |$)|parc|garden|jardin/.test(text)) return 'generic_park';
+  if (/piazza|square|place /.test(text)) return 'generic_square';
+  if (/museum|musee|musée|gallery|galerie|galleria/.test(text)) return 'museum_gallery';
+  if (/pantheon|forum|colossee|colisee|colisee|colosseum|ruin|ruines|historic|historique|archaeolog/.test(text)) return 'historic_site';
+  if (/tower|tour|sky|viewpoint|belvedere|observatory/.test(text)) return 'viewpoint_tower';
+  return 'general_landmark';
+}
+
+function isSecondaryPoiFamily(family?: string): boolean {
+  return family === 'church_basilica'
+    || family === 'column_memorial'
+    || family === 'generic_park'
+    || family === 'generic_square';
+}
+
+function inferMacroZoneId(
+  activity: ScoredActivity,
+  cityCenter: { lat: number; lng: number }
+): string {
+  const latKm = (activity.latitude - cityCenter.lat) * 111;
+  const lngKm = (activity.longitude - cityCenter.lng) * 111 * Math.cos((cityCenter.lat * Math.PI) / 180);
+  const distKm = Math.hypot(latKm, lngKm);
+  if (distKm < 2) return 'core';
+
+  const vertical = latKm >= 1 ? 'n' : latKm <= -1 ? 's' : '';
+  const horizontal = lngKm >= 1 ? 'e' : lngKm <= -1 ? 'w' : '';
+  return `${vertical}${horizontal}` || (Math.abs(latKm) >= Math.abs(lngKm) ? (latKm >= 0 ? 'n' : 's') : (lngKm >= 0 ? 'e' : 'w'));
+}
+
+function annotatePlannerMetadata(
+  activities: ScoredActivity[],
+  cityCenter: { lat: number; lng: number },
+  fatigueRole: ArrivalFatigueRole
+): void {
+  for (const activity of activities) {
+    activity.poiFamily = activity.poiFamily || inferPoiFamily(activity);
+    activity.macroZoneId = activity.macroZoneId || inferMacroZoneId(activity, cityCenter);
+    activity.fatigueRole = fatigueRole;
+  }
+}
+
+function getDominantMacroZone(activities: ScoredActivity[]): string | null {
+  const counts = new Map<string, number>();
+  for (const activity of activities) {
+    const zone = activity.macroZoneId;
+    if (!zone) continue;
+    counts.set(zone, (counts.get(zone) || 0) + 1);
+  }
+  let best: string | null = null;
+  let bestCount = 0;
+  for (const [zone, count] of counts) {
+    if (count > bestCount) {
+      best = zone;
+      bestCount = count;
+    }
+  }
+  return best;
+}
+
+function isHighFrictionBoundaryActivity(activity: ScoredActivity): boolean {
+  const text = normalizePlannerText(`${activity.name || ''} ${(activity.description || '')} ${activity.type || ''}`);
+  return /disney|theme park|amusement|water park|universal|segway|workshop|cooking|photoshoot|cruise|excursion|tour /.test(text);
+}
+
 function isBoundaryFriendlyForPlanner(
   activity: ScoredActivity,
   slot: DaySlot,
   cityCenter: { lat: number; lng: number },
-  plannerProfile: PlannerProfile
+  plannerProfile: PlannerProfile,
+  context: PlannerV32Context
 ): boolean {
   if (plannerProfile !== 'v3.2') return true;
   if (slot.role !== 'arrival' && slot.role !== 'departure') return true;
-  if (activity.protectedReason || activity.mustSee) return true;
+  if (activity.protectedReason === 'user_forced') return true;
   const duration = activity.duration || 60;
   const distKm = calculateDistance(activity.latitude, activity.longitude, cityCenter.lat, cityCenter.lng);
+  const isDayTripLike = activity.protectedReason === 'day_trip'
+    || activity.protectedReason === 'day_trip_anchor'
+    || (activity.dayTripAffinity || 0) >= 0.7;
+  if (isDayTripLike || isHighFrictionBoundaryActivity(activity)) return false;
+
+  if (slot.role === 'arrival' && context.arrivalFatigueRole === 'long_haul') {
+    return duration <= 60 && distKm <= 2;
+  }
+
+  if (slot.role === 'departure') {
+    return duration <= 60 && distKm <= 2.5;
+  }
+
   return duration <= 90 && distKm <= 3;
 }
 
@@ -341,10 +438,19 @@ function getSlotBudget(slot: DaySlot): number {
 }
 
 /** Get max activities for a slot — derived from available time */
-function getSlotMaxActivities(slot: DaySlot): number {
+function getSlotMaxActivities(
+  slot: DaySlot,
+  plannerProfile: PlannerProfile = 'v3.1',
+  context: PlannerV32Context = {}
+): number {
   const budget = getSlotBudget(slot);
   if (slot.role === 'recovery') return 2;
   if (slot.role === 'day_trip') return 6;
+  if (plannerProfile === 'v3.2') {
+    if (slot.role === 'departure') return 1;
+    if (slot.role === 'arrival' && context.arrivalFatigueRole === 'long_haul') return 1;
+    if (slot.role === 'arrival') return 2;
+  }
   // ~75min average per activity (duration + transition)
   return Math.max(1, Math.floor(budget / 75));
 }
@@ -408,7 +514,8 @@ function computePenalties(
   densityProfile?: CityDensityProfile,
   rescueStage: V31RescueStage = 0,
   startDate?: Date,
-  plannerProfile: PlannerProfile = 'v3.1'
+  plannerProfile: PlannerProfile = 'v3.1',
+  context: PlannerV32Context = {}
 ): BeamPenalties {
   const p = emptyPenalties();
   const urbanBudgetKm = densityProfile?.urbanLegBudgetKm ?? 3.5;
@@ -430,7 +537,7 @@ function computePenalties(
     const slot = slots[i];
     const acts = state.assignments[i] || [];
     const budget = getSlotBudget(slot);
-    const maxActs = getSlotMaxActivities(slot);
+    const maxActs = getSlotMaxActivities(slot, plannerProfile, context);
     const dayDate = getSlotDate(startDate, slot.dayNumber);
 
     // Duration overrun
@@ -460,7 +567,7 @@ function computePenalties(
 
     if (dayDate) {
       for (const act of acts) {
-        if (!isBoundaryFriendlyForPlanner(act, slot, cityCenter, plannerProfile)) {
+        if (!isBoundaryFriendlyForPlanner(act, slot, cityCenter, plannerProfile, context)) {
           p.hardViolations++;
         }
         if (!canActivityFitDayWindow(act, slot, dayDate)) {
@@ -475,8 +582,22 @@ function computePenalties(
       }
     }
 
-    // Type diversity: count excess same-type activities
-    if (rescueStage < 3 && acts.length >= 3) {
+    if (plannerProfile === 'v3.2' && acts.length >= 2) {
+      const secondaryFamilyCounts = new Map<string, number>();
+      const uniqueZones = new Set<string>();
+      for (const activity of acts) {
+        if (activity.macroZoneId) uniqueZones.add(activity.macroZoneId);
+        if (isSecondaryPoiFamily(activity.poiFamily)) {
+          secondaryFamilyCounts.set(activity.poiFamily!, (secondaryFamilyCounts.get(activity.poiFamily!) || 0) + 1);
+        }
+      }
+      for (const count of secondaryFamilyCounts.values()) {
+        if (count > 1) p.rhythmPenalty += (count - 1) * 2;
+      }
+      if (uniqueZones.size > 1) {
+        p.routeInefficiencyPenalty += uniqueZones.size - 1;
+      }
+    } else if (rescueStage < 3 && acts.length >= 3) {
       const typeCounts = new Map<string, number>();
       for (const a of acts) {
         typeCounts.set(a.type, (typeCounts.get(a.type) || 0) + 1);
@@ -488,8 +609,28 @@ function computePenalties(
 
     // Rhythm: penalize very dense or very light days
     if (slot.role === 'full_city') {
-      if (acts.length <= 1) p.rhythmPenalty += 2; // too light
+      if (acts.length <= 1) p.rhythmPenalty += plannerProfile === 'v3.2' ? 5 : 2;
       if (acts.length >= 7) p.rhythmPenalty += acts.length - 6; // too dense
+    }
+  }
+
+  if (plannerProfile === 'v3.2') {
+    const zoneDays = new Map<string, number[]>();
+    for (let index = 0; index < slots.length; index++) {
+      const slot = slots[index];
+      if (slot.role !== 'full_city') continue;
+      const dominantZone = getDominantMacroZone(state.assignments[index] || []);
+      if (!dominantZone) continue;
+      if (!zoneDays.has(dominantZone)) zoneDays.set(dominantZone, []);
+      zoneDays.get(dominantZone)!.push(slot.dayNumber);
+    }
+    for (const dayNumbers of zoneDays.values()) {
+      dayNumbers.sort((left, right) => left - right);
+      for (let i = 1; i < dayNumbers.length; i++) {
+        if (dayNumbers[i] - dayNumbers[i - 1] > 1) {
+          p.routeInefficiencyPenalty += dayNumbers[i] - dayNumbers[i - 1] - 1;
+        }
+      }
     }
   }
 
@@ -521,7 +662,8 @@ function greedyAssign(
   cityCenter: { lat: number; lng: number },
   rescueStage: V31RescueStage,
   startDate?: Date,
-  plannerProfile: PlannerProfile = 'v3.1'
+  plannerProfile: PlannerProfile = 'v3.1',
+  context: PlannerV32Context = {}
 ): ScoredActivity[][] {
   const assignments: ScoredActivity[][] = slots.map(() => []);
 
@@ -548,12 +690,12 @@ function greedyAssign(
       const dayDate = getSlotDate(startDate, slot.dayNumber);
       if (slot.role === 'day_trip') continue;
       if (slot.role === 'recovery' && plannerProfile === 'v3.2' && isProtected(activity)) continue;
-      if (!isBoundaryFriendlyForPlanner(activity, slot, cityCenter, plannerProfile)) continue;
+      if (!isBoundaryFriendlyForPlanner(activity, slot, cityCenter, plannerProfile, context)) continue;
       if (!canActivityFitDayWindow(activity, slot, dayDate)) continue;
 
       const dayActs = assignments[i];
       const totalDur = dayActs.reduce((s, a) => s + (a.duration || 60), 0);
-      const dayHasCapacity = dayActs.length < getSlotMaxActivities(slot);
+      const dayHasCapacity = dayActs.length < getSlotMaxActivities(slot, plannerProfile, context);
       const dayHasDuration = totalDur + (activity.duration || 60) <= getSlotBudget(slot);
 
       let canPlace = dayHasCapacity && dayHasDuration;
@@ -563,7 +705,7 @@ function greedyAssign(
           .sort((a, b) => a.score - b.score)[0];
         if (victim) {
           const adjustedDur = totalDur - (victim.duration || 60) + (activity.duration || 60);
-          canPlace = dayActs.length <= getSlotMaxActivities(slot) && adjustedDur <= getSlotBudget(slot);
+          canPlace = dayActs.length <= getSlotMaxActivities(slot, plannerProfile, context) && adjustedDur <= getSlotBudget(slot);
         }
       }
       if (!canPlace) continue;
@@ -589,6 +731,25 @@ function greedyAssign(
         geoScore = -dist * 0.5;
       }
 
+      let zoneScore = 0;
+      if (plannerProfile === 'v3.2') {
+        const actZone = activity.macroZoneId || inferMacroZoneId(activity, cityCenter);
+        const dominantZone = getDominantMacroZone(dayActs);
+        if (dominantZone && actZone === dominantZone) zoneScore += 2.5;
+        if (dominantZone && actZone !== dominantZone) zoneScore -= 2;
+
+        if (!dominantZone) {
+          const prevZone = i > 0 ? getDominantMacroZone(assignments[i - 1] || []) : null;
+          const nextZone = i < assignments.length - 1 ? getDominantMacroZone(assignments[i + 1] || []) : null;
+          if (actZone && (prevZone === actZone || nextZone === actZone)) zoneScore += 1.5;
+        }
+
+        if (!isProtected(activity) && isSecondaryPoiFamily(activity.poiFamily)) {
+          const sameFamilyCount = dayActs.filter((candidate) => candidate.poiFamily === activity.poiFamily).length;
+          if (sameFamilyCount > 0) zoneScore -= 3 * sameFamilyCount;
+        }
+      }
+
       let roleBonus = 0;
       if (plannerProfile === 'v3.2') {
         if (slot.role === 'full_city') roleBonus += 3;
@@ -598,7 +759,7 @@ function greedyAssign(
         if (slot.role === 'departure' && dayActs.length < 2) roleBonus += 1;
       }
 
-      const score = geoScore + roleBonus;
+      const score = geoScore + zoneScore + roleBonus;
       if (score > bestScore) {
         bestScore = score;
         bestDay = i;
@@ -627,7 +788,7 @@ function greedyAssign(
         if (
           victim
           && (
-            assignments[bestDay].length >= getSlotMaxActivities(slot)
+            assignments[bestDay].length >= getSlotMaxActivities(slot, plannerProfile, context)
             || totalDur + (activity.duration || 60) > getSlotBudget(slot)
           )
         ) {
@@ -663,7 +824,8 @@ function beamSearch(
   densityProfile?: CityDensityProfile,
   rescueStage: V31RescueStage = 0,
   startDate?: Date,
-  plannerProfile: PlannerProfile = 'v3.1'
+  plannerProfile: PlannerProfile = 'v3.1',
+  context: PlannerV32Context = {}
 ): { assignments: ScoredActivity[][]; usedBeam: boolean; fellBackToGreedy: boolean } {
   const t0 = Date.now();
 
@@ -671,7 +833,7 @@ function beamSearch(
     assignments,
     penalties: computePenalties(
       { assignments, penalties: emptyPenalties(), stableTieBreakKey: '' },
-      slots, allMustSeeIds, allProtectedIds, cityCenter, densityProfile, rescueStage, startDate, plannerProfile
+      slots, allMustSeeIds, allProtectedIds, cityCenter, densityProfile, rescueStage, startDate, plannerProfile, context
     ),
     stableTieBreakKey: computeStableTieBreakKey(assignments),
   });
@@ -708,12 +870,12 @@ function beamSearch(
             const toDayDate = getSlotDate(startDate, toSlot.dayNumber);
             if (toSlot.role === 'day_trip') continue;
             if (!isRoleCompatible(fromSlot.role, toSlot.role)) continue;
-            if (!isBoundaryFriendlyForPlanner(activity, toSlot, cityCenter, plannerProfile)) continue;
+            if (!isBoundaryFriendlyForPlanner(activity, toSlot, cityCenter, plannerProfile, context)) continue;
             if (!canActivityFitDayWindow(activity, toSlot, toDayDate)) continue;
 
             // Check capacity
             const toDayActs = state.assignments[toDay];
-            if (toDayActs.length >= getSlotMaxActivities(toSlot)) continue;
+            if (toDayActs.length >= getSlotMaxActivities(toSlot, plannerProfile, context)) continue;
             const toDur = toDayActs.reduce((s, a) => s + (a.duration || 60), 0);
             if (toDur + (activity.duration || 60) > getSlotBudget(toSlot)) continue;
             if (rescueStage >= 1 && isLongDurationActivity(activity) && toDur > 120) continue;
@@ -792,11 +954,19 @@ export function buildPlannerClustersV31(
   numDays: number,
   cityCenter: { lat: number; lng: number },
   densityProfile?: CityDensityProfile,
-  options: { rescueStage?: V31RescueStage; startDate?: Date; plannerVersion?: PlannerProfile } = {}
+  options: {
+    rescueStage?: V31RescueStage;
+    startDate?: Date;
+    plannerVersion?: PlannerProfile;
+    arrivalFatigueRole?: ArrivalFatigueRole;
+  } = {}
 ): PlannerV31Result {
   const rescueStage = options.rescueStage ?? 0;
   const startDate = options.startDate;
   const plannerProfile = options.plannerVersion ?? 'v3.1';
+  const context: PlannerV32Context = {
+    arrivalFatigueRole: options.arrivalFatigueRole ?? 'standard',
+  };
   // 1. Assign day roles
   const slots = assignDayRoles(numDays, timeWindows);
 
@@ -848,6 +1018,9 @@ export function buildPlannerClustersV31(
 
   // 2. Must-see IDs for penalty computation
   const plannerCityActivities = [...cityActivities, ...demotedDayTripActivities];
+  if (plannerProfile === 'v3.2') {
+    annotatePlannerMetadata(plannerCityActivities, cityCenter, context.arrivalFatigueRole || 'standard');
+  }
   const allMustSeeIds = new Set(
     plannerCityActivities.filter(a => a.mustSee).map(a => a.id || a.name)
   );
@@ -858,11 +1031,11 @@ export function buildPlannerClustersV31(
   );
 
   // 3. Greedy baseline
-  const greedy = greedyAssign(plannerCityActivities, slots, cityCenter, rescueStage, startDate, plannerProfile);
+  const greedy = greedyAssign(plannerCityActivities, slots, cityCenter, rescueStage, startDate, plannerProfile, context);
 
   // 4. Beam search improvement
   const { assignments, usedBeam, fellBackToGreedy } = beamSearch(
-    greedy, slots, allMustSeeIds, allProtectedIds, cityCenter, densityProfile, rescueStage, startDate, plannerProfile
+    greedy, slots, allMustSeeIds, allProtectedIds, cityCenter, densityProfile, rescueStage, startDate, plannerProfile, context
   );
 
   // 5. Convert to ActivityCluster[]

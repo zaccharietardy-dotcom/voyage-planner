@@ -45,6 +45,8 @@ export interface RepairResult {
     freeTimeOverBudgetCount?: number;
     mealFallbackCount?: number;
     routeRebuildCount?: number;
+    restaurantRefetchMissCount?: number;
+    temporalImpossibleItemCount?: number;
   };
 }
 

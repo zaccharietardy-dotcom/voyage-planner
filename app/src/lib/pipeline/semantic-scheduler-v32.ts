@@ -13,6 +13,7 @@ import type { RepairAction, RepairResult } from './step10-repair';
 import type { DayTravelTimes, TravelLeg } from './step7b-travel-times';
 
 import { calculateDistance } from '../services/geocoding';
+import { searchRestaurantsNearbyWithFallback } from '../services/serpApiPlaces';
 import { findBestRestaurant, createHotelBreakfastRestaurant, getDayDateForCluster } from './step8-place-restaurants';
 import {
   createActivityItem,
@@ -38,6 +39,8 @@ export type V32Diagnostics = NonNullable<RepairResult['rescueDiagnostics']> & {
   freeTimeOverBudgetCount: number;
   mealFallbackCount: number;
   routeRebuildCount: number;
+  restaurantRefetchMissCount: number;
+  temporalImpossibleItemCount?: number;
 };
 
 const EXPERIENTIAL_VIATOR_RE = /segway|photoshoot|photo shoot|workshop|atelier|cours|cooking|culinary|tour|excursion|cruise|vespa|class/i;
@@ -60,6 +63,22 @@ const FREE_TIME_LIMIT_BY_ROLE: Record<NonNullable<PlannerRole>, number> = {
 
 const ROUTE_TRANSPORT_DISTANCE_KM = 0.4;
 const ROUTE_TRANSPORT_MIN = 5;
+const MAX_VALID_URBAN_LEG_MIN = 90;
+const MAX_VALID_URBAN_LEG_DISTANCE_KM = 25;
+
+function normalizePlannerText(value?: string): string {
+  return (value || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+function isHighFrictionBoundaryActivity(activity: ScoredActivity): boolean {
+  const text = normalizePlannerText(`${activity.name || ''} ${activity.description || ''} ${activity.type || ''}`);
+  return /disney|theme park|amusement|water park|universal|segway|workshop|cooking|photoshoot|cruise|excursion|tour /.test(text);
+}
 
 function getActivityKey(activity: ScoredActivity): string {
   return activity.id || activity.planningToken || activity.name;
@@ -86,12 +105,22 @@ function isBoundaryFriendlyActivity(
   anchor: { lat: number; lng: number }
 ): boolean {
   if (role !== 'arrival' && role !== 'departure') return true;
-  if (isProtectedActivity(activity)) return true;
+  if (activity.protectedReason === 'user_forced') return true;
   if (isExperientialViator(activity)) return false;
+  if (isHighFrictionBoundaryActivity(activity)) return false;
   const duration = activity.duration || 60;
-  if (duration > 90) return false;
+  const isDayTripLike = activity.protectedReason === 'day_trip'
+    || activity.protectedReason === 'day_trip_anchor'
+    || (activity.dayTripAffinity || 0) >= 0.7;
+  if (isDayTripLike) return false;
   const distKm = calculateDistance(activity.latitude, activity.longitude, anchor.lat, anchor.lng);
-  return distKm <= 3;
+  if (role === 'departure') {
+    return duration <= 60 && distKm <= 2.5;
+  }
+  if (activity.fatigueRole === 'long_haul') {
+    return duration <= 60 && distKm <= 2;
+  }
+  return duration <= 90 && distKm <= 3;
 }
 
 function dedupeRestaurants(restaurants: Restaurant[]): Restaurant[] {
@@ -174,10 +203,20 @@ function estimateTravelLeg(
 function resolveTravelLeg(
   dayTravel: DayTravelTimes | undefined,
   from: { id: string; name: string; lat: number; lng: number },
-  to: { id: string; name: string; lat: number; lng: number }
+  to: { id: string; name: string; lat: number; lng: number },
+  role: NonNullable<PlannerRole> = 'full_city'
 ): TravelLeg {
   const exact = dayTravel?.legs.find((leg) => leg.fromId === from.id && leg.toId === to.id);
-  return exact || estimateTravelLeg(from, to);
+  const fallback = estimateTravelLeg(from, to);
+  if (!exact) return fallback;
+  if (
+    role !== 'day_trip'
+    && exact.durationMinutes > MAX_VALID_URBAN_LEG_MIN
+    && (exact.distanceKm || calculateDistance(from.lat, from.lng, to.lat, to.lng)) <= MAX_VALID_URBAN_LEG_DISTANCE_KM
+  ) {
+    return fallback;
+  }
+  return exact;
 }
 
 function makeStopId(kind: ScheduledStop['kind'], dayNumber: number, index: number): string {
@@ -271,7 +310,7 @@ function scheduleActivitiesForDay(
         lat: activity.latitude,
         lng: activity.longitude,
       };
-      const leg = resolveTravelLeg(dayTravel, currentAnchor, target);
+      const leg = resolveTravelLeg(dayTravel, currentAnchor, target, role);
       const travelMin = leg.durationMinutes;
       let startMin = currentTimeMin + travelMin;
       const openTime = getActivityOpenTime(activity, dayDate);
@@ -309,7 +348,7 @@ function scheduleActivitiesForDay(
         lat: stop.latitude,
         lng: stop.longitude,
       };
-      const leg = resolveTravelLeg(dayTravel, currentAnchor, stopTarget);
+      const leg = resolveTravelLeg(dayTravel, currentAnchor, stopTarget, role);
       const minStart = Math.max(timeToMin(stop.startTime), currentTimeMin + leg.durationMinutes);
       if (minStart + 15 <= dayEndMin + 5) {
         scheduled.push({
@@ -328,8 +367,17 @@ function scheduleActivitiesForDay(
     };
   };
 
+  const candidateActivities = (role === 'day_trip'
+    ? cluster.activities.filter((activity) =>
+        activity.protectedReason === 'day_trip'
+        || activity.protectedReason === 'day_trip_anchor'
+        || Boolean(activity.sourcePackId)
+      )
+    : cluster.activities
+  ).filter((activity) => isBoundaryFriendlyActivity(activity, role, hotelAnchor));
+
   const orderedActivities = promoteUrgentActivities(
-    cluster.activities.filter((activity) => isBoundaryFriendlyActivity(activity, role, hotelAnchor)),
+    candidateActivities,
     dayDate,
     dayStartMin
   );
@@ -380,7 +428,7 @@ function gapBounds(
   return { startMin, endMin };
 }
 
-function pickStrictMeal(
+async function pickStrictMeal(
   restaurants: Restaurant[],
   dayDate: Date,
   mealType: 'breakfast' | 'lunch' | 'dinner',
@@ -388,16 +436,17 @@ function pickStrictMeal(
   usedRestaurantIds: Set<string>,
   dietary: string[],
   startTime: string,
-  duration: number
-): Restaurant | null {
-  const localPool = restaurants.filter((restaurant) =>
-    anchors.some((anchor) => calculateDistance(anchor.lat, anchor.lng, restaurant.latitude, restaurant.longitude) <= 0.8)
-  );
-  if (localPool.length === 0) return null;
-
-  for (const anchor of anchors) {
+  duration: number,
+  destination: string,
+  diagnostics: V32Diagnostics
+): Promise<Restaurant | null> {
+  const tryPickForAnchor = (
+    pool: Restaurant[],
+    anchor: { lat: number; lng: number }
+  ): Restaurant | null => {
+    if (pool.length === 0) return null;
     const placement = findBestRestaurant(
-      localPool,
+      pool,
       anchor,
       mealType,
       0.8,
@@ -414,6 +463,67 @@ function pickStrictMeal(
     ) {
       return placement.primary;
     }
+    return null;
+  };
+
+  const tryPickFromPool = (pool: Restaurant[]): Restaurant | null => {
+    if (pool.length === 0) return null;
+
+    for (const anchor of anchors) {
+      const picked = tryPickForAnchor(pool, anchor);
+      if (picked) return picked;
+    }
+
+    return null;
+  };
+
+  const localPool = restaurants.filter((restaurant) =>
+    anchors.some((anchor) => calculateDistance(anchor.lat, anchor.lng, restaurant.latitude, restaurant.longitude) <= 0.8)
+  );
+  const immediatePick = tryPickFromPool(localPool);
+  if (immediatePick) return immediatePick;
+
+  if (!destination) {
+    if (localPool.length === 0) diagnostics.restaurantRefetchMissCount++;
+    return null;
+  }
+
+  const seen = new Set(restaurants.map((restaurant) => restaurant.id || `${restaurant.name}:${restaurant.latitude}:${restaurant.longitude}`));
+  let refetchAdded = 0;
+  for (const anchor of anchors) {
+    const anchorPool = restaurants.filter((restaurant) =>
+      calculateDistance(anchor.lat, anchor.lng, restaurant.latitude, restaurant.longitude) <= 0.8
+    );
+    const currentCoverage = anchorPool.length;
+    const anchorHasValidPick = Boolean(tryPickForAnchor(anchorPool, anchor));
+    if (currentCoverage >= 5 && anchorHasValidPick) continue;
+
+    try {
+      const nearby = await searchRestaurantsNearbyWithFallback(anchor, destination, {
+        mealType,
+        maxDistance: 1000,
+        limit: 8,
+      });
+      for (const restaurant of nearby) {
+        const key = restaurant.id || `${restaurant.name}:${restaurant.latitude}:${restaurant.longitude}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        restaurants.push(restaurant);
+        refetchAdded++;
+      }
+    } catch {
+      // Non-blocking: keep existing pool and fall back cleanly.
+    }
+  }
+
+  const postRefetchPool = restaurants.filter((restaurant) =>
+    anchors.some((anchor) => calculateDistance(anchor.lat, anchor.lng, restaurant.latitude, restaurant.longitude) <= 0.8)
+  );
+  const postRefetchPick = tryPickFromPool(postRefetchPool);
+  if (postRefetchPick) return postRefetchPick;
+
+  if (refetchAdded === 0 || postRefetchPool.length === 0) {
+    diagnostics.restaurantRefetchMissCount++;
   }
 
   return null;
@@ -429,17 +539,100 @@ function estimateLocalTravelMinutes(
   ).durationMinutes;
 }
 
-function insertMealsForDay(
+function canShiftStopLater(
+  stop: ScheduledStop,
+  deltaMin: number,
+  dayDate: Date,
+  dayEndMin: number
+): boolean {
+  const shiftedStartMin = timeToMin(stop.startTime) + deltaMin;
+  const shiftedEndMin = timeToMin(stop.endTime) + deltaMin;
+  if (shiftedEndMin > dayEndMin) return false;
+  if (stop.kind === 'activity' && stop.activity) {
+    const closeTime = getActivityCloseTime(stop.activity, dayDate);
+    if (closeTime && closeTime !== '00:00' && shiftedEndMin > timeToMin(closeTime)) return false;
+    const latestStart = latestFeasibleStartMin(stop.activity, dayDate);
+    if (latestStart != null && shiftedStartMin > latestStart) return false;
+  }
+  return true;
+}
+
+function snapshotStopTimes(stops: ScheduledStop[]): Map<string, { startTime: string; endTime: string }> {
+  return new Map(
+    stops.map((stop) => [stop.id, { startTime: stop.startTime, endTime: stop.endTime }])
+  );
+}
+
+function restoreStopTimes(
+  stops: ScheduledStop[],
+  snapshot: Map<string, { startTime: string; endTime: string }>
+): void {
+  for (const stop of stops) {
+    const saved = snapshot.get(stop.id);
+    if (!saved) continue;
+    stop.startTime = saved.startTime;
+    stop.endTime = saved.endTime;
+  }
+}
+
+function shiftFollowingActivitySlice(
+  dayPlan: ScheduledDayPlan,
+  startStopId: string,
+  deltaMin: number,
+  dayDate: Date,
+  dayEndMin: number
+): boolean {
+  if (deltaMin <= 0 || deltaMin > 90) return false;
+  const sorted = [...dayPlan.stops].sort((a, b) => timeToMin(a.startTime) - timeToMin(b.startTime));
+  const startIndex = sorted.findIndex((stop) => stop.id === startStopId);
+  if (startIndex < 0) return false;
+
+  const slice: ScheduledStop[] = [];
+  let boundaryStop: ScheduledStop | undefined;
+  for (let index = startIndex; index < sorted.length; index++) {
+    const stop = sorted[index];
+    if (stop.kind !== 'activity' || !stop.activity) {
+      if (slice.length === 0) return false;
+      boundaryStop = stop;
+      break;
+    }
+    slice.push(stop);
+    const next = sorted[index + 1];
+    if (!next) break;
+    if (next.kind !== 'activity' || !next.activity) {
+      boundaryStop = next;
+      break;
+    }
+  }
+
+  if (slice.length === 0) return false;
+  if (slice.some((stop) => !canShiftStopLater(stop, deltaMin, dayDate, dayEndMin))) return false;
+  if (boundaryStop) {
+    const last = slice[slice.length - 1];
+    if (timeToMin(last.endTime) + deltaMin + 10 > timeToMin(boundaryStop.startTime)) return false;
+  }
+
+  const shiftedIds = new Set(slice.map((stop) => stop.id));
+  for (const stop of dayPlan.stops) {
+    if (!shiftedIds.has(stop.id)) continue;
+    stop.startTime = minToTime(timeToMin(stop.startTime) + deltaMin);
+    stop.endTime = minToTime(timeToMin(stop.endTime) + deltaMin);
+  }
+  return true;
+}
+
+async function insertMealsForDay(
   dayPlan: ScheduledDayPlan,
   cluster: ActivityCluster,
   dayDate: Date,
   timeWindow: DayTimeWindow | undefined,
   hotel: Accommodation | null,
   restaurants: Restaurant[],
+  destination: string,
   dietary: string[],
   usedRestaurantIds: Set<string>,
   diagnostics: V32Diagnostics
-): void {
+): Promise<void> {
   const role = dayPlan.role || getRole(cluster);
   const dayStartMin = timeToMin(timeWindow?.activityStartTime || '08:30');
   const dayEndMin = timeToMin(timeWindow?.activityEndTime || '21:00');
@@ -466,6 +659,7 @@ function insertMealsForDay(
       enabled: dayEndMin >= 19 * 60,
     },
   ];
+  let fallbackMealsInserted = 0;
 
   for (const meal of mealSpecs) {
     if (!meal.enabled) continue;
@@ -475,28 +669,43 @@ function insertMealsForDay(
         : meal.type === 'lunch'
           ? { startMin: Math.max(dayStartMin, 12 * 60), endMin: Math.min(dayEndMin, 14 * 60 + 30) }
           : { startMin: Math.max(dayStartMin, 19 * 60), endMin: Math.min(dayEndMin, 21 * 60 + 30) };
-    const tryInsertMeal = (): boolean => {
+    const tryInsertMeal = async (): Promise<boolean> => {
       const currentStops = [...dayPlan.stops].sort((a, b) => timeToMin(a.startTime) - timeToMin(b.startTime));
       for (let index = 0; index <= currentStops.length; index++) {
         const prev = index > 0 ? currentStops[index - 1] : undefined;
         const next = index < currentStops.length ? currentStops[index] : undefined;
         const { startMin, endMin } = gapBounds(prev, next, dayStartMin, dayEndMin);
         const slotStartMin = Math.max(startMin, mealWindow.startMin);
-        const slotEndMin = Math.min(endMin, mealWindow.endMin);
-        if (slotEndMin - slotStartMin < meal.duration) continue;
+        const latestMealStartMin = Math.min(endMin - meal.duration, mealWindow.endMin);
+        if (latestMealStartMin < slotStartMin) continue;
 
-        const naturalStart = Math.max(slotStartMin, Math.min(meal.idealMin, slotEndMin - meal.duration));
+        const naturalStart = Math.max(slotStartMin, Math.min(meal.idealMin, latestMealStartMin));
         const prevAnchor = prev ? { lat: prev.latitude, lng: prev.longitude } : hotelAnchor;
         const nextAnchor = next ? { lat: next.latitude, lng: next.longitude } : prevAnchor;
         const midpoint = {
           lat: (prevAnchor.lat + nextAnchor.lat) / 2,
           lng: (prevAnchor.lng + nextAnchor.lng) / 2,
         };
-        const anchorCandidates = [prevAnchor, nextAnchor, midpoint];
+        const anchorCandidates = [prevAnchor, nextAnchor];
         const mealStart = minToTime(naturalStart);
         const restaurant = meal.type === 'breakfast' && hotel
           ? createHotelBreakfastRestaurant(hotelAnchor, hotel.name || 'Hôtel')
-          : pickStrictMeal(restaurants, dayDate, meal.type, anchorCandidates, usedRestaurantIds, dietary, mealStart, meal.duration);
+          : await pickStrictMeal(
+              restaurants,
+              dayDate,
+              meal.type,
+              anchorCandidates,
+              usedRestaurantIds,
+              dietary,
+              mealStart,
+              meal.duration,
+              destination,
+              diagnostics
+            );
+
+        if (!restaurant && fallbackMealsInserted >= 1) {
+          continue;
+        }
 
         const stop: ScheduledStop = restaurant
           ? {
@@ -525,27 +734,59 @@ function insertMealsForDay(
             };
 
         const mealPoint = { lat: stop.latitude, lng: stop.longitude };
+        if (restaurant && meal.type !== 'breakfast') {
+          const nearestAnchorDist = Math.min(
+            calculateDistance(prevAnchor.lat, prevAnchor.lng, mealPoint.lat, mealPoint.lng),
+            calculateDistance(nextAnchor.lat, nextAnchor.lng, mealPoint.lat, mealPoint.lng)
+          );
+          if (nearestAnchorDist > 1.5) {
+            if (restaurant.id) usedRestaurantIds.delete(restaurant.id);
+            continue;
+          }
+        }
         const travelBefore = prev ? estimateLocalTravelMinutes(prevAnchor, mealPoint) : 0;
         const travelAfter = next ? estimateLocalTravelMinutes(mealPoint, nextAnchor) : 0;
         const feasibleStartMin = Math.max(slotStartMin, startMin + travelBefore);
-        const feasibleEndMin = Math.min(slotEndMin, endMin - travelAfter);
-        if (feasibleEndMin - feasibleStartMin < meal.duration) {
+        const feasibleLatestStartMin = Math.min(latestMealStartMin, endMin - meal.duration - travelAfter);
+        if (feasibleLatestStartMin < feasibleStartMin) {
           if (restaurant?.id) usedRestaurantIds.delete(restaurant.id);
           continue;
         }
 
-        stop.startTime = minToTime(Math.max(feasibleStartMin, naturalStart));
+        stop.startTime = minToTime(Math.max(feasibleStartMin, Math.min(naturalStart, feasibleLatestStartMin)));
         stop.endTime = addMinutes(stop.startTime, meal.duration);
 
         if (restaurant?.id) usedRestaurantIds.add(restaurant.id);
-        if (!restaurant) diagnostics.mealFallbackCount++;
+        if (!restaurant) {
+          diagnostics.mealFallbackCount++;
+          fallbackMealsInserted++;
+        }
         dayPlan.stops.push(stop);
         return true;
       }
       return false;
     };
 
-    let inserted = tryInsertMeal();
+    const tryReslotActivitySlice = async (): Promise<boolean> => {
+      const currentStops = [...dayPlan.stops].sort((a, b) => timeToMin(a.startTime) - timeToMin(b.startTime));
+      const shiftCandidates = [10, 15, 20, 25, 30, 45, 60, 75, 90];
+      for (const stop of currentStops) {
+        if (stop.kind !== 'activity' || !stop.activity) continue;
+        const originalTimes = snapshotStopTimes(dayPlan.stops);
+        for (const deltaMin of shiftCandidates) {
+          restoreStopTimes(dayPlan.stops, originalTimes);
+          if (!shiftFollowingActivitySlice(dayPlan, stop.id, deltaMin, dayDate, dayEndMin)) continue;
+          if (await tryInsertMeal()) return true;
+        }
+        restoreStopTimes(dayPlan.stops, originalTimes);
+      }
+      return false;
+    };
+
+    let inserted = await tryInsertMeal();
+    if (!inserted && (meal.type === 'lunch' || meal.type === 'dinner')) {
+      inserted = await tryReslotActivitySlice();
+    }
     if (!inserted && (meal.type === 'lunch' || meal.type === 'dinner')) {
       const optionalCandidates = [...dayPlan.stops]
         .filter((stop) => stop.kind === 'activity' && stop.activity && !isProtectedActivity(stop.activity))
@@ -564,7 +805,7 @@ function insertMealsForDay(
       for (const candidate of optionalCandidates) {
         const originalStops = dayPlan.stops;
         dayPlan.stops = originalStops.filter((stop) => stop.id !== candidate.id);
-        inserted = tryInsertMeal();
+        inserted = await tryInsertMeal();
         if (inserted) break;
         dayPlan.stops = originalStops;
       }
@@ -578,6 +819,8 @@ function insertFreeTimeForDay(
   diagnostics: V32Diagnostics
 ): void {
   const role = dayPlan.role || 'full_city';
+  const activityCount = dayPlan.stops.filter((stop) => stop.kind === 'activity').length;
+  if (activityCount <= 1) return;
   const maxBlocks = FREE_TIME_LIMIT_BY_ROLE[role];
   if (maxBlocks <= 0) return;
   const threshold = FREE_TIME_GAP_BY_ROLE[role];
@@ -701,6 +944,7 @@ function materializeStops(dayPlan: ScheduledDayPlan, hotel: Accommodation | null
     theme: '',
     dayNarrative: '',
     ...(role === 'day_trip' ? { isDayTrip: true } : {}),
+    ...(dayPlan.dayTripDestination ? { dayTripDestination: dayPlan.dayTripDestination } : {}),
   };
 }
 
@@ -715,13 +959,15 @@ function shouldSkipInterItemLeg(prev: TripItem, current: TripItem, isFirstDay: b
 function materializeLeg(
   from: TripItem,
   to: TripItem,
-  dayTravel: DayTravelTimes | undefined
+  dayTravel: DayTravelTimes | undefined,
+  role: NonNullable<PlannerRole>
 ): MaterializedLeg | null {
   const distanceKm = calculateDistance(from.latitude, from.longitude, to.latitude, to.longitude);
   const leg = resolveTravelLeg(
     dayTravel,
     { id: from.id, name: from.locationName || from.title, lat: from.latitude, lng: from.longitude },
-    { id: to.id, name: to.locationName || to.title, lat: to.latitude, lng: to.longitude }
+    { id: to.id, name: to.locationName || to.title, lat: to.latitude, lng: to.longitude },
+    role
   );
   const durationMinutes = leg.durationMinutes;
   if (distanceKm <= ROUTE_TRANSPORT_DISTANCE_KM && durationMinutes <= ROUTE_TRANSPORT_MIN) return null;
@@ -812,6 +1058,7 @@ export function rebuildInterItemTravelForDays(
 ): void {
   for (const day of days) {
     const dayTravel = travelTimes.find((travel) => travel.dayNumber === day.dayNumber);
+    const role = getRole(day);
     const kept = day.items.filter((item) => item.type !== 'transport' || item.transportRole === 'longhaul');
     const rebuilt: TripItem[] = [];
 
@@ -820,7 +1067,7 @@ export function rebuildInterItemTravelForDays(
       const prev = rebuilt.length > 0 ? rebuilt[rebuilt.length - 1] : undefined;
 
       if (prev && prev.type !== 'transport' && item.type !== 'transport' && !shouldSkipInterItemLeg(prev, item, day.dayNumber === 1)) {
-        const leg = materializeLeg(prev, item, dayTravel);
+        const leg = materializeLeg(prev, item, dayTravel, role);
         const directDistance = calculateDistance(prev.latitude, prev.longitude, item.latitude, item.longitude);
         const estimatedMinutes = Math.max(5, Math.ceil(((directDistance > 1 ? directDistance * 4 : (directDistance / 4.5) * 60)) / 5) * 5);
         const legDistance = leg?.distanceKm ?? directDistance;
@@ -884,7 +1131,7 @@ export function rebuildInterItemTravelForDays(
   }).length, 0);
 }
 
-export function semanticScheduleV32Days(
+export async function semanticScheduleV32Days(
   clusters: ActivityCluster[],
   travelTimes: DayTravelTimes[],
   timeWindows: DayTimeWindow[],
@@ -894,7 +1141,7 @@ export function semanticScheduleV32Days(
   restaurants: Restaurant[],
   _allActivities: ScoredActivity[],
   _destCoords: { lat: number; lng: number }
-): RepairResult {
+): Promise<RepairResult> {
   const repairs: RepairAction[] = [];
   const unresolvedViolations: string[] = [];
   const diagnostics: V32Diagnostics = {
@@ -908,6 +1155,7 @@ export function semanticScheduleV32Days(
     freeTimeOverBudgetCount: 0,
     mealFallbackCount: 0,
     routeRebuildCount: 0,
+    restaurantRefetchMissCount: 0,
   };
 
   const usedRestaurantIds = new Set<string>();
@@ -924,16 +1172,19 @@ export function semanticScheduleV32Days(
     const dayPlan: ScheduledDayPlan = {
       dayNumber: cluster.dayNumber,
       role,
+      isDayTrip: Boolean(cluster.isDayTrip),
+      dayTripDestination: cluster.dayTripDestination,
       stops,
     };
 
-    insertMealsForDay(
+    await insertMealsForDay(
       dayPlan,
       cluster,
       dayDate,
       timeWindow,
       hotel,
       dayRestaurants,
+      preferences.destination,
       preferences.dietary || [],
       usedRestaurantIds,
       diagnostics

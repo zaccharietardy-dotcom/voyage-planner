@@ -119,6 +119,141 @@ function resolveBestTransport(
   return transportOptions?.find(t => t.recommended) || transportOptions?.[0] || null;
 }
 
+type ArrivalFatigueRole = 'standard' | 'long_haul';
+
+function inferArrivalFatigueRole(
+  outboundFlight: { duration?: number; stops?: number } | null,
+  timeWindows: Array<{ dayNumber: number; activityStartTime: string }>
+): ArrivalFatigueRole {
+  const day1 = timeWindows.find((window) => window.dayNumber === 1);
+  const lateArrival = day1 ? timeToMin(day1.activityStartTime) >= 14 * 60 : false;
+  if ((outboundFlight?.duration || 0) >= 8 * 60) return 'long_haul';
+  if ((outboundFlight?.stops || 0) >= 2) return 'long_haul';
+  if (lateArrival) return 'long_haul';
+  return 'standard';
+}
+
+function normalizePlannerText(value?: string): string {
+  return (value || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+function inferPoiFamilyFromItem(item: { title?: string; description?: string; type?: string }): string {
+  const text = normalizePlannerText(`${item.title || ''} ${item.description || ''} ${item.type || ''}`);
+  if (/basilica|basilique|church|eglise|église|cathedral|cathedrale|cathédrale/.test(text)) return 'church_basilica';
+  if (/column|colonne|memorial|monument a|monument à/.test(text)) return 'column_memorial';
+  if (/(^| )park( |$)|parc|garden|jardin/.test(text)) return 'generic_park';
+  if (/piazza|square|place /.test(text)) return 'generic_square';
+  return 'other';
+}
+
+function resolveItemHoursForDate(item: any, dayDate: Date): { open: string; close: string } | null | undefined {
+  const dayKey = dayDate.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+  const byDay = item.openingHoursByDay?.[dayKey];
+  if (byDay === null) return null;
+  if (byDay?.open && byDay?.close) return { open: byDay.open, close: byDay.close };
+  if (item.openingHours?.open && item.openingHours?.close) return { open: item.openingHours.open, close: item.openingHours.close };
+  return undefined;
+}
+
+function pruneTemporalImpossibleItems(days: any[], startDate: Date): number {
+  let removed = 0;
+  for (const day of days) {
+    const dayDate = new Date(startDate);
+    dayDate.setDate(dayDate.getDate() + day.dayNumber - 1);
+    const before = day.items.length;
+    day.items = day.items.filter((item: any) => {
+      if (item.type !== 'activity') return true;
+      const hours = resolveItemHoursForDate(item, dayDate);
+      if (hours === null) return false;
+      if (!hours) return true;
+      const openMin = timeToMin(hours.open);
+      const closeMin = hours.close === '00:00' && hours.open !== '00:00' ? 24 * 60 : timeToMin(hours.close);
+      const startMin = timeToMin(item.startTime || '00:00');
+      const endMin = timeToMin(item.endTime || item.startTime || '00:00');
+      return startMin >= openMin && endMin <= closeMin;
+    });
+    if (day.items.length !== before) {
+      day.items.forEach((item: any, index: number) => { item.orderIndex = index; });
+      removed += before - day.items.length;
+    }
+  }
+  return removed;
+}
+
+function countSparseFullCityDays(
+  days: any[],
+  dayRoles: Array<{ dayNumber: number; role: string }> = []
+): number {
+  const roleByDay = new Map(dayRoles.map((slot) => [slot.dayNumber, slot.role]));
+  return days.filter((day) => {
+    const role =
+      roleByDay.get(day.dayNumber)
+      || day.items?.find((item: any) => item.planningMeta?.plannerRole)?.planningMeta?.plannerRole
+      || (day.isDayTrip ? 'day_trip' : 'full_city');
+    if (role !== 'full_city') return false;
+    return day.items.filter((item: any) => item.type === 'activity').length <= 1;
+  }).length;
+}
+
+function countSameFamilyOverload(
+  days: any[],
+  dayRoles: Array<{ dayNumber: number; role: string }> = []
+): number {
+  const roleByDay = new Map(dayRoles.map((slot) => [slot.dayNumber, slot.role]));
+  let overload = 0;
+  for (const day of days) {
+    const role =
+      roleByDay.get(day.dayNumber)
+      || day.items?.find((item: any) => item.planningMeta?.plannerRole)?.planningMeta?.plannerRole
+      || (day.isDayTrip ? 'day_trip' : 'full_city');
+    if (role !== 'full_city') continue;
+    const counts = new Map<string, number>();
+    for (const item of day.items || []) {
+      if (item.type !== 'activity') continue;
+      const family = inferPoiFamilyFromItem(item);
+      if (family === 'other') continue;
+      counts.set(family, (counts.get(family) || 0) + 1);
+    }
+    for (const [family, count] of counts) {
+      if ((family === 'church_basilica' || family === 'column_memorial' || family === 'generic_park' || family === 'generic_square') && count > 1) {
+        overload += count - 1;
+      }
+    }
+  }
+  return overload;
+}
+
+function countArrivalFatigueViolations(
+  days: any[],
+  hotel: { latitude: number; longitude: number } | null,
+  arrivalFatigueRole: ArrivalFatigueRole
+): number {
+  if (arrivalFatigueRole !== 'long_haul' || days.length === 0) return 0;
+  const anchor = hotel ? { lat: hotel.latitude, lng: hotel.longitude } : null;
+  let violations = 0;
+  for (const item of days[0].items || []) {
+    if (item.type !== 'activity') continue;
+    const text = normalizePlannerText(`${item.title || ''} ${item.description || ''}`);
+    if (/disney|theme park|amusement|water park|universal/.test(text)) {
+      violations++;
+      continue;
+    }
+    if ((item.duration || 0) > 60) {
+      violations++;
+      continue;
+    }
+    if (anchor && calculateDistance(item.latitude, item.longitude, anchor.lat, anchor.lng) > 2) {
+      violations++;
+    }
+  }
+  return violations;
+}
+
 /**
  * Generate a trip — routes to V3, LLM, or Algorithmic pipeline based on PIPELINE_VERSION env var.
  */
@@ -579,9 +714,10 @@ export async function generateTripV3(
   console.log(`[Pipeline V3] Step 2c: Time windows anchored`);
 
   // Step 2d: Build DayTripPacks (robust day trip validation + transport resolution)
-  const { packs: dayTripPacks, cityActivities: activitiesAfterDayTrips } = buildDayTripPacks(
+  const { packs: dayTripPacks, cityActivities: activitiesAfterDayTrips, destinationMismatchCount } = buildDayTripPacks(
     selectedActivities, data, data.destCoords, preferences.durationDays
   );
+  const arrivalFatigueRole = inferArrivalFatigueRole(data.outboundFlight, timeWindows);
 
   // Step 3: Cluster by day (v3.0 or v3.1 planner)
   t = Date.now();
@@ -592,6 +728,7 @@ export async function generateTripV3(
   let beamUsed = false;
   let beamFallbackUsed = false;
   let dayNumberMismatchCount = 0;
+  let plannerDayRoles: Array<{ dayNumber: number; role: string }> = [];
 
   if (plannerVersion === 'v3.1' || plannerVersion === 'v3.2') {
     // V3.1: role-aware beam search planner
@@ -602,12 +739,13 @@ export async function generateTripV3(
       preferences.durationDays,
       data.destCoords,
       densityProfile,
-      { rescueStage, startDate: preferences.startDate, plannerVersion }
+      { rescueStage, startDate: preferences.startDate, plannerVersion, arrivalFatigueRole }
     );
     clusters = plannerResult.clusters;
     beamUsed = plannerResult.beamUsed;
     beamFallbackUsed = plannerResult.beamFallbackUsed;
     dayNumberMismatchCount = plannerResult.dayNumberMismatchCount;
+    plannerDayRoles = plannerResult.dayRoles.map((slot) => ({ dayNumber: slot.dayNumber, role: slot.role }));
   } else {
     // V3.0: hierarchical clustering (existing behavior)
     const PACE_FACTOR: Record<string, number> = {
@@ -715,7 +853,7 @@ export async function generateTripV3(
   t = Date.now();
   onEvent?.({ type: 'step_start', step: 8, stepName: 'Unified scheduling', timestamp: Date.now() });
   const repairResult = plannerVersion === 'v3.2'
-    ? semanticScheduleV32Days(
+    ? await semanticScheduleV32Days(
         clusters,
         travelTimes,
         timeWindows,
@@ -820,12 +958,18 @@ export async function generateTripV3(
       freeTimeOverBudgetCount: repairResult.rescueDiagnostics?.freeTimeOverBudgetCount ?? 0,
       mealFallbackCount: repairResult.rescueDiagnostics?.mealFallbackCount ?? 0,
       routeRebuildCount: repairResult.rescueDiagnostics?.routeRebuildCount ?? 0,
+      restaurantRefetchMissCount: repairResult.rescueDiagnostics?.restaurantRefetchMissCount ?? 0,
     };
     rebuildInterItemTravelForDays(
       scheduledDays,
       travelTimes,
       v32Diagnostics
     );
+    const temporalImpossibleItemCount = pruneTemporalImpossibleItems(scheduledDays, preferences.startDate);
+    if (temporalImpossibleItemCount > 0) {
+      rebuildInterItemTravelForDays(scheduledDays, travelTimes, v32Diagnostics);
+    }
+    v32Diagnostics.temporalImpossibleItemCount = temporalImpossibleItemCount;
     repairResult.rescueDiagnostics = v32Diagnostics;
   }
 
@@ -879,6 +1023,15 @@ export async function generateTripV3(
   for (const dayNumbers of packDays.values()) {
     if (dayNumbers.size > 1) dayTripAtomicityBreakCount += dayNumbers.size - 1;
   }
+  const dayTripDestinationMismatchCount = destinationMismatchCount + scheduledDays.reduce((sum, day) => {
+    const isPlannerDayTrip = day.items.some((item) => item.planningMeta?.plannerRole === 'day_trip') || day.isDayTrip;
+    if (!isPlannerDayTrip) return sum;
+    return sum + day.items.filter((item) => item.type === 'activity' && !item.planningMeta?.sourcePackId).length;
+  }, 0);
+  const sparseFullCityDayCount = countSparseFullCityDays(scheduledDays, plannerDayRoles);
+  const sameFamilyOverloadCount = countSameFamilyOverload(scheduledDays, plannerDayRoles);
+  const arrivalFatigueViolationCount = countArrivalFatigueViolations(scheduledDays, hotel, arrivalFatigueRole);
+  const temporalImpossibleItemCount = repairResult.rescueDiagnostics?.temporalImpossibleItemCount ?? 0;
 
   // Step 10: Validate contracts
   t = Date.now();
@@ -1021,8 +1174,14 @@ export async function generateTripV3(
     freeTimeOverBudgetCount: repairResult.rescueDiagnostics?.freeTimeOverBudgetCount ?? 0,
     mealFallbackCount: repairResult.rescueDiagnostics?.mealFallbackCount ?? 0,
     routeRebuildCount: repairResult.rescueDiagnostics?.routeRebuildCount ?? 0,
+    restaurantRefetchMissCount: repairResult.rescueDiagnostics?.restaurantRefetchMissCount ?? 0,
     missingProtectedMustSeeCount,
     dayTripAtomicityBreakCount,
+    arrivalFatigueViolationCount,
+    temporalImpossibleItemCount,
+    sparseFullCityDayCount,
+    dayTripDestinationMismatchCount,
+    sameFamilyOverloadCount,
   };
 
   const totalTime = Date.now() - startTime;

@@ -99,6 +99,14 @@ export interface ScoredActivity extends Attraction {
   protectedReason?: 'must_see' | 'day_trip_anchor' | 'day_trip' | 'user_forced';
   /** Inferred geographic zone hint for clustering */
   zoneHint?: string;
+  /** Coarse planner zone used by v3.2 for same-day and adjacent-day grouping */
+  macroZoneId?: string;
+  /** Planner-only family bucket used for diversity caps */
+  poiFamily?: string;
+  /** Arrival/departure fatigue tag assigned by planner heuristics */
+  fatigueRole?: 'standard' | 'long_haul';
+  /** Day-trip destination envelope identifier for atomic packs */
+  destinationEnvelopeId?: string;
   /** Stable internal token for planner/scheduler repair coordination */
   planningToken?: string;
   /** Day trip pack source for protected atomic units */
@@ -415,6 +423,8 @@ export interface ScheduledStop {
 export interface ScheduledDayPlan {
   dayNumber: number;
   role?: ActivityCluster['plannerRole'];
+  isDayTrip?: boolean;
+  dayTripDestination?: string;
   stops: ScheduledStop[];
 }
 

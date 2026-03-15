@@ -150,7 +150,7 @@ function makeTravelTimes(dayNumber: number, legs: DayTravelTimes['legs']): DayTr
 }
 
 describe('semantic scheduler v3.2', () => {
-  it('does not insert breakfast when travel to the first activity would overlap it', () => {
+  it('does not insert breakfast when travel to the first activity would overlap it', async () => {
     const hotel = makeHotel({ latitude: 48.85, longitude: 2.34 });
     const museum = makeActivity({
       id: 'museum',
@@ -159,7 +159,7 @@ describe('semantic scheduler v3.2', () => {
       longitude: 2.40,
     });
 
-    const result = semanticScheduleV32Days(
+    const result = await semanticScheduleV32Days(
       [makeCluster(1, [museum])],
       makeTravelTimes(1, [{
         fromId: 'hotel-start',
@@ -183,7 +183,7 @@ describe('semantic scheduler v3.2', () => {
     expect(result.days[0].items.some((item) => item.type === 'restaurant' && item.mealType === 'breakfast')).toBe(false);
   });
 
-  it('regenerates transport metrics from the final neighboring stops', () => {
+  it('regenerates transport metrics from the final neighboring stops', async () => {
     const act1 = makeActivity({
       id: 'act-1',
       name: 'Act 1',
@@ -197,7 +197,7 @@ describe('semantic scheduler v3.2', () => {
       longitude: 2.2950,
     });
 
-    const result = semanticScheduleV32Days(
+    const result = await semanticScheduleV32Days(
       [makeCluster(1, [act1, act2])],
       makeTravelTimes(1, [{
         fromId: 'act-1',
@@ -230,7 +230,7 @@ describe('semantic scheduler v3.2', () => {
     expect(transport?.description).toContain('Act 2');
   });
 
-  it('never commits a lunch outside the lunch window', () => {
+  it('never commits a lunch outside the lunch window', async () => {
     const morning = makeActivity({
       id: 'morning',
       name: 'Morning Visit',
@@ -246,7 +246,7 @@ describe('semantic scheduler v3.2', () => {
       longitude: 2.295,
     });
 
-    const result = semanticScheduleV32Days(
+    const result = await semanticScheduleV32Days(
       [makeCluster(1, [morning, evening])],
       makeTravelTimes(1, [{
         fromId: 'morning',
@@ -271,7 +271,76 @@ describe('semantic scheduler v3.2', () => {
     expect(lunchItems.every((item) => item.startTime <= '14:30')).toBe(true);
   });
 
-  it('falls back to self meal instead of committing a far restaurant', () => {
+  it('allows a late lunch when it still starts inside the lunch window', async () => {
+    const longMorning = makeActivity({
+      id: 'long-morning',
+      name: 'Long Morning Visit',
+      duration: 300,
+      latitude: 48.8566,
+      longitude: 2.3522,
+    });
+
+    const result = await semanticScheduleV32Days(
+      [makeCluster(1, [longMorning])],
+      makeTravelTimes(1, []),
+      [makeTimeWindow(1, { activityStartTime: '09:00', activityEndTime: '18:00' })],
+      null,
+      makePreferences(),
+      emptyFetchedData(),
+      [makeRestaurant({ id: 'late-lunch', latitude: 48.8567, longitude: 2.3523 })],
+      [longMorning],
+      { lat: 41.9028, lng: 12.4964 }
+    );
+
+    const lunch = result.days[0].items.find((item) => item.type === 'restaurant' && item.mealType === 'lunch');
+    expect(lunch).toBeDefined();
+    expect(lunch?.startTime >= '14:00').toBe(true);
+    expect(lunch?.startTime <= '14:30').toBe(true);
+  });
+
+  it('shifts later activities to open a lunch slot before dropping them', async () => {
+    const morningMustSee = makeActivity({
+      id: 'morning-must-see',
+      name: 'Morning Must See',
+      duration: 180,
+      latitude: 48.8566,
+      longitude: 2.3522,
+      mustSee: true,
+      openingHours: { open: '09:00', close: '20:00' },
+    });
+    const afternoonMustSee = makeActivity({
+      id: 'afternoon-must-see',
+      name: 'Afternoon Must See',
+      duration: 180,
+      latitude: 48.8570,
+      longitude: 2.3526,
+      mustSee: true,
+      openingHours: { open: '09:00', close: '20:00' },
+    });
+
+    const result = await semanticScheduleV32Days(
+      [makeCluster(1, [morningMustSee, afternoonMustSee])],
+      makeTravelTimes(1, []),
+      [makeTimeWindow(1, { activityStartTime: '09:00', activityEndTime: '20:00' })],
+      null,
+      makePreferences(),
+      emptyFetchedData(),
+      [makeRestaurant({ id: 'lunch-nearby', latitude: 48.8568, longitude: 2.3524 })],
+      [morningMustSee, afternoonMustSee],
+      { lat: 41.9028, lng: 12.4964 }
+    );
+
+    const lunch = result.days[0].items.find((item) => item.type === 'restaurant' && item.mealType === 'lunch');
+    const afternoon = result.days[0].items.find((item) => item.type === 'activity' && item.title === 'Afternoon Must See');
+
+    expect(lunch).toBeDefined();
+    expect((lunch?.startTime || '') >= '12:00').toBe(true);
+    expect((lunch?.startTime || '') <= '14:30').toBe(true);
+    expect(afternoon).toBeDefined();
+    expect(afternoon?.startTime > '12:15').toBe(true);
+  });
+
+  it('falls back to self meal instead of committing a far restaurant', async () => {
     const act1 = makeActivity({
       id: 'act-a',
       name: 'Act A',
@@ -288,7 +357,7 @@ describe('semantic scheduler v3.2', () => {
       openingHours: { open: '15:00', close: '20:00' },
     });
 
-    const result = semanticScheduleV32Days(
+    const result = await semanticScheduleV32Days(
       [makeCluster(1, [act1, act2])],
       makeTravelTimes(1, []),
       [makeTimeWindow(1, { activityStartTime: '10:00', activityEndTime: '18:00' })],
@@ -305,7 +374,7 @@ describe('semantic scheduler v3.2', () => {
     expect(lunch?.title).toContain('Repas libre');
   });
 
-  it('drops a low-value optional to preserve a protected must-see on the same day', () => {
+  it('drops a low-value optional to preserve a protected must-see on the same day', async () => {
     const optional = makeActivity({
       id: 'optional',
       name: 'Optional Visit',
@@ -328,7 +397,7 @@ describe('semantic scheduler v3.2', () => {
       openingHours: { open: '13:00', close: '17:00' },
     });
 
-    const result = semanticScheduleV32Days(
+    const result = await semanticScheduleV32Days(
       [makeCluster(1, [optional, protectedMustSee])],
       makeTravelTimes(1, []),
       [makeTimeWindow(1, { activityStartTime: '09:00', activityEndTime: '17:00' })],
@@ -345,10 +414,10 @@ describe('semantic scheduler v3.2', () => {
     expect(titles).not.toContain('Optional Visit');
   });
 
-  it('does not inject free time before checkout on a departure day', () => {
+  it('does not inject free time before checkout on a departure day', async () => {
     const hotel = makeHotel();
 
-    const result = semanticScheduleV32Days(
+    const result = await semanticScheduleV32Days(
       [makeCluster(1, [], 'departure')],
       makeTravelTimes(1, []),
       [makeTimeWindow(1, { activityStartTime: '08:30', activityEndTime: '17:00', hasDepartureTransport: true })],
@@ -361,5 +430,74 @@ describe('semantic scheduler v3.2', () => {
     );
 
     expect(result.days[0].items.some((item) => item.type === 'free_time')).toBe(false);
+  });
+
+  it('limits self-meal fallback to at most one meal per day', async () => {
+    const morning = makeActivity({
+      id: 'morning',
+      name: 'Morning Visit',
+      duration: 60,
+      latitude: 48.8566,
+      longitude: 2.3522,
+    });
+    const afternoon = makeActivity({
+      id: 'afternoon',
+      name: 'Afternoon Visit',
+      duration: 60,
+      latitude: 48.8567,
+      longitude: 2.3523,
+      openingHours: { open: '15:00', close: '20:00' },
+    });
+
+    const result = await semanticScheduleV32Days(
+      [makeCluster(1, [morning, afternoon])],
+      makeTravelTimes(1, []),
+      [makeTimeWindow(1, { activityStartTime: '10:00', activityEndTime: '21:00' })],
+      null,
+      makePreferences({ destination: '' }),
+      emptyFetchedData(),
+      [],
+      [morning, afternoon],
+      { lat: 41.9028, lng: 12.4964 }
+    );
+
+    const fallbackMeals = result.days[0].items.filter(
+      (item) => item.type === 'restaurant' && item.qualityFlags?.includes('self_meal_fallback')
+    );
+    expect(fallbackMeals.length).toBeLessThanOrEqual(1);
+  });
+
+  it('preserves the day-trip destination on the materialized day', async () => {
+    const fuji = makeActivity({
+      id: 'fuji',
+      name: 'Mont Fuji',
+      latitude: 35.3606,
+      longitude: 138.7274,
+      duration: 90,
+    });
+    const dayTripCluster: ActivityCluster = {
+      ...makeCluster(1, [fuji], 'day_trip'),
+      isDayTrip: true,
+      dayTripDestination: 'Kawaguchiko',
+    };
+
+    const result = await semanticScheduleV32Days(
+      [dayTripCluster],
+      makeTravelTimes(1, []),
+      [makeTimeWindow(1, { activityStartTime: '09:00', activityEndTime: '18:00' })],
+      null,
+      makePreferences({ destination: 'Tokyo' }),
+      emptyFetchedData({
+        dayTripRestaurants: {
+          Kawaguchiko: [],
+        },
+      }),
+      [],
+      [fuji],
+      { lat: 35.6764, lng: 139.6500 }
+    );
+
+    expect(result.days[0].isDayTrip).toBe(true);
+    expect(result.days[0].dayTripDestination).toBe('Kawaguchiko');
   });
 });

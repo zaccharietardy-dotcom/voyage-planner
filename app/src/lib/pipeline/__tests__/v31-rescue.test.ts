@@ -418,6 +418,52 @@ describe('v3.1 rescue invariants', () => {
     expect(result.packs[0].activities.reduce((sum, activity) => sum + (activity.duration || 60), 0)).toBeLessThanOrEqual(465);
   });
 
+  it('rejects a day-trip pack whose activity falls outside the destination envelope', () => {
+    const validKamakura = makeActivity({
+      id: 'kamakura-anchor',
+      name: 'Grand Bouddha de Kamakura',
+      latitude: 35.3167,
+      longitude: 139.5354,
+      duration: 120,
+      score: 90,
+      mustSee: true,
+    });
+    const mismatchedOutskirts = makeActivity({
+      id: 'kamakura-outskirts',
+      name: 'Far Outskirts Stop',
+      latitude: 35.46,
+      longitude: 139.70,
+      duration: 90,
+      score: 55,
+    });
+
+    const data = emptyFetchedData({
+      dayTripSuggestions: [
+        makeSuggestion({
+          name: 'Kamakura',
+          destination: 'Kamakura',
+          latitude: 35.319,
+          longitude: 139.55,
+          transportDurationMin: 60,
+        }),
+      ],
+    });
+
+    const result = buildDayTripPacks(
+      [validKamakura, mismatchedOutskirts],
+      data,
+      { lat: 35.6764, lng: 139.65 },
+      7,
+      12 * 60
+    );
+
+    expect(result.packs).toHaveLength(1);
+    expect(result.destinationMismatchCount).toBe(1);
+    expect(result.cityActivities.map((activity) => activity.name)).toContain('Far Outskirts Stop');
+    expect(result.packs[0].activities.map((activity) => activity.name)).toContain('Grand Bouddha de Kamakura');
+    expect(result.packs[0].activities.map((activity) => activity.name)).not.toContain('Far Outskirts Stop');
+  });
+
   it('keeps an early-closing activity off a late arrival day', () => {
     const earlyClose = makeActivity({
       id: 'early-close',
@@ -453,6 +499,51 @@ describe('v3.1 rescue invariants', () => {
     )?.dayNumber;
 
     expect(assignedDay).toBe(2);
+  });
+
+  it('keeps a theme park off a long-haul arrival day in v3.2', () => {
+    const disney = makeActivity({
+      id: 'disney',
+      name: 'Tokyo DisneySea',
+      type: 'theme_park',
+      duration: 300,
+      latitude: 35.6267,
+      longitude: 139.8851,
+      score: 95,
+      mustSee: true,
+    });
+    const localVisit = makeActivity({
+      id: 'local-visit',
+      name: 'Local Evening Stroll',
+      duration: 45,
+      latitude: 35.6764,
+      longitude: 139.65,
+      score: 40,
+    });
+
+    const result = buildPlannerClustersV31(
+      [disney, localVisit],
+      [],
+      [
+        makeTimeWindow(1, { activityStartTime: '17:00', activityEndTime: '22:00', hasArrivalTransport: true }),
+        makeTimeWindow(2, { activityStartTime: '08:30', activityEndTime: '22:00' }),
+      ],
+      2,
+      { lat: 35.6764, lng: 139.65 },
+      undefined,
+      {
+        rescueStage: 0,
+        plannerVersion: 'v3.2',
+        arrivalFatigueRole: 'long_haul',
+        startDate: new Date('2026-05-20T00:00:00.000Z'),
+      }
+    );
+
+    const disneyDay = result.clusters.find((cluster) =>
+      cluster.activities.some((activity) => activity.id === 'disney')
+    )?.dayNumber;
+
+    expect(disneyDay).toBe(2);
   });
 
   it('classifies a late transfer day as departure when the cutoff is early evening', () => {

@@ -21,6 +21,9 @@ const DEFAULT_SLACK_MIN = 60;
 const LONG_DAY_TRIP_SLACK_MIN = 90;
 const DAY_TRIP_LUNCH_MIN = 75;
 const MIN_USEFUL_WINDOW_MIN = 420; // 7h minimum useful time for a day trip
+const DAY_TRIP_WIDE_PROXIMITY_KM = 25;
+const DESTINATION_ENVELOPE_KM = 20;
+const ANCHOR_ENVELOPE_KM = 18;
 
 // ============================================
 // Transport Duration Resolution
@@ -101,8 +104,42 @@ function findMatchingSuggestion(
 
   // 3. Wider proximity (<50km)
   return suggestions.find(s =>
-    calculateDistance(activity.latitude, activity.longitude, s.latitude, s.longitude) < 50
+    calculateDistance(activity.latitude, activity.longitude, s.latitude, s.longitude) < DAY_TRIP_WIDE_PROXIMITY_KM
   );
+}
+
+function normalizePlannerText(value?: string): string {
+  return (value || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+function matchesDestinationEnvelope(
+  activity: ScoredActivity,
+  destination: string,
+  suggestion?: DayTripSuggestion,
+  anchor?: ScoredActivity
+): boolean {
+  const text = normalizePlannerText(`${activity.name || ''} ${activity.description || ''}`);
+  const normalizedDestination = normalizePlannerText(destination);
+  if (normalizedDestination && text.includes(normalizedDestination)) return true;
+
+  if (suggestion) {
+    const distToSuggestion = calculateDistance(activity.latitude, activity.longitude, suggestion.latitude, suggestion.longitude);
+    if (distToSuggestion <= DESTINATION_ENVELOPE_KM) return true;
+    const keyAttractions = (suggestion.keyAttractions || []).map((value) => normalizePlannerText(value));
+    if (keyAttractions.some((key) => key && text.includes(key))) return true;
+  }
+
+  if (anchor) {
+    const distToAnchor = calculateDistance(activity.latitude, activity.longitude, anchor.latitude, anchor.longitude);
+    if (distToAnchor <= ANCHOR_ENVELOPE_KM) return true;
+  }
+
+  return false;
 }
 
 // ============================================
@@ -219,9 +256,10 @@ export function buildDayTripPacks(
   cityCenter: { lat: number; lng: number },
   numDays: number,
   defaultWindowMin: number = 12 * 60 // 12h default available window
-): { packs: DayTripPack[]; cityActivities: ScoredActivity[] } {
+): { packs: DayTripPack[]; cityActivities: ScoredActivity[]; destinationMismatchCount: number } {
   const suggestions = data.dayTripSuggestions || [];
   const dayTripActivitiesMap = data.dayTripActivities || {};
+  let destinationMismatchCount = 0;
 
   // Identify day trip candidates (same logic as current step3)
   const dayTripCandidates: ScoredActivity[] = [];
@@ -245,7 +283,7 @@ export function buildDayTripPacks(
   }
 
   if (dayTripCandidates.length === 0) {
-    return { packs: [], cityActivities: activities };
+    return { packs: [], cityActivities: activities, destinationMismatchCount: 0 };
   }
 
   // Cap day trips
@@ -305,11 +343,37 @@ export function buildDayTripPacks(
       }
     }
 
-    const packActivities = trimPackActivitiesToFit(rawPackActivities, anchor, availableActivityMin);
+    if (!matchesDestinationEnvelope(anchor, destName, group.suggestion, anchor)) {
+      destinationMismatchCount++;
+      cityActivities.push(...group.candidates);
+      continue;
+    }
+
+    const mismatchedCandidates: ScoredActivity[] = [];
+    const packActivitiesWithinEnvelope = rawPackActivities.filter((activity) => {
+      const valid = matchesDestinationEnvelope(activity, destName, group.suggestion, anchor);
+      if (!valid && group.candidates.some((candidate) => candidate.id === activity.id || candidate.name === activity.name)) {
+        destinationMismatchCount++;
+        mismatchedCandidates.push({
+          ...activity,
+          protectedReason: activity.mustSee ? 'must_see' : undefined,
+          dayTripAffinity: 0,
+          sourcePackId: undefined,
+          planningToken: undefined,
+          destinationEnvelopeId: undefined,
+        });
+      }
+      return valid;
+    });
+
+    const packActivities = trimPackActivitiesToFit(packActivitiesWithinEnvelope, anchor, availableActivityMin);
     if (packActivities.length === 0) {
       console.log(`[DayTripPack] "${destName}" infeasible after protected-trim (budget ${availableActivityMin}min activities)`);
       cityActivities.push(...group.candidates);
       continue;
+    }
+    if (mismatchedCandidates.length > 0) {
+      cityActivities.push(...mismatchedCandidates);
     }
     const totalActivityDuration = packActivities.reduce((sum, a) => sum + (a.duration || 60), 0);
 
@@ -339,6 +403,7 @@ export function buildDayTripPacks(
       a.protectedReason = a.id === anchor.id ? 'day_trip_anchor' : 'day_trip';
       a.dayTripAffinity = 1.0;
       a.sourcePackId = packId;
+      a.destinationEnvelopeId = packId;
       a.planningToken = a.planningToken || `${packId}:${a.id || a.name}`;
     }
 
@@ -394,6 +459,7 @@ export function buildDayTripPacks(
           dayTripAffinity: 0,
           sourcePackId: undefined,
           planningToken: undefined,
+          destinationEnvelopeId: undefined,
         });
       }
       console.log(`[DayTripPack] Demoted "${pack.destination}" (over max ${maxDayTrips} day trips)`);
@@ -412,5 +478,5 @@ export function buildDayTripPacks(
     );
   }
 
-  return { packs, cityActivities };
+  return { packs, cityActivities, destinationMismatchCount };
 }
