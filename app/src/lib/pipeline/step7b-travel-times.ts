@@ -73,7 +73,8 @@ const MAX_API_CALLS_PER_TRIP = 20;
 export async function computeTravelTimes(
   clusters: ActivityCluster[],
   hotelCoords: { lat: number; lng: number } | null,
-  mode: 'selective' | 'all' | 'off' = 'selective'
+  mode: 'selective' | 'all' | 'off' = 'selective',
+  startDate?: Date
 ): Promise<DayTravelTimes[]> {
   if (mode === 'off') {
     // Pure estimation mode — no API calls
@@ -118,10 +119,18 @@ export async function computeTravelTimes(
 
       if (shouldCallApi) {
         try {
+          // Compute departure time for transit (required by Google for schedule-based routing)
+          let departureTime: Date | undefined;
+          if (apiMode === 'transit' && startDate) {
+            departureTime = new Date(startDate);
+            departureTime.setDate(departureTime.getDate() + cluster.dayNumber - 1);
+            departureTime.setHours(10, 0, 0, 0); // 10:00 as representative departure
+          }
           const request: DirectionsRequest = {
             from: { lat: from.lat, lng: from.lng },
             to: { lat: to.lat, lng: to.lng },
             mode: apiMode,
+            departureTime,
           };
 
           const directions = await getDirections(request);

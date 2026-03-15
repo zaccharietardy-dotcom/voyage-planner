@@ -550,7 +550,7 @@ export async function generateTripV3(
   onEvent?.({ type: 'step_start', step: 6, stepName: 'Computing travel times', timestamp: Date.now() });
   let travelTimes: Awaited<ReturnType<typeof computeTravelTimes>>;
   try {
-    travelTimes = await computeTravelTimes(clusters, hotelCoords, directionsMode);
+    travelTimes = await computeTravelTimes(clusters, hotelCoords, directionsMode, preferences.startDate);
   } catch (err) {
     console.error('[Pipeline V3] Step 6 failed:', err);
     throw new Error(`[Pipeline V3] Travel times computation failed: ${(err as Error).message}`);
