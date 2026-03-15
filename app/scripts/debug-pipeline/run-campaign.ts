@@ -22,8 +22,12 @@ import {
 import { SECTION_KEYS, type AnalysisReport, type SectionKey } from './report';
 import { SCENARIOS, getAllScenarioIds } from './scenarios';
 import type { AnalysisIssue } from './analyzers/schedule';
+import { HARD_GATE_CODES, GEO_CODES, LINK_CODES, DATA_CODES, SMOKE_SCENARIOS, PRIORITY_GOLDEN_SCENARIOS } from '../../src/lib/pipeline/quality-rules';
+import { loadFixture, hasFixture, getFixtureMode, captureFixture } from './fixture-utils';
 
 type RunKind = 'scenario' | 'random';
+
+type CampaignMode = 'full' | 'golden' | 'smoke';
 
 interface CampaignOptions {
   campaignId: string;
@@ -33,6 +37,7 @@ interface CampaignOptions {
   outDir: string;
   analyze: boolean;
   failFast: boolean;
+  mode: CampaignMode;
 }
 
 interface CampaignRun {
@@ -82,6 +87,7 @@ interface CampaignSummary {
     analyze: boolean;
     failFast: boolean;
     outDir: string;
+    mode: CampaignMode;
   };
   runStats: {
     total: number;
@@ -122,6 +128,7 @@ interface CampaignSummary {
     urbanLegPolicy: { count: number; pass: boolean };
     averageScore: { value: number; target: number; pass: boolean };
     noCriticalRemaining: { count: number; pass: boolean };
+    hardGatesZero: { count: number; pass: boolean };
     overallPass: boolean;
   };
   runs: CampaignRun[];
@@ -176,6 +183,8 @@ function buildCampaignOptions(): CampaignOptions {
   const seed = parseIntArg(args, '--seed', 424242);
   const analyze = args.includes('--no-analyze') ? false : true;
   const failFast = args.includes('--fail-fast');
+  const modeRaw = parseStringArg(args, '--mode', 'full');
+  const mode: CampaignMode = (modeRaw === 'golden' || modeRaw === 'smoke') ? modeRaw : 'full';
 
   const defaultOutDir = path.join(__dirname, 'results', campaignId);
   const outDirArg = parseStringArg(args, '--out-dir', defaultOutDir);
@@ -189,6 +198,7 @@ function buildCampaignOptions(): CampaignOptions {
     outDir,
     analyze,
     failFast,
+    mode,
   };
 }
 
@@ -392,6 +402,7 @@ function buildSummaryMarkdown(summary: CampaignSummary): string {
   lines.push(`- Urban leg policy clean: ${summary.exitCriteria.urbanLegPolicy.pass ? 'PASS' : 'FAIL'} (${summary.exitCriteria.urbanLegPolicy.count})`);
   lines.push(`- Average score >= 85: ${summary.exitCriteria.averageScore.pass ? 'PASS' : 'FAIL'} (${summary.exitCriteria.averageScore.value.toFixed(1)})`);
   lines.push(`- No critical remaining: ${summary.exitCriteria.noCriticalRemaining.pass ? 'PASS' : 'FAIL'} (${summary.exitCriteria.noCriticalRemaining.count})`);
+  lines.push(`- Hard gates zero (GEO_IMPOSSIBLE/URBAN_HARD): ${summary.exitCriteria.hardGatesZero.pass ? 'PASS' : 'FAIL'} (${summary.exitCriteria.hardGatesZero.count})`);
   lines.push(`- Overall: ${summary.exitCriteria.overallPass ? 'PASS' : 'FAIL'}`);
   lines.push('');
 
@@ -442,39 +453,71 @@ function toFixed2(value: number): number {
 
 async function main(): Promise<void> {
   const options = buildCampaignOptions();
-  const scenarioIds = getAllScenarioIds();
-  const scenarioCount = Math.min(scenarioIds.length, options.total);
-  const randomCount = Math.max(0, Math.min(options.randomCount, options.total - scenarioCount));
+  const allScenarioIds = getAllScenarioIds();
   const randomFn = createSeededRandom(options.seed);
 
-  try {
-    assertRequiredEnv(['ANTHROPIC_API_KEY']);
-  } catch (err) {
-    console.error(`❌ ${err instanceof Error ? err.message : String(err)}`);
-    process.exit(1);
+  // Determine which scenarios to run based on mode
+  let activeScenarioIds: string[];
+  let activeRandomCount = 0;
+
+  if (options.mode === 'golden') {
+    // Golden mode: all 17 scenarios from fixtures, no random, no network
+    activeScenarioIds = allScenarioIds;
+    activeRandomCount = 0;
+    console.log('🏆 Mode: GOLDEN — running all scenarios from fixtures (offline)');
+  } else if (options.mode === 'smoke') {
+    // Smoke mode: 4 priority scenarios live, no random
+    activeScenarioIds = allScenarioIds.filter(id => (SMOKE_SCENARIOS as readonly string[]).includes(id));
+    activeRandomCount = 0;
+    console.log('💨 Mode: SMOKE — running 4 live scenarios');
+  } else {
+    // Full mode: all scenarios + random
+    activeScenarioIds = allScenarioIds;
+    const scenarioCount = Math.min(allScenarioIds.length, options.total);
+    activeRandomCount = Math.max(0, Math.min(options.randomCount, options.total - scenarioCount));
+    activeScenarioIds = allScenarioIds.slice(0, scenarioCount);
+  }
+
+  // Golden mode doesn't need API keys
+  if (options.mode !== 'golden') {
+    try {
+      assertRequiredEnv(['ANTHROPIC_API_KEY']);
+    } catch (err) {
+      console.error(`❌ ${err instanceof Error ? err.message : String(err)}`);
+      process.exit(1);
+    }
   }
 
   if (!fs.existsSync(options.outDir)) {
     fs.mkdirSync(options.outDir, { recursive: true });
   }
 
-  console.log('🔑 ENV check:', getEnvHealth());
+  if (options.mode !== 'golden') {
+    console.log('🔑 ENV check:', getEnvHealth());
+  }
   console.log(`📁 Output: ${options.outDir}`);
-  console.log(`🧪 Campaign: ${options.campaignId} | total=${options.total} | scenarios=${scenarioCount} | random=${randomCount} | seed=${options.seed}`);
+  console.log(`🧪 Campaign: ${options.campaignId} | mode=${options.mode} | scenarios=${activeScenarioIds.length} | random=${activeRandomCount} | seed=${options.seed}`);
 
   const startedAt = new Date().toISOString();
   const runs: CampaignRun[] = [];
   const reportsByRun: Array<{ runId: string; report: AnalysisReport }> = [];
 
   // Run predefined scenarios
-  for (let i = 0; i < scenarioCount; i += 1) {
-    const scenarioId = scenarioIds[i];
+  for (let i = 0; i < activeScenarioIds.length; i += 1) {
+    const scenarioId = activeScenarioIds[i];
     const scenario = SCENARIOS[scenarioId];
     const runId = `S${String(i + 1).padStart(2, '0')}-${sanitize(scenarioId)}`;
     const started = new Date().toISOString();
     console.log(`\n▶️  [${runId}] Scenario ${scenarioId}`);
 
-    const result = await generateTripRun(scenarioId, scenario.preferences);
+    // In golden mode, load fixture data; in capture mode, capture after run
+    const fixtureData = options.mode === 'golden' ? loadFixture(scenarioId) : undefined;
+    if (options.mode === 'golden' && !fixtureData) {
+      console.warn(`⚠️  [${runId}] No fixture for ${scenarioId} — skipping`);
+      continue;
+    }
+
+    const result = await generateTripRun(scenarioId, scenario.preferences, fixtureData ? { fixtureData } : undefined);
     const decorated: GenerationResult = {
       ...result,
       _campaign: {
@@ -514,9 +557,9 @@ async function main(): Promise<void> {
     if (options.failFast && !result.success) break;
   }
 
-  // Run stratified random samples
-  if (!options.failFast || runs.every((r) => r.success)) {
-    const specs = buildRandomRunSpecs(randomCount);
+  // Run stratified random samples (skipped in golden/smoke modes)
+  if (activeRandomCount > 0 && (!options.failFast || runs.every((r) => r.success))) {
+    const specs = buildRandomRunSpecs(activeRandomCount);
 
     for (let i = 0; i < specs.length; i += 1) {
       const spec = specs[i];
@@ -598,9 +641,10 @@ async function main(): Promise<void> {
   const getIssueCount = (codes: string[]): number =>
     issuesByCode.filter((issue) => codes.includes(issue.code)).reduce((sum, issue) => sum + issue.count, 0);
 
-  const apiKeyLeakCount = getIssueCount(['LINK_API_KEY_LEAK']);
-  const hotelBoundaryCount = getIssueCount(['DATA_HOTEL_BOUNDARY_INCOHERENT']);
-  const urbanLegPolicyCount = getIssueCount(['GEO_URBAN_HARD_LONG_LEG', 'GEO_URBAN_TOO_MANY_LONG_LEGS']);
+  const apiKeyLeakCount = getIssueCount([LINK_CODES.API_KEY_LEAK]);
+  const hotelBoundaryCount = getIssueCount([DATA_CODES.HOTEL_BOUNDARY_INCOHERENT]);
+  const urbanLegPolicyCount = getIssueCount([GEO_CODES.URBAN_HARD_LONG_LEG, GEO_CODES.URBAN_TOO_MANY_LONG_LEGS]);
+  const hardGateCount = getIssueCount([...HARD_GATE_CODES]);
   const remainingCriticalCount = reportsByRun.reduce((sum, item) => sum + item.report.summary.critical, 0);
 
   const exitCriteria = {
@@ -610,6 +654,7 @@ async function main(): Promise<void> {
     urbanLegPolicy: { count: urbanLegPolicyCount, pass: urbanLegPolicyCount === 0 },
     averageScore: { value: avgScore, target: 85, pass: avgScore >= 85 },
     noCriticalRemaining: { count: remainingCriticalCount, pass: remainingCriticalCount === 0 },
+    hardGatesZero: { count: hardGateCount, pass: hardGateCount === 0 },
     overallPass: false,
   };
   exitCriteria.overallPass = Object.values(exitCriteria).every((value) => {
@@ -665,11 +710,12 @@ async function main(): Promise<void> {
       durationMs,
       seed: options.seed,
       totalRequested: options.total,
-      randomCountRequested: options.randomCount,
-      scenarioCountRequested: scenarioCount,
+      randomCountRequested: activeRandomCount,
+      scenarioCountRequested: activeScenarioIds.length,
       analyze: options.analyze,
       failFast: options.failFast,
       outDir: options.outDir,
+      mode: options.mode,
     },
     runStats: {
       total: runs.length,

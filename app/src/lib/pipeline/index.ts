@@ -8,8 +8,8 @@
  */
 
 import type { Trip, TripPreferences, TransportOptionSummary, Restaurant } from '../types';
-import type { ActivityCluster, OnPipelineEvent } from './types';
-export type { PipelineEvent, OnPipelineEvent } from './types';
+import type { ActivityCluster, FetchedData, OnPipelineEvent } from './types';
+export type { PipelineEvent, OnPipelineEvent, FetchedData } from './types';
 import { fetchAllData } from './step1-fetch';
 import { scoreAndSelectActivities } from './step2-score';
 import { batchFetchWikipediaSummaries, getWikiLanguageForDestination } from '../services/wikipedia';
@@ -45,12 +45,64 @@ import { enrichRestaurantPool } from './step8-place-restaurants';
 import { unifiedScheduleV3Days } from './step8910-unified-schedule';
 import { validateContracts } from './step11-contracts';
 import { decorateTrip } from './step12-decorate';
+import { applyTrustLayer } from './trust-layer';
+import { buildDayTripPacks } from './day-trip-pack';
+import { buildPlannerClustersV31 } from './planner-v31';
+import { optimizeClusterRouting } from './intra-day-router';
 
 // ---------------------------------------------------------------------------
 // Pipeline Event System — emit helper
 // ---------------------------------------------------------------------------
 function emit(onEvent: OnPipelineEvent | undefined, partial: Omit<import('./types').PipelineEvent, 'timestamp'>) {
   onEvent?.({ ...partial, timestamp: Date.now() });
+}
+
+// ---------------------------------------------------------------------------
+// Shadow mode — run v3.1 in parallel for comparison
+// ---------------------------------------------------------------------------
+
+/**
+ * Deterministic selection: hash tripId to decide if this request is in the shadow sample.
+ * 'sampled' = 10% of requests, 'all' = 100% (staging only).
+ */
+function shouldRunShadow(shadowMode: string, tripId: string): boolean {
+  if (shadowMode === 'all') return true;
+  if (shadowMode !== 'sampled') return false;
+  // Simple hash: sum char codes mod 10 → 10% sample
+  let hash = 0;
+  for (let i = 0; i < tripId.length; i++) {
+    hash = (hash * 31 + tripId.charCodeAt(i)) >>> 0;
+  }
+  return (hash % 10) === 0;
+}
+
+/**
+ * Fire-and-forget shadow run: execute v3.1 planner on same preferences,
+ * log comparison metrics. Does NOT affect the served result.
+ */
+async function runShadowPlanner(preferences: TripPreferences, primaryTrip: Trip): Promise<void> {
+  const t0 = Date.now();
+  try {
+    // Temporarily override planner version for shadow run
+    const origVersion = process.env.PLANNER_VERSION;
+    process.env.PLANNER_VERSION = 'v3.1';
+    const shadowTrip = await generateTripV3(preferences);
+    process.env.PLANNER_VERSION = origVersion || 'v3.0';
+
+    const primaryScore = primaryTrip.qualityMetrics?.score ?? 0;
+    const shadowScore = shadowTrip.qualityMetrics?.score ?? 0;
+    const primaryDiag = primaryTrip.plannerDiagnostics;
+    const shadowDiag = shadowTrip.plannerDiagnostics;
+
+    console.log(
+      `[Shadow] v3.0=${primaryScore}/100 vs v3.1=${shadowScore}/100 ` +
+      `(Δ=${shadowScore - primaryScore}) ` +
+      `beam=${shadowDiag?.beamUsed}, fallback=${shadowDiag?.beamFallbackUsed}, ` +
+      `elapsed=${Date.now() - t0}ms`
+    );
+  } catch (err) {
+    console.warn(`[Shadow] v3.1 shadow run failed: ${(err as Error).message}`);
+  }
 }
 
 /** Resolve best transport option based on user preference + available options */
@@ -73,14 +125,24 @@ export async function generateTripV2(
   onEvent?: OnPipelineEvent
 ): Promise<Trip> {
   const version = process.env.PIPELINE_VERSION || 'v3';
+  const plannerVersion = process.env.PLANNER_VERSION || 'v3.0';
+  const shadowMode = process.env.PLANNER_SHADOW || 'off';
 
   if (version === 'v3') {
-    console.log('[Pipeline V3] Using V3 pipeline (deterministic 12-step)');
+    console.log(`[Pipeline V3] Using V3 pipeline (deterministic 12-step), planner=${plannerVersion}, shadow=${shadowMode}`);
     // Check for multi-city
     if (preferences.cityPlan && preferences.cityPlan.length > 1) {
       return generateTripV3MultiCity(preferences, onEvent);
     }
-    return generateTripV3(preferences, onEvent);
+
+    const trip = await generateTripV3(preferences, onEvent);
+
+    // Shadow mode: run v3.1 in parallel for comparison (fire-and-forget)
+    if (plannerVersion === 'v3.0' && shouldRunShadow(shadowMode, trip.id)) {
+      runShadowPlanner(preferences, trip).catch(() => {});
+    }
+
+    return trip;
   }
 
   if (version === 'v2-llm') {
@@ -413,25 +475,39 @@ async function populateRestaurantAlternatives(
  *   11. validateContracts()    — Quality scoring and contract validation
  *   12. decorateTrip()         — Optional LLM decoration (OFF by default)
  */
+export interface GenerateTripV3Options {
+  /** Pre-loaded fixture data — skips step 1 fetch when provided */
+  fixtureData?: FetchedData;
+}
+
 export async function generateTripV3(
   preferences: TripPreferences,
-  onEvent?: OnPipelineEvent
+  onEvent?: OnPipelineEvent,
+  options?: GenerateTripV3Options
 ): Promise<Trip> {
   const startTime = Date.now();
   const stageTimes: Record<string, number> = {};
+  const plannerVersion = (process.env.PLANNER_VERSION || 'v3.0') as 'v3.0' | 'v3.1';
 
-  // Step 1: Fetch all data
+  // Step 1: Fetch all data (or use fixture)
   let t = Date.now();
-  onEvent?.({ type: 'step_start', step: 1, stepName: 'Fetching data', timestamp: Date.now() });
-  let data: Awaited<ReturnType<typeof fetchAllData>>;
-  try {
-    data = await fetchAllData(preferences, onEvent);
-  } catch (err) {
-    console.error('[Pipeline V3] Step 1 failed:', err);
-    throw new Error(`[Pipeline V3] Data fetch failed: ${(err as Error).message}`);
+  let data: FetchedData;
+  if (options?.fixtureData) {
+    data = options.fixtureData;
+    stageTimes['fetch'] = 0;
+    console.log('[Pipeline V3] Step 1: Using fixture data (no API calls)');
+    onEvent?.({ type: 'step_done', step: 1, stepName: 'Fetching data (fixture)', durationMs: 0, timestamp: Date.now() });
+  } else {
+    onEvent?.({ type: 'step_start', step: 1, stepName: 'Fetching data', timestamp: Date.now() });
+    try {
+      data = await fetchAllData(preferences, onEvent);
+    } catch (err) {
+      console.error('[Pipeline V3] Step 1 failed:', err);
+      throw new Error(`[Pipeline V3] Data fetch failed: ${(err as Error).message}`);
+    }
+    stageTimes['fetch'] = Date.now() - t;
+    onEvent?.({ type: 'step_done', step: 1, stepName: 'Fetching data', durationMs: stageTimes['fetch'], timestamp: Date.now() });
   }
-  stageTimes['fetch'] = Date.now() - t;
-  onEvent?.({ type: 'step_done', step: 1, stepName: 'Fetching data', durationMs: stageTimes['fetch'], timestamp: Date.now() });
 
   // Step 2: Score and rank activities
   t = Date.now();
@@ -441,6 +517,9 @@ export async function generateTripV3(
   stageTimes['score'] = Date.now() - t;
   console.log(`[Pipeline V3] Step 2: ${selectedActivities.length} activities selected`);
   onEvent?.({ type: 'step_done', step: 2, stepName: 'Scoring activities', durationMs: stageTimes['score'], timestamp: Date.now() });
+
+  // Step 2a: Trust layer — enrich activities with confidence metadata (internal, no prod impact)
+  applyTrustLayer(selectedActivities, data, data.destCoords);
 
   // Step 2b: Enrich descriptions with Wikipedia (async, 5s timeout, cached 30 days)
   try {
@@ -496,33 +575,82 @@ export async function generateTripV3(
   stageTimes['anchor-transport'] = Date.now() - t;
   console.log(`[Pipeline V3] Step 2c: Time windows anchored`);
 
-  // Step 3: Cluster by day
+  // Step 2d: Build DayTripPacks (robust day trip validation + transport resolution)
+  const { packs: dayTripPacks, cityActivities: activitiesAfterDayTrips } = buildDayTripPacks(
+    selectedActivities, data, data.destCoords, preferences.durationDays
+  );
+
+  // Step 3: Cluster by day (v3.0 or v3.1 planner)
   t = Date.now();
   onEvent?.({ type: 'step_start', step: 3, stepName: 'Clustering', timestamp: Date.now() });
-  const densityProfile = computeCityDensityProfile(selectedActivities, preferences.durationDays);
-  const PACE_FACTOR: Record<string, number> = {
-    relaxed: 0.65,
-    moderate: 1.0,
-    intensive: 1.3,
-  };
-  const paceFactor = PACE_FACTOR[preferences.pace || 'moderate'] || 1.0;
+  const densityProfile = computeCityDensityProfile(activitiesAfterDayTrips, preferences.durationDays);
 
-  const clusters = clusterActivities(
-    selectedActivities,
-    preferences.durationDays,
-    data.destCoords,
-    densityProfile,
-    preferences.startDate.toISOString().split('T')[0],
-    timeWindows,
-    paceFactor,
-    {
-      dayTripActivities: data.dayTripActivities,
-      dayTripSuggestions: data.dayTripSuggestions,
+  let clusters: ActivityCluster[];
+  let beamUsed = false;
+  let beamFallbackUsed = false;
+
+  if (plannerVersion === 'v3.1') {
+    // V3.1: role-aware beam search planner
+    const plannerResult = buildPlannerClustersV31(
+      activitiesAfterDayTrips,
+      dayTripPacks,
+      timeWindows,
+      preferences.durationDays,
+      data.destCoords,
+      densityProfile
+    );
+    clusters = plannerResult.clusters;
+    beamUsed = plannerResult.beamUsed;
+    beamFallbackUsed = plannerResult.beamFallbackUsed;
+  } else {
+    // V3.0: hierarchical clustering (existing behavior)
+    const PACE_FACTOR: Record<string, number> = {
+      relaxed: 0.65,
+      moderate: 1.0,
+      intensive: 1.3,
+    };
+    const paceFactor = PACE_FACTOR[preferences.pace || 'moderate'] || 1.0;
+
+    clusters = clusterActivities(
+      activitiesAfterDayTrips,
+      Math.max(1, preferences.durationDays - dayTripPacks.length),
+      data.destCoords,
+      densityProfile,
+      preferences.startDate.toISOString().split('T')[0],
+      timeWindows,
+      paceFactor,
+      {
+        dayTripActivities: data.dayTripActivities,
+        dayTripSuggestions: data.dayTripSuggestions,
+      }
+    );
+    // Inject DayTripPack clusters (atomic, protected)
+    for (const pack of dayTripPacks) {
+      clusters.push({
+        dayNumber: clusters.length + 1,
+        activities: pack.activities,
+        centroid: {
+          lat: pack.activities.reduce((s, a) => s + a.latitude, 0) / pack.activities.length,
+          lng: pack.activities.reduce((s, a) => s + a.longitude, 0) / pack.activities.length,
+        },
+        totalIntraDistance: 0,
+        isFullDay: true,
+        isDayTrip: true,
+        dayTripDestination: pack.destination,
+      });
     }
-  );
+    // Re-number all clusters
+    clusters.forEach((c, i) => { c.dayNumber = i + 1; });
+  }
+
   stageTimes['cluster'] = Date.now() - t;
-  console.log(`[Pipeline V3] Step 3: ${clusters.length} clusters created`);
+  console.log(`[Pipeline V3] Step 3: ${clusters.length} clusters created (${dayTripPacks.length} day trip packs, planner=${plannerVersion})`);
   onEvent?.({ type: 'step_done', step: 3, stepName: 'Clustering', durationMs: stageTimes['cluster'], timestamp: Date.now() });
+
+  // Step 3b: Optimize intra-day routing (weighted NN + 2-opt)
+  if (plannerVersion === 'v3.1') {
+    optimizeClusterRouting(clusters);
+  }
 
   // Step 4: Select hotel (3 tiers)
   t = Date.now();
@@ -758,6 +886,29 @@ export async function generateTripV3(
     ...repairResult.unresolvedViolations.map(v => `Repair unresolved: ${v}`),
   ];
   trip.contractViolations = combinedContractViolations;
+
+  // Planner diagnostics — collect from geoDiagnostics on each day
+  const zigzagTurnsTotal = repairResult.days.reduce(
+    (sum, d) => sum + (d.geoDiagnostics?.zigzagTurns ?? 0), 0
+  );
+  const routeInefficiencyTotal = repairResult.days.reduce(
+    (sum, d) => sum + (d.geoDiagnostics?.routeInefficiencyRatio ?? 0), 0
+  );
+  const criticalGeoCount = combinedContractViolations.filter(
+    v => v.includes('P0.5') || v.includes('P0.6')
+  ).length;
+
+  trip.plannerDiagnostics = {
+    plannerVersion,
+    beamUsed,
+    beamFallbackUsed,
+    dayTripPackCount: dayTripPacks.length,
+    repairRejectedCount: repairResult.unresolvedViolations.length,
+    zigzagTurnsTotal,
+    routeInefficiencyTotal: Number(routeInefficiencyTotal.toFixed(2)),
+    criticalGeoCount,
+    contractsPassed: contractResult.invariantsPassed,
+  };
 
   const totalTime = Date.now() - startTime;
   console.log(`[Pipeline V3] Trip generated in ${totalTime}ms`);

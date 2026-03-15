@@ -7,10 +7,13 @@
 
 import { TripPreferences } from '../../src/lib/types';
 
-function futureDate(daysFromNow: number): Date {
-  const d = new Date();
-  d.setDate(d.getDate() + daysFromNow);
-  return d;
+/**
+ * Dates gelées pour les golden tests — déterministes et reproductibles.
+ * Les dates sont choisies un mercredi de mai 2026 pour éviter les edge cases
+ * week-end/lundi et les fermetures saisonnières.
+ */
+function frozenDate(iso: string): Date {
+  return new Date(iso);
 }
 
 export interface Scenario {
@@ -28,7 +31,7 @@ export const SCENARIOS: Record<string, Scenario> = {
     preferences: {
       origin: 'Paris',
       destination: 'Rome',
-      startDate: futureDate(30),
+      startDate: frozenDate('2026-05-06T09:00:00.000Z'),
       durationDays: 4,
       transport: 'optimal',
       carRental: false,
@@ -50,7 +53,7 @@ export const SCENARIOS: Record<string, Scenario> = {
     preferences: {
       origin: 'Paris',
       destination: 'Barcelona',
-      startDate: new Date('2026-03-16T11:00:00.000Z'),
+      startDate: frozenDate('2026-05-13T11:00:00.000Z'),
       durationDays: 6,
       transport: 'plane',
       carRental: false,
@@ -72,7 +75,7 @@ export const SCENARIOS: Record<string, Scenario> = {
     preferences: {
       origin: 'Paris',
       destination: 'Barcelone',
-      startDate: futureDate(35),
+      startDate: frozenDate('2026-05-11T08:00:00.000Z'),
       durationDays: 1,
       transport: 'plane',
       carRental: false,
@@ -94,7 +97,7 @@ export const SCENARIOS: Record<string, Scenario> = {
     preferences: {
       origin: 'Lyon',
       destination: 'Tokyo',
-      startDate: futureDate(45),
+      startDate: frozenDate('2026-05-20T08:00:00.000Z'),
       durationDays: 14,
       transport: 'optimal',
       carRental: false,
@@ -116,7 +119,7 @@ export const SCENARIOS: Record<string, Scenario> = {
     preferences: {
       origin: 'Paris',
       destination: 'Marrakech',
-      startDate: new Date('2026-04-02T10:00:00.000Z'),
+      startDate: frozenDate('2026-05-07T10:00:00.000Z'),
       durationDays: 4,
       transport: 'plane',
       carRental: false,
@@ -138,7 +141,7 @@ export const SCENARIOS: Record<string, Scenario> = {
     preferences: {
       origin: 'Marseille',
       destination: 'Marrakech',
-      startDate: futureDate(40),
+      startDate: frozenDate('2026-05-15T08:00:00.000Z'),
       durationDays: 7,
       transport: 'optimal',
       carRental: false,
@@ -160,7 +163,7 @@ export const SCENARIOS: Record<string, Scenario> = {
     preferences: {
       origin: 'Paris',
       destination: 'Londres',
-      startDate: futureDate(30),
+      startDate: frozenDate('2026-05-06T09:00:00.000Z'),
       durationDays: 5,
       transport: 'train',
       carRental: false,
@@ -182,7 +185,7 @@ export const SCENARIOS: Record<string, Scenario> = {
     preferences: {
       origin: 'Bordeaux',
       destination: 'Barcelone',
-      startDate: futureDate(50),
+      startDate: frozenDate('2026-05-25T08:00:00.000Z'),
       durationDays: 5,
       transport: 'optimal',
       carRental: false,
@@ -204,11 +207,7 @@ export const SCENARIOS: Record<string, Scenario> = {
     preferences: {
       origin: 'Lyon',
       destination: 'Paris',
-      startDate: (() => {
-        const d = futureDate(30);
-        d.setHours(11, 0, 0, 0); // Train départ 11h → arrivée ~14h
-        return d;
-      })(),
+      startDate: frozenDate('2026-05-06T11:00:00.000Z'),
       durationDays: 3,
       transport: 'train',
       carRental: false,
@@ -230,7 +229,7 @@ export const SCENARIOS: Record<string, Scenario> = {
     preferences: {
       origin: 'Paris',
       destination: 'Amsterdam',
-      startDate: futureDate(35),
+      startDate: frozenDate('2026-05-11T09:00:00.000Z'),
       durationDays: 4,
       transport: 'train',
       carRental: false,
@@ -252,7 +251,7 @@ export const SCENARIOS: Record<string, Scenario> = {
     preferences: {
       origin: 'Toulouse',
       destination: 'Nice',
-      startDate: futureDate(40),
+      startDate: frozenDate('2026-05-15T08:00:00.000Z'),
       durationDays: 6,
       transport: 'car',
       carRental: true,
@@ -274,7 +273,7 @@ export const SCENARIOS: Record<string, Scenario> = {
     preferences: {
       origin: 'Paris',
       destination: 'Rome',
-      startDate: futureDate(45),
+      startDate: frozenDate('2026-05-20T09:00:00.000Z'),
       durationDays: 10,
       transport: 'optimal',
       carRental: false,
@@ -300,7 +299,7 @@ export const SCENARIOS: Record<string, Scenario> = {
     preferences: {
       origin: 'Nantes',
       destination: 'Dubrovnik',
-      startDate: futureDate(50),
+      startDate: frozenDate('2026-05-25T08:00:00.000Z'),
       durationDays: 5,
       transport: 'optimal',
       carRental: false,
@@ -322,7 +321,7 @@ export const SCENARIOS: Record<string, Scenario> = {
     preferences: {
       origin: 'Lille',
       destination: 'Barcelone',
-      startDate: futureDate(40),
+      startDate: frozenDate('2026-05-15T08:00:00.000Z'),
       durationDays: 7,
       transport: 'optimal',
       carRental: false,
@@ -344,7 +343,7 @@ export const SCENARIOS: Record<string, Scenario> = {
     preferences: {
       origin: 'Paris',
       destination: 'Rome',
-      startDate: futureDate(35),
+      startDate: frozenDate('2026-05-11T09:00:00.000Z'),
       durationDays: 5,
       transport: 'optimal',
       carRental: false,
@@ -366,7 +365,7 @@ export const SCENARIOS: Record<string, Scenario> = {
     preferences: {
       origin: 'Paris',
       destination: 'Tokyo',
-      startDate: futureDate(45),
+      startDate: frozenDate('2026-05-20T08:00:00.000Z'),
       durationDays: 7,
       transport: 'plane',
       carRental: false,
@@ -388,7 +387,7 @@ export const SCENARIOS: Record<string, Scenario> = {
     preferences: {
       origin: 'Lyon',
       destination: 'Naples',
-      startDate: futureDate(40),
+      startDate: frozenDate('2026-05-15T08:00:00.000Z'),
       durationDays: 3,
       transport: 'plane',
       carRental: false,

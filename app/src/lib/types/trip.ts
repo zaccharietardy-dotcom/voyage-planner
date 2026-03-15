@@ -600,6 +600,17 @@ export interface Trip {
   };
   qualityWarnings?: string[];
   contractViolations?: string[];
+  plannerDiagnostics?: {
+    plannerVersion: 'v3.0' | 'v3.1';
+    beamUsed: boolean;
+    beamFallbackUsed: boolean;
+    dayTripPackCount: number;
+    repairRejectedCount: number;
+    zigzagTurnsTotal: number;
+    routeInefficiencyTotal: number;
+    criticalGeoCount: number;
+    contractsPassed: boolean;
+  };
 
   // État des réservations
   bookedItems?: Record<string, {

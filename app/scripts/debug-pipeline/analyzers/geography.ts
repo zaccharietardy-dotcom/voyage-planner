@@ -4,12 +4,15 @@
 
 import { Trip, TripItem } from '../../../src/lib/types';
 import { AnalysisIssue } from './schedule';
+import { GEO_THRESHOLDS, GEO_CODES } from '../../../src/lib/pipeline/quality-rules';
 
-const URBAN_LONG_LEG_TARGET_KM = 2.5;
-const URBAN_LONG_LEG_HARD_KM = 4;
-const OUTLIER_MIN_THRESHOLD_KM = 3;
-const ROUTE_INEFFICIENCY_WARNING_RATIO = 1.75;
-const ZIGZAG_WARNING_THRESHOLD = 2;
+const {
+  urbanLongLegTargetKm: URBAN_LONG_LEG_TARGET_KM,
+  urbanLongLegHardKm: URBAN_LONG_LEG_HARD_KM,
+  outlierMinThresholdKm: OUTLIER_MIN_THRESHOLD_KM,
+  routeInefficiencyWarningRatio: ROUTE_INEFFICIENCY_WARNING_RATIO,
+  zigzagWarningThreshold: ZIGZAG_WARNING_THRESHOLD,
+} = GEO_THRESHOLDS;
 const LOGISTICS_TYPES = ['flight', 'transport', 'checkin', 'checkout', 'parking', 'luggage'];
 
 function isHotelMeal(item: TripItem): boolean {

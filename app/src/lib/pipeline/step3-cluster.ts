@@ -25,7 +25,7 @@ export function computeCityDensityProfile(
 ): CityDensityProfile {
   const valid = activities.filter(a => a.latitude && a.longitude);
   if (valid.length < 2) {
-    return { p75PairwiseDistance: 2, medianPairwiseDistance: 1, maxClusterRadius: 2, densityCategory: 'medium', hardRadiusCap: 5 };
+    return { p75PairwiseDistance: 2, medianPairwiseDistance: 1, maxClusterRadius: 2, densityCategory: 'medium', hardRadiusCap: 5, urbanLegBudgetKm: 3.5, dayTripThresholdKm: 15, swapRadiusFactor: 1.3 };
   }
 
   // Compute all pairwise distances
@@ -66,9 +66,22 @@ export function computeCityDensityProfile(
     maxClusterRadius <= 2.0 ? 'medium' :
     'spread';
 
+  // Planner budgets derived from density category
+  const BUDGETS: Record<CityDensityProfile['densityCategory'], { urbanLegBudgetKm: number; dayTripThresholdKm: number; swapRadiusFactor: number }> = {
+    dense:  { urbanLegBudgetKm: 2,   dayTripThresholdKm: 10, swapRadiusFactor: 1.0 },
+    medium: { urbanLegBudgetKm: 3.5, dayTripThresholdKm: 15, swapRadiusFactor: 1.3 },
+    spread: { urbanLegBudgetKm: 6,   dayTripThresholdKm: 20, swapRadiusFactor: 1.8 },
+  };
+  const budgets = BUDGETS[densityCategory];
+
   console.log(`[Pipeline V2] City density profile: category=${densityCategory}, p75=${p75.toFixed(2)}km, median=${median.toFixed(2)}km, maxClusterRadius=${maxClusterRadius.toFixed(2)}km, hardRadiusCap=${hardRadiusCap.toFixed(2)}km${isSpreadCity ? ' (spread city)' : ''}`);
 
-  return { p75PairwiseDistance: p75, medianPairwiseDistance: median, maxClusterRadius, densityCategory, hardRadiusCap };
+  return {
+    p75PairwiseDistance: p75, medianPairwiseDistance: median, maxClusterRadius, densityCategory, hardRadiusCap,
+    urbanLegBudgetKm: budgets.urbanLegBudgetKm,
+    dayTripThresholdKm: budgets.dayTripThresholdKm,
+    swapRadiusFactor: budgets.swapRadiusFactor,
+  };
 }
 
 /**

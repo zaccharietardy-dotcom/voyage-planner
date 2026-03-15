@@ -38,7 +38,8 @@ if (!process.env.PIPELINE_VERSION) {
 }
 
 // Imports après dotenv
-import { generateTripV2 } from '../../src/lib/pipeline';
+import { generateTripV2, generateTripV3 } from '../../src/lib/pipeline';
+import type { FetchedData } from '../../src/lib/pipeline/types';
 import { generateRandomPreferences } from '../../src/lib/randomExample';
 import { TripPreferences } from '../../src/lib/types';
 import { SCENARIOS, getScenario, getAllScenarioIds } from './scenarios';
@@ -109,7 +110,12 @@ export interface GenerationResult {
   _campaign?: CampaignRunMetadata;
 }
 
-export async function generateTripRun(scenarioId: string, preferences: TripPreferences): Promise<GenerationResult> {
+export interface GenerateTripRunOptions {
+  /** Pre-loaded fixture data — passed to pipeline to skip step 1 */
+  fixtureData?: FetchedData;
+}
+
+export async function generateTripRun(scenarioId: string, preferences: TripPreferences, options?: GenerateTripRunOptions): Promise<GenerationResult> {
   const captured = captureConsole();
   const startTime = Date.now();
   const generatedAt = new Date().toISOString();
@@ -121,7 +127,13 @@ export async function generateTripRun(scenarioId: string, preferences: TripPrefe
   console.log(`${'='.repeat(70)}\n`);
 
   try {
-    const trip = await generateTripV2(preferences);
+    let trip;
+    if (options?.fixtureData) {
+      // Direct call to V3 with fixture data (bypasses version routing)
+      trip = await generateTripV3(preferences, undefined, { fixtureData: options.fixtureData });
+    } else {
+      trip = await generateTripV2(preferences);
+    }
     const durationMs = Date.now() - startTime;
     captured.restore();
 

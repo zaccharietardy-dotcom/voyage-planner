@@ -85,6 +85,20 @@ export interface ScoredActivity extends Attraction {
   score: number;
   source: 'google_places' | 'serpapi' | 'overpass' | 'viator' | 'mustsee';
   reviewCount: number;
+
+  // ── Trust layer (Phase 1 — internal planner fields, no prod surface impact) ──
+  /** Confidence in GPS coordinates: high = verified multi-source, low = single source or geocode fallback */
+  coordinateConfidence?: 'high' | 'medium' | 'low';
+  /** Numeric coordinate confidence score (0-1) for ranking */
+  coordinateConfidenceScore?: number;
+  /** Confidence in duration estimate */
+  durationConfidence?: 'high' | 'medium' | 'low';
+  /** Affinity to a day trip destination (0 = city, 1 = strongly associated with a day trip) */
+  dayTripAffinity?: number;
+  /** Why this activity is protected from swaps/eviction */
+  protectedReason?: 'must_see' | 'day_trip_anchor' | 'user_requested';
+  /** Inferred geographic zone hint for clustering */
+  zoneHint?: string;
 }
 
 // ============================================
@@ -103,6 +117,29 @@ export interface ActivityCluster {
 }
 
 // ============================================
+// Step 2d: DayTripPack (Phase 2)
+// ============================================
+
+export interface DayTripPack {
+  /** The primary must-see or anchor activity that triggers the day trip */
+  anchor: ScoredActivity;
+  /** All activities at the day trip destination (anchor + enrichment) */
+  activities: ScoredActivity[];
+  /** Destination name (e.g. "Pompei", "Versailles") */
+  destination: string;
+  /** Outbound travel time in minutes */
+  outboundDurationMin: number;
+  /** Return travel time in minutes */
+  returnDurationMin: number;
+  /** Slack buffer in minutes (default 60) */
+  slackMin: number;
+  /** Confidence in transport duration estimate */
+  transportConfidence: 'high' | 'medium' | 'low';
+  /** Transport mode */
+  transportMode: string;
+}
+
+// ============================================
 // Step 3b: City Density Profile
 // ============================================
 
@@ -117,6 +154,14 @@ export interface CityDensityProfile {
   densityCategory: 'dense' | 'medium' | 'spread';
   /** Hard cap on cluster radius (km). Adaptive: 5km for compact cities, up to 15km for spread cities. */
   hardRadiusCap: number;
+
+  // ── Planner budgets (Phase 1) ──
+  /** Max distance for an urban leg before penalty (km). Dense=2, Medium=3.5, Spread=6 */
+  urbanLegBudgetKm?: number;
+  /** Distance threshold to classify as day trip candidate (km). Dense=10, Medium=15, Spread=20 */
+  dayTripThresholdKm?: number;
+  /** Multiplier for swap radius during inter-cluster optimization. Dense=1.0, Medium=1.3, Spread=1.8 */
+  swapRadiusFactor?: number;
 }
 
 // ============================================
@@ -276,4 +321,29 @@ export interface PreparedLLMData {
   llmInput: LLMPlannerInput;
   prePlannedDayTripDays: LLMDayPlan[];
   reservedDayNumbers: number[];
+}
+
+// ============================================
+// Planner Diagnostics — structured per-run metrics
+// ============================================
+
+export interface PlannerDiagnostics {
+  /** Which planner produced this result */
+  plannerVersion: 'v3.0' | 'v3.1';
+  /** Was beam search used (v3.1 only) */
+  beamUsed: boolean;
+  /** Did beam search fall back to greedy (v3.1 only) */
+  beamFallbackUsed: boolean;
+  /** Number of DayTripPack created (v3.1 only) */
+  dayTripPackCount: number;
+  /** Number of repairs rejected for quality (v3.1 only) */
+  repairRejectedCount: number;
+  /** Total zigzag turns across all days */
+  zigzagTurnsTotal: number;
+  /** Total route inefficiency across all days */
+  routeInefficiencyTotal: number;
+  /** Number of critical geo issues */
+  criticalGeoCount: number;
+  /** Whether contracts passed */
+  contractsPassed: boolean;
 }
