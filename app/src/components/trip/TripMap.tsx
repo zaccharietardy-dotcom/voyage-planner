@@ -592,10 +592,27 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
         nodes.push({ coords: hotelCoords });
       }
 
+      // Build route nodes: skip transport items but propagate their travel data
+      // to the next non-transport item (so route labels show transit info between activities)
+      let pendingTransport: TripItem | null = null;
       for (const item of dayItems) {
-        if (item.type !== 'checkin' && item.type !== 'checkout') {
-          nodes.push({ coords: [item.latitude, item.longitude], item });
+        if (item.type === 'checkin' || item.type === 'checkout') continue;
+        if (item.type === 'transport') {
+          // Store transport data for the next activity/restaurant node
+          pendingTransport = item;
+          continue;
         }
+        // Merge pending transport data onto this item (for route label display)
+        const nodeItem = pendingTransport ? {
+          ...item,
+          timeFromPrevious: pendingTransport.timeFromPrevious ?? pendingTransport.duration ?? item.timeFromPrevious,
+          distanceFromPrevious: pendingTransport.distanceFromPrevious ?? item.distanceFromPrevious,
+          transportToPrevious: pendingTransport.transportToPrevious ?? item.transportToPrevious,
+          transitInfo: pendingTransport.transitInfo ?? item.transitInfo,
+          routePolylineFromPrevious: pendingTransport.routePolylineFromPrevious ?? item.routePolylineFromPrevious,
+        } : item;
+        pendingTransport = null;
+        nodes.push({ coords: [nodeItem.latitude, nodeItem.longitude], item: nodeItem });
       }
 
       const hasReturnTransport = dayItems.some(item =>
