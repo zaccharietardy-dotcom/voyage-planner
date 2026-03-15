@@ -275,7 +275,10 @@ export function unifiedScheduleV3Days(
 
       const act = cluster.activities[i];
       const prevId = items.length > 0 ? (items[items.length - 1].id || '') : (hotel?.id || 'hotel');
-      let travelLeg = dayTravel?.legs.find(l => l.toId === act.id && l.fromId === prevId);
+      // Match travel leg: exact IDs first, then by toId only, prefer legs with polyline data
+      let travelLeg = dayTravel?.legs.find(l => l.toId === act.id && l.fromId === prevId)
+        || dayTravel?.legs.find(l => (l.toId === act.id || l.toId === act.name) && l.polyline)
+        || dayTravel?.legs.find(l => l.toId === act.id || l.toId === act.name);
       if (!travelLeg && currentPosition) {
         // Fallback: estimate from haversine distance
         const dist = calculateDistance(currentPosition.lat, currentPosition.lng, act.latitude, act.longitude);

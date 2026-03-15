@@ -100,6 +100,17 @@ export async function getDirections(request: DirectionsRequest): Promise<Directi
       const result = await searchWithGoogle(from, to, mode, departureTime);
       return { ...result, googleMapsUrl };
     } catch (error) {
+      // Transit mode may fail (ZERO_RESULTS) in some regions (Japan, etc.)
+      // Retry with driving to at least get a polyline for the map
+      if (mode === 'transit') {
+        try {
+          const drivingResult = await searchWithGoogle(from, to, 'driving');
+          console.log(`[Directions] Transit failed, driving fallback succeeded for ${from.lat},${from.lng} → ${to.lat},${to.lng}`);
+          return { ...drivingResult, googleMapsUrl, transitLines: [] };
+        } catch {
+          // Both failed
+        }
+      }
       console.warn('Google Directions API error, falling back:', error);
     }
   }
