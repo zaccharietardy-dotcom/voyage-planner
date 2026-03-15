@@ -609,7 +609,7 @@ export interface Trip {
   qualityWarnings?: string[];
   contractViolations?: string[];
   plannerDiagnostics?: {
-    plannerVersion: 'v3.0' | 'v3.1';
+    plannerVersion: 'v3.0' | 'v3.1' | 'v3.2';
     beamUsed: boolean;
     beamFallbackUsed: boolean;
     dayTripPackCount: number;
@@ -624,6 +624,14 @@ export interface Trip {
     dayNumberMismatchCount?: number;
     dayTripEvictionCount?: number;
     finalIntegrityFailures?: number;
+    orphanTransportCount?: number;
+    teleportLegCount?: number;
+    staleNarrativeCount?: number;
+    freeTimeOverBudgetCount?: number;
+    mealFallbackCount?: number;
+    routeRebuildCount?: number;
+    missingProtectedMustSeeCount?: number;
+    dayTripAtomicityBreakCount?: number;
   };
 
   // État des réservations

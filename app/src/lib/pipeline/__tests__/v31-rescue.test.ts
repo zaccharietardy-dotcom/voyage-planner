@@ -379,6 +379,45 @@ describe('v3.1 rescue invariants', () => {
     expect(result.dayNumberMismatchCount).toBe(0);
   });
 
+  it('trims an overfull long day trip instead of dropping the pack entirely', () => {
+    const kamakuraActs = Array.from({ length: 5 }, (_, index) =>
+      makeActivity({
+        id: `kamakura-${index + 1}`,
+        name: `Kamakura Stop ${index + 1}`,
+        latitude: 35.319 + index * 0.002,
+        longitude: 139.550 + index * 0.002,
+        duration: 180,
+        score: 80 - index,
+        mustSee: index === 0,
+      })
+    );
+
+    const data = emptyFetchedData({
+      dayTripSuggestions: [
+        makeSuggestion({
+          name: 'Kamakura',
+          destination: 'Kamakura',
+          latitude: 35.319,
+          longitude: 139.550,
+          transportDurationMin: 60,
+        }),
+      ],
+    });
+
+    const result = buildDayTripPacks(
+      kamakuraActs,
+      data,
+      { lat: 35.6764, lng: 139.6500 },
+      7,
+      12 * 60
+    );
+
+    expect(result.packs).toHaveLength(1);
+    expect(result.packs[0].destination).toBe('Kamakura');
+    expect(result.packs[0].activities.some((activity) => activity.name === 'Kamakura Stop 1')).toBe(true);
+    expect(result.packs[0].activities.reduce((sum, activity) => sum + (activity.duration || 60), 0)).toBeLessThanOrEqual(465);
+  });
+
   it('keeps an early-closing activity off a late arrival day', () => {
     const earlyClose = makeActivity({
       id: 'early-close',

@@ -271,56 +271,48 @@ export function scoreAndSelectActivities(
   // 3b. Deduplicate by shared booking URL (e.g. Vatican Museums + Sistine Chapel = same visit)
   const deduped = deduplicateByBookingUrl(locationTypeDeduped);
 
+  const normalizeAccents = (s: string) =>
+    s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const userMustSeeItems = preferences.mustSee?.trim()
+    ? preferences.mustSee
+        .split(',')
+        .map(s => s.trim().toLowerCase())
+        .filter(Boolean)
+        .flatMap(item => {
+          if (/\s+et\s+/i.test(item) || /\s*&\s*/.test(item)) {
+            return item.split(/\s+et\s+|\s*&\s*/i).map(p => p.trim()).filter(Boolean);
+          }
+          return [item];
+        })
+    : [];
+  const matchesUserMustSeePreference = (activity: ScoredActivity): boolean => {
+    if (userMustSeeItems.length === 0) return false;
+    if ((activity as any).source === 'viator') return false;
+    const actNameNorm = normalizeAccents(activity.name || '');
+    for (const mustSeeItem of userMustSeeItems) {
+      const mustSeeNorm = normalizeAccents(mustSeeItem);
+      const nameRatio = mustSeeNorm.length / Math.max(1, actNameNorm.length);
+      if (nameRatio < 0.3 || nameRatio > 3.0) continue;
+      if (actNameNorm.includes(mustSeeNorm) || mustSeeNorm.includes(actNameNorm)) {
+        const actTextForExclude = `${(activity.name || '').toLowerCase()} ${((activity as any).description || '').toLowerCase()}`;
+        if (MUST_SEE_EXCLUDED_KEYWORDS.some(kw => actTextForExclude.includes(kw))) continue;
+        return true;
+      }
+    }
+    return false;
+  };
+
   // 3c. FALLBACK must-see name matching
   // If the SerpAPI must-see search failed for an item, or the dedup lost the flag,
   // check all activities against the user's mustSee text and apply the flag.
   // This catches cases like "Fontaine de Trevi" where the API search returned
   // a different result or the GPS was too far from the Google Places entry.
-  if (preferences.mustSee?.trim()) {
-    const mustSeeItems = preferences.mustSee
-      .split(',')
-      .map(s => s.trim().toLowerCase())
-      .filter(Boolean)
-      .flatMap(item => {
-        // Also expand "et" / "&"
-        if (/\s+et\s+/i.test(item) || /\s*&\s*/.test(item)) {
-          return item.split(/\s+et\s+|\s*&\s*/i).map(p => p.trim()).filter(Boolean);
-        }
-        return [item];
-      });
-
-    // Normalize for accent-insensitive matching
-    const normalizeAccents = (s: string) =>
-      s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-
+  if (userMustSeeItems.length > 0) {
     for (const activity of deduped) {
       if (activity.mustSee) continue; // Already flagged
-      // Skip Viator activities for fallback matching — their marketing names
-      // often include landmark names ("Séance photo à la Tour Eiffel") which
-      // causes false must-see matches. Viator activities should only be must-see
-      // if explicitly matched via ID/slug in the primary matching pass.
-      if ((activity as any).source === 'viator') continue;
-      const actNameNorm = normalizeAccents(activity.name || '');
-      for (const mustSeeItem of mustSeeItems) {
-        const mustSeeNorm = normalizeAccents(mustSeeItem);
-        // Guard: require the must-see term to be a significant portion of the
-        // activity name. This prevents "Tour Eiffel" (11 chars) matching inside
-        // "Séance photo privée parisienne Life Style à la Tour Eiffel" (55 chars)
-        // because 11/55 = 0.20 < 0.3.
-        const nameRatio = mustSeeNorm.length / actNameNorm.length;
-        if (nameRatio < 0.3 || nameRatio > 3.0) continue;
-        // Check if activity name contains the must-see item or vice versa
-        if (actNameNorm.includes(mustSeeNorm) || mustSeeNorm.includes(actNameNorm)) {
-          // Guard: don't mark experiences/walks/tours as must-see even if name-matched
-          const actTextForExclude = `${(activity.name || '').toLowerCase()} ${((activity as any).description || '').toLowerCase()}`;
-          if (MUST_SEE_EXCLUDED_KEYWORDS.some(kw => actTextForExclude.includes(kw))) {
-            console.log(`[Pipeline V2] Fallback must-see: "${activity.name}" matched "${mustSeeItem}" but excluded by keyword guard`);
-            continue;
-          }
-          console.log(`[Pipeline V2] Fallback must-see: "${activity.name}" matched "${mustSeeItem}" from user preferences (ratio=${nameRatio.toFixed(2)})`);
-          activity.mustSee = true;
-          break;
-        }
+      if (matchesUserMustSeePreference(activity)) {
+        console.log(`[Pipeline V2] Fallback must-see: "${activity.name}" matched explicit user preferences`);
+        activity.mustSee = true;
       }
     }
   }
@@ -494,6 +486,10 @@ export function scoreAndSelectActivities(
   // 9. Fix durations, costs, and enrich with Viator known product data
   return categoryCapped.map(a => {
     let fixed = fixAttractionCost(fixAttractionDuration(a)) as ScoredActivity;
+    const userForced = matchesUserMustSeePreference(fixed);
+    if (userForced && fixed.protectedReason !== 'user_forced') {
+      fixed = { ...fixed, protectedReason: 'user_forced', mustSee: true };
+    }
 
     // Enrich with known Viator product data (sync dictionary lookup)
     const viatorData = findKnownViatorProduct(fixed.name);

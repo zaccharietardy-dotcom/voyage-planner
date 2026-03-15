@@ -39,6 +39,12 @@ export interface RepairResult {
     lateMealReplacementCount: number;
     dayTripEvictionCount: number;
     finalIntegrityFailures: number;
+    orphanTransportCount?: number;
+    teleportLegCount?: number;
+    staleNarrativeCount?: number;
+    freeTimeOverBudgetCount?: number;
+    mealFallbackCount?: number;
+    routeRebuildCount?: number;
   };
 }
 

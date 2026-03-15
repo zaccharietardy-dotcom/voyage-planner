@@ -18,7 +18,9 @@ import type { Attraction } from '../services/attractions';
 import { calculateDistance } from '../services/geocoding';
 
 const DEFAULT_SLACK_MIN = 60;
-const MIN_USEFUL_WINDOW_MIN = 360; // 6h minimum useful time for a day trip
+const LONG_DAY_TRIP_SLACK_MIN = 90;
+const DAY_TRIP_LUNCH_MIN = 75;
+const MIN_USEFUL_WINDOW_MIN = 420; // 7h minimum useful time for a day trip
 
 // ============================================
 // Transport Duration Resolution
@@ -114,7 +116,7 @@ function isDayTripFeasible(
   totalActivityDurationMin: number,
   availableWindowMin: number
 ): boolean {
-  const totalRequired = outboundMin + returnMin + slackMin + totalActivityDurationMin;
+  const totalRequired = outboundMin + returnMin + slackMin + DAY_TRIP_LUNCH_MIN + totalActivityDurationMin;
   return totalRequired <= availableWindowMin;
 }
 
@@ -154,6 +156,49 @@ function enrichWithLocalActivities(
   }
 
   return enriched;
+}
+
+function trimPackActivitiesToFit(
+  activities: ScoredActivity[],
+  anchor: ScoredActivity,
+  availableActivityMin: number
+): ScoredActivity[] {
+  if (availableActivityMin <= 0) return [];
+
+  const selected: ScoredActivity[] = [];
+  const selectedKeys = new Set<string>();
+  const anchorKey = anchor.id || anchor.name;
+  const ordered = [...activities].sort((left, right) => {
+    const leftProtected = left.id === anchor.id || left.mustSee ? 1 : 0;
+    const rightProtected = right.id === anchor.id || right.mustSee ? 1 : 0;
+    if (rightProtected !== leftProtected) return rightProtected - leftProtected;
+    if (right.score !== left.score) return right.score - left.score;
+    const leftDist = calculateDistance(left.latitude, left.longitude, anchor.latitude, anchor.longitude);
+    const rightDist = calculateDistance(right.latitude, right.longitude, anchor.latitude, anchor.longitude);
+    if (leftDist !== rightDist) return leftDist - rightDist;
+    return (left.duration || 60) - (right.duration || 60);
+  });
+
+  let usedMin = 0;
+  for (const activity of ordered) {
+    const key = activity.id || activity.name;
+    const duration = activity.duration || 60;
+    if (selectedKeys.has(key)) continue;
+    if (key === anchorKey || activity.mustSee) {
+      if (usedMin + duration > availableActivityMin) return [];
+      selected.push(activity);
+      selectedKeys.add(key);
+      usedMin += duration;
+      continue;
+    }
+    if (usedMin + duration > availableActivityMin) continue;
+    selected.push(activity);
+    selectedKeys.add(key);
+    usedMin += duration;
+  }
+
+  if (!selectedKeys.has(anchorKey)) return [];
+  return selected;
 }
 
 // ============================================
@@ -242,12 +287,15 @@ export function buildDayTripPacks(
 
     const transport = resolveTransportDuration(group.suggestion, group.distKm);
 
+    const slackMin = transport.durationMin * 2 > 180 ? LONG_DAY_TRIP_SLACK_MIN : DEFAULT_SLACK_MIN;
+    const availableActivityMin = defaultWindowMin - transport.durationMin * 2 - DAY_TRIP_LUNCH_MIN - slackMin;
+
     // Build activities: anchor + other candidates in same destination + enrichment
-    const packActivities = enrichWithLocalActivities(anchor, destName, dayTripActivitiesMap, packId);
+    const rawPackActivities = enrichWithLocalActivities(anchor, destName, dayTripActivitiesMap, packId);
     // Add other candidates from the same destination group (if not already included)
     for (const other of sortedCandidates.slice(1)) {
-      if (!packActivities.some(a => a.id === other.id || a.name === other.name)) {
-        packActivities.push({
+      if (!rawPackActivities.some(a => a.id === other.id || a.name === other.name)) {
+        rawPackActivities.push({
           ...other,
           protectedReason: other === anchor ? 'day_trip_anchor' : 'day_trip',
           dayTripAffinity: 1.0,
@@ -257,13 +305,20 @@ export function buildDayTripPacks(
       }
     }
 
+    const packActivities = trimPackActivitiesToFit(rawPackActivities, anchor, availableActivityMin);
+    if (packActivities.length === 0) {
+      console.log(`[DayTripPack] "${destName}" infeasible after protected-trim (budget ${availableActivityMin}min activities)`);
+      cityActivities.push(...group.candidates);
+      continue;
+    }
     const totalActivityDuration = packActivities.reduce((sum, a) => sum + (a.duration || 60), 0);
 
     // Feasibility check
-    const feasible = isDayTripFeasible(
+    const requiredWindowMin = transport.durationMin * 2 + totalActivityDuration + DAY_TRIP_LUNCH_MIN + slackMin;
+    const feasible = defaultWindowMin >= MIN_USEFUL_WINDOW_MIN && isDayTripFeasible(
       transport.durationMin,
       transport.durationMin,
-      DEFAULT_SLACK_MIN,
+      slackMin,
       totalActivityDuration,
       defaultWindowMin
     );
@@ -271,8 +326,8 @@ export function buildDayTripPacks(
     if (!feasible) {
       console.log(
         `[DayTripPack] "${destName}" infeasible: ` +
-        `${transport.durationMin}min×2 travel + ${totalActivityDuration}min activities + ${DEFAULT_SLACK_MIN}min slack = ` +
-        `${transport.durationMin * 2 + totalActivityDuration + DEFAULT_SLACK_MIN}min > ${defaultWindowMin}min window`
+        `${transport.durationMin}min×2 travel + ${totalActivityDuration}min activities + ${DAY_TRIP_LUNCH_MIN}min lunch + ${slackMin}min slack = ` +
+        `${requiredWindowMin}min > ${defaultWindowMin}min window`
       );
       // Demote all candidates back to city
       cityActivities.push(...group.candidates);
@@ -294,9 +349,10 @@ export function buildDayTripPacks(
       destination: destName,
       outboundDurationMin: transport.durationMin,
       returnDurationMin: transport.durationMin,
-      slackMin: DEFAULT_SLACK_MIN,
+      slackMin,
       transportConfidence: transport.confidence,
       transportMode: transport.mode,
+      requiredWindowMin,
       score: anchor.score,
       distKm: group.distKm,
       originalCandidates: sortedCandidates,

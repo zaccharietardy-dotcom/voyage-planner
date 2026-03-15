@@ -150,6 +150,8 @@ export interface DayTripPack {
   transportMode: string;
   /** Original scored activities that created this pack (for safe demotion) */
   originalCandidates?: ScoredActivity[];
+  /** Total minimum useful window required for this pack, including lunch + slack */
+  requiredWindowMin?: number;
 }
 
 // ============================================
@@ -342,7 +344,7 @@ export interface PreparedLLMData {
 
 export interface PlannerDiagnostics {
   /** Which planner produced this result */
-  plannerVersion: 'v3.0' | 'v3.1';
+  plannerVersion: 'v3.0' | 'v3.1' | 'v3.2';
   /** Was beam search used (v3.1 only) */
   beamUsed: boolean;
   /** Did beam search fall back to greedy (v3.1 only) */
@@ -371,4 +373,56 @@ export interface PlannerDiagnostics {
   dayTripEvictionCount?: number;
   /** Final integrity issues left unresolved */
   finalIntegrityFailures?: number;
+  /** Non-longhaul transport items left without valid adjacent stops */
+  orphanTransportCount?: number;
+  /** Large inter-stop legs left without explicit transport */
+  teleportLegCount?: number;
+  /** Day narratives/themes generated before final itinerary stabilization */
+  staleNarrativeCount?: number;
+  /** free_time blocks beyond v3.2 role budgets */
+  freeTimeOverBudgetCount?: number;
+  /** Number of self_meal_fallback meals in final output */
+  mealFallbackCount?: number;
+  /** Number of days whose inter-item transport chain was rebuilt */
+  routeRebuildCount?: number;
+  /** Protected must-see placements missing from the final plan */
+  missingProtectedMustSeeCount?: number;
+  /** Day-trip items that leaked out of a day-trip day, or city items that leaked in */
+  dayTripAtomicityBreakCount?: number;
+}
+
+// ============================================
+// V3.2 Semantic Scheduler — Internal Types
+// ============================================
+
+export interface ScheduledStop {
+  id: string;
+  dayNumber: number;
+  kind: 'breakfast' | 'checkin' | 'activity' | 'lunch' | 'dinner' | 'checkout' | 'free_time' | 'outbound' | 'return';
+  title: string;
+  startTime: string;
+  endTime: string;
+  latitude: number;
+  longitude: number;
+  fixed?: boolean;
+  mealType?: 'breakfast' | 'lunch' | 'dinner';
+  activity?: ScoredActivity;
+  restaurant?: Restaurant;
+  qualityFlags?: string[];
+  protectedReason?: ScoredActivity['protectedReason'];
+}
+
+export interface ScheduledDayPlan {
+  dayNumber: number;
+  role?: ActivityCluster['plannerRole'];
+  stops: ScheduledStop[];
+}
+
+export interface MaterializedLeg {
+  fromId: string;
+  toId: string;
+  distanceKm: number;
+  durationMinutes: number;
+  mode: 'walk' | 'public' | 'car';
+  polyline?: string;
 }

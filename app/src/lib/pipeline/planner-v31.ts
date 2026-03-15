@@ -21,6 +21,8 @@ import { getActivityHoursForDay } from './utils/opening-hours';
 // ============================================
 
 export type DayRole = 'arrival' | 'full_city' | 'day_trip' | 'recovery' | 'departure';
+type PlannerProfile = 'v3.1' | 'v3.2';
+const MIN_DAY_TRIP_WINDOW_MIN = 420;
 
 export interface DaySlot {
   dayNumber: number;
@@ -34,8 +36,7 @@ export interface DaySlot {
  */
 export function assignDayRoles(
   numDays: number,
-  timeWindows: DayTimeWindow[],
-  dayTripPacks: DayTripPack[]
+  timeWindows: DayTimeWindow[]
 ): DaySlot[] {
   const slots: DaySlot[] = [];
 
@@ -63,24 +64,6 @@ export function assignDayRoles(
     }
 
     slots.push({ dayNumber: d, role, windowMin, timeWindow: tw });
-  }
-
-  // Assign day_trip roles for days that will hold DayTripPacks
-  // Place day trips on full_city days, preferring middle days
-  const cityDayIndices = slots
-    .map((s, i) => ({ idx: i, s }))
-    .filter(x => x.s.role === 'full_city')
-    .sort((a, b) => {
-      // Prefer middle days
-      const midDay = numDays / 2;
-      return Math.abs(a.s.dayNumber - midDay) - Math.abs(b.s.dayNumber - midDay);
-    });
-
-  let dtAssigned = 0;
-  for (const { idx } of cityDayIndices) {
-    if (dtAssigned >= dayTripPacks.length) break;
-    slots[idx].role = 'day_trip';
-    dtAssigned++;
   }
 
   // Recovery day: max 1, only if durationDays >= 6 and >= 4 city days remain
@@ -128,6 +111,7 @@ interface BeamState {
 
 interface BeamPenalties {
   hardViolations: number;
+  missingProtectedMustSees: number;
   protectedViolations: number;
   missingMustSees: number;
   daysOverRoleBudget: number;
@@ -144,6 +128,7 @@ interface BeamPenalties {
 function emptyPenalties(): BeamPenalties {
   return {
     hardViolations: 0,
+    missingProtectedMustSees: 0,
     protectedViolations: 0,
     missingMustSees: 0,
     daysOverRoleBudget: 0,
@@ -167,12 +152,29 @@ function emptyPenalties(): BeamPenalties {
  * Returns negative if a is better, positive if b is better, 0 if equal.
  */
 function compareStates(a: BeamState, b: BeamState): number {
-  return compareStatesWithStage(a, b, 0);
+  return compareStatesWithStage(a, b, 0, 'v3.1');
 }
 
-function compareStatesWithStage(a: BeamState, b: BeamState, rescueStage: V31RescueStage): number {
+function compareStatesWithStage(
+  a: BeamState,
+  b: BeamState,
+  rescueStage: V31RescueStage,
+  plannerProfile: PlannerProfile
+): number {
   const pa = a.penalties;
   const pb = b.penalties;
+
+  if (plannerProfile === 'v3.2') {
+    if (pa.hardViolations !== pb.hardViolations) return pa.hardViolations - pb.hardViolations;
+    if (pa.missingProtectedMustSees !== pb.missingProtectedMustSees) return pa.missingProtectedMustSees - pb.missingProtectedMustSees;
+    if (pa.dayTripBoundaryPenalty !== pb.dayTripBoundaryPenalty) return pa.dayTripBoundaryPenalty - pb.dayTripBoundaryPenalty;
+    if (pa.urbanLongLegCount !== pb.urbanLongLegCount) return pa.urbanLongLegCount - pb.urbanLongLegCount;
+    if (pa.zigzagTurnsTotal !== pb.zigzagTurnsTotal) return pa.zigzagTurnsTotal - pb.zigzagTurnsTotal;
+    if (pa.routeInefficiencyPenalty !== pb.routeInefficiencyPenalty) return pa.routeInefficiencyPenalty - pb.routeInefficiencyPenalty;
+    if (pa.rhythmPenalty !== pb.rhythmPenalty) return pa.rhythmPenalty - pb.rhythmPenalty;
+    if (pa.totalTravelMinutes !== pb.totalTravelMinutes) return pa.totalTravelMinutes - pb.totalTravelMinutes;
+    return a.stableTieBreakKey.localeCompare(b.stableTieBreakKey);
+  }
 
   // 1. hardViolations
   if (pa.hardViolations !== pb.hardViolations) return pa.hardViolations - pb.hardViolations;
@@ -204,6 +206,117 @@ function compareStatesWithStage(a: BeamState, b: BeamState, rescueStage: V31Resc
   if (pa.totalTravelMinutes !== pb.totalTravelMinutes) return pa.totalTravelMinutes - pb.totalTravelMinutes;
   // 13. stableTieBreakKey (lexicographic on sorted activity IDs)
   return a.stableTieBreakKey.localeCompare(b.stableTieBreakKey);
+}
+
+function isBoundaryFriendlyForPlanner(
+  activity: ScoredActivity,
+  slot: DaySlot,
+  cityCenter: { lat: number; lng: number },
+  plannerProfile: PlannerProfile
+): boolean {
+  if (plannerProfile !== 'v3.2') return true;
+  if (slot.role !== 'arrival' && slot.role !== 'departure') return true;
+  if (activity.protectedReason || activity.mustSee) return true;
+  const duration = activity.duration || 60;
+  const distKm = calculateDistance(activity.latitude, activity.longitude, cityCenter.lat, cityCenter.lng);
+  return duration <= 90 && distKm <= 3;
+}
+
+function buildApproxRoute(points: Array<{ lat: number; lng: number }>): Array<{ lat: number; lng: number }> {
+  if (points.length <= 2) return points;
+  const remaining = points.slice(1);
+  const path = [points[0]];
+  let current = points[0];
+  while (remaining.length > 0) {
+    let bestIndex = 0;
+    let bestDistance = Number.POSITIVE_INFINITY;
+    for (let i = 0; i < remaining.length; i++) {
+      const dist = calculateDistance(current.lat, current.lng, remaining[i].lat, remaining[i].lng);
+      if (dist < bestDistance) {
+        bestDistance = dist;
+        bestIndex = i;
+      }
+    }
+    current = remaining.splice(bestIndex, 1)[0];
+    path.push(current);
+  }
+  return path;
+}
+
+function computeApproxRouteMetrics(
+  acts: ScoredActivity[],
+  cityCenter: { lat: number; lng: number }
+): { longLegCount: number; zigzagTurns: number; ineffPenalty: number; travelMinutes: number } {
+  if (acts.length <= 1) {
+    return { longLegCount: 0, zigzagTurns: 0, ineffPenalty: 0, travelMinutes: 0 };
+  }
+
+  const centroid = {
+    lat: acts.reduce((sum, act) => sum + act.latitude, 0) / acts.length,
+    lng: acts.reduce((sum, act) => sum + act.longitude, 0) / acts.length,
+  };
+  const seed = acts
+    .map((act) => ({ lat: act.latitude, lng: act.longitude, dist: calculateDistance(act.latitude, act.longitude, centroid.lat, centroid.lng) }))
+    .sort((a, b) => a.dist - b.dist)[0];
+  const route = buildApproxRoute([{ lat: seed.lat, lng: seed.lng }, ...acts
+    .filter((act) => act.latitude !== seed.lat || act.longitude !== seed.lng)
+    .map((act) => ({ lat: act.latitude, lng: act.longitude }))]);
+
+  let totalKm = 0;
+  let zigzagTurns = 0;
+  let longLegCount = 0;
+  const legs: number[] = [];
+  for (let i = 1; i < route.length; i++) {
+    const dist = calculateDistance(route[i - 1].lat, route[i - 1].lng, route[i].lat, route[i].lng);
+    totalKm += dist;
+    legs.push(dist);
+    if (dist > 3) longLegCount++;
+  }
+  for (let i = 1; i < route.length - 1; i++) {
+    const v1x = route[i].lng - route[i - 1].lng;
+    const v1y = route[i].lat - route[i - 1].lat;
+    const v2x = route[i + 1].lng - route[i].lng;
+    const v2y = route[i + 1].lat - route[i].lat;
+    const norm1 = Math.hypot(v1x, v1y);
+    const norm2 = Math.hypot(v2x, v2y);
+    if (norm1 < 1e-6 || norm2 < 1e-6) continue;
+    const cosTheta = Math.max(-1, Math.min(1, (v1x * v2x + v1y * v2y) / (norm1 * norm2)));
+    const angle = Math.acos(cosTheta) * (180 / Math.PI);
+    if (angle >= 115) zigzagTurns++;
+  }
+
+  let mstLowerBoundKm = 0;
+  if (route.length > 1) {
+    const visited = new Array<boolean>(route.length).fill(false);
+    const bestEdge = new Array<number>(route.length).fill(Number.POSITIVE_INFINITY);
+    bestEdge[0] = 0;
+    for (let step = 0; step < route.length; step++) {
+      let bestIndex = -1;
+      let bestValue = Number.POSITIVE_INFINITY;
+      for (let i = 0; i < route.length; i++) {
+        if (!visited[i] && bestEdge[i] < bestValue) {
+          bestValue = bestEdge[i];
+          bestIndex = i;
+        }
+      }
+      if (bestIndex < 0) break;
+      visited[bestIndex] = true;
+      mstLowerBoundKm += bestValue;
+      for (let i = 0; i < route.length; i++) {
+        if (visited[i]) continue;
+        const dist = calculateDistance(route[bestIndex].lat, route[bestIndex].lng, route[i].lat, route[i].lng);
+        if (dist < bestEdge[i]) bestEdge[i] = dist;
+      }
+    }
+  }
+
+  const ineffRatio = mstLowerBoundKm > 0.05 ? totalKm / mstLowerBoundKm : 1;
+  return {
+    longLegCount,
+    zigzagTurns,
+    ineffPenalty: Math.max(0, Math.round((ineffRatio - 1) * 10)),
+    travelMinutes: Math.round((totalKm / 30) * 60),
+  };
 }
 
 // ============================================
@@ -294,7 +407,8 @@ function computePenalties(
   cityCenter: { lat: number; lng: number },
   densityProfile?: CityDensityProfile,
   rescueStage: V31RescueStage = 0,
-  startDate?: Date
+  startDate?: Date,
+  plannerProfile: PlannerProfile = 'v3.1'
 ): BeamPenalties {
   const p = emptyPenalties();
   const urbanBudgetKm = densityProfile?.urbanLegBudgetKm ?? 3.5;
@@ -307,6 +421,9 @@ function computePenalties(
   // Missing must-sees
   for (const msId of allMustSeeIds) {
     if (!assignedIds.has(msId)) p.missingMustSees++;
+  }
+  for (const protectedId of allProtectedIds) {
+    if (!assignedIds.has(protectedId)) p.missingProtectedMustSees++;
   }
 
   for (let i = 0; i < slots.length; i++) {
@@ -325,31 +442,27 @@ function computePenalties(
       p.daysOverRoleBudget += acts.length - maxActs;
     }
 
-    // Day trip on boundary day penalty
-    if (slot.role === 'day_trip' && (slot.dayNumber === 1 || slot.dayNumber === slots.length)) {
+    // Day trip on boundary day or on a too-short window
+    if (slot.role === 'day_trip' && ((slot.dayNumber === 1 || slot.dayNumber === slots.length) || slot.windowMin < MIN_DAY_TRIP_WINDOW_MIN)) {
       p.dayTripBoundaryPenalty += 10;
     }
 
     // Geo penalties per day
     if (acts.length >= 2) {
-      let prevAct = acts[0];
-      for (let j = 1; j < acts.length; j++) {
-        const dist = calculateDistance(
-          prevAct.latitude, prevAct.longitude,
-          acts[j].latitude, acts[j].longitude
-        );
-        // Urban long legs
-        if (dist > urbanBudgetKm && slot.role !== 'day_trip') {
-          p.urbanLongLegCount++;
-        }
-        // Travel time estimate (30km/h urban)
-        p.totalTravelMinutes += Math.round((dist / 30) * 60);
-        prevAct = acts[j];
+      const routeMetrics = computeApproxRouteMetrics(acts, cityCenter);
+      p.zigzagTurnsTotal += routeMetrics.zigzagTurns;
+      p.routeInefficiencyPenalty += routeMetrics.ineffPenalty;
+      p.totalTravelMinutes += routeMetrics.travelMinutes;
+      if (slot.role !== 'day_trip') {
+        p.urbanLongLegCount += routeMetrics.longLegCount;
       }
     }
 
     if (dayDate) {
       for (const act of acts) {
+        if (!isBoundaryFriendlyForPlanner(act, slot, cityCenter, plannerProfile)) {
+          p.hardViolations++;
+        }
         if (!canActivityFitDayWindow(act, slot, dayDate)) {
           p.hardViolations++;
         }
@@ -407,37 +520,55 @@ function greedyAssign(
   slots: DaySlot[],
   cityCenter: { lat: number; lng: number },
   rescueStage: V31RescueStage,
-  startDate?: Date
+  startDate?: Date,
+  plannerProfile: PlannerProfile = 'v3.1'
 ): ScoredActivity[][] {
   const assignments: ScoredActivity[][] = slots.map(() => []);
 
-  // Sort: must-sees first, then by score desc
-  const sorted = [...activities].sort((a, b) => {
-    if (a.mustSee !== b.mustSee) return a.mustSee ? -1 : 1;
-    return b.score - a.score;
-  });
+  const protectedActivities = activities
+    .filter((activity) => activity.mustSee || activity.protectedReason)
+    .sort((a, b) => {
+      if (Boolean(a.mustSee) !== Boolean(b.mustSee)) return a.mustSee ? -1 : 1;
+      if (Boolean(a.protectedReason) !== Boolean(b.protectedReason)) return a.protectedReason ? -1 : 1;
+      return b.score - a.score;
+    });
+  const optionalActivities = activities
+    .filter((activity) => !protectedActivities.includes(activity))
+    .sort((a, b) => b.score - a.score);
 
-  for (const activity of sorted) {
-    // Find best day for this activity
+  const sorted = [...protectedActivities, ...optionalActivities];
+  const isProtected = (activity: ScoredActivity) => Boolean(activity.mustSee || activity.protectedReason);
+
+  const findBestDay = (activity: ScoredActivity, allowEviction: boolean): number => {
     let bestDay = -1;
     let bestScore = -Infinity;
 
     for (let i = 0; i < slots.length; i++) {
       const slot = slots[i];
       const dayDate = getSlotDate(startDate, slot.dayNumber);
-      if (slot.role === 'day_trip') continue; // day trips handled separately
-      if (slot.role === 'recovery') continue; // recovery days are minimal
-
-      const dayActs = assignments[i];
-      const maxActs = getSlotMaxActivities(slot);
-      if (dayActs.length >= maxActs) continue;
-
+      if (slot.role === 'day_trip') continue;
+      if (slot.role === 'recovery' && plannerProfile === 'v3.2' && isProtected(activity)) continue;
+      if (!isBoundaryFriendlyForPlanner(activity, slot, cityCenter, plannerProfile)) continue;
       if (!canActivityFitDayWindow(activity, slot, dayDate)) continue;
 
+      const dayActs = assignments[i];
       const totalDur = dayActs.reduce((s, a) => s + (a.duration || 60), 0);
-      if (totalDur + (activity.duration || 60) > getSlotBudget(slot)) continue;
-      if (rescueStage >= 1 && isLongDurationActivity(activity) && totalDur > 120) continue;
+      const dayHasCapacity = dayActs.length < getSlotMaxActivities(slot);
+      const dayHasDuration = totalDur + (activity.duration || 60) <= getSlotBudget(slot);
 
+      let canPlace = dayHasCapacity && dayHasDuration;
+      if (!canPlace && allowEviction && isProtected(activity)) {
+        const victim = [...dayActs]
+          .filter((candidate) => !isProtected(candidate))
+          .sort((a, b) => a.score - b.score)[0];
+        if (victim) {
+          const adjustedDur = totalDur - (victim.duration || 60) + (activity.duration || 60);
+          canPlace = dayActs.length <= getSlotMaxActivities(slot) && adjustedDur <= getSlotBudget(slot);
+        }
+      }
+      if (!canPlace) continue;
+
+      if (rescueStage >= 1 && isLongDurationActivity(activity) && totalDur > 120) continue;
       if (
         rescueStage >= 1
         && isShortConstrainedSlot(slot)
@@ -447,24 +578,24 @@ function greedyAssign(
         continue;
       }
 
-      // Score: prefer days where this activity is geographically close to existing
       let geoScore = 0;
       if (dayActs.length > 0) {
         const centroidLat = dayActs.reduce((s, a) => s + a.latitude, 0) / dayActs.length;
         const centroidLng = dayActs.reduce((s, a) => s + a.longitude, 0) / dayActs.length;
         const dist = calculateDistance(activity.latitude, activity.longitude, centroidLat, centroidLng);
-        geoScore = -dist; // closer is better
+        geoScore = -dist;
       } else {
-        // Empty day: prefer closer to city center
         const dist = calculateDistance(activity.latitude, activity.longitude, cityCenter.lat, cityCenter.lng);
-        geoScore = -dist * 0.5; // less weight for first activity
+        geoScore = -dist * 0.5;
       }
 
-      // Prefer arrival day for close-to-hotel activities, departure for wrap-up
       let roleBonus = 0;
-      if (rescueStage < 1) {
-        if (slot.role === 'arrival' && dayActs.length < 2) roleBonus = 1;
-        if (slot.role === 'departure' && dayActs.length < 2) roleBonus = 1;
+      if (plannerProfile === 'v3.2') {
+        if (slot.role === 'full_city') roleBonus += 3;
+        if ((slot.role === 'arrival' || slot.role === 'departure') && isProtected(activity)) roleBonus -= 1;
+      } else {
+        if (slot.role === 'arrival' && dayActs.length < 2) roleBonus += 1;
+        if (slot.role === 'departure' && dayActs.length < 2) roleBonus += 1;
       }
 
       const score = geoScore + roleBonus;
@@ -474,7 +605,35 @@ function greedyAssign(
       }
     }
 
+    return bestDay;
+  };
+
+  // Sort: must-sees first, then by score desc
+  sorted.sort((a, b) => {
+    if (a.mustSee !== b.mustSee) return a.mustSee ? -1 : 1;
+    return b.score - a.score;
+  });
+
+  for (const activity of sorted) {
+    const bestDay = findBestDay(activity, plannerProfile === 'v3.2');
+
     if (bestDay >= 0) {
+      if (plannerProfile === 'v3.2' && isProtected(activity)) {
+        const slot = slots[bestDay];
+        const victim = [...assignments[bestDay]]
+          .filter((candidate) => !(candidate.mustSee || candidate.protectedReason))
+          .sort((a, b) => a.score - b.score)[0];
+        const totalDur = assignments[bestDay].reduce((sum, candidate) => sum + (candidate.duration || 60), 0);
+        if (
+          victim
+          && (
+            assignments[bestDay].length >= getSlotMaxActivities(slot)
+            || totalDur + (activity.duration || 60) > getSlotBudget(slot)
+          )
+        ) {
+          assignments[bestDay] = assignments[bestDay].filter((candidate) => candidate !== victim);
+        }
+      }
       assignments[bestDay].push(activity);
     }
   }
@@ -503,7 +662,8 @@ function beamSearch(
   cityCenter: { lat: number; lng: number },
   densityProfile?: CityDensityProfile,
   rescueStage: V31RescueStage = 0,
-  startDate?: Date
+  startDate?: Date,
+  plannerProfile: PlannerProfile = 'v3.1'
 ): { assignments: ScoredActivity[][]; usedBeam: boolean; fellBackToGreedy: boolean } {
   const t0 = Date.now();
 
@@ -511,7 +671,7 @@ function beamSearch(
     assignments,
     penalties: computePenalties(
       { assignments, penalties: emptyPenalties(), stableTieBreakKey: '' },
-      slots, allMustSeeIds, allProtectedIds, cityCenter, densityProfile, rescueStage, startDate
+      slots, allMustSeeIds, allProtectedIds, cityCenter, densityProfile, rescueStage, startDate, plannerProfile
     ),
     stableTieBreakKey: computeStableTieBreakKey(assignments),
   });
@@ -548,6 +708,7 @@ function beamSearch(
             const toDayDate = getSlotDate(startDate, toSlot.dayNumber);
             if (toSlot.role === 'day_trip') continue;
             if (!isRoleCompatible(fromSlot.role, toSlot.role)) continue;
+            if (!isBoundaryFriendlyForPlanner(activity, toSlot, cityCenter, plannerProfile)) continue;
             if (!canActivityFitDayWindow(activity, toSlot, toDayDate)) continue;
 
             // Check capacity
@@ -571,7 +732,7 @@ function beamSearch(
             newAssignments[toDay] = [...newAssignments[toDay], activity];
 
             const newState = makeState(newAssignments);
-            if (compareStatesWithStage(newState, state, rescueStage) < 0) {
+            if (compareStatesWithStage(newState, state, rescueStage, plannerProfile) < 0) {
               candidates.push(newState);
               expansions++;
             }
@@ -583,13 +744,13 @@ function beamSearch(
     if (candidates.length === 0) break;
 
     // Merge beam + candidates, keep top BEAM_WIDTH
-    const merged = [...beam, ...candidates].sort((left, right) => compareStatesWithStage(left, right, rescueStage));
+    const merged = [...beam, ...candidates].sort((left, right) => compareStatesWithStage(left, right, rescueStage, plannerProfile));
     beam = merged.slice(0, BEAM_WIDTH);
     improved = true;
   }
 
   const best = beam[0];
-  const wasImproved = improved && compareStatesWithStage(best, baselineState, rescueStage) < 0;
+  const wasImproved = improved && compareStatesWithStage(best, baselineState, rescueStage, plannerProfile) < 0;
   const elapsed = Date.now() - t0;
 
   console.log(
@@ -631,32 +792,77 @@ export function buildPlannerClustersV31(
   numDays: number,
   cityCenter: { lat: number; lng: number },
   densityProfile?: CityDensityProfile,
-  options: { rescueStage?: V31RescueStage; startDate?: Date } = {}
+  options: { rescueStage?: V31RescueStage; startDate?: Date; plannerVersion?: PlannerProfile } = {}
 ): PlannerV31Result {
   const rescueStage = options.rescueStage ?? 0;
   const startDate = options.startDate;
+  const plannerProfile = options.plannerVersion ?? 'v3.1';
   // 1. Assign day roles
-  const slots = assignDayRoles(numDays, timeWindows, dayTripPacks);
+  const slots = assignDayRoles(numDays, timeWindows);
+
+  const eligibleDayTripSlots = slots
+    .filter((slot) => slot.role === 'full_city' && slot.windowMin >= MIN_DAY_TRIP_WINDOW_MIN)
+    .sort((left, right) => {
+      const midDay = numDays / 2;
+      const midDelta = Math.abs(left.dayNumber - midDay) - Math.abs(right.dayNumber - midDay);
+      if (midDelta !== 0) return midDelta;
+      return right.windowMin - left.windowMin;
+    });
+  const sortedDayTripPacks = [...dayTripPacks].sort((left, right) => {
+    const leftProtected = left.anchor.mustSee ? 1 : 0;
+    const rightProtected = right.anchor.mustSee ? 1 : 0;
+    if (rightProtected !== leftProtected) return rightProtected - leftProtected;
+    if ((right.requiredWindowMin ?? 0) !== (left.requiredWindowMin ?? 0)) {
+      return (right.requiredWindowMin ?? 0) - (left.requiredWindowMin ?? 0);
+    }
+    return right.anchor.score - left.anchor.score;
+  });
+  const assignedDayTripPacks = new Map<number, DayTripPack>();
+  const demotedDayTripActivities: ScoredActivity[] = [];
+  const availableSlots = [...eligibleDayTripSlots];
+  for (const pack of sortedDayTripPacks) {
+    const slotIndex = availableSlots.findIndex((slot) => slot.windowMin >= (pack.requiredWindowMin ?? MIN_DAY_TRIP_WINDOW_MIN));
+    if (slotIndex === -1) {
+      const seen = new Set<string>();
+      for (const candidate of pack.originalCandidates || pack.activities || [pack.anchor]) {
+        const key = candidate.id || candidate.name;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        demotedDayTripActivities.push({
+          ...candidate,
+          protectedReason: candidate.mustSee ? 'must_see' : undefined,
+          dayTripAffinity: 0,
+          sourcePackId: undefined,
+          planningToken: undefined,
+        });
+      }
+      continue;
+    }
+    const slot = availableSlots.splice(slotIndex, 1)[0];
+    slot.role = 'day_trip';
+    assignedDayTripPacks.set(slot.dayNumber, pack);
+  }
   console.log(
     `[Planner V3.1] Day roles: ${slots.map(s => `D${s.dayNumber}=${s.role}(${s.windowMin}min)`).join(', ')}`
   );
 
   // 2. Must-see IDs for penalty computation
+  const plannerCityActivities = [...cityActivities, ...demotedDayTripActivities];
   const allMustSeeIds = new Set(
-    cityActivities.filter(a => a.mustSee).map(a => a.id || a.name)
+    plannerCityActivities.filter(a => a.mustSee).map(a => a.id || a.name)
   );
   const allProtectedIds = new Set(
-    cityActivities
+    plannerCityActivities
       .filter(a => a.protectedReason || a.mustSee)
       .map(a => a.id || a.name)
   );
 
   // 3. Greedy baseline
-  const greedy = greedyAssign(cityActivities, slots, cityCenter, rescueStage, startDate);
+  const greedy = greedyAssign(plannerCityActivities, slots, cityCenter, rescueStage, startDate, plannerProfile);
 
   // 4. Beam search improvement
   const { assignments, usedBeam, fellBackToGreedy } = beamSearch(
-    greedy, slots, allMustSeeIds, allProtectedIds, cityCenter, densityProfile, rescueStage, startDate
+    greedy, slots, allMustSeeIds, allProtectedIds, cityCenter, densityProfile, rescueStage, startDate, plannerProfile
   );
 
   // 5. Convert to ActivityCluster[]
@@ -670,9 +876,7 @@ export function buildPlannerClustersV31(
     }
 
     if (slot.role === 'day_trip') {
-      // Find the corresponding DayTripPack
-      const packIdx = slots.slice(0, i + 1).filter(s => s.role === 'day_trip').length - 1;
-      const pack = dayTripPacks[packIdx];
+      const pack = assignedDayTripPacks.get(slot.dayNumber);
       if (pack) {
         const packActs = pack.activities;
         clusters.push({

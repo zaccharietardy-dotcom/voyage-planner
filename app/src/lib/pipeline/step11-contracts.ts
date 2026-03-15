@@ -114,7 +114,12 @@ export function validateContracts(
         }
 
         // P0.6: Cross-country check (>100km from destination)
-        if (item.latitude !== 0 && item.longitude !== 0) {
+        if (
+          item.latitude !== 0
+          && item.longitude !== 0
+          && item.type !== 'flight'
+          && !(item.type === 'transport' && item.transportRole === 'longhaul')
+        ) {
           const dist = calculateDistance(item.latitude, item.longitude, destCoords.lat, destCoords.lng);
           if (dist > 100) {
             violations.push(`P0.6: "${item.title}" is ${dist.toFixed(0)}km from destination (cross-country?)`);

@@ -49,6 +49,7 @@ import { applyTrustLayer } from './trust-layer';
 import { buildDayTripPacks } from './day-trip-pack';
 import { buildPlannerClustersV31 } from './planner-v31';
 import { optimizeClusterRouting } from './intra-day-router';
+import { semanticScheduleV32Days, rebuildInterItemTravelForDays, type V32Diagnostics } from './semantic-scheduler-v32';
 import { getV31RescueStage, stripPlanningMetaFromDays } from './v31-rescue';
 
 // ---------------------------------------------------------------------------
@@ -488,7 +489,7 @@ export async function generateTripV3(
 ): Promise<Trip> {
   const startTime = Date.now();
   const stageTimes: Record<string, number> = {};
-  const plannerVersion = (process.env.PLANNER_VERSION || 'v3.0') as 'v3.0' | 'v3.1';
+  const plannerVersion = (process.env.PLANNER_VERSION || 'v3.0') as 'v3.0' | 'v3.1' | 'v3.2';
   const rescueStage = plannerVersion === 'v3.1' ? getV31RescueStage() : 0;
 
   // Step 1: Fetch all data (or use fixture)
@@ -592,7 +593,7 @@ export async function generateTripV3(
   let beamFallbackUsed = false;
   let dayNumberMismatchCount = 0;
 
-  if (plannerVersion === 'v3.1') {
+  if (plannerVersion === 'v3.1' || plannerVersion === 'v3.2') {
     // V3.1: role-aware beam search planner
     const plannerResult = buildPlannerClustersV31(
       activitiesAfterDayTrips,
@@ -601,7 +602,7 @@ export async function generateTripV3(
       preferences.durationDays,
       data.destCoords,
       densityProfile,
-      { rescueStage, startDate: preferences.startDate }
+      { rescueStage, startDate: preferences.startDate, plannerVersion }
     );
     clusters = plannerResult.clusters;
     beamUsed = plannerResult.beamUsed;
@@ -653,7 +654,7 @@ export async function generateTripV3(
   onEvent?.({ type: 'step_done', step: 3, stepName: 'Clustering', durationMs: stageTimes['cluster'], timestamp: Date.now() });
 
   // Step 3b: Optimize intra-day routing (weighted NN + 2-opt)
-  if (plannerVersion === 'v3.1') {
+  if (plannerVersion === 'v3.1' || plannerVersion === 'v3.2') {
     optimizeClusterRouting(clusters);
   }
 
@@ -713,59 +714,40 @@ export async function generateTripV3(
   // Step 8+9+10: Unified schedule (replaces placeRestaurants + assembleV3Days + repairPass)
   t = Date.now();
   onEvent?.({ type: 'step_start', step: 8, stepName: 'Unified scheduling', timestamp: Date.now() });
-  const repairResult = unifiedScheduleV3Days(
-    clusters, travelTimes, timeWindows, hotel, preferences, data,
-    enrichedRestaurants, allActivities, data.destCoords,
-    { plannerVersion, rescueStage }
-  );
+  const repairResult = plannerVersion === 'v3.2'
+    ? semanticScheduleV32Days(
+        clusters,
+        travelTimes,
+        timeWindows,
+        hotel,
+        preferences,
+        data,
+        enrichedRestaurants,
+        allActivities,
+        data.destCoords
+      )
+    : unifiedScheduleV3Days(
+        clusters,
+        travelTimes,
+        timeWindows,
+        hotel,
+        preferences,
+        data,
+        enrichedRestaurants,
+        allActivities,
+        data.destCoords,
+        { plannerVersion, rescueStage }
+      );
   stageTimes['schedule'] = Date.now() - t;
   console.log(`[Pipeline V3] Step 8: Unified schedule built with ${repairResult.days.length} days, ${repairResult.repairs.length} repairs`);
   onEvent?.({ type: 'step_done', step: 8, stepName: 'Unified scheduling', durationMs: stageTimes['schedule'], timestamp: Date.now() });
 
-  // Step 10: Validate contracts
-  t = Date.now();
-  const startDateStr = preferences.startDate.toISOString().split('T')[0];
-  const mustSeeActivitiesForContracts = selectedActivities.filter(a => a.mustSee);
-  const mustSeeIds = new Set(mustSeeActivitiesForContracts.map(a => a.id));
-  const contractResult = validateContracts(
-    repairResult.days,
-    startDateStr,
-    mustSeeIds,
-    data.destCoords,
-    mustSeeActivitiesForContracts.map(a => ({ id: a.id, name: a.name })),
-    timeWindows
-  );
-  stageTimes['contracts'] = Date.now() - t;
-  console.log(`[Pipeline V3] Step 10: Quality score ${contractResult.score}/100, Invariants: ${contractResult.invariantsPassed ? 'PASSED' : 'FAILED'}`);
-
-  const contractsModeRaw = (process.env.PIPELINE_CONTRACTS_MODE || 'warn').toLowerCase();
-  const contractsMode: 'strict' | 'warn' = contractsModeRaw === 'warn' ? 'warn' : 'strict';
-  const unresolvedRepairViolations = repairResult.unresolvedViolations.map(v => `REPAIR: ${v}`);
-  const combinedContractViolations = [...unresolvedRepairViolations, ...contractResult.violations];
-  if (contractsMode === 'strict' && combinedContractViolations.length > 0) {
-    const violationPreview = combinedContractViolations.slice(0, 5).join(' | ');
-    throw new Error(
-      `[Pipeline V3] Contract validation failed with ${combinedContractViolations.length} violation(s). ` +
-      `Set PIPELINE_CONTRACTS_MODE=warn to return degraded output. ` +
-      `Preview: ${violationPreview}`
-    );
-  }
-
-  // Step 11: Decorate (optional)
-  t = Date.now();
-  const useLLMDecor = process.env.PIPELINE_LLM_DECOR === 'on';
-  const decorResult = await decorateTrip(
-    repairResult.days,
-    preferences.destination || '',
-    useLLMDecor
-  );
-  stageTimes['decorate'] = Date.now() - t;
-  console.log(`[Pipeline V3] Step 11: Decoration complete (LLM: ${decorResult.usedLLM})`);
+  let scheduledDays = repairResult.days;
 
   // Step 11b: Inject transport items (outbound + return) into day schedule
-  if (decorResult.days.length > 0) {
-    const day1 = decorResult.days[0];
-    const lastDay = decorResult.days[decorResult.days.length - 1];
+  if (scheduledDays.length > 0) {
+    const day1 = scheduledDays[0];
+    const lastDay = scheduledDays[scheduledDays.length - 1];
     const transportFallbackCoords = hotel
       ? { lat: hotel.latitude, lng: hotel.longitude }
       : data.destCoords;
@@ -825,6 +807,118 @@ export async function generateTripV3(
       }
     }
   }
+
+  if (plannerVersion === 'v3.2') {
+    const v32Diagnostics: V32Diagnostics = {
+      protectedBreakCount: repairResult.rescueDiagnostics?.protectedBreakCount ?? 0,
+      lateMealReplacementCount: repairResult.rescueDiagnostics?.lateMealReplacementCount ?? 0,
+      dayTripEvictionCount: repairResult.rescueDiagnostics?.dayTripEvictionCount ?? 0,
+      finalIntegrityFailures: repairResult.rescueDiagnostics?.finalIntegrityFailures ?? 0,
+      orphanTransportCount: repairResult.rescueDiagnostics?.orphanTransportCount ?? 0,
+      teleportLegCount: repairResult.rescueDiagnostics?.teleportLegCount ?? 0,
+      staleNarrativeCount: repairResult.rescueDiagnostics?.staleNarrativeCount ?? 0,
+      freeTimeOverBudgetCount: repairResult.rescueDiagnostics?.freeTimeOverBudgetCount ?? 0,
+      mealFallbackCount: repairResult.rescueDiagnostics?.mealFallbackCount ?? 0,
+      routeRebuildCount: repairResult.rescueDiagnostics?.routeRebuildCount ?? 0,
+    };
+    rebuildInterItemTravelForDays(
+      scheduledDays,
+      travelTimes,
+      v32Diagnostics
+    );
+    repairResult.rescueDiagnostics = v32Diagnostics;
+  }
+
+  const normalizePlannerName = (value: string): string =>
+    value
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/gi, ' ')
+      .trim()
+      .toLowerCase();
+
+  const finalActivities = scheduledDays
+    .flatMap((day) => day.items)
+    .filter((item) => item.type === 'activity');
+  const finalActivityIds = new Set(finalActivities.map((item) => item.id));
+  const finalActivityNames = new Set(finalActivities.map((item) => normalizePlannerName(item.title || item.locationName || '')));
+  const selectedProtectedMustSees = selectedActivities.filter(
+    (activity) => activity.mustSee || activity.protectedReason === 'user_forced'
+  );
+  const missingProtectedMustSeeCount = selectedProtectedMustSees.filter((activity) => {
+    const id = activity.id || activity.name;
+    if (finalActivityIds.has(id)) return false;
+    const normalizedName = normalizePlannerName(activity.name);
+    return normalizedName.length === 0 || !finalActivityNames.has(normalizedName);
+  }).length;
+
+  const packDays = new Map<string, Set<number>>();
+  let dayTripAtomicityBreakCount = 0;
+  for (const day of scheduledDays) {
+    const dayPackIds = new Set(
+      day.items
+        .map((item) => item.planningMeta?.sourcePackId)
+        .filter((packId): packId is string => Boolean(packId))
+    );
+
+    for (const packId of dayPackIds) {
+      if (!packDays.has(packId)) packDays.set(packId, new Set<number>());
+      packDays.get(packId)!.add(day.dayNumber);
+    }
+
+    const isPlannerDayTrip = day.items.some((item) => item.planningMeta?.plannerRole === 'day_trip') || day.isDayTrip;
+    if (!isPlannerDayTrip) continue;
+
+    const contaminationCount = day.items.filter((item) =>
+      item.type === 'activity' && !item.planningMeta?.sourcePackId
+    ).length;
+    dayTripAtomicityBreakCount += contaminationCount;
+    if (dayPackIds.size === 0) dayTripAtomicityBreakCount++;
+    if (dayPackIds.size > 1) dayTripAtomicityBreakCount += dayPackIds.size - 1;
+  }
+  for (const dayNumbers of packDays.values()) {
+    if (dayNumbers.size > 1) dayTripAtomicityBreakCount += dayNumbers.size - 1;
+  }
+
+  // Step 10: Validate contracts
+  t = Date.now();
+  const startDateStr = preferences.startDate.toISOString().split('T')[0];
+  const mustSeeActivitiesForContracts = selectedActivities.filter(a => a.mustSee);
+  const mustSeeIds = new Set(mustSeeActivitiesForContracts.map(a => a.id));
+  const contractResult = validateContracts(
+    scheduledDays,
+    startDateStr,
+    mustSeeIds,
+    data.destCoords,
+    mustSeeActivitiesForContracts.map(a => ({ id: a.id, name: a.name })),
+    timeWindows
+  );
+  stageTimes['contracts'] = Date.now() - t;
+  console.log(`[Pipeline V3] Step 10: Quality score ${contractResult.score}/100, Invariants: ${contractResult.invariantsPassed ? 'PASSED' : 'FAILED'}`);
+
+  const contractsModeRaw = (process.env.PIPELINE_CONTRACTS_MODE || 'warn').toLowerCase();
+  const contractsMode: 'strict' | 'warn' = contractsModeRaw === 'warn' ? 'warn' : 'strict';
+  const unresolvedRepairViolations = repairResult.unresolvedViolations.map(v => `REPAIR: ${v}`);
+  const combinedContractViolations = [...unresolvedRepairViolations, ...contractResult.violations];
+  if (contractsMode === 'strict' && combinedContractViolations.length > 0) {
+    const violationPreview = combinedContractViolations.slice(0, 5).join(' | ');
+    throw new Error(
+      `[Pipeline V3] Contract validation failed with ${combinedContractViolations.length} violation(s). ` +
+      `Set PIPELINE_CONTRACTS_MODE=warn to return degraded output. ` +
+      `Preview: ${violationPreview}`
+    );
+  }
+
+  // Step 11: Decorate (optional, after final schedule stabilization)
+  t = Date.now();
+  const useLLMDecor = process.env.PIPELINE_LLM_DECOR === 'on';
+  const decorResult = await decorateTrip(
+    scheduledDays,
+    preferences.destination || '',
+    useLLMDecor
+  );
+  stageTimes['decorate'] = Date.now() - t;
+  console.log(`[Pipeline V3] Step 11: Decoration complete (LLM: ${decorResult.usedLLM})`);
 
   // Build final Trip object
   const publicDays = stripPlanningMetaFromDays(decorResult.days);
@@ -921,6 +1015,14 @@ export async function generateTripV3(
     dayNumberMismatchCount,
     dayTripEvictionCount: repairResult.rescueDiagnostics?.dayTripEvictionCount ?? 0,
     finalIntegrityFailures: repairResult.rescueDiagnostics?.finalIntegrityFailures ?? 0,
+    orphanTransportCount: repairResult.rescueDiagnostics?.orphanTransportCount ?? 0,
+    teleportLegCount: repairResult.rescueDiagnostics?.teleportLegCount ?? 0,
+    staleNarrativeCount: repairResult.rescueDiagnostics?.staleNarrativeCount ?? 0,
+    freeTimeOverBudgetCount: repairResult.rescueDiagnostics?.freeTimeOverBudgetCount ?? 0,
+    mealFallbackCount: repairResult.rescueDiagnostics?.mealFallbackCount ?? 0,
+    routeRebuildCount: repairResult.rescueDiagnostics?.routeRebuildCount ?? 0,
+    missingProtectedMustSeeCount,
+    dayTripAtomicityBreakCount,
   };
 
   const totalTime = Date.now() - startTime;
