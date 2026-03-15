@@ -194,30 +194,61 @@ function getPopupContent(item: TripItem, index: number): string {
     item.googleMapsUrl ||
     `https://www.google.com/maps/search/?api=1&query=${item.latitude},${item.longitude}`;
 
-  const imageHtml = item.imageUrl
-    ? `<img src="${item.imageUrl}" alt="" style="width:100%;height:120px;object-fit:cover;border-radius:8px 8px 0 0;margin-bottom:8px;" onerror="this.style.display='none'" />`
+  const maxW = typeof window !== 'undefined' ? Math.min(300, window.innerWidth - 40) : 300;
+
+  // Photo with gradient overlay for title readability
+  const hasImage = !!item.imageUrl;
+  const imageHtml = hasImage
+    ? `<div style="position:relative;width:100%;height:140px;overflow:hidden;border-radius:10px 10px 0 0;">
+        <img src="${item.imageUrl}" alt="" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.style.display='none'" />
+        <div style="position:absolute;bottom:0;left:0;right:0;height:60px;background:linear-gradient(transparent,rgba(0,0,0,0.6));"></div>
+        <div style="position:absolute;bottom:8px;left:10px;right:10px;display:flex;align-items:center;gap:6px;">
+          <div style="width:22px;height:22px;border-radius:50%;background:${color};color:white;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1.5px solid white;">${index}</div>
+          <div style="font-size:13px;font-weight:600;color:white;text-shadow:0 1px 3px rgba(0,0,0,0.5);line-height:1.2;">${escapeHtml(item.title)}</div>
+        </div>
+      </div>`
     : '';
 
-  let details = '';
-  if (item.estimatedCost) details += `<span style="color:var(--color-muted-foreground);font-size:11px;">~${item.estimatedCost}€</span>`;
-  if (item.rating) details += `${details ? ' · ' : ''}<span style="color:var(--color-muted-foreground);font-size:11px;">${item.rating.toFixed(1)}★</span>`;
-  if (item.timeFromPrevious) details += `${details ? ' · ' : ''}<span style="color:var(--color-muted-foreground);font-size:11px;">${item.timeFromPrevious}min</span>`;
+  // Time display
+  const timeHtml = item.startTime
+    ? `<div style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--color-muted-foreground);">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span style="font-weight:500;color:var(--color-card-foreground);">${escapeHtml(item.startTime)}${item.endTime ? ` - ${escapeHtml(item.endTime)}` : ''}</span>
+        ${item.duration ? `<span style="opacity:0.6;">(${item.duration}min)</span>` : ''}
+      </div>`
+    : '';
 
-  const maxW = typeof window !== 'undefined' ? Math.min(280, window.innerWidth - 60) : 280;
+  // Rating + cost
+  let metaHtml = '';
+  const metaParts: string[] = [];
+  if (item.rating) metaParts.push(`${item.rating.toFixed(1)}★`);
+  if (item.estimatedCost) metaParts.push(`~${item.estimatedCost}€`);
+  if (item.locationName) metaParts.push(escapeHtml(item.locationName));
+  if (metaParts.length > 0) {
+    metaHtml = `<div style="font-size:11px;color:var(--color-muted-foreground);margin-top:2px;">${metaParts.join(' · ')}</div>`;
+  }
+
+  // Title row (only if no image — when image exists, title is overlaid on photo)
+  const titleHtml = hasImage ? '' : `
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+      <div style="width:22px;height:22px;border-radius:50%;background:${color};color:white;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${index}</div>
+      <div style="font-size:14px;font-weight:600;line-height:1.2;">${escapeHtml(item.title)}</div>
+    </div>`;
+
+  // Action links
+  const links = [`<a href="${escapeHtml(googleMapsUrl)}" target="_blank" style="color:var(--color-primary);font-size:11px;text-decoration:none;font-weight:500;">Itinéraire</a>`];
+  if (item.bookingUrl) links.push(`<a href="${escapeHtml(item.bookingUrl)}" target="_blank" style="color:#34a853;font-size:11px;text-decoration:none;font-weight:500;">Réserver</a>`);
 
   return `
     <div style="min-width:200px;max-width:${maxW}px;font-family:system-ui,-apple-system,sans-serif;color:var(--color-card-foreground);">
       ${imageHtml}
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-        <div style="width:24px;height:24px;border-radius:50%;background:${color};color:white;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${index}</div>
-        <div style="font-size:14px;font-weight:600;line-height:1.2;">${escapeHtml(item.title)}</div>
-      </div>
-      <div style="font-size:12px;color:var(--color-muted-foreground);margin-bottom:4px;">${escapeHtml(item.startTime)} - ${escapeHtml(item.endTime)}</div>
-      ${item.description ? `<div style="font-size:12px;color:var(--color-muted-foreground);margin-bottom:6px;line-height:1.3;">${escapeHtml(item.description.slice(0, 120))}${item.description.length > 120 ? '...' : ''}</div>` : ''}
-      ${details ? `<div style="margin-bottom:6px;">${details}</div>` : ''}
-      <div style="display:flex;gap:8px;padding-top:6px;border-top:1px solid var(--color-border);">
-        <a href="${escapeHtml(googleMapsUrl)}" target="_blank" style="color:var(--color-primary);font-size:12px;text-decoration:none;font-weight:500;">Google Maps</a>
-        ${item.bookingUrl ? `<a href="${escapeHtml(item.bookingUrl)}" target="_blank" style="color:#34a853;font-size:12px;text-decoration:none;font-weight:500;">Réserver</a>` : ''}
+      <div style="padding:${hasImage ? '10px 12px 10px' : '4px 0'};">
+        ${titleHtml}
+        ${timeHtml}
+        ${metaHtml}
+        <div style="display:flex;gap:10px;margin-top:8px;padding-top:6px;border-top:1px solid var(--color-border);">
+          ${links.join('')}
+        </div>
       </div>
     </div>
   `;
