@@ -196,11 +196,17 @@ function getPopupContent(item: TripItem, index: number): string {
 
   const maxW = typeof window !== 'undefined' ? Math.min(300, window.innerWidth - 40) : 300;
 
-  // Photo with gradient overlay for title readability
+  // Hardcoded colors (CSS variables don't reliably cascade into Leaflet popups)
+  const textColor = '#1a1a2e';
+  const mutedColor = '#6b7280';
+  const linkColor = '#2563eb';
+  const borderColor = '#e5e7eb';
+
+  // Photo — onerror hides only the img, not the container
   const hasImage = !!item.imageUrl;
   const imageHtml = hasImage
-    ? `<div style="position:relative;width:100%;height:140px;overflow:hidden;border-radius:10px 10px 0 0;">
-        <img src="${item.imageUrl}" alt="" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.style.display='none'" />
+    ? `<div style="position:relative;width:100%;height:140px;overflow:hidden;border-radius:10px 10px 0 0;background:#f3f4f6;">
+        <img src="${item.imageUrl}" alt="" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'" />
         <div style="position:absolute;bottom:0;left:0;right:0;height:60px;background:linear-gradient(transparent,rgba(0,0,0,0.6));"></div>
         <div style="position:absolute;bottom:8px;left:10px;right:10px;display:flex;align-items:center;gap:6px;">
           <div style="width:22px;height:22px;border-radius:50%;background:${color};color:white;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1.5px solid white;">${index}</div>
@@ -209,44 +215,43 @@ function getPopupContent(item: TripItem, index: number): string {
       </div>`
     : '';
 
+  // Title row (always show if no image)
+  const titleHtml = hasImage ? '' : `
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+      <div style="width:24px;height:24px;border-radius:50%;background:${color};color:white;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${index}</div>
+      <div style="font-size:14px;font-weight:600;line-height:1.2;color:${textColor};">${escapeHtml(item.title)}</div>
+    </div>`;
+
   // Time display
   const timeHtml = item.startTime
-    ? `<div style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--color-muted-foreground);">
-        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        <span style="font-weight:500;color:var(--color-card-foreground);">${escapeHtml(item.startTime)}${item.endTime ? ` - ${escapeHtml(item.endTime)}` : ''}</span>
+    ? `<div style="display:flex;align-items:center;gap:5px;font-size:12px;color:${mutedColor};margin-bottom:3px;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="${mutedColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span style="font-weight:500;color:${textColor};">${escapeHtml(item.startTime)}${item.endTime ? ` - ${escapeHtml(item.endTime)}` : ''}</span>
         ${item.duration ? `<span style="opacity:0.6;">(${item.duration}min)</span>` : ''}
       </div>`
     : '';
 
   // Rating + cost
-  let metaHtml = '';
   const metaParts: string[] = [];
   if (item.rating) metaParts.push(`${item.rating.toFixed(1)}★`);
   if (item.estimatedCost) metaParts.push(`~${item.estimatedCost}€`);
   if (item.locationName) metaParts.push(escapeHtml(item.locationName));
-  if (metaParts.length > 0) {
-    metaHtml = `<div style="font-size:11px;color:var(--color-muted-foreground);margin-top:2px;">${metaParts.join(' · ')}</div>`;
-  }
-
-  // Title row (only if no image — when image exists, title is overlaid on photo)
-  const titleHtml = hasImage ? '' : `
-    <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
-      <div style="width:22px;height:22px;border-radius:50%;background:${color};color:white;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${index}</div>
-      <div style="font-size:14px;font-weight:600;line-height:1.2;">${escapeHtml(item.title)}</div>
-    </div>`;
+  const metaHtml = metaParts.length > 0
+    ? `<div style="font-size:11px;color:${mutedColor};margin-top:2px;">${metaParts.join(' · ')}</div>`
+    : '';
 
   // Action links
-  const links = [`<a href="${escapeHtml(googleMapsUrl)}" target="_blank" style="color:var(--color-primary);font-size:11px;text-decoration:none;font-weight:500;">Itinéraire</a>`];
+  const links = [`<a href="${escapeHtml(googleMapsUrl)}" target="_blank" style="color:${linkColor};font-size:11px;text-decoration:none;font-weight:500;">Itinéraire</a>`];
   if (item.bookingUrl) links.push(`<a href="${escapeHtml(item.bookingUrl)}" target="_blank" style="color:#34a853;font-size:11px;text-decoration:none;font-weight:500;">Réserver</a>`);
 
   return `
-    <div style="min-width:200px;max-width:${maxW}px;font-family:system-ui,-apple-system,sans-serif;color:var(--color-card-foreground);">
+    <div style="min-width:200px;max-width:${maxW}px;font-family:system-ui,-apple-system,sans-serif;color:${textColor};">
       ${imageHtml}
       <div style="padding:${hasImage ? '10px 12px 10px' : '4px 0'};">
         ${titleHtml}
         ${timeHtml}
         ${metaHtml}
-        <div style="display:flex;gap:10px;margin-top:8px;padding-top:6px;border-top:1px solid var(--color-border);">
+        <div style="display:flex;gap:10px;margin-top:8px;padding-top:6px;border-top:1px solid ${borderColor};">
           ${links.join('')}
         </div>
       </div>
@@ -263,8 +268,8 @@ const LEAFLET_STYLE_OVERRIDES = `
   box-shadow: 0 4px 20px rgba(0,0,0,0.12);
   padding: 0;
   overflow: hidden;
-  background: var(--color-card);
-  color: var(--color-card-foreground);
+  background: var(--color-card, #ffffff);
+  color: var(--color-card-foreground, #1a1a2e);
 }
 .clean-popup .leaflet-popup-content {
   margin: 12px;
@@ -278,7 +283,7 @@ const LEAFLET_STYLE_OVERRIDES = `
 }
 .clean-popup .leaflet-popup-tip {
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  background: var(--color-card);
+  background: var(--color-card, #ffffff);
 }
 .dark .clean-popup .leaflet-popup-content-wrapper {
   box-shadow: 0 4px 20px rgba(0,0,0,0.4);
@@ -680,7 +685,7 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
       for (let i = 0; i < nodes.length - 1; i++) {
         const fromNode = nodes[i];
         const toNode = nodes[i + 1];
-        const nextItem = toNode.item;
+        let nextItem = toNode.item;
 
         // Determine segment coords: decoded polyline or straight line
         let segmentCoords: [number, number][];
@@ -746,6 +751,25 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
             }],
           });
           routeLayer.addLayer(decorator);
+        }
+
+        // Estimate travel time from segment distance if no transport data
+        if (nextItem && !nextItem.timeFromPrevious && segmentCoords.length >= 2) {
+          const first = segmentCoords[0];
+          const last = segmentCoords[segmentCoords.length - 1];
+          const dLat = (last[0] - first[0]) * 111.32;
+          const dLng = (last[1] - first[1]) * 111.32 * Math.cos(first[0] * Math.PI / 180);
+          const distKm = Math.sqrt(dLat * dLat + dLng * dLng);
+          if (distKm > 0.05) { // >50m
+            nextItem = { ...nextItem, distanceFromPrevious: distKm };
+            if (distKm <= 1.5) {
+              nextItem.timeFromPrevious = Math.ceil((distKm / 4.5) * 60);
+              nextItem.transportToPrevious = 'walk';
+            } else {
+              nextItem.timeFromPrevious = Math.ceil(distKm * 3);
+              nextItem.transportToPrevious = 'public';
+            }
+          }
         }
 
         // Travel time label at segment midpoint

@@ -497,6 +497,10 @@ export function clusterActivities(
   // Inter-cluster swap optimization (2-opt between days)
   interClusterSwap(clusters);
 
+  // Type diversity pass: swap out excess same-type activities between clusters
+  // Prevents days like "3 basilicas" by distributing same-type activities across days
+  diversifyClusterTypes(clusters, protectedIndices);
+
   // Log cluster quality metrics
   for (const c of clusters) {
     const radius = c.activities.length > 0
@@ -1070,6 +1074,81 @@ function handleDayClosures(
     // Recompute centroid after moving activities
     if (cluster.activities.length > 0) {
       recomputeCentroid(cluster);
+    }
+  }
+}
+
+/**
+ * Type diversity: if a cluster has >2 activities of the same type (e.g. 3 churches),
+ * try to swap the excess with a different-type activity from another cluster.
+ * This prevents monotonous days like "visit 3 basilicas".
+ */
+function diversifyClusterTypes(clusters: ActivityCluster[], protectedIndices: Set<number>): void {
+  const MAX_SAME_TYPE = 2;
+
+  for (let ci = 0; ci < clusters.length; ci++) {
+    if (protectedIndices.has(ci)) continue;
+    const cluster = clusters[ci];
+
+    // Count activities by type
+    const typeCounts = new Map<string, number>();
+    for (const act of cluster.activities) {
+      typeCounts.set(act.type, (typeCounts.get(act.type) || 0) + 1);
+    }
+
+    for (const [type, count] of typeCounts) {
+      if (count <= MAX_SAME_TYPE) continue;
+
+      // Find excess non-must-see activities of this type (keep the highest-scored ones)
+      const sameTypeActs = cluster.activities
+        .filter(a => a.type === type && !a.mustSee)
+        .sort((a, b) => a.score - b.score); // lowest score first = candidates to swap out
+
+      const toSwap = Math.min(sameTypeActs.length, count - MAX_SAME_TYPE);
+
+      for (let s = 0; s < toSwap; s++) {
+        const candidate = sameTypeActs[s];
+
+        // Find a target cluster that:
+        // 1. Is not protected
+        // 2. Has fewer of this type
+        // 3. Has an activity of a DIFFERENT type we can swap in
+        let bestSwap: { targetIdx: number; targetActIdx: number; distance: number } | null = null;
+
+        for (let ti = 0; ti < clusters.length; ti++) {
+          if (ti === ci || protectedIndices.has(ti)) continue;
+          const target = clusters[ti];
+
+          const targetTypeCount = target.activities.filter(a => a.type === type).length;
+          if (targetTypeCount >= MAX_SAME_TYPE) continue; // target already has enough of this type
+
+          // Find a non-must-see activity in target that is a DIFFERENT type
+          for (let ai = 0; ai < target.activities.length; ai++) {
+            const tAct = target.activities[ai];
+            if (tAct.mustSee) continue;
+            if (tAct.type === type) continue; // same type, no improvement
+            // Check the incoming activity wouldn't make OUR cluster lose diversity
+            const ourTypeCountOfIncoming = cluster.activities.filter(a => a.type === tAct.type).length;
+            if (ourTypeCountOfIncoming >= MAX_SAME_TYPE) continue;
+
+            // Prefer swaps with nearby activities (don't blow up geographic clusters)
+            const dist = calculateDistance(candidate.latitude, candidate.longitude, tAct.latitude, tAct.longitude);
+            if (!bestSwap || dist < bestSwap.distance) {
+              bestSwap = { targetIdx: ti, targetActIdx: ai, distance: dist };
+            }
+          }
+        }
+
+        if (bestSwap && bestSwap.distance < 10) { // only swap if within 10km
+          const candIdx = cluster.activities.indexOf(candidate);
+          const swappedIn = clusters[bestSwap.targetIdx].activities[bestSwap.targetActIdx];
+          cluster.activities[candIdx] = swappedIn;
+          clusters[bestSwap.targetIdx].activities[bestSwap.targetActIdx] = candidate;
+          recomputeCentroid(cluster);
+          recomputeCentroid(clusters[bestSwap.targetIdx]);
+          console.log(`[Pipeline V3] Type diversity: swapped "${candidate.name}" (${type}) from Day ${cluster.dayNumber} ↔ "${swappedIn.name}" (${swappedIn.type}) from Day ${clusters[bestSwap.targetIdx].dayNumber}`);
+        }
+      }
     }
   }
 }
