@@ -51,6 +51,7 @@ import { buildPlannerClustersV31 } from './planner-v31';
 import { optimizeClusterRouting } from './intra-day-router';
 import { semanticScheduleV32Days, rebuildInterItemTravelForDays, type V32Diagnostics } from './semantic-scheduler-v32';
 import { getV31RescueStage, stripPlanningMetaFromDays } from './v31-rescue';
+import { generateTripStructure, type AffinityPair } from './step0-structure';
 
 // ---------------------------------------------------------------------------
 // Pipeline Event System — emit helper
@@ -264,6 +265,20 @@ export async function generateTripV2(
   const version = process.env.PIPELINE_VERSION || 'v3';
   const plannerVersion = process.env.PLANNER_VERSION || 'v3.0';
   const shadowMode = process.env.PLANNER_SHADOW || 'off';
+  const totalRequestedDays = preferences.cityPlan?.reduce((sum, city) => sum + city.days, 0) || preferences.durationDays || 0;
+  const shouldForceDeterministicForLongTrip =
+    version === 'v2-llm'
+    && (totalRequestedDays >= 7 || (preferences.cityPlan?.length || 0) > 1);
+
+  if (shouldForceDeterministicForLongTrip) {
+    console.log(
+      `[Pipeline] Long or multi-city trip detected (${totalRequestedDays}d) — forcing deterministic v3 pipeline instead of quota-heavy LLM planner`
+    );
+    if (preferences.cityPlan && preferences.cityPlan.length > 1) {
+      return generateTripV3MultiCity(preferences, onEvent);
+    }
+    return generateTripV3(preferences, onEvent);
+  }
 
   if (version === 'v3') {
     console.log(`[Pipeline V3] Using V3 pipeline (deterministic 12-step), planner=${plannerVersion}, shadow=${shadowMode}`);
@@ -615,6 +630,8 @@ async function populateRestaurantAlternatives(
 export interface GenerateTripV3Options {
   /** Pre-loaded fixture data — skips step 1 fetch when provided */
   fixtureData?: FetchedData;
+  /** Disables optional AI-powered enrichments so deterministic v3 can survive provider quota issues */
+  quotaSafe?: boolean;
 }
 
 export async function generateTripV3(
@@ -626,6 +643,7 @@ export async function generateTripV3(
   const stageTimes: Record<string, number> = {};
   const plannerVersion = (process.env.PLANNER_VERSION || 'v3.0') as 'v3.0' | 'v3.1' | 'v3.2';
   const rescueStage = plannerVersion === 'v3.1' ? getV31RescueStage() : 0;
+  const quotaSafe = options?.quotaSafe === true;
 
   // Step 1: Fetch all data (or use fixture)
   let t = Date.now();
@@ -638,7 +656,7 @@ export async function generateTripV3(
   } else {
     onEvent?.({ type: 'step_start', step: 1, stepName: 'Fetching data', timestamp: Date.now() });
     try {
-      data = await fetchAllData(preferences, onEvent);
+      data = await fetchAllData(preferences, onEvent, { quotaSafe });
     } catch (err) {
       console.error('[Pipeline V3] Step 1 failed:', err);
       throw new Error(`[Pipeline V3] Data fetch failed: ${(err as Error).message}`);
@@ -719,6 +737,31 @@ export async function generateTripV3(
   );
   const arrivalFatigueRole = inferArrivalFatigueRole(data.outboundFlight, timeWindows);
 
+  // Step 0: LLM Trip Structure — Gemini Flash suggests thematic day groupings.
+  // Runs in parallel with nothing (fast, ~2s). Output = affinity hints for step3.
+  let llmAffinityPairs: AffinityPair[] | null = null;
+  if (!quotaSafe) {
+    t = Date.now();
+    try {
+      const arrivalTime = timeWindows[0]?.activityStartTime || null;
+      const departureTime = timeWindows[timeWindows.length - 1]?.activityEndTime || null;
+      const mustSees = selectedActivities.filter(a => a.mustSee);
+      llmAffinityPairs = await generateTripStructure(
+        preferences.destination,
+        preferences.durationDays,
+        preferences.groupType || 'couple',
+        arrivalTime,
+        departureTime,
+        mustSees,
+        selectedActivities,
+      );
+      stageTimes['llm-structure'] = Date.now() - t;
+      console.log(`[Pipeline V3] Step 0: LLM structure ${llmAffinityPairs ? `generated ${llmAffinityPairs.length} affinity pairs` : 'skipped (null)'} in ${stageTimes['llm-structure']}ms`);
+    } catch (err) {
+      console.warn('[Pipeline V3] Step 0: LLM structure failed (non-critical):', err instanceof Error ? err.message : err);
+    }
+  }
+
   // Step 3: Cluster by day (v3.0 or v3.1 planner)
   t = Date.now();
   onEvent?.({ type: 'step_start', step: 3, stepName: 'Clustering', timestamp: Date.now() });
@@ -766,7 +809,8 @@ export async function generateTripV3(
       {
         dayTripActivities: data.dayTripActivities,
         dayTripSuggestions: data.dayTripSuggestions,
-      }
+      },
+      llmAffinityPairs,
     );
     // Inject DayTripPack clusters (atomic, protected)
     for (const pack of dayTripPacks) {
@@ -1064,7 +1108,7 @@ export async function generateTripV3(
 
   // Step 11: Decorate (optional, after final schedule stabilization)
   t = Date.now();
-  const useLLMDecor = process.env.PIPELINE_LLM_DECOR === 'on';
+  const useLLMDecor = !quotaSafe && process.env.PIPELINE_LLM_DECOR === 'on';
   const decorResult = await decorateTrip(
     scheduledDays,
     preferences.destination || '',
@@ -1200,11 +1244,12 @@ export async function generateTripV3(
  */
 export async function generateTripV3MultiCity(
   preferences: TripPreferences,
-  onEvent?: OnPipelineEvent
+  onEvent?: OnPipelineEvent,
+  options?: GenerateTripV3Options
 ): Promise<Trip> {
   const cityPlan = preferences.cityPlan;
   if (!cityPlan || cityPlan.length <= 1) {
-    return generateTripV3(preferences, onEvent);
+    return generateTripV3(preferences, onEvent, options);
   }
 
   console.log(`[Pipeline V3] Multi-city trip: ${cityPlan.map(c => `${c.city} (${c.days}d)`).join(' → ')}`);
@@ -1229,7 +1274,7 @@ export async function generateTripV3MultiCity(
       timestamp: Date.now(),
     });
 
-    const segment = await generateTripV3(cityPrefs, onEvent);
+    const segment = await generateTripV3(cityPrefs, onEvent, options);
     segments.push(segment);
 
     // Advance date
