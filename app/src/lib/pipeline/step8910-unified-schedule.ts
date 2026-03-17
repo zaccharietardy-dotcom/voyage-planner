@@ -394,8 +394,8 @@ export function unifiedScheduleV3Days(
           const candEnd = addMinutes(currentTime, candDuration);
           // Candidate fits if it either has no closing time or its closing is after we'd finish
           const candFits = !candClose || !isPastEnd(candEnd, candClose);
-          // And it's open now (or has no opening constraint)
-          const candOpenNow = !candOpen || !isPastEnd(currentTime, candOpen) === false || timeToMin(currentTime) >= timeToMin(candOpen);
+          // And it's open now (or has no opening constraint): current time >= open time
+          const candOpenNow = !candOpen || timeToMin(currentTime) >= timeToMin(candOpen);
           if (candFits && candOpenNow) {
             // Swap i and j
             [cluster.activities[i], cluster.activities[j]] = [cluster.activities[j], cluster.activities[i]];

@@ -537,13 +537,14 @@ export function scoreAndSelectActivities(
   const curatedNonMustSees = curateNonMustSeePool(nonMustSees, preferences);
 
   // 8. Select the right count
-  // Target ~3 non-must-see activities per day — avoids filler and over-dense schedules.
-  // Arrival/departure days get fewer activities (~2 each), full days get ~4.
+  // Target ~3.5 non-must-see activities per day — enough to fill each day's cluster
+  // without the filler problem of 4.5. Short trips (≤4d) need relatively more to avoid
+  // starved clusters (e.g. Vatican day with only 1 activity).
   const fullDays = Math.max(0, preferences.durationDays - 2);
   const targetCount = Math.max(
-    mustSees.length + Math.ceil(preferences.durationDays * 3),
-    preferences.durationDays * 4,
-    12 // Absolute minimum for any trip
+    mustSees.length + Math.ceil(preferences.durationDays * 3.5),
+    preferences.durationDays * 5,
+    16 // Absolute minimum for any trip
   );
   const remainingSlots = Math.max(0, targetCount - mustSees.length);
   const selected: ScoredActivity[] = [...mustSees, ...curatedNonMustSees.slice(0, remainingSlots)];
