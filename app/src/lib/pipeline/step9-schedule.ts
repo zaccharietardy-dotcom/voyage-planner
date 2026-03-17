@@ -607,15 +607,11 @@ export function createSelfMealFallbackItem(
   duration: number,
   dayNumber: number,
   orderIndex: number,
-  anchor: { lat: number; lng: number } | null,
-  options?: { isolatedZone?: boolean }
+  anchor: { lat: number; lng: number } | null
 ): TripItem {
   const mealLabel = getMealLabel(mealType);
   const latitude = anchor?.lat ?? 0;
   const longitude = anchor?.lng ?? 0;
-  const isIsolated = options?.isolatedZone ?? false;
-  const fallbackLabel = isIsolated ? 'Pique-nique' : 'Repas libre';
-  const fallbackDesc = isIsolated ? 'Pique-nique en zone nature' : 'Pique-nique / courses / repas maison';
 
   return {
     id: `meal-self-${dayNumber}-${mealType}`,
@@ -623,9 +619,9 @@ export function createSelfMealFallbackItem(
     startTime,
     endTime: addMinutes(startTime, duration),
     type: 'restaurant',
-    title: `${mealLabel} — ${fallbackLabel}`,
-    description: fallbackDesc,
-    locationName: fallbackLabel,
+    title: `${mealLabel} — Repas libre`,
+    description: 'Pique-nique / courses / repas maison',
+    locationName: 'Repas libre',
     latitude,
     longitude,
     orderIndex,

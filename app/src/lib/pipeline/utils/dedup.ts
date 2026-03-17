@@ -300,7 +300,7 @@ export function isIrrelevantAttraction(activity: ScoredActivity): boolean {
 
   // 2. Genuine spam: wax museums, fast food chains, escape rooms, commercial experience museums
   const irrelevantNames = [
-    'madame tussaud', 'wax museum', 'selfie museum', 'escape room', 'escape game',
+    'madame tussaud', 'selfie museum', 'escape room',
     'hard rock cafe', 'starbucks', 'mcdonalds', 'mcdonald',
     'burger king', 'kfc', 'subway',
     'ripley', 'body worlds',
@@ -308,9 +308,7 @@ export function isIrrelevantAttraction(activity: ScoredActivity): boolean {
     // Commercial experience museums — franchised tourist traps with inflated pricing
     'museum of illusions', 'trick eye museum', 'upside down museum',
     'upside down house', 'banksy museum', 'wondr', 'wondr experience',
-    'ice bar', 'sensas',
-    // Immersive commercial experiences — overpriced gimmicks, not cultural
-    'immersive experience', 'immersive museum',
+    'ice bar',
   ];
 
   if (irrelevantNames.some(n => name.includes(n))) return true;

@@ -194,20 +194,6 @@ export function unifiedScheduleV3Days(
       console.log(`[Unified] Day ${cluster.dayNumber}: remote cluster — dinner will anchor near hotel`);
     }
 
-    // Detect isolated zones: cluster centroid >2km from city center with no nearby restaurants.
-    // These zones (e.g. Montjuïc, hilltop parks) should be half-day with "Pique-nique" meals.
-    const clusterCentroid = getClusterCentroid(cluster.activities);
-    const distFromCenter = clusterCentroid
-      ? calculateDistance(clusterCentroid.lat, clusterCentroid.lng, destCoords.lat, destCoords.lng)
-      : 0;
-    const nearbyRestaurantCount = clusterCentroid
-      ? restaurants.filter(r => calculateDistance(r.latitude, r.longitude, clusterCentroid.lat, clusterCentroid.lng) <= 1).length
-      : 999;
-    const isIsolatedZone = distFromCenter > 2 && nearbyRestaurantCount === 0;
-    if (isIsolatedZone) {
-      console.log(`[Unified] Day ${cluster.dayNumber}: isolated zone (${distFromCenter.toFixed(1)}km from center, 0 restaurants within 1km)`);
-    }
-
     // 1. DEDUP activities (ID global + similarity intra-day)
     const seenInDay: Array<{ id?: string; name?: string; latitude?: number; longitude?: number }> = [];
     cluster.activities = cluster.activities.filter(act => {
@@ -336,40 +322,19 @@ export function unifiedScheduleV3Days(
     }
     dayRestaurantPools.set(cluster.dayNumber, dayRestaurants);
 
-    // 4. SORT activities: preserve step3 geo order as base, only promote for hard constraints.
-    // Step3 produced a nearest-neighbor + 2-opt optimized order — respect it.
-    const isDeparture = timeWindow?.hasDepartureTransport ?? false;
-    const geoOrder = new Map(cluster.activities.map((a, i) => [a.id || a.name, i]));
-
-    // Time slot ordering: morning=0, anytime=1, afternoon=2, evening=3
-    const slotOrder: Record<string, number> = { morning: 0, anytime: 1, afternoon: 2, evening: 3 };
-
+    // 4. SORT activities: must-sees that close early go first
     cluster.activities.sort((a, b) => {
-      // Hard constraint 1: On departure day, must-sees go first (morning)
-      if (isDeparture) {
-        if (a.mustSee && !b.mustSee) return -1;
-        if (!a.mustSee && b.mustSee) return 1;
+      if (a.mustSee && !b.mustSee) return -1;
+      if (!a.mustSee && b.mustSee) return 1;
+      // Among must-sees, those that close early go first
+      if (a.mustSee && b.mustSee) {
+        const aClose = getActivityCloseTime(a, dayDate);
+        const bClose = getActivityCloseTime(b, dayDate);
+        if (aClose && bClose) return timeToMin(aClose) - timeToMin(bClose);
+        if (aClose) return -1;
+        if (bClose) return 1;
       }
-
-      // Hard constraint 2: Activities closing within 2h of day start must go first
-      const aClose = getActivityCloseTime(a, dayDate);
-      const bClose = getActivityCloseTime(b, dayDate);
-      const dayStartMin = timeToMin(dayStartTime);
-      const aUrgent = aClose && (timeToMin(aClose) - dayStartMin) <= 120;
-      const bUrgent = bClose && (timeToMin(bClose) - dayStartMin) <= 120;
-      if (aUrgent && !bUrgent) return -1;
-      if (!aUrgent && bUrgent) return 1;
-      if (aUrgent && bUrgent && aClose && bClose) return timeToMin(aClose) - timeToMin(bClose);
-
-      // Secondary: time-of-day affinity (morning activities before evening ones)
-      const aSlot = slotOrder[a.preferredTimeSlot || 'anytime'] ?? 1;
-      const bSlot = slotOrder[b.preferredTimeSlot || 'anytime'] ?? 1;
-      if (aSlot !== bSlot) return aSlot - bSlot;
-
-      // Tertiary: preserve step3 geographic order
-      const aGeo = geoOrder.get(a.id || a.name) ?? 999;
-      const bGeo = geoOrder.get(b.id || b.name) ?? 999;
-      return aGeo - bGeo;
+      return 0;
     });
 
     // 5. ACTIVITY LOOP
@@ -378,31 +343,6 @@ export function unifiedScheduleV3Days(
       if (isPastEnd(currentTime, dayEndTime)) {
         console.log(`[Unified] Day ${cluster.dayNumber}: stopping at activity ${i}/${cluster.activities.length} (${currentTime} >= ${dayEndTime})`);
         break;
-      }
-
-      // 5a2. Opening hours swap-ahead: if current activity is closed at planned time
-      // but a later one in the list is open, swap them to avoid losing the activity entirely.
-      const actOpen = getActivityOpenTime(cluster.activities[i], dayDate);
-      const actClose = getActivityCloseTime(cluster.activities[i], dayDate);
-      if (actClose && isPastEnd(addMinutes(currentTime, cluster.activities[i].duration || 60), actClose)) {
-        // Activity would end past close — try to find a swap candidate
-        for (let j = i + 1; j < cluster.activities.length; j++) {
-          const candidate = cluster.activities[j];
-          const candClose = getActivityCloseTime(candidate, dayDate);
-          const candOpen = getActivityOpenTime(candidate, dayDate);
-          const candDuration = candidate.duration || 60;
-          const candEnd = addMinutes(currentTime, candDuration);
-          // Candidate fits if it either has no closing time or its closing is after we'd finish
-          const candFits = !candClose || !isPastEnd(candEnd, candClose);
-          // And it's open now (or has no opening constraint): current time >= open time
-          const candOpenNow = !candOpen || timeToMin(currentTime) >= timeToMin(candOpen);
-          if (candFits && candOpenNow) {
-            // Swap i and j
-            [cluster.activities[i], cluster.activities[j]] = [cluster.activities[j], cluster.activities[i]];
-            console.log(`[Unified] Day ${cluster.dayNumber}: swapped "${cluster.activities[j].name}" (closed) with "${cluster.activities[i].name}" (open)`);
-            break;
-          }
-        }
       }
 
       const act = cluster.activities[i];
@@ -497,7 +437,7 @@ export function unifiedScheduleV3Days(
             ));
             usedRestaurantIds.add(lunchPlacement.primary.id);
           } else {
-            items.push(createSelfMealFallbackItem('lunch', currentTime, 75, cluster.dayNumber, orderIndex++, lunchAnchor, { isolatedZone: isIsolatedZone }));
+            items.push(createSelfMealFallbackItem('lunch', currentTime, 75, cluster.dayNumber, orderIndex++, lunchAnchor));
           }
           currentTime = addMinutes(finalLunchTime, 90);
         } else {
@@ -607,7 +547,7 @@ export function unifiedScheduleV3Days(
             ));
             usedRestaurantIds.add(dinnerPlacement.primary.id);
           } else {
-            items.push(createSelfMealFallbackItem('dinner', currentTime, 90, cluster.dayNumber, orderIndex++, dinnerAnchorInSitu, { isolatedZone: isIsolatedZone }));
+            items.push(createSelfMealFallbackItem('dinner', currentTime, 90, cluster.dayNumber, orderIndex++, dinnerAnchorInSitu));
           }
           currentTime = addMinutes(finalDinnerTime, 100); // 90min dinner + 10min buffer
           dinnerPlaced = true;
@@ -633,7 +573,7 @@ export function unifiedScheduleV3Days(
             ));
             usedRestaurantIds.add(lunchPlacement.primary.id);
           } else {
-            items.push(createSelfMealFallbackItem('lunch', lunchTime, 75, cluster.dayNumber, orderIndex++, lunchAnchor, { isolatedZone: isIsolatedZone }));
+            items.push(createSelfMealFallbackItem('lunch', lunchTime, 75, cluster.dayNumber, orderIndex++, lunchAnchor));
           }
         }
         currentTime = addMinutes(lunchTime, 90);
@@ -678,7 +618,7 @@ export function unifiedScheduleV3Days(
           ));
           usedRestaurantIds.add(dinnerPlacement.primary.id);
         } else {
-          items.push(createSelfMealFallbackItem('dinner', dinnerTime, 90, cluster.dayNumber, orderIndex++, dinnerAnchor, { isolatedZone: isIsolatedZone }));
+          items.push(createSelfMealFallbackItem('dinner', dinnerTime, 90, cluster.dayNumber, orderIndex++, dinnerAnchor));
         }
       }
     }

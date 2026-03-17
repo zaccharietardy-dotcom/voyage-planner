@@ -13,7 +13,7 @@ import { classifyExperienceCategory } from './utils/activityDedup';
 import { fixAttractionDuration, fixAttractionCost } from '../tripAttractions';
 import { findKnownViatorProduct } from '../services/viatorKnownProducts';
 import { calculateDistance } from '../services/geocoding';
-import { classifyOutdoorIndoor, getMinDuration, getMaxDuration, inferTimeSlot } from './utils/constants';
+import { classifyOutdoorIndoor, getMinDuration, getMaxDuration } from './utils/constants';
 import { isViatorGenericPrivateTourCandidate, scoreViatorPlusValue } from '../services/viator';
 import { isMonumentLikeActivityName, resolveOfficialTicketing } from '../services/officialTicketing';
 import { isGarbageActivity } from './utils/garbage-filter';
@@ -467,36 +467,6 @@ export function scoreAndSelectActivities(
     console.log(`[Pipeline V2] Excluded ${beforeViatorGpsFilter - scored.length} Viator activities with unreliable GPS (city-center fallback)`);
   }
 
-  // 5b2. Drop Viator activities that reference a different city in their title
-  // but have GPS coords within the destination (e.g. "Visite guidée de Sitges" at Barcelona coords).
-  // These are misleading wrappers — the activity is elsewhere but GPS points to the meeting point.
-  const destNorm = preferences.destination.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-  const KNOWN_PLACE_PATTERN = /\b(?:de|di|of|du|to|à|a|in|from)\s+([A-Z][a-zà-ÿ]{2,}(?:\s+[A-Z][a-zà-ÿ]+)*)/g;
-  const beforeViatorMismatch = scored.length;
-  scored = scored.filter(a => {
-    if (a.source !== 'viator') return true;
-    const name = a.name || '';
-    const matches = [...name.matchAll(KNOWN_PLACE_PATTERN)];
-    if (matches.length === 0) return true;
-    for (const m of matches) {
-      const placeName = m[1].toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-      // Skip if the place name IS the destination or a substring of it
-      if (destNorm.includes(placeName) || placeName.includes(destNorm)) continue;
-      // Skip generic words that aren't real place names
-      if (['art', 'wine', 'food', 'bike', 'boat', 'night', 'day', 'sunset', 'sunrise'].includes(placeName)) continue;
-      // This activity references a different place — check if GPS is suspiciously close to destination center
-      const distToCenter = calculateDistance(a.latitude, a.longitude, data.destCoords.lat, data.destCoords.lng);
-      if (distToCenter < 5) {
-        console.log(`[Pipeline V2] Dropping Viator "${name}" — references "${m[1]}" but GPS is ${distToCenter.toFixed(1)}km from ${preferences.destination} center`);
-        return false;
-      }
-    }
-    return true;
-  });
-  if (scored.length < beforeViatorMismatch) {
-    console.log(`[Pipeline V2] Excluded ${beforeViatorMismatch - scored.length} Viator activities referencing other cities`);
-  }
-
   // 5c. Validate and filter coordinates using coordinate-validator.
   // Filters out invalid coordinates and auto-corrects swapped lat/lng.
   // Must-see activities use a wider distance cap (500km) to avoid re-rejecting
@@ -537,13 +507,12 @@ export function scoreAndSelectActivities(
   const curatedNonMustSees = curateNonMustSeePool(nonMustSees, preferences);
 
   // 8. Select the right count
-  // Target ~3.5 non-must-see activities per day — enough to fill each day's cluster
-  // without the filler problem of 4.5. Short trips (≤4d) need relatively more to avoid
-  // starved clusters (e.g. Vatican day with only 1 activity).
+  // Arrival/departure days get fewer activities (~2 each), full days get ~5
+  // Over-select to provide margin for rebalancing drops and gap-fill candidates.
   const fullDays = Math.max(0, preferences.durationDays - 2);
   const targetCount = Math.max(
-    mustSees.length + Math.ceil(preferences.durationDays * 3.5),
-    preferences.durationDays * 5,
+    mustSees.length + Math.ceil(preferences.durationDays * 4.5),
+    preferences.durationDays * 6,
     16 // Absolute minimum for any trip
   );
   const remainingSlots = Math.max(0, targetCount - mustSees.length);
@@ -615,9 +584,6 @@ export function scoreAndSelectActivities(
     if (maxDur !== null) {
       fixed.duration = Math.min(maxDur, fixed.duration);
     }
-
-    // Infer preferred time slot for scheduling
-    fixed.preferredTimeSlot = inferTimeSlot(fixed.name || '', fixed.type, fixed.openingHours);
 
     return fixed;
   });

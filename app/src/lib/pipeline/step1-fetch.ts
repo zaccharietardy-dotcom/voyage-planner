@@ -28,10 +28,6 @@ import { resolveCoordinates } from '../services/coordsResolver';
 import { fetchWeatherForecast } from '../services/weather';
 import Anthropic from '@anthropic-ai/sdk';
 
-export interface FetchAllDataOptions {
-  quotaSafe?: boolean;
-}
-
 /**
  * Retry wrapper: retries a promise factory once with a delay on rejection.
  * Used for critical API calls (Google Places, SerpAPI) that occasionally timeout.
@@ -83,14 +79,9 @@ function buildViatorLocationCandidates(activityName: string, destination: string
  */
 import type { OnPipelineEvent } from './types';
 
-export async function fetchAllData(
-  preferences: TripPreferences,
-  onEvent?: OnPipelineEvent,
-  options: FetchAllDataOptions = {}
-): Promise<FetchedData> {
+export async function fetchAllData(preferences: TripPreferences, onEvent?: OnPipelineEvent): Promise<FetchedData> {
   const T0 = Date.now();
   const { origin, destination } = preferences;
-  const quotaSafe = options.quotaSafe === true;
 
   /** Wrapper to emit api_call/api_done events around a promise */
   function tracked<T>(label: string, promise: Promise<T>): Promise<T> {
@@ -147,7 +138,7 @@ export async function fetchAllData(
     });
 
     // AI fallback for uncovered destinations
-    if (!quotaSafe && dayTripSuggestions.length === 0 && preferences.durationDays >= 4) {
+    if (dayTripSuggestions.length === 0 && preferences.durationDays >= 4) {
       try {
         const aiSuggestions = await generateDayTripsWithAI(destination, destCoords, {
           durationDays: preferences.durationDays,
@@ -209,7 +200,7 @@ export async function fetchAllData(
     // 3: Viator — bookable experiences
     tracked('Viator', searchViatorActivities(destination, destCoords, {
       types: activityTypes,
-      limit: 10,
+      limit: 20,
     })),
     // 4: Must-see attractions (user-specified) — Google Places (New) → SerpAPI fallback
     tracked('Must-sees', preferences.mustSee?.trim()
@@ -246,26 +237,16 @@ export async function fetchAllData(
       },
     })),
     // 9: Travel tips
-    tracked(
-      'Travel tips',
-      quotaSafe
-        ? Promise.resolve(null)
-        : generateTravelTips(origin, destination, startDate, preferences.durationDays)
-    ),
+    tracked('Travel tips', generateTravelTips(origin, destination, startDate, preferences.durationDays)),
     // 10: Budget strategy
-    tracked(
-      'Budget strategy',
-      quotaSafe
-        ? Promise.resolve(null)
-        : generateBudgetStrategy(
-            resolvedBudget,
-            destination,
-            preferences.durationDays,
-            preferences.groupSize || 1,
-            activityTypes,
-            preferences.mealPreference,
-          )
-    ),
+    tracked('Budget strategy', generateBudgetStrategy(
+      resolvedBudget,
+      destination,
+      preferences.durationDays,
+      preferences.groupSize || 1,
+      activityTypes,
+      preferences.mealPreference,
+    )),
     // 11: Weather forecast (Open-Meteo, free, no key)
     tracked('Weather forecast', fetchWeatherForecast(destCoords, startDate, preferences.durationDays)),
   ]);
@@ -456,7 +437,7 @@ export async function fetchAllData(
   // ── AI fallback: generate must-sees for uncovered destinations ──────────
   // When the local database has no curated must-sees AND the user didn't specify any,
   // use Claude Haiku for NAMES + resolveCoordinates for verified GPS.
-  if (!quotaSafe && curatedMustSees.length === 0 && mustSeeAttractions.length === 0) {
+  if (curatedMustSees.length === 0 && mustSeeAttractions.length === 0) {
     console.log(`[Pipeline V2] No curated must-sees for "${destination}" — generating via AI...`);
     try {
       const aiMustSees = await generateMustSeesWithAI(destination, destCoords);
