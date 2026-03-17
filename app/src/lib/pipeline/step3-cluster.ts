@@ -89,6 +89,12 @@ export function computeCityDensityProfile(
  * Uses agglomerative hierarchical clustering with average-linkage distance.
  * When a densityProfile is provided, enforces max cluster radius constraints.
  */
+export interface AffinityPair {
+  activityA: string;
+  activityB: string;
+  dayNumber: number;
+}
+
 export function clusterActivities(
   activities: ScoredActivity[],
   numDays: number,
@@ -100,7 +106,8 @@ export function clusterActivities(
   dayTripData?: {
     dayTripActivities?: Record<string, import('../services/attractions').Attraction[]>;
     dayTripSuggestions?: import('../services/dayTripSuggestions').DayTripSuggestion[];
-  }
+  },
+  affinityPairs?: AffinityPair[] | null,
 ): ActivityCluster[] {
   if (activities.length === 0) return [];
   if (numDays <= 1 || activities.length <= 4) {
@@ -222,7 +229,7 @@ export function clusterActivities(
   // Hierarchical clustering on regular city activities (with radius constraint if available)
   const maxRadius = densityProfile?.maxClusterRadius;
   const hardRadiusCap = densityProfile?.hardRadiusCap ?? 5.0;
-  const clusters = hierarchicalClustering(regularActivities, cityDays, maxRadius, hardRadiusCap);
+  const clusters = hierarchicalClustering(regularActivities, cityDays, maxRadius, hardRadiusCap, affinityPairs);
 
   // Add full-day clusters
   for (const fdc of fullDayClusters) {
@@ -547,7 +554,8 @@ function hierarchicalClustering(
   activities: ScoredActivity[],
   K: number,
   maxClusterRadius?: number,
-  hardRadiusCap: number = 5.0
+  hardRadiusCap: number = 5.0,
+  affinityPairs?: AffinityPair[] | null,
 ): ActivityCluster[] {
   if (activities.length === 0) return [];
   if (K <= 1) return [buildCluster(1, activities)];
@@ -572,6 +580,33 @@ function hierarchicalClustering(
           activities[j].latitude, activities[j].longitude
         );
       }
+    }
+  }
+
+  // 1b. Apply LLM affinity bonus: reduce distance by 50% for activities the LLM
+  // suggests should be on the same day. This encourages (but doesn't force) thematic grouping.
+  if (affinityPairs && affinityPairs.length > 0) {
+    const nameToIdx = new Map<string, number>();
+    for (let i = 0; i < N; i++) {
+      const name = activities[i].name?.toLowerCase().trim();
+      if (name) nameToIdx.set(name, i);
+    }
+    let bonusCount = 0;
+    for (const pair of affinityPairs) {
+      const normA = pair.activityA.toLowerCase().trim();
+      const normB = pair.activityB.toLowerCase().trim();
+      // Exact or substring match
+      const idxA = nameToIdx.get(normA) ?? [...nameToIdx.entries()].find(([k]) => k.includes(normA) || normA.includes(k))?.[1];
+      const idxB = nameToIdx.get(normB) ?? [...nameToIdx.entries()].find(([k]) => k.includes(normB) || normB.includes(k))?.[1];
+      if (idxA !== undefined && idxB !== undefined && idxA !== idxB) {
+        const originalDist = distMatrix[idxA][idxB];
+        distMatrix[idxA][idxB] *= 0.5;
+        distMatrix[idxB][idxA] *= 0.5;
+        bonusCount++;
+      }
+    }
+    if (bonusCount > 0) {
+      console.log(`[Step 3] Applied ${bonusCount} LLM affinity bonuses to distance matrix`);
     }
   }
 
@@ -1392,11 +1427,20 @@ function rebalanceByTimeCapacity(
       }
       if (bestTarget === -1) continue;
 
-      // Move the lowest-scored non-must-see activity
+      // Move the lowest-scored non-must-see activity, but only if it's geographically close
+      // to the target cluster (prevents splitting coherent zones like Montjuïc)
       let worstIdx = -1;
       let worstScore = Infinity;
+      const targetCentroid = clusters[bestTarget].centroid;
+      const maxRebalanceRadius = (clusters[bestTarget].maxRadius || 3) * 2;
       for (let ai = 0; ai < clusters[ci].activities.length; ai++) {
         if (clusters[ci].activities[ai].mustSee) continue;
+        // Geo guard: only move if activity is within 2× target cluster radius
+        const distToTarget = calculateDistance(
+          clusters[ci].activities[ai].latitude, clusters[ci].activities[ai].longitude,
+          targetCentroid.lat, targetCentroid.lng
+        );
+        if (distToTarget > maxRebalanceRadius) continue;
         if (clusters[ci].activities[ai].score < worstScore) {
           worstScore = clusters[ci].activities[ai].score;
           worstIdx = ai;

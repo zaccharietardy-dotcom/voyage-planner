@@ -111,6 +111,8 @@ export interface ScoredActivity extends Attraction {
   planningToken?: string;
   /** Day trip pack source for protected atomic units */
   sourcePackId?: string;
+  /** Preferred time of day for this activity (inferred from type/hours) */
+  preferredTimeSlot?: 'morning' | 'afternoon' | 'evening' | 'anytime';
   /** Planner role assigned to the activity's day */
   plannerRole?: 'arrival' | 'full_city' | 'day_trip' | 'recovery' | 'departure' | 'short_full_day';
   /** Original day number from the planner before any repair pass */

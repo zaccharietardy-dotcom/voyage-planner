@@ -363,10 +363,31 @@ export function ensureMustSees(
 
       // Find lowest-scored non-must-see activity to evict, but only if the
       // must-see's opening hours cover the evicted activity's time slot.
+      // Geo-aware eviction: prefer to evict activities far from the day's centroid
+      const dayActivities = day.items.filter(i => i.type === 'activity');
+      const dayCentroid = dayActivities.length > 0
+        ? {
+            lat: dayActivities.reduce((s, a) => s + (a.latitude || 0), 0) / dayActivities.length,
+            lng: dayActivities.reduce((s, a) => s + (a.longitude || 0), 0) / dayActivities.length,
+          }
+        : null;
+      const maxDayRadius = dayCentroid
+        ? Math.max(...dayActivities.map(a => calculateDistance(a.latitude || 0, a.longitude || 0, dayCentroid.lat, dayCentroid.lng)), 1)
+        : 1;
+
       const evictCandidates = day.items
         .filter(i => i.type === 'activity' && !i.mustSee)
         .filter(i => !rescueStageAtLeast(rescueStage, 1) || !isProtectedTripItem(i))
-        .sort((a, b) => (a.rating || 0) - (b.rating || 0));
+        .sort((a, b) => {
+          // Eviction score: lower = evicted first. Combines rating (50%) and proximity to centroid (50%).
+          const ratingA = (a.rating || 0) / 5;
+          const ratingB = (b.rating || 0) / 5;
+          const distA = dayCentroid ? calculateDistance(a.latitude || 0, a.longitude || 0, dayCentroid.lat, dayCentroid.lng) : 0;
+          const distB = dayCentroid ? calculateDistance(b.latitude || 0, b.longitude || 0, dayCentroid.lat, dayCentroid.lng) : 0;
+          const scoreA = ratingA * 0.5 + (1 - Math.min(distA / maxDayRadius, 1)) * 0.5;
+          const scoreB = ratingB * 0.5 + (1 - Math.min(distB / maxDayRadius, 1)) * 0.5;
+          return scoreA - scoreB; // lowest composite score = evicted first
+        });
 
       for (const evicted of evictCandidates) {
         const idx = day.items.indexOf(evicted);
@@ -437,17 +458,36 @@ export function ensureMustSees(
       if (injected) break; // break days loop
     }
 
-    // Fallback: place must-see at its own preferred time, evict lowest-rated regardless of time
+    // Fallback: place must-see at its own preferred time, evict lowest geo+rating score regardless of time
     if (!injected && !rescueStageAtLeast(rescueStage, 1)) {
       for (const day of days) {
         if (rescueStageAtLeast(rescueStage, 1) && getDayPlannerRole(day) === 'day_trip') continue;
         const dayDate = getDayDate(startDate, day.dayNumber);
         if (!isActivityOpenOnDay(mustSee as any, dayDate)) continue;
 
+        const fbActivities = day.items.filter(i => i.type === 'activity');
+        const fbCentroid = fbActivities.length > 0
+          ? {
+              lat: fbActivities.reduce((s, a) => s + (a.latitude || 0), 0) / fbActivities.length,
+              lng: fbActivities.reduce((s, a) => s + (a.longitude || 0), 0) / fbActivities.length,
+            }
+          : null;
+        const fbMaxRadius = fbCentroid
+          ? Math.max(...fbActivities.map(a => calculateDistance(a.latitude || 0, a.longitude || 0, fbCentroid.lat, fbCentroid.lng)), 1)
+          : 1;
+
         const evictCandidates = day.items
           .filter(i => i.type === 'activity' && !i.mustSee)
           .filter(i => !rescueStageAtLeast(rescueStage, 1) || !isProtectedTripItem(i))
-          .sort((a, b) => (a.rating || 0) - (b.rating || 0));
+          .sort((a, b) => {
+            const rA = (a.rating || 0) / 5;
+            const rB = (b.rating || 0) / 5;
+            const dA = fbCentroid ? calculateDistance(a.latitude || 0, a.longitude || 0, fbCentroid.lat, fbCentroid.lng) : 0;
+            const dB = fbCentroid ? calculateDistance(b.latitude || 0, b.longitude || 0, fbCentroid.lat, fbCentroid.lng) : 0;
+            const sA = rA * 0.5 + (1 - Math.min(dA / fbMaxRadius, 1)) * 0.5;
+            const sB = rB * 0.5 + (1 - Math.min(dB / fbMaxRadius, 1)) * 0.5;
+            return sA - sB;
+          });
 
         if (evictCandidates.length === 0) continue;
 
