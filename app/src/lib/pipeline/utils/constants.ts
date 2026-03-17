@@ -93,6 +93,8 @@ export function getMinDuration(name: string, type: string): number {
  * Applied AFTER min-duration; only caps activities matching these patterns.
  */
 const MAX_DURATION_RULES: [RegExp, number][] = [
+  // Markets: quick browse, not a multi-hour visit
+  [/\b(market|march[ée]|mercato|mercat|mercado|bazar|bazaar|souk|souq)\b/i, 45],
   // Famous arches and gates: larger landmarks deserve more time
   [/\b(arc\s+de\s+triomphe|arco\s+d[ie]\s+triun?fo|brandenburg|brandenburger|india\s?gate|gateway\s+of\s+india|puerta\s+del?\s+sol)\b/i, 60],
   // Observation towers and decks: 60-90min max (includes ascent + view + descent)
@@ -111,8 +113,10 @@ const MAX_DURATION_RULES: [RegExp, number][] = [
   [/\b(amusement[_ ]park|parc\s+d.attraction|theme\s*park)\b/i, 300],
   // Parks, gardens: 90min cap
   [/\b(park|parc|garden|jardin|botanical|botanique)\b/i, 90],
-  // Generic monuments/statues: quick visits
+  // Generic monuments/statues: quick visits (30min max)
   [/\b(statue|sculpture|fountain|fontaine|fontana|monument|memorial|m[eé]morial)\b/i, 30],
+  // Simple monuments without specific name match: 30min cap
+  [/\b(column|colonne|colonna|obelisk|ob[eé]lisque|triumphal|arc\b|arco\b|gate\b|porte\b|porta\b)\b/i, 30],
   [/\b(viewpoint|belvedere|belv[eé]d[eè]re|mirador|panorama)\b/i, 45],
 ];
 
@@ -194,4 +198,44 @@ export function classifyOutdoorIndoor(name: string, description?: string, activi
   }
 
   return undefined; // truly unknown
+}
+
+/**
+ * Infer the preferred time-of-day slot for an activity.
+ * Used by the scheduler to order activities within a day for natural flow.
+ *
+ * Priority: explicit opening hours override > keyword-based inference > 'anytime'.
+ */
+export type TimeSlot = 'morning' | 'afternoon' | 'evening' | 'anytime';
+
+export function inferTimeSlot(
+  name: string,
+  type?: string,
+  openingHours?: { open?: string; close?: string } | null
+): TimeSlot {
+  const text = `${name} ${type || ''}`.toLowerCase();
+
+  // 1. Override by opening hours: if opens at 18:00+, it's evening
+  if (openingHours?.open) {
+    const openHour = parseInt(openingHours.open.split(':')[0], 10);
+    if (openHour >= 18) return 'evening';
+    if (openHour >= 14) return 'afternoon';
+  }
+
+  // 2. Markets, bakeries, breakfast spots → morning
+  if (/\b(market|march[ée]|mercato|mercat|mercado|bazar|bazaar|souk|souq|bakery|boulangerie|brunch)\b/i.test(text)) {
+    return 'morning';
+  }
+
+  // 3. Bars, clubs, nightlife, concerts, shows → evening
+  if (/\b(bar|pub|club|nightlife|rooftop|cocktail|jazz|flamenco|cabaret|concert|show|spectacle|night\s?tour|sunset)\b/i.test(text)) {
+    return 'evening';
+  }
+
+  // 4. Beaches, pools → afternoon (when warmest)
+  if (/\b(beach|plage|playa|spiaggia|pool|piscine)\b/i.test(text)) {
+    return 'afternoon';
+  }
+
+  return 'anytime';
 }
