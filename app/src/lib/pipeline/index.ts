@@ -900,14 +900,27 @@ export async function generateTripV3(
     );
     if (returnFlightItem) {
       const flightStartMin = timeToMin(returnFlightItem.startTime || '23:59');
-      const cutoffMin = flightStartMin - 150; // 2h30 before flight
+      const isFlight = returnFlightItem.type === 'flight';
+      const cutoffMin = flightStartMin - (isFlight ? 150 : 60); // 2h30 before flight, 1h before train/bus
       const beforeCount = lastDay.items.length;
       lastDay.items = lastDay.items.filter(item => {
         if (item.type === 'flight' || item.type === 'checkout') return true;
         if (item.type === 'transport' && (item as any).transportRole === 'longhaul') return true;
         const startMin = timeToMin(item.startTime || '00:00');
-        if (startMin >= cutoffMin) return false;
-        if (item.endTime && timeToMin(item.endTime) > cutoffMin) return false;
+        if (startMin >= cutoffMin) {
+          if (item.mustSee) {
+            console.warn(`[Pipeline V3] Post-injection sweep: keeping must-see "${item.title}" on Day ${lastDay.dayNumber} despite departure cutoff`);
+            return true;
+          }
+          return false;
+        }
+        if (item.endTime && timeToMin(item.endTime) > cutoffMin) {
+          if (item.mustSee) {
+            console.warn(`[Pipeline V3] Post-injection sweep: keeping must-see "${item.title}" on Day ${lastDay.dayNumber} despite end past departure cutoff`);
+            return true;
+          }
+          return false;
+        }
         return true;
       });
       if (lastDay.items.length < beforeCount) {

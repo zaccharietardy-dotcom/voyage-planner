@@ -217,7 +217,9 @@ export function unifiedScheduleV3Days(
     const dayEndMin = timeToMin(dayEndTime);
     let canHaveBreakfast = dayStartMin < 10 * 60 && dayStartMin < dayEndMin;   // start before 10:00 AND window exists
     const canHaveLunch = dayStartMin < 13 * 60 && dayEndMin > 12 * 60; // window spans lunch hours
-    const canHaveDinner = dayEndMin >= 19 * 60;        // day extends past 19:00
+    const hasDepartureForMeals = timeWindow?.hasDepartureTransport ?? false;
+    // Departure days need more buffer (dinner + travel to station/airport)
+    const canHaveDinner = dayEndMin >= (hasDepartureForMeals ? 20 * 60 : 18 * 60);
 
     if (rescueStageAtLeast(rescueStage, 3) && canHaveBreakfast) {
       const breakfastConsumesUntil = dayStartMin + 60;
@@ -932,10 +934,14 @@ export function unifiedScheduleV3Days(
             openingHoursByDay: next.openingHoursByDay as Record<string, { open: string; close: string } | null> | undefined,
           } as ScoredActivity;
           if (!isOpenAtTime(mockAct, day.date, minToTime(shiftedStart), minToTime(shiftedEnd))) {
-            console.log(`[Unified] Overlap fix: dropping "${next.title}" on Day ${day.dayNumber} (outside opening hours after shift)`);
-            day.items.splice(i + 1, 1);
-            i--;
-            continue;
+            if (next.mustSee) {
+              console.warn(`[Unified] Overlap fix: keeping must-see "${next.title}" on Day ${day.dayNumber} despite hours shift`);
+            } else {
+              console.log(`[Unified] Overlap fix: dropping "${next.title}" on Day ${day.dayNumber} (outside opening hours after shift)`);
+              day.items.splice(i + 1, 1);
+              i--;
+              continue;
+            }
           }
         }
 
@@ -990,6 +996,11 @@ export function unifiedScheduleV3Days(
             && item.type === 'activity' && isNightlifeActivity({ name: item.title })) {
           return true;
         }
+        // Exempt must-see activities — dropping them causes P0.8 violations
+        if (item.mustSee) {
+          console.warn(`[Unified] Hard stop: keeping must-see "${item.title}" on Day ${day.dayNumber} despite cutoff at ${minToTime(dayEndForHardStop)}`);
+          return true;
+        }
         console.log(`[Unified] Hard stop: dropping "${item.title}" on Day ${day.dayNumber} (past ${minToTime(dayEndForHardStop)})`);
         return false;
       }
@@ -997,6 +1008,11 @@ export function unifiedScheduleV3Days(
       if (hasDeparture && item.endTime) {
         const endMin = timeToMin(item.endTime);
         if (endMin > dayEndForHardStop) {
+          // Exempt must-see activities
+          if (item.mustSee) {
+            console.warn(`[Unified] Hard stop: keeping must-see "${item.title}" on Day ${day.dayNumber} despite end past departure window`);
+            return true;
+          }
           console.log(`[Unified] Hard stop: dropping "${item.title}" on Day ${day.dayNumber} (ends past departure window)`);
           return false;
         }

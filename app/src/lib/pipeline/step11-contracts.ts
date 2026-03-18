@@ -253,8 +253,28 @@ export function validateContracts(
     const twStartMin = tw ? toMinutes(tw.activityStartTime) : 0;
     const twEndMin = tw ? toMinutes(tw.activityEndTime) : 22 * 60;
     const hasUsableWindow = twEndMin > twStartMin;
-    const expectLunch = hasUsableWindow && twStartMin < 13 * 60 && twEndMin > 12 * 60;
-    const expectDinner = hasUsableWindow && twEndMin >= 19 * 60;
+    // Check actual arrival/departure transport (more reliable than time window flags,
+    // which are set before transport injection in step 11b)
+    const isFirstDay = day.dayNumber === days[0]?.dayNumber;
+    const isLastDay = day.dayNumber === days[days.length - 1]?.dayNumber;
+    const arrivalItem = day.items.find(i =>
+      (isFirstDay && i.type === 'flight') || (i.type === 'transport' && (i as any).transportDirection === 'outbound')
+    );
+    const departureItem = day.items.find(i =>
+      (isLastDay && i.type === 'flight') || (i.type === 'transport' && (i as any).transportDirection === 'return')
+    );
+    // For arrival days, effective start = arrival end time + buffer (customs/transport)
+    const effectiveStartMin = arrivalItem?.endTime
+      ? toMinutes(arrivalItem.endTime) + 60  // 1h buffer after arrival
+      : twStartMin;
+    const expectLunch = hasUsableWindow && effectiveStartMin < 13 * 60 && twEndMin > 12 * 60;
+    const hasDeparture = !!(tw?.hasDepartureTransport || departureItem);
+    const effectiveEndMin = departureItem
+      ? toMinutes(departureItem.startTime || '23:59')
+      : twEndMin;
+    // Departure days: need dinner feasible before departure (20:00 threshold)
+    const dinnerThreshold = hasDeparture ? 20 * 60 : 18 * 60;
+    const expectDinner = hasUsableWindow && effectiveEndMin >= dinnerThreshold;
 
     if (!hasLunch && expectLunch) {
       violations.push(`P0.3: Day ${day.dayNumber} has no lunch`);
@@ -398,11 +418,7 @@ export function validateContracts(
   // Opening hours: -10 extra per violation
   score -= metrics.activitiesOutsideHours * 10;
 
-  // Must-sees missing: -20 scaled
-  if (metrics.mustSeesTotal > 0) {
-    const mustSeeRatio = metrics.mustSeesPlanned / metrics.mustSeesTotal;
-    if (mustSeeRatio < 1) score -= (1 - mustSeeRatio) * 20;
-  }
+  // Must-sees missing: already penalized -5 each via P0.8 violations above — no double-counting
 
   // Distribution penalties (NEW)
   // Near-empty full days: -4 each (wasted day)
@@ -418,8 +434,8 @@ export function validateContracts(
   // Long urban legs: -2 each (inefficient routing)
   score -= Math.min(8, metrics.longUrbanLegCount * 2);
 
-  // Zigzag: -2 per turn (backtracking wastes time)
-  score -= Math.min(6, metrics.zigzagTurnsTotal * 2);
+  // Zigzag: -1 per turn, capped at -3 (115° turns are common in cities)
+  score -= Math.min(3, metrics.zigzagTurnsTotal * 1);
 
   // Excessive travel: -1 per 30min above 60min total (some travel is normal)
   const excessTravelMin = Math.max(0, metrics.totalTravelMinutes - 60 * days.length);
