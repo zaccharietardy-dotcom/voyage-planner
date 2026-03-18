@@ -1205,10 +1205,35 @@ export function unifiedScheduleV3Days(
         }, Infinity);
 
       if (nearestDist > P02_MAX_KM) {
-        console.warn(`[Unified P0.2] Day ${day.dayNumber}: "${item.title}" is ${(nearestDist * 1000).toFixed(0)}m from nearest activity — replacing with self-meal`);
-        const anchor = item.latitude && item.longitude ? { lat: item.latitude, lng: item.longitude } : null;
-        rescueDiagnostics.lateMealReplacementCount++;
-        day.items[i] = createSelfMealFallbackItem(mealType as 'lunch' | 'dinner', item.startTime, item.duration || 75, day.dayNumber, item.orderIndex, anchor);
+        console.warn(`[Unified P0.2] Day ${day.dayNumber}: "${item.title}" is ${(nearestDist * 1000).toFixed(0)}m from nearest activity — searching closer restaurant`);
+        // Find the nearest activity to use as anchor for re-search
+        const nearestActivity = day.items
+          .filter(a => anchorTypes.has(a.type) && a.latitude && a.longitude)
+          .sort((a, b) => {
+            const da = calculateDistance(item.latitude!, item.longitude!, a.latitude!, a.longitude!);
+            const db = calculateDistance(item.latitude!, item.longitude!, b.latitude!, b.longitude!);
+            return da - db;
+          })[0];
+        const reAnchor = nearestActivity
+          ? { lat: nearestActivity.latitude!, lng: nearestActivity.longitude! }
+          : (item.latitude && item.longitude ? { lat: item.latitude, lng: item.longitude } : null);
+        const dayPool = dayRestaurantPools.get(day.dayNumber) || restaurants;
+        const dayDateForSearch = new Date(new Date(startDateStr).getTime() + (day.dayNumber - 1) * 86400000);
+        const replacement = reAnchor ? findBestRestaurant(
+          dayPool, reAnchor, mealType as 'lunch' | 'dinner',
+          0.8, 3.5, 2, dietary, usedRestaurantIds, dayDateForSearch
+        ) : null;
+        if (replacement) {
+          console.log(`[Unified P0.2] Day ${day.dayNumber}: found closer restaurant "${replacement.primary.name}"`);
+          day.items[i] = createRestaurantItem(
+            { ...replacement, anchorName: 'Position actuelle' },
+            mealType as 'lunch' | 'dinner', item.startTime, item.duration || 75, day.dayNumber, item.orderIndex
+          );
+          usedRestaurantIds.add(replacement.primary.id);
+        } else {
+          rescueDiagnostics.lateMealReplacementCount++;
+          day.items[i] = createSelfMealFallbackItem(mealType as 'lunch' | 'dinner', item.startTime, item.duration || 75, day.dayNumber, item.orderIndex, reAnchor);
+        }
       }
     }
   }

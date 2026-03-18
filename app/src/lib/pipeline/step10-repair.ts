@@ -17,7 +17,7 @@ import { calculateDistance } from '../services/geocoding';
 import { getMinDuration, getMaxDuration } from './utils/constants';
 import { normalizeForMatching } from './utils/dedup';
 import { timeToMin, addMinutes } from './utils/time';
-import { normalizeActivityTitle } from './step9-schedule';
+import { normalizeActivityTitle, getActivityCloseTime } from './step9-schedule';
 import {
   arePlannerRolesCompatible,
   getDayPlannerRole,
@@ -386,6 +386,11 @@ export function ensureMustSees(
             !isOpenAtTime(mockMustSee, dayDate, slotStart, slotEnd)) {
           continue; // Must-see not open during this time slot — try next candidate
         }
+        // Also check keyword-based closing time (gardens/parks without explicit hours)
+        const closeTime = getActivityCloseTime(mustSee as ScoredActivity, dayDate);
+        if (closeTime && timeToMin(slotEnd) > timeToMin(closeTime)) {
+          continue; // Activity would end after closing time
+        }
 
         // Replace with must-see (update ID to match the must-see's real ID)
         const newDuration = mustSee.duration || 60;
@@ -458,6 +463,63 @@ export function ensureMustSees(
         // Use must-see's own opening hours for start time, or early morning default
         const preferredStart = mustSee.openingHours?.open || '09:00';
         const mustSeeDuration = mustSee.duration || 60;
+
+        // Check keyword-based closing time (gardens/parks without explicit hours)
+        const closeTime = getActivityCloseTime(mustSee as ScoredActivity, dayDate);
+        const preferredEnd = addMinutes(preferredStart, mustSeeDuration);
+        if (closeTime && timeToMin(preferredEnd) > timeToMin(closeTime)) {
+          // Would end after closing — try to fit before close instead
+          const fitStart = addMinutes(closeTime, -mustSeeDuration);
+          if (timeToMin(fitStart) >= timeToMin('09:00')) {
+            // Can fit earlier in the day
+            const adjustedStart = fitStart;
+            const adjustedEnd = closeTime;
+            day.items[idx] = {
+              ...day.items[idx],
+              id: mustSee.id || day.items[idx].id,
+              title: normalizeActivityTitle(mustSee.name),
+              latitude: mustSee.latitude,
+              longitude: mustSee.longitude,
+              duration: mustSeeDuration,
+              startTime: adjustedStart,
+              endTime: adjustedEnd,
+              rating: mustSee.rating,
+              mustSee: true,
+              description: mustSee.description || '',
+              locationName: mustSee.name,
+              openingHours: mustSee.openingHours,
+              openingHoursByDay: mustSee.openingHoursByDay,
+              bookingUrl: mustSee.bookingUrl,
+              imageUrl: mustSee.imageUrl,
+              photoGallery: mustSee.photoGallery,
+              googleMapsPlaceUrl: (mustSee as any).googlePlaceId
+                ? `https://www.google.com/maps/place/?q=place_id:${(mustSee as any).googlePlaceId}`
+                : mustSee.latitude && mustSee.longitude
+                  ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mustSee.name)}&query=${mustSee.latitude},${mustSee.longitude}`
+                  : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mustSee.name)}`,
+              planningMeta: {
+                planningToken: mustSee.planningToken || `mustsee:${mustSee.id || mustSee.name}:${day.dayNumber}`,
+                protectedReason: 'must_see',
+                sourcePackId: mustSee.sourcePackId,
+                plannerRole: getDayPlannerRole(day),
+                originalDayNumber: day.dayNumber,
+              },
+            };
+            repairs.push({
+              type: 'replacement',
+              dayNumber: day.dayNumber,
+              itemTitle: mustSee.name,
+              description: `Injected must-see "${mustSee.name}" at ${adjustedStart} (adjusted to fit before close ${closeTime}), evicted "${evicted.title}"`,
+            });
+            plannedActivityNamesNorm.add(normalizeForMatching(mustSee.name));
+            globalPlacedIds?.add(mustSee.id || mustSee.name);
+            options.changedDays?.add(day.dayNumber);
+            injected = true;
+            break;
+          }
+          // Can't fit at all on this day — try next day
+          continue;
+        }
 
         day.items[idx] = {
           ...day.items[idx],
