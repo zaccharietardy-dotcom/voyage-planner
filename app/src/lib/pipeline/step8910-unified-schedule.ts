@@ -322,19 +322,16 @@ export function unifiedScheduleV3Days(
     }
     dayRestaurantPools.set(cluster.dayNumber, dayRestaurants);
 
-    // 4. SORT activities: must-sees that close early go first
+    // 4. SORT activities: only promote must-sees with truly urgent close times
+    // Preserves the geographic order from the intra-day router for everything else
     cluster.activities.sort((a, b) => {
-      if (a.mustSee && !b.mustSee) return -1;
-      if (!a.mustSee && b.mustSee) return 1;
-      // Among must-sees, those that close early go first
-      if (a.mustSee && b.mustSee) {
-        const aClose = getActivityCloseTime(a, dayDate);
-        const bClose = getActivityCloseTime(b, dayDate);
-        if (aClose && bClose) return timeToMin(aClose) - timeToMin(bClose);
-        if (aClose) return -1;
-        if (bClose) return 1;
-      }
-      return 0;
+      const aClose = a.mustSee ? getActivityCloseTime(a, dayDate) : null;
+      const bClose = b.mustSee ? getActivityCloseTime(b, dayDate) : null;
+      const aUrgent = aClose && (timeToMin(aClose) - (a.duration || 60)) <= dayStartMin + 120;
+      const bUrgent = bClose && (timeToMin(bClose) - (b.duration || 60)) <= dayStartMin + 120;
+      if (aUrgent && !bUrgent) return -1;
+      if (!aUrgent && bUrgent) return 1;
+      return 0; // preserve router's geographic order
     });
 
     // 5. ACTIVITY LOOP
@@ -513,6 +510,11 @@ export function unifiedScheduleV3Days(
       if (timeToMin(placementTime) < timeToMin(currentTime)) {
         placementTime = currentTime;
       }
+      // Re-check: override may have pushed past closing → skip activity
+      if (actCloseTime && isPastEnd(addMinutes(placementTime, duration), actCloseTime)) {
+        console.warn(`[Unified] Day ${cluster.dayNumber}: skipping "${act.name}" — too late for close ${actCloseTime}`);
+        continue;
+      }
       currentTime = placementTime;
 
       items.push(createActivityItem(act, currentTime, duration, cluster.dayNumber, orderIndex++, destination));
@@ -520,11 +522,46 @@ export function unifiedScheduleV3Days(
       currentPosition = { lat: act.latitude, lng: act.longitude };
       currentTime = roundUpTo5(addMinutes(currentTime, duration + 10)); // 10min buffer, rounded to 5min
 
+      // 5f-bis. LUNCH CATCH-UP — activity crossed noon without triggering lunch
+      if (!lunchPlaced && timeToMin(currentTime) >= 12 * 60) {
+        const lunchAnchor = currentPosition || getClusterCentroid(cluster.activities);
+        if (lunchAnchor) {
+          const lunchSlots = [currentTime, '12:30', '13:00', '13:30'];
+          let lunchPlacement: ReturnType<typeof findBestRestaurant> = null;
+          let finalLunchTime = currentTime;
+          const candidatePlacement = findBestRestaurant(
+            dayRestaurants, lunchAnchor, 'lunch',
+            0.8, 3.5, 2, dietary, usedRestaurantIds, dayDateForRestaurant
+          );
+          if (candidatePlacement) {
+            for (const slot of lunchSlots) {
+              if (strictMealPlacement(candidatePlacement, dayDate, slot, 75, 0.8)) {
+                lunchPlacement = candidatePlacement;
+                finalLunchTime = slot;
+                break;
+              }
+            }
+          }
+          if (lunchPlacement) {
+            items.push(createRestaurantItem(
+              { ...lunchPlacement, anchorName: 'Position actuelle' },
+              'lunch', finalLunchTime, 75, cluster.dayNumber, orderIndex++
+            ));
+            usedRestaurantIds.add(lunchPlacement.primary.id);
+          } else {
+            items.push(createSelfMealFallbackItem('lunch', currentTime, 75, cluster.dayNumber, orderIndex++, lunchAnchor));
+          }
+          currentTime = addMinutes(finalLunchTime, 90);
+        }
+        lunchPlaced = true;
+      }
+
       // 5g. DINNER WINDOW — place dinner IN-SITU when time >= 19:00
       if (!dinnerPlaced && timeToMin(currentTime) >= 19 * 60) {
         const dinnerAnchorInSitu = currentPosition || hotelLatLng || getClusterCentroid(cluster.activities);
         if (dinnerAnchorInSitu) {
-          const dinnerSlots = [currentTime, '19:30', '20:00', '20:30'];
+          const dinnerStartCap = timeToMin(currentTime) <= 21 * 60 ? currentTime : '21:00';
+          const dinnerSlots = [dinnerStartCap, '19:30', '20:00', '20:30'];
           let dinnerPlacement: ReturnType<typeof findBestRestaurant> = null;
           let finalDinnerTime = currentTime;
           const candidateDinner = findBestRestaurant(
@@ -555,11 +592,11 @@ export function unifiedScheduleV3Days(
       }
     }
 
-    // 6. LUNCH FALLBACK if not placed (cap at 14:30)
+    // 6. LUNCH FALLBACK if not placed — a late lunch beats no lunch
     if (!lunchPlaced) {
       const idealLunch = ensureAfter(currentTime, '12:00');
       const lunchTime = isPastEnd(idealLunch, '14:30') ? '14:30' : idealLunch;
-      if (!isPastEnd(lunchTime, addMinutes(dayEndTime, 30))) {
+      {
         const lunchAnchor = currentPosition || getClusterCentroid(cluster.activities);
         if (lunchAnchor) {
           const lunchPlacement = findBestRestaurant(
@@ -589,7 +626,7 @@ export function unifiedScheduleV3Days(
         : (currentPosition || hotelLatLng || getClusterCentroid(cluster.activities));
       if (dinnerAnchor) {
         let dinnerTime = ensureAfter(currentTime, '19:00');
-        if (isPastEnd(dinnerTime, '21:30')) {
+        if (isPastEnd(dinnerTime, '21:00')) {
           dinnerTime = '21:00';
         }
         // Try multiple slots for dinner

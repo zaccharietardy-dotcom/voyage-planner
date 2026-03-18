@@ -792,7 +792,7 @@ export async function generateTripV3(
   onEvent?.({ type: 'step_done', step: 3, stepName: 'Clustering', durationMs: stageTimes['cluster'], timestamp: Date.now() });
 
   // Step 3b: Optimize intra-day routing (weighted NN + 2-opt)
-  if (plannerVersion === 'v3.1' || plannerVersion === 'v3.2') {
+  {
     optimizeClusterRouting(clusters);
   }
 

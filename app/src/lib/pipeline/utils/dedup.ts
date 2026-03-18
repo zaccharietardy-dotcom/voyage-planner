@@ -39,6 +39,9 @@ function extractSignificantWords(name: string): Set<string> {
     'venezia', 'lisbon', 'lisbonne', 'lisboa', 'prague', 'vienna', 'munich',
     'ticket', 'tickets', 'access', 'acces', 'priority', 'prioritaire',
     'walking', 'balade', 'promenade',
+    // Infrastructure terms that shouldn't trigger dedup between different POIs
+    'vatican', 'vaticani', 'basilica', 'basilique', 'chapelle', 'chapel',
+    'jardin', 'jardins', 'garden', 'gardens', 'forum', 'forums',
   ]);
   const normalized = name
     .toLowerCase()
