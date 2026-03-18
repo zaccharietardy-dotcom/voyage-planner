@@ -339,8 +339,9 @@ export function validateContracts(
     const actCount = activities.length;
     dayActivityCounts.push(actCount);
 
-    // Near-empty days (skip short-window arrival/departure)
-    if (actCount <= 1 && !isShortWindow && !day.isDayTrip) {
+    // Near-empty days (skip short-window, arrival/departure days with flights)
+    const hasFlight = day.items.some(i => i.type === 'flight');
+    if (actCount <= 1 && !isShortWindow && !day.isDayTrip && !hasFlight) {
       metrics.nearEmptyDayCount++;
     }
     // Overloaded days

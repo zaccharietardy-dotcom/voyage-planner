@@ -566,6 +566,87 @@ export function ensureMustSees(
       }
     }
 
+    // Last resort: INSERT must-see as a new item on a day with available time
+    // (no eviction needed — works even on days with 0 activities)
+    if (!injected) {
+      for (const day of days) {
+        const dayDate = getDayDate(startDate, day.dayNumber);
+        if (!isActivityOpenOnDay(mustSee as any, dayDate)) continue;
+
+        // Find the best insertion slot: after last non-transport/flight item before dayEnd
+        const lastActivityIdx = day.items.reduce((best, item, idx) => {
+          if (item.type === 'activity' || item.type === 'restaurant' || item.type === 'checkin' || item.type === 'checkout') {
+            return idx;
+          }
+          return best;
+        }, -1);
+
+        // Determine start time for the new must-see
+        const anchorItem = lastActivityIdx >= 0 ? day.items[lastActivityIdx] : null;
+        const insertAfterIdx = lastActivityIdx >= 0 ? lastActivityIdx + 1 : 0;
+        const mustSeeDuration = mustSee.duration || 60;
+        const candidateStart = anchorItem?.endTime || mustSee.openingHours?.open || '10:00';
+        const candidateEnd = addMinutes(candidateStart, mustSeeDuration);
+
+        // Check opening hours
+        const mockMustSee = { ...mustSee } as ScoredActivity;
+        if ((mustSee.openingHours || mustSee.openingHoursByDay) &&
+            !isOpenAtTime(mockMustSee, dayDate, candidateStart, candidateEnd)) {
+          continue;
+        }
+
+        const newItem: TripItem = {
+          id: mustSee.id || `mustsee-${mustSee.name}`,
+          dayNumber: day.dayNumber,
+          type: 'activity',
+          title: normalizeActivityTitle(mustSee.name),
+          description: mustSee.description || '',
+          locationName: mustSee.name,
+          startTime: candidateStart,
+          endTime: candidateEnd,
+          duration: mustSeeDuration,
+          latitude: mustSee.latitude,
+          longitude: mustSee.longitude,
+          rating: mustSee.rating,
+          mustSee: true,
+          orderIndex: insertAfterIdx,
+          openingHours: mustSee.openingHours,
+          openingHoursByDay: mustSee.openingHoursByDay,
+          bookingUrl: mustSee.bookingUrl,
+          imageUrl: mustSee.imageUrl,
+          photoGallery: mustSee.photoGallery,
+          googleMapsPlaceUrl: (mustSee as any).googlePlaceId
+            ? `https://www.google.com/maps/place/?q=place_id:${(mustSee as any).googlePlaceId}`
+            : mustSee.latitude && mustSee.longitude
+              ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mustSee.name)}&query=${mustSee.latitude},${mustSee.longitude}`
+              : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mustSee.name)}`,
+          planningMeta: {
+            planningToken: mustSee.planningToken || `mustsee:${mustSee.id || mustSee.name}:${day.dayNumber}`,
+            protectedReason: 'must_see',
+            sourcePackId: mustSee.sourcePackId,
+            plannerRole: getDayPlannerRole(day),
+            originalDayNumber: day.dayNumber,
+          },
+        } as TripItem;
+
+        day.items.splice(insertAfterIdx, 0, newItem);
+        day.items.forEach((item, idx) => { item.orderIndex = idx; });
+
+        repairs.push({
+          type: 'replacement',
+          dayNumber: day.dayNumber,
+          itemTitle: mustSee.name,
+          description: `Inserted must-see "${mustSee.name}" at ${candidateStart} on Day ${day.dayNumber} (no eviction needed)`,
+        });
+        plannedActivityNamesNorm.add(normalizeForMatching(mustSee.name));
+        globalPlacedIds?.add(mustSee.id || mustSee.name);
+        options.changedDays?.add(day.dayNumber);
+        injected = true;
+        console.log(`[Repair] Inserted must-see "${mustSee.name}" at ${candidateStart} on Day ${day.dayNumber} (last-resort injection)`);
+        break;
+      }
+    }
+
     if (!injected) {
       unresolvedViolations.push(`Must-see "${mustSee.name}" not in plan and could not be injected`);
     }

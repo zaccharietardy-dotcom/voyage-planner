@@ -324,15 +324,27 @@ export function unifiedScheduleV3Days(
     }
     dayRestaurantPools.set(cluster.dayNumber, dayRestaurants);
 
-    // 4. SORT activities: only promote must-sees with truly urgent close times
-    // Preserves the geographic order from the intra-day router for everything else
+    // 4. SORT activities: promote activities with early closing hours
+    // Priority 1: must-sees with very urgent close (within 2h of start) — must be first
+    // Priority 2: any activity closing before 18:00 — schedule before late-closing ones
+    // Otherwise: preserve geographic order from intra-day router
     cluster.activities.sort((a, b) => {
-      const aClose = a.mustSee ? getActivityCloseTime(a, dayDate) : null;
-      const bClose = b.mustSee ? getActivityCloseTime(b, dayDate) : null;
-      const aUrgent = aClose && (timeToMin(aClose) - (a.duration || 60)) <= dayStartMin + 120;
-      const bUrgent = bClose && (timeToMin(bClose) - (b.duration || 60)) <= dayStartMin + 120;
-      if (aUrgent && !bUrgent) return -1;
-      if (!aUrgent && bUrgent) return 1;
+      const aClose = getActivityCloseTime(a, dayDate);
+      const bClose = getActivityCloseTime(b, dayDate);
+      // Priority 1: must-sees with very urgent close times
+      const aVeryUrgent = a.mustSee && aClose && (timeToMin(aClose) - (a.duration || 60)) <= dayStartMin + 120;
+      const bVeryUrgent = b.mustSee && bClose && (timeToMin(bClose) - (b.duration || 60)) <= dayStartMin + 120;
+      if (aVeryUrgent && !bVeryUrgent) return -1;
+      if (!aVeryUrgent && bVeryUrgent) return 1;
+      // Priority 2: activities with tight deadlines (must start by 17:00 to fit)
+      const aDeadline = aClose ? timeToMin(aClose) - (a.duration || 60) : Infinity;
+      const bDeadline = bClose ? timeToMin(bClose) - (b.duration || 60) : Infinity;
+      const aConstrained = aDeadline <= 17 * 60;
+      const bConstrained = bDeadline <= 17 * 60;
+      if (aConstrained && !bConstrained) return -1;
+      if (!aConstrained && bConstrained) return 1;
+      // Among constrained activities, sort by deadline (tightest first)
+      if (aConstrained && bConstrained) return aDeadline - bDeadline;
       return 0; // preserve router's geographic order
     });
 
