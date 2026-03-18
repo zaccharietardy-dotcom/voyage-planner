@@ -1185,9 +1185,12 @@ export async function generateTripV3(
   };
 
   const totalTime = Date.now() - startTime;
+  const { getApiCostSummary } = await import('../services/apiCostGuard');
+  const costSummary = getApiCostSummary();
   console.log(`[Pipeline V3] Trip generated in ${totalTime}ms`);
   console.log(`  Stage times: ${Object.entries(stageTimes).map(([k, v]) => `${k}=${v}ms`).join(', ')}`);
   console.log(`  Quality: ${contractResult.score}/100, Invariants: ${contractResult.invariantsPassed ? 'PASSED' : 'FAILED'}`);
+  console.log(`  API cost: €${costSummary.totalEur.toFixed(2)} / €${costSummary.budget.toFixed(2)} — ${JSON.stringify(costSummary.calls)}`);
 
   onEvent?.({ type: 'info', label: 'complete', detail: 'Trip generation complete!', timestamp: Date.now() });
 

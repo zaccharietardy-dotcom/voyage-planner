@@ -138,6 +138,9 @@ async function searchWithGoogle(
   mode: 'transit' | 'walking' | 'driving',
   departureTime?: Date
 ): Promise<Omit<DirectionsResult, 'googleMapsUrl'>> {
+  const { trackApiCost } = await import('./apiCostGuard');
+  trackApiCost('directions');
+
   const params = new URLSearchParams({
     origin: `${from.lat},${from.lng}`,
     destination: `${to.lat},${to.lng}`,

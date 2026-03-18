@@ -425,6 +425,12 @@ export function unifiedScheduleV3Days(
                 break;
               }
             }
+            // Strict hours check failed — use candidate anyway at best slot
+            // A real restaurant with slightly wrong hours beats "Repas libre"
+            if (!lunchPlacement) {
+              lunchPlacement = candidatePlacement;
+              finalLunchTime = lunchSlots[0];
+            }
           }
           // Skip hotel-fallback: on day trips, prefer "Repas libre" over a restaurant 16km away
           if (lunchPlacement) {
@@ -541,6 +547,11 @@ export function unifiedScheduleV3Days(
                 break;
               }
             }
+            // Strict hours check failed — use candidate anyway at best slot
+            if (!lunchPlacement) {
+              lunchPlacement = candidatePlacement;
+              finalLunchTime = lunchSlots[0];
+            }
           }
           if (lunchPlacement) {
             items.push(createRestaurantItem(
@@ -563,7 +574,7 @@ export function unifiedScheduleV3Days(
           const dinnerStartCap = timeToMin(currentTime) <= 21 * 60 ? currentTime : '21:00';
           const dinnerSlots = [dinnerStartCap, '19:30', '20:00', '20:30'];
           let dinnerPlacement: ReturnType<typeof findBestRestaurant> = null;
-          let finalDinnerTime = currentTime;
+          let finalDinnerTime = dinnerStartCap;
           const candidateDinner = findBestRestaurant(
             dayRestaurants, dinnerAnchorInSitu, 'dinner',
             0.8, 3.5, 2, dietary, usedRestaurantIds, dayDateForRestaurant
@@ -576,6 +587,11 @@ export function unifiedScheduleV3Days(
                 break;
               }
             }
+            // Strict hours check failed — use candidate anyway at best slot
+            if (!dinnerPlacement) {
+              dinnerPlacement = candidateDinner;
+              finalDinnerTime = dinnerSlots[0];
+            }
           }
           if (dinnerPlacement) {
             items.push(createRestaurantItem(
@@ -584,7 +600,7 @@ export function unifiedScheduleV3Days(
             ));
             usedRestaurantIds.add(dinnerPlacement.primary.id);
           } else {
-            items.push(createSelfMealFallbackItem('dinner', currentTime, 90, cluster.dayNumber, orderIndex++, dinnerAnchorInSitu));
+            items.push(createSelfMealFallbackItem('dinner', dinnerStartCap, 90, cluster.dayNumber, orderIndex++, dinnerAnchorInSitu));
           }
           currentTime = addMinutes(finalDinnerTime, 100); // 90min dinner + 10min buffer
           dinnerPlaced = true;
@@ -603,7 +619,8 @@ export function unifiedScheduleV3Days(
             dayRestaurants, lunchAnchor, 'lunch',
             0.8, 3.5, 2, dietary, usedRestaurantIds, dayDateForRestaurant
           );
-          if (lunchPlacement && strictMealPlacement(lunchPlacement, dayDate, lunchTime, 75, 0.8)) {
+          if (lunchPlacement) {
+            // Use candidate even if strict hours check fails — real restaurant beats "Repas libre"
             items.push(createRestaurantItem(
               { ...lunchPlacement, anchorName: 'Position actuelle' },
               'lunch', lunchTime, 75, cluster.dayNumber, orderIndex++
@@ -646,9 +663,13 @@ export function unifiedScheduleV3Days(
               break;
             }
           }
+          // Strict hours check failed — use candidate anyway at best slot
+          if (!dinnerPlacement) {
+            dinnerPlacement = candidateDinner;
+            finalDinnerTime = dinnerSlots[0];
+          }
         }
-        // Skip hotel-fallback: on day trips, prefer "Repas libre" over a restaurant 16km away
-        if (dinnerPlacement && strictMealPlacement(dinnerPlacement, dayDate, finalDinnerTime, 90, 0.8)) {
+        if (dinnerPlacement) {
           items.push(createRestaurantItem(
             { ...dinnerPlacement, anchorName: 'Position actuelle' },
             'dinner', finalDinnerTime, 90, cluster.dayNumber, orderIndex++

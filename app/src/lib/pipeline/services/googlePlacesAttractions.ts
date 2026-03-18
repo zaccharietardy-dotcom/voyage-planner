@@ -69,6 +69,9 @@ export async function searchGooglePlacesAttractions(
     const seenPlaceIds = new Set<string>();
 
     for (const query of queries) {
+      const { trackApiCost } = await import('../../services/apiCostGuard');
+      trackApiCost('places-text-search-legacy');
+
       const url = new URL(GOOGLE_PLACES_TEXT_SEARCH_URL);
       url.searchParams.set('query', query);
       url.searchParams.set('language', 'fr');
@@ -257,6 +260,9 @@ async function fetchPlaceDetails(
   apiKey: string
 ): Promise<PlaceDetailsResult | null> {
   try {
+    const { trackApiCost } = await import('../../services/apiCostGuard');
+    trackApiCost('places-details-legacy');
+
     const url = new URL(GOOGLE_PLACES_DETAILS_URL);
     url.searchParams.set('place_id', placeId);
     url.searchParams.set('fields', 'opening_hours,business_status,formatted_phone_number,website');

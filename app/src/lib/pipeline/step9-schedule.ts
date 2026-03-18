@@ -1076,12 +1076,15 @@ export function getActivityCloseTime(activity: ScoredActivity, dayDate: Date): s
   const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
   const dayName = dayNames[dayDate.getDay()];
 
-  // Always-open public spaces (piazzas, parks, streets) — no closing time
+  // Always-open public spaces — no closing time
   // BUT only if no explicit opening hours are provided (e.g. "Le Jardin Secret" has hours)
   const hasExplicitHours = activity.openingHoursByDay || activity.openingHours;
   if (!hasExplicitHours) {
-    const alwaysOpenKeywords = /piazza|plaza|place|park|jardin|garden|fontaine|fountain|bridge|pont|quartier|street|via|campo|square/i;
-    if (alwaysOpenKeywords.test(activity.name || '')) return null;
+    const trulyAlwaysOpen = /piazza|plaza|place|fontaine|fountain|bridge|pont|quartier|street|via|campo|square/i;
+    if (trulyAlwaysOpen.test(activity.name || '')) return null;
+    // Managed parks/gardens close at dusk — conservative 19:00
+    const duskClose = /park|jardin|garden/i;
+    if (duskClose.test(activity.name || '')) return '19:00';
   }
 
   // Check day-specific hours first

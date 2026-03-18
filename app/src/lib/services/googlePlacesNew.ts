@@ -111,6 +111,11 @@ async function googlePlacesFetch<T>(
 
   googlePlacesRequestCount++;
 
+  // Cost guard — determine call type from endpoint
+  const { trackApiCost } = await import('./apiCostGuard');
+  const costType = endpoint.includes('searchNearby') ? 'places-nearby-search' : 'places-text-search';
+  trackApiCost(costType);
+
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT_MS);
 
