@@ -13,6 +13,7 @@
 import type { Attraction } from '../../services/attractions';
 import type { ActivityType } from '../../types';
 import { buildPlacePhotoProxyUrl } from '../../services/googlePlacePhoto';
+import { getCachedResponse, setCachedResponse } from '../../services/supabaseCache';
 
 const GOOGLE_PLACES_TEXT_SEARCH_URL = 'https://maps.googleapis.com/maps/api/place/textsearch/json';
 
@@ -69,6 +70,20 @@ export async function searchGooglePlacesAttractions(
     const seenPlaceIds = new Set<string>();
 
     for (const query of queries) {
+      // L2 cache check
+      const cacheKey = `places-text-search-legacy|${query}|fr`;
+      const cachedResults = await getCachedResponse<any[]>('places-text-search-legacy', cacheKey);
+      if (cachedResults) {
+        for (const result of cachedResults) {
+          if (!seenPlaceIds.has(result.place_id)) {
+            if (isExcludedPlaceType(result.types || [])) continue;
+            seenPlaceIds.add(result.place_id);
+            allResults.push(result);
+          }
+        }
+        continue;
+      }
+
       const { trackApiCost } = await import('../../services/apiCostGuard');
       trackApiCost('places-text-search-legacy');
 
@@ -92,6 +107,9 @@ export async function searchGooglePlacesAttractions(
         console.warn(`[Google Places] Status: ${data.status} - ${data.error_message || ''}`);
         continue;
       }
+
+      // Save raw results to L2 (before dedup/filtering)
+      setCachedResponse('places-text-search-legacy', cacheKey, data.results || [], 30, destination).catch(() => {});
 
       for (const result of data.results || []) {
         if (!seenPlaceIds.has(result.place_id)) {
@@ -259,6 +277,11 @@ async function fetchPlaceDetails(
   placeId: string,
   apiKey: string
 ): Promise<PlaceDetailsResult | null> {
+  // L2 cache check
+  const cacheKey = `places-details|${placeId}`;
+  const cachedDetails = await getCachedResponse<PlaceDetailsResult>('places-details-legacy', cacheKey);
+  if (cachedDetails) return cachedDetails;
+
   try {
     const { trackApiCost } = await import('../../services/apiCostGuard');
     trackApiCost('places-details-legacy');
@@ -320,12 +343,17 @@ async function fetchPlaceDetails(
       }
     }
 
-    return {
+    const detailResult: PlaceDetailsResult = {
       openingHours,
       businessStatus: result.business_status || undefined,
       phone: result.formatted_phone_number || undefined,
       website: result.website || undefined,
     };
+
+    // Save to L2
+    setCachedResponse('places-details-legacy', cacheKey, detailResult, 30).catch(() => {});
+
+    return detailResult;
   } catch {
     return null;
   }

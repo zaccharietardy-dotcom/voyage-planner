@@ -21,6 +21,7 @@ import { Attraction } from './attractions';
 import { calculateDistance } from './geocoding';
 import { getDestinationSize, getCostMultiplier, getDestinationArchetypes } from './destinationData';
 import { buildPlacePhotoProxyUrl } from './googlePlacePhoto';
+import { getCachedResponse, setCachedResponse } from './supabaseCache';
 
 // ============================================
 // Configuration
@@ -238,6 +239,13 @@ export async function textSearchPlaces(
   const cached = getFromCache(textSearchCache, cacheKey);
   if (cached) return cached;
 
+  // L2 Supabase cache
+  const l2 = await getCachedResponse<GooglePlaceNewResult[]>('text-search', cacheKey);
+  if (l2) {
+    setInCache(textSearchCache, cacheKey, l2);
+    return l2;
+  }
+
   const body: Record<string, unknown> = {
     textQuery: query,
     languageCode,
@@ -265,6 +273,7 @@ export async function textSearchPlaces(
 
   const places = result?.places || [];
   setInCache(textSearchCache, cacheKey, places);
+  setCachedResponse('text-search', cacheKey, places, 30).catch(() => {});
 
   console.log(`[Google Places New] Text search "${query}": ${places.length} results`);
   return places;
@@ -305,6 +314,13 @@ export async function nearbySearchPlaces(
   const cached = getFromCache(nearbySearchCache, cacheKey);
   if (cached) return cached;
 
+  // L2 Supabase cache
+  const l2 = await getCachedResponse<GooglePlaceNewResult[]>('nearby-search', cacheKey);
+  if (l2) {
+    setInCache(nearbySearchCache, cacheKey, l2);
+    return l2;
+  }
+
   const body: Record<string, unknown> = {
     locationRestriction: {
       circle: {
@@ -331,6 +347,7 @@ export async function nearbySearchPlaces(
 
   const places = result?.places || [];
   setInCache(nearbySearchCache, cacheKey, places);
+  setCachedResponse('nearby-search', cacheKey, places, 30).catch(() => {});
 
   console.log(`[Google Places New] Nearby search @${center.lat.toFixed(3)},${center.lng.toFixed(3)}: ${places.length} results`);
   return places;

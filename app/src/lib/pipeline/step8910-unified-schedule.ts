@@ -1249,10 +1249,10 @@ export function unifiedScheduleV3Days(
         const dayDateForSearch = new Date(new Date(startDateStr).getTime() + (day.dayNumber - 1) * 86400000);
         const replacement = reAnchor ? findBestRestaurant(
           dayPool, reAnchor, mealType as 'lunch' | 'dinner',
-          0.8, 3.5, 2, dietary, usedRestaurantIds, dayDateForSearch
+          1.5, 3.5, 2, dietary, usedRestaurantIds, dayDateForSearch
         ) : null;
         // Check if replacement is actually close enough (< 1km from anchor)
-        const SELF_MEAL_THRESHOLD_KM = 1.0;
+        const SELF_MEAL_THRESHOLD_KM = 2.0;
         const replacementDist = replacement && reAnchor
           ? calculateDistance(replacement.primary.latitude, replacement.primary.longitude, reAnchor.lat, reAnchor.lng)
           : Infinity;
@@ -1263,10 +1263,16 @@ export function unifiedScheduleV3Days(
             mealType as 'lunch' | 'dinner', item.startTime, item.duration || 75, day.dayNumber, item.orderIndex
           );
           usedRestaurantIds.add(replacement.primary.id);
-        } else {
+        } else if (item.restaurant) {
+          // Un vrai restaurant distant > "Repas libre" — garder mais flagger
           const reason = replacement
             ? `closest restaurant "${replacement.primary.name}" still ${(replacementDist * 1000).toFixed(0)}m away`
             : 'no restaurant found nearby';
+          console.log(`[Unified P0.2] Day ${day.dayNumber}: ${reason} — keeping "${item.restaurant.name}" with distant flag`);
+          item.qualityFlags = [...(item.qualityFlags || []), 'restaurant_distant'];
+        } else {
+          // Aucun restaurant placé → vrai fallback
+          const reason = 'no restaurant available';
           console.log(`[Unified P0.2] Day ${day.dayNumber}: ${reason} — using Repas libre`);
           rescueDiagnostics.lateMealReplacementCount++;
           day.items[i] = createSelfMealFallbackItem(mealType as 'lunch' | 'dinner', item.startTime, item.duration || 75, day.dayNumber, item.orderIndex, reAnchor);
