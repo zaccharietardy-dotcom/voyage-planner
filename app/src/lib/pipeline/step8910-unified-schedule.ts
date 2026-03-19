@@ -1251,14 +1251,23 @@ export function unifiedScheduleV3Days(
           dayPool, reAnchor, mealType as 'lunch' | 'dinner',
           0.8, 3.5, 2, dietary, usedRestaurantIds, dayDateForSearch
         ) : null;
-        if (replacement) {
-          console.log(`[Unified P0.2] Day ${day.dayNumber}: found closer restaurant "${replacement.primary.name}"`);
+        // Check if replacement is actually close enough (< 1km from anchor)
+        const SELF_MEAL_THRESHOLD_KM = 1.0;
+        const replacementDist = replacement && reAnchor
+          ? calculateDistance(replacement.primary.latitude, replacement.primary.longitude, reAnchor.lat, reAnchor.lng)
+          : Infinity;
+        if (replacement && replacementDist <= SELF_MEAL_THRESHOLD_KM) {
+          console.log(`[Unified P0.2] Day ${day.dayNumber}: found closer restaurant "${replacement.primary.name}" (${(replacementDist * 1000).toFixed(0)}m)`);
           day.items[i] = createRestaurantItem(
             { ...replacement, anchorName: 'Position actuelle' },
             mealType as 'lunch' | 'dinner', item.startTime, item.duration || 75, day.dayNumber, item.orderIndex
           );
           usedRestaurantIds.add(replacement.primary.id);
         } else {
+          const reason = replacement
+            ? `closest restaurant "${replacement.primary.name}" still ${(replacementDist * 1000).toFixed(0)}m away`
+            : 'no restaurant found nearby';
+          console.log(`[Unified P0.2] Day ${day.dayNumber}: ${reason} — using Repas libre`);
           rescueDiagnostics.lateMealReplacementCount++;
           day.items[i] = createSelfMealFallbackItem(mealType as 'lunch' | 'dinner', item.startTime, item.duration || 75, day.dayNumber, item.orderIndex, reAnchor);
         }
