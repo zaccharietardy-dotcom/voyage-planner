@@ -80,6 +80,22 @@ function strictMealPlacement(
   );
 }
 
+/** Search restaurant with tight radius first (400m), fallback to standard (800m) */
+function findBestRestaurantTight(
+  restaurants: Parameters<typeof findBestRestaurant>[0],
+  anchor: Parameters<typeof findBestRestaurant>[1],
+  mealType: Parameters<typeof findBestRestaurant>[2],
+  dietary: string[],
+  usedIds: Set<string>,
+  dayDate: Date | null
+): ReturnType<typeof findBestRestaurant> {
+  // Try tight radius first (400m) — less zigzag
+  const tight = findBestRestaurant(restaurants, anchor, mealType, 0.4, 3.5, 2, dietary, usedIds, dayDate);
+  if (tight) return tight;
+  // Fallback to standard radius (800m)
+  return findBestRestaurant(restaurants, anchor, mealType, 0.8, 3.5, 2, dietary, usedIds, dayDate);
+}
+
 function stampDayPlanningMeta(day: TripDay, role?: PlannerRole): void {
   for (const item of day.items) {
     item.planningMeta = {
@@ -492,9 +508,9 @@ export function unifiedScheduleV3Days(
           const lunchSlots = [currentTime, '12:30', '13:00', '13:30'];
           let lunchPlacement: ReturnType<typeof findBestRestaurant> = null;
           let finalLunchTime = currentTime;
-          const candidatePlacement = findBestRestaurant(
+          const candidatePlacement = findBestRestaurantTight(
             dayRestaurants, lunchAnchor, 'lunch',
-            0.8, 3.5, 2, dietary, usedRestaurantIds, dayDateForRestaurant
+            dietary, usedRestaurantIds, dayDateForRestaurant
           );
           if (candidatePlacement) {
             // Verify restaurant is actually open at the specific slot time
@@ -615,9 +631,9 @@ export function unifiedScheduleV3Days(
           const lunchSlots = [currentTime, '12:30', '13:00', '13:30'];
           let lunchPlacement: ReturnType<typeof findBestRestaurant> = null;
           let finalLunchTime = currentTime;
-          const candidatePlacement = findBestRestaurant(
+          const candidatePlacement = findBestRestaurantTight(
             dayRestaurants, lunchAnchor, 'lunch',
-            0.8, 3.5, 2, dietary, usedRestaurantIds, dayDateForRestaurant
+            dietary, usedRestaurantIds, dayDateForRestaurant
           );
           if (candidatePlacement) {
             for (const slot of lunchSlots) {
@@ -655,9 +671,9 @@ export function unifiedScheduleV3Days(
           const dinnerSlots = [dinnerStartCap, '19:30', '20:00', '20:30'];
           let dinnerPlacement: ReturnType<typeof findBestRestaurant> = null;
           let finalDinnerTime = dinnerStartCap;
-          const candidateDinner = findBestRestaurant(
+          const candidateDinner = findBestRestaurantTight(
             dayRestaurants, dinnerAnchorInSitu, 'dinner',
-            0.8, 3.5, 2, dietary, usedRestaurantIds, dayDateForRestaurant
+            dietary, usedRestaurantIds, dayDateForRestaurant
           );
           if (candidateDinner) {
             for (const slot of dinnerSlots) {
@@ -695,9 +711,9 @@ export function unifiedScheduleV3Days(
       {
         const lunchAnchor = currentPosition || getClusterCentroid(cluster.activities);
         if (lunchAnchor) {
-          const lunchPlacement = findBestRestaurant(
+          const lunchPlacement = findBestRestaurantTight(
             dayRestaurants, lunchAnchor, 'lunch',
-            0.8, 3.5, 2, dietary, usedRestaurantIds, dayDateForRestaurant
+            dietary, usedRestaurantIds, dayDateForRestaurant
           );
           if (lunchPlacement) {
             // Use candidate even if strict hours check fails — real restaurant beats "Repas libre"
@@ -730,9 +746,9 @@ export function unifiedScheduleV3Days(
         const dinnerSlots = [dinnerTime, '19:30', '20:00', '20:30'];
         let dinnerPlacement: ReturnType<typeof findBestRestaurant> = null;
         let finalDinnerTime = dinnerTime;
-        const candidateDinner = findBestRestaurant(
+        const candidateDinner = findBestRestaurantTight(
           dayRestaurants, dinnerAnchor, 'dinner',
-          0.8, 3.5, 2, dietary, usedRestaurantIds, dayDateForRestaurant
+          dietary, usedRestaurantIds, dayDateForRestaurant
         );
         if (candidateDinner) {
           // Verify restaurant is actually open at the specific slot time
