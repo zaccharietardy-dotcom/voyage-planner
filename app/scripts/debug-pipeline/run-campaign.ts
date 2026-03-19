@@ -510,14 +510,27 @@ async function main(): Promise<void> {
     const started = new Date().toISOString();
     console.log(`\n▶️  [${runId}] Scenario ${scenarioId}`);
 
-    // In golden mode, load fixture data; in capture mode, capture after run
-    const fixtureData = options.mode === 'golden' ? loadFixture(scenarioId) : undefined;
+    // In golden/smoke mode, load fixture data if available; in capture mode, capture after run
+    const fixtureData = (options.mode === 'golden' || options.mode === 'smoke') ? loadFixture(scenarioId) : undefined;
     if (options.mode === 'golden' && !fixtureData) {
       console.warn(`⚠️  [${runId}] No fixture for ${scenarioId} — skipping`);
       continue;
     }
+    if (options.mode === 'smoke' && fixtureData) {
+      console.log(`  📦 Using fixture for ${scenarioId} (no API calls)`);
+    }
 
-    const result = await generateTripRun(scenarioId, scenario.preferences, fixtureData ? { fixtureData } : undefined);
+    const fixtureMode = getFixtureMode();
+    let capturedFetchedData: import('../../src/lib/pipeline/types').FetchedData | null = null;
+    const runOptions: Parameters<typeof generateTripRun>[2] = fixtureData
+      ? { fixtureData }
+      : fixtureMode === 'capture'
+        ? { onFetchedData: (data) => { capturedFetchedData = data; } }
+        : undefined;
+    const result = await generateTripRun(scenarioId, scenario.preferences, runOptions);
+    if (fixtureMode === 'capture' && capturedFetchedData && result.success) {
+      captureFixture(scenarioId, capturedFetchedData);
+    }
     const decorated: GenerationResult = {
       ...result,
       _campaign: {

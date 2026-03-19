@@ -615,6 +615,8 @@ async function populateRestaurantAlternatives(
 export interface GenerateTripV3Options {
   /** Pre-loaded fixture data — skips step 1 fetch when provided */
   fixtureData?: FetchedData;
+  /** Callback to capture FetchedData after step 1 (for fixture recording) */
+  onFetchedData?: (data: FetchedData) => void;
 }
 
 export async function generateTripV3(
@@ -646,6 +648,9 @@ export async function generateTripV3(
     stageTimes['fetch'] = Date.now() - t;
     onEvent?.({ type: 'step_done', step: 1, stepName: 'Fetching data', durationMs: stageTimes['fetch'], timestamp: Date.now() });
   }
+
+  // Notify caller with FetchedData (for fixture capture)
+  options?.onFetchedData?.(data);
 
   // Step 2: Score and rank activities
   t = Date.now();

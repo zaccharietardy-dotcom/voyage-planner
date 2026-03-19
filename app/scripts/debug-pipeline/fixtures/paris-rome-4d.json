@@ -1,0 +1,2199 @@
+{
+  "destCoords": {
+    "lat": 41.9028,
+    "lng": 12.4964
+  },
+  "originCoords": {
+    "lat": 48.8566,
+    "lng": 2.3522
+  },
+  "originAirports": [
+    {
+      "code": "CDG",
+      "name": "Paris Charles de Gaulle",
+      "city": "Paris",
+      "country": "France",
+      "latitude": 49.0097,
+      "longitude": 2.5479
+    },
+    {
+      "code": "ORY",
+      "name": "Paris Orly",
+      "city": "Paris",
+      "country": "France",
+      "latitude": 48.7262,
+      "longitude": 2.3652
+    }
+  ],
+  "destAirports": [
+    {
+      "code": "FCO",
+      "name": "Rome Fiumicino",
+      "city": "Rome",
+      "country": "Italie",
+      "latitude": 41.8003,
+      "longitude": 12.2389
+    }
+  ],
+  "googlePlacesAttractions": [],
+  "serpApiAttractions": [],
+  "overpassAttractions": [
+    {
+      "id": "osm-Q12512",
+      "name": "basilique Saint-Pierre",
+      "type": "culture",
+      "description": "basilique catholique de la Cité du Vatican",
+      "duration": 60,
+      "estimatedCost": 0,
+      "latitude": 41.9021616,
+      "longitude": 12.4537132,
+      "rating": 4.616244071283537,
+      "mustSee": true,
+      "bookingRequired": false,
+      "bookingUrl": "https://www.basilicasanpietro.va/",
+      "openingHours": {
+        "open": "09:00",
+        "close": "18:00"
+      },
+      "dataReliability": "verified",
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=basilique%20Saint-Pierre",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Basilica_di_San_Pietro_in_Vaticano_September_2015-1a.jpg/400px-Basilica_di_San_Pietro_in_Vaticano_September_2015-1a.jpg",
+      "providerName": "OpenStreetMap + Wikidata",
+      "reviewCount": 128
+    },
+    {
+      "id": "osm-Q2943",
+      "name": "chapelle Sixtine",
+      "type": "culture",
+      "description": "chapelle construite au Vatican par le Pape Sixte IV en l’honneur de la Conception de la Vierge Marie",
+      "duration": 60,
+      "estimatedCost": 0,
+      "latitude": 41.9029338,
+      "longitude": 12.4544042,
+      "rating": 4.34011878852098,
+      "mustSee": false,
+      "bookingRequired": false,
+      "bookingUrl": "https://www.museivaticani.va/content/museivaticani/it.html",
+      "openingHours": {
+        "open": "09:00",
+        "close": "18:00"
+      },
+      "dataReliability": "verified",
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=chapelle%20Sixtine",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Sistina-interno.jpg/400px-Sistina-interno.jpg",
+      "providerName": "OpenStreetMap + Wikidata",
+      "reviewCount": 88
+    },
+    {
+      "id": "osm-Q182955",
+      "name": "musées du Vatican",
+      "type": "culture",
+      "description": "ensemble de musées dans la Cité du Vatican",
+      "duration": 120,
+      "estimatedCost": 0,
+      "latitude": 41.9062675,
+      "longitude": 12.4527441,
+      "rating": 4.1338934190276815,
+      "mustSee": false,
+      "bookingRequired": false,
+      "bookingUrl": "http://www.museivaticani.va",
+      "openingHours": {
+        "open": "09:00",
+        "close": "18:00"
+      },
+      "dataReliability": "verified",
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=mus%C3%A9es%20du%20Vatican",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Mura_vaticane_-_ingresso_ai_Musei_00410.JPG/400px-Mura_vaticane_-_ingresso_ai_Musei_00410.JPG",
+      "providerName": "OpenStreetMap + Wikidata",
+      "reviewCount": 63
+    },
+    {
+      "id": "osm-Q200642",
+      "name": "mont Palatin",
+      "type": "culture",
+      "description": "une des sept collines de Rome",
+      "duration": 60,
+      "estimatedCost": 0,
+      "latitude": 41.8893064,
+      "longitude": 12.4871093,
+      "rating": 4.1248582677159735,
+      "mustSee": false,
+      "bookingRequired": false,
+      "openingHours": {
+        "open": "09:00",
+        "close": "18:00"
+      },
+      "dataReliability": "verified",
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=mont%20Palatin",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/Palatine_Hill_from_across_the_Circus_Maximus_April_2019.jpg/400px-Palatine_Hill_from_across_the_Circus_Maximus_April_2019.jpg",
+      "providerName": "OpenStreetMap + Wikidata",
+      "reviewCount": 62
+    },
+    {
+      "id": "osm-Q486382",
+      "name": "château Saint-Ange",
+      "type": "culture",
+      "description": "château et musée à Rome",
+      "duration": 90,
+      "estimatedCost": 0,
+      "latitude": 41.9030762,
+      "longitude": 12.4663312,
+      "rating": 4.087967586551986,
+      "mustSee": false,
+      "bookingRequired": false,
+      "bookingUrl": "http://www.castelsantangelo.beniculturali.it/",
+      "openingHours": {
+        "open": "09:00",
+        "close": "18:00"
+      },
+      "dataReliability": "verified",
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=ch%C3%A2teau%20Saint-Ange",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Engelsburg_und_Engelsbr%C3%BCcke_abends_(Zuschnitt).jpg/400px-Engelsburg_und_Engelsbr%C3%BCcke_abends_(Zuschnitt).jpg",
+      "providerName": "OpenStreetMap + Wikidata",
+      "reviewCount": 58
+    },
+    {
+      "id": "osm-Q235242",
+      "name": "La Pietà",
+      "type": "culture",
+      "description": "sculpture de Michel-Ange",
+      "duration": 60,
+      "estimatedCost": 0,
+      "latitude": 41.9023032,
+      "longitude": 12.4545797,
+      "rating": 4.069044967649697,
+      "mustSee": false,
+      "bookingRequired": false,
+      "openingHours": {
+        "open": "09:00",
+        "close": "18:00"
+      },
+      "dataReliability": "verified",
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=La%20Piet%C3%A0",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Michelangelo's_Pieta_5450_cropncleaned_edit.jpg/400px-Michelangelo's_Pieta_5450_cropncleaned_edit.jpg",
+      "providerName": "OpenStreetMap + Wikidata",
+      "reviewCount": 56
+    },
+    {
+      "id": "osm-Q5786",
+      "name": "arc de Constantin",
+      "type": "culture",
+      "description": "arc de triomphe à Rome",
+      "duration": 20,
+      "estimatedCost": 0,
+      "latitude": 41.8897623,
+      "longitude": 12.4906668,
+      "rating": 4,
+      "mustSee": false,
+      "bookingRequired": false,
+      "bookingUrl": "https://www.colosseo.beniculturali.it",
+      "openingHours": {
+        "open": "09:00",
+        "close": "18:00"
+      },
+      "dataReliability": "verified",
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=arc%20de%20Constantin",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Arch_of_Constantine_(Rome)_-_South_side%2C_from_Via_triumphalis.jpg/400px-Arch_of_Constantine_(Rome)_-_South_side%2C_from_Via_triumphalis.jpg",
+      "providerName": "OpenStreetMap + Wikidata",
+      "reviewCount": 49
+    },
+    {
+      "id": "osm-Q463400",
+      "name": "piazza Navona",
+      "type": "culture",
+      "description": "place de Rome, Italie",
+      "duration": 60,
+      "estimatedCost": 0,
+      "latitude": 41.8989256,
+      "longitude": 12.4730991,
+      "rating": 3.9793792286287206,
+      "mustSee": false,
+      "bookingRequired": false,
+      "openingHours": {
+        "open": "09:00",
+        "close": "18:00"
+      },
+      "dataReliability": "verified",
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=piazza%20Navona",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Paolo_Monti_-_Servizio_fotografico_(Roma%2C_1966)_-_BEIC_6329173.jpg/400px-Paolo_Monti_-_Servizio_fotografico_(Roma%2C_1966)_-_BEIC_6329173.jpg",
+      "providerName": "OpenStreetMap + Wikidata",
+      "reviewCount": 47
+    },
+    {
+      "id": "osm-Q841506",
+      "name": "Galerie Borghèse",
+      "type": "culture",
+      "description": "musée d'art à Rome",
+      "duration": 120,
+      "estimatedCost": 0,
+      "latitude": 41.9141133,
+      "longitude": 12.4921053,
+      "rating": 3.9689042833036097,
+      "mustSee": false,
+      "bookingRequired": false,
+      "bookingUrl": "http://galleriaborghese.beniculturali.it",
+      "openingHours": {
+        "open": "09:00",
+        "close": "18:00"
+      },
+      "dataReliability": "verified",
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Galerie%20Borgh%C3%A8se",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/Roma_Museo_Borghese.jpg/400px-Roma_Museo_Borghese.jpg",
+      "providerName": "OpenStreetMap + Wikidata",
+      "reviewCount": 46
+    },
+    {
+      "id": "osm-Q408623",
+      "name": "Louve capitoline",
+      "type": "culture",
+      "description": "sculpture en bronze d'une louve allaitant les deux jumeaux Romulus et Rémus, inspirée par la légende de la fondation de Rome",
+      "duration": 60,
+      "estimatedCost": 0,
+      "latitude": 41.8932668,
+      "longitude": 12.4836522,
+      "rating": 3.9258200997725514,
+      "mustSee": false,
+      "bookingRequired": false,
+      "openingHours": {
+        "open": "09:00",
+        "close": "18:00"
+      },
+      "dataReliability": "verified",
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Louve%20capitoline",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Lupa_Capitolina%2C_Rome.jpg/400px-Lupa_Capitolina%2C_Rome.jpg",
+      "providerName": "OpenStreetMap + Wikidata",
+      "reviewCount": 42
+    },
+    {
+      "id": "osm-Q723887",
+      "name": "arc de Titus",
+      "type": "culture",
+      "description": "arc de triomphe sur le forum romain",
+      "duration": 20,
+      "estimatedCost": 0,
+      "latitude": 41.8906722,
+      "longitude": 12.4885842,
+      "rating": 3.9258200997725514,
+      "mustSee": false,
+      "bookingRequired": false,
+      "bookingUrl": "https://parcocolosseo.it/mirabilia/arco-di-tito/",
+      "openingHours": {
+        "open": "09:00",
+        "close": "18:00"
+      },
+      "dataReliability": "verified",
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=arc%20de%20Titus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Arch_Titus%2C_Forum_Romanum%2C_Rome%2C_Italy.jpg/400px-Arch_Titus%2C_Forum_Romanum%2C_Rome%2C_Italy.jpg",
+      "providerName": "OpenStreetMap + Wikidata",
+      "reviewCount": 42
+    },
+    {
+      "id": "osm-Q848072",
+      "name": "escalier de la Trinité-des-Monts",
+      "type": "culture",
+      "description": "escalier monumental à Rome",
+      "duration": 60,
+      "estimatedCost": 0,
+      "latitude": 41.9060487,
+      "longitude": 12.4827975,
+      "rating": 3.9035079029052513,
+      "mustSee": false,
+      "bookingRequired": false,
+      "openingHours": {
+        "open": "09:00",
+        "close": "18:00"
+      },
+      "dataReliability": "verified",
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=escalier%20de%20la%20Trinit%C3%A9-des-Monts",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Scalinata_della_Trinit%C3%A0_dei_Monti.jpg/400px-Scalinata_della_Trinit%C3%A0_dei_Monti.jpg",
+      "providerName": "OpenStreetMap + Wikidata",
+      "reviewCount": 40
+    },
+    {
+      "id": "osm-Q623612",
+      "name": "autel de la paix d'Auguste",
+      "type": "culture",
+      "description": "musée en Italie",
+      "duration": 60,
+      "estimatedCost": 0,
+      "latitude": 41.9061511,
+      "longitude": 12.4755017,
+      "rating": 3.9035079029052513,
+      "mustSee": false,
+      "bookingRequired": false,
+      "openingHours": {
+        "open": "09:00",
+        "close": "18:00"
+      },
+      "dataReliability": "verified",
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=autel%20de%20la%20paix%20d'Auguste",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Ara_Pacis_(SW).jpg/400px-Ara_Pacis_(SW).jpg",
+      "providerName": "OpenStreetMap + Wikidata",
+      "reviewCount": 40
+    }
+  ],
+  "viatorActivities": [
+    {
+      "id": "viator-476313P2",
+      "name": "Rome: Cours pratique de cuisine Fettuccine, Ravioli et Tiramisu",
+      "type": "culture",
+      "description": "Le cours Master Pasta Fettuccine, Ravioli et Tiramisu propose un voyage culinaire pratique à travers les saveurs authentiques de l'Italie. Vous apprendrez à préparer des pâtes fraîches à partir de zéro, à façonner des fettuccine et des raviolis et à confectionner un tiramisu classique avec du mascarpone riche et un expresso audacieux. Guidé par un chef expert, vous acquerrez non seulement des techniques, mais aussi un aperçu des histoires culturelles derrière chaque plat. L'atmosphère chaleureuse et engageante vous encourage à expérimenter et à perfectionner vos compétences. À la fin du cours, vous aurez créé un délicieux repas italien et acquis une appréciation plus profonde de ces traditions culinaires bien-aimées.",
+      "duration": 180,
+      "estimatedCost": 59,
+      "latitude": 41.9028,
+      "longitude": 12.4964,
+      "rating": 5,
+      "mustSee": false,
+      "bookingRequired": true,
+      "bookingUrl": "https://www.viator.com/fr-FR/tours/Rome/Rome-Pasta-Fettuccine-Ravioli-and-Tiramisu-Class/d511-476313P2?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+      "openingHours": {
+        "open": "09:00",
+        "close": "18:00"
+      },
+      "dataReliability": "estimated",
+      "geoSource": "city_fallback",
+      "geoConfidence": "low",
+      "qualityFlags": [
+        "viator_city_center_fallback"
+      ],
+      "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/r/32/6f/29/d4/caption.jpg",
+      "providerName": "Viator",
+      "reviewCount": 219,
+      "freeCancellation": true,
+      "instantConfirmation": false
+    },
+    {
+      "id": "viator-296635P1",
+      "name": "Repas fait maison privé avec un chef privé à Rome",
+      "type": "culture",
+      "description": "Bien que je ne connaissais pas bien l'anglais (comme la plupart des italiens), je me suis fait comprendre et apprécier, comme vous pouvez le voir sur les commentaires et je vais vous en dire plus j'ai également été inclus sur Tripadvisor parmi les meilleures expériences gastronomiques \"mondiales\" et je suis le quatrième au monde. Lors de mes expériences, on m’a souvent demandé de partager les recettes des plats que je préparais. C’est ainsi qu’est née l’idée de les inclure dans mon premier roman, où histoires de famille, anecdotes historiques et saveurs se côtoient dans une série de récits. Si vous le souhaitez, vous pouvez simplement me demander le lien pour l’acheter et je vous l’enverrai. Quand nous nous rencontrerons, je serai heureux d’écrire une dédicace personnelle, ou, si vous préférez, je peux apporter une copie moi-même, tout comme je peux apporter, sur demande, une bouteille de vin accompagnée de votre menu. Un souvenir qui, je l’espère, restera dans votre cœur, tout comme l’expérience que nous partagerons.",
+      "duration": 150,
+      "estimatedCost": 70,
+      "latitude": 41.9028,
+      "longitude": 12.4964,
+      "rating": 5,
+      "mustSee": false,
+      "bookingRequired": true,
+      "bookingUrl": "https://www.viator.com/fr-FR/tours/Rome/Homemade-Meal-with-a-Private-Chef/d511-296635P1?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+      "openingHours": {
+        "open": "09:00",
+        "close": "18:00"
+      },
+      "dataReliability": "estimated",
+      "geoSource": "city_fallback",
+      "geoConfidence": "low",
+      "qualityFlags": [
+        "viator_city_center_fallback"
+      ],
+      "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/0b/95/a8/c3.jpg",
+      "providerName": "Viator",
+      "reviewCount": 135,
+      "freeCancellation": true,
+      "instantConfirmation": false
+    },
+    {
+      "id": "viator-323442P1",
+      "name": "Visite des jeux et des chasses aux trésors à Rome",
+      "type": "culture",
+      "description": "Profitez de notre visite amusante de 2 heures à Rome! Nous découvrirons les points forts du centre-ville tout en jouant à un jeu familial : votre guide vous demandera de résoudre des quiz et des questions pour des points et des prix. Vous et les enfants serez divertis et engagés tout au long de l'expérience.",
+      "duration": 120,
+      "estimatedCost": 87,
+      "latitude": 41.9028,
+      "longitude": 12.4964,
+      "rating": 5,
+      "mustSee": false,
+      "bookingRequired": true,
+      "bookingUrl": "https://www.viator.com/fr-FR/tours/Rome/Games-and-Treasures-Hunts-in-Rome-for-Kids/d511-323442P1?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+      "openingHours": {
+        "open": "09:00",
+        "close": "18:00"
+      },
+      "dataReliability": "estimated",
+      "geoSource": "city_fallback",
+      "geoConfidence": "low",
+      "qualityFlags": [
+        "viator_city_center_fallback"
+      ],
+      "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/0b/fe/be/35.jpg",
+      "providerName": "Viator",
+      "reviewCount": 109,
+      "freeCancellation": true,
+      "instantConfirmation": false
+    },
+    {
+      "id": "viator-75037P8",
+      "name": "Rome 3 - Excursion d'une heure en Vespa Side-car avec dégustation de pizza gastronomique",
+      "type": "culture",
+      "description": "Découvrez Rome à bord d'une icône intemporelle avec la première agence de voyage à Rome à proposer cette visite unique. Une visite nocturne à bord de nos side-cars Vespa construits sur mesure, modernes et confortables vous mènera aux points forts emblématiques de notre ville ainsi qu'à ses aperçus les plus précieux et les plus authentiques. Notre guide certifié accompagnera votre visite avec une narration détaillée via des écouteurs. Vous naviguerez à travers les places et les monuments historiques de Rome, et parfois nous nous arrêterons et sauterons, nous vous montrerons l'inaccessible dans les meilleurs endroits photo. Pourquoi choisir le Vespa Sidecar Tour : * Asseyez-vous et détendez-vous avec un être cher dans la ville la plus romantique * Nous travaillons avec des guides agréés et expérimentés, et faites-nous confiance, cela fait la différence ! * Rouler sur un side-car est extrêmement sûr et bien plus stable qu'une moto à 2 roues. * Enfin et surtout, cela coûte moins cher ! Il faut compter 1 conducteur pour 2 passagers. Découvrez l'histoire millénaire romaine dans les ruelles historiques de la ville,",
+      "duration": 180,
+      "estimatedCost": 150,
+      "latitude": 41.9028,
+      "longitude": 12.4964,
+      "rating": 5,
+      "mustSee": false,
+      "bookingRequired": true,
+      "bookingUrl": "https://www.viator.com/fr-FR/tours/Rome/Evening-Vespa-Sidecar-Tour-with-Italian-Aperitivo/d511-75037P8?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+      "openingHours": {
+        "open": "09:00",
+        "close": "18:00"
+      },
+      "dataReliability": "estimated",
+      "geoSource": "city_fallback",
+      "geoConfidence": "low",
+      "qualityFlags": [
+        "viator_city_center_fallback",
+        "viator_low_plus_value"
+      ],
+      "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/15/46/8c/b8.jpg",
+      "providerName": "Viator",
+      "reviewCount": 107,
+      "freeCancellation": true,
+      "instantConfirmation": false
+    },
+    {
+      "id": "viator-5499038P2",
+      "name": "Rome : Séance de photos privée au Colisée avec un photographe local",
+      "type": "culture",
+      "description": "Profitez d'une séance photo privée avec Eidos Photography au Colisée et ses points de vue les plus photogéniques, dirigée par un photographe local axé sur la pose naturelle et un flux fluide et détendu. Choisissez votre itinéraire préféré (Colisée uniquement, Colisée + Colline Capitoline, ou Colisée + Forum Romain) et nous adapterons la session à votre style, votre rythme et vos plans de voyage. Idéal pour les couples, les voyageurs en solo, les familles et les propositions. Vous recevrez une galerie organisée de photos magnifiquement retouchées livrées dans les 48 heures, afin de revivre votre expérience à Rome immédiatement.",
+      "duration": 90,
+      "estimatedCost": 45,
+      "latitude": 41.9028,
+      "longitude": 12.4964,
+      "rating": 5,
+      "mustSee": false,
+      "bookingRequired": true,
+      "bookingUrl": "https://www.viator.com/fr-FR/tours/Rome/Private-Photoshoot-in-Rome-at-Colosseum-and-Surroundings/d511-5499038P2?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+      "openingHours": {
+        "open": "09:00",
+        "close": "18:00"
+      },
+      "dataReliability": "estimated",
+      "geoSource": "city_fallback",
+      "geoConfidence": "low",
+      "qualityFlags": [
+        "viator_city_center_fallback"
+      ],
+      "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/13/e7/d6/28.jpg",
+      "providerName": "Viator",
+      "reviewCount": 102,
+      "freeCancellation": true,
+      "instantConfirmation": false
+    },
+    {
+      "id": "viator-5487240P2",
+      "name": "Cours de préparation de pâtes et de tiramisu avec vin italien raffiné à Rome",
+      "type": "culture",
+      "description": "La classe de maître complète comprend un guide étape par étape sur la façon de faire de la pâte à pâtes faite à la main, combiner les ingrédients, créer la garniture parfaite et terminer avec une sauce délicieuse et gourmande. Grâce aux conseils avisés de chefs romains expérimentés, les participants pourront rouler, couper et remplir leurs raviolis à la perfection. Pour compléter les pâtes, l’activité comprend également du vin sans fond, savamment sélectionné pour s’accorder parfaitement avec les délicieux raviolis. Avec une large sélection de vins de haute qualité, les participants peuvent choisir leur accord préféré et profiter pleinement de l'expérience culinaire. Enfin, la classe de fabrication des pâtes: Ravioli & Tiramisu by the Colosseum se déroule à proximité d'un endroit qui offre une toile de fond magnifique pour l'événement. Le Colisée est l'un des monuments les plus emblématiques de Rome, et les participants auront l'occasion de profiter de la beauté du célèbre monument antique tout en s'adonnant à une expérience culinaire authentique.",
+      "duration": 180,
+      "estimatedCost": 99,
+      "latitude": 41.9028,
+      "longitude": 12.4964,
+      "rating": 5,
+      "mustSee": false,
+      "bookingRequired": true,
+      "bookingUrl": "https://www.viator.com/fr-FR/tours/Rome/Rome-Pasta-and-Tiramisu-Making-Experience-with-Fine-Italian-Wine/d511-5487240P2?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+      "openingHours": {
+        "open": "09:00",
+        "close": "18:00"
+      },
+      "dataReliability": "estimated",
+      "geoSource": "city_fallback",
+      "geoConfidence": "low",
+      "qualityFlags": [
+        "viator_city_center_fallback"
+      ],
+      "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/13/c6/df/de.jpg",
+      "providerName": "Viator",
+      "reviewCount": 102,
+      "freeCancellation": true,
+      "instantConfirmation": false
+    },
+    {
+      "id": "viator-131178P1",
+      "name": "Expérience professionnelle de pâtes au laboratoire",
+      "type": "culture",
+      "description": "En 4 ans d'activité dans mon magasin de pâtes, j'ai reçu de nombreuses nominations: dans le prestigieux guide \"Gambero Rosso\" à partir de 2017 et comme la meilleure parmi 10 usines de pâtes à Rome. En Italie, la \"fabrique de pâtes\" est un lieu où des pâtes fraîches sont produites et vendues à ceux qui veulent les cuisiner à la maison. J'ai été inspiré par les pâtes que ma grand-mère préparait quand j'étais enfant. C’était des pâtes très spéciales et aujourd’hui, j’ai réalisé mon rêve parce que je suis fier d’enseigner, au sein de ma \"fabrique de pâtes\", l’ancienne méthode italienne de fabrication des pâtes pour des centaines de personnes désireuses Tradition italienne transmettant tout l'amour et la passion de ma famille. Aujourd'hui, je me consacre à l'organisation de cours de cuisine de grande valeur pour apprendre à préparer des pâtes artisanales fraîches de manière simple et efficace, en réalisant ainsi toutes les recettes de la leçon à la maison.",
+      "duration": 180,
+      "estimatedCost": 64,
+      "latitude": 41.9028,
+      "longitude": 12.4964,
+      "rating": 5,
+      "mustSee": false,
+      "bookingRequired": true,
+      "bookingUrl": "https://www.viator.com/fr-FR/tours/Rome/Professional-Lab-Pasta-Experience/d511-131178P1?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+      "openingHours": {
+        "open": "09:00",
+        "close": "18:00"
+      },
+      "dataReliability": "estimated",
+      "geoSource": "city_fallback",
+      "geoConfidence": "low",
+      "qualityFlags": [
+        "viator_city_center_fallback"
+      ],
+      "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/07/37/9b/1a.jpg",
+      "providerName": "Viator",
+      "reviewCount": 100,
+      "freeCancellation": true,
+      "instantConfirmation": false
+    },
+    {
+      "id": "viator-105123P6",
+      "name": "Rome unique de nuit, visite photo et atelier à la belle étoile",
+      "type": "culture",
+      "description": "C'est la seule visite photo à recueillir exclusivement des commentaires cinq étoiles incroyables. C'est parce que ma priorité est toujours la QUALITÉ plutôt que la quantité, en fournissant une attention amicale, experte et sans partage à mes clients. Vous visiterez Rome avec un vrai photographe professionnel lors d'un atelier photo conçu pour vous donner la meilleure expérience de Rome by Night tout en saisissant ses lieux les plus emblématiques. Vous apprendrez: Lumière & exposition: Maîtrisez les expositions longues, l'équilibre lumineux et l'utilisation de la lumière naturelle et artificielle la nuit. Réglages de l'appareil photo: guidage du mode manuel, contrôle ISO, balance des blancs, ouverture et vitesse d'obturation. Composition: Apprenez à cadrer des clichés captivants à l'aide de lignes principales, de symétrie, d'intérêt pour le premier plan et de superpositions. Coaching: Commentaires et conseils constructifs et amicaux en temps réel pendant que vous tirez. Les utilisateurs d'iPhone sont également les bienvenus. Examen facultatif des photos: Soumettez vos images pour une critique détaillée et des conseils d'amélioration. Consultez nos photos et commentaires 5 étoiles. Vous ne chercherez pas plus loin.",
+      "duration": 240,
+      "estimatedCost": 180,
+      "latitude": 41.9028,
+      "longitude": 12.4964,
+      "rating": 5,
+      "mustSee": false,
+      "bookingRequired": true,
+      "bookingUrl": "https://www.viator.com/fr-FR/tours/Rome/Rome-by-Night-Photo-Tour-and-Workshop-under-the-Stars/d511-105123P6?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+      "openingHours": {
+        "open": "17:00",
+        "close": "23:30"
+      },
+      "dataReliability": "estimated",
+      "geoSource": "city_fallback",
+      "geoConfidence": "low",
+      "qualityFlags": [
+        "viator_city_center_fallback",
+        "viator_low_plus_value"
+      ],
+      "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/06/fa/5b/4f.jpg",
+      "providerName": "Viator",
+      "reviewCount": 96,
+      "freeCancellation": true,
+      "instantConfirmation": false
+    },
+    {
+      "id": "viator-5487240P1",
+      "name": "Expérience de fabrication de pizzas et de gelatos avec du vin italien raffiné à Rome",
+      "type": "culture",
+      "description": "Laissez-vous tenter par une aventure inoubliable avec notre Masterclass Pizza & Gelato, où vous plongerez dans l'art de la cuisine italienne. Dirigée par des chefs experts, cette expérience pratique vous mènera à travers le processus de fabrication de pizzas traditionnelles napolitaines, de gelato crémeux et d'un supplément romain emblématique, accompagné de vins italiens fins à volonté. Commencez votre voyage en apprenant les secrets de la fabrication de la pâte à pizza parfaite, du pétrissage au lancer comme un pro. Explorez une variété de garnitures et de sauces, maîtrisant l'art de créer des saveurs qui dansent sur vos papilles. Ensuite, plongez dans le monde des gelatos, en découvrant l'équilibre délicat des ingrédients et des techniques nécessaires pour atteindre sa perfection crémeuse. Des saveurs classiques aux combinaisons innovantes, percez les secrets pour créer des délices glacés irrésistibles. En savourant vos créations, laissez-vous tenter par le délice savoureux d'un supplì romain, croustillant de boules de risotto suintant à la mozzarella.",
+      "duration": 180,
+      "estimatedCost": 99,
+      "latitude": 41.9028,
+      "longitude": 12.4964,
+      "rating": 5,
+      "mustSee": false,
+      "bookingRequired": true,
+      "bookingUrl": "https://www.viator.com/fr-FR/tours/Rome/Rome-Pizza-and-Gelato-Making-Experience-with-Fine-Italian-Wine/d511-5487240P1?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+      "openingHours": {
+        "open": "09:00",
+        "close": "18:00"
+      },
+      "dataReliability": "estimated",
+      "geoSource": "city_fallback",
+      "geoConfidence": "low",
+      "qualityFlags": [
+        "viator_city_center_fallback"
+      ],
+      "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/13/c6/cb/fa.jpg",
+      "providerName": "Viator",
+      "reviewCount": 95,
+      "freeCancellation": true,
+      "instantConfirmation": false
+    },
+    {
+      "id": "viator-5487240P4",
+      "name": "Cours de cuisine pizza, gelato et suppli par Colisée",
+      "type": "culture",
+      "description": "Laissez-vous tenter par une aventure inoubliable avec notre Masterclass Pizza & Gelato, où vous plongerez dans l'art de la cuisine italienne. Dirigée par des chefs experts, cette expérience pratique vous mènera à travers le processus de fabrication de pizzas traditionnelles napolitaines, de gelato crémeux et d'un supplément romain emblématique, accompagné de vins italiens fins à volonté. Commencez votre voyage en apprenant les secrets de la fabrication de la pâte à pizza parfaite, du pétrissage au lancer comme un pro. Explorez une variété de garnitures et de sauces, maîtrisant l'art de créer des saveurs qui dansent sur vos papilles. Ensuite, plongez dans le monde des gelatos, en découvrant l'équilibre délicat des ingrédients et des techniques nécessaires pour atteindre sa perfection crémeuse. Des saveurs classiques aux combinaisons innovantes, percez les secrets pour créer des délices glacés irrésistibles. En savourant vos créations, laissez-vous tenter par le délice savoureux d'un supplì romain, croustillant de boules de risotto suintant à la mozzarella.",
+      "duration": 180,
+      "estimatedCost": 99,
+      "latitude": 41.9028,
+      "longitude": 12.4964,
+      "rating": 5,
+      "mustSee": false,
+      "bookingRequired": true,
+      "bookingUrl": "https://www.viator.com/fr-FR/tours/Rome/Rome-Pizza-Gelato-and-Suppli-Cooking-Experience-with-Premium-Wine/d511-5487240P4?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+      "openingHours": {
+        "open": "09:00",
+        "close": "18:00"
+      },
+      "dataReliability": "estimated",
+      "geoSource": "city_fallback",
+      "geoConfidence": "low",
+      "qualityFlags": [
+        "viator_city_center_fallback"
+      ],
+      "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/13/c5/38/69.jpg",
+      "providerName": "Viator",
+      "reviewCount": 94,
+      "freeCancellation": true,
+      "instantConfirmation": false
+    },
+    {
+      "id": "viator-402815P2",
+      "name": " Excursion d'une journée à Rome en voiture Tivoli Unesco Villa D'Este et Villa d'Hadrien",
+      "type": "culture",
+      "description": "Ciao soyez curieux de nos destinations, notre IG : scoot_around_rome Tivoli est une petite ville non loin de Rome (50 km), pleine d'histoire et de points forts La prise en charge et le retour se font à la station de métro Cinecittà. Prise en charge/retour OPTIONNEL à votre hôtel (frais supplémentaires, contactez-nous à l'avance, fournissez le nom et l'adresse de l'hôtel pour confirmer sa viabilité) 2 sites UNESCO : Villa Adriana et Villa D'este ! Découvrez ces deux endroits, profitez d'un bon déjeuner et de la vue sur l'incroyable cascade de Tivoli. Je serai votre chauffeur privé. Dans 50 minutes, nous atteignons la Villa Adriana (la villa d'Hadrien). La visite de ce site antique prendra environ 3 heures. Après cela, nous nous dirigerons vers le centre-ville de Tivoli où se trouve la Villa D'Este, à environ 15 minutes de la villa d'Hadrien ! Avant la visite de la Villa D'Este, vous pouvez prendre une pause déjeuner. La Villa D'Este, célèbre pour ses fontaines et ses jardins, la durée de la visite est d'environ 10 minutes. 1h30 - 2 heures ! A la fin de la visite nous irons voir la GRANDE Cascata de Tivoli, une vue imprenable sur la cascade de Tivoli.",
+      "duration": 360,
+      "estimatedCost": 89,
+      "latitude": 41.9028,
+      "longitude": 12.4964,
+      "rating": 5,
+      "mustSee": false,
+      "bookingRequired": true,
+      "bookingUrl": "https://www.viator.com/fr-FR/tours/Rome/Day-trip-Rome-car-Tivoli-Unesco-Villa-Deste-and-Hadrian-Villa/d511-402815P2?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+      "openingHours": {
+        "open": "09:00",
+        "close": "18:00"
+      },
+      "dataReliability": "estimated",
+      "geoSource": "city_fallback",
+      "geoConfidence": "low",
+      "qualityFlags": [
+        "viator_city_center_fallback"
+      ],
+      "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/12/78/50/54.jpg",
+      "providerName": "Viator",
+      "reviewCount": 85,
+      "freeCancellation": true,
+      "instantConfirmation": false
+    },
+    {
+      "id": "viator-7377P9",
+      "name": "Tour de Rome en Segway avec Guide Local",
+      "type": "culture",
+      "description": "Cette visite est absolument parfaite si vous souhaitez connaître rapidement le centre historique de Rome avec ses belles places et ses fontaines. Nous glissons à travers de belles rues, des églises, des marchés de fontaines et de nombreuses autres attractions. Parfait pour un premier jour à Rome et à tous ceux qui voudraient obtenir de belles histoires sur les sites!",
+      "duration": 210,
+      "estimatedCost": 90,
+      "latitude": 41.9028,
+      "longitude": 12.4964,
+      "rating": 5,
+      "mustSee": false,
+      "bookingRequired": true,
+      "bookingUrl": "https://www.viator.com/fr-FR/tours/Rome/Rome-Highlights-by-Segway-Tour-with-Local-Guide/d511-7377P9?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+      "openingHours": {
+        "open": "09:00",
+        "close": "18:00"
+      },
+      "dataReliability": "estimated",
+      "geoSource": "city_fallback",
+      "geoConfidence": "low",
+      "qualityFlags": [
+        "viator_city_center_fallback"
+      ],
+      "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/06/75/42/20.jpg",
+      "providerName": "Viator",
+      "reviewCount": 80,
+      "freeCancellation": true,
+      "instantConfirmation": false
+    }
+  ],
+  "mustSeeAttractions": [
+    {
+      "id": "colosseum",
+      "name": "Colisée",
+      "type": "culture",
+      "description": "Amphithéâtre antique emblématique de Rome",
+      "duration": 120,
+      "estimatedCost": 18,
+      "latitude": 41.8902,
+      "longitude": 12.4922,
+      "rating": 4.8,
+      "mustSee": true,
+      "bookingRequired": true,
+      "bookingUrl": "https://www.coopculture.it/en/colosseo-e-shop.cfm",
+      "openingHours": {
+        "open": "09:00",
+        "close": "19:00"
+      },
+      "dataReliability": "verified"
+    },
+    {
+      "id": "vatican",
+      "name": "Musées du Vatican & Chapelle Sixtine",
+      "type": "culture",
+      "description": "Collection d'art exceptionnelle et chef-d'œuvre de Michel-Ange",
+      "duration": 180,
+      "estimatedCost": 20,
+      "latitude": 41.9065,
+      "longitude": 12.4534,
+      "rating": 4.7,
+      "mustSee": true,
+      "bookingRequired": true,
+      "bookingUrl": "https://www.museivaticani.va/content/museivaticani/en.html",
+      "openingHours": {
+        "open": "09:00",
+        "close": "18:00"
+      },
+      "dataReliability": "verified"
+    },
+    {
+      "id": "trevi-fountain",
+      "name": "Fontaine de Trevi",
+      "type": "culture",
+      "description": "Fontaine baroque monumentale",
+      "duration": 30,
+      "estimatedCost": 0,
+      "latitude": 41.9009,
+      "longitude": 12.4833,
+      "rating": 4.7,
+      "mustSee": true,
+      "bookingRequired": false,
+      "openingHours": {
+        "open": "00:00",
+        "close": "23:59"
+      },
+      "dataReliability": "verified"
+    },
+    {
+      "id": "pantheon",
+      "name": "Panthéon",
+      "type": "culture",
+      "description": "Temple romain antique avec dôme impressionnant",
+      "duration": 45,
+      "estimatedCost": 5,
+      "latitude": 41.8986,
+      "longitude": 12.4769,
+      "rating": 4.8,
+      "mustSee": true,
+      "bookingRequired": false,
+      "openingHours": {
+        "open": "09:00",
+        "close": "19:00"
+      },
+      "dataReliability": "verified"
+    },
+    {
+      "id": "trastevere",
+      "name": "Quartier du Trastevere",
+      "type": "gastronomy",
+      "description": "Quartier bohème avec restaurants traditionnels",
+      "duration": 120,
+      "estimatedCost": 0,
+      "latitude": 41.8867,
+      "longitude": 12.4692,
+      "rating": 4.6,
+      "mustSee": true,
+      "bookingRequired": false,
+      "openingHours": {
+        "open": "00:00",
+        "close": "23:59"
+      },
+      "dataReliability": "verified"
+    },
+    {
+      "id": "roman-forum",
+      "name": "Forum Romain & Palatin",
+      "type": "culture",
+      "description": "Centre politique de la Rome antique et colline du Palatin",
+      "duration": 90,
+      "estimatedCost": 18,
+      "latitude": 41.8925,
+      "longitude": 12.4853,
+      "rating": 4.7,
+      "mustSee": true,
+      "bookingRequired": true,
+      "bookingUrl": "https://www.coopculture.it/en/colosseo-e-shop.cfm",
+      "openingHours": {
+        "open": "09:00",
+        "close": "19:00"
+      },
+      "dataReliability": "verified"
+    },
+    {
+      "id": "st-peters-basilica",
+      "name": "Basilique Saint-Pierre",
+      "type": "culture",
+      "description": "Plus grande église chrétienne, chef-d'œuvre de la Renaissance",
+      "duration": 60,
+      "estimatedCost": 0,
+      "latitude": 41.9022,
+      "longitude": 12.4539,
+      "rating": 4.8,
+      "mustSee": true,
+      "bookingRequired": false,
+      "openingHours": {
+        "open": "07:00",
+        "close": "19:00"
+      },
+      "dataReliability": "verified"
+    },
+    {
+      "id": "piazza-di-spagna",
+      "name": "Place d'Espagne",
+      "type": "culture",
+      "description": "Escaliers monumentaux et fontaine Barcaccia",
+      "duration": 30,
+      "estimatedCost": 0,
+      "latitude": 41.906,
+      "longitude": 12.4828,
+      "rating": 4.6,
+      "mustSee": true,
+      "bookingRequired": false,
+      "openingHours": {
+        "open": "00:00",
+        "close": "23:59"
+      },
+      "dataReliability": "verified"
+    }
+  ],
+  "tripAdvisorRestaurants": [
+    {
+      "id": "ta-Restaurant_Review-g187791-d17412951-Reviews-Pinsitaly_Trevi-Rome_Lazio",
+      "name": "Pinsitaly Trevi",
+      "address": "Adresse non disponible",
+      "latitude": 0,
+      "longitude": 0,
+      "rating": 4.9,
+      "reviewCount": 2391,
+      "priceLevel": 3,
+      "cuisineTypes": [
+        "Italian",
+        "Pizza",
+        "Fast Food",
+        "Romana"
+      ],
+      "dietaryOptions": [
+        "none"
+      ],
+      "openingHours": {},
+      "isOpenNow": false,
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Pinsitaly%20Trevi%2C%20Rome",
+      "photos": [
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/32/81/e3/7f/pizza-diavola.jpg?w=1300&h=1000&s=1"
+      ],
+      "distance": 0,
+      "walkingTime": 0
+    },
+    {
+      "id": "ta-Restaurant_Review-g187791-d14121704-Reviews-Cipasso-Rome_Lazio",
+      "name": "Cipasso",
+      "address": "Adresse non disponible",
+      "latitude": 0,
+      "longitude": 0,
+      "rating": 4.9,
+      "reviewCount": 4121,
+      "priceLevel": 3,
+      "cuisineTypes": [
+        "Italian",
+        "Mediterranean",
+        "Romana",
+        "Lazio",
+        "Central-Italian"
+      ],
+      "dietaryOptions": [
+        "none"
+      ],
+      "openingHours": {},
+      "isOpenNow": false,
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Cipasso%2C%20Rome",
+      "photos": [
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/21/81/25/70/il-nostro-chef-adriano.jpg?w=4000&h=3200&s=1"
+      ],
+      "distance": 0,
+      "walkingTime": 0
+    },
+    {
+      "id": "ta-Restaurant_Review-g187791-d32760375-Reviews-Come_na_Vorta_Pasta_e_Vino_Santa_Dorotea-Rome_Lazio",
+      "name": "Come 'na Vorta - Pasta e Vino - Santa Dorotea",
+      "address": "Adresse non disponible",
+      "latitude": 0,
+      "longitude": 0,
+      "rating": 4.9,
+      "reviewCount": 891,
+      "priceLevel": 3,
+      "cuisineTypes": [
+        "Italian",
+        "Romana",
+        "Lazio",
+        "Central-Italian"
+      ],
+      "dietaryOptions": [
+        "none"
+      ],
+      "openingHours": {},
+      "isOpenNow": true,
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Come%20'na%20Vorta%20-%20Pasta%20e%20Vino%20-%20Santa%20Dorotea%2C%20Rome",
+      "photos": [
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/2e/62/25/28/amatriciana.jpg?w=2500&h=1700&s=1"
+      ],
+      "distance": 0,
+      "walkingTime": 0
+    },
+    {
+      "id": "ta-Restaurant_Review-g187791-d13443832-Reviews-Tonnarello-Rome_Lazio",
+      "name": "Tonnarello",
+      "address": "Adresse non disponible",
+      "latitude": 0,
+      "longitude": 0,
+      "rating": 4.7,
+      "reviewCount": 40963,
+      "priceLevel": 3,
+      "cuisineTypes": [
+        "Italian",
+        "Romana",
+        "Lazio"
+      ],
+      "dietaryOptions": [
+        "none"
+      ],
+      "openingHours": {},
+      "isOpenNow": false,
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Tonnarello%2C%20Rome",
+      "photos": [
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/19/37/06/e3/tonnarello.jpg?w=4100&h=2300&s=1"
+      ],
+      "distance": 0,
+      "walkingTime": 0
+    },
+    {
+      "id": "ta-Restaurant_Review-g187791-d10109712-Reviews-Ce_Stamo_a_Pensa-Rome_Lazio",
+      "name": "Ce Stamo a Pensà",
+      "address": "Adresse non disponible",
+      "latitude": 0,
+      "longitude": 0,
+      "rating": 4.6,
+      "reviewCount": 1638,
+      "priceLevel": 1,
+      "cuisineTypes": [
+        "Italian",
+        "Mediterranean",
+        "Street Food",
+        "Romana",
+        "Lazio"
+      ],
+      "dietaryOptions": [
+        "none"
+      ],
+      "openingHours": {},
+      "isOpenNow": true,
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Ce%20Stamo%20a%20Pens%C3%A0%2C%20Rome",
+      "photos": [
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/12/99/8e/ff/tonnarelli-cacio-pepe.jpg?w=900&h=900&s=1"
+      ],
+      "distance": 0,
+      "walkingTime": 0
+    },
+    {
+      "id": "ta-Restaurant_Review-g187791-d4437197-Reviews-Pizza_e_Mozzarella-Rome_Lazio",
+      "name": "Pizza e Mozzarella",
+      "address": "Adresse non disponible",
+      "latitude": 0,
+      "longitude": 0,
+      "rating": 4.8,
+      "reviewCount": 2379,
+      "priceLevel": 1,
+      "cuisineTypes": [
+        "Italian",
+        "Pizza",
+        "Romana"
+      ],
+      "dietaryOptions": [
+        "none"
+      ],
+      "openingHours": {},
+      "isOpenNow": false,
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Pizza%20e%20Mozzarella%2C%20Rome",
+      "photos": [
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/13/eb/d1/8d/photo2jpg.jpg?w=2000&h=2000&s=1"
+      ],
+      "distance": 0,
+      "walkingTime": 0
+    },
+    {
+      "id": "ta-Restaurant_Review-g187791-d10044289-Reviews-Pane_e_Salame-Rome_Lazio",
+      "name": "Pane e Salame",
+      "address": "Adresse non disponible",
+      "latitude": 0,
+      "longitude": 0,
+      "rating": 4.8,
+      "reviewCount": 8607,
+      "priceLevel": 1,
+      "cuisineTypes": [
+        "Italian",
+        "Street Food",
+        "Romana",
+        "Lazio",
+        "Central-Italian"
+      ],
+      "dietaryOptions": [
+        "none"
+      ],
+      "openingHours": {},
+      "isOpenNow": false,
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Pane%20e%20Salame%2C%20Rome",
+      "photos": [
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/1b/4e/b1/55/panino-special-speck.jpg?w=1000&h=1000&s=1"
+      ],
+      "distance": 0,
+      "walkingTime": 0
+    },
+    {
+      "id": "ta-Restaurant_Review-g187791-d1207928-Reviews-That_s_Amore-Rome_Lazio",
+      "name": "That's Amore",
+      "address": "Adresse non disponible",
+      "latitude": 0,
+      "longitude": 0,
+      "rating": 4.5,
+      "reviewCount": 8754,
+      "priceLevel": 3,
+      "cuisineTypes": [
+        "Italian",
+        "Mediterranean",
+        "European",
+        "Romana",
+        "Lazio"
+      ],
+      "dietaryOptions": [
+        "none"
+      ],
+      "openingHours": {},
+      "isOpenNow": true,
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=That's%20Amore%2C%20Rome",
+      "photos": [
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/12/7d/40/8e/interni-interior.jpg?w=2000&h=1300&s=1"
+      ],
+      "distance": 0,
+      "walkingTime": 0
+    },
+    {
+      "id": "ta-Restaurant_Review-g187791-d3598856-Reviews-La_Fata_Ignorante_Rooftop_Restaurant_Bar-Rome_Lazio",
+      "name": "La Fata Ignorante - Rooftop Restaurant & Bar",
+      "address": "Adresse non disponible",
+      "latitude": 0,
+      "longitude": 0,
+      "rating": 4.7,
+      "reviewCount": 7289,
+      "priceLevel": 3,
+      "cuisineTypes": [
+        "Italian",
+        "Seafood",
+        "Mediterranean",
+        "European",
+        "Healthy"
+      ],
+      "dietaryOptions": [
+        "none"
+      ],
+      "openingHours": {},
+      "isOpenNow": true,
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=La%20Fata%20Ignorante%20-%20Rooftop%20Restaurant%20%26%20Bar%2C%20Rome",
+      "photos": [
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/2c/6f/a7/e6/lato-teatro-dell-opera.jpg?w=1500&h=800&s=1"
+      ],
+      "distance": 0,
+      "walkingTime": 0
+    },
+    {
+      "id": "ta-Restaurant_Review-g187791-d12729060-Reviews-Fuorinorma-Rome_Lazio",
+      "name": "Fuorinorma",
+      "address": "Adresse non disponible",
+      "latitude": 0,
+      "longitude": 0,
+      "rating": 4.8,
+      "reviewCount": 1506,
+      "priceLevel": 1,
+      "cuisineTypes": [
+        "Healthy",
+        "Wine Bar",
+        "Street Food",
+        "Romana",
+        "Lazio"
+      ],
+      "dietaryOptions": [
+        "none"
+      ],
+      "openingHours": {},
+      "isOpenNow": false,
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Fuorinorma%2C%20Rome",
+      "photos": [
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/11/0f/47/2e/photo0jpg.jpg?w=2000&h=1500&s=1"
+      ],
+      "distance": 0,
+      "walkingTime": 0
+    },
+    {
+      "id": "ta-Restaurant_Review-g187791-d12537849-Reviews-Er_Pizzicarolo-Rome_Lazio",
+      "name": "Er Pizzicarolo",
+      "address": "Adresse non disponible",
+      "latitude": 0,
+      "longitude": 0,
+      "rating": 4.9,
+      "reviewCount": 859,
+      "priceLevel": 1,
+      "cuisineTypes": [
+        "Italian",
+        "Pizza",
+        "Mediterranean",
+        "Deli",
+        "Healthy"
+      ],
+      "dietaryOptions": [
+        "none"
+      ],
+      "openingHours": {},
+      "isOpenNow": false,
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Er%20Pizzicarolo%2C%20Rome",
+      "photos": [
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/20/7f/1d/c3/caption.jpg?w=1000&h=700&s=1"
+      ],
+      "distance": 0,
+      "walkingTime": 0
+    },
+    {
+      "id": "ta-Restaurant_Review-g187791-d21096353-Reviews-Mastrociccia_Osteria_Pinseria-Rome_Lazio",
+      "name": "Mastrociccia Osteria Pinseria",
+      "address": "Adresse non disponible",
+      "latitude": 0,
+      "longitude": 0,
+      "rating": 4.8,
+      "reviewCount": 3239,
+      "priceLevel": 3,
+      "cuisineTypes": [
+        "Italian",
+        "Pizza",
+        "Seafood",
+        "Mediterranean",
+        "Grill"
+      ],
+      "dietaryOptions": [
+        "none"
+      ],
+      "openingHours": {},
+      "isOpenNow": false,
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Mastrociccia%20Osteria%20Pinseria%2C%20Rome",
+      "photos": [
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/26/0d/81/13/la-nostra-mitica-carbonara.jpg?w=1200&h=900&s=1"
+      ],
+      "distance": 0,
+      "walkingTime": 0
+    },
+    {
+      "id": "ta-Restaurant_Review-g187791-d24098935-Reviews-Come_na_Vorta_Pasta_E_Vino_Largo_Arenula-Rome_Lazio",
+      "name": "Come 'na Vorta Pasta E Vino - Largo Arenula",
+      "address": "Adresse non disponible",
+      "latitude": 0,
+      "longitude": 0,
+      "rating": 4.8,
+      "reviewCount": 2290,
+      "priceLevel": 3,
+      "cuisineTypes": [
+        "Italian",
+        "Mediterranean",
+        "Romana",
+        "Lazio",
+        "Central-Italian"
+      ],
+      "dietaryOptions": [
+        "none"
+      ],
+      "openingHours": {},
+      "isOpenNow": true,
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Come%20'na%20Vorta%20Pasta%20E%20Vino%20-%20Largo%20Arenula%2C%20Rome",
+      "photos": [
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/23/c3/34/1c/pasta-e-vino-tavola.jpg?w=2400&h=1300&s=1"
+      ],
+      "distance": 0,
+      "walkingTime": 0
+    },
+    {
+      "id": "ta-Restaurant_Review-g187791-d25107357-Reviews-Adesso_Vineria_Bistrot-Rome_Lazio",
+      "name": "Adesso Vineria Bistrot",
+      "address": "Adresse non disponible",
+      "latitude": 0,
+      "longitude": 0,
+      "rating": 4.9,
+      "reviewCount": 983,
+      "priceLevel": 3,
+      "cuisineTypes": [
+        "Italian",
+        "Mediterranean",
+        "Healthy",
+        "Wine Bar",
+        "Romana"
+      ],
+      "dietaryOptions": [
+        "none"
+      ],
+      "openingHours": {},
+      "isOpenNow": false,
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Adesso%20Vineria%20Bistrot%2C%20Rome",
+      "photos": [
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/2e/4b/3a/5b/polpette-alla-boscaiola.jpg?w=3000&h=1800&s=1"
+      ],
+      "distance": 0,
+      "walkingTime": 0
+    },
+    {
+      "id": "ta-Restaurant_Review-g187791-d1207928-Reviews-That_s_Amore-Rome_Lazio",
+      "name": "That's Amore",
+      "address": "Adresse non disponible",
+      "latitude": 0,
+      "longitude": 0,
+      "rating": 4.5,
+      "reviewCount": 8754,
+      "priceLevel": 3,
+      "cuisineTypes": [
+        "Italian",
+        "Mediterranean",
+        "European",
+        "Romana",
+        "Lazio"
+      ],
+      "dietaryOptions": [
+        "none"
+      ],
+      "openingHours": {},
+      "isOpenNow": true,
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=That's%20Amore%2C%20Rome",
+      "photos": [
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/12/7d/40/8e/interni-interior.jpg?w=2000&h=1300&s=1"
+      ],
+      "distance": 0,
+      "walkingTime": 0
+    },
+    {
+      "id": "ta-Restaurant_Review-g187791-d3674983-Reviews-Ambrosia_Rooftop_Restaurant_Bar-Rome_Lazio",
+      "name": "Ambrosia Rooftop Restaurant & Bar",
+      "address": "Adresse non disponible",
+      "latitude": 0,
+      "longitude": 0,
+      "rating": 4.7,
+      "reviewCount": 2194,
+      "priceLevel": 3,
+      "cuisineTypes": [
+        "Italian",
+        "Mediterranean",
+        "Fusion"
+      ],
+      "dietaryOptions": [
+        "none"
+      ],
+      "openingHours": {},
+      "isOpenNow": true,
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Ambrosia%20Rooftop%20Restaurant%20%26%20Bar%2C%20Rome",
+      "photos": [
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/2c/61/17/ab/ambrosia-rooftop-restaurant.jpg?w=3000&h=2000&s=1"
+      ],
+      "distance": 0,
+      "walkingTime": 0
+    },
+    {
+      "id": "ta-Restaurant_Review-g187791-d12557336-Reviews-Osteria_da_Fortunata_Cancelleria-Rome_Lazio",
+      "name": "Osteria da Fortunata - Cancelleria",
+      "address": "Adresse non disponible",
+      "latitude": 0,
+      "longitude": 0,
+      "rating": 4.7,
+      "reviewCount": 2218,
+      "priceLevel": 3,
+      "cuisineTypes": [
+        "Italian",
+        "Romana",
+        "Lazio",
+        "Central-Italian"
+      ],
+      "dietaryOptions": [
+        "none"
+      ],
+      "openingHours": {},
+      "isOpenNow": true,
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Osteria%20da%20Fortunata%20-%20Cancelleria%2C%20Rome",
+      "photos": [
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/29/a9/2b/0b/caption.jpg?w=1100&h=1500&s=1"
+      ],
+      "distance": 0,
+      "walkingTime": 0
+    },
+    {
+      "id": "ta-Restaurant_Review-g187791-d18850657-Reviews-Bono_Bottega_Nostrana_San_Pietro-Rome_Lazio",
+      "name": "Bono Bottega Nostrana - San Pietro",
+      "address": "Adresse non disponible",
+      "latitude": 0,
+      "longitude": 0,
+      "rating": 4.9,
+      "reviewCount": 2122,
+      "priceLevel": 1,
+      "cuisineTypes": [
+        "Italian",
+        "Mediterranean",
+        "Romana",
+        "Lazio",
+        "Central-Italian"
+      ],
+      "dietaryOptions": [
+        "none"
+      ],
+      "openingHours": {},
+      "isOpenNow": true,
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Bono%20Bottega%20Nostrana%20-%20San%20Pietro%2C%20Rome",
+      "photos": [
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/25/dc/1d/62/preferisci-rimanere-leggero.jpg?w=8100&h=5400&s=1"
+      ],
+      "distance": 0,
+      "walkingTime": 0
+    },
+    {
+      "id": "ta-Restaurant_Review-g187791-d1034543-Reviews-Ristorante_Arlu-Rome_Lazio",
+      "name": "Ristorante Arlù",
+      "address": "Adresse non disponible",
+      "latitude": 0,
+      "longitude": 0,
+      "rating": 4.6,
+      "reviewCount": 3958,
+      "priceLevel": 3,
+      "cuisineTypes": [
+        "Italian",
+        "Mediterranean",
+        "European",
+        "Healthy",
+        "Romana"
+      ],
+      "dietaryOptions": [
+        "none"
+      ],
+      "openingHours": {},
+      "isOpenNow": false,
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Ristorante%20Arl%C3%B9%2C%20Rome",
+      "photos": [
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/21/8a/c3/35/ristorante-arlu.jpg?w=3900&h=3900&s=1"
+      ],
+      "distance": 0,
+      "walkingTime": 0
+    },
+    {
+      "id": "ta-Restaurant_Review-g187791-d17412951-Reviews-Pinsitaly_Trevi-Rome_Lazio",
+      "name": "Pinsitaly Trevi",
+      "address": "Adresse non disponible",
+      "latitude": 0,
+      "longitude": 0,
+      "rating": 4.9,
+      "reviewCount": 2391,
+      "priceLevel": 3,
+      "cuisineTypes": [
+        "Italian",
+        "Pizza",
+        "Fast Food",
+        "Romana"
+      ],
+      "dietaryOptions": [
+        "none"
+      ],
+      "openingHours": {},
+      "isOpenNow": false,
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Pinsitaly%20Trevi%2C%20Rome",
+      "photos": [
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/32/81/e3/7f/pizza-diavola.jpg?w=1300&h=1000&s=1"
+      ],
+      "distance": 0,
+      "walkingTime": 0
+    },
+    {
+      "id": "ta-Restaurant_Review-g187791-d3729375-Reviews-Titanic_Pub-Rome_Lazio",
+      "name": "Titanic Pub",
+      "address": "Adresse non disponible",
+      "latitude": 0,
+      "longitude": 0,
+      "rating": 4.5,
+      "reviewCount": 579,
+      "priceLevel": 3,
+      "cuisineTypes": [
+        "Irish",
+        "Pub",
+        "Beer restaurants"
+      ],
+      "dietaryOptions": [
+        "none"
+      ],
+      "openingHours": {},
+      "isOpenNow": true,
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Titanic%20Pub%2C%20Rome",
+      "photos": [
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/32/31/fe/f3/l-arredamento-unico-de.jpg?w=900&h=600&s=1"
+      ],
+      "distance": 0,
+      "walkingTime": 0
+    },
+    {
+      "id": "ta-Restaurant_Review-g187791-d2206695-Reviews-Ornelli_Black_Angus_Steakhouse-Rome_Lazio",
+      "name": "Ornelli Black Angus Steakhouse",
+      "address": "Adresse non disponible",
+      "latitude": 0,
+      "longitude": 0,
+      "rating": 4.8,
+      "reviewCount": 2188,
+      "priceLevel": 4,
+      "cuisineTypes": [
+        "Steakhouse",
+        "International",
+        "Grill"
+      ],
+      "dietaryOptions": [
+        "none"
+      ],
+      "openingHours": {},
+      "isOpenNow": false,
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Ornelli%20Black%20Angus%20Steakhouse%2C%20Rome",
+      "photos": [
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/21/95/e0/8a/cottura-alla-griglia.jpg?w=3000&h=2000&s=1"
+      ],
+      "distance": 0,
+      "walkingTime": 0
+    },
+    {
+      "id": "ta-Restaurant_Review-g187791-d11793251-Reviews-Casa_Manco-Rome_Lazio",
+      "name": "Casa Manco",
+      "address": "Adresse non disponible",
+      "latitude": 0,
+      "longitude": 0,
+      "rating": 4.9,
+      "reviewCount": 651,
+      "priceLevel": 1,
+      "cuisineTypes": [
+        "Italian",
+        "Pizza"
+      ],
+      "dietaryOptions": [
+        "none"
+      ],
+      "openingHours": {},
+      "isOpenNow": false,
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Casa%20Manco%2C%20Rome",
+      "photos": [
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/0f/58/2b/57/paola-and-andrea-prepared.jpg?w=900&h=500&s=1"
+      ],
+      "distance": 0,
+      "walkingTime": 0
+    },
+    {
+      "id": "ta-Restaurant_Review-g187791-d1011258-Reviews-La_Piccola_Cuccagna-Rome_Lazio",
+      "name": "La Piccola Cuccagna",
+      "address": "Adresse non disponible",
+      "latitude": 0,
+      "longitude": 0,
+      "rating": 4.5,
+      "reviewCount": 3269,
+      "priceLevel": 3,
+      "cuisineTypes": [
+        "Italian",
+        "Mediterranean",
+        "Romana",
+        "Lazio",
+        "Central-Italian"
+      ],
+      "dietaryOptions": [
+        "none"
+      ],
+      "openingHours": {},
+      "isOpenNow": true,
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=La%20Piccola%20Cuccagna%2C%20Rome",
+      "photos": [
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/27/07/36/5d/la-carbonara-con-guanciale.jpg?w=1000&h=900&s=1"
+      ],
+      "distance": 0,
+      "walkingTime": 0
+    },
+    {
+      "id": "ta-Restaurant_Review-g187791-d786482-Reviews-Il_Chianti_Osteria_Toscana-Rome_Lazio",
+      "name": "Il Chianti Osteria Toscana",
+      "address": "Adresse non disponible",
+      "latitude": 0,
+      "longitude": 0,
+      "rating": 4.3,
+      "reviewCount": 4654,
+      "priceLevel": 3,
+      "cuisineTypes": [
+        "Italian",
+        "Pizza",
+        "Wine Bar",
+        "Tuscan",
+        "Romana"
+      ],
+      "dietaryOptions": [
+        "none"
+      ],
+      "openingHours": {},
+      "isOpenNow": true,
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Il%20Chianti%20Osteria%20Toscana%2C%20Rome",
+      "photos": [
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/0e/25/8a/48/il-nostro-tagliere.jpg?w=1000&h=600&s=1"
+      ],
+      "distance": 0,
+      "walkingTime": 0
+    },
+    {
+      "id": "ta-Restaurant_Review-g187791-d3398803-Reviews-Pizzeria_Teresina_Tradizionale_e_Senza_Glutine-Rome_Lazio",
+      "name": "Pizzeria Teresina - Tradizionale e Senza Glutine",
+      "address": "Adresse non disponible",
+      "latitude": 0,
+      "longitude": 0,
+      "rating": 4.5,
+      "reviewCount": 505,
+      "priceLevel": 3,
+      "cuisineTypes": [
+        "Pizza"
+      ],
+      "dietaryOptions": [
+        "none"
+      ],
+      "openingHours": {},
+      "isOpenNow": false,
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Pizzeria%20Teresina%20-%20Tradizionale%20e%20Senza%20Glutine%2C%20Rome",
+      "photos": [
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/18/fa/79/dd/la-tommasino-mozzarella.jpg?w=1900&h=1200&s=1"
+      ],
+      "distance": 0,
+      "walkingTime": 0
+    },
+    {
+      "id": "ta-Restaurant_Review-g187791-d2481923-Reviews-Trattoria_Marcella_dal_1947-Rome_Lazio",
+      "name": "Trattoria Marcella dal 1947",
+      "address": "Adresse non disponible",
+      "latitude": 0,
+      "longitude": 0,
+      "rating": 4.8,
+      "reviewCount": 285,
+      "priceLevel": 3,
+      "cuisineTypes": [
+        "Italian",
+        "Pizza",
+        "Mediterranean",
+        "Romana",
+        "Lazio"
+      ],
+      "dietaryOptions": [
+        "none"
+      ],
+      "openingHours": {},
+      "isOpenNow": false,
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Trattoria%20Marcella%20dal%201947%2C%20Rome",
+      "photos": [
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/04/6d/21/4b/trattoria-marcella.jpg?w=2100&h=1500&s=1"
+      ],
+      "distance": 0,
+      "walkingTime": 0
+    },
+    {
+      "id": "ta-Restaurant_Review-g187791-d1210614-Reviews-Mimi_Coco-Rome_Lazio",
+      "name": "Mimì & Cocò",
+      "address": "Adresse non disponible",
+      "latitude": 0,
+      "longitude": 0,
+      "rating": 4.7,
+      "reviewCount": 11290,
+      "priceLevel": 3,
+      "cuisineTypes": [
+        "Italian",
+        "Romana",
+        "Lazio",
+        "Central-Italian"
+      ],
+      "dietaryOptions": [
+        "none"
+      ],
+      "openingHours": {},
+      "isOpenNow": true,
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Mim%C3%AC%20%26%20Coc%C3%B2%2C%20Rome",
+      "photos": [
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/19/74/06/bf/20191001-135124-largejpg.jpg?w=1000&h=1000&s=1"
+      ],
+      "distance": 0,
+      "walkingTime": 0
+    },
+    {
+      "id": "ta-Restaurant_Review-g187791-d793647-Reviews-Sushisen-Rome_Lazio",
+      "name": "Sushisen",
+      "address": "Adresse non disponible",
+      "latitude": 0,
+      "longitude": 0,
+      "rating": 4.5,
+      "reviewCount": 2223,
+      "priceLevel": 3,
+      "cuisineTypes": [
+        "Japanese",
+        "Sushi",
+        "Healthy"
+      ],
+      "dietaryOptions": [
+        "none"
+      ],
+      "openingHours": {},
+      "isOpenNow": false,
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Sushisen%2C%20Rome",
+      "photos": [
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/1c/88/5f/73/katsuo-amaebi-roll.jpg?w=800&h=500&s=1"
+      ],
+      "distance": 0,
+      "walkingTime": 0
+    },
+    {
+      "id": "ta-Restaurant_Review-g187791-d1035927-Reviews-Hosteria_Romana-Rome_Lazio",
+      "name": "Hosteria Romana",
+      "address": "Adresse non disponible",
+      "latitude": 0,
+      "longitude": 0,
+      "rating": 4.4,
+      "reviewCount": 3643,
+      "priceLevel": 3,
+      "cuisineTypes": [
+        "Italian",
+        "Mediterranean",
+        "Soups",
+        "Romana",
+        "Lazio"
+      ],
+      "dietaryOptions": [
+        "none"
+      ],
+      "openingHours": {},
+      "isOpenNow": false,
+      "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Hosteria%20Romana%2C%20Rome",
+      "photos": [
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/1b/fb/67/f5/photo0jpg.jpg?w=2000&h=2000&s=1"
+      ],
+      "distance": 0,
+      "walkingTime": 0
+    }
+  ],
+  "serpApiRestaurants": [],
+  "bookingHotels": [
+    {
+      "id": "ta-hotel-205044",
+      "name": "Hotel Artemide",
+      "type": "hotel",
+      "address": "Rome",
+      "latitude": 41.893623,
+      "longitude": 12.495978,
+      "rating": 4.8,
+      "reviewCount": 9498,
+      "pricePerNight": 0,
+      "currency": "EUR",
+      "amenities": [],
+      "photos": [
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/31/f4/3f/74/entrance-hotel-artemide.jpg?w=600&h=400&s=1"
+      ],
+      "checkInTime": "15:00",
+      "checkOutTime": "11:00",
+      "bookingUrl": "https://www.tripadvisor.in/Commerce?p=MakeMyTrip&src=48331333&geo=205044&from=HotelDateSearch_Hotels&slot=1&matchID=1&oos=0&cnt=6&silo=37958&bucket=934340&nrank=1&crank=1&clt=M&ttype=MobileCR&tm=353825467&managed=false&capped=false&gosox=19Pb3nOK2dlpZbZKLVtl_pYFQuUz5tSB_6v81qR_J8lazHtwiTpQmk8ow7J9wWlu3b87dyrzSEoPJdUYpbFhtt6XiVSpcy2W4WO3rUCg48RgejfwQFKydBH24C3TnyUCsF_Yo9etV_h8ebZs2nwNFOkWEAlJJ3f5By2-golOKGLa7GPW42l-t3j9nVOvCGoGIXCvPljMKJmpX10-14GrUUXTmsW_Znxy7TP001Zp9nY1cON8nbZqgY-vjhv_mZTHjT7O15xNQTRD8rZjfWAqM5ADijQH7GuzogQLZORTRgQ&priceShown=516&pm=AI&hac=AVAILABLE&mbl=LOSE&mbldelta=8751&rq=P&rate=455.00&taxesRate=60.6700&feesRate=0&fees=60.6700&cur=EUR&adults=2&child_rm_ages=&inDay=6&outDay=9&rdex=RDEX_50f218707cc6380735c70fb7f3901b0b&rooms=1&inMonth=5&inYear=2026&outMonth=5&outYear=2026&auid=0e95ff78-938b-4244-85ac-4268ccf4a6d6&def_d=true&bld=L_3,D_48,G_2,W_3,U_1,C_260506,T_10&bh=true&cs=1876c821d5b4c422849937b28a3abe62a&ik=58b1d0aa6ae34eae9f4b3d35f32743ae&aok=9eab81c34fb440e2b270886cf8210763&tp=APS-Hotels&pageLocId=187791",
+      "description": "Esquilino • Prix via MakeMyTrip",
+      "totalPrice": 0
+    },
+    {
+      "id": "ta-hotel-230612",
+      "name": "Hotel Colosseum",
+      "type": "hotel",
+      "address": "Rome",
+      "latitude": 41.893623,
+      "longitude": 12.495978,
+      "rating": 4.5,
+      "reviewCount": 2521,
+      "pricePerNight": 0,
+      "currency": "EUR",
+      "amenities": [
+        "breakfast"
+      ],
+      "photos": [
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/04/35/9b/49/hotel-colosseum.jpg?w=600&h=400&s=1"
+      ],
+      "checkInTime": "15:00",
+      "checkOutTime": "11:00",
+      "bookingUrl": "https://www.tripadvisor.in/Commerce?p=BookingCom&src=32451992&geo=230612&from=HotelDateSearch_Hotels&slot=1&matchID=1&oos=0&cnt=6&silo=10476&bucket=902999&nrank=2&crank=2&clt=M&ttype=MobileCR&tm=353825467&managed=false&capped=false&gosox=RXVLOhMcS12ggv9Jq-uexd0XXH5Gi8-eazuTaOWwAFh1z4aucOwxn-_9R7u6InTN7Q4Jp_N_wnx-Ebwp5wwSBdEsO-qwz-CQ7LKwKqakAUJZnvs4RvoUZJF4-GcSnDfU7W4iOE7RUaAcNZFEPal5Q1w4ZmcNcqf7rXhKEAAd3W50QjpU_p0akemGr9npg_RG1FEu0eNjvxeu-AzUdKP1N3WRkm45KJYSGWUG_xX_rMzmLh2vVp8BATxC27VysLLInB1s0Z7BtN2NVXnd8UUmWepqzGIMkAHRjVv7JLxhyMk&priceShown=374&pm=AI&hac=AVAILABLE&mbl=LOSE&mbldelta=3224&rq=P&rate=332.90&taxesRate=41.2800&feesRate=0&fees=41.2800&cur=EUR&adults=2&child_rm_ages=&inDay=6&outDay=9&rdex=RDEX_3e2524a293817c710319cd02444062e&rooms=1&inMonth=5&inYear=2026&outMonth=5&outYear=2026&auid=cada92fd-321e-4ec2-b523-93973b773c71&def_d=true&bld=L_3,D_48,G_2,W_3,U_1,C_260506,T_10&bh=true&cs=1ce2737a651dd00109ab985ffd029a7da&ik=58b1d0aa6ae34eae9f4b3d35f32743ae&aok=f2d2f323bf154343b9a5cfecdb8b749b&tp=APS-Hotels&pageLocId=187791",
+      "description": "Free breakfast available • Centro • Prix via Booking.com",
+      "totalPrice": 0
+    },
+    {
+      "id": "ta-hotel-231925",
+      "name": "Hotel Viminale",
+      "type": "hotel",
+      "address": "Rome",
+      "latitude": 41.893623,
+      "longitude": 12.495978,
+      "rating": 5,
+      "reviewCount": 569,
+      "pricePerNight": 0,
+      "currency": "EUR",
+      "amenities": [
+        "breakfast"
+      ],
+      "photos": [
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/32/9d/7b/3d/caption.jpg?w=600&h=400&s=1"
+      ],
+      "checkInTime": "15:00",
+      "checkOutTime": "11:00",
+      "bookingUrl": "https://www.tripadvisor.in/Commerce?p=BookingCom&src=32433822&geo=231925&from=HotelDateSearch_Hotels&slot=1&matchID=1&oos=0&cnt=7&silo=10476&bucket=902999&nrank=1&crank=1&clt=M&ttype=MobileCR&tm=353825467&managed=false&capped=false&gosox=IZpMR_Zds2SQN2EOE0L8A90XXH5Gi8-eazuTaOWwAFg-cwjS6JssnOJ0pkBp2ky2z8IEpRmp9S8kLAEmC4GT661yf62P12TmcoiAwCmbSKdZnvs4RvoUZJF4-GcSnDfU3uLKJC9d6WvUNNZYCa7UdaI7AmsWB8rny46RIMDPuhk5BaU9TyPzOuI8Z1NR-UhOW8km6jZhafJFWPdkWEzm1nMFP3ReCQSzXr8NLBUilluINEIRUSqlBDRsjF4q-I-j1v3ic4J4WzfBJrO_5tE7-A3_i2VES760vQBKmlIJGZQ&priceShown=380&pm=AI&hac=AVAILABLE&mbl=LOSE&mbldelta=5182&rq=P&rate=334.93&taxesRate=45.4900&feesRate=0&fees=45.4900&cur=EUR&adults=2&child_rm_ages=&inDay=6&outDay=9&rdex=RDEX_6f0beb7b9f2fc0db5517518b49e5d3cf&rooms=1&inMonth=5&inYear=2026&outMonth=5&outYear=2026&auid=72ed276c-7a35-46bb-9e99-ee4f028241be&def_d=true&bld=L_3,D_48,G_2,W_3,U_1,C_260506,T_10&bh=true&cs=157f19bd064912aa9c0e05a92e1d05e81&ik=58b1d0aa6ae34eae9f4b3d35f32743ae&aok=1214d4962d334240a326de9d177d665e&tp=APS-Hotels&pageLocId=187791",
+      "description": "Free breakfast available • Centro • Prix via Booking.com",
+      "totalPrice": 0
+    },
+    {
+      "id": "ta-hotel-1729030",
+      "name": "iQ Hotel Roma",
+      "type": "hotel",
+      "address": "Rome",
+      "latitude": 41.893623,
+      "longitude": 12.495978,
+      "rating": 4.7,
+      "reviewCount": 5579,
+      "pricePerNight": 0,
+      "currency": "EUR",
+      "amenities": [],
+      "photos": [
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/22/65/12/ed/iq-hotel-roma.jpg?w=600&h=400&s=1"
+      ],
+      "checkInTime": "15:00",
+      "checkOutTime": "11:00",
+      "bookingUrl": "https://www.tripadvisor.in/Commerce?p=BookingCom&src=32439588&geo=1729030&from=HotelDateSearch_Hotels&slot=1&matchID=1&oos=0&cnt=7&silo=10476&bucket=902999&nrank=2&crank=2&clt=M&ttype=MobileCR&tm=353825467&managed=false&capped=false&gosox=TRzjYFexX0c7GJNY4cjj190XXH5Gi8-eazuTaOWwAFh1z4aucOwxn-_9R7u6InTN_51FbzQx6QElhvU1ftIoctIuABgIJtDNCGIRKwl_2k9Znvs4RvoUZJF4-GcSnDfUPixFL2CP5EG1SpRem4yHO-_kcOYfZX5kVhs3HjqslXMjzKPbdOXR4FZnvmeaagkPdbcfjxHasN3b0RJD-NJEh3WRkm45KJYSGWUG_xX_rMzmLh2vVp8BATxC27VysLLInB1s0Z7BtN2NVXnd8UUmWepqzGIMkAHRjVv7JLxhyMk&priceShown=410&pm=AI&hac=AVAILABLE&mbl=LOSE&mbldelta=8291&rq=P&rate=358.64&taxesRate=50.8600&feesRate=0&fees=50.8600&cur=EUR&adults=2&child_rm_ages=&inDay=6&outDay=9&rdex=RDEX_15a34c76826330635d3946f26ef763cb&rooms=1&inMonth=5&inYear=2026&outMonth=5&outYear=2026&auid=f70da591-51ed-4e77-9ef0-1e160fb760ec&def_d=true&bld=L_3,D_48,G_2,W_3,U_1,C_260506,T_10&bh=true&cs=1085e615fc7a636eb42a325d5296ea507&ik=58b1d0aa6ae34eae9f4b3d35f32743ae&aok=f80d2355d36644cd98eff3dd81a3cc40&tp=APS-Hotels&pageLocId=187791",
+      "description": "Esquilino • Prix via Booking.com",
+      "totalPrice": 0
+    },
+    {
+      "id": "ta-hotel-3964772",
+      "name": "Rome Times Hotel",
+      "type": "hotel",
+      "address": "Rome",
+      "latitude": 41.893623,
+      "longitude": 12.495978,
+      "rating": 4.4,
+      "reviewCount": 2388,
+      "pricePerNight": 0,
+      "currency": "EUR",
+      "amenities": [],
+      "photos": [
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/15/79/09/4d/rome-times-hotel.jpg?w=600&h=400&s=1"
+      ],
+      "checkInTime": "15:00",
+      "checkOutTime": "11:00",
+      "bookingUrl": "https://www.tripadvisor.in/Commerce?p=BookingCom&src=47855625&geo=3964772&from=HotelDateSearch_Hotels&slot=1&matchID=1&oos=0&cnt=7&silo=10476&bucket=902999&nrank=2&crank=2&clt=M&ttype=MobileCR&tm=353825467&managed=false&capped=false&gosox=EZqoh30OnQzAn4iklV0Wbt0XXH5Gi8-eazuTaOWwAFg-cwjS6JssnOJ0pkBp2ky29x5Qldwi5zM30QOWy_Szya1yf62P12TmcoiAwCmbSKdZnvs4RvoUZJF4-GcSnDfU4QiE_nbqjUrgzF6tosgXrlpfPFzevRKHML6SltGo2Od0QjpU_p0akemGr9npg_RGKVuuONQQv0jVbaLQKdl_InWRkm45KJYSGWUG_xX_rMzmLh2vVp8BATxC27VysLLInB1s0Z7BtN2NVXnd8UUmWepqzGIMkAHRjVv7JLxhyMk&priceShown=380&pm=AI&hac=AVAILABLE&mbl=LOSE&mbldelta=6218&rq=P&rate=332.25&taxesRate=48.2300&feesRate=0&fees=48.2300&cur=EUR&adults=2&child_rm_ages=&inDay=6&outDay=9&rdex=RDEX_53ae8325715025bac639785f7c9fd4da&rooms=1&inMonth=5&inYear=2026&outMonth=5&outYear=2026&auid=ddc61db4-4960-4e02-b621-25ea2e2940cc&def_d=true&bld=L_3,D_48,G_2,W_3,U_1,C_260506,T_10&bh=true&cs=17dd1c4d5836adeb59379b70a60847a6f&ik=58b1d0aa6ae34eae9f4b3d35f32743ae&aok=adcecdee0a2f4c998d89beeb9b654b2d&tp=APS-Hotels&pageLocId=187791",
+      "description": "Centro • Prix via Booking.com",
+      "totalPrice": 0
+    },
+    {
+      "id": "ta-hotel-13232396",
+      "name": "The RomeHello",
+      "type": "hotel",
+      "address": "Rome",
+      "latitude": 41.893623,
+      "longitude": 12.495978,
+      "rating": 4.9,
+      "reviewCount": 366,
+      "pricePerNight": 0,
+      "currency": "EUR",
+      "amenities": [
+        "breakfast"
+      ],
+      "photos": [
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/12/36/28/05/inner-courtyard.jpg?w=600&h=400&s=1"
+      ],
+      "checkInTime": "15:00",
+      "checkOutTime": "11:00",
+      "bookingUrl": "https://www.tripadvisor.in/Commerce?p=BookingCom&src=122622190&geo=13232396&from=HotelDateSearch_Hotels&slot=1&matchID=1&oos=0&cnt=6&silo=10476&bucket=902999&nrank=2&crank=2&clt=M&ttype=MobileCR&tm=353825467&managed=false&capped=false&gosox=DBhXkJVo75bxtssxTdNhdt0XXH5Gi8-eazuTaOWwAFjSkh2IbYI2ZglU6ZJwEx6ytthUItjCS6Xd2Fj_5kZ_5VI8-b1prpp8eB1HX6wT8lxZnvs4RvoUZJF4-GcSnDfUKuws_D7PQNSYqEpHl6es4C_Y0a-rV928oFd44iGp8etCtdaeh4im_Fju3h6kNsSqDHP4E1aRj0bVFqqRxnp13XMFP3ReCQSzXr8NLBUilluINEIRUSqlBDRsjF4q-I-j1v3ic4J4WzfBJrO_5tE7-A3_i2VES760vQBKmlIJGZQ&priceShown=431&pm=AI&hac=AVAILABLE&mbl=LOSE&mbldelta=5182&rq=P&rate=392.12&taxesRate=39.2100&feesRate=0&fees=39.2100&cur=EUR&adults=2&child_rm_ages=&inDay=6&outDay=9&rdex=RDEX_2bdd8b15c7da6d7f0d67a16d7d6af37f&rooms=1&inMonth=5&inYear=2026&outMonth=5&outYear=2026&auid=1ad028d8-e2c1-4da8-8396-a5cb5f0c3964&def_d=true&bld=L_3,D_48,G_2,W_3,U_1,C_260506,T_10&bh=true&cs=13db90a9d068ad6b0ce9f39d68e2bcf0e&ik=58b1d0aa6ae34eae9f4b3d35f32743ae&aok=929921ef21a447989f4efbd937ce48f6&tp=APS-Hotels&pageLocId=187791",
+      "description": "Free breakfast available • Esquilino • Prix via Booking.com",
+      "totalPrice": 0
+    },
+    {
+      "id": "ta-hotel-1024807",
+      "name": "Donna Camilla Savelli",
+      "type": "hotel",
+      "address": "Rome",
+      "latitude": 41.893623,
+      "longitude": 12.495978,
+      "rating": 4.5,
+      "reviewCount": 2038,
+      "pricePerNight": 0,
+      "currency": "EUR",
+      "amenities": [],
+      "photos": [
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/15/fe/28/96/view-of-hotel-garden.jpg?w=600&h=400&s=1"
+      ],
+      "checkInTime": "15:00",
+      "checkOutTime": "11:00",
+      "bookingUrl": "https://www.tripadvisor.in/Commerce?p=BookingCom&src=32434594&geo=1024807&from=HotelDateSearch_Hotels&slot=1&matchID=1&oos=0&cnt=7&silo=10476&bucket=902999&nrank=2&crank=2&clt=M&ttype=MobileCR&tm=353825467&managed=false&capped=false&gosox=IZpMR_Zds2SQN2EOE0L8A90XXH5Gi8-eazuTaOWwAFg-cwjS6JssnOJ0pkBp2ky2bCCXacYPuZV_3K4NjeJ4jVI8-b1prpp8eB1HX6wT8lxZnvs4RvoUZJF4-GcSnDfU5UkfgzpSRHjM3vctyKfNbxqS7XltpMBAcNz24mh5tY-yxRBZZioK29ZJ_JS7fs7Dv0PC5Z2HdrMjlL7C4ADsLHMFP3ReCQSzXr8NLBUilluINEIRUSqlBDRsjF4q-I-j1v3ic4J4WzfBJrO_5tE7-A3_i2VES760vQBKmlIJGZQ&priceShown=655&pm=AI&hac=AVAILABLE&mbl=LOSE&mbldelta=5642&rq=P&rate=584.09&taxesRate=70.4100&feesRate=0&fees=70.4100&cur=EUR&adults=2&child_rm_ages=&inDay=6&outDay=9&rdex=RDEX_55729b6519746a46b04a60201579eea1&rooms=1&inMonth=5&inYear=2026&outMonth=5&outYear=2026&auid=274c3b77-76c2-46e5-a54b-649ff8ba0251&def_d=true&bld=L_3,D_48,G_2,W_3,U_1,C_260506,T_10&bh=true&cs=16873c212fc7a60750d84dea19591ed3a&ik=58b1d0aa6ae34eae9f4b3d35f32743ae&aok=65f1313badf2427daea015300ed0aa5b&tp=APS-Hotels&pageLocId=187791",
+      "description": "Centro • Prix via Booking.com",
+      "totalPrice": 0
+    },
+    {
+      "id": "ta-hotel-203175",
+      "name": "Hotel Barocco",
+      "type": "hotel",
+      "address": "Rome",
+      "latitude": 41.893623,
+      "longitude": 12.495978,
+      "rating": 4.8,
+      "reviewCount": 4178,
+      "pricePerNight": 0,
+      "currency": "EUR",
+      "amenities": [
+        "breakfast"
+      ],
+      "photos": [
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/2d/d1/c9/70/caption.jpg?w=600&h=400&s=1"
+      ],
+      "checkInTime": "15:00",
+      "checkOutTime": "11:00",
+      "bookingUrl": "https://www.tripadvisor.in/Commerce?p=BookingCom&src=32451947&geo=203175&from=HotelDateSearch_Hotels&slot=1&matchID=1&oos=0&cnt=6&silo=10476&bucket=902999&nrank=2&crank=2&clt=M&ttype=MobileCR&tm=353825468&managed=false&capped=false&gosox=BRkZ6cTuejfyODx7IJp1Fd0XXH5Gi8-eazuTaOWwAFh1z4aucOwxn-_9R7u6InTNeXhbtADoD1ARIjj2ae4KmNEsO-qwz-CQ7LKwKqakAUJZnvs4RvoUZJF4-GcSnDfURlpX2ttnx7c_Q8R1rJXpkQ8qTXHAqT7jXliCrB5vUQs5BaU9TyPzOuI8Z1NR-UhOAbWmFN-p6kh3-d3qWpYvKnWRkm45KJYSGWUG_xX_rMzmLh2vVp8BATxC27VysLLInB1s0Z7BtN2NVXnd8UUmWepqzGIMkAHRjVv7JLxhyMk&priceShown=459&pm=AI&hac=AVAILABLE&mbl=LOSE&mbldelta=3800&rq=P&rate=403.22&taxesRate=55.3100&feesRate=0&fees=55.3100&cur=EUR&adults=2&child_rm_ages=&inDay=6&outDay=9&rdex=RDEX_24385cf3e9ab4e8920ba04db3559bd56&rooms=1&inMonth=5&inYear=2026&outMonth=5&outYear=2026&auid=cddd969e-4f33-473b-ac32-9016c66dc38c&def_d=true&bld=L_3,D_48,G_2,W_3,U_1,C_260506,T_10&bh=true&cs=18ecdc09497412f9698c26023c5b844bc&ik=58b1d0aa6ae34eae9f4b3d35f32743ae&aok=61ead8f18e6f44869456653014d5dc6b&tp=APS-Hotels&pageLocId=187791",
+      "description": "Free breakfast available • Centro • Prix via Booking.com",
+      "totalPrice": 0
+    },
+    {
+      "id": "ta-hotel-203130",
+      "name": "Hotel Canada, BW Premier Collection",
+      "type": "hotel",
+      "address": "Rome",
+      "latitude": 41.893623,
+      "longitude": 12.495978,
+      "rating": 4.6,
+      "reviewCount": 2828,
+      "pricePerNight": 0,
+      "currency": "EUR",
+      "amenities": [],
+      "photos": [
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/0e/d5/64/b1/hotel-canada-la-vostra.jpg?w=600&h=400&s=1"
+      ],
+      "checkInTime": "15:00",
+      "checkOutTime": "11:00",
+      "bookingUrl": "https://www.tripadvisor.in/Commerce?p=BookingCom&src=56363293&geo=203130&from=HotelDateSearch_Hotels&slot=1&matchID=1&oos=0&cnt=7&silo=10476&bucket=902999&nrank=2&crank=1&clt=M&ttype=MobileCR&tm=353825467&managed=false&capped=false&gosox=HgqCE56izC5iDxUiwsEln90XXH5Gi8-eazuTaOWwAFjSkh2IbYI2ZglU6ZJwEx6y6SCVCMvz4bnjGKShui489DA8vZTu2XflAYTrfZl1TsRZnvs4RvoUZJF4-GcSnDfUIVFQ9jDsROyHGfgUwSuy6zTLAuYwLfLKdCbkXuAoQE7WNjeENSAFrsFSykEaXazOv0PC5Z2HdrMjlL7C4ADsLHMFP3ReCQSzXr8NLBUilluINEIRUSqlBDRsjF4q-I-j1v3ic4J4WzfBJrO_5tE7-A3_i2VES760vQBKmlIJGZQ&priceShown=313&pm=AI&hac=AVAILABLE&mbl=BEAT&mbldelta=0&rq=P&rate=274.00&taxesRate=39.4000&feesRate=0&fees=39.4000&cur=EUR&adults=2&child_rm_ages=&inDay=6&outDay=9&rdex=RDEX_49740c3cb26e23166087327d236367cc&rooms=1&inMonth=5&inYear=2026&outMonth=5&outYear=2026&auid=30a94e7d-03d4-44b9-92ed-af2e773c66a4&def_d=true&bld=L_3,D_48,G_2,W_3,U_1,C_260506,T_10&bh=true&cs=15c82482fd4d5de175d56fd4e2f271519&ik=58b1d0aa6ae34eae9f4b3d35f32743ae&aok=374d83c299ff4dc99bef5e3e2b991b84&tp=APS-Hotels&pageLocId=187791",
+      "description": "Esquilino • Prix via Booking.com",
+      "totalPrice": 0
+    },
+    {
+      "id": "ta-hotel-208552",
+      "name": "Boutique Hotel Campo de Fiori",
+      "type": "hotel",
+      "address": "Rome",
+      "latitude": 41.893623,
+      "longitude": 12.495978,
+      "rating": 4.7,
+      "reviewCount": 3641,
+      "pricePerNight": 0,
+      "currency": "EUR",
+      "amenities": [],
+      "photos": [
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/15/91/0f/37/boutique-hotel-campo.jpg?w=600&h=400&s=1"
+      ],
+      "checkInTime": "15:00",
+      "checkOutTime": "11:00",
+      "bookingUrl": "https://www.tripadvisor.in/Commerce?p=BookingCom&src=32434479&geo=208552&from=HotelDateSearch_Hotels&slot=1&matchID=1&oos=0&cnt=5&silo=10476&bucket=902999&nrank=1&crank=1&clt=M&ttype=MobileCR&tm=353825467&managed=false&capped=false&gosox=HgqCE56izC5iDxUiwsEln90XXH5Gi8-eazuTaOWwAFjSkh2IbYI2ZglU6ZJwEx6yHaX8b27hEfKMqK7H1wUMdTA8vZTu2XflAYTrfZl1TsRZnvs4RvoUZJF4-GcSnDfUDdt90qXxvXlO9J4g3-Hh5G6xJRWOH9l3_9xPJREOQ3jpuGkQhmLsUzb989O-RW2UdbcfjxHasN3b0RJD-NJEh3WRkm45KJYSGWUG_xX_rMzmLh2vVp8BATxC27VysLLInB1s0Z7BtN2NVXnd8UUmWepqzGIMkAHRjVv7JLxhyMk&priceShown=535&pm=AI&hac=AVAILABLE&mbl=LOSE&mbldelta=7369&rq=ML&rate=472.36&taxesRate=62.2400&feesRate=0&fees=62.2400&cur=EUR&adults=2&child_rm_ages=&inDay=6&outDay=9&rdex=RDEX_4c3043d7a81b96e807d81f57dc85b5be&rooms=1&inMonth=5&inYear=2026&outMonth=5&outYear=2026&auid=7aae4060-c4f1-4f9f-a066-ce174e90b158&def_d=true&bld=L_3,D_48,G_2,W_3,U_1,C_260506,T_10&bh=true&cs=1945c902675ee4c149de05fd60085e618&ik=58b1d0aa6ae34eae9f4b3d35f32743ae&aok=6138aa3e08cb48ce81bef11ad0845445&tp=APS-Hotels&pageLocId=187791",
+      "description": "Parioli • Prix via Booking.com",
+      "totalPrice": 0
+    },
+    {
+      "id": "ta-hotel-2372788",
+      "name": "Dharma Luxury Hotel & Spa",
+      "type": "resort",
+      "address": "Rome",
+      "latitude": 41.893623,
+      "longitude": 12.495978,
+      "rating": 4.7,
+      "reviewCount": 2563,
+      "pricePerNight": 0,
+      "currency": "EUR",
+      "amenities": [
+        "breakfast"
+      ],
+      "photos": [
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/10/a2/a8/45/dharma-hotel.jpg?w=600&h=400&s=1"
+      ],
+      "checkInTime": "15:00",
+      "checkOutTime": "11:00",
+      "bookingUrl": "https://www.tripadvisor.in/Commerce?p=Agoda&src=42195321&geo=2372788&from=HotelDateSearch_Hotels&slot=1&matchID=1&oos=0&cnt=7&silo=5094&bucket=907355&nrank=4&crank=4&clt=M&ttype=MobileCR&tm=353825467&managed=false&capped=false&gosox=jZbcBq0eBN138p1wGuYfzEiOCrrTFrvYPoVAXyIiUTK0uog82S_f7fsZZHxamwISnDZ-AMCnYJv-8DtKoXZa_g8PjmOoUjrJC4BuKJ2LPGvkPPZgRig9FIL6BOCFTXNRZromel_eI25ImQkepSatZElzosQGk8OQ5IOvLrhOc_efOL1XZ31G4xKwftnpEsOhJCkLEViI1U-UDakZajTT4XWRkm45KJYSGWUG_xX_rMzmLh2vVp8BATxC27VysLLInB1s0Z7BtN2NVXnd8UUmWepqzGIMkAHRjVv7JLxhyMk&priceShown=614&pm=AI&hac=AVAILABLE&mbl=BEAT&mbldelta=0&rq=P&rate=547.57&taxesRate=66.7600&feesRate=0&fees=66.7600&cur=EUR&adults=2&child_rm_ages=&inDay=6&outDay=9&rdex=RDEX_540a4177a7602f6b41eb2053061a5bef&rooms=1&inMonth=5&inYear=2026&outMonth=5&outYear=2026&auid=e3e9d726-c106-4b64-8097-fd404294928f&def_d=true&bld=L_3,D_48,G_2,W_3,U_1,C_260506,T_10&bh=true&cs=1c3a01ab4742e5361c999a866bbf49fdb&ik=58b1d0aa6ae34eae9f4b3d35f32743ae&aok=4af9748bcbf44130beb70d27f986b888&tp=APS-Hotels&pageLocId=187791",
+      "description": "Free breakfast available • Esquilino • Prix via Agoda.com",
+      "totalPrice": 0
+    },
+    {
+      "id": "ta-hotel-3244512",
+      "name": "The Independent Hotel",
+      "type": "hotel",
+      "address": "Rome",
+      "latitude": 41.893623,
+      "longitude": 12.495978,
+      "rating": 4.7,
+      "reviewCount": 2080,
+      "pricePerNight": 0,
+      "currency": "EUR",
+      "amenities": [],
+      "photos": [
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/2b/0a/fe/12/caption.jpg?w=600&h=400&s=1"
+      ],
+      "checkInTime": "15:00",
+      "checkOutTime": "11:00",
+      "bookingUrl": "https://www.tripadvisor.in/Commerce?p=BookingCom&src=43051633&geo=3244512&from=HotelDateSearch_Hotels&slot=1&matchID=1&oos=0&cnt=8&silo=10476&bucket=902999&nrank=2&crank=2&clt=M&ttype=MobileCR&tm=353825467&managed=false&capped=false&gosox=yCswOYwicXpfW1ykihK7Rt0XXH5Gi8-eazuTaOWwAFh1z4aucOwxn-_9R7u6InTN4OhyA6pOOtUgmxTWUFQkRj1johhIaqFArNiCbA8qF1hZnvs4RvoUZJF4-GcSnDfUEkQsLbOGF5_N4gFIU147pern4_hQ9SzKbh2H47FOeiflZSf7pJFSI9FfKz05mfPAcQVP7J9illH7wABRDIdaYHWRkm45KJYSGWUG_xX_rMzmLh2vVp8BATxC27VysLLInB1s0Z7BtN2NVXnd8UUmWepqzGIMkAHRjVv7JLxhyMk&priceShown=435&pm=AI&hac=AVAILABLE&mbl=LOSE&mbldelta=9327&rq=P&rate=384.29&taxesRate=50.4300&feesRate=0&fees=50.4300&cur=EUR&adults=2&child_rm_ages=&inDay=6&outDay=9&rdex=RDEX_707ac22cad6515c463e23d80587bee48&rooms=1&inMonth=5&inYear=2026&outMonth=5&outYear=2026&auid=750c13f4-6488-4f9d-b2db-49fb45069bc0&def_d=true&bld=L_3,D_48,G_2,W_3,U_1,C_260506,T_10&bh=true&cs=1344be00a12bf1d251978e135a48f9f40&ik=58b1d0aa6ae34eae9f4b3d35f32743ae&aok=80ce1f854c6d4d7e991c2bc61b200aa1&tp=APS-Hotels&pageLocId=187791",
+      "description": "Esquilino • Prix via Booking.com",
+      "totalPrice": 0
+    },
+    {
+      "id": "ta-hotel-228970",
+      "name": "FH55 Grand Hotel Palatino",
+      "type": "hotel",
+      "address": "Rome",
+      "latitude": 41.893623,
+      "longitude": 12.495978,
+      "rating": 4.1,
+      "reviewCount": 3099,
+      "pricePerNight": 0,
+      "currency": "EUR",
+      "amenities": [
+        "breakfast"
+      ],
+      "photos": [
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/2b/ff/ee/91/deluxe-executive.jpg?w=600&h=400&s=1"
+      ],
+      "checkInTime": "15:00",
+      "checkOutTime": "11:00",
+      "bookingUrl": "https://www.tripadvisor.in/Commerce?p=MakeMyTrip&src=48331680&geo=228970&from=HotelDateSearch_Hotels&slot=1&matchID=1&oos=0&cnt=7&silo=37958&bucket=934340&nrank=1&crank=1&clt=M&ttype=MobileCR&tm=353825467&managed=false&capped=false&gosox=WqYoNCDdOuUdkgX30DUlwJYFQuUz5tSB_6v81qR_J8lazHtwiTpQmk8ow7J9wWluLi1LLMEaDB8ujwNNkVbPcyxZnL_iQSUkUm4h_4ZWk9JgejfwQFKydBH24C3TnyUCSQSt7rTQvthKH_i9fHSyeZcOO4Z6Ikp5ho2MjhjLGhlCgnKEACyrYqWOtrfI5iP8CepAGRxIJQxjXuC9nZtADEXTmsW_Znxy7TP001Zp9nY1cON8nbZqgY-vjhv_mZTHjT7O15xNQTRD8rZjfWAqM5ADijQH7GuzogQLZORTRgQ&priceShown=406&pm=AI&hac=AVAILABLE&mbl=LOSE&mbldelta=2879&rq=P&rate=355.67&taxesRate=50.6700&feesRate=0&fees=50.6700&cur=EUR&adults=2&child_rm_ages=&inDay=6&outDay=9&rdex=RDEX_5c4c3e45ef45bb3c4d6bbf298f5e7984&rooms=1&inMonth=5&inYear=2026&outMonth=5&outYear=2026&auid=f78b0912-995e-497c-8077-ec5a32a33e69&def_d=true&bld=L_3,D_48,G_2,W_3,U_1,C_260506,T_10&bh=true&cs=10c8fcef762ba09ab1993b9b9ceb581b3&ik=58b1d0aa6ae34eae9f4b3d35f32743ae&aok=d6796cf6c2bc46bfaea0bffae46fde97&tp=APS-Hotels&pageLocId=187791",
+      "description": "Free breakfast available • Centro • Prix via MakeMyTrip",
+      "totalPrice": 0
+    },
+    {
+      "id": "ta-hotel-236154",
+      "name": "Hotel Scalinata di Spagna",
+      "type": "resort",
+      "address": "Rome",
+      "latitude": 41.893623,
+      "longitude": 12.495978,
+      "rating": 4.5,
+      "reviewCount": 963,
+      "pricePerNight": 0,
+      "currency": "EUR",
+      "amenities": [
+        "breakfast"
+      ],
+      "photos": [
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/1b/4c/e9/d8/hotel-scalinata-di-spagna.jpg?w=600&h=400&s=1"
+      ],
+      "checkInTime": "15:00",
+      "checkOutTime": "11:00",
+      "bookingUrl": "https://www.tripadvisor.in/Commerce?p=Agoda&src=180090265&geo=236154&from=HotelDateSearch_Hotels&slot=1&matchID=1&oos=0&cnt=8&silo=5094&bucket=907355&nrank=4&crank=4&clt=M&ttype=MobileCR&tm=353825467&managed=false&capped=false&gosox=T4T4IUwqYOz6wqK3m4Z9spu98c-yjlG2WiD1dLjyLTmn2eTtbME5fiU1r94TGurn5VkNUz1THKkofCO1h7GyOUfVqjWFZrJB4_WZV0HrgsTptPJlsK9YoG6HMAr6AlHS0KOXzMvVGL65oQDbCClB47C5IpIIu_p60jDMX6aiL8qxfX38oPJDG6nkPu7-C1p964bOSOzNWD2i5QTWLZLFGJiG2zOzzAQRixgKcnS-o5FqlQqZ_QNPqWWyHWp5wJkXuJQkTjPJUa_P_F25i3y9Lv9lr3F4ihtsu-tQxQ0THHA&priceShown=444&pm=AI&hac=AVAILABLE&mbl=BEAT&mbldelta=0&rq=P&rate=403.66&taxesRate=40.3600&feesRate=0&fees=40.3600&cur=EUR&adults=2&child_rm_ages=&inDay=6&outDay=9&rdex=RDEX_1097ab097b58c0749a46b65f033f0cef&rooms=1&inMonth=5&inYear=2026&outMonth=5&outYear=2026&auid=6ec8d483-cfd1-49ce-9783-62c41ea2545d&def_d=true&bld=L_3,D_48,G_2,W_3,U_1,C_260506,T_10&bh=true&cs=149ceacab86a6a7f53225797566057d62&ik=58b1d0aa6ae34eae9f4b3d35f32743ae&aok=aba90c39d8c7485c8d2a0e9bcd5eae3e&tp=APS-Hotels&pageLocId=187791",
+      "description": "Free breakfast available • Centro • Prix via Agoda.com",
+      "totalPrice": 0
+    },
+    {
+      "id": "ta-hotel-231290",
+      "name": "Dharma Style Hotel & Spa",
+      "type": "resort",
+      "address": "Rome",
+      "latitude": 41.893623,
+      "longitude": 12.495978,
+      "rating": 4.5,
+      "reviewCount": 2206,
+      "pricePerNight": 0,
+      "currency": "EUR",
+      "amenities": [
+        "breakfast"
+      ],
+      "photos": [
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/25/5b/91/b3/suite-executive-con-spa.jpg?w=600&h=400&s=1"
+      ],
+      "checkInTime": "15:00",
+      "checkOutTime": "11:00",
+      "bookingUrl": "https://www.tripadvisor.in/Commerce?p=MakeMyTrip&src=236919553&geo=231290&from=HotelDateSearch_Hotels&slot=1&matchID=1&oos=0&cnt=5&silo=37958&bucket=934340&nrank=1&crank=1&clt=M&ttype=MobileCR&tm=353825467&managed=false&capped=false&gosox=z97Z1bqyL8Hg3nIz5eMgE5YFQuUz5tSB_6v81qR_J8loLy08gqBaImlkd7skcfj9_QCP6lVSwF_1BrZHGa8iFQFVNhFAzi17D4tyA3SliXdgejfwQFKydBH24C3TnyUC66VZp2qO-FKkoJ3vx2LPVpKjd92-cBfzPCr467kE-mznKlWMmgyA019NcPZtiaaZ52J2_tD3Rredq5JGy7cgmXJltIOsRIKsTyNcSsJN92-CDE4q8WZOSzZB3x4QMeUto1O5IHl6qu1sb-AWRgJ6qCL-qlR2VVIusPyj-S87vAs&priceShown=359&pm=AI&hac=AVAILABLE&mbl=LOSE&mbldelta=576&rq=P&rate=313.00&taxesRate=46.3300&feesRate=0&fees=46.3300&cur=EUR&adults=2&child_rm_ages=&inDay=6&outDay=9&rdex=RDEX_67cf28f06c00d355cdc020a88016c391&rooms=1&inMonth=5&inYear=2026&outMonth=5&outYear=2026&auid=c915a1e4-c9ac-4140-949b-d378cebee044&def_d=true&bld=L_3,D_48,G_2,W_3,U_1,C_260506,T_10&bh=true&cs=1be104b0c4495d930bab0e29c2eef7f5d&ik=58b1d0aa6ae34eae9f4b3d35f32743ae&aok=16f13c608a254d54b4eec652586b7941&tp=APS-Hotels&pageLocId=187791",
+      "description": "Free breakfast available • Esquilino • Prix via MakeMyTrip",
+      "totalPrice": 0
+    }
+  ],
+  "transportOptions": [
+    {
+      "id": "bus",
+      "mode": "bus",
+      "segments": [
+        {
+          "mode": "bus",
+          "from": "Paris",
+          "to": "Rome",
+          "fromCoords": {
+            "lat": 48.8566,
+            "lng": 2.3522
+          },
+          "toCoords": {
+            "lat": 41.9028,
+            "lng": 12.4964
+          },
+          "duration": 829,
+          "price": 44,
+          "co2": 30,
+          "operator": "FlixBus / BlaBlaCar Bus",
+          "frequency": "1-4 par jour",
+          "bookingUrl": "https://www.omio.fr/bus/paris/rome?departure_date=2026-05-06&passengers%5B%5D=adult&passengers%5B%5D=adult"
+        }
+      ],
+      "totalDuration": 884,
+      "totalPrice": 44,
+      "totalCO2": 30,
+      "score": 6.7,
+      "scoreDetails": {
+        "priceScore": 10,
+        "timeScore": 0,
+        "co2Score": 10
+      },
+      "bookingUrl": "https://www.omio.fr/bus/paris/rome?departure_date=2026-05-06&passengers%5B%5D=adult&passengers%5B%5D=adult",
+      "recommended": true,
+      "recommendationReason": "Option économique, écologique"
+    },
+    {
+      "id": "combined_train_plane",
+      "mode": "combined",
+      "segments": [
+        {
+          "mode": "train",
+          "from": "Paris",
+          "to": "Paris",
+          "duration": 48,
+          "price": 24,
+          "co2": 1,
+          "operator": "Train grande vitesse"
+        },
+        {
+          "mode": "plane",
+          "from": "Paris",
+          "to": "Rome",
+          "duration": 68,
+          "price": 91,
+          "co2": 177
+        }
+      ],
+      "totalDuration": 356,
+      "totalPrice": 115,
+      "totalCO2": 178,
+      "score": 6.1,
+      "scoreDetails": {
+        "priceScore": 6.3,
+        "timeScore": 10,
+        "co2Score": 2
+      }
+    },
+    {
+      "id": "plane",
+      "mode": "plane",
+      "segments": [
+        {
+          "mode": "plane",
+          "from": "Paris",
+          "to": "Rome",
+          "fromCoords": {
+            "lat": 48.8566,
+            "lng": 2.3522
+          },
+          "toCoords": {
+            "lat": 41.9028,
+            "lng": 12.4964
+          },
+          "duration": 83,
+          "price": 111,
+          "co2": 216,
+          "frequency": "Plusieurs vols par jour",
+          "bookingUrl": "https://www.aviasales.com/search/CDG0605FCO2?currency=eur&locale=fr"
+        }
+      ],
+      "totalDuration": 373,
+      "totalPrice": 111,
+      "totalCO2": 216,
+      "score": 5.4,
+      "scoreDetails": {
+        "priceScore": 6.5,
+        "timeScore": 9.7,
+        "co2Score": 0
+      },
+      "bookingUrl": "https://www.aviasales.com/search/CDG0605FCO2?currency=eur&locale=fr",
+      "omioFlightUrl": "https://www.omio.fr/vols/paris/rome?departure_date=2026-05-06&passengers%5B%5D=adult&passengers%5B%5D=adult"
+    },
+    {
+      "id": "car",
+      "mode": "car",
+      "segments": [
+        {
+          "mode": "car",
+          "from": "Paris",
+          "to": "Rome",
+          "fromCoords": {
+            "lat": 48.8566,
+            "lng": 2.3522
+          },
+          "toCoords": {
+            "lat": 41.9028,
+            "lng": 12.4964
+          },
+          "duration": 663,
+          "price": 238,
+          "co2": 57,
+          "frequency": "Flexible",
+          "bookingUrl": "https://www.google.com/maps/dir/Paris/Rome"
+        }
+      ],
+      "totalDuration": 753,
+      "totalPrice": 238,
+      "totalCO2": 57,
+      "score": 3.7,
+      "scoreDetails": {
+        "priceScore": 0,
+        "timeScore": 2.5,
+        "co2Score": 8.5
+      },
+      "bookingUrl": "https://www.google.com/maps/dir/Paris/Rome",
+      "dataSource": "estimated"
+    }
+  ],
+  "outboundFlight": null,
+  "returnFlight": null,
+  "flightAlternatives": {
+    "outbound": [],
+    "return": []
+  },
+  "weatherForecasts": [],
+  "dayTripSuggestions": [
+    {
+      "name": "Ostia Antica",
+      "description": "Port antique de Rome avec ruines romaines exceptionnellement préservées",
+      "destination": "Ostia Antica",
+      "latitude": 41.7576,
+      "longitude": 12.2917,
+      "distanceKm": 25,
+      "transportMode": "metro",
+      "transportDurationMin": 45,
+      "estimatedCostPerPerson": 2,
+      "keyAttractions": [
+        "Théâtre romain",
+        "Forum",
+        "Thermes de Neptune",
+        "Insulae (immeubles antiques)",
+        "Mosaïques"
+      ],
+      "tags": [
+        "culture"
+      ],
+      "suitableFor": [
+        "solo",
+        "couple",
+        "friends",
+        "family_with_kids",
+        "family_without_kids"
+      ],
+      "minBudgetLevel": "economic",
+      "notes": "Alternative moins touristique à Pompéi, plus proche de Rome.",
+      "minDays": 4,
+      "fullDayRequired": true,
+      "fromCity": "rome"
+    }
+  ],
+  "dayTripActivities": {
+    "Ostia Antica": []
+  },
+  "dayTripRestaurants": {
+    "Ostia Antica": []
+  },
+  "travelTips": null,
+  "budgetStrategy": {
+    "accommodationType": "airbnb_with_kitchen",
+    "accommodationBudgetPerNight": 60,
+    "mealsStrategy": {
+      "breakfast": "restaurant",
+      "lunch": "restaurant",
+      "dinner": "restaurant"
+    },
+    "groceryShoppingNeeded": false,
+    "activitiesLevel": "mixed",
+    "dailyActivityBudget": 16,
+    "transportTips": "Achetez un pass de transport 48h (28€) pour illimité bus/métro. À pied pour le centre historique (Colosseo, Forum, Panthéon).",
+    "reasoning": "Budget serré (125€/pers/jour). Airbnb avec cuisine permet petit-déj économique (~3€) et déjeuners courses (~6€). Dîners restaurants sélectifs (12-15€) pour l'expérience gastronomique souhaitée. Logement 60€/nuit × 4 = 240€, repas estimés 420€ pour 2, activités culturelles 200€ (musées gratuits 1er dimanche, églises libres, archaeological sites). Reste ~140€ de marge pour imprévus ou musées premium.",
+    "maxPricePerActivity": 50
+  },
+  "resolvedBudget": {
+    "totalBudget": 1000,
+    "perPersonBudget": 500,
+    "perPersonPerDay": 125,
+    "budgetLevel": "moderate"
+  }
+}

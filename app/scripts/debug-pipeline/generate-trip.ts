@@ -113,6 +113,8 @@ export interface GenerationResult {
 export interface GenerateTripRunOptions {
   /** Pre-loaded fixture data — passed to pipeline to skip step 1 */
   fixtureData?: FetchedData;
+  /** Callback to capture FetchedData after step 1 (for fixture recording) */
+  onFetchedData?: (data: FetchedData) => void;
 }
 
 export async function generateTripRun(scenarioId: string, preferences: TripPreferences, options?: GenerateTripRunOptions): Promise<GenerationResult> {
@@ -132,7 +134,7 @@ export async function generateTripRun(scenarioId: string, preferences: TripPrefe
       // Direct call to V3 with fixture data (bypasses version routing)
       trip = await generateTripV3(preferences, undefined, { fixtureData: options.fixtureData });
     } else {
-      trip = await generateTripV2(preferences);
+      trip = await generateTripV3(preferences, undefined, { onFetchedData: options?.onFetchedData });
     }
     const durationMs = Date.now() - startTime;
     captured.restore();
