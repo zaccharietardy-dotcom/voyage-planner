@@ -324,29 +324,56 @@ export function unifiedScheduleV3Days(
     }
     dayRestaurantPools.set(cluster.dayNumber, dayRestaurants);
 
-    // 4. SORT activities: promote activities with early closing hours
-    // Priority 1: must-sees with very urgent close (within 2h of start) — must be first
-    // Priority 2: any activity closing before 18:00 — schedule before late-closing ones
-    // Otherwise: preserve geographic order from intra-day router
-    cluster.activities.sort((a, b) => {
-      const aClose = getActivityCloseTime(a, dayDate);
-      const bClose = getActivityCloseTime(b, dayDate);
-      // Priority 1: must-sees with very urgent close times
-      const aVeryUrgent = a.mustSee && aClose && (timeToMin(aClose) - (a.duration || 60)) <= dayStartMin + 120;
-      const bVeryUrgent = b.mustSee && bClose && (timeToMin(bClose) - (b.duration || 60)) <= dayStartMin + 120;
-      if (aVeryUrgent && !bVeryUrgent) return -1;
-      if (!aVeryUrgent && bVeryUrgent) return 1;
-      // Priority 2: activities with tight deadlines (must start by 17:00 to fit)
-      const aDeadline = aClose ? timeToMin(aClose) - (a.duration || 60) : Infinity;
-      const bDeadline = bClose ? timeToMin(bClose) - (b.duration || 60) : Infinity;
-      const aConstrained = aDeadline <= 17 * 60;
-      const bConstrained = bDeadline <= 17 * 60;
-      if (aConstrained && !bConstrained) return -1;
-      if (!aConstrained && bConstrained) return 1;
-      // Among constrained activities, sort by deadline (tightest first)
-      if (aConstrained && bConstrained) return aDeadline - bDeadline;
-      return 0; // preserve router's geographic order
-    });
+    // 4. SORT activities: constrained first (by deadline), then NN reorder for unconstrained
+    {
+      const constrained: ScoredActivity[] = [];
+      const unconstrained: ScoredActivity[] = [];
+      for (const act of cluster.activities) {
+        const close = getActivityCloseTime(act, dayDate);
+        const deadline = close ? timeToMin(close) - (act.duration || 60) : Infinity;
+        const isUrgent = act.mustSee && close && deadline <= dayStartMin + 120;
+        const isConstrained = deadline <= 17 * 60;
+        if (isUrgent || isConstrained) constrained.push(act);
+        else unconstrained.push(act);
+      }
+      // Sort constrained by deadline (tightest first), urgent must-sees at top
+      constrained.sort((a, b) => {
+        const aClose = getActivityCloseTime(a, dayDate);
+        const bClose = getActivityCloseTime(b, dayDate);
+        const aUrgent = a.mustSee && aClose && (timeToMin(aClose) - (a.duration || 60)) <= dayStartMin + 120;
+        const bUrgent = b.mustSee && bClose && (timeToMin(bClose) - (b.duration || 60)) <= dayStartMin + 120;
+        if (aUrgent && !bUrgent) return -1;
+        if (!aUrgent && bUrgent) return 1;
+        const aDeadline = aClose ? timeToMin(aClose) - (a.duration || 60) : Infinity;
+        const bDeadline = bClose ? timeToMin(bClose) - (b.duration || 60) : Infinity;
+        return aDeadline - bDeadline;
+      });
+      // Nearest-neighbor reorder for unconstrained, starting from last constrained position
+      if (unconstrained.length >= 2) {
+        const anchor = constrained.length > 0
+          ? constrained[constrained.length - 1]
+          : (hotel ? { latitude: hotel.latitude, longitude: hotel.longitude } : unconstrained[0]);
+        const reordered: ScoredActivity[] = [];
+        const remaining = [...unconstrained];
+        let curLat = anchor.latitude;
+        let curLng = anchor.longitude;
+        while (remaining.length > 0) {
+          let nearestIdx = 0;
+          let nearestDist = Infinity;
+          for (let ri = 0; ri < remaining.length; ri++) {
+            const d = calculateDistance(curLat, curLng, remaining[ri].latitude, remaining[ri].longitude);
+            if (d < nearestDist) { nearestDist = d; nearestIdx = ri; }
+          }
+          const next = remaining.splice(nearestIdx, 1)[0];
+          reordered.push(next);
+          curLat = next.latitude;
+          curLng = next.longitude;
+        }
+        unconstrained.length = 0;
+        unconstrained.push(...reordered);
+      }
+      cluster.activities = [...constrained, ...unconstrained];
+    }
 
     // 5. ACTIVITY LOOP
     for (let i = 0; i < cluster.activities.length; i++) {
