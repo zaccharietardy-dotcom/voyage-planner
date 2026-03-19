@@ -7,6 +7,8 @@
  * 3. Estimation par vitesse (toujours disponible)
  */
 
+import { getCachedResponse, setCachedResponse } from './supabaseCache';
+
 // Configuration des API
 function getGoogleMapsKey() { return process.env.GOOGLE_MAPS_API_KEY; }
 function getOpenRouteKey() { return process.env.OPENROUTE_API_KEY; }
@@ -138,6 +140,11 @@ async function searchWithGoogle(
   mode: 'transit' | 'walking' | 'driving',
   departureTime?: Date
 ): Promise<Omit<DirectionsResult, 'googleMapsUrl'>> {
+  // L2 cache check (coords truncated to 4 decimals = ~11m precision)
+  const cacheKey = `directions|${from.lat.toFixed(4)},${from.lng.toFixed(4)}|${to.lat.toFixed(4)},${to.lng.toFixed(4)}|${mode}`;
+  const cached = await getCachedResponse<Omit<DirectionsResult, 'googleMapsUrl'>>('directions', cacheKey);
+  if (cached) return cached;
+
   const { trackApiCost } = await import('./apiCostGuard');
   trackApiCost('directions');
 
@@ -155,7 +162,7 @@ async function searchWithGoogle(
 
   const response = await fetch(
     `https://maps.googleapis.com/maps/api/directions/json?${params}`,
-    { signal: AbortSignal.timeout(5000) }
+    { signal: AbortSignal.timeout(10000) }
   );
 
   if (!response.ok) {
@@ -202,14 +209,19 @@ async function searchWithGoogle(
     steps.push(parsedStep);
   }
 
-  return {
+  const dirResult = {
     duration: Math.ceil(leg.duration.value / 60),
     distance: leg.distance.value / 1000,
     steps,
     transitLines,
-    source: 'google',
+    source: 'google' as const,
     overviewPolyline: route.overview_polyline?.points,
   };
+
+  // Save to L2 (14 day TTL — routes stable, transit schedules change)
+  setCachedResponse('directions', cacheKey, dirResult, 14).catch(() => {});
+
+  return dirResult;
 }
 
 /**
