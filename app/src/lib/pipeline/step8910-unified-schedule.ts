@@ -324,55 +324,94 @@ export function unifiedScheduleV3Days(
     }
     dayRestaurantPools.set(cluster.dayNumber, dayRestaurants);
 
-    // 4. SORT activities: constrained first (by deadline), then NN reorder for unconstrained
+    // 4. SORT activities: NN seed → 2-opt with opening-hours constraints
     {
-      const constrained: ScoredActivity[] = [];
-      const unconstrained: ScoredActivity[] = [];
-      for (const act of cluster.activities) {
-        const close = getActivityCloseTime(act, dayDate);
-        const deadline = close ? timeToMin(close) - (act.duration || 60) : Infinity;
-        const isUrgent = act.mustSee && close && deadline <= dayStartMin + 120;
-        const isConstrained = deadline <= 17 * 60;
-        if (isUrgent || isConstrained) constrained.push(act);
-        else unconstrained.push(act);
-      }
-      // Sort constrained by deadline (tightest first), urgent must-sees at top
-      constrained.sort((a, b) => {
-        const aClose = getActivityCloseTime(a, dayDate);
-        const bClose = getActivityCloseTime(b, dayDate);
-        const aUrgent = a.mustSee && aClose && (timeToMin(aClose) - (a.duration || 60)) <= dayStartMin + 120;
-        const bUrgent = b.mustSee && bClose && (timeToMin(bClose) - (b.duration || 60)) <= dayStartMin + 120;
-        if (aUrgent && !bUrgent) return -1;
-        if (!aUrgent && bUrgent) return 1;
-        const aDeadline = aClose ? timeToMin(aClose) - (a.duration || 60) : Infinity;
-        const bDeadline = bClose ? timeToMin(bClose) - (b.duration || 60) : Infinity;
-        return aDeadline - bDeadline;
-      });
-      // Nearest-neighbor reorder for unconstrained, starting from last constrained position
-      if (unconstrained.length >= 2) {
-        const anchor = constrained.length > 0
-          ? constrained[constrained.length - 1]
-          : (hotel ? { latitude: hotel.latitude, longitude: hotel.longitude } : unconstrained[0]);
-        const reordered: ScoredActivity[] = [];
-        const remaining = [...unconstrained];
-        let curLat = anchor.latitude;
-        let curLng = anchor.longitude;
-        while (remaining.length > 0) {
-          let nearestIdx = 0;
-          let nearestDist = Infinity;
-          for (let ri = 0; ri < remaining.length; ri++) {
-            const d = calculateDistance(curLat, curLng, remaining[ri].latitude, remaining[ri].longitude);
-            if (d < nearestDist) { nearestDist = d; nearestIdx = ri; }
-          }
-          const next = remaining.splice(nearestIdx, 1)[0];
-          reordered.push(next);
-          curLat = next.latitude;
-          curLng = next.longitude;
+      const startLat = hotel?.latitude ?? cluster.activities[0]?.latitude ?? 0;
+      const startLng = hotel?.longitude ?? cluster.activities[0]?.longitude ?? 0;
+
+      // Nearest-neighbor seed from hotel/start position
+      const seed: ScoredActivity[] = [];
+      const pool = [...cluster.activities];
+      let curLat = startLat;
+      let curLng = startLng;
+      while (pool.length > 0) {
+        let bestIdx = 0;
+        let bestDist = Infinity;
+        for (let ri = 0; ri < pool.length; ri++) {
+          const d = calculateDistance(curLat, curLng, pool[ri].latitude, pool[ri].longitude);
+          if (d < bestDist) { bestDist = d; bestIdx = ri; }
         }
-        unconstrained.length = 0;
-        unconstrained.push(...reordered);
+        const next = pool.splice(bestIdx, 1)[0];
+        seed.push(next);
+        curLat = next.latitude;
+        curLng = next.longitude;
       }
-      cluster.activities = [...constrained, ...unconstrained];
+
+      // Route cost: total haversine distance from start through activities
+      const routeDist = (route: ScoredActivity[]): number => {
+        if (route.length === 0) return 0;
+        let total = calculateDistance(startLat, startLng, route[0].latitude, route[0].longitude);
+        for (let ri = 1; ri < route.length; ri++) {
+          total += calculateDistance(route[ri - 1].latitude, route[ri - 1].longitude, route[ri].latitude, route[ri].longitude);
+        }
+        return total;
+      };
+
+      // Check opening-hours feasibility: simulate time progression
+      const isFeasible = (route: ScoredActivity[]): boolean => {
+        let time = dayStartMin;
+        for (const act of route) {
+          // Estimate travel: ~4 min/km urban
+          const prevAct = route[route.indexOf(act) - 1];
+          const fromLat = prevAct ? prevAct.latitude : startLat;
+          const fromLng = prevAct ? prevAct.longitude : startLng;
+          const dist = calculateDistance(fromLat, fromLng, act.latitude, act.longitude);
+          const travelMin = dist <= 1 ? Math.ceil((dist / 4.5) * 60) : Math.ceil(dist * 4);
+          time += travelMin;
+
+          // Check opening time — wait if not open yet
+          const openTime = getActivityOpenTime(act, dayDate);
+          if (openTime) time = Math.max(time, timeToMin(openTime));
+
+          // Check closing time — must finish before close
+          const closeTime = getActivityCloseTime(act, dayDate);
+          if (closeTime && time + (act.duration || 60) > timeToMin(closeTime)) return false;
+
+          time += (act.duration || 60) + 10; // 10min buffer
+        }
+        return true;
+      };
+
+      // 2-opt improvement on the full route
+      let route = seed;
+      let bestCost = routeDist(route);
+      let improved = true;
+      let passes = 0;
+      while (improved && passes < 5) {
+        improved = false;
+        passes++;
+        for (let i = 0; i < route.length - 1; i++) {
+          for (let k = i + 1; k < route.length; k++) {
+            const candidate = [
+              ...route.slice(0, i + 1),
+              ...route.slice(i + 1, k + 1).reverse(),
+              ...route.slice(k + 1),
+            ];
+            const candidateCost = routeDist(candidate);
+            if (candidateCost + 0.05 < bestCost && isFeasible(candidate)) {
+              route = candidate;
+              bestCost = candidateCost;
+              improved = true;
+            }
+          }
+        }
+      }
+
+      if (bestCost < routeDist(cluster.activities) - 0.1) {
+        const saved = routeDist(cluster.activities) - bestCost;
+        console.log(`[Unified] Day ${cluster.dayNumber}: 2-opt saved ${saved.toFixed(1)}km (${passes} passes)`);
+      }
+      cluster.activities = route;
     }
 
     // 5. ACTIVITY LOOP
