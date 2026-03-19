@@ -2,16 +2,17 @@
  * Cache L2 persistant Supabase pour les appels Google API
  *
  * Architecture: L1 (in-memory) -> L2 (Supabase search_cache) -> Google API
- * Si Supabase est down/lent -> timeout 2s, fallback transparent sur Google API
+ * Si Supabase est down/lent -> timeout 5s, fallback transparent sur Google API
  */
 
 import crypto from 'crypto';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-const SUPABASE_TIMEOUT_MS = 2000;
+const SUPABASE_TIMEOUT_MS = 5000;
 
 // Singleton Supabase admin client
 let _supabaseAdmin: SupabaseClient | null | undefined;
+let _warmupDone = false;
 
 function getSupabaseAdmin(): SupabaseClient | null {
   if (_supabaseAdmin !== undefined) return _supabaseAdmin;
@@ -25,6 +26,23 @@ function getSupabaseAdmin(): SupabaseClient | null {
     auth: { autoRefreshToken: false, persistSession: false },
   });
   return _supabaseAdmin;
+}
+
+/**
+ * Warmup: establish TCP+TLS connection with a lightweight query.
+ * Called once on first cache access — avoids cold-start timeout on real queries.
+ */
+async function ensureWarm(supabase: SupabaseClient): Promise<void> {
+  if (_warmupDone) return;
+  _warmupDone = true;
+  try {
+    await withTimeout(
+      supabase.from('search_cache').select('query_hash').limit(1),
+      SUPABASE_TIMEOUT_MS
+    );
+  } catch {
+    // Warmup failure is non-fatal
+  }
 }
 
 export function toCacheHash(cacheKey: string): string {
@@ -43,7 +61,10 @@ export async function getCachedResponse<T>(queryType: string, cacheKey: string):
     const supabase = getSupabaseAdmin();
     if (!supabase) return null;
 
+    await ensureWarm(supabase);
+
     const queryHash = toCacheHash(cacheKey);
+    const t0 = Date.now();
 
     const result = await withTimeout(
       supabase
@@ -53,15 +74,16 @@ export async function getCachedResponse<T>(queryType: string, cacheKey: string):
         .single()
     );
 
+    const elapsed = Date.now() - t0;
+
     if (!result) {
-      console.log(`[Cache L2] TIMEOUT ${queryType}`);
+      console.log(`[Cache L2] TIMEOUT ${queryType} (${elapsed}ms)`);
       return null;
     }
 
     const { data, error } = result;
 
     if (error || !data) {
-      console.log(`[Cache L2] MISS ${queryType}`);
       return null;
     }
 
@@ -71,7 +93,7 @@ export async function getCachedResponse<T>(queryType: string, cacheKey: string):
       return null;
     }
 
-    console.log(`[Cache L2] HIT ${queryType}`);
+    console.log(`[Cache L2] HIT ${queryType} (${elapsed}ms)`);
     return data.results as T;
   } catch {
     return null;
