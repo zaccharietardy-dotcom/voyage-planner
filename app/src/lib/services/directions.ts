@@ -162,7 +162,7 @@ async function searchWithGoogle(
 
   const response = await fetch(
     `https://maps.googleapis.com/maps/api/directions/json?${params}`,
-    { signal: AbortSignal.timeout(10000) }
+    { signal: AbortSignal.timeout(15000) }
   );
 
   if (!response.ok) {
