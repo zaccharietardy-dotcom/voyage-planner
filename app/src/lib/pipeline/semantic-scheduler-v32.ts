@@ -893,8 +893,8 @@ function insertFreeTimeForDay(
     const gap = endMin - startMin;
     if (gap <= threshold) continue;
 
-    const lat = prev && next ? (prev.latitude + next.latitude) / 2 : (prev?.latitude ?? next?.latitude ?? 0);
-    const lng = prev && next ? (prev.longitude + next.longitude) / 2 : (prev?.longitude ?? next?.longitude ?? 0);
+    const lat = prev?.latitude ?? next?.latitude ?? 0;
+    const lng = prev?.longitude ?? next?.longitude ?? 0;
     const stop: ScheduledStop = {
       id: makeStopId('free_time', dayPlan.dayNumber, index + inserted),
       dayNumber: dayPlan.dayNumber,

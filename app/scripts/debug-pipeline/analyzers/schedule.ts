@@ -49,7 +49,10 @@ export function analyzeSchedule(trip: Trip): AnalysisIssue[] {
       const currentEnd = parseTime(current.endTime);
       const nextStart = parseTime(next.startTime);
 
-      if (currentEnd > nextStart) {
+      const isFlightCheckoutPair =
+        (current.type === 'checkout' && next.type === 'flight') ||
+        (current.type === 'flight' && next.type === 'checkout');
+      if (!isFlightCheckoutPair && currentEnd > nextStart) {
         issues.push({
           severity: 'critical',
           category: 'schedule',

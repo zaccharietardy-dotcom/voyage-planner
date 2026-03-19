@@ -85,7 +85,7 @@ export function analyzeBudget(trip: Trip): AnalysisIssue[] {
             itemTitle: item.title,
           });
         }
-        if (item.estimatedCost === 0) {
+        if (item.estimatedCost === 0 && !item.qualityFlags?.includes('self_meal_fallback')) {
           issues.push({
             severity: 'warning',
             category: 'budget',

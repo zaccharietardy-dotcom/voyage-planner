@@ -729,10 +729,12 @@ export function fillLargeGapsWithFreeTime(days: TripDay[]): void {
         const freeDuration = gapMinutes - 20;
         const freeEnd = addMinutes(freeStart, freeDuration);
 
-        // Midpoint coordinates between the two items
-        if (!current.latitude || !current.longitude || !next.latitude || !next.longitude) continue;
-        const lat = (current.latitude + next.latitude) / 2;
-        const lng = (current.longitude + next.longitude) / 2;
+        // Use previous item's coordinates (free time = explore near where you are)
+        const refItem = (current.latitude && current.longitude) ? current
+          : (next.latitude && next.longitude) ? next : null;
+        if (!refItem) continue;
+        const lat = refItem.latitude!;
+        const lng = refItem.longitude!;
 
         insertions.push({
           index: i + 1,

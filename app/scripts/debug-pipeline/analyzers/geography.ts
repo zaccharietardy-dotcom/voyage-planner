@@ -147,7 +147,7 @@ export function analyzeGeography(trip: Trip): AnalysisIssue[] {
       }
 
       // Restaurant trop loin du centre (>15km)
-      if (centerCount > 0 && item.type === 'restaurant' && !isHotelMeal(item)) {
+      if (centerCount > 0 && item.type === 'restaurant' && !isHotelMeal(item) && !item.qualityFlags?.includes('self_meal_fallback')) {
         const dist = haversineDistance(centerLat, centerLng, item.latitude, item.longitude);
         if (dist > 15) {
           issues.push({
@@ -163,7 +163,7 @@ export function analyzeGeography(trip: Trip): AnalysisIssue[] {
     }
 
     // Distance entre activités consécutives
-    const nonLogistics = items.filter(i => !LOGISTICS_TYPES.includes(i.type) && !isHotelMeal(i));
+    const nonLogistics = items.filter(i => !LOGISTICS_TYPES.includes(i.type) && !isHotelMeal(i) && !i.qualityFlags?.includes('self_meal_fallback'));
     const dayLegDistancesKm: number[] = [];
 
     for (let i = 0; i < nonLogistics.length - 1; i++) {
@@ -211,7 +211,7 @@ export function analyzeGeography(trip: Trip): AnalysisIssue[] {
 
       // Règle urbaine non day-trip: segments >4km are only critical if gap is too short
       // Long distances with sufficient travel time are normal (excursions, parks, etc.)
-      if (!day.isDayTrip && dist > URBAN_LONG_LEG_HARD_KM) {
+      else if (!day.isDayTrip && dist > URBAN_LONG_LEG_HARD_KM) {
         if (!hasEnoughTime) {
           issues.push({
             severity: 'critical',
