@@ -263,34 +263,33 @@ export function unifiedScheduleV3Days(
       console.log(`[Unified] Day ${cluster.dayNumber}: constrained window (${dayStartTime}–${dayEndTime}) — breakfast:${canHaveBreakfast} lunch:${canHaveLunch} dinner:${canHaveDinner}`);
     }
 
-    // 2. BREAKFAST (anchor = hotel or cluster centroid) — only if day starts early enough
+    // 2. BREAKFAST — prefer hotel, only use external if bakery/café < 400m
     if (canHaveBreakfast) {
       const breakfastAnchor = hotelLatLng || getClusterCentroid(cluster.activities);
       if (breakfastAnchor) {
+        // Tight search: only nearby breakfast spots (400m)
         const breakfastPlacement = findBestRestaurant(
           dayRestaurants, breakfastAnchor, 'breakfast',
-          0.8, 3.5, 2, dietary, usedRestaurantIds, dayDateForRestaurant
+          0.4, 3.5, 2, dietary, usedRestaurantIds, dayDateForRestaurant
         );
-        // Validate restaurant is actually open at the specific slot time (not just generic meal window)
         const breakfastEnd = addMinutes(currentTime, 45);
         const breakfastOpenAtSlot = breakfastPlacement && dayDateForRestaurant
           ? isRestaurantOpenForSlot(breakfastPlacement.primary, dayDateForRestaurant, currentTime, breakfastEnd)
-          : true; // no date → skip check
-        if (breakfastPlacement && breakfastPlacement.distanceFromAnchor <= 0.8 && breakfastOpenAtSlot) {
+          : true;
+        if (breakfastPlacement && breakfastPlacement.distanceFromAnchor <= 0.4 && breakfastOpenAtSlot) {
           items.push(createRestaurantItem(
             { ...breakfastPlacement, anchorName: 'Hotel' },
             'breakfast', currentTime, 45, cluster.dayNumber, orderIndex++
           ));
           usedRestaurantIds.add(breakfastPlacement.primary.id);
         } else if (hotelLatLng && hotel) {
-          // Hotel breakfast fallback
+          // Default: breakfast at hotel (no detour)
           const hotelBreakfast = createHotelBreakfastRestaurant(hotelLatLng, hotel.name || 'Hôtel');
           items.push(createRestaurantItem(
             { mealType: 'breakfast', anchorPoint: hotelLatLng, anchorName: 'Hotel', primary: hotelBreakfast, alternatives: [], distanceFromAnchor: 0 },
             'breakfast', currentTime, 45, cluster.dayNumber, orderIndex++
           ));
         } else {
-          // No hotel — "Repas libre"
           items.push(createSelfMealFallbackItem('breakfast', currentTime, 45, cluster.dayNumber, orderIndex++, breakfastAnchor));
         }
       }
