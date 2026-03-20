@@ -16,7 +16,7 @@ import { isOpenAtTime, isActivityOpenOnDay, DAY_NAMES_EN } from './utils/opening
 import { calculateDistance } from '../services/geocoding';
 import { getMinDuration, getMaxDuration } from './utils/constants';
 import { normalizeForMatching } from './utils/dedup';
-import { timeToMin, addMinutes } from './utils/time';
+import { timeToMin, addMinutes, estimateTravelBuffer } from './utils/time';
 import { normalizeActivityTitle, getActivityCloseTime } from './step9-schedule';
 import {
   arePlannerRolesCompatible,
@@ -724,17 +724,25 @@ export function fillLargeGapsWithFreeTime(days: TripDay[]): void {
 
       // Only fill gaps >90 min (smaller gaps are normal breathing room)
       if (gapMinutes > 90) {
-        // Place free_time with 10min margin on each side
-        const freeStart = addMinutes(current.endTime, 10);
-        const freeDuration = gapMinutes - 20;
-        const freeEnd = addMinutes(freeStart, freeDuration);
-
         // Use previous item's coordinates (free time = explore near where you are)
         const refItem = (current.latitude && current.longitude) ? current
           : (next.latitude && next.longitude) ? next : null;
         if (!refItem) continue;
         const lat = refItem.latitude!;
         const lng = refItem.longitude!;
+
+        // Dynamic trailing buffer based on distance to next item
+        const hasNextCoords = next.latitude && next.longitude && !(next.latitude === 0 && next.longitude === 0);
+        const distToNext = hasNextCoords
+          ? calculateDistance(lat, lng, next.latitude!, next.longitude!)
+          : 0;
+        const trailingBuffer = hasNextCoords ? estimateTravelBuffer(distToNext) : 10;
+
+        const freeStart = addMinutes(current.endTime, 10);
+        const freeDuration = gapMinutes - 10 - trailingBuffer;
+        if (freeDuration < 30) continue; // Not enough time for meaningful free time
+
+        const freeEnd = addMinutes(freeStart, freeDuration);
 
         insertions.push({
           index: i + 1,

@@ -27,7 +27,7 @@ import {
   isRestaurantOpenForSlot,
 } from './step9-schedule';
 import { inferLonghaulDirectionFromItem } from './utils/longhaulConsistency';
-import { addMinutes, minToTime, roundUpTo5, sortAndReindexItems, timeToMin } from './utils/time';
+import { addMinutes, estimateTravelBuffer, minToTime, roundUpTo5, sortAndReindexItems, timeToMin } from './utils/time';
 import { getClusterCentroid } from './utils/geo';
 
 type PlannerRole = ActivityCluster['plannerRole'];
@@ -889,9 +889,23 @@ function insertFreeTimeForDay(
     if (!prev && next?.kind === 'activity') continue;
     if (role === 'departure' && (prev?.kind === 'checkout' || next?.kind === 'checkout' || !prev)) continue;
 
-    const { startMin, endMin } = gapBounds(prev, next, dayStartMin, dayEndMin);
+    const prevEnd = prev ? timeToMin(prev.endTime) : dayStartMin;
+    const nextStart = next ? timeToMin(next.startTime) : dayEndMin;
+
+    const startMin = prevEnd + 10; // 10min leading buffer
+
+    // Dynamic trailing buffer based on distance to next item
+    const prevLat = prev?.latitude ?? 0;
+    const prevLng = prev?.longitude ?? 0;
+    const nextLat = next?.latitude ?? 0;
+    const nextLng = next?.longitude ?? 0;
+    const hasCoords = prevLat !== 0 && prevLng !== 0 && nextLat !== 0 && nextLng !== 0;
+    const distToNext = hasCoords ? calculateDistance(prevLat, prevLng, nextLat, nextLng) : 0;
+    const trailingBuffer = hasCoords ? estimateTravelBuffer(distToNext) : 10;
+
+    const endMin = nextStart - trailingBuffer;
     const gap = endMin - startMin;
-    if (gap <= threshold) continue;
+    if (gap <= threshold || gap < 30) continue;
 
     const lat = prev?.latitude ?? next?.latitude ?? 0;
     const lng = prev?.longitude ?? next?.longitude ?? 0;
@@ -900,8 +914,8 @@ function insertFreeTimeForDay(
       dayNumber: dayPlan.dayNumber,
       kind: 'free_time',
       title: 'Temps libre — Exploration du quartier',
-      startTime: minToTime(startMin + 10),
-      endTime: minToTime(endMin - 10),
+      startTime: minToTime(startMin),
+      endTime: minToTime(endMin),
       latitude: lat,
       longitude: lng,
     };
