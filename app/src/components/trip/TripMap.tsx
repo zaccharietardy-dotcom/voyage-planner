@@ -70,6 +70,19 @@ const TYPE_LABELS: Record<string, string> = {
   luggage: 'Bagages',
 };
 
+const TYPE_EMOJIS: Record<string, string> = {
+  activity:   '🏛️',
+  restaurant: '🍴',
+  hotel:      '🏨',
+  checkin:    '🔑',
+  checkout:   '🧳',
+  transport:  '🚇',
+  flight:     '✈️',
+  parking:    '🅿️',
+  luggage:    '🧳',
+  free_time:  '☕',
+};
+
 // ─── Helpers ────────────────────────────────────────────────
 
 function escapeHtml(str: string): string {
@@ -148,8 +161,9 @@ function compareItemsForRoute(a: TripItem, b: TripItem): number {
 function createNumberedIcon(L: any, num: number, type: string, dayNumber: number, isHighlighted: boolean) {
   const colors = getDayColor(dayNumber);
   const shape = TYPE_SHAPES[type] || TYPE_SHAPES.activity;
-  const size = isHighlighted ? 36 : 30;
-  const fontSize = isHighlighted ? 14 : 12;
+  const size = isHighlighted ? 36 : 32;
+  const emoji = TYPE_EMOJIS[type] || '📍';
+  const emojiSize = isHighlighted ? 17 : 15;
   const shadow = isHighlighted
     ? `box-shadow: 0 0 0 3px ${colors.bg}40, 0 2px 8px rgba(0,0,0,0.3);`
     : 'box-shadow: 0 1px 4px rgba(0,0,0,0.25);';
@@ -176,12 +190,12 @@ function createNumberedIcon(L: any, num: number, type: string, dayNumber: number
       width:${size}px;height:${size}px;
       ${shapeCss}
       background:${colors.bg};border:2px solid white;
-      color:white;font-size:${fontSize}px;font-weight:700;
+      color:white;font-weight:700;
       display:flex;align-items:center;justify-content:center;
       ${shadow}
       transition:transform 0.15s ease;
       ${containerTransform}
-    "><span style="display:flex;align-items:center;justify-content:center;${shape.innerCss}">${num}</span></div>`,
+    "><span style="display:flex;align-items:center;justify-content:center;font-size:${emojiSize}px;line-height:1;${shape.innerCss}">${emoji}</span></div>`,
     iconSize: [size, size],
     iconAnchor: [size / 2, size / 2],
     popupAnchor: [0, -size / 2],
@@ -294,6 +308,14 @@ const LEAFLET_STYLE_OVERRIDES = `
 }
 .numbered-marker {
   z-index: 500 !important;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+}
+.leaflet-popup {
+  z-index: 1100 !important;
+}
+.leaflet-popup-pane {
+  z-index: 1100 !important;
 }
 .leaflet-control-attribution {
   font-size: 10px !important;
@@ -512,13 +534,14 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
       const num = mapNumbers?.get(item.id) ?? globalIndex++;
       const icon = createNumberedIcon(L, num, item.type, item.dayNumber, false);
 
-      const marker = L.marker([item.latitude, item.longitude], { icon })
+      const marker = L.marker([item.latitude, item.longitude], { icon, interactive: true })
         .bindPopup(getPopupContent(item, num), {
           maxWidth: typeof window !== 'undefined' ? Math.min(280, window.innerWidth - 60) : 280,
           className: 'clean-popup',
         });
 
-      marker.on('click', () => onItemClickRef.current?.(item));
+      // Use popupopen instead of click to avoid conflicts with Leaflet's popup toggle
+      marker.on('popupopen', () => onItemClickRef.current?.(item));
 
       markerLayer.addLayer(marker);
       markerMapRef.current.set(item.id, { marker, num, type: item.type, dayNumber: item.dayNumber });

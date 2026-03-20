@@ -111,6 +111,7 @@ function isBoundaryFriendlyActivity(
 ): boolean {
   if (role !== 'arrival' && role !== 'departure') return true;
   if (activity.protectedReason === 'user_forced') return true;
+  if (activity.mustSee) return true;
   if (isExperientialViator(activity)) return false;
   if (isHighFrictionBoundaryActivity(activity)) return false;
   const duration = activity.duration || 60;
