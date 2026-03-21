@@ -13,7 +13,7 @@ import { toast } from 'sonner';
 const freePlan = {
   name: 'Gratuit',
   features: [
-    '1 voyage par mois',
+    '2 voyages par mois',
     'Itinéraire IA',
     'Réseau social complet',
     'Carte interactive',
