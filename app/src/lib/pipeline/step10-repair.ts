@@ -714,7 +714,8 @@ export function fillLargeGapsWithFreeTime(
   days: TripDay[],
   activityPool?: ScoredActivity[],
   startDate?: string,
-  repairs?: RepairAction[]
+  repairs?: RepairAction[],
+  densityCategory: 'dense' | 'medium' | 'spread' = 'medium'
 ): void {
   // Build set of already-placed activity IDs to find unassigned pool activities
   const placedIds = new Set<string>();
@@ -773,13 +774,22 @@ export function fillLargeGapsWithFreeTime(
         const dayDate = getDayDate(startDate, day.dayNumber);
         const candidateStart = addMinutes(current.endTime, 10);
 
+        // Progressive distance: prefer nearby, widen only if needed. Tiers adapt to city density.
+        const DISTANCE_TIERS_KM =
+          densityCategory === 'dense'  ? [0.8, 1.2, 2.0] :
+          densityCategory === 'spread' ? [2.0, 4.0, 8.0] :
+                                         [1.0, 1.5, 2.5];  // medium (default)
+
+        for (const maxDistKm of DISTANCE_TIERS_KM) {
+          if (filled) break;
+
         for (let j = 0; j < unassigned.length; j++) {
           const candidate = unassigned[j];
           if ((candidate.score || 0) < MIN_CANDIDATE_SCORE) break; // sorted, so all below threshold
 
-          // Distance check: <3km from current position
+          // Progressive distance check
           const dist = calculateDistance(lat, lng, candidate.latitude, candidate.longitude);
-          if (dist > 3) continue;
+          if (dist > maxDistKm) continue;
 
           // Duration check: activity must fit in the gap (with transport margins)
           const actDuration = candidate.duration || 60;
@@ -839,6 +849,7 @@ export function fillLargeGapsWithFreeTime(
           filled = true;
           break;
         }
+        } // end distance tier loop
       }
 
       // Fallback: insert free_time if no suitable activity found

@@ -776,7 +776,7 @@ export async function searchRestaurantsNearbyGooglePlaces(
     : ['restaurant'];
 
   const places = await nearbySearchPlaces(activityCoords, {
-    radiusMeters: Math.min(maxDistance, 1500),
+    radiusMeters: Math.min(maxDistance, 2500),
     includedTypes,
     maxResultCount: 20,
   });

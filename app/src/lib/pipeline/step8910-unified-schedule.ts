@@ -80,20 +80,28 @@ function strictMealPlacement(
   );
 }
 
-/** Search restaurant with tight radius first (400m), fallback to standard (800m) */
+/** Search restaurant with progressive radius: tight (400m) → standard (800m) → extended for non-dense cities */
 function findBestRestaurantTight(
   restaurants: Parameters<typeof findBestRestaurant>[0],
   anchor: Parameters<typeof findBestRestaurant>[1],
   mealType: Parameters<typeof findBestRestaurant>[2],
   dietary: string[],
   usedIds: Set<string>,
-  dayDate: Date | null
+  dayDate: Date | null,
+  densityCategory: 'dense' | 'medium' | 'spread' = 'medium'
 ): ReturnType<typeof findBestRestaurant> {
   // Try tight radius first (400m) — less zigzag
   const tight = findBestRestaurant(restaurants, anchor, mealType, 0.4, 3.5, 2, dietary, usedIds, dayDate);
   if (tight) return tight;
   // Fallback to standard radius (800m)
-  return findBestRestaurant(restaurants, anchor, mealType, 0.8, 3.5, 2, dietary, usedIds, dayDate);
+  const standard = findBestRestaurant(restaurants, anchor, mealType, 0.8, 3.5, 2, dietary, usedIds, dayDate);
+  if (standard) return standard;
+  // Extended radius for non-dense cities (medium: 1.2km, spread: 1.5km)
+  if (densityCategory !== 'dense') {
+    const extendedRadius = densityCategory === 'spread' ? 1.5 : 1.2;
+    return findBestRestaurant(restaurants, anchor, mealType, extendedRadius, 3.5, 2, dietary, usedIds, dayDate);
+  }
+  return null;
 }
 
 function stampDayPlanningMeta(day: TripDay, role?: PlannerRole): void {
@@ -135,11 +143,12 @@ export function unifiedScheduleV3Days(
   restaurants: Restaurant[],
   allActivities: ScoredActivity[],
   destCoords: { lat: number; lng: number },
-  options: { plannerVersion?: 'v3.0' | 'v3.1'; rescueStage?: number } = {}
+  options: { plannerVersion?: 'v3.0' | 'v3.1'; rescueStage?: number; densityCategory?: 'dense' | 'medium' | 'spread' } = {}
 ): RepairResult {
   const repairs: RepairAction[] = [];
   const unresolvedViolations: string[] = [];
   const plannerVersion = options.plannerVersion || 'v3.0';
+  const density = options.densityCategory || 'medium';
   const rescueStage = plannerVersion === 'v3.1'
     ? (options.rescueStage ?? getV31RescueStage())
     : 0;
@@ -509,7 +518,7 @@ export function unifiedScheduleV3Days(
           let finalLunchTime = currentTime;
           const candidatePlacement = findBestRestaurantTight(
             dayRestaurants, lunchAnchor, 'lunch',
-            dietary, usedRestaurantIds, dayDateForRestaurant
+            dietary, usedRestaurantIds, dayDateForRestaurant, density
           );
           if (candidatePlacement) {
             // Verify restaurant is actually open at the specific slot time
@@ -632,7 +641,7 @@ export function unifiedScheduleV3Days(
           let finalLunchTime = currentTime;
           const candidatePlacement = findBestRestaurantTight(
             dayRestaurants, lunchAnchor, 'lunch',
-            dietary, usedRestaurantIds, dayDateForRestaurant
+            dietary, usedRestaurantIds, dayDateForRestaurant, density
           );
           if (candidatePlacement) {
             for (const slot of lunchSlots) {
@@ -672,7 +681,7 @@ export function unifiedScheduleV3Days(
           let finalDinnerTime = dinnerStartCap;
           const candidateDinner = findBestRestaurantTight(
             dayRestaurants, dinnerAnchorInSitu, 'dinner',
-            dietary, usedRestaurantIds, dayDateForRestaurant
+            dietary, usedRestaurantIds, dayDateForRestaurant, density
           );
           if (candidateDinner) {
             for (const slot of dinnerSlots) {
@@ -712,7 +721,7 @@ export function unifiedScheduleV3Days(
         if (lunchAnchor) {
           const lunchPlacement = findBestRestaurantTight(
             dayRestaurants, lunchAnchor, 'lunch',
-            dietary, usedRestaurantIds, dayDateForRestaurant
+            dietary, usedRestaurantIds, dayDateForRestaurant, density
           );
           if (lunchPlacement) {
             // Use candidate even if strict hours check fails — real restaurant beats "Repas libre"
@@ -747,7 +756,7 @@ export function unifiedScheduleV3Days(
         let finalDinnerTime = dinnerTime;
         const candidateDinner = findBestRestaurantTight(
           dayRestaurants, dinnerAnchor, 'dinner',
-          dietary, usedRestaurantIds, dayDateForRestaurant
+          dietary, usedRestaurantIds, dayDateForRestaurant, density
         );
         if (candidateDinner) {
           // Verify restaurant is actually open at the specific slot time
@@ -1256,7 +1265,7 @@ export function unifiedScheduleV3Days(
   fillGapsByExtension(days, startDateStr, repairs);
 
   // 20. Insert free time for gaps >90min (try unassigned activities first)
-  fillLargeGapsWithFreeTime(days, allActivities, startDateStr, repairs);
+  fillLargeGapsWithFreeTime(days, allActivities, startDateStr, repairs, options.densityCategory || 'medium');
 
   // 20b. Re-cascade overlaps after repairs (must-see injection can create new overlaps)
   for (const day of days) {

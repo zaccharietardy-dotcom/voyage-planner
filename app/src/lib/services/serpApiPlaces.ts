@@ -1101,12 +1101,16 @@ export async function searchRestaurantsNearby(
       query = 'restaurant';
   }
 
-  // Zoom 16z = ~300m de rayon, parfait pour proximité
+  // Adapt zoom level to maxDistance so the API actually returns results in that radius
+  const zoom = maxDistance <= 800 ? 16    // ~300m
+    : maxDistance <= 1500 ? 15            // ~600m
+    : maxDistance <= 2500 ? 14            // ~1.2km
+    : 13;                                // ~2.5km
   const params = new URLSearchParams({
     api_key: getSerpApiKey()!,
     engine: 'google_maps',
     q: query,
-    ll: `@${activityCoords.lat},${activityCoords.lng},16z`,
+    ll: `@${activityCoords.lat},${activityCoords.lng},${zoom}z`,
     hl: 'fr',
     gl: getCountryCode(destination),
   });

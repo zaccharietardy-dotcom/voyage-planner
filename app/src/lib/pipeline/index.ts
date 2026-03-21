@@ -436,7 +436,7 @@ export async function generateTripV3(
   ];
   let enrichedRestaurants: Restaurant[];
   try {
-    enrichedRestaurants = await enrichRestaurantPool(clusters, allRestaurants, preferences.destination);
+    enrichedRestaurants = await enrichRestaurantPool(clusters, allRestaurants, preferences.destination, densityProfile.densityCategory);
   } catch (err) {
     console.error('[Pipeline V3] Step 7 failed:', err);
     throw new Error(`[Pipeline V3] Restaurant pool enrichment failed: ${(err as Error).message}`);
@@ -458,6 +458,7 @@ export async function generateTripV3(
     enrichedRestaurants,
     allActivities,
     data.destCoords,
+    { densityCategory: densityProfile.densityCategory },
   );
   stageTimes['schedule'] = Date.now() - t;
   console.log(`[Pipeline V3] Step 8: Unified schedule built with ${repairResult.days.length} days, ${repairResult.repairs.length} repairs`);

@@ -510,23 +510,30 @@ export function createHotelBreakfastRestaurant(
 export async function enrichRestaurantPool(
   clusters: ActivityCluster[],
   restaurants: Restaurant[],
-  destination?: string
+  destination?: string,
+  densityCategory: 'dense' | 'medium' | 'spread' = 'medium'
 ): Promise<Restaurant[]> {
   const enrichedRestaurants = [...restaurants];
   if (!destination) return enrichedRestaurants;
+
+  // Density-aware search radius: spread cities need wider coverage
+  const SEARCH_RADIUS =
+    densityCategory === 'dense'  ? { nearbyCheck: 0.8, maxDistance: 1000 } :
+    densityCategory === 'spread' ? { nearbyCheck: 2.0, maxDistance: 2500 } :
+                                   { nearbyCheck: 1.0, maxDistance: 1500 };  // medium
 
   const enrichedIds = new Set(restaurants.map(r => r.id));
   const clusterSearches = clusters.map(async (cluster) => {
     const centroid = getClusterCentroid(cluster.activities);
     if (!centroid) return [];
     const nearbyCount = restaurants.filter(r =>
-      calculateDistance(centroid.lat, centroid.lng, r.latitude, r.longitude) <= 0.8
+      calculateDistance(centroid.lat, centroid.lng, r.latitude, r.longitude) <= SEARCH_RADIUS.nearbyCheck
     ).length;
     if (nearbyCount >= 5) return [];
     try {
       const nearby = await searchRestaurantsNearbyWithFallback(centroid, destination, {
         mealType: 'lunch',
-        maxDistance: 1000,
+        maxDistance: SEARCH_RADIUS.maxDistance,
         limit: 10,
       });
       return nearby;
@@ -545,7 +552,7 @@ export async function enrichRestaurantPool(
     }
   }
   if (enrichedRestaurants.length > restaurants.length) {
-    console.log(`[enrichRestaurantPool] Enriched pool: ${restaurants.length} → ${enrichedRestaurants.length} restaurants (${enrichedRestaurants.length - restaurants.length} added from cluster searches)`);
+    console.log(`[enrichRestaurantPool] Enriched pool: ${restaurants.length} → ${enrichedRestaurants.length} restaurants (${enrichedRestaurants.length - restaurants.length} added, density=${densityCategory}, radius=${SEARCH_RADIUS.maxDistance}m)`);
   }
   return enrichedRestaurants;
 }
