@@ -1,13 +1,21 @@
 # Voyage Planner — Documentation Pipeline
 
-> Dernière mise à jour : Février 2026
+> Dernière mise à jour : Mars 2026
 
 ## Aperçu
 
 Application de planification de voyages. Génère des itinéraires détaillés et optimisés avec activités, restaurants, hôtel et transport.
 
-**Stack** : Next.js 15, React 19, TypeScript, Tailwind CSS, Supabase, Leaflet
-**Pipeline** : V3 déterministe (V2-LLM en legacy)
+**Stack** : Next.js 16, React 19, TypeScript, Tailwind CSS, Supabase, Leaflet
+**Pipeline** : V3 déterministe (unique pipeline, legacy supprimé)
+
+## Pipeline Freeze (Mars 2026)
+
+Pipeline V3.0 est **GELÉ**. Aucune modification sauf :
+1. Bug P0 production (crash, data loss, sécurité)
+2. Violation contract sur >10% des trips
+
+Fichiers gelés : step1-fetch → step12-decorate, step8910-unified-schedule, step11-contracts.
 
 ## Architecture Pipeline V3
 
@@ -57,24 +65,25 @@ Step 12: decorateWithLLM()         — Thèmes/narratifs optionnels (OFF par dé
 
 ```
 pipeline/
-├── index.ts                    — Orchestrateur V3 + multi-city + V2 legacy
+├── index.ts                    — Orchestrateur V3 + multi-city
 ├── step1-fetch.ts              — Fetch parallel toutes APIs
 ├── step2-score.ts              — Score Bayésien + clamp + coords + perso
 ├── step3-cluster.ts            — Clustering hiérarchique + capacité + closures + 2-opt inter
 ├── step4-anchor-transport.ts   — Fenêtres temporelles transport
 ├── step4-restaurants.ts        — Helpers restaurant (meal suitability, cuisine family)
 ├── step5-hotel.ts              — Sélection hôtel 3 tiers
-├── step7-assemble.ts           — Assemblage V2 (legacy, 6000+ lignes)
 ├── step7b-travel-times.ts      — Directions API sélective
 ├── step8-place-restaurants.ts  — Helpers restaurant (findBestRestaurant, enrichRestaurantPool)
 ├── step8910-unified-schedule.ts — Scheduler unifié (activités + restaurants in-situ + repair)
 ├── step10-repair.ts            — Helpers repair (fixOpeningHours, ensureMustSees, fillGaps)
 ├── step11-contracts.ts         — Contract Layer (8 invariants P0)
 ├── step12-decorate.ts          — Décoration LLM optionnelle
-├── scheduler.ts                — Scheduler single-pass + gap-fill progressif
+├── planning-meta.ts            — Types planning (PlannerRole, PlanningMeta)
 ├── qualityPolicy.ts            — Politique qualité restaurants
 ├── types.ts                    — Types pipeline internes
 └── utils/
+    ├── transport-items.ts      — Ajout items transport (vol, train)
+    ├── restaurant-outliers.ts  — Fix restaurants outliers post-scheduling
     ├── opening-hours.ts        — Validation horaires d'ouverture
     ├── coordinate-validator.ts — Validation GPS + auto-correction lat/lng
     ├── constants.ts            — Durées min/max, coûts estimés, keywords
@@ -89,7 +98,6 @@ pipeline/
 
 ```bash
 # Pipeline
-PIPELINE_VERSION=v3              # v3 | v2-llm | v2-algorithmic (default: v3)
 PIPELINE_DIRECTIONS_MODE=selective  # selective | all | off (default: selective)
 PIPELINE_LLM_DECOR=off           # on | off (default: off)
 
@@ -128,10 +136,10 @@ Quand `preferences.cityPlan` contient N villes :
 
 ## Performance
 
-| Étape | V2-LLM | V3 |
-|-------|--------|-----|
-| Total | 20-75s | 6-16s |
-| Coût | $0.10/trip | ~$0.06/trip |
+| Métrique | V3 |
+|----------|-----|
+| Total | 6-16s |
+| Coût | ~$0.06/trip |
 
 ## Commandes
 
@@ -181,7 +189,7 @@ TripItem {
 | `HotelSelector.tsx` | Hotel selection carousel |
 | `TransportOptions.tsx` | Transport mode comparison |
 | `BookingChecklist.tsx` | Pre-trip booking checklist |
-| `GeneratingOverlay.tsx` | Generation progress overlay |
+| `GeneratingScreen.tsx` | Generation progress screen |
 
 ## Quality Filters
 
