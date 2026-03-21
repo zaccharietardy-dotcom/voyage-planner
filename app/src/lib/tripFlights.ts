@@ -89,7 +89,7 @@ export async function findBestFlights(
         });
 
         if (flightResults.outboundFlights.length > 0) {
-          const outbound = selectFlightByBudget(flightResults.outboundFlights, preferences.budgetLevel, 'outbound');
+          const outbound = selectFlightByBudget(flightResults.outboundFlights, preferences.budgetLevel, 'outbound', preferences.durationDays);
           const returnFlight = selectFlightByBudget(flightResults.returnFlights, preferences.budgetLevel, 'return');
 
           if (outbound) {
@@ -147,7 +147,7 @@ export async function findBestFlights(
   };
 }
 
-export function selectFlightByBudget(flights: Flight[], budgetLevel?: BudgetLevel, flightType: 'outbound' | 'return' = 'outbound'): Flight | null {
+export function selectFlightByBudget(flights: Flight[], budgetLevel?: BudgetLevel, flightType: 'outbound' | 'return' = 'outbound', durationDays?: number): Flight | null {
   if (flights.length === 0) return null;
 
   // ÉTAPE 1: Filtrer les vols avec une durée excessive
@@ -188,7 +188,7 @@ export function selectFlightByBudget(flights: Flight[], budgetLevel?: BudgetLeve
       arrivalTime: arrivalTimeForScoring,
       type: flightType,
       price: flight.price,
-    });
+    }, durationDays);
 
     // Combiner avec le prix selon le budget
     let priceWeight = 0.5; // Par défaut équilibré

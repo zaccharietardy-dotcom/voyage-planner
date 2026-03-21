@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Compass, Map, PlusCircle, Users, Globe, MessageCircle } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { UserMenu } from '@/components/auth/UserMenu';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
@@ -23,12 +24,11 @@ export function Header() {
     { href: '/globe', label: t('nav.globe'), icon: Globe },
     { href: '/mes-voyages', label: t('nav.myTrips'), icon: Map },
     { href: '/community', label: t('nav.community'), icon: Users },
-    { href: '/messages', label: t('nav.messages'), icon: MessageCircle },
   ];
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 8);
+      setIsScrolled(window.scrollY > 20);
     };
 
     window.addEventListener('scroll', handleScroll);
@@ -38,51 +38,69 @@ export function Header() {
   return (
     <header
       className={cn(
-        'fixed left-0 right-0 top-0 z-50 transition-all duration-300',
-        isScrolled
-          ? 'border-b border-[#1e3a5f]/12 bg-background/85 shadow-[0_8px_30px_rgba(10,22,40,0.08)] backdrop-blur-xl dark:bg-[#0a1628]/90'
-          : 'bg-transparent'
+        'fixed left-0 right-0 top-0 z-50 transition-all duration-500 ease-in-out px-4 py-4'
       )}
     >
-      <div className="container mx-auto px-4">
-        <div className="flex h-16 items-center justify-between">
-          <Link href="/" className="z-50 inline-flex items-center gap-2">
-            <Image
-              src="/logo-narae.png"
-              alt="Narae Voyage"
-              width={36}
-              height={36}
-              className="h-9 w-9 rounded-lg object-cover shadow-sm"
-              priority
-            />
-            <span className="font-display text-xl font-semibold tracking-tight">Narae Voyage</span>
+      <div 
+        className={cn(
+          "container mx-auto rounded-3xl transition-all duration-500 border",
+          isScrolled 
+            ? "bg-white/80 dark:bg-[#020617]/80 backdrop-blur-xl border-gold/20 shadow-2xl py-2 px-6" 
+            : "bg-transparent border-transparent py-4 px-4"
+        )}
+      >
+        <div className="flex items-center justify-between">
+          <Link href="/" className="z-50 inline-flex items-center gap-3 group">
+            <div className="relative h-10 w-10 overflow-hidden rounded-xl bg-gold-gradient p-[1px] shadow-lg group-hover:scale-110 transition-transform">
+              <div className="flex h-full w-full items-center justify-center rounded-[11px] bg-[#020617]">
+                <Image
+                  src="/logo-narae.png"
+                  alt="Narae"
+                  width={24}
+                  height={24}
+                  className="h-6 w-6 object-contain"
+                />
+              </div>
+            </div>
+            <span className="font-display text-xl font-bold tracking-tight text-foreground">
+              Narae <span className="text-gold italic">Voyage</span>
+            </span>
           </Link>
 
-          <nav className="hidden items-center gap-1 rounded-full border border-[#1e3a5f]/10 bg-background/70 p-1 backdrop-blur-md md:flex">
+          <nav className="hidden items-center gap-1 md:flex">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  'rounded-full px-4 py-2 text-sm font-medium transition-all',
+                  'relative rounded-full px-5 py-2 text-[10px] font-bold tracking-widest transition-all uppercase',
                   pathname === link.href
-                    ? 'bg-[#102a45] text-white shadow-sm dark:bg-[#d4a853] dark:text-[#102a45]'
-                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                    ? 'text-gold'
+                    : 'text-muted-foreground hover:text-foreground'
                 )}
               >
                 {link.label}
+                {pathname === link.href && (
+                  <motion.div
+                    layoutId="nav-underline"
+                    className="absolute bottom-0 left-1/2 -translate-x-1/2 h-1 w-1 rounded-full bg-gold"
+                  />
+                )}
               </Link>
             ))}
           </nav>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
+            <div className="hidden sm:flex items-center gap-2 mr-2">
+              <LanguageSwitcher />
+              <ThemeToggle />
+            </div>
             <NotificationBell />
             <UserMenu />
-            <LanguageSwitcher />
-            <ThemeToggle />
           </div>
         </div>
       </div>
     </header>
   );
 }
+

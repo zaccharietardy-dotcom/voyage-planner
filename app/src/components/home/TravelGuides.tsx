@@ -111,75 +111,105 @@ export function TravelGuides() {
           durationDays={generatingDest.preferences.durationDays}
         />
       )}
-      <section>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">Destinations populaires</h2>
-          <div className="hidden gap-2 md:flex">
+      <section className="py-12">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h2 className="text-2xl font-display font-bold">Destinations d'exception</h2>
+            <p className="text-sm text-muted-foreground mt-1">Inspirations pour votre prochain départ</p>
+          </div>
+          <div className="hidden gap-3 md:flex">
             <Button
               variant="outline"
               size="icon"
               onClick={() => scroll('left')}
-              className="h-9 w-9 rounded-full border-[#1e3a5f]/25 bg-background/70 hover:bg-[#1e3a5f]/5"
+              className="h-10 w-10 rounded-full border-gold/20 bg-background/50 hover:bg-gold/5 hover:border-gold/40 transition-all"
               aria-label="Destinations précédentes"
             >
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft className="h-5 w-5" />
             </Button>
             <Button
               variant="outline"
               size="icon"
               onClick={() => scroll('right')}
-              className="h-9 w-9 rounded-full border-[#1e3a5f]/25 bg-background/70 hover:bg-[#1e3a5f]/5"
+              className="h-10 w-10 rounded-full border-gold/20 bg-background/50 hover:bg-gold/5 hover:border-gold/40 transition-all"
               aria-label="Destinations suivantes"
             >
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-5 w-5" />
             </Button>
           </div>
         </div>
         <div
           ref={scrollRef}
-          className="flex gap-5 overflow-x-auto scroll-snap-x pb-2 scrollbar-hide -mx-4 px-4"
+          className="flex gap-6 overflow-x-auto scroll-snap-x pb-8 scrollbar-hide -mx-4 px-4"
         >
           {DESTINATIONS.map((dest, idx) => {
             const isGenerating = generatingIdx === idx;
 
             return (
-              <button
+              <motion.button
                 key={dest.name}
-                className="group shrink-0 w-[280px] rounded-2xl overflow-hidden border border-border/40 bg-card shadow-soft transition-all active:scale-[0.97] hover:shadow-medium hover:-translate-y-1"
+                whileHover={{ y: -8 }}
+                whileTap={{ scale: 0.98 }}
+                className="group shrink-0 w-[320px] premium-card overflow-hidden text-left"
                 disabled={generatingIdx !== null}
                 onClick={() => handleGenerate(dest, idx)}
               >
-                <div className="relative h-[200px] overflow-hidden">
+                <div className="relative h-[240px] overflow-hidden">
                   <Image
                     src={dest.image}
                     alt={dest.name}
                     fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-500"
-                    sizes="(max-width: 768px) 280px, 280px"
+                    className="object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+                    sizes="(max-width: 768px) 320px, 320px"
                     placeholder="blur"
                     blurDataURL={dest.blur}
                   />
-                  <div className={`absolute inset-0 bg-gradient-to-t ${dest.gradient}`} />
-                  <div className="absolute bottom-3 left-3 right-3">
-                    <p className="text-white text-lg font-semibold drop-shadow-md">
-                      {dest.flag} {dest.name}
-                    </p>
-                    <p className="text-white/85 text-sm">{dest.country}</p>
-                    <p className="text-white/70 text-xs mt-0.5">
-                      {dest.preferences.durationDays} jours · {GROUP_TYPE_LABELS_SHORT[dest.preferences.groupType!]}
-                    </p>
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#020617]/90 via-[#020617]/20 to-transparent" />
+                  
+                  <div className="absolute top-4 right-4">
+                    <div className="bg-white/10 backdrop-blur-md border border-white/20 px-3 py-1 rounded-full text-[10px] font-bold text-white uppercase tracking-widest">
+                      {dest.preferences.durationDays} Jours
+                    </div>
                   </div>
+
+                  <div className="absolute bottom-6 left-6 right-6">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-2xl">{dest.flag}</span>
+                      <span className="text-white/70 text-xs font-bold uppercase tracking-widest">{dest.country}</span>
+                    </div>
+                    <h3 className="text-white text-2xl font-display font-bold drop-shadow-lg">
+                      {dest.name}
+                    </h3>
+                  </div>
+
                   {isGenerating && (
-                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                      <Loader2 className="h-6 w-6 animate-spin text-white" />
+                    <div className="absolute inset-0 bg-[#020617]/70 backdrop-blur-sm flex items-center justify-center">
+                      <div className="flex flex-col items-center gap-4">
+                        <Loader2 className="h-10 w-10 animate-spin text-gold" />
+                        <span className="text-white text-xs font-bold uppercase tracking-[0.2em]">Préparation...</span>
+                      </div>
                     </div>
                   )}
                 </div>
-              </button>
+                <div className="p-6 bg-card border-t border-border/50">
+                  <div className="flex items-center justify-between">
+                    <div className="flex flex-col">
+                      <span className="text-[10px] uppercase font-bold text-muted-foreground/60 tracking-wider">Type de séjour</span>
+                      <span className="text-sm font-bold text-foreground">{GROUP_TYPE_LABELS_SHORT[dest.preferences.groupType!]}</span>
+                    </div>
+                    <div className="h-8 w-px bg-border/50" />
+                    <div className="flex flex-col text-right">
+                      <span className="text-[10px] uppercase font-bold text-muted-foreground/60 tracking-wider">À partir de</span>
+                      <span className="text-sm font-bold text-gold">Sur mesure</span>
+                    </div>
+                  </div>
+                </div>
+              </motion.button>
             );
           })}
         </div>
       </section>
+
     </>
   );
 }

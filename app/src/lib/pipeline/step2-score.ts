@@ -384,6 +384,73 @@ export function scoreAndSelectActivities(
     }
   }
 
+  // 3c-ter. Companion must-sees: when an iconic must-see is present, auto-promote its companions.
+  // E.g. Colosseum → Roman Forum + Palatine Hill, St Peter's → Vatican Museums.
+  const COMPANION_MUST_SEES: Record<string, string[]> = {
+    // Rome
+    'colosseum': ['roman forum', 'palatine hill'],
+    'colosseo': ['roman forum', 'palatine hill'],
+    'roman forum': ['colosseum', 'palatine hill'],
+    'foro romano': ['colosseum', 'palatine hill'],
+    'palatine hill': ['colosseum', 'roman forum'],
+    'st peter': ['vatican museums', 'sistine chapel'],
+    'san pietro': ['vatican museums', 'sistine chapel'],
+    'vatican museums': ['st peter', 'sistine chapel'],
+    'musei vaticani': ['st peter', 'sistine chapel'],
+    'sistine chapel': ['vatican museums', 'st peter'],
+    // Paris
+    'eiffel tower': ['trocadero'],
+    'tour eiffel': ['trocadero'],
+    'louvre': ['tuileries garden', 'jardin des tuileries'],
+    'sacre-coeur': ['montmartre'],
+    'sacre coeur': ['montmartre'],
+    // Barcelona
+    'sagrada familia': ['park guell'],
+    'park guell': ['sagrada familia'],
+    // London
+    'tower of london': ['tower bridge'],
+    'tower bridge': ['tower of london'],
+    'british museum': ['bloomsbury'],
+    // Florence
+    'uffizi': ['ponte vecchio'],
+    'ponte vecchio': ['uffizi'],
+    'duomo': ['baptistery', 'battistero'],
+    // Athens
+    'acropolis': ['parthenon', 'ancient agora'],
+    'parthenon': ['acropolis'],
+  };
+
+  function normalizeForCompanion(name: string): string {
+    return name
+      .toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // strip accents
+      .replace(/[''`]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  const currentMustSees = deduped.filter(a => a.mustSee);
+  for (const ms of currentMustSees) {
+    const msNorm = normalizeForCompanion(ms.name);
+    // Find matching companion key
+    for (const [key, companions] of Object.entries(COMPANION_MUST_SEES)) {
+      if (!msNorm.includes(key) && !key.includes(msNorm.length >= 5 ? msNorm : '___')) continue;
+      // Promote companions found in the pool
+      for (const companionKey of companions) {
+        const candidate = deduped.find(a => {
+          if (a.mustSee) return false;
+          const aNorm = normalizeForCompanion(a.name);
+          return aNorm.includes(companionKey) || companionKey.includes(aNorm.length >= 5 ? aNorm : '___');
+        });
+        if (candidate) {
+          candidate.mustSee = true;
+          console.log(`[Pipeline V2] Companion must-see: "${candidate.name}" promoted (companion of "${ms.name}")`);
+        }
+      }
+      break; // only match one key per must-see
+    }
+  }
+
   // 3d. Cap OSM-only mustSees to prevent pool flooding.
   // User-specified mustSees (from 'mustsee' source or fallback matching) are untouched.
   // Only auto-detected OSM mustSees (from Wikidata sitelinks) are capped.
@@ -509,11 +576,12 @@ export function scoreAndSelectActivities(
   // 8. Select the right count
   // Arrival/departure days get fewer activities (~2 each), full days get ~5
   // Over-select to provide margin for rebalancing drops and gap-fill candidates.
+  // Surplus pool (~50% above placed count) ensures gap-fill has candidates.
   const fullDays = Math.max(0, preferences.durationDays - 2);
   const targetCount = Math.max(
-    mustSees.length + Math.ceil(preferences.durationDays * 4.5),
-    preferences.durationDays * 6,
-    16 // Absolute minimum for any trip
+    mustSees.length + Math.ceil(preferences.durationDays * 6),
+    preferences.durationDays * 8,
+    24 // Absolute minimum for any trip
   );
   const remainingSlots = Math.max(0, targetCount - mustSees.length);
   const selected: ScoredActivity[] = [...mustSees, ...curatedNonMustSees.slice(0, remainingSlots)];

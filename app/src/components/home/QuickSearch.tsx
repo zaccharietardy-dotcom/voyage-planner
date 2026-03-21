@@ -1,20 +1,31 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Sparkles } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export function QuickSearch() {
   const router = useRouter();
 
   return (
-    <div className="flex justify-center">
-      <button
-        className="w-full sm:w-auto flex items-center justify-center gap-3 rounded-2xl bg-[#d4a853] px-8 py-4 text-[#0a1628] text-lg font-semibold shadow-medium transition-all hover:bg-[#e8c068] hover:-translate-y-0.5 hover:shadow-lg active:scale-[0.98]"
+    <div className="flex justify-center w-full">
+      <motion.button
+        whileHover={{ scale: 1.02, y: -2 }}
+        whileTap={{ scale: 0.98 }}
+        className="group relative w-full overflow-hidden rounded-[2rem] bg-gold-gradient p-[1px] shadow-xl shadow-gold/20 transition-all hover:shadow-2xl hover:shadow-gold/30"
         onClick={() => router.push('/plan')}
       >
-        Créer mon voyage
-        <ArrowRight className="h-5 w-5" />
-      </button>
+        <div className="flex h-full w-full items-center justify-center gap-4 rounded-[1.95rem] bg-[#020617] px-10 py-5 text-white transition-colors group-hover:bg-transparent">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gold/10 group-hover:bg-white/20 transition-colors">
+            <Sparkles className="h-5 w-5 text-gold group-hover:text-white" />
+          </div>
+          <span className="text-xl font-display font-bold tracking-wide">
+            Commencer une nouvelle aventure
+          </span>
+          <ArrowRight className="h-6 w-6 text-gold transition-transform group-hover:translate-x-1 group-hover:text-white" />
+        </div>
+      </motion.button>
     </div>
   );
 }
+

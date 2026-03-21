@@ -203,7 +203,7 @@ TripItem {
 
 - **TypeScript strict mode** — avoid `any`, use explicit types
 - **Comments**: French for business logic, English for technical
-- **Commits**: `feat:`, `fix:`, `refactor:` conventional format
+- **Commits**: `feat:`, `fix:`, `refactor:` conventional format. Ne pas mettre Claude en co-auteur (`Co-Authored-By`)
 - **Imports**: relative paths within pipeline, absolute for services
 - Always `npm run build` before push
 

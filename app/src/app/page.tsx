@@ -14,46 +14,89 @@ import { Button } from '@/components/ui/button';
 function LandingPage() {
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero — adapted for social network messaging */}
       <Hero />
 
-      {/* Value proposition — 3 steps */}
-      <section className="py-16 bg-muted/30">
+      {/* Value proposition — Enhanced Premium Section */}
+      <section className="section-padding relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-gold/20 to-transparent" />
+        
         <div className="container mx-auto px-4">
-          <h2 className="text-2xl md:text-3xl font-serif font-bold text-center mb-12">
-            Comment ça marche
-          </h2>
-          <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-            <div className="text-center space-y-3">
-              <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
-                <Compass className="h-7 w-7 text-primary" />
-              </div>
-              <h3 className="font-semibold text-lg">Explore</h3>
-              <p className="text-sm text-muted-foreground">Découvre les voyages des autres voyageurs. Scroll, like, sauvegarde tes favoris.</p>
-            </div>
-            <div className="text-center space-y-3">
-              <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
-                <Map className="h-7 w-7 text-primary" />
-              </div>
-              <h3 className="font-semibold text-lg">Adapte</h3>
-              <p className="text-sm text-muted-foreground">Un voyage te plaît ? Adapte-le à tes dates et ton groupe en un clic.</p>
-            </div>
-            <div className="text-center space-y-3">
-              <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
-                <Users2 className="h-7 w-7 text-primary" />
-              </div>
-              <h3 className="font-semibold text-lg">Pars</h3>
-              <p className="text-sm text-muted-foreground">Itinéraire optimisé, temps de trajet réels, liens de réservation. Tout est prêt.</p>
-            </div>
+          <div className="text-center max-w-3xl mx-auto mb-20">
+            <h2 className="text-sm uppercase tracking-[0.3em] text-gold font-bold mb-4">
+              L'excellence du voyage
+            </h2>
+            <p className="text-4xl md:text-5xl font-display font-bold leading-tight">
+              Une expérience sur-mesure, à chaque étape
+            </p>
           </div>
-          <div className="flex justify-center mt-10">
+
+          <div className="grid md:grid-cols-3 gap-10 max-w-6xl mx-auto">
+            <motion.div 
+              whileHover={{ y: -10 }}
+              className="premium-card p-10 flex flex-col items-center text-center group"
+            >
+              <div className="w-20 h-20 rounded-3xl bg-gold/10 flex items-center justify-center mb-8 group-hover:bg-gold-gradient transition-all duration-500">
+                <Compass className="h-10 w-10 text-gold group-hover:text-white transition-colors" />
+              </div>
+              <h3 className="text-2xl font-display font-bold mb-4">Exploration Illimitée</h3>
+              <p className="text-muted-foreground leading-relaxed">
+                Parcourez des milliers d'itinéraires créés par notre communauté de voyageurs experts. L'inspiration n'a plus de limites.
+              </p>
+            </motion.div>
+
+            <motion.div 
+              whileHover={{ y: -10 }}
+              className="premium-card p-10 flex flex-col items-center text-center group border-gold/20 shadow-xl shadow-gold/5"
+            >
+              <div className="w-20 h-20 rounded-3xl bg-gold/10 flex items-center justify-center mb-8 group-hover:bg-gold-gradient transition-all duration-500">
+                <Map className="h-10 w-10 text-gold group-hover:text-white transition-colors" />
+              </div>
+              <h3 className="text-2xl font-display font-bold mb-4">Adaptation Précise</h3>
+              <p className="text-muted-foreground leading-relaxed">
+                Personnalisez chaque détail selon vos envies. Notre IA ajuste les temps de trajet et les réservations en temps réel.
+              </p>
+            </motion.div>
+
+            <motion.div 
+              whileHover={{ y: -10 }}
+              className="premium-card p-10 flex flex-col items-center text-center group"
+            >
+              <div className="w-20 h-20 rounded-3xl bg-gold/10 flex items-center justify-center mb-8 group-hover:bg-gold-gradient transition-all duration-500">
+                <Users2 className="h-10 w-10 text-gold group-hover:text-white transition-colors" />
+              </div>
+              <h3 className="text-2xl font-display font-bold mb-4">Partage Privilégié</h3>
+              <p className="text-muted-foreground leading-relaxed">
+                Invitez vos proches, collaborez sur l'itinéraire et centralisez tous vos documents de voyage en un seul lieu sécurisé.
+              </p>
+            </motion.div>
+          </div>
+          
+          <div className="flex justify-center mt-20">
             <Link href="/explore">
-              <Button size="lg" className="gap-2 rounded-full px-8">
-                Explorer les voyages
-                <ArrowRight className="h-4 w-4" />
+              <Button size="lg" className="h-14 gap-3 rounded-full px-10 bg-gold-gradient text-white font-bold shadow-lg shadow-gold/20 transition-all hover:scale-105 active:scale-95">
+                Découvrir les horizons
+                <ArrowRight className="h-5 w-5" />
               </Button>
             </Link>
           </div>
+        </div>
+      </section>
+
+      {/* CTA Section - Dark & Gold */}
+      <section className="py-24 bg-[#020617] text-white relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(197,160,89,0.1),transparent_50%)]" />
+        <div className="container mx-auto px-4 relative z-10 text-center max-w-4xl">
+          <h2 className="text-4xl md:text-6xl font-display font-bold mb-8">
+            Prêt pour votre prochaine <span className="text-gold-gradient italic">aventure ?</span>
+          </h2>
+          <p className="text-xl text-slate-400 mb-12 leading-relaxed">
+            Rejoignez des milliers de voyageurs qui font confiance à Narae pour planifier des moments inoubliables.
+          </p>
+          <Link href="/register">
+            <Button size="lg" className="h-16 rounded-2xl bg-white text-[#020617] px-12 text-lg font-bold hover:bg-gold-light transition-all shadow-2xl">
+              Commencer gratuitement
+            </Button>
+          </Link>
         </div>
       </section>
 
@@ -62,6 +105,7 @@ function LandingPage() {
     </div>
   );
 }
+
 
 function Dashboard() {
   const { user, profile } = useAuth();

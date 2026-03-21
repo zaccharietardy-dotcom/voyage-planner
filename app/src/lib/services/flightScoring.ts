@@ -87,7 +87,7 @@ function parseHour(timeStr: string): number {
  * @param flight Vol à évaluer
  * @returns Score (0-110+)
  */
-export function calculateFlightScore(flight: FlightForScoring): number {
+export function calculateFlightScore(flight: FlightForScoring, durationDays?: number): number {
   let score = 100;
   const departureHour = parseHour(flight.departureTime);
 
@@ -131,6 +131,19 @@ export function calculateFlightScore(flight: FlightForScoring): number {
       if (departureHour >= 6 && departureHour <= 10) {
         // Léger bonus pour vol aller matinal
         score += 5;
+      }
+    }
+
+    // Pénalité "jour perdu" proportionnelle à la durée du trip
+    // Perdre 1 jour sur 3 = -33%, sur 7 = -14%. Rend les vols matinaux nettement préférés.
+    if (durationDays && durationDays > 0 && flight.arrivalTime) {
+      const [arrH, arrM] = flight.arrivalTime.split(':').map(Number);
+      const arrivalMin = arrH * 60 + (arrM || 0);
+      if (arrivalMin >= 20 * 60) {
+        const usableHoursLost = Math.min(14, (arrivalMin - 8 * 60) / 60);
+        const dayFraction = usableHoursLost / 14;
+        const tripImpact = dayFraction / durationDays;
+        score -= Math.round(tripImpact * 100);
       }
     }
   }

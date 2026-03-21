@@ -44,64 +44,84 @@ export function Footer() {
   }), [t]);
 
   return (
-    <footer className="relative overflow-hidden border-t border-[#1e3a5f]/12 bg-gradient-to-b from-transparent to-[#102a45]/5">
-      <div className="container mx-auto px-4 py-14">
-        <div className="rounded-3xl border border-[#1e3a5f]/10 bg-background/75 p-8 shadow-xl backdrop-blur-lg md:p-10">
-          <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-5 lg:gap-12">
-            <div className="lg:col-span-2">
-              <Link href="/" className="mb-4 inline-flex items-center gap-2">
-                <Image
-                  src="/logo-narae.png"
-                  alt="Narae Voyage"
-                  width={40}
-                  height={40}
-                  className="h-10 w-10 rounded-lg object-cover"
-                />
-                <span className="font-display text-2xl font-semibold tracking-tight">Narae Voyage</span>
-              </Link>
-              <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">
-                {t('footer.tagline')}
-              </p>
-            </div>
-
-            {Object.entries(footerLinks).map(([key, section]) => (
-              <div key={key}>
-                <h3 className="mb-4 text-sm font-semibold uppercase tracking-[0.14em] text-foreground/80">{section.title}</h3>
-                <ul className="space-y-3">
-                  {section.links.map((link) => (
-                    <li key={link.href}>
-                      <Link href={link.href} className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-                        {link.label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
+    <footer className="relative overflow-hidden bg-[#020617] text-white pt-24 pb-12">
+      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-gold/30 to-transparent" />
+      
+      <div className="container mx-auto px-4 relative z-10">
+        <div className="grid grid-cols-1 gap-16 lg:grid-cols-6 mb-20">
+          <div className="lg:col-span-2">
+            <Link href="/" className="mb-8 inline-flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl bg-gold-gradient p-[1px]">
+                <div className="h-full w-full rounded-[10px] bg-[#020617] flex items-center justify-center">
+                  <Image
+                    src="/logo-narae.png"
+                    alt="Narae"
+                    width={24}
+                    height={24}
+                    className="h-6 w-6"
+                  />
+                </div>
               </div>
-            ))}
-          </div>
-
-          <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-[#1e3a5f]/10 pt-6 md:flex-row">
-            <p className="text-sm text-muted-foreground">&copy; {new Date().getFullYear()} Narae Voyage. {t('footer.allRights')}</p>
-
-            <div className="flex items-center gap-3">
+              <span className="font-display text-2xl font-bold tracking-tight">Narae <span className="text-gold italic">Voyage</span></span>
+            </Link>
+            <p className="max-w-sm text-sm leading-relaxed text-slate-400 mb-8">
+              {t('footer.tagline')}
+            </p>
+            <div className="flex items-center gap-4">
               {socialLinks.map((social) => (
                 <a
                   key={social.label}
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="rounded-full border border-[#1e3a5f]/15 p-2 text-muted-foreground transition-all hover:border-[#d4a853]/50 hover:text-[#d4a853]"
+                  className="h-10 w-10 rounded-full border border-white/10 flex items-center justify-center text-slate-400 transition-all hover:border-gold hover:text-gold hover:scale-110"
                   aria-label={social.label}
                 >
                   <social.icon className="h-4 w-4" />
                 </a>
               ))}
             </div>
-
-            <p className="text-sm text-muted-foreground">{t('footer.madeIn')}</p>
           </div>
+
+          {Object.entries(footerLinks).map(([key, section]) => (
+            <div key={key} className="lg:col-span-1">
+              <h3 className="mb-6 text-xs font-bold uppercase tracking-[0.2em] text-gold">{section.title}</h3>
+              <ul className="space-y-4">
+                {section.links.map((link) => (
+                  <li key={link.href}>
+                    <Link href={link.href} className="text-sm text-slate-400 transition-colors hover:text-white font-medium">
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+          
+          <div className="lg:col-span-1">
+            <h3 className="mb-6 text-xs font-bold uppercase tracking-[0.2em] text-gold">News</h3>
+            <div className="rounded-2xl bg-white/5 border border-white/10 p-1 flex items-center">
+              <input 
+                type="email" 
+                placeholder="Votre email" 
+                className="bg-transparent border-none focus:ring-0 text-xs px-3 py-2 w-full text-white placeholder:text-slate-500"
+              />
+              <button className="bg-gold text-[#020617] px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-wider">OK</button>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col items-center justify-between gap-6 border-t border-white/10 pt-10 md:flex-row text-slate-500 font-medium">
+          <p className="text-xs">&copy; {new Date().getFullYear()} Narae Voyage. {t('footer.allRights')}</p>
+          <div className="flex items-center gap-8 text-[10px] uppercase tracking-widest font-bold">
+            <Link href="/privacy" className="hover:text-gold transition-colors">Privacy</Link>
+            <Link href="/cgu" className="hover:text-gold transition-colors">Terms</Link>
+            <Link href="/cookies" className="hover:text-gold transition-colors">Cookies</Link>
+          </div>
+          <p className="text-xs">{t('footer.madeIn')}</p>
         </div>
       </div>
     </footer>
   );
 }
+
