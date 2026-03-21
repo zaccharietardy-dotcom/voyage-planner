@@ -35,8 +35,11 @@ import {
   GripHorizontal,
   AlertTriangle,
   X,
+  Check,
+  Pencil,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { generateHotelSearchLinks } from '@/lib/services/linkGenerator';
@@ -1414,340 +1417,125 @@ export default function TripPage() {
       )}
 
       {/* Header — hidden on mobile (replaced by floating header over map) */}
-      <header className={`sticky top-16 z-40 border-b border-[#1e3a5f]/10 bg-background/85 shadow-sm ${isDesktop ? '' : 'hidden'}`}>
-        <div className="container mx-auto px-4 py-3">
-          <div className="rounded-2xl border border-[#1e3a5f]/10 bg-background/75 px-3 py-2 shadow-sm">
-            <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
-              <div className="flex items-start gap-2 sm:gap-3">
-              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => router.push('/')}>
-                <ArrowLeft className="h-4 w-4" />
-              </Button>
-              <div className="min-w-0">
-                <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                  <h1 className="font-serif font-bold text-lg">
-                    {trip.preferences.origin && <span className="text-muted-foreground font-normal">{trip.preferences.origin} → </span>}
-                    {trip.preferences.destination}
-                  </h1>
-                  {/* Budget badge - visible et coloré si over budget */}
-                  <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
-                    trip.budgetStatus?.isOverBudget
-                      ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-                      : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                  }`}>
-                    <span>~{trip.totalEstimatedCost}€</span>
-                    {trip.budgetStatus?.target && trip.budgetStatus.target > 0 && (
-                      <span className="text-[10px] opacity-70">/ {trip.budgetStatus.target}€</span>
-                    )}
+      <header className={`sticky top-16 z-40 border-b border-gold/10 bg-background/80 backdrop-blur-xl shadow-lg ${isDesktop ? '' : 'hidden'}`}>
+        <div className="container mx-auto px-4 py-4">
+          <div className="rounded-[2rem] border border-gold/20 bg-white/50 dark:bg-white/5 px-6 py-4 shadow-xl shadow-gold/5 backdrop-blur-md">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div className="flex items-center gap-5">
+                <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-gold/10 hover:text-gold transition-all" onClick={() => router.push('/')}>
+                  <ArrowLeft className="h-5 w-5" />
+                </Button>
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-4">
+                    <h1 className="font-display text-2xl font-bold tracking-tight text-foreground">
+                      {trip.preferences.origin && <span className="text-muted-foreground/60 font-normal">{trip.preferences.origin} <ChevronsLeftRight className="inline h-4 w-4 mx-1 rotate-0 opacity-40" /> </span>}
+                      {trip.preferences.destination}
+                    </h1>
+                    {/* Budget badge - visible et coloré si over budget */}
+                    <div className={cn(
+                      "flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold border shadow-sm transition-all",
+                      trip.budgetStatus?.isOverBudget
+                        ? "bg-red-500/10 text-red-500 border-red-500/20"
+                        : "bg-gold/10 text-gold border-gold/20"
+                    )}>
+                      <Wallet className="h-3.5 w-3.5" />
+                      <span>~{trip.totalEstimatedCost}€</span>
+                      {trip.budgetStatus?.target && trip.budgetStatus.target > 0 && (
+                        <span className="opacity-50 font-medium">/ {trip.budgetStatus.target}€</span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 mt-1.5">
+                    <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground/70">
+                      {format(new Date(trip.preferences.startDate), 'd MMM yyyy', { locale: fr })} · {trip.days.length} jour{trip.days.length > 1 ? 's' : ''} · {getAllItems().length} étapes
+                    </p>
+                    <div className="h-1 w-1 rounded-full bg-muted-foreground/30" />
+                    <PresenceAvatars users={presenceUsers} />
                   </div>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  {format(new Date(trip.preferences.startDate), 'd MMM yyyy', { locale: fr })} · {trip.days.length} jour{trip.days.length > 1 ? 's' : ''} · {getAllItems().length} activités · {useCollaborativeMode ? members.length : (trip.preferences.groupSize || 1)} {useCollaborativeMode ? 'collaborateurs' : 'voyageurs'}
-                </p>
-                <div className="flex flex-wrap items-center gap-1.5 mt-1">
-                  {trip.preferences.groupType && (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
-                      {GROUP_TYPE_LABELS[trip.preferences.groupType]}
-                    </span>
-                  )}
-                  {trip.preferences.activities?.map((act) => (
-                    <span key={act} className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300">
-                      {ACTIVITY_LABELS[act]}
-                    </span>
-                  ))}
-                  <PresenceAvatars users={presenceUsers} className="ml-2" />
-                </div>
               </div>
-            </div>
-              <div className="flex max-w-full items-center gap-1.5 overflow-x-auto pb-1 scrollbar-hide md:max-w-[60%] md:flex-wrap md:justify-end md:overflow-visible md:pb-0">
-              {/* Transport selector - compact popover */}
-              {canOwnerEdit && trip.transportOptions && trip.transportOptions.length > 0 && (
-                <div className="shrink-0">
-                  <TransportOptions
-                    options={trip.transportOptions}
-                    selectedId={trip.selectedTransport?.id}
-                    onSelect={(option) => {
-                      const updatedTrip: Trip = {
-                        ...trip,
-                        selectedTransport: option,
-                        preferences: {
-                          ...trip.preferences,
-                          transport: toTripPreferenceTransportMode(option.mode),
-                        },
-                        updatedAt: new Date(),
-                      };
-                      saveTrip(updatedTrip);
-                      setTransportChanged(option.id !== originalTransportId);
-                    }}
-                  />
-                </div>
-              )}
-
-              {useCollaborativeMode && isOwner && collaborativeTrip && (
-                <div className="shrink-0">
-                  <TripVisibilitySelector
-                    tripId={tripId}
-                    currentVisibility={collaborativeTrip.visibility || 'private'}
-                  />
-                </div>
-              )}
-              {useCollaborativeMode && !isOwner && collaborativeTrip && (
-                <div className="shrink-0">
-                  <VisibilityBadge visibility={collaborativeTrip.visibility || 'private'} />
-                </div>
-              )}
-
-              {canOwnerEdit && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm" className="gap-1.5 h-8 shrink-0" disabled={regenerating}>
-                      {regenerating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
-                      <span className="hidden sm:inline text-xs">Régénérer</span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={handleRegenerateTrip}>Tout régénérer</DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    {trip.days.map((day) => (
-                      <DropdownMenuItem key={day.dayNumber} onClick={() => handleRegenerateDay(day.dayNumber)}>
-                        Jour {day.dayNumber}
-                      </DropdownMenuItem>
-                    ))}
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleRegenerateRestaurants}>Restaurants uniquement</DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
-
-              {canPropose && !editMode && (
-                <Button variant="outline" size="sm" className="gap-1.5 h-8 shrink-0" onClick={() => setEditMode(true)} data-tour="edit-mode">
-                  <GripVertical className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline text-xs">{canOwnerEdit ? 'Éditer' : 'Proposer'}</span>
-                </Button>
-              )}
-              {canPropose && editMode && (
-                <Button variant="default" size="sm" className="gap-1.5 h-8 shrink-0" onClick={() => setEditMode(false)}>
-                  <ArrowLeft className="h-3.5 w-3.5" />
-                  <span className="text-xs">Terminer</span>
-                </Button>
-              )}
-
-              {useCollaborativeMode && (
-                <Sheet open={showCollabPanel} onOpenChange={setShowCollabPanel}>
-                  <SheetTrigger asChild>
-                    <Button variant="outline" size="sm" className="gap-1.5 h-8 relative shrink-0 hidden sm:inline-flex">
-                      <GitPullRequest className="h-3.5 w-3.5" />
-                      {openProposalCount > 0 && (
-                        <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary text-primary-foreground text-[10px] rounded-full flex items-center justify-center">
-                          {openProposalCount}
-                        </span>
-                      )}
-                    </Button>
-                  </SheetTrigger>
-                  <SheetContent className="w-full sm:max-w-md overflow-y-auto">
-                    <SheetHeader><SheetTitle>Collaboration</SheetTitle></SheetHeader>
-                    <div className="mt-6 space-y-6">
-                      <SharePanel tripId={tripId} shareCode={shareCode} members={members} currentUserId={user?.id} userRole={userRole} />
-                      <ProposalsList
-                        proposals={proposals}
-                        onVote={handleVote}
-                        onDecision={handleProposalDecision}
-                        currentUserId={user?.id}
-                        canVote={canVoteOnProposals}
-                        canOwnerDecide={canOwnerDecide}
-                      />
-                    </div>
-                  </SheetContent>
-                </Sheet>
-              )}
-
-              {!canOwnerEdit && useCollaborativeMode && (
-                <Button variant="outline" size="sm" className="gap-1.5 h-8 shrink-0 hidden sm:inline-flex" onClick={() => setShowCloneModal(true)}>
-                  <Copy className="h-3.5 w-3.5" />
-                </Button>
-              )}
-
-              {isOwner && (
-                <Button variant="outline" size="sm" className="gap-1.5 h-8 shrink-0 hidden sm:inline-flex" onClick={() => setShowShareDialog(true)} data-tour="share-button">
-                  <Share2 className="h-3.5 w-3.5" />
-                </Button>
-              )}
-
-              <Button variant="outline" size="sm" className="gap-1.5 h-8 shrink-0 hidden sm:inline-flex" onClick={() => setShowFlythrough(true)} title="Visualisation 3D">
-                <Globe className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline text-xs">3D</span>
-              </Button>
-
-              <Button variant="outline" size="sm" className="gap-1.5 h-8 shrink-0 hidden sm:inline-flex" onClick={handleExportPdf} title="Exporter en PDF">
-                <Download className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline text-xs">PDF</span>
-              </Button>
-
-              <AddToCalendarDropdown
-                savedTripId={dbTrip?.id}
-                shareCode={shareCode}
-                trip={trip}
-              />
-
-              {canOwnerEdit && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-1.5 h-8 shrink-0 hidden sm:inline-flex"
-                  onClick={() => setShowImportPlaces(true)}
-                  title="Importer des lieux depuis Google Maps"
-                >
-                  <Upload className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline text-xs">Lieux</span>
-                </Button>
-              )}
-
-              {canOwnerEdit && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-1.5 h-8 shrink-0 hidden sm:inline-flex"
-                  onClick={(event) => handleExportDebug(!event.shiftKey)}
-                  title="Export debug compact (Shift+clic pour inclure _rawTrip)"
-                >
-                  <Bug className="h-3.5 w-3.5" />
-                </Button>
-              )}
-
-              {/* Chat Assistant Button */}
-              {canOwnerEdit && (
-                <div className="shrink-0 hidden sm:block" data-tour="chat-button">
-                  <ChatButton onClick={() => setShowChatPanel(true)} />
-                </div>
-              )}
-
-              <Sheet open={showMobileActions} onOpenChange={setShowMobileActions}>
-                <SheetTrigger asChild>
-                  <Button variant="outline" size="sm" className="h-8 gap-1.5 shrink-0 sm:hidden">
-                    <MoreHorizontal className="h-3.5 w-3.5" />
-                    <span className="text-xs">Actions</span>
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="bottom" className="max-h-[80vh] rounded-t-2xl">
-                  <SheetHeader>
-                    <SheetTitle>Actions du voyage</SheetTitle>
-                  </SheetHeader>
-                  <div className="mt-5 grid gap-2">
-                    {isOwner && (
-                      <Button
-                        variant="outline"
-                        className="justify-start gap-2"
-                        onClick={() => {
-                          setShowMobileActions(false);
-                          setShowShareDialog(true);
-                        }}
-                      >
-                        <Share2 className="h-4 w-4" />
-                        Partager le voyage
-                      </Button>
-                    )}
-                    {useCollaborativeMode && (
-                      <Button
-                        variant="outline"
-                        className="justify-start gap-2"
-                        onClick={() => {
-                          setShowMobileActions(false);
-                          setShowCollabPanel(true);
-                        }}
-                      >
-                        <GitPullRequest className="h-4 w-4" />
-                        Collaboration
-                      </Button>
-                    )}
-                    {!canOwnerEdit && useCollaborativeMode && (
-                      <Button
-                        variant="outline"
-                        className="justify-start gap-2"
-                        onClick={() => {
-                          setShowMobileActions(false);
-                          setShowCloneModal(true);
-                        }}
-                      >
-                        <Copy className="h-4 w-4" />
-                        Cloner ce voyage
-                      </Button>
-                    )}
-                    <Button
-                      variant="outline"
-                      className="justify-start gap-2"
-                      onClick={() => {
-                        setShowMobileActions(false);
-                        setShowFlythrough(true);
+              
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5 p-1 bg-muted/30 rounded-2xl border border-border/40">
+                  {canOwnerEdit && trip.transportOptions && trip.transportOptions.length > 0 && (
+                    <TransportOptions
+                      options={trip.transportOptions}
+                      selectedId={trip.selectedTransport?.id}
+                      onSelect={(option) => {
+                        const updatedTrip: Trip = {
+                          ...trip,
+                          selectedTransport: option,
+                          preferences: {
+                            ...trip.preferences,
+                            transport: toTripPreferenceTransportMode(option.mode),
+                          },
+                          updatedAt: new Date(),
+                        };
+                        saveTrip(updatedTrip);
+                        setTransportChanged(option.id !== originalTransportId);
                       }}
+                    />
+                  )}
+                  
+                  <div className="h-6 w-px bg-border/40 mx-1" />
+
+                  {useCollaborativeMode && isOwner && collaborativeTrip && (
+                    <TripVisibilitySelector
+                      tripId={tripId}
+                      currentVisibility={collaborativeTrip.visibility || 'private'}
+                    />
+                  )}
+
+                  <div className="flex items-center gap-1">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-9 w-9 rounded-xl text-muted-foreground hover:text-gold hover:bg-gold/10" 
+                      onClick={() => setShowFlythrough(true)} 
+                      title="Visualisation 3D"
                     >
                       <Globe className="h-4 w-4" />
-                      Vue 3D
                     </Button>
-                    <Button
-                      variant="outline"
-                      className="justify-start gap-2"
-                      onClick={() => {
-                        setShowMobileActions(false);
-                        handleExportPdf();
-                      }}
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-9 w-9 rounded-xl text-muted-foreground hover:text-gold hover:bg-gold/10" 
+                      onClick={handleExportPdf} 
+                      title="Exporter en PDF"
                     >
                       <Download className="h-4 w-4" />
-                      Exporter en PDF
                     </Button>
-                    {canOwnerEdit && (
-                      <Button
-                        variant="outline"
-                        className="justify-start gap-2"
-                        onClick={() => {
-                          setShowMobileActions(false);
-                          setShowImportPlaces(true);
-                        }}
+                    {isOwner && (
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-9 w-9 rounded-xl text-muted-foreground hover:text-gold hover:bg-gold/10" 
+                        onClick={() => setShowShareDialog(true)}
                       >
-                        <Upload className="h-4 w-4" />
-                        Importer des lieux
-                      </Button>
-                    )}
-                    {canOwnerEdit && (
-                      <Button
-                        variant="outline"
-                        className="justify-start gap-2"
-                        onClick={() => {
-                          setShowMobileActions(false);
-                          setShowChatPanel(true);
-                        }}
-                      >
-                        <MessageCircle className="h-4 w-4" />
-                        Assistant IA
-                      </Button>
-                    )}
-                    {canOwnerEdit && (
-                      <Button
-                        variant="outline"
-                        className="justify-start gap-2"
-                        onClick={() => {
-                          setShowMobileActions(false);
-                          handleExportDebug(true);
-                        }}
-                      >
-                        <Bug className="h-4 w-4" />
-                        Export debug
+                        <Share2 className="h-4 w-4" />
                       </Button>
                     )}
                   </div>
-                </SheetContent>
-              </Sheet>
+                </div>
+
+                <div className="h-8 w-px bg-border/40 mx-2" />
+
+                {canPropose && (
+                  <Button 
+                    variant={editMode ? "default" : "outline"} 
+                    size="sm" 
+                    className={cn(
+                      "h-10 rounded-xl font-bold text-[10px] uppercase tracking-widest px-5 gap-2 transition-all",
+                      editMode ? "bg-gold text-white hover:bg-gold-dark shadow-lg shadow-gold/20" : "border-gold/20 hover:bg-gold/5"
+                    )} 
+                    onClick={() => setEditMode(!editMode)}
+                  >
+                    {editMode ? <Check className="h-3.5 w-3.5" /> : <Pencil className="h-3.5 w-3.5 text-gold" />}
+                    {editMode ? 'Terminer' : (canOwnerEdit ? 'Éditer' : 'Proposer')}
+                  </Button>
+                )}
               </div>
             </div>
-
-            {/* Transport changed warning */}
-            {transportChanged && canOwnerEdit && (
-              <div className="mt-2 flex items-center justify-between gap-3 rounded-lg border border-amber-200 bg-amber-50 p-2 text-sm dark:border-amber-700 dark:bg-amber-900/20">
-                <p className="text-xs text-amber-800 dark:text-amber-300">Transport modifié — régénérez pour recalculer horaires et liens</p>
-                <Button size="sm" className="h-7 bg-amber-600 text-xs hover:bg-amber-700" onClick={handleRegenerateTrip} disabled={regenerating}>
-                  {regenerating ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <RefreshCw className="mr-1 h-3 w-3" />}
-                  Régénérer
-                </Button>
-              </div>
-            )}
           </div>
         </div>
       </header>
@@ -2043,18 +1831,16 @@ export default function TripPage() {
         </div>}
 
       {/* Desktop layout: scrollable planning panel left + fixed full-height map right */}
-      {isDesktop && <div className="flex h-[calc(100vh-73px)]">
+      {isDesktop && <div className="flex h-[calc(100vh-73px)] bg-background">
         {/* Left: Scrollable planning panel */}
-          <div className="w-[480px] xl:w-[540px] 2xl:w-[600px] shrink-0 overflow-y-auto overscroll-contain border-r border-border/40 px-5 py-5">
-            <Tabs value={mainTab} onValueChange={setMainTab}>
-              <TabsList className="mb-3 rounded-xl border border-[#1e3a5f]/12 bg-background/70 p-1" data-tour="tabs">
-                {liveState && <TabsTrigger value="live" className="text-sm bg-gradient-to-r from-purple-500 to-blue-500 text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600">Live</TabsTrigger>}
-                <TabsTrigger value="overview" className="text-sm">Overview</TabsTrigger>
-                <TabsTrigger value="planning" className="text-sm">Planning</TabsTrigger>
-                <TabsTrigger value="reserver" className="text-sm">Réserver</TabsTrigger>
-                {user && <TabsTrigger value="photos" className="text-sm">Photos</TabsTrigger>}
-                {user && <TabsTrigger value="depenses" className="text-sm">Dépenses</TabsTrigger>}
-                <TabsTrigger value="infos" className="text-sm">Infos</TabsTrigger>
+          <div className="w-[500px] xl:w-[580px] 2xl:w-[650px] shrink-0 overflow-y-auto overscroll-contain border-r border-gold/10 px-6 py-8 scrollbar-hide">
+            <Tabs value={mainTab} onValueChange={setMainTab} className="space-y-8">
+              <TabsList className="w-full h-12 rounded-2xl border border-gold/10 bg-white/50 dark:bg-white/5 p-1 shadow-sm backdrop-blur-md" data-tour="tabs">
+                {liveState && <TabsTrigger value="live" className="flex-1 text-[10px] font-bold uppercase tracking-widest bg-gradient-to-r from-purple-500 to-blue-500 text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 rounded-xl">Live</TabsTrigger>}
+                <TabsTrigger value="overview" className="flex-1 text-[10px] font-bold uppercase tracking-widest rounded-xl data-[state=active]:bg-gold data-[state=active]:text-white transition-all">Overview</TabsTrigger>
+                <TabsTrigger value="planning" className="flex-1 text-[10px] font-bold uppercase tracking-widest rounded-xl data-[state=active]:bg-gold data-[state=active]:text-white transition-all">Itinéraire</TabsTrigger>
+                <TabsTrigger value="reserver" className="flex-1 text-[10px] font-bold uppercase tracking-widest rounded-xl data-[state=active]:bg-gold data-[state=active]:text-white transition-all">Réserver</TabsTrigger>
+                <TabsTrigger value="infos" className="flex-1 text-[10px] font-bold uppercase tracking-widest rounded-xl data-[state=active]:bg-gold data-[state=active]:text-white transition-all">Infos</TabsTrigger>
               </TabsList>
 
               {liveState && (
@@ -2088,16 +1874,14 @@ export default function TripPage() {
                 {/* Hotel selector moved to check-in in timeline */}
 
                 {/* Planning view toggle */}
-                <div className="mb-3 flex items-center justify-between rounded-xl border border-[#1e3a5f]/10 bg-background/65 px-3 py-2">
-                  <h2 className="font-semibold">Itinéraire</h2>
-                  <div className="flex items-center gap-2">
-                    {editMode && planningView === 'timeline' && (
-                      <span className="text-xs text-muted-foreground">Glissez pour réorganiser</span>
-                    )}
-                    <div className="flex items-center gap-0.5 bg-muted rounded-md p-0.5" data-tour="view-toggle">
-                      <Button variant={planningView === 'timeline' ? 'default' : 'ghost'} size="sm" className="h-6 text-xs px-2" onClick={() => setPlanningView('timeline')}>Timeline</Button>
-                      <Button variant={planningView === 'calendar' ? 'default' : 'ghost'} size="sm" className="h-6 text-xs px-2" onClick={() => setPlanningView('calendar')}>Calendrier</Button>
-                    </div>
+                <div className="flex items-center justify-between p-4 rounded-3xl border border-gold/10 bg-white/30 dark:bg-white/5 backdrop-blur-sm shadow-sm mb-6">
+                  <div className="flex flex-col">
+                    <h2 className="font-display text-xl font-bold">Votre Voyage</h2>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 mt-0.5">Chronologie détaillée</p>
+                  </div>
+                  <div className="flex items-center gap-1 bg-muted/50 rounded-xl p-1 border border-border/40">
+                    <Button variant={planningView === 'timeline' ? 'default' : 'ghost'} size="sm" className="h-8 text-[10px] font-bold uppercase tracking-widest px-4 rounded-lg data-[state=active]:bg-gold" onClick={() => setPlanningView('timeline')}>Timeline</Button>
+                    <Button variant={planningView === 'calendar' ? 'default' : 'ghost'} size="sm" className="h-8 text-[10px] font-bold uppercase tracking-widest px-4 rounded-lg data-[state=active]:bg-gold" onClick={() => setPlanningView('calendar')}>Calendrier</Button>
                   </div>
                 </div>
 
@@ -2130,7 +1914,7 @@ export default function TripPage() {
                     hotelSelectorData={hotelSelectorData}
                   />
                 ) : !editMode ? (
-                  <div className="space-y-6">
+                  <div className="space-y-12">
                     {(trip?.days || []).map((day, idx) => (
                       <div key={day.dayNumber}>
                         <DayTimeline

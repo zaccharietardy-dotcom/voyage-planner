@@ -28,6 +28,7 @@ const PRESET_IMAGES: Record<string, string> = {
   'Lisbonne': 'https://images.unsplash.com/photo-1585208798174-6cedd86e019a?w=300&h=200&fit=crop',
   'Marrakech': 'https://images.unsplash.com/photo-1597212618440-806262de4f6b?w=300&h=200&fit=crop',
   'Nice': 'https://images.unsplash.com/photo-1491166617655-0723a0999cfc?w=300&h=200&fit=crop',
+  'Madrid': 'https://images.unsplash.com/photo-1543783207-ec64e4d95325?w=300&h=200&fit=crop',
 };
 
 function getImageForDestination(destination?: string): string {

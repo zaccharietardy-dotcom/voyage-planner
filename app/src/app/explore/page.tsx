@@ -55,7 +55,7 @@ const FALLBACK_IMAGES: Record<string, string> = {
   'barcelone': 'https://images.unsplash.com/photo-1583422409516-2895a77efded?w=1080&q=80',
   'seville': 'https://images.unsplash.com/photo-1559386484-97dfc0e15539?w=1080&q=80',
   'séville': 'https://images.unsplash.com/photo-1559386484-97dfc0e15539?w=1080&q=80',
-  'madrid': 'https://images.unsplash.com/photo-1539037116277-4db20889f2d4?w=1080&q=80',
+  'madrid': 'https://images.unsplash.com/photo-1543783207-ec64e4d95325?w=1080&q=80',
   'lisbonne': 'https://images.unsplash.com/photo-1585208798174-6cedd86e019a?w=1080&q=80',
   'amsterdam': 'https://images.unsplash.com/photo-1534351590666-13e3e96b5017?w=1080&q=80',
   'berlin': 'https://images.unsplash.com/photo-1560969184-10fe8719e047?w=1080&q=80',

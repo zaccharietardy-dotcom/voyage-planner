@@ -23,8 +23,10 @@ const DURATION_OPTIONS = [
 
 export function StepWhen({ data, onChange }: StepWhenProps) {
   const [showCalendar, setShowCalendar] = useState(false);
+  const [customMode, setCustomMode] = useState(false);
 
   const selectedDuration = data.durationDays || 7;
+  const isPreset = DURATION_OPTIONS.some(o => o.days === selectedDuration);
 
   return (
     <div className="space-y-8">
@@ -41,11 +43,12 @@ export function StepWhen({ data, onChange }: StepWhenProps) {
             <button
               key={opt.days}
               className={`rounded-xl border p-3 text-center transition-all ${
-                selectedDuration === opt.days
+                selectedDuration === opt.days && !customMode
                   ? 'border-primary bg-primary/10 ring-1 ring-primary/30'
                   : 'border-border/60 bg-card hover:border-primary/30'
               }`}
               onClick={() => {
+                setCustomMode(false);
                 const cityPlan = data.cityPlan || [{ city: '', days: opt.days }];
                 onChange({
                   durationDays: opt.days,
@@ -60,6 +63,55 @@ export function StepWhen({ data, onChange }: StepWhenProps) {
             </button>
           ))}
         </div>
+
+        {/* Custom day count picker */}
+        <button
+          className={`w-full rounded-xl border p-3 text-center transition-all mt-2 ${
+            customMode || (!isPreset && selectedDuration > 0)
+              ? 'border-primary bg-primary/10 ring-1 ring-primary/30'
+              : 'border-border/60 bg-card hover:border-primary/30'
+          }`}
+          onClick={() => setCustomMode(true)}
+        >
+          <p className="text-sm font-medium">Nombre de jours exact</p>
+          <p className="text-xs text-muted-foreground">Choisissez précisément</p>
+        </button>
+
+        {(customMode || (!isPreset && selectedDuration > 0)) && (
+          <div className="flex items-center justify-center gap-3 mt-3">
+            <button
+              className="h-10 w-10 rounded-lg border border-border/60 bg-card flex items-center justify-center text-lg font-medium hover:border-primary/30 transition-colors disabled:opacity-40"
+              onClick={() => {
+                const next = Math.max(1, selectedDuration - 1);
+                const cityPlan = data.cityPlan || [{ city: '', days: next }];
+                onChange({
+                  durationDays: next,
+                  cityPlan: cityPlan.length === 1 ? [{ ...cityPlan[0], days: next }] : cityPlan,
+                });
+              }}
+              disabled={selectedDuration <= 1}
+            >
+              -
+            </button>
+            <div className="h-12 w-20 flex items-center justify-center border rounded-lg text-xl font-bold">
+              {selectedDuration}j
+            </div>
+            <button
+              className="h-10 w-10 rounded-lg border border-border/60 bg-card flex items-center justify-center text-lg font-medium hover:border-primary/30 transition-colors disabled:opacity-40"
+              onClick={() => {
+                const next = Math.min(30, selectedDuration + 1);
+                const cityPlan = data.cityPlan || [{ city: '', days: next }];
+                onChange({
+                  durationDays: next,
+                  cityPlan: cityPlan.length === 1 ? [{ ...cityPlan[0], days: next }] : cityPlan,
+                });
+              }}
+              disabled={selectedDuration >= 30}
+            >
+              +
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Date selection */}

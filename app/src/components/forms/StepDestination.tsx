@@ -60,6 +60,9 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
   const [originSuggestions, setOriginSuggestions] = useState<LocationSuggestion[]>([]);
   const [originSuggestionsLoading, setOriginSuggestionsLoading] = useState(false);
   const [showOriginSuggestions, setShowOriginSuggestions] = useState(false);
+  const [destSuggestions, setDestSuggestions] = useState<LocationSuggestion[]>([]);
+  const [destSuggestionsLoading, setDestSuggestionsLoading] = useState(false);
+  const [activeDestStage, setActiveDestStage] = useState<number | null>(null);
   const geoPromptTriggeredRef = useRef(false);
   const { preferences } = useUserPreferences();
 
@@ -262,6 +265,41 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
     };
   }, [departureInputValue, fetchLocationSuggestions]);
 
+  // Destination city autocomplete
+  const activeDestCity = activeDestStage !== null ? (stages[activeDestStage]?.city || '') : '';
+
+  useEffect(() => {
+    const query = activeDestCity.trim();
+    if (query.length < 2 || activeDestStage === null) {
+      setDestSuggestions([]);
+      return;
+    }
+
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(async () => {
+      setDestSuggestionsLoading(true);
+      try {
+        const suggestions = await fetchLocationSuggestions(query, 'city', controller.signal);
+        setDestSuggestions(suggestions);
+      } catch {
+        setDestSuggestions([]);
+      } finally {
+        setDestSuggestionsLoading(false);
+      }
+    }, 250);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      controller.abort();
+    };
+  }, [activeDestCity, activeDestStage, fetchLocationSuggestions]);
+
+  const applyDestSuggestion = (stageIndex: number, suggestion: LocationSuggestion) => {
+    updateStage(stageIndex, { city: suggestion.city || suggestion.label || suggestion.displayName });
+    setActiveDestStage(null);
+    setDestSuggestions([]);
+  };
+
   const applyOriginSuggestion = (suggestion: LocationSuggestion) => {
     const queryIsAddress = looksLikeStreetQuery(departureInputValue);
     const nextAddress = queryIsAddress
@@ -447,9 +485,50 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
                     <Input
                       placeholder={index === 0 ? 'Barcelone, Tokyo, 北京...' : `Étape ${index + 1}`}
                       value={stage.city}
-                      onChange={(e) => updateStage(index, { city: e.target.value })}
+                      onChange={(e) => {
+                        updateStage(index, { city: e.target.value });
+                        setActiveDestStage(index);
+                      }}
+                      onFocus={() => setActiveDestStage(index)}
+                      onBlur={() => window.setTimeout(() => {
+                        setActiveDestStage(prev => {
+                          if (prev === index) { setDestSuggestions([]); return null; }
+                          return prev;
+                        });
+                      }, 120)}
                       className="pl-10 h-12 text-base"
                     />
+                    {activeDestStage === index && stage.city.trim().length >= 2 && (
+                      <div className="absolute z-20 mt-1 w-full rounded-md border border-border bg-background shadow-lg overflow-hidden">
+                        <div className="max-h-64 overflow-y-auto">
+                          {destSuggestionsLoading ? (
+                            <div className="px-3 py-2 text-sm text-muted-foreground flex items-center gap-2">
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                              Recherche des villes...
+                            </div>
+                          ) : destSuggestions.length > 0 ? (
+                            destSuggestions.map((suggestion, si) => (
+                              <button
+                                key={`dest-${suggestion.displayName}-${si}`}
+                                type="button"
+                                className="w-full text-left px-3 py-2 hover:bg-muted transition-colors"
+                                onMouseDown={(e) => e.preventDefault()}
+                                onClick={() => applyDestSuggestion(index, suggestion)}
+                              >
+                                <div className="text-sm font-medium line-clamp-1">{suggestion.label || suggestion.displayName}</div>
+                                {suggestion.country && (
+                                  <div className="text-xs text-muted-foreground line-clamp-1">{suggestion.country}</div>
+                                )}
+                              </button>
+                            ))
+                          ) : (
+                            <div className="px-3 py-2 text-sm text-muted-foreground">
+                              Aucune suggestion.
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Duration for this stage */}

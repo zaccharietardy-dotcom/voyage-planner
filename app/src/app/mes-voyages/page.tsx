@@ -45,6 +45,7 @@ const DESTINATION_IMAGES: Record<string, string> = {
   'lisbonne': 'https://images.unsplash.com/photo-1585208798174-6cedd86e019a?w=600&h=300&fit=crop',
   'amsterdam': 'https://images.unsplash.com/photo-1534351590666-13e3e96b5017?w=600&h=300&fit=crop',
   'marrakech': 'https://images.unsplash.com/photo-1597212618440-806262de4f6b?w=600&h=300&fit=crop',
+  'madrid': 'https://images.unsplash.com/photo-1543783207-ec64e4d95325?w=600&h=300&fit=crop',
 };
 
 function getDestinationImage(destination: string): string {
