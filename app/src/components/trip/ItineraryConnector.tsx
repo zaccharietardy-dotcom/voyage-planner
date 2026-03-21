@@ -101,57 +101,59 @@ export function ItineraryConnector({
         rel="noopener noreferrer"
         onClick={handleConnectorClick}
         className={cn(
-          'flex items-center gap-2 py-2 px-3 my-1.5 ml-2 rounded-lg border border-dashed border-border/50 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/40 hover:border-primary/30 transition-all group',
+          'flex items-center gap-3 py-3 px-4 my-2 ml-2 rounded-2xl border border-dashed border-gold/20 text-[11px] font-bold text-muted-foreground/70 hover:text-gold hover:bg-gold/5 hover:border-gold/50 transition-all group backdrop-blur-sm shadow-sm',
           isEditable ? 'cursor-pointer' : 'cursor-pointer',
         )}
       >
-        <ModeIcon className="h-3.5 w-3.5 shrink-0 opacity-50 group-hover:opacity-80 transition-opacity" />
+        <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-gold/10 group-hover:bg-gold/20 transition-colors">
+          <ModeIcon className="h-3.5 w-3.5 shrink-0 text-gold transition-opacity" />
+        </div>
 
-        <span className="truncate">
+        <span className="truncate font-medium text-foreground/70 group-hover:text-foreground transition-colors">
           → {to.name}
         </span>
 
         {(duration || distance) && (
-          <span className="flex items-center gap-2 shrink-0 ml-auto opacity-60 group-hover:opacity-100 transition-opacity">
+          <span className="flex items-center gap-4 shrink-0 ml-auto opacity-70 group-hover:opacity-100 transition-opacity">
             {duration && (
-              <span className="flex items-center gap-0.5">
-                <Clock className="h-2.5 w-2.5" />
+              <span className="flex items-center gap-1.5 uppercase tracking-widest text-[9px]">
+                <Clock className="h-3 w-3 text-gold" />
                 {formatDuration(duration)}
               </span>
             )}
             {distance && distance > 0.1 && (
-              <span>{formatDistance(distance)}</span>
+              <span className="font-mono text-[10px] opacity-60">{formatDistance(distance)}</span>
             )}
           </span>
         )}
 
         {/* Transit line badges (metro M6, bus 42, etc.) */}
         {transitLines && transitLines.length > 0 && (
-          <span className="flex items-center gap-1 shrink-0">
+          <span className="flex items-center gap-1.5 shrink-0">
             {transitLines.slice(0, 3).map((line, idx) => (
               <span
                 key={idx}
-                className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-bold text-white leading-none"
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold text-white leading-none shadow-sm border border-white/20"
                 style={{ backgroundColor: line.color || '#6B7280' }}
                 title={[line.name, line.departureStop && `de ${line.departureStop}`, line.arrivalStop && `à ${line.arrivalStop}`, line.numStops && `${line.numStops} arrêts`].filter(Boolean).join(' · ')}
               >
-                {line.mode === 'metro' ? 'M' : line.mode === 'tram' ? 'T' : ''}{line.number}
+                {line.number}
               </span>
             ))}
           </span>
         )}
 
         {!isEditable && (
-          <Navigation className="h-3 w-3 shrink-0 opacity-0 group-hover:opacity-60 transition-opacity" />
+          <Navigation className="h-3.5 w-3.5 shrink-0 opacity-0 group-hover:opacity-100 text-gold transition-all" />
         )}
         {isEditable && (
-          <span className="text-[10px] opacity-0 group-hover:opacity-50 transition-opacity shrink-0">changer</span>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-gold opacity-0 group-hover:opacity-100 transition-opacity shrink-0">Changer</span>
         )}
       </a>
 
       {/* Mode selector popover */}
       {showModeSelector && (
-        <div className="absolute left-2 top-full z-20 mt-1 flex gap-1 rounded-xl border bg-background/95 backdrop-blur-sm p-1.5 shadow-lg">
+        <div className="absolute left-2 top-full z-20 mt-2 flex gap-1.5 rounded-2xl border border-gold/20 bg-white/90 dark:bg-[#020617]/90 backdrop-blur-xl p-2 shadow-2xl">
           {MODE_OPTIONS.map((opt) => {
             const Icon = opt.icon;
             const isActive = opt.mode === mode || (opt.mode === 'transit' && mode === 'public');
@@ -160,10 +162,10 @@ export function ItineraryConnector({
                 key={opt.mode}
                 onClick={(e) => handleModeClick(e, opt.mode)}
                 className={cn(
-                  'flex flex-col items-center gap-0.5 rounded-lg px-3 py-1.5 text-[10px] font-medium transition-all',
+                  'flex flex-col items-center gap-1 rounded-xl px-4 py-2 text-[9px] font-bold uppercase tracking-widest transition-all',
                   isActive
-                    ? 'bg-primary text-primary-foreground shadow-sm'
-                    : 'hover:bg-muted text-muted-foreground hover:text-foreground'
+                    ? 'bg-gold text-white shadow-lg shadow-gold/20'
+                    : 'hover:bg-gold/5 text-muted-foreground hover:text-gold'
                 )}
                 title={opt.label}
               >
@@ -176,10 +178,10 @@ export function ItineraryConnector({
             href={googleMapsUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex flex-col items-center gap-0.5 rounded-lg px-3 py-1.5 text-[10px] font-medium hover:bg-muted text-muted-foreground hover:text-foreground transition-all"
+            className="flex flex-col items-center gap-1 rounded-xl px-4 py-2 text-[9px] font-bold uppercase tracking-widest hover:bg-gold/5 text-muted-foreground hover:text-gold transition-all"
             onClick={(e) => e.stopPropagation()}
           >
-            <Navigation className="h-4 w-4" />
+            <Navigation className="h-4 w-4 text-gold" />
             Maps
           </a>
         </div>

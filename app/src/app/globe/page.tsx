@@ -3,22 +3,25 @@
 import { useState, useEffect, useCallback, Suspense, useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Camera, Loader2, MapPin, Route } from 'lucide-react';
+import { ArrowLeft, Camera, Loader2, MapPin, Route, Globe, Sparkles, Navigation, Layers } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/components/auth';
 import { GlobeWaypoint, Traveler, TripArc } from '@/lib/globe/types';
 import type { PhotoCluster } from '@/lib/globe/types';
 import { Switch } from '@/components/ui/switch';
 import { buildClusterHierarchy, getVisibleClusters, getZoomHeightForLevel } from '@/lib/globe/clusterEngine';
+import { cn } from '@/lib/utils';
 
 const CesiumGlobe = dynamic(
   () => import('@/components/globe/CesiumGlobe').then((mod) => mod.CesiumGlobe),
   {
     ssr: false,
     loading: () => (
-      <div className="w-full h-full flex items-center justify-center bg-background">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      <div className="w-full h-full flex flex-col items-center justify-center bg-[#020617]">
+        <Loader2 className="h-12 w-12 animate-spin text-gold mb-4" />
+        <p className="text-gold font-display text-lg tracking-widest animate-pulse">Initialisation du monde...</p>
       </div>
     ),
   }
@@ -34,7 +37,7 @@ interface GlobeTrip {
   cover_url: string | null;
 }
 
-const ARC_COLORS = ['#f59e0b', '#38bdf8', '#34d399', '#f97316', '#a78bfa', '#f43f5e'];
+const ARC_COLORS = ['#c5a059', '#dfc28d', '#a37f3d', '#e8c068']; // All variations of gold for premium look
 
 function toRad(value: number): number {
   return (value * Math.PI) / 180;
@@ -261,203 +264,271 @@ export default function GlobePage() {
   }, []);
 
   return (
-    <div className="flex h-[calc(100dvh-4rem)] flex-col bg-background">
-      <div className="flex items-center gap-4 px-4 py-3 border-b bg-background/95 backdrop-blur z-20">
-        <Button variant="ghost" size="icon" asChild>
-          <Link href="/explore">
+    <div className="flex h-screen flex-col bg-[#020617] overflow-hidden">
+      {/* Premium Header */}
+      <div className="fixed top-0 left-0 right-0 z-[100] flex items-center gap-6 px-6 py-4 bg-gradient-to-b from-[#020617] to-transparent">
+        <Link href="/explore" className="group">
+          <div className="h-12 w-12 rounded-xl bg-white/10 backdrop-blur-xl border border-white/10 flex items-center justify-center text-gold group-hover:bg-gold/20 group-hover:border-gold/50 transition-all">
             <ArrowLeft className="h-5 w-5" />
-          </Link>
-        </Button>
-        <div className="flex-1">
-          <h1 className="text-lg font-semibold">Globe</h1>
-          <p className="text-xs text-muted-foreground">
-            {filteredTrips.length} voyage{filteredTrips.length > 1 ? 's' : ''} et leurs itin\u00e9raires
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground">Mes voyages</span>
-          <Switch
-            checked={showMode === 'all_trips'}
-            onCheckedChange={(checked) => setShowMode(checked ? 'all_trips' : 'my_trips')}
-          />
-          <span className="text-xs text-muted-foreground">+ Amis</span>
+          </div>
+        </Link>
+        
+        <div className="flex-1 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl px-6 py-2 shadow-2xl flex items-center justify-between max-w-2xl">
+          <div>
+            <h1 className="font-display text-xl font-bold text-white flex items-center gap-2">
+              <Globe className="h-5 w-5 text-gold" />
+              Narae <span className="text-gold italic">Globe</span>
+            </h1>
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
+              {filteredTrips.length} Itinéraires partagés
+            </p>
+          </div>
+
+          <div className="flex items-center gap-4 border-l border-white/10 pl-6 ml-6">
+            <div className="flex items-center gap-3">
+              <span className={cn("text-[9px] font-bold uppercase tracking-widest transition-colors", showMode === 'my_trips' ? "text-gold" : "text-slate-500")}>Mes voyages</span>
+              <Switch
+                checked={showMode === 'all_trips'}
+                onCheckedChange={(checked) => setShowMode(checked ? 'all_trips' : 'my_trips')}
+                className="data-[state=checked]:bg-gold"
+              />
+              <span className={cn("text-[9px] font-bold uppercase tracking-widest transition-colors", showMode === 'all_trips' ? "text-gold" : "text-slate-500")}>Communauté</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="relative flex-1 min-h-0">
-        {!loading && (
-          <Suspense
-            fallback={(
-              <div className="w-full h-full flex items-center justify-center">
-                <Loader2 className="h-12 w-12 animate-spin text-primary" />
-              </div>
-            )}
-          >
-            <CesiumGlobe
-              travelers={travelers}
-              arcs={arcs}
-              selectedTraveler={selectedTraveler}
-              selectedTripPoints={selectedTrip?.points || []}
-              selectedWaypointId={selectedWaypoint?.id || null}
-              onTravelerSelect={handleTravelerSelect}
-              onWaypointSelect={setSelectedWaypoint}
-              photoClusters={visibleClusters}
-              onClusterClick={handleClusterClick}
-              onCameraHeightChange={handleCameraHeightChange}
-            />
-          </Suspense>
-        )}
+      {/* Main Globe Area */}
+      <div className="relative flex-1 min-h-0 w-full h-full">
+        <Suspense
+          fallback={(
+            <div className="w-full h-full flex flex-col items-center justify-center bg-[#020617]">
+              <Loader2 className="h-12 w-12 animate-spin text-gold mb-4" />
+              <p className="text-gold font-display text-lg tracking-widest animate-pulse">Initialisation du monde...</p>
+            </div>
+          )}
+        >
+          <CesiumGlobe
+            travelers={travelers}
+            arcs={arcs}
+            selectedTraveler={selectedTraveler}
+            selectedTripPoints={selectedTrip?.points || []}
+            selectedWaypointId={selectedWaypoint?.id || null}
+            onTravelerSelect={handleTravelerSelect}
+            onWaypointSelect={setSelectedWaypoint}
+            photoClusters={visibleClusters}
+            onClusterClick={handleClusterClick}
+            onCameraHeightChange={handleCameraHeightChange}
+          />
+        </Suspense>
 
-        {user && globeTrips.length > 0 && (
-          <>
-            <div className="hidden md:block absolute left-4 top-4 z-20 w-[330px] max-h-[calc(100%-2rem)] overflow-hidden rounded-2xl border bg-background/92 backdrop-blur-xl shadow-xl">
-              <div className="p-3 border-b">
-                <p className="text-sm font-semibold">{showMode === 'my_trips' ? 'Mes voyages' : 'Voyages'}</p>
-                <p className="text-xs text-muted-foreground">Clique pour centrer le globe et afficher la route</p>
-              </div>
-              <div className="max-h-[420px] overflow-y-auto p-2 space-y-2">
-                {filteredTrips.map((trip) => {
-                  const isActive = trip.id === selectedTrip?.id;
-                  const stopCount = trip.points.length;
-                  const owner = trip.owner?.display_name || trip.owner?.username || 'Voyageur';
+        {/* Sidebar: List of trips */}
+        <AnimatePresence>
+          {user && globeTrips.length > 0 && (
+            <motion.div 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="hidden md:block absolute left-6 top-28 z-[90] w-[350px] max-h-[calc(100vh-10rem)]"
+            >
+              <div className="flex flex-col h-full bg-[#020617]/60 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] shadow-2xl overflow-hidden">
+                <div className="p-6 border-b border-white/10">
+                  <h2 className="font-display text-xl font-bold text-white mb-1">Explorer</h2>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Cliquez pour centrer le globe</p>
+                </div>
+                
+                <div className="flex-1 overflow-y-auto p-4 space-y-3 scrollbar-hide">
+                  {filteredTrips.map((trip) => {
+                    const isActive = trip.id === selectedTrip?.id;
+                    const stopCount = trip.points.length;
+                    const owner = trip.owner?.display_name || trip.owner?.username || 'Voyageur';
 
-                  return (
-                    <button
-                      key={trip.id}
-                      type="button"
-                      onClick={() => selectTripById(trip.id)}
-                      className={`w-full rounded-xl border p-2 text-left transition-colors ${
-                        isActive ? 'border-primary/60 bg-primary/10' : 'hover:bg-accent/50'
-                      }`}
-                    >
-                      <div className="flex gap-2 items-center">
-                        {trip.cover_url ? (
-                          <img
-                            src={trip.cover_url}
-                            alt={trip.destination || trip.title}
-                            className="h-12 w-12 rounded-lg object-cover shrink-0"
-                          />
-                        ) : (
-                          <div className="h-12 w-12 rounded-lg bg-muted shrink-0" />
+                    return (
+                      <button
+                        key={trip.id}
+                        type="button"
+                        onClick={() => selectTripById(trip.id)}
+                        className={cn(
+                          "w-full group rounded-2xl border p-3 text-left transition-all duration-300",
+                          isActive 
+                            ? "bg-gold-gradient border-white/20 shadow-xl shadow-gold/10" 
+                            : "bg-white/5 border-white/5 hover:bg-white/10 hover:border-white/20"
                         )}
-                        <div className="min-w-0">
-                          <p className="text-sm font-medium truncate">{trip.title || trip.destination}</p>
-                          <p className="text-xs text-muted-foreground truncate">{owner}</p>
-                          <p className="text-xs text-muted-foreground">{stopCount} étapes</p>
+                      >
+                        <div className="flex gap-4 items-center">
+                          <div className="relative h-14 w-14 rounded-xl overflow-hidden shrink-0 border border-white/10 shadow-lg">
+                            {trip.cover_url ? (
+                              <img src={trip.cover_url} alt="" className="h-full w-full object-cover" />
+                            ) : (
+                              <div className="h-full w-full bg-slate-800 flex items-center justify-center text-slate-600">
+                                <MapPin className="h-6 w-6" />
+                              </div>
+                            )}
+                          </div>
+                          <div className="min-w-0">
+                            <p className={cn("text-sm font-bold truncate", isActive ? "text-[#020617]" : "text-white")}>
+                              {trip.title || trip.destination}
+                            </p>
+                            <p className={cn("text-[10px] font-bold uppercase tracking-widest mt-0.5", isActive ? "text-[#020617]/70" : "text-slate-400")}>
+                              {owner}
+                            </p>
+                            <div className="flex items-center gap-2 mt-1.5">
+                              <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full border", isActive ? "bg-[#020617]/10 border-[#020617]/20 text-[#020617]" : "bg-white/5 border-white/10 text-gold")}>
+                                {stopCount} étapes
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Selected Trip Info Card (Bottom) */}
+        <AnimatePresence>
+          {selectedTrip && (
+            <motion.div 
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 40 }}
+              className="absolute bottom-10 left-1/2 -translate-x-1/2 z-[100] w-full max-w-3xl px-6"
+            >
+              <div className="flex flex-col gap-4">
+                {/* Photo Spots Carousel */}
+                {selectedTripPhotoPoints.length > 0 && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-[#020617]/60 backdrop-blur-2xl rounded-[2rem] border border-white/10 p-4 shadow-2xl"
+                  >
+                    <div className="flex items-center gap-2 mb-3 px-2">
+                      <Camera className="h-4 w-4 text-gold" />
+                      <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold">Points de vue exceptionnels</span>
+                    </div>
+                    <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
+                      {selectedTripPhotoPoints.map((point) => (
+                        <button
+                          key={point.id}
+                          type="button"
+                          onClick={() => setSelectedWaypoint(point)}
+                          className={cn(
+                            "shrink-0 w-36 rounded-2xl border text-left overflow-hidden group transition-all duration-300",
+                            selectedWaypoint?.id === point.id ? "border-gold ring-1 ring-gold shadow-lg shadow-gold/20 scale-105" : "border-white/10"
+                          )}
+                        >
+                          <div className="relative h-20 w-full overflow-hidden">
+                            {point.imageUrl ? (
+                              <img src={point.imageUrl} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                            ) : (
+                              <div className="w-full h-full bg-slate-800" />
+                            )}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                          </div>
+                          <div className="p-2 bg-[#020617]">
+                            <p className="text-[9px] font-bold text-white truncate leading-tight uppercase tracking-wider">{point.name}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Main Trip Highlight Card */}
+                <button
+                  type="button"
+                  onClick={() => router.push(`/trip/${selectedTrip.id}`)}
+                  className="w-full bg-[#020617]/80 backdrop-blur-2xl rounded-[2.5rem] border border-gold/30 shadow-2xl p-6 text-left group hover:border-gold transition-all relative overflow-hidden"
+                >
+                  <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <Sparkles className="h-20 w-20 text-gold" />
+                  </div>
+
+                  <div className="flex gap-6 items-center relative z-10">
+                    <div className="relative h-24 w-24 rounded-3xl overflow-hidden shrink-0 border border-white/10 shadow-2xl group-hover:scale-105 transition-transform duration-500">
+                      {selectedTrip.cover_url ? (
+                        <img src={selectedTrip.cover_url} alt="" className="h-full w-full object-cover" />
+                      ) : (
+                        <div className="h-full w-full bg-slate-800 flex items-center justify-center text-slate-600">
+                          <MapPin className="h-8 w-8" />
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-display text-2xl font-bold text-white mb-2 group-hover:text-gold transition-colors">
+                        {selectedTrip.title || selectedTrip.destination}
+                      </h3>
+                      
+                      <div className="flex items-center flex-wrap gap-4">
+                        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10">
+                          <MapPin className="h-3.5 w-3.5 text-gold" />
+                          <span className="text-xs font-bold text-white/80">{selectedTrip.destination}</span>
+                        </div>
+                        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10">
+                          <Route className="h-3.5 w-3.5 text-gold" />
+                          <span className="text-xs font-bold text-white/80">{Math.round(selectedTripTotalDistance)} km parcourus</span>
+                        </div>
+                        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10">
+                          <Navigation className="h-3.5 w-3.5 text-gold" />
+                          <span className="text-xs font-bold text-white/80">{selectedTrip.points.length} étapes</span>
                         </div>
                       </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+                    </div>
 
-            <div className="md:hidden absolute top-4 left-4 right-16 z-20 overflow-x-auto">
-              <div className="flex gap-2 w-max">
-                {filteredTrips.map((trip) => (
-                  <button
-                    key={trip.id}
-                    type="button"
-                    onClick={() => selectTripById(trip.id)}
-                    className={`rounded-full border px-3 py-1 text-xs backdrop-blur ${
-                      selectedTrip?.id === trip.id ? 'bg-primary/90 text-primary-foreground' : 'bg-background/85'
-                    }`}
-                  >
-                    {trip.destination || trip.title}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </>
-        )}
-
-        {selectedTrip && (
-          <div className="absolute bottom-4 left-4 right-4 z-20 space-y-2">
-            <button
-              type="button"
-              onClick={() => router.push(`/trip/${selectedTrip.id}`)}
-              className="w-full bg-background/95 backdrop-blur-xl rounded-2xl border shadow-lg p-3 text-left hover:bg-accent transition-colors"
-            >
-              <div className="flex gap-3 items-center">
-                {selectedTrip.cover_url ? (
-                  <img
-                    src={selectedTrip.cover_url}
-                    alt={selectedTrip.destination}
-                    className="w-16 h-16 rounded-xl object-cover shrink-0"
-                  />
-                ) : (
-                  <div className="w-16 h-16 rounded-xl bg-muted shrink-0" />
-                )}
-                <div className="min-w-0 flex-1">
-                  <h3 className="font-semibold text-base mb-1 truncate">
-                    {selectedTrip.title || selectedTrip.destination}
-                  </h3>
-                  <div className="flex items-center flex-wrap gap-x-3 gap-y-1 text-sm text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                      <MapPin className="h-3.5 w-3.5" />
-                      {selectedTrip.destination}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Route className="h-3.5 w-3.5" />
-                      {Math.round(selectedTripTotalDistance)} km
-                    </span>
-                    <span>{selectedTrip.points.length} étapes</span>
-                  </div>
-                </div>
-              </div>
-            </button>
-
-            {selectedTripPhotoPoints.length > 0 && (
-              <div className="bg-background/95 backdrop-blur-xl rounded-2xl border shadow-lg p-3">
-                <p className="text-xs font-medium mb-2 flex items-center gap-1">
-                  <Camera className="h-3.5 w-3.5" />
-                  Spots photo du voyage
-                </p>
-                <div className="flex gap-2 overflow-x-auto pb-1">
-                  {selectedTripPhotoPoints.map((point) => (
-                    <button
-                      key={point.id}
-                      type="button"
-                      onClick={() => setSelectedWaypoint(point)}
-                      className={`shrink-0 w-28 rounded-lg border text-left overflow-hidden ${
-                        selectedWaypoint?.id === point.id ? 'border-primary' : ''
-                      }`}
-                    >
-                      {point.imageUrl ? (
-                        <img
-                          src={point.imageUrl}
-                          alt={point.name}
-                          className="w-full h-16 object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-16 bg-muted" />
-                      )}
-                      <div className="p-1.5">
-                        <p className="text-[11px] leading-tight overflow-hidden text-ellipsis whitespace-nowrap">{point.name}</p>
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="h-12 w-12 rounded-full bg-gold-gradient flex items-center justify-center text-[#020617] shadow-lg shadow-gold/20 group-hover:scale-110 transition-transform">
+                        <ArrowLeft className="h-6 w-6 rotate-180" />
                       </div>
-                    </button>
-                  ))}
-                </div>
+                      <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-gold">Explorer</span>
+                    </div>
+                  </div>
+                </button>
               </div>
-            )}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-            {selectedWaypoint && (
-              <div className="bg-background/95 backdrop-blur-xl rounded-xl border shadow-lg p-3">
-                <p className="text-xs text-muted-foreground mb-1">Point sélectionné</p>
-                <p className="text-sm font-medium">{selectedWaypoint.name}</p>
-                <p className="text-xs text-muted-foreground">{selectedWaypoint.type}</p>
+        {/* Selected Waypoint Detail (Floating) */}
+        <AnimatePresence>
+          {selectedWaypoint && (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, x: 20 }}
+              animate={{ opacity: 1, scale: 1, x: 0 }}
+              exit={{ opacity: 0, scale: 0.9, x: 20 }}
+              className="absolute top-28 right-6 z-[100] w-64 bg-[#020617]/80 backdrop-blur-2xl rounded-[2rem] border border-gold/30 shadow-2xl p-5"
+            >
+              <div className="flex items-center gap-2 mb-3">
+                <Sparkles className="h-4 w-4 text-gold" />
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold">Étape sélectionnée</span>
               </div>
-            )}
-          </div>
-        )}
+              <p className="text-lg font-display font-bold text-white leading-tight mb-1">{selectedWaypoint.name}</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{selectedWaypoint.type}</p>
+              
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="w-full mt-4 h-10 rounded-xl border-white/10 bg-white/5 hover:bg-gold/10 hover:text-gold hover:border-gold/30 transition-all font-bold text-[10px] uppercase tracking-widest"
+                onClick={() => setSelectedWaypoint(null)}
+              >
+                Fermer
+              </Button>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
+        {/* Empty state / Login CTA */}
         {!user && !loading && (
-          <div className="absolute bottom-6 left-4 right-4 z-20">
-            <div className="bg-background/95 backdrop-blur-xl rounded-xl border shadow-lg p-4 text-center">
-              <p className="text-sm text-muted-foreground mb-2">
-                Connectez-vous pour voir vos voyages sur le globe
+          <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-[100] w-full max-w-md px-6">
+            <div className="bg-[#020617]/80 backdrop-blur-2xl rounded-[2.5rem] border border-gold/30 shadow-2xl p-8 text-center">
+              <Globe className="h-12 w-12 text-gold mx-auto mb-4 animate-float" />
+              <h2 className="font-display text-2xl font-bold text-white mb-2">Connectez-vous</h2>
+              <p className="text-slate-400 mb-6 text-sm">
+                Découvrez vos propres voyages sur le globe et partagez vos explorations avec le monde.
               </p>
-              <Button size="sm" asChild>
+              <Button className="w-full h-14 rounded-2xl bg-gold-gradient text-[#020617] text-lg font-bold shadow-xl shadow-gold/20" asChild>
                 <Link href="/login?redirect=/globe">Se connecter</Link>
               </Button>
             </div>

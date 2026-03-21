@@ -115,25 +115,25 @@ function HotelBoundaryMiniConnector({
   const distanceLabel = formatBoundaryDistance(distance);
 
   return (
-    <div className="my-1 ml-2 flex items-center gap-2 rounded-xl border border-[#1e3a5f]/15 bg-gradient-to-r from-[#1e3a5f]/5 to-[#d4a853]/5 px-3 py-1.5 text-xs text-muted-foreground">
-      <Bed className="h-3.5 w-3.5 shrink-0 text-[#b8923d]" />
-      <span className="rounded-full bg-[#102a45]/10 px-1.5 py-0.5 text-[10px] font-medium text-[#102a45] dark:text-[#f4d03f]">
+    <div className="my-2 ml-2 flex items-center gap-3 rounded-2xl border border-gold/20 bg-white/40 dark:bg-white/5 px-4 py-2 text-[11px] font-bold text-muted-foreground backdrop-blur-sm shadow-sm">
+      <Bed className="h-4 w-4 shrink-0 text-gold" />
+      <span className="rounded-lg bg-gold/10 px-2 py-0.5 text-[9px] font-bold text-gold uppercase tracking-widest border border-gold/20">
         {type === 'depart' ? 'Aller' : 'Retour'}
       </span>
-      <span className="truncate">
+      <span className="truncate text-foreground/80">
         {fromLabel} → {toLabel}
       </span>
       {(duration || distanceLabel) && (
-        <span className="ml-auto inline-flex shrink-0 items-center gap-2 text-[11px] text-muted-foreground/85">
+        <span className="ml-auto inline-flex shrink-0 items-center gap-3 text-[10px] font-bold uppercase tracking-wider opacity-60">
           {duration ? (
-            <span className="inline-flex items-center gap-0.5">
-              <Clock className="h-2.5 w-2.5" />
+            <span className="inline-flex items-center gap-1">
+              <Clock className="h-3 w-3 text-gold" />
               {duration} min
             </span>
           ) : null}
           {distanceLabel ? (
-            <span className="inline-flex items-center gap-0.5">
-              <Navigation className="h-2.5 w-2.5" />
+            <span className="inline-flex items-center gap-1">
+              <Navigation className="h-3 w-3 text-gold" />
               {distanceLabel}
             </span>
           ) : null}
@@ -222,52 +222,46 @@ export const DayTimeline = memo(function DayTimeline({
     <div ref={timelineRef} className="space-y-5">
       {/* Day header */}
       <motion.div
-        className="flex items-center justify-between rounded-2xl border border-[#1e3a5f]/12 bg-background/75 p-3 backdrop-blur-sm"
+        className="flex items-center justify-between rounded-3xl border border-gold/20 bg-white/80 dark:bg-[#020617]/80 p-4 backdrop-blur-xl shadow-xl shadow-gold/5"
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, ease: 'easeOut' }}
+        transition={{ duration: 0.5, ease: 'easeOut' }}
       >
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-gold-gradient flex items-center justify-center text-white font-display font-bold text-xl shadow-lg shadow-gold/20">
             {day.dayNumber}
           </div>
           <div>
-            <h3 className="font-serif font-semibold flex items-center gap-2">
+            <h3 className="font-display text-xl font-bold flex items-center gap-3">
               Jour {day.dayNumber}
               {day.weatherForecast && (
-                <span className="text-sm font-normal text-muted-foreground" title={day.weatherForecast.condition}>
+                <span className="text-sm font-medium text-gold bg-gold/10 px-2 py-0.5 rounded-full" title={day.weatherForecast.condition}>
                   {day.weatherForecast.icon} {day.weatherForecast.tempMin}\u00b0/{day.weatherForecast.tempMax}\u00b0
                 </span>
               )}
             </h3>
-            <p className="text-sm text-muted-foreground flex items-center gap-1">
-              <Calendar className="h-3.5 w-3.5" />
+            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60 flex items-center gap-2 mt-1">
+              <Calendar className="h-3.5 w-3.5 text-gold" />
               {format(new Date(day.date), 'EEEE d MMMM', { locale: fr })}
-              {day.weatherForecast && (
-                <span className="ml-1 opacity-70">
-                  — {day.weatherForecast.condition}
-                </span>
-              )}
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           {onOptimizeDay && (
             <Button
               variant="outline"
               size="sm"
-              className="gap-1.5 h-9 text-xs"
+              className="h-10 rounded-xl border-gold/20 bg-white/50 dark:bg-white/5 hover:bg-gold/5 hover:border-gold/50 transition-all font-bold text-[10px] uppercase tracking-widest gap-2"
               onClick={() => onOptimizeDay(day.dayNumber)}
-              title="Optimiser le parcours du jour"
             >
-              <Route className="h-3.5 w-3.5" />
+              <Route className="h-4 w-4 text-gold" />
               Optimiser
             </Button>
           )}
           {onAddItem && (
             <Button
-              variant="outline"
-              className="gap-1.5 h-10 px-4"
+              size="sm"
+              className="h-10 rounded-xl bg-gold text-white hover:bg-gold-dark transition-all font-bold text-[10px] uppercase tracking-widest gap-2 shadow-lg shadow-gold/20"
               onClick={() => onAddItem(day.dayNumber)}
             >
               <Plus className="h-4 w-4" />
@@ -279,19 +273,19 @@ export const DayTimeline = memo(function DayTimeline({
 
       {/* Timeline */}
       <motion.div
-        className="relative space-y-3 rounded-2xl border border-[#1e3a5f]/10 bg-background/65 p-3 pl-6 shadow-sm"
+        className="relative space-y-4 rounded-[2.5rem] border border-gold/10 bg-white/30 dark:bg-white/5 p-6 pl-10 shadow-sm backdrop-blur-sm"
         initial="hidden"
         animate="visible"
         variants={{
           visible: {
             transition: {
-              staggerChildren: 0.08,
+              staggerChildren: 0.1,
             },
           },
         }}
       >
-        {/* Vertical line */}
-        <div className="absolute bottom-4 left-[11px] top-4 w-0.5 bg-border/80" />
+        {/* Vertical line with gold gradient */}
+        <div className="absolute bottom-10 left-[19px] top-10 w-[2px] bg-gradient-to-b from-gold via-gold/30 to-gold/10" />
 
         {visibleItems.map((item, index) => {
           const nextItem = index < visibleItems.length - 1 ? visibleItems[index + 1] : null;
@@ -305,21 +299,23 @@ export const DayTimeline = memo(function DayTimeline({
             <motion.div
               key={item.id}
               data-item-id={item.id}
-              className="relative group/item"
+              className="relative"
               variants={{
-                hidden: { opacity: 0, y: 20 },
+                hidden: { opacity: 0, x: -10 },
                 visible: {
                   opacity: 1,
-                  y: 0,
+                  x: 0,
                   transition: {
-                    duration: 0.4,
-                    ease: 'easeOut',
+                    duration: 0.5,
+                    ease: [0.22, 1, 0.36, 1],
                   },
                 },
               }}
             >
-              {/* Timeline dot */}
-              <div className="absolute -left-6 top-5 w-3 h-3 rounded-full bg-background border-2 border-primary" />
+              {/* Timeline dot - Gold Outer, White Inner */}
+              <div className="absolute -left-[28px] top-7 w-4 h-4 rounded-full bg-gold flex items-center justify-center shadow-lg shadow-gold/30 border-2 border-white dark:border-[#020617] z-10">
+                <div className="w-1.5 h-1.5 rounded-full bg-white dark:bg-[#020617]" />
+              </div>
 
               {departureBoundary && (
                 <HotelBoundaryMiniConnector

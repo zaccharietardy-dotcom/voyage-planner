@@ -3,14 +3,15 @@
 import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 import { GoogleSignIn } from '@/components/auth';
 import { useAuth } from '@/components/auth';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Plane, MapPin, Users, Loader2, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { Loader2, Eye, EyeOff, AlertCircle, ArrowRight } from 'lucide-react';
 import { getSupabaseClient } from '@/lib/supabase';
+import { cn } from '@/lib/utils';
 
 function LoginContent() {
   const router = useRouter();
@@ -80,135 +81,178 @@ function LoginContent() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="min-h-screen flex items-center justify-center bg-[#020617]">
+        <Loader2 className="h-10 w-10 animate-spin text-gold" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <Link href="/" className="inline-block mb-4">
-            <img src="/logo-narae.png" alt="Narae Voyage" className="w-12 h-12 mx-auto rounded-lg object-cover" />
+    <div className="min-h-screen flex bg-[#020617]">
+      {/* Left Side: Visual Inspiration */}
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
+        <img 
+          src="https://images.unsplash.com/photo-1539635278303-d4002c07dee3?q=80&w=2070&auto=format&fit=crop" 
+          alt="Travel Inspiration" 
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-tr from-[#020617] via-[#020617]/40 to-transparent" />
+        
+        <div className="relative z-10 flex flex-col justify-end p-20 w-full">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+          >
+            <div className="w-20 h-1 bg-gold mb-8 rounded-full shadow-[0_0_15px_rgba(197,160,89,0.5)]" />
+            <h2 className="font-display text-6xl font-bold text-white leading-tight mb-6">
+              Votre prochaine <br />
+              <span className="text-gold-gradient italic">odyssée</span> commence ici.
+            </h2>
+            <p className="text-xl text-white/70 max-w-md leading-relaxed">
+              Reconnectez-vous à vos envies d'évasion et planifiez des moments qui resteront gravés.
+            </p>
+          </motion.div>
+        </div>
+
+        {/* Decorative elements */}
+        <div className="absolute top-10 left-10">
+          <Link href="/" className="flex items-center gap-3 group">
+            <div className="h-12 w-12 rounded-xl bg-gold-gradient p-[1px] shadow-2xl group-hover:scale-110 transition-transform">
+              <div className="h-full w-full rounded-[11px] bg-[#020617] flex items-center justify-center">
+                <img src="/logo-narae.png" alt="Narae" className="w-6 h-6 object-contain" />
+              </div>
+            </div>
+            <span className="font-display text-2xl font-bold text-white tracking-tight">Narae <span className="text-gold italic">Voyage</span></span>
           </Link>
-          <CardTitle className="text-2xl">Bienvenue sur Narae Voyage</CardTitle>
-          <CardDescription>
-            Connectez-vous pour planifier et partager vos voyages
-          </CardDescription>
-        </CardHeader>
+        </div>
+      </div>
 
-        <CardContent className="space-y-6">
-          <GoogleSignIn
-            redirectTo={redirectTo}
-            className="w-full"
-          />
+      {/* Right Side: Login Form */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 md:p-16 relative">
+        {/* Background glow for mobile */}
+        <div className="lg:hidden absolute inset-0 -z-10">
+          <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-gold/10 blur-[100px] rounded-full" />
+          <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-blue-500/10 blur-[100px] rounded-full" />
+        </div>
 
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
+        <motion.div 
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6 }}
+          className="w-full max-w-md"
+        >
+          <div className="mb-12 text-center lg:text-left">
+            <div className="lg:hidden flex justify-center mb-8">
+              <Link href="/">
+                <div className="h-16 w-16 rounded-2xl bg-gold-gradient p-[1px] shadow-2xl">
+                  <div className="h-full w-full rounded-[15px] bg-[#020617] flex items-center justify-center">
+                    <img src="/logo-narae.png" alt="Narae" className="w-8 h-8 object-contain" />
+                  </div>
+                </div>
+              </Link>
             </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">ou avec email</span>
-            </div>
+            <h1 className="font-display text-4xl font-bold text-white mb-3">Bon retour parmi nous</h1>
+            <p className="text-slate-400">Accédez à vos carnets de route et vos projets d'évasion.</p>
           </div>
 
-          <form onSubmit={handleEmailLogin} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="jean@exemple.com"
-                value={formData.email}
-                onChange={(e) => handleChange('email', e.target.value)}
-                required
-              />
+          <div className="space-y-8">
+            <GoogleSignIn
+              redirectTo={redirectTo}
+              className="w-full h-14 rounded-2xl border-white/10 bg-white/5 hover:bg-white/10 text-white font-bold transition-all"
+            />
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-white/10" />
+              </div>
+              <div className="relative flex justify-center text-[10px] uppercase tracking-[0.2em] font-bold">
+                <span className="bg-[#020617] px-4 text-slate-500">Ou continuer avec email</span>
+              </div>
             </div>
 
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">Mot de passe</Label>
-                <Link
-                  href="/forgot-password"
-                  className="text-xs text-primary hover:underline"
-                >
-                  Mot de passe oublié ?
-                </Link>
-              </div>
-              <div className="relative">
+            <form onSubmit={handleEmailLogin} className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-xs font-bold uppercase tracking-widest text-slate-400 ml-1">Email</Label>
                 <Input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="••••••••"
-                  value={formData.password}
-                  onChange={(e) => handleChange('password', e.target.value)}
+                  id="email"
+                  type="email"
+                  placeholder="votre@email.com"
+                  className="h-14 rounded-2xl bg-white/5 border-white/10 focus:border-gold/50 focus:ring-gold/20 transition-all text-white placeholder:text-slate-600"
+                  value={formData.email}
+                  onChange={(e) => handleChange('email', e.target.value)}
                   required
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between ml-1">
+                  <Label htmlFor="password" className="text-xs font-bold uppercase tracking-widest text-slate-400">Mot de passe</Label>
+                  <Link
+                    href="/forgot-password"
+                    className="text-[10px] font-bold uppercase tracking-widest text-gold hover:text-gold-light transition-colors"
+                  >
+                    Oublié ?
+                  </Link>
+                </div>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="••••••••"
+                    className="h-14 rounded-2xl bg-white/5 border-white/10 focus:border-gold/50 focus:ring-gold/20 transition-all text-white placeholder:text-slate-600"
+                    value={formData.password}
+                    onChange={(e) => handleChange('password', e.target.value)}
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
+              </div>
+
+              {error && (
+                <motion.div 
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm flex items-start gap-3"
                 >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
-            </div>
-
-            {error && (
-              <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm flex items-start gap-2">
-                <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                {error}
-              </div>
-            )}
-
-            <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Connexion...
-                </>
-              ) : (
-                'Se connecter'
+                  <AlertCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
+                  <span className="font-medium">{error}</span>
+                </motion.div>
               )}
-            </Button>
-          </form>
 
-          <p className="text-center text-sm text-muted-foreground">
-            Pas encore de compte ?{' '}
-            <Link href="/register" className="text-primary hover:underline font-medium">
-              Créer un compte
-            </Link>
-          </p>
+              <Button 
+                type="submit" 
+                className="w-full h-16 rounded-2xl bg-gold-gradient text-[#020617] text-lg font-bold shadow-xl shadow-gold/20 hover:scale-[1.02] active:scale-[0.98] transition-all" 
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    Authentification...
+                  </>
+                ) : (
+                  'Se connecter'
+                )}
+              </Button>
+            </form>
 
-          <div className="space-y-4 pt-4 border-t">
-            <p className="text-sm text-muted-foreground text-center">
-              Avec votre compte, vous pouvez:
-            </p>
-            <div className="grid gap-3">
-              <div className="flex items-center gap-3 text-sm">
-                <div className="h-8 w-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                  <MapPin className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                </div>
-                <span>Sauvegarder vos voyages</span>
-              </div>
-              <div className="flex items-center gap-3 text-sm">
-                <div className="h-8 w-8 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                  <Users className="h-4 w-4 text-green-600 dark:text-green-400" />
-                </div>
-                <span>Partager et collaborer avec vos amis</span>
-              </div>
-              <div className="flex items-center gap-3 text-sm">
-                <div className="h-8 w-8 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-                  <Plane className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                </div>
-                <span>Retrouver vos voyages sur tous vos appareils</span>
-              </div>
+            <div className="pt-6 text-center">
+              <p className="text-slate-400 font-medium">
+                Pas encore de compte ?{' '}
+                <Link href="/register" className="text-gold hover:text-gold-light font-bold underline decoration-gold/30 underline-offset-4 transition-all">
+                  Créer un compte
+                </Link>
+              </p>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </motion.div>
+      </div>
     </div>
   );
 }
@@ -216,8 +260,8 @@ function LoginContent() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="min-h-screen flex items-center justify-center bg-[#020617]">
+        <Loader2 className="h-10 w-10 animate-spin text-gold" />
       </div>
     }>
       <LoginContent />

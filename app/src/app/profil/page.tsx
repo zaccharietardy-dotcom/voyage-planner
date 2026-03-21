@@ -1,11 +1,12 @@
 'use client';
 
-import { LogOut, Loader2, ArrowLeft, MapPin, Settings, Users, UserPlus, Crown, CreditCard, Sparkles, Check, Trophy } from 'lucide-react';
+import { LogOut, Loader2, ArrowLeft, MapPin, Settings, Users, UserPlus, Crown, CreditCard, Sparkles, Check, Trophy, ShieldCheck, Mail, Calendar, Settings2, Globe, Heart } from 'lucide-react';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useSubscription } from '@/hooks/useSubscription';
 import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -69,7 +70,6 @@ export default function ProfilPage() {
           fetch('/api/follows?type=following'),
         ]);
 
-        // If any response is 401, auth cookies not ready — retry
         const has401 = responses.some(r => r.status === 401);
         if (has401 && retries < 3) {
           setTimeout(() => fetchData(retries + 1), (retries + 1) * 800);
@@ -99,8 +99,9 @@ export default function ProfilPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="min-h-screen bg-[#020617] flex flex-col items-center justify-center">
+        <Loader2 className="h-12 w-12 animate-spin text-gold mb-4" />
+        <p className="text-gold font-display text-lg tracking-widest">Préparation de votre espace...</p>
       </div>
     );
   }
@@ -112,429 +113,287 @@ export default function ProfilPage() {
   const email = profile?.email || user.email || '';
   const username = profileData?.username || displayName.toLowerCase().replace(/\s+/g, '_');
 
-  const handleCheckout = async (plan: 'monthly' | 'yearly') => {
-    setCheckoutLoading('pro');
-    try {
-      if (nativeApp) {
-        if (!user) {
-          toast.error('Connectez-vous pour acheter depuis l’app');
-          return;
-        }
-
-        const result = await purchaseProPlan(plan, user.id);
-        if (!result.success) {
-          toast.error(result.message || 'Achat in-app annulé ou échoué');
-          return;
-        }
-
-        toast.success('Achat validé');
-        window.location.reload();
-        return;
-      }
-
-      const res = await fetch('/api/billing/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan }),
-      });
-      const data = await res.json();
-      if (data.url) window.location.href = data.url;
-    } catch (e) { console.error(e); }
-    finally { setCheckoutLoading(null); }
-  };
-
-  const handleOneTime = async () => {
-    setCheckoutLoading('one-time');
-    try {
-      if (nativeApp) {
-        toast.info('Achat à l’unité disponible sur le site web.');
-        return;
-      }
-
-      const res = await fetch('/api/billing/one-time', { method: 'POST' });
-      const data = await res.json();
-      if (data.url) window.location.href = data.url;
-    } catch (e) { console.error(e); }
-    finally { setCheckoutLoading(null); }
-  };
-
-  const handlePortal = async () => {
-    setCheckoutLoading('portal');
-    try {
-      if (nativeApp) {
-        toast.info('Gérez l’abonnement depuis App Store / Google Play.');
-        return;
-      }
-
-      const res = await fetch('/api/billing/portal', { method: 'POST' });
-      const data = await res.json();
-      if (data.url) window.location.href = data.url;
-    } catch (e) { console.error(e); }
-    finally { setCheckoutLoading(null); }
-  };
-
-  const handleRestore = async () => {
-    if (!nativeApp || !user) return;
-    setCheckoutLoading('restore');
-    try {
-      const result = await restoreMobilePurchases(user.id);
-      if (!result.success) {
-        toast.error(result.message || 'Restauration impossible');
-        return;
-      }
-      toast.success('Achats restaurés');
-      window.location.reload();
-    } finally {
-      setCheckoutLoading(null);
-    }
-  };
-
   const handleSignOut = async () => {
     await signOut();
     router.push('/');
   };
 
+  const handleCheckout = async (plan: 'monthly' | 'yearly') => {
+    setCheckoutLoading('pro');
+    try {
+      if (nativeApp) {
+        const result = await purchaseProPlan(plan, user.id);
+        if (!result.success) { toast.error(result.message || 'Échec de l\'achat'); return; }
+        window.location.reload();
+        return;
+      }
+      const res = await fetch('/api/billing/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ plan }) });
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+    } finally { setCheckoutLoading(null); }
+  };
+
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="relative h-32 bg-gradient-to-r from-primary to-primary/80">
-        <Link
-          href="/"
-          className="absolute top-4 left-4 p-2 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5 text-white" />
-        </Link>
-        <Link
-          href="/preferences"
-          className="absolute top-4 right-4 p-2 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-colors"
-        >
-          <Settings className="w-5 h-5 text-white" />
-        </Link>
+    <div className="min-h-screen bg-background pb-20">
+      {/* Visual Cover */}
+      <div className="relative h-64 bg-[#020617] overflow-hidden">
+        <img 
+          src="https://images.unsplash.com/photo-1436491865332-7a61a109c0f2?q=80&w=2070&auto=format&fit=crop" 
+          alt="Travel Cover" 
+          className="w-full h-full object-cover opacity-40 grayscale-[0.5]"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+        
+        <div className="absolute top-6 left-6 right-6 flex items-center justify-between z-20">
+          <Link href="/" className="h-10 w-10 rounded-full bg-white/10 backdrop-blur-md border border-white/10 flex items-center justify-center text-white hover:bg-gold/20 transition-all">
+            <ArrowLeft className="h-5 w-5" />
+          </Link>
+          <Link href="/preferences" className="h-10 w-10 rounded-full bg-white/10 backdrop-blur-md border border-white/10 flex items-center justify-center text-white hover:bg-gold/20 transition-all">
+            <Settings className="h-5 w-5" />
+          </Link>
+        </div>
       </div>
 
-      {/* Profile info */}
-      <div className="px-4 -mt-16 relative z-10 max-w-lg mx-auto">
-        <div className="flex flex-col items-center">
-          <Avatar className="w-24 h-24 border-4 border-background shadow-lg">
-            <AvatarImage src={avatarUrl || undefined} />
-            <AvatarFallback className="text-3xl font-bold bg-primary text-primary-foreground">
-              {displayName.charAt(0).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-          <h1 className="text-2xl font-bold mt-4">{displayName}</h1>
-          <p className="text-muted-foreground text-sm">@{username}</p>
-          {profileData?.bio && (
-            <p className="text-sm text-center mt-2 text-muted-foreground">{profileData.bio}</p>
-          )}
-        </div>
+      {/* Profile Card Overlay */}
+      <div className="max-w-2xl mx-auto px-4 -mt-32 relative z-30">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="premium-card bg-[#020617]/80 backdrop-blur-2xl rounded-[2.5rem] border border-gold/20 shadow-2xl p-8"
+        >
+          <div className="flex flex-col items-center text-center">
+            <div className="relative">
+              <Avatar className="w-32 h-32 border-4 border-[#020617] shadow-2xl ring-2 ring-gold/30">
+                <AvatarImage src={avatarUrl || undefined} className="object-cover" />
+                <AvatarFallback className="text-4xl font-display font-bold bg-gold text-[#020617]">
+                  {displayName.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              {isPro && (
+                <div className="absolute -bottom-2 -right-2 bg-gold-gradient p-2 rounded-xl shadow-xl border border-[#020617]">
+                  <Crown className="h-5 w-5 text-[#020617]" />
+                </div>
+              )}
+            </div>
 
-        {/* Stats */}
-        <div className="flex items-center justify-center gap-8 mt-5">
-          <button onClick={() => setActiveTab('trips')} className="text-center">
-            <p className="font-bold text-lg">
-              {dataLoading ? <Loader2 className="w-4 h-4 animate-spin inline" /> : trips.length}
-            </p>
-            <p className="text-muted-foreground text-xs">Voyages</p>
-          </button>
-          <button onClick={() => setActiveTab('followers')} className="text-center">
-            <p className="font-bold text-lg">
-              {dataLoading ? <Loader2 className="w-4 h-4 animate-spin inline" /> : followers.length}
-            </p>
-            <p className="text-muted-foreground text-xs">Abonnés</p>
-          </button>
-          <button onClick={() => setActiveTab('following')} className="text-center">
-            <p className="font-bold text-lg">
-              {dataLoading ? <Loader2 className="w-4 h-4 animate-spin inline" /> : following.length}
-            </p>
-            <p className="text-muted-foreground text-xs">Abonnements</p>
-          </button>
-        </div>
+            <div className="mt-6">
+              <h1 className="font-display text-3xl font-bold text-white flex items-center gap-3">
+                {displayName}
+                {isPro && <ShieldCheck className="h-5 w-5 text-gold" />}
+              </h1>
+              <div className="flex items-center justify-center gap-4 mt-2">
+                <p className="text-gold font-bold text-xs uppercase tracking-[0.2em]">@{username}</p>
+                <div className="h-1 w-1 rounded-full bg-slate-600" />
+                <p className="text-slate-400 text-xs font-bold uppercase tracking-widest flex items-center gap-1">
+                  <Mail className="h-3 w-3" />
+                  {email}
+                </p>
+              </div>
+              {profileData?.bio && (
+                <p className="text-slate-400 text-sm mt-4 max-w-sm italic leading-relaxed">
+                  "{profileData.bio}"
+                </p>
+              )}
+            </div>
 
-        {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
-          <TabsList className="w-full grid grid-cols-5 gap-1">
-            <TabsTrigger value="trips" className="text-xs">Voyages</TabsTrigger>
-            <TabsTrigger value="gamification" className="gap-1 text-xs">
-              <Trophy className="w-3.5 h-3.5" />
-              Stats
+            {/* Stats Bar */}
+            <div className="grid grid-cols-3 gap-8 w-full mt-10 pt-8 border-t border-white/5">
+              <button onClick={() => setActiveTab('trips')} className="group">
+                <p className="font-display text-2xl font-bold text-white group-hover:text-gold transition-colors">
+                  {dataLoading ? <Loader2 className="w-4 h-4 animate-spin inline" /> : trips.length}
+                </p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mt-1">Voyages</p>
+              </button>
+              <button onClick={() => setActiveTab('followers')} className="group">
+                <p className="font-display text-2xl font-bold text-white group-hover:text-gold transition-colors">
+                  {dataLoading ? <Loader2 className="w-4 h-4 animate-spin inline" /> : followers.length}
+                </p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mt-1">Abonnés</p>
+              </button>
+              <button onClick={() => setActiveTab('following')} className="group">
+                <p className="font-display text-2xl font-bold text-white group-hover:text-gold transition-colors">
+                  {dataLoading ? <Loader2 className="w-4 h-4 animate-spin inline" /> : following.length}
+                </p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mt-1">Suivis</p>
+              </button>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Tabs System */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-12">
+          <TabsList className="w-full h-14 bg-white/5 border border-white/10 rounded-2xl p-1 backdrop-blur-xl">
+            <TabsTrigger value="trips" className="flex-1 rounded-xl text-[10px] font-bold uppercase tracking-widest data-[state=active]:bg-gold data-[state=active]:text-[#020617]">
+              Voyages
             </TabsTrigger>
-            <TabsTrigger value="followers" className="text-xs">Abonnés</TabsTrigger>
-            <TabsTrigger value="following" className="text-xs">Suivis</TabsTrigger>
-            <TabsTrigger value="pro" className="gap-1 text-xs">
-              <Crown className="w-3.5 h-3.5" />
-              Pro
+            <TabsTrigger value="gamification" className="flex-1 rounded-xl text-[10px] font-bold uppercase tracking-widest data-[state=active]:bg-gold data-[state=active]:text-[#020617] gap-2">
+              <Trophy className="h-3.5 w-3.5" /> Stats
+            </TabsTrigger>
+            <TabsTrigger value="followers" className="flex-1 rounded-xl text-[10px] font-bold uppercase tracking-widest data-[state=active]:bg-gold data-[state=active]:text-[#020617]">
+              Abonnés
+            </TabsTrigger>
+            <TabsTrigger value="pro" className="flex-1 rounded-xl text-[10px] font-bold uppercase tracking-widest data-[state=active]:bg-gold data-[state=active]:text-[#020617] gap-2">
+              <Crown className="h-3.5 w-3.5" /> Club
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="trips" className="mt-4">
-            {trips.length === 0 ? (
-              <div className="text-center py-10">
-                <MapPin className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-                <p className="text-muted-foreground">Aucun voyage</p>
-                <Link href="/plan" className="text-primary text-sm mt-2 inline-block">
-                  Créer un voyage
-                </Link>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {trips.map((trip) => (
-                  <Card
-                    key={trip.id}
-                    className="cursor-pointer hover:shadow-md transition-shadow"
-                    onClick={() => router.push(`/trip/${trip.id}`)}
-                  >
-                    <CardContent className="p-3">
-                      <h4 className="font-medium">{trip.title}</h4>
-                      <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {trip.destination}</span>
-                        <span>{trip.duration_days}j</span>
-                        <span>{format(new Date(trip.start_date), 'd MMM', { locale: fr })}</span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </TabsContent>
+          <AnimatePresence mode="wait">
+            <TabsContent value="trips" className="mt-8 outline-none">
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+                {trips.length === 0 ? (
+                  <div className="text-center py-20 bg-white/5 rounded-[2rem] border border-dashed border-white/10">
+                    <MapPin className="w-12 h-12 text-slate-700 mx-auto mb-4" />
+                    <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Aucun voyage pour le moment</p>
+                    <Link href="/plan">
+                      <Button variant="link" className="text-gold font-bold mt-2">Planifier mon premier départ</Button>
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="grid gap-4">
+                    {trips.map((trip) => (
+                      <button
+                        key={trip.id}
+                        onClick={() => router.push(`/trip/${trip.id}`)}
+                        className="w-full text-left group"
+                      >
+                        <div className="bg-white/5 border border-white/5 rounded-2xl p-5 hover:border-gold/30 hover:bg-white/10 transition-all flex items-center justify-between">
+                          <div className="flex items-center gap-5">
+                            <div className="h-14 w-14 rounded-xl bg-gold/10 flex items-center justify-center shrink-0 border border-gold/20 text-gold group-hover:bg-gold group-hover:text-[#020617] transition-all">
+                              <Globe className="h-6 w-6" />
+                            </div>
+                            <div>
+                              <h4 className="font-display font-bold text-white text-lg group-hover:text-gold transition-colors">{trip.title}</h4>
+                              <div className="flex items-center gap-3 mt-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                                <span className="flex items-center gap-1.5"><MapPin className="h-3 w-3 text-gold" /> {trip.destination}</span>
+                                <span className="flex items-center gap-1.5"><Calendar className="h-3 w-3 text-gold" /> {format(new Date(trip.start_date), 'd MMM yyyy', { locale: fr })}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <ArrowLeft className="h-5 w-5 text-slate-700 group-hover:text-gold group-hover:translate-x-1 transition-all rotate-180" />
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </motion.div>
+            </TabsContent>
 
-          <TabsContent value="gamification" className="mt-4">
-            {user && <GamificationSection userId={user.id} isOwnProfile={true} />}
-          </TabsContent>
+            <TabsContent value="gamification" className="mt-8 outline-none">
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+                {user && <GamificationSection userId={user.id} isOwnProfile={true} />}
+              </motion.div>
+            </TabsContent>
 
-          <TabsContent value="followers" className="mt-4">
-            {followers.length === 0 ? (
-              <div className="text-center py-10">
-                <Users className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-                <p className="text-muted-foreground">Aucun abonné</p>
-              </div>
-            ) : (
-              <div className="space-y-1">
-                {followers.map((f: any) => (
-                  <UserProfileCard
-                    key={f.id}
-                    user={f.follower || { id: '', display_name: 'Utilisateur', avatar_url: null }}
-                  />
-                ))}
-              </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="following" className="mt-4">
-            {following.length === 0 ? (
-              <div className="text-center py-10">
-                <UserPlus className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-                <p className="text-muted-foreground">Tu ne suis personne</p>
-                <p className="text-muted-foreground text-sm mt-1">
-                  Découvre des voyageurs dans l&apos;onglet Explorer
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-1">
-                {following.map((f: any) => (
-                  <UserProfileCard
-                    key={f.id}
-                    user={f.following || { id: '', display_name: 'Utilisateur', avatar_url: null }}
-                  />
-                ))}
-              </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="pro" className="mt-4 space-y-4">
-            {/* Current plan */}
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
+            <TabsContent value="pro" className="mt-8 outline-none space-y-6">
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+                {/* Status Card */}
+                <div className={cn(
+                  "p-8 rounded-[2.5rem] border flex flex-col items-center text-center relative overflow-hidden",
+                  isPro ? "bg-gold-gradient border-white/20" : "bg-white/5 border-white/10"
+                )}>
                   <div className={cn(
-                    'w-10 h-10 rounded-full flex items-center justify-center',
-                    isPro ? 'bg-amber-100 dark:bg-amber-900/30' : 'bg-muted'
+                    "w-20 h-20 rounded-3xl flex items-center justify-center mb-6 shadow-2xl",
+                    isPro ? "bg-[#020617] text-gold" : "bg-slate-800 text-slate-500"
                   )}>
-                    {isPro ? (
-                      <Crown className="w-5 h-5 text-amber-600 dark:text-amber-400" />
-                    ) : (
-                      <CreditCard className="w-5 h-5 text-muted-foreground" />
-                    )}
+                    {isPro ? <Crown className="h-10 w-10" /> : <CreditCard className="h-10 w-10" />}
                   </div>
-                  <div className="flex-1">
-                    <p className="font-semibold">{isPro ? 'Plan Pro actif' : 'Plan Gratuit'}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {isPro
-                        ? expiresAt
-                          ? `Renouvellement le ${format(new Date(expiresAt), 'd MMMM yyyy', { locale: fr })}`
-                          : 'Voyages illimités'
-                        : '1 voyage IA par mois'}
-                    </p>
-                  </div>
-                </div>
-                {isPro && (
-                  <div className="mt-3 space-y-2">
-                    <Button
-                      variant="outline"
-                      className="w-full"
-                      onClick={handlePortal}
-                      disabled={!!checkoutLoading}
-                    >
-                      {checkoutLoading === 'portal'
-                        ? <Loader2 className="w-4 h-4 animate-spin" />
-                        : nativeApp
-                          ? 'Gérer sur le store'
-                          : 'Gérer mon abonnement'}
-                    </Button>
-                    {nativeApp && (
-                      <Button
-                        variant="ghost"
-                        className="w-full"
-                        onClick={handleRestore}
-                        disabled={!!checkoutLoading || !user}
-                      >
-                        {checkoutLoading === 'restore' ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Restaurer mes achats'}
-                      </Button>
-                    )}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                  <h3 className={cn("text-2xl font-display font-bold mb-2", isPro ? "text-[#020617]" : "text-white")}>
+                    {isPro ? "Membre Privilège Narae" : "Accès Standard"}
+                  </h3>
+                  <p className={cn("text-sm max-w-xs mb-8 font-medium", isPro ? "text-[#020617]/70" : "text-slate-400")}>
+                    {isPro 
+                      ? (expiresAt ? `Abonnement actif jusqu'au ${format(new Date(expiresAt), 'd MMMM yyyy', { locale: fr })}` : "Accès illimité à vie")
+                      : "Découvrez l'intégralité des fonctionnalités de Narae Voyage en rejoignant le Club Pro."}
+                  </p>
 
-            {!isPro && (
-              <>
-                {!nativeApp && (
-                  <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={handleOneTime}>
-                    <CardContent className="p-4 flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">Voyage à l&apos;unité</p>
-                        <p className="text-xs text-muted-foreground">1 voyage supplémentaire, sans engagement</p>
+                  {!isPro && (
+                    <div className="grid gap-4 w-full">
+                      <div className="grid grid-cols-2 gap-3 bg-muted/50 p-1 rounded-xl mb-4">
+                        <button onClick={() => setBillingPeriod('yearly')} className={cn("py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all", billingPeriod === 'yearly' ? "bg-gold text-[#020617] shadow-lg" : "text-slate-500")}>Annuel</button>
+                        <button onClick={() => setBillingPeriod('monthly')} className={cn("py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all", billingPeriod === 'monthly' ? "bg-gold text-[#020617] shadow-lg" : "text-slate-500")}>Mensuel</button>
                       </div>
-                      {checkoutLoading === 'one-time' ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : (
-                        <span className="font-bold text-lg">0.99€</span>
-                      )}
-                    </CardContent>
-                  </Card>
-                )}
-
-                {/* Pro subscription */}
-                <Card className="border-amber-500/30 bg-amber-50/50 dark:bg-amber-900/10">
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-2 mb-3">
-                      <Sparkles className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                      <p className="font-semibold">Passer Pro</p>
-                    </div>
-                    <ul className="space-y-2 mb-4">
-                      {['Voyages illimités', 'Régénération IA illimitée', 'Export PDF & calendrier', 'Badge Pro sur le profil'].map(f => (
-                        <li key={f} className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <Check className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
-                          {f}
-                        </li>
-                      ))}
-                    </ul>
-
-                    {/* Period toggle */}
-                    <div className="flex gap-1 bg-muted rounded-lg p-1 mb-3">
-                      <button
-                        onClick={() => setBillingPeriod('yearly')}
-                        className={cn(
-                          'flex-1 py-1.5 rounded-md text-xs font-medium transition-all',
-                          billingPeriod === 'yearly' ? 'bg-amber-500 text-white shadow-sm' : 'text-muted-foreground'
-                        )}
+                      <Button 
+                        onClick={() => handleCheckout(billingPeriod)} 
+                        className="h-16 rounded-2xl bg-gold-gradient text-[#020617] font-bold text-lg shadow-xl shadow-gold/20"
+                        disabled={!!checkoutLoading}
                       >
-                        Annuel · 9.99€
-                      </button>
-                      <button
-                        onClick={() => setBillingPeriod('monthly')}
-                        className={cn(
-                          'flex-1 py-1.5 rounded-md text-xs font-medium transition-all',
-                          billingPeriod === 'monthly' ? 'bg-amber-500 text-white shadow-sm' : 'text-muted-foreground'
-                        )}
-                      >
-                        Mensuel · 1.99€
-                      </button>
-                    </div>
-
-                    <Button
-                      className="w-full bg-amber-500 hover:bg-amber-600 text-white"
-                      onClick={() => handleCheckout(billingPeriod)}
-                      disabled={!!checkoutLoading}
-                    >
-                      {checkoutLoading === 'pro' ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : nativeApp ? (
-                        platform === 'ios'
-                          ? 'Acheter via App Store'
-                          : platform === 'android'
-                            ? 'Acheter via Google Play'
-                            : 'Acheter'
-                      ) : billingPeriod === 'yearly' ? (
-                        "S'abonner — 9.99€/an"
-                      ) : (
-                        "S'abonner — 1.99€/mois"
-                      )}
-                    </Button>
-                    {nativeApp && (
-                      <Button
-                        variant="ghost"
-                        className="w-full mt-2"
-                        onClick={handleRestore}
-                        disabled={!!checkoutLoading || !user}
-                      >
-                        {checkoutLoading === 'restore' ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Restaurer mes achats'}
+                        {checkoutLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : `Devenir Pro — ${billingPeriod === 'yearly' ? '9.99€/an' : '1.99€/mois'}`}
                       </Button>
-                    )}
-                    {billingPeriod === 'yearly' && (
-                      <p className="text-center text-[10px] text-muted-foreground mt-2">
-                        soit 0.83€/mois · économise 58%
-                      </p>
-                    )}
-                  </CardContent>
-                </Card>
-              </>
-            )}
-          </TabsContent>
+                    </div>
+                  )}
+                </div>
+
+                {!isPro && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {[
+                      { icon: Globe, label: "Voyages illimités", desc: "Planifiez sans aucune limite." },
+                      { icon: Sparkles, label: "Régénération IA", desc: "Optimisation infinie par IA." },
+                      { icon: Download, label: "Export PDF Deluxe", desc: "Vos carnets de route imprimables." },
+                      { icon: Crown, label: "Badge Exclusif", desc: "Affirmez votre statut d'explorateur." }
+                    ].map((feat, i) => (
+                      <div key={i} className="p-5 bg-white/5 border border-white/5 rounded-2xl flex items-start gap-4">
+                        <div className="h-10 w-10 rounded-xl bg-gold/10 flex items-center justify-center shrink-0 text-gold">
+                          <feat.icon className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-white mb-1">{feat.label}</p>
+                          <p className="text-[10px] font-medium text-slate-500 leading-relaxed uppercase tracking-wider">{feat.desc}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </motion.div>
+            </TabsContent>
+          </AnimatePresence>
         </Tabs>
 
-        {/* Quick actions */}
-        <div className="mt-6 space-y-3">
-          <Link href="/mes-voyages" className="block">
-            <Card className="hover:shadow-md transition-shadow cursor-pointer">
-              <CardContent className="p-4 flex items-center gap-4">
-                <div className="p-3 rounded-full bg-primary/10">
-                  <MapPin className="w-5 h-5 text-primary" />
+        {/* Action Menu */}
+        <div className="mt-12 space-y-4">
+          <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-600 mb-6 ml-2 text-center">Menu Privé</h3>
+          
+          <div className="grid grid-cols-1 gap-4">
+            <Link href="/mes-voyages" className="group">
+              <div className="bg-white/5 border border-white/5 rounded-2xl p-6 hover:bg-white/10 hover:border-gold/30 transition-all flex items-center gap-6">
+                <div className="h-12 w-12 rounded-xl bg-white/5 flex items-center justify-center text-slate-400 group-hover:text-gold group-hover:bg-gold/10 transition-all">
+                  <MapPin className="h-6 w-6" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-medium">Mes voyages</h3>
-                  <p className="text-sm text-muted-foreground">Voir et gérer mes voyages</p>
+                  <p className="text-sm font-bold text-white mb-1">Gérer mes voyages</p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Modifier, supprimer ou archiver</p>
                 </div>
-                <ArrowLeft className="w-4 h-4 text-muted-foreground rotate-180" />
-              </CardContent>
-            </Card>
-          </Link>
+                <ArrowLeft className="h-5 w-5 text-slate-700 rotate-180 group-hover:text-gold group-hover:translate-x-1 transition-all" />
+              </div>
+            </Link>
 
-          <Link href="/preferences" className="block">
-            <Card className="hover:shadow-md transition-shadow cursor-pointer">
-              <CardContent className="p-4 flex items-center gap-4">
-                <div className="p-3 rounded-full bg-primary/10">
-                  <Settings className="w-5 h-5 text-primary" />
+            <Link href="/preferences" className="group">
+              <div className="bg-white/5 border border-white/5 rounded-2xl p-6 hover:bg-white/10 hover:border-gold/30 transition-all flex items-center gap-6">
+                <div className="h-12 w-12 rounded-xl bg-white/5 flex items-center justify-center text-slate-400 group-hover:text-gold group-hover:bg-gold/10 transition-all">
+                  <Settings2 className="h-6 w-6" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-medium">Préférences de voyage</h3>
-                  <p className="text-sm text-muted-foreground">Style, budget, régime alimentaire</p>
+                  <p className="text-sm font-bold text-white mb-1">Préférences Expert</p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Style, budget & régime alimentaire</p>
                 </div>
-                <ArrowLeft className="w-4 h-4 text-muted-foreground rotate-180" />
-              </CardContent>
-            </Card>
-          </Link>
+                <ArrowLeft className="h-5 w-5 text-slate-700 rotate-180 group-hover:text-gold group-hover:translate-x-1 transition-all" />
+              </div>
+            </Link>
+          </div>
+
+          <Button 
+            variant="outline" 
+            onClick={handleSignOut}
+            className="w-full h-16 rounded-2xl mt-8 border-red-500/20 bg-red-500/5 text-red-400 font-bold text-[10px] uppercase tracking-[0.2em] hover:bg-red-500 hover:text-white transition-all"
+          >
+            <LogOut className="h-4 w-4 mr-2" /> Quitter l'application
+          </Button>
         </div>
-
-        {/* Sign out */}
-        <Button
-          variant="outline"
-          onClick={handleSignOut}
-          className="w-full mt-8 mb-8 text-destructive border-destructive/30 hover:bg-destructive/10"
-        >
-          <LogOut className="w-4 h-4 mr-2" />
-          Se déconnecter
-        </Button>
       </div>
     </div>
   );
 }
+
+// Placeholder for missing Download icon in imports if needed (it was used in my feature list)
+const Download = ({ className }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+);

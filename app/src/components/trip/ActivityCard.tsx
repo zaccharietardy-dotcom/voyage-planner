@@ -459,31 +459,30 @@ export const ActivityCard = memo(function ActivityCard({
         {!isHeroType && (
           orderNumber !== undefined ? (
             <div
-              className="w-9 self-stretch flex items-center justify-center shrink-0"
-              style={{ backgroundColor: `${color}10` }}
+              className="w-12 self-stretch flex items-center justify-center shrink-0 border-r border-border/40"
+              style={{ background: 'linear-gradient(to bottom, rgba(197, 160, 89, 0.05), transparent)' }}
             >
               <span
-                className="w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold text-white shadow-sm"
-                style={{ backgroundColor: color }}
+                className="w-8 h-8 rounded-xl flex items-center justify-center text-sm font-display font-bold text-gold border border-gold/30 bg-white/50 dark:bg-white/5 shadow-sm"
               >
                 {orderNumber}
               </span>
             </div>
           ) : (
-            <div className="w-1 self-stretch rounded-l-md" style={{ backgroundColor: color }} />
+            <div className="w-1.5 self-stretch rounded-l-md bg-gold/50" />
           )
         )}
 
         {/* Content */}
-        <div className={cn("flex-1 min-w-0", useHeroStyle ? "p-4" : "p-3.5")}>
-          <div className="flex items-start gap-3">
+        <div className={cn("flex-1 min-w-0", useHeroStyle ? "p-5" : "p-4")}>
+          <div className="flex items-start gap-4">
             <div className="flex-1 min-w-0">
               {/* Time row */}
-              <div className={cn("flex items-center gap-2", useHeroStyle ? "mb-2" : "mb-1")}>
+              <div className={cn("flex items-center gap-3", useHeroStyle ? "mb-3" : "mb-2")}>
                 {/* Order number badge (inline on hero cards) */}
                 {useHeroStyle && orderNumber !== undefined && (
                   <span
-                    className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-md shrink-0 bg-white/20"
+                    className="w-8 h-8 rounded-xl flex items-center justify-center text-sm font-display font-bold text-white shadow-xl shrink-0 bg-gold-gradient border border-white/20"
                   >
                     {orderNumber}
                   </span>

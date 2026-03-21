@@ -5,6 +5,16 @@ import { TripItem, TRIP_ITEM_COLORS, ImportedPlace } from '@/lib/types';
 import { AIRPORTS } from '@/lib/services/geocoding';
 import type { PriceCell } from '@/lib/services/neighbourhoodPricing';
 import { renderNeighbourhoodOverlay } from './NeighbourhoodMap';
+import { cn } from '@/lib/utils';
+import { 
+  Maximize2, 
+  Minimize2, 
+  Globe, 
+  PlusCircle, 
+  MinusCircle, 
+  MapPin, 
+  Info 
+} from 'lucide-react';
 
 interface TripMapProps {
   items: TripItem[];
@@ -26,19 +36,19 @@ interface TripMapProps {
 
 // ─── Constants ──────────────────────────────────────────────
 
-const DAY_COLORS: { bg: string; border: string }[] = [
-  { bg: '#6366F1', border: '#4F46E5' }, // Indigo   — Jour 1
-  { bg: '#06B6D4', border: '#0891B2' }, // Cyan     — Jour 2
-  { bg: '#F59E0B', border: '#D97706' }, // Ambre    — Jour 3
-  { bg: '#EF4444', border: '#DC2626' }, // Rouge    — Jour 4
-  { bg: '#8B5CF6', border: '#7C3AED' }, // Violet   — Jour 5
-  { bg: '#10B981', border: '#059669' }, // Émeraude — Jour 6
-  { bg: '#F97316', border: '#EA580C' }, // Orange   — Jour 7
-  { bg: '#EC4899', border: '#DB2777' }, // Rose     — Jour 8
-  { bg: '#14B8A6', border: '#0D9488' }, // Teal     — Jour 9
-  { bg: '#A855F7', border: '#9333EA' }, // Pourpre  — Jour 10
+const DAY_COLORS: { bg: string; border: string; text: string }[] = [
+  { bg: '#0f172a', border: '#c5a059', text: '#ffffff' }, // Deep Blue & Gold — Jour 1
+  { bg: '#1e293b', border: '#c5a059', text: '#ffffff' }, // Slate Blue & Gold — Jour 2
+  { bg: '#334155', border: '#c5a059', text: '#ffffff' }, // Muted Blue & Gold — Jour 3
+  { bg: '#020617', border: '#c5a059', text: '#ffffff' }, // Midnight & Gold — Jour 4
+  { bg: '#0f172a', border: '#c5a059', text: '#ffffff' }, // Repeat with subtle variations
+  { bg: '#1e293b', border: '#c5a059', text: '#ffffff' },
+  { bg: '#334155', border: '#c5a059', text: '#ffffff' },
+  { bg: '#020617', border: '#c5a059', text: '#ffffff' },
+  { bg: '#0f172a', border: '#c5a059', text: '#ffffff' },
+  { bg: '#1e293b', border: '#c5a059', text: '#ffffff' },
 ];
-const DEFAULT_DAY_COLOR = { bg: '#6B7280', border: '#4B5563' };
+const DEFAULT_DAY_COLOR = { bg: '#0f172a', border: '#c5a059', text: '#ffffff' };
 
 function getDayColor(dayNumber: number) {
   if (dayNumber < 1) return DEFAULT_DAY_COLOR;
@@ -46,13 +56,13 @@ function getDayColor(dayNumber: number) {
 }
 
 const TYPE_SHAPES: Record<string, { containerCss: string; innerCss: string }> = {
-  activity:   { containerCss: 'border-radius:50%;', innerCss: '' },
-  restaurant: { containerCss: 'border-radius:4px;', innerCss: '' },
-  transport:  { containerCss: 'border-radius:3px;transform:rotate(45deg);', innerCss: 'transform:rotate(-45deg);' },
-  flight:     { containerCss: 'border-radius:3px;transform:rotate(45deg);', innerCss: 'transform:rotate(-45deg);' },
-  hotel:      { containerCss: 'border-radius:4px 4px 50% 50%;', innerCss: '' },
-  checkin:    { containerCss: 'border-radius:4px 4px 50% 50%;', innerCss: '' },
-  checkout:   { containerCss: 'border-radius:4px 4px 50% 50%;', innerCss: '' },
+  activity:   { containerCss: 'border-radius:12px;', innerCss: '' },
+  restaurant: { containerCss: 'border-radius:6px;', innerCss: '' },
+  transport:  { containerCss: 'border-radius:6px;transform:rotate(45deg);', innerCss: 'transform:rotate(-45deg);' },
+  flight:     { containerCss: 'border-radius:6px;transform:rotate(45deg);', innerCss: 'transform:rotate(-45deg);' },
+  hotel:      { containerCss: 'border-radius:12px 12px 4px 4px;', innerCss: '' },
+  checkin:    { containerCss: 'border-radius:12px 12px 4px 4px;', innerCss: '' },
+  checkout:   { containerCss: 'border-radius:12px 12px 4px 4px;', innerCss: '' },
   parking:    { containerCss: 'border-radius:50%;border-style:dashed !important;', innerCss: '' },
   luggage:    { containerCss: 'border-radius:50%;border-style:dashed !important;', innerCss: '' },
   free_time:  { containerCss: 'border-radius:50%;border-style:dashed !important;', innerCss: '' },
@@ -161,41 +171,55 @@ function compareItemsForRoute(a: TripItem, b: TripItem): number {
 function createNumberedIcon(L: any, num: number, type: string, dayNumber: number, isHighlighted: boolean) {
   const colors = getDayColor(dayNumber);
   const shape = TYPE_SHAPES[type] || TYPE_SHAPES.activity;
-  const size = isHighlighted ? 36 : 32;
+  const size = isHighlighted ? 44 : 38;
   const emoji = TYPE_EMOJIS[type] || '📍';
-  const emojiSize = isHighlighted ? 17 : 15;
   const shadow = isHighlighted
-    ? `box-shadow: 0 0 0 3px ${colors.bg}40, 0 2px 8px rgba(0,0,0,0.3);`
-    : 'box-shadow: 0 1px 4px rgba(0,0,0,0.25);';
+    ? `box-shadow: 0 0 25px rgba(197, 160, 89, 0.5), 0 5px 15px rgba(0,0,0,0.4);`
+    : 'box-shadow: 0 4px 12px rgba(0,0,0,0.2);';
 
-  // For losange types, compose rotate(45deg) with scale when highlighted
   const isLosange = type === 'transport' || type === 'flight';
   let containerTransform = '';
   if (isLosange) {
     containerTransform = isHighlighted
-      ? 'transform:rotate(45deg) scale(1.2);z-index:1000;'
+      ? 'transform:rotate(45deg) scale(1.1);z-index:1000;'
       : 'transform:rotate(45deg);';
   } else {
-    containerTransform = isHighlighted ? 'transform:scale(1.2);z-index:1000;' : '';
+    containerTransform = isHighlighted ? 'transform:scale(1.1);z-index:1000;' : '';
   }
 
-  // Strip transform from containerCss since we handle it via containerTransform
   const shapeCss = isLosange
     ? shape.containerCss.replace('transform:rotate(45deg);', '')
     : shape.containerCss;
 
+  // Premium Marker: Number in the middle, emoji as a small badge
   return L.divIcon({
     className: 'numbered-marker',
     html: `<div style="
       width:${size}px;height:${size}px;
       ${shapeCss}
-      background:${colors.bg};border:2px solid white;
-      color:white;font-weight:700;
+      background:linear-gradient(135deg, ${colors.bg} 0%, #1e293b 100%);
+      border:2.5px solid #c5a059;
+      color:#c5a059;
       display:flex;align-items:center;justify-content:center;
       ${shadow}
-      transition:transform 0.15s ease;
+      transition:all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       ${containerTransform}
-    "><span style="display:flex;align-items:center;justify-content:center;font-size:${emojiSize}px;line-height:1;${shape.innerCss}">${emoji}</span></div>`,
+    ">
+      <span style="font-family:'Playfair Display', serif; font-size:${size * 0.45}px; font-weight:800; ${shape.innerCss}">${num}</span>
+      <div style="
+        position:absolute;
+        top:-8px;
+        right:-8px;
+        background:white;
+        width:20px;height:20px;
+        border-radius:50%;
+        display:flex;align-items:center;justify-content:center;
+        font-size:11px;
+        border:1.5px solid #c5a059;
+        box-shadow:0 2px 4px rgba(0,0,0,0.2);
+        ${shape.innerCss}
+      ">${emoji}</div>
+    </div>`,
     iconSize: [size, size],
     iconAnchor: [size / 2, size / 2],
     popupAnchor: [0, -size / 2],
@@ -210,62 +234,62 @@ function getPopupContent(item: TripItem, index: number): string {
 
   const maxW = typeof window !== 'undefined' ? Math.min(300, window.innerWidth - 40) : 300;
 
-  // Hardcoded colors (CSS variables don't reliably cascade into Leaflet popups)
-  const textColor = '#1a1a2e';
-  const mutedColor = '#6b7280';
-  const linkColor = '#2563eb';
-  const borderColor = '#e5e7eb';
+  // Hardcoded colors for premium look
+  const textColor = '#020617';
+  const mutedColor = '#64748b';
+  const goldColor = '#c5a059';
+  const borderColor = '#e2e8f0';
 
   // Photo — onerror hides only the img, not the container
   const hasImage = !!item.imageUrl;
   const imageHtml = hasImage
-    ? `<div style="position:relative;width:100%;height:140px;overflow:hidden;border-radius:10px 10px 0 0;background:#f3f4f6;">
+    ? `<div style="position:relative;width:100%;height:160px;overflow:hidden;border-radius:15px 15px 0 0;background:#0f172a;">
         <img src="${item.imageUrl}" alt="" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'" />
-        <div style="position:absolute;bottom:0;left:0;right:0;height:60px;background:linear-gradient(transparent,rgba(0,0,0,0.6));"></div>
-        <div style="position:absolute;bottom:8px;left:10px;right:10px;display:flex;align-items:center;gap:6px;">
-          <div style="width:22px;height:22px;border-radius:50%;background:${color};color:white;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1.5px solid white;">${index}</div>
-          <div style="font-size:13px;font-weight:600;color:white;text-shadow:0 1px 3px rgba(0,0,0,0.5);line-height:1.2;">${escapeHtml(item.title)}</div>
+        <div style="position:absolute;bottom:0;left:0;right:0;height:80px;background:linear-gradient(transparent,rgba(2,6,23,0.9));"></div>
+        <div style="position:absolute;bottom:12px;left:15px;right:15px;display:flex;align-items:center;gap:10px;">
+          <div style="width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg, #c5a059 0%, #a37f3d 100%);color:white;font-family:'Playfair Display', serif;font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid rgba(255,255,255,0.3);box-shadow:0 4px 10px rgba(0,0,0,0.3);">${index}</div>
+          <div style="font-family:'Playfair Display', serif;font-size:16px;font-weight:700;color:white;text-shadow:0 2px 4px rgba(0,0,0,0.5);line-height:1.2;">${escapeHtml(item.title)}</div>
         </div>
       </div>`
     : '';
 
   // Title row (always show if no image)
   const titleHtml = hasImage ? '' : `
-    <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
-      <div style="width:24px;height:24px;border-radius:50%;background:${color};color:white;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${index}</div>
-      <div style="font-size:14px;font-weight:600;line-height:1.2;color:${textColor};">${escapeHtml(item.title)}</div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+      <div style="width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg, #c5a059 0%, #a37f3d 100%);color:white;font-family:'Playfair Display', serif;font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${index}</div>
+      <div style="font-family:'Playfair Display', serif;font-size:16px;font-weight:700;line-height:1.2;color:${textColor};">${escapeHtml(item.title)}</div>
     </div>`;
 
   // Time display
   const timeHtml = item.startTime
-    ? `<div style="display:flex;align-items:center;gap:5px;font-size:12px;color:${mutedColor};margin-bottom:3px;">
-        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="${mutedColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        <span style="font-weight:500;color:${textColor};">${escapeHtml(item.startTime)}${item.endTime ? ` - ${escapeHtml(item.endTime)}` : ''}</span>
-        ${item.duration ? `<span style="opacity:0.6;">(${item.duration}min)</span>` : ''}
+    ? `<div style="display:flex;align-items:center;gap:6px;font-size:12px;color:${mutedColor};margin-bottom:6px;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${goldColor}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span style="font-weight:700;color:${textColor};letter-spacing:0.02em;">${escapeHtml(item.startTime)}${item.endTime ? ` – ${escapeHtml(item.endTime)}` : ''}</span>
+        ${item.duration ? `<span style="color:${goldColor};font-weight:600;margin-left:4px;">${item.duration} min</span>` : ''}
       </div>`
     : '';
 
   // Rating + cost
   const metaParts: string[] = [];
-  if (item.rating) metaParts.push(`${item.rating.toFixed(1)}★`);
-  if (item.estimatedCost) metaParts.push(`~${item.estimatedCost}€`);
+  if (item.rating) metaParts.push(`<span style="color:${goldColor};font-weight:700;">${item.rating.toFixed(1)}★</span>`);
+  if (item.estimatedCost) metaParts.push(`<span style="font-weight:600;">~${item.estimatedCost}€</span>`);
   if (item.locationName) metaParts.push(escapeHtml(item.locationName));
   const metaHtml = metaParts.length > 0
-    ? `<div style="font-size:11px;color:${mutedColor};margin-top:2px;">${metaParts.join(' · ')}</div>`
+    ? `<div style="font-size:11px;color:${mutedColor};margin-top:4px;display:flex;align-items:center;gap:8px;">${metaParts.join('<span style="opacity:0.3;">·</span>')}</div>`
     : '';
 
   // Action links
-  const links = [`<a href="${escapeHtml(googleMapsUrl)}" target="_blank" style="color:${linkColor};font-size:11px;text-decoration:none;font-weight:500;">Itinéraire</a>`];
-  if (item.bookingUrl) links.push(`<a href="${escapeHtml(item.bookingUrl)}" target="_blank" style="color:#34a853;font-size:11px;text-decoration:none;font-weight:500;">Réserver</a>`);
+  const links = [`<a href="${escapeHtml(googleMapsUrl)}" target="_blank" style="background:${goldColor}15;color:${goldColor};padding:6px 12px;border-radius:8px;font-size:11px;text-decoration:none;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;border:1px solid ${goldColor}30;transition:all 0.2s;">Itinéraire</a>`];
+  if (item.bookingUrl) links.push(`<a href="${escapeHtml(item.bookingUrl)}" target="_blank" style="background:${goldColor};color:white;padding:6px 12px;border-radius:8px;font-size:11px;text-decoration:none;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;box-shadow:0 4px 10px ${goldColor}40;">Réserver</a>`);
 
   return `
-    <div style="min-width:200px;max-width:${maxW}px;font-family:system-ui,-apple-system,sans-serif;color:${textColor};">
+    <div style="min-width:220px;max-width:${maxW}px;font-family:system-ui,-apple-system,sans-serif;color:${textColor};">
       ${imageHtml}
-      <div style="padding:${hasImage ? '10px 12px 10px' : '4px 0'};">
+      <div style="padding:${hasImage ? '15px 15px 15px' : '5px 0'};">
         ${titleHtml}
         ${timeHtml}
         ${metaHtml}
-        <div style="display:flex;gap:10px;margin-top:8px;padding-top:6px;border-top:1px solid ${borderColor};">
+        <div style="display:flex;gap:10px;margin-top:15px;padding-top:12px;border-top:1px solid ${borderColor};">
           ${links.join('')}
         </div>
       </div>
@@ -278,29 +302,35 @@ function getPopupContent(item: TripItem, index: number): string {
 
 const LEAFLET_STYLE_OVERRIDES = `
 .clean-popup .leaflet-popup-content-wrapper {
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+  border-radius: 20px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.15);
   padding: 0;
   overflow: hidden;
-  background: var(--color-card, #ffffff);
-  color: var(--color-card-foreground, #1a1a2e);
+  background: #ffffff;
+  border: 1px solid rgba(197, 160, 89, 0.2);
 }
 .clean-popup .leaflet-popup-content {
-  margin: 12px;
+  margin: 15px;
   margin-top: 0;
+  width: auto !important;
 }
 .clean-popup .leaflet-popup-content img {
-  margin-left: -12px;
-  margin-right: -12px;
-  width: calc(100% + 24px) !important;
+  margin-left: -15px;
+  margin-right: -15px;
+  width: calc(100% + 30px) !important;
   max-width: none !important;
 }
 .clean-popup .leaflet-popup-tip {
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  background: var(--color-card, #ffffff);
+  background: #ffffff;
+  border: 1px solid rgba(197, 160, 89, 0.1);
 }
 .dark .clean-popup .leaflet-popup-content-wrapper {
-  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  background: #020617;
+  border-color: rgba(197, 160, 89, 0.1);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+.dark .clean-popup .leaflet-popup-tip {
+  background: #020617;
 }
 .direction-arrow, .numbered-marker, .origin-marker, .plane-marker {
   background: none !important;
@@ -309,17 +339,13 @@ const LEAFLET_STYLE_OVERRIDES = `
 .numbered-marker {
   z-index: 500 !important;
   cursor: pointer !important;
-  pointer-events: auto !important;
 }
 .leaflet-popup {
   z-index: 1100 !important;
 }
-.leaflet-popup-pane {
-  z-index: 1100 !important;
-}
 .leaflet-control-attribution {
-  font-size: 10px !important;
-  opacity: 0.6 !important;
+  font-size: 9px !important;
+  opacity: 0.4 !important;
 }
 @keyframes dashflow {
   to { stroke-dashoffset: -20; }
@@ -734,10 +760,10 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
 
         // Halo
         const halo = L.polyline(segmentCoords, {
-          color,
-          weight: 12,
-          opacity: 0.22,
-          smoothFactor: 1.5,
+          color: '#c5a059',
+          weight: 10,
+          opacity: 0.15,
+          smoothFactor: 2,
           lineJoin: 'round',
           lineCap: 'round',
         });
@@ -745,10 +771,10 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
 
         // Main line
         const polyline = L.polyline(segmentCoords, {
-          color,
-          weight: 4,
-          opacity: 0.85,
-          smoothFactor: 1.5,
+          color: '#c5a059',
+          weight: 3,
+          opacity: 0.7,
+          smoothFactor: 2,
           lineJoin: 'round',
           lineCap: 'round',
         });
@@ -759,15 +785,15 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
           const decorator = L.polylineDecorator(polyline, {
             patterns: [{
               offset: '25%',
-              repeat: 80,
+              repeat: 100,
               symbol: L.Symbol.arrowHead({
-                pixelSize: 10,
+                pixelSize: 8,
                 polygon: false,
                 pathOptions: {
                   stroke: true,
-                  color,
-                  weight: 2,
-                  opacity: 0.8,
+                  color: '#c5a059',
+                  weight: 1.5,
+                  opacity: 0.6,
                   fillOpacity: 0,
                 },
               }),
@@ -1121,32 +1147,32 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
         <>
           {/* Top-left: Day filter chips */}
           {dayNumbers.length > 1 && (
-            <div className="absolute top-3 left-3 z-[1000] flex gap-1 overflow-x-auto max-w-[65%] pb-1" style={{ scrollbarWidth: 'none' }}>
+            <div className="absolute top-4 left-4 z-[1000] flex gap-2 overflow-x-auto max-w-[70%] pb-2 scrollbar-hide">
               <button
                 onClick={() => setFilterDay(null)}
-                className={`flex-shrink-0 px-2.5 py-1 rounded-full text-xs font-medium transition-colors shadow-sm border ${
+                className={cn(
+                  "flex-shrink-0 px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all shadow-lg border backdrop-blur-md",
                   filterDay === null
-                    ? 'bg-primary text-primary-foreground border-primary'
-                    : 'bg-white/90 dark:bg-card/90 text-muted-foreground border-border/50 hover:bg-white dark:hover:bg-card'
-                }`}
+                    ? "bg-gold-gradient text-white border-white/20"
+                    : "bg-white/80 dark:bg-[#020617]/80 text-muted-foreground border-white/10 hover:border-gold/30"
+                )}
               >
                 Tout
               </button>
               {dayNumbers.map(d => {
-                const dc = getDayColor(d);
+                const isActive = filterDay === d;
                 return (
                   <button
                     key={d}
-                    onClick={() => setFilterDay(filterDay === d ? null : d)}
-                    className={`flex-shrink-0 px-2.5 py-1 rounded-full text-xs font-medium transition-colors shadow-sm border ${
-                      filterDay !== d ? 'bg-white/90 dark:bg-card/90 text-muted-foreground hover:bg-white dark:hover:bg-card' : ''
-                    }`}
-                    style={filterDay === d
-                      ? { background: dc.bg, color: 'white', borderColor: dc.border }
-                      : undefined
-                    }
+                    onClick={() => setFilterDay(isActive ? null : d)}
+                    className={cn(
+                      "flex-shrink-0 px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all shadow-lg border backdrop-blur-md",
+                      isActive
+                        ? "bg-gold text-white border-white/20"
+                        : "bg-white/80 dark:bg-[#020617]/80 text-muted-foreground border-white/10 hover:border-gold/30"
+                    )}
                   >
-                    J{d}
+                    Jour {d}
                   </button>
                 );
               })}
@@ -1155,71 +1181,52 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
 
           {/* Day summary legend — top-left, below filter chips */}
           {daySummaries.length > 1 && (
-            <div className="absolute top-12 left-3 z-[1000] flex flex-col gap-0.5 bg-white/90 dark:bg-card/90 backdrop-blur-sm rounded-lg shadow-md border border-border/50 px-2.5 py-1.5">
+            <div className="absolute top-14 left-4 z-[1000] flex flex-col gap-1.5 bg-white/40 dark:bg-[#020617]/40 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 px-4 py-3 min-w-[120px]">
+              <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-gold mb-1">Itinéraires</span>
               {daySummaries.map(({ dayNum, totalKm, color }) => (
-                <div key={dayNum} className="flex items-center gap-2 text-xs font-semibold" style={{ color }}>
-                  <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: color }} />
-                  <span>J{dayNum}{totalKm > 0 ? ` · ${totalKm.toFixed(1)} km` : ''}</span>
+                <div key={dayNum} className="flex items-center justify-between gap-4 text-[11px] font-bold">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full flex-shrink-0 bg-gold shadow-[0_0_8px_rgba(197,160,89,0.5)]" />
+                    <span className="text-foreground/90">J{dayNum}</span>
+                  </div>
+                  {totalKm > 0 && <span className="text-muted-foreground font-mono text-[10px]">{totalKm.toFixed(1)}km</span>}
                 </div>
               ))}
             </div>
           )}
 
           {/* Top-right: Fit all + Fullscreen */}
-          <div className="absolute top-3 right-3 z-[1000] flex flex-col gap-1.5">
+          <div className="absolute top-4 right-4 z-[1000] flex flex-col gap-2">
             <button
               onClick={handleFitAll}
-              title="Voir tout"
-              aria-label="Voir tous les points sur la carte"
-              className="w-8 h-8 bg-white dark:bg-card rounded-md shadow-md border border-border/50 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+              className="w-10 h-10 bg-white/80 dark:bg-[#020617]/80 backdrop-blur-md rounded-xl shadow-xl border border-white/10 flex items-center justify-center text-gold hover:scale-110 transition-all active:scale-95 group"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="15 3 21 3 21 9" /><polyline points="9 21 3 21 3 15" />
-                <line x1="21" y1="3" x2="14" y2="10" /><line x1="3" y1="21" x2="10" y2="14" />
-              </svg>
+              <Maximize2 className="h-5 w-5 group-hover:rotate-12 transition-transform" />
             </button>
             <button
               onClick={handleFullscreen}
-              title={isFullscreen ? 'Quitter plein écran' : 'Plein écran'}
-              aria-label={isFullscreen ? 'Quitter le mode plein écran' : 'Afficher en plein écran'}
-              className="w-8 h-8 bg-white dark:bg-card rounded-md shadow-md border border-border/50 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+              className="w-10 h-10 bg-white/80 dark:bg-[#020617]/80 backdrop-blur-md rounded-xl shadow-xl border border-white/10 flex items-center justify-center text-gold hover:scale-110 transition-all active:scale-95"
             >
-              {isFullscreen ? (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="4 14 10 14 10 20" /><polyline points="20 10 14 10 14 4" />
-                  <line x1="14" y1="10" x2="21" y2="3" /><line x1="3" y1="21" x2="10" y2="14" />
-                </svg>
-              ) : (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
-                </svg>
-              )}
+              {isFullscreen ? <Minimize2 className="h-5 w-5" /> : <Globe className="h-5 w-5" />}
             </button>
           </div>
 
           {/* Bottom-right: Custom zoom controls */}
-          <div className="absolute bottom-6 right-3 z-[1000] flex flex-col">
+          <div className="absolute bottom-8 right-4 z-[1000] flex flex-col gap-1 shadow-2xl rounded-xl overflow-hidden border border-white/10">
             <button
               onClick={handleZoomIn}
-              title="Zoom avant"
-              aria-label="Zoomer sur la carte"
-              className="w-8 h-8 bg-white dark:bg-card rounded-t-md shadow-md border border-border/50 border-b-0 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+              className="w-10 h-10 bg-white/80 dark:bg-[#020617]/80 backdrop-blur-md flex items-center justify-center text-gold hover:bg-gold/10 transition-colors"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
+              <PlusCircle className="h-5 w-5" />
             </button>
             <button
               onClick={handleZoomOut}
-              title="Zoom arrière"
-              aria-label="Dézoomer sur la carte"
-              className="w-8 h-8 bg-white dark:bg-card rounded-b-md shadow-md border border-border/50 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+              className="w-10 h-10 bg-white/80 dark:bg-[#020617]/80 backdrop-blur-md flex items-center justify-center text-gold hover:bg-gold/10 transition-colors border-t border-white/5"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
+              <MinusCircle className="h-5 w-5" />
             </button>
           </div>
+
 
           {/* Bottom-left: Legend toggle + Neighbourhood toggle */}
           <div className="absolute bottom-6 left-3 z-[1000] flex gap-1.5">
