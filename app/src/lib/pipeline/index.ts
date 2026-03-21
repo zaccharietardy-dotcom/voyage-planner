@@ -1,10 +1,20 @@
 /**
- * Pipeline V2 — Main Orchestrator
+ * Pipeline V3 — Main Orchestrator
  *
- * Replaces the old ai.ts pipeline (1400+ lines, 13 sequential phases, 3-5 min)
- * with a clean 7-step approach: parallel fetch → algorithmic organization → single Claude call.
+ * Deterministic 12-step pipeline for trip generation.
+ * V2 (algorithmic + LLM) code paths have been removed.
  *
- * Target: 20-40s per trip generation.
+ * Steps:
+ *   1. fetchAllData()             — Parallel API calls
+ *   2. scoreAndSelectActivities() — Score, dedup, select top N
+ *   3. clusterActivities()        — Geographic clustering per day
+ *   4. selectTopHotelsByBarycenter() — Hotel near activity centroid
+ *   5. anchorTransport()          — Compute time windows from flights/transport
+ *   6. computeTravelTimes()       — Selective Directions API calls
+ *   7. enrichRestaurantPool()     — Restaurant pool enrichment
+ *   8+9+10. unifiedScheduleV3Days() — Unified scheduler
+ *   11. validateContracts()       — Quality scoring and contract validation
+ *   12. decorateTrip()            — Optional LLM decoration
  */
 
 import type { Trip, TripPreferences, TransportOptionSummary, Restaurant } from '../types';
@@ -15,29 +25,10 @@ import { scoreAndSelectActivities } from './step2-score';
 import { batchFetchWikipediaSummaries, getWikiLanguageForDestination } from '../services/wikipedia';
 import { clusterActivities, computeCityDensityProfile } from './step3-cluster';
 import { selectTieredHotels, selectTopHotelsByBarycenter } from './step5-hotel';
-import { validateAndFixTrip } from './step8-validate';
 import { calculateDistance } from '../services/geocoding';
-
-// ---------------------------------------------------------------------------
-// V2 Algorithmic pipeline — moved to legacy file
-// ---------------------------------------------------------------------------
-import { generateTripV2Algorithmic } from './legacy/v2-algorithmic';
-export { selectSelfCateredMealsForBudget } from './legacy/v2-algorithmic';
-
-// ---------------------------------------------------------------------------
-// Pipeline V2 LLM — New imports
-// ---------------------------------------------------------------------------
-import { prepareDataForLLM } from './step2-prepare-llm';
-import { planWithLLM } from './step3-llm-plan';
-import { assembleFromLLMPlan, computeDistancesForDay, addOutboundTransportItem, addReturnTransportItem } from './step4-assemble-llm';
-import { mergeDayTripDaysWithLLMPlan } from './utils/day-trip-builder';
-import { fixRestaurantOutliers } from './step7-assemble';
+import { addOutboundTransportItem, addReturnTransportItem } from './utils/transport-items';
 import { isAppropriateForMeal, isBreakfastSpecialized, getCuisineFamily } from './step4-restaurants';
 import { searchRestaurantsNearbyWithFallback } from '../services/serpApiPlaces';
-
-// ---------------------------------------------------------------------------
-// Pipeline V3 — New imports
-// ---------------------------------------------------------------------------
 import { anchorTransport } from './step4-anchor-transport';
 import { timeToMin, minToTime } from './utils/time';
 import { computeTravelTimes } from './step7b-travel-times';
@@ -47,64 +38,14 @@ import { validateContracts } from './step11-contracts';
 import { decorateTrip } from './step12-decorate';
 import { applyTrustLayer } from './trust-layer';
 import { buildDayTripPacks } from './day-trip-pack';
-import { buildPlannerClustersV31 } from './planner-v31';
 import { optimizeClusterRouting } from './intra-day-router';
-import { semanticScheduleV32Days, rebuildInterItemTravelForDays, type V32Diagnostics } from './semantic-scheduler-v32';
-import { getV31RescueStage, stripPlanningMetaFromDays } from './v31-rescue';
+import { stripPlanningMetaFromDays } from './planning-meta';
 
 // ---------------------------------------------------------------------------
 // Pipeline Event System — emit helper
 // ---------------------------------------------------------------------------
 function emit(onEvent: OnPipelineEvent | undefined, partial: Omit<import('./types').PipelineEvent, 'timestamp'>) {
   onEvent?.({ ...partial, timestamp: Date.now() });
-}
-
-// ---------------------------------------------------------------------------
-// Shadow mode — run v3.1 in parallel for comparison
-// ---------------------------------------------------------------------------
-
-/**
- * Deterministic selection: hash tripId to decide if this request is in the shadow sample.
- * 'sampled' = 10% of requests, 'all' = 100% (staging only).
- */
-function shouldRunShadow(shadowMode: string, tripId: string): boolean {
-  if (shadowMode === 'all') return true;
-  if (shadowMode !== 'sampled') return false;
-  // Simple hash: sum char codes mod 10 → 10% sample
-  let hash = 0;
-  for (let i = 0; i < tripId.length; i++) {
-    hash = (hash * 31 + tripId.charCodeAt(i)) >>> 0;
-  }
-  return (hash % 10) === 0;
-}
-
-/**
- * Fire-and-forget shadow run: execute v3.1 planner on same preferences,
- * log comparison metrics. Does NOT affect the served result.
- */
-async function runShadowPlanner(preferences: TripPreferences, primaryTrip: Trip): Promise<void> {
-  const t0 = Date.now();
-  try {
-    // Temporarily override planner version for shadow run
-    const origVersion = process.env.PLANNER_VERSION;
-    process.env.PLANNER_VERSION = 'v3.1';
-    const shadowTrip = await generateTripV3(preferences);
-    process.env.PLANNER_VERSION = origVersion || 'v3.0';
-
-    const primaryScore = primaryTrip.qualityMetrics?.score ?? 0;
-    const shadowScore = shadowTrip.qualityMetrics?.score ?? 0;
-    const primaryDiag = primaryTrip.plannerDiagnostics;
-    const shadowDiag = shadowTrip.plannerDiagnostics;
-
-    console.log(
-      `[Shadow] v3.0=${primaryScore}/100 vs v3.1=${shadowScore}/100 ` +
-      `(Δ=${shadowScore - primaryScore}) ` +
-      `beam=${shadowDiag?.beamUsed}, fallback=${shadowDiag?.beamFallbackUsed}, ` +
-      `elapsed=${Date.now() - t0}ms`
-    );
-  } catch (err) {
-    console.warn(`[Shadow] v3.1 shadow run failed: ${(err as Error).message}`);
-  }
 }
 
 /** Resolve best transport option based on user preference + available options */
@@ -255,341 +196,16 @@ function countArrivalFatigueViolations(
 }
 
 /**
- * Generate a trip — routes to V3, LLM, or Algorithmic pipeline based on PIPELINE_VERSION env var.
+ * Generate a trip — routes to V3 single-city or multi-city.
  */
 export async function generateTripV2(
   preferences: TripPreferences,
   onEvent?: OnPipelineEvent
 ): Promise<Trip> {
-  const version = process.env.PIPELINE_VERSION || 'v3';
-  const plannerVersion = process.env.PLANNER_VERSION || 'v3.0';
-  const shadowMode = process.env.PLANNER_SHADOW || 'off';
-
-  if (version === 'v3') {
-    console.log(`[Pipeline V3] Using V3 pipeline (deterministic 12-step), planner=${plannerVersion}, shadow=${shadowMode}`);
-    // Check for multi-city
-    if (preferences.cityPlan && preferences.cityPlan.length > 1) {
-      return generateTripV3MultiCity(preferences, onEvent);
-    }
-
-    const trip = await generateTripV3(preferences, onEvent);
-
-    // Shadow mode: run v3.1 in parallel for comparison (fire-and-forget)
-    if (plannerVersion === 'v3.0' && shouldRunShadow(shadowMode, trip.id)) {
-      runShadowPlanner(preferences, trip).catch(() => {});
-    }
-
-    return trip;
+  if (preferences.cityPlan && preferences.cityPlan.length > 1) {
+    return generateTripV3MultiCity(preferences, onEvent);
   }
-
-  if (version === 'v2-llm') {
-    console.log('[Pipeline V2] Using LLM pipeline (Claude as primary planner)');
-    return generateTripV2LLM(preferences, onEvent);
-  }
-
-  console.log('[Pipeline V2] Using algorithmic pipeline (legacy)');
-  return generateTripV2Algorithmic(preferences, onEvent);
-}
-
-/**
- * Pipeline V2 LLM — Claude Sonnet as primary trip planner.
- * Steps: fetchData → prepareForLLM → planWithClaude → assembleTrip → validate
- */
-async function generateTripV2LLM(
-  preferences: TripPreferences,
-  onEvent?: OnPipelineEvent
-): Promise<Trip> {
-  const T0 = Date.now();
-
-  // Step 1: Fetch all data in parallel (UNCHANGED from algorithmic pipeline)
-  console.log('[Pipeline V2 LLM] === Step 1: Fetching data... ===');
-  emit(onEvent, { type: 'step_start', step: 1, stepName: 'Fetching data' });
-  const data = await fetchAllData(preferences, onEvent);
-  const step1Ms = Date.now() - T0;
-  console.log(`[Pipeline V2 LLM] Step 1 done in ${step1Ms}ms`);
-  emit(onEvent, { type: 'step_done', step: 1, stepName: 'Fetching data', durationMs: step1Ms });
-
-  // Resolve transport
-  const bestTransport = resolveBestTransport(preferences, data.transportOptions);
-
-  // Step 2: Select hotel + prepare data for LLM
-  console.log('[Pipeline V2 LLM] === Step 2: Preparing data for LLM... ===');
-  emit(onEvent, { type: 'step_start', step: 2, stepName: 'Preparing data for LLM' });
-  const T2 = Date.now();
-
-  // Select hotel using existing barycenter logic (need minimal clusters for hotel selection)
-  // We'll use a simple approach: compute centroid from all activities
-  const allAttractions = [
-    ...data.googlePlacesAttractions,
-    ...data.serpApiAttractions,
-    ...data.viatorActivities,
-    ...data.mustSeeAttractions,
-  ].filter(a => a.latitude && a.longitude);
-
-  // Build minimal single-cluster for hotel selection
-  const centroid = allAttractions.length > 0
-    ? {
-        lat: allAttractions.reduce((s, a) => s + a.latitude, 0) / allAttractions.length,
-        lng: allAttractions.reduce((s, a) => s + a.longitude, 0) / allAttractions.length,
-      }
-    : data.destCoords;
-
-  const minimalCluster: ActivityCluster = {
-    dayNumber: 1,
-    activities: [],
-    centroid,
-    totalIntraDistance: 0,
-  };
-
-  const tieredHotels = selectTieredHotels(
-    [minimalCluster],
-    data.bookingHotels,
-    preferences.budgetLevel,
-    undefined,
-    preferences.durationDays,
-    { destination: preferences.destination, destCoords: data.destCoords }
-  );
-
-  const hotel = tieredHotels.length > 0 ? tieredHotels[0] : null; // Tier 1 = most central
-
-  if (hotel) {
-    console.log(`[Pipeline V2 LLM] Hotel selected: "${hotel.name}" (${hotel.rating}★, €${hotel.pricePerNight}/night, ${hotel.distanceToCenter}km, tier: ${hotel.distanceTier})`);
-    console.log(`[Pipeline V2 LLM] ${tieredHotels.length} tiered hotels: ${tieredHotels.map(h => `${h.distanceTier}="${h.name}" (${h.distanceToCenter}km)`).join(', ')}`);
-  } else {
-    console.warn('[Pipeline V2 LLM] No hotel selected from pool');
-  }
-
-  const { llmInput, prePlannedDayTripDays, reservedDayNumbers } = await prepareDataForLLM(data, preferences, hotel, bestTransport, data.outboundFlight, data.returnFlight);
-  console.log(`[Pipeline V2 LLM] Step 2 done in ${Date.now() - T2}ms`);
-  emit(onEvent, { type: 'step_done', step: 2, stepName: 'Preparing data for LLM', durationMs: Date.now() - T2,
-    detail: `${llmInput.activities.length} activities, ${llmInput.restaurants.length} restaurants, ${prePlannedDayTripDays.length} day-trip day(s) pre-planned` });
-
-  // Step 3: LLM planning (Claude or Gemini based on LLM_PLANNER_MODEL env)
-  const plannerModel = process.env.LLM_PLANNER_MODEL || 'claude-sonnet-4-6';
-  console.log(`[Pipeline V2 LLM] === Step 3: LLM planning (${plannerModel})... ===`);
-  emit(onEvent, { type: 'step_start', step: 3, stepName: `LLM planning (${plannerModel})` });
-  const T3 = Date.now();
-  const llmPlan = await planWithLLM(llmInput);
-  const step3Ms = Date.now() - T3;
-  console.log(`[Pipeline V2 LLM] Step 3 done in ${step3Ms}ms — ${llmPlan.days.length} days planned`);
-  emit(onEvent, { type: 'step_done', step: 3, stepName: `LLM planning (${plannerModel})`, durationMs: step3Ms,
-    detail: `${llmPlan.days.length} days, ${llmPlan.days.reduce((s, d) => s + d.items.length, 0)} items` });
-
-  // Step 3b: Merge pre-planned day-trip days with LLM plan
-  if (prePlannedDayTripDays.length > 0) {
-    llmPlan.days = mergeDayTripDaysWithLLMPlan(llmPlan, prePlannedDayTripDays, reservedDayNumbers, preferences.durationDays);
-    console.log(`[Pipeline V2 LLM] Step 3b: Merged ${prePlannedDayTripDays.length} pre-planned day-trip day(s) — total ${llmPlan.days.length} days`);
-  }
-
-  // Step 4: Assemble Trip from LLM plan
-  console.log('[Pipeline V2 LLM] === Step 4: Assembling trip... ===');
-  emit(onEvent, { type: 'step_start', step: 4, stepName: 'Assembling trip' });
-  const T4 = Date.now();
-  const trip = await assembleFromLLMPlan(llmPlan, llmInput, data, preferences, hotel, bestTransport, onEvent, tieredHotels);
-  const step4Ms = Date.now() - T4;
-  console.log(`[Pipeline V2 LLM] Step 4 done in ${step4Ms}ms`);
-  emit(onEvent, { type: 'step_done', step: 4, stepName: 'Assembling trip', durationMs: step4Ms });
-
-  // Step 4b: Fix restaurant outliers (swap far restaurants for nearby ones)
-  console.log('[Pipeline V2 LLM] === Step 4b: Fixing restaurant proximity... ===');
-  const T4b = Date.now();
-  const restaurantPool: Restaurant[] = [
-    ...(data.tripAdvisorRestaurants || []),
-    ...(data.serpApiRestaurants || []),
-    ...Object.values(data.dayTripRestaurants || {}).flat(),
-  ];
-
-  // For day-trip days, fix restaurants using day-trip destination as anchor
-  // For city days, use hotel as anchor
-  const dayTripDays = trip.days.filter(d => d.isDayTrip && d.dayTripDestination);
-  const cityDays = trip.days.filter(d => !d.isDayTrip);
-
-  // Fix city days (standard behavior)
-  const fixStats = await fixRestaurantOutliers(
-    cityDays,
-    restaurantPool,
-    preferences.destination,
-    {
-      allowApiFallback: true,
-      breakfastMaxKm: 0.5,
-      mealMaxKm: 0.3,
-      hotelCoords: hotel ? { latitude: hotel.latitude, longitude: hotel.longitude } : undefined,
-    }
-  );
-
-  // Fix day-trip days using day-trip destination pool and coordinates
-  for (const dtDay of dayTripDays) {
-    const dtName = dtDay.dayTripDestination!;
-    const dtRestaurants = data.dayTripRestaurants?.[dtName] || [];
-    const dtSuggestion = data.dayTripSuggestions?.find(s => (s.destination || s.name) === dtName);
-    const dtCoords = dtSuggestion
-      ? { latitude: dtSuggestion.latitude, longitude: dtSuggestion.longitude }
-      : undefined;
-
-    if (dtRestaurants.length > 0) {
-      await fixRestaurantOutliers(
-        [dtDay],
-        dtRestaurants,
-        dtName,
-        {
-          allowApiFallback: false, // don't make extra API calls for day trips
-          breakfastMaxKm: 2.0,    // more lenient for day trips
-          mealMaxKm: 1.5,
-          hotelCoords: dtCoords,
-        }
-      );
-    }
-  }
-
-  // Recalculate distances after restaurant swaps (coordinates may have changed)
-  for (const day of trip.days) {
-    computeDistancesForDay(day);
-  }
-
-  console.log(`[Pipeline V2 LLM] Step 4b: ${fixStats.replaced} restaurants swapped, ${fixStats.flaggedFallback} kept as fallback (${Date.now() - T4b}ms)`);
-
-  // Step 4c: Populate restaurant alternatives (2-3 suggestions per meal)
-  console.log('[Pipeline V2 LLM] === Step 4c: Populating restaurant alternatives... ===');
-  const T4c = Date.now();
-  await populateRestaurantAlternatives(trip.days, restaurantPool, preferences.destination);
-  console.log(`[Pipeline V2 LLM] Step 4c done in ${Date.now() - T4c}ms`);
-
-  // Step 5: Light validation
-  console.log('[Pipeline V2 LLM] === Step 5: Validating... ===');
-  emit(onEvent, { type: 'step_start', step: 5, stepName: 'Validating trip' });
-  const T5 = Date.now();
-  const validated = validateAndFixTrip(trip);
-  console.log(`[Pipeline V2 LLM] Step 5 done in ${Date.now() - T5}ms — score: ${validated.score}/100`);
-  emit(onEvent, { type: 'step_done', step: 5, stepName: 'Validating trip', durationMs: Date.now() - T5,
-    detail: `Score: ${validated.score}/100, warnings: ${validated.warnings.length}` });
-
-  const totalMs = Date.now() - T0;
-  console.log(`[Pipeline V2 LLM] === Total pipeline time: ${totalMs}ms ===`);
-
-  // validateAndFixTrip modifies trip in-place, just return it
-  return trip;
-}
-
-// ---------------------------------------------------------------------------
-// LLM Pipeline: Populate restaurant alternatives (2 diverse suggestions per meal)
-// Reuses logic from step7-assemble section 13c but as a standalone function.
-// ---------------------------------------------------------------------------
-import type { TripDay } from '../types';
-
-const ALT_SEARCH_RADIUS_KM = 1.5;
-const TARGET_ALTS = 2;
-
-async function populateRestaurantAlternatives(
-  days: TripDay[],
-  pool: Restaurant[],
-  destination: string
-): Promise<void> {
-  // Build global used set (avoid suggesting a restaurant that's already used elsewhere)
-  const globalUsedIds = new Set<string>();
-  const globalUsedNames = new Set<string>();
-  for (const day of days) {
-    for (const item of day.items) {
-      if (item.type === 'restaurant' && item.restaurant) {
-        globalUsedIds.add(item.restaurant.id || item.id);
-        if (item.restaurant.name) globalUsedNames.add(item.restaurant.name);
-      }
-    }
-  }
-
-  let totalAltsAdded = 0;
-  let apiCallCount = 0;
-
-  for (const day of days) {
-    for (const item of day.items) {
-      if (item.type !== 'restaurant') continue;
-      if (!item.restaurant) continue;
-      if (!item.latitude || !item.longitude || item.latitude === 0) continue;
-
-      const currentAlts = item.restaurantAlternatives || [];
-      if (currentAlts.length >= TARGET_ALTS) continue;
-
-      // Determine meal type from title (consistent with fixRestaurantOutliers)
-      const title = item.title || '';
-      const mealType: 'breakfast' | 'lunch' | 'dinner' =
-        title.includes('Petit-déjeuner') ? 'breakfast' :
-        title.includes('Déjeuner') ? 'lunch' : 'dinner';
-
-      const refLat = item.latitude;
-      const refLng = item.longitude;
-      const primaryFamily = getCuisineFamily(item.restaurant);
-      const currentAltIds = new Set(currentAlts.map((a: Restaurant) => a.id));
-      const usedFamilies = new Set<string>([primaryFamily, ...currentAlts.map((a: Restaurant) => getCuisineFamily(a))]);
-
-      // Search pool for candidates within radius
-      const candidates: { r: Restaurant; dist: number; family: string }[] = [];
-      for (const r of pool) {
-        if (r.id === (item.restaurant.id || item.id)) continue;
-        if (currentAltIds.has(r.id)) continue;
-        if (globalUsedIds.has(r.id) || globalUsedNames.has(r.name)) continue;
-        if (!r.latitude || !r.longitude) continue;
-        if (!isAppropriateForMeal(r, mealType)) continue;
-        if (mealType === 'breakfast' && !isBreakfastSpecialized(r)) continue;
-        const dist = calculateDistance(refLat, refLng, r.latitude, r.longitude);
-        if (dist <= ALT_SEARCH_RADIUS_KM) {
-          candidates.push({ r, dist, family: getCuisineFamily(r) });
-        }
-      }
-      candidates.sort((a, b) => a.dist - b.dist);
-
-      const newAlts: Restaurant[] = [...currentAlts];
-
-      // Pass 1: pick diverse cuisines first
-      for (const c of candidates) {
-        if (newAlts.length >= TARGET_ALTS) break;
-        if (!usedFamilies.has(c.family)) {
-          newAlts.push(c.r);
-          usedFamilies.add(c.family);
-        }
-      }
-      // Pass 2: fill remaining with closest
-      for (const c of candidates) {
-        if (newAlts.length >= TARGET_ALTS) break;
-        if (!newAlts.some((a: Restaurant) => a.id === c.r.id)) {
-          newAlts.push(c.r);
-        }
-      }
-
-      // If pool didn't have enough, try SerpAPI (max 3 API calls total)
-      if (newAlts.length < TARGET_ALTS && apiCallCount < 3) {
-        try {
-          apiCallCount++;
-          const apiResults = await searchRestaurantsNearbyWithFallback(
-            { lat: refLat, lng: refLng },
-            destination,
-            { mealType, maxDistance: 1500, limit: 5 }
-          );
-          if (apiResults.length > 0) pool.push(...apiResults);
-          for (const r of apiResults) {
-            if (newAlts.length >= TARGET_ALTS) break;
-            if (r.id === (item.restaurant.id || item.id)) continue;
-            if (newAlts.some((a: Restaurant) => a.id === r.id)) continue;
-            if (globalUsedNames.has(r.name)) continue;
-            if (!r.latitude || !r.longitude) continue;
-            if (!isAppropriateForMeal(r, mealType)) continue;
-            if (mealType === 'breakfast' && !isBreakfastSpecialized(r)) continue;
-            const dist = calculateDistance(refLat, refLng, r.latitude, r.longitude);
-            if (dist <= ALT_SEARCH_RADIUS_KM) {
-              newAlts.push(r);
-            }
-          }
-        } catch {
-          // Non-blocking: keep what we have
-        }
-      }
-
-      if (newAlts.length > currentAlts.length) {
-        item.restaurantAlternatives = newAlts.slice(0, TARGET_ALTS);
-        totalAltsAdded += newAlts.length - currentAlts.length;
-      }
-    }
-  }
-
-  console.log(`[Pipeline V2 LLM] Restaurant alternatives: ${totalAltsAdded} alternatives added`);
+  return generateTripV3(preferences, onEvent);
 }
 
 // ============================================
@@ -626,8 +242,6 @@ export async function generateTripV3(
 ): Promise<Trip> {
   const startTime = Date.now();
   const stageTimes: Record<string, number> = {};
-  const plannerVersion = (process.env.PLANNER_VERSION || 'v3.0') as 'v3.0' | 'v3.1' | 'v3.2';
-  const rescueStage = plannerVersion === 'v3.1' ? getV31RescueStage() : 0;
 
   // Step 1: Fetch all data (or use fixture)
   let t = Date.now();
@@ -724,76 +338,53 @@ export async function generateTripV3(
   );
   const arrivalFatigueRole = inferArrivalFatigueRole(data.outboundFlight, timeWindows);
 
-  // Step 3: Cluster by day (v3.0 or v3.1 planner)
+  // Step 3: Cluster by day (hierarchical clustering)
   t = Date.now();
   onEvent?.({ type: 'step_start', step: 3, stepName: 'Clustering', timestamp: Date.now() });
   const densityProfile = computeCityDensityProfile(activitiesAfterDayTrips, preferences.durationDays);
 
-  let clusters: ActivityCluster[];
-  let beamUsed = false;
-  let beamFallbackUsed = false;
-  let dayNumberMismatchCount = 0;
-  let plannerDayRoles: Array<{ dayNumber: number; role: string }> = [];
+  const PACE_FACTOR: Record<string, number> = {
+    relaxed: 0.65,
+    moderate: 1.0,
+    intensive: 1.3,
+  };
+  const paceFactor = PACE_FACTOR[preferences.pace || 'moderate'] || 1.0;
 
-  if (plannerVersion === 'v3.1' || plannerVersion === 'v3.2') {
-    // V3.1: role-aware beam search planner
-    const plannerResult = buildPlannerClustersV31(
-      activitiesAfterDayTrips,
-      dayTripPacks,
-      timeWindows,
-      preferences.durationDays,
-      data.destCoords,
-      densityProfile,
-      { rescueStage, startDate: preferences.startDate, plannerVersion, arrivalFatigueRole }
-    );
-    clusters = plannerResult.clusters;
-    beamUsed = plannerResult.beamUsed;
-    beamFallbackUsed = plannerResult.beamFallbackUsed;
-    dayNumberMismatchCount = plannerResult.dayNumberMismatchCount;
-    plannerDayRoles = plannerResult.dayRoles.map((slot) => ({ dayNumber: slot.dayNumber, role: slot.role }));
-  } else {
-    // V3.0: hierarchical clustering (existing behavior)
-    const PACE_FACTOR: Record<string, number> = {
-      relaxed: 0.65,
-      moderate: 1.0,
-      intensive: 1.3,
-    };
-    const paceFactor = PACE_FACTOR[preferences.pace || 'moderate'] || 1.0;
-
-    clusters = clusterActivities(
-      activitiesAfterDayTrips,
-      Math.max(1, preferences.durationDays - dayTripPacks.length),
-      data.destCoords,
-      densityProfile,
-      preferences.startDate.toISOString().split('T')[0],
-      timeWindows,
-      paceFactor,
-      {
-        dayTripActivities: data.dayTripActivities,
-        dayTripSuggestions: data.dayTripSuggestions,
-      }
-    );
-    // Inject DayTripPack clusters (atomic, protected)
-    for (const pack of dayTripPacks) {
-      clusters.push({
-        dayNumber: clusters.length + 1,
-        activities: pack.activities,
-        centroid: {
-          lat: pack.activities.reduce((s, a) => s + a.latitude, 0) / pack.activities.length,
-          lng: pack.activities.reduce((s, a) => s + a.longitude, 0) / pack.activities.length,
-        },
-        totalIntraDistance: 0,
-        isFullDay: true,
-        isDayTrip: true,
-        dayTripDestination: pack.destination,
-      });
+  const clusters: ActivityCluster[] = clusterActivities(
+    activitiesAfterDayTrips,
+    Math.max(1, preferences.durationDays - dayTripPacks.length),
+    data.destCoords,
+    densityProfile,
+    preferences.startDate.toISOString().split('T')[0],
+    timeWindows,
+    paceFactor,
+    {
+      dayTripActivities: data.dayTripActivities,
+      dayTripSuggestions: data.dayTripSuggestions,
     }
-    // Re-number all clusters
-    clusters.forEach((c, i) => { c.dayNumber = i + 1; });
+  );
+
+  // Inject DayTripPack clusters (atomic, protected)
+  for (const pack of dayTripPacks) {
+    clusters.push({
+      dayNumber: clusters.length + 1,
+      activities: pack.activities,
+      centroid: {
+        lat: pack.activities.reduce((s, a) => s + a.latitude, 0) / pack.activities.length,
+        lng: pack.activities.reduce((s, a) => s + a.longitude, 0) / pack.activities.length,
+      },
+      totalIntraDistance: 0,
+      isFullDay: true,
+      isDayTrip: true,
+      dayTripDestination: pack.destination,
+    });
   }
 
+  // Re-number all clusters
+  clusters.forEach((c, i) => { c.dayNumber = i + 1; });
+
   stageTimes['cluster'] = Date.now() - t;
-  console.log(`[Pipeline V3] Step 3: ${clusters.length} clusters created (${dayTripPacks.length} day trip packs, planner=${plannerVersion})`);
+  console.log(`[Pipeline V3] Step 3: ${clusters.length} clusters created (${dayTripPacks.length} day trip packs)`);
   onEvent?.({ type: 'step_done', step: 3, stepName: 'Clustering', durationMs: stageTimes['cluster'], timestamp: Date.now() });
 
   // Step 3b: Optimize intra-day routing (weighted NN + 2-opt)
@@ -857,30 +448,17 @@ export async function generateTripV3(
   // Step 8+9+10: Unified schedule (replaces placeRestaurants + assembleV3Days + repairPass)
   t = Date.now();
   onEvent?.({ type: 'step_start', step: 8, stepName: 'Unified scheduling', timestamp: Date.now() });
-  const repairResult = plannerVersion === 'v3.2'
-    ? await semanticScheduleV32Days(
-        clusters,
-        travelTimes,
-        timeWindows,
-        hotel,
-        preferences,
-        data,
-        enrichedRestaurants,
-        allActivities,
-        data.destCoords
-      )
-    : unifiedScheduleV3Days(
-        clusters,
-        travelTimes,
-        timeWindows,
-        hotel,
-        preferences,
-        data,
-        enrichedRestaurants,
-        allActivities,
-        data.destCoords,
-        { plannerVersion, rescueStage }
-      );
+  const repairResult = unifiedScheduleV3Days(
+    clusters,
+    travelTimes,
+    timeWindows,
+    hotel,
+    preferences,
+    data,
+    enrichedRestaurants,
+    allActivities,
+    data.destCoords,
+  );
   stageTimes['schedule'] = Date.now() - t;
   console.log(`[Pipeline V3] Step 8: Unified schedule built with ${repairResult.days.length} days, ${repairResult.repairs.length} repairs`);
   onEvent?.({ type: 'step_done', step: 8, stepName: 'Unified scheduling', durationMs: stageTimes['schedule'], timestamp: Date.now() });
@@ -964,33 +542,6 @@ export async function generateTripV3(
     }
   }
 
-  if (plannerVersion === 'v3.2') {
-    const v32Diagnostics: V32Diagnostics = {
-      protectedBreakCount: repairResult.rescueDiagnostics?.protectedBreakCount ?? 0,
-      lateMealReplacementCount: repairResult.rescueDiagnostics?.lateMealReplacementCount ?? 0,
-      dayTripEvictionCount: repairResult.rescueDiagnostics?.dayTripEvictionCount ?? 0,
-      finalIntegrityFailures: repairResult.rescueDiagnostics?.finalIntegrityFailures ?? 0,
-      orphanTransportCount: repairResult.rescueDiagnostics?.orphanTransportCount ?? 0,
-      teleportLegCount: repairResult.rescueDiagnostics?.teleportLegCount ?? 0,
-      staleNarrativeCount: repairResult.rescueDiagnostics?.staleNarrativeCount ?? 0,
-      freeTimeOverBudgetCount: repairResult.rescueDiagnostics?.freeTimeOverBudgetCount ?? 0,
-      mealFallbackCount: repairResult.rescueDiagnostics?.mealFallbackCount ?? 0,
-      routeRebuildCount: repairResult.rescueDiagnostics?.routeRebuildCount ?? 0,
-      restaurantRefetchMissCount: repairResult.rescueDiagnostics?.restaurantRefetchMissCount ?? 0,
-    };
-    rebuildInterItemTravelForDays(
-      scheduledDays,
-      travelTimes,
-      v32Diagnostics
-    );
-    const temporalImpossibleItemCount = pruneTemporalImpossibleItems(scheduledDays, preferences.startDate);
-    if (temporalImpossibleItemCount > 0) {
-      rebuildInterItemTravelForDays(scheduledDays, travelTimes, v32Diagnostics);
-    }
-    v32Diagnostics.temporalImpossibleItemCount = temporalImpossibleItemCount;
-    repairResult.rescueDiagnostics = v32Diagnostics;
-  }
-
   const normalizePlannerName = (value: string): string =>
     value
       .normalize('NFD')
@@ -1046,8 +597,8 @@ export async function generateTripV3(
     if (!isPlannerDayTrip) return sum;
     return sum + day.items.filter((item) => item.type === 'activity' && !item.planningMeta?.sourcePackId).length;
   }, 0);
-  const sparseFullCityDayCount = countSparseFullCityDays(scheduledDays, plannerDayRoles);
-  const sameFamilyOverloadCount = countSameFamilyOverload(scheduledDays, plannerDayRoles);
+  const sparseFullCityDayCount = countSparseFullCityDays(scheduledDays);
+  const sameFamilyOverloadCount = countSameFamilyOverload(scheduledDays);
   const arrivalFatigueViolationCount = countArrivalFatigueViolations(scheduledDays, hotel, arrivalFatigueRole);
   const temporalImpossibleItemCount = repairResult.rescueDiagnostics?.temporalImpossibleItemCount ?? 0;
 
@@ -1171,19 +722,19 @@ export async function generateTripV3(
   ).length;
 
   trip.plannerDiagnostics = {
-    plannerVersion,
-    beamUsed,
-    beamFallbackUsed,
+    plannerVersion: 'v3.0',
+    beamUsed: false,
+    beamFallbackUsed: false,
     dayTripPackCount: dayTripPacks.length,
     repairRejectedCount: repairResult.unresolvedViolations.length,
     zigzagTurnsTotal,
     routeInefficiencyTotal: Number(routeInefficiencyTotal.toFixed(2)),
     criticalGeoCount,
     contractsPassed: contractResult.invariantsPassed,
-    rescueStage,
+    rescueStage: 0,
     protectedBreakCount: repairResult.rescueDiagnostics?.protectedBreakCount ?? 0,
     lateMealReplacementCount: repairResult.rescueDiagnostics?.lateMealReplacementCount ?? 0,
-    dayNumberMismatchCount,
+    dayNumberMismatchCount: 0,
     dayTripEvictionCount: repairResult.rescueDiagnostics?.dayTripEvictionCount ?? 0,
     finalIntegrityFailures: repairResult.rescueDiagnostics?.finalIntegrityFailures ?? 0,
     orphanTransportCount: repairResult.rescueDiagnostics?.orphanTransportCount ?? 0,

@@ -24,7 +24,7 @@ import {
   getV31RescueStage,
   isProtectedTripItem,
   rescueStageAtLeast,
-} from './v31-rescue';
+} from './planning-meta';
 
 // ============================================
 // Types
@@ -99,8 +99,8 @@ export function repairPass(
   // Pass 4: Fill large gaps by extending adjacent activities
   fillGapsByExtension(repairedDays, startDate, repairs);
 
-  // Pass 5: Fill remaining large gaps (>90min) with explicit free_time items
-  fillLargeGapsWithFreeTime(repairedDays);
+  // Pass 5: Fill remaining large gaps (>90min) — try unassigned activities first, then free_time
+  fillLargeGapsWithFreeTime(repairedDays, activityPool, startDate, repairs);
 
   // Log summary
   console.log(`[Repair] ${repairs.length} repairs performed, ${unresolvedViolations.length} unresolved`);
@@ -710,7 +710,33 @@ export function fillGapsByExtension(
 // Pass 5: Fill large gaps with free_time
 // ============================================
 
-export function fillLargeGapsWithFreeTime(days: TripDay[]): void {
+export function fillLargeGapsWithFreeTime(
+  days: TripDay[],
+  activityPool?: ScoredActivity[],
+  startDate?: string,
+  repairs?: RepairAction[]
+): void {
+  // Build set of already-placed activity IDs to find unassigned pool activities
+  const placedIds = new Set<string>();
+  const placedNamesNorm = new Set<string>();
+  for (const day of days) {
+    for (const item of day.items) {
+      if (item.id) placedIds.add(item.id);
+      if (item.title) placedNamesNorm.add(normalizeForMatching(item.title));
+    }
+  }
+
+  const unassigned = activityPool?.filter(a => {
+    if (placedIds.has(a.id || '')) return false;
+    if (placedNamesNorm.has(normalizeForMatching(a.name))) return false;
+    return true;
+  }) || [];
+
+  // Sort unassigned by score descending so we insert the best candidates first
+  unassigned.sort((a, b) => (b.score || 0) - (a.score || 0));
+
+  const MIN_CANDIDATE_SCORE = 5; // Minimum quality threshold
+
   for (const day of days) {
     const insertions: Array<{ index: number; item: TripItem }> = [];
 
@@ -723,25 +749,102 @@ export function fillLargeGapsWithFreeTime(days: TripDay[]): void {
       const gapMinutes = timeToMin(next.startTime) - timeToMin(current.endTime);
 
       // Only fill gaps >90 min (smaller gaps are normal breathing room)
-      if (gapMinutes > 90) {
-        // Use previous item's coordinates (free time = explore near where you are)
-        const refItem = (current.latitude && current.longitude) ? current
-          : (next.latitude && next.longitude) ? next : null;
-        if (!refItem) continue;
-        const lat = refItem.latitude!;
-        const lng = refItem.longitude!;
+      if (gapMinutes <= 90) continue;
 
-        // Dynamic trailing buffer based on distance to next item
-        const hasNextCoords = next.latitude && next.longitude && !(next.latitude === 0 && next.longitude === 0);
-        const distToNext = hasNextCoords
-          ? calculateDistance(lat, lng, next.latitude!, next.longitude!)
-          : 0;
-        const trailingBuffer = hasNextCoords ? estimateTravelBuffer(distToNext) : 10;
+      const refItem = (current.latitude && current.longitude) ? current
+        : (next.latitude && next.longitude) ? next : null;
+      if (!refItem) continue;
+      const lat = refItem.latitude!;
+      const lng = refItem.longitude!;
 
+      // Dynamic trailing buffer based on distance to next item
+      const hasNextCoords = next.latitude && next.longitude && !(next.latitude === 0 && next.longitude === 0);
+      const distToNext = hasNextCoords
+        ? calculateDistance(lat, lng, next.latitude!, next.longitude!)
+        : 0;
+      const trailingBuffer = hasNextCoords ? estimateTravelBuffer(distToNext) : 10;
+
+      const availableMinutes = gapMinutes - 10 - trailingBuffer; // 10min leading buffer
+      if (availableMinutes < 30) continue;
+
+      // Try to fill with an unassigned activity from the pool
+      let filled = false;
+      if (startDate) {
+        const dayDate = getDayDate(startDate, day.dayNumber);
+        const candidateStart = addMinutes(current.endTime, 10);
+
+        for (let j = 0; j < unassigned.length; j++) {
+          const candidate = unassigned[j];
+          if ((candidate.score || 0) < MIN_CANDIDATE_SCORE) break; // sorted, so all below threshold
+
+          // Distance check: <3km from current position
+          const dist = calculateDistance(lat, lng, candidate.latitude, candidate.longitude);
+          if (dist > 3) continue;
+
+          // Duration check: activity must fit in the gap (with transport margins)
+          const actDuration = candidate.duration || 60;
+          const transportIn = estimateTravelBuffer(dist);
+          if (actDuration + transportIn > availableMinutes) continue;
+
+          // Opening hours check
+          const actStart = addMinutes(candidateStart, transportIn);
+          const actEnd = addMinutes(actStart, actDuration);
+          if (candidate.openingHours || candidate.openingHoursByDay) {
+            if (!isOpenAtTime(candidate, dayDate, actStart, actEnd)) continue;
+          }
+          const closeTime = getActivityCloseTime(candidate, dayDate);
+          if (closeTime && timeToMin(actEnd) > timeToMin(closeTime)) continue;
+
+          // Insert the activity
+          const newItem: TripItem = {
+            id: candidate.id || `gapfill-${day.dayNumber}-${i}`,
+            dayNumber: day.dayNumber,
+            type: 'activity',
+            title: normalizeActivityTitle(candidate.name),
+            description: candidate.description || '',
+            locationName: candidate.name,
+            startTime: actStart,
+            endTime: actEnd,
+            duration: actDuration,
+            latitude: candidate.latitude,
+            longitude: candidate.longitude,
+            rating: candidate.rating,
+            mustSee: candidate.mustSee,
+            orderIndex: 0,
+            openingHours: candidate.openingHours,
+            openingHoursByDay: candidate.openingHoursByDay,
+            bookingUrl: candidate.bookingUrl,
+            imageUrl: candidate.imageUrl,
+            photoGallery: candidate.photoGallery,
+            googleMapsPlaceUrl: candidate.latitude && candidate.longitude
+              ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(candidate.name)}&query=${candidate.latitude},${candidate.longitude}`
+              : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(candidate.name)}`,
+          } as TripItem;
+
+          insertions.push({ index: i + 1, item: newItem });
+
+          // Remove from unassigned pool so it's not placed twice
+          unassigned.splice(j, 1);
+          placedIds.add(candidate.id || '');
+          placedNamesNorm.add(normalizeForMatching(candidate.name));
+
+          repairs?.push({
+            type: 'replacement',
+            dayNumber: day.dayNumber,
+            itemTitle: candidate.name,
+            description: `Gap-fill: inserted "${candidate.name}" (${actDuration}min, ${(dist * 1000).toFixed(0)}m away) into ${gapMinutes}min gap`,
+          });
+
+          console.log(`[Repair] Gap-fill: "${candidate.name}" on Day ${day.dayNumber} at ${actStart} (${(dist * 1000).toFixed(0)}m, ${actDuration}min)`);
+          filled = true;
+          break;
+        }
+      }
+
+      // Fallback: insert free_time if no suitable activity found
+      if (!filled) {
         const freeStart = addMinutes(current.endTime, 10);
-        const freeDuration = gapMinutes - 10 - trailingBuffer;
-        if (freeDuration < 30) continue; // Not enough time for meaningful free time
-
+        const freeDuration = availableMinutes;
         const freeEnd = addMinutes(freeStart, freeDuration);
 
         insertions.push({

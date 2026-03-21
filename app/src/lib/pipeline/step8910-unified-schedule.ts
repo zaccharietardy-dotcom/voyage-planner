@@ -61,7 +61,7 @@ import {
   isProtectedTripItem,
   rescueStageAtLeast,
   type PlannerRole,
-} from './v31-rescue';
+} from './planning-meta';
 
 function strictMealPlacement(
   placement: ReturnType<typeof findBestRestaurant>,
@@ -1255,8 +1255,8 @@ export function unifiedScheduleV3Days(
   // 19. Extension gaps 30-90min
   fillGapsByExtension(days, startDateStr, repairs);
 
-  // 20. Insert free time for gaps >90min
-  fillLargeGapsWithFreeTime(days);
+  // 20. Insert free time for gaps >90min (try unassigned activities first)
+  fillLargeGapsWithFreeTime(days, allActivities, startDateStr, repairs);
 
   // 20b. Re-cascade overlaps after repairs (must-see injection can create new overlaps)
   for (const day of days) {
