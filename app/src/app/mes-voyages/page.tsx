@@ -13,7 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Plus, MapPin, Calendar, Users, Plane, Loader2, Globe, Lock, Users2, ChevronDown, Camera, Sparkles, Navigation, Clock, Trash2, Settings2 } from 'lucide-react';
+import { Plus, MapPin, Calendar, Users, Plane, Loader2, Globe, Lock, Users2, ChevronDown, Camera, Sparkles, Navigation, Clock, Trash2, Settings2, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { fr, enUS, es, de, it, pt } from 'date-fns/locale';
@@ -290,7 +290,7 @@ export default function MesVoyagesPage() {
                           </p>
                         </div>
 
-                        {!isPastTrip && prefs.groupSize && (
+                        {!isPastTrip && !!prefs.groupSize && (
                           <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/5">
                             <Users className="h-3.5 w-3.5 text-gold" />
                             <span className="text-xs font-bold text-white">{String(prefs.groupSize)}</span>
