@@ -7,6 +7,7 @@ import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/components/auth';
+import { motion } from 'framer-motion';
 import { generateTripStream } from '@/lib/generateTrip';
 import { GeneratingScreen } from '@/components/trip/GeneratingScreen';
 import { TripPreferences } from '@/lib/types';

@@ -10,6 +10,7 @@ import { HowItWorks } from '@/components/landing/HowItWorks';
 import Link from 'next/link';
 import { ArrowRight, Compass, Map, Users2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { motion } from 'framer-motion';
 
 function LandingPage() {
   return (
