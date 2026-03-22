@@ -1388,7 +1388,7 @@ export function unifiedScheduleV3Days(
 
       const startMin = timeToMin(item.startTime || '00:00');
       if (startMin >= cutoffMin) {
-        if (rescueStageAtLeast(rescueStage, 3) && isProtectedTripItem(item)) {
+        if (isProtectedTripItem(item)) {
           unresolvedViolations.push(`Day ${day.dayNumber}: protected "${item.title}" exceeds departure cutoff`);
           rescueDiagnostics.protectedBreakCount++;
           rescueDiagnostics.finalIntegrityFailures++;
@@ -1398,7 +1398,7 @@ export function unifiedScheduleV3Days(
         return false;
       }
       if (item.endTime && timeToMin(item.endTime) > cutoffMin) {
-        if (rescueStageAtLeast(rescueStage, 3) && isProtectedTripItem(item)) {
+        if (isProtectedTripItem(item)) {
           unresolvedViolations.push(`Day ${day.dayNumber}: protected "${item.title}" ends past departure cutoff`);
           rescueDiagnostics.protectedBreakCount++;
           rescueDiagnostics.finalIntegrityFailures++;
