@@ -638,6 +638,12 @@ export interface Trip {
     restaurantRefetchMissCount?: number;
     dayTripDestinationMismatchCount?: number;
     sameFamilyOverloadCount?: number;
+    // LLM rebalance A/B fork diagnostics
+    llmRebalanceUsed?: boolean;
+    llmRebalanceScore?: number | null;
+    algoScore?: number;
+    llmRebalanceThemes?: string[];
+    llmRebalanceLatencyMs?: number;
   };
 
   // État des réservations

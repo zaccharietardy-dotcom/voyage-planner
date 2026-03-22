@@ -17,8 +17,9 @@
  *   12. decorateTrip()            — Optional LLM decoration
  */
 
-import type { Trip, TripPreferences, TransportOptionSummary, Restaurant } from '../types';
-import type { ActivityCluster, FetchedData, OnPipelineEvent } from './types';
+import type { Trip, TripPreferences, TransportOptionSummary, Restaurant, Accommodation } from '../types';
+import type { ActivityCluster, FetchedData, OnPipelineEvent, ScoredActivity, DayTripPack, CityDensityProfile } from './types';
+import type { DayTimeWindow } from './step4-anchor-transport';
 export type { PipelineEvent, OnPipelineEvent, FetchedData } from './types';
 import { fetchAllData } from './step1-fetch';
 import { scoreAndSelectActivities } from './step2-score';
@@ -40,6 +41,7 @@ import { applyTrustLayer } from './trust-layer';
 import { buildDayTripPacks } from './day-trip-pack';
 import { optimizeClusterRouting } from './intra-day-router';
 import { stripPlanningMetaFromDays } from './planning-meta';
+import { rebalanceClustersWithLLM, type LLMRebalanceResult } from './step3b-llm-rebalance';
 
 // ---------------------------------------------------------------------------
 // Pipeline Event System — emit helper
@@ -387,14 +389,109 @@ export async function generateTripV3(
   console.log(`[Pipeline V3] Step 3: ${clusters.length} clusters created (${dayTripPacks.length} day trip packs)`);
   onEvent?.({ type: 'step_done', step: 3, stepName: 'Clustering', durationMs: stageTimes['cluster'], timestamp: Date.now() });
 
-  // Step 3b: Optimize intra-day routing (weighted NN + 2-opt)
-  {
-    optimizeClusterRouting(clusters);
+  // Step 3b: LLM rebalance attempt
+  const llmResult = await rebalanceClustersWithLLM(
+    clusters, timeWindows, preferences, densityProfile
+  );
+
+  const pipelineCtx = {
+    data, preferences, timeWindows, bestTransport, syntheticReturnTransport,
+    allActivities, selectedActivities,
+    densityProfile: { densityCategory: densityProfile.densityCategory },
+    dayTripPacks, arrivalFatigueRole, destinationMismatchCount,
+  };
+
+  let trip: Trip;
+
+  if (llmResult) {
+    // Run both paths in parallel (no onEvent in helpers to avoid double-emitting)
+    const [tripAlgo, tripLLM] = await Promise.all([
+      runPipelineFromClusters(structuredClone(clusters), pipelineCtx),
+      runPipelineFromClusters(llmResult.clusters, pipelineCtx),
+    ]);
+
+    const scoreAlgo = tripAlgo.qualityMetrics?.score ?? 0;
+    const scoreLLM = tripLLM.qualityMetrics?.score ?? 0;
+    console.log(`[Pipeline V3] A/B fork: algo=${scoreAlgo}/100 vs llm=${scoreLLM}/100`);
+
+    if (scoreLLM > scoreAlgo) {
+      trip = tripLLM;
+      trip.plannerDiagnostics = {
+        ...trip.plannerDiagnostics,
+        llmRebalanceUsed: true,
+        llmRebalanceScore: scoreLLM,
+        algoScore: scoreAlgo,
+        llmRebalanceThemes: llmResult.themes,
+        llmRebalanceLatencyMs: llmResult.latencyMs,
+      };
+    } else {
+      trip = tripAlgo;
+      trip.plannerDiagnostics = {
+        ...trip.plannerDiagnostics,
+        llmRebalanceUsed: false,
+        llmRebalanceScore: scoreLLM,
+        algoScore: scoreAlgo,
+        llmRebalanceLatencyMs: llmResult.latencyMs,
+      };
+    }
+  } else {
+    // LLM failed, algo only
+    trip = await runPipelineFromClusters(clusters, pipelineCtx);
+    trip.plannerDiagnostics = {
+      ...trip.plannerDiagnostics,
+      llmRebalanceUsed: false,
+      llmRebalanceScore: null,
+      algoScore: trip.qualityMetrics?.score ?? 0,
+      llmRebalanceLatencyMs: 0,
+    };
   }
 
-  // Step 4: Select hotel (3 tiers)
-  t = Date.now();
-  onEvent?.({ type: 'step_start', step: 4, stepName: 'Hotel selection', timestamp: Date.now() });
+  // Timing and cost logging
+  const totalTime = Date.now() - startTime;
+  const { getApiCostSummary } = await import('../services/apiCostGuard');
+  const costSummary = getApiCostSummary();
+  console.log(`[Pipeline V3] Trip generated in ${totalTime}ms`);
+  console.log(`  Quality: ${trip.qualityMetrics?.score}/100`);
+  console.log(`  LLM rebalance: ${trip.plannerDiagnostics?.llmRebalanceUsed ? 'WON' : 'algo won'}`);
+  console.log(`  API cost: €${costSummary.totalEur.toFixed(2)} / €${costSummary.budget.toFixed(2)}`);
+
+  onEvent?.({ type: 'info', label: 'complete', detail: 'Trip generation complete!', timestamp: Date.now() });
+
+  return trip;
+}
+
+// ---------------------------------------------------------------------------
+// runPipelineFromClusters — shared helper for A/B fork
+// Runs step 3b (routing) through step 11 (decoration) and returns a Trip.
+// ---------------------------------------------------------------------------
+
+async function runPipelineFromClusters(
+  clusters: ActivityCluster[],
+  ctx: {
+    data: FetchedData;
+    preferences: TripPreferences;
+    timeWindows: DayTimeWindow[];
+    bestTransport: TransportOptionSummary | null;
+    syntheticReturnTransport: TransportOptionSummary | null;
+    allActivities: ScoredActivity[];
+    selectedActivities: ScoredActivity[];
+    densityProfile: { densityCategory: string };
+    dayTripPacks: DayTripPack[];
+    arrivalFatigueRole: ArrivalFatigueRole;
+    destinationMismatchCount: number;
+    onEvent?: OnPipelineEvent;
+  }
+): Promise<Trip> {
+  const {
+    data, preferences, timeWindows, bestTransport, syntheticReturnTransport,
+    allActivities, selectedActivities, densityProfile, dayTripPacks,
+    arrivalFatigueRole, destinationMismatchCount, onEvent,
+  } = ctx;
+
+  // Step 3b: Optimize intra-day routing (weighted NN + 2-opt)
+  optimizeClusterRouting(clusters);
+
+  // Step 4: Select hotel (3 tiers) — per-path since clusters differ
   const hotels = selectTopHotelsByBarycenter(
     clusters,
     data.bookingHotels || [],
@@ -406,16 +503,10 @@ export async function generateTripV3(
   );
   const hotel = hotels[0] || null;
   const hotelCoords = hotel ? { lat: hotel.latitude, lng: hotel.longitude } : data.destCoords;
-  stageTimes['hotel'] = Date.now() - t;
   console.log(`[Pipeline V3] Step 4: Hotel selected: ${hotel?.name || 'none'}`);
-  onEvent?.({ type: 'step_done', step: 4, stepName: 'Hotel selection', durationMs: stageTimes['hotel'], timestamp: Date.now() });
-
-  // Step 5: Time windows already computed at Step 2c (before clustering)
 
   // Step 6: Compute travel times (selective Directions API)
-  t = Date.now();
   const directionsMode = (process.env.PIPELINE_DIRECTIONS_MODE || 'selective') as 'selective' | 'all' | 'off';
-  onEvent?.({ type: 'step_start', step: 6, stepName: 'Computing travel times', timestamp: Date.now() });
   let travelTimes: Awaited<ReturnType<typeof computeTravelTimes>>;
   try {
     travelTimes = await computeTravelTimes(clusters, hotelCoords, directionsMode, preferences.startDate);
@@ -423,13 +514,9 @@ export async function generateTripV3(
     console.error('[Pipeline V3] Step 6 failed:', err);
     throw new Error(`[Pipeline V3] Travel times computation failed: ${(err as Error).message}`);
   }
-  stageTimes['travel-times'] = Date.now() - t;
   console.log(`[Pipeline V3] Step 6: Travel times computed (${directionsMode} mode)`);
-  onEvent?.({ type: 'step_done', step: 6, stepName: 'Computing travel times', durationMs: stageTimes['travel-times'], timestamp: Date.now() });
 
-  // Step 7: Enrich restaurant pool (async, extracted from step8)
-  t = Date.now();
-  onEvent?.({ type: 'step_start', step: 7, stepName: 'Enriching restaurant pool', timestamp: Date.now() });
+  // Step 7: Enrich restaurant pool
   const allRestaurants = [
     ...(data.tripAdvisorRestaurants || []),
     ...(data.serpApiRestaurants || []),
@@ -441,13 +528,9 @@ export async function generateTripV3(
     console.error('[Pipeline V3] Step 7 failed:', err);
     throw new Error(`[Pipeline V3] Restaurant pool enrichment failed: ${(err as Error).message}`);
   }
-  stageTimes['restaurants'] = Date.now() - t;
   console.log(`[Pipeline V3] Step 7: Restaurant pool enriched (${enrichedRestaurants.length} restaurants)`);
-  onEvent?.({ type: 'step_done', step: 7, stepName: 'Enriching restaurant pool', durationMs: stageTimes['restaurants'], timestamp: Date.now() });
 
-  // Step 8+9+10: Unified schedule (replaces placeRestaurants + assembleV3Days + repairPass)
-  t = Date.now();
-  onEvent?.({ type: 'step_start', step: 8, stepName: 'Unified scheduling', timestamp: Date.now() });
+  // Step 8+9+10: Unified schedule
   const repairResult = unifiedScheduleV3Days(
     clusters,
     travelTimes,
@@ -460,9 +543,7 @@ export async function generateTripV3(
     data.destCoords,
     { densityCategory: densityProfile.densityCategory },
   );
-  stageTimes['schedule'] = Date.now() - t;
   console.log(`[Pipeline V3] Step 8: Unified schedule built with ${repairResult.days.length} days, ${repairResult.repairs.length} repairs`);
-  onEvent?.({ type: 'step_done', step: 8, stepName: 'Unified scheduling', durationMs: stageTimes['schedule'], timestamp: Date.now() });
 
   let scheduledDays = repairResult.days;
 
@@ -543,6 +624,7 @@ export async function generateTripV3(
     }
   }
 
+  // Diagnostics computation
   const normalizePlannerName = (value: string): string =>
     value
       .normalize('NFD')
@@ -604,7 +686,6 @@ export async function generateTripV3(
   const temporalImpossibleItemCount = repairResult.rescueDiagnostics?.temporalImpossibleItemCount ?? 0;
 
   // Step 10: Validate contracts
-  t = Date.now();
   const startDateStr = preferences.startDate.toISOString().split('T')[0];
   const mustSeeActivitiesForContracts = selectedActivities.filter(a => a.mustSee);
   const mustSeeIds = new Set(mustSeeActivitiesForContracts.map(a => a.id));
@@ -616,7 +697,6 @@ export async function generateTripV3(
     mustSeeActivitiesForContracts.map(a => ({ id: a.id, name: a.name })),
     timeWindows
   );
-  stageTimes['contracts'] = Date.now() - t;
   console.log(`[Pipeline V3] Step 10: Quality score ${contractResult.score}/100, Invariants: ${contractResult.invariantsPassed ? 'PASSED' : 'FAILED'}`);
 
   const contractsModeRaw = (process.env.PIPELINE_CONTRACTS_MODE || 'warn').toLowerCase();
@@ -633,14 +713,12 @@ export async function generateTripV3(
   }
 
   // Step 11: Decorate (optional, after final schedule stabilization)
-  t = Date.now();
   const useLLMDecor = process.env.PIPELINE_LLM_DECOR === 'on';
   const decorResult = await decorateTrip(
     scheduledDays,
     preferences.destination || '',
     useLLMDecor
   );
-  stageTimes['decorate'] = Date.now() - t;
   console.log(`[Pipeline V3] Step 11: Decoration complete (LLM: ${decorResult.usedLLM})`);
 
   // Build final Trip object
@@ -672,7 +750,7 @@ export async function generateTripV3(
       photos: hotel.photos,
       breakfastIncluded: hotel.breakfastIncluded,
     } : undefined,
-    accommodationOptions: hotels.slice(0, 3).map((h: import('../types').Accommodation) => ({
+    accommodationOptions: hotels.slice(0, 3).map((h: Accommodation) => ({
       id: h.id || '',
       name: h.name || '',
       type: h.type || 'hotel',
@@ -697,9 +775,8 @@ export async function generateTripV3(
     budgetStrategy: data.budgetStrategy,
   };
 
-  // V3 pipeline metadata (fields are typed on Trip)
+  // V3 pipeline metadata
   trip.pipelineVersion = 'v3';
-  trip.stageDurationsMs = stageTimes;
   trip.qualityMetrics = {
     score: contractResult.score,
     invariantsPassed: contractResult.invariantsPassed,
@@ -753,16 +830,6 @@ export async function generateTripV3(
     dayTripDestinationMismatchCount,
     sameFamilyOverloadCount,
   };
-
-  const totalTime = Date.now() - startTime;
-  const { getApiCostSummary } = await import('../services/apiCostGuard');
-  const costSummary = getApiCostSummary();
-  console.log(`[Pipeline V3] Trip generated in ${totalTime}ms`);
-  console.log(`  Stage times: ${Object.entries(stageTimes).map(([k, v]) => `${k}=${v}ms`).join(', ')}`);
-  console.log(`  Quality: ${contractResult.score}/100, Invariants: ${contractResult.invariantsPassed ? 'PASSED' : 'FAILED'}`);
-  console.log(`  API cost: €${costSummary.totalEur.toFixed(2)} / €${costSummary.budget.toFixed(2)} — ${JSON.stringify(costSummary.calls)}`);
-
-  onEvent?.({ type: 'info', label: 'complete', detail: 'Trip generation complete!', timestamp: Date.now() });
 
   return trip;
 }
