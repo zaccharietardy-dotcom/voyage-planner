@@ -416,34 +416,31 @@ export async function generateTripV3(
 
     if (scoreLLM > scoreAlgo) {
       trip = tripLLM;
-      trip.plannerDiagnostics = {
-        ...trip.plannerDiagnostics,
-        llmRebalanceUsed: true,
-        llmRebalanceScore: scoreLLM,
-        algoScore: scoreAlgo,
-        llmRebalanceThemes: llmResult.themes,
-        llmRebalanceLatencyMs: llmResult.latencyMs,
-      };
+      if (trip.plannerDiagnostics) {
+        trip.plannerDiagnostics.llmRebalanceUsed = true;
+        trip.plannerDiagnostics.llmRebalanceScore = scoreLLM;
+        trip.plannerDiagnostics.algoScore = scoreAlgo;
+        trip.plannerDiagnostics.llmRebalanceThemes = llmResult.themes;
+        trip.plannerDiagnostics.llmRebalanceLatencyMs = llmResult.latencyMs;
+      }
     } else {
       trip = tripAlgo;
-      trip.plannerDiagnostics = {
-        ...trip.plannerDiagnostics,
-        llmRebalanceUsed: false,
-        llmRebalanceScore: scoreLLM,
-        algoScore: scoreAlgo,
-        llmRebalanceLatencyMs: llmResult.latencyMs,
-      };
+      if (trip.plannerDiagnostics) {
+        trip.plannerDiagnostics.llmRebalanceUsed = false;
+        trip.plannerDiagnostics.llmRebalanceScore = scoreLLM;
+        trip.plannerDiagnostics.algoScore = scoreAlgo;
+        trip.plannerDiagnostics.llmRebalanceLatencyMs = llmResult.latencyMs;
+      }
     }
   } else {
     // LLM failed, algo only
     trip = await runPipelineFromClusters(clusters, pipelineCtx);
-    trip.plannerDiagnostics = {
-      ...trip.plannerDiagnostics,
-      llmRebalanceUsed: false,
-      llmRebalanceScore: null,
-      algoScore: trip.qualityMetrics?.score ?? 0,
-      llmRebalanceLatencyMs: 0,
-    };
+    if (trip.plannerDiagnostics) {
+      trip.plannerDiagnostics.llmRebalanceUsed = false;
+      trip.plannerDiagnostics.llmRebalanceScore = null;
+      trip.plannerDiagnostics.algoScore = trip.qualityMetrics?.score ?? 0;
+      trip.plannerDiagnostics.llmRebalanceLatencyMs = 0;
+    }
   }
 
   // Timing and cost logging
@@ -523,7 +520,7 @@ async function runPipelineFromClusters(
   ];
   let enrichedRestaurants: Restaurant[];
   try {
-    enrichedRestaurants = await enrichRestaurantPool(clusters, allRestaurants, preferences.destination, densityProfile.densityCategory);
+    enrichedRestaurants = await enrichRestaurantPool(clusters, allRestaurants, preferences.destination, densityProfile.densityCategory as 'spread' | 'medium' | 'dense');
   } catch (err) {
     console.error('[Pipeline V3] Step 7 failed:', err);
     throw new Error(`[Pipeline V3] Restaurant pool enrichment failed: ${(err as Error).message}`);
@@ -541,7 +538,7 @@ async function runPipelineFromClusters(
     enrichedRestaurants,
     allActivities,
     data.destCoords,
-    { densityCategory: densityProfile.densityCategory },
+    { densityCategory: densityProfile.densityCategory as 'spread' | 'medium' | 'dense' },
   );
   console.log(`[Pipeline V3] Step 8: Unified schedule built with ${repairResult.days.length} days, ${repairResult.repairs.length} repairs`);
 

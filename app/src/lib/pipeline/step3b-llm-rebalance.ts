@@ -10,7 +10,7 @@
 import type { ActivityCluster, ScoredActivity } from './types';
 import type { DayTimeWindow } from './step4-anchor-transport';
 import type { TripPreferences } from '../types';
-import type { CityDensityProfile } from './step3-cluster';
+import type { CityDensityProfile } from './types';
 import { fetchGeminiWithRetry } from '../services/geminiSearch';
 import { calculateDistance } from '../services/geocoding';
 
