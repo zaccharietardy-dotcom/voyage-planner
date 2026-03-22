@@ -512,7 +512,7 @@ export function clusterActivities(
 
   // Type diversity pass: swap out excess same-type activities between clusters
   // Prevents days like "3 basilicas" by distributing same-type activities across days
-  diversifyClusterTypes(clusters, protectedIndices);
+  diversifyClusterTypes(clusters, protectedIndices, timeWindows);
 
   // Log cluster quality metrics
   for (const c of clusters) {
@@ -1096,7 +1096,11 @@ function handleDayClosures(
  * try to swap the excess with a different-type activity from another cluster.
  * This prevents monotonous days like "visit 3 basilicas".
  */
-function diversifyClusterTypes(clusters: ActivityCluster[], protectedIndices: Set<number>): void {
+function diversifyClusterTypes(
+  clusters: ActivityCluster[],
+  protectedIndices: Set<number>,
+  timeWindows?: Array<{ dayNumber: number; activityStartTime: string; activityEndTime: string; hasDepartureTransport?: boolean }>
+): void {
   const MAX_SAME_TYPE = 2;
 
   for (let ci = 0; ci < clusters.length; ci++) {
@@ -1165,33 +1169,50 @@ function diversifyClusterTypes(clusters: ActivityCluster[], protectedIndices: Se
     }
   }
 
-  // Second pass: cap major museums (culture ≥90min) to 1 per day
+  // Second pass: spread must-see museums across days (max 1 must-see museum per day)
   if (clusters.length >= 2) {
+    const isMajorMuseum = (a: ScoredActivity) =>
+      ((a.type as string) === 'museum' || a.type === 'culture') && (a.duration || 60) >= 90;
+
     for (let ci = 0; ci < clusters.length; ci++) {
       if (protectedIndices.has(ci)) continue;
       const cluster = clusters[ci];
 
-      const majorMuseums = cluster.activities
-        .filter(a => a.type === 'culture' && (a.duration || 60) >= 90 && !a.mustSee)
-        .sort((a, b) => a.score - b.score); // lowest score first = candidate to move
+      const mustSeeMuseums = cluster.activities
+        .filter(a => isMajorMuseum(a) && a.mustSee)
+        .sort((a, b) => a.score - b.score); // lowest score = candidate to move
 
-      if (majorMuseums.length <= 1) continue;
+      if (mustSeeMuseums.length <= 1) continue;
 
-      // Move the lowest-scored major museum to another day that has none
-      const candidate = majorMuseums[0];
+      const candidate = mustSeeMuseums[0];
+
+      // Find the cluster with the fewest must-see museums whose time window
+      // can actually host a museum visit (needs morning hours, start before 12:00)
+      const toMin = (t: string): number => { const [h, m] = t.split(':').map(Number); return h * 60 + (m || 0); };
 
       let bestTarget = -1;
+      let bestTargetCount = mustSeeMuseums.length;
       let bestDist = Infinity;
       for (let ti = 0; ti < clusters.length; ti++) {
         if (ti === ci || protectedIndices.has(ti)) continue;
-        const targetMuseums = clusters[ti].activities
-          .filter(a => a.type === 'culture' && (a.duration || 60) >= 90);
-        if (targetMuseums.length >= 1) continue; // already has a major museum
+
+        // Skip days where the window starts too late for a museum visit
+        if (timeWindows) {
+          const tw = timeWindows.find(w => w.dayNumber === clusters[ti].dayNumber);
+          if (tw && toMin(tw.activityStartTime) >= 12 * 60) continue;
+        }
+
+        const targetMustSeeMuseums = clusters[ti].activities.filter(a => isMajorMuseum(a) && a.mustSee).length;
+        if (targetMustSeeMuseums >= bestTargetCount) continue;
 
         const centroid = clusters[ti].centroid;
         if (!centroid || (centroid.lat === 0 && centroid.lng === 0)) continue;
         const dist = calculateDistance(candidate.latitude, candidate.longitude, centroid.lat, centroid.lng);
-        if (dist < bestDist) { bestDist = dist; bestTarget = ti; }
+        if (targetMustSeeMuseums < bestTargetCount || dist < bestDist) {
+          bestTargetCount = targetMustSeeMuseums;
+          bestDist = dist;
+          bestTarget = ti;
+        }
       }
 
       if (bestTarget !== -1 && bestDist < 15) {
@@ -1200,7 +1221,7 @@ function diversifyClusterTypes(clusters: ActivityCluster[], protectedIndices: Se
         clusters[bestTarget].activities.push(candidate);
         recomputeCentroid(cluster);
         recomputeCentroid(clusters[bestTarget]);
-        console.log(`[Pipeline V3] Museum diversity: moved "${candidate.name}" from Day ${cluster.dayNumber} → Day ${clusters[bestTarget].dayNumber} (${bestDist.toFixed(1)}km)`);
+        console.log(`[Pipeline V3] Museum diversity: moved must-see "${candidate.name}" from Day ${cluster.dayNumber} → Day ${clusters[bestTarget].dayNumber} (${bestDist.toFixed(1)}km)`);
       }
     }
   }
