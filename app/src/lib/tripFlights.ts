@@ -90,7 +90,7 @@ export async function findBestFlights(
 
         if (flightResults.outboundFlights.length > 0) {
           const outbound = selectFlightByBudget(flightResults.outboundFlights, preferences.budgetLevel, 'outbound', preferences.durationDays);
-          const returnFlight = selectFlightByBudget(flightResults.returnFlights, preferences.budgetLevel, 'return');
+          const returnFlight = selectFlightByBudget(flightResults.returnFlights, preferences.budgetLevel, 'return', preferences.durationDays);
 
           if (outbound) {
             const totalPrice = (outbound?.price || 0) + (returnFlight?.price || 0);

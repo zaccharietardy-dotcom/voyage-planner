@@ -103,6 +103,19 @@ export function calculateFlightScore(flight: FlightForScoring, durationDays?: nu
       // 14:00-19:59: bonus (heure optimale, profite de la journée)
       score += OPTIMAL_TIME_BONUS;
     }
+
+    // Pénalité "jour perdu" pour retour trop tôt — proportionnelle à la durée du trip
+    if (durationDays && durationDays > 0) {
+      const DEPARTURE_BUFFER = 150; // même valeur que step4-anchor-transport
+      const [depH, depM] = flight.departureTime.split(':').map(Number);
+      const depMin = depH * 60 + (depM || 0);
+      const usableHours = Math.max(0, (depMin - DEPARTURE_BUFFER - 8 * 60) / 60);
+      if (usableHours < 7) {
+        const dayFraction = (14 - usableHours) / 14;
+        const tripImpact = dayFraction / durationDays;
+        score -= Math.round(tripImpact * 80);
+      }
+    }
   } else {
     // Vol aller: pénaliser les arrivées tardives qui gaspillent le Jour 1
     if (flight.arrivalTime) {

@@ -95,7 +95,7 @@ export function clusterActivities(
   cityCenter: { lat: number; lng: number },
   densityProfile?: CityDensityProfile,
   startDate?: string,
-  timeWindows?: Array<{ dayNumber: number; activityStartTime: string; activityEndTime: string }>,
+  timeWindows?: Array<{ dayNumber: number; activityStartTime: string; activityEndTime: string; hasDepartureTransport?: boolean }>,
   paceFactor?: number,
   dayTripData?: {
     dayTripActivities?: Record<string, import('../services/attractions').Attraction[]>;
@@ -1164,6 +1164,46 @@ function diversifyClusterTypes(clusters: ActivityCluster[], protectedIndices: Se
       }
     }
   }
+
+  // Second pass: cap major museums (culture ≥90min) to 1 per day
+  if (clusters.length >= 2) {
+    for (let ci = 0; ci < clusters.length; ci++) {
+      if (protectedIndices.has(ci)) continue;
+      const cluster = clusters[ci];
+
+      const majorMuseums = cluster.activities
+        .filter(a => a.type === 'culture' && (a.duration || 60) >= 90 && !a.mustSee)
+        .sort((a, b) => a.score - b.score); // lowest score first = candidate to move
+
+      if (majorMuseums.length <= 1) continue;
+
+      // Move the lowest-scored major museum to another day that has none
+      const candidate = majorMuseums[0];
+
+      let bestTarget = -1;
+      let bestDist = Infinity;
+      for (let ti = 0; ti < clusters.length; ti++) {
+        if (ti === ci || protectedIndices.has(ti)) continue;
+        const targetMuseums = clusters[ti].activities
+          .filter(a => a.type === 'culture' && (a.duration || 60) >= 90);
+        if (targetMuseums.length >= 1) continue; // already has a major museum
+
+        const centroid = clusters[ti].centroid;
+        if (!centroid || (centroid.lat === 0 && centroid.lng === 0)) continue;
+        const dist = calculateDistance(candidate.latitude, candidate.longitude, centroid.lat, centroid.lng);
+        if (dist < bestDist) { bestDist = dist; bestTarget = ti; }
+      }
+
+      if (bestTarget !== -1 && bestDist < 15) {
+        const candIdx = cluster.activities.indexOf(candidate);
+        cluster.activities.splice(candIdx, 1);
+        clusters[bestTarget].activities.push(candidate);
+        recomputeCentroid(cluster);
+        recomputeCentroid(clusters[bestTarget]);
+        console.log(`[Pipeline V3] Museum diversity: moved "${candidate.name}" from Day ${cluster.dayNumber} → Day ${clusters[bestTarget].dayNumber} (${bestDist.toFixed(1)}km)`);
+      }
+    }
+  }
 }
 
 /**
@@ -1339,7 +1379,7 @@ function buildCluster(dayNumber: number, activities: ScoredActivity[]): Activity
  */
 function rebalanceByTimeCapacity(
   clusters: ActivityCluster[],
-  timeWindows: Array<{ dayNumber: number; activityStartTime: string; activityEndTime: string }>,
+  timeWindows: Array<{ dayNumber: number; activityStartTime: string; activityEndTime: string; hasDepartureTransport?: boolean }>,
   protectedIndices: Set<number>,
   paceFactor?: number
 ): void {
@@ -1350,14 +1390,22 @@ function rebalanceByTimeCapacity(
   };
 
   // Compute capacity for each cluster in minutes (available time minus meal overhead)
-  const MEAL_OVERHEAD = 195; // breakfast 60 + lunch 90 + dinner-buffer 45
+  const FULL_DAY_MEAL_OVERHEAD = 195; // breakfast 60 + lunch 90 + dinner-buffer 45
   const AVG_ACTIVITY_SLOT = 90; // 60min activity + 15min travel + 15min buffer
 
   const capacities = clusters.map((c) => {
     const tw = timeWindows.find(w => w.dayNumber === c.dayNumber);
     if (!tw) return 600; // default 10h
     const availableMin = toMin(tw.activityEndTime) - toMin(tw.activityStartTime);
-    return Math.max(0, availableMin - MEAL_OVERHEAD);
+    // Departure days need less meal overhead (no lunch/dinner if leaving early)
+    let mealOverhead = FULL_DAY_MEAL_OVERHEAD;
+    if (tw.hasDepartureTransport) {
+      const endMin = toMin(tw.activityEndTime);
+      mealOverhead = endMin < 12 * 60 ? 0     // matin: hotel breakfast only
+                   : endMin < 15 * 60 ? 90    // début aprèm: + lunch
+                   : 135;                      // aprèm: + lunch + dinner buffer
+    }
+    return Math.max(0, availableMin - mealOverhead);
   });
 
   // Target activity count per cluster = proportional to capacity, adjusted by pace
