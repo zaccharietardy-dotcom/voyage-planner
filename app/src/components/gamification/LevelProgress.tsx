@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UserLevel, calculateUserLevel } from '@/lib/services/gamificationService';
-import { Sparkles, TrendingUp } from 'lucide-react';
+import { TrendingUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface LevelProgressProps {
@@ -82,7 +82,7 @@ export function LevelProgress({ totalXp, className, showAnimation = true }: Leve
             exit={{ opacity: 0, y: 20, scale: 0.8 }}
             className="absolute -top-16 left-1/2 -translate-x-1/2 z-50 bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-2 font-bold"
           >
-            <Sparkles className="w-5 h-5" />
+            <TrendingUp className="w-5 h-5" />
             Niveau {levelData.level}!
           </motion.div>
         )}

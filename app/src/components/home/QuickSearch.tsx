@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { ArrowRight, Sparkles } from 'lucide-react';
+import { ArrowRight, Zap } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export function QuickSearch() {
@@ -17,7 +17,7 @@ export function QuickSearch() {
       >
         <div className="flex h-full w-full items-center justify-center gap-4 rounded-[1.95rem] bg-[#020617] px-10 py-5 text-white transition-colors group-hover:bg-transparent">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gold/10 group-hover:bg-white/20 transition-colors">
-            <Sparkles className="h-5 w-5 text-gold group-hover:text-white" />
+            <Zap className="h-5 w-5 text-gold group-hover:text-white" />
           </div>
           <span className="text-xl font-display font-bold tracking-wide">
             Commencer une nouvelle aventure

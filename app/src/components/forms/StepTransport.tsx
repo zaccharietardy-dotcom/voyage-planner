@@ -4,7 +4,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 import { TripPreferences, TransportType, TRANSPORT_LABELS } from '@/lib/types';
-import { Plane, Train, Car, Bus, Sparkles } from 'lucide-react';
+import { Plane, Train, Car, Bus, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface StepTransportProps {
@@ -13,7 +13,7 @@ interface StepTransportProps {
 }
 
 const TRANSPORT_ICONS: Record<TransportType, React.ReactNode> = {
-  optimal: <Sparkles className="h-8 w-8" />,
+  optimal: <Zap className="h-8 w-8" />,
   plane: <Plane className="h-8 w-8" />,
   train: <Train className="h-8 w-8" />,
   car: <Car className="h-8 w-8" />,

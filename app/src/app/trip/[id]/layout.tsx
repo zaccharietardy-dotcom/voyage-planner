@@ -32,7 +32,7 @@ export async function generateMetadata({
 
   const tripTitle = trip.title || trip.destination;
   const title = `${tripTitle} — ${trip.duration_days}j`;
-  const description = `Découvrez cet itinéraire de ${trip.duration_days} jours à ${trip.destination} sur ${SITE_NAME}. Planifié avec l'IA, personnalisable et partageable.`;
+  const description = `Découvrez cet itinéraire de ${trip.duration_days} jours à ${trip.destination} sur ${SITE_NAME}. Planifié avec Narae, personnalisable et partageable.`;
 
   return {
     title,

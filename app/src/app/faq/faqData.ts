@@ -14,7 +14,7 @@ export const faqCategories: FaqCategory[] = [
     questions: [
       {
         question: 'Qu\'est-ce que Narae Voyage ?',
-        answer: 'Narae Voyage est une plateforme de planification de voyage assistée par intelligence artificielle. Elle vous permet de générer des itinéraires personnalisés en quelques minutes, de collaborer avec vos amis et de découvrir les voyages d\'autres voyageurs.',
+        answer: 'Narae Voyage est une plateforme de planification de voyage assistée par un savoir-faire expert. Elle vous permet de générer des itinéraires personnalisés en quelques minutes, de collaborer avec vos amis et de découvrir les voyages d\'autres voyageurs.',
       },
       {
         question: 'Est-ce que Narae Voyage est gratuit ?',
@@ -22,7 +22,7 @@ export const faqCategories: FaqCategory[] = [
       },
       {
         question: 'Comment fonctionne la génération d\'itinéraire ?',
-        answer: 'Notre IA analyse vos préférences (destination, dates, budget, activités, régime alimentaire) et génère un itinéraire jour par jour avec des restaurants authentiques, des activités adaptées et des hébergements. Vous pouvez ensuite personnaliser chaque élément.',
+        answer: 'Notre expertise analyse vos préférences (destination, dates, budget, activités, régime alimentaire) et génère un itinéraire jour par jour avec des restaurants authentiques, des activités adaptées et des hébergements. Vous pouvez ensuite personnaliser chaque élément.',
       },
     ],
   },
@@ -48,7 +48,7 @@ export const faqCategories: FaqCategory[] = [
     questions: [
       {
         question: 'Comment créer un voyage ?',
-        answer: 'Cliquez sur "Créer mon voyage", renseignez votre destination, vos dates et vos préférences, puis laissez notre IA générer votre itinéraire personnalisé.',
+        answer: 'Cliquez sur "Créer mon voyage", renseignez votre destination, vos dates et vos préférences, puis laissez notre Concierge Narae générer votre itinéraire personnalisé.',
       },
       {
         question: 'Puis-je modifier mon itinéraire après génération ?',

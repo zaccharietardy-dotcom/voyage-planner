@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Check, Sparkles, Loader2 } from 'lucide-react';
+import { Check, Gem, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useSubscription } from '@/hooks/useSubscription';
@@ -14,7 +14,7 @@ const freePlan = {
   name: 'Gratuit',
   features: [
     '2 voyages par mois',
-    'Itinéraire IA',
+    'Itinéraire Expert',
     'Réseau social complet',
     'Carte interactive',
   ],
@@ -22,7 +22,7 @@ const freePlan = {
 
 const proFeatures = [
   'Voyages illimités',
-  'Régénération IA illimitée',
+  'Optimisation experte illimitée',
   'Collaborateurs illimités',
   'Export PDF & calendrier',
   'Badge Pro sur le profil',
@@ -195,7 +195,7 @@ export function PricingCards() {
               <span className="text-muted-foreground">/voyage</span>
             </div>
             <ul className="space-y-3 flex-1">
-              {['1 voyage supplémentaire', 'Itinéraire IA complet', 'Sans engagement'].map((f) => (
+              {['1 voyage supplémentaire', 'Itinéraire Expert complet', 'Sans engagement'].map((f) => (
                 <li key={f} className="flex items-center gap-2 text-sm">
                   <Check className="h-4 w-4 text-green-500 shrink-0" />
                   {f}
@@ -228,7 +228,7 @@ export function PricingCards() {
         )}>
           {!isPro && (
             <div className="absolute top-4 right-4">
-              <Sparkles className="h-5 w-5 text-[#d4a853]" />
+              <Gem className="h-5 w-5 text-[#d4a853]" />
             </div>
           )}
           <h3 className="text-xl font-bold">Pro</h3>

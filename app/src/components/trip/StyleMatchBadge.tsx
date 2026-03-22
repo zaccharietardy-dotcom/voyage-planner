@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Sparkles } from 'lucide-react';
+import { Compass } from 'lucide-react';
 import { UserPreferences } from '@/lib/supabase/types';
 import { getDestinationMatch } from '@/lib/services/styleRecommendations';
 import { cn } from '@/lib/utils';
@@ -80,7 +80,7 @@ export function StyleMatchBadge({
               className
             )}
           >
-            {showIcon && <Sparkles className="h-3 w-3 mr-1" />}
+            {showIcon && <Compass className="h-3 w-3 mr-1" />}
             {score}% compatible
           </Badge>
         </TooltipTrigger>

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { ArrowRight, Clock3, MapPin, ShieldCheck, Sparkles, Star, Utensils, Users2 } from 'lucide-react';
+import { ArrowRight, Clock3, MapPin, ShieldCheck, Compass, Star, Utensils, Users2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/lib/i18n';
 
@@ -66,7 +66,7 @@ export function Hero() {
               transition={{ delay: 0.2 }}
               className="mb-8 inline-flex items-center gap-2 rounded-full border border-gold/30 bg-white/50 dark:bg-white/5 px-4 py-1.5 text-sm font-medium text-gold-dark backdrop-blur-md shadow-sm"
             >
-              <Sparkles className="h-4 w-4" />
+              <Compass className="h-4 w-4" />
               <span className="tracking-wide uppercase text-[10px]">{t('hero.badge')}</span>
             </motion.div>
 
@@ -193,8 +193,8 @@ export function Hero() {
                   <ShieldCheck className="h-5 w-5 text-green-500" />
                 </div>
                 <div>
-                  <p className="text-[10px] uppercase font-bold text-muted-foreground/60 tracking-widest">Généré par AI</p>
-                  <p className="text-xs font-bold">Optimisé à 100%</p>
+                  <p className="text-[10px] uppercase font-bold text-muted-foreground/60 tracking-widest">Optimisation Experte</p>
+                  <p className="text-xs font-bold">Vérifié à 100%</p>
                 </div>
               </div>
             </motion.div>

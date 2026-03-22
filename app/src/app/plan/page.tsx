@@ -21,6 +21,7 @@ import { useUserPreferences, preferenceOptions } from '@/hooks/useUserPreference
 import { toast } from 'sonner';
 import { GeneratingScreen } from '@/components/trip/GeneratingScreen';
 import { trackEvent } from '@/lib/analytics';
+import { PremiumBackground } from '@/components/ui/PremiumBackground';
 
 const STEPS = [
   { id: 1, label: 'Où' },
@@ -296,7 +297,8 @@ export default function PlanPage() {
     : preferences.durationDays;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#020617] relative">
+      <PremiumBackground />
       {isGenerating && (
         <GeneratingScreen
           destination={generatingDestination}
@@ -357,7 +359,7 @@ export default function PlanPage() {
         </div>
 
         {/* Step content */}
-        <div className="rounded-2xl border border-border/50 bg-card/80 p-5 sm:p-7 shadow-soft">
+        <div className="rounded-[2.5rem] border border-white/10 bg-black/40 backdrop-blur-3xl p-6 sm:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
           <AnimatePresence mode="wait" custom={directionRef.current}>
             <motion.div
               key={currentStep}

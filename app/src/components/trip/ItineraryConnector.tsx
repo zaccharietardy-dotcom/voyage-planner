@@ -1,8 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import { Navigation, Clock, Footprints, Car, TrainFront, Bike } from 'lucide-react';
+import { Navigation, Clock, Footprints, Car, TrainFront, Bike, ChevronRight, Map as MapIcon, MoreHorizontal, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+  DrawerClose,
+  DrawerHandle,
+} from '@/components/ui/drawer';
+import { hapticImpactLight, hapticImpactMedium } from '@/lib/mobile/haptics';
 
 export type TransportMode = 'walk' | 'transit' | 'driving' | 'car' | 'public' | 'taxi' | 'bike';
 
@@ -36,11 +46,11 @@ interface ItineraryConnectorProps {
   isEditable?: boolean;
 }
 
-const MODE_OPTIONS: { mode: TransportMode; icon: typeof Footprints; label: string }[] = [
-  { mode: 'walk', icon: Footprints, label: 'À pied' },
-  { mode: 'transit', icon: TrainFront, label: 'Transport' },
-  { mode: 'car', icon: Car, label: 'Voiture' },
-  { mode: 'bike', icon: Bike, label: 'Vélo' },
+const MODE_OPTIONS: { mode: TransportMode; icon: typeof Footprints; label: string; description: string }[] = [
+  { mode: 'walk', icon: Footprints, label: 'À pied', description: 'Idéal pour les courtes distances' },
+  { mode: 'transit', icon: TrainFront, label: 'Transports', description: 'Métro, bus et tramway' },
+  { mode: 'car', icon: Car, label: 'Voiture', description: 'Trajet en voiture ou taxi' },
+  { mode: 'bike', icon: Bike, label: 'Vélo', description: 'Pour explorer librement' },
 ];
 
 export function ItineraryConnector({
@@ -53,7 +63,7 @@ export function ItineraryConnector({
   onModeChange,
   isEditable = false,
 }: ItineraryConnectorProps) {
-  const [showModeSelector, setShowModeSelector] = useState(false);
+  const [showModeDrawer, setShowModeDrawer] = useState(false);
 
   const googleMapsMode = mode === 'walk' ? 'walking'
     : mode === 'bike' ? 'bicycling'
@@ -79,113 +89,125 @@ export function ItineraryConnector({
     return `${km.toFixed(1)} km`;
   };
 
-  const handleModeClick = (e: React.MouseEvent, newMode: TransportMode) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleModeSelect = (newMode: TransportMode) => {
     onModeChange?.(newMode);
-    setShowModeSelector(false);
-  };
-
-  const handleConnectorClick = (e: React.MouseEvent) => {
-    if (isEditable && onModeChange) {
-      e.preventDefault();
-      setShowModeSelector(!showModeSelector);
-    }
+    setShowModeDrawer(false);
+    hapticImpactMedium();
   };
 
   return (
-    <div className="relative">
-      <a
-        href={isEditable ? undefined : googleMapsUrl}
-        target={isEditable ? undefined : '_blank'}
-        rel="noopener noreferrer"
-        onClick={handleConnectorClick}
-        className={cn(
-          'flex items-center gap-3 py-3 px-4 my-2 ml-2 rounded-2xl border border-dashed border-gold/20 text-[11px] font-bold text-muted-foreground/70 hover:text-gold hover:bg-gold/5 hover:border-gold/50 transition-all group backdrop-blur-sm shadow-sm',
-          isEditable ? 'cursor-pointer' : 'cursor-pointer',
-        )}
-      >
-        <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-gold/10 group-hover:bg-gold/20 transition-colors">
-          <ModeIcon className="h-3.5 w-3.5 shrink-0 text-gold transition-opacity" />
-        </div>
-
-        <span className="truncate font-medium text-foreground/70 group-hover:text-foreground transition-colors">
-          → {to.name}
-        </span>
-
-        {(duration || distance) && (
-          <span className="flex items-center gap-4 shrink-0 ml-auto opacity-70 group-hover:opacity-100 transition-opacity">
-            {duration && (
-              <span className="flex items-center gap-1.5 uppercase tracking-widest text-[9px]">
-                <Clock className="h-3 w-3 text-gold" />
-                {formatDuration(duration)}
-              </span>
-            )}
-            {distance && distance > 0.1 && (
-              <span className="font-mono text-[10px] opacity-60">{formatDistance(distance)}</span>
-            )}
-          </span>
-        )}
-
-        {/* Transit line badges (metro M6, bus 42, etc.) */}
-        {transitLines && transitLines.length > 0 && (
-          <span className="flex items-center gap-1.5 shrink-0">
-            {transitLines.slice(0, 3).map((line, idx) => (
-              <span
-                key={idx}
-                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold text-white leading-none shadow-sm border border-white/20"
-                style={{ backgroundColor: line.color || '#6B7280' }}
-                title={[line.name, line.departureStop && `de ${line.departureStop}`, line.arrivalStop && `à ${line.arrivalStop}`, line.numStops && `${line.numStops} arrêts`].filter(Boolean).join(' · ')}
-              >
-                {line.number}
-              </span>
-            ))}
-          </span>
-        )}
-
-        {!isEditable && (
-          <Navigation className="h-3.5 w-3.5 shrink-0 opacity-0 group-hover:opacity-100 text-gold transition-all" />
-        )}
-        {isEditable && (
-          <span className="text-[10px] font-bold uppercase tracking-widest text-gold opacity-0 group-hover:opacity-100 transition-opacity shrink-0">Changer</span>
-        )}
-      </a>
-
-      {/* Mode selector popover */}
-      {showModeSelector && (
-        <div className="absolute left-2 top-full z-20 mt-2 flex gap-1.5 rounded-2xl border border-gold/20 bg-white/90 dark:bg-[#020617]/90 backdrop-blur-xl p-2 shadow-2xl">
-          {MODE_OPTIONS.map((opt) => {
-            const Icon = opt.icon;
-            const isActive = opt.mode === mode || (opt.mode === 'transit' && mode === 'public');
-            return (
+    <div className="relative py-2">
+      <div className="flex items-center gap-4 ml-[19px]">
+        {/* Connector Line with animated feel */}
+        <div className="w-[2px] h-12 bg-gradient-to-b from-gold/40 via-gold/10 to-transparent border-l border-dashed border-gold/30" />
+        
+        <div className="flex-1">
+          <Drawer open={showModeDrawer} onOpenChange={setShowModeDrawer}>
+            <DrawerTrigger asChild>
               <button
-                key={opt.mode}
-                onClick={(e) => handleModeClick(e, opt.mode)}
+                onClick={() => {
+                  if (isEditable) {
+                    hapticImpactLight();
+                    setShowModeDrawer(true);
+                  } else {
+                    window.open(googleMapsUrl, '_blank');
+                  }
+                }}
                 className={cn(
-                  'flex flex-col items-center gap-1 rounded-xl px-4 py-2 text-[9px] font-bold uppercase tracking-widest transition-all',
-                  isActive
-                    ? 'bg-gold text-white shadow-lg shadow-gold/20'
-                    : 'hover:bg-gold/5 text-muted-foreground hover:text-gold'
+                  "group flex items-center gap-3 p-3 rounded-2xl bg-[#0A1628]/40 border border-white/5 backdrop-blur-md transition-all active:scale-[0.98] w-full max-w-[320px] shadow-lg",
+                  isEditable ? "hover:border-gold/30" : "hover:border-white/10"
                 )}
-                title={opt.label}
               >
-                <Icon className="h-4 w-4" />
-                {opt.label}
+                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gold/10 text-gold shadow-inner border border-gold/20">
+                  <ModeIcon className="h-4 w-4" />
+                </div>
+
+                <div className="flex flex-col items-start min-w-0 flex-1">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-gold/80 mb-0.5">
+                    {currentOption.label}
+                  </span>
+                  <div className="flex items-center gap-2 text-xs font-bold text-white/90">
+                    {duration && formatDuration(duration)}
+                    {distance && distance > 0.1 && (
+                      <span className="text-white/40 font-medium">· {formatDistance(distance)}</span>
+                    )}
+                  </div>
+                </div>
+
+                {transitLines && transitLines.length > 0 && (
+                  <div className="flex -space-x-1.5 mr-1">
+                    {transitLines.slice(0, 2).map((line, idx) => (
+                      <span
+                        key={idx}
+                        className="h-5 w-5 rounded-full flex items-center justify-center text-[8px] font-black text-white border border-[#0A1628] shadow-sm"
+                        style={{ backgroundColor: line.color || '#6B7280' }}
+                      >
+                        {line.number}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {isEditable ? (
+                  <MoreHorizontal className="h-4 w-4 text-white/20 group-hover:text-gold transition-colors" />
+                ) : (
+                  <MapIcon className="h-4 w-4 text-white/20 group-hover:text-gold transition-colors" />
+                )}
               </button>
-            );
-          })}
-          <a
-            href={googleMapsUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex flex-col items-center gap-1 rounded-xl px-4 py-2 text-[9px] font-bold uppercase tracking-widest hover:bg-gold/5 text-muted-foreground hover:text-gold transition-all"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <Navigation className="h-4 w-4 text-gold" />
-            Maps
-          </a>
+            </DrawerTrigger>
+
+            <DrawerContent>
+              <DrawerHandle />
+              <DrawerHeader>
+                <DrawerTitle className="text-white">Mode de transport</DrawerTitle>
+              </DrawerHeader>
+              <div className="p-6 pt-0 space-y-3">
+                {MODE_OPTIONS.map((opt) => {
+                  const Icon = opt.icon;
+                  const isActive = opt.mode === mode || (opt.mode === 'transit' && mode === 'public');
+                  return (
+                    <button
+                      key={opt.mode}
+                      onClick={() => handleModeSelect(opt.mode)}
+                      className={cn(
+                        "w-full flex items-center gap-4 p-4 rounded-2xl border transition-all active:scale-[0.95]",
+                        isActive 
+                          ? "bg-gold/10 border-gold/50 text-white" 
+                          : "bg-white/5 border-white/10 text-white/60 hover:bg-white/10 hover:text-white"
+                      )}
+                    >
+                      <div className={cn(
+                        "h-12 w-12 rounded-xl flex items-center justify-center transition-colors",
+                        isActive ? "bg-gold text-black shadow-[0_0_15px_rgba(197,160,89,0.3)]" : "bg-white/5 text-gold/60"
+                      )}>
+                        <Icon className="h-6 w-6" />
+                      </div>
+                      <div className="flex flex-col items-start">
+                        <span className="font-black text-base">{opt.label}</span>
+                        <span className="text-xs text-white/40">{opt.description}</span>
+                      </div>
+                      {isActive && <Check className="h-5 w-5 text-gold ml-auto" />}
+                    </button>
+                  );
+                })}
+                
+                <div className="pt-4">
+                  <a
+                    href={googleMapsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full flex items-center justify-center gap-3 h-14 rounded-2xl bg-white/5 border border-white/10 text-white font-bold text-sm hover:bg-white/10 transition-all"
+                    onClick={() => hapticImpactLight()}
+                  >
+                    <MapIcon className="h-5 w-5 text-gold" />
+                    Ouvrir dans Google Maps
+                  </a>
+                </div>
+              </div>
+            </DrawerContent>
+          </Drawer>
         </div>
-      )}
+      </div>
     </div>
   );
 }

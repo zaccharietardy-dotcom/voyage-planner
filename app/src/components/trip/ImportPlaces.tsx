@@ -22,7 +22,7 @@ import {
   Map as MapIconLucide,
   Share2,
   Instagram,
-  Sparkles,
+  Compass,
 } from 'lucide-react';
 import { parseImportedPlaces, ImportedPlace, detectCategory } from '@/lib/services/googleMapsImport';
 import { geocodeAddress } from '@/lib/services/geocoding';
@@ -333,7 +333,7 @@ export function ImportPlaces({ open, onOpenChange, onImport, destinationCoords }
       setPlaces(data.places);
       setSelectedIds(new Set(data.places.map((_: any, i: number) => i)));
       setSocialPlatform(data.platform || detectedPlatform);
-      toast.success(`${data.places.length} lieu${data.places.length > 1 ? 'x' : ''} extrait${data.places.length > 1 ? 's' : ''} par l'IA`);
+      toast.success(`${data.places.length} lieu${data.places.length > 1 ? 'x' : ''} extrait${data.places.length > 1 ? 's' : ''} par Narae`);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Erreur lors de l\'extraction';
       setError(message);
@@ -377,8 +377,8 @@ export function ImportPlaces({ open, onOpenChange, onImport, destinationCoords }
           <TabsContent value="social" className="space-y-4">
             <div className="space-y-3">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Sparkles className="h-4 w-4 text-primary" />
-                <span>Extraction automatique par IA</span>
+                <Compass className="h-4 w-4 text-primary" />
+                <span>Extraction automatique par expertise</span>
               </div>
 
               <div className="space-y-2">
@@ -421,11 +421,11 @@ export function ImportPlaces({ open, onOpenChange, onImport, destinationCoords }
                 {socialLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Extraction en cours avec l&apos;IA...
+                    Extraction en cours avec Narae...
                   </>
                 ) : (
                   <>
-                    <Sparkles className="mr-2 h-4 w-4" />
+                    <Compass className="mr-2 h-4 w-4" />
                     Extraire les lieux
                   </>
                 )}

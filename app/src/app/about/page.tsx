@@ -1,15 +1,15 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowLeft, Sparkles, Users, Globe, Leaf } from 'lucide-react';
+import { ArrowLeft, Compass, Users, Globe, Leaf } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
 const values = [
   {
-    icon: Sparkles,
+    icon: Compass,
     title: 'Intelligence Artificielle',
-    description: 'Notre IA génère des itinéraires personnalisés en quelques secondes, adaptés à vos préférences et contraintes.',
+    description: 'Narae génère des itinéraires personnalisés en quelques secondes, adaptés à vos préférences et contraintes.',
   },
   {
     icon: Users,

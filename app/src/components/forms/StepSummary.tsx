@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { TripPreferences, ACTIVITY_LABELS, GROUP_TYPE_LABELS } from '@/lib/types';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { ChevronDown, ChevronUp, Sparkles } from 'lucide-react';
+import { ChevronDown, ChevronUp, Compass } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { StepTransport } from './StepTransport';
 import { StepGroup } from './StepGroup';
@@ -117,7 +117,7 @@ export function StepSummary({ data, onChange, onGenerate, isGenerating }: StepSu
         onClick={onGenerate}
         disabled={isGenerating}
       >
-        <Sparkles className="h-5 w-5" />
+        <Compass className="h-5 w-5" />
         Générer mon voyage
       </Button>
     </div>

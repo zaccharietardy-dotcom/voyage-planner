@@ -8,7 +8,7 @@ import {
   ArrowRight,
   Check,
   Loader2,
-  Sparkles,
+  Gem,
   Compass,
   Utensils,
   Bed,
@@ -33,7 +33,7 @@ type Step = 'travel_style' | 'budget' | 'accommodation' | 'pace' | 'activities' 
 
 const steps: { id: Step; title: string; icon: React.ReactNode; description: string }[] = [
   { id: 'travel_style', title: 'Style de voyage', icon: <Compass className="h-5 w-5" />, description: 'Comment aimez-vous voyager ?' },
-  { id: 'budget', title: 'Budget', icon: <Sparkles className="h-5 w-5" />, description: 'Quel est votre budget type ?' },
+  { id: 'budget', title: 'Budget', icon: <Gem className="h-5 w-5" />, description: 'Quel est votre budget type ?' },
   { id: 'accommodation', title: 'Hébergement', icon: <Bed className="h-5 w-5" />, description: 'Où préférez-vous dormir ?' },
   { id: 'pace', title: 'Rythme', icon: <Clock className="h-5 w-5" />, description: 'À quel rythme voyagez-vous ?' },
   { id: 'activities', title: 'Activités', icon: <Heart className="h-5 w-5" />, description: 'Que préférez-vous faire ?' },
@@ -155,7 +155,7 @@ export default function PreferencesPage() {
           <Card className="border-0 shadow-lg">
             <CardHeader className="text-center pb-4">
               <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                <Sparkles className="h-8 w-8 text-primary" />
+                <Compass className="h-8 w-8 text-primary" />
               </div>
               <CardTitle className="text-3xl mb-2">Bienvenue !</CardTitle>
               <CardDescription className="text-base">

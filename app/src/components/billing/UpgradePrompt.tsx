@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Sparkles, X, Loader2 } from 'lucide-react';
+import { Gem, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { isNativeApp } from '@/lib/mobile/runtime';
@@ -78,7 +78,7 @@ export function UpgradePrompt({ message = 'Tu as atteint la limite de 2 voyages/
 
   return (
     <div className="relative rounded-xl border border-[#d4a853]/30 bg-[#d4a853]/5 p-4 flex items-center gap-4">
-      <Sparkles className="h-5 w-5 text-[#d4a853] shrink-0" />
+      <Gem className="h-5 w-5 text-[#d4a853] shrink-0" />
       <div className="flex-1">
         <p className="text-sm font-medium">{message}</p>
         <p className="text-xs text-muted-foreground mt-1">

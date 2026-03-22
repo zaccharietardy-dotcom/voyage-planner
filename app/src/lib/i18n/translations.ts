@@ -51,7 +51,7 @@ export const translations = {
     'plan.budgetLevels.comfort': 'Confort',
     'plan.budgetLevels.luxury': 'Luxe',
     'plan.generate': 'Générer mon voyage',
-    'plan.generating': 'Génération en cours...',
+    'plan.generating': 'Optimisation en cours...',
 
     // Trip page
     'trip.itinerary': 'Itinéraire',
@@ -130,7 +130,7 @@ export const translations = {
     'generating.finalizing': 'Finalisation de votre voyage...',
 
     // Landing - Hero
-    'hero.badge': 'Planification IA haut de gamme, en français',
+    'hero.badge': 'Planification experte haut de gamme, en français',
     'hero.title1': 'Ton agence de voyage',
     'hero.title2': 'personnelle et premium',
     'hero.subtitle': 'Narae compose un itinéraire précis, élégant et collaboratif: horaires réalistes, adresses de qualité, réseau social voyageur et réservations prêtes à ouvrir.',
@@ -167,8 +167,8 @@ export const translations = {
     'howItWorks.subtitle': 'Une expérience premium doit être simple: moins de clics, plus de valeur à chaque étape.',
     'howItWorks.step1Title': '1. Cadrez votre voyage',
     'howItWorks.step1Desc': 'Destination, dates, style de séjour et budget. Narae comprend votre intention en quelques champs.',
-    'howItWorks.step2Title': '2. Génération intelligente',
-    'howItWorks.step2Desc': 'Le moteur V2 crée un planning réaliste avec horaires cohérents, restaurants crédibles et trajets utiles.',
+    'howItWorks.step2Title': '2. Génération experte',
+    'howItWorks.step2Desc': 'Le notre algorithme crée un planning réaliste avec horaires cohérents, restaurants crédibles et trajets utiles.',
     'howItWorks.step3Title': '3. Finalisez en équipe',
     'howItWorks.step3Desc': 'Partage, propositions et validation owner. Votre voyage avance sans chaos ni modifications sauvages.',
 
@@ -364,7 +364,7 @@ export const translations = {
     'generating.finalizing': 'Finalizing your trip...',
 
     // Landing - Hero
-    'hero.badge': 'Premium AI travel planning',
+    'hero.badge': 'Premium expert travel planning',
     'hero.title1': 'Your personal',
     'hero.title2': 'premium travel agency',
     'hero.subtitle': 'Narae crafts a precise, elegant and collaborative itinerary: realistic schedules, quality addresses, traveler social network and ready-to-book links.',
@@ -401,7 +401,7 @@ export const translations = {
     'howItWorks.subtitle': 'A premium experience should be simple: fewer clicks, more value at every step.',
     'howItWorks.step1Title': '1. Define your trip',
     'howItWorks.step1Desc': 'Destination, dates, travel style and budget. Narae understands your intent in a few fields.',
-    'howItWorks.step2Title': '2. Smart generation',
+    'howItWorks.step2Title': '2. Expert generation',
     'howItWorks.step2Desc': 'The V2 engine creates a realistic schedule with consistent timings, credible restaurants and useful routes.',
     'howItWorks.step3Title': '3. Finalize as a team',
     'howItWorks.step3Desc': 'Sharing, proposals and owner approval. Your trip moves forward without chaos or wild edits.',
@@ -598,7 +598,7 @@ export const translations = {
     'generating.finalizing': 'Finalizando tu viaje...',
 
     // Landing - Hero
-    'hero.badge': 'Planificación IA premium',
+    'hero.badge': 'Planificación premium expert',
     'hero.title1': 'Tu agencia de viajes',
     'hero.title2': 'personal y premium',
     'hero.subtitle': 'Narae compone un itinerario preciso, elegante y colaborativo: horarios realistas, direcciones de calidad, red social de viajeros y enlaces listos para reservar.',
@@ -1066,7 +1066,7 @@ export const translations = {
     'generating.finalizing': 'Finalizzazione del tuo viaggio...',
 
     // Landing - Hero
-    'hero.badge': 'Pianificazione viaggi IA premium',
+    'hero.badge': 'Pianificazione viaggi premium expert',
     'hero.title1': 'La tua agenzia di viaggi',
     'hero.title2': 'personale e premium',
     'hero.subtitle': 'Narae compone un itinerario preciso, elegante e collaborativo: orari realistici, indirizzi di qualità, rete social viaggiatori e link pronti per prenotare.',
@@ -1300,7 +1300,7 @@ export const translations = {
     'generating.finalizing': 'Finalizando sua viagem...',
 
     // Landing - Hero
-    'hero.badge': 'Planejamento de viagens IA premium',
+    'hero.badge': 'Planejamento de viagens premium expert',
     'hero.title1': 'Sua agência de viagens',
     'hero.title2': 'pessoal e premium',
     'hero.subtitle': 'Narae compõe um itinerário preciso, elegante e colaborativo: horários realistas, endereços de qualidade, rede social de viajantes e links prontos para reservar.',

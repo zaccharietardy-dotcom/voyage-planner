@@ -955,26 +955,33 @@ export function CesiumGlobe({
       const focusedTravelerId = selectedTraveler?.id || null;
       const isFocused = focusedTravelerId ? arc.travelerId === focusedTravelerId : true;
       const isDimmed = focusedTravelerId ? arc.travelerId !== focusedTravelerId : false;
-      const hasLongDistance = (arc.distanceKm || 0) > 1200 || arc.isLongHaul;
+      const distance = arc.distanceKm || 0;
+      
+      // Calculate more points for a smooth geodesic-like curve
+      const numPoints = distance > 2000 ? 20 : 10;
+      const positions: any[] = [];
+      const maxHeight = Math.min(distance * 500, 1500000); // Scale height with distance, but cap it
 
-      const positions = Cesium.Cartesian3.fromDegreesArrayHeights([
-        arc.from.lng, arc.from.lat, 100000,
-        (arc.from.lng + arc.to.lng) / 2, (arc.from.lat + arc.to.lat) / 2, 500000,
-        arc.to.lng, arc.to.lat, 100000,
-      ]);
+      for (let i = 0; i <= numPoints; i++) {
+        const t = i / numPoints;
+        const lat = arc.from.lat + (arc.to.lat - arc.from.lat) * t;
+        const lng = arc.from.lng + (arc.to.lng - arc.from.lng) * t;
+        // Parabolic height
+        const h = Math.sin(Math.PI * t) * maxHeight + 50000;
+        positions.push(lng, lat, h);
+      }
+
+      const cartesianPositions = Cesium.Cartesian3.fromDegreesArrayHeights(positions);
 
       viewer.entities.add({
         id: `arc-${arc.id}`,
         polyline: {
-          positions: positions,
-          width: isFocused ? 3.2 : 1.4,
+          positions: cartesianPositions,
+          width: isFocused ? 2.5 : 1.0,
           material: new Cesium.PolylineGlowMaterialProperty({
-            glowPower: isFocused ? 0.28 : 0.1,
-            color: Cesium.Color.fromCssColorString(
-              hasLongDistance
-                ? '#fb923c'
-                : (arc.color || colors.arcColor)
-            ).withAlpha(isDimmed ? 0.2 : 0.92),
+            glowPower: isFocused ? 0.15 : 0.05,
+            taperPower: 0.5,
+            color: Cesium.Color.fromCssColorString('#c5a059').withAlpha(isDimmed ? 0.1 : 0.6),
           }),
           arcType: Cesium.ArcType.NONE,
         },

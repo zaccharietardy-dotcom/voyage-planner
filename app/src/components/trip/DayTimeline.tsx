@@ -11,6 +11,7 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { shouldShowItinerary } from '@/lib/services/itineraryValidator';
 import { motion } from 'framer-motion';
+import { hapticImpactLight } from '@/lib/mobile/haptics';
 
 export interface HotelSelectorData {
   hotels: Accommodation[];
@@ -36,7 +37,8 @@ interface DayTimelineProps {
   onMoveItem?: (item: TripItem, direction: 'up' | 'down') => void;
   onHoverItem?: (itemId: string | null) => void;
   showMoveButtons?: boolean;
-  renderSwapButton?: (item: TripItem) => React.ReactNode;
+  onSwapClick?: (item: TripItem) => void;
+  onEditTime?: (item: TripItem, start: string, end: string) => void;
   hotelSelectorData?: HotelSelectorData;
   onSelectRestaurantAlternative?: (item: TripItem, restaurant: NonNullable<TripItem['restaurant']>) => void;
   onSelectSelfMeal?: (item: TripItem) => void;
@@ -155,7 +157,8 @@ export const DayTimeline = memo(function DayTimeline({
   onMoveItem,
   onHoverItem,
   showMoveButtons = false,
-  renderSwapButton,
+  onSwapClick,
+  onEditTime,
   hotelSelectorData,
   onSelectRestaurantAlternative,
   onSelectSelfMeal,
@@ -222,70 +225,63 @@ export const DayTimeline = memo(function DayTimeline({
     <div ref={timelineRef} className="space-y-5">
       {/* Day header */}
       <motion.div
-        className="flex items-center justify-between rounded-3xl border border-gold/20 bg-white/80 dark:bg-[#020617]/80 p-4 backdrop-blur-xl shadow-xl shadow-gold/5"
-        initial={{ opacity: 0, y: -10 }}
+        className="flex items-center justify-between rounded-[2.5rem] border border-white/5 bg-black/40 p-5 backdrop-blur-3xl shadow-[0_15px_35px_rgba(0,0,0,0.3)]"
+        initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: 'easeOut' }}
+        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
       >
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-gold-gradient flex items-center justify-center text-white font-display font-bold text-xl shadow-lg shadow-gold/20">
+        <div className="flex items-center gap-5">
+          <div className="w-14 h-14 rounded-[1.5rem] bg-gold-gradient flex items-center justify-center text-black font-black text-2xl shadow-[0_10px_20px_rgba(197,160,89,0.3)] border border-white/20">
             {day.dayNumber}
           </div>
           <div>
-            <h3 className="font-display text-xl font-bold flex items-center gap-3">
+            <h3 className="font-black text-2xl text-white tracking-tight flex items-center gap-3">
               Jour {day.dayNumber}
               {day.weatherForecast && (
-                <span className="text-sm font-medium text-gold bg-gold/10 px-2 py-0.5 rounded-full" title={day.weatherForecast.condition}>
-                  {day.weatherForecast.icon} {day.weatherForecast.tempMin}\u00b0/{day.weatherForecast.tempMax}\u00b0
+                <span className="text-xs font-black text-gold bg-gold/10 px-3 py-1 rounded-full border border-gold/20 uppercase tracking-widest">
+                  {day.weatherForecast.icon} {day.weatherForecast.tempMax}\u00b0
                 </span>
               )}
             </h3>
-            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60 flex items-center gap-2 mt-1">
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 flex items-center gap-2 mt-1.5">
               <Calendar className="h-3.5 w-3.5 text-gold" />
               {format(new Date(day.date), 'EEEE d MMMM', { locale: fr })}
             </p>
           </div>
         </div>
         <div className="flex items-center gap-3">
-          {onOptimizeDay && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-10 rounded-xl border-gold/20 bg-white/50 dark:bg-white/5 hover:bg-gold/5 hover:border-gold/50 transition-all font-bold text-[10px] uppercase tracking-widest gap-2"
-              onClick={() => onOptimizeDay(day.dayNumber)}
-            >
-              <Route className="h-4 w-4 text-gold" />
-              Optimiser
-            </Button>
-          )}
           {onAddItem && (
             <Button
-              size="sm"
-              className="h-10 rounded-xl bg-gold text-white hover:bg-gold-dark transition-all font-bold text-[10px] uppercase tracking-widest gap-2 shadow-lg shadow-gold/20"
-              onClick={() => onAddItem(day.dayNumber)}
+              size="icon"
+              className="h-12 w-12 rounded-2xl bg-white/5 border border-white/10 text-gold hover:bg-white/10 shadow-inner"
+              onClick={() => { hapticImpactLight(); onAddItem(day.dayNumber); }}
             >
-              <Plus className="h-4 w-4" />
-              Ajouter
+              <Plus className="h-6 w-6" />
             </Button>
           )}
         </div>
       </motion.div>
 
-      {/* Timeline */}
+      {/* Timeline Container */}
       <motion.div
-        className="relative space-y-4 rounded-[2.5rem] border border-gold/10 bg-white/30 dark:bg-white/5 p-6 pl-10 shadow-sm backdrop-blur-sm"
+        className="relative space-y-2"
         initial="hidden"
         animate="visible"
         variants={{
           visible: {
             transition: {
-              staggerChildren: 0.1,
+              staggerChildren: 0.12,
             },
           },
         }}
       >
-        {/* Vertical line with gold gradient */}
-        <div className="absolute bottom-10 left-[19px] top-10 w-[2px] bg-gradient-to-b from-gold via-gold/30 to-gold/10" />
+        {/* Animated vertical filament line */}
+        <motion.div 
+          initial={{ scaleY: 0 }}
+          animate={{ scaleY: 1 }}
+          transition={{ duration: 1, ease: "easeInOut" }}
+          className="absolute left-[26px] top-12 bottom-12 w-[1px] bg-gradient-to-b from-gold/60 via-gold/10 to-transparent origin-top" 
+        />
 
         {visibleItems.map((item, index) => {
           const nextItem = index < visibleItems.length - 1 ? visibleItems[index + 1] : null;
@@ -299,39 +295,40 @@ export const DayTimeline = memo(function DayTimeline({
             <motion.div
               key={item.id}
               data-item-id={item.id}
-              className="relative"
+              className="relative pl-14"
               variants={{
-                hidden: { opacity: 0, x: -10 },
+                hidden: { opacity: 0, x: -20, scale: 0.95 },
                 visible: {
                   opacity: 1,
                   x: 0,
+                  scale: 1,
                   transition: {
-                    duration: 0.5,
+                    duration: 0.6,
                     ease: [0.22, 1, 0.36, 1],
                   },
                 },
               }}
             >
-              {/* Timeline dot - Gold Outer, White Inner */}
-              <div className="absolute -left-[28px] top-7 w-4 h-4 rounded-full bg-gold flex items-center justify-center shadow-lg shadow-gold/30 border-2 border-white dark:border-[#020617] z-10">
-                <div className="w-1.5 h-1.5 rounded-full bg-white dark:bg-[#020617]" />
-              </div>
+              {/* Point de connexion (Timeline Dot) */}
+              <div className="absolute left-[21px] top-8 w-3 h-3 rounded-full bg-gold shadow-[0_0_15px_rgba(197,160,89,0.5)] border-[3px] border-black z-10" />
 
               {departureBoundary && (
-                <HotelBoundaryMiniConnector
-                  type="depart"
-                  fromLabel="Hôtel"
-                  toLabel={item.locationName || item.title}
-                  duration={departureBoundary.duration}
-                  distance={departureBoundary.distanceFromPrevious}
-                />
+                <div className="mb-4 -ml-2">
+                  <HotelBoundaryMiniConnector
+                    type="depart"
+                    fromLabel="Hôtel"
+                    toLabel={item.locationName || item.title}
+                    duration={departureBoundary.duration}
+                    distance={departureBoundary.distanceFromPrevious}
+                  />
+                </div>
               )}
 
               <ActivityCard
                 item={item}
                 orderNumber={mapNumbers?.get(item.id) ?? (globalIndexOffset + index + 1)}
                 isSelected={selectedItemId === item.id}
-                onSelect={() => onSelectItem?.(item)}
+                onSelect={() => { hapticImpactLight(); onSelectItem?.(item); }}
                 onEdit={() => onEditItem?.(item)}
                 onDelete={() => onDeleteItem?.(item)}
                 onMoveUp={showMoveButtons && onMoveItem ? () => onMoveItem(item, 'up') : undefined}
@@ -340,7 +337,8 @@ export const DayTimeline = memo(function DayTimeline({
                 canMoveDown={!isLast}
                 onMouseEnter={() => onHoverItem?.(item.id)}
                 onMouseLeave={() => onHoverItem?.(null)}
-                swapButton={renderSwapButton?.(item)}
+                onSwapClick={onSwapClick ? () => onSwapClick(item) : undefined}
+                onEditTime={onEditTime}
                 onSelectRestaurantAlternative={onSelectRestaurantAlternative}
                 onSelectSelfMeal={onSelectSelfMeal}
                 onDurationChange={onDurationChange}
@@ -350,7 +348,7 @@ export const DayTimeline = memo(function DayTimeline({
 
               {/* Sélecteur d'hôtel inline après le check-in */}
               {(item.type === 'hotel' || item.type === 'checkin') && hotelSelectorData && hotelSelectorData.hotels.length > 0 && (
-                <div className="mt-3 mb-1">
+                <div className="mt-4 mb-2">
                   <HotelCarouselSelector
                     hotels={hotelSelectorData.hotels}
                     selectedId={hotelSelectorData.selectedId}
@@ -362,36 +360,39 @@ export const DayTimeline = memo(function DayTimeline({
               )}
 
               {/* Connecteur d'itinéraire vers l'activité suivante */}
-              {/* FILTRE: N'afficher que les itinéraires pratiques (pas check-in→vol, vol, etc.) */}
               {nextItem && shouldShowItinerary(item, nextItem) && (
-                <ItineraryConnector
-                  from={{
-                    name: item.locationName || item.title,
-                    latitude: item.latitude,
-                    longitude: item.longitude,
-                  }}
-                  to={{
-                    name: nextItem.locationName || nextItem.title,
-                    latitude: nextItem.latitude,
-                    longitude: nextItem.longitude,
-                  }}
-                  duration={nextItem.timeFromPrevious}
-                  distance={nextItem.distanceFromPrevious}
-                  mode={nextItem.transportToPrevious}
-                  transitLines={nextItem.transitInfo?.lines}
-                  isEditable={!!onTransportModeChange}
-                  onModeChange={onTransportModeChange ? (newMode) => onTransportModeChange(nextItem, newMode) : undefined}
-                />
+                <div className="my-2">
+                  <ItineraryConnector
+                    from={{
+                      name: item.locationName || item.title,
+                      latitude: item.latitude,
+                      longitude: item.longitude,
+                    }}
+                    to={{
+                      name: nextItem.locationName || nextItem.title,
+                      latitude: nextItem.latitude,
+                      longitude: nextItem.longitude,
+                    }}
+                    duration={nextItem.timeFromPrevious}
+                    distance={nextItem.distanceFromPrevious}
+                    mode={nextItem.transportToPrevious}
+                    transitLines={nextItem.transitInfo?.lines}
+                    isEditable={!!onTransportModeChange}
+                    onModeChange={onTransportModeChange ? (newMode) => onTransportModeChange(nextItem, newMode) : undefined}
+                  />
+                </div>
               )}
 
               {returnBoundary && (
-                <HotelBoundaryMiniConnector
-                  type="return"
-                  fromLabel={item.locationName || item.title}
-                  toLabel={returnBoundary.locationName || "Hôtel"}
-                  duration={returnBoundary.duration}
-                  distance={returnBoundary.distanceFromPrevious}
-                />
+                <div className="mt-4 -ml-2">
+                  <HotelBoundaryMiniConnector
+                    type="return"
+                    fromLabel={item.locationName || item.title}
+                    toLabel={returnBoundary.locationName || "Hôtel"}
+                    duration={returnBoundary.duration}
+                    distance={returnBoundary.distanceFromPrevious}
+                  />
+                </div>
               )}
             </motion.div>
           );

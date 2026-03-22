@@ -9,10 +9,11 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
-import { CalendarIcon, MapPin, Plus, X, Sparkles, Loader2, Clock, Map, Route, Navigation } from 'lucide-react';
+import { CalendarIcon, MapPin, Plus, X, Compass, Loader2, Clock, Map, Route, Navigation } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
 import { TripPreferences, CityStage, DurationSuggestion, DestinationSuggestion } from '@/lib/types';
 import { useSuggestions } from '@/hooks/useSuggestions';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
@@ -328,46 +329,62 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
       </div>
 
       {/* Mode selector */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-4">
         <button
           type="button"
           onClick={() => setMode('precise')}
           className={cn(
-            'flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all text-center',
+            'flex flex-col items-center gap-4 p-6 rounded-[2rem] border-2 transition-all text-center relative overflow-hidden group',
             mode === 'precise'
-              ? 'border-primary bg-primary/5 shadow-sm'
-              : 'border-border hover:border-primary/30 hover:bg-muted/50'
+              ? 'border-gold bg-gold/10 shadow-[0_15px_35px_rgba(197,160,89,0.2)]'
+              : 'border-white/5 bg-white/5 hover:border-white/20'
           )}
         >
-          <MapPin className={cn('h-6 w-6', mode === 'precise' ? 'text-primary' : 'text-muted-foreground')} />
+          <div className={cn(
+            'p-4 rounded-2xl transition-all duration-300',
+            mode === 'precise' ? 'bg-gold text-black shadow-lg shadow-gold/30 scale-110' : 'bg-white/5 text-white/40 group-hover:text-white/60'
+          )}>
+            <MapPin className="h-6 w-6" />
+          </div>
           <div>
-            <p className={cn('font-semibold text-sm', mode === 'precise' && 'text-primary')}>
+            <p className={cn('font-bold text-sm tracking-tight transition-colors', mode === 'precise' ? 'text-white' : 'text-white/60')}>
               Je sais où je vais
             </p>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Ville(s) et durée
+            <p className="text-[10px] text-white/40 mt-1 uppercase tracking-[0.2em] font-black">
+              Précis
             </p>
           </div>
+          {mode === 'precise' && (
+            <motion.div layoutId="mode-glow" className="absolute inset-0 bg-gold/5 pointer-events-none" />
+          )}
         </button>
         <button
           type="button"
           onClick={() => setMode('inspired')}
           className={cn(
-            'flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all text-center',
+            'flex flex-col items-center gap-4 p-6 rounded-[2rem] border-2 transition-all text-center relative overflow-hidden group',
             mode === 'inspired'
-              ? 'border-primary bg-primary/5 shadow-sm'
-              : 'border-border hover:border-primary/30 hover:bg-muted/50'
+              ? 'border-gold bg-gold/10 shadow-[0_15px_35px_rgba(197,160,89,0.2)]'
+              : 'border-white/5 bg-white/5 hover:border-white/20'
           )}
         >
-          <Sparkles className={cn('h-6 w-6', mode === 'inspired' ? 'text-primary' : 'text-muted-foreground')} />
+          <div className={cn(
+            'p-4 rounded-2xl transition-all duration-300',
+            mode === 'inspired' ? 'bg-gold text-black shadow-lg shadow-gold/30 scale-110' : 'bg-white/5 text-white/40 group-hover:text-white/60'
+          )}>
+            <Compass className="h-6 w-6" />
+          </div>
           <div>
-            <p className={cn('font-semibold text-sm', mode === 'inspired' && 'text-primary')}>
+            <p className={cn('font-bold text-sm tracking-tight transition-colors', mode === 'inspired' ? 'text-white' : 'text-white/60')}>
               Inspirez-moi
             </p>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Suggestions AI
+            <p className="text-[10px] text-white/40 mt-1 uppercase tracking-[0.2em] font-black">
+              Découverte
             </p>
           </div>
+          {mode === 'inspired' && (
+            <motion.div layoutId="mode-glow" className="absolute inset-0 bg-gold/5 pointer-events-none" />
+          )}
         </button>
       </div>
 
@@ -672,7 +689,7 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
               </>
             ) : (
               <>
-                <Sparkles className="h-4 w-4 mr-2" />
+                <Compass className="h-4 w-4 mr-2" />
                 Suggérer des itinéraires
               </>
             )}
@@ -797,7 +814,7 @@ function DurationSuggestionCard({
       <CardContent className="p-3 space-y-3">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-primary shrink-0" />
+            <Compass className="h-4 w-4 text-primary shrink-0" />
             <div>
               <p className="text-sm font-semibold">
                 {suggestion.optimal} jours recommandés

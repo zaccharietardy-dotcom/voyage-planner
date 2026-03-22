@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
+import dynamic from 'next/dynamic';
 import {
   Heart,
   MapPin,
@@ -13,10 +14,9 @@ import {
   Flame,
   Clock,
   Copy,
-  Sparkles,
+  Compass,
   ArrowRight,
   TrendingUp,
-  Check,
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -27,6 +27,7 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { RecommendedUsers } from '@/components/social/RecommendedUsers';
 import { CloneTripModal } from '@/components/social/CloneTripModal';
+import { hapticImpactLight, hapticImpactMedium } from '@/lib/mobile/haptics';
 
 interface FeedTrip {
   id: string;
@@ -128,10 +129,8 @@ export default function ExplorePage() {
     fetchFeed(1);
   }, [feedTab, sortMode, fetchFeed]);
 
-  // Infinite scroll observer
   useEffect(() => {
     if (observerRef.current) observerRef.current.disconnect();
-
     observerRef.current = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasMore && !isLoadingMore && !isLoading) {
@@ -140,16 +139,13 @@ export default function ExplorePage() {
       },
       { threshold: 0.1 }
     );
-
-    if (loadMoreRef.current) {
-      observerRef.current.observe(loadMoreRef.current);
-    }
-
+    if (loadMoreRef.current) observerRef.current.observe(loadMoreRef.current);
     return () => observerRef.current?.disconnect();
   }, [hasMore, isLoadingMore, isLoading, page, fetchFeed]);
 
   const handleLike = async (tripId: string) => {
     if (!user) { toast.error('Connectez-vous pour aimer ce voyage'); return; }
+    hapticImpactLight();
     setLikingTripId(tripId);
     try {
       const trip = trips.find(t => t.id === tripId);
@@ -171,256 +167,176 @@ export default function ExplorePage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Premium Header section */}
-      <div className="relative overflow-hidden pt-12 pb-8">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-64 bg-[radial-gradient(circle_at_center,rgba(197,160,89,0.05)_0%,transparent_70%)]" />
-        <div className="max-w-6xl mx-auto px-4 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <div className="flex items-center gap-2 mb-4">
-              <Sparkles className="h-4 w-4 text-gold" />
-              <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-gold">Inspirations Illimitées</span>
+    <div className="flex h-[calc(100vh-64px)] overflow-hidden bg-background">
+      {/* Left: Scrollable Feed */}
+      <div className="w-full lg:w-[500px] xl:w-[580px] 2xl:w-[650px] shrink-0 flex flex-col border-r border-gold/10">
+        <div className="p-6 md:p-8 pb-4">
+          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
+            <div className="flex items-center gap-2 mb-2">
+              <Compass className="h-4 w-4 text-gold" />
+              <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-gold">Communauté</span>
             </div>
-            <h1 className="font-display text-4xl md:text-6xl font-bold text-foreground leading-tight">
-              Explorer les <br />
-              <span className="text-gold-gradient italic">Horizons</span>
-            </h1>
-            <p className="text-muted-foreground mt-4 text-lg max-w-xl leading-relaxed">
-              Laissez-vous guider par les carnets de voyage les plus exceptionnels de notre communauté.
-            </p>
+            <h1 className="font-display text-4xl md:text-5xl font-black text-white tracking-tight">Explorer</h1>
           </motion.div>
         </div>
-      </div>
 
-      {/* Glassmorphism filter tabs */}
-      <div className="sticky top-16 z-40 bg-background/80 backdrop-blur-xl border-b border-gold/10">
-        <div className="max-w-6xl mx-auto px-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+        <div className="px-6 md:px-8 py-4 border-b border-white/5 flex items-center justify-between bg-black/40 backdrop-blur-xl z-10 sticky top-0">
+          <div className="flex items-center gap-6">
             <button
-              onClick={() => setFeedTab('discover')}
+              onClick={() => { hapticImpactLight(); setFeedTab('discover'); }}
               className={cn(
-                'relative px-6 py-4 text-[10px] font-bold uppercase tracking-widest transition-all',
-                feedTab === 'discover'
-                  ? 'text-gold'
-                  : 'text-muted-foreground hover:text-foreground'
+                'text-[11px] font-black uppercase tracking-widest transition-all pb-2 border-b-2 relative',
+                feedTab === 'discover' ? 'text-gold border-gold' : 'text-white/40 border-transparent hover:text-white/70'
               )}
             >
-              <span className="flex items-center gap-2">
-                <Globe className="h-3.5 w-3.5" />
-                Découvrir
-              </span>
-              {feedTab === 'discover' && (
-                <motion.span layoutId="explore-tab" className="absolute bottom-0 left-6 right-6 h-0.5 bg-gold rounded-full" />
-              )}
+              Découvrir
             </button>
             {user && (
               <button
-                onClick={() => setFeedTab('following')}
+                onClick={() => { hapticImpactLight(); setFeedTab('following'); }}
                 className={cn(
-                  'relative px-6 py-4 text-[10px] font-bold uppercase tracking-widest transition-all',
-                  feedTab === 'following'
-                    ? 'text-gold'
-                    : 'text-muted-foreground hover:text-foreground'
+                  'text-[11px] font-black uppercase tracking-widest transition-all pb-2 border-b-2 relative',
+                  feedTab === 'following' ? 'text-gold border-gold' : 'text-white/40 border-transparent hover:text-white/70'
                 )}
               >
-                <span className="flex items-center gap-2">
-                  <UsersIcon className="h-3.5 w-3.5" />
-                  Abonnements
-                </span>
-                {feedTab === 'following' && (
-                  <motion.span layoutId="explore-tab" className="absolute bottom-0 left-6 right-6 h-0.5 bg-gold rounded-full" />
-                )}
+                Suivis
               </button>
             )}
           </div>
 
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setSortMode(sortMode === 'recent' ? 'trending' : 'recent')}
-              className="group flex items-center gap-2 px-4 py-2 rounded-full border border-gold/20 bg-gold/5 text-[10px] font-bold uppercase tracking-widest text-gold hover:bg-gold hover:text-white transition-all shadow-lg shadow-gold/5"
-            >
-              {sortMode === 'trending' ? (
-                <>
-                  <TrendingUp className="h-3.5 w-3.5" />
-                  Tendances
-                </>
-              ) : (
-                <>
-                  <Clock className="h-3.5 w-3.5" />
-                  Récents
-                </>
-              )}
-            </button>
-          </div>
+          <button
+            onClick={() => { hapticImpactLight(); setSortMode(sortMode === 'recent' ? 'trending' : 'recent'); }}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl border border-white/10 bg-white/5 text-[9px] font-black uppercase tracking-widest text-white hover:bg-white/10 hover:border-white/20 transition-all shadow-inner active:scale-95"
+          >
+            {sortMode === 'trending' ? <TrendingUp className="h-3.5 w-3.5 text-gold" /> : <Clock className="h-3.5 w-3.5 text-gold" />}
+            {sortMode === 'trending' ? 'Tendances' : 'Récents'}
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 scrollbar-hide" ref={containerRef}>
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center py-32 gap-4">
+              <Loader2 className="h-10 w-10 animate-spin text-gold" />
+              <p className="text-[10px] font-bold uppercase tracking-widest text-white/40">Recherche d'horizons...</p>
+            </div>
+          ) : trips.length === 0 ? (
+            <div className="text-center py-32">
+              <div className="w-24 h-24 rounded-3xl bg-white/5 flex items-center justify-center border border-white/10 mx-auto mb-6 shadow-inner">
+                <MapPin className="h-10 w-10 text-gold/50" />
+              </div>
+              <p className="text-2xl font-black text-white mb-2 tracking-tight">Aucune découverte</p>
+              <p className="text-sm text-white/50 max-w-xs mx-auto leading-relaxed">
+                Suivez des voyageurs ou explorez les nouveaux départs de la communauté.
+              </p>
+            </div>
+          ) : (
+            <>
+              <div className="space-y-6">
+                {trips.map((trip, idx) => (
+                  <motion.div
+                    key={trip.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: idx * 0.05, ease: [0.22, 1, 0.36, 1] }}
+                    className="group relative cursor-pointer"
+                    onClick={() => { hapticImpactLight(); router.push(`/trip/${trip.id}`); }}
+                  >
+                    <div className="relative overflow-hidden rounded-[2rem] bg-[#0A1628]/40 border border-white/5 backdrop-blur-md shadow-[0_8px_30px_rgb(0,0,0,0.12)] group-hover:shadow-[0_15px_40px_rgba(197,160,89,0.15)] group-hover:border-gold/30 transition-all duration-500 active:scale-[0.98]">
+                      {/* Hero Image Section */}
+                      <div className="relative h-56 overflow-hidden">
+                        <img
+                          src={trip.cover_url || getFallbackImage(trip.destination)}
+                          alt={trip.destination}
+                          className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#0A1628] via-[#0A1628]/40 to-transparent" />
+                        
+                        {/* Top Badges */}
+                        <div className="absolute top-4 left-4 flex gap-2">
+                          <div className="bg-black/40 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-full text-[10px] font-black text-white uppercase tracking-widest shadow-sm">
+                            {trip.duration_days} Jours
+                          </div>
+                        </div>
+
+                        {/* Title & Location (Overlaid on image bottom) */}
+                        <div className="absolute bottom-4 left-5 right-5">
+                          <div className="flex items-center gap-2 mb-1.5">
+                            <MapPin className="h-3.5 w-3.5 text-gold" />
+                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/80 drop-shadow-md">{trip.destination}</span>
+                          </div>
+                          <h3 className="text-2xl font-black text-white leading-tight group-hover:text-gold transition-colors truncate drop-shadow-lg">
+                            {trip.title || trip.destination}
+                          </h3>
+                        </div>
+                      </div>
+
+                      {/* Info & Actions Section */}
+                      <div className="p-5 flex items-center justify-between">
+                        {/* User Profile */}
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-10 w-10 border-2 border-gold/30 p-0.5 bg-black/40">
+                            <AvatarImage src={trip.owner?.avatar_url || undefined} />
+                            <AvatarFallback className="bg-gold-gradient text-black text-xs font-black">{(trip.owner?.display_name || '?')[0]}</AvatarFallback>
+                          </Avatar>
+                          <div className="flex flex-col">
+                            <span className="text-sm font-bold text-white leading-tight">{trip.owner?.display_name || 'Voyageur'}</span>
+                            <span className="text-[9px] font-black text-gold uppercase tracking-widest mt-0.5">Créateur</span>
+                          </div>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleLike(trip.id); }}
+                            className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 transition-all active:scale-90"
+                          >
+                            <Heart className={cn("h-4 w-4 transition-colors", trip.user_liked ? "fill-red-500 text-red-500" : "text-white/60 group-hover:text-white")} />
+                            <span className={cn("text-[11px] font-black", trip.user_liked ? "text-red-500" : "text-white/60")}>{trip.likes_count}</span>
+                          </button>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); hapticImpactMedium(); setCloneTrip(trip); }}
+                            className="flex items-center justify-center h-9 w-9 bg-gold/10 hover:bg-gold/20 text-gold border border-gold/20 rounded-xl transition-all active:scale-90"
+                          >
+                            <Copy className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+              <div ref={loadMoreRef} className="py-10 flex justify-center">
+                {isLoadingMore && <Loader2 className="h-6 w-6 animate-spin text-gold" />}
+              </div>
+            </>
+          )}
         </div>
       </div>
 
-      {/* Content Gallery */}
-      <div className="max-w-6xl mx-auto px-4 py-12" ref={containerRef}>
-        {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-32 gap-4">
-            <Loader2 className="h-12 w-12 animate-spin text-gold" />
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Chargement de la galerie...</p>
-          </div>
-        ) : trips.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-32 gap-6">
-            <div className="w-24 h-24 rounded-[2rem] bg-gold/5 flex items-center justify-center border border-gold/10">
-              <MapPin className="h-10 w-10 text-gold/30" />
-            </div>
+      {/* Right: Full-height Interactive Map */}
+      <div className="hidden lg:block flex-1 relative bg-[#020617]">
+        <div className="absolute inset-0">
+          <ExploreMap trips={trips} onTripClick={(id) => router.push(`/trip/${id}`)} />
+        </div>
+
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-10">
+          <div className="bg-black/60 backdrop-blur-2xl border border-white/10 rounded-3xl px-10 py-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex items-center gap-12">
             <div className="text-center">
-              <p className="text-2xl font-display font-bold text-foreground">Aucun voyage trouvé</p>
-              <p className="text-muted-foreground mt-2 max-w-md">
-                {feedTab === 'following'
-                  ? 'Suivez d\'autres voyageurs pour voir leurs aventures apparaître dans votre galerie privée.'
-                  : 'La galerie est vide pour le moment. Revenez bientôt !'}
-              </p>
+              <p className="font-display text-3xl font-black text-white drop-shadow-md">{trips.length}</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gold mt-1">Explorations</p>
             </div>
-            <div className="mt-8 w-full max-w-2xl">
-              <RecommendedUsers />
+            <div className="h-10 w-px bg-white/10" />
+            <div className="text-center">
+              <p className="font-display text-3xl font-black text-white drop-shadow-md">{trips.reduce((acc, t) => acc + (t.likes_count || 0), 0)}</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gold mt-1">Coups de cœur</p>
+            </div>
+            <div className="h-10 w-px bg-white/10" />
+            <div className="text-center">
+              <p className="font-display text-3xl font-black text-white drop-shadow-md flex justify-center"><Globe className="h-8 w-8 text-gold" /></p>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gold mt-1">Savoir-faire</p>
             </div>
           </div>
-        ) : (
-          <>
-            {/* Masonry-like Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-              {trips.map((trip, idx) => (
-                <motion.div
-                  key={trip.id}
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: idx * 0.05 }}
-                  className="group relative flex flex-col cursor-pointer"
-                  onClick={() => router.push(`/trip/${trip.id}`)}
-                >
-                  {/* Card Container */}
-                  <div className="relative aspect-[4/5] overflow-hidden rounded-[2.5rem] border border-gold/10 bg-[#020617] shadow-2xl transition-all duration-700 group-hover:-translate-y-2 group-hover:shadow-gold/10">
-                    {/* Full-bleed image with parallax-like effect */}
-                    <img
-                      src={trip.cover_url || getFallbackImage(trip.destination)}
-                      alt={trip.destination}
-                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 ease-out group-hover:scale-110"
-                    />
-
-                    {/* Sophisticated Overlays */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#020617] via-[#020617]/20 to-transparent opacity-80 transition-opacity duration-500 group-hover:opacity-90" />
-                    <div className="absolute inset-0 border-[1px] border-white/5 rounded-[2.5rem] pointer-events-none" />
-
-                    {/* Top Content (Badges) */}
-                    <div className="absolute top-6 left-6 right-6 flex items-center justify-between">
-                      {trip.duration_days && (
-                        <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 px-4 py-1.5 rounded-full shadow-xl">
-                          <Calendar className="h-3.5 w-3.5 text-gold" />
-                          <span className="text-[10px] font-bold text-white uppercase tracking-widest">
-                            {trip.duration_days} Jours
-                          </span>
-                        </div>
-                      )}
-
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-bold text-white/90 drop-shadow-lg">
-                          {trip.likes_count || 0}
-                        </span>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleLike(trip.id);
-                          }}
-                          disabled={likingTripId === trip.id}
-                          className={cn(
-                            "p-2.5 rounded-full backdrop-blur-md transition-all duration-300 border hover:scale-110 active:scale-95",
-                            trip.user_liked
-                              ? "bg-red-500 border-red-500 shadow-lg shadow-red-500/20"
-                              : "bg-white/10 border-white/20 hover:bg-white/20"
-                          )}
-                        >
-                          <Heart
-                            className={cn(
-                              'h-4 w-4 transition-colors',
-                              trip.user_liked ? 'fill-white text-white' : 'text-white'
-                            )}
-                          />
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Bottom Content */}
-                    <div className="absolute inset-x-0 bottom-0 p-8 flex flex-col gap-6">
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2 text-gold">
-                          <MapPin className="h-3 w-3" />
-                          <span className="text-[9px] font-bold uppercase tracking-[0.3em]">Destination d'exception</span>
-                        </div>
-                        <h3 className="font-display text-3xl font-bold text-white leading-tight group-hover:text-gold transition-colors">
-                          {trip.destination}
-                        </h3>
-                        {trip.start_date && (
-                          <p className="text-xs font-medium text-white/60 tracking-wide">
-                            {format(new Date(trip.start_date), 'MMMM yyyy', { locale: fr })}
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="flex items-center justify-between pt-6 border-t border-white/10">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            router.push(`/user/${trip.owner?.id}`);
-                          }}
-                          className="flex items-center gap-3 group/user transition-all"
-                        >
-                          <div className="relative">
-                            <Avatar className="h-10 w-10 shrink-0 border-2 border-gold/30 p-0.5 transition-all group-hover/user:border-gold">
-                              <AvatarImage src={trip.owner?.avatar_url || undefined} className="rounded-full" />
-                              <AvatarFallback className="bg-gold text-[#020617] text-xs font-bold">
-                                {(trip.owner?.display_name || '?')[0].toUpperCase()}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="absolute -bottom-1 -right-1 bg-gold rounded-full p-0.5 shadow-lg">
-                              <Check className="h-2 w-2 text-[#020617]" />
-                            </div>
-                          </div>
-                          <div className="flex flex-col text-left">
-                            <span className="text-xs font-bold text-white group-hover/user:text-gold transition-colors">
-                              {trip.owner?.display_name || trip.owner?.username || 'Voyageur'}
-                            </span>
-                            <span className="text-[9px] font-bold text-white/40 uppercase tracking-widest">Membre Premium</span>
-                          </div>
-                        </button>
-
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setCloneTrip(trip);
-                          }}
-                          className="group/btn flex items-center gap-2 bg-gold-gradient text-[#020617] px-5 py-2.5 rounded-xl font-bold text-[10px] uppercase tracking-widest shadow-xl shadow-gold/20 hover:scale-105 active:scale-95 transition-all"
-                        >
-                          <Copy className="h-3.5 w-3.5" />
-                          Personnaliser
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-
-            {/* Load more sentinel with luxury loader */}
-            <div ref={loadMoreRef} className="h-40 flex flex-col items-center justify-center gap-4">
-              {isLoadingMore ? (
-                <>
-                  <Loader2 className="h-8 w-8 animate-spin text-gold" />
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Découverte de nouveaux horizons...</span>
-                </>
-              ) : hasMore && (
-                <div className="w-1 h-12 bg-gradient-to-b from-gold/50 to-transparent rounded-full" />
-              )}
-            </div>
-          </>
-        )}
+        </div>
       </div>
 
       {cloneTrip && (
@@ -435,3 +351,34 @@ export default function ExplorePage() {
     </div>
   );
 }
+
+function ExploreMap({ trips, onTripClick }: { trips: FeedTrip[], onTripClick: (id: string) => void }) {
+  const [isClient, setIsClient] = useState(false);
+  useEffect(() => setIsClient(true), []);
+  if (!isClient) return <div className="w-full h-full bg-[#020617]" />;
+
+  const TripMap = dynamic(() => import('@/components/trip/TripMap').then(mod => mod.TripMap), { ssr: false });
+
+  const mapItems = trips.map(t => ({
+    id: t.id,
+    title: t.destination,
+    locationName: t.destination,
+    latitude: t.preferences?.destinationCoords?.lat || 48.8566,
+    longitude: t.preferences?.destinationCoords?.lng || 2.3522,
+    type: 'activity' as const,
+    dayNumber: 1,
+    orderIndex: 0,
+    startTime: '09:00',
+    endTime: '10:00',
+    description: '',
+  }));
+
+  return (
+    <TripMap 
+      items={mapItems} 
+      onItemClick={(item) => onTripClick(item.id)}
+      isVisible={true}
+    />
+  );
+}
+

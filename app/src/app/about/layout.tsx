@@ -3,7 +3,7 @@ import { SITE_NAME, SITE_URL, OG_IMAGE_DEFAULT, LOCALE } from '@/lib/seo';
 
 const title = `À propos | ${SITE_NAME}`;
 const description =
-  "Découvrez Narae Voyage, la plateforme de planification de voyage assistée par IA. Notre mission : rendre le voyage accessible, collaboratif et authentique.";
+  "Découvrez Narae Voyage, la plateforme de planification de voyage assistée par Narae. Notre mission : rendre le voyage accessible, collaboratif et authentique.";
 
 export const metadata: Metadata = {
   title: 'À propos',

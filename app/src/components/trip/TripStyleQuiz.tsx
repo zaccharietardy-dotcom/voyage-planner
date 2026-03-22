@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { Check, ArrowRight, ArrowLeft, Sparkles, Clock } from 'lucide-react';
+import { Check, ArrowRight, ArrowLeft, Compass, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
 import { toast } from 'sonner';
@@ -269,7 +269,7 @@ export function TripStyleQuiz({ onComplete, onClose }: TripStyleQuizProps) {
       {/* Header */}
       <div className="mb-8 text-center">
         <div className="flex items-center justify-center gap-2 mb-3">
-          <Sparkles className="h-6 w-6 text-primary" />
+          <Compass className="h-6 w-6 text-primary" />
           <h2 className="text-2xl font-bold">Découvrez votre style de voyage</h2>
         </div>
         <p className="text-muted-foreground">

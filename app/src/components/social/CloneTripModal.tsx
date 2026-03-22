@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Calendar, Users, Loader2, Sparkles } from 'lucide-react';
+import { Calendar, Users, Loader2, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -116,7 +116,7 @@ export function CloneTripModal({ isOpen, onClose, tripId, tripTitle, originalDur
               {loading ? (
                 <><Loader2 className="w-4 h-4 animate-spin" /> Adaptation en cours...</>
               ) : (
-                <><Sparkles className="w-4 h-4" /> Adapter et personnaliser</>
+                <><Zap className="w-4 h-4" /> Adapter et personnaliser</>
               )}
             </Button>
             <p className="text-xs text-muted-foreground text-center">

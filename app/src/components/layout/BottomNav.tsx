@@ -2,58 +2,96 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Map, PlusCircle, Compass } from 'lucide-react';
+import { Map, Plus, Compass, Globe, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { motion, AnimatePresence } from 'framer-motion';
+import { hapticImpactLight, hapticImpactMedium } from '@/lib/mobile/haptics';
 
 export function BottomNav() {
   const pathname = usePathname();
 
-  // Hide on trip pages (fullscreen map + bottom sheet)
-  if (pathname.startsWith('/trip/')) return null;
+  // Hide on certain pages for a cleaner immersive experience
+  if (pathname.startsWith('/trip/') || pathname === '/globe') return null;
 
   const items = [
     { href: '/mes-voyages', label: 'Voyages', icon: Map },
-    { href: '/plan', label: 'Créer', icon: PlusCircle, accent: true },
     { href: '/explore', label: 'Explorer', icon: Compass },
+    { href: '/plan', label: 'Créer', icon: Plus, isAction: true },
+    { href: '/globe', label: 'Globe', icon: Globe },
+    { href: '/profil', label: 'Profil', icon: User },
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden border-t border-border/60 bg-background/95 backdrop-blur-xl pb-[env(safe-area-inset-bottom)]">
-      <div className="flex items-center justify-around h-14">
+    <div className="fixed bottom-8 left-0 right-0 z-50 flex justify-center px-6 pointer-events-none md:hidden">
+      <nav className="relative flex items-center justify-around h-20 px-4 rounded-[2.5rem] bg-black/40 backdrop-blur-3xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] pointer-events-auto w-full max-w-[400px]">
+        {/* Subtle inner glow */}
+        <div className="absolute inset-0 rounded-[2.5rem] border border-white/5 pointer-events-none" />
+        
         {items.map((item) => {
           const isActive = pathname === item.href;
+          
+          if (item.isAction) {
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => hapticImpactMedium()}
+                className="relative -mt-14 active:scale-90 transition-transform duration-200"
+              >
+                <div className="flex h-16 w-16 items-center justify-center rounded-[1.75rem] bg-gradient-to-br from-[#E2B35C] via-[#C5A059] to-[#8B6E37] shadow-[0_10px_25px_rgba(197,160,89,0.4)] border border-white/20">
+                  <item.icon className="h-8 w-8 text-black stroke-[2.5px]" />
+                </div>
+                {/* Floating glow behind the main action */}
+                <div className="absolute -inset-1 bg-gold/20 blur-xl rounded-full -z-10" />
+              </Link>
+            );
+          }
+
           return (
             <Link
               key={item.href}
               href={item.href}
-              className={cn(
-                'flex flex-col items-center justify-center gap-0.5 px-4 py-1.5 transition-colors',
-                isActive
-                  ? 'text-primary'
-                  : 'text-muted-foreground',
-                item.accent && !isActive && 'text-foreground'
-              )}
+              onClick={() => hapticImpactLight()}
+              className="relative flex flex-col items-center justify-center w-14 h-14 rounded-2xl transition-all"
             >
-              {item.accent ? (
-                <div className={cn(
-                  'flex h-10 w-10 items-center justify-center rounded-full -mt-4 shadow-md transition-colors',
-                  isActive ? 'bg-primary text-primary-foreground' : 'bg-primary/90 text-primary-foreground'
-                )}>
-                  <item.icon className="h-5 w-5" />
-                </div>
-              ) : (
-                <item.icon className={cn('h-5 w-5', isActive && 'stroke-[2.5px]')} />
+              <motion.div
+                animate={{
+                  scale: isActive ? 1.15 : 1,
+                  y: isActive ? -2 : 0,
+                }}
+                transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                className={cn(
+                  'transition-colors duration-300',
+                  isActive ? 'text-gold' : 'text-white/40'
+                )}
+              >
+                <item.icon className="h-6 w-6 stroke-[2px]" />
+              </motion.div>
+              
+              <AnimatePresence>
+                {isActive && (
+                  <motion.span
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 5 }}
+                    className="absolute -bottom-1 text-[9px] font-bold uppercase tracking-[0.1em] text-gold"
+                  >
+                    {item.label}
+                  </motion.span>
+                )}
+              </AnimatePresence>
+
+              {isActive && (
+                <motion.div
+                  layoutId="active-pill"
+                  className="absolute -top-1 w-1 h-1 rounded-full bg-gold shadow-[0_0_10px_rgba(197,160,89,0.8)]"
+                  transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                />
               )}
-              <span className={cn(
-                'text-[10px] font-medium',
-                item.accent && '-mt-0.5'
-              )}>
-                {item.label}
-              </span>
             </Link>
           );
         })}
-      </div>
-    </nav>
+      </nav>
+    </div>
   );
 }

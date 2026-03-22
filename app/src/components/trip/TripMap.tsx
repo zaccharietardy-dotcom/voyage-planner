@@ -174,7 +174,7 @@ function createNumberedIcon(L: any, num: number, type: string, dayNumber: number
   const size = isHighlighted ? 44 : 38;
   const emoji = TYPE_EMOJIS[type] || '📍';
   const shadow = isHighlighted
-    ? `box-shadow: 0 0 25px rgba(197, 160, 89, 0.5), 0 5px 15px rgba(0,0,0,0.4);`
+    ? `box-shadow: 0 0 25px rgba(197, 160, 89, 0.6), 0 8px 20px rgba(0,0,0,0.4);`
     : 'box-shadow: 0 4px 12px rgba(0,0,0,0.2);';
 
   const isLosange = type === 'transport' || type === 'flight';
@@ -191,15 +191,15 @@ function createNumberedIcon(L: any, num: number, type: string, dayNumber: number
     ? shape.containerCss.replace('transform:rotate(45deg);', '')
     : shape.containerCss;
 
-  // Premium Marker: Number in the middle, emoji as a small badge
+  // Premium Marker: Gold background, White border, Dark Blue text
   return L.divIcon({
     className: 'numbered-marker',
     html: `<div style="
       width:${size}px;height:${size}px;
       ${shapeCss}
-      background:linear-gradient(135deg, ${colors.bg} 0%, #1e293b 100%);
-      border:2.5px solid #c5a059;
-      color:#c5a059;
+      background:linear-gradient(135deg, #c5a059 0%, #a37f3d 100%);
+      border:2px solid white;
+      color:#020617;
       display:flex;align-items:center;justify-content:center;
       ${shadow}
       transition:all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -210,13 +210,13 @@ function createNumberedIcon(L: any, num: number, type: string, dayNumber: number
         position:absolute;
         top:-8px;
         right:-8px;
-        background:white;
+        background:#020617;
         width:20px;height:20px;
         border-radius:50%;
         display:flex;align-items:center;justify-content:center;
         font-size:11px;
         border:1.5px solid #c5a059;
-        box-shadow:0 2px 4px rgba(0,0,0,0.2);
+        box-shadow:0 2px 4px rgba(0,0,0,0.3);
         ${shape.innerCss}
       ">${emoji}</div>
     </div>`,

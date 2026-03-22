@@ -1,6 +1,6 @@
 'use client';
 
-import { LogOut, Loader2, ArrowLeft, MapPin, Settings, Users, UserPlus, Crown, CreditCard, Sparkles, Check, Trophy, ShieldCheck, Mail, Calendar, Settings2, Globe, Heart } from 'lucide-react';
+import { LogOut, Loader2, ArrowLeft, MapPin, Settings, Users, UserPlus, Crown, CreditCard, Zap, Check, Trophy, ShieldCheck, Mail, Calendar, Settings2, Globe, Heart } from 'lucide-react';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -327,7 +327,7 @@ export default function ProfilPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {[
                       { icon: Globe, label: "Voyages illimités", desc: "Planifiez sans aucune limite." },
-                      { icon: Sparkles, label: "Régénération IA", desc: "Optimisation infinie par IA." },
+                      { icon: Zap, label: "Régénération Experte", desc: "Optimisation infinie de vos trajets." },
                       { icon: Download, label: "Export PDF Deluxe", desc: "Vos carnets de route imprimables." },
                       { icon: Crown, label: "Badge Exclusif", desc: "Affirmez votre statut d'explorateur." }
                     ].map((feat, i) => (

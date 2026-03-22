@@ -78,7 +78,7 @@ import { ProposedChange } from '@/lib/types/collaboration';
 import { recalculateTimes, cascadeRecalculate, insertDay } from '@/lib/services/itineraryCalculator';
 import { optimizeDay } from '@/lib/services/routeOptimizer';
 import { Attraction } from '@/lib/services/attractions';
-import { ActivitySwapButton } from '@/components/trip/ActivitySwapButton';
+import { ActivityAlternativesDialog } from '@/components/trip/ActivitySwapButton';
 import { AddActivityModal } from '@/components/trip/AddActivityModal';
 import { CalendarView } from '@/components/trip/CalendarView';
 import { CommentsSection } from '@/components/trip/CommentsSection';
@@ -97,6 +97,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
+import { hapticImpactLight, hapticImpactMedium } from '@/lib/mobile/haptics';
+import { PremiumBackground } from '@/components/ui/PremiumBackground';
 // exportTripPdf is dynamically imported on-demand (~650KB jsPDF + autotable)
 import { useLiveTrip } from '@/hooks/useLiveTrip';
 import { LiveTripBanner } from '@/components/trip/LiveTripBanner';
@@ -309,6 +311,7 @@ export default function TripPage() {
   const [showChatPanel, setShowChatPanel] = useState(false);
   const [showFlythrough, setShowFlythrough] = useState(false);
   const [showImportPlaces, setShowImportPlaces] = useState(false);
+  const [swapItem, setSwapItem] = useState<TripItem | null>(null);
   const [showLiveDashboard, setShowLiveDashboard] = useState(false);
   const [showMobileActions, setShowMobileActions] = useState(false);
   const [mobileMapHeight, setMobileMapHeight] = useState(30); // vh percentage for mobile split view
@@ -577,7 +580,6 @@ export default function TripPage() {
 
   const handleDeleteItem = useCallback((item: TripItem) => {
     if (!trip) return;
-    if (!confirm('Supprimer cette activité ?')) return;
     const updatedDays = cascadeRecalculate(
       trip.days.map((day) => ({
         ...day,
@@ -771,19 +773,27 @@ export default function TripPage() {
     } catch { /* keep estimated time */ }
   }, [trip, saveTrip]);
 
-  // Render swap button pour les ActivityCards (si pool disponible)
-  const renderSwapButton = useCallback((item: TripItem) => {
-    if (!trip?.attractionPool || trip.attractionPool.length === 0 || !canOwnerEdit) return null;
-    if (item.type !== 'activity') return null;
-    return (
-      <ActivitySwapButton
-        item={item}
-        days={trip.days}
-        attractionPool={trip.attractionPool}
-        onSwap={handleSwapActivity}
-      />
+  const handleSwapClick = useCallback((item: TripItem) => {
+    if (!trip?.attractionPool || trip.attractionPool.length === 0) return;
+    setSwapItem(item);
+  }, [trip?.attractionPool]);
+
+  const handleEditTime = useCallback((item: TripItem, startTime: string, endTime: string) => {
+    if (!trip) return;
+    const updatedDays = cascadeRecalculate(
+      trip.days.map((day) => ({
+        ...day,
+        items: day.items.map((i) =>
+          i.id === item.id ? { ...i, startTime, endTime } : i
+        ),
+      })),
+      item.id,
+      'move'
     );
-  }, [trip?.attractionPool, trip?.days, canOwnerEdit, handleSwapActivity]);
+    const updatedTrip = { ...trip, days: updatedDays, updatedAt: new Date() };
+    saveTrip(updatedTrip);
+    toast.success('Horaire modifié');
+  }, [trip, saveTrip]);
 
   const handleInsertDay = (afterDayNumber: number) => {
     if (!trip) return;
@@ -1354,7 +1364,46 @@ export default function TripPage() {
 
   return (
     <TripErrorBoundary>
-      <div className="min-h-screen bg-gradient-to-b from-background via-background to-[#1e3a5f]/5">
+      <div className="min-h-screen bg-[#020617] relative">
+        <PremiumBackground />
+        
+        {/* Hero Section - Visual & Immersive */}
+        <div className="relative h-[40vh] md:h-[50vh] w-full overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#020617]/40 to-[#020617] z-10" />
+          {(trip as Trip & { cover_url?: string }).cover_url ? (
+            <motion.img
+              initial={{ scale: 1.1 }}
+              animate={{ scale: 1 }}
+              transition={{ duration: 10, ease: "linear" }}
+              src={(trip as Trip & { cover_url?: string }).cover_url}
+              alt={trip.preferences.destination}
+              className="h-full w-full object-cover opacity-60"
+            />
+          ) : (
+            <div className="h-full w-full bg-gradient-to-br from-gold/20 via-blue-900/40 to-black" />
+          )}
+          
+          <div className="absolute inset-0 z-20 flex flex-col items-center justify-end pb-12 px-4 text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <div className="flex items-center justify-center gap-2 mb-4">
+                <div className="h-px w-8 bg-gold/50" />
+                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-gold">Itinéraire Signature</span>
+                <div className="h-px w-8 bg-gold/50" />
+              </div>
+              <h1 className="font-display text-5xl md:text-7xl font-black text-white tracking-tight drop-shadow-2xl">
+                {trip.preferences.destination}
+              </h1>
+              <p className="mt-4 text-white/60 font-medium tracking-[0.1em] uppercase text-xs md:text-sm">
+                {format(new Date(trip.preferences.startDate), 'd MMMM yyyy', { locale: fr })} · {trip.days.length} Jours de découverte
+              </p>
+            </motion.div>
+          </div>
+        </div>
+
         {/* Live Trip Banner */}
         {liveState && trip && (
         <LiveTripBanner
@@ -1368,7 +1417,7 @@ export default function TripPage() {
       {isOffline && (
         <div className="container mx-auto px-4 pt-3">
           <div className="rounded-xl border border-amber-300/50 bg-amber-50 px-3 py-2 text-xs text-amber-700 dark:border-amber-900/40 dark:bg-amber-900/20 dark:text-amber-300">
-            Mode hors ligne: certaines actions (IA, collaboration, paiements) sont indisponibles.
+            Mode hors ligne: certaines actions (Calculs, collaboration, paiements) sont indisponibles.
           </div>
         </div>
       )}
@@ -1496,11 +1545,24 @@ export default function TripPage() {
                     >
                       <Globe className="h-4 w-4" />
                     </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-9 w-9 rounded-xl text-muted-foreground hover:text-gold hover:bg-gold/10" 
-                      onClick={handleExportPdf} 
+                    <ImportBooking
+                      onImport={handleImportBooking}
+                      trigger={
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-9 w-9 rounded-xl text-muted-foreground hover:text-gold hover:bg-gold/10"
+                          title="Importer une réservation"
+                        >
+                          <Upload className="h-4 w-4" />
+                        </Button>
+                      }
+                    />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-9 w-9 rounded-xl text-muted-foreground hover:text-gold hover:bg-gold/10"
+                      onClick={handleExportPdf}
                       title="Exporter en PDF"
                     >
                       <Download className="h-4 w-4" />
@@ -1558,42 +1620,39 @@ export default function TripPage() {
           </div>
 
           {/* Floating header */}
-          <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-3 pt-[calc(env(safe-area-inset-top)+0.75rem)] pb-2 bg-gradient-to-b from-black/40 to-transparent">
-            <div className="flex items-center gap-2">
+          <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-4 pt-[calc(env(safe-area-inset-top)+1rem)] pb-6 bg-gradient-to-b from-black/60 via-black/20 to-transparent pointer-events-none">
+            <div className="flex items-center gap-3 pointer-events-auto">
               <button
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-background/80 shadow-md backdrop-blur-sm"
-                onClick={() => router.push('/')}
+                className="flex h-11 w-11 items-center justify-center rounded-full bg-black/40 border border-white/10 shadow-[0_8px_16px_rgba(0,0,0,0.4)] backdrop-blur-xl active:scale-90 transition-all text-white"
+                onClick={() => { hapticImpactLight(); router.push('/'); }}
               >
-                <ArrowLeft className="h-4 w-4" />
+                <ArrowLeft className="h-5 w-5" />
               </button>
-              <div className="min-w-0">
-                <h1 className="text-sm font-semibold text-white drop-shadow-md truncate max-w-[200px]">
+              <div className="min-w-0 flex flex-col justify-center">
+                <h1 className="text-base font-black text-white drop-shadow-lg truncate max-w-[200px] leading-none mb-1">
                   {trip.preferences.destination}
                 </h1>
-                <p className="text-[11px] text-white/80 drop-shadow-sm">
-                  {trip.days.length} jours · {trip.preferences.groupSize || 1} voyageur{(trip.preferences.groupSize || 1) > 1 ? 's' : ''} · {format(new Date(trip.preferences.startDate), 'd MMM', { locale: fr })}
-                  {trip.totalEstimatedCost != null && (
-                    <span className="ml-1.5 inline-flex items-center rounded-full bg-white/20 px-1.5 py-px text-[10px] font-medium text-white backdrop-blur-sm">
-                      ~{trip.totalEstimatedCost}€
-                    </span>
-                  )}
+                <p className="text-[10px] font-bold uppercase tracking-widest text-white/80 drop-shadow-md flex items-center gap-1.5">
+                  {trip.days.length} Jours
+                  <span className="w-1 h-1 rounded-full bg-gold/50" />
+                  {format(new Date(trip.preferences.startDate), 'd MMM', { locale: fr })}
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-2 pointer-events-auto">
               {isOwner && (
                 <button
-                  className="flex h-9 w-9 items-center justify-center rounded-full bg-background/80 shadow-md backdrop-blur-sm"
-                  onClick={() => setShowShareDialog(true)}
+                  className="flex h-11 w-11 items-center justify-center rounded-full bg-black/40 border border-white/10 shadow-[0_8px_16px_rgba(0,0,0,0.4)] backdrop-blur-xl active:scale-90 transition-all text-white"
+                  onClick={() => { hapticImpactLight(); setShowShareDialog(true); }}
                 >
-                  <Share2 className="h-4 w-4" />
+                  <Share2 className="h-5 w-5" />
                 </button>
               )}
               <button
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-background/80 shadow-md backdrop-blur-sm"
-                onClick={() => setShowMobileActions(true)}
+                className="flex h-11 w-11 items-center justify-center rounded-full bg-black/40 border border-white/10 shadow-[0_8px_16px_rgba(0,0,0,0.4)] backdrop-blur-xl active:scale-90 transition-all text-white"
+                onClick={() => { hapticImpactLight(); setShowMobileActions(true); }}
               >
-                <MoreHorizontal className="h-4 w-4" />
+                <MoreHorizontal className="h-5 w-5" />
               </button>
             </div>
           </div>
@@ -1601,10 +1660,10 @@ export default function TripPage() {
           {/* Chat floating button */}
           {canOwnerEdit && (
             <button
-              className="absolute bottom-[14vh] right-3 z-20 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-hard"
-              onClick={() => setShowChatPanel(true)}
+              className="absolute bottom-[16vh] right-4 z-20 flex h-14 w-14 items-center justify-center rounded-full bg-gold-gradient text-black shadow-[0_10px_25px_rgba(197,160,89,0.4)] border border-white/20 active:scale-90 transition-all"
+              onClick={() => { hapticImpactMedium(); setShowChatPanel(true); }}
             >
-              <MessageCircle className="h-5 w-5" />
+              <MessageCircle className="h-6 w-6 stroke-[2.5px]" />
             </button>
           )}
 
@@ -1747,7 +1806,8 @@ export default function TripPage() {
                                     onMoveItem={canOwnerEdit ? handleMoveItem : undefined}
                                     onHoverItem={setHoveredItemId}
                                     showMoveButtons={canOwnerEdit}
-                                    renderSwapButton={renderSwapButton}
+                                    onSwapClick={canOwnerEdit ? handleSwapClick : undefined}
+                                    onEditTime={canOwnerEdit ? handleEditTime : undefined}
                                     hotelSelectorData={hotelSelectorData}
                                     onSelectRestaurantAlternative={canOwnerEdit ? handleSelectRestaurantAlternative : undefined}
                                     onSelectSelfMeal={canOwnerEdit ? handleSelectSelfMeal : undefined}
@@ -1929,7 +1989,8 @@ export default function TripPage() {
                           onHoverItem={setHoveredItemId}
                           onAddItem={canOwnerEdit ? (dayNumber) => { setAddActivityDay(dayNumber); setAddActivityDefaultTime(undefined); setAddActivityDefaultEndTime(undefined); setShowAddActivityModal(true); } : undefined}
                           showMoveButtons={canOwnerEdit}
-                          renderSwapButton={renderSwapButton}
+                          onSwapClick={canOwnerEdit ? handleSwapClick : undefined}
+                          onEditTime={canOwnerEdit ? handleEditTime : undefined}
                           hotelSelectorData={hotelSelectorData}
                           onSelectRestaurantAlternative={canOwnerEdit ? handleSelectRestaurantAlternative : undefined}
                           onSelectSelfMeal={canOwnerEdit ? handleSelectSelfMeal : undefined}
@@ -2070,6 +2131,20 @@ export default function TripPage() {
 
       {trip && (
         <AddActivityModal isOpen={showAddActivityModal} onClose={() => setShowAddActivityModal(false)} onAdd={handleAddNewItem} dayNumber={addActivityDay} destination={trip.preferences?.destination || collaborativeTrip?.destination || ''} defaultStartTime={addActivityDefaultTime} defaultEndTime={addActivityDefaultEndTime} />
+      )}
+
+      {swapItem && trip?.attractionPool && (
+        <ActivityAlternativesDialog
+          item={swapItem}
+          days={trip.days}
+          attractionPool={trip.attractionPool}
+          open={!!swapItem}
+          onOpenChange={(open) => { if (!open) setSwapItem(null); }}
+          onSwap={(oldItem, newAttraction) => {
+            handleSwapActivity(oldItem, newAttraction);
+            setSwapItem(null);
+          }}
+        />
       )}
 
       <ImportPlaces

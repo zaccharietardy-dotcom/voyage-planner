@@ -3,7 +3,7 @@ import { SITE_NAME, SITE_URL, OG_IMAGE_DEFAULT, LOCALE } from '@/lib/seo';
 
 const title = `Planifier un voyage | ${SITE_NAME}`;
 const description =
-  "Créez votre itinéraire de voyage personnalisé en quelques minutes grâce à l'intelligence artificielle. Destination, dates, budget : notre IA s'occupe de tout.";
+  "Créez votre itinéraire de voyage personnalisé en quelques minutes grâce à notre savoir-faire expert. Destination, dates, budget : notre expertise s'occupe de tout.";
 
 export const metadata: Metadata = {
   title: 'Planifier un voyage',

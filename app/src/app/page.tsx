@@ -54,7 +54,7 @@ function LandingPage() {
               </div>
               <h3 className="text-2xl font-display font-bold mb-4">Adaptation Précise</h3>
               <p className="text-muted-foreground leading-relaxed">
-                Personnalisez chaque détail selon vos envies. Notre IA ajuste les temps de trajet et les réservations en temps réel.
+                Personnalisez chaque détail selon vos envies. Narae ajuste les temps de trajet et les réservations en temps réel.
               </p>
             </motion.div>
 

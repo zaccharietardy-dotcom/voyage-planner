@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Loader2, Plane, Globe, Utensils, Landmark, Languages, Info, Banknote, Sun } from 'lucide-react';
+import { Loader2, Plane, Globe, Utensils, Landmark, Languages, Info, Banknote, Sun, Compass } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
+import { PremiumBackground } from '@/components/ui/PremiumBackground';
 
 // ── Fun facts database by destination keyword ──
 // Each destination has 6-10 facts that rotate during generation.
@@ -476,33 +477,41 @@ export function GeneratingScreen({ destination, durationDays, pipelineStep }: Ge
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-background/95 backdrop-blur-md"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-[#020617]"
       role="status"
       aria-live="polite"
     >
-      <div className="mx-auto w-full max-w-lg px-6">
+      <PremiumBackground />
+      
+      <div className="mx-auto w-full max-w-lg px-6 relative z-10">
         {/* Header */}
-        <div className="mb-8 text-center">
+        <div className="mb-12 text-center">
           <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-            className="mx-auto mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-[#102a45] text-white dark:bg-[#d4a853] dark:text-[#102a45]"
+            animate={{ 
+              y: [0, -10, 0],
+              rotate: [0, 5, -5, 0]
+            }}
+            transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+            className="mx-auto mb-6 inline-flex h-20 w-20 items-center justify-center rounded-[2rem] bg-gradient-to-br from-[#E2B35C] via-[#C5A059] to-[#8B6E37] text-black shadow-[0_20px_40px_rgba(197,160,89,0.3)] border border-white/20"
           >
-            <Plane className="h-6 w-6" />
+            <Plane className="h-10 w-10 stroke-[2.5px]" />
           </motion.div>
-          <h2 className="font-display text-2xl font-semibold">
-            {t('generating.creating')}
+          <h2 className="font-display text-4xl font-black text-white tracking-tight mb-2">
+            Conception Narae
           </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {destination}{durationDays ? ` \u00b7 ${durationDays} ${t('common.days')}` : ''}
-          </p>
+          <div className="flex items-center justify-center gap-2">
+            <Compass className="h-4 w-4 text-gold animate-pulse" />
+            <p className="text-gold font-bold uppercase tracking-[0.2em] text-[10px]">
+              {destination}{durationDays ? ` \u00b7 ${durationDays} ${t('common.days')}` : ''}
+            </p>
+          </div>
         </div>
 
         {/* Progress bar */}
-        <div className="mb-3">
-          <div className="h-2 overflow-hidden rounded-full bg-muted">
+        <div className="mb-4">
+          <div className="h-1.5 overflow-hidden rounded-full bg-white/5 border border-white/5">
             <motion.div
-              className="h-full rounded-full bg-gradient-to-r from-[#102a45] to-[#1e3a5f] dark:from-[#d4a853] dark:to-[#f4d03f]"
+              className="h-full rounded-full bg-gradient-to-r from-[#E2B35C] via-[#C5A059] to-[#8B6E37] shadow-[0_0_15px_rgba(197,160,89,0.5)]"
               initial={{ width: '0%' }}
               animate={{ width: `${progressPercent}%` }}
               transition={{ duration: 0.8, ease: 'easeOut' }}
@@ -511,53 +520,52 @@ export function GeneratingScreen({ destination, durationDays, pipelineStep }: Ge
         </div>
 
         {/* Pipeline step */}
-        <div className="mb-8 flex items-center justify-between text-xs text-muted-foreground" aria-live="polite" aria-atomic="true">
-          <span className="flex items-center gap-1.5">
-            <Loader2 className="h-3 w-3 animate-spin" />
+        <div className="mb-12 flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-white/40" aria-live="polite" aria-atomic="true">
+          <span className="flex items-center gap-2">
+            <div className="h-1 w-1 rounded-full bg-gold animate-ping" />
             {displayedStep}
           </span>
-          <span className="tabular-nums">{elapsed}s</span>
+          <span className="tabular-nums bg-white/5 px-2 py-1 rounded-md border border-white/5">{elapsed}s</span>
         </div>
 
         {/* Fun fact card */}
-        <div className="relative overflow-hidden rounded-2xl border border-[#1e3a5f]/15 bg-background p-5 shadow-sm dark:border-[#1e3a5f] dark:bg-[#0d1f35]/80">
+        <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-black/40 backdrop-blur-3xl p-8 shadow-2xl">
           <AnimatePresence mode="wait">
             <motion.div
               key={factIndex}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -12 }}
-              transition={{ duration: 0.35 }}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.05 }}
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             >
-              <div className="mb-3 flex items-center gap-2">
-                <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-[#1e3a5f]/10 text-[#1e3a5f] dark:bg-[#d4a853]/20 dark:text-[#d4a853]">
-                  <FactIcon className="h-4 w-4" />
-                </span>
-                <span className="text-xs font-semibold uppercase tracking-wider text-[#b8923d]">
+              <div className="mb-4 flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-gold/10 flex items-center justify-center text-gold">
+                  <FactIcon className="h-5 w-5" />
+                </div>
+                <span className="text-xs font-black uppercase tracking-[0.2em] text-gold">
                   {fact.category}
                 </span>
               </div>
-              <p className="text-sm leading-relaxed text-foreground">
+              <p className="text-lg leading-relaxed text-white font-medium">
                 {fact.text}
               </p>
             </motion.div>
           </AnimatePresence>
 
           {/* Dot indicators */}
-          <div className="mt-4 flex justify-center gap-1.5">
+          <div className="mt-8 flex justify-center gap-2">
             {facts.map((_, i) => (
               <span
                 key={i}
-                className={`h-1.5 rounded-full transition-all duration-300 ${
+                className={`h-1 rounded-full transition-all duration-500 ${
                   i === factIndex
-                    ? 'w-4 bg-[#d4a853]'
-                    : 'w-1.5 bg-muted-foreground/25'
+                    ? 'w-6 bg-gold shadow-[0_0_10px_rgba(197,160,89,0.5)]'
+                    : 'w-1.5 bg-white/10'
                 }`}
               />
             ))}
           </div>
         </div>
-
       </div>
     </motion.div>
   );

@@ -13,7 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Plus, MapPin, Calendar, Users, Plane, Loader2, Globe, Lock, Users2, ChevronDown, Camera, Sparkles, Navigation, Clock, Trash2, Settings2, ArrowRight } from 'lucide-react';
+import { Plus, MapPin, Calendar, Users, Plane, Loader2, Globe, Lock, Users2, ChevronDown, Camera, Navigation, Clock, Trash2, Settings2, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { fr, enUS, es, de, it, pt } from 'date-fns/locale';
@@ -158,7 +158,7 @@ export default function MesVoyagesPage() {
               transition={{ duration: 0.6 }}
             >
               <div className="flex items-center gap-2 mb-4">
-                <Sparkles className="h-4 w-4 text-gold" />
+                <Globe className="h-4 w-4 text-gold" />
                 <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-gold">Votre Patrimoine Voyage</span>
               </div>
               <h1 className="font-display text-4xl md:text-6xl font-bold text-foreground leading-tight">

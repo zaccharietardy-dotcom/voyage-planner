@@ -1,11 +1,27 @@
 'use client';
 
-import { useState, memo } from 'react';
+import { useState, useEffect, memo } from 'react';
 import { TripItem, TripItemType, Flight, Restaurant, Accommodation, TRIP_ITEM_COLORS } from '@/lib/types';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Popover, PopoverContent, PopoverTrigger, PopoverAnchor } from '@/components/ui/popover';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+  DrawerClose,
+  DrawerHandle,
+} from '@/components/ui/drawer';
 import { PriceComparisonCard } from './PriceComparisonCard';
 import {
   MapPin,
@@ -44,10 +60,16 @@ import {
   Award,
   Check,
   TrendingDown,
+  UtensilsCrossed,
+  MoreHorizontal,
+  ArrowLeftRight,
+  X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
 import { classifyActivityCategory, getCategoryConfig } from '@/lib/utils/activityClassifier';
 import { ActivityVote } from './ActivityVote';
+import { hapticImpactLight, hapticImpactMedium } from '@/lib/mobile/haptics';
 
 type SvgIconComponent = React.ComponentType<React.SVGProps<SVGSVGElement>>;
 
@@ -66,7 +88,8 @@ interface ActivityCardProps {
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
   dragHandleProps?: React.HTMLAttributes<HTMLDivElement>;
-  swapButton?: React.ReactNode;
+  onSwapClick?: () => void;
+  onEditTime?: (item: TripItem, start: string, end: string) => void;
   onSelectRestaurantAlternative?: (item: TripItem, restaurant: Restaurant) => void;
   onSelectSelfMeal?: (item: TripItem) => void;
   onDurationChange?: (item: TripItem, newDuration: number) => void;
@@ -324,7 +347,8 @@ export const ActivityCard = memo(function ActivityCard({
   onMouseEnter,
   onMouseLeave,
   dragHandleProps,
-  swapButton,
+  onSwapClick,
+  onEditTime,
   onSelectRestaurantAlternative,
   onSelectSelfMeal,
   onDurationChange,
@@ -333,7 +357,8 @@ export const ActivityCard = memo(function ActivityCard({
   voteData,
   onVote,
 }: ActivityCardProps) {
-  const [showPriceComparisonDialog, setShowPriceComparisonDialog] = useState(false);
+  const [showPriceComparisonDrawer, setShowPriceComparisonDrawer] = useState(false);
+  const [showActionsDrawer, setShowActionsDrawer] = useState(false);
   const transportMode = item.type === 'transport' ? getTransportModeForItem(item) : undefined;
   const transportIconTestId = transportMode ? `transport-icon-${transportMode}` : undefined;
   const color = TRIP_ITEM_COLORS[item.type];
@@ -343,12 +368,26 @@ export const ActivityCard = memo(function ActivityCard({
   const hasImage = imageUrl && IMAGE_TYPES.includes(item.type);
   const [imgError, setImgError] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showTimeEdit, setShowTimeEdit] = useState(false);
+  const [editStartTime, setEditStartTime] = useState(item.startTime || '');
+  const [editEndTime, setEditEndTime] = useState(item.endTime || '');
+
+  useEffect(() => {
+    if (!showDeleteConfirm) return;
+    const timer = setTimeout(() => setShowDeleteConfirm(false), 4000);
+    return () => clearTimeout(timer);
+  }, [showDeleteConfirm]);
+
+  const isLocked = item.type === 'flight' || item.type === 'checkin' || item.type === 'checkout';
+  const hasActions = !isLocked && (onSwapClick || onEdit || onDelete || onEditTime);
+
   const showImage = hasImage && !imgError;
   // Restaurant with alternatives: render as flat card with 3 equal suggestion cards
   const hasRestaurantAlternatives = item.type === 'restaurant' && item.restaurant && item.restaurantAlternatives && item.restaurantAlternatives.length > 0;
   // Hotel with alternatives: show flat carousel of options below the main card
   const hasHotelAlternatives = (item.type === 'hotel' || item.type === 'checkin') && hotelAlternatives && hotelAlternatives.length > 0;
-  const isHeroType = IMAGE_TYPES.includes(item.type) && !hasRestaurantAlternatives;
+  const isHeroType = IMAGE_TYPES.includes(item.type);
   // Hero cards always use the "image" style (white text, overlay) — either with a real image or a gradient fallback
   const useHeroStyle = isHeroType;
   const isCompactCheckin = item.type === 'checkin';
@@ -356,443 +395,162 @@ export const ActivityCard = memo(function ActivityCard({
   return (
     <Card
       className={cn(
-        'relative group transition-all duration-200 cursor-pointer overflow-hidden active:scale-[0.98]',
-        'border-border/60 hover:border-primary/40 hover:shadow-lg hover:scale-[1.01] hover:-translate-y-0.5',
-        isSelected && 'ring-2 ring-primary/80 border-primary shadow-lg transition-shadow',
-        isDragging && 'shadow-xl rotate-1 scale-[1.03]',
-        item.type === 'free_time' && 'bg-emerald-50/40 border-emerald-200/50 dark:bg-emerald-950/15 dark:border-emerald-800/30',
+        'relative group transition-all duration-300 cursor-pointer overflow-hidden active:scale-[0.97]',
+        'border-white/5 bg-[#0A1628]/40 backdrop-blur-md shadow-[0_8px_30px_rgb(0,0,0,0.12)]',
+        'hover:shadow-[0_8px_30px_rgb(0,0,0,0.2)] hover:border-white/10',
+        isSelected && 'ring-2 ring-gold/50 border-gold/30 shadow-gold/10',
+        isDragging && 'shadow-2xl rotate-2 scale-[1.05] z-50',
       )}
       onClick={onSelect}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
-      {/* Compact checkin: slim bar instead of hero card */}
+      {/* Compact checkin: simplified for mobile premium feel */}
       {isCompactCheckin && (
-        <div className="flex items-center gap-3 p-3">
-          <div className="w-1 self-stretch rounded-full" style={{ backgroundColor: color }} />
-          <div
-            className="p-2 rounded-lg shrink-0"
-            style={{ backgroundColor: `${color}15` }}
-          >
-            <LogIn className="h-4 w-4" style={{ color }} />
-          </div>
+        <div className="flex items-center gap-4 p-4">
+          <div className="w-1.5 h-12 rounded-full" style={{ backgroundColor: color }} />
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-0.5">
-              <h4 className="text-[13px] font-semibold leading-snug truncate">{item.title}</h4>
-              <span className="inline-flex items-center gap-1 font-mono text-xs text-muted-foreground shrink-0">
+            <div className="flex items-center justify-between mb-1">
+              <h4 className="text-sm font-bold tracking-tight text-white truncate">{item.title}</h4>
+              <span className="flex items-center gap-1 font-mono text-[10px] font-bold text-gold/80 bg-gold/10 px-2 py-0.5 rounded-full">
                 <Clock className="h-3 w-3" />
                 {item.startTime}
               </span>
             </div>
             {item.description && (
-              <p className="text-xs text-muted-foreground line-clamp-1">{item.description}</p>
-            )}
-            {item.bookingUrl && (
-              <div className="flex items-center gap-1.5 mt-1.5">
-                <BookingButtons item={item} />
-              </div>
+              <p className="text-[11px] text-white/50 line-clamp-1 italic">{item.description}</p>
             )}
           </div>
         </div>
       )}
 
-      {/* Standard card layout (hero + content) — hidden for compact checkin */}
+      {/* Standard card layout (hero + content) */}
       {!isCompactCheckin && (
         <>
-      {/* Background: gradient base (always visible) + image on top with fade-in */}
-      {isHeroType && (
-        <>
-          {/* Gradient is always rendered as the base layer / loading placeholder */}
-          <div className={cn("absolute inset-0 bg-gradient-to-br", TYPE_GRADIENTS[item.type] || 'from-gray-600/90 to-gray-800/95')} />
-          {!showImage && (
-            <ItemTypeIcon
-              item={item}
-              className="absolute right-3 bottom-3 h-16 w-16 text-white/10"
-              testId={transportIconTestId}
-            />
-          )}
-
-          {/* Image fades in over the gradient once loaded */}
-          {showImage && (
-            <>
-              {item.photoGallery && item.photoGallery.length > 1 ? (
-                <PhotoCarousel
-                  photos={item.photoGallery}
-                  alt={item.title}
-                  className="absolute inset-0 w-full h-full object-cover"
-                />
-              ) : (
-                <img
-                  src={imageUrl}
-                  alt={item.title}
-                  className={cn(
-                    "absolute inset-0 w-full h-full object-cover transition-opacity duration-500",
-                    imgLoaded ? "opacity-100" : "opacity-0"
+          {isHeroType && (
+            <div className="relative h-48 w-full overflow-hidden">
+              {/* Gradient base */}
+              <div className={cn("absolute inset-0 bg-gradient-to-br", TYPE_GRADIENTS[item.type] || 'from-slate-800 to-slate-950')} />
+              
+              {showImage ? (
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="absolute inset-0"
+                >
+                  {item.photoGallery && item.photoGallery.length > 1 ? (
+                    <PhotoCarousel
+                      photos={item.photoGallery}
+                      alt={item.title}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <img
+                      src={imageUrl}
+                      alt={item.title}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
                   )}
-                  loading="lazy"
-                  onLoad={() => setImgLoaded(true)}
-                  onError={() => setImgError(true)}
+                  {/* Premium overlay gradient */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0A1628] via-[#0A1628]/20 to-transparent" />
+                </motion.div>
+              ) : (
+                <ItemTypeIcon
+                  item={item}
+                  className="absolute right-4 bottom-4 h-20 w-20 text-white/5"
+                  testId={transportIconTestId}
                 />
               )}
-              {/* Dark gradient overlay for text readability */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/30" />
-            </>
-          )}
-        </>
-      )}
 
-      <div className={cn("flex", useHeroStyle ? "relative z-10" : "")}>
-        {/* Drag handle */}
-        {dragHandleProps && (
-          <div
-            {...dragHandleProps}
-            className={cn(
-              "flex items-center justify-center w-7 cursor-grab active:cursor-grabbing transition-colors",
-              useHeroStyle ? "hover:bg-white/10" : "bg-muted/30 hover:bg-muted/60"
-            )}
-          >
-            <GripVertical className={cn("h-3.5 w-3.5", useHeroStyle ? "text-white/60" : "text-muted-foreground/60")} />
-          </div>
-        )}
-
-        {/* Color accent stripe + order number (non-hero types only: transport, flight, etc.) */}
-        {!isHeroType && (
-          orderNumber !== undefined ? (
-            <div
-              className="w-12 self-stretch flex items-center justify-center shrink-0 border-r border-border/40"
-              style={{ background: 'linear-gradient(to bottom, rgba(197, 160, 89, 0.05), transparent)' }}
-            >
-              <span
-                className="w-8 h-8 rounded-xl flex items-center justify-center text-sm font-display font-bold text-gold border border-gold/30 bg-white/50 dark:bg-white/5 shadow-sm"
-              >
-                {orderNumber}
-              </span>
-            </div>
-          ) : (
-            <div className="w-1.5 self-stretch rounded-l-md bg-gold/50" />
-          )
-        )}
-
-        {/* Content */}
-        <div className={cn("flex-1 min-w-0", useHeroStyle ? "p-5" : "p-4")}>
-          <div className="flex items-start gap-4">
-            <div className="flex-1 min-w-0">
-              {/* Time row */}
-              <div className={cn("flex items-center gap-3", useHeroStyle ? "mb-3" : "mb-2")}>
-                {/* Order number badge (inline on hero cards) */}
-                {useHeroStyle && orderNumber !== undefined && (
-                  <span
-                    className="w-8 h-8 rounded-xl flex items-center justify-center text-sm font-display font-bold text-white shadow-xl shrink-0 bg-gold-gradient border border-white/20"
-                  >
-                    {orderNumber}
-                  </span>
-                )}
-                <span className={cn(
-                  "inline-flex items-center gap-1 font-mono font-medium",
-                  useHeroStyle ? "text-sm text-white/90" : "text-xs text-muted-foreground"
-                )}>
-                  <Clock className={cn(useHeroStyle ? "h-3.5 w-3.5" : "h-3 w-3")} />
-                  {item.startTime} – {item.endTime}
+              {/* Top badges (Time & Type) */}
+              <div className="absolute top-3 left-3 flex items-center gap-2">
+                <span className="bg-black/40 backdrop-blur-md text-white/90 text-[10px] font-bold px-2.5 py-1 rounded-full border border-white/10 flex items-center gap-1">
+                  <Clock className="h-3 w-3 text-gold" />
+                  {item.startTime}
                 </span>
-                {/* Type badge */}
-                <span
-                  className={cn(
-                    "font-semibold leading-none rounded",
-                    useHeroStyle ? "px-2 py-1 text-xs bg-white/20 text-white/90" : "px-1.5 py-0.5 text-[10px]"
-                  )}
-                  style={!useHeroStyle ? { backgroundColor: `${color}12`, color } : undefined}
+                <span 
+                  className="text-white text-[10px] font-bold px-2.5 py-1 rounded-full border border-white/10 backdrop-blur-md"
+                  style={{ backgroundColor: `${color}40` }}
                 >
                   {TYPE_LABELS[item.type]}
                 </span>
-                {item.type === 'activity' && item.duration && onDurationChange && (
-                  <DurationBadge
-                    duration={item.duration}
-                    onDurationChange={(newDuration) => onDurationChange(item, newDuration)}
-                    isHero={useHeroStyle}
-                  />
-                )}
               </div>
 
-              {/* Title — hidden for restaurant flat layout (shown in cards) */}
-              {!hasRestaurantAlternatives && (
-                <h4 className={cn(
-                  "font-semibold leading-snug mb-0 line-clamp-2",
-                  useHeroStyle ? "text-base text-white drop-shadow-md" : "text-[13px]"
-                )}>
+              {/* Price/Rating floating badge */}
+              <div className="absolute bottom-3 right-3 flex flex-col items-end gap-1.5">
+                {item.rating && (
+                  <span className="bg-gold-gradient text-black text-[10px] font-black px-2 py-0.5 rounded-md shadow-lg flex items-center gap-0.5">
+                    <Star className="h-2.5 w-2.5 fill-black" />
+                    {item.rating.toFixed(1)}
+                  </span>
+                )}
+                {item.estimatedCost && (
+                  <span className="bg-white/10 backdrop-blur-md text-white text-[11px] font-bold px-2 py-0.5 rounded-md border border-white/10">
+                    {item.estimatedCost}€
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+
+          <div className="p-4">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex-1 min-w-0">
+                <h4 className="text-base font-bold text-white tracking-tight leading-snug mb-1">
                   {item.title}
                 </h4>
-              )}
+                
+                {item.description && (
+                  <p className="text-xs text-white/60 line-clamp-2 leading-relaxed mb-3">
+                    {item.description}
+                  </p>
+                )}
 
-              {/* Description — hidden for restaurant flat layout */}
-              {!hasRestaurantAlternatives && item.description && (
-                <p className={cn(
-                  "leading-relaxed line-clamp-2 mb-1.5",
-                  useHeroStyle ? "text-sm text-white/70" : "text-xs text-muted-foreground"
-                )}>
-                  {item.description}
-                </p>
-              )}
-
-              {/* Viator flags + Restaurant badges */}
-              {!hasRestaurantAlternatives && (
-                <div className="flex items-center gap-1.5 flex-wrap mt-1">
-                  {/* Viator: Free cancellation */}
-                  {item.freeCancellation && (
-                    <span className={cn(
-                      "inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-medium",
-                      useHeroStyle ? "bg-emerald-500/20 text-emerald-300" : "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400"
-                    )}>
-                      <ShieldCheck className="h-2.5 w-2.5" />
-                      Annulation gratuite
-                    </span>
-                  )}
-                  {/* Viator: Instant confirmation */}
-                  {item.instantConfirmation && (
-                    <span className={cn(
-                      "inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-medium",
-                      useHeroStyle ? "bg-blue-500/20 text-blue-300" : "bg-blue-50 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400"
-                    )}>
-                      <Zap className="h-2.5 w-2.5" />
-                      Confirmation instantanée
-                    </span>
-                  )}
-                  {/* Restaurant badges (Michelin, etc.) */}
-                  {item.type === 'restaurant' && item.restaurant?.badges?.map((badge, i) => (
-                    <span key={i} className={cn(
-                      "inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-medium",
-                      useHeroStyle ? "bg-white/15 text-white/80" : "bg-muted text-muted-foreground"
-                    )}>
-                      <Award className="h-2.5 w-2.5" />
-                      {badge}
+                {/* Micro-tags for premium feel */}
+                <div className="flex items-center gap-2 flex-wrap mb-3">
+                  {item.type === 'activity' && classifyActivityCategory(item).slice(0, 2).map(cat => (
+                    <span key={cat} className="text-[10px] font-bold text-gold/80 bg-gold/5 px-2 py-0.5 rounded-full border border-gold/10">
+                      {getCategoryConfig(cat).label}
                     </span>
                   ))}
-                </div>
-              )}
-
-              {/* Activity category tags */}
-              {!hasRestaurantAlternatives && item.type === 'activity' && (
-                <div className="flex items-center gap-1 flex-wrap mt-1">
-                  {classifyActivityCategory(item).slice(0, 3).map(cat => {
-                    const config = getCategoryConfig(cat);
-                    return (
-                      <span key={cat} className={cn(
-                        "inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-medium",
-                        useHeroStyle ? "bg-white/15 text-white/80" : "bg-muted text-muted-foreground"
-                      )}>
-                        {config.emoji} {config.label}
-                      </span>
-                    );
-                  })}
-                </div>
-              )}
-
-              {/* Meta row: rating, cost — hidden for restaurant flat layout */}
-              {!hasRestaurantAlternatives && (
-              <div className={cn(
-                "flex items-center gap-2.5 flex-wrap",
-                useHeroStyle ? "text-sm text-white/80 mt-1" : "text-xs text-muted-foreground"
-              )}>
-                {item.rating && item.rating > 0 && (
-                  <span className="inline-flex items-center gap-0.5 font-medium">
-                    <Star className={cn(useHeroStyle ? "h-3.5 w-3.5" : "h-3 w-3", "fill-yellow-500/70 text-yellow-500/70")} />
-                    {item.rating.toFixed(1)}
-                    {item.reviewCount && item.reviewCount > 0 && (
-                      <span className={useHeroStyle ? "text-white/50" : "text-muted-foreground/60"}>
-                        ({item.reviewCount > 1000 ? `${(item.reviewCount / 1000).toFixed(1)}k` : item.reviewCount})
-                      </span>
-                    )}
-                  </span>
-                )}
-                {item.timeFromPrevious && item.timeFromPrevious > 0 && (
-                  <span className="inline-flex items-center gap-1">
-                    <Navigation className={cn(useHeroStyle ? "h-3.5 w-3.5" : "h-3 w-3")} />
-                    {item.timeFromPrevious} min
-                    {item.distanceFromPrevious && item.distanceFromPrevious > 0.1 && (
-                      <span className={useHeroStyle ? "text-white/50" : "text-muted-foreground/60"}>({item.distanceFromPrevious.toFixed(1)} km)</span>
-                    )}
-                  </span>
-                )}
-                {/* Cost */}
-                {item.type !== 'transport' && (
-                  <>
-                    {item.estimatedCost != null && item.estimatedCost > 0 ? (
-                      <span className={cn("font-semibold", useHeroStyle ? "text-white" : "text-primary")}>
-                        ~{item.estimatedCost}€
-                        {item.type !== 'parking' && (
-                          <span className={cn("font-normal", useHeroStyle ? "text-white/60" : "text-muted-foreground")}> / pers.</span>
-                        )}
-                      </span>
-                    ) : item.type === 'activity' ? (
-                      item.officialBookingUrl ? (
-                        <span className={cn("font-medium", useHeroStyle ? "text-blue-300" : "text-blue-600 dark:text-blue-400")}>Voir billetterie</span>
-                      ) : (
-                        <span className={cn("font-medium", useHeroStyle ? "text-emerald-300" : "text-emerald-600 dark:text-emerald-400")}>Gratuit</span>
-                      )
-                    ) : null}
-                  </>
-                )}
-              </div>
-              )}
-
-              {/* Restaurant phone & website (non-flat layout) */}
-              {!hasRestaurantAlternatives && item.type === 'restaurant' && item.restaurant && (item.restaurant.phoneNumber || item.restaurant.website) && (
-                <div className={cn(
-                  "flex items-center gap-3 mt-1",
-                  useHeroStyle ? "text-xs text-white/70" : "text-xs text-muted-foreground"
-                )}>
-                  {item.restaurant.phoneNumber && (
-                    <a
-                      href={`tel:${item.restaurant.phoneNumber}`}
-                      className={cn("inline-flex items-center gap-1 hover:underline", useHeroStyle ? "hover:text-white" : "hover:text-foreground")}
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <Phone className="h-3 w-3" />
-                      {item.restaurant.phoneNumber}
-                    </a>
-                  )}
-                  {item.restaurant.website && (
-                    <a
-                      href={item.restaurant.website}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={cn("inline-flex items-center gap-1 hover:underline", useHeroStyle ? "hover:text-white" : "hover:text-foreground")}
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <Globe className="h-3 w-3" />
-                      Site web
-                    </a>
+                  {item.timeFromPrevious && (
+                    <span className="text-[10px] text-white/40 flex items-center gap-1">
+                      <Navigation className="h-2.5 w-2.5" />
+                      {item.timeFromPrevious}m
+                    </span>
                   )}
                 </div>
-              )}
 
-              {/* Transit lines */}
-              {item.transitInfo?.lines && item.transitInfo.lines.length > 0 && !(item.type === 'transport' && item.bookingUrl) && (
-                <div className="flex items-center gap-1.5 mt-2 flex-wrap">
-                  {item.transitInfo.lines.map((line, idx) => {
-                    const ModeIcon = TRANSIT_MODE_ICONS[line.mode] || Bus;
-                    const bgColor = line.color || TRANSIT_MODE_COLORS[line.mode] || '#666';
-                    return (
-                      <span
-                        key={`${line.mode}-${line.number}-${idx}`}
-                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold text-white"
-                        style={{ backgroundColor: bgColor }}
-                      >
-                        <ModeIcon className="h-2.5 w-2.5" />
-                        {line.number}
-                      </span>
-                    );
-                  })}
-                </div>
-              )}
-
-              {/* Transport card */}
-              {item.type === 'transport' && item.bookingUrl && (
-                <TransportCard item={item} />
-              )}
-
-              {/* Viator product card */}
-              {item.viatorImageUrl && (item.bookingUrl?.includes('viator.com') || item.viatorUrl) && (
-                <a
-                  href={item.viatorUrl || item.bookingUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                  className="flex items-center gap-2.5 mt-2.5 p-2 rounded-lg border border-border/60 bg-muted/20 hover:bg-muted/40 transition-colors"
-                >
-                  <img
-                    src={item.viatorImageUrl}
-                    alt={item.viatorTitle || item.title}
-                    className="w-12 h-12 rounded-md object-cover shrink-0"
-                  />
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs font-medium line-clamp-2 leading-snug">{item.viatorTitle || item.title}</p>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      {item.viatorRating && (
-                        <span className="flex items-center gap-0.5 text-[10px]">
-                          <Star className="h-2.5 w-2.5 fill-yellow-500/70 text-yellow-500/70" />
-                          {item.viatorRating.toFixed(1)}
-                          {item.viatorReviewCount && <span className="text-muted-foreground">({item.viatorReviewCount})</span>}
-                        </span>
-                      )}
-                      {item.viatorDuration && item.viatorDuration > 0 && (
-                        <span className="flex items-center gap-0.5 text-[10px] text-muted-foreground">
-                          <Clock className="h-2.5 w-2.5" />
-                          {formatDuration(item.viatorDuration)}
-                        </span>
-                      )}
-                      {(item.viatorPrice || item.estimatedCost) && (item.viatorPrice || item.estimatedCost)! > 0 && (
-                        <span className="text-[10px] font-semibold text-primary">dès {item.viatorPrice || item.estimatedCost}€</span>
-                      )}
-                    </div>
-                  </div>
-                </a>
-              )}
-
-              {/* Booking buttons — clean pill style (hidden for restaurant flat layout) */}
-              {!hasRestaurantAlternatives && (
-                <div className="flex items-center gap-1.5 mt-2.5 flex-wrap">
+                {/* Action pills */}
+                <div className="flex items-center gap-2">
                   <BookingButtons item={item} />
-                  {/* Price comparison button for activities */}
-                  {showPriceComparison && item.type === 'activity' && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setShowPriceComparisonDialog(true);
-                      }}
-                      className={cn(
-                        'inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors',
-                        'text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300',
-                        'hover:bg-emerald-500/10 border border-transparent hover:border-emerald-500/20'
-                      )}
-                    >
-                      <TrendingDown className="h-3 w-3" />
-                      Comparer les prix
-                    </button>
-                  )}
+                </div>
+              </div>
+              
+              {!isHeroType && (
+                <div className="p-3 rounded-2xl bg-white/5 border border-white/10 shadow-inner">
+                  <ItemTypeIcon item={item} className="h-5 w-5 text-gold" />
                 </div>
               )}
             </div>
-
-            {/* Type icon (non-hero types only) */}
-            {!isHeroType && (
-              <div
-                className="p-2 rounded-lg shrink-0"
-                style={{ backgroundColor: `${color}10` }}
-              >
-                <ItemTypeIcon
-                  item={item}
-                  className="h-4 w-4"
-                  style={{ color }}
-                  testId={transportIconTestId}
-                />
-              </div>
-            )}
           </div>
+        </>
+      )}
 
-          {/* Flight alternatives */}
-          {item.type === 'flight' && item.flightAlternatives && item.flightAlternatives.length > 0 && (
-            <FlightAlternatives alternatives={item.flightAlternatives} />
-          )}
-
-          {/* Restaurant top-3 suggestions — old nested style (only for restaurants without the flat layout) */}
-          {item.type === 'restaurant' && item.restaurant && item.restaurantAlternatives && item.restaurantAlternatives.length > 0 && !hasRestaurantAlternatives && (
-            <RestaurantSuggestions
-              item={item}
-              onSelectRestaurantAlternative={onSelectRestaurantAlternative}
-              onSelectSelfMeal={onSelectSelfMeal}
-            />
-          )}
-        </div>
-      </div>
-
-      {/* Restaurant flat layout: 3 equal cards side by side as the main content */}
+      {/* Restaurant alternatives overlay */}
       {hasRestaurantAlternatives && (
-        <RestaurantSuggestionsFlat
+        <RestaurantAlternativesOverlay
           item={item}
           onSelectRestaurantAlternative={onSelectRestaurantAlternative}
         />
       )}
-        </>
+
+      {/* Flight alternatives */}
+      {item.type === 'flight' && item.flightAlternatives && item.flightAlternatives.length > 0 && (
+        <div className="px-4 pb-3">
+          <FlightAlternatives alternatives={item.flightAlternatives} />
+        </div>
       )}
 
       {/* Hotel alternatives carousel */}
@@ -805,7 +563,7 @@ export const ActivityCard = memo(function ActivityCard({
 
       {/* Move buttons */}
       {onMoveUp && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
           <Button
             size="icon"
             variant="secondary"
@@ -819,7 +577,7 @@ export const ActivityCard = memo(function ActivityCard({
         </div>
       )}
       {onMoveDown && (
-        <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+        <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 z-10">
           <Button
             size="icon"
             variant="secondary"
@@ -833,45 +591,130 @@ export const ActivityCard = memo(function ActivityCard({
         </div>
       )}
 
-      {/* Action buttons (swap/edit/delete) */}
-      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-0.5 z-10">
-        {swapButton && (item.type === 'activity' || item.type === 'free_time') && swapButton}
-        {onEdit && (
-          <Button
-            size="icon"
-            variant="ghost"
-            className="h-7 w-7 bg-background/80 backdrop-blur-sm hover:bg-background"
-            onClick={(e) => { e.stopPropagation(); onEdit(); }}
-          >
-            <Pencil className="h-3 w-3" />
-          </Button>
-        )}
-        {onDelete && (
-          <Button
-            size="icon"
-            variant="ghost"
-            className="h-7 w-7 bg-background/80 backdrop-blur-sm hover:bg-background text-destructive hover:text-destructive"
-            onClick={(e) => { e.stopPropagation(); onDelete(); }}
-          >
-            <Trash2 className="h-3 w-3" />
-          </Button>
-        )}
-      </div>
-
-      {/* Activity voting */}
-      {item.type === 'activity' && voteData && onVote && (
-        <div className="px-3 pb-2">
-          <ActivityVote {...voteData} onVote={onVote} />
+      {/* Action Drawer (Mobile First) */}
+      {hasActions && (
+        <div className="absolute top-3 right-3 z-10">
+          <Drawer open={showActionsDrawer} onOpenChange={setShowActionsDrawer}>
+            <DrawerTrigger asChild>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-9 w-9 bg-black/40 backdrop-blur-md hover:bg-black/60 rounded-full border border-white/10"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  hapticImpactLight();
+                }}
+              >
+                <MoreHorizontal className="h-5 w-5 text-white" />
+              </Button>
+            </DrawerTrigger>
+            <DrawerContent>
+              <DrawerHandle />
+              <DrawerHeader className="pb-4">
+                <DrawerTitle className="text-xl font-black text-white flex items-center gap-3">
+                  <div className="p-2 rounded-xl bg-gold/10 border border-gold/20">
+                    <ItemTypeIcon item={item} className="h-5 w-5 text-gold" />
+                  </div>
+                  {item.title}
+                </DrawerTitle>
+              </DrawerHeader>
+              
+              <div className="p-6 pt-0 space-y-3">
+                {onSwapClick && (item.type === 'activity' || item.type === 'free_time') && (
+                  <button 
+                    className="w-full flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 active:scale-95 transition-all text-white font-bold"
+                    onClick={(e) => { e.stopPropagation(); onSwapClick(); setShowActionsDrawer(false); hapticImpactMedium(); }}
+                  >
+                    <ArrowLeftRight className="h-5 w-5 text-gold" />
+                    Remplacer l'activité
+                  </button>
+                )}
+                
+                {onEditTime && (
+                  <button 
+                    className="w-full flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 active:scale-95 transition-all text-white font-bold"
+                    onClick={(e) => { e.stopPropagation(); setShowTimeEdit(true); setShowActionsDrawer(false); hapticImpactLight(); }}
+                  >
+                    <Clock className="h-5 w-5 text-gold" />
+                    Modifier l'horaire
+                  </button>
+                )}
+                
+                {onEdit && (
+                  <button 
+                    className="w-full flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 active:scale-95 transition-all text-white font-bold"
+                    onClick={(e) => { e.stopPropagation(); onEdit(); setShowActionsDrawer(false); hapticImpactLight(); }}
+                  >
+                    <Pencil className="h-5 w-5 text-gold" />
+                    Modifier les détails
+                  </button>
+                )}
+                
+                {onDelete && (
+                  <button 
+                    className="w-full flex items-center gap-4 p-4 rounded-2xl bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 active:scale-95 transition-all text-red-400 font-bold"
+                    onClick={(e) => { e.stopPropagation(); setShowDeleteConfirm(true); setShowActionsDrawer(false); hapticImpactMedium(); }}
+                  >
+                    <Trash2 className="h-5 w-5" />
+                    Supprimer du voyage
+                  </button>
+                )}
+              </div>
+            </DrawerContent>
+          </Drawer>
         </div>
       )}
 
-      {/* Price comparison dialog */}
-      {item.type === 'activity' && (
-        <Dialog open={showPriceComparisonDialog} onOpenChange={setShowPriceComparisonDialog}>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>{item.title} - Comparaison des prix</DialogTitle>
-            </DialogHeader>
+      {/* Time Edit Drawer (separate from main actions for focus) */}
+      <Drawer open={showTimeEdit} onOpenChange={setShowTimeEdit}>
+        <DrawerContent>
+          <DrawerHandle />
+          <DrawerHeader>
+            <DrawerTitle className="text-white">Modifier l'horaire</DrawerTitle>
+          </DrawerHeader>
+          <div className="p-6 space-y-6">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-gold">Début</label>
+                <input
+                  type="time"
+                  value={editStartTime}
+                  onChange={(e) => setEditStartTime(e.target.value)}
+                  className="w-full h-14 px-4 rounded-2xl bg-white/5 border border-white/10 text-white font-bold text-lg focus:border-gold/50 outline-none transition-all"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-gold">Fin</label>
+                <input
+                  type="time"
+                  value={editEndTime}
+                  onChange={(e) => setEditEndTime(e.target.value)}
+                  className="w-full h-14 px-4 rounded-2xl bg-white/5 border border-white/10 text-white font-bold text-lg focus:border-gold/50 outline-none transition-all"
+                />
+              </div>
+            </div>
+            <Button
+              className="w-full h-14 rounded-2xl bg-gold-gradient text-black font-black text-lg shadow-xl shadow-gold/20"
+              onClick={() => {
+                onEditTime!(item, editStartTime, editEndTime);
+                setShowTimeEdit(false);
+                hapticImpactMedium();
+              }}
+            >
+              Appliquer
+            </Button>
+          </div>
+        </DrawerContent>
+      </Drawer>
+
+      {/* Price Comparison Drawer */}
+      <Drawer open={showPriceComparisonDrawer} onOpenChange={setShowPriceComparisonDrawer}>
+        <DrawerContent>
+          <DrawerHandle />
+          <DrawerHeader>
+            <DrawerTitle className="text-white">Comparaison des prix</DrawerTitle>
+          </DrawerHeader>
+          <div className="p-6 max-h-[70vh] overflow-y-auto scrollbar-hide">
             <PriceComparisonCard
               type="activity"
               params={{
@@ -880,8 +723,40 @@ export const ActivityCard = memo(function ActivityCard({
               }}
               currentPrice={item.estimatedCost}
             />
-          </DialogContent>
-        </Dialog>
+          </div>
+        </DrawerContent>
+      </Drawer>
+
+      {/* Activity voting */}
+      {item.type === 'activity' && voteData && onVote && (
+        <div className="px-3 pb-2">
+          <ActivityVote {...voteData} onVote={onVote} />
+        </div>
+      )}
+
+      {/* Delete confirmation overlay */}
+      {showDeleteConfirm && (
+        <div
+          className="absolute inset-0 z-20 flex items-center justify-center gap-3 rounded-[inherit] bg-destructive/95 backdrop-blur-sm"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <p className="text-sm font-medium text-white">Supprimer ?</p>
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-7 text-xs bg-white/20 border-white/30 text-white hover:bg-white/30"
+            onClick={(e) => { e.stopPropagation(); setShowDeleteConfirm(false); }}
+          >
+            Annuler
+          </Button>
+          <Button
+            size="sm"
+            className="h-7 text-xs bg-white text-destructive hover:bg-white/90"
+            onClick={(e) => { e.stopPropagation(); onDelete?.(); setShowDeleteConfirm(false); }}
+          >
+            Confirmer
+          </Button>
+        </div>
       )}
     </Card>
   );
@@ -1542,6 +1417,115 @@ function RestaurantSuggestionsFlat({
         })}
         </div>
       </div>
+    </div>
+  );
+}
+
+/**
+ * Restaurant alternatives overlay: small cards shown below the hero card.
+ * The hero shows the selected restaurant's photo; alternatives appear as compact cards underneath.
+ */
+function RestaurantAlternativesOverlay({
+  item,
+  onSelectRestaurantAlternative,
+}: {
+  item: TripItem;
+  onSelectRestaurantAlternative?: (item: TripItem, restaurant: Restaurant) => void;
+}) {
+  const current = item.restaurant;
+  if (!current) return null;
+
+  const uniqueById = new Map<string, Restaurant>();
+  (item.restaurantAlternatives || []).forEach((r) => {
+    if (r?.id && r.id !== current.id) uniqueById.set(r.id, r);
+  });
+
+  const rankRestaurant = (r: Restaurant): number => {
+    const ratingScore = (r.rating || 0) * 22;
+    const reviewScore = Math.min(Math.log10((r.reviewCount || 0) + 1) * 10, 25);
+    const distancePenalty = Math.min((r.distance || 0) * 12, 28);
+    return ratingScore + reviewScore - distancePenalty;
+  };
+
+  const alternatives = Array.from(uniqueById.values())
+    .sort((a, b) => rankRestaurant(b) - rankRestaurant(a))
+    .slice(0, 2);
+  if (alternatives.length === 0) return null;
+
+  const getCuisineShort = (r: Restaurant): string => {
+    const text = `${r.name || ''} ${(r.cuisineTypes || []).join(' ')}`.toLowerCase();
+    const CUISINES: [string[], string][] = [
+      [['sushi', 'ramen', 'japonais', 'japanese', 'izakaya'], 'Japonais'],
+      [['italien', 'italian', 'pizza', 'trattoria', 'osteria'], 'Italien'],
+      [['chinois', 'chinese', 'dim sum'], 'Chinois'],
+      [['indien', 'indian', 'curry', 'tandoori'], 'Indien'],
+      [['thai', 'thaï', 'thaïlandais'], 'Thaï'],
+      [['mexicain', 'mexican', 'tacos'], 'Mexicain'],
+      [['libanais', 'lebanese', 'mezze'], 'Libanais'],
+      [['grec', 'greek', 'taverna'], 'Grec'],
+      [['burger', 'american', 'bbq'], 'Américain'],
+      [['français', 'french', 'brasserie', 'bistrot'], 'Français'],
+      [['espagnol', 'spanish', 'tapas'], 'Espagnol'],
+      [['méditerranéen', 'mediterranean'], 'Méditerranéen'],
+    ];
+    for (const [kws, label] of CUISINES) {
+      if (kws.some(kw => text.includes(kw))) return label;
+    }
+    return 'Restaurant';
+  };
+
+  return (
+    <div className="px-3 pb-2.5 flex gap-2 overflow-x-auto scrollbar-hide" onClick={(e) => e.stopPropagation()}>
+      {alternatives.map((alt) => {
+        const altImage = getRestaurantGooglePhoto(alt);
+        const bookingUrl = alt.googleMapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(alt.name)}`;
+
+        return (
+          <div
+            key={alt.id}
+            className="flex-1 min-w-0 rounded-xl border border-border/50 bg-card/80 backdrop-blur-sm overflow-hidden hover:border-primary/40 hover:shadow-md transition-all"
+          >
+            <div className="flex items-center gap-2.5 p-2">
+              {/* Mini photo */}
+              <div className="w-14 h-14 rounded-lg overflow-hidden shrink-0 bg-muted">
+                {altImage ? (
+                  <img src={altImage} alt={alt.name} className="w-full h-full object-cover" loading="lazy" />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-stone-200 to-stone-300 dark:from-stone-700 dark:to-stone-800 flex items-center justify-center">
+                    <UtensilsCrossed className="h-4 w-4 text-muted-foreground/40" />
+                  </div>
+                )}
+              </div>
+
+              {/* Info */}
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-semibold leading-tight line-clamp-1">{alt.name}</p>
+                <div className="flex items-center gap-1.5 mt-0.5 text-[10px] text-muted-foreground">
+                  <span className="font-medium text-foreground/70">{getCuisineShort(alt)}</span>
+                  {alt.rating > 0 && (
+                    <span className="inline-flex items-center gap-0.5">
+                      <Star className="h-2.5 w-2.5 fill-yellow-500/70 text-yellow-500/70" />
+                      {alt.rating.toFixed(1)}
+                    </span>
+                  )}
+                  {alt.distance != null && (
+                    <span>{alt.distance < 1 ? `${Math.round(alt.distance * 1000)}m` : `${alt.distance.toFixed(1)}km`}</span>
+                  )}
+                </div>
+                <button
+                  className="mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-primary/10 text-primary text-[10px] font-semibold hover:bg-primary/20 transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onSelectRestaurantAlternative?.(item, alt);
+                  }}
+                >
+                  Choisir
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

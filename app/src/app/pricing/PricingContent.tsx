@@ -14,7 +14,7 @@ export function PricingContent() {
       <div className="text-center mb-12">
         <h1 className="text-3xl font-bold mb-3">Choisissez votre plan</h1>
         <p className="text-muted-foreground">
-          Planifiez vos voyages avec l&apos;IA. Apple Pay, Google Pay et CB acceptés.
+          Planifiez vos voyages avec Narae. Apple Pay, Google Pay et CB acceptés.
         </p>
       </div>
 

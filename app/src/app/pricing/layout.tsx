@@ -4,7 +4,7 @@ import { JsonLd } from '@/components/seo/JsonLd';
 
 const title = `Tarifs | ${SITE_NAME}`;
 const description =
-  "Découvrez nos offres pour planifier vos voyages avec l'IA. Gratuit ou Pro, choisissez le plan adapté à vos besoins.";
+  "Découvrez nos offres pour planifier vos voyages avec Narae. Gratuit ou Pro, choisissez le plan adapté à vos besoins.";
 
 export const metadata: Metadata = {
   title: 'Tarifs',
@@ -40,7 +40,7 @@ export default function PricingLayout({
           '@type': 'Product',
           name: `${SITE_NAME} Pro`,
           description:
-            "Abonnement Pro pour la planification de voyage assistée par IA avec fonctionnalités avancées.",
+            "Abonnement Pro pour la planification de voyage assistée par Narae avec fonctionnalités avancées.",
           brand: {
             '@type': 'Brand',
             name: SITE_NAME,
@@ -52,7 +52,7 @@ export default function PricingLayout({
               price: '0',
               priceCurrency: 'EUR',
               description:
-                'Planification de voyage IA de base, collaboration et partage inclus.',
+                'Planification de voyage Expert de base, collaboration et partage inclus.',
               url: `${SITE_URL}/pricing`,
               availability: 'https://schema.org/InStock',
             },

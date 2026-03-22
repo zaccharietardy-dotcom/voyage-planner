@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageCircle, Send, X, Undo2, Loader2, Sparkles } from 'lucide-react';
+import { MessageCircle, Send, X, Undo2, Loader2, Headphones } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -115,8 +115,8 @@ export function ChatPanel({
         <SheetHeader className="border-b px-4 py-3 flex-shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <MessageCircle className="h-5 w-5 text-blue-500" />
-              <SheetTitle className="text-lg">Assistant Voyage</SheetTitle>
+              <Headphones className="h-5 w-5 text-blue-500" />
+              <SheetTitle className="text-lg">Votre Concierge Narae</SheetTitle>
             </div>
             <div className="flex items-center gap-2">
               {canUndo && (
@@ -206,7 +206,7 @@ export function ChatPanel({
         {showSuggestions && hasContextualSuggestions && (
           <div className="px-4 py-2 border-t flex-shrink-0">
             <div className="flex items-center gap-1 mb-2">
-              <Sparkles className="h-3 w-3 text-blue-500" />
+              <MessageCircle className="h-3 w-3 text-blue-500" />
               <p className="text-xs text-muted-foreground">Suggestions :</p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -310,8 +310,8 @@ export function ChatButton({ onClick }: { onClick: () => void }) {
       size="sm"
       className="gap-2"
     >
-      <MessageCircle className="h-4 w-4" />
-      <span className="hidden sm:inline">Assistant</span>
+      <Headphones className="h-4 w-4" />
+      <span className="hidden sm:inline">Concierge</span>
     </Button>
   );
 }
