@@ -8,7 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 const values = [
   {
     icon: Compass,
-    title: 'Intelligence Artificielle',
+    title: 'Expertise Narae',
     description: 'Narae génère des itinéraires personnalisés en quelques secondes, adaptés à vos préférences et contraintes.',
   },
   {

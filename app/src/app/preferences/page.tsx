@@ -16,7 +16,6 @@ import {
   Heart,
   Accessibility,
   Save,
-  Wand2,
   Settings
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -168,7 +167,7 @@ export default function PreferencesPage() {
                 className="w-full h-auto py-6 flex-col gap-2"
                 size="lg"
               >
-                <Wand2 className="h-6 w-6" />
+                <Compass className="h-6 w-6" />
                 <div className="flex flex-col gap-1">
                   <span className="font-semibold">Quiz interactif (recommandé)</span>
                   <span className="text-xs font-normal opacity-90">5 questions rapides - 2 minutes</span>
@@ -218,7 +217,7 @@ export default function PreferencesPage() {
                   onClick={() => setShowQuiz(true)}
                   className="gap-1"
                 >
-                  <Wand2 className="h-3 w-3" />
+                  <Compass className="h-3 w-3" />
                   Refaire le quiz
                 </Button>
               )}

@@ -3,7 +3,7 @@
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { TripPreferences, BudgetLevel, BUDGET_LABELS } from '@/lib/types';
-import { Wallet, Coins, CreditCard, Gem, ChefHat, UtensilsCrossed, Shuffle, Settings2 } from 'lucide-react';
+import { Wallet, Coins, CreditCard, Gem, ChefHat, UtensilsCrossed, Shuffle, Settings2, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface StepBudgetProps {
@@ -157,7 +157,7 @@ export function StepBudget({ data, onChange }: StepBudgetProps) {
         <Label className="text-base font-medium">Préférence pour les repas</Label>
         <div className="grid grid-cols-2 gap-3">
           {([
-            { value: 'auto', label: 'Automatique', desc: 'Selon votre budget', icon: <Settings2 className="h-5 w-5" /> },
+            { value: 'auto', label: 'Automatique', desc: 'Selon votre budget', icon: <Zap className="h-5 w-5" /> },
             { value: 'mostly_cooking', label: 'Plutôt cuisiner', desc: 'Plus économique', icon: <ChefHat className="h-5 w-5" /> },
             { value: 'mostly_restaurants', label: 'Plutôt restaurants', desc: 'Découverte locale', icon: <UtensilsCrossed className="h-5 w-5" /> },
             { value: 'balanced', label: 'Équilibré', desc: 'Mix des deux', icon: <Shuffle className="h-5 w-5" /> },

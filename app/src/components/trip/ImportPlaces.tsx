@@ -450,7 +450,7 @@ export function ImportPlaces({ open, onOpenChange, onImport, destinationCoords }
                 <ul className="list-disc list-inside space-y-0.5 ml-2">
                   <li>Collez un lien Instagram, TikTok, YouTube ou d&apos;un blog de voyage</li>
                   <li>Ou copiez-collez directement le texte d&apos;une légende/description</li>
-                  <li>L&apos;IA extrait automatiquement les noms de restaurants, hôtels et attractions</li>
+                  <li>Notre technologie extrait automatiquement les noms de restaurants, hôtels et attractions</li>
                   <li>Les coordonnées GPS sont géocodées automatiquement</li>
                 </ul>
               </div>

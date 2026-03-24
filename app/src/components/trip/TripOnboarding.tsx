@@ -35,7 +35,7 @@ const TOUR_STEPS: TourStep[] = [
   {
     target: 'chat-button',
     title: 'Concierge Narae',
-    description: 'Demandez à l\'IA de modifier votre voyage en langage naturel.',
+    description: 'Demandez au Concierge de modifier votre voyage en langage naturel.',
   },
   {
     target: 'tabs',

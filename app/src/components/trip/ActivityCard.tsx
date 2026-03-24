@@ -561,36 +561,6 @@ export const ActivityCard = memo(function ActivityCard({
         />
       )}
 
-      {/* Move buttons */}
-      {onMoveUp && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
-          <Button
-            size="icon"
-            variant="secondary"
-            className="h-7 w-7 rounded-full shadow-md"
-            disabled={!canMoveUp}
-            onClick={(e) => { e.stopPropagation(); onMoveUp(); }}
-            title="Déplacer vers le haut"
-          >
-            <ChevronUp className="h-4 w-4" />
-          </Button>
-        </div>
-      )}
-      {onMoveDown && (
-        <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 z-10">
-          <Button
-            size="icon"
-            variant="secondary"
-            className="h-7 w-7 rounded-full shadow-md"
-            disabled={!canMoveDown}
-            onClick={(e) => { e.stopPropagation(); onMoveDown(); }}
-            title="Déplacer vers le bas"
-          >
-            <ChevronDown className="h-4 w-4" />
-          </Button>
-        </div>
-      )}
-
       {/* Action Drawer (Mobile First) */}
       {hasActions && (
         <div className="absolute top-3 right-3 z-10">

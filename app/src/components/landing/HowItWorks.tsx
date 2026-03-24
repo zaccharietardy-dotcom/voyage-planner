@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { MapPin, Wand2, Share2 } from 'lucide-react';
+import { MapPin, Zap, Share2 } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
 
 export function HowItWorks() {
@@ -16,7 +16,7 @@ export function HowItWorks() {
       accent: 'from-[#1e3a5f] to-[#2f6db3]',
     },
     {
-      icon: Wand2,
+      icon: Zap,
       title: t('howItWorks.step2Title'),
       description: t('howItWorks.step2Desc'),
       accent: 'from-[#b8923d] to-[#e8c068]',
