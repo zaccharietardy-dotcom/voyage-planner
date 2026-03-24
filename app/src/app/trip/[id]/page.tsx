@@ -1744,6 +1744,10 @@ export default function TripPage() {
                             onClickSlot={canOwnerEdit ? handleCalendarSlotClick : undefined}
                             onCreateSlotRange={canOwnerEdit ? handleCalendarSlotRange : undefined}
                             onMoveItemCrossDay={canOwnerEdit ? handleCalendarMoveItemCrossDay : undefined}
+                            onAddItem={canOwnerEdit ? (dayNumber) => { setAddActivityDay(dayNumber); setAddActivityDefaultTime(undefined); setAddActivityDefaultEndTime(undefined); setShowAddActivityModal(true); } : undefined}
+                            onDeleteItem={canOwnerEdit ? handleDeleteItem : undefined}
+                            onEditItem={canOwnerEdit ? handleEditItem : undefined}
+                            onSwapClick={canOwnerEdit ? handleSwapClick : undefined}
                           />
                         </div>
                       ) : editMode && !isDesktop ? (
@@ -1955,6 +1959,10 @@ export default function TripPage() {
                       onClickSlot={canOwnerEdit ? handleCalendarSlotClick : undefined}
                       onCreateSlotRange={canOwnerEdit ? handleCalendarSlotRange : undefined}
                       onMoveItemCrossDay={canOwnerEdit ? handleCalendarMoveItemCrossDay : undefined}
+                      onAddItem={canOwnerEdit ? (dayNumber) => { setAddActivityDay(dayNumber); setAddActivityDefaultTime(undefined); setAddActivityDefaultEndTime(undefined); setShowAddActivityModal(true); } : undefined}
+                      onDeleteItem={canOwnerEdit ? handleDeleteItem : undefined}
+                      onEditItem={canOwnerEdit ? handleEditItem : undefined}
+                      onSwapClick={canOwnerEdit ? handleSwapClick : undefined}
                     />
                   </div>
                 ) : editMode && isDesktop ? (
@@ -2176,6 +2184,49 @@ export default function TripPage() {
           onClose={() => setShowFlythrough(false)}
         />
       )}
+
+      {/* Mobile actions sheet */}
+      <Sheet open={showMobileActions} onOpenChange={setShowMobileActions}>
+        <SheetContent side="bottom" className="rounded-t-3xl">
+          <SheetHeader>
+            <SheetTitle>Actions</SheetTitle>
+          </SheetHeader>
+          <div className="grid gap-2 py-4">
+            <ImportBooking
+              onImport={(b) => { handleImportBooking(b); setShowMobileActions(false); }}
+              trigger={
+                <button className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-left text-sm font-medium hover:bg-muted transition-colors">
+                  <Upload className="h-5 w-5 text-muted-foreground" />
+                  Importer une réservation
+                </button>
+              }
+            />
+            <button
+              className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-left text-sm font-medium hover:bg-muted transition-colors"
+              onClick={() => { handleExportPdf(); setShowMobileActions(false); }}
+            >
+              <Download className="h-5 w-5 text-muted-foreground" />
+              Exporter en PDF
+            </button>
+            <button
+              className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-left text-sm font-medium hover:bg-muted transition-colors"
+              onClick={() => { setShowFlythrough(true); setShowMobileActions(false); }}
+            >
+              <Globe className="h-5 w-5 text-muted-foreground" />
+              Visualisation 3D
+            </button>
+            {canPropose && (
+              <button
+                className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-left text-sm font-medium hover:bg-muted transition-colors"
+                onClick={() => { setEditMode(!editMode); setShowMobileActions(false); }}
+              >
+                <Pencil className="h-5 w-5 text-muted-foreground" />
+                {editMode ? 'Terminer édition' : 'Éditer le voyage'}
+              </button>
+            )}
+          </div>
+        </SheetContent>
+      </Sheet>
 
       {/* Tour guidé pour les nouveaux utilisateurs */}
       {trip && <TripOnboarding />}

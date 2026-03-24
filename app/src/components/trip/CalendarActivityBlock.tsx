@@ -4,7 +4,14 @@ import { useRef, useCallback, useState, useEffect } from 'react';
 import { TripItem, TRIP_ITEM_COLORS } from '@/lib/types';
 import { isLockedItem } from '@/lib/services/itineraryCalculator';
 import { cn } from '@/lib/utils';
-import { Lock, GripHorizontal } from 'lucide-react';
+import { Lock, GripHorizontal, Pencil, Trash2, ArrowLeftRight } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface CalendarActivityBlockProps {
   item: TripItem;
@@ -19,6 +26,9 @@ interface CalendarActivityBlockProps {
   onMove?: (item: TripItem, deltaSlots: number, deltaDays: number) => void;
   onClick?: () => void;
   onInteraction?: () => void;
+  onDelete?: (item: TripItem) => void;
+  onEdit?: (item: TripItem) => void;
+  onSwapClick?: (item: TripItem) => void;
 }
 
 function parseMinutes(time: string | undefined | null): number {
@@ -48,6 +58,9 @@ export function CalendarActivityBlock({
   onMove,
   onClick,
   onInteraction,
+  onDelete,
+  onEdit,
+  onSwapClick,
 }: CalendarActivityBlockProps) {
   const locked = isLockedItem(item);
   const canResize = isEditable && !locked;
@@ -63,6 +76,10 @@ export function CalendarActivityBlock({
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
     return () => observer.disconnect();
   }, []);
+
+  // ── Context menu state ──────────────────────────────────────────
+  const [contextOpen, setContextOpen] = useState(false);
+  const hasContextActions = !!(onDelete || onEdit || onSwapClick);
 
   // ── Resize state ─────────────────────────────────────────────────
   const [dragState, setDragState] = useState<{
@@ -445,6 +462,11 @@ export function CalendarActivityBlock({
           onClick?.();
         }
       }}
+      onContextMenu={hasContextActions ? (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setContextOpen(true);
+      } : undefined}
     >
       {/* Color stripe left */}
       <div
@@ -471,6 +493,38 @@ export function CalendarActivityBlock({
           </span>
         )}
       </div>
+
+      {/* Context menu (right-click desktop) */}
+      {hasContextActions && (
+        <DropdownMenu open={contextOpen} onOpenChange={setContextOpen}>
+          <DropdownMenuTrigger asChild>
+            <span className="absolute top-0 left-0 w-0 h-0 overflow-hidden" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-48">
+            {onEdit && (
+              <DropdownMenuItem onClick={() => { onEdit(item); setContextOpen(false); }}>
+                <Pencil className="h-4 w-4 mr-2" />
+                Modifier les détails
+              </DropdownMenuItem>
+            )}
+            {onSwapClick && (
+              <DropdownMenuItem onClick={() => { onSwapClick(item); setContextOpen(false); }}>
+                <ArrowLeftRight className="h-4 w-4 mr-2" />
+                Remplacer
+              </DropdownMenuItem>
+            )}
+            {onDelete && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => { onDelete(item); setContextOpen(false); }}>
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Supprimer
+                </DropdownMenuItem>
+              </>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
 
       {/* Resize handles */}
       {canResize && (

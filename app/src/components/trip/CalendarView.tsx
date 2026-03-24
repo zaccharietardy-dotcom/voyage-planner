@@ -38,6 +38,10 @@ interface CalendarViewProps {
   onClickSlot?: (dayNumber: number, time: string) => void;
   onCreateSlotRange?: (dayNumber: number, startTime: string, endTime: string) => void;
   onMoveItemCrossDay?: (item: TripItem, fromDayNumber: number, toDayNumber: number, newStartTime: string) => void;
+  onAddItem?: (dayNumber: number) => void;
+  onDeleteItem?: (item: TripItem) => void;
+  onEditItem?: (item: TripItem) => void;
+  onSwapClick?: (item: TripItem) => void;
 }
 
 export function CalendarView({
@@ -48,6 +52,10 @@ export function CalendarView({
   onClickSlot,
   onCreateSlotRange,
   onMoveItemCrossDay,
+  onAddItem,
+  onDeleteItem,
+  onEditItem,
+  onSwapClick,
 }: CalendarViewProps) {
   const [viewMode, setViewMode] = useState<'day' | 'trip'>('trip');
   const [selectedDay, setSelectedDay] = useState(0);
@@ -403,6 +411,10 @@ export function CalendarView({
                         onClickItem={onClickItem}
                         onClickSlot={onClickSlot}
                         onCreateSlotRange={onCreateSlotRange}
+                        onAddItem={onAddItem}
+                        onDeleteItem={onDeleteItem}
+                        onEditItem={onEditItem}
+                        onSwapClick={onSwapClick}
                       />
                     )}
                   </motion.div>
@@ -426,6 +438,10 @@ export function CalendarView({
                     onClickItem={onClickItem}
                     onClickSlot={onClickSlot}
                     onCreateSlotRange={onCreateSlotRange}
+                    onAddItem={onAddItem}
+                    onDeleteItem={onDeleteItem}
+                    onEditItem={onEditItem}
+                    onSwapClick={onSwapClick}
                   />
                 </div>
               ))

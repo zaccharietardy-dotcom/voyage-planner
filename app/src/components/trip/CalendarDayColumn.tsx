@@ -5,6 +5,7 @@ import { TripDay, TripItem } from '@/lib/types';
 import { CalendarActivityBlock } from './CalendarActivityBlock';
 import { format, isSameDay } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { Plus } from 'lucide-react';
 
 // 24h = 96 slots of 15min (00:00 → 23:45)
 const TOTAL_SLOTS = 96;
@@ -21,6 +22,10 @@ interface CalendarDayColumnProps {
   onClickItem?: (item: TripItem) => void;
   onClickSlot?: (dayNumber: number, time: string) => void;
   onCreateSlotRange?: (dayNumber: number, startTime: string, endTime: string) => void;
+  onAddItem?: (dayNumber: number) => void;
+  onDeleteItem?: (item: TripItem) => void;
+  onEditItem?: (item: TripItem) => void;
+  onSwapClick?: (item: TripItem) => void;
 }
 
 function parseMinutes(time: string | undefined | null): number {
@@ -149,6 +154,10 @@ export const CalendarDayColumn = memo(function CalendarDayColumn({
   onClickItem,
   onClickSlot,
   onCreateSlotRange,
+  onAddItem,
+  onDeleteItem,
+  onEditItem,
+  onSwapClick,
 }: CalendarDayColumnProps) {
   const layoutItems_ = useMemo(() => layoutItems(day.items), [day.items]);
   const lastInteractionRef = useRef(0);
@@ -378,8 +387,21 @@ export const CalendarDayColumn = memo(function CalendarDayColumn({
             onMove={onMoveItem}
             onClick={() => onClickItem?.(li.item)}
             onInteraction={() => { lastInteractionRef.current = Date.now(); }}
+            onDelete={onDeleteItem}
+            onEdit={onEditItem}
+            onSwapClick={onSwapClick}
           />
         ))}
+
+        {/* Add activity button */}
+        {onAddItem && (
+          <button
+            className="absolute bottom-2 left-1/2 -translate-x-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-500 hover:bg-amber-500/20 transition-colors z-10"
+            onClick={(e) => { e.stopPropagation(); onAddItem(day.dayNumber); }}
+          >
+            <Plus className="h-4 w-4" />
+          </button>
+        )}
       </div>
     </div>
   );
@@ -390,7 +412,11 @@ export const CalendarDayColumn = memo(function CalendarDayColumn({
     prev.slotHeight === next.slotHeight &&
     prev.isEditable === next.isEditable &&
     prev.showHeader === next.showHeader &&
-    prev.dayColumnWidth === next.dayColumnWidth
+    prev.dayColumnWidth === next.dayColumnWidth &&
+    prev.onAddItem === next.onAddItem &&
+    prev.onDeleteItem === next.onDeleteItem &&
+    prev.onEditItem === next.onEditItem &&
+    prev.onSwapClick === next.onSwapClick
   );
 });
 
