@@ -1668,8 +1668,8 @@ export default function TripPage() {
           )}
 
           {/* Bottom sheet */}
-          <Drawer open modal={false} snapPoints={[0.12, 0.55, 0.92]} dismissible={false}>
-            <DrawerContent className="rounded-t-3xl bg-background/98 backdrop-blur-xl">
+          <Drawer open modal={false} snapPoints={[0.12, 0.55, 0.92]} dismissible={false} handleOnly>
+            <DrawerContent showOverlay={false} className="rounded-t-3xl bg-background/98 backdrop-blur-xl">
               <DrawerHandle />
               <DrawerHeader className="pb-0">
                 <DrawerTitle className="text-base">
