@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
+import type { PipelineQuestion } from '@/lib/types/pipelineQuestions';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -53,6 +54,8 @@ export default function PlanPage() {
   const directionRef = useRef(1);
   const [showErrors, setShowErrors] = useState(false);
   const [pipelineStep, setPipelineStep] = useState<string | undefined>(undefined);
+  const [currentQuestion, setCurrentQuestion] = useState<PipelineQuestion | null>(null);
+  const questionResolverRef = useRef<((optionId: string) => void) | null>(null);
 
   const stepVariants = {
     enter: (dir: number) => ({ x: dir > 0 ? 80 : -80, opacity: 0 }),
@@ -203,6 +206,8 @@ export default function PlanPage() {
 
       const onProgress = (status: string, event?: PipelineProgressEvent) => {
         if (status === 'progress' && event) {
+          // Clear question card when pipeline resumes (all questions answered)
+          setCurrentQuestion(null);
           if (event.type === 'step_start' && event.stepName) {
             const label = event.step
               ? `${event.step}/8 — ${event.stepName}`
@@ -214,7 +219,20 @@ export default function PlanPage() {
         }
       };
 
-      const generatedTrip = await generateTripStream(finalPreferences, onProgress);
+      const onQuestion = (question: PipelineQuestion): Promise<string> => {
+        return new Promise<string>((resolve) => {
+          setCurrentQuestion(question);
+          questionResolverRef.current = (optionId: string) => {
+            questionResolverRef.current = null;
+            resolve(optionId);
+            // Don't clear currentQuestion immediately — the answered QuestionCard
+            // stays visible (with selected state) until the next question arrives
+            // or the pipeline emits progress. Avoids a fact-card flash between questions.
+          };
+        });
+      };
+
+      const generatedTrip = await generateTripStream(finalPreferences, onProgress, onQuestion);
 
       trackEvent('trip_generation_completed', {
         destination: finalPreferences.destination || '',
@@ -291,6 +309,10 @@ export default function PlanPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentStep, preferences, updatePreferences, isGenerating]);
 
+  const handleQuestionAnswer = useCallback((questionId: string, selectedOptionId: string) => {
+    questionResolverRef.current?.(selectedOptionId);
+  }, []);
+
   const generatingDestination = preferences.cityPlan?.[0]?.city || preferences.destination || '';
   const generatingDuration = preferences.cityPlan
     ? preferences.cityPlan.reduce((sum, s) => sum + s.days, 0)
@@ -304,6 +326,8 @@ export default function PlanPage() {
           destination={generatingDestination}
           durationDays={generatingDuration}
           pipelineStep={pipelineStep}
+          question={currentQuestion}
+          onAnswer={handleQuestionAnswer}
         />
       )}
 

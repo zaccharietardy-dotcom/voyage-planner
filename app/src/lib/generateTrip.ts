@@ -1,4 +1,5 @@
 import { Trip, TripPreferences } from './types';
+import type { PipelineQuestion } from './types/pipelineQuestions';
 
 /**
  * Appelle /api/generate en streaming SSE.
@@ -22,7 +23,9 @@ export interface PipelineProgressEvent {
 export async function generateTripStream(
   preferences: Partial<TripPreferences> & Record<string, unknown>,
   onProgress?: (status: string, event?: PipelineProgressEvent) => void,
+  onQuestion?: (question: PipelineQuestion) => Promise<string>,
 ): Promise<Trip> {
+  let sessionId: string | null = null;
   const res = await fetch('/api/generate', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -56,7 +59,26 @@ export async function generateTripStream(
     buffer += decoder.decode(value, { stream: true });
 
     // Essayer de traiter les événements SSE complets (terminés par \n\n)
-    const result = processSSEBuffer(buffer, onProgress);
+    const result = processSSEBuffer(buffer, onProgress, async (sid) => {
+      sessionId = sid;
+    }, async (question) => {
+      if (!onQuestion || !sessionId) return;
+      const selectedOptionId = await onQuestion(question);
+      // POST the answer to the server
+      try {
+        await fetch('/api/generate/answer', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sessionId,
+            questionId: question.questionId,
+            selectedOptionId,
+          }),
+        });
+      } catch (e) {
+        console.warn('[SSE] Failed to POST answer:', e);
+      }
+    });
     if (result.trip) return result.trip;
     if (result.error) throw new Error(result.error);
     buffer = result.remaining;
@@ -86,6 +108,8 @@ export async function generateTripStream(
 function processSSEBuffer(
   buffer: string,
   onProgress?: (status: string, event?: PipelineProgressEvent) => void,
+  onSession?: (sessionId: string) => void,
+  onQuestionEvent?: (question: PipelineQuestion) => void,
 ): { trip?: Trip; error?: string; remaining: string } {
   // Séparer les événements SSE par \n\n (double newline = fin d'événement)
   const parts = buffer.split('\n\n');
@@ -110,6 +134,16 @@ function processSSEBuffer(
 
       if (msg.status === 'generating') {
         onProgress?.('generating');
+        continue;
+      }
+
+      if (msg.status === 'session' && msg.sessionId) {
+        onSession?.(msg.sessionId);
+        continue;
+      }
+
+      if (msg.status === 'question' && msg.question) {
+        onQuestionEvent?.(msg.question as PipelineQuestion);
         continue;
       }
 

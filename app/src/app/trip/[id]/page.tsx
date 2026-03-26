@@ -107,6 +107,9 @@ import { LiveTripDashboard } from '@/components/trip/LiveTripDashboard';
 import { useConnectivity } from '@/hooks/useConnectivity';
 import { useActivityVotes } from '@/hooks/useActivityVotes';
 import { cacheTripById, readCachedTripById } from '@/lib/mobile/offline-cache';
+import { generateFeedbackCards } from '@/lib/generateFeedbackCards';
+import type { FeedbackCard } from '@/lib/types/pipelineQuestions';
+import { TripFeedbackCards } from '@/components/trip/TripFeedbackCards';
 import { generateTripStream } from '@/lib/generateTrip';
 import { safeGetItem, safeSetItem } from '@/lib/storage';
 
@@ -318,6 +321,8 @@ export default function TripPage() {
   const [mobileMapHeight, setMobileMapHeight] = useState(30); // vh percentage for mobile split view
   const [dismissedViolations, setDismissedViolations] = useState(false);
   const [mobileMapFullscreen, setMobileMapFullscreen] = useState(false);
+  const [feedbackCards, setFeedbackCards] = useState<FeedbackCard[]>([]);
+  const [showFeedbackCards, setShowFeedbackCards] = useState(false);
   const prevDayRef = useRef('1');
   const dayDirection = useRef(0);
 
@@ -372,6 +377,24 @@ export default function TripPage() {
 
   // Activity voting (collaborative mode)
   const { getVoteData, castVote } = useActivityVotes(tripId);
+
+  // Post-generation feedback cards — show on fresh trips (<2 min old)
+  useEffect(() => {
+    if (!trip || feedbackCards.length > 0) return;
+    const dismissedKey = `feedback-dismissed-${tripId}`;
+    if (safeGetItem(dismissedKey)) return;
+
+    const createdAt = trip.createdAt ? new Date(trip.createdAt).getTime() : 0;
+    const isFresh = Date.now() - createdAt < 2 * 60 * 1000;
+    if (!isFresh) return;
+
+    const cards = generateFeedbackCards(trip);
+    if (cards.length > 0) {
+      setFeedbackCards(cards);
+      setShowFeedbackCards(true);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [trip?.id]);
 
   const members = useMemo(() => collaborativeTrip?.members || [], [collaborativeTrip?.members]);
   const proposals = useMemo(() => collaborativeTrip?.proposals || [], [collaborativeTrip?.proposals]);
@@ -1669,8 +1692,8 @@ export default function TripPage() {
           )}
 
           {/* Bottom sheet */}
-          <Drawer open modal={false} snapPoints={[0.1, 0.5, 0.92]} dismissible={false}>
-            <DrawerContent showOverlay={false} className="flex flex-col h-full bg-[#0A1628]/95 backdrop-blur-2xl border-t border-white/10 rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.5)] outline-none overflow-hidden">
+          <Drawer open modal={false} snapPoints={[0.3, 0.6, 0.94]} dismissible={false}>
+            <DrawerContent showOverlay={false} className="flex flex-col h-full bg-[#0A1628]/98 backdrop-blur-md border-t border-white/10 rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.5)] outline-none overflow-hidden">
               <DrawerHandle className="bg-white/20 w-12 h-1.5 mt-3 mb-2 shrink-0" />
               
               <Tabs value={mainTab} onValueChange={(v) => { hapticImpactLight(); setMainTab(v); }} className="flex-1 flex flex-col min-h-0">
@@ -2179,6 +2202,48 @@ export default function TripPage() {
 
       {/* Tour guidé pour les nouveaux utilisateurs */}
       {trip && <TripOnboarding />}
+
+      {/* Post-generation A/B feedback cards */}
+      <AnimatePresence>
+        {showFeedbackCards && feedbackCards.length > 0 && trip && (
+          <TripFeedbackCards
+            cards={feedbackCards}
+            onSelectA={() => {
+              // Keep current — no action needed
+            }}
+            onSelectB={(card) => {
+              if (card.type === 'restaurant_swap') {
+                // Find the target item and the alternative restaurant
+                for (const day of trip.days) {
+                  const item = day.items.find(i => i.id === card.targetItemId);
+                  if (!item || !item.restaurantAlternatives) continue;
+                  const alt = item.restaurantAlternatives.find(r => (r.id || r.name) === card.optionB.id);
+                  if (alt) {
+                    handleSelectRestaurantAlternative(item, alt);
+                    break;
+                  }
+                }
+              } else if (card.type === 'activity_swap') {
+                const pool = trip.attractionPool || [];
+                const newAttraction = pool.find(a => (a.id || a.name) === card.optionB.id);
+                if (newAttraction) {
+                  for (const day of trip.days) {
+                    const item = day.items.find(i => i.id === card.targetItemId);
+                    if (item) {
+                      handleSwapActivity(item, newAttraction);
+                      break;
+                    }
+                  }
+                }
+              }
+            }}
+            onDismiss={() => {
+              setShowFeedbackCards(false);
+              safeSetItem(`feedback-dismissed-${tripId}`, 'true');
+            }}
+          />
+        )}
+      </AnimatePresence>
       </div>
     </TripErrorBoundary>
   );

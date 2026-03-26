@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateTripV2, type PipelineEvent } from '@/lib/pipeline';
 import { TripPreferences } from '@/lib/types';
+import type { PipelineQuestion } from '@/lib/types/pipelineQuestions';
 import { normalizeCity } from '@/lib/services/cityNormalization';
 import { createRouteHandlerClient } from '@/lib/supabase/server';
 import { deriveBillingState, fetchEntitlementsForUser } from '@/lib/server/billingEntitlements';
 import { checkAndIncrementRateLimit } from '@/lib/server/dbRateLimit';
+import { registerQuestion, cleanupSession } from './sessionStore';
 
 export const maxDuration = 300; // 5 minutes max
 
@@ -102,9 +104,17 @@ export async function POST(request: NextRequest) {
 
     // Streaming response: envoie des keepalive pings pendant la génération
     // pour éviter le timeout 504 de Vercel/CDN
+    const sessionId = crypto.randomUUID();
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
       async start(controller) {
+        // Emit sessionId as the very first event
+        try {
+          controller.enqueue(
+            encoder.encode(`data: ${JSON.stringify({ status: 'session', sessionId })}\n\n`)
+          );
+        } catch { /* stream closed */ }
+
         // Envoyer un ping toutes les 10s pour garder la connexion vivante
         const keepAlive = setInterval(() => {
           try {
@@ -134,8 +144,33 @@ export async function POST(request: NextRequest) {
             } catch { /* stream closed */ }
           };
 
+          // askUser: pause pipeline, emit question via SSE, wait for answer
+          const askUser = (question: Omit<PipelineQuestion, 'sessionId'>): Promise<string> => {
+            const fullQuestion: PipelineQuestion = { ...question, sessionId };
+            const defaultOption = question.options.find(o => o.isDefault) || question.options[0];
+
+            return new Promise<string>((resolve) => {
+              registerQuestion(
+                sessionId,
+                question.questionId,
+                resolve,
+                question.timeoutMs,
+                defaultOption.id,
+              );
+
+              try {
+                controller.enqueue(
+                  encoder.encode(`data: ${JSON.stringify({ status: 'question', question: fullQuestion })}\n\n`)
+                );
+              } catch {
+                // Stream closed — resolve with default immediately
+                resolve(defaultOption.id);
+              }
+            });
+          };
+
           const trip = await Promise.race([
-            generateTripV2(preferences, onEvent),
+            generateTripV2(preferences, onEvent, { askUser }),
             timeoutPromise
           ]);
 
@@ -158,9 +193,11 @@ export async function POST(request: NextRequest) {
           controller.enqueue(encoder.encode(finalMessage));
           // Petit délai pour s'assurer que le message est bien flush avant de fermer
           await new Promise(resolve => setTimeout(resolve, 100));
+          cleanupSession(sessionId);
           controller.close();
         } catch (error) {
           clearInterval(keepAlive);
+          cleanupSession(sessionId);
           const message = error instanceof Error ? error.message : String(error);
           const stack = error instanceof Error ? error.stack : '';
           console.error('[Generate] ❌ Erreur de génération:', message);

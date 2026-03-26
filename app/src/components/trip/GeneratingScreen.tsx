@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2, Plane, Globe, Utensils, Landmark, Languages, Info, Banknote, Sun, Compass } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
 import { PremiumBackground } from '@/components/ui/PremiumBackground';
+import { QuestionCard } from './QuestionCard';
 
 // ── Fun facts database by destination keyword ──
 // Each destination has 6-10 facts that rotate during generation.
@@ -400,9 +401,13 @@ interface GeneratingScreenProps {
   durationDays?: number;
   /** Real pipeline step label from SSE events — overrides the fake rotating messages */
   pipelineStep?: string;
+  /** Current pipeline question (shown in place of the fact card) */
+  question?: import('@/lib/types/pipelineQuestions').PipelineQuestion | null;
+  /** Called when user answers a question */
+  onAnswer?: (questionId: string, selectedOptionId: string) => void;
 }
 
-export function GeneratingScreen({ destination, durationDays, pipelineStep }: GeneratingScreenProps) {
+export function GeneratingScreen({ destination, durationDays, pipelineStep, question, onAnswer }: GeneratingScreenProps) {
   const { t } = useTranslation();
   const [factIndex, setFactIndex] = useState(0);
   const [stepIndex, setStepIndex] = useState(0);
@@ -528,43 +533,53 @@ export function GeneratingScreen({ destination, durationDays, pipelineStep }: Ge
           <span className="tabular-nums bg-white/5 px-2 py-1 rounded-md border border-white/5">{elapsed}s</span>
         </div>
 
-        {/* Fun fact card */}
+        {/* Question or Fun fact card */}
         <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-black/40 backdrop-blur-3xl p-8 shadow-2xl">
           <AnimatePresence mode="wait">
-            <motion.div
-              key={factIndex}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 1.05 }}
-              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <div className="mb-4 flex items-center gap-3">
-                <div className="h-10 w-10 rounded-xl bg-gold/10 flex items-center justify-center text-gold">
-                  <FactIcon className="h-5 w-5" />
+            {question && onAnswer ? (
+              <QuestionCard
+                key={`q-${question.questionId}`}
+                question={question}
+                onAnswer={onAnswer}
+              />
+            ) : (
+              <motion.div
+                key={factIndex}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 1.05 }}
+                transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <div className="mb-4 flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-gold/10 flex items-center justify-center text-gold">
+                    <FactIcon className="h-5 w-5" />
+                  </div>
+                  <span className="text-xs font-black uppercase tracking-[0.2em] text-gold">
+                    {fact.category}
+                  </span>
                 </div>
-                <span className="text-xs font-black uppercase tracking-[0.2em] text-gold">
-                  {fact.category}
-                </span>
-              </div>
-              <p className="text-lg leading-relaxed text-white font-medium">
-                {fact.text}
-              </p>
-            </motion.div>
+                <p className="text-lg leading-relaxed text-white font-medium">
+                  {fact.text}
+                </p>
+              </motion.div>
+            )}
           </AnimatePresence>
 
-          {/* Dot indicators */}
-          <div className="mt-8 flex justify-center gap-2">
-            {facts.map((_, i) => (
-              <span
-                key={i}
-                className={`h-1 rounded-full transition-all duration-500 ${
-                  i === factIndex
-                    ? 'w-6 bg-gold shadow-[0_0_10px_rgba(197,160,89,0.5)]'
-                    : 'w-1.5 bg-white/10'
-                }`}
-              />
-            ))}
-          </div>
+          {/* Dot indicators (hidden during question) */}
+          {!question && (
+            <div className="mt-8 flex justify-center gap-2">
+              {facts.map((_, i) => (
+                <span
+                  key={i}
+                  className={`h-1 rounded-full transition-all duration-500 ${
+                    i === factIndex
+                      ? 'w-6 bg-gold shadow-[0_0_10px_rgba(197,160,89,0.5)]'
+                      : 'w-1.5 bg-white/10'
+                  }`}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </motion.div>

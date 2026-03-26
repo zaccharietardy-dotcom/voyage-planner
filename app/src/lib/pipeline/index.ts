@@ -18,9 +18,19 @@
  */
 
 import type { Trip, TripPreferences, TransportOptionSummary, Restaurant, Accommodation } from '../types';
+import type { PipelineQuestion } from '../types/pipelineQuestions';
 import type { ActivityCluster, FetchedData, OnPipelineEvent, ScoredActivity, DayTripPack, CityDensityProfile } from './types';
 import type { DayTimeWindow } from './step4-anchor-transport';
 export type { PipelineEvent, OnPipelineEvent, FetchedData } from './types';
+
+// ---------------------------------------------------------------------------
+// AskUser — pause/resume callback for pipeline smart questions
+// ---------------------------------------------------------------------------
+export type AskUserFn = (question: Omit<PipelineQuestion, 'sessionId'>) => Promise<string>;
+
+export interface GenerateTripV2Options {
+  askUser?: AskUserFn;
+}
 import { fetchAllData } from './step1-fetch';
 import { scoreAndSelectActivities } from './step2-score';
 import { batchFetchWikipediaSummaries, getWikiLanguageForDestination } from '../services/wikipedia';
@@ -42,6 +52,7 @@ import { buildDayTripPacks } from './day-trip-pack';
 import { optimizeClusterRouting } from './intra-day-router';
 import { stripPlanningMetaFromDays } from './planning-meta';
 import { rebalanceClustersWithLLM, type LLMRebalanceResult } from './step3b-llm-rebalance';
+import { detectQuestions, applyQuestionAnswers } from './questionDetectors';
 
 // ---------------------------------------------------------------------------
 // Pipeline Event System — emit helper
@@ -202,12 +213,13 @@ function countArrivalFatigueViolations(
  */
 export async function generateTripV2(
   preferences: TripPreferences,
-  onEvent?: OnPipelineEvent
+  onEvent?: OnPipelineEvent,
+  v2Options?: GenerateTripV2Options,
 ): Promise<Trip> {
   if (preferences.cityPlan && preferences.cityPlan.length > 1) {
     return generateTripV3MultiCity(preferences, onEvent);
   }
-  return generateTripV3(preferences, onEvent);
+  return generateTripV3(preferences, onEvent, undefined, v2Options?.askUser);
 }
 
 // ============================================
@@ -240,7 +252,8 @@ export interface GenerateTripV3Options {
 export async function generateTripV3(
   preferences: TripPreferences,
   onEvent?: OnPipelineEvent,
-  options?: GenerateTripV3Options
+  options?: GenerateTripV3Options,
+  askUser?: AskUserFn,
 ): Promise<Trip> {
   const startTime = Date.now();
   const stageTimes: Record<string, number> = {};
@@ -304,7 +317,24 @@ export async function generateTripV3(
     console.warn(`[Pipeline V3] Step 2b: Wikipedia enrichment failed (non-critical):`, err);
   }
 
-  // Step 2c: Resolve transport BEFORE anchoring time windows
+  // Step 2c: Smart Questions — ask user between step 2 and clustering
+  if (askUser) {
+    const questions = detectQuestions(selectedActivities, data.dayTripSuggestions, preferences);
+    const answers: Array<{ questionId: string; selectedOptionId: string }> = [];
+
+    for (const q of questions) {
+      emit(onEvent, { type: 'info', label: 'question', detail: q.title });
+      const selectedOptionId = await askUser(q);
+      answers.push({ questionId: q.questionId, selectedOptionId });
+    }
+
+    if (answers.length > 0) {
+      applyQuestionAnswers(answers, selectedActivities, data);
+      console.log(`[Pipeline V3] Smart Questions: ${answers.length} answered`);
+    }
+  }
+
+  // Step 2d: Resolve transport BEFORE anchoring time windows
   const bestTransport = resolveBestTransport(preferences, data.transportOptions);
 
   // Synthetic return transport: 17:00 departure (matches addReturnTransportItem hardcoded departure)
