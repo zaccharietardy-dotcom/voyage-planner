@@ -272,8 +272,9 @@ export function validateContracts(
     const effectiveEndMin = departureItem
       ? toMinutes(departureItem.startTime || '23:59')
       : twEndMin;
-    // Departure days: need dinner feasible before departure (20:00 threshold)
-    const dinnerThreshold = hasDeparture ? 20 * 60 : 18 * 60;
+    // Departure days: a quick dinner is feasible if departure is >= 18:30
+    // (the departure buffer already accounts for airport travel)
+    const dinnerThreshold = hasDeparture ? 18 * 60 + 30 : 18 * 60;
     const expectDinner = hasUsableWindow && effectiveEndMin >= dinnerThreshold;
 
     if (!hasLunch && expectLunch) {

@@ -127,6 +127,62 @@ function findDayRole(day: TripDay): PlannerRole | undefined {
 // Public API
 // ============================================
 
+// ---------------------------------------------------------------------------
+// Meal rescue helpers
+// ---------------------------------------------------------------------------
+
+/** Find a gap >= minDuration minutes between items within [windowStart, windowEnd] */
+function findGapForMeal(
+  items: TripItem[],
+  windowStartMin: number,
+  windowEndMin: number,
+  minDurationMin: number,
+): { start: number; end: number } | null {
+  const sorted = items
+    .filter(i => i.startTime && i.endTime)
+    .sort((a, b) => timeToMin(a.startTime) - timeToMin(b.startTime));
+
+  // Check gap before first item in window
+  let cursor = windowStartMin;
+  for (const item of sorted) {
+    const itemStart = timeToMin(item.startTime);
+    const itemEnd = timeToMin(item.endTime || item.startTime);
+    if (itemEnd <= windowStartMin) continue;
+    if (itemStart >= windowEndMin) break;
+    const gapStart = Math.max(cursor, windowStartMin);
+    const gapEnd = Math.min(itemStart, windowEndMin);
+    if (gapEnd - gapStart >= minDurationMin) {
+      return { start: gapStart, end: gapEnd };
+    }
+    cursor = Math.max(cursor, itemEnd);
+  }
+  // Check gap after last item
+  const finalGapStart = Math.max(cursor, windowStartMin);
+  if (windowEndMin - finalGapStart >= minDurationMin) {
+    return { start: finalGapStart, end: windowEndMin };
+  }
+  return null;
+}
+
+/** Find the nearest activity's coordinates to a given time */
+function findNearestActivityCoords(
+  items: TripItem[],
+  targetMin: number,
+): { lat: number; lng: number } | null {
+  let best: TripItem | null = null;
+  let bestDist = Infinity;
+  for (const item of items) {
+    if (item.type !== 'activity' || !item.latitude || !item.longitude) continue;
+    const mid = (timeToMin(item.startTime) + timeToMin(item.endTime || item.startTime)) / 2;
+    const dist = Math.abs(mid - targetMin);
+    if (dist < bestDist) {
+      bestDist = dist;
+      best = item;
+    }
+  }
+  return best ? { lat: best.latitude, lng: best.longitude } : null;
+}
+
 /**
  * Unified scheduler: schedules activities + restaurants + repair in a single pass.
  * Restaurants are placed IN-SITU at the traveler's real position.
@@ -243,8 +299,11 @@ export function unifiedScheduleV3Days(
     let canHaveBreakfast = dayStartMin < 10 * 60 && dayStartMin < dayEndMin;   // start before 10:00 AND window exists
     const canHaveLunch = dayStartMin < 13 * 60 && dayEndMin > 12 * 60; // window spans lunch hours
     const hasDepartureForMeals = timeWindow?.hasDepartureTransport ?? false;
-    // Departure days need more buffer (dinner + travel to station/airport)
-    const canHaveDinner = dayEndMin >= (hasDepartureForMeals ? 20 * 60 : 18 * 60);
+    // Departure days: allow an early dinner if activity window ends late enough
+    // (dayEndMin already includes departure buffer, so a dinner fits if ≥90min remain after 17:30)
+    const canHaveDinner = hasDepartureForMeals
+      ? dayEndMin >= 18 * 60 + 30  // 18:30 = enough for a quick 60min dinner before cutoff
+      : dayEndMin >= 18 * 60;
 
     if (rescueStageAtLeast(rescueStage, 3) && canHaveBreakfast) {
       const breakfastConsumesUntil = dayStartMin + 60;
@@ -1517,6 +1576,91 @@ export function unifiedScheduleV3Days(
           rescueDiagnostics.dayTripEvictionCount++;
         }
         unresolvedViolations.push(`Protected planner item "${token}" moved from Day ${expected.dayNumber} to Day ${current.dayNumber}`);
+      }
+    }
+  }
+
+  // 25. MEAL RESCUE — inject missing lunch/dinner after all repairs
+  // Catches cases where the initial scheduler couldn't place meals (e.g., arrival days
+  // where activities were injected by repair before the official activity window)
+  for (const day of days) {
+    const tw = timeWindows.find(w => w.dayNumber === day.dayNumber);
+    const hasLunch = day.items.some(i => i.type === 'restaurant' && i.startTime >= '11:00' && i.startTime < '15:00');
+    const hasDinner = day.items.some(i => i.type === 'restaurant' && i.startTime >= '17:30');
+
+    // Compute the actual occupied time range from ALL items (not just activities)
+    const scheduledItems = day.items.filter(i => i.startTime && i.endTime);
+    if (scheduledItems.length === 0) continue;
+
+    // Effective start: for arrival days, the traveler is available well before dayStartTime
+    // (transport items haven't been injected yet at this stage, so use timeWindow)
+    const hasArrival = tw?.hasArrivalTransport ?? false;
+    const firstItemMin = timeToMin(scheduledItems[0].startTime);
+    // On arrival days, assume traveler is available by ~11:00 at latest (even long-haul)
+    // This enables lunch rescue on days where the scheduler used a conservative late start
+    const effectiveStartMin = hasArrival ? Math.min(firstItemMin, 11 * 60) : firstItemMin;
+    const lastItemEnd = scheduledItems.reduce((max, a) => Math.max(max, timeToMin(a.endTime || a.startTime)), 0);
+
+    // Lunch rescue: if effective day start is before 13:00 and items span past noon
+    if (!hasLunch && effectiveStartMin < 13 * 60 && lastItemEnd > 12 * 60) {
+      // Find a gap around 12:00-14:30 that's >= 60min
+      const lunchSlot = findGapForMeal(day.items, 12 * 60, 14 * 60 + 30, 60);
+      if (lunchSlot) {
+        const lunchAnchor = findNearestActivityCoords(day.items, lunchSlot.start);
+        if (lunchAnchor) {
+          const lunchTime = minToTime(lunchSlot.start);
+          const dayDate = new Date(new Date(startDate).getTime() + (day.dayNumber - 1) * 86400000);
+          const pool = dayRestaurantPools.get(day.dayNumber) || restaurants;
+          const result = findBestRestaurantTight(pool, lunchAnchor, 'lunch', dietary, usedRestaurantIds, dayDate, density);
+          if (result) {
+            const meal = { ...result, anchorName: 'activity' };
+            const lunchItem = createRestaurantItem(meal, 'lunch', lunchTime, 60, day.dayNumber, 0);
+            day.items.push(lunchItem);
+            usedRestaurantIds.add(result.primary.id);
+            sortAndReindexItems(day.items);
+            repairs.push({ type: 'replacement', dayNumber: day.dayNumber, itemTitle: lunchItem.title, description: `Meal rescue: injected lunch at ${lunchTime}` });
+            console.log(`[Unified] Meal rescue: injected lunch on Day ${day.dayNumber} at ${lunchTime}`);
+          } else {
+            const fallback = createSelfMealFallbackItem('lunch', lunchTime, 60, day.dayNumber, 0, lunchAnchor);
+            day.items.push(fallback);
+            sortAndReindexItems(day.items);
+            console.log(`[Unified] Meal rescue: injected lunch fallback on Day ${day.dayNumber} at ${lunchTime}`);
+          }
+        }
+      }
+    }
+
+    // Dinner rescue: if there are activities past 17:00 but no dinner
+    // For departure days, use a generous cutoff: departure buffer already accounts
+    // for travel to airport. A quick 60min dinner fits before the buffer.
+    const hasDeparture = tw?.hasDepartureTransport ?? false;
+    const strictDayEnd = hasDeparture ? timeToMin(tw?.activityEndTime || '22:00') : 22 * 60;
+    // Allow dinner up to 60min past the strict end — the 150min flight buffer has room
+    const dinnerDeadline = hasDeparture ? strictDayEnd + 60 : Math.min(strictDayEnd, 21 * 60 + 30);
+    if (!hasDinner && lastItemEnd >= 17 * 60 && dinnerDeadline >= 18 * 60 + 30) {
+      const dinnerSlot = findGapForMeal(day.items, 17 * 60 + 30, dinnerDeadline, 60);
+      if (dinnerSlot) {
+        const dinnerAnchor = findNearestActivityCoords(day.items, dinnerSlot.start);
+        if (dinnerAnchor) {
+          const dinnerTime = minToTime(dinnerSlot.start);
+          const dayDateD = new Date(new Date(startDate).getTime() + (day.dayNumber - 1) * 86400000);
+          const pool = dayRestaurantPools.get(day.dayNumber) || restaurants;
+          const result = findBestRestaurantTight(pool, dinnerAnchor, 'dinner', dietary, usedRestaurantIds, dayDateD, density);
+          if (result) {
+            const meal = { ...result, anchorName: 'activity' };
+            const dinnerItem = createRestaurantItem(meal, 'dinner', dinnerTime, 60, day.dayNumber, 0);
+            day.items.push(dinnerItem);
+            usedRestaurantIds.add(result.primary.id);
+            sortAndReindexItems(day.items);
+            repairs.push({ type: 'replacement', dayNumber: day.dayNumber, itemTitle: dinnerItem.title, description: `Meal rescue: injected dinner at ${dinnerTime}` });
+            console.log(`[Unified] Meal rescue: injected dinner on Day ${day.dayNumber} at ${dinnerTime}`);
+          } else {
+            const fallback = createSelfMealFallbackItem('dinner', dinnerTime, 60, day.dayNumber, 0, dinnerAnchor);
+            day.items.push(fallback);
+            sortAndReindexItems(day.items);
+            console.log(`[Unified] Meal rescue: injected dinner fallback on Day ${day.dayNumber} at ${dinnerTime}`);
+          }
+        }
       }
     }
   }

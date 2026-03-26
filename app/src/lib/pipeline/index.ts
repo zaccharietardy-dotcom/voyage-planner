@@ -640,6 +640,11 @@ async function runPipelineFromClusters(
             item.endTime = minToTime(activityStartMin + 15);
             return true;
           }
+          // Protect must-sees — dropping them causes P0.8 violations
+          if (item.mustSee) {
+            console.warn(`[Pipeline V3] Post-injection sweep: keeping must-see "${item.title}" on Day ${day1.dayNumber} despite pre-arrival time`);
+            return true;
+          }
           return false;
         }
         return true;
