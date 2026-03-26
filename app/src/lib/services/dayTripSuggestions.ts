@@ -2386,11 +2386,11 @@ OUTPUT FORMAT - JSON array, no text before or after:
   }
 ]`;
 
-    console.log('[Day Trips AI] Calling Gemini 2.0 Flash for day trip suggestions...');
+    console.log('[Day Trips AI] Calling Gemini 2.5 Flash for day trip suggestions...');
     const startTime = Date.now();
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
