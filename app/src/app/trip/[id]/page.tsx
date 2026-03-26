@@ -797,6 +797,41 @@ export default function TripPage() {
     } catch { /* keep estimated time */ }
   }, [trip, saveTrip]);
 
+  // Feedback card handlers (stable refs to avoid re-renders)
+  const handleFeedbackKeep = useCallback(() => {}, []);
+
+  const handleFeedbackSwap = useCallback((card: FeedbackCard) => {
+    if (!trip) return;
+    if (card.type === 'restaurant_swap') {
+      for (const day of trip.days) {
+        const item = day.items.find(i => i.id === card.targetItemId);
+        if (!item || !item.restaurantAlternatives) continue;
+        const alt = item.restaurantAlternatives.find(r => (r.id || r.name) === card.optionB.id);
+        if (alt) {
+          handleSelectRestaurantAlternative(item, alt);
+          return;
+        }
+      }
+    } else if (card.type === 'activity_swap') {
+      const pool = trip.attractionPool || [];
+      const newAttraction = pool.find(a => (a.id || a.name) === card.optionB.id);
+      if (newAttraction) {
+        for (const day of trip.days) {
+          const item = day.items.find(i => i.id === card.targetItemId);
+          if (item) {
+            handleSwapActivity(item, newAttraction);
+            return;
+          }
+        }
+      }
+    }
+  }, [trip, handleSelectRestaurantAlternative, handleSwapActivity]);
+
+  const handleFeedbackDismiss = useCallback(() => {
+    setShowFeedbackCards(false);
+    safeSetItem(`feedback-dismissed-${tripId}`, 'true');
+  }, [tripId]);
+
   const handleSwapClick = useCallback((item: TripItem) => {
     if (!trip?.attractionPool || trip.attractionPool.length === 0) return;
     setSwapItem(item);
@@ -2204,43 +2239,13 @@ export default function TripPage() {
       {trip && <TripOnboarding />}
 
       {/* Post-generation A/B feedback cards */}
-      <AnimatePresence>
+      <AnimatePresence mode="wait">
         {showFeedbackCards && feedbackCards.length > 0 && trip && (
           <TripFeedbackCards
             cards={feedbackCards}
-            onSelectA={() => {
-              // Keep current — no action needed
-            }}
-            onSelectB={(card) => {
-              if (card.type === 'restaurant_swap') {
-                // Find the target item and the alternative restaurant
-                for (const day of trip.days) {
-                  const item = day.items.find(i => i.id === card.targetItemId);
-                  if (!item || !item.restaurantAlternatives) continue;
-                  const alt = item.restaurantAlternatives.find(r => (r.id || r.name) === card.optionB.id);
-                  if (alt) {
-                    handleSelectRestaurantAlternative(item, alt);
-                    break;
-                  }
-                }
-              } else if (card.type === 'activity_swap') {
-                const pool = trip.attractionPool || [];
-                const newAttraction = pool.find(a => (a.id || a.name) === card.optionB.id);
-                if (newAttraction) {
-                  for (const day of trip.days) {
-                    const item = day.items.find(i => i.id === card.targetItemId);
-                    if (item) {
-                      handleSwapActivity(item, newAttraction);
-                      break;
-                    }
-                  }
-                }
-              }
-            }}
-            onDismiss={() => {
-              setShowFeedbackCards(false);
-              safeSetItem(`feedback-dismissed-${tripId}`, 'true');
-            }}
+            onSelectA={handleFeedbackKeep}
+            onSelectB={handleFeedbackSwap}
+            onDismiss={handleFeedbackDismiss}
           />
         )}
       </AnimatePresence>
