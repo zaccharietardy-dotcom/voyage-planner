@@ -44,14 +44,14 @@ export function Header() {
   return (
     <header
       className={cn(
-        'fixed left-0 right-0 top-0 z-50 transition-all duration-500 ease-in-out px-4 py-4'
+        'fixed left-0 right-0 top-0 z-50 px-4 py-4 pointer-events-none'
       )}
     >
-      <div 
+      <div
         className={cn(
-          "container mx-auto rounded-3xl transition-all duration-500 border",
-          isScrolled 
-            ? "bg-white/80 dark:bg-[#020617]/80 backdrop-blur-xl border-gold/20 shadow-2xl py-2 px-6" 
+          "container mx-auto rounded-3xl transition-[background-color,border-color,box-shadow,padding] duration-300 border pointer-events-auto",
+          isScrolled
+            ? "bg-white/80 dark:bg-[#020617]/80 backdrop-blur-xl border-gold/20 shadow-2xl py-2 px-6"
             : "bg-transparent border-transparent py-4 px-4"
         )}
       >

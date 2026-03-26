@@ -1682,7 +1682,7 @@ export default function TripPage() {
           <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-4 pt-[calc(env(safe-area-inset-top)+1rem)] pb-6 bg-gradient-to-b from-black/60 via-black/20 to-transparent pointer-events-none">
             <div className="flex items-center gap-3 pointer-events-auto">
               <button
-                className="flex h-11 w-11 items-center justify-center rounded-full bg-black/40 border border-white/10 shadow-[0_8px_16px_rgba(0,0,0,0.4)] backdrop-blur-xl active:scale-90 transition-all text-white"
+                className="flex h-11 w-11 items-center justify-center rounded-full bg-black/60 border border-white/10 shadow-[0_8px_16px_rgba(0,0,0,0.4)] active:scale-90 transition-transform text-white"
                 onClick={() => { hapticImpactLight(); router.push('/'); }}
               >
                 <ArrowLeft className="h-5 w-5" />
@@ -1701,14 +1701,14 @@ export default function TripPage() {
             <div className="flex items-center gap-2 pointer-events-auto">
               {isOwner && (
                 <button
-                  className="flex h-11 w-11 items-center justify-center rounded-full bg-black/40 border border-white/10 shadow-[0_8px_16px_rgba(0,0,0,0.4)] backdrop-blur-xl active:scale-90 transition-all text-white"
+                  className="flex h-11 w-11 items-center justify-center rounded-full bg-black/60 border border-white/10 shadow-[0_8px_16px_rgba(0,0,0,0.4)] active:scale-90 transition-transform text-white"
                   onClick={() => { hapticImpactLight(); setShowShareDialog(true); }}
                 >
                   <Share2 className="h-5 w-5" />
                 </button>
               )}
               <button
-                className="flex h-11 w-11 items-center justify-center rounded-full bg-black/40 border border-white/10 shadow-[0_8px_16px_rgba(0,0,0,0.4)] backdrop-blur-xl active:scale-90 transition-all text-white"
+                className="flex h-11 w-11 items-center justify-center rounded-full bg-black/60 border border-white/10 shadow-[0_8px_16px_rgba(0,0,0,0.4)] active:scale-90 transition-transform text-white"
                 onClick={() => { hapticImpactLight(); setShowMobileActions(true); }}
               >
                 <MoreHorizontal className="h-5 w-5" />
@@ -1728,7 +1728,7 @@ export default function TripPage() {
 
           {/* Bottom sheet */}
           <Drawer open modal={false} snapPoints={[0.3, 0.6, 0.94]} dismissible={false}>
-            <DrawerContent showOverlay={false} className="flex flex-col h-full bg-[#0A1628]/98 backdrop-blur-md border-t border-white/10 rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.5)] outline-none overflow-hidden">
+            <DrawerContent showOverlay={false} className="flex flex-col h-full bg-[#0A1628] border-t border-white/10 rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.5)] outline-none overflow-hidden">
               <DrawerHandle className="bg-white/20 w-12 h-1.5 mt-3 mb-2 shrink-0" />
               
               <Tabs value={mainTab} onValueChange={(v) => { hapticImpactLight(); setMainTab(v); }} className="flex-1 flex flex-col min-h-0">
@@ -1818,7 +1818,7 @@ export default function TripPage() {
                       ) : (
                         <div className="space-y-4">
                           {/* Day pills compact */}
-                          <div className="flex gap-1.5 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 sticky top-0 bg-[#0A1628]/95 backdrop-blur-md z-10 py-2 border-b border-white/5">
+                          <div className="flex gap-1.5 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 sticky top-0 bg-[#0A1628] z-10 py-2 border-b border-white/5">
                             {trip.days.map((day) => (
                               <button
                                 key={day.dayNumber}
