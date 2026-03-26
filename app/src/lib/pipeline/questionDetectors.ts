@@ -46,14 +46,15 @@ function detectDayTripQuestions(
   if (suggestions.length === 0 || preferences.durationDays <= 2) return [];
 
   const best = suggestions[0];
+  const transportLabel = best.transportMode === 'RER' ? 'RER' : best.transportMode;
   return [{
     questionId: `daytrip-${best.destination}`,
     sessionId: '',
     type: 'day_trip',
     title: `Excursion à ${best.destination}`,
-    prompt: `${best.destination} est accessible en ${best.transportMode} (${best.transportDurationMin} min). On garde cette option ?`,
+    prompt: `On peut organiser une excursion à ${best.destination} (${transportLabel}, ${best.transportDurationMin} min). Ça vous tente ?`,
     options: [
-      { id: 'include', label: 'Oui, bonne idée', emoji: '🚆', isDefault: true },
+      { id: 'include', label: `Oui, direction ${best.destination}`, emoji: '🚆', isDefault: true },
       { id: 'skip', label: 'Non, rester en ville', emoji: '🏙️', isDefault: false },
     ],
     timeoutMs: DEFAULT_TIMEOUT_MS,
