@@ -45,29 +45,33 @@ async function applyBest3DQuality(
 
   if (!hasIonToken) return;
 
-  try {
-    let photorealisticTileset: any = null;
-    if (typeof Cesium.createGooglePhotorealistic3DTileset === 'function') {
-      photorealisticTileset = await withTimeout(
-        Cesium.createGooglePhotorealistic3DTileset(),
-        6000
-      );
-    } else if (Cesium.Cesium3DTileset?.fromIonAssetId) {
-      photorealisticTileset = await withTimeout(
-        Cesium.Cesium3DTileset.fromIonAssetId(GOOGLE_PHOTOREALISTIC_ION_ASSET_ID),
-        6000
-      );
-    }
+  // Skip photorealistic 3D tiles on Capacitor/iOS — they fail to load and crash WKWebView
+  const isCapacitor = typeof (window as any).Capacitor !== 'undefined';
+  if (!isCapacitor) {
+    try {
+      let photorealisticTileset: any = null;
+      if (typeof Cesium.createGooglePhotorealistic3DTileset === 'function') {
+        photorealisticTileset = await withTimeout(
+          Cesium.createGooglePhotorealistic3DTileset(),
+          6000
+        );
+      } else if (Cesium.Cesium3DTileset?.fromIonAssetId) {
+        photorealisticTileset = await withTimeout(
+          Cesium.Cesium3DTileset.fromIonAssetId(GOOGLE_PHOTOREALISTIC_ION_ASSET_ID),
+          6000
+        );
+      }
 
-    if (photorealisticTileset) {
-      photorealisticTileset.maximumScreenSpaceError = compatibilityMode ? 2.4 : 1.2;
-      photorealisticTileset.dynamicScreenSpaceError = true;
-      photorealisticTileset.preloadFlightDestinations = true;
-      viewer.scene.primitives.add(photorealisticTileset);
-      return;
+      if (photorealisticTileset) {
+        photorealisticTileset.maximumScreenSpaceError = compatibilityMode ? 2.4 : 1.2;
+        photorealisticTileset.dynamicScreenSpaceError = true;
+        photorealisticTileset.preloadFlightDestinations = true;
+        viewer.scene.primitives.add(photorealisticTileset);
+        return;
+      }
+    } catch (error) {
+      console.info('[CesiumGlobe] Photorealistic tiles unavailable, fallback to OSM 3D buildings', error);
     }
-  } catch (error) {
-    console.info('[CesiumGlobe] Photorealistic tiles unavailable, fallback to OSM 3D buildings', error);
   }
 
   try {

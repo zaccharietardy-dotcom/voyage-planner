@@ -240,10 +240,22 @@ function getPopupContent(item: TripItem, index: number): string {
   const goldColor = '#c5a059';
   const borderColor = '#e2e8f0';
 
-  // For transport: use description (from→to) as display title
-  const displayTitle = item.type === 'transport' && item.description
-    ? item.description
-    : item.title;
+  // Build transport fallback from available metadata
+  const transportModeFallback = (() => {
+    if (item.type !== 'transport') return '';
+    const modeLabels: Record<string, string> = { walk: 'Marche', public: 'Transport en commun', car: 'Voiture' };
+    const label = modeLabels[item.transportToPrevious || ''] || 'Déplacement';
+    const dist = item.distanceFromPrevious;
+    if (dist) {
+      return dist < 1 ? `${label} — ${Math.round(dist * 1000)}m` : `${label} — ${dist.toFixed(1)}km`;
+    }
+    return label;
+  })();
+
+  // For transport: use description (from→to) as display title, fallback to mode info
+  const displayTitle = item.type === 'transport'
+    ? (item.description || item.title || transportModeFallback)
+    : (item.title || '');
 
   // Photo — onerror hides only the img, not the container
   const hasImage = !!item.imageUrl;
@@ -265,22 +277,29 @@ function getPopupContent(item: TripItem, index: number): string {
       <div style="font-family:'Playfair Display', serif;font-size:16px;font-weight:700;line-height:1.2;color:${textColor};">${escapeHtml(displayTitle)}</div>
     </div>`;
 
-  // Transport mode details (title contains "À pied — 1.2km" or "Transport en commun — 3.6km")
-  const transportDetailsHtml = item.type === 'transport'
+  // Transport mode details — show mode info (from title or fallback)
+  const transportModeText = item.type === 'transport' ? (item.title || transportModeFallback) : '';
+  const transportDetailsHtml = item.type === 'transport' && transportModeText
     ? `<div style="display:flex;align-items:center;gap:6px;font-size:12px;color:${mutedColor};margin-bottom:6px;">
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${goldColor}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        <span style="font-weight:600;color:${textColor};">${escapeHtml(item.title)}</span>
+        <span style="font-weight:600;color:${textColor};">${escapeHtml(transportModeText)}</span>
       </div>`
     : '';
 
-  // Time display
-  const timeHtml = item.startTime
+  // Time display — trim startTime to avoid invisible whitespace
+  const startTimeTrimmed = item.startTime?.trim() || '';
+  const timeHtml = startTimeTrimmed
     ? `<div style="display:flex;align-items:center;gap:6px;font-size:12px;color:${mutedColor};margin-bottom:6px;">
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${goldColor}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        <span style="font-weight:700;color:${textColor};letter-spacing:0.02em;">${escapeHtml(item.startTime)}${item.endTime ? ` – ${escapeHtml(item.endTime)}` : ''}</span>
+        <span style="font-weight:700;color:${textColor};letter-spacing:0.02em;">${escapeHtml(startTimeTrimmed)}${item.endTime ? ` – ${escapeHtml(item.endTime)}` : ''}</span>
         ${item.duration ? `<span style="color:${goldColor};font-weight:600;margin-left:4px;">${item.duration} min</span>` : ''}
       </div>`
-    : '';
+    : item.duration
+      ? `<div style="display:flex;align-items:center;gap:6px;font-size:12px;color:${mutedColor};margin-bottom:6px;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${goldColor}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span style="color:${goldColor};font-weight:600;">${item.duration} min</span>
+        </div>`
+      : '';
 
   // Rating + cost
   const metaParts: string[] = [];
