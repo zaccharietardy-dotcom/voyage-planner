@@ -240,6 +240,11 @@ function getPopupContent(item: TripItem, index: number): string {
   const goldColor = '#c5a059';
   const borderColor = '#e2e8f0';
 
+  // For transport: use description (from→to) as display title
+  const displayTitle = item.type === 'transport' && item.description
+    ? item.description
+    : item.title;
+
   // Photo — onerror hides only the img, not the container
   const hasImage = !!item.imageUrl;
   const imageHtml = hasImage
@@ -248,7 +253,7 @@ function getPopupContent(item: TripItem, index: number): string {
         <div style="position:absolute;bottom:0;left:0;right:0;height:80px;background:linear-gradient(transparent,rgba(2,6,23,0.9));"></div>
         <div style="position:absolute;bottom:12px;left:15px;right:15px;display:flex;align-items:center;gap:10px;">
           <div style="width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg, #c5a059 0%, #a37f3d 100%);color:white;font-family:'Playfair Display', serif;font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid rgba(255,255,255,0.3);box-shadow:0 4px 10px rgba(0,0,0,0.3);">${index}</div>
-          <div style="font-family:'Playfair Display', serif;font-size:16px;font-weight:700;color:white;text-shadow:0 2px 4px rgba(0,0,0,0.5);line-height:1.2;">${escapeHtml(item.title)}</div>
+          <div style="font-family:'Playfair Display', serif;font-size:16px;font-weight:700;color:white;text-shadow:0 2px 4px rgba(0,0,0,0.5);line-height:1.2;">${escapeHtml(displayTitle)}</div>
         </div>
       </div>`
     : '';
@@ -257,8 +262,16 @@ function getPopupContent(item: TripItem, index: number): string {
   const titleHtml = hasImage ? '' : `
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
       <div style="width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg, #c5a059 0%, #a37f3d 100%);color:white;font-family:'Playfair Display', serif;font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${index}</div>
-      <div style="font-family:'Playfair Display', serif;font-size:16px;font-weight:700;line-height:1.2;color:${textColor};">${escapeHtml(item.title)}</div>
+      <div style="font-family:'Playfair Display', serif;font-size:16px;font-weight:700;line-height:1.2;color:${textColor};">${escapeHtml(displayTitle)}</div>
     </div>`;
+
+  // Transport mode details (title contains "À pied — 1.2km" or "Transport en commun — 3.6km")
+  const transportDetailsHtml = item.type === 'transport'
+    ? `<div style="display:flex;align-items:center;gap:6px;font-size:12px;color:${mutedColor};margin-bottom:6px;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${goldColor}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span style="font-weight:600;color:${textColor};">${escapeHtml(item.title)}</span>
+      </div>`
+    : '';
 
   // Time display
   const timeHtml = item.startTime
@@ -287,6 +300,7 @@ function getPopupContent(item: TripItem, index: number): string {
       ${imageHtml}
       <div style="padding:${hasImage ? '15px 15px 15px' : '5px 0'};">
         ${titleHtml}
+        ${transportDetailsHtml}
         ${timeHtml}
         ${metaHtml}
         <div style="display:flex;gap:10px;margin-top:15px;padding-top:12px;border-top:1px solid ${borderColor};">

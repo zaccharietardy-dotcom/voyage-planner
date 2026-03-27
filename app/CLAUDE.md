@@ -243,6 +243,12 @@ TripItem {
 - Find root causes. No temporary fixes. Senior developer standards.
 - Changes should only touch what's necessary.
 
+### Mobile-First Verification
+- Chaque changement UI/CSS doit être vérifié sur le site ET dans l'app Capacitor
+- Tester sur iPhone (WKWebView) — les backdrop-blur, transitions, et z-index se comportent différemment
+- Bumper `native-cache-v*` dans layout.tsx si un fix CSS/JS critique doit invalider le cache Capacitor
+- Jamais de `return null` avant des hooks React (violation Rules of Hooks au changement de route)
+
 ## Known Issues / Areas to Improve
 
 1. **Hotel distance**: Hotel can be far from activity zones (4-15km in some tests). Barycenter doesn't always pick central locations.

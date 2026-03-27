@@ -1512,7 +1512,7 @@ export default function TripPage() {
       )}
 
       {/* Adapt banner for non-owners viewing a public trip */}
-      {trip && !isOwner && !showCloneModal && (
+      {trip && !isOwner && !localIsOwner && isDesktop && !showCloneModal && (
         <div className="sticky top-16 z-50 bg-gradient-to-r from-primary/90 to-primary backdrop-blur-sm border-b border-primary/20">
           <div className="container mx-auto px-4 py-2.5 flex items-center justify-between">
             <span className="text-sm font-medium text-primary-foreground">
@@ -1731,7 +1731,7 @@ export default function TripPage() {
           )}
 
           {/* Bottom sheet */}
-          <Drawer open modal={false} snapPoints={[0.3, 0.6, 0.94]} dismissible={false}>
+          <Drawer open modal={false} snapPoints={[0.3, 0.94]} dismissible={false}>
             <DrawerContent showOverlay={false} className="flex flex-col h-full bg-[#0A1628] border-t border-white/10 rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.5)] outline-none overflow-hidden">
               <DrawerHandle className="bg-white/20 w-12 h-1.5 mt-3 mb-2 shrink-0" />
               

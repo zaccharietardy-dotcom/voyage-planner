@@ -137,8 +137,8 @@ function createMarkerCanvas(Cesium: any, isSelected: boolean, isOnline: boolean)
   // Outer glow
   if (isOnline) {
     const gradient = ctx.createRadialGradient(centerX, centerY, radius, centerX, centerY, radius + 8);
-    gradient.addColorStop(0, 'rgba(251, 191, 36, 0.4)');
-    gradient.addColorStop(1, 'rgba(251, 191, 36, 0)');
+    gradient.addColorStop(0, 'rgba(197, 160, 89, 0.4)');
+    gradient.addColorStop(1, 'rgba(197, 160, 89, 0)');
     ctx.beginPath();
     ctx.arc(centerX, centerY, radius + 8, 0, Math.PI * 2);
     ctx.fillStyle = gradient;
@@ -154,7 +154,7 @@ function createMarkerCanvas(Cesium: any, isSelected: boolean, isOnline: boolean)
   // Inner circle
   ctx.beginPath();
   ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-  ctx.fillStyle = isSelected ? '#6366f1' : '#fbbf24';
+  ctx.fillStyle = isSelected ? '#6366f1' : '#c5a059';
   ctx.fill();
 
   // Inner highlight
@@ -622,7 +622,7 @@ export function CesiumGlobe({
           const isMegaCity = city.population > 10000000;
           const isLargeCity = city.population > 5000000;
 
-          const fontSize = isMegaCity ? 14 : isLargeCity ? 12 : 11;
+          const fontSize = isMegaCity ? 12 : isLargeCity ? 10 : 9;
 
           viewer.entities.add({
             id: `city-${city.name}`,
@@ -639,7 +639,7 @@ export function CesiumGlobe({
               // Much stricter zoom requirements - need to zoom more to see labels
               distanceDisplayCondition: new Cesium.DistanceDisplayCondition(
                 0,
-                isMegaCity ? 4000000 : isLargeCity ? 2500000 : 1500000
+                isMegaCity ? 3000000 : isLargeCity ? 2000000 : 1000000
               ),
               heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
               disableDepthTestDistance: Number.POSITIVE_INFINITY,
@@ -730,7 +730,7 @@ export function CesiumGlobe({
         },
         label: {
           text: traveler.name,
-          font: '600 11px -apple-system, BlinkMacSystemFont, sans-serif',
+          font: '600 9px -apple-system, BlinkMacSystemFont, sans-serif',
           fillColor: Cesium.Color.WHITE,
           outlineColor: Cesium.Color.BLACK.withAlpha(0.8),
           outlineWidth: 3,
@@ -859,7 +859,7 @@ export function CesiumGlobe({
           },
           label: {
             text: cluster.label + (cluster.tripCount > 1 ? ` (${cluster.tripCount})` : ''),
-            font: '600 12px -apple-system, BlinkMacSystemFont, sans-serif',
+            font: '600 10px -apple-system, BlinkMacSystemFont, sans-serif',
             fillColor: Cesium.Color.WHITE,
             outlineColor: Cesium.Color.BLACK.withAlpha(0.85),
             outlineWidth: 3,
@@ -907,7 +907,7 @@ export function CesiumGlobe({
       const isSelected = selectedWaypointId === point.id;
       const entity = viewer.entities.add({
         id: `waypoint-${point.id}`,
-        position: Cesium.Cartesian3.fromDegrees(point.lng, point.lat, 120),
+        position: Cesium.Cartesian3.fromDegrees(point.lng, point.lat, 0),
         point: {
           pixelSize: isSelected ? 14 : 10,
           color: isSelected
@@ -916,7 +916,7 @@ export function CesiumGlobe({
           outlineColor: Cesium.Color.WHITE,
           outlineWidth: 2,
           disableDepthTestDistance: Number.POSITIVE_INFINITY,
-          heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND,
+          heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
         },
         label: {
           text: `${index + 1}`,
@@ -979,7 +979,7 @@ export function CesiumGlobe({
           positions: cartesianPositions,
           width: isFocused ? 2.5 : 1.0,
           material: new Cesium.PolylineGlowMaterialProperty({
-            glowPower: isFocused ? 0.15 : 0.05,
+            glowPower: isFocused ? 0.15 : 0.1,
             taperPower: 0.5,
             color: Cesium.Color.fromCssColorString('#c5a059').withAlpha(isDimmed ? 0.1 : 0.6),
           }),
@@ -1014,8 +1014,8 @@ export function CesiumGlobe({
     if (!point) return;
 
     viewerRef.current.camera.flyTo({
-      destination: Cesium.Cartesian3.fromDegrees(point.lng, point.lat, 350000),
-      duration: 1.4,
+      destination: Cesium.Cartesian3.fromDegrees(point.lng, point.lat, 50000),
+      duration: 0.8,
     });
   }, [isLoaded, selectedWaypointId, selectedTripPoints]);
 
@@ -1023,14 +1023,14 @@ export function CesiumGlobe({
     const viewer = viewerRef.current;
     if (!viewer) return;
     const cameraHeight = viewer.camera.positionCartographic.height;
-    viewer.camera.zoomIn(cameraHeight * 0.28);
+    viewer.camera.zoomIn(cameraHeight * 0.5);
   };
 
   const handleZoomOut = () => {
     const viewer = viewerRef.current;
     if (!viewer) return;
     const cameraHeight = viewer.camera.positionCartographic.height;
-    viewer.camera.zoomOut(cameraHeight * 0.32);
+    viewer.camera.zoomOut(cameraHeight * 0.5);
   };
 
   const handleResetView = () => {
@@ -1054,7 +1054,7 @@ export function CesiumGlobe({
       {!isLoaded && !error && (
         <div className="absolute inset-0 flex items-center justify-center bg-[#0a0a0f] z-10">
           <div className="text-center">
-            <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+            <div className="w-12 h-12 border-4 border-[#c5a059] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
             <p className="text-gray-400">Chargement du globe...</p>
           </div>
         </div>

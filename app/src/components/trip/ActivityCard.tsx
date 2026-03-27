@@ -364,6 +364,8 @@ export const ActivityCard = memo(function ActivityCard({
   const color = TRIP_ITEM_COLORS[item.type];
   const imageUrl = item.type === 'restaurant'
     ? (getRestaurantGooglePhoto(item.restaurant) || toGooglePlacePhotoUrl(item.imageUrl))
+    : item.type === 'flight'
+    ? undefined
     : item.imageUrl;
   const hasImage = imageUrl && IMAGE_TYPES.includes(item.type);
   const [imgError, setImgError] = useState(false);
@@ -561,6 +563,11 @@ export const ActivityCard = memo(function ActivityCard({
         />
       )}
 
+      {/* Activity voting */}
+      {item.type === 'activity' && voteData && onVote && (
+        <ActivityVote {...voteData} onVote={onVote} />
+      )}
+
       {/* Action Drawer (Mobile First) */}
       {hasActions && (
         <div className="absolute top-3 right-3 z-10">
@@ -696,13 +703,6 @@ export const ActivityCard = memo(function ActivityCard({
           </div>
         </DrawerContent>
       </Drawer>
-
-      {/* Activity voting */}
-      {item.type === 'activity' && voteData && onVote && (
-        <div className="px-3 pb-2">
-          <ActivityVote {...voteData} onVote={onVote} />
-        </div>
-      )}
 
       {/* Delete confirmation overlay */}
       {showDeleteConfirm && (
