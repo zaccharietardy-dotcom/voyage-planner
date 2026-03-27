@@ -59,18 +59,14 @@ export function Header() {
         )}
       >
         <div className="flex items-center justify-between">
-          <Link href="/" className="z-50 inline-flex items-center gap-3 group">
-            <div className="relative h-10 w-10 overflow-hidden rounded-xl bg-gold-gradient p-[1px] shadow-lg group-hover:scale-110 transition-transform">
-              <div className="flex h-full w-full items-center justify-center rounded-[11px] bg-[#020617]">
-                <Image
-                  src="/logo-narae.png"
-                  alt="Narae"
-                  width={24}
-                  height={24}
-                  className="h-6 w-6 object-contain"
-                />
-              </div>
-            </div>
+          <Link href="/" className="z-50 inline-flex items-center gap-2.5">
+            <Image
+              src="/logo-narae.png"
+              alt="Narae"
+              width={32}
+              height={32}
+              className="h-8 w-8 object-contain"
+            />
             <span className="font-display text-xl font-bold tracking-tight text-foreground">
               Narae <span className="text-gold italic">Voyage</span>
             </span>

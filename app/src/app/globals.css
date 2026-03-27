@@ -152,10 +152,18 @@
     max-width: 100%;
     overflow-x: hidden;
   }
+  input, textarea, [contenteditable] {
+    -webkit-user-select: text;
+    user-select: text;
+  }
 
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-geist-sans);
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
     background-image:
       radial-gradient(circle at 10% 10%, rgba(197, 160, 89, 0.03), transparent 30%),
       radial-gradient(circle at 90% 90%, rgba(30, 58, 95, 0.05), transparent 40%);

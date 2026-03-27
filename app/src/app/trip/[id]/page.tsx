@@ -388,10 +388,14 @@ export default function TripPage() {
     const isFresh = Date.now() - createdAt < 2 * 60 * 1000;
     if (!isFresh) return;
 
-    const cards = generateFeedbackCards(trip);
-    if (cards.length > 0) {
-      setFeedbackCards(cards);
-      setShowFeedbackCards(true);
+    try {
+      const cards = generateFeedbackCards(trip);
+      if (cards.length > 0) {
+        setFeedbackCards(cards);
+        setShowFeedbackCards(true);
+      }
+    } catch (e) {
+      console.warn('[FeedbackCards] Failed to generate:', e);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [trip?.id]);
