@@ -163,9 +163,9 @@ export default function ProfilPage() {
         >
           <div className="flex flex-col items-center text-center">
             <div className="relative">
-              <Avatar className="w-32 h-32 border-4 border-[#020617] shadow-2xl ring-2 ring-gold/30">
+              <Avatar className="w-24 h-24 md:w-32 md:h-32 border-4 border-[#020617] shadow-2xl ring-2 ring-gold/30">
                 <AvatarImage src={avatarUrl || undefined} className="object-cover" />
-                <AvatarFallback className="text-4xl font-display font-bold bg-gold text-[#020617]">
+                <AvatarFallback className="text-3xl md:text-4xl font-display font-bold bg-gold text-[#020617]">
                   {displayName.charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
@@ -176,16 +176,16 @@ export default function ProfilPage() {
               )}
             </div>
 
-            <div className="mt-6">
-              <h1 className="font-display text-3xl font-bold text-white flex items-center gap-3">
+            <div className="mt-6 w-full overflow-hidden px-2">
+              <h1 className="font-display text-2xl md:text-3xl font-bold text-white flex items-center justify-center gap-3 truncate">
                 {displayName}
-                {isPro && <ShieldCheck className="h-5 w-5 text-gold" />}
+                {isPro && <ShieldCheck className="h-5 w-5 text-gold shrink-0" />}
               </h1>
-              <div className="flex items-center justify-center gap-4 mt-2">
-                <p className="text-gold font-bold text-xs uppercase tracking-[0.2em]">@{username}</p>
-                <div className="h-1 w-1 rounded-full bg-slate-600" />
-                <p className="text-slate-400 text-xs font-bold uppercase tracking-widest flex items-center gap-1">
-                  <Mail className="h-3 w-3" />
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 mt-2">
+                <p className="text-gold font-bold text-[10px] sm:text-xs uppercase tracking-[0.2em] truncate max-w-full">@{username}</p>
+                <div className="hidden sm:block h-1 w-1 rounded-full bg-slate-600" />
+                <p className="text-slate-400 text-[10px] sm:text-xs font-bold uppercase tracking-widest flex items-center gap-1 truncate max-w-full px-2">
+                  <Mail className="h-3 w-3 shrink-0" />
                   {email}
                 </p>
               </div>

@@ -428,9 +428,9 @@ export const ActivityCard = memo(function ActivityCard({
 
       {/* Standard card layout (hero + content) */}
       {!isCompactCheckin && (
-        <>
+        <div className="relative">
           {isHeroType && (
-            <div className="relative h-48 w-full overflow-hidden">
+            <div className="relative h-44 sm:h-52 w-full overflow-hidden">
               {/* Gradient base */}
               <div className={cn("absolute inset-0 bg-gradient-to-br", TYPE_GRADIENTS[item.type] || 'from-slate-800 to-slate-950')} />
               
@@ -454,8 +454,8 @@ export const ActivityCard = memo(function ActivityCard({
                       loading="lazy"
                     />
                   )}
-                  {/* Premium overlay gradient */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#0A1628] via-[#0A1628]/20 to-transparent" />
+                  {/* Heavy bottom gradient for text readability */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0A1628] via-[#0A1628]/60 to-transparent" />
                 </motion.div>
               ) : (
                 <ItemTypeIcon
@@ -465,79 +465,72 @@ export const ActivityCard = memo(function ActivityCard({
                 />
               )}
 
-              {/* Top badges (Time & Type) */}
-              <div className="absolute top-3 left-3 flex items-center gap-2">
-                <span className="bg-black/60 text-white/90 text-[10px] font-bold px-2.5 py-1 rounded-full border border-white/10 flex items-center gap-1">
-                  <Clock className="h-3 w-3 text-gold" />
-                  {item.startTime}
-                </span>
-                <span
-                  className="text-white text-[10px] font-bold px-2.5 py-1 rounded-full border border-white/10"
-                  style={{ backgroundColor: `${color}40` }}
-                >
-                  {TYPE_LABELS[item.type]}
-                </span>
-              </div>
+              {/* Content Overlay (Title, Desc, Badges) */}
+              <div className="absolute inset-0 p-4 flex flex-col justify-between z-10">
+                {/* Top row */}
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="bg-black/60 backdrop-blur-md text-white/90 text-[10px] font-black px-2 py-1 rounded-lg border border-white/10 flex items-center gap-1">
+                      <Clock className="h-3 w-3 text-gold" />
+                      {item.startTime}
+                    </span>
+                    <span
+                      className="text-white text-[10px] font-black px-2 py-1 rounded-lg border border-white/10 backdrop-blur-md uppercase tracking-wider"
+                      style={{ backgroundColor: `${color}60` }}
+                    >
+                      {TYPE_LABELS[item.type]}
+                    </span>
+                  </div>
+                </div>
 
-              {/* Price/Rating floating badge */}
-              <div className="absolute bottom-3 right-3 flex flex-col items-end gap-1.5">
-                {item.rating && (
-                  <span className="bg-gold-gradient text-black text-[10px] font-black px-2 py-0.5 rounded-md shadow-lg flex items-center gap-0.5">
-                    <Star className="h-2.5 w-2.5 fill-black" />
-                    {item.rating.toFixed(1)}
-                  </span>
-                )}
-                {item.estimatedCost ? (
-                  <span className="bg-white/10 text-white text-[11px] font-bold px-2 py-0.5 rounded-md border border-white/10">
-                    {item.estimatedCost}€
-                  </span>
-                ) : null}
+                {/* Bottom row: Title & Meta */}
+                <div className="space-y-1">
+                  <h4 className="text-lg font-black text-white tracking-tight leading-tight drop-shadow-lg">
+                    {item.title}
+                  </h4>
+                  {item.description && (
+                    <p className="text-[11px] text-white/70 line-clamp-1 leading-relaxed drop-shadow-md italic">
+                      {item.description}
+                    </p>
+                  )}
+                  
+                  <div className="flex items-center justify-between mt-2 pt-2 border-t border-white/10">
+                    <div className="flex items-center gap-2">
+                      {item.rating && (
+                        <span className="bg-gold-gradient text-black text-[10px] font-black px-1.5 py-0.5 rounded shadow-lg flex items-center gap-0.5">
+                          <Star className="h-2.5 w-2.5 fill-black" />
+                          {item.rating.toFixed(1)}
+                        </span>
+                      )}
+                      {item.estimatedCost ? (
+                        <span className="text-white text-[10px] font-bold">
+                          {item.estimatedCost}€
+                        </span>
+                      ) : null}
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <BookingButtons item={item} isCompact={true} />
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           )}
 
-          <div className="p-4">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex-1 min-w-0">
-                <h4 className="text-base font-bold text-white tracking-tight leading-snug mb-1">
-                  {item.title}
-                </h4>
-                
-                {item.description && (
-                  <p className="text-xs text-white/60 line-clamp-2 leading-relaxed mb-3">
-                    {item.description}
-                  </p>
-                )}
-
-                {/* Micro-tags for premium feel */}
-                <div className="flex items-center gap-2 flex-wrap mb-3">
-                  {item.type === 'activity' && classifyActivityCategory(item).slice(0, 2).map(cat => (
-                    <span key={cat} className="text-[10px] font-bold text-gold/80 bg-gold/5 px-2 py-0.5 rounded-full border border-gold/10">
-                      {getCategoryConfig(cat).label}
-                    </span>
-                  ))}
-                  {item.timeFromPrevious && (
-                    <span className="text-[10px] text-white/40 flex items-center gap-1">
-                      <Navigation className="h-2.5 w-2.5" />
-                      {item.timeFromPrevious}m
-                    </span>
-                  )}
-                </div>
-
-                {/* Action pills */}
-                <div className="flex items-center gap-2">
-                  <BookingButtons item={item} />
-                </div>
+          {/* Fallback for non-hero cards or extra info */}
+          {!isHeroType && (
+            <div className="p-4 flex items-center justify-between">
+               <div className="flex-1 min-w-0">
+                <h4 className="text-base font-bold text-white tracking-tight leading-snug">{item.title}</h4>
+                <p className="text-xs text-white/60 line-clamp-1 mt-1">{item.description}</p>
               </div>
-              
-              {!isHeroType && (
-                <div className="p-3 rounded-2xl bg-white/5 border border-white/10 shadow-inner">
-                  <ItemTypeIcon item={item} className="h-5 w-5 text-gold" />
-                </div>
-              )}
+              <div className="p-3 rounded-2xl bg-white/5 border border-white/10">
+                <ItemTypeIcon item={item} className="h-5 w-5 text-gold" />
+              </div>
             </div>
-          </div>
-        </>
+          )}
+        </div>
       )}
 
       {/* Restaurant alternatives overlay */}
@@ -827,7 +820,7 @@ function DurationBadge({
 /**
  * Booking buttons — Clean, subtle style with branded accents
  */
-function BookingButtons({ item }: { item: TripItem }) {
+function BookingButtons({ item, isCompact = false }: { item: TripItem; isCompact?: boolean }) {
   const buttons: { label: string; url: string; variant: 'primary' | 'secondary' | 'ghost'; icon: React.ReactNode }[] = [];
   const bookingUrl = item.bookingUrl || '';
   const isLocalTransport = item.type === 'transport' && item.transportRole === 'inter_item';
@@ -926,14 +919,16 @@ function BookingButtons({ item }: { item: TripItem }) {
           rel="noopener noreferrer"
           onClick={(e) => e.stopPropagation()}
           className={cn(
-            'inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors',
-            btn.variant === 'primary' && 'bg-primary text-primary-foreground hover:opacity-90 shadow-sm',
-            btn.variant === 'secondary' && 'bg-secondary text-secondary-foreground hover:bg-secondary/80 border border-border/50',
-            btn.variant === 'ghost' && 'text-muted-foreground hover:text-foreground hover:bg-muted/60 border border-transparent hover:border-border/40',
+            'inline-flex items-center gap-1 transition-colors font-bold',
+            isCompact ? 'px-2 py-1 rounded-lg bg-black/40 backdrop-blur-md text-white/90 border border-white/10 text-[9px]' : 'px-2.5 py-1 rounded-md text-[11px]',
+            !isCompact && btn.variant === 'primary' && 'bg-primary text-primary-foreground hover:opacity-90 shadow-sm',
+            !isCompact && btn.variant === 'secondary' && 'bg-secondary text-secondary-foreground hover:bg-secondary/80 border border-border/50',
+            !isCompact && btn.variant === 'ghost' && 'text-muted-foreground hover:text-foreground hover:bg-muted/60 border border-transparent hover:border-border/40',
           )}
         >
           {btn.icon}
-          {btn.label}
+          {(!isCompact || (btn.label !== 'Maps' && btn.label !== 'Billetterie officielle')) && btn.label}
+          {isCompact && btn.label === 'Billetterie officielle' && 'Billets'}
         </a>
       ))}
     </>
