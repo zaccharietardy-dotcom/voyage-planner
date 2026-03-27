@@ -127,7 +127,7 @@ export default function RootLayout({
               (function() {
                 if (typeof window === 'undefined' || typeof navigator === 'undefined') return;
 
-                var cacheVersion = 'native-cache-v3';
+                var cacheVersion = 'native-cache-v4';
                 var capacitor = window.Capacitor;
                 var nativeFromRuntime = false;
                 var nativeFromUA = /capacitor/i.test(navigator.userAgent || '');
