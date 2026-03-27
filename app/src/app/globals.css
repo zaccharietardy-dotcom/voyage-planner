@@ -269,11 +269,33 @@
   .animate-float {
     animation: float 6s ease-in-out infinite;
   }
+  .animate-drift1 {
+    animation: drift1 20s ease-in-out infinite;
+  }
+  .animate-drift2 {
+    animation: drift2 25s ease-in-out infinite;
+  }
+  .animate-drift3 {
+    animation: drift3 18s ease-in-out infinite;
+  }
 
   @keyframes float {
     0% { transform: translateY(0px); }
     50% { transform: translateY(-10px); }
     100% { transform: translateY(0px); }
+  }
+
+  @keyframes drift1 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(50px, 30px) scale(1.2); }
+  }
+  @keyframes drift2 {
+    0%, 100% { transform: translate(0, 0) scale(1.2); }
+    50% { transform: translate(-50px, -40px) scale(1); }
+  }
+  @keyframes drift3 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(30px, 60px) scale(1.3); }
   }
 }
 
