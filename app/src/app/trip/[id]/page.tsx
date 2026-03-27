@@ -1682,9 +1682,10 @@ export default function TripPage() {
             />
           </div>
 
-          {/* Floating header */}
-          <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-4 pt-[calc(env(safe-area-inset-top)+1rem)] pb-6 bg-gradient-to-b from-black/60 via-black/20 to-transparent pointer-events-none">
-            <div className="flex items-center gap-3 pointer-events-auto">
+          {/* Floating header — gradient layer (click-through) + buttons (separate) */}
+          <div className="absolute top-0 left-0 right-0 z-10 h-28 bg-gradient-to-b from-black/60 via-black/20 to-transparent pointer-events-none" />
+          <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-4 pt-[calc(env(safe-area-inset-top)+1rem)] pb-6">
+            <div className="flex items-center gap-3">
               <button
                 className="flex h-11 w-11 items-center justify-center rounded-full bg-black/60 border border-white/10 shadow-[0_8px_16px_rgba(0,0,0,0.4)] active:scale-90 transition-transform text-white"
                 onClick={() => { hapticImpactLight(); router.push('/'); }}
@@ -1702,7 +1703,7 @@ export default function TripPage() {
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-2 pointer-events-auto">
+            <div className="flex items-center gap-2">
               {isOwner && (
                 <button
                   className="flex h-11 w-11 items-center justify-center rounded-full bg-black/60 border border-white/10 shadow-[0_8px_16px_rgba(0,0,0,0.4)] active:scale-90 transition-transform text-white"

@@ -271,9 +271,9 @@ export default function GlobePage() {
   return (
     <div className="flex h-screen flex-col bg-[#020617] overflow-hidden">
       {/* Mobile-first Header */}
-      <div className="fixed top-[max(72px,env(safe-area-inset-top)+16px)] left-4 right-4 md:left-6 md:right-6 z-[40] flex flex-col md:flex-row md:items-center justify-between gap-3 pointer-events-none">
-        
-        <div className="flex items-center gap-3 pointer-events-auto">
+      <div className="fixed top-[max(72px,env(safe-area-inset-top)+16px)] left-4 md:left-6 z-[40] flex flex-col md:flex-row md:items-center gap-3">
+
+        <div className="flex items-center gap-3">
           <button 
             onClick={() => { hapticImpactLight(); router.back(); }}
             className="flex h-12 w-12 items-center justify-center rounded-2xl bg-black/40 border border-white/10 shadow-[0_8px_16px_rgba(0,0,0,0.4)] backdrop-blur-xl active:scale-90 transition-all text-white"
