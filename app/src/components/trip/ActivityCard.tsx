@@ -395,8 +395,8 @@ export const ActivityCard = memo(function ActivityCard({
   return (
     <Card
       className={cn(
-        'relative group transition-all duration-300 cursor-pointer overflow-hidden active:scale-[0.97]',
-        'border-white/5 bg-[#0A1628]/40 backdrop-blur-md shadow-[0_8px_30px_rgb(0,0,0,0.12)]',
+        'relative group cursor-pointer overflow-hidden active:scale-[0.97] transition-transform',
+        'border-white/5 bg-[#0A1628]/80 shadow-[0_8px_30px_rgb(0,0,0,0.12)]',
         'hover:shadow-[0_8px_30px_rgb(0,0,0,0.2)] hover:border-white/10',
         isSelected && 'ring-2 ring-gold/50 border-gold/30 shadow-gold/10',
         isDragging && 'shadow-2xl rotate-2 scale-[1.05] z-50',
@@ -465,12 +465,12 @@ export const ActivityCard = memo(function ActivityCard({
 
               {/* Top badges (Time & Type) */}
               <div className="absolute top-3 left-3 flex items-center gap-2">
-                <span className="bg-black/40 backdrop-blur-md text-white/90 text-[10px] font-bold px-2.5 py-1 rounded-full border border-white/10 flex items-center gap-1">
+                <span className="bg-black/60 text-white/90 text-[10px] font-bold px-2.5 py-1 rounded-full border border-white/10 flex items-center gap-1">
                   <Clock className="h-3 w-3 text-gold" />
                   {item.startTime}
                 </span>
-                <span 
-                  className="text-white text-[10px] font-bold px-2.5 py-1 rounded-full border border-white/10 backdrop-blur-md"
+                <span
+                  className="text-white text-[10px] font-bold px-2.5 py-1 rounded-full border border-white/10"
                   style={{ backgroundColor: `${color}40` }}
                 >
                   {TYPE_LABELS[item.type]}
@@ -485,11 +485,11 @@ export const ActivityCard = memo(function ActivityCard({
                     {item.rating.toFixed(1)}
                   </span>
                 )}
-                {item.estimatedCost && (
-                  <span className="bg-white/10 backdrop-blur-md text-white text-[11px] font-bold px-2 py-0.5 rounded-md border border-white/10">
+                {item.estimatedCost ? (
+                  <span className="bg-white/10 text-white text-[11px] font-bold px-2 py-0.5 rounded-md border border-white/10">
                     {item.estimatedCost}€
                   </span>
-                )}
+                ) : null}
               </div>
             </div>
           )}
@@ -569,7 +569,7 @@ export const ActivityCard = memo(function ActivityCard({
               <Button
                 size="icon"
                 variant="ghost"
-                className="h-9 w-9 bg-black/40 backdrop-blur-md hover:bg-black/60 rounded-full border border-white/10"
+                className="h-9 w-9 bg-black/60 hover:bg-black/80 rounded-full border border-white/10"
                 onClick={(e) => {
                   e.stopPropagation();
                   hapticImpactLight();

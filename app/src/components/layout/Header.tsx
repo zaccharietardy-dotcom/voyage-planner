@@ -18,6 +18,9 @@ export function Header() {
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
 
+  // Hide on pages with their own header/fullscreen layout
+  if (pathname.startsWith('/trip/') || pathname === '/plan' || pathname === '/globe') return null;
+
   const navLinks = [
     { href: '/plan', label: t('nav.createTrip'), icon: PlusCircle },
     { href: '/explore', label: t('nav.explore'), icon: Compass },
