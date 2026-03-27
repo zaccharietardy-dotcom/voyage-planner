@@ -18,17 +18,7 @@ export function Header() {
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
 
-  // Hide on pages with their own header/fullscreen layout
-  if (pathname.startsWith('/trip/') || pathname === '/plan' || pathname === '/globe') return null;
-
-  const navLinks = [
-    { href: '/plan', label: t('nav.createTrip'), icon: PlusCircle },
-    { href: '/explore', label: t('nav.explore'), icon: Compass },
-    { href: '/globe', label: t('nav.globe'), icon: Globe },
-    { href: '/mes-voyages', label: t('nav.myTrips'), icon: Map },
-    { href: '/community', label: t('nav.community'), icon: Users },
-  ];
-
+  // ALL hooks must be called before any conditional return
   useEffect(() => {
     let ticking = false;
     const handleScroll = () => {
@@ -43,6 +33,18 @@ export function Header() {
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Hide on pages with their own header/fullscreen layout
+  const hidden = pathname.startsWith('/trip/') || pathname === '/plan' || pathname === '/globe';
+  if (hidden) return null;
+
+  const navLinks = [
+    { href: '/plan', label: t('nav.createTrip'), icon: PlusCircle },
+    { href: '/explore', label: t('nav.explore'), icon: Compass },
+    { href: '/globe', label: t('nav.globe'), icon: Globe },
+    { href: '/mes-voyages', label: t('nav.myTrips'), icon: Map },
+    { href: '/community', label: t('nav.community'), icon: Users },
+  ];
 
   return (
     <header
@@ -108,4 +110,3 @@ export function Header() {
     </header>
   );
 }
-
