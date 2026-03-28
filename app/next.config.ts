@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 import bundleAnalyzer from "@next/bundle-analyzer";
 import withSerwistInit from "@serwist/next";
+import { withSentryConfig } from "@sentry/nextjs";
 
 const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === "true",
@@ -31,6 +32,21 @@ const nextConfig: NextConfig = {
     ],
   },
   async headers() {
+    const csp = [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://emrldtp.com https://*.sentry.io https://*.vercel-scripts.com",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "img-src 'self' data: blob: https://images.unsplash.com https://i.pravatar.cc https://*.googleapis.com https://*.gstatic.com https://*.basemaps.cartocdn.com https://*.sentry.io",
+      "font-src 'self' https://fonts.gstatic.com",
+      "connect-src 'self' https://*.supabase.co https://*.googleapis.com https://*.sentry.io https://serpapi.com https://*.basemaps.cartocdn.com https://nominatim.openstreetmap.org https://overpass-api.de https://*.stripe.com https://vitals.vercel-insights.com https://va.vercel-scripts.com https://emrldtp.com",
+      "frame-src 'self' https://*.stripe.com",
+      "worker-src 'self' blob:",
+      "media-src 'self'",
+      "object-src 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+    ].join('; ');
+
     return [
       {
         source: '/(.*)',
@@ -47,6 +63,10 @@ const nextConfig: NextConfig = {
             key: 'Permissions-Policy',
             value: 'camera=(), microphone=(), geolocation=(self)',
           },
+          {
+            key: 'Content-Security-Policy-Report-Only',
+            value: csp,
+          },
         ],
       },
     ];
@@ -55,4 +75,8 @@ const nextConfig: NextConfig = {
   // Use `next dev --webpack` for local dev if needed (see package.json scripts).
 };
 
-export default withSerwist(withBundleAnalyzer(nextConfig));
+export default withSentryConfig(withSerwist(withBundleAnalyzer(nextConfig)), {
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  silent: !process.env.CI,
+});

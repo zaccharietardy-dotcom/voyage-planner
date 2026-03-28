@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import * as Sentry from '@sentry/nextjs';
 import { generateTripV2, type PipelineEvent } from '@/lib/pipeline';
 import { TripPreferences } from '@/lib/types';
 import type { PipelineQuestion } from '@/lib/types/pipelineQuestions';
@@ -7,6 +8,7 @@ import { createRouteHandlerClient } from '@/lib/supabase/server';
 import { deriveBillingState, fetchEntitlementsForUser } from '@/lib/server/billingEntitlements';
 import { checkAndIncrementRateLimit } from '@/lib/server/dbRateLimit';
 import { registerQuestion, cleanupSession } from './sessionStore';
+import { generateTripSchema } from '@/lib/validations/generate';
 
 export const maxDuration = 300; // 5 minutes max
 
@@ -16,13 +18,15 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    // Validation basique
-    if (!body.origin || !body.destination || !body.startDate) {
+    // Zod validation
+    const parsed = generateTripSchema.safeParse(body);
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: 'Paramètres manquants: origin, destination, startDate requis' },
+        { error: 'Paramètres invalides', details: parsed.error.flatten().fieldErrors },
         { status: 400 }
       );
     }
+    const validatedBody = parsed.data;
 
     // Check subscription quota
     const supabase = await createRouteHandlerClient();
@@ -92,14 +96,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Normaliser les noms de villes
-    const normalizedOrigin = await normalizeCity(body.origin);
-    const normalizedDestination = await normalizeCity(body.destination);
+    const normalizedOrigin = await normalizeCity(validatedBody.origin);
+    const normalizedDestination = await normalizeCity(validatedBody.destination);
 
     const preferences: TripPreferences = {
-      ...body,
+      ...validatedBody,
       origin: normalizedOrigin.displayName,
       destination: normalizedDestination.displayName,
-      startDate: new Date(body.startDate),
+      startDate: new Date(validatedBody.startDate),
     };
 
     // Streaming response: envoie des keepalive pings pendant la génération
@@ -133,7 +137,7 @@ export async function POST(request: NextRequest) {
           });
 
           const configuredPipeline = process.env.PIPELINE_VERSION || 'v3';
-          console.log(`[Generate] Using pipeline ${configuredPipeline}`);
+          console.debug(`[Generate] Using pipeline ${configuredPipeline}`);
 
           // Stream pipeline events to the client for real-time monitoring
           const onEvent = (event: PipelineEvent) => {
@@ -180,7 +184,7 @@ export async function POST(request: NextRequest) {
           let tripJson: string;
           try {
             tripJson = JSON.stringify(trip);
-            console.log(`[Generate] ✅ Trip generated, JSON size: ${(tripJson.length / 1024).toFixed(1)}KB`);
+            console.debug(`[Generate] Trip generated, JSON size: ${(tripJson.length / 1024).toFixed(1)}KB`);
           } catch (serializeErr) {
             console.error('[Generate] ❌ JSON.stringify(trip) failed:', serializeErr);
             controller.enqueue(encoder.encode(`data: {"status":"error","error":"Erreur de sérialisation du voyage"}\n\n`));
@@ -202,6 +206,9 @@ export async function POST(request: NextRequest) {
           const stack = error instanceof Error ? error.stack : '';
           console.error('[Generate] ❌ Erreur de génération:', message);
           console.error('[Generate] Stack trace:', stack);
+          Sentry.captureException(error, {
+            extra: { destination: preferences.destination, origin: preferences.origin, userId: user.id },
+          });
 
           // S'assurer que le message d'erreur est bien envoyé
           try {
@@ -229,6 +236,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.error('Erreur de génération:', message);
+    Sentry.captureException(error);
     return NextResponse.json(
       { error: `Erreur lors de la génération du voyage: ${message}` },
       { status: 500 }

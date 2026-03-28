@@ -11,6 +11,9 @@ import { SITE_NAME, SITE_URL, SITE_DESCRIPTION, OG_IMAGE_DEFAULT, LOCALE } from 
 import { AnalyticsProvider } from "@/components/AnalyticsProvider";
 import { I18nProvider } from "@/lib/i18n";
 import { PageTransition } from "@/components/layout/PageTransition";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { CookieConsentBanner } from "@/components/CookieConsentBanner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -242,7 +245,7 @@ export default function RootLayout({
             <AuthProvider>
               <AnalyticsProvider>
                 <Header />
-                <main className="pt-16 pb-16 md:pb-0">
+                <main className="pt-16 pb-24 md:pb-0">
                   <PageTransition>{children}</PageTransition>
                 </main>
                 <BottomNav />
@@ -260,6 +263,9 @@ export default function RootLayout({
             </AuthProvider>
           </I18nProvider>
         </ThemeProvider>
+        <Analytics />
+        <SpeedInsights />
+        <CookieConsentBanner />
       </body>
     </html>
   );

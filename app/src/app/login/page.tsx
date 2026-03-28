@@ -52,6 +52,14 @@ function LoginContent() {
     setIsLoading(true);
 
     try {
+      // Server-side rate limit check before attempting login
+      const rlRes = await fetch('/api/auth/login', { method: 'POST' });
+      if (rlRes.status === 429) {
+        const rlData = await rlRes.json();
+        setError(rlData.error || 'Trop de tentatives. Réessayez plus tard.');
+        return;
+      }
+
       const supabase = getSupabaseClient();
 
       const { error: signInError } = await supabase.auth.signInWithPassword({
