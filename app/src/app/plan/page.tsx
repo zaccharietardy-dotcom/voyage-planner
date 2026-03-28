@@ -24,6 +24,8 @@ import { GeneratingScreen } from '@/components/trip/GeneratingScreen';
 import { trackEvent } from '@/lib/analytics';
 import { PremiumBackground } from '@/components/ui/PremiumBackground';
 
+import { hapticImpactLight, hapticSuccess } from '@/lib/utils/haptics';
+
 const STEPS = [
   { id: 1, label: 'Où' },
   { id: 2, label: 'Quand' },
@@ -71,13 +73,39 @@ export default function PlanPage() {
   }, []);
 
   const stepVariants = {
-    enter: (dir: number) => ({ x: dir > 0 ? 80 : -80, opacity: 0 }),
-    center: { x: 0, opacity: 1 },
-    exit: (dir: number) => ({ x: dir > 0 ? -80 : 80, opacity: 0 }),
+    enter: (dir: number) => ({
+      x: dir > 0 ? 100 : -100,
+      y: 10,
+      opacity: 0,
+      scale: 0.98
+    }),
+    center: {
+      x: 0,
+      y: 0,
+      opacity: 1,
+      scale: 1,
+      transition: {
+        x: { type: "spring" as const, stiffness: 300, damping: 30 },
+        opacity: { duration: 0.2 },
+        scale: { duration: 0.4, ease: [0.4, 0, 0.2, 1] as [number, number, number, number] }
+      }
+    },
+    exit: (dir: number) => ({
+      x: dir > 0 ? -100 : 100,
+      y: -10,
+      opacity: 0,
+      scale: 0.98,
+      transition: {
+        x: { duration: 0.3 },
+        opacity: { duration: 0.2 },
+        scale: { duration: 0.3 }
+      }
+    }),
   };
 
   const applyUserPreferences = () => {
     if (!userPrefs) return;
+    hapticSuccess();
 
     const updatedPrefs: Partial<TripPreferences> = { ...preferences };
 
@@ -167,6 +195,7 @@ export default function PlanPage() {
       setShowErrors(true);
       return;
     }
+    hapticImpactLight();
     if (currentStep < STEPS.length) {
       directionRef.current = 1;
       setShowErrors(false);
@@ -175,6 +204,7 @@ export default function PlanPage() {
   };
 
   const handleBack = () => {
+    hapticImpactLight();
     if (currentStep > 1) {
       directionRef.current = -1;
       setShowErrors(false);

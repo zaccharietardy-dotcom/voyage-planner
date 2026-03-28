@@ -4,5 +4,5 @@ export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || 'https://naraevoyage.com';
 export const SITE_DESCRIPTION =
   "Planifiez vos voyages avec Narae. Itinéraires personnalisés en 2 minutes, collaboration en temps réel et découverte de voyages.";
-export const OG_IMAGE_DEFAULT = `${SITE_URL}/og-image.png`;
+export const OG_IMAGE_DEFAULT = `${SITE_URL}/api/og`;
 export const LOCALE = 'fr_FR';

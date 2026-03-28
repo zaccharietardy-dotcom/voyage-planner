@@ -43,7 +43,12 @@ export async function generateMetadata({
       url: `${SITE_URL}/trip/${id}`,
       siteName: SITE_NAME,
       images: [
-        { url: OG_IMAGE_DEFAULT, width: 1200, height: 630, alt: tripTitle },
+        {
+          url: `${SITE_URL}/api/og?destination=${encodeURIComponent(trip.destination)}&days=${trip.duration_days}`,
+          width: 1200,
+          height: 630,
+          alt: tripTitle,
+        },
       ],
       locale: LOCALE,
       type: 'article',
@@ -52,7 +57,7 @@ export async function generateMetadata({
       card: 'summary_large_image',
       title: `${title} | ${SITE_NAME}`,
       description,
-      images: [OG_IMAGE_DEFAULT],
+      images: [`${SITE_URL}/api/og?destination=${encodeURIComponent(trip.destination)}&days=${trip.duration_days}`],
     },
     alternates: { canonical: `${SITE_URL}/trip/${id}` },
   };
