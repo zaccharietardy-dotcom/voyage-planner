@@ -21,14 +21,16 @@ const nextConfig: NextConfig = {
   },
   images: {
     remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "images.unsplash.com",
-      },
-      {
-        protocol: "https",
-        hostname: "i.pravatar.cc",
-      },
+      { protocol: "https", hostname: "images.unsplash.com" },
+      { protocol: "https", hostname: "i.pravatar.cc" },
+      { protocol: "https", hostname: "maps.googleapis.com" },
+      { protocol: "https", hostname: "lh3.googleusercontent.com" },
+      { protocol: "https", hostname: "staticcdn.viator.com" },
+      { protocol: "https", hostname: "hq.viator.com" },
+      { protocol: "https", hostname: "media.viator.com" },
+      { protocol: "https", hostname: "upload.wikimedia.org" },
+      { protocol: "https", hostname: "cf.bstatic.com" },
+      { protocol: "https", hostname: "serpapi.com" },
     ],
   },
   async headers() {

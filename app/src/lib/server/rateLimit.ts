@@ -6,6 +6,7 @@ interface RateLimitEntry {
   resetAt: number;
 }
 
+const MAX_STORE_SIZE = 10_000;
 const store = new Map<string, RateLimitEntry>();
 
 // Clean up expired entries periodically
@@ -39,6 +40,10 @@ export function checkRateLimit(
   const entry = store.get(ip);
 
   if (!entry || now > entry.resetAt) {
+    // Reject new entries if store is full (DDoS protection)
+    if (!entry && store.size >= MAX_STORE_SIZE) {
+      return { allowed: false, remaining: 0, resetAt: now + windowMs };
+    }
     // New window
     store.set(ip, { count: 1, resetAt: now + windowMs });
     return { allowed: true, remaining: maxRequests - 1, resetAt: now + windowMs };
