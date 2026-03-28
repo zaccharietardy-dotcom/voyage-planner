@@ -2,6 +2,8 @@ import { createRouteHandlerClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@/lib/supabase/types';
+import { sendEmail } from '@/lib/email/send';
+import { tripReadyEmail } from '@/lib/email/templates';
 
 function getServiceClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -199,7 +201,17 @@ export async function POST(request: Request) {
         action: 'trip_created',
         details: { destination: trip.destination },
       });
-    } catch { /* ignore */ }
+    } catch (e) {
+      console.error('[trips] activity_log insert failed:', e);
+    }
+
+    // Send "trip ready" email (best effort, don't block response)
+    const userEmail = user.email;
+    if (userEmail) {
+      const formattedDate = new Date(startDateStr).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+      const email = tripReadyEmail(trip.id, destination, formattedDate, durationDays || 7);
+      sendEmail({ to: userEmail, ...email }).catch((e) => console.error('[trips] Trip ready email failed:', e));
+    }
 
     // Exclure generator_ip de la réponse (donnée sensible pour anti-abus)
     const { generator_ip, ...tripWithoutIp } = trip;
