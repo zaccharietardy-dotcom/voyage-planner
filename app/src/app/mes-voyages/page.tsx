@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Plus, MapPin, Calendar, Users, Plane, Loader2, Globe, Lock, Users2, ChevronDown, Camera, Navigation, Clock, Trash2, Settings2, ArrowRight } from 'lucide-react';
+import { TripTemplates } from '@/components/TripTemplates';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { fr, enUS, es, de, it, pt } from 'date-fns/locale';
@@ -265,6 +266,16 @@ export default function MesVoyagesPage() {
                 </Link>
               </Button>
               <p className="text-xs text-muted-foreground mt-4">Gratuit — aucune carte requise</p>
+            </motion.div>
+
+            {/* Trip templates */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1 }}
+              className="mt-16"
+            >
+              <TripTemplates title="Ou partez d'un modèle" maxItems={6} />
             </motion.div>
           </motion.div>
         ) : (

@@ -57,6 +57,19 @@ export default function PlanPage() {
   const [currentQuestion, setCurrentQuestion] = useState<PipelineQuestion | null>(null);
   const questionResolverRef = useRef<((optionId: string) => void) | null>(null);
 
+  // Load template preferences if coming from a template card
+  useEffect(() => {
+    const stored = sessionStorage.getItem('narae-template');
+    if (stored) {
+      sessionStorage.removeItem('narae-template');
+      try {
+        const templatePrefs = JSON.parse(stored);
+        setPreferences((prev) => ({ ...prev, ...templatePrefs }));
+        toast.success('Modèle chargé — personnalisez et lancez !');
+      } catch { /* ignore */ }
+    }
+  }, []);
+
   const stepVariants = {
     enter: (dir: number) => ({ x: dir > 0 ? 80 : -80, opacity: 0 }),
     center: { x: 0, opacity: 1 },
@@ -170,6 +183,27 @@ export default function PlanPage() {
   };
 
   const handleGenerate = async () => {
+    // Pre-check auth + quota before starting generation
+    try {
+      const preflight = await fetch('/api/generate/preflight');
+      const check = await preflight.json();
+
+      if (!check.allowed) {
+        if (check.action === 'login') {
+          toast.error(check.reason);
+          router.push('/login?redirect=/plan');
+          return;
+        }
+        if (check.action === 'upgrade') {
+          toast.error(check.reason);
+          router.push('/pricing');
+          return;
+        }
+      }
+    } catch {
+      // Fail open — don't block if preflight errors
+    }
+
     setIsGenerating(true);
     setPipelineStep(undefined);
     try {
@@ -280,7 +314,18 @@ export default function PlanPage() {
     } catch (error) {
       console.error('Erreur génération:', error);
       const message = error instanceof Error ? error.message : 'Erreur inconnue';
-      toast.error(`Erreur: ${message}`);
+
+      if (message.includes('authentifié') || message.includes('Non authentifié')) {
+        toast.error('Connectez-vous pour générer votre voyage');
+        router.push('/login?redirect=/plan');
+      } else if (message.includes('QUOTA_EXCEEDED') || message.includes('Limite')) {
+        toast.error('Passez à Pro pour des voyages illimités');
+        router.push('/pricing');
+      } else if (message.includes('RATE_LIMIT')) {
+        toast.error('Trop de générations récentes. Réessayez dans quelques minutes.');
+      } else {
+        toast.error(`Une erreur est survenue. Réessayez.`);
+      }
     } finally {
       setIsGenerating(false);
     }
