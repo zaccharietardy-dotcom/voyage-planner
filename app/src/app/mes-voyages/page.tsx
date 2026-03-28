@@ -207,21 +207,65 @@ export default function MesVoyagesPage() {
             ))}
           </div>
         ) : trips.length === 0 ? (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="flex flex-col items-center justify-center py-32 text-center"
+            className="max-w-2xl mx-auto py-16"
           >
-            <div className="w-24 h-24 rounded-[2.5rem] bg-gold/5 flex items-center justify-center border border-gold/10 mb-8">
-              <Navigation className="h-10 w-10 text-gold/30" />
+            {/* Welcome hero */}
+            <div className="text-center mb-12">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: 'spring', stiffness: 200, delay: 0.2 }}
+                className="w-20 h-20 mx-auto rounded-[1.5rem] bg-gold-gradient flex items-center justify-center mb-6 shadow-xl shadow-gold/20"
+              >
+                <Plane className="h-9 w-9 text-[#020617]" />
+              </motion.div>
+              <h2 className="text-3xl md:text-4xl font-display font-bold mb-3">Bienvenue sur Narae</h2>
+              <p className="text-muted-foreground text-lg max-w-md mx-auto">
+                Votre premier voyage est à portée de clic. Notre algorithme crée un itinéraire personnalisé en 2 minutes.
+              </p>
             </div>
-            <h3 className="text-2xl font-display font-bold mb-4">{t('myTrips.empty')}</h3>
-            <p className="text-muted-foreground mb-8 max-w-sm">
-              {t('myTrips.emptyDesc')}
-            </p>
-            <Button size="lg" className="rounded-2xl bg-gold-gradient text-[#020617] font-bold" asChild>
-              <Link href="/plan">{t('myTrips.planFirst')}</Link>
-            </Button>
+
+            {/* How it works */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
+              {[
+                { icon: <MapPin className="h-5 w-5" />, title: 'Choisissez', desc: 'Destination, dates, style de voyage' },
+                { icon: <Clock className="h-5 w-5" />, title: '2 minutes', desc: 'Notre algorithme génère votre itinéraire' },
+                { icon: <Navigation className="h-5 w-5" />, title: 'Partez !', desc: 'Activités, restos, hôtels — tout est planifié' },
+              ].map((step, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 + i * 0.15 }}
+                  className="rounded-2xl border border-white/10 bg-white/[0.02] p-6 text-center"
+                >
+                  <div className="w-10 h-10 mx-auto rounded-xl bg-gold/10 flex items-center justify-center text-gold mb-3">
+                    {step.icon}
+                  </div>
+                  <h3 className="font-bold text-sm mb-1">{step.title}</h3>
+                  <p className="text-xs text-muted-foreground">{step.desc}</p>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* CTA */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8 }}
+              className="text-center"
+            >
+              <Button size="lg" className="h-16 px-12 rounded-2xl bg-gold-gradient text-[#020617] text-lg font-bold shadow-xl shadow-gold/20 hover:scale-105 active:scale-95 transition-all" asChild>
+                <Link href="/plan">
+                  <Plus className="h-5 w-5 mr-2" />
+                  Planifier mon premier voyage
+                </Link>
+              </Button>
+              <p className="text-xs text-muted-foreground mt-4">Gratuit — aucune carte requise</p>
+            </motion.div>
           </motion.div>
         ) : (
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
