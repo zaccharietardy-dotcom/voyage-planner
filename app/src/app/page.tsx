@@ -8,9 +8,105 @@ import { Footer } from '@/components/layout';
 import { Hero } from '@/components/landing/Hero';
 import { HowItWorks } from '@/components/landing/HowItWorks';
 import Link from 'next/link';
-import { ArrowRight, Compass, Map, Users2 } from 'lucide-react';
+import { ArrowRight, Compass, Map, Users2, Star, Quote } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
+
+const TESTIMONIALS = [
+  {
+    name: 'Marie L.',
+    trip: 'Rome, 5 jours',
+    text: "L'itinéraire était parfait — chaque restaurant était une découverte et les temps de trajet étaient réalistes. On n'a rien eu à modifier.",
+  },
+  {
+    name: 'Thomas & Sarah',
+    trip: 'Tokyo, 7 jours',
+    text: "On partait en famille avec 2 enfants. Narae a proposé des activités adaptées et des restos kid-friendly. Un gain de temps énorme.",
+  },
+  {
+    name: 'Alexandre D.',
+    trip: 'Lisbonne, 3 jours',
+    text: "J'ai testé 3 planificateurs avant. Narae est le seul qui donne des horaires d'ouverture corrects et des restaurants à proximité des activités.",
+  },
+];
+
+function SocialProof() {
+  const [stats, setStats] = useState<{ trips: number; users: number; destinations: number } | null>(null);
+
+  useEffect(() => {
+    fetch('/api/stats/public')
+      .then((r) => r.ok ? r.json() : null)
+      .then(setStats)
+      .catch(() => {});
+  }, []);
+
+  return (
+    <section className="py-24 relative overflow-hidden">
+      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-gold/20 to-transparent" />
+      <div className="container mx-auto px-4 max-w-6xl">
+        {/* Stats */}
+        {stats && (stats.trips > 0 || stats.users > 0) && (
+          <div className="grid grid-cols-3 gap-8 mb-20 max-w-2xl mx-auto text-center">
+            {[
+              { value: stats.trips, label: 'Voyages générés' },
+              { value: stats.users, label: 'Voyageurs' },
+              { value: stats.destinations, label: 'Destinations' },
+            ].map((stat, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+              >
+                <div className="text-3xl md:text-4xl font-display font-bold text-gold">
+                  {stat.value.toLocaleString('fr-FR')}+
+                </div>
+                <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground mt-1">
+                  {stat.label}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
+
+        {/* Testimonials */}
+        <div className="text-center mb-12">
+          <h2 className="text-sm uppercase tracking-[0.3em] text-gold font-bold mb-4">Ils nous font confiance</h2>
+          <p className="text-3xl md:text-4xl font-display font-bold">Ce qu'en disent nos voyageurs</p>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-6">
+          {TESTIMONIALS.map((t, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.15 }}
+              className="rounded-2xl border border-white/10 bg-white/[0.02] p-6"
+            >
+              <Quote className="h-6 w-6 text-gold/30 mb-4" />
+              <p className="text-sm text-muted-foreground leading-relaxed mb-4">"{t.text}"</p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-bold">{t.name}</p>
+                  <p className="text-xs text-muted-foreground">{t.trip}</p>
+                </div>
+                <div className="flex gap-0.5">
+                  {[...Array(5)].map((_, j) => (
+                    <Star key={j} className="h-3.5 w-3.5 fill-gold text-gold" />
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
 
 function LandingPage() {
   return (
@@ -82,6 +178,9 @@ function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* Social Proof */}
+      <SocialProof />
 
       {/* CTA Section - Dark & Gold */}
       <section className="py-24 bg-[#020617] text-white relative overflow-hidden">

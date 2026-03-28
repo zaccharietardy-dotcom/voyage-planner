@@ -1,0 +1,17 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "XA2J5GRLDF.com.naraevoyage.app",
+        "paths": [
+          "/trip/*",
+          "/join/*",
+          "/invite/*",
+          "/explore",
+          "/plan"
+        ]
+      }
+    ]
+  }
+}
