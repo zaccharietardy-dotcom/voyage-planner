@@ -58,6 +58,20 @@ export const showFeedbackWidget = flag<boolean>({
   },
 });
 
+export const landingCtaVariant = flag<'default' | 'action'>({
+  key: 'landing-cta-variant',
+  defaultValue: 'default',
+  description: 'A/B test: CTA text on landing page. default="Commencer gratuitement" vs action="Planifier mon voyage"',
+  options: [
+    { value: 'default', label: 'Commencer gratuitement' },
+    { value: 'action', label: 'Planifier mon voyage' },
+  ],
+  decide() {
+    // 50/50 split based on random
+    return Math.random() > 0.5 ? 'action' : 'default';
+  },
+});
+
 export const showSocialProof = flag<boolean>({
   key: 'show-social-proof',
   defaultValue: true,

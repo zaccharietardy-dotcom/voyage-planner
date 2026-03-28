@@ -1,63 +1,36 @@
 'use client';
 
-function isNative(): boolean {
-  try {
-    return typeof window !== 'undefined' && !!(window as any).Capacitor?.isNativePlatform?.();
-  } catch { return false; }
-}
+/**
+ * UTILITY: Haptic Feedback Wrapper
+ * 
+ * NOTE: Physical vibrations have been disabled based on user feedback.
+ * The functions are kept for architectural consistency but perform no action.
+ */
 
 /**
- * Trigger a light impact haptic feedback if running on a native device.
+ * Trigger a light impact haptic feedback (DISABLED)
  */
 export async function hapticImpactLight() {
-  if (isNative()) {
-    try {
-      const { Haptics, ImpactStyle } = await import('@capacitor/haptics');
-      await Haptics.impact({ style: ImpactStyle.Light });
-    } catch (e) {
-      // Ignore errors if haptics fail
-    }
-  }
+  // Disabled: user prefers no physical vibration
 }
 
 /**
- * Trigger a medium impact haptic feedback if running on a native device.
+ * Trigger a medium impact haptic feedback (DISABLED)
  */
 export async function hapticImpactMedium() {
-  if (isNative()) {
-    try {
-      const { Haptics, ImpactStyle } = await import('@capacitor/haptics');
-      await Haptics.impact({ style: ImpactStyle.Medium });
-    } catch (e) {
-      // Ignore
-    }
-  }
+  // Disabled: user prefers no physical vibration
 }
 
 /**
- * Trigger a selection change haptic feedback if running on a native device.
+ * Trigger a selection change haptic feedback (DISABLED)
  */
 export async function hapticSelection() {
-  if (isNative()) {
-    try {
-      const { Haptics } = await import('@capacitor/haptics');
-      await Haptics.selectionChanged();
-    } catch (e) {
-      // Ignore
-    }
-  }
+  // Disabled: user prefers no physical vibration
 }
 
 /**
- * Trigger a success notification haptic feedback if running on a native device.
+ * Trigger a success notification haptic feedback (DISABLED)
  */
 export async function hapticSuccess() {
-  if (isNative()) {
-    try {
-      const { Haptics, NotificationType } = await import('@capacitor/haptics');
-      await Haptics.notification({ type: NotificationType.Success });
-    } catch (e) {
-      // Ignore
-    }
-  }
+  // Disabled: user prefers no physical vibration
 }

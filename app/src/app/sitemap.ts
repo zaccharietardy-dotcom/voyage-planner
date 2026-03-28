@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { DESTINATIONS } from '@/lib/destinations';
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || 'https://naraevoyage.com';
@@ -74,5 +75,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.warn('[sitemap] Erreur lors de la récupération des voyages publics');
   }
 
-  return [...staticRoutes, ...tripRoutes];
+  // Routes destinations
+  const destinationRoutes: MetadataRoute.Sitemap = DESTINATIONS.map((d) => ({
+    url: `${SITE_URL}/destination/${d.slug}`,
+    lastModified: new Date(),
+    changeFrequency: 'monthly' as const,
+    priority: 0.8,
+  }));
+
+  return [...staticRoutes, ...destinationRoutes, ...tripRoutes];
 }

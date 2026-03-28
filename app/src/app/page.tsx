@@ -12,6 +12,7 @@ import { ArrowRight, Compass, Map, Users2, Star, Quote } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
+import { trackEvent } from '@/lib/analytics';
 
 const TESTIMONIALS = [
   {
@@ -109,6 +110,16 @@ function SocialProof() {
 }
 
 function LandingPage() {
+  // A/B test: CTA variant stored in cookie for consistency
+  const [ctaVariant] = useState<'default' | 'action'>(() => {
+    if (typeof window === 'undefined') return 'default';
+    const stored = document.cookie.match(/narae-cta=(\w+)/)?.[1];
+    if (stored === 'action' || stored === 'default') return stored as 'default' | 'action';
+    const variant = Math.random() > 0.5 ? 'action' : 'default';
+    document.cookie = `narae-cta=${variant};path=/;max-age=${60 * 60 * 24 * 30}`;
+    return variant as 'default' | 'action';
+  });
+
   return (
     <div className="min-h-screen bg-background">
       <Hero />
@@ -193,8 +204,12 @@ function LandingPage() {
             Rejoignez des milliers de voyageurs qui font confiance à Narae pour planifier des moments inoubliables.
           </p>
           <Link href="/register">
-            <Button size="lg" className="h-16 rounded-2xl bg-white text-[#020617] px-12 text-lg font-bold hover:bg-gold-light transition-all shadow-2xl">
-              Commencer gratuitement
+            <Button
+              size="lg"
+              className="h-16 rounded-2xl bg-white text-[#020617] px-12 text-lg font-bold hover:bg-gold-light transition-all shadow-2xl"
+              onClick={() => trackEvent('landing_cta_click', { variant: ctaVariant })}
+            >
+              {ctaVariant === 'action' ? 'Planifier mon voyage' : 'Commencer gratuitement'}
             </Button>
           </Link>
         </div>
