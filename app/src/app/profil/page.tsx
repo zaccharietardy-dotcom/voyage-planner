@@ -13,6 +13,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { UserProfileCard } from '@/components/social/UserProfileCard';
 import { GamificationSection } from '@/components/gamification/GamificationSection';
+import { ReferralCard } from '@/components/ReferralCard';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -279,7 +280,8 @@ export default function ProfilPage() {
             </TabsContent>
 
             <TabsContent value="gamification" className="mt-8 outline-none">
-              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+                <ReferralCard />
                 {user && <GamificationSection userId={user.id} isOwnProfile={true} />}
               </motion.div>
             </TabsContent>

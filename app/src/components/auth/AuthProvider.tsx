@@ -115,6 +115,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             if (!existingProfile) {
               await createProfile(session.user);
             }
+
+            // Apply referral code if stored from registration
+            const refCode = localStorage.getItem('narae-referral-code');
+            if (refCode) {
+              localStorage.removeItem('narae-referral-code');
+              fetch('/api/referral', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code: refCode }),
+              }).catch(() => {});
+            }
           } catch (profileError) {
             console.error('Erreur chargement profil:', profileError);
           }

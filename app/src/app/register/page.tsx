@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Eye, EyeOff, Loader2, Check, X, AlertCircle, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -49,6 +49,7 @@ function PasswordRequirement({ met, text }: { met: boolean; text: string }) {
 
 export default function RegisterPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -63,6 +64,12 @@ export default function RegisterPage() {
     confirmPassword: '',
     acceptTerms: false,
   });
+
+  // Store referral code from URL for post-signup application
+  useEffect(() => {
+    const ref = searchParams.get('ref');
+    if (ref) localStorage.setItem('narae-referral-code', ref.toUpperCase().trim());
+  }, [searchParams]);
 
   const passwordStrength = checkPasswordStrength(formData.password);
   const isPasswordValid = Object.values(passwordStrength).every(Boolean);
