@@ -4,7 +4,7 @@ import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { GoogleSignIn } from '@/components/auth';
+import { GoogleSignIn, AppleSignIn } from '@/components/auth';
 import { useAuth } from '@/components/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -165,10 +165,16 @@ function LoginContent() {
           </div>
 
           <div className="space-y-8">
-            <GoogleSignIn
-              redirectTo={redirectTo}
-              className="w-full h-14 rounded-2xl border-white/10 bg-white/5 hover:bg-white/10 text-white font-bold transition-all"
-            />
+            <div className="space-y-3">
+              <AppleSignIn
+                redirectTo={redirectTo}
+                className="w-full h-14 rounded-2xl border-white/10 bg-white text-black hover:bg-white/90 font-bold transition-all"
+              />
+              <GoogleSignIn
+                redirectTo={redirectTo}
+                className="w-full h-14 rounded-2xl border-white/10 bg-white/5 hover:bg-white/10 text-white font-bold transition-all"
+              />
+            </div>
 
             <div className="relative">
               <div className="absolute inset-0 flex items-center">

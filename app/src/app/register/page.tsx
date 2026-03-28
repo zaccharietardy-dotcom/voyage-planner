@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { GoogleSignIn } from '@/components/auth/GoogleSignIn';
+import { AppleSignIn } from '@/components/auth/AppleSignIn';
 import { getSupabaseClient } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 
@@ -195,7 +196,10 @@ export default function RegisterPage() {
           </div>
 
           <div className="space-y-8">
-            <GoogleSignIn className="w-full h-14 rounded-2xl border-white/10 bg-white/5 hover:bg-white/10 text-white font-bold transition-all" />
+            <div className="space-y-3">
+              <AppleSignIn className="w-full h-14 rounded-2xl border-white/10 bg-white text-black hover:bg-white/90 font-bold transition-all" />
+              <GoogleSignIn className="w-full h-14 rounded-2xl border-white/10 bg-white/5 hover:bg-white/10 text-white font-bold transition-all" />
+            </div>
 
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
