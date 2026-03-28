@@ -2,6 +2,7 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 export async function middleware(request: NextRequest) {
+  const requestId = request.headers.get('x-request-id') || crypto.randomUUID();
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
@@ -29,6 +30,7 @@ export async function middleware(request: NextRequest) {
   // using the refresh token (7d) without user intervention.
   await supabase.auth.getUser();
 
+  supabaseResponse.headers.set('x-request-id', requestId);
   return supabaseResponse;
 }
 

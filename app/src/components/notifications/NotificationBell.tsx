@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Bell, Heart, UserPlus, MessageCircle, Reply, X } from 'lucide-react';
 import { useAuth } from '@/components/auth';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useRouter } from 'next/navigation';
+import { getSupabaseClient } from '@/lib/supabase';
 
 interface Notification {
   id: string;
@@ -36,7 +37,7 @@ export function NotificationBell() {
   const [isLoading, setIsLoading] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async () => {
     if (!user) return;
     setIsLoading(true);
     try {
@@ -51,13 +52,36 @@ export function NotificationBell() {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  useEffect(() => {
-    fetchNotifications();
-    const interval = setInterval(fetchNotifications, 30000); // Poll every 30s
-    return () => clearInterval(interval);
   }, [user]);
+
+  // Initial fetch + Supabase Realtime subscription
+  useEffect(() => {
+    if (!user) return;
+    fetchNotifications();
+
+    const supabase = getSupabaseClient();
+    const channel = supabase
+      .channel(`notifications-${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          const newNotif = payload.new as Notification;
+          setNotifications((prev) => [newNotif, ...prev].slice(0, 15));
+          setUnreadCount((prev) => prev + 1);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, fetchNotifications]);
 
   // Close on click outside
   useEffect(() => {
