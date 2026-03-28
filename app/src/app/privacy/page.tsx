@@ -16,7 +16,7 @@ export default function PrivacyPage() {
         </Button>
 
         <h1 className="text-4xl font-bold mb-2">Politique de Confidentialité</h1>
-        <p className="text-muted-foreground mb-8">Dernière mise à jour : 28 janvier 2025</p>
+        <p className="text-muted-foreground mb-8">Dernière mise à jour : 28 mars 2026</p>
 
         <div className="prose prose-neutral dark:prose-invert max-w-none">
           <section className="mb-8">
@@ -104,11 +104,47 @@ export default function PrivacyPage() {
             <p className="text-muted-foreground leading-relaxed mb-4">
               Vos données peuvent être partagées avec :
             </p>
+            <h3 className="text-xl font-medium mb-2 mt-4">6.1 Hébergement et Infrastructure</h3>
             <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
-              <li><strong>Supabase :</strong> Hébergement de la base de données (UE)</li>
-              <li><strong>Vercel :</strong> Hébergement du site web</li>
-              <li><strong>Google :</strong> Authentification (si vous utilisez &quot;Se connecter avec Google&quot;)</li>
-              <li><strong>Autres utilisateurs :</strong> Voyages publics et profils partagés</li>
+              <li><strong>Supabase :</strong> Base de données et authentification (UE)</li>
+              <li><strong>Vercel :</strong> Hébergement du site web et fonctions serverless (global)</li>
+              <li><strong>Sentry :</strong> Suivi des erreurs techniques (UE/US)</li>
+              <li><strong>Firebase (Google) :</strong> Notifications push (US)</li>
+            </ul>
+
+            <h3 className="text-xl font-medium mb-2 mt-4">6.2 Authentification</h3>
+            <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
+              <li><strong>Google :</strong> Connexion via &quot;Se connecter avec Google&quot;</li>
+              <li><strong>Apple :</strong> Connexion via &quot;Se connecter avec Apple&quot;</li>
+            </ul>
+
+            <h3 className="text-xl font-medium mb-2 mt-4">6.3 Génération d&apos;itinéraires</h3>
+            <p className="text-muted-foreground leading-relaxed mb-2">
+              Lors de la génération d&apos;un itinéraire, vos préférences de voyage (destination, dates, style) sont transmises aux services suivants pour trouver les meilleures activités, restaurants et hébergements :
+            </p>
+            <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
+              <li><strong>Google Places API :</strong> Recherche d&apos;attractions, horaires, photos (Google LLC, US)</li>
+              <li><strong>Google Directions API :</strong> Calcul des temps de trajet (Google LLC, US)</li>
+              <li><strong>SerpAPI :</strong> Recherche de restaurants et hôtels (SerpAPI LLC, US)</li>
+              <li><strong>Viator (Tripadvisor) :</strong> Activités et excursions (Tripadvisor LLC, US)</li>
+              <li><strong>Open-Meteo :</strong> Données météorologiques (Open-Meteo, UE — open source, pas de données personnelles)</li>
+              <li><strong>OpenStreetMap / Overpass :</strong> Points d&apos;intérêt complémentaires (open source, pas de données personnelles)</li>
+              <li><strong>Nominatim :</strong> Géocodage des villes (open source, pas de données personnelles)</li>
+            </ul>
+            <p className="text-muted-foreground leading-relaxed mt-2">
+              <strong>Note :</strong> Aucune donnée personnelle identifiable (email, nom) n&apos;est transmise à ces services.
+              Seules les préférences de voyage anonymisées sont utilisées pour les requêtes.
+            </p>
+
+            <h3 className="text-xl font-medium mb-2 mt-4">6.4 Paiement et Communication</h3>
+            <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
+              <li><strong>Stripe :</strong> Traitement des paiements (Stripe Inc, UE/US — certifié PCI DSS)</li>
+              <li><strong>Resend :</strong> Envoi d&apos;emails transactionnels (Resend Inc, US)</li>
+            </ul>
+
+            <h3 className="text-xl font-medium mb-2 mt-4">6.5 Autres utilisateurs</h3>
+            <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
+              <li>Voyages publics et profils partagés selon vos paramètres de visibilité</li>
             </ul>
             <p className="text-muted-foreground leading-relaxed mt-4">
               Nous ne vendons jamais vos données personnelles à des tiers.
@@ -140,7 +176,11 @@ export default function PrivacyPage() {
               <li><strong>Droit de retrait du consentement :</strong> Retirer votre consentement à tout moment</li>
             </ul>
             <p className="text-muted-foreground leading-relaxed mt-4">
-              Pour exercer ces droits, contactez-nous à{' '}
+              Vous pouvez exercer directement vos droits d&apos;accès, de portabilité et d&apos;effacement
+              depuis votre <a href="/profil" className="text-primary hover:underline">page de profil</a> (boutons &quot;Exporter mes données&quot; et &quot;Supprimer mon compte&quot;).
+            </p>
+            <p className="text-muted-foreground leading-relaxed mt-2">
+              Pour toute autre demande, contactez-nous à{' '}
               <a href="mailto:privacy@naraevoyage.com" className="text-primary hover:underline">
                 privacy@naraevoyage.com
               </a>
