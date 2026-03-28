@@ -1,6 +1,6 @@
 'use client';
 
-import { LogOut, Loader2, ArrowLeft, MapPin, Settings, Users, UserPlus, Crown, CreditCard, Zap, Check, Trophy, ShieldCheck, Mail, Calendar, Settings2, Globe, Heart } from 'lucide-react';
+import { LogOut, Loader2, ArrowLeft, MapPin, Settings, Users, UserPlus, Crown, CreditCard, Zap, Check, Trophy, ShieldCheck, Mail, Calendar, Settings2, Globe, Heart, Download, Trash2 } from 'lucide-react';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -382,10 +382,37 @@ export default function ProfilPage() {
             </Link>
           </div>
 
-          <Button 
-            variant="outline" 
+          <div className="grid grid-cols-2 gap-4 mt-4">
+            <Button
+              variant="outline"
+              className="h-14 rounded-2xl border-white/10 text-slate-400 font-bold text-[10px] uppercase tracking-widest hover:bg-white/10 transition-all"
+              onClick={() => window.location.href = '/api/account'}
+            >
+              <Download className="h-4 w-4 mr-2" /> Exporter mes données
+            </Button>
+            <Button
+              variant="outline"
+              className="h-14 rounded-2xl border-red-500/20 text-red-400 font-bold text-[10px] uppercase tracking-widest hover:bg-red-500/10 transition-all"
+              onClick={async () => {
+                if (!confirm('Supprimer définitivement votre compte et toutes vos données ? Cette action est irréversible.')) return;
+                if (!confirm('Êtes-vous vraiment sûr ? Vos voyages, préférences et données seront supprimés.')) return;
+                const res = await fetch('/api/account', { method: 'DELETE' });
+                if (res.ok) {
+                  toast.success('Compte supprimé');
+                  signOut();
+                } else {
+                  toast.error('Erreur lors de la suppression');
+                }
+              }}
+            >
+              <Trash2 className="h-4 w-4 mr-2" /> Supprimer mon compte
+            </Button>
+          </div>
+
+          <Button
+            variant="outline"
             onClick={handleSignOut}
-            className="w-full h-16 rounded-2xl mt-8 border-red-500/20 bg-red-500/5 text-red-400 font-bold text-[10px] uppercase tracking-[0.2em] hover:bg-red-500 hover:text-white transition-all"
+            className="w-full h-16 rounded-2xl mt-4 border-red-500/20 bg-red-500/5 text-red-400 font-bold text-[10px] uppercase tracking-[0.2em] hover:bg-red-500 hover:text-white transition-all"
           >
             <LogOut className="h-4 w-4 mr-2" /> Quitter l'application
           </Button>
@@ -395,7 +422,3 @@ export default function ProfilPage() {
   );
 }
 
-// Placeholder for missing Download icon in imports if needed (it was used in my feature list)
-const Download = ({ className }: { className?: string }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
-);

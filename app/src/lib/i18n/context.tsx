@@ -12,17 +12,24 @@ interface I18nContextType {
 const I18nContext = createContext<I18nContextType | null>(null);
 
 const LOCALE_KEY = 'voyage-locale';
+const SUPPORTED_LOCALES: Locale[] = ['fr', 'en', 'es', 'de', 'it', 'pt'];
 
 function detectLocale(): Locale {
   if (typeof window === 'undefined') return 'fr';
 
-  // Check localStorage first
-  const stored = localStorage.getItem(LOCALE_KEY);
-  if (stored === 'en' || stored === 'fr') return stored;
+  // Check localStorage first (user's explicit choice)
+  const stored = localStorage.getItem(LOCALE_KEY) as Locale | null;
+  if (stored && SUPPORTED_LOCALES.includes(stored)) return stored;
 
-  // Check browser language
-  const browserLang = navigator.language.split('-')[0];
-  return browserLang === 'en' ? 'en' : 'fr';
+  // Detect from browser languages (ordered by preference)
+  const languages = navigator.languages || [navigator.language];
+  for (const lang of languages) {
+    const code = lang.split('-')[0].toLowerCase() as Locale;
+    if (SUPPORTED_LOCALES.includes(code)) return code;
+  }
+
+  // Default to English for non-French speakers (better international reach)
+  return 'en';
 }
 
 export function I18nProvider({ children }: { children: ReactNode }) {
