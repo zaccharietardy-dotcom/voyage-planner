@@ -96,11 +96,11 @@ function LoginContent() {
   }
 
   return (
-    <div className="min-h-screen flex bg-[#020617]">
+    <div className="min-h-screen flex bg-[#020617] pt-[env(safe-area-inset-top)]">
       {/* Left Side: Visual Inspiration */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
         <img 
-          src="https://images.unsplash.com/photo-1539635278303-d4002c07dee3?q=80&w=2070&auto=format&fit=crop" 
+          src="https://images.unsplash.com/photo-1488646953014-85cb44e25828?q=80&w=2070&auto=format&fit=crop" 
           alt="Travel Inspiration" 
           className="absolute inset-0 w-full h-full object-cover"
         />
@@ -137,21 +137,18 @@ function LoginContent() {
       </div>
 
       {/* Right Side: Login Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 md:p-16 relative">
-        {/* Background glow for mobile */}
-        <div className="lg:hidden absolute inset-0 -z-10">
-          <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-gold/10 blur-[100px] rounded-full" />
-          <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-blue-500/10 blur-[100px] rounded-full" />
-        </div>
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 md:p-16 relative z-10">
+        {/* Background glow for mobile (optimized for performance, no heavy blur) */}
+        <div className="lg:hidden absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gold/10 via-[#020617] to-[#020617]" />
 
         <motion.div 
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6 }}
-          className="w-full max-w-md"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="w-full max-w-md bg-[#020617]/80 lg:bg-transparent backdrop-blur-md lg:backdrop-blur-none p-8 lg:p-0 rounded-[2rem] border border-white/5 lg:border-none shadow-2xl lg:shadow-none"
         >
-          <div className="mb-12 text-center lg:text-left">
-            <div className="lg:hidden flex justify-center mb-8">
+          <div className="mb-10 text-center lg:text-left">
+            <div className="lg:hidden flex justify-center mb-6">
               <Link href="/">
                 <div className="h-16 w-16 rounded-2xl bg-gold-gradient p-[1px] shadow-2xl">
                   <div className="h-full w-full rounded-[15px] bg-[#020617] flex items-center justify-center">
@@ -160,19 +157,19 @@ function LoginContent() {
                 </div>
               </Link>
             </div>
-            <h1 className="font-display text-4xl font-bold text-white mb-3">Bon retour parmi nous</h1>
-            <p className="text-slate-400">Accédez à vos carnets de route et vos projets d'évasion.</p>
+            <h1 className="font-display text-3xl md:text-4xl font-bold text-white mb-2">Bon retour parmi nous</h1>
+            <p className="text-slate-400 text-sm md:text-base">Accédez à vos carnets de route et vos projets d'évasion.</p>
           </div>
 
           <div className="space-y-8">
             <div className="space-y-3">
               <AppleSignIn
                 redirectTo={redirectTo}
-                className="w-full h-14 rounded-2xl border-white/10 bg-white text-black hover:bg-white/90 font-bold transition-all"
+                className="w-full h-14 rounded-2xl border-white/10 bg-white text-black hover:bg-white/90 font-bold transition-all shadow-md"
               />
               <GoogleSignIn
                 redirectTo={redirectTo}
-                className="w-full h-14 rounded-2xl border-white/10 bg-white/5 hover:bg-white/10 text-white font-bold transition-all"
+                className="w-full h-14 rounded-2xl border-white/10 bg-white/5 hover:bg-white/10 text-white font-bold transition-all shadow-sm"
               />
             </div>
 
@@ -185,23 +182,24 @@ function LoginContent() {
               </div>
             </div>
 
-            <form onSubmit={handleEmailLogin} className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-xs font-bold uppercase tracking-widest text-slate-400 ml-1">Email</Label>
+            <form onSubmit={handleEmailLogin} className="space-y-5">
+              <div className="space-y-1.5">
+                <Label htmlFor="email" className="text-[11px] font-bold uppercase tracking-widest text-slate-400 ml-1">Email</Label>
                 <Input
                   id="email"
                   type="email"
+                  autoComplete="email"
                   placeholder="votre@email.com"
-                  className="h-14 rounded-2xl bg-white/5 border-white/10 focus:border-gold/50 focus:ring-gold/20 transition-all text-white placeholder:text-slate-600"
+                  className="h-14 rounded-2xl bg-white/5 border-white/10 focus:border-gold/50 focus:ring-gold/20 transition-all text-white placeholder:text-slate-600 px-5 shadow-inner"
                   value={formData.email}
                   onChange={(e) => handleChange('email', e.target.value)}
                   required
                 />
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <div className="flex items-center justify-between ml-1">
-                  <Label htmlFor="password" className="text-xs font-bold uppercase tracking-widest text-slate-400">Mot de passe</Label>
+                  <Label htmlFor="password" className="text-[11px] font-bold uppercase tracking-widest text-slate-400">Mot de passe</Label>
                   <Link
                     href="/forgot-password"
                     className="text-[10px] font-bold uppercase tracking-widest text-gold hover:text-gold-light transition-colors"
@@ -213,8 +211,9 @@ function LoginContent() {
                   <Input
                     id="password"
                     type={showPassword ? 'text' : 'password'}
+                    autoComplete="current-password"
                     placeholder="••••••••"
-                    className="h-14 rounded-2xl bg-white/5 border-white/10 focus:border-gold/50 focus:ring-gold/20 transition-all text-white placeholder:text-slate-600"
+                    className="h-14 rounded-2xl bg-white/5 border-white/10 focus:border-gold/50 focus:ring-gold/20 transition-all text-white placeholder:text-slate-600 px-5 shadow-inner"
                     value={formData.password}
                     onChange={(e) => handleChange('password', e.target.value)}
                     required
@@ -242,7 +241,7 @@ function LoginContent() {
 
               <Button 
                 type="submit" 
-                className="w-full h-16 rounded-2xl bg-gold-gradient text-[#020617] text-lg font-bold shadow-xl shadow-gold/20 hover:scale-[1.02] active:scale-[0.98] transition-all" 
+                className="w-full h-14 rounded-2xl bg-gold-gradient text-[#020617] text-base font-bold shadow-lg shadow-gold/20 hover:scale-[1.02] active:scale-[0.98] transition-all mt-2" 
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -256,8 +255,8 @@ function LoginContent() {
               </Button>
             </form>
 
-            <div className="pt-6 text-center">
-              <p className="text-slate-400 font-medium">
+            <div className="pt-4 text-center">
+              <p className="text-slate-400 text-sm font-medium">
                 Pas encore de compte ?{' '}
                 <Link href="/register" className="text-gold hover:text-gold-light font-bold underline decoration-gold/30 underline-offset-4 transition-all">
                   Créer un compte
