@@ -3,6 +3,7 @@ import { View, Text, FlatList, Pressable, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Map, Plus, Trash2 } from 'lucide-react-native';
+import * as Haptics from 'expo-haptics';
 import { useAuth } from '@/hooks/useAuth';
 import { useApi } from '@/hooks/useApi';
 import { useRefreshOnFocus } from '@/hooks/useRefreshOnFocus';
@@ -13,6 +14,8 @@ import { TripCard } from '@/components/trip/TripCard';
 import { TripCardSkeleton } from '@/components/ui/Skeleton';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { Button } from '@/components/ui/Button';
+import { colors } from '@/lib/theme';
+import { PremiumBackground } from '@/components/ui/PremiumBackground';
 
 type Filter = 'all' | 'upcoming' | 'active' | 'past';
 
@@ -76,107 +79,113 @@ export default function TripsScreen() {
   }, [selectedTrip, refetch]);
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#020617' }}>
-      <ScreenHeader
-        title="Mes Voyages"
-        rightAction={
-          <Pressable
-            onPress={() => router.push('/(tabs)/plan')}
-            style={{
-              width: 40, height: 40, borderRadius: 12,
-              backgroundColor: 'rgba(197,160,89,0.15)',
-              alignItems: 'center', justifyContent: 'center',
-            }}
-          >
-            <Plus size={20} color="#c5a059" />
-          </Pressable>
-        }
-      />
+    <View style={{ flex: 1, backgroundColor: colors.bg }}>
+      <PremiumBackground />
+      <SafeAreaView style={{ flex: 1 }}>
+        <ScreenHeader
+          title="Mes Voyages"
+          rightAction={
+            <Pressable
+              onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push('/(tabs)/plan'); }}
+              style={{
+                width: 40, height: 40, borderRadius: 12,
+                backgroundColor: 'rgba(197,160,89,0.15)',
+                alignItems: 'center', justifyContent: 'center',
+              }}
+            >
+              <Plus size={20} color="#c5a059" />
+            </Pressable>
+          }
+        />
 
-      {/* Filters */}
-      <View style={{ flexDirection: 'row', paddingHorizontal: 20, gap: 8, marginBottom: 16 }}>
-        {FILTERS.map((f) => (
-          <Pressable
-            key={f.key}
-            onPress={() => setFilter(f.key)}
-            style={{
-              paddingHorizontal: 14, paddingVertical: 7, borderRadius: 10,
-              backgroundColor: filter === f.key ? 'rgba(197,160,89,0.15)' : 'rgba(255,255,255,0.05)',
-              borderWidth: 1,
-              borderColor: filter === f.key ? '#c5a059' : 'transparent',
-            }}
-          >
-            <Text style={{
-              color: filter === f.key ? '#c5a059' : '#94a3b8',
-              fontSize: 13, fontWeight: '600',
-            }}>
-              {f.label}
+        {/* Filters */}
+        <View style={{ flexDirection: 'row', paddingHorizontal: 20, gap: 8, marginBottom: 16 }}>
+          {FILTERS.map((f) => (
+            <Pressable
+              key={f.key}
+              onPress={() => { Haptics.selectionAsync(); setFilter(f.key); }}
+              style={{
+                paddingHorizontal: 14, paddingVertical: 7, borderRadius: 10,
+                backgroundColor: filter === f.key ? 'rgba(197,160,89,0.15)' : 'rgba(255,255,255,0.05)',
+                borderWidth: 1,
+                borderColor: filter === f.key ? '#c5a059' : 'transparent',
+              }}
+            >
+              <Text style={{
+                color: filter === f.key ? '#c5a059' : '#94a3b8',
+                fontSize: 13, fontWeight: '600',
+              }}>
+                {f.label}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+
+        {/* List */}
+        {isLoading ? (
+          <View style={{ padding: 20 }}>
+            <TripCardSkeleton />
+            <TripCardSkeleton />
+            <TripCardSkeleton />
+          </View>
+        ) : filtered.length === 0 ? (
+          <EmptyState
+            icon={Map}
+            title="Aucun voyage"
+            description={filter === 'all'
+              ? 'Planifiez votre premier voyage en appuyant sur le bouton +'
+              : 'Aucun voyage dans cette catégorie'}
+            action={filter === 'all' ? { label: 'Créer un voyage', onPress: () => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); router.push('/(tabs)/plan'); } } : undefined}
+          />
+        ) : (
+          <FlatList
+            data={filtered}
+            keyExtractor={(t) => t.id}
+            contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 100 }}
+            refreshing={false}
+            onRefresh={refetch}
+            renderItem={({ item }) => (
+              <TripCard
+                trip={item}
+                onPress={() => { Haptics.selectionAsync(); router.push(`/trip/${item.id}`); }}
+              />
+            )}
+          />
+        )}
+
+        {/* Actions bottom sheet */}
+        <BottomSheet
+          isOpen={!!selectedTrip}
+          onClose={() => setSelectedTrip(null)}
+          height={0.3}
+        >
+          <View style={{ padding: 20, gap: 12 }}>
+            <Text style={{ color: '#f8fafc', fontSize: 17, fontWeight: '700', marginBottom: 4 }}>
+              {selectedTrip?.title || selectedTrip?.destination}
             </Text>
-          </Pressable>
-        ))}
-      </View>
-
-      {/* List */}
-      {isLoading ? (
-        <View style={{ padding: 20 }}>
-          <TripCardSkeleton />
-          <TripCardSkeleton />
-          <TripCardSkeleton />
-        </View>
-      ) : filtered.length === 0 ? (
-        <EmptyState
-          icon={Map}
-          title="Aucun voyage"
-          description={filter === 'all'
-            ? 'Planifiez votre premier voyage en appuyant sur le bouton +'
-            : 'Aucun voyage dans cette catégorie'}
-          action={filter === 'all' ? { label: 'Créer un voyage', onPress: () => router.push('/(tabs)/plan') } : undefined}
-        />
-      ) : (
-        <FlatList
-          data={filtered}
-          keyExtractor={(t) => t.id}
-          contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 20 }}
-          refreshing={false}
-          onRefresh={refetch}
-          renderItem={({ item }) => (
-            <TripCard
-              trip={item}
-              onPress={() => router.push(`/trip/${item.id}`)}
-            />
-          )}
-        />
-      )}
-
-      {/* Actions bottom sheet */}
-      <BottomSheet
-        isOpen={!!selectedTrip}
-        onClose={() => setSelectedTrip(null)}
-        height={0.3}
-      >
-        <View style={{ padding: 20, gap: 12 }}>
-          <Text style={{ color: '#f8fafc', fontSize: 17, fontWeight: '700', marginBottom: 4 }}>
-            {selectedTrip?.title || selectedTrip?.destination}
-          </Text>
-          <Button
-            variant="outline"
-            onPress={() => {
-              if (selectedTrip) router.push(`/trip/${selectedTrip.id}`);
-              setSelectedTrip(null);
-            }}
-          >
-            Voir le voyage
-          </Button>
-          <Button
-            variant="danger"
-            icon={Trash2}
-            isLoading={deleting}
-            onPress={handleDelete}
-          >
-            Supprimer
-          </Button>
-        </View>
-      </BottomSheet>
-    </SafeAreaView>
+            <Button
+              variant="outline"
+              onPress={() => {
+                if (selectedTrip) {
+                  Haptics.selectionAsync();
+                  router.push(`/trip/${selectedTrip.id}`);
+                }
+                setSelectedTrip(null);
+              }}
+            >
+              Voir le voyage
+            </Button>
+            <Button
+              variant="danger"
+              icon={Trash2}
+              isLoading={deleting}
+              onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy); handleDelete(); }}
+            >
+              Supprimer
+            </Button>
+          </View>
+        </BottomSheet>
+      </SafeAreaView>
+    </View>
   );
 }

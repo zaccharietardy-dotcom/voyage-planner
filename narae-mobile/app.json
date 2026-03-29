@@ -38,7 +38,14 @@
       "expo-router",
       "expo-secure-store",
       "expo-web-browser",
-      "expo-apple-authentication"
+      "expo-apple-authentication",
+      "expo-sharing",
+      [
+        "expo-calendar",
+        {
+          "calendarPermission": "Narae Voyage a besoin d'accéder à votre calendrier pour y ajouter vos activités de voyage."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

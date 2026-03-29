@@ -22,10 +22,13 @@ import { BookingChecklist } from '@/components/trip/BookingChecklist';
 import { DaySelector } from '@/components/trip/DaySelector';
 import { ChatPanel } from '@/components/trip/ChatPanel';
 import { SharePanel } from '@/components/trip/SharePanel';
+import { CalendarExport } from '@/components/trip/CalendarExport';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { Badge } from '@/components/ui/Badge';
-import { Calendar, Users, Wallet, Train } from 'lucide-react-native';
+import { Calendar, Users, Wallet, Train, CalendarPlus, Download } from 'lucide-react-native';
+import { cacheTripLocally, getCachedTrip } from '@/lib/offline/tripCache';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 
 const FALLBACK_IMAGES: Record<string, string> = {
   paris: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800&q=80',
@@ -66,17 +69,24 @@ export default function TripDetailScreen() {
   const [selectedItem, setSelectedItem] = useState<TripItem | null>(null);
   const [chatOpen, setChatOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [calendarOpen, setCalendarOpen] = useState(false);
   const [actionItem, setActionItem] = useState<TripItem | null>(null);
+  const { isOnline } = useNetworkStatus();
   const [bookedItems, setBookedItems] = useState<Record<string, { booked: boolean }>>({});
 
   const { data: row, isLoading, error } = useApi(() => fetchTrip(id!), [id]);
 
   const trip: Trip | null = row?.data ?? null;
 
-  // Initialize booked items from trip data
+  // Initialize booked items from trip data + auto-cache
   useMemo(() => {
     if (trip?.bookedItems) setBookedItems(trip.bookedItems);
   }, [trip?.bookedItems]);
+
+  // Auto-cache trip for offline access
+  useMemo(() => {
+    if (row) cacheTripLocally(row).catch(() => {});
+  }, [row]);
 
   const sections = useMemo(() => {
     if (!trip?.days) return [];
@@ -256,20 +266,37 @@ export default function TripDetailScreen() {
         </ScrollView>
       )}
 
-      {/* Chat FAB */}
-      <Pressable
-        onPress={() => setChatOpen(true)}
-        style={{
-          position: 'absolute', bottom: 100, right: 20,
-          width: 56, height: 56, borderRadius: 18,
-          backgroundColor: colors.gold,
-          alignItems: 'center', justifyContent: 'center',
-          shadowColor: colors.gold, shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.35, shadowRadius: 10, elevation: 8,
-        }}
-      >
-        <MessageCircle size={24} color={colors.bg} />
-      </Pressable>
+      {/* FAB buttons */}
+      <View style={{ position: 'absolute', bottom: 100, right: 20, gap: 12, alignItems: 'center' }}>
+        {/* Calendar export */}
+        <Pressable
+          onPress={() => setCalendarOpen(true)}
+          style={{
+            width: 48, height: 48, borderRadius: 16,
+            backgroundColor: colors.surface,
+            borderWidth: 1, borderColor: colors.borderSubtle,
+            alignItems: 'center', justifyContent: 'center',
+            shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.2, shadowRadius: 6, elevation: 4,
+          }}
+        >
+          <CalendarPlus size={20} color={colors.gold} />
+        </Pressable>
+
+        {/* Chat */}
+        <Pressable
+          onPress={() => setChatOpen(true)}
+          style={{
+            width: 56, height: 56, borderRadius: 18,
+            backgroundColor: colors.gold,
+            alignItems: 'center', justifyContent: 'center',
+            shadowColor: colors.gold, shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.35, shadowRadius: 10, elevation: 8,
+          }}
+        >
+          <MessageCircle size={24} color={colors.bg} />
+        </Pressable>
+      </View>
 
       {/* Activity detail */}
       <BottomSheet isOpen={!!selectedItem} onClose={() => setSelectedItem(null)} height={0.7}>
@@ -285,6 +312,9 @@ export default function TripDetailScreen() {
         isOpen={!!actionItem}
         onClose={() => setActionItem(null)}
       />
+
+      {/* Calendar export */}
+      {trip && <CalendarExport isOpen={calendarOpen} onClose={() => setCalendarOpen(false)} trip={trip} />}
 
       {/* Share panel */}
       <SharePanel
