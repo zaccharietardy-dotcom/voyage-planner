@@ -269,7 +269,7 @@ export default function GlobePage() {
   }, []);
 
   return (
-    <div className="flex h-screen flex-col bg-[#020617] overflow-hidden">
+    <div className="flex flex-col bg-[#020617] overflow-hidden" style={{ height: 'calc(100vh - 4rem)' }}>
       {/* Mobile-first Header */}
       <div className="fixed top-[max(72px,env(safe-area-inset-top)+16px)] left-4 md:left-6 z-[40] flex flex-col md:flex-row md:items-center gap-3">
 
@@ -293,19 +293,19 @@ export default function GlobePage() {
 
             <div className="flex items-center gap-3 shrink-0">
               <div className="flex items-center gap-2">
-                <span className={cn("text-[10px] font-black uppercase tracking-widest transition-colors hidden sm:inline", showMode === 'my_trips' ? "text-gold" : "text-white/40")}>Privé</span>
+                <span className={cn("text-[10px] font-black uppercase tracking-widest transition-colors hidden sm:inline", showMode === 'my_trips' ? "text-gold" : "text-white/60")}>Privé</span>
                 <Switch
                   checked={showMode === 'all_trips'}
                   onCheckedChange={(checked) => { hapticImpactLight(); setShowMode(checked ? 'all_trips' : 'my_trips'); }}
                   className="data-[state=checked]:bg-gold"
                 />
-                <span className={cn("text-[10px] font-black uppercase tracking-widest transition-colors", showMode === 'all_trips' ? "text-gold" : "text-white/40")}>Public</span>
+                <span className={cn("text-[10px] font-black uppercase tracking-widest transition-colors", showMode === 'all_trips' ? "text-gold" : "text-white/60")}>Public</span>
               </div>
               
               <div className="h-4 w-px bg-white/10" />
 
               <div className="flex items-center gap-2">
-                <span className={cn("text-[10px] font-black uppercase tracking-widest transition-colors hidden sm:inline", showArcs ? "text-gold" : "text-white/40")}>Tracés</span>
+                <span className={cn("text-[10px] font-black uppercase tracking-widest transition-colors hidden sm:inline", showArcs ? "text-gold" : "text-white/60")}>Tracés</span>
                 <Switch
                   checked={showArcs}
                   onCheckedChange={(checked) => { hapticImpactLight(); setShowArcs(checked); }}
@@ -376,7 +376,7 @@ export default function GlobePage() {
                         <div className="flex gap-3 items-center">
                           <div className="relative h-12 w-12 rounded-xl overflow-hidden shrink-0 shadow-lg group-hover/item:scale-105 transition-transform duration-500">
                             {trip.cover_url ? (
-                              <img src={trip.cover_url} alt="" className="h-full w-full object-cover" />
+                              <img src={trip.cover_url} alt={trip.title || trip.destination} className="h-full w-full object-cover" />
                             ) : (
                               <div className="h-full w-full bg-slate-800 flex items-center justify-center text-slate-600">
                                 <MapPin className="h-5 w-5" />
@@ -388,7 +388,7 @@ export default function GlobePage() {
                               {trip.title || trip.destination}
                             </p>
                             <div className="flex items-center gap-2 mt-0.5">
-                              <span className={cn("text-[9px] font-black uppercase tracking-widest", isActive ? "text-[#020617]/70" : "text-white/40")}>
+                              <span className={cn("text-[9px] font-black uppercase tracking-widest", isActive ? "text-[#020617]/70" : "text-white/60")}>
                                 {owner}
                               </span>
                               <div className={cn("h-1 w-1 rounded-full", isActive ? "bg-[#020617]/30" : "bg-white/10")} />
@@ -438,7 +438,7 @@ export default function GlobePage() {
                         >
                           <div className="relative h-16 md:h-20 w-full overflow-hidden">
                             {point.imageUrl ? (
-                              <img src={point.imageUrl} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                              <img src={point.imageUrl} alt={point.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                             ) : (
                               <div className="w-full h-full bg-slate-800" />
                             )}
@@ -466,7 +466,7 @@ export default function GlobePage() {
                   <div className="flex gap-4 md:gap-6 items-center relative z-10">
                     <div className="relative h-16 w-16 md:h-24 md:w-24 rounded-2xl md:rounded-3xl overflow-hidden shrink-0 shadow-2xl group-hover:scale-105 transition-transform duration-500">
                       {selectedTrip.cover_url ? (
-                        <img src={selectedTrip.cover_url} alt="" className="h-full w-full object-cover" />
+                        <img src={selectedTrip.cover_url} alt={selectedTrip.title || selectedTrip.destination} className="h-full w-full object-cover" />
                       ) : (
                         <div className="h-full w-full bg-slate-800 flex items-center justify-center text-slate-600">
                           <MapPin className="h-6 w-6 md:h-8 md:w-8" />
