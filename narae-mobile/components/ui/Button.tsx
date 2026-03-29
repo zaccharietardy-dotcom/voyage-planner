@@ -13,6 +13,8 @@ interface Props {
   iconPosition?: 'left' | 'right';
   children: string;
   onPress: () => void;
+  style?: ViewStyle;
+  textStyle?: TextStyle;
 }
 
 const BG: Record<Variant, string> = {
@@ -44,6 +46,8 @@ export function Button({
   iconPosition = 'left',
   children,
   onPress,
+  style: styleProp,
+  textStyle: textStyleProp,
 }: Props) {
   const isDisabled = disabled || isLoading;
   const color = TEXT_COLOR[variant];
@@ -69,7 +73,7 @@ export function Button({
 
   return (
     <Pressable
-      style={({ pressed }) => [containerStyle, pressed && !isDisabled && { opacity: 0.8 }]}
+      style={({ pressed }) => [containerStyle, styleProp, pressed && !isDisabled && { opacity: 0.8 }]}
       onPress={onPress}
       disabled={isDisabled}
     >
@@ -78,7 +82,7 @@ export function Button({
       ) : (
         <>
           {Icon && iconPosition === 'left' && <Icon size={FONT_SIZE[size] + 2} color={color} />}
-          <Text style={textStyle}>{children}</Text>
+          <Text style={[textStyle, textStyleProp]}>{children}</Text>
           {Icon && iconPosition === 'right' && <Icon size={FONT_SIZE[size] + 2} color={color} />}
         </>
       )}

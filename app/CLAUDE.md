@@ -243,10 +243,14 @@ TripItem {
 - Find root causes. No temporary fixes. Senior developer standards.
 - Changes should only touch what's necessary.
 
-### Mobile-First Verification
-- Chaque changement UI/CSS doit être vérifié sur le site ET dans l'app Capacitor
-- Tester sur iPhone (WKWebView) — les backdrop-blur, transitions, et z-index se comportent différemment
-- Bumper `native-cache-v*` dans layout.tsx si un fix CSS/JS critique doit invalider le cache Capacitor
+### Dual Platform (Web + App Native)
+- Le projet a deux clients : webapp Next.js (`app/`) et app native Expo (`narae-mobile/`)
+- Toute modification UI/UX doit être répliquée sur les DEUX plateformes
+- Webapp : Next.js 16, React 19, Tailwind, shadcn/ui
+- App native : Expo 55, React Native 0.83, NativeWind, composants custom
+- Même design system : Playfair Display (titres), fond #020617, or #c5a059
+- Tester sur les deux : `npm run dev` (webapp) + Xcode build (native)
+- Les composants trip (wizard steps, cards, timeline) ont des équivalents dans les deux codebases
 - Jamais de `return null` avant des hooks React (violation Rules of Hooks au changement de route)
 
 ## Known Issues / Areas to Improve

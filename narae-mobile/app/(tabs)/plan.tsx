@@ -12,6 +12,7 @@ import type { TripPreferences, Trip } from '@/lib/types/trip';
 import { colors, fonts, radius } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
 import { StepDestination } from '@/components/plan/StepDestination';
+import { StepOrigin } from '@/components/plan/StepOrigin';
 import { StepWhen } from '@/components/plan/StepWhen';
 import { StepGroup } from '@/components/plan/StepGroup';
 import { StepPreferences } from '@/components/plan/StepPreferences';
@@ -22,6 +23,7 @@ import { PremiumBackground } from '@/components/ui/PremiumBackground';
 
 const STEP_TITLES = [
   'Destination',
+  'D\'où ?',
   'Quand ?',
   'Groupe',
   'Préférences',
@@ -67,13 +69,16 @@ export default function PlanScreen() {
 
   const validate = (): string | null => {
     switch (step) {
-      case 0:
+      case 0: // Destination
         if (!prefs.destination?.trim()) return 'Veuillez choisir une destination';
         return null;
-      case 1:
+      case 1: // Origin
+        if (!prefs.origin?.trim()) return 'Indiquez votre ville de départ';
+        return null;
+      case 2: // When
         if (!prefs.startDate) return 'Veuillez choisir une date de départ';
         return null;
-      case 3:
+      case 4: // Preferences
         if (!prefs.activities?.length) return 'Sélectionnez au moins une activité';
         return null;
       default:
@@ -93,7 +98,7 @@ export default function PlanScreen() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     const err = validate();
     if (err) { Alert.alert('Attention', err); return; }
-    if (step < 5) goTo(step + 1);
+    if (step < 6) goTo(step + 1);
   };
 
   const prev = () => {
@@ -191,11 +196,12 @@ export default function PlanScreen() {
             <Pressable onPress={Keyboard.dismiss} style={{ flex: 1 }}>
               <Animated.View key={step} entering={entering}>
                 {step === 0 && <StepDestination prefs={prefs} onChange={updatePrefs} />}
-                {step === 1 && <StepWhen prefs={prefs} onChange={updatePrefs} />}
-                {step === 2 && <StepGroup prefs={prefs} onChange={updatePrefs} />}
-                {step === 3 && <StepPreferences prefs={prefs} onChange={updatePrefs} />}
-                {step === 4 && <StepBudget prefs={prefs} onChange={updatePrefs} />}
-                {step === 5 && (
+                {step === 1 && <StepOrigin prefs={prefs} onChange={updatePrefs} />}
+                {step === 2 && <StepWhen prefs={prefs} onChange={updatePrefs} />}
+                {step === 3 && <StepGroup prefs={prefs} onChange={updatePrefs} />}
+                {step === 4 && <StepPreferences prefs={prefs} onChange={updatePrefs} />}
+                {step === 5 && <StepBudget prefs={prefs} onChange={updatePrefs} />}
+                {step === 6 && (
                   <StepSummary
                     prefs={prefs}
                     onEdit={goTo}
@@ -208,7 +214,7 @@ export default function PlanScreen() {
           </ScrollView>
 
           {/* Navigation buttons */}
-          {step < 5 && (
+          {step < 6 && (
             <View style={{
               flexDirection: 'row', paddingHorizontal: 20, paddingVertical: 20,
               gap: 12, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.05)',
@@ -221,7 +227,7 @@ export default function PlanScreen() {
               )}
               <View style={{ flex: 1 }}>
                 <Button icon={ArrowRight} iconPosition="right" onPress={next} style={{ borderRadius: 18, height: 54, backgroundColor: 'white' }} textStyle={{ color: 'black', fontWeight: 'bold' }}>
-                  {step === 4 ? 'Récapitulatif' : 'Suivant'}
+                  {step === 5 ? 'Récapitulatif' : 'Suivant'}
                 </Button>
               </View>
             </View>

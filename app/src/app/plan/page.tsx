@@ -9,11 +9,14 @@ import { Button } from '@/components/ui/button';
 import {
   StepDestination,
   StepWhen,
+  StepGroup,
   StepPreferences,
+  StepBudget,
   StepSummary,
 } from '@/components/forms';
+import { StepOrigin } from '@/components/forms/StepOrigin';
 import { TripPreferences } from '@/lib/types';
-import { ArrowLeft, ArrowRight, UserCog, Check, AlertCircle } from 'lucide-react';
+import { ArrowLeft, ArrowRight, UserCog, Check, AlertCircle, X } from 'lucide-react';
 import { generateTripStream, PipelineProgressEvent } from '@/lib/generateTrip';
 import { cn } from '@/lib/utils';
 import { safeSetItem } from '@/lib/storage';
@@ -28,21 +31,25 @@ import { hapticImpactLight, hapticSuccess } from '@/lib/utils/haptics';
 
 const STEPS = [
   { id: 1, label: 'Où' },
-  { id: 2, label: 'Quand' },
-  { id: 3, label: 'Style' },
-  { id: 4, label: 'Résumé' },
+  { id: 2, label: "D'où" },
+  { id: 3, label: 'Quand' },
+  { id: 4, label: 'Groupe' },
+  { id: 5, label: 'Style' },
+  { id: 6, label: 'Budget' },
+  { id: 7, label: 'Résumé' },
 ];
 
 const DEFAULT_PREFERENCES: Partial<TripPreferences> = {
-  durationDays: 7,
+  durationDays: 4,
   groupSize: 2,
+  groupType: 'couple',
   transport: 'optimal',
   carRental: false,
   budgetLevel: 'moderate',
   activities: [],
   dietary: ['none'],
   tripMode: 'precise',
-  cityPlan: [{ city: '', days: 7 }],
+  cityPlan: [{ city: '', days: 4 }],
 };
 
 export default function PlanPage() {
@@ -72,26 +79,26 @@ export default function PlanPage() {
     }
   }, []);
 
-  const stepVariants = {
-    enter: (dir: number) => ({
-      x: dir > 0 ? 100 : -100,
+  const stepVariants: any = {
+    enter: (dir: number) => ({ 
+      x: dir > 0 ? 100 : -100, 
       y: 10,
       opacity: 0,
       scale: 0.98
     }),
-    center: {
-      x: 0,
-      y: 0,
+    center: { 
+      x: 0, 
+      y: 0, 
       opacity: 1,
       scale: 1,
       transition: {
-        x: { type: "spring" as const, stiffness: 300, damping: 30 },
+        x: { type: "spring", stiffness: 300, damping: 30 },
         opacity: { duration: 0.2 },
-        scale: { duration: 0.4, ease: [0.4, 0, 0.2, 1] as [number, number, number, number] }
+        scale: { duration: 0.4, ease: [0.4, 0, 0.2, 1] }
       }
     },
-    exit: (dir: number) => ({
-      x: dir > 0 ? -100 : 100,
+    exit: (dir: number) => ({ 
+      x: dir > 0 ? -100 : 100, 
       y: -10,
       opacity: 0,
       scale: 0.98,
@@ -157,25 +164,41 @@ export default function PlanPage() {
   const getValidationErrors = (): string[] => {
     switch (currentStep) {
       case 1: {
-        const errors: string[] = [];
-        if (!preferences.origin) errors.push('Indiquez votre ville de départ');
+        // Step 1: Destination only
         const stages = preferences.cityPlan || [];
         if (stages.length === 0 || !stages.every(s => s.city.trim().length > 0)) {
-          errors.push('Renseignez au moins une destination');
+          return ['Renseignez au moins une destination'];
         }
-        return errors;
+        return [];
       }
       case 2: {
-        const errors: string[] = [];
-        if (!preferences.startDate) errors.push('Choisissez une date de départ');
-        return errors;
+        // Step 2: Origin
+        if (!preferences.origin) return ['Indiquez votre ville de départ'];
+        return [];
       }
-      case 3:
+      case 3: {
+        // Step 3: When
+        if (!preferences.startDate) return ['Choisissez une date de départ'];
+        return [];
+      }
+      case 4: {
+        // Step 4: Group
+        if (!preferences.groupType) return ['Précisez le type de groupe'];
+        return [];
+      }
+      case 5:
+        // Step 5: Style
         return (preferences.activities && preferences.activities.length > 0)
           ? []
           : ['Sélectionnez au moins un centre d\'intérêt'];
-      case 4:
-        return []; // Summary — always valid
+      case 6: {
+        // Step 6: Budget
+        if (!preferences.budgetLevel && !preferences.budgetCustom) return ['Définissez un budget'];
+        return [];
+      }
+      case 7:
+        // Step 7: Summary
+        return [];
       default:
         return [];
     }
@@ -366,16 +389,26 @@ export default function PlanPage() {
       case 1:
         return <StepDestination data={preferences} onChange={updatePreferences} />;
       case 2:
-        return <StepWhen data={preferences} onChange={updatePreferences} />;
+        return <StepOrigin data={preferences} onChange={updatePreferences} />;
       case 3:
-        return <StepPreferences data={preferences} onChange={updatePreferences} />;
+        return <StepWhen data={preferences} onChange={updatePreferences} />;
       case 4:
+        return <StepGroup data={preferences} onChange={updatePreferences} />;
+      case 5:
+        return <StepPreferences data={preferences} onChange={updatePreferences} />;
+      case 6:
+        return <StepBudget data={preferences} onChange={updatePreferences} />;
+      case 7:
         return (
           <StepSummary
             data={preferences}
             onChange={updatePreferences}
             onGenerate={handleGenerate}
             isGenerating={isGenerating}
+            onJumpToStep={(step) => {
+              directionRef.current = -1;
+              setCurrentStep(step);
+            }}
           />
         );
       default:
@@ -442,14 +475,14 @@ export default function PlanPage() {
               className="flex flex-col items-center gap-1.5"
             >
               <div className={cn(
-                'w-2.5 h-2.5 rounded-full transition-all',
-                step.id === currentStep && 'w-8 bg-primary',
+                'w-2 h-2 rounded-full transition-all duration-500',
+                step.id === currentStep && 'w-6 bg-primary shadow-[0_0_10px_rgba(197,160,89,0.5)]',
                 step.id < currentStep && 'bg-primary/40 cursor-pointer',
-                step.id > currentStep && 'bg-muted-foreground/20'
+                step.id > currentStep && 'bg-white/10'
               )} />
               <span className={cn(
-                'text-[10px] font-medium',
-                step.id === currentStep ? 'text-primary' : 'text-muted-foreground/60'
+                'text-[9px] font-bold uppercase tracking-wider',
+                step.id === currentStep ? 'text-primary' : 'text-white/20'
               )}>
                 {step.label}
               </span>
@@ -458,7 +491,7 @@ export default function PlanPage() {
         </div>
 
         {/* Step content */}
-        <div className="rounded-[2.5rem] border border-white/10 bg-black/40 backdrop-blur-3xl p-6 sm:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
+        <div className="rounded-[2.5rem] border border-white/10 bg-black/40 backdrop-blur-3xl p-6 sm:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] min-h-[400px] md:min-h-[450px]">
           <AnimatePresence mode="wait" custom={directionRef.current}>
             <motion.div
               key={currentStep}
@@ -475,20 +508,30 @@ export default function PlanPage() {
         </div>
 
         {/* Navigation */}
-        {currentStep < 4 && (
+        {currentStep < 6 && (
           <div className="mt-5 space-y-3">
             <div className="flex justify-between">
-              <Button
-                variant="ghost"
-                onClick={handleBack}
-                disabled={currentStep === 1}
-                className="gap-1.5 text-muted-foreground"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Retour
-              </Button>
+              {currentStep === 1 ? (
+                <Button
+                  variant="ghost"
+                  onClick={() => router.push('/')}
+                  className="gap-1.5 text-muted-foreground/50 h-12 px-6 rounded-xl hover:text-white"
+                >
+                  <X className="h-4 w-4" />
+                  Quitter
+                </Button>
+              ) : (
+                <Button
+                  variant="ghost"
+                  onClick={handleBack}
+                  className="gap-1.5 text-muted-foreground h-12 px-6 rounded-xl"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  Retour
+                </Button>
+              )}
 
-              <Button onClick={handleNext} className="gap-1.5 rounded-xl">
+              <Button onClick={handleNext} className="gap-1.5 h-12 px-8 rounded-xl font-bold bg-white text-black hover:bg-white/90">
                 Suivant
                 <ArrowRight className="h-4 w-4" />
               </Button>
@@ -518,12 +561,12 @@ export default function PlanPage() {
           </div>
         )}
 
-        {currentStep === 4 && (
+        {currentStep === 6 && (
           <div className="mt-4">
             <Button
               variant="ghost"
               onClick={handleBack}
-              className="gap-1.5 text-muted-foreground"
+              className="gap-1.5 text-muted-foreground h-12 px-6 rounded-xl"
             >
               <ArrowLeft className="h-4 w-4" />
               Retour
