@@ -57,7 +57,7 @@ export function Header() {
           "container mx-auto rounded-3xl transition-[background-color,border-color,box-shadow,padding] duration-300 border",
           isScrolled
             ? "bg-white/80 dark:bg-[#020617]/80 backdrop-blur-xl border-gold/20 shadow-2xl py-2 px-6"
-            : "bg-transparent border-transparent py-4 px-4"
+            : "bg-background/90 backdrop-blur-md border-transparent py-4 px-4"
         )}
       >
         <div className="flex items-center justify-between">
