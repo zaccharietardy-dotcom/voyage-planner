@@ -65,6 +65,9 @@ export default function PlanPage() {
   const [pipelineStep, setPipelineStep] = useState<string | undefined>(undefined);
   const [currentQuestion, setCurrentQuestion] = useState<PipelineQuestion | null>(null);
   const questionResolverRef = useRef<((optionId: string) => void) | null>(null);
+  const [gate, setGate] = useState<null | 'login' | 'upgrade'>(null);
+  const [gateMessage, setGateMessage] = useState('');
+  const [gateChecked, setGateChecked] = useState(false);
 
   // Gate: check auth + quota IMMEDIATELY on page load
   useEffect(() => {
@@ -74,19 +77,20 @@ export default function PlanPage() {
         const check = await res.json();
         if (!check.allowed) {
           if (check.action === 'login') {
-            const msg = encodeURIComponent('Connectez-vous pour planifier un voyage');
-            router.replace(`/login?redirect=/plan&reason=${msg}`);
+            setGate('login');
+            setGateMessage('Connectez-vous pour planifier votre voyage');
           } else if (check.action === 'upgrade') {
-            const msg = encodeURIComponent(check.reason || 'Vous avez atteint votre limite de voyages gratuits. Passez à Pro pour continuer.');
-            router.replace(`/pricing?reason=${msg}`);
+            setGate('upgrade');
+            setGateMessage(check.reason || 'Vous avez utilisé tous vos voyages gratuits ce mois-ci');
           }
         }
       } catch {
-        // Fail open — don't block if preflight errors
+        // Fail open
       }
+      setGateChecked(true);
     };
     checkAccess();
-  }, [router]);
+  }, []);
 
   // Load template preferences if coming from a template card
   useEffect(() => {
@@ -447,6 +451,67 @@ export default function PlanPage() {
   const generatingDuration = preferences.cityPlan
     ? preferences.cityPlan.reduce((sum, s) => sum + s.days, 0)
     : preferences.durationDays;
+
+  // Gate screen — shown instead of wizard when not authorized
+  if (gate && gateChecked) {
+    return (
+      <div className="min-h-screen bg-[#020617] relative flex items-center justify-center">
+        <PremiumBackground />
+        <div className="relative z-10 max-w-md w-full mx-4">
+          <div className="rounded-[2.5rem] border border-white/10 bg-white/[0.03] backdrop-blur-xl p-10 text-center space-y-6 shadow-2xl">
+            <div className="mx-auto w-20 h-20 rounded-3xl bg-gold/10 flex items-center justify-center">
+              {gate === 'login' ? (
+                <ArrowRight className="h-8 w-8 text-gold" />
+              ) : (
+                <AlertCircle className="h-8 w-8 text-gold" />
+              )}
+            </div>
+            <div className="space-y-2">
+              <h2 className="font-display text-2xl font-bold text-white">
+                {gate === 'login' ? 'Créez votre compte' : 'Limite atteinte'}
+              </h2>
+              <p className="text-muted-foreground text-sm leading-relaxed">
+                {gateMessage}
+              </p>
+            </div>
+            {gate === 'login' ? (
+              <div className="space-y-3">
+                <Button
+                  onClick={() => router.push('/login?redirect=/plan')}
+                  className="w-full h-14 rounded-2xl bg-gold hover:bg-gold/90 text-black font-bold text-base"
+                >
+                  Se connecter
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => router.push('/register?redirect=/plan')}
+                  className="w-full h-12 rounded-xl text-muted-foreground"
+                >
+                  Créer un compte gratuitement
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <Button
+                  onClick={() => router.push('/pricing')}
+                  className="w-full h-14 rounded-2xl bg-gold hover:bg-gold/90 text-black font-bold text-base"
+                >
+                  Passer à Narae Pro
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => router.push('/')}
+                  className="w-full h-12 rounded-xl text-muted-foreground"
+                >
+                  Retour à l&apos;accueil
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#020617] relative">
