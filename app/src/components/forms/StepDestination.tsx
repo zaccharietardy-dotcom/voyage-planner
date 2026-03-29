@@ -19,9 +19,40 @@ import { useSuggestions } from '@/hooks/useSuggestions';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
 import { StyleMatchBadge } from '@/components/trip/StyleMatchBadge';
 
+import { hapticSelection } from '@/lib/utils/haptics';
+
 interface StepDestinationProps {
   data: Partial<TripPreferences>;
   onChange: (data: Partial<TripPreferences>) => void;
+}
+
+/**
+ * Smart duration defaults based on city name and relative distance if possible.
+ */
+function getSuggestedDuration(city: string, origin?: string): number {
+  const c = city.toLowerCase();
+  const o = origin?.toLowerCase() || '';
+  
+  // Region detection
+  const isAsia = (s: string) => /tokyo|seoul|pékin|beijing|shanghai|bangkok|singapour|singapore|phuket|bali|denpasar|hong kong/i.test(s);
+  const isEurope = (s: string) => /paris|london|londres|rome|roma|madrid|barcelone|barcelona|amsterdam|berlin|vienne|vienna|prague|lisbonne|lisbon|nice|lyon|bordeaux|nantes|marseille/i.test(s);
+  const isUS = (s: string) => /new york|nyc|los angeles|san francisco|las vegas|miami/i.test(s);
+
+  const sameRegion = (isAsia(c) && isAsia(o)) || (isEurope(c) && isEurope(o)) || (isUS(c) && isUS(o));
+
+  // Big complex cities
+  if (/tokyo|seoul|pékin|beijing|shanghai|new york|nyc|los angeles|rio de janeiro|bangkok|singapour|singapore/i.test(c)) {
+    return sameRegion ? 3 : 5; 
+  }
+  // Standard City break
+  if (/paris|london|londres|rome|roma|madrid|barcelone|barcelona|amsterdam|berlin|vienne|vienna|prague|lisbonne|lisbon/i.test(c)) {
+    return 3;
+  }
+  // Quick getaway
+  if (/nice|lyon|bordeaux|nantes|marseille|strasbourg|lille|montpellier|toulouse|annecy|biarritz/i.test(c)) {
+    return 2;
+  }
+  return 4;
 }
 
 type LocationSuggestion = {
@@ -81,6 +112,7 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
   // --- Helpers ---
 
   const setMode = (newMode: 'precise' | 'inspired') => {
+    hapticSelection();
     onChange({ tripMode: newMode });
     clearDestination();
     clearDuration();
@@ -296,7 +328,12 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
   }, [activeDestCity, activeDestStage, fetchLocationSuggestions]);
 
   const applyDestSuggestion = (stageIndex: number, suggestion: LocationSuggestion) => {
-    updateStage(stageIndex, { city: suggestion.city || suggestion.label || suggestion.displayName });
+    const cityName = suggestion.city || suggestion.label || suggestion.displayName;
+    const suggestedDays = getSuggestedDuration(cityName, data.origin);
+    updateStage(stageIndex, { 
+      city: cityName,
+      days: suggestedDays // Apply smart default duration
+    });
     setActiveDestStage(null);
     setDestSuggestions([]);
   };
@@ -324,12 +361,12 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
   return (
     <div className="space-y-8">
       <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold mb-2">Planifiez votre voyage</h2>
-        <p className="text-muted-foreground">Choisissez votre destination ou laissez-vous inspirer</p>
+        <h2 className="text-2xl font-display font-bold mb-2">Où allez-vous ?</h2>
+        <p className="text-muted-foreground">Choisissez votre destination</p>
       </div>
 
-      {/* Mode selector */}
-      <div className="grid grid-cols-2 gap-4">
+      {/* Mode selector — hidden (origin moved to StepOrigin, default to precise) */}
+      <div className="hidden grid grid-cols-2 gap-4">
         <button
           type="button"
           onClick={() => setMode('precise')}
@@ -342,7 +379,7 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
         >
           <div className={cn(
             'p-4 rounded-2xl transition-all duration-300',
-            mode === 'precise' ? 'bg-gold text-black shadow-lg shadow-gold/30 scale-110' : 'bg-white/5 text-white/40 group-hover:text-white/60'
+            mode === 'precise' ? 'bg-gold text-black shadow-lg shadow-gold/30 scale-110' : 'bg-white/5 text-white/60 group-hover:text-white/80'
           )}>
             <MapPin className="h-6 w-6" />
           </div>
@@ -350,7 +387,7 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
             <p className={cn('font-bold text-sm tracking-tight transition-colors', mode === 'precise' ? 'text-white' : 'text-white/60')}>
               Je sais où je vais
             </p>
-            <p className="text-[10px] text-white/40 mt-1 uppercase tracking-[0.2em] font-black">
+            <p className="text-[10px] text-white/60 mt-1 uppercase tracking-[0.2em] font-black">
               Précis
             </p>
           </div>
@@ -370,7 +407,7 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
         >
           <div className={cn(
             'p-4 rounded-2xl transition-all duration-300',
-            mode === 'inspired' ? 'bg-gold text-black shadow-lg shadow-gold/30 scale-110' : 'bg-white/5 text-white/40 group-hover:text-white/60'
+            mode === 'inspired' ? 'bg-gold text-black shadow-lg shadow-gold/30 scale-110' : 'bg-white/5 text-white/60 group-hover:text-white/80'
           )}>
             <Compass className="h-6 w-6" />
           </div>
@@ -378,7 +415,7 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
             <p className={cn('font-bold text-sm tracking-tight transition-colors', mode === 'inspired' ? 'text-white' : 'text-white/60')}>
               Inspirez-moi
             </p>
-            <p className="text-[10px] text-white/40 mt-1 uppercase tracking-[0.2em] font-black">
+            <p className="text-[10px] text-white/60 mt-1 uppercase tracking-[0.2em] font-black">
               Découverte
             </p>
           </div>
@@ -388,8 +425,8 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
         </button>
       </div>
 
-      {/* Origin (common to both modes) */}
-      <div className="space-y-2">
+      {/* Origin — moved to StepOrigin (step 2) */}
+      <div className="hidden space-y-2">
         <Label htmlFor="origin" className="text-base font-medium">
           D&apos;où partez-vous ?
         </Label>
@@ -549,31 +586,33 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
                   </div>
 
                   {/* Duration for this stage */}
-                  <div className="flex items-center gap-1.5 shrink-0">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="icon"
-                      className="h-12 w-10"
-                      onClick={() => stage.days > 1 && updateStage(index, { days: stage.days - 1 })}
-                      disabled={stage.days <= 1}
-                    >
-                      -
-                    </Button>
-                    <div className="h-12 w-16 flex items-center justify-center border rounded-md text-sm font-semibold">
-                      {stage.days}j
+                  {stages.length > 1 && (
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        className="h-12 w-10"
+                        onClick={() => stage.days > 1 && updateStage(index, { days: stage.days - 1 })}
+                        disabled={stage.days <= 1}
+                      >
+                        -
+                      </Button>
+                      <div className="h-12 w-16 flex items-center justify-center border rounded-md text-sm font-semibold">
+                        {stage.days}j
+                      </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        className="h-12 w-10"
+                        onClick={() => stage.days < 30 && updateStage(index, { days: stage.days + 1 })}
+                        disabled={stage.days >= 30}
+                      >
+                        +
+                      </Button>
                     </div>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="icon"
-                      className="h-12 w-10"
-                      onClick={() => stage.days < 30 && updateStage(index, { days: stage.days + 1 })}
-                      disabled={stage.days >= 30}
-                    >
-                      +
-                    </Button>
-                  </div>
+                  )}
 
                   {/* Remove stage button */}
                   {stages.length > 1 && (
@@ -592,19 +631,21 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
                 {/* Duration suggestion and style match */}
                 {stage.city.length > 2 && (
                   <div className="flex items-center gap-3 ml-1">
-                    <button
-                      type="button"
-                      onClick={() => handleDurationSuggestion(index)}
-                      disabled={loadingDuration && durationSuggestionForStage === index}
-                      className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
-                    >
-                      {loadingDuration && durationSuggestionForStage === index ? (
-                        <Loader2 className="h-3 w-3 animate-spin" />
-                      ) : (
-                        <Clock className="h-3 w-3" />
-                      )}
-                      Combien de jours ?
-                    </button>
+                    {stages.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => handleDurationSuggestion(index)}
+                        disabled={loadingDuration && durationSuggestionForStage === index}
+                        className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
+                      >
+                        {loadingDuration && durationSuggestionForStage === index ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : (
+                          <Clock className="h-3 w-3" />
+                        )}
+                        Combien de jours ?
+                      </button>
+                    )}
 
                     {/* Show style match if user has preferences */}
                     {preferences && (
@@ -618,7 +659,7 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
                 )}
 
                 {/* Duration suggestion display for this stage */}
-                {durationSuggestion && durationSuggestionForStage === index && (
+                {stages.length > 1 && durationSuggestion && durationSuggestionForStage === index && (
                   <DurationSuggestionCard
                     suggestion={durationSuggestion}
                     onApply={applyDurationChip}
@@ -637,7 +678,7 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
               className="w-full border-dashed"
             >
               <Plus className="h-4 w-4 mr-2" />
-              Ajouter une ville
+              Ajouter une étape
             </Button>
 
             {/* Total duration display */}
@@ -760,38 +801,6 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
           )}
         </div>
       )}
-
-      {/* Date (common to both modes) */}
-      <div className="space-y-2">
-        <Label className="text-base font-medium">Date de départ</Label>
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              className={cn(
-                'w-full h-12 justify-start text-left font-normal text-base',
-                !data.startDate && 'text-muted-foreground'
-              )}
-            >
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              {data.startDate ? (
-                format(data.startDate, 'PPP', { locale: fr })
-              ) : (
-                <span>Sélectionnez une date</span>
-              )}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-            <Calendar
-              mode="single"
-              selected={data.startDate}
-              onSelect={(date) => date && onChange({ startDate: date })}
-              disabled={(date) => date < new Date()}
-              initialFocus
-            />
-          </PopoverContent>
-        </Popover>
-      </div>
     </div>
   );
 }
