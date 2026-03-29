@@ -72,19 +72,22 @@ export function StepOrigin({ data, onChange }: StepOriginProps) {
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="space-y-8"
+      className="space-y-10"
     >
-      <div className="space-y-2">
-        <h2 className="font-display text-3xl font-bold">D&apos;où partez-vous ?</h2>
-        <p className="text-muted-foreground">
-          Votre ville de départ pour calculer les transports
+      <div className="text-center space-y-3">
+        <h2 className="text-4xl md:text-5xl font-serif font-bold tracking-tight bg-gradient-to-b from-white to-white/60 bg-clip-text text-transparent">
+          D&apos;où partez-vous ?
+        </h2>
+        <p className="text-lg text-muted-foreground/80 max-w-md mx-auto">
+          Pour calculer vos temps de trajet et options de transport.
         </p>
       </div>
 
-      <div className="space-y-4">
-        <div className="relative">
+      <div className="space-y-6 max-w-xl mx-auto">
+        <div className="relative group">
+          <div className="absolute -inset-0.5 bg-gold/20 rounded-2xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
           <div className="relative">
-            <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gold/50 group-focus-within:text-gold transition-colors" />
             <Input
               value={query}
               onChange={(e) => {
@@ -92,7 +95,7 @@ export function StepOrigin({ data, onChange }: StepOriginProps) {
                 onChange({ origin: e.target.value });
               }}
               placeholder="Ex: Paris, Lyon, Bordeaux..."
-              className="pl-12 h-14 text-lg rounded-2xl border-border/50 bg-card"
+              className="pl-12 h-16 text-xl rounded-2xl bg-white/[0.03] border-white/10 focus:border-gold/50 focus:bg-white/[0.05] transition-all"
             />
           </div>
 

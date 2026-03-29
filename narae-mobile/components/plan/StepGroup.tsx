@@ -41,71 +41,78 @@ export function StepGroup({ prefs, onChange }: Props) {
   };
 
   return (
-    <View style={{ gap: 28 }}>
-      {/* Group size */}
+    <View style={{ gap: 32 }}>
       <View>
-        <Text style={{ color: '#94a3b8', fontSize: 13, fontWeight: '600', marginBottom: 16 }}>
-          Nombre de voyageurs
+        <Text style={{ color: colors.text, fontSize: 28, fontFamily: fonts.display, fontWeight: 'bold' }}>
+          Avec qui partez-vous ?
         </Text>
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 24 }}>
+        <Text style={{ color: colors.textSecondary, fontSize: 15, marginTop: 4 }}>
+          Pour adapter les activités et le rythme
+        </Text>
+      </View>
+
+      {/* Group Size */}
+      <View style={{ backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: 24, padding: 24, borderWidth: 1, borderColor: 'rgba(255,255,255,0.05)' }}>
+        <Text style={{ color: '#94a3b8', fontSize: 13, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 20, textAlign: 'center' }}>Nombre de voyageurs</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 32 }}>
           <Pressable
             onPress={() => setSize(size - 1)}
             style={{
-              width: 44, height: 44, borderRadius: 14,
+              width: 56, height: 56, borderRadius: 20,
               backgroundColor: 'rgba(255,255,255,0.05)',
               alignItems: 'center', justifyContent: 'center',
+              borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)',
               opacity: size <= 1 ? 0.3 : 1,
             }}
           >
-            <Minus size={20} color="#f8fafc" />
+            <Minus size={24} color="#f8fafc" />
           </Pressable>
-          <View style={{ alignItems: 'center' }}>
-            <Text style={{ color: colors.gold, fontSize: 44, fontFamily: fonts.display }}>{size}</Text>
-            <Text style={{ color: colors.textSecondary, fontSize: 13 }}>{size === 1 ? 'voyageur' : 'voyageurs'}</Text>
+          <View style={{ alignItems: 'center', minWidth: 80 }}>
+            <Text style={{ color: colors.gold, fontSize: 52, fontFamily: fonts.display, fontWeight: 'bold' }}>{size}</Text>
+            <Text style={{ color: colors.textSecondary, fontSize: 14, fontWeight: '600' }}>{size === 1 ? 'Voyageur' : 'Voyageurs'}</Text>
           </View>
           <Pressable
             onPress={() => setSize(size + 1)}
             style={{
-              width: 44, height: 44, borderRadius: 14,
+              width: 56, height: 56, borderRadius: 20,
               backgroundColor: 'rgba(255,255,255,0.05)',
               alignItems: 'center', justifyContent: 'center',
+              borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)',
               opacity: size >= 20 ? 0.3 : 1,
             }}
           >
-            <Plus size={20} color="#f8fafc" />
+            <Plus size={24} color="#f8fafc" />
           </Pressable>
         </View>
       </View>
 
-      {/* Group type */}
-      <View>
-        <Text style={{ color: '#94a3b8', fontSize: 13, fontWeight: '600', marginBottom: 12 }}>
-          Type de groupe
-        </Text>
-        <View style={{ gap: 8 }}>
+      {/* Group Type */}
+      <View style={{ gap: 16 }}>
+        <Text style={{ color: '#94a3b8', fontSize: 13, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 }}>Type de voyage</Text>
+        <View style={{ gap: 10 }}>
           {GROUP_OPTIONS.map((opt) => {
             const selected = type === opt.value;
             const label = GROUP_TYPE_LABELS[opt.value].replace(/\s*[\p{Emoji_Presentation}\p{Extended_Pictographic}]+$/u, '');
+            
             return (
               <Pressable
                 key={opt.value}
                 onPress={() => setType(opt.value)}
                 style={{
-                  flexDirection: 'row', alignItems: 'center', gap: 14,
-                  backgroundColor: selected ? 'rgba(197,160,89,0.1)' : 'rgba(255,255,255,0.03)',
-                  borderWidth: 1,
-                  borderColor: selected ? '#c5a059' : 'rgba(255,255,255,0.05)',
-                  borderRadius: 14, padding: 16,
+                  flexDirection: 'row', alignItems: 'center', gap: 16,
+                  padding: 18, borderRadius: 24,
+                  backgroundColor: selected ? colors.goldBg : 'rgba(255,255,255,0.03)',
+                  borderWidth: 1, borderColor: selected ? colors.gold : 'rgba(255,255,255,0.05)',
                 }}
               >
                 <View style={{
-                  width: 40, height: 40, borderRadius: 12,
-                  backgroundColor: selected ? 'rgba(197,160,89,0.15)' : 'rgba(255,255,255,0.05)',
+                  width: 48, height: 48, borderRadius: 16,
+                  backgroundColor: selected ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.05)',
                   alignItems: 'center', justifyContent: 'center',
                 }}>
-                  <Text style={{ fontSize: 18 }}>{opt.emoji}</Text>
+                  <Text style={{ fontSize: 24 }}>{opt.emoji}</Text>
                 </View>
-                <Text style={{ color: selected ? '#c5a059' : '#e2e8f0', fontSize: 15, fontWeight: '600' }}>
+                <Text style={{ color: selected ? colors.gold : colors.textSecondary, fontSize: 17, fontWeight: 'bold' }}>
                   {label}
                 </Text>
               </Pressable>

@@ -23,12 +23,12 @@ import { PremiumBackground } from '@/components/ui/PremiumBackground';
 
 const STEP_TITLES = [
   'Destination',
-  'D\'où ?',
+  'Ville de départ',
   'Quand ?',
-  'Groupe',
-  'Préférences',
-  'Budget',
-  'Récapitulatif',
+  'Voyageurs',
+  'Centres d’intérêt',
+  'Quel budget ?',
+  'Résumé',
 ];
 
 const DEFAULT_PREFS: Partial<TripPreferences> = {
@@ -160,24 +160,24 @@ export default function PlanScreen() {
       <SafeAreaView style={{ flex: 1 }}>
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           {/* Header */}
-          <View style={{ paddingHorizontal: 20, paddingTop: 12, paddingBottom: 16 }}>
-            <Text style={{ color: colors.text, fontSize: 32, fontFamily: fonts.display, fontWeight: 'bold' }}>
+          <View style={{ paddingHorizontal: 24, paddingTop: 20, paddingBottom: 20 }}>
+            <Text style={{ color: colors.text, fontSize: 36, fontFamily: fonts.display, fontWeight: 'bold', letterSpacing: -0.5 }}>
               {STEP_TITLES[step]}
             </Text>
             {/* Premium Step dots */}
-            <View style={{ flexDirection: 'row', gap: 8, marginTop: 14, alignItems: 'center' }}>
+            <View style={{ flexDirection: 'row', gap: 10, marginTop: 18, alignItems: 'center' }}>
               {STEP_TITLES.map((_, i) => (
                 <View
                   key={i}
                   style={{
-                    height: 6,
-                    width: i === step ? 24 : 6,
-                    borderRadius: 3,
+                    height: 7,
+                    width: i === step ? 32 : 7,
+                    borderRadius: 4,
                     backgroundColor: i === step ? colors.gold : i < step ? 'rgba(197,160,89,0.4)' : 'rgba(255,255,255,0.1)',
                     shadowColor: i === step ? colors.gold : 'transparent',
                     shadowOffset: { width: 0, height: 0 },
-                    shadowOpacity: i === step ? 0.8 : 0,
-                    shadowRadius: 6,
+                    shadowOpacity: i === step ? 0.9 : 0,
+                    shadowRadius: 8,
                   }}
                 />
               ))}

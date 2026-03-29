@@ -30,11 +30,11 @@ import { PremiumBackground } from '@/components/ui/PremiumBackground';
 import { hapticImpactLight, hapticSuccess } from '@/lib/utils/haptics';
 
 const STEPS = [
-  { id: 1, label: 'Où' },
-  { id: 2, label: "D'où" },
-  { id: 3, label: 'Quand' },
-  { id: 4, label: 'Groupe' },
-  { id: 5, label: 'Style' },
+  { id: 1, label: 'Destination' },
+  { id: 2, label: 'Départ' },
+  { id: 3, label: 'Dates' },
+  { id: 4, label: 'Voyageurs' },
+  { id: 5, label: 'Centres d’intérêt' },
   { id: 6, label: 'Budget' },
   { id: 7, label: 'Résumé' },
 ];
@@ -461,7 +461,7 @@ export default function PlanPage() {
         )}
 
         {/* Step dots */}
-        <div className="flex items-center justify-center gap-3 mb-8">
+        <div className="flex items-center justify-center gap-4 mb-12">
           {STEPS.map((step) => (
             <button
               key={step.id}
@@ -472,17 +472,16 @@ export default function PlanPage() {
                 }
               }}
               disabled={step.id > currentStep}
-              className="flex flex-col items-center gap-1.5"
+              className="flex flex-col items-center gap-2 group"
             >
               <div className={cn(
-                'w-2 h-2 rounded-full transition-all duration-500',
-                step.id === currentStep && 'w-6 bg-primary shadow-[0_0_10px_rgba(197,160,89,0.5)]',
-                step.id < currentStep && 'bg-primary/40 cursor-pointer',
-                step.id > currentStep && 'bg-white/10'
+                'h-2.5 rounded-full transition-all duration-500',
+                step.id === currentStep ? 'w-10 bg-gold shadow-[0_0_20px_rgba(197,160,89,0.6)]' : 'w-2.5 bg-white/10 group-hover:bg-white/20',
+                step.id < currentStep && 'bg-gold/40'
               )} />
               <span className={cn(
-                'text-[9px] font-bold uppercase tracking-wider',
-                step.id === currentStep ? 'text-primary' : 'text-white/20'
+                'text-[10px] font-black uppercase tracking-widest transition-colors duration-300',
+                step.id === currentStep ? 'text-gold' : 'text-white/20 group-hover:text-white/40'
               )}>
                 {step.label}
               </span>

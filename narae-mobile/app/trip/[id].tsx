@@ -29,6 +29,8 @@ import { Badge } from '@/components/ui/Badge';
 import { Calendar, Users, Wallet, Train, CalendarPlus, Download } from 'lucide-react-native';
 import { cacheTripLocally, getCachedTrip } from '@/lib/offline/tripCache';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
+import * as Haptics from 'expo-haptics';
+import { PremiumBackground } from '@/components/ui/PremiumBackground';
 
 const FALLBACK_IMAGES: Record<string, string> = {
   paris: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800&q=80',
@@ -90,9 +92,13 @@ export default function TripDetailScreen() {
     return trip.days.map((day: TripDay) => ({ day, data: day.items }));
   }, [trip]);
 
-  const handleShare = async () => setOpenModal('share');
+  const handleShare = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setOpenModal('share');
+  };
 
   const handleBookingToggle = useCallback(async (itemId: string) => {
+    Haptics.selectionAsync();
     setBookedItems((prev) => {
       const current = prev[itemId]?.booked ?? false;
       return { ...prev, [itemId]: { booked: !current } };
@@ -110,6 +116,7 @@ export default function TripDetailScreen() {
   if (isLoading) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.bg }}>
+        <PremiumBackground />
         <Skeleton height={280} radius={0} />
         <View style={{ padding: 20, gap: 16 }}>
           <Skeleton width={200} height={24} />
@@ -124,8 +131,9 @@ export default function TripDetailScreen() {
   if (error || !row) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center' }}>
+        <PremiumBackground />
         <Text style={{ color: colors.danger, fontSize: 16, marginBottom: 12 }}>Voyage introuvable</Text>
-        <Pressable onPress={() => router.back()}>
+        <Pressable onPress={() => { Haptics.selectionAsync(); router.back(); }}>
           <Text style={{ color: colors.gold, fontSize: 14 }}>Retour</Text>
         </Pressable>
       </View>
@@ -192,7 +200,7 @@ export default function TripDetailScreen() {
         {TABS.map((t) => (
           <Pressable
             key={t.key}
-            onPress={() => setActiveTab(t.key)}
+            onPress={() => { Haptics.selectionAsync(); setActiveTab(t.key); }}
             style={{
               flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
               paddingHorizontal: 16, paddingVertical: 10, borderRadius: radius.md,
@@ -214,6 +222,7 @@ export default function TripDetailScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
+      <PremiumBackground />
       {activeTab === 'itinerary' && trip ? (
         <SectionList
           sections={sections}
@@ -233,8 +242,8 @@ export default function TripDetailScreen() {
               item={item}
               isFirst={index === 0}
               isLast={index === section.data.length - 1}
-              onPress={() => { setModalItem(item); setOpenModal('detail'); }}
-              onLongPress={() => { setModalItem(item); setOpenModal('actions'); }}
+              onPress={() => { Haptics.selectionAsync(); setModalItem(item); setOpenModal('detail'); }}
+              onLongPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); setModalItem(item); setOpenModal('actions'); }}
             />
           )}
           contentContainerStyle={{ paddingBottom: 100 }}
@@ -267,7 +276,7 @@ export default function TripDetailScreen() {
       <View style={{ position: 'absolute', bottom: 100, right: 20, gap: 12, alignItems: 'center' }}>
         {/* Calendar export */}
         <Pressable
-          onPress={() => setOpenModal('calendar')}
+          onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setOpenModal('calendar'); }}
           style={{
             width: 48, height: 48, borderRadius: 16,
             backgroundColor: colors.surface,
@@ -282,7 +291,7 @@ export default function TripDetailScreen() {
 
         {/* Chat */}
         <Pressable
-          onPress={() => setOpenModal('chat')}
+          onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); setOpenModal('chat'); }}
           style={{
             width: 56, height: 56, borderRadius: 18,
             backgroundColor: colors.gold,

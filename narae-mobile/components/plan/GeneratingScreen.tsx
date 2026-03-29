@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { View, Text } from 'react-native';
-import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
-import { Plane, Check, Loader } from 'lucide-react-native';
-import { colors, fonts } from '@/lib/theme';
+import { View, Text, ActivityIndicator, Pressable } from 'react-native';
+import Animated, { FadeIn, FadeInDown, withRepeat, withTiming, useAnimatedStyle, useSharedValue, Easing } from 'react-native-reanimated';
+import { Plane, Check, Compass, Info } from 'lucide-react-native';
+import { colors, fonts, radius } from '@/lib/theme';
 import type { GenerateProgress } from '@/lib/api/trips';
+import { PremiumBackground } from '@/components/ui/PremiumBackground';
 
 interface Props {
   destination: string;
@@ -23,115 +24,150 @@ const PIPELINE_LABELS = [
 ];
 
 const FUN_FACTS = [
-  'Saviez-vous ? Notre algorithme compare plus de 500 activités.',
-  'Chaque restaurant est vérifié à moins de 800m de votre parcours.',
-  'Votre itinéraire respecte les horaires d\'ouverture de chaque lieu.',
-  'Nous optimisons votre parcours pour minimiser les trajets inutiles.',
-  'Les alternatives restaurant proposent toujours des cuisines différentes.',
+  'Notre algorithme compare plus de 500 activités.',
+  'Chaque restaurant est vérifié à moins de 800m.',
+  'Votre itinéraire respecte les horaires d\'ouverture.',
+  'Nous optimisons vos trajets pour gagner du temps.',
+  'Les restaurants proposent des cuisines variées.',
 ];
 
 export function GeneratingScreen({ destination, progress, error, onRetry }: Props) {
   const [factIndex, setFactIndex] = useState(0);
   const currentStep = progress?.step ?? 0;
-  const totalSteps = progress?.total ?? PIPELINE_LABELS.length;
+  const anim = useSharedValue(0);
 
   useEffect(() => {
+    anim.value = withRepeat(
+      withTiming(1, { duration: 4000, easing: Easing.inOut(Easing.quad) }),
+      -1,
+      true
+    );
     const interval = setInterval(() => {
       setFactIndex((i) => (i + 1) % FUN_FACTS.length);
-    }, 5000);
+    }, 6000);
     return () => clearInterval(interval);
   }, []);
 
+  const planeStyle = useAnimatedStyle(() => ({
+    transform: [
+      { translateY: anim.value * -15 },
+      { rotate: `${anim.value * 10 - 5}deg` }
+    ]
+  }));
+
   if (error) {
     return (
-      <View style={{ flex: 1, backgroundColor: '#020617', alignItems: 'center', justifyContent: 'center', padding: 40 }}>
+      <View style={{ flex: 1, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center', padding: 40 }}>
+        <PremiumBackground />
         <View style={{
-          width: 72, height: 72, borderRadius: 20,
+          width: 80, height: 80, borderRadius: 24,
           backgroundColor: 'rgba(239,68,68,0.1)',
-          alignItems: 'center', justifyContent: 'center', marginBottom: 20,
+          alignItems: 'center', justifyContent: 'center', marginBottom: 24,
         }}>
-          <Text style={{ fontSize: 32 }}>😞</Text>
+          <Text style={{ fontSize: 40 }}>😞</Text>
         </View>
-        <Text style={{ color: '#f8fafc', fontSize: 18, fontWeight: '700', textAlign: 'center', marginBottom: 8 }}>
-          Erreur de génération
+        <Text style={{ color: '#f8fafc', fontSize: 24, fontFamily: fonts.display, fontWeight: 'bold', textAlign: 'center', marginBottom: 12 }}>
+          Oups, un imprévu...
         </Text>
-        <Text style={{ color: '#94a3b8', fontSize: 14, textAlign: 'center', marginBottom: 24 }}>
+        <Text style={{ color: '#94a3b8', fontSize: 16, textAlign: 'center', marginBottom: 32, lineHeight: 22 }}>
           {error}
         </Text>
-        <Animated.View entering={FadeIn}>
+        <Pressable onPress={onRetry} style={{ width: '100%' }}>
           <View style={{
-            paddingHorizontal: 24, paddingVertical: 14, borderRadius: 14,
-            backgroundColor: '#c5a059',
+            paddingVertical: 18, borderRadius: 18,
+            backgroundColor: colors.gold, alignItems: 'center',
           }}>
-            <Text onPress={onRetry} style={{ color: '#020617', fontSize: 15, fontWeight: '700' }}>
-              Réessayer
+            <Text style={{ color: colors.bg, fontSize: 16, fontWeight: '800' }}>
+              Réessayer la génération
             </Text>
           </View>
-        </Animated.View>
+        </Pressable>
       </View>
     );
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#020617', alignItems: 'center', justifyContent: 'center', padding: 40 }}>
-      {/* Animated plane */}
-      <Animated.View entering={FadeInDown.springify()} style={{ marginBottom: 32 }}>
-        <View style={{
-          width: 80, height: 80, borderRadius: 24,
-          backgroundColor: 'rgba(197,160,89,0.1)',
-          alignItems: 'center', justifyContent: 'center',
-        }}>
-          <Plane size={36} color="#c5a059" />
+    <View style={{ flex: 1, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center' }}>
+      <PremiumBackground />
+      
+      <View style={{ width: '100%', padding: 32, alignItems: 'center' }}>
+        {/* Animated plane icon */}
+        <Animated.View style={[planeStyle, { marginBottom: 40 }]}>
+          <View style={{
+            width: 100, height: 100, borderRadius: 32,
+            backgroundColor: colors.gold,
+            alignItems: 'center', justifyContent: 'center',
+            shadowColor: colors.gold, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.4, shadowRadius: 20,
+          }}>
+            <Plane size={48} color={colors.bg} strokeWidth={2.5} />
+          </View>
+        </Animated.View>
+
+        {/* Title */}
+        <Text style={{ color: colors.text, fontSize: 32, fontFamily: fonts.display, fontWeight: 'bold', textAlign: 'center' }}>
+          Conception Narae
+        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 8, marginBottom: 40 }}>
+          <Compass size={16} color={colors.gold} />
+          <Text style={{ color: colors.gold, fontSize: 12, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 2 }}>
+            {destination}
+          </Text>
         </View>
-      </Animated.View>
 
-      {/* Title */}
-      <Text style={{ color: colors.text, fontSize: 22, fontFamily: fonts.display, textAlign: 'center', marginBottom: 6 }}>
-        Création en cours...
-      </Text>
-      <Text style={{ color: colors.gold, fontSize: 17, fontFamily: fonts.displayMedium, textAlign: 'center', marginBottom: 28 }}>
-        {destination}
-      </Text>
+        {/* Status card */}
+        <View style={{ 
+          width: '100%', backgroundColor: 'rgba(0,0,0,0.4)', borderRadius: 32, padding: 32, 
+          borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)',
+          shadowColor: '#000', shadowOffset: { width: 0, height: 20 }, shadowOpacity: 0.5, shadowRadius: 40,
+        }}>
+          <View style={{ gap: 12, marginBottom: 32 }}>
+            {PIPELINE_LABELS.map((label, i) => {
+              const displayLabel = progress?.label && i === currentStep ? progress.label : label;
+              const isDone = i < currentStep;
+              const isCurrent = i === currentStep;
 
-      {/* Progress steps */}
-      <View style={{ width: '100%', gap: 10, marginBottom: 32 }}>
-        {PIPELINE_LABELS.slice(0, Math.max(totalSteps, PIPELINE_LABELS.length)).map((label, i) => {
-          const displayLabel = progress?.label && i === currentStep ? progress.label : label;
-          const isDone = i < currentStep;
-          const isCurrent = i === currentStep;
+              if (!isCurrent && !isDone) return null; // Only show current and completed steps for clarity
 
-          return (
-            <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-              <View style={{
-                width: 24, height: 24, borderRadius: 12,
-                backgroundColor: isDone ? 'rgba(34,197,94,0.15)' : isCurrent ? 'rgba(197,160,89,0.15)' : 'rgba(255,255,255,0.05)',
-                alignItems: 'center', justifyContent: 'center',
-              }}>
-                {isDone ? (
-                  <Check size={14} color="#4ade80" />
-                ) : isCurrent ? (
-                  <Loader size={14} color="#c5a059" />
-                ) : (
-                  <Text style={{ color: '#475569', fontSize: 10 }}>{i + 1}</Text>
-                )}
-              </View>
-              <Text style={{
-                color: isDone ? '#4ade80' : isCurrent ? '#c5a059' : '#475569',
-                fontSize: 13, fontWeight: isCurrent ? '600' : '400',
-              }}>
-                {displayLabel}
+              return (
+                <Animated.View key={i} entering={FadeInDown} style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                  <View style={{
+                    width: 28, height: 28, borderRadius: 14,
+                    backgroundColor: isDone ? 'rgba(34,197,94,0.2)' : colors.goldBg,
+                    alignItems: 'center', justifyContent: 'center',
+                  }}>
+                    {isDone ? (
+                      <Check size={16} color="#4ade80" />
+                    ) : (
+                      <ActivityIndicator size="small" color={colors.gold} />
+                    )}
+                  </View>
+                  <Text style={{
+                    color: isDone ? '#4ade80' : 'white',
+                    fontSize: 15, fontWeight: isCurrent ? '700' : '400',
+                  }}>
+                    {displayLabel}
+                  </Text>
+                </Animated.View>
+              );
+            })}
+          </View>
+
+          {/* Fun fact area */}
+          <View style={{ borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.05)', paddingTop: 24 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+              <Info size={14} color={colors.gold} />
+              <Text style={{ color: colors.gold, fontSize: 10, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 1.5 }}>
+                Le saviez-vous ?
               </Text>
             </View>
-          );
-        })}
+            <Animated.View key={factIndex} entering={FadeIn} style={{ minHeight: 60 }}>
+              <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 15, lineHeight: 22, fontWeight: '500' }}>
+                {FUN_FACTS[factIndex]}
+              </Text>
+            </Animated.View>
+          </View>
+        </View>
       </View>
-
-      {/* Fun fact */}
-      <Animated.View key={factIndex} entering={FadeIn}>
-        <Text style={{ color: '#64748b', fontSize: 12, textAlign: 'center', fontStyle: 'italic' }}>
-          {FUN_FACTS[factIndex]}
-        </Text>
-      </Animated.View>
     </View>
   );
 }

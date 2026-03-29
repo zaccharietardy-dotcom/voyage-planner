@@ -359,10 +359,14 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
   };
 
   return (
-    <div className="space-y-8">
-      <div className="text-center mb-8">
-        <h2 className="text-2xl font-display font-bold mb-2">Où allez-vous ?</h2>
-        <p className="text-muted-foreground">Choisissez votre destination</p>
+    <div className="space-y-10">
+      <div className="text-center space-y-3">
+        <h2 className="text-4xl md:text-5xl font-serif font-bold tracking-tight bg-gradient-to-b from-white to-white/60 bg-clip-text text-transparent">
+          Où allez-vous ?
+        </h2>
+        <p className="text-lg text-muted-foreground/80 max-w-md mx-auto">
+          Explorez le monde, nous planifions le reste.
+        </p>
       </div>
 
       {/* Mode selector — hidden (origin moved to StepOrigin, default to precise) */}
@@ -523,21 +527,18 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
 
       {/* ============ MODE PRECISE ============ */}
       {mode === 'precise' && (
-        <div className="space-y-6">
+        <div className="space-y-8 max-w-xl mx-auto">
           {/* City stages */}
-          <div className="space-y-3">
-            <Label className="text-base font-medium">
-              {stages.length > 1 ? 'Étapes du voyage' : 'Destination'}
-            </Label>
-
+          <div className="space-y-4">
             {stages.map((stage, index) => (
-              <div key={index} className="space-y-2">
-                <div className="flex gap-2 items-start">
+              <div key={index} className="space-y-3">
+                <div className="flex gap-3 items-start">
                   {/* City name */}
-                  <div className="flex-1 relative">
-                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <div className="flex-1 relative group">
+                    <div className="absolute -inset-0.5 bg-gold/20 rounded-2xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
+                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gold/50 group-focus-within:text-gold transition-colors" />
                     <Input
-                      placeholder={index === 0 ? 'Barcelone, Tokyo, 北京...' : `Étape ${index + 1}`}
+                      placeholder={index === 0 ? 'Ex: Tokyo, Barcelone, Marrakech...' : `Étape ${index + 1}`}
                       value={stage.city}
                       onChange={(e) => {
                         updateStage(index, { city: e.target.value });
@@ -550,7 +551,7 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
                           return prev;
                         });
                       }, 120)}
-                      className="pl-10 h-12 text-base"
+                      className="pl-12 h-16 text-xl rounded-2xl bg-white/[0.03] border-white/10 focus:border-gold/50 focus:bg-white/[0.05] transition-all"
                     />
                     {activeDestStage === index && stage.city.trim().length >= 2 && (
                       <div className="absolute z-20 mt-1 w-full rounded-md border border-border bg-background shadow-lg overflow-hidden">

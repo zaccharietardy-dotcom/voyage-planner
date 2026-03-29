@@ -3,6 +3,7 @@ import {
   ACTIVITY_LABELS, DIETARY_LABELS,
   type ActivityType, type DietaryType, type PaceLevel, type TripPreferences,
 } from '@/lib/types/trip';
+import * as Haptics from 'expo-haptics';
 import { colors, fonts, radius } from '@/lib/theme';
 
 interface Props {
@@ -33,27 +34,39 @@ export function StepPreferences({ prefs, onChange }: Props) {
   };
 
   return (
-    <View style={{ gap: 24 }}>
+    <View style={{ gap: 32 }}>
+      <View>
+        <Text style={{ color: colors.text, fontSize: 28, fontFamily: fonts.display, fontWeight: 'bold' }}>
+          Qu'aimez-vous ?
+        </Text>
+        <Text style={{ color: colors.textSecondary, fontSize: 15, marginTop: 4 }}>
+          Pour un itinéraire qui vous ressemble
+        </Text>
+      </View>
+
       {/* Activities */}
       <View>
-        <Text style={{ color: '#94a3b8', fontSize: 13, fontWeight: '600', marginBottom: 10 }}>
-          Activités préférées
-        </Text>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+        <Text style={{ color: '#94a3b8', fontSize: 13, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 16 }}>Activités préférées</Text>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
           {(Object.entries(ACTIVITY_LABELS) as [ActivityType, string][]).map(([key, label]) => {
             const selected = activities.includes(key);
+            const emoji = label.split(' ')[0];
+            const text = label.split(' ').slice(1).join(' ');
+            
             return (
               <Pressable
                 key={key}
                 onPress={() => toggleActivity(key)}
                 style={{
-                  paddingHorizontal: 14, paddingVertical: 10, borderRadius: 12,
-                  backgroundColor: selected ? 'rgba(197,160,89,0.15)' : 'rgba(255,255,255,0.05)',
-                  borderWidth: 1, borderColor: selected ? '#c5a059' : 'transparent',
+                  flexDirection: 'row', alignItems: 'center', gap: 8,
+                  paddingHorizontal: 16, paddingVertical: 12, borderRadius: 16,
+                  backgroundColor: selected ? colors.goldBg : 'rgba(255,255,255,0.03)',
+                  borderWidth: 1, borderColor: selected ? colors.gold : 'rgba(255,255,255,0.05)',
                 }}
               >
-                <Text style={{ color: selected ? '#c5a059' : '#94a3b8', fontSize: 13, fontWeight: '600' }}>
-                  {label}
+                <Text style={{ fontSize: 18 }}>{emoji}</Text>
+                <Text style={{ color: selected ? colors.gold : colors.textSecondary, fontSize: 14, fontWeight: '700' }}>
+                  {text}
                 </Text>
               </Pressable>
             );
@@ -63,25 +76,25 @@ export function StepPreferences({ prefs, onChange }: Props) {
 
       {/* Pace */}
       <View>
-        <Text style={{ color: '#94a3b8', fontSize: 13, fontWeight: '600', marginBottom: 10 }}>Rythme</Text>
-        <View style={{ flexDirection: 'row', gap: 8 }}>
+        <Text style={{ color: '#94a3b8', fontSize: 13, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 16 }}>Rythme</Text>
+        <View style={{ flexDirection: 'row', gap: 10 }}>
           {PACE_OPTIONS.map((opt) => {
             const selected = pace === opt.value;
             return (
               <Pressable
                 key={opt.value}
-                onPress={() => onChange({ pace: opt.value })}
+                onPress={() => { Haptics.selectionAsync(); onChange({ pace: opt.value }); }}
                 style={{
-                  flex: 1, alignItems: 'center', padding: 14, borderRadius: 14,
-                  backgroundColor: selected ? 'rgba(197,160,89,0.1)' : 'rgba(255,255,255,0.03)',
-                  borderWidth: 1, borderColor: selected ? '#c5a059' : 'rgba(255,255,255,0.05)',
+                  flex: 1, alignItems: 'center', padding: 16, borderRadius: 20,
+                  backgroundColor: selected ? colors.goldBg : 'rgba(255,255,255,0.03)',
+                  borderWidth: 1, borderColor: selected ? colors.gold : 'rgba(255,255,255,0.05)',
                 }}
               >
-                <Text style={{ fontSize: 22, marginBottom: 4 }}>{opt.emoji}</Text>
-                <Text style={{ color: selected ? '#c5a059' : '#e2e8f0', fontSize: 13, fontWeight: '700' }}>
+                <Text style={{ fontSize: 28, marginBottom: 6 }}>{opt.emoji}</Text>
+                <Text style={{ color: selected ? colors.gold : colors.textSecondary, fontSize: 14, fontWeight: 'bold' }}>
                   {opt.label}
                 </Text>
-                <Text style={{ color: '#64748b', fontSize: 10, marginTop: 2, textAlign: 'center' }}>{opt.desc}</Text>
+                <Text style={{ color: colors.textMuted, fontSize: 10, marginTop: 4, textAlign: 'center', fontWeight: '600' }}>{opt.desc}</Text>
               </Pressable>
             );
           })}
