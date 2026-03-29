@@ -73,8 +73,7 @@ export function AppleSignIn({ redirectTo, className }: AppleSignInProps) {
     <Button
       onClick={handleSignIn}
       disabled={isLoading}
-      variant="outline"
-      className={`gap-2 ${className || ''}`}
+      className={`gap-2 ${className || 'variant-outline'}`}
     >
       {isLoading ? (
         <Loader2 className="h-5 w-5 animate-spin" />
